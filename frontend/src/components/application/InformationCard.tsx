@@ -1,5 +1,6 @@
 "use client";
 
+import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   Status,
   type ApplicationDetail,
@@ -126,6 +127,7 @@ export const InformationCard = ({
   opportunityName,
   submissionLoading,
   instructionsDownloadPath,
+  latestApplicationSubmission,
 }: {
   applicationDetails: ApplicationDetailsCardProps;
   applicationSubmitHandler: () => void;
@@ -133,6 +135,7 @@ export const InformationCard = ({
   opportunityName: string | null;
   submissionLoading: boolean;
   instructionsDownloadPath: string;
+  latestApplicationSubmission: ApplicationSubmission | null;
 }) => {
   const t = useTranslations("Application.information");
 
@@ -201,6 +204,45 @@ export const InformationCard = ({
     );
   };
 
+  /**
+   * Application submission download will only be available when an application has
+   * a status of ACCEPTED. The following are cases of each application status
+   *
+   * IN_PROGRESS
+   *  - Has not been submitted, so do not render anything related to submission.
+   * SUBMITTED
+   *  - Submitted but does not yet have submission db entry and S3 download not available yet.
+   *  - Show message that download is being prepared.
+   * ACCEPTED
+   *  - Download available, render button to download submission zip.
+   */
+  const ApplicationSubmissionDownload = () => {
+    if (applicationDetails.application_status === Status.SUBMITTED)
+      return (
+        <p data-testid={"application-submission-download-message"}>
+          {t("applicationSubmissionZipDownloadLoadingMessage")}
+        </p>
+      );
+    if (
+      latestApplicationSubmission === null ||
+      applicationDetails.application_status === Status.IN_PROGRESS
+    )
+      return null;
+    return (
+      <Link href={latestApplicationSubmission.download_path}>
+        <Button
+          type="button"
+          data-testid="application-submission-download"
+          disabled={submissionLoading}
+          outline
+        >
+          <USWDSIcon name="file_download" />
+          {t("applicationSubmissionZipDownload")}
+        </Button>
+      </Link>
+    );
+  };
+
   const NoApplicationInstructionsDownload = () => {
     return (
       <div className="margin-bottom-1 margin-left-0">
@@ -220,6 +262,102 @@ export const InformationCard = ({
           {t("specialInstructions")}
         </dd>
       </div>
+    );
+  };
+
+  const applicationStatus = () => {
+    switch (applicationDetails.application_status) {
+      case Status.IN_PROGRESS:
+        return t("statusInProgress");
+      case Status.ACCEPTED:
+      case Status.SUBMITTED:
+        return t("statusSubmitted");
+      default:
+        return "-";
+    }
+  };
+
+  const InformationCardDetails = ({
+    applicationSubmitHandler,
+  }: {
+    applicationSubmitHandler: () => void;
+  }) => {
+    return (
+      <>
+        {/*
+          TODO: Edit functionality in future task
+        */}
+        <Grid tablet={{ col: 12 }} mobile={{ col: 12 }}>
+          <h3 className="margin-top-2">
+            {applicationDetails.application_name}
+            {applicationDetails.application_status !== Status.SUBMITTED &&
+              applicationDetails.application_status !== Status.ACCEPTED && (
+                <EditAppFilingName
+                  applicationId={applicationDetails.application_id}
+                  applicationName={applicationDetails.application_name}
+                  opportunityName={opportunityName}
+                />
+              )}
+          </h3>
+        </Grid>
+        <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
+          <dl>
+            <ApplicantDetails
+              hasOrganization={hasOrganization}
+              samGovEntity={applicationDetails.organization?.sam_gov_entity}
+            />
+          </dl>
+        </Grid>
+
+        <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
+          <dl>
+            <div className="margin-bottom-1">
+              <dt className="margin-right-1 text-bold">
+                {applicationDetails.competition.is_open
+                  ? t("closeDate")
+                  : t("closed")}
+                :{" "}
+              </dt>
+              <dd className="margin-right-1">
+                <span className="text-bold text-orange">
+                  {applicationDetails.competition.closing_date}
+                </span>{" "}
+                (11:59pm ET)
+              </dd>
+            </div>
+            {!is_open ? <SpecialInstructions /> : null}
+            <div className="margin-bottom-1">
+              <dt className="margin-right-1 text-bold">{t("statusLabel")}:</dt>
+              <dd className="margin-right-1 text-bold text-orange">
+                {applicationStatus()}
+              </dd>
+            </div>
+          </dl>
+        </Grid>
+
+        <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
+          {applicationDetails.competition.competition_instructions.length ? (
+            <ApplicationInstructionsDownload />
+          ) : (
+            <NoApplicationInstructionsDownload />
+          )}
+        </Grid>
+
+        <Grid
+          tablet={{ col: 6 }}
+          mobile={{ col: 12 }}
+          className={"margin-bottom-2"}
+        >
+          {!applicationSubmitted && is_open && (
+            <SubmitApplicationButton
+              buttonText={t("submit")}
+              submitHandler={applicationSubmitHandler}
+              loading={submissionLoading}
+            />
+          )}
+          <ApplicationSubmissionDownload />
+        </Grid>
+      </>
     );
   };
 

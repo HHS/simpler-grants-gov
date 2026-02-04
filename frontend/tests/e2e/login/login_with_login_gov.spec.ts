@@ -5,78 +5,61 @@ import {
   type Locator,
   type Page,
 } from "@playwright/test";
-import { authenticator } from "otplib";
+import playwrightEnv from "tests/e2e/playwright-env";
+import {
+  clickSignIn,
+  fillSignInForm,
+  findSignOutButton,
+  generateMfaAndSubmit,
+  locateMfaInput,
+} from "tests/e2e/utils/perform-login-utils";
+
+const { baseUrl, targetEnv, testUserAuthKey, testUserEmail, testUserPassword } =
+  playwrightEnv;
+// --- Timeouts ---
+const TIMEOUT_REDIRECT = 90000;
 
 // Tagging the test for config separation
-test.describe("@login Login.gov tests", () => {
-  // --- Environment Variables ---
-  const email = process.env.STAGING_TEST_USER_EMAIL;
-  const password = process.env.STAGING_TEST_USER_PASSWORD;
-  const authKey = process.env.STAGING_TEST_USER_MFA_KEY;
-  const baseUrl = process.env.STAGING_BASE_URL;
-
+test.describe("Login.gov based authentication tests", () => {
   // Skip test if env missing
-  const envMissing = !email || !password || !authKey || !baseUrl;
+  const envMissing =
+    targetEnv !== "staging" ||
+    !testUserEmail ||
+    !testUserPassword ||
+    !testUserAuthKey;
   test.skip(envMissing, "Login E2E env not configured; skipping spec");
 
-  // --- Helper to require env variables ---
-  const requireEnv = (value: string | undefined, name: string): string => {
-    if (!value) throw new Error(`${name} is not defined`);
-    return value;
-  };
-
-  // --- Timeouts ---
-  const TIMEOUT_HOME = 60000;
-  const TIMEOUT_MFA = 120000;
-  const TIMEOUT_REDIRECT = 90000;
-
   // --- Test ---
-  test("Login.gov authentication with MFA (PR CI)", async ({
+  test("Login.gov authentication with MFA", async ({
     page,
     context,
   }: {
     page: Page;
     context: BrowserContext;
   }) => {
-    // Validate and load envs inside the test so we don't throw at import time
-    const loginEmail: string = requireEnv(email, "STAGING_TEST_USER_EMAIL");
-    const loginPassword: string = requireEnv(
-      password,
-      "STAGING_TEST_USER_PASSWORD",
-    );
-    const loginAuthKey: string = requireEnv(
-      authKey,
-      "STAGING_TEST_USER_MFA_KEY",
-    );
-
+    const isChrome = !!test.info().project.name.match(/^Chrome/);
     const isMobileProject = !!test.info().project.name.match(/[Mm]obile/);
 
-    const playwriteBaseUrl: string = requireEnv(baseUrl, "STAGING_BASE_URL");
+    // for now MFA is failing if we run this test too frequently, so limiting to one browser until we can figure that out
+    if (!isChrome) {
+      return;
+    }
+
     // Optional tracing for CI debugging
     await context.tracing.start({ screenshots: true, snapshots: true });
 
     // --- Step 1: Navigate to staging ---
-    await page.goto(playwriteBaseUrl, { waitUntil: "domcontentloaded" });
+    await page.goto(baseUrl, {
+      waitUntil: "domcontentloaded",
+      timeout: targetEnv === "staging" ? 180000 : 60000,
+    });
     const step1Path = test.info().outputPath("step1-homepage.png");
     await page.screenshot({ path: step1Path, fullPage: true });
     await test
       .info()
       .attach("step1-homepage", { path: step1Path, contentType: "image/png" });
 
-    // --- Step 2: Click Sign In ---
-    let signInButton: Locator = page
-      .locator('button:has-text("Sign In")')
-      .filter({ visible: true })
-      .first();
-    let isVisible = await signInButton.isVisible().catch(() => false);
-
-    if (!isVisible) {
-      signInButton = page
-        .locator('a:has-text("Sign In")')
-        .filter({ visible: true })
-        .first();
-      isVisible = await signInButton.isVisible().catch(() => false);
-    }
+    const isVisible = await clickSignIn(page);
 
     if (!isVisible) {
       const debugNoSignInPath = test
@@ -90,21 +73,7 @@ test.describe("@login Login.gov tests", () => {
       throw new Error("Could not find Sign In button or link");
     }
 
-    await signInButton.click();
-
-    // --- Step 3: Fill login form ---
-    await page.waitForSelector('input[name="user[email]"]', {
-      state: "visible",
-      timeout: TIMEOUT_HOME,
-    });
-    await page.fill('input[name="user[email]"]', loginEmail);
-    await page.fill('input[name="user[password]"]', loginPassword);
-
-    const submitButton: Locator = page
-      .locator('button[type="submit"]')
-      .filter({ visible: true })
-      .first();
-    await submitButton.click();
+    await fillSignInForm(page);
 
     // --- Step 4: Wait for MFA input ---
     await page.waitForLoadState("networkidle");
@@ -120,34 +89,15 @@ test.describe("@login Login.gov tests", () => {
     // --- Step 5: Locate MFA input with retries ---
     let mfaInput: Locator | undefined;
 
-    for (let attempt = 1; attempt <= 3; attempt++) {
+    for (let attempt = 1; attempt <= 3 && !mfaInput; attempt++) {
       await test.step(`MFA retry attempt ${attempt}`, async () => {
         try {
-          let inputCandidate: Locator = page.locator(
-            'input[autocomplete="one-time-code"]',
-          );
-          if (!(await inputCandidate.isVisible().catch(() => false))) {
-            // Check frames if input is inside iframe
-            for (const frame of page.frames()) {
-              const frameInput = frame.locator(
-                'input[autocomplete="one-time-code"]',
-              );
-              if (await frameInput.isVisible().catch(() => false)) {
-                inputCandidate = frameInput;
-                break;
-              }
-            }
-          }
-
-          await inputCandidate.waitFor({
-            state: "visible",
-            timeout: TIMEOUT_MFA,
-          });
+          const inputCandidate: Locator = await locateMfaInput(page);
           mfaInput = inputCandidate;
-        } catch (err) {
-          if (page.isClosed()) throw err;
+        } catch (e) {
+          if (page.isClosed()) throw e;
           await page.waitForTimeout(3000);
-          if (attempt === 3) throw err;
+          if (attempt === 3) throw e;
         }
       });
     }
@@ -162,21 +112,7 @@ test.describe("@login Login.gov tests", () => {
     });
 
     // --- Step 6: Generate OTP and submit ---
-    type AuthenticatorClient = {
-      generate: (secret: string) => string;
-    };
-
-    const authenticatorClient: AuthenticatorClient =
-      authenticator as unknown as AuthenticatorClient;
-
-    const oneTimeCode: string = authenticatorClient.generate(loginAuthKey);
-    await mfaInput.fill(oneTimeCode);
-
-    const mfaSubmitButton: Locator = page
-      .locator('button[type="submit"]:not(:has-text("Cancel"))')
-      .filter({ visible: true })
-      .first();
-    await mfaSubmitButton.click();
+    await generateMfaAndSubmit(page, mfaInput);
 
     // --- Step 7: Handle mobile dropdown if needed and confirm login success ---
     if (isMobileProject) {
@@ -193,10 +129,8 @@ test.describe("@login Login.gov tests", () => {
     }
 
     // --- Step 8: Confirm Account element is visible ---
-    const signInButtonLocator = page.locator(
-      'button:has-text("Sign In"), a:has-text("Sign In")',
-    );
-    await expect(signInButtonLocator).toHaveCount(0, {
+    const signOutButton = await findSignOutButton(page, isMobileProject);
+    await expect(signOutButton).toHaveCount(1, {
       timeout: TIMEOUT_REDIRECT,
     });
 

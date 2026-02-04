@@ -60,6 +60,7 @@ class OpportunityContainer:
     ### Opportunity
     opportunity_title: str
     opportunity_number: str
+    opportunity_id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid4)
     agency_code: str = "SGG"
     category: OpportunityCategory = OpportunityCategory.DISCRETIONARY
 
@@ -164,7 +165,11 @@ class BuildAutomaticOpportunitiesTask(Task):
         OPPORTUNITY_CREATED_COUNT = "opportunity_created_count"
         OPPORTUNITY_ALREADY_EXIST_COUNT = "opportunity_already_exist_count"
 
-    def __init__(self, db_session: db.Session, s3_config: S3Config | None = None) -> None:
+    def __init__(
+        self,
+        db_session: db.Session,
+        s3_config: S3Config | None = None,
+    ) -> None:
         super().__init__(db_session)
 
         if s3_config is None:
@@ -186,11 +191,17 @@ class BuildAutomaticOpportunitiesTask(Task):
         forms = self.db_session.scalars(select(Form).where(Form.is_deprecated.isnot(True))).all()
 
         # For each form, create an opportunity with just that form
+        # Use uuid5 to create deterministic UUIDs based on form ID
         for form in forms:
+            # Create a deterministic UUID based on the form ID
+            form_opportunity_id = uuid.uuid5(
+                uuid.NAMESPACE_DNS, f"simpler-grants-gov.form.{form.form_id}"
+            )
             self.create_opportunity(
                 OpportunityContainer(
                     opportunity_title=f"Opportunity for form {form.short_form_name}",
                     opportunity_number=f"SGG-{form.short_form_name}",
+                    opportunity_id=form_opportunity_id,
                 ),
                 competitions=[CompetitionContainer(optional_form_ids=[form.form_id])],
             )
@@ -204,7 +215,6 @@ class BuildAutomaticOpportunitiesTask(Task):
                 opportunity_number=f"SGG-ALL-Forms-{datetime_util.get_now_us_eastern_date().isoformat()}",
             ),
             competitions=[CompetitionContainer(optional_form_ids=[form.form_id for form in forms])],
-            force_create=True,
         )
 
         # Create various other specific scenarios
@@ -219,6 +229,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             OpportunityContainer(
                 opportunity_title="Opportunity open to only organizations",
                 opportunity_number="SGG-org-only-test",
+                opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000001"),
             ),
             competitions=[
                 CompetitionContainer(
@@ -234,6 +245,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             OpportunityContainer(
                 opportunity_title="Opportunity open to only individuals",
                 opportunity_number="SGG-indv-only-test",
+                opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000002"),
             ),
             competitions=[
                 CompetitionContainer(
@@ -249,6 +261,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             OpportunityContainer(
                 opportunity_title="MOCK PILOT - Native American Affairs: Technical Assistance to Tribes for Fiscal Year 2025",
                 opportunity_number="MOCK-R25AS00293-Dec102025",
+                opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000003"),
                 agency_code="DOI-BOR",
                 category=OpportunityCategory.DISCRETIONARY,
                 assistance_listing_number="15.519",
@@ -299,6 +312,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             OpportunityContainer(
                 opportunity_title="DOJ Mock Opportunity",
                 opportunity_number="MOCK-O-OVW-2025-172425-Dec102025",
+                opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000004"),
                 agency_code="USDOJ-OJP-OVW",
                 category=OpportunityCategory.MANDATORY,
                 assistance_listing_number="16.557",
@@ -340,37 +354,33 @@ class BuildAutomaticOpportunitiesTask(Task):
         self,
         data: OpportunityContainer,
         competitions: list[CompetitionContainer],
-        force_create: bool = False,
     ) -> None:
-        # We won't always remake the opportunities every time
-        # unless the flag passed in says to do so
-        if not force_create:
-            existing_opportunity = (
-                self.db_session.execute(
-                    select(Opportunity).where(
-                        Opportunity.opportunity_number == data.opportunity_number
-                    )
-                )
-                .scalars()
-                .first()
+        # Check if opportunity already exists by number
+        existing_opportunity = (
+            self.db_session.execute(
+                select(Opportunity).where(Opportunity.opportunity_number == data.opportunity_number)
             )
-            if existing_opportunity is not None:
-                logger.info(
-                    f"Skipping creating opportunity '{data.opportunity_number}' as it already exists",
-                    extra={
-                        "opportunity_id": existing_opportunity.opportunity_id,
-                        "opportunity_number": data.opportunity_number,
-                    },
-                )
-                self.increment(self.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT)
-                return
+            .scalars()
+            .first()
+        )
+
+        if existing_opportunity:
+            logger.info(
+                f"Skipping creating opportunity '{data.opportunity_number}' as it already exists",
+                extra={
+                    "opportunity_id": existing_opportunity.opportunity_id,
+                    "opportunity_number": data.opportunity_number,
+                },
+            )
+            self.increment(self.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT)
+            return
 
         logger.info(f"Creating opportunity for scenario '{data.opportunity_number}'")
         current_date = datetime_util.get_now_us_eastern_date()
 
         ### Opportunity
         opportunity = Opportunity(
-            opportunity_id=uuid.uuid4(),
+            opportunity_id=data.opportunity_id,
             legacy_opportunity_id=random.randint(100_000_000, 999_999_999),
             opportunity_number=data.opportunity_number,
             opportunity_title=data.opportunity_title,

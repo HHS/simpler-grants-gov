@@ -2,6 +2,7 @@
 
 import { useUser } from "src/services/auth/useUser";
 import { submitApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
+import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   ApplicationDetail,
   ApplicationHistory,
@@ -36,11 +37,13 @@ const ApplicationContainer = ({
   attachments,
   opportunity,
   applicationHistory,
+  latestApplicationSubmission,
 }: {
   applicationDetails: ApplicationDetail;
   attachments: Attachment[];
   opportunity: OpportunityDetail;
   applicationHistory: ApplicationHistory[];
+  latestApplicationSubmission: ApplicationSubmission | null;
 }) => {
   const forms = applicationDetails.competition.competition_forms;
   const applicationForms = applicationDetails.application_forms;
@@ -161,6 +164,7 @@ const ApplicationContainer = ({
         submissionLoading={loading}
         opportunityName={opportunity.opportunity_title}
         instructionsDownloadPath={instructionsDownloadPath}
+        latestApplicationSubmission={latestApplicationSubmission}
       />
       <OpportunityCard opportunityOverview={opportunity} />
       <ApplicationFormsTable

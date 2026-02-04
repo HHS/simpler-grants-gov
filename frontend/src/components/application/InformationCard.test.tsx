@@ -1,8 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import {
-  Status,
-  type ApplicationDetail,
-} from "src/types/applicationResponseTypes";
+import { render, screen } from "@testing-library/react";
+import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
+import { mockApplicationSubmission } from "src/utils/testing/fixtures";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import applicationMock from "stories/components/application/application.mock.json";
 
 import React from "react";
@@ -113,6 +112,7 @@ describe("InformationCard - Edit filing name button visibility", () => {
     opportunityName: "Test Opportunity",
     submissionLoading: false,
     instructionsDownloadPath: "http://path-to-instructions.com",
+    latestApplicationSubmission: mockApplicationSubmission,
   };
 
   it("shows Edit filing name button when application status is in_progress", () => {
@@ -172,6 +172,7 @@ describe("InformationCard - Special instructions when closed", () => {
     opportunityName: "Test Opportunity",
     submissionLoading: false,
     instructionsDownloadPath: "http://path-to-instructions.com",
+    latestApplicationSubmission: mockApplicationSubmission,
   };
 
   it("shows special instructions when competition is CLOSED (is_open=false)", () => {
@@ -221,6 +222,7 @@ describe("InformationCard - Submit button", () => {
     opportunityName: "Test Opportunity",
     submissionLoading: false,
     instructionsDownloadPath: "http://path-to-instructions.com",
+    latestApplicationSubmission: mockApplicationSubmission,
   };
 
   it("shows submit when is_open=true and not submitted", () => {
@@ -382,5 +384,78 @@ describe("InformationCard - org-only eligibility", () => {
     fireEvent.click(screen.getByTestId("transfer-ownership-open"));
 
     expect(screen.getByTestId("transfer-ownership-modal")).toBeInTheDocument();
+  });
+});
+
+describe("InformationCard - Download submission button visibility and content", () => {
+  const submissionButtonTestId = "application-submission-download";
+  const submissionMessageTestId = "application-submission-download-message";
+  const baseProps = {
+    applicationDetails: mockApplicationDetails,
+    applicationSubmitHandler: jest.fn(),
+    applicationSubmitted: false,
+    opportunityName: "Test Opportunity",
+    submissionLoading: false,
+    instructionsDownloadPath: "http://path-to-instructions.com",
+    latestApplicationSubmission: mockApplicationSubmission,
+  };
+
+  it("shows the download submission button when status is accepted", () => {
+    const acceptedApplication = {
+      ...mockApplicationDetails,
+      application_status: Status.ACCEPTED,
+    };
+
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={acceptedApplication}
+      />,
+    );
+
+    expect(screen.queryByTestId(submissionButtonTestId)).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(submissionMessageTestId),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows download processing message if in submitted status", () => {
+    const submittedApplication = {
+      ...mockApplicationDetails,
+      application_status: Status.SUBMITTED,
+    };
+
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={submittedApplication}
+      />,
+    );
+
+    expect(
+      screen.queryByTestId(submissionButtonTestId),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId(submissionMessageTestId)).toBeInTheDocument();
+  });
+
+  it("shows does not render if application is in in_progress status", () => {
+    const inProgressApplication = {
+      ...mockApplicationDetails,
+      application_status: Status.IN_PROGRESS,
+    };
+
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={inProgressApplication}
+      />,
+    );
+
+    expect(
+      screen.queryByTestId(submissionButtonTestId),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId(submissionMessageTestId),
+    ).not.toBeInTheDocument();
   });
 });
