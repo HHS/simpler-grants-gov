@@ -23,8 +23,10 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
+import { LOGIN_URL } from "src/constants/auth";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
+import { storeCurrentPage } from "src/utils/userUtils";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { TestUserSelect } from "./TestUserSelect";
 import { UserControl } from "./user/UserControl";
@@ -70,9 +72,11 @@ const NavLink = ({
 const NavLinks = ({
   mobileExpanded,
   onToggleMobileNav,
+  showLoginLink,
 }: {
   mobileExpanded: boolean;
   onToggleMobileNav: () => void;
+  showLoginLink?: boolean;
 }) => {
   const t = useTranslations("Header.navLinks");
   const path = usePathname();
@@ -192,12 +196,12 @@ const NavLinks = ({
   }, [closeMobileNav]);
 
   const navItems = useMemo(() => {
-    return navLinkList.map((link: PrimaryLink, index: number) => {
+    const items = navLinkList.map((link: PrimaryLink, index: number) => {
       if (!link.text) {
         return <></>;
       }
       if (link.children) {
-        const items = link.children.map((childLink) => {
+        const childItems = link.children.map((childLink) => {
           if (!childLink.text) {
             return <></>;
           }
@@ -217,7 +221,7 @@ const NavLinks = ({
             index={index}
             isCurrent={currentNavItemIndex === index}
             linkText={link.text}
-            menuItems={items}
+            menuItems={childItems}
             setActiveNavDropdownIndex={setActiveNavDropdownIndex}
           />
         );
@@ -235,12 +239,34 @@ const NavLinks = ({
         />
       );
     });
+
+    if (showLoginLink && !user?.token) {
+      items.push(
+        <a
+          key="sign-in-mobile"
+          href={LOGIN_URL}
+          className="usa-nav__link desktop:display-none"
+          onClick={() => {
+            storeCurrentPage();
+            closeDropdownAndMobileNav();
+          }}
+          data-testid="sign-in-button"
+        >
+          {t("login")}
+        </a>,
+      );
+    }
+
+    return items;
   }, [
     activeNavDropdownIndex,
     closeDropdownAndMobileNav,
     currentNavItemIndex,
     navLinkList,
     setActiveNavDropdownIndex,
+    showLoginLink,
+    t,
+    user?.token,
   ]);
 
   return (
@@ -265,7 +291,7 @@ const Header = ({
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
 
-  const { hasBeenLoggedOut, resetHasBeenLoggedOut } = useUser();
+  const { hasBeenLoggedOut, resetHasBeenLoggedOut, user } = useUser();
   const { showSnackbar, Snackbar, hideSnackbar, snackbarIsVisible } =
     useSnackbar();
 
@@ -347,13 +373,19 @@ const Header = ({
             />
           </div>
           {!!showLoginLink && (
-            <div className="usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
+            <div
+              className={clsx(
+                "usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6",
+                { "display-none desktop:display-block": !user?.token },
+              )}
+            >
               <UserControl localDev={localDev} />
             </div>
           )}
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
+            showLoginLink={showLoginLink}
           />
         </div>
       </USWDSHeader>
