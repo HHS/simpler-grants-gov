@@ -4,22 +4,20 @@ import React from "react";
 
 import { TransferOwnershipButton } from "./TransferOwnershipButton";
 
+const onClickMock = jest.fn<void, []>();
+
 jest.mock("@trussworks/react-uswds", () => ({
   Button: ({
     children,
     onClick,
     className,
     type,
-    secondary,
-    unstyled,
     "data-testid": dataTestId,
   }: {
     children: React.ReactNode;
     onClick?: () => void;
     className?: string;
     type?: "button" | "submit" | "reset";
-    secondary?: boolean;
-    unstyled?: boolean;
     "data-testid"?: string;
   }) => (
     <button
@@ -27,8 +25,6 @@ jest.mock("@trussworks/react-uswds", () => ({
       className={className}
       data-testid={dataTestId}
       onClick={onClick}
-      data-secondary={String(Boolean(secondary))}
-      data-unstyled={String(Boolean(unstyled))}
     >
       {children}
     </button>
@@ -44,9 +40,23 @@ jest.mock("src/components/USWDSIcon", () => ({
 }));
 
 describe("TransferOwnershipButton", () => {
-  it("calls onClick when pressed", () => {
-    const onClickMock = jest.fn();
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
+  it("renders the transfer ownership button", () => {
+    render(<TransferOwnershipButton onClick={onClickMock} />);
+
+    const button = screen.getByTestId("transfer-ownership-open");
+    expect(button).toBeInTheDocument();
+
+    // We mock translations to return the key string.
+    expect(
+      screen.getByText("transferApplicaitonOwnership"),
+    ).toBeInTheDocument();
+  });
+
+  it("calls onClick when clicked", () => {
     render(<TransferOwnershipButton onClick={onClickMock} />);
 
     fireEvent.click(screen.getByTestId("transfer-ownership-open"));
@@ -54,11 +64,9 @@ describe("TransferOwnershipButton", () => {
     expect(onClickMock).toHaveBeenCalledTimes(1);
   });
 
-  it("renders the label from translations", () => {
-    render(<TransferOwnershipButton onClick={jest.fn()} />);
+  it("does not call onClick on render", () => {
+    render(<TransferOwnershipButton onClick={onClickMock} />);
 
-    expect(
-      screen.getByText("transferApplicaitonOwnership"),
-    ).toBeInTheDocument();
+    expect(onClickMock).not.toHaveBeenCalled();
   });
 });
