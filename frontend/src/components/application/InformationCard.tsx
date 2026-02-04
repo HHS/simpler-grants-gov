@@ -2,37 +2,20 @@
 
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
+  ApplicationDetail,
+  SamGovEntity,
   Status,
-  type ApplicationDetail,
-  type SamGovEntity,
 } from "src/types/applicationResponseTypes";
-import type {
-  ApplicantTypes,
-  Competition,
-} from "src/types/competitionsResponseTypes";
+import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  Alert,
-  Button,
-  Grid,
-  GridContainer,
-  Link,
-  type ModalRef,
-} from "@trussworks/react-uswds";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Button, Grid, GridContainer, Link, ModalRef } from "@trussworks/react-uswds";
 
 import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
-import { TransferOwnershipModal } from "src/components/application/transferOwnership/TransferOwnershipModal";
-import { InlineActionLink } from "src/components/InlineActionLink";
 import { USWDSIcon } from "src/components/USWDSIcon";
+
+import { TransferOwnershipModal } from "src/components/application/transferOwnership/TransferOwnershipModal";
 import { TransferOwnershipButton } from "./transferOwnership/TransferOwnershipButton";
 
 type CompetitionDetails = { competition: Competition };
@@ -72,12 +55,10 @@ const ApplicantDetails = ({
   hasOrganization,
   samGovEntity,
   onOpenTransferModal,
-  competitionAllowsOrganizations,
 }: {
   hasOrganization: boolean;
   samGovEntity?: SamGovEntity;
-  onOpenTransferModal: () => void;
-  competitionAllowsOrganizations: boolean;
+    onOpenTransferModal: () => void;
 }) => {
   const t = useTranslations("Application.information");
 
@@ -90,35 +71,13 @@ const ApplicantDetails = ({
       <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
       <dd>
         {t("applicantTypeIndividual")}
-        {competitionAllowsOrganizations ? (
+        {!hasOrganization ? (
           <TransferOwnershipButton onClick={onOpenTransferModal} />
         ) : null}
       </dd>
     </div>
   );
 };
-
-const getApplicationStatusLabel = (
-  applicationStatus: string,
-  t: ReturnType<typeof useTranslations>,
-): string => {
-  switch (applicationStatus) {
-    case Status.ACCEPTED:
-      return t("statusAccepted");
-    case Status.IN_PROGRESS:
-      return t("statusInProgress");
-    case Status.SUBMITTED:
-      return t("statusSubmitted");
-    default:
-      return "-";
-  }
-};
-
-const isCompetitionOrganizationOnly = (
-  openToApplicants: ApplicantTypes[],
-): boolean =>
-  openToApplicants.includes("organization") &&
-  !openToApplicants.includes("individual");
 
 export const InformationCard = ({
   applicationDetails,
@@ -138,10 +97,8 @@ export const InformationCard = ({
   latestApplicationSubmission: ApplicationSubmission | null;
 }) => {
   const t = useTranslations("Application.information");
-
   const hasOrganization = Boolean(applicationDetails.organization);
-  const competitionIsOpen = applicationDetails.competition.is_open;
-
+  const { is_open } = applicationDetails.competition;
   const transferModalRef = useRef<ModalRef | null>(null);
   const transferModalId = "transfer-ownership-modal";
   const [isTransferModalOpen, setIsTransferModalOpen] =
@@ -162,32 +119,14 @@ export const InformationCard = ({
     transferModalRef.current?.toggleModal?.();
   }, [isTransferModalOpen]);
 
-  const submitBlockedByEligibility = useMemo((): boolean => {
-    const orgOnly = isCompetitionOrganizationOnly(
-      applicationDetails.competition.open_to_applicants,
-    );
-    return orgOnly && !hasOrganization;
-  }, [applicationDetails.competition.open_to_applicants, hasOrganization]);
-
-  const submitDisabled =
-    submissionLoading || isTransferModalOpen || submitBlockedByEligibility;
-
-  const alertBody: ReactNode = t.rich("unassociatedApplicationAlert.body", {
-    link: (content) => (
-      <InlineActionLink onClick={openTransferModal}>{content}</InlineActionLink>
-    ),
-  });
-  const competitionAllowsOrganizations =
-    applicationDetails.competition.open_to_applicants.includes("organization");
-
   const ApplicationInstructionsDownload = () => {
     return (
       <div className="margin-bottom-1 margin-left-0">
         <dt className="usa-sr-only">
-          {t("applicationDownloadInstructionsLabel")}:
+          {t("applicationDownloadInstructionsLabel")}:{" "}
         </dt>
         <dd className="margin-left-0">
-          {instructionsDownloadPath ? (
+          {instructionsDownloadPath && (
             <Link href={instructionsDownloadPath}>
               <Button
                 type="button"
@@ -198,7 +137,7 @@ export const InformationCard = ({
                 {t("applicationDownloadInstructions")}
               </Button>
             </Link>
-          ) : null}
+          )}
         </dd>
       </div>
     );
@@ -305,6 +244,7 @@ export const InformationCard = ({
             <ApplicantDetails
               hasOrganization={hasOrganization}
               samGovEntity={applicationDetails.organization?.sam_gov_entity}
+              onOpenTransferModal={openTransferModal}
             />
           </dl>
         </Grid>
@@ -335,6 +275,15 @@ export const InformationCard = ({
           </dl>
         </Grid>
 
+        {isTransferModalOpen ? (
+          <TransferOwnershipModal
+            applicationId={applicationDetails.application_id}
+            modalId={transferModalId}
+            modalRef={transferModalRef}
+            onAfterClose={handleTransferModalAfterClose}
+          />
+        ) : null}
+
         <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
           {applicationDetails.competition.competition_instructions.length ? (
             <ApplicationInstructionsDownload />
@@ -362,130 +311,32 @@ export const InformationCard = ({
   };
 
   return (
-    <>
-      {submitBlockedByEligibility ? (
-        <Grid tablet={{ col: 12 }} mobile={{ col: 12 }}>
-          <Alert
-            type="warning"
-            noIcon
-            headingLevel="h2"
-            heading={t("unassociatedApplicationAlert.title")}
-            className="margin-top-2"
-            data-testid="unassociated-application-alert"
-          >
-            {alertBody}
-          </Alert>
-        </Grid>
-      ) : null}
-
-      {isTransferModalOpen ? (
-        <TransferOwnershipModal
-          applicationId={applicationDetails.application_id}
-          modalId={transferModalId}
-          modalRef={transferModalRef}
-          onAfterClose={handleTransferModalAfterClose}
+    <GridContainer
+      data-testid="information-card"
+      className="border radius-md border-base-lighter padding-x-2 margin-y-4"
+    >
+      <Grid row gap>
+        <InformationCardDetails
+          applicationSubmitHandler={applicationSubmitHandler}
         />
-      ) : null}
-
-      <GridContainer
-        data-testid="information-card"
-        className="border radius-md border-base-lighter padding-x-2 margin-y-4"
-      >
-        <Grid row gap>
-          <Grid tablet={{ col: 12 }} mobile={{ col: 12 }}>
-            <h3 className="margin-top-2">
-              {applicationDetails.application_name}
-              {applicationDetails.application_status !== Status.SUBMITTED &&
-                applicationDetails.application_status !== Status.ACCEPTED && (
-                  <EditAppFilingName
-                    applicationId={applicationDetails.application_id}
-                    applicationName={applicationDetails.application_name}
-                    opportunityName={opportunityName}
-                  />
-                )}
-            </h3>
-          </Grid>
-
-          <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
-            <dl>
-              <ApplicantDetails
-                hasOrganization={hasOrganization}
-                samGovEntity={applicationDetails.organization?.sam_gov_entity}
-                onOpenTransferModal={openTransferModal}
-                competitionAllowsOrganizations={competitionAllowsOrganizations}
-              />
-            </dl>
-          </Grid>
-
-          <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
-            <dl>
-              <div className="margin-bottom-1">
-                <dt className="margin-right-1 text-bold">
-                  {competitionIsOpen ? t("closeDate") : t("closed")}:
-                </dt>
-                <dd className="margin-right-1">
-                  <span className="text-bold text-orange">
-                    {applicationDetails.competition.closing_date}
-                  </span>{" "}
-                  (11:59pm ET)
-                </dd>
-              </div>
-
-              {!competitionIsOpen ? <SpecialInstructions /> : null}
-
-              <div className="margin-bottom-1">
-                <dt className="margin-right-1 text-bold">
-                  {t("statusLabel")}:
-                </dt>
-                <dd className="margin-right-1 text-bold text-orange">
-                  {getApplicationStatusLabel(
-                    applicationDetails.application_status,
-                    t,
-                  )}
-                </dd>
-              </div>
-            </dl>
-          </Grid>
-
-          <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
-            {applicationDetails.competition.competition_instructions.length ? (
-              <ApplicationInstructionsDownload />
-            ) : (
-              <NoApplicationInstructionsDownload />
-            )}
-          </Grid>
-
-          <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
-            {!applicationSubmitted && competitionIsOpen ? (
-              <SubmitApplicationButton
-                buttonText={t("submit")}
-                onSubmit={applicationSubmitHandler}
-                isDisabled={submitDisabled}
-                isSubmitting={submissionLoading}
-              />
-            ) : null}
-          </Grid>
-        </Grid>
-      </GridContainer>
-    </>
+      </Grid>
+    </GridContainer>
   );
 };
 
 export const SubmitApplicationButton = ({
   buttonText,
-  isDisabled,
-  isSubmitting,
-  onSubmit,
+  loading,
+  submitHandler,
 }: {
   buttonText: string;
-  isDisabled: boolean;
-  isSubmitting: boolean;
-  onSubmit: () => void;
+  loading: boolean;
+  submitHandler: () => void;
 }) => {
   return (
-    <Button type="button" disabled={isDisabled} onClick={onSubmit}>
+    <Button type="button" disabled={!!loading} onClick={submitHandler}>
       <USWDSIcon name="upload_file" />
-      {isSubmitting ? "Loading... " : buttonText}
+      {loading ? "Loading...  " : buttonText}
     </Button>
   );
 };

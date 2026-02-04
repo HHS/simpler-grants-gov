@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
 import { mockApplicationSubmission } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import applicationMock from "stories/components/application/application.mock.json";
 
 import React from "react";
@@ -54,20 +54,6 @@ jest.mock(
 
 jest.mock("src/components/USWDSIcon", () => ({
   USWDSIcon: () => <span aria-hidden="true" />,
-}));
-
-jest.mock("src/components/InlineActionLink", () => ({
-  InlineActionLink: ({
-    onClick,
-    children,
-  }: {
-    onClick: () => void;
-    children: React.ReactNode;
-  }) => (
-    <button type="button" onClick={onClick}>
-      {children}
-    </button>
-  ),
 }));
 
 jest.mock(
@@ -282,12 +268,11 @@ describe("InformationCard - Submit button", () => {
       />,
     );
 
-    // Button shows “Loading...” when isSubmitting
     expect(screen.getByRole("button", { name: /loading/i })).toBeDisabled();
   });
 });
 
-describe("InformationCard - org-only eligibility", () => {
+describe("InformationCard - Transfer ownership UI", () => {
   const baseProps = {
     applicationDetails: mockApplicationDetails,
     applicationSubmitHandler: jest.fn(),
@@ -295,95 +280,75 @@ describe("InformationCard - org-only eligibility", () => {
     opportunityName: "Test Opportunity",
     submissionLoading: false,
     instructionsDownloadPath: "http://path-to-instructions.com",
+    latestApplicationSubmission: mockApplicationSubmission,
   };
 
-  it("shows warning alert and disables submit when competition is org-only and application has no org", () => {
-    const orgOnlyNoOrg: ApplicationDetail = {
+  it("shows the transfer ownership button when the application has no organization", () => {
+    const noOrganizationApplication: ApplicationDetail = {
       ...mockApplicationDetails,
       organization: null,
-      competition: {
-        ...mockApplicationDetails.competition,
-        is_open: true,
-        open_to_applicants: ["organization"],
+    };
+
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={noOrganizationApplication}
+      />,
+    );
+
+    expect(screen.getByTestId("transfer-ownership-open")).toBeInTheDocument();
+  });
+
+  it("does not show the transfer ownership button when the application has an organization", () => {
+    const hasOrganizationApplication: ApplicationDetail = {
+      ...mockApplicationDetails,
+      organization: {
+        organization_id: "org-123",
+        sam_gov_entity: {
+          expiration_date: "2099-01-01",
+          legal_business_name: "Test Org",
+          uei: "UEI123",
+          ebiz_poc_email: "test@example.com",
+          ebiz_poc_first_name: "Test",
+          ebiz_poc_last_name: "Org",
+        },
       },
     };
 
     render(
-      <InformationCard {...baseProps} applicationDetails={orgOnlyNoOrg} />,
+      <InformationCard
+        {...baseProps}
+        applicationDetails={hasOrganizationApplication}
+      />,
     );
 
     expect(
-      screen.getByTestId("unassociated-application-alert"),
-    ).toBeInTheDocument();
-
-    // submit text is "submit" when not loading
-    const submitButton = screen.getByRole("button", { name: "submit" });
-    expect(submitButton).toBeDisabled();
-  });
-
-  it("does not show alert when competition allows individuals (individual+organization) even if application has no org", () => {
-    const mixedNoOrg: ApplicationDetail = {
-      ...mockApplicationDetails,
-      organization: null,
-      competition: {
-        ...mockApplicationDetails.competition,
-        is_open: true,
-        open_to_applicants: ["individual", "organization"],
-      },
-    };
-
-    render(<InformationCard {...baseProps} applicationDetails={mixedNoOrg} />);
-
-    expect(
-      screen.queryByTestId("unassociated-application-alert"),
+      screen.queryByTestId("transfer-ownership-open"),
     ).not.toBeInTheDocument();
   });
 
-  it("opens the transfer modal from the alert link", () => {
-    const orgOnlyNoOrg: ApplicationDetail = {
+  it("opens the transfer modal when clicking the transfer ownership button and closes it via onAfterClose", async () => {
+    const user = userEvent.setup();
+
+    const noOrganizationApplication: ApplicationDetail = {
       ...mockApplicationDetails,
       organization: null,
-      competition: {
-        ...mockApplicationDetails.competition,
-        is_open: true,
-        open_to_applicants: ["organization"],
-      },
     };
 
     render(
-      <InformationCard {...baseProps} applicationDetails={orgOnlyNoOrg} />,
+      <InformationCard
+        {...baseProps}
+        applicationDetails={noOrganizationApplication}
+      />,
     );
 
-    // translation mock returns the key string, but the body uses rich text content
-    // so we click by the literal text inside the <link> tag from your locale file:
-    // "Click here to transfer application ownership"
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Click here to transfer application ownership/i,
-      }),
-    );
-
+    await user.click(screen.getByTestId("transfer-ownership-open"));
     expect(screen.getByTestId("transfer-ownership-modal")).toBeInTheDocument();
-  });
 
-  it("opens the transfer modal from the transfer ownership button next to applicant type", () => {
-    const orgOnlyNoOrg: ApplicationDetail = {
-      ...mockApplicationDetails,
-      organization: null,
-      competition: {
-        ...mockApplicationDetails.competition,
-        is_open: true,
-        open_to_applicants: ["organization"],
-      },
-    };
-
-    render(
-      <InformationCard {...baseProps} applicationDetails={orgOnlyNoOrg} />,
-    );
-
-    fireEvent.click(screen.getByTestId("transfer-ownership-open"));
-
-    expect(screen.getByTestId("transfer-ownership-modal")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(
+      screen.queryByTestId("transfer-ownership-modal"),
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -438,7 +403,7 @@ describe("InformationCard - Download submission button visibility and content", 
     expect(screen.queryByTestId(submissionMessageTestId)).toBeInTheDocument();
   });
 
-  it("shows does not render if application is in in_progress status", () => {
+  it("does not render download submission section if application is in in_progress status", () => {
     const inProgressApplication = {
       ...mockApplicationDetails,
       application_status: Status.IN_PROGRESS,
