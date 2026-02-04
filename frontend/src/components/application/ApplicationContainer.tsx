@@ -71,6 +71,7 @@ const ApplicationContainer = ({
     .competition_instructions.length
     ? applicationDetails.competition.competition_instructions[0].download_path
     : "";
+
   const handleSubmit = useCallback(() => {
     if (!token) {
       return;
