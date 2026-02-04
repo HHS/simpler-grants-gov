@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { UserDropdown } from "src/components/user/UserControl";
 
@@ -11,10 +10,6 @@ const mockUseUser = jest.fn(() => ({
   },
   hasBeenLoggedOut: false,
   resetHasBeenLoggedOut: jest.fn(),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/hooks/useFeatureFlags", () => ({

@@ -2,7 +2,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
 import PageNotFound from "src/app/[locale]/(base)/not-found";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
@@ -13,10 +12,6 @@ jest.mock("react", () => ({
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 describe("PageNotFound", () => {

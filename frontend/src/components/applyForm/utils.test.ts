@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { RJSFSchema } from "@rjsf/utils";
 
 import sflllSchema from "src/components/applyForm/sflll.mock.json";
@@ -660,7 +658,7 @@ describe("getWarningsForField", () => {
       }),
     ).toEqual([]);
   });
-  // eslint-disable-next-line
+
   it.skip("does something with arrays?", () => {});
   it("returns warnings that directly reference the field name", () => {
     expect(

@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { fakeSavedSearch } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
 
@@ -16,10 +15,6 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
 
 jest.mock("src/services/auth/useUser", () => ({
   useUser: (): unknown => mockUseUser(),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/hooks/useSearchParamUpdater", () => ({

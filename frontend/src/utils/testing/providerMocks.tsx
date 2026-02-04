@@ -24,7 +24,7 @@ export const FakeQueryProvider = ({
     updateTotalResults: mockUpdateTotalResults,
     totalPages,
     queryTerm,
-    // eslint-disable-next-line
+
     updateQueryTerm: mockUpdateQueryTerm,
     totalResults,
     updateLocalAndOrParam: mockUpdateLocalAndOrParam,

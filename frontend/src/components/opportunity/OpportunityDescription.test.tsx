@@ -3,7 +3,6 @@
 import { render, screen } from "@testing-library/react";
 import DOMPurify from "isomorphic-dompurify";
 import { Summary } from "src/types/opportunity/opportunityResponseTypes";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
 
@@ -16,10 +15,6 @@ const splitMarkupMock = jest
 
 jest.mock("isomorphic-dompurify", () => ({
   sanitize: jest.fn((input: string) => input),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/utils/generalUtils", () => ({

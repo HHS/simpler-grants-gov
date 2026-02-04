@@ -5,7 +5,6 @@ import {
   ApplicationFormDetail,
   ApplicationStatus,
 } from "src/types/applicationResponseTypes";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import competitionMock from "stories/components/application/competition.mock.json";
 
 import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";
@@ -22,10 +21,6 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({
     refresh: jest.fn(),
   }),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 const applicationForms =

@@ -3,11 +3,7 @@ import { axe } from "jest-axe";
 import { identity } from "lodash";
 import Maintenance from "src/app/[locale]/(base)/maintenance/page";
 import { UserContext } from "src/services/auth/useUser";
-import {
-  localeParams,
-  mockMessages,
-  useTranslationsMock,
-} from "src/utils/testing/intlMocks";
+import { localeParams } from "src/utils/testing/intlMocks";
 import { createFakeUserContext } from "src/utils/testing/providerMocks";
 
 jest.mock("next-intl/server", () => ({
@@ -38,11 +34,6 @@ jest.mock("next/navigation", () => ({
   push: jest.fn(),
   redirect: (url: string): unknown => redirectMock(url),
   RedirectType: { push: "PUSH" },
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-  useMessages: () => mockMessages,
 }));
 
 describe("Maintenance", () => {

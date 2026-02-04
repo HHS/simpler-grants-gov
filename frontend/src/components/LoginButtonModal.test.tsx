@@ -1,6 +1,6 @@
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LOGIN_URL } from "src/constants/auth";
-import { render, screen } from "tests/react-utils";
 
 import { LoginButtonModal } from "src/components/LoginButtonModal";
 
@@ -27,19 +27,21 @@ describe("LoginButtonModal", () => {
   it("renders", () => {
     render(<LoginButtonModal navLoginLinkText="Sign in" />);
     const loginGovLink = screen.getByRole("link", {
-      name: /Sign in with Login.gov/i,
+      name: "button",
     });
     expect(loginGovLink).toBeInTheDocument();
     expect(loginGovLink).toHaveAttribute("href", LOGIN_URL);
 
     const modalTitle = screen.getByRole("heading", { level: 2 });
-    expect(modalTitle).toHaveTextContent("Sign in to Simpler.Grants.gov");
+    expect(modalTitle).toHaveTextContent("title");
   });
 
   it("displays modal when clicked", async () => {
     render(<LoginButtonModal navLoginLinkText="Sign in" />);
 
-    const loginButton = screen.getByRole("button", { name: /Sign in/i });
+    const loginButton = screen.getByRole("button", {
+      name: "Sign in",
+    });
     expect(loginButton).toBeInTheDocument();
 
     const modal = screen.getByRole("dialog");
@@ -48,7 +50,7 @@ describe("LoginButtonModal", () => {
     await userEvent.click(loginButton);
     expect(modal).toHaveClass("is-visible");
 
-    const cancelButton = screen.getByRole("button", { name: /Cancel/i });
+    const cancelButton = screen.getByRole("button", { name: "close" });
     await userEvent.click(cancelButton);
     expect(modal).toHaveClass("is-hidden");
   });

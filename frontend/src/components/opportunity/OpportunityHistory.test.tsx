@@ -1,18 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { Summary } from "src/types/opportunity/opportunityResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
 
 // Mock the formatDate function
 jest.mock("src/utils/dateUtil", () => ({
   formatDate: jest.fn((date: string) => date),
-}));
-
-// Mock `useTranslations`
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 const mockSummary = {

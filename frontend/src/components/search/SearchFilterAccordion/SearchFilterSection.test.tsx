@@ -1,30 +1,22 @@
 import "@testing-library/jest-dom";
 
+import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
-import { render, screen } from "tests/react-utils";
 
-import React from "react";
-
-import * as AllOptionCheckboxImport from "src/components/search/SearchFilterAccordion/AllOptionCheckbox";
 import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection";
 
-// const AllOptionCheckboxMock = jest.fn();
+const AllOptionCheckboxMock = jest.fn();
 
-// jest.mock(
-//   "src/components/search/SearchFilterAccordion/AllOptionCheckbox",
-//   () => ({
-//     AllOptionCheckbox: (props: unknown) =>
-//       AllOptionCheckboxMock(props) as unknown,
-//   }),
-// );
+jest.mock(
+  "src/components/search/SearchFilterAccordion/AllOptionCheckbox",
+  () => ({
+    AllOptionCheckbox: (props: unknown) =>
+      AllOptionCheckboxMock(props) as unknown,
+  }),
+);
 
 const mockSetQueryParam = jest.fn();
-
-const AllOptionCheckboxMock = jest.spyOn(
-  AllOptionCheckboxImport,
-  "AllOptionCheckbox",
-);
 
 const defaultProps = {
   queryParamKey: "agency" as ValidSearchQueryParam,
@@ -56,9 +48,9 @@ const defaultProps = {
   },
 };
 
-// const ActualAllOptionCheckbox = jest.requireActual<
-//   typeof import("src/components/search/SearchFilterAccordion/AllOptionCheckbox")
-// >("src/components/search/SearchFilterAccordion/AllOptionCheckbox");
+const ActualAllOptionCheckbox = jest.requireActual<
+  typeof import("src/components/search/SearchFilterAccordion/AllOptionCheckbox")
+>("src/components/search/SearchFilterAccordion/AllOptionCheckbox");
 
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
@@ -67,11 +59,12 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
 }));
 
 describe("SearchFilterSection", () => {
-  // beforeEach(() => {
-  //   AllOptionCheckboxMock.mockImplementation((props) =>
-  //     ActualAllOptionCheckbox.AllOptionCheckbox(props),
-  //   );
-  // });
+  beforeEach(() => {
+    AllOptionCheckboxMock.mockImplementation((props) =>
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      ActualAllOptionCheckbox.AllOptionCheckbox(props),
+    );
+  });
   afterEach(() => jest.resetAllMocks());
   it("should not have accessibility violations", async () => {
     const { container } = render(<SearchFilterSection {...defaultProps} />);

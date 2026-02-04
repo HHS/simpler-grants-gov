@@ -6,7 +6,7 @@
     "node": ">=24.13.0"
   },
   "scripts": {
-    "all-checks": "npm run lint && npm run ts:check && npm run format-check && npm run test && npm run build -- --no-lint",
+    "all-checks": "npm run lint && npm run ts:check && npm run format-check && npm run test && npm run build",
     "build": "next build",
     "dev": "NEW_RELIC_ENABLED=false next dev",
     "local": "ENVIRONMENT=local NEW_RELIC_ENABLED=false next dev",

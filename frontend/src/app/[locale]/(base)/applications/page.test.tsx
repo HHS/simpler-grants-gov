@@ -8,7 +8,7 @@ import {
   ApplicationStatus,
 } from "src/types/applicationResponseTypes";
 import { DeepPartial } from "src/utils/testing/commonTestUtils";
-import { localeParams, useTranslationsMock } from "src/utils/testing/intlMocks";
+import { localeParams } from "src/utils/testing/intlMocks";
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
@@ -20,10 +20,6 @@ jest.mock("react", () => ({
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
   setRequestLocale: identity,
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 const applications = jest.fn().mockResolvedValue([]);

@@ -1,10 +1,10 @@
 import { act, render, screen } from "@testing-library/react";
+import { identity } from "lodash";
 import {
   fakeAgencyResponseData,
   fakeSearchAPIResponse,
   searchFetcherParams,
 } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { SearchDrawerFilters } from "src/components/search/SearchDrawerFilters";
 
@@ -22,20 +22,14 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
     updateQueryParams: mockUpdateQueryParams,
   }),
 }));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
+jest.mock("next-intl/server", () => ({
+  getTranslations: () => identity,
 }));
 
 jest.mock("src/services/fetch/fetchers/agenciesFetcher", () => ({
   getAgenciesForFilterOptions: () =>
     mockGetAgenciesForFilterOptions() as unknown,
 }));
-
-// jest.mock("react", () => ({
-//   ...jest.requireActual<typeof import("react")>("react"),
-//   Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
-// }));
 
 describe("SearchDrawerFilters", () => {
   it("renders without errors", async () => {
