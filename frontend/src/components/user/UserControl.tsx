@@ -53,12 +53,8 @@ const UserAccountItem = ({ isSubnav }: { isSubnav: boolean }) => {
         "border-y-0": isSubnav,
       })}
     >
-      <USWDSIcon
-        name="account_circle"
-        className="usa-icon--size-3 display-block"
-      />
       <div
-        className={clsx("padding-left-1", {
+        className={clsx({
           "display-none": !isSubnav,
           "desktop:display-block": !isSubnav,
         })}
