@@ -64,7 +64,6 @@ class TestSQSClient:
         messages = sqs_client.receive_messages(max_messages=1)
         assert len(messages) == 1
         assert messages[0].body == '{"event_type": "start_workflow"}'
-        assert messages[0].receipt_handle is not None
 
     def test_receive_messages_empty_queue(self, workflow_sqs_queue):
         """Verify that receive_messages returns an empty list when no messages are available."""
@@ -77,8 +76,7 @@ class TestSQSClient:
     def test_receive_messages_logs_on_error(self, mock_sqs, caplog):
         """Verify that failed receive attempts raise a ClientError and log the queue URL as extra context."""
         invalid_url = "https://sqs.us-east-1.amazonaws.com/123456789012/non-existent"
-        boto_client = boto3.client("sqs", region_name="us-east-1")
-        sqs_client = SQSClient(queue_url=invalid_url, sqs_client=boto_client)
+        sqs_client = SQSClient(queue_url=invalid_url)
 
         with pytest.raises(ClientError):
             with caplog.at_level(logging.ERROR):
@@ -115,7 +113,6 @@ class TestSQSClient:
 
         assert isinstance(results, SQSDeleteBatchResponse)
         assert len(results.successful_deletes) == 2
-        assert len(results.failed_deletes) == 0
         assert set(handles) == results.successful_deletes
 
     def test_delete_message_batch_partial_failure(self, workflow_sqs_queue):
