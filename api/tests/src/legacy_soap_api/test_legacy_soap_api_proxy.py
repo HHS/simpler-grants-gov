@@ -184,3 +184,37 @@ def test_get_soap_jwt_auth_request(
         }
         assert original_claims == expected
         assert "soap_client_certificate: created SOAP JWT" in caplog.messages
+
+def test_get_soap_jwt_auth_request_when_use_jwt_is_set_on_headers(
+    enable_factory_create,
+    caplog,
+):
+    caplog.set_level(logging.INFO)
+    mock_config = MagicMock(spec=LegacySoapAPIConfig)
+
+    mock_soap_request = MagicMock(spec=SOAPRequest)
+    mock_soap_request.headers = {
+        "use_jwt_auth": "1",
+        "X-Gg-S2S-Uri": "https://google.com/xyz",
+    }
+    mock_soap_request.full_path = "/grantors/x"
+    mock_soap_request.data = SOAP_PAYLOAD
+    mock_soap_request.auth = MagicMock()
+    mock_soap_request.auth.certificate.legacy_certificate = (
+        factories.LegacyAgencyCertificateFactory.create()
+    )
+
+    with patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response") as _, patch(
+        "src.legacy_soap_api.legacy_soap_api_proxy.get_soap_config"
+    ) as mock_get_config, patch("src.legacy_soap_api.legacy_soap_api_proxy.get_soap_jwt_auth_request") as mock_soap_jwt_auth_request:
+        mock_get_config.return_value = mock_config
+        mock_config.soap_partner_gateway_uri = "https://grants.gov"
+        mock_config.soap_partner_gateway_auth_key = "X-Gg-S2S-Uri"
+        mock_config.gg_s2s_proxy_header_key = "X-Gg-S2S-Uri"
+        mock_config.gg_url = "/x"
+        get_proxy_response(mock_soap_request)
+        mock_soap_jwt_auth_request.assert_called_once_with(
+            "https://google.com/xyz/grantors/x",
+            mock_soap_request,
+            mock_config,
+        )

@@ -44,13 +44,14 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     proxy_headers = filter_headers(
         soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
     )
-    use_jwt_auth = False
+    use_jwt_auth = soap_request.headers.get("use_jwt_auth") == "1"
     if use_jwt_auth:
+        print(f"{proxy_url=}")
         _request = get_soap_jwt_auth_request(proxy_url, soap_request, config)
-    else:
-        _request = Request(
-            method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data
-        )
+        return _get_soap_response(_request, timeout=timeout)
+    _request = Request(
+        method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data
+    )
     soap_auth = soap_request.auth
 
     if not soap_auth or config.soap_auth_map == {}:
@@ -123,6 +124,7 @@ def _get_soap_response(
 def get_soap_jwt_auth_request(
     proxy_url: str, soap_request: SOAPRequest, config: LegacySoapAPIConfig
 ) -> Request:
+    print(f"2. {proxy_url}")
     if not (soap_request.auth and soap_request.auth.certificate.legacy_certificate):
         logger.exception("soap_client_certificate: no legacy_certificate found for soap jwt auth")
         raise Exception
