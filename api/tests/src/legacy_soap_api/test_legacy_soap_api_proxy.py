@@ -1,13 +1,22 @@
+import base64
 import logging
 import os
 from unittest.mock import ANY, MagicMock, patch
 
+import jwt
+from freezegun import freeze_time
+
+import tests.src.db.models.factories as factories
 from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientCertificateLookupError,
     SOAPClientCertificateNotConfigured,
 )
 from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig
-from src.legacy_soap_api.legacy_soap_api_proxy import get_cert_file, get_proxy_response
+from src.legacy_soap_api.legacy_soap_api_proxy import (
+    get_cert_file,
+    get_proxy_response,
+    get_soap_jwt_auth_request,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
 
 SOAP_PAYLOAD = (
@@ -140,3 +149,38 @@ def test_get_proxy_response_logs_soap_client_certificate_not_configured_error_an
         mock_error_response.assert_called_once_with(
             faultstring="Client certificate not configured for Simpler SOAP."
         )
+
+
+def test_get_soap_jwt_auth_request(
+    enable_factory_create,
+    caplog,
+):
+    caplog.set_level(logging.INFO)
+    mock_config = MagicMock(spec=LegacySoapAPIConfig)
+    mock_config.soap_partner_gateway_uri = "https://grants.gov"
+    mock_config.soap_partner_gateway_auth_key = "X-Gg-S2S-Uri"
+
+    mock_soap_request = MagicMock(spec=SOAPRequest)
+    mock_soap_request.headers = {}
+    mock_soap_request.full_path = "/grantors/x"
+    mock_soap_request.data = SOAP_PAYLOAD
+    mock_soap_request.auth = MagicMock()
+    mock_soap_request.auth.certificate.legacy_certificate = (
+        factories.LegacyAgencyCertificateFactory.create()
+    )
+
+    with freeze_time("2023-05-10 12:00:00", tz_offset=0):
+        request = get_soap_jwt_auth_request("proxy_url", mock_soap_request, mock_config)
+        s2s_partner_certid_jwt_b64 = request.headers.get("S2S_PARTNER_CERTID_JWT_B64")
+        decoded_base64 = base64.b64decode(s2s_partner_certid_jwt_b64).decode("utf-8")
+        original_claims = jwt.decode(
+            decoded_base64, key=mock_config.soap_partner_gateway_auth_key, algorithms=["HS256"]
+        )
+        expected = {
+            "sub": "partner_soap_call",
+            "iss": f"{mock_config.soap_partner_gateway_uri}",
+            "exp": 1683720060,
+            "certId": mock_soap_request.auth.certificate.legacy_certificate.cert_id,
+        }
+        assert original_claims == expected
+        assert "soap_client_certificate: created SOAP JWT" in caplog.messages
