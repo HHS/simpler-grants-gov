@@ -1,4 +1,3 @@
-import { ExternalRoutes } from "src/constants/routes";
 import { ApplicantTypes } from "src/types/competitionsResponseTypes";
 import { UserOrganization } from "src/types/userTypes";
 
