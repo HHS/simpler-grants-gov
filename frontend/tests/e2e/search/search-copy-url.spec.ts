@@ -25,7 +25,7 @@ test("should copy search query URL to clipboard", async ({ page }, {
   // this way we avoid an arbitrary timeout, and do not slow down the other tests
   try {
     await fillSearchInputAndSubmit("education grants", page);
-  } catch (e) {
+  } catch (_e) {
     await fillSearchInputAndSubmit("education grants", page);
   }
 

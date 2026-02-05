@@ -2,7 +2,7 @@ import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { SearchAPIResponse } from "src/types/search/searchRequestTypes";
 import { agenciesToSortedAndNestedFilterOptions } from "src/utils/search/filterUtils";
 
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 import { AgencyFilterContent } from "src/components/search/Filters/AgencyFilterContent";
 import { BasicSearchFilterAccordion } from "src/components/search/SearchFilterAccordion/SearchFilterAccordion";
@@ -20,7 +20,7 @@ export async function AgencyFilterAccordion({
   className?: string;
   selectedStatuses?: string[];
 }) {
-  const t = useTranslations("Search");
+  const t = await getTranslations("Search");
 
   let allAgencies: RelevantAgencyRecord[] = [];
   let facetCounts: { [key: string]: number } = {};

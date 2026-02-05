@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => {
   // this way we avoid an arbitrary timeout, and do not slow down the other tests
   try {
     await fillSearchInputAndSubmit(searchTerm, page);
-  } catch (e) {
+  } catch (_e) {
     await fillSearchInputAndSubmit(searchTerm, page);
   }
 

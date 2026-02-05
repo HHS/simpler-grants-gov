@@ -39,7 +39,7 @@ const parseValue = (value: unknown, type: string) => {
   }
   try {
     return JSON.parse(value as string) as unknown;
-  } catch (e) {
+  } catch (_e) {
     return value || undefined;
   }
 };
