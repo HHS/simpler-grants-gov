@@ -1,8 +1,10 @@
 import logging
 import ssl
+from datetime import datetime
 from typing import Any
 from urllib.parse import unquote
 
+import jwt
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
@@ -168,3 +170,18 @@ def validate_certificate(
         raise SOAPClientCertificateLookupError("certificate does not have agency")
 
     return legacy_certificate
+
+
+def generate_soap_jwt(
+    cert_id: str,
+    expiration_time: datetime,
+    soap_partner_gateway_uri: str,
+    soap_partner_gateway_auth_key: str,
+) -> str:
+    payload = {
+        "sub": "partner_soap_call",
+        "iss": soap_partner_gateway_uri,
+        "exp": expiration_time,
+        "certId": cert_id,
+    }
+    return jwt.encode(payload=payload, key=soap_partner_gateway_auth_key, algorithm="HS256")
