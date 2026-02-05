@@ -235,6 +235,7 @@ const NavLinks = ({
           classes={clsx({
             "usa-nav__link": true,
             "usa-current": currentNavItemIndex === index,
+            "text-bold": true,
           })}
         />
       );
@@ -242,18 +243,19 @@ const NavLinks = ({
 
     if (showLoginLink && !user?.token) {
       items.push(
-        <a
+        <NavLink
           key="sign-in-mobile"
           href={LOGIN_URL}
-          className="usa-nav__link desktop:display-none"
           onClick={() => {
             storeCurrentPage();
             closeDropdownAndMobileNav();
           }}
-          data-testid="sign-in-button"
-        >
-          {t("login")}
-        </a>,
+          text={t("login")}
+          classes={clsx({
+            "usa-nav__link": true,
+            "desktop:display-none": true,
+          })}
+        />,
       );
     }
 
