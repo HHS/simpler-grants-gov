@@ -485,12 +485,17 @@ def s3_config(mock_s3_bucket, other_mock_s3_bucket):
 
 
 @pytest.fixture
-def mock_sqs():
-    with moto.mock_aws():
-        sqs = boto3.client("sqs", region_name="us-east-1")
-        # Create a default queue for tests
-        queue = sqs.create_queue(QueueName="test-workflow-queue")
-        yield {"client": sqs, "queue_url": queue["QueueUrl"]}
+def mock_sqs(reset_aws_env_vars):
+    with moto.mock_aws(config={"core": {"service_whitelist": ["sqs"]}}):
+        yield
+
+
+@pytest.fixture
+def workflow_sqs_queue(mock_sqs):
+    sqs = boto3.client("sqs", region_name="us-east-1")
+    # Create a default queue for tests
+    queue = sqs.create_queue(QueueName="test-workflow-queue")
+    return queue["QueueUrl"]
 
 
 ####################

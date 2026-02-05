@@ -2,7 +2,7 @@ import logging
 
 import boto3
 import botocore.client
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from src.adapters.aws import get_boto_session
 from src.util.env_config import PydanticBaseEnvConfig
@@ -13,6 +13,22 @@ logger = logging.getLogger(__name__)
 class SQSConfig(PydanticBaseEnvConfig):
     # SQS Queue URL will be required by the service using this adapter
     workflow_queue_url: str = Field(alias="WORKFLOW_QUEUE_URL")
+
+
+class SQSMessage(BaseModel):
+    """Represents a simplified SQS message object."""
+
+    body: str = Field(alias="Body")
+    receipt_handle: str = Field(alias="ReceiptHandle")
+    message_id: str = Field(alias="MessageId")
+    attributes: dict[str, str] = Field(alias="Attributes", default_factory=dict)
+
+
+class SQSDeleteBatchResponse(BaseModel):
+    """Represents the results of an SQS batch delete operation."""
+
+    successful_deletes: set[str] = Field(default_factory=set)
+    failed_deletes: set[str] = Field(default_factory=set)
 
 
 def get_boto_sqs_client(session: boto3.Session | None = None) -> botocore.client.BaseClient:
@@ -28,8 +44,8 @@ class SQSClient:
 
     def receive_messages(
         self, max_messages: int = 10, wait_time: int = 10, visibility_timeout: int = 300
-    ) -> list[dict]:
-        """Fetch messages from SQS using long polling."""
+    ) -> list[SQSMessage]:
+        """Fetch messages from SQS using long polling and return as SQSMessage objects."""
         try:
             response = self.client.receive_message(
                 QueueUrl=self.queue_url,
@@ -39,38 +55,44 @@ class SQSClient:
                 AttributeNames=["All"],
                 MessageAttributeNames=["All"],
             )
-            return response.get("Messages", [])
+
+            raw_messages = response.get("Messages", [])
+
+            return [SQSMessage.model_validate(m) for m in raw_messages]
+
         except Exception:
             logger.exception(
                 "Failed to receive messages from SQS", extra={"queue_url": self.queue_url}
             )
             raise
 
-    def delete_message_batch(self, receipt_handles: list[str]) -> dict[str, str]:
+    def delete_message_batch(self, receipt_handles: list[str]) -> SQSDeleteBatchResponse:
         """
-        Deletes a batch of messages.
-        Returns a mapping of receipt_handle -> status (Success or Error Code).
+        Deletes a batch of messages and returns an SQSDeleteBatchResponse.
         """
         if not receipt_handles:
-            return {}
+            return SQSDeleteBatchResponse()
 
-        entries = [
-            {"Id": str(i), "ReceiptHandle": handle} for i, handle in enumerate(receipt_handles)
-        ]
+        receipt_mapping = {}
+        entries = []
+        for i, handle in enumerate(receipt_handles):
+            id_str = str(i)
+            receipt_mapping[id_str] = handle
+            entries.append({"Id": id_str, "ReceiptHandle": handle})
 
         try:
             response = self.client.delete_message_batch(QueueUrl=self.queue_url, Entries=entries)
 
-            results = {}
+            batch_results = SQSDeleteBatchResponse()
+
             for success in response.get("Successful", []):
-                idx = int(success["Id"])
-                results[receipt_handles[idx]] = "Success"
+                batch_results.successful_deletes.add(receipt_mapping[success["Id"]])
 
             for failure in response.get("Failed", []):
-                idx = int(failure["Id"])
-                results[receipt_handles[idx]] = failure.get("Code", "UnknownError")
+                batch_results.failed_deletes.add(receipt_mapping[failure["Id"]])
 
-            return results
+            return batch_results
+
         except Exception:
             logger.exception("Failed to delete message batch", extra={"queue_url": self.queue_url})
             raise
