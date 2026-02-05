@@ -15,7 +15,7 @@ const setupLoginRedirectSpoof = async (page: Page) => {
   await page.context().addCookies([
     {
       name: "_ff",
-      value: JSON.stringify({ authOn: true }),
+      value: JSON.stringify({}),
       domain: baseUrl,
       path: "/",
     },

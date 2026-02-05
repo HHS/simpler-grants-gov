@@ -5125,6 +5125,10 @@ components:
             - manage_internal_roles
             - manage_competition
             - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - 'update_opportunity '
+            - publish_opportunity
             type:
             - string
     UserOrganization:
@@ -5275,6 +5279,10 @@ components:
             - manage_internal_roles
             - manage_competition
             - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - 'update_opportunity '
+            - publish_opportunity
             type:
             - string
     UserCanAccessResponse:
@@ -6279,6 +6287,10 @@ components:
             - manage_internal_roles
             - manage_competition
             - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - 'update_opportunity '
+            - publish_opportunity
             type:
             - string
     UserInvitationItem:
@@ -6832,6 +6844,10 @@ components:
             - manage_internal_roles
             - manage_competition
             - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - 'update_opportunity '
+            - publish_opportunity
             type:
             - string
     OrganizationUser:

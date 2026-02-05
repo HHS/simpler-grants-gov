@@ -1,6 +1,6 @@
 # Background
 
-Simpler Grants maintains a feature flag system within its NextJS app that currently allows for custom behavior for top level pages. Each feature flag is a simple boolean, and when turned on (or turned to `true`), the page that is set up to respond to this flag can opt out of the standard render. For example, when a "searchOff" feature flag is set to "true", the search page is configured to redirect to a maintenance page.
+Simpler Grants maintains a feature flag system within its NextJS app that currently allows for custom behavior on pages and features. Each feature flag is a simple boolean, and when turned on (or turned to `true`), a page or feature that is set up to respond to this flag can opt out of the standard render or behavior. For example, when an "applyFormPrototypeOff" feature flag is set to "true", the application form page is configured to disable or hide the prototype feature.
 
 Our feature flags implementation can read feature flag values from environment variables, but can also read them from the frontend, and stores user settings on client side cookies. The intent is for these feature flags to be user configurable, so that
 
@@ -19,8 +19,8 @@ You can find and update the feature flags currently in use by the application in
 
 Feature flags will follow these conventions!
 
-- feature flags should be named and conceived such that their default value is `false` or `off`. This allows us to easily implement custom behavior across the board when flags are turned on. For example, a feature flag to toggle the opportunity page should be something like `opportunityOff` or `disableOpportunity` and with a default value of `false`.
-- feature flag names will use simple camel case naming, for example `searchOff`, `disableApplicationForm`
+- feature flags should be named and conceived such that their default value is `false` or `off`. This allows us to easily implement custom behavior across the board when flags are turned on. For example, a feature flag to toggle the form prototype should be something like `applyFormPrototypeOff` or `disableApplyFormPrototype` and with a default value of `false`.
+- feature flag names will use simple camel case naming, for example `applyFormPrototypeOff`
 - names of environment variables for controlling feature flag values should match the name of the flags within the code, except
   - using snake case
   - all caps

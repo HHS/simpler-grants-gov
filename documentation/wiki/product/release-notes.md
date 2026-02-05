@@ -60,7 +60,7 @@ Users can now download their submitted application from the application page. Th
 {% column width="75%" %}
 ### Primary EBIZ POC Role Protections&#x20;
 
-The team has made sure that users cannot be removed from an organization if they are also the EBIZ POC for that organization by disabling the ‘Remove’ button. This will ensure that organizations do not lose access to the EBIZ POC administrative functions required to use and access Simpler Grants.
+The team has made sure that users cannot be removed from an organization if they are also the EBIZ POC for that organization by disabling the ‘Remove’ button. This will ensure that organizations do not lose access to the EBIZ POC administrative functions required to use and access Simpler Grants. If your EBIZ POC changes in [Sam.gov](https://sam.gov/), that will automatically be reflected in [Simpler.Grants.gov](http://simpler.grants.gov).
 {% endcolumn %}
 {% endcolumns %}
 
