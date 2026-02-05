@@ -6,11 +6,6 @@ import {
 import { expectFeatureFlagWiring } from "src/test/harness/featureFlagHarness";
 import { loadPageWithFeatureFlagHarness } from "src/test/helpers/loadPageWithFeatureFlagHarness";
 
-import type { JSX } from "react";
-
-type Params = { locale: string; id: string };
-type PageFn = (args: { params: Promise<Params> }) => Promise<JSX.Element>;
-
 const LEGACY_MANAGE_USERS_PAGE_MODULE_PATH =
   "src/app/[locale]/(base)/organizations/[id]/manage-users/legacy/page";
 
