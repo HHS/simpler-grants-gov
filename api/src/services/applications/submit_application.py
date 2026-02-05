@@ -37,6 +37,9 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
         application,
     )
 
+    # This assignment will not persist if any of the form validations fail.
+    application.submitted_by = user.user_id
+
     # Run validations
     validate_application_in_progress(application, ApplicationAction.SUBMIT)
     validate_competition_open(application.competition, ApplicationAction.SUBMIT)
@@ -45,7 +48,6 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
     # Update application status and submission metadata
     application.application_status = ApplicationStatus.SUBMITTED
     application.submitted_at = utcnow()
-    application.submitted_by = user.user_id
     logger.info("Application successfully submitted")
 
     # Add application metadata to logs
