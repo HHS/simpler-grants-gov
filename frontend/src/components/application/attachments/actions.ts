@@ -78,7 +78,7 @@ export const uploadAttachmentAction = async (
       throw new Error(`Failed to update application: ${res.status_code}`);
     }
 
-    revalidateTag(`application-${applicationId}`, "max");
+    revalidateTag(`application-${applicationId}`);
 
     return { success: true, error: undefined, uploads: uploadState };
   } catch (_e) {
@@ -117,7 +117,7 @@ export const deleteAttachmentAction = async (
       throw new Error(`Failed to delete application: ${res.status_code}`);
     }
 
-    revalidateTag(`application-${applicationId}`, "max");
+    revalidateTag(`application-${applicationId}`);
 
     return { success: true, error: null };
   } catch (_e) {
