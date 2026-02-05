@@ -9,6 +9,7 @@ import { isBasicallyAnObject } from "src/utils/generalUtils";
 
 import { formDataToObject } from "./formDataToJson";
 import {
+  BroadlyDefinedWidgetValue,
   FormattedFormValidationWarning,
   FormValidationWarning,
   SchemaField,
@@ -98,7 +99,7 @@ const formatValidationWarning = (
 const validationWarningOverrides = (
   message: string,
   fieldName: string,
-  title?: string | null | undefined,
+  title?: string | null,
 ) => {
   const formattedTitle = title ? title.replace("?", "") : "Field";
   return message
@@ -437,7 +438,7 @@ export const getFieldConfig = ({
   let fieldSchema = {} as RJSFSchema;
   let fieldName = "";
   let htmlFieldName = "";
-  let value = "" as string | number | object | undefined;
+  let value = "" as BroadlyDefinedWidgetValue;
   let rawErrors: string[] | FormattedFormValidationWarning[] = [];
 
   if (fieldType === "multiField" && definition && Array.isArray(definition)) {
@@ -481,7 +482,7 @@ export const getFieldConfig = ({
     fieldName = getNameFromDef({ definition, schema });
     htmlFieldName = getFieldNameForHtml({ definition, schema });
     const formDataPath = getFieldPathFromHtml(htmlFieldName);
-    value = getByPointer(formData, formDataPath) as string | number | undefined;
+    value = getByPointer(formData, formDataPath) as BroadlyDefinedWidgetValue;
 
     const fieldType =
       typeof fieldSchema?.type === "string"
