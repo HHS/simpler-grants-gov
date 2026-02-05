@@ -162,7 +162,11 @@ export const StartApplicationModal = ({
     [],
   );
 
-  if (!organizations.length && !applicantTypes.includes("individual")) {
+  if (
+    !organizations.length &&
+    !applicantTypes.includes("individual") &&
+    !organizationsError
+  ) {
     return (
       <IneligibleApplicationStart
         modalRef={modalRef}
@@ -184,7 +188,13 @@ export const StartApplicationModal = ({
       onClose={onClose}
     >
       {organizationsError && (
-        <Alert type="error" headingLevel="h4" noIcon={false} slim={false}>
+        <Alert
+          type="error"
+          headingLevel="h4"
+          noIcon={true}
+          slim={false}
+          className="margin-bottom-3"
+        >
           {t.rich("organizationLoadError", {
             telephone: (chunk) => <a href="tel:18005184726">{chunk}</a>,
             email: (chunk) => <a href="mailto:simpler@grants.gov">{chunk}</a>,
@@ -197,6 +207,7 @@ export const StartApplicationModal = ({
       <StartApplicationDescription
         organizations={organizations}
         applicantTypes={applicantTypes}
+        organizationsError={organizationsError}
       />
       <p className="font-sans-sm text-bold" data-testid="opportunity-title">
         {t("applyingFor")} {opportunityTitle}
@@ -223,20 +234,25 @@ export const StartApplicationModal = ({
         {error && <ErrorMessage>{error}</ErrorMessage>}
       </FormGroup>
       <ModalFooter>
-        <Button
-          onClick={handleSubmit}
-          type="button"
-          data-testid="application-start-save"
-          disabled={!!loading}
-          className="bg-success"
-        >
-          <USWDSIcon
-            name="add"
-            className="margin-right-05"
-            aria-hidden="true"
-          />
-          {loading || updating ? "Loading..." : t("saveButtonText")}
-        </Button>
+        {(() => {
+          const isDisabled = !!loading || !!organizationsError;
+          return (
+            <Button
+              onClick={handleSubmit}
+              type="button"
+              data-testid="application-start-save"
+              disabled={isDisabled}
+              className={isDisabled ? "" : "bg-success"}
+            >
+              <USWDSIcon
+                name="add"
+                className="margin-right-05"
+                aria-hidden="true"
+              />
+              {loading || updating ? "Loading..." : t("saveButtonText")}
+            </Button>
+          );
+        })()}
         <ModalToggleButton
           modalRef={modalRef}
           closer

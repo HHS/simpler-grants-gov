@@ -6,9 +6,11 @@ import { useTranslations } from "next-intl";
 export const StartApplicationDescription = ({
   organizations,
   applicantTypes,
+  organizationsError,
 }: {
   organizations: UserOrganization[];
   applicantTypes: ApplicantTypes[];
+  organizationsError?: boolean;
 }) => {
   const t = useTranslations(
     "OpportunityListing.startApplicationModal.description",
@@ -17,8 +19,12 @@ export const StartApplicationDescription = ({
   if (!applicantTypes.includes("organization")) {
     return;
   }
-  // ineligible
-  if (!organizations.length && !applicantTypes.includes("individual")) {
+  // ineligible (but not if there's an error loading organizations)
+  if (
+    !organizations.length &&
+    !applicantTypes.includes("individual") &&
+    !organizationsError
+  ) {
     return (
       <div>
         <p>{t("organizationIntro")}</p>
