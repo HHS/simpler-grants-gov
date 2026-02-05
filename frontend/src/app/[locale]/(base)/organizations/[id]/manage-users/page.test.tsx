@@ -89,7 +89,7 @@ describe("manage-users page", () => {
 
   function loadPageModuleWithMocks(
     featureFlagHarnessMode: "flagDisabled" | "flagEnabled",
-  ): ReturnType<typeof loadPageWithFeatureFlagHarness<Params, PageModule>> {
+  ) {
     return loadPageWithFeatureFlagHarness<Params, PageModule>(
       MANAGE_USERS_PAGE_MODULE_PATH,
       featureFlagHarnessMode,
