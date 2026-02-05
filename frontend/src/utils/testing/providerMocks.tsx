@@ -63,6 +63,7 @@ export const createFakeUserContext = (featureFlags?: FeatureFlags) => {
         authOn: false,
         opportunityOff: false,
         searchOff: false,
+        opportunitiesListOff: false,
       },
       ...featureFlags,
     },

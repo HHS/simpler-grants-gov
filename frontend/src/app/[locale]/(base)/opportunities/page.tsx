@@ -1,10 +1,13 @@
 import { UnauthorizedError } from "src/errors";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import { LocalizedPageProps, TFn } from "src/types/intl";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
+import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
@@ -12,6 +15,8 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
+
+type OpportunitiesListProps = LocalizedPageProps & WithFeatureFlagProps;
 
 const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Opportunities");
@@ -102,7 +107,7 @@ const OpportunitiesTable = ({
   );
 };
 
-export default async function Opportunities(_props: LocalizedPageProps) {
+async function OpportunitiesListPage(_props: OpportunitiesListProps) {
   const searchParams = convertSearchParamsToProperTypes({});
 
   let userOpportunities: BaseOpportunity[];
@@ -127,3 +132,9 @@ export default async function Opportunities(_props: LocalizedPageProps) {
     </OpportunitiesPageWrapper>
   );
 }
+
+export default withFeatureFlag<OpportunitiesListProps, never>(
+  OpportunitiesListPage,
+  "opportunitiesListOff",
+  () => redirect("/maintenance"),
+);
