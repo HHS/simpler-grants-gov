@@ -18,7 +18,13 @@ module.exports = defineConfig([
   {
     // ignoring linting errors on storybook for now, will turn back on when we resume
     // active storybook development
-    ignores: ["**/public/", "**/.storybook/", "**/.next/"],
+    ignores: [
+      "**/public/",
+      "**/.storybook/",
+      "**/.next/",
+      "**/storybook-static",
+      "next-env.d.ts",
+    ],
   },
   {
     extends: compat.extends(
