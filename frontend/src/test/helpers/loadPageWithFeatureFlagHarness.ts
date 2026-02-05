@@ -1,9 +1,11 @@
-import type { JSX } from "react";
-
-import { createFeatureFlagHarness } from "src/test/harness/featureFlagHarness";
-import type { FeatureFlagHarness } from "src/test/harness/featureFlagHarness";
+import {
+  createFeatureFlagHarness,
+  type FeatureFlagHarness,
+} from "src/test/harness/featureFlagHarness";
 import { loadIsolatedPageModule } from "src/test/harness/loadIsolatedPageModule";
 import type { FeatureFlagMode } from "src/test/types/featureFlagTypes";
+
+import type { JSX } from "react";
 
 export type DefaultPageModule<Params> = {
   default: (args: { params: Promise<Params> }) => Promise<JSX.Element>;

@@ -5,7 +5,10 @@ import React, { type JSX } from "react";
 import "@testing-library/jest-dom";
 
 import { expectFeatureFlagWiring } from "src/test/harness/featureFlagHarness";
-import { DefaultPageModule, loadPageWithFeatureFlagHarness } from "src/test/helpers/loadPageWithFeatureFlagHarness";
+import {
+  DefaultPageModule,
+  loadPageWithFeatureFlagHarness,
+} from "src/test/helpers/loadPageWithFeatureFlagHarness";
 
 type Params = { locale: string; id: string };
 
