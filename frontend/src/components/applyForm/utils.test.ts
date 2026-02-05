@@ -526,8 +526,7 @@ describe("processFormSchema", () => {
     };
 
     mockExtricateConditionalValidationRules.mockReturnValue({
-      propertiesWithoutComplexConditionals:
-        propertiesWithoutComplexConditionals,
+      propertiesWithoutComplexConditionals,
       conditionalValidationRules: { path: [{ rule: "something " }] },
     });
 
