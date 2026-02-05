@@ -39,7 +39,7 @@ const applicationDetailsObject: ApplicationDetail = {
   },
 };
 
-describe("CompetitionFormsTable", () => {
+describe("ApplicationFormsTable", () => {
   it("should not have accessibility violations", async () => {
     const { container } = render(
       <ApplicationFormsTable
