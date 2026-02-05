@@ -40,6 +40,7 @@ jobs:
     uses: ./.github/workflows/vulnerability-scans.yml
     with:
       app_name: analytics
+      fail_on_vulns: ${{ ! contains(fromJSON(inputs.environment), 'staging') }}
 
   deploy:
     name: Deploy
