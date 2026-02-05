@@ -109,7 +109,7 @@ export const getLatestApplicationSubmission = async (
       return null;
     }
     return submissionsResponse.data[0];
-  } catch (e) {
+  } catch (_e) {
     console.error(
       `Error retrieving latest application submission for (${applicationId})`,
     );
