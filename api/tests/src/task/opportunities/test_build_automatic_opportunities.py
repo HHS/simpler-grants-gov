@@ -63,7 +63,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     # Grab the opportunities created from the task itself
     opportunities = task.opportunities
-    assert len(opportunities) == 12
+    assert len(opportunities) == 15
 
     # Figure out the forms we added to each opportunity
     opp_form_ids_for_opps = set()
@@ -80,7 +80,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     # There should also be one opportunity with every form
     assert all_form_ids in opp_form_ids_for_opps
 
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 12
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 15
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
 
     # If we rerun the task, all opportunities should be skipped (including ALL-forms)
@@ -90,7 +90,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert len(task.opportunities) == 0
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 12
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 15
 
 
 def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_session, forms):
