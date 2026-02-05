@@ -8,15 +8,9 @@ import { loadPageWithFeatureFlagHarness } from "src/test/helpers/loadPageWithFea
 import type { Organization } from "src/types/applicationResponseTypes";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
-import React, { type JSX } from "react";
+import React from "react";
 
 type Params = { locale: string };
-
-type PageFn = (args: { params: Promise<Params> }) => Promise<JSX.Element>;
-
-type PageModule = {
-  default: PageFn;
-};
 
 const ORGANIZATIONS_PAGE_MODULE_PATH =
   "src/app/[locale]/(base)/organizations/page";
@@ -72,13 +66,13 @@ describe("Organizations page feature flag wiring", () => {
     redirectMock: jest.Mock<void, [string]>;
   }): Promise<{
     featureFlagHarness: ReturnType<
-      typeof loadPageWithFeatureFlagHarness<PageModule>
+      typeof loadPageWithFeatureFlagHarness<Params>
     >["featureFlagHarness"];
   }> {
     registerCommonMocks(options);
 
     const { pageModule, featureFlagHarness } =
-      loadPageWithFeatureFlagHarness<PageModule>(
+      loadPageWithFeatureFlagHarness<Params>(
         ORGANIZATIONS_PAGE_MODULE_PATH,
         options.featureFlagMode,
       );
@@ -182,7 +176,7 @@ describe("Organizations page feature flag wiring", () => {
       organizationsMock,
     });
 
-    const { pageModule } = loadPageWithFeatureFlagHarness<PageModule>(
+    const { pageModule } = loadPageWithFeatureFlagHarness<Params>(
       ORGANIZATIONS_PAGE_MODULE_PATH,
       "flagDisabled",
     );

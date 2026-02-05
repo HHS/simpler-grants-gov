@@ -4,15 +4,12 @@ import React, { type JSX } from "react";
 
 import "@testing-library/jest-dom";
 
-import { expectAnyFeatureFlagWiring } from "src/test/harness/featureFlagHarness";
-import { loadPageWithFeatureFlagHarness } from "src/test/helpers/loadPageWithFeatureFlagHarness";
+import { expectFeatureFlagWiring } from "src/test/harness/featureFlagHarness";
+import { DefaultPageModule, loadPageWithFeatureFlagHarness } from "src/test/helpers/loadPageWithFeatureFlagHarness";
 
 type Params = { locale: string; id: string };
 
-type PageFn = (args: { params: Promise<Params> }) => Promise<JSX.Element>;
-
-type PageModule = {
-  default: PageFn;
+type PageModule = DefaultPageModule<Params> & {
   generateMetadata: (args: { params: Promise<Params> }) => Promise<{
     title: string;
     description: string;
@@ -89,8 +86,8 @@ describe("manage-users page", () => {
 
   function loadPageModuleWithMocks(
     featureFlagHarnessMode: "flagDisabled" | "flagEnabled",
-  ): ReturnType<typeof loadPageWithFeatureFlagHarness<PageModule>> {
-    return loadPageWithFeatureFlagHarness<PageModule>(
+  ): ReturnType<typeof loadPageWithFeatureFlagHarness<Params, PageModule>> {
+    return loadPageWithFeatureFlagHarness<Params, PageModule>(
       MANAGE_USERS_PAGE_MODULE_PATH,
       featureFlagHarnessMode,
     );
@@ -138,8 +135,7 @@ describe("manage-users page", () => {
     const { pageModule, featureFlagHarness } =
       loadPageModuleWithMocks("flagDisabled");
 
-    // Assert that the page is wrapped by withFeatureFlag without coupling to a specific flag name.
-    expectAnyFeatureFlagWiring(featureFlagHarness);
+    expectFeatureFlagWiring(featureFlagHarness, "manageUsersOff");
 
     const params: Promise<Params> = Promise.resolve({
       locale: "en",

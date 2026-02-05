@@ -94,15 +94,3 @@ export function expectFeatureFlagWiring(
 
   expect(captured.featureFlagName).toBe(expectedFlagName);
 }
-
-/**
- * Asserts that a page is wrapped by withFeatureFlag,
- * without asserting the specific flag name.
- *
- * Use this when the test cares about the presence of
- * feature flag gating, but not the exact flag used.
- */
-export function expectAnyFeatureFlagWiring(harness: FeatureFlagHarness): void {
-  const captured = harness.getCaptured();
-  expect(captured.featureFlagName).not.toBeNull();
-}

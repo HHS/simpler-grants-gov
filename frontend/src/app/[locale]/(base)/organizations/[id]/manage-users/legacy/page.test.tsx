@@ -20,45 +20,48 @@ describe("InviteLegacyUsersPage page", () => {
     jest.clearAllMocks();
   });
 
-  it("redirects to maintenance if manageUsersOff is enabled", async () => {
-    const redirectMock = jest.fn<void, [string]>();
+it("redirects to maintenance if manageUsersOff is enabled", async () => {
+  const redirectMock = jest.fn<void, [string]>();
 
-    const sessionUser = buildSessionUser();
-    const authenticationMock: jest.MockedFunction<GetSession> = jest
-      .fn()
-      .mockResolvedValue(sessionUser);
+  const sessionUser = buildSessionUser();
+  const authenticationMock: jest.MockedFunction<GetSession> = jest
+    .fn()
+    .mockResolvedValue(sessionUser);
 
-    jest.doMock("next-intl/server", () => ({
-      setRequestLocale: (_locale: string) => undefined,
-    }));
+  jest.doMock("next-intl/server", () => ({
+    setRequestLocale: (_locale: string) => undefined,
+  }));
 
-    jest.doMock("next-intl", () => ({
-      useTranslations: () => (key: string) => key,
-    }));
+  jest.doMock("next-intl", () => ({
+    useTranslations: () => (key: string) => key,
+  }));
 
-    jest.doMock("src/services/auth/session", () => ({
-      getSession: () => authenticationMock(),
-    }));
+  jest.doMock("src/services/auth/session", () => ({
+    getSession: () => authenticationMock(),
+  }));
 
-    jest.doMock("next/navigation", () => ({
-      redirect: (location: string) => redirectMock(location),
-    }));
+  jest.doMock("next/navigation", () => ({
+    redirect: (location: string) => redirectMock(location),
+  }));
 
-    const { pageModule, featureFlagHarness } =
-      loadPageWithFeatureFlagHarness<PageModule>(
-        LEGACY_MANAGE_USERS_PAGE_MODULE_PATH,
-        "flagEnabled",
-      );
+  type Params = { locale: string; id: string };
 
-    const component = await pageModule.default({
-      params: Promise.resolve({ locale: "en", id: "org-123" }),
-    });
+  const { pageModule, featureFlagHarness } =
+    loadPageWithFeatureFlagHarness<Params>(
+      LEGACY_MANAGE_USERS_PAGE_MODULE_PATH,
+      "flagEnabled",
+    );
 
-    render(component);
-
-    expectFeatureFlagWiring(featureFlagHarness, "manageUsersOff");
-
-    expect(redirectMock).toHaveBeenCalledTimes(1);
-    expect(redirectMock).toHaveBeenCalledWith("/maintenance");
+  const component = await pageModule.default({
+    params: Promise.resolve({ locale: "en", id: "org-123" }),
   });
+
+  render(component);
+
+  expectFeatureFlagWiring(featureFlagHarness, "manageUsersOff");
+
+  expect(redirectMock).toHaveBeenCalledTimes(1);
+  expect(redirectMock).toHaveBeenCalledWith("/maintenance");
+});
+
 });
