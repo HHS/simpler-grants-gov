@@ -1,5 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  ApplicationStatus,
+} from "src/types/applicationResponseTypes";
 import { mockApplicationSubmission } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import applicationMock from "stories/components/application/application.mock.json";
@@ -33,7 +36,7 @@ describe("InformationCard - Edit filing name button visibility", () => {
   it("shows Edit filing name button when application status is in_progress", () => {
     const inProgressApplication = {
       ...mockApplicationDetails,
-      application_status: Status.IN_PROGRESS,
+      application_status: ApplicationStatus.IN_PROGRESS,
     };
 
     render(
@@ -50,7 +53,7 @@ describe("InformationCard - Edit filing name button visibility", () => {
   it("hides Edit filing name button when application status is submitted", () => {
     const submittedApplication = {
       ...mockApplicationDetails,
-      application_status: Status.SUBMITTED,
+      application_status: ApplicationStatus.SUBMITTED,
     };
 
     render(
@@ -67,7 +70,7 @@ describe("InformationCard - Edit filing name button visibility", () => {
   it("hides Edit filing name button when application status is accepted", () => {
     const acceptedApplication = {
       ...mockApplicationDetails,
-      application_status: Status.ACCEPTED,
+      application_status: ApplicationStatus.ACCEPTED,
     };
 
     render(
@@ -220,7 +223,7 @@ describe("InformationCard - Download submission button visibility and content", 
   it("shows the download submission button when status is accepted", () => {
     const acceptedApplication = {
       ...mockApplicationDetails,
-      application_status: Status.ACCEPTED,
+      application_status: ApplicationStatus.ACCEPTED,
     };
 
     render(
@@ -239,7 +242,7 @@ describe("InformationCard - Download submission button visibility and content", 
   it("shows download processing message if in submitted status", () => {
     const submittedApplication = {
       ...mockApplicationDetails,
-      application_status: Status.SUBMITTED,
+      application_status: ApplicationStatus.SUBMITTED,
     };
 
     render(
@@ -258,7 +261,7 @@ describe("InformationCard - Download submission button visibility and content", 
   it("shows does not render if application is in in_progress status", () => {
     const inProgressApplication = {
       ...mockApplicationDetails,
-      application_status: Status.IN_PROGRESS,
+      application_status: ApplicationStatus.IN_PROGRESS,
     };
 
     render(

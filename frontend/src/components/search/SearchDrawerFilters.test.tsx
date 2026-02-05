@@ -1,4 +1,5 @@
 import { act, render, screen } from "@testing-library/react";
+import { identity } from "lodash";
 import {
   fakeAgencyResponseData,
   fakeSearchAPIResponse,
@@ -21,6 +22,10 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
     updateQueryParams: mockUpdateQueryParams,
   }),
+}));
+
+jest.mock("next-intl/server", () => ({
+  getTranslations: () => identity,
 }));
 
 jest.mock("next-intl", () => ({
