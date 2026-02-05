@@ -29,7 +29,7 @@ import NavDropdown from "./NavDropdown";
 import { storeCurrentPage } from "src/utils/userUtils";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { TestUserSelect } from "./TestUserSelect";
-import { UserControl } from "./user/UserControl";
+import { SignOutNavLink, UserControl } from "./user/UserControl";
 
 type PrimaryLink = {
   text?: string;
@@ -259,6 +259,29 @@ const NavLinks = ({
       );
     }
 
+    if (showLoginLink && user?.token) {
+      const accountIndex = navLinkList.length;
+      items.push(
+        <NavDropdown
+          key="account"
+          activeNavDropdownIndex={activeNavDropdownIndex}
+          index={accountIndex}
+          isCurrent={false}
+          linkText={t("account")}
+          menuItems={[
+            <NavLink
+              href="/settings"
+              key="settings"
+              onClick={closeDropdownAndMobileNav}
+              text={t("settings")}
+            />,
+            <SignOutNavLink key="logout" onClick={closeDropdownAndMobileNav} />,
+          ]}
+          setActiveNavDropdownIndex={setActiveNavDropdownIndex}
+        />,
+      );
+    }
+
     return items;
   }, [
     activeNavDropdownIndex,
@@ -374,11 +397,11 @@ const Header = ({
               className="usa-menu-btn"
             />
           </div>
-          {!!showLoginLink && (
+          {!!showLoginLink && !user?.token && (
             <div
               className={clsx(
                 "usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6",
-                { "display-none desktop:display-block": !user?.token },
+                "display-none desktop:display-block",
               )}
             >
               <UserControl localDev={localDev} />
