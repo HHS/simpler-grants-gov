@@ -1,7 +1,5 @@
 import { render, screen } from "@testing-library/react";
 
-import React from "react";
-
 import "@testing-library/jest-dom";
 
 import { axe } from "jest-axe";
@@ -10,13 +8,8 @@ import {
   OrganizationLegacyUserStatus,
 } from "src/types/userTypes";
 import { fakeOrganizationDetailsResponse } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { InviteLegacyUsersPageContent } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersPageContent";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 type Breadcrumb = { title: string; path: string };
 type BreadcrumbsProps = { breadcrumbList: Breadcrumb[] };

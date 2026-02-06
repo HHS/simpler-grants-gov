@@ -1,5 +1,4 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { EditSavedSearchModal } from "src/components/workspace/EditSavedSearchModal";
 
@@ -27,10 +26,6 @@ jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
     clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
   }),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.useFakeTimers();

@@ -1,7 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { fakeUserOrganization } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { createRef } from "react";
 
@@ -14,10 +13,6 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockRouterPush,
   }),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/hooks/useClientFetch", () => ({

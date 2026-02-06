@@ -27,7 +27,7 @@ export const deleteAttachmentHandler = async (
     );
     const status = response.status_code;
 
-    revalidateTag(`application-${applicationId}`);
+    revalidateTag(`application-${applicationId}`, "max");
 
     if (!response || status !== 200) {
       throw new ApiRequestError(

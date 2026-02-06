@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import React, { type RefObject } from "react";
+import { type RefObject } from "react";
 
 import "@testing-library/jest-dom";
 

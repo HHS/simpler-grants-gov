@@ -4,7 +4,6 @@ import {
   filterOptionsWithChildren,
   initialFilterOptions,
 } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { AgencyFilterBody } from "src/components/search/Filters/AgencyFilterBody";
 
@@ -26,10 +25,6 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
     updateQueryParams: mockUpdateQueryParams,
     setQueryParams: mockSetQueryParams,
   }),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("react", () => ({

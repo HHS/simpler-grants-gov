@@ -1,7 +1,7 @@
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Response } from "node-fetch";
 import { fakeTestUser } from "src/utils/testing/fixtures";
-import { render, screen, waitFor } from "tests/react-utils";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
 
@@ -121,7 +121,7 @@ describe("Header", () => {
   it("displays a search link without refresh param if not currently on search page", () => {
     render(<Header />);
 
-    const searchLink = screen.getByRole("link", { name: "Search" });
+    const searchLink = screen.getByRole("link", { name: "search" });
     expect(searchLink).toBeInTheDocument();
     expect(searchLink).toHaveAttribute("href", "/search");
   });
@@ -130,7 +130,7 @@ describe("Header", () => {
     usePathnameMock.mockReturnValue("/search");
     render(<Header />);
 
-    const searchLink = screen.getByRole("link", { name: "Search" });
+    const searchLink = screen.getByRole("link", { name: "search" });
     expect(searchLink).toBeInTheDocument();
     expect(searchLink).toHaveAttribute("href", "/search?refresh=true");
   });
@@ -139,7 +139,7 @@ describe("Header", () => {
     usePathnameMock.mockReturnValue("/search");
     render(<Header />);
 
-    const homeLink = screen.getByRole("link", { name: "Simpler.Grants.gov" });
+    const homeLink = screen.getByRole("link", { name: "title" });
     expect(homeLink).toBeInTheDocument();
     expect(homeLink).toHaveAttribute("href", "/");
   });
@@ -148,22 +148,22 @@ describe("Header", () => {
     usePathnameMock.mockReturnValue("/");
     const { rerender } = render(<Header />);
 
-    const homeLink = screen.getByRole("link", { name: "Home" });
+    const homeLink = screen.getByRole("link", { name: "home" });
     expect(homeLink).toHaveClass("usa-current");
 
     usePathnameMock.mockReturnValue("/search");
     rerender(<Header />);
-    const searchLink = screen.getByRole("link", { name: "Search" });
+    const searchLink = screen.getByRole("link", { name: "search" });
     expect(searchLink).toHaveClass("usa-current");
 
     usePathnameMock.mockReturnValue("/es/search");
     rerender(<Header />);
-    const spanishLink = screen.getByRole("link", { name: "Search" });
+    const spanishLink = screen.getByRole("link", { name: "search" });
     expect(spanishLink).toHaveClass("usa-current");
 
     usePathnameMock.mockReturnValue("/es/search?query=hello");
     rerender(<Header />);
-    const queryLink = screen.getByRole("link", { name: "Search" });
+    const queryLink = screen.getByRole("link", { name: "search" });
     expect(queryLink).toHaveClass("usa-current");
     usePathnameMock.mockReturnValue("/opportunity/35");
     rerender(<Header />);
@@ -178,7 +178,7 @@ describe("Header", () => {
     render(<Header {...props} />);
 
     const workspaceButton = screen.getByRole("button", {
-      name: "Workspace",
+      name: "workspace",
     });
     expect(workspaceButton).toHaveAttribute("aria-expanded", "false");
 
@@ -195,7 +195,7 @@ describe("Header", () => {
     );
     await waitFor(() => expect(subMenu).toBeVisible());
 
-    const anywhereElse = screen.getByText("Home");
+    const anywhereElse = screen.getByText("home");
     await userEvent.click(anywhereElse);
 
     await waitFor(() =>
@@ -209,11 +209,11 @@ describe("Header", () => {
       render(<Header {...props} />);
 
       const workspaceButton = screen.getByRole("button", {
-        name: "Workspace",
+        name: "workspace",
       });
       await userEvent.click(workspaceButton);
       const applicationsLink = screen.getByRole("link", {
-        name: "Applications",
+        name: "applications",
       });
       expect(applicationsLink).toBeInTheDocument();
       expect(applicationsLink).toHaveAttribute("href", "/applications");
@@ -225,14 +225,14 @@ describe("Header", () => {
       usePathnameMock.mockReturnValue("/vision");
       render(<Header />);
 
-      const homeLink = screen.getByRole("button", { name: /About/i });
+      const homeLink = screen.getByRole("button", { name: /about/i });
       expect(homeLink).toHaveClass("usa-current");
     });
     it("shows About as the active nav item when on Roadmap page", () => {
       usePathnameMock.mockReturnValue("/roadmap");
       render(<Header />);
 
-      const homeLink = screen.getByRole("button", { name: /About/i });
+      const homeLink = screen.getByRole("button", { name: /about/i });
       expect(homeLink).toHaveClass("usa-current");
     });
 
@@ -244,13 +244,13 @@ describe("Header", () => {
         screen.queryByRole("link", { name: /Our Vision/i }),
       ).not.toBeInTheDocument();
 
-      const aboutBtn = screen.getByRole("button", { name: /About/i });
+      const aboutBtn = screen.getByRole("button", { name: /about/i });
 
       await user.click(aboutBtn);
 
       expect(aboutBtn).toHaveAttribute("aria-expanded", "true");
 
-      const visionLink = screen.getByRole("link", { name: /Our Vision/i });
+      const visionLink = screen.getByRole("link", { name: /vision/i });
       expect(visionLink).toBeInTheDocument();
     });
     it("renders Community submenu", async () => {
@@ -258,16 +258,16 @@ describe("Header", () => {
       render(<Header {...props} />);
 
       expect(
-        screen.queryByRole("link", { name: /Events/i }),
+        screen.queryByRole("link", { name: /events/i }),
       ).not.toBeInTheDocument();
 
-      const communityBtn = screen.getByRole("button", { name: /Community/i });
+      const communityBtn = screen.getByRole("button", { name: /community/i });
 
       await user.click(communityBtn);
 
       expect(communityBtn).toHaveAttribute("aria-expanded", "true");
 
-      const eventsLink = screen.getByRole("link", { name: /Events/i });
+      const eventsLink = screen.getByRole("link", { name: /events/i });
       expect(eventsLink).toBeInTheDocument();
     });
   });

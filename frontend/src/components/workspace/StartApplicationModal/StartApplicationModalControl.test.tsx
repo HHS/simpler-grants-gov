@@ -4,7 +4,6 @@ import {
   fakeCompetition,
   fakeUserOrganization,
 } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { StartApplicationModalControl } from "src/components/workspace/StartApplicationModal/StartApplicationModalControl";
 
@@ -32,10 +31,6 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("src/services/auth/useUser", () => ({
   useUser: () => mockUseUser(),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/hooks/useClientFetch", () => ({

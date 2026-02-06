@@ -77,7 +77,7 @@ const isACdnTestRequest = (request: NextRequest): boolean => {
   );
 };
 
-export default function middleware(request: NextRequest): NextResponse {
+export default function proxy(request: NextRequest): NextResponse {
   const cacheControl: string[] = [];
 
   // only allow for cdn testing/troubleshooting in lower envs

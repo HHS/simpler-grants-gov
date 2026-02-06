@@ -6,7 +6,7 @@ import { ApplicationSubmission } from "src/types/application/applicationSubmissi
 import {
   ApplicationDetail,
   ApplicationHistory,
-  Status,
+  ApplicationStatus,
 } from "src/types/applicationResponseTypes";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
@@ -103,8 +103,9 @@ const ApplicationContainer = ({
   return (
     <>
       {(success ||
-        applicationDetails.application_status === Status.SUBMITTED ||
-        applicationDetails.application_status === Status.ACCEPTED) && (
+        applicationDetails.application_status === ApplicationStatus.SUBMITTED ||
+        applicationDetails.application_status ===
+          ApplicationStatus.ACCEPTED) && (
         <SummaryBox>
           <SummaryBoxHeading headingLevel="h3">
             {t("submissionSuccess.title")}
@@ -149,7 +150,8 @@ const ApplicationContainer = ({
         </Alert>
       )}
       {validationErrors.length > 0 &&
-        applicationDetails.application_status === "in_progress" &&
+        applicationDetails.application_status ===
+          ApplicationStatus.IN_PROGRESS &&
         !success && (
           <ApplicationValidationAlert
             applicationForms={applicationForms}
@@ -161,8 +163,8 @@ const ApplicationContainer = ({
         applicationDetails={applicationDetails}
         applicationSubmitHandler={handleSubmit}
         applicationSubmitted={
-          applicationStatus === "submitted" ||
-          applicationStatus === "accepted" ||
+          applicationStatus === ApplicationStatus.SUBMITTED ||
+          applicationStatus === ApplicationStatus.ACCEPTED ||
           success
         }
         submissionLoading={loading}

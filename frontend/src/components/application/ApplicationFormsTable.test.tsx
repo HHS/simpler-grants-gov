@@ -3,8 +3,8 @@ import { axe } from "jest-axe";
 import {
   ApplicationDetail,
   ApplicationFormDetail,
+  ApplicationStatus,
 } from "src/types/applicationResponseTypes";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import competitionMock from "stories/components/application/competition.mock.json";
 
 import { ApplicationFormsTable } from "src/components/application/ApplicationFormsTable";
@@ -23,15 +23,11 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
-
 const applicationForms =
   competitionMock.application_forms as unknown as ApplicationFormDetail[];
 const applicationDetailsObject: ApplicationDetail = {
   ...(competitionMock as unknown as ApplicationDetail),
-  application_status: "in_progress",
+  application_status: ApplicationStatus.IN_PROGRESS,
   application_id: "12345",
   competition: {
     ...(competitionMock.competition as unknown as ApplicationDetail["competition"]),
