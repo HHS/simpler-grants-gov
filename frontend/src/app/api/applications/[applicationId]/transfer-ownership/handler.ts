@@ -4,27 +4,30 @@ import { addOrganizationToApplication } from "src/services/fetch/fetchers/addOrg
 
 import { NextResponse } from "next/server";
 
+type TransferOwnershipRequestBody = {
+  organization_id?: string;
+};
+
 export const transferOwnershipHandler = async (
   request: Request,
   options: { params: Promise<{ applicationId: string }> },
 ): Promise<Response> => {
   try {
     const session = await getSession();
-
-    if (!session || !session.token) {
+    if (!session?.token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { applicationId } = await options.params;
 
-    let requestBody: { organization_id?: string };
+    let parsedBody: TransferOwnershipRequestBody;
     try {
-      requestBody = (await request.json()) as { organization_id?: string };
+      parsedBody = (await request.json()) as TransferOwnershipRequestBody;
     } catch {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const organizationId = requestBody.organization_id;
+    const organizationId = parsedBody.organization_id;
 
     if (!applicationId || !organizationId) {
       return NextResponse.json(
@@ -41,7 +44,7 @@ export const transferOwnershipHandler = async (
     return NextResponse.json(responseBody, { status: 200 });
   } catch (error: unknown) {
     const { status, message } = readError(error as Error, 500);
-    return Response.json(
+    return NextResponse.json(
       { message: `Error transferring application ownership: ${message}` },
       { status },
     );
