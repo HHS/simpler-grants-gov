@@ -397,6 +397,11 @@ const Header = ({
               className="usa-menu-btn"
             />
           </div>
+          <NavLinks
+            mobileExpanded={isMobileNavExpanded}
+            onToggleMobileNav={handleMobileNavToggle}
+            showLoginLink={showLoginLink}
+          />
           {!!showLoginLink && !user?.token && (
             <div
               className={clsx(
@@ -407,11 +412,6 @@ const Header = ({
               <UserControl localDev={localDev} />
             </div>
           )}
-          <NavLinks
-            mobileExpanded={isMobileNavExpanded}
-            onToggleMobileNav={handleMobileNavToggle}
-            showLoginLink={showLoginLink}
-          />
         </div>
       </USWDSHeader>
       <Snackbar close={hideSnackbar} isVisible={snackbarIsVisible}>
