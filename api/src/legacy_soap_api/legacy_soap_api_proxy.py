@@ -44,9 +44,12 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     proxy_headers = filter_headers(
         soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
     )
-    use_jwt_auth = soap_request.headers.get("use_jwt_auth") == "1"
+    use_jwt_auth = soap_request.headers.get("use-jwt-auth") == "1"
     if use_jwt_auth:
-        print(f"{proxy_url=}")
+        logger.info(
+            "soap_client_certificate: use-soap-jwt flag is enabled",
+            extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_JWT},
+        )
         _request = get_soap_jwt_auth_request(proxy_url, soap_request, config)
         return _get_soap_response(_request, timeout=timeout)
     _request = Request(
@@ -124,7 +127,7 @@ def _get_soap_response(
 def get_soap_jwt_auth_request(
     proxy_url: str, soap_request: SOAPRequest, config: LegacySoapAPIConfig
 ) -> Request:
-    print(f"2. {proxy_url}")
+
     if not (soap_request.auth and soap_request.auth.certificate.legacy_certificate):
         logger.exception("soap_client_certificate: no legacy_certificate found for soap jwt auth")
         raise Exception
@@ -137,7 +140,9 @@ def get_soap_jwt_auth_request(
         config.soap_partner_gateway_uri,
         config.soap_partner_gateway_auth_key,
     )
-    logger.info("soap_client_certificate: created SOAP JWT")
+    logger.info("soap_client_certificate: created SOAP JWT",
+        extra={"soap_api_event": LegacySoapApiEvent.JWT_CREATED},
+    )
 
     proxy_headers = {
         "S2S_PARTNER_CERTID_JWT_B64": base64.b64encode(jwt_string.encode("utf-8")).decode("utf-8")

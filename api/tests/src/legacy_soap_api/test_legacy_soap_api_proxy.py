@@ -161,14 +161,12 @@ def test_get_soap_jwt_auth_request(
     mock_config.soap_partner_gateway_auth_key = "X-Gg-S2S-Uri"
 
     mock_soap_request = MagicMock(spec=SOAPRequest)
-    mock_soap_request.headers = {}
     mock_soap_request.full_path = "/grantors/x"
     mock_soap_request.data = SOAP_PAYLOAD
     mock_soap_request.auth = MagicMock()
     mock_soap_request.auth.certificate.legacy_certificate = (
         factories.LegacyAgencyCertificateFactory.create()
     )
-
     with freeze_time("2023-05-10 12:00:00", tz_offset=0):
         request = get_soap_jwt_auth_request("proxy_url", mock_soap_request, mock_config)
         s2s_partner_certid_jwt_b64 = request.headers.get("S2S_PARTNER_CERTID_JWT_B64")
@@ -194,7 +192,7 @@ def test_get_soap_jwt_auth_request_when_use_jwt_is_set_on_headers(
 
     mock_soap_request = MagicMock(spec=SOAPRequest)
     mock_soap_request.headers = {
-        "use_jwt_auth": "1",
+        "use-jwt-auth": "1",
         "X-Gg-S2S-Uri": "https://google.com/xyz",
     }
     mock_soap_request.full_path = "/grantors/x"
@@ -203,7 +201,6 @@ def test_get_soap_jwt_auth_request_when_use_jwt_is_set_on_headers(
     mock_soap_request.auth.certificate.legacy_certificate = (
         factories.LegacyAgencyCertificateFactory.create()
     )
-
     with patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response") as _, patch(
         "src.legacy_soap_api.legacy_soap_api_proxy.get_soap_config"
     ) as mock_get_config, patch("src.legacy_soap_api.legacy_soap_api_proxy.get_soap_jwt_auth_request") as mock_soap_jwt_auth_request:
@@ -218,3 +215,4 @@ def test_get_soap_jwt_auth_request_when_use_jwt_is_set_on_headers(
             mock_soap_request,
             mock_config,
         )
+    assert "soap_client_certificate: use-soap-jwt flag is enabled" in caplog.messages

@@ -11,6 +11,7 @@ class LegacySoapApiEvent(StrEnum):
     CALLING_WITHOUT_CERT = "calling_without_cert"
     CALLING_WITH_CERT = "calling_with_cert"
     CALLING_WITH_JWT = "calling_with_jwt"
+    JWT_CREATED = "jwt_created"
 
     NO_SIMPLER_SCHEMA_DEFINED = "no_simpler_schema_defined"
 
