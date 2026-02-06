@@ -52,10 +52,6 @@ jest.mock(
   }),
 );
 
-jest.mock("src/components/USWDSIcon", () => ({
-  USWDSIcon: () => <span aria-hidden="true" />,
-}));
-
 jest.mock(
   "src/components/application/transferOwnership/TransferOwnershipModal",
   () => ({
@@ -150,7 +146,7 @@ describe("InformationCard - Edit filing name button visibility", () => {
   });
 });
 
-describe("InformationCard - Special instructions when closed", () => {
+describe("InformationCard - Special instructions when Submitted", () => {
   const defaultProps = {
     applicationDetails: mockApplicationDetails,
     applicationSubmitHandler: jest.fn(),
@@ -283,42 +279,86 @@ describe("InformationCard - Transfer ownership UI", () => {
     latestApplicationSubmission: mockApplicationSubmission,
   };
 
-  it("shows the transfer ownership button when the application has no organization", () => {
-    const noOrganizationApplication: ApplicationDetail = {
+  it("shows the transfer ownership button when the application has no organization AND the competition allows organizations", () => {
+    const noOrganizationOrgEligible: ApplicationDetail = {
       ...mockApplicationDetails,
       organization: null,
-    };
-
-    render(
-      <InformationCard
-        {...baseProps}
-        applicationDetails={noOrganizationApplication}
-      />,
-    );
-
-    expect(screen.getByTestId("transfer-ownership-open")).toBeInTheDocument();
-  });
-
-  it("does not show the transfer ownership button when the application has an organization", () => {
-    const hasOrganizationApplication: ApplicationDetail = {
-      ...mockApplicationDetails,
-      organization: {
-        organization_id: "org-123",
-        sam_gov_entity: {
-          expiration_date: "2099-01-01",
-          legal_business_name: "Test Org",
-          uei: "UEI123",
-          ebiz_poc_email: "test@example.com",
-          ebiz_poc_first_name: "Test",
-          ebiz_poc_last_name: "Org",
-        },
+      competition: {
+        ...mockApplicationDetails.competition,
+        open_to_applicants: ["organization"],
       },
     };
 
     render(
       <InformationCard
         {...baseProps}
-        applicationDetails={hasOrganizationApplication}
+        applicationDetails={noOrganizationOrgEligible}
+      />,
+    );
+
+    expect(screen.getByTestId("transfer-ownership-open")).toBeInTheDocument();
+  });
+
+it("does not show transfer ownership button when application is submitted", () => {
+  const submittedNoOrg: ApplicationDetail = {
+    ...mockApplicationDetails,
+    organization: null,
+    application_status: Status.SUBMITTED,
+    competition: {
+      ...mockApplicationDetails.competition,
+      open_to_applicants: ["organization"],
+    },
+  };
+
+  render(
+    <InformationCard
+      {...baseProps}
+      applicationDetails={submittedNoOrg}
+    />,
+  );
+
+  expect(
+    screen.queryByTestId("transfer-ownership-open"),
+  ).not.toBeInTheDocument();
+});
+
+it("does not show transfer ownership button when application is accepted", () => {
+  const acceptedNoOrg: ApplicationDetail = {
+    ...mockApplicationDetails,
+    organization: null,
+    application_status: Status.ACCEPTED,
+    competition: {
+      ...mockApplicationDetails.competition,
+      open_to_applicants: ["organization"],
+    },
+  };
+
+  render(
+    <InformationCard
+      {...baseProps}
+      applicationDetails={acceptedNoOrg}
+    />,
+  );
+
+  expect(
+    screen.queryByTestId("transfer-ownership-open"),
+  ).not.toBeInTheDocument();
+});
+
+  it("does not show the transfer ownership button when the application has no organization but the competition does NOT allow organizations", () => {
+    const noOrganizationOrgIneligible: ApplicationDetail = {
+      ...mockApplicationDetails,
+      organization: null,
+      competition: {
+        ...mockApplicationDetails.competition,
+        open_to_applicants: ["individual"],
+      },
+    };
+
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={noOrganizationOrgIneligible}
       />,
     );
 
@@ -330,15 +370,19 @@ describe("InformationCard - Transfer ownership UI", () => {
   it("opens the transfer modal when clicking the transfer ownership button and closes it via onAfterClose", async () => {
     const user = userEvent.setup();
 
-    const noOrganizationApplication: ApplicationDetail = {
+    const noOrganizationOrgEligible: ApplicationDetail = {
       ...mockApplicationDetails,
       organization: null,
+      competition: {
+        ...mockApplicationDetails.competition,
+        open_to_applicants: ["organization"],
+      },
     };
 
     render(
       <InformationCard
         {...baseProps}
-        applicationDetails={noOrganizationApplication}
+        applicationDetails={noOrganizationOrgEligible}
       />,
     );
 
@@ -351,6 +395,7 @@ describe("InformationCard - Transfer ownership UI", () => {
     ).not.toBeInTheDocument();
   });
 });
+
 
 describe("InformationCard - Download submission button visibility and content", () => {
   const submissionButtonTestId = "application-submission-download";

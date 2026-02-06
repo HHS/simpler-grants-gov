@@ -60,12 +60,15 @@ const ApplicantDetails = ({
   hasOrganization,
   samGovEntity,
   onOpenTransferModal,
+  canTransferOwnership
 }: {
   hasOrganization: boolean;
   samGovEntity?: SamGovEntity;
   onOpenTransferModal: () => void;
+  canTransferOwnership: Boolean
 }) => {
   const t = useTranslations("Application.information");
+
   if (hasOrganization) {
     return <OrganizationDetailsDisplay samGovEntity={samGovEntity} />;
   }
@@ -75,7 +78,7 @@ const ApplicantDetails = ({
       <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
       <dd>
         {t("applicantTypeIndividual")}
-        {!hasOrganization ? (
+        {canTransferOwnership ? (
           <TransferOwnershipButton onClick={onOpenTransferModal} />
         ) : null}
       </dd>
@@ -105,6 +108,12 @@ export const InformationCard = ({
   const { is_open } = applicationDetails.competition;
   const transferModalRef = useRef<ModalRef | null>(null);
   const transferModalId = "transfer-ownership-modal";
+    const organizationEligible =
+    applicationDetails.competition.open_to_applicants.includes("organization");
+  const isEditable =
+    applicationDetails.application_status === Status.IN_PROGRESS;
+  const canTransferOwnership =
+    !hasOrganization && organizationEligible && isEditable;
   const [isTransferModalOpen, setIsTransferModalOpen] =
     useState<boolean>(false);
 
@@ -249,6 +258,7 @@ export const InformationCard = ({
               hasOrganization={hasOrganization}
               samGovEntity={applicationDetails.organization?.sam_gov_entity}
               onOpenTransferModal={openTransferModal}
+              canTransferOwnership={canTransferOwnership}
             />
           </dl>
         </Grid>

@@ -6,31 +6,6 @@ import { TransferOwnershipButton } from "./TransferOwnershipButton";
 
 const onClickMock = jest.fn<void, []>();
 
-jest.mock("@trussworks/react-uswds", () => ({
-  Button: ({
-    children,
-    onClick,
-    className,
-    type,
-    "data-testid": dataTestId,
-  }: {
-    children: React.ReactNode;
-    onClick?: () => void;
-    className?: string;
-    type?: "button" | "submit" | "reset";
-    "data-testid"?: string;
-  }) => (
-    <button
-      type={type ?? "button"}
-      className={className}
-      data-testid={dataTestId}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  ),
-}));
-
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
