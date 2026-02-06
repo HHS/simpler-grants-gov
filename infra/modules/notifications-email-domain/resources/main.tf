@@ -4,7 +4,6 @@ data "aws_region" "current" {}
 
 locals {
   mail_from_domain = "mail.${var.domain_name}"
-  dmarc_domain     = "_dmarc.${var.domain_name}"
   dash_domain      = replace(var.domain_name, ".", "-")
 }
 
@@ -36,4 +35,6 @@ resource "aws_sesv2_configuration_set" "email" {
 resource "aws_sesv2_email_identity_mail_from_attributes" "sender_domain" {
   email_identity   = aws_sesv2_email_identity.sender_domain.email_identity
   mail_from_domain = local.mail_from_domain
+
+  depends_on = [aws_sesv2_email_identity.sender_domain]
 }
