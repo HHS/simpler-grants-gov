@@ -3,7 +3,6 @@
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
 import { ExternalRoutes } from "src/constants/routes";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { IndexType } from "src/types/generalTypes";
@@ -72,11 +71,9 @@ const NavLink = ({
 const NavLinks = ({
   mobileExpanded,
   onToggleMobileNav,
-  showLoginLink,
 }: {
   mobileExpanded: boolean;
   onToggleMobileNav: () => void;
-  showLoginLink?: boolean;
 }) => {
   const t = useTranslations("Header.navLinks");
   const path = usePathname();
@@ -241,7 +238,7 @@ const NavLinks = ({
       );
     });
 
-    if (showLoginLink && !user?.token) {
+    if (!user?.token) {
       items.push(
         <NavLink
           key="sign-in-mobile"
@@ -259,7 +256,7 @@ const NavLinks = ({
       );
     }
 
-    if (showLoginLink && user?.token) {
+    if (user?.token) {
       const accountIndex = navLinkList.length;
       items.push(
         <NavDropdown
@@ -289,7 +286,6 @@ const NavLinks = ({
     currentNavItemIndex,
     navLinkList,
     setActiveNavDropdownIndex,
-    showLoginLink,
     t,
     user?.token,
   ]);
@@ -342,8 +338,6 @@ const Header = ({
     };
   }, [isMobileNavExpanded, closeMenuOnEscape]);
 
-  const { checkFeatureFlag } = useFeatureFlags();
-  const showLoginLink = checkFeatureFlag("authOn");
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
   const handleMobileNavToggle = () => {
@@ -400,9 +394,8 @@ const Header = ({
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
-            showLoginLink={showLoginLink}
           />
-          {!!showLoginLink && !user?.token && (
+          {!user?.token && (
             <div
               className={clsx(
                 "usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6",
