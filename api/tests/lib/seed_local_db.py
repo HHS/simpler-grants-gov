@@ -115,6 +115,9 @@ def _build_opportunities(
             if agency not in agencies_with_opp:
                 factories.OpportunityFactory.create(agency_code=agency)
 
+    # create a few Assistance Listing records
+    factories.AssistanceListingFactory.create_batch(size=5)
+
     logger.info("Finished creating opportunities")
 
 
