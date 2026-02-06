@@ -54,7 +54,7 @@ def test_soap_jwt_flag_is_enabled_is_logged(client, fixture_from_file, caplog) -
     post_message = next(
         record
         for record in caplog.records
-        if record.message == "soap_client_certificate: use_soap_jwt flag is enabled"
+        if record.message == "soap_client_certificate: use-soap-jwt flag is enabled"
     )
     assert post_message.service_name == "grantsws-applicant"
     assert post_message.service_port_name == "ApplicantWebServicesSoapPort"
@@ -73,7 +73,7 @@ def test_soap_jwt_flag_is_disabled_is_not_logged(client, fixture_from_file, capl
     post_message = [
         record
         for record in caplog.records
-        if record.message == "soap_client_certificate: use_soap_jwt flag is enabled"
+        if record.message == "soap_client_certificate: use-soap-jwt flag is enabled"
     ]
     assert len(post_message) == 0
 
