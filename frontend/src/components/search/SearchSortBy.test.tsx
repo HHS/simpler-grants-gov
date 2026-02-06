@@ -1,7 +1,5 @@
-import { fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
-import { render, screen } from "tests/react-utils";
 
 import SearchSortBy from "src/components/search/SearchSortBy";
 
@@ -12,11 +10,6 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
     updateQueryParams: updateQueryParamsMock,
   }),
-}));
-
-jest.mock("next-intl", () => ({
-  ...jest.requireActual<typeof import("next-intl")>("next-intl"),
-  useTranslations: () => useTranslationsMock(),
 }));
 
 describe("SearchSortBy", () => {

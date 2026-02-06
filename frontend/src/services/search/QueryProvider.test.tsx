@@ -1,7 +1,7 @@
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import QueryProvider, { QueryContext } from "src/services/search/QueryProvider";
 import { QueryContextParams } from "src/types/search/searchQueryTypes";
-import { render, screen } from "tests/react-utils";
 
 import React, { useContext } from "react";
 

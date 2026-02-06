@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
 import Subscribe from "src/app/[locale]/(base)/newsletter/page";
-import { localeParams, useTranslationsMock } from "src/utils/testing/intlMocks";
+import { localeParams } from "src/utils/testing/intlMocks";
 
 const mockSetItem = jest.fn();
 const mockGetItem = jest.fn();
@@ -22,10 +22,6 @@ jest.mock("react", () => ({
   use: jest.fn(() => ({
     locale: "en",
   })),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("next-intl/server", () => ({

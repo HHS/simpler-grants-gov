@@ -1,5 +1,3 @@
-/* eslint-disable testing-library/no-node-access */
-
 import { render, screen, within } from "@testing-library/react";
 
 import {
@@ -22,17 +20,21 @@ describe("OpportunityEligibility", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
 
     expect(governmentsHeading).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access
     expect(governmentsHeading.parentElement).toBeDefined();
     expect(
+      // eslint-disable-next-line testing-library/no-node-access
       within(governmentsHeading.parentElement || new HTMLElement()).getByText(
         "State governments",
       ),
     ).toBeInTheDocument();
 
     expect(nonprofitHeading).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access
     expect(nonprofitHeading.parentElement).toBeDefined();
 
     expect(
+      // eslint-disable-next-line testing-library/no-node-access
       within(nonprofitHeading.parentElement || new HTMLElement()).getByText(
         "Nonprofits non-higher education with 501(c)(3)",
       ),

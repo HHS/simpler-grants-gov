@@ -1,18 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+import { identity } from "lodash";
 import {
   fakeAgencyResponseData,
   fakeSearchAPIResponse,
 } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
 
 import { AgencyFilterAccordion } from "src/components/search/SearchFilterAccordion/AgencyFilterAccordion";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
@@ -24,6 +20,10 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
+}));
+
+jest.mock("next-intl/server", () => ({
+  getTranslations: () => identity,
 }));
 
 describe("AgencyFilterAccordion", () => {

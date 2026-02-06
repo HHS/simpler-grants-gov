@@ -1,5 +1,5 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
-import { Status } from "src/types/applicationResponseTypes";
+import { ApplicationStatus } from "src/types/applicationResponseTypes";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -59,7 +59,7 @@ export const IncludeFormInSubmissionRadio = ({
       ? "No"
       : undefined;
   const disabledValue =
-    applicationStatus !== Status.IN_PROGRESS ? true : loading;
+    applicationStatus !== ApplicationStatus.IN_PROGRESS ? true : loading;
   const radioId = `include-form${formId}-in-application-submission-radio`;
   return (
     <>
