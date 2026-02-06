@@ -1,39 +1,50 @@
+"""
+This file contains state machines that we use in our
+unit tests. This is to avoid building unit tests against
+real workflows for core logic as we'd otherwise need
+to keep modifying tests as we modify the real workflows.
+"""
+
 from enum import StrEnum
 
 from statemachine import Event
 from statemachine.states import States
 
-from src.constants.lookup_constants import WorkflowEntityType, WorkflowType
+from src.constants.lookup_constants import WorkflowEntityType
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.state_persistence.opportunity_persistence_model import OpportunityPersistenceModel
 from src.workflow.workflow_config import WorkflowConfig
 
+#########################
+# Basic State Machine
+#########################
+# For testing core functionality with a very
+# basic workflow.
 
-class InitialPrototypeState(StrEnum):
-    # Will add more states as we build functionality
-    # and need a place to test it.
+
+class BasicState(StrEnum):
     START = "start"
     MIDDLE = "middle"
     END = "end"
 
 
-initial_prototype_state_machine_config = WorkflowConfig(
-    workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+basic_test_workflow_config = WorkflowConfig(
+    workflow_type="basic_test_workflow",
     persistence_model_cls=OpportunityPersistenceModel,
     entity_types=[WorkflowEntityType.OPPORTUNITY],
     approval_mapping={},
 )
 
 
-@WorkflowRegistry.register_workflow(initial_prototype_state_machine_config)
-class InitialPrototypeStateMachine(BaseStateMachine):
-    ### States
+@WorkflowRegistry.register_workflow(basic_test_workflow_config)
+class BasicTestStateMachine(BaseStateMachine):
+
     states = States.from_enum(
-        InitialPrototypeState,
-        initial=InitialPrototypeState.START,
-        final=[InitialPrototypeState.END],
+        BasicState,
+        initial=BasicState.START,
+        final=[BasicState.END],
         use_enum_instance=True,
     )
 

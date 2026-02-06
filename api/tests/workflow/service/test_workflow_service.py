@@ -4,7 +4,8 @@ import pytest
 
 from src.constants.lookup_constants import WorkflowEntityType
 from src.workflow.event.workflow_event import WorkflowEntity
-from src.workflow.service.workflow_service import get_workflow_entities
+from src.workflow.service.workflow_service import get_workflow_entities, is_event_valid_for_workflow
+from src.workflow.state_machine.initial_prototype_state_machine import InitialPrototypeStateMachine
 from src.workflow.workflow_errors import EntityNotFound, InvalidEntityForWorkflow
 from tests.src.db.models.factories import ApplicationFactory, OpportunityFactory
 from tests.workflow.workflow_test_util import build_workflow_config
@@ -172,3 +173,15 @@ def test_get_workflow_entities_application_missing(db_session, enable_factory_cr
 
     with pytest.raises(EntityNotFound, match="Application not found"):
         get_workflow_entities(db_session, entities, config)
+
+
+@pytest.mark.parametrize(
+    "event,state_machine_cls,expected_is_valid",
+    [
+        ("start_workflow", InitialPrototypeStateMachine, True),
+        ("middle_to_end", InitialPrototypeStateMachine, True),
+        ("fake_event", InitialPrototypeStateMachine, False),
+    ],
+)
+def test_is_event_valid_for_workflow(event, state_machine_cls, expected_is_valid):
+    assert is_event_valid_for_workflow(event, state_machine_cls) == expected_is_valid

@@ -11,9 +11,10 @@ from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_event import WorkflowEvent
 from src.workflow.registry.workflow_registry import WorkflowRegistry
-from src.workflow.service.workflow_service import get_workflow_entities
+from src.workflow.service.workflow_service import get_workflow_entities, is_event_valid_for_workflow
 from src.workflow.state_persistence.base_state_persistence_model import Workflow
 from src.workflow.workflow_config import WorkflowConfig
+from src.workflow.workflow_constants import WorkflowConstants
 from src.workflow.workflow_errors import (
     InvalidEventError,
     InvalidWorkflowTypeError,
@@ -26,25 +27,55 @@ logger = logging.getLogger(__name__)
 
 
 class EventHandler:
+    """
+    Handle a workflow event and run it against the underlying state machine.
+
+    The event handler does the following:
+    * Validates the event, ensuring that it makes sense and connects
+      to an actual workflow.
+    * Fetches any entities associated with the workflow
+    * Fetches the user associated with the workflow
+    * Instantiates and runs the workflow against the underlying state machine
+
+       Usage:
+
+          event_handler = EventHandler(db_session, event)
+          try:
+             # For convenience, the state machine is returned
+             # although outside of testing you can ignore this generally
+             state_machine = event_handler.process()
+          except NonRetryableWorkflowError as e:
+             ...
+          except RetryableWorkflowError as e:
+             ...
+          except Exception as e:
+             ...
+    """
 
     def __init__(self, db_session: db.Session, event: WorkflowEvent):
         self.db_session = db_session
         self.event = event
 
     def process(self) -> BaseStateMachine:
+        """Process an event."""
         state_machine_event = self._pre_process_event()
         return self._process_event(state_machine_event)
 
     def _process_event(self, state_machine_event: StateMachineEvent) -> BaseStateMachine:
-
-        persistence_model = state_machine_event.config.persistence_model(
+        """Run the state machine event against the state machine."""
+        persistence_model = state_machine_event.config.persistence_model_cls(
             db_session=self.db_session, workflow=state_machine_event.workflow
         )
 
         state_machine = state_machine_event.state_machine_cls(persistence_model)
-        log_extra = self.event.get_log_extra() | {
-            "current_workflow_state": state_machine.current_state
-        }
+        log_extra = self.event.get_log_extra() | {"current_workflow_state": persistence_model.state}
+
+        if not is_event_valid_for_workflow(state_machine_event.event_to_send, state_machine):
+            logger.warning(
+                "Event is not valid for workflow",
+                extra=log_extra | {"erroring_event": state_machine_event.event_to_send},
+            )
+            raise InvalidEventError("Event is not valid for workflow")
 
         try:
             state_machine.send(
@@ -107,16 +138,16 @@ class EventHandler:
             workflow_id=uuid.uuid4(),
             workflow_type=context.workflow_type,
             # When initializing a workflow, grab the current state from
-            # the state machine class. Note the str() is needed as it
+            # the state machine class. Note the .value is needed as it
             # otherwise won't realize the StrEnum is also a string and error.
-            current_workflow_state=str(state_machine_cls.initial_state),
+            current_workflow_state=state_machine_cls.initial_state.value,
             is_active=True,
             **workflow_entities
         )
         # self.db_session.add(workflow) # TODO - when DB table exists
 
         return StateMachineEvent(
-            event_to_send="start_workflow",
+            event_to_send=WorkflowConstants.START_WORKFLOW,
             acting_user=self._get_user(),
             workflow=workflow,
             config=config,
@@ -125,7 +156,16 @@ class EventHandler:
         )
 
     def _pre_process_existing_workflow_event(self) -> StateMachineEvent:
-        """TODO"""
+        """Pre-process a process_workflow event.
+
+        Parse and validates that the information passed in makes sense
+        and is something we want to pass to the underlying state machine.
+
+        This includes:
+        * Validating that the process workflow context is present
+        * Fetching and verifying that the workflow exists in our DB
+        * Fetching the acting user
+        """
 
         log_extra = self.event.get_log_extra()
 

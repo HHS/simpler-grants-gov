@@ -14,7 +14,7 @@ class WorkflowConfig:
 
     workflow_type: WorkflowType
 
-    persistence_model: type[BaseStatePersistenceModel]
+    persistence_model_cls: type[BaseStatePersistenceModel]
 
     # Likely we'll want entity type to be a bit more flexible in the future
     # if we want to limit to 1 or more of a given entity type

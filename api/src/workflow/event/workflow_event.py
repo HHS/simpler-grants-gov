@@ -22,6 +22,9 @@ class ProcessWorkflowEventContext(BaseModel):
 
 
 class WorkflowEvent(BaseModel):
+    """An event representing what we send over SQS
+    for starting/processing a workflow.
+    """
 
     event_id: uuid.UUID
     acting_user_id: uuid.UUID
