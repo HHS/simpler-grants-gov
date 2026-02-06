@@ -33,7 +33,7 @@ data "aws_iam_policy_document" "ecs_tasks_assume_role_policy" {
 }
 
 data "aws_iam_policy_document" "task_executor" {
-  # Allow ECS to log to Cloudwatch.
+  # Allow ECS to log to CloudWatch.
   statement {
     actions = [
       "logs:CreateLogStream",
