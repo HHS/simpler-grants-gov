@@ -47,7 +47,7 @@ def test_soap_jwt_flag_is_enabled_is_logged(client, fixture_from_file, caplog) -
         "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
     )
     mock_data = fixture_from_file(fixture_path)
-    response = client.post(full_path, data=mock_data, headers={"use_soap_jwt": "1"})
+    response = client.post(full_path, data=mock_data, headers={"use-soap-jwt": "1"})
     assert response.status_code == 200
 
     # Verify that certain logs are present with expected extra values
@@ -66,7 +66,7 @@ def test_soap_jwt_flag_is_disabled_is_not_logged(client, fixture_from_file, capl
         "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
     )
     mock_data = fixture_from_file(fixture_path)
-    response = client.post(full_path, data=mock_data, headers={"use_soap_jwt": "0"})
+    response = client.post(full_path, data=mock_data, headers={"use-soap-jwt": "0"})
     assert response.status_code == 200
 
     # Verify that certain logs are present with expected extra values
