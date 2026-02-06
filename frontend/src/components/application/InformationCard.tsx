@@ -9,10 +9,19 @@ import {
 import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { Button, Grid, GridContainer, Link } from "@trussworks/react-uswds";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Button,
+  Grid,
+  GridContainer,
+  Link,
+  ModalRef,
+} from "@trussworks/react-uswds";
 
 import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
+import { TransferOwnershipModal } from "src/components/application/transferOwnership/TransferOwnershipModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { TransferOwnershipButton } from "./transferOwnership/TransferOwnershipButton";
 
 type CompetitionDetails = { competition: Competition };
 
@@ -50,11 +59,16 @@ const OrganizationDetailsDisplay = ({
 const ApplicantDetails = ({
   hasOrganization,
   samGovEntity,
+  onOpenTransferModal,
+  canTransferOwnership,
 }: {
   hasOrganization: boolean;
   samGovEntity?: SamGovEntity;
+  onOpenTransferModal: () => void;
+  canTransferOwnership: boolean;
 }) => {
   const t = useTranslations("Application.information");
+
   if (hasOrganization) {
     return <OrganizationDetailsDisplay samGovEntity={samGovEntity} />;
   }
@@ -62,7 +76,12 @@ const ApplicantDetails = ({
   return (
     <div className="margin-bottom-1">
       <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
-      <dd>{t("applicantTypeIndividual")}</dd>
+      <dd>
+        {t("applicantTypeIndividual")}
+        {canTransferOwnership ? (
+          <TransferOwnershipButton onClick={onOpenTransferModal} />
+        ) : null}
+      </dd>
     </div>
   );
 };
@@ -87,6 +106,31 @@ export const InformationCard = ({
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
   const { is_open } = applicationDetails.competition;
+  const transferModalRef = useRef<ModalRef | null>(null);
+  const transferModalId = "transfer-ownership-modal";
+  const organizationEligible =
+    applicationDetails.competition.open_to_applicants.includes("organization");
+  const isEditable =
+    applicationDetails.application_status === Status.IN_PROGRESS;
+  const canTransferOwnership =
+    !hasOrganization && organizationEligible && isEditable;
+  const [isTransferModalOpen, setIsTransferModalOpen] =
+    useState<boolean>(false);
+
+  const openTransferModal = useCallback((): void => {
+    setIsTransferModalOpen(true);
+  }, []);
+
+  const handleTransferModalAfterClose = useCallback((): void => {
+    setIsTransferModalOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isTransferModalOpen) {
+      return;
+    }
+    transferModalRef.current?.toggleModal?.();
+  }, [isTransferModalOpen]);
 
   const ApplicationInstructionsDownload = () => {
     return (
@@ -213,6 +257,8 @@ export const InformationCard = ({
             <ApplicantDetails
               hasOrganization={hasOrganization}
               samGovEntity={applicationDetails.organization?.sam_gov_entity}
+              onOpenTransferModal={openTransferModal}
+              canTransferOwnership={canTransferOwnership}
             />
           </dl>
         </Grid>
@@ -242,6 +288,15 @@ export const InformationCard = ({
             </div>
           </dl>
         </Grid>
+
+        {isTransferModalOpen ? (
+          <TransferOwnershipModal
+            applicationId={applicationDetails.application_id}
+            modalId={transferModalId}
+            modalRef={transferModalRef}
+            onAfterClose={handleTransferModalAfterClose}
+          />
+        ) : null}
 
         <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
           {applicationDetails.competition.competition_instructions.length ? (

@@ -285,6 +285,11 @@ export const messages = {
       closed: "Closed",
       status: "Status",
       submit: "Submit application",
+      transferApplicaitonOwnership: "Transfer application ownership",
+      unassociatedApplicationAlert: {
+        title: "This application isn't associated with a valid organization.",
+        body: "You can continue working and your progress will be saved, but to submit on behalf of an organization, you must <link>select that organization and transfer ownership</link>.",
+      },
       editApplicationFilingNameModal: {
         buttonText: "Edit filing name",
         title: "Change application filing name",
@@ -411,7 +416,9 @@ export const messages = {
         "Once you assign an organization, that choice is permanent. An application cannot be transferred to another organization or returned to an individual.",
       actionConfirm: "Transfer ownership",
       actionCancel: "Return to application",
-      errorMessage:
+      transferErrorMessage:
+        "We couldn't transfer application ownership right now. Please try again.",
+      failedFetchingOrganizationErrorMessage:
         "We couldn't load your organizations right now. Please try again.",
       contactSupport:
         "If the problem continues, contact product support, <tel>1-800-518-4726</tel> or <link>simpler@grants.gov</link>.",

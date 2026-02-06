@@ -62,7 +62,7 @@ export interface ApplicationDetail {
   application_status: string;
   competition: Competition;
   form_validation_warnings?: FormValidationWarnings;
-  organization: Organization;
+  organization?: Organization | null;
   users: {
     email: string;
     user_id: string;
