@@ -2,12 +2,14 @@
 
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
+import { LOGIN_URL } from "src/constants/auth";
 import { ExternalRoutes } from "src/constants/routes";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { IndexType } from "src/types/generalTypes";
 import { TestUser } from "src/types/userTypes";
 import { isCurrentPath, isExternalLink } from "src/utils/generalUtils";
+import { storeCurrentPage } from "src/utils/userUtils";
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -26,7 +28,7 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { TestUserSelect } from "./TestUserSelect";
-import { UserControl } from "./user/UserControl";
+import { SignOutNavLink, UserControl } from "./user/UserControl";
 
 type PrimaryLink = {
   text?: string;
@@ -191,12 +193,12 @@ const NavLinks = ({
   }, [closeMobileNav]);
 
   const navItems = useMemo(() => {
-    return navLinkList.map((link: PrimaryLink, index: number) => {
+    const items = navLinkList.map((link: PrimaryLink, index: number) => {
       if (!link.text) {
         return <></>;
       }
       if (link.children) {
-        const items = link.children.map((childLink) => {
+        const childItems = link.children.map((childLink) => {
           if (!childLink.text) {
             return <></>;
           }
@@ -216,7 +218,7 @@ const NavLinks = ({
             index={index}
             isCurrent={currentNavItemIndex === index}
             linkText={link.text}
-            menuItems={items}
+            menuItems={childItems}
             setActiveNavDropdownIndex={setActiveNavDropdownIndex}
           />
         );
@@ -230,16 +232,62 @@ const NavLinks = ({
           classes={clsx({
             "usa-nav__link": true,
             "usa-current": currentNavItemIndex === index,
+            "text-bold": true,
           })}
         />
       );
     });
+
+    if (!user?.token) {
+      items.push(
+        <NavLink
+          key="sign-in-mobile"
+          href={LOGIN_URL}
+          onClick={() => {
+            storeCurrentPage();
+            closeDropdownAndMobileNav();
+          }}
+          text={t("login")}
+          classes={clsx({
+            "usa-nav__link": true,
+            "desktop:display-none": true,
+          })}
+        />,
+      );
+    }
+
+    if (user?.token) {
+      const accountIndex = navLinkList.length;
+      items.push(
+        <NavDropdown
+          key="account"
+          activeNavDropdownIndex={activeNavDropdownIndex}
+          index={accountIndex}
+          isCurrent={false}
+          linkText={t("account")}
+          menuItems={[
+            <NavLink
+              href="/settings"
+              key="settings"
+              onClick={closeDropdownAndMobileNav}
+              text={t("settings")}
+            />,
+            <SignOutNavLink key="logout" onClick={closeDropdownAndMobileNav} />,
+          ]}
+          setActiveNavDropdownIndex={setActiveNavDropdownIndex}
+        />,
+      );
+    }
+
+    return items;
   }, [
     activeNavDropdownIndex,
     closeDropdownAndMobileNav,
     currentNavItemIndex,
     navLinkList,
     setActiveNavDropdownIndex,
+    t,
+    user?.token,
   ]);
 
   return (
@@ -264,7 +312,7 @@ const Header = ({
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
 
-  const { hasBeenLoggedOut, resetHasBeenLoggedOut } = useUser();
+  const { hasBeenLoggedOut, resetHasBeenLoggedOut, user } = useUser();
   const { showSnackbar, Snackbar, hideSnackbar, snackbarIsVisible } =
     useSnackbar();
 
@@ -343,13 +391,20 @@ const Header = ({
               className="usa-menu-btn"
             />
           </div>
-          <div className="usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
-            <UserControl localDev={localDev} />
-          </div>
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
           />
+          {!user?.token && (
+            <div
+              className={clsx(
+                "usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6",
+                "display-none desktop:display-block",
+              )}
+            >
+              <UserControl localDev={localDev} />
+            </div>
+          )}
         </div>
       </USWDSHeader>
       <Snackbar close={hideSnackbar} isVisible={snackbarIsVisible}>

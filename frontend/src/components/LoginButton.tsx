@@ -3,8 +3,6 @@ import { storeCurrentPage } from "src/utils/userUtils";
 
 import { PropsWithChildren } from "react";
 
-import { USWDSIcon } from "./USWDSIcon";
-
 export function LoginLink({
   children,
   className,
@@ -34,11 +32,6 @@ export function LoginButton({
         className="usa-nav__link text-normal font-sans-2xs display-flex flex-align-center height-full"
         data-testid="sign-in-button"
       >
-        <USWDSIcon
-          className="usa-icon margin-right-105 margin-left-neg-05"
-          name="login"
-          key="login-link-icon"
-        />
         {navLoginLinkText}
       </LoginLink>
     </div>

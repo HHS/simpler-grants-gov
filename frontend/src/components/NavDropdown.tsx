@@ -83,6 +83,7 @@ export default function NavDropdown({
         className={clsx({
           "usa-current": isCurrent,
           "simpler-subnav-open": isOpen,
+          "text-bold": true,
         })}
       />
       <Menu
