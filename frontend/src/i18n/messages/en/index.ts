@@ -853,7 +853,7 @@ export const messages = {
     validationError: "Search Validation Error",
     tooLongError: "Search terms must be no longer than 100 characters.",
     exportButton: {
-      title: "Export results",
+      title: "Export results as .csv",
     },
     betaAlert: {
       alertTitle: "How can we build a simpler search experience?",
