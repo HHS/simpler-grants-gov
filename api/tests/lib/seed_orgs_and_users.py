@@ -348,6 +348,25 @@ def _build_organizations_and_users(
 
     user_scenarios.append("api_user - API-only user (no OAuth, API key only)")
 
+    ###############################
+    # Workflow management user
+    ###############################
+    (
+        UserBuilder(
+            uuid.UUID("aed2ad32-8427-41bd-aee7-199310292941"),
+            db_session,
+            "Workflow Management System User",
+        )
+        .with_api_key("local-workflow-user-api-key")
+        .with_profile(first_name="System", last_name="User")
+        .with_internal_role(
+            "Workflow internal role", privileges=[Privilege.INTERNAL_WORKFLOW_ACCESS]
+        )
+        .build()
+    )
+
+    user_scenarios.append("Workflow management user - Needed for certain workflow related tasks")
+
     ##############################################################
     # Log output
     ##############################################################

@@ -123,6 +123,17 @@ class UserBuilder:
 
         return self
 
+    def with_profile(self, first_name: str, last_name: str, middle_name: str | None = None) -> Self:
+        """Add a profile to the user."""
+        self.db_session.merge(
+            factories.UserProfileFactory.build(
+                user=self.user, first_name=first_name, middle_name=middle_name, last_name=last_name
+            ),
+            load=True,
+        )
+
+        return self
+
     def build(self) -> User:
         log_msg = f"Updating {self.scenario_name}:"
         if self.link_external_id:

@@ -187,6 +187,19 @@ E2E_TEST_USER_ROLE = Role(
     link_role_types=[LinkRoleRoleType(role_id=E2E_TEST_USER_ROLE_ID, role_type=RoleType.INTERNAL)],
 )
 
+SYSTEM_WORKFLOW_USER_ROLE_ID = uuid.UUID("18258804-a281-41cd-9afb-06061fa7593c")
+SYSTEM_WORKFLOW_USER_ROLE = Role(
+    role_id=SYSTEM_WORKFLOW_USER_ROLE_ID,
+    role_name="System Workflow Role",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        SYSTEM_WORKFLOW_USER_ROLE_ID, [Privilege.INTERNAL_WORKFLOW_ACCESS]
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=SYSTEM_WORKFLOW_USER_ROLE_ID, role_type=RoleType.INTERNAL),
+    ],
+)
+
 CORE_ROLES = [
     ORG_ADMIN,
     ORG_MEMBER,
@@ -197,4 +210,5 @@ CORE_ROLES = [
     OPPORTUNITY_EDITOR,
     OPPORTUNITY_PUBLISHER,
     NAVA_INTERNAL_ROLE,
+    SYSTEM_WORKFLOW_USER_ROLE,
 ]
