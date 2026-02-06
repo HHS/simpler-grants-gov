@@ -11,9 +11,6 @@ const {
   SESSION_SECRET,
   NEXT_PUBLIC_BASE_URL,
   ENVIRONMENT = "dev",
-  FEATURE_SEARCH_OFF,
-  FEATURE_OPPORTUNITY_OFF,
-  FEATURE_AUTH_ON,
   FEATURE_APPLY_FORM_PROTOTYPE_OFF,
   AUTH_LOGIN_URL,
   AUTH_EXPIRATION_TIME,
@@ -24,9 +21,6 @@ const {
 } = process.env;
 
 export const envFeatureFlags = {
-  opportunityOff: FEATURE_OPPORTUNITY_OFF,
-  searchOff: FEATURE_SEARCH_OFF,
-  authOn: FEATURE_AUTH_ON,
   applyFormPrototypeOff: FEATURE_APPLY_FORM_PROTOTYPE_OFF,
 };
 

@@ -3,7 +3,6 @@
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
 import { ExternalRoutes } from "src/constants/routes";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { IndexType } from "src/types/generalTypes";
@@ -291,8 +290,6 @@ const Header = ({
     };
   }, [isMobileNavExpanded, closeMenuOnEscape]);
 
-  const { checkFeatureFlag } = useFeatureFlags();
-  const showLoginLink = checkFeatureFlag("authOn");
   const language = locale && locale.match("/^es/") ? "spanish" : "english";
 
   const handleMobileNavToggle = () => {
@@ -346,11 +343,9 @@ const Header = ({
               className="usa-menu-btn"
             />
           </div>
-          {!!showLoginLink && (
-            <div className="usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
-              <UserControl localDev={localDev} />
-            </div>
-          )}
+          <div className="usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
+            <UserControl localDev={localDev} />
+          </div>
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
