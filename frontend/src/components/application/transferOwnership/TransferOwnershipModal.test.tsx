@@ -34,7 +34,10 @@ type ClientFetch = (
   },
 ) => Promise<TransferOwnershipSuccessResponse>;
 
-const clientFetchMock = jest.fn<ReturnType<ClientFetch>, Parameters<ClientFetch>>();
+const clientFetchMock = jest.fn<
+  ReturnType<ClientFetch>,
+  Parameters<ClientFetch>
+>();
 
 const routerRefreshMock = jest.fn();
 
@@ -46,9 +49,7 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("next-intl", () => ({
   useTranslations: () => {
-    const translate = ((key: string) => key) as ((
-      key: string,
-    ) => string) & {
+    const translate = ((key: string) => key) as ((key: string) => string) & {
       rich: (
         key: string,
         values: Record<string, (chunks: React.ReactNode) => React.ReactNode>,
@@ -174,7 +175,7 @@ const fakeOrganizations: UserOrganization[] = [
       ebiz_poc_first_name: "Org",
       ebiz_poc_last_name: "One",
     },
-    is_organization_owner: false
+    is_organization_owner: false,
   },
 ];
 
@@ -184,9 +185,9 @@ describe("TransferOwnershipModal", () => {
 
   const onAfterCloseMock = jest.fn();
 
-  function renderModal(
-    overrides: Partial<UseUserOrganizationsResult> = {},
-  ): { modalRef: React.RefObject<ModalRef | null> } {
+  function renderModal(overrides: Partial<UseUserOrganizationsResult> = {}): {
+    modalRef: React.RefObject<ModalRef | null>;
+  } {
     const modalRef = createRef<ModalRef>();
 
     // Provide a toggleModal implementation so handleTransfer can call it safely.

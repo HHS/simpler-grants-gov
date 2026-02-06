@@ -60,12 +60,12 @@ const ApplicantDetails = ({
   hasOrganization,
   samGovEntity,
   onOpenTransferModal,
-  canTransferOwnership
+  canTransferOwnership,
 }: {
   hasOrganization: boolean;
   samGovEntity?: SamGovEntity;
   onOpenTransferModal: () => void;
-  canTransferOwnership: Boolean
+  canTransferOwnership: Boolean;
 }) => {
   const t = useTranslations("Application.information");
 
@@ -108,7 +108,7 @@ export const InformationCard = ({
   const { is_open } = applicationDetails.competition;
   const transferModalRef = useRef<ModalRef | null>(null);
   const transferModalId = "transfer-ownership-modal";
-    const organizationEligible =
+  const organizationEligible =
     applicationDetails.competition.open_to_applicants.includes("organization");
   const isEditable =
     applicationDetails.application_status === Status.IN_PROGRESS;

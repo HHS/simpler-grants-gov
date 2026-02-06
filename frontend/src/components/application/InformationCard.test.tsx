@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
+import { Competition } from "src/types/competitionsResponseTypes";
 import { mockApplicationSubmission } from "src/utils/testing/fixtures";
 import applicationMock from "stories/components/application/application.mock.json";
 
 import React from "react";
 
 import { InformationCard } from "src/components/application/InformationCard";
-import { Competition } from "src/types/competitionsResponseTypes";
 
 jest.mock("next-intl", () => ({
   useTranslations: () => {

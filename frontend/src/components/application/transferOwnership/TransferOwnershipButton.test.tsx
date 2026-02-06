@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
 import React from "react";
+
 import { TransferOwnershipButton } from "./TransferOwnershipButton";
 
 jest.mock("next-intl", () => ({
@@ -24,6 +26,8 @@ describe("TransferOwnershipButton", () => {
 
   it("renders the label from translations", () => {
     render(<TransferOwnershipButton onClick={jest.fn()} />);
-    expect(screen.getByText("transferApplicaitonOwnership")).toBeInTheDocument();
+    expect(
+      screen.getByText("transferApplicaitonOwnership"),
+    ).toBeInTheDocument();
   });
 });
