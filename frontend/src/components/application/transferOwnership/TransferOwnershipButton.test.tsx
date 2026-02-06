@@ -1,10 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
-
 import { TransferOwnershipButton } from "./TransferOwnershipButton";
-
-const onClickMock = jest.fn<void, []>();
 
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
@@ -15,33 +12,18 @@ jest.mock("src/components/USWDSIcon", () => ({
 }));
 
 describe("TransferOwnershipButton", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  it("calls onClick when pressed", async () => {
+    const user = userEvent.setup();
+    const onClickMock = jest.fn();
 
-  it("renders the transfer ownership button", () => {
     render(<TransferOwnershipButton onClick={onClickMock} />);
 
-    const button = screen.getByTestId("transfer-ownership-open");
-    expect(button).toBeInTheDocument();
-
-    // We mock translations to return the key string.
-    expect(
-      screen.getByText("transferApplicaitonOwnership"),
-    ).toBeInTheDocument();
-  });
-
-  it("calls onClick when clicked", () => {
-    render(<TransferOwnershipButton onClick={onClickMock} />);
-
-    fireEvent.click(screen.getByTestId("transfer-ownership-open"));
-
+    await user.click(screen.getByTestId("transfer-ownership-open"));
     expect(onClickMock).toHaveBeenCalledTimes(1);
   });
 
-  it("does not call onClick on render", () => {
-    render(<TransferOwnershipButton onClick={onClickMock} />);
-
-    expect(onClickMock).not.toHaveBeenCalled();
+  it("renders the label from translations", () => {
+    render(<TransferOwnershipButton onClick={jest.fn()} />);
+    expect(screen.getByText("transferApplicaitonOwnership")).toBeInTheDocument();
   });
 });

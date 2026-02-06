@@ -7,6 +7,7 @@ import applicationMock from "stories/components/application/application.mock.jso
 import React from "react";
 
 import { InformationCard } from "src/components/application/InformationCard";
+import { Competition } from "src/types/competitionsResponseTypes";
 
 jest.mock("next-intl", () => ({
   useTranslations: () => {
@@ -86,6 +87,23 @@ jest.mock(
 
 const mockApplicationDetails = applicationMock as unknown as ApplicationDetail;
 
+function makeApplicationDetails(
+  overrides: Omit<Partial<ApplicationDetail>, "competition"> & {
+    competition?: Partial<Competition>;
+  } = {},
+): ApplicationDetail {
+  const competition: Competition = {
+    ...mockApplicationDetails.competition,
+    ...(overrides.competition ?? {}),
+  };
+
+  return {
+    ...mockApplicationDetails,
+    ...overrides,
+    competition,
+  };
+}
+
 describe("InformationCard - Edit filing name button visibility", () => {
   const defaultProps = {
     applicationDetails: mockApplicationDetails,
@@ -98,15 +116,12 @@ describe("InformationCard - Edit filing name button visibility", () => {
   };
 
   it("shows Edit filing name button when application status is in_progress", () => {
-    const inProgressApplication: ApplicationDetail = {
-      ...mockApplicationDetails,
-      application_status: Status.IN_PROGRESS,
-    };
-
     render(
       <InformationCard
         {...defaultProps}
-        applicationDetails={inProgressApplication}
+        applicationDetails={makeApplicationDetails({
+          application_status: Status.IN_PROGRESS,
+        })}
       />,
     );
 
@@ -114,15 +129,12 @@ describe("InformationCard - Edit filing name button visibility", () => {
   });
 
   it("hides Edit filing name button when application status is submitted", () => {
-    const submittedApplication: ApplicationDetail = {
-      ...mockApplicationDetails,
-      application_status: Status.SUBMITTED,
-    };
-
     render(
       <InformationCard
         {...defaultProps}
-        applicationDetails={submittedApplication}
+        applicationDetails={makeApplicationDetails({
+          application_status: Status.SUBMITTED,
+        })}
       />,
     );
 
@@ -130,15 +142,12 @@ describe("InformationCard - Edit filing name button visibility", () => {
   });
 
   it("hides Edit filing name button when application status is accepted", () => {
-    const acceptedApplication: ApplicationDetail = {
-      ...mockApplicationDetails,
-      application_status: Status.ACCEPTED,
-    };
-
     render(
       <InformationCard
         {...defaultProps}
-        applicationDetails={acceptedApplication}
+        applicationDetails={makeApplicationDetails({
+          application_status: Status.ACCEPTED,
+        })}
       />,
     );
 
@@ -158,18 +167,12 @@ describe("InformationCard - Special instructions when Submitted", () => {
   };
 
   it("shows special instructions when competition is CLOSED (is_open=false)", () => {
-    const closedApplication: ApplicationDetail = {
-      ...mockApplicationDetails,
-      competition: {
-        ...mockApplicationDetails.competition,
-        is_open: false,
-      },
-    };
-
     render(
       <InformationCard
         {...defaultProps}
-        applicationDetails={closedApplication}
+        applicationDetails={makeApplicationDetails({
+          competition: { is_open: false },
+        })}
       />,
     );
 
@@ -177,18 +180,12 @@ describe("InformationCard - Special instructions when Submitted", () => {
   });
 
   it("hides special instructions when competition is OPEN (is_open=true)", () => {
-    const openApplication: ApplicationDetail = {
-      ...mockApplicationDetails,
-      competition: {
-        ...mockApplicationDetails.competition,
-        is_open: true,
-      },
-    };
-
     render(
       <InformationCard
         {...defaultProps}
-        applicationDetails={openApplication}
+        applicationDetails={makeApplicationDetails({
+          competition: { is_open: true },
+        })}
       />,
     );
 
@@ -208,42 +205,39 @@ describe("InformationCard - Submit button", () => {
   };
 
   it("shows submit when is_open=true and not submitted", () => {
-    const openApplication: ApplicationDetail = {
-      ...mockApplicationDetails,
-      competition: { ...mockApplicationDetails.competition, is_open: true },
-    };
-
     render(
-      <InformationCard {...baseProps} applicationDetails={openApplication} />,
+      <InformationCard
+        {...baseProps}
+        applicationDetails={makeApplicationDetails({
+          competition: { is_open: true },
+        })}
+      />,
     );
 
     expect(screen.getByText("submit")).toBeInTheDocument();
   });
 
   it("hides submit when is_open=false", () => {
-    const closedApplication: ApplicationDetail = {
-      ...mockApplicationDetails,
-      competition: { ...mockApplicationDetails.competition, is_open: false },
-    };
-
     render(
-      <InformationCard {...baseProps} applicationDetails={closedApplication} />,
+      <InformationCard
+        {...baseProps}
+        applicationDetails={makeApplicationDetails({
+          competition: { is_open: false },
+        })}
+      />,
     );
 
     expect(screen.queryByText("submit")).not.toBeInTheDocument();
   });
 
   it("hides submit when applicationSubmitted=true", () => {
-    const openApplication: ApplicationDetail = {
-      ...mockApplicationDetails,
-      competition: { ...mockApplicationDetails.competition, is_open: true },
-    };
-
     render(
       <InformationCard
         {...baseProps}
         applicationSubmitted={true}
-        applicationDetails={openApplication}
+        applicationDetails={makeApplicationDetails({
+          competition: { is_open: true },
+        })}
       />,
     );
 
@@ -251,16 +245,13 @@ describe("InformationCard - Submit button", () => {
   });
 
   it("disables submit when submissionLoading=true", () => {
-    const openApplication: ApplicationDetail = {
-      ...mockApplicationDetails,
-      competition: { ...mockApplicationDetails.competition, is_open: true },
-    };
-
     render(
       <InformationCard
         {...baseProps}
         submissionLoading={true}
-        applicationDetails={openApplication}
+        applicationDetails={makeApplicationDetails({
+          competition: { is_open: true },
+        })}
       />,
     );
 
@@ -279,86 +270,64 @@ describe("InformationCard - Transfer ownership UI", () => {
     latestApplicationSubmission: mockApplicationSubmission,
   };
 
-  it("shows the transfer ownership button when the application has no organization AND the competition allows organizations", () => {
-    const noOrganizationOrgEligible: ApplicationDetail = {
-      ...mockApplicationDetails,
-      organization: null,
-      competition: {
-        ...mockApplicationDetails.competition,
-        open_to_applicants: ["organization"],
-      },
-    };
-
+  it("shows the transfer ownership button when: no org + competition allows orgs + application is editable (in_progress)", () => {
     render(
       <InformationCard
         {...baseProps}
-        applicationDetails={noOrganizationOrgEligible}
+        applicationDetails={makeApplicationDetails({
+          organization: null,
+          application_status: Status.IN_PROGRESS,
+          competition: { open_to_applicants: ["organization"] },
+        })}
       />,
     );
 
     expect(screen.getByTestId("transfer-ownership-open")).toBeInTheDocument();
   });
 
-it("does not show transfer ownership button when application is submitted", () => {
-  const submittedNoOrg: ApplicationDetail = {
-    ...mockApplicationDetails,
-    organization: null,
-    application_status: Status.SUBMITTED,
-    competition: {
-      ...mockApplicationDetails.competition,
-      open_to_applicants: ["organization"],
-    },
-  };
-
-  render(
-    <InformationCard
-      {...baseProps}
-      applicationDetails={submittedNoOrg}
-    />,
-  );
-
-  expect(
-    screen.queryByTestId("transfer-ownership-open"),
-  ).not.toBeInTheDocument();
-});
-
-it("does not show transfer ownership button when application is accepted", () => {
-  const acceptedNoOrg: ApplicationDetail = {
-    ...mockApplicationDetails,
-    organization: null,
-    application_status: Status.ACCEPTED,
-    competition: {
-      ...mockApplicationDetails.competition,
-      open_to_applicants: ["organization"],
-    },
-  };
-
-  render(
-    <InformationCard
-      {...baseProps}
-      applicationDetails={acceptedNoOrg}
-    />,
-  );
-
-  expect(
-    screen.queryByTestId("transfer-ownership-open"),
-  ).not.toBeInTheDocument();
-});
-
-  it("does not show the transfer ownership button when the application has no organization but the competition does NOT allow organizations", () => {
-    const noOrganizationOrgIneligible: ApplicationDetail = {
-      ...mockApplicationDetails,
-      organization: null,
-      competition: {
-        ...mockApplicationDetails.competition,
-        open_to_applicants: ["individual"],
-      },
-    };
-
+  it("does not show transfer ownership button when application is submitted", () => {
     render(
       <InformationCard
         {...baseProps}
-        applicationDetails={noOrganizationOrgIneligible}
+        applicationDetails={makeApplicationDetails({
+          organization: null,
+          application_status: Status.SUBMITTED,
+          competition: { open_to_applicants: ["organization"] },
+        })}
+      />,
+    );
+
+    expect(
+      screen.queryByTestId("transfer-ownership-open"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not show transfer ownership button when application is accepted", () => {
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={makeApplicationDetails({
+          organization: null,
+          application_status: Status.ACCEPTED,
+          competition: { open_to_applicants: ["organization"] },
+        })}
+      />,
+    );
+
+    expect(
+      screen.queryByTestId("transfer-ownership-open"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not show the transfer ownership button when the application has no organization but the competition does NOT allow organizations", () => {
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={makeApplicationDetails({
+          organization: null,
+          application_status: Status.IN_PROGRESS,
+          competition: { open_to_applicants: ["individual"] },
+        })}
       />,
     );
 
@@ -370,19 +339,14 @@ it("does not show transfer ownership button when application is accepted", () =>
   it("opens the transfer modal when clicking the transfer ownership button and closes it via onAfterClose", async () => {
     const user = userEvent.setup();
 
-    const noOrganizationOrgEligible: ApplicationDetail = {
-      ...mockApplicationDetails,
-      organization: null,
-      competition: {
-        ...mockApplicationDetails.competition,
-        open_to_applicants: ["organization"],
-      },
-    };
-
     render(
       <InformationCard
         {...baseProps}
-        applicationDetails={noOrganizationOrgEligible}
+        applicationDetails={makeApplicationDetails({
+          organization: null,
+          application_status: Status.IN_PROGRESS,
+          competition: { open_to_applicants: ["organization"] },
+        })}
       />,
     );
 
@@ -395,7 +359,6 @@ it("does not show transfer ownership button when application is accepted", () =>
     ).not.toBeInTheDocument();
   });
 });
-
 
 describe("InformationCard - Download submission button visibility and content", () => {
   const submissionButtonTestId = "application-submission-download";
@@ -411,15 +374,12 @@ describe("InformationCard - Download submission button visibility and content", 
   };
 
   it("shows the download submission button when status is accepted", () => {
-    const acceptedApplication = {
-      ...mockApplicationDetails,
-      application_status: Status.ACCEPTED,
-    };
-
     render(
       <InformationCard
         {...baseProps}
-        applicationDetails={acceptedApplication}
+        applicationDetails={makeApplicationDetails({
+          application_status: Status.ACCEPTED,
+        })}
       />,
     );
 
@@ -430,15 +390,12 @@ describe("InformationCard - Download submission button visibility and content", 
   });
 
   it("shows download processing message if in submitted status", () => {
-    const submittedApplication = {
-      ...mockApplicationDetails,
-      application_status: Status.SUBMITTED,
-    };
-
     render(
       <InformationCard
         {...baseProps}
-        applicationDetails={submittedApplication}
+        applicationDetails={makeApplicationDetails({
+          application_status: Status.SUBMITTED,
+        })}
       />,
     );
 
@@ -449,15 +406,12 @@ describe("InformationCard - Download submission button visibility and content", 
   });
 
   it("does not render download submission section if application is in in_progress status", () => {
-    const inProgressApplication = {
-      ...mockApplicationDetails,
-      application_status: Status.IN_PROGRESS,
-    };
-
     render(
       <InformationCard
         {...baseProps}
-        applicationDetails={inProgressApplication}
+        applicationDetails={makeApplicationDetails({
+          application_status: Status.IN_PROGRESS,
+        })}
       />,
     );
 
