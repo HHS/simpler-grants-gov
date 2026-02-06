@@ -65,7 +65,7 @@ const ApplicantDetails = ({
   hasOrganization: boolean;
   samGovEntity?: SamGovEntity;
   onOpenTransferModal: () => void;
-  canTransferOwnership: Boolean;
+  canTransferOwnership: boolean;
 }) => {
   const t = useTranslations("Application.information");
 

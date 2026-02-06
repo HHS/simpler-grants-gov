@@ -166,7 +166,7 @@ describe("InformationCard - Special instructions when Submitted", () => {
     latestApplicationSubmission: mockApplicationSubmission,
   };
 
-  it("shows special instructions when competition is CLOSED (is_open=false)", () => {
+  it("shows special instructions when competition is set to (is_open=false)", () => {
     render(
       <InformationCard
         {...defaultProps}
@@ -179,7 +179,7 @@ describe("InformationCard - Special instructions when Submitted", () => {
     expect(screen.getByText("specialInstructions")).toBeInTheDocument();
   });
 
-  it("hides special instructions when competition is OPEN (is_open=true)", () => {
+  it("hides special instructions when competition is set to (is_open=true)", () => {
     render(
       <InformationCard
         {...defaultProps}

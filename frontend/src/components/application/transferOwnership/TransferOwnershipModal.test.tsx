@@ -137,6 +137,8 @@ jest.mock("./TransferOwnershipOrganizationSelect", () => ({
  * Keep real components, override only ModalToggleButton to avoid coupling to modal internals in tests.
  */
 jest.mock("@trussworks/react-uswds", () => {
+  // ignoring this because it sets acutal to ANY, which triggers another linting error
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const actual = jest.requireActual("@trussworks/react-uswds") as Record<
     string,
     unknown
