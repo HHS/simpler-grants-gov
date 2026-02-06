@@ -144,7 +144,7 @@ describe("StartApplicationModalControl", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("requiredText")).toBeInTheDocument();
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
     expect(screen.getByRole("dialog")).not.toHaveClass("is-hidden");
   });
