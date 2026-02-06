@@ -4,6 +4,7 @@ import { axe } from "jest-axe";
 import {
   ApplicationDetail,
   ApplicationHistory,
+  ApplicationStatus,
 } from "src/types/applicationResponseTypes";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
@@ -127,7 +128,7 @@ describe("ApplicationContainer", () => {
     it("should pass applicationSubmitted=false when application status is 'in_progress'", () => {
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       render(
@@ -147,7 +148,7 @@ describe("ApplicationContainer", () => {
     it("should pass applicationSubmitted=true when application status is 'submitted'", () => {
       const submittedApplication = {
         ...mockApplicationDetails,
-        application_status: "submitted",
+        application_status: ApplicationStatus.SUBMITTED,
       };
 
       render(
@@ -167,7 +168,7 @@ describe("ApplicationContainer", () => {
     it("should pass applicationSubmitted=true when application status is 'accepted'", () => {
       const acceptedApplication = {
         ...mockApplicationDetails,
-        application_status: "accepted",
+        application_status: ApplicationStatus.ACCEPTED,
       };
 
       render(
@@ -189,7 +190,7 @@ describe("ApplicationContainer", () => {
     it("should have a history section", () => {
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       render(
@@ -212,7 +213,7 @@ describe("ApplicationContainer", () => {
       const user = userEvent.setup();
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -246,7 +247,7 @@ describe("ApplicationContainer", () => {
       const user = userEvent.setup();
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -279,7 +280,7 @@ describe("ApplicationContainer", () => {
       const user = userEvent.setup();
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -310,7 +311,7 @@ describe("ApplicationContainer", () => {
       const user = userEvent.setup();
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       // Create a promise that we can control
@@ -360,7 +361,7 @@ describe("ApplicationContainer", () => {
     it("should display the submission successful box", () => {
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "submitted",
+        application_status: ApplicationStatus.SUBMITTED,
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -388,7 +389,7 @@ describe("ApplicationContainer", () => {
     it("should not display the submission successful box when in progress", () => {
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({

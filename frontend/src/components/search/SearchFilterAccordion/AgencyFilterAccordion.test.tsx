@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
+import { identity } from "lodash";
 import {
   fakeAgencyResponseData,
   fakeSearchAPIResponse,
@@ -9,6 +10,10 @@ import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import { ReadonlyURLSearchParams } from "next/navigation";
 
 import { AgencyFilterAccordion } from "src/components/search/SearchFilterAccordion/AgencyFilterAccordion";
+
+jest.mock("next-intl/server", () => ({
+  getTranslations: () => identity,
+}));
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),

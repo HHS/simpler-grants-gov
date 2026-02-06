@@ -1,31 +1,9 @@
 import { render, screen } from "@testing-library/react";
 
-import React from "react";
-
+import { GeneralRecord } from "src/components/applyForm/types";
 import Budget424aSectionC from "src/components/applyForm/widgets/budget/Budget424aSectionC";
 
-type MoneyString = string;
-
-interface NonFederalResources {
-  applicant_amount?: MoneyString;
-  state_amount?: MoneyString;
-  other_amount?: MoneyString;
-  total_amount?: MoneyString;
-}
-
-interface ActivityItemValue {
-  activity_title?: string;
-  assistance_listing_number?: string;
-  budget_summary?: { total_amount?: MoneyString };
-  non_federal_resources?: NonFederalResources;
-}
-
-interface SectionCValue {
-  activity_line_items?: ActivityItemValue[];
-  total_non_federal_resources?: NonFederalResources;
-}
-
-const buildWidgetProps = (value: SectionCValue) => ({
+const buildWidgetProps = (value: GeneralRecord) => ({
   id: "section-c",
   schema: {},
   rawErrors: [],
@@ -35,7 +13,7 @@ const buildWidgetProps = (value: SectionCValue) => ({
 
 describe("Budget424aSectionC", () => {
   it("renders applicant/state/other totals and row totals", () => {
-    const value: SectionCValue = {
+    const value: GeneralRecord = {
       activity_line_items: [
         {
           activity_title: "Service A",

@@ -128,7 +128,7 @@ function SuccessContent({
   onClose,
   mode,
   keyName,
-  originalName,
+  originalName = "",
 }: {
   modalRef: RefObject<ModalRef | null>;
   modalId: string;
