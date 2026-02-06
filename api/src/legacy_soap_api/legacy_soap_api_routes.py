@@ -38,7 +38,7 @@ def simpler_soap_api_route(
     use_soap_jwt = request.headers.get("use-soap-jwt")
     if use_soap_jwt == "1":
         logger.info(
-            "soap_client_certificate: use_soap_jwt flag is enabled",
+            "soap_client_certificate: use-soap-jwt flag is enabled",
             extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_JWT},
         )
 
