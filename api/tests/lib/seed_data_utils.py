@@ -123,6 +123,13 @@ class UserBuilder:
 
         return self
 
+    def with_profile(self, first_name: str, last_name: str, middle_name: str | None = None) -> Self:
+        factories.UserProfileFactory.create(
+            user=self.user, first_name=first_name, middle_name=middle_name, last_name=last_name
+        )
+
+        return self
+
     def build(self) -> User:
         log_msg = f"Updating {self.scenario_name}:"
         if self.link_external_id:
