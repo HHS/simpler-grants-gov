@@ -2,12 +2,14 @@
 
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
+import { LOGIN_URL } from "src/constants/auth";
 import { ExternalRoutes } from "src/constants/routes";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { IndexType } from "src/types/generalTypes";
 import { TestUser } from "src/types/userTypes";
 import { isCurrentPath, isExternalLink } from "src/utils/generalUtils";
+import { storeCurrentPage } from "src/utils/userUtils";
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -22,10 +24,8 @@ import {
   Header as USWDSHeader,
 } from "@trussworks/react-uswds";
 
-import { LOGIN_URL } from "src/constants/auth";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
-import { storeCurrentPage } from "src/utils/userUtils";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { TestUserSelect } from "./TestUserSelect";
 import { SignOutNavLink, UserControl } from "./user/UserControl";

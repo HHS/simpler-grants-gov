@@ -107,10 +107,7 @@ export const SignOutNavLink = ({ onClick }: { onClick: () => void }) => {
   }, [logoutLocalUser, router, onClick]);
 
   return (
-    <Link
-      href="#"
-      onClick={(e) => e.preventDefault()}
-    >
+    <Link href="#" onClick={(e) => e.preventDefault()}>
       <div
         onClick={(e) => {
           e.preventDefault();
