@@ -241,6 +241,10 @@ class Privilege(StrEnum):
     MANAGE_INTERNAL_ROLES = "manage_internal_roles"
     MANAGE_COMPETITION = "manage_competition"
     READ_TEST_USER_TOKEN = "read_test_user_token"
+    VIEW_OPPORTUNITY = "view_opportunity"
+    CREATE_OPPORTUNITY = "create_opportunity"
+    UPDATE_OPPORTUNITY = "update_opportunity "
+    PUBLISH_OPPORTUNITY = "publish_opportunity"
 
 
 class RoleType(StrEnum):
