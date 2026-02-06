@@ -178,7 +178,7 @@ class TestSF424BXMLGeneration:
 
     def test_generate_sf424b_xml_matches_legacy_format(self):
         """Test that generated XML matches legacy Grants.gov XML format exactly."""
-        
+
         # Input data matching the legacy XML sample
         application_data = {
             "signature": "MH",
