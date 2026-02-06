@@ -486,6 +486,14 @@ button.usa-pagination__button.usa-button {
     left: 0;
     right: 0;
   }
+
+  // Match padding of non-dropdown nav links (Home, Search, Sign In) to dropdown items on mobile (12px)
+  @include at-media-max($theme-header-min-width) {
+    .usa-nav__primary-item > .usa-nav__link {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+  }
 }
 
 // revert to behavior before upgrade https://github.com/uswds/uswds/commit/2785b67e58ae19f161101f4859afff0e9664fbda
