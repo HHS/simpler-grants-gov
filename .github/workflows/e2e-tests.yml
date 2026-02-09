@@ -1,14 +1,29 @@
-name: Dynamic E2E Tests
+name: E2E Tests
 on:
-  push:
-    branches: ["e2e-staging"]
-
+  workflow_call:
+    inputs:
+      version:
+        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
+        required: true
+        type: string
+      target:
+        description: "application environment to run tests against"
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       version:
         description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
         required: true
         type: string
+      target:
+        description: "application environment to run tests against"
+        required: true
+        default: "local"
+        type: choice
+        options:
+          - local
+          - staging
 
 defaults:
   run:
@@ -21,7 +36,7 @@ env:
   NODE_OPTIONS: --dns-result-order=ipv4first
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: e2e-tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -40,7 +55,7 @@ jobs:
         with:
           ref: ${{ inputs.version }}
 
-      - name: Setup Node.js
+      - name: Install Node dependencies & Playwright
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -56,12 +71,13 @@ jobs:
           CI: true
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
-          PLAYWRIGHT_TARGET_ENV: "staging"
+          PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
           STAGING_TEST_USER_EMAIL: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           STAGING_TEST_USER_PASSWORD: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           STAGING_TEST_USER_MFA_KEY: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
 
         run: |
+          PLAYWRIGHT_TARGET_ENV != "local" || PLAYWRIGHT_TARGET_ENV != "local" && echo "invalid e2e test target provided" && exit 1
           npm run test:e2e
 
       - name: Debug logging on failure

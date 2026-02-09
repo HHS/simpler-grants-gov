@@ -1,0 +1,23 @@
+name: E2E Tests (Deployed)
+on:
+  push:
+    branches:
+      - "dschrashun/7973-e2e-ci-staging-refactor"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-tests-staging:
+    uses: ./.github/workflows/e2e-tests.yml
+    with:
+      version: ${{ inputs.version || github.ref }}
+      target: "staging"
+
