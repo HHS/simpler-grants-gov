@@ -12,6 +12,7 @@ const {
   NEXT_PUBLIC_BASE_URL,
   ENVIRONMENT = "dev",
   FEATURE_APPLY_FORM_PROTOTYPE_OFF,
+  FEATURE_OPPORTUNITIES_LIST_OFF,
   AUTH_LOGIN_URL,
   AUTH_EXPIRATION_TIME,
   API_JWT_PUBLIC_KEY,
@@ -22,6 +23,7 @@ const {
 
 export const envFeatureFlags = {
   applyFormPrototypeOff: FEATURE_APPLY_FORM_PROTOTYPE_OFF,
+  opportunitiesListOff: FEATURE_OPPORTUNITIES_LIST_OFF,
 };
 
 const legacyHost = (): string => {
