@@ -20,4 +20,5 @@ jobs:
     with:
       version: ${{ inputs.version || github.ref }}
       target: "staging"
+    secrets: inherit
 
