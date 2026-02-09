@@ -379,43 +379,15 @@ h6 {
   padding-bottom: calc(1rem + 3vw);
 }
 
-// truss adds usa-button classes and button elements in the pagination component
-// overriding button styles for pagination
-.usa-pagination__button,
-button.usa-pagination__button {
-  align-items: left;
-  background-color: color("mint-5") !important;
-  border-width: 0px;
-  color: color("gray-warm-90");
-  display: inline-flex;
-  justify-content: center;
-  text-decoration: none !important;
-  padding: units(1);
-  width: 100%;
-
-  &:hover,
-  &:focus,
-  &:active {
-    color: white;
-    background-color: color("mint-70");
-  }
-}
-
-.usa-pagination button.usa-button.usa-current,
-.usa-pagination .usa-button.usa-current {
-  color: white;
-  background-color: color("mint-40");
-
-  &:hover,
-  &:focus,
-  &:active {
-    background-color: color("mint-80");
-    color: white;
-  }
-}
-
+.usa-pagination button.usa-current,
 .usa-pagination .usa-current {
-  background-color: color("mint-60") !important;
+    color: color("mint-70");
+    &:hover,
+    &:focus,
+    &:active {
+      background-color: color("mint-80") !important;
+      color: white;
+  }
 }
 
 // we are implementing the uswds nav drop down at mobile widths, which is not ordinarily supported
