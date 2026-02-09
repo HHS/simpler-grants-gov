@@ -26,6 +26,7 @@ from src.api.healthcheck import healthcheck_blueprint
 from src.api.internal import internal_blueprint
 from src.api.local import local_blueprint
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
+from src.api.opportunities_grantor_v1 import opportunity_grantor_blueprint as opportunities_grantor_v1_blueprint
 from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema
@@ -167,6 +168,7 @@ def configure_app(app: APIFlask) -> None:
 def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(healthcheck_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
+    app.register_blueprint(opportunities_grantor_v1_blueprint)
     app.register_blueprint(extracts_v1_blueprint)
     app.register_blueprint(agencies_v1_blueprint)
     app.register_blueprint(organizations_v1_blueprint)
