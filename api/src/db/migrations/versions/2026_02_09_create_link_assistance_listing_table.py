@@ -1,8 +1,8 @@
 """Create & Link Assistance Listing table
 
-Revision ID: 290f5c9d7e0c
+Revision ID: 20990ede6fc3
 Revises: 1c069c3a6ccc
-Create Date: 2026-02-09 17:12:32.872937
+Create Date: 2026-02-09 20:56:31.568544
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "290f5c9d7e0c"
+revision = "20990ede6fc3"
 down_revision = "1c069c3a6ccc"
 branch_labels = None
 depends_on = None

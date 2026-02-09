@@ -338,7 +338,7 @@ class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):
     assistance_listing_record_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID, ForeignKey(AssistanceListing.assistance_listing_record_id), index=True
     )
-    assistance_listing: Mapped[AssistanceListing] = relationship(AssistanceListing)
+    assistance_listing: Mapped[AssistanceListing | None] = relationship(AssistanceListing)
 
 
 class LinkOpportunitySummaryFundingInstrument(ApiSchemaTable, TimestampMixin):
