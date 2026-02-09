@@ -17,7 +17,14 @@ def _transform_nested_field_names(
     transform_config_root: dict[str, Any],
     field_overrides: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    """Transform field names in a nested object based on transform rules."""
+    """Transform field names in a nested object based on transform rules.
+
+        Args:
+            data: Data dictionary to transform
+            transform_config_root: Root transform configuration
+            field_overrides: Optional dict mapping field names to override target names
+                            (e.g., {"other_amount": "BudgetOtherRequestedAmount"})
+        """
     if not isinstance(data, dict) or not transform_config_root:
         return data
 
@@ -40,8 +47,13 @@ def _transform_nested_field_names(
         if isinstance(field_config, dict):
             xml_transform = field_config.get("xml_transform", {})
             target_name = xml_transform.get("target")
+
+            # Check for field override (takes precedence over config target)
+            if field_overrides and field_name in field_overrides:
+                target_name = field_overrides[field_name]
+
             if target_name and xml_transform.get("type") != "attribute":
-                # Use transformed name
+                # Use transformed name (either from override or config)
                 result[target_name] = field_value
                 processed_fields.add(field_name)
                 continue
