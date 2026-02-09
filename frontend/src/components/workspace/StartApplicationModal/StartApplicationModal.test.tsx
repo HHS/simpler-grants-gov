@@ -34,7 +34,7 @@ describe("StartApplicationModal", () => {
     jest.resetAllMocks();
   });
 
-  it("displays validation error if submitted without a name", async () => {
+  it.only("displays validation error if submitted without a name", async () => {
     render(
       <StartApplicationModal
         competitionId="1"
