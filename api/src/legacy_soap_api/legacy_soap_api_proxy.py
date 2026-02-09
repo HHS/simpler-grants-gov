@@ -42,30 +42,22 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     )
 
     # Exclude header keys that are utilized only in simpler soap api. Not needed for proxy request.
-    proxy_headers = filter_headers(
-        soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
-    )
     soap_auth = soap_request.auth
-
     use_jwt_auth = soap_request.headers.get("use-jwt-auth") == "1"
-    if use_jwt_auth:
-        if soap_auth and soap_auth.certificate.legacy_certificate:
-            _request = get_soap_jwt_auth_request(
-                proxy_url, soap_request, config, soap_auth.certificate.legacy_certificate
+    if use_jwt_auth and soap_auth and soap_auth.certificate.legacy_certificate:
+        proxy_headers = {
+            "S2S_PARTNER_CERTID_JWT_B64": get_soap_jwt_auth_jwt(
+                config, soap_auth.certificate.legacy_certificate
             )
-            return _get_soap_response(_request, timeout=timeout)
-        else:
-            logger.info(
-                "soap_client_certificate: soap jwt auth certificate not found",
-                extra={"soap_api_event": LegacySoapApiEvent.NOT_CONFIGURED_CERT},
-            )
-            return get_soap_error_response(
-                faultstring="Client certificate not configured for Simpler SOAP jwt auth."
-            )
+        }
+    else:
+        proxy_headers = filter_headers(
+            soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
+        )
 
     _request = Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
 
-    if not soap_auth or config.soap_auth_map == {}:
+    if not soap_auth or config.soap_auth_map == {} or use_jwt_auth:
         logger.info(
             "soap_client_certificate: Sending soap request without client certificate",
             extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITHOUT_CERT},
@@ -132,12 +124,10 @@ def _get_soap_response(
     )
 
 
-def get_soap_jwt_auth_request(
-    proxy_url: str,
-    soap_request: SOAPRequest,
+def get_soap_jwt_auth_jwt(
     config: LegacySoapAPIConfig,
     legacy_certificate: LegacyCertificate,
-) -> Request:
+) -> str:
     expiration_time = utcnow() + timedelta(minutes=1)
     jwt_string = generate_soap_jwt(
         legacy_certificate.cert_id,
@@ -145,11 +135,8 @@ def get_soap_jwt_auth_request(
         config.soap_partner_gateway_uri,
         config.soap_partner_gateway_auth_key,
     )
-    proxy_headers = {
-        "S2S_PARTNER_CERTID_JWT_B64": base64.b64encode(jwt_string.encode("utf-8")).decode("utf-8")
-    }
     logger.info(
         "soap_client_certificate: created SOAP JWT",
         extra={"soap_api_event": LegacySoapApiEvent.JWT_CREATED},
     )
-    return Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
+    return base64.b64encode(jwt_string.encode("utf-8")).decode("utf-8")
