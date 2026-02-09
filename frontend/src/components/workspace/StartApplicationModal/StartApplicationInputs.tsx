@@ -44,9 +44,9 @@ export const StartApplicationOrganizationInput = ({
         id={"label-for-organization"}
         key={"label-for-organization"}
         htmlFor="application-organization"
-        className="font-sans-2xs text-bold"
+        className="font-sans-sm text-bold"
       >
-        {t("label")}
+        {t("label")} <span className="text-red">*</span>
       </Label>
       {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
 
@@ -106,10 +106,12 @@ export const StartApplicationNameInput = ({
         id={"label-for-name"}
         key={"label-for-name"}
         htmlFor="application-name"
-        className="font-sans-2xs"
+        className="font-sans-sm margin-top-3"
       >
-        <span className="text-bold">{t("label")}</span>
-        <div>{t("description")}</div>
+        <span className="text-bold">
+          {t("label")} <span className="text-red">*</span>
+        </span>
+        <div className="font-sans-2xs">{t("description")}</div>
       </Label>
       {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
 

@@ -75,13 +75,8 @@ export const StartApplicationModal = ({
     const isNotListedSelected =
       selectedOrganization === SPECIAL_VALUES.NOT_LISTED;
 
-    // Organization required unless:
-    // 1. Individual applicant type allowed AND nothing selected (legacy behavior)
-    // 2. User explicitly selected individual or not-listed
-    const skipOrgValidation =
-      applicantTypes.includes("individual") ||
-      isIndividualSelected ||
-      isNotListedSelected;
+    // Organization required unless user explicitly selected individual or not-listed
+    const skipOrgValidation = isIndividualSelected || isNotListedSelected;
 
     if (!skipOrgValidation && !selectedOrganization) {
       setOrgValidationError(t("fields.organizationSelect.validationError"));
@@ -89,7 +84,7 @@ export const StartApplicationModal = ({
     }
 
     return valid;
-  }, [token, savedApplicationName, applicantTypes, selectedOrganization, t]);
+  }, [token, savedApplicationName, selectedOrganization, t]);
 
   const handleSubmit = useCallback(() => {
     const valid = validateSubmission();
@@ -198,16 +193,16 @@ export const StartApplicationModal = ({
         organizations={organizations}
         applicantTypes={applicantTypes}
       />
+      <p className="font-sans-2xs text-base margin-top-1 margin-bottom-0">
+        {t("requiredText")}
+      </p>
       <p className="font-sans-sm text-bold" data-testid="opportunity-title">
         {t("applyingFor")} {opportunityTitle}
       </p>
       <hr className="margin-y-2 border-base-lighter" />
       <StartApplicationInfoBanner />
-      <FormGroup
-        error={!!(nameValidationError || orgValidationError || error)}
-        className="margin-top-1"
-      >
-        {applicantTypes.includes("organization") && (
+      {applicantTypes.includes("organization") && (
+        <FormGroup error={!!orgValidationError} className="margin-top-1">
           <StartApplicationOrganizationInput
             onOrganizationChange={onOrganizationChange}
             validationError={orgValidationError}
@@ -215,20 +210,21 @@ export const StartApplicationModal = ({
             selectedOrganization={selectedOrganization}
             applicantTypes={applicantTypes}
           />
-        )}
+        </FormGroup>
+      )}
+      <FormGroup error={!!nameValidationError} className="margin-top-1">
         <StartApplicationNameInput
           validationError={nameValidationError}
           onNameChange={onNameChange}
         />
-        {error && <ErrorMessage>{error}</ErrorMessage>}
       </FormGroup>
+      {error && <ErrorMessage>{error}</ErrorMessage>}
       <ModalFooter>
         <Button
           onClick={handleSubmit}
           type="button"
           data-testid="application-start-save"
           disabled={!!loading}
-          className="bg-success"
         >
           <USWDSIcon
             name="add"

@@ -58,14 +58,14 @@ export const StartApplicationDescription = ({
   if (applicantTypes.length === 2) {
     return (
       <div>
-        <p>{t("pilotIntro")}</p>
+        <p className="font-sans-sm">{t("pilotIntro")}</p>
       </div>
     );
   }
   // organization
   return (
     <div>
-      <p>{t("pilotIntro")}</p>
+      <p className="font-sans-sm">{t("pilotIntro")}</p>
     </div>
   );
 };

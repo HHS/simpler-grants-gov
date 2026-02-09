@@ -17,9 +17,12 @@ export const StartApplicationInfoBanner = () => {
       validation={true}
       data-testid="helpful-tips-banner"
     >
-      <ul className="usa-list margin-top-0">
-        <li>{t("bullet1")}</li>
-        <li>
+      <ul
+        className="usa-list margin-top-0 font-sans-2xs"
+        style={{ marginBottom: 0 }}
+      >
+        <li style={{ marginBottom: 0 }}>{t("bullet1")}</li>
+        <li style={{ marginBottom: 0 }}>
           {t.rich("bullet2", {
             applicationsPageLink: (chunk) => (
               <Link href="/applications" className="usa-link">
@@ -28,7 +31,7 @@ export const StartApplicationInfoBanner = () => {
             ),
           })}
         </li>
-        <li>{t("bullet3")}</li>
+        <li style={{ marginBottom: 0 }}>{t("bullet3")}</li>
       </ul>
     </Alert>
   );

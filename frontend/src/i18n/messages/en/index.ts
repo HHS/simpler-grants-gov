@@ -118,7 +118,7 @@ export const messages = {
       cancelButtonText: "Cancel",
       error: "Error starting the application. Please try again.",
       organizationLoadError:
-        "We couldn't load your organizations right now. Please try again. If the problem continues, contact product support, <telephone>1-800-518-4726</telephone> or <email>simpler@grants.gov</email>.",
+        "We couldn't load your organizations right now. Please try again.\n\nIf the problem continues, contact product support, <telephone>1-800-518-4726</telephone> or <email>simpler@grants.gov</email>.",
       login: "Sign in to work on the application",
       loggedOut:
         "You must be logged in to proceed. Please login and start your application again.",
@@ -130,7 +130,7 @@ export const messages = {
         bullet1:
           "You don't need to finish an application in one session, easily save and return to make changes.",
         bullet2:
-          "All draft and past applications can be accessed from your <applicationsPageLink>Applications page</applicationsPageLink>.",
+          "All draft and past applications can be accessed from your <applicationsPageLink>Applications</applicationsPageLink> page.",
         bullet3:
           "Only create a new application if you're applying for the first time or need to submit a separate application.",
       },
@@ -139,13 +139,14 @@ export const messages = {
       applyingFor: "Applying for: ",
       fields: {
         name: {
-          label: "Name this application *",
+          label: "Name this application",
           description:
             "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track (e.g. NAA Tech Tribes 2025). You can change this later.",
-          validationError: "Enter a filing name. You can change this later.",
+          validationError:
+            "Please enter a name to create an application, you may change this anytime.",
         },
         organizationSelect: {
-          label: "Who is applying? *",
+          label: "Who is applying?",
           default: "-Select-",
           asIndividual: "As an individual (myself)",
           notListed: "I don't see my organization listed",
