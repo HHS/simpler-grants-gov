@@ -38,6 +38,8 @@ from src.constants.lookup_constants import (
     ApplicantType,
     ApplicationAuditEvent,
     ApplicationStatus,
+    ApprovalResponseType,
+    ApprovalType,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -55,6 +57,7 @@ from src.constants.lookup_constants import (
     SamGovImportType,
     SamGovProcessingStatus,
     UserType,
+    WorkflowType,
 )
 from src.constants.static_role_values import (
     APPLICATION_CONTRIBUTOR,
@@ -65,6 +68,15 @@ from src.constants.static_role_values import (
 from src.db.models import agency_models
 from src.db.models.lookup.lookup_registry import LookupRegistry
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
+from src.db.models.workflow_models import (
+    Workflow,
+    WorkflowApplication,
+    WorkflowApplicationSubmission,
+    WorkflowApproval,
+    WorkflowAudit,
+    WorkflowEventHistory,
+    WorkflowOpportunity,
+)
 from src.util import file_util
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
@@ -3106,3 +3118,118 @@ class LegacyOrganizationCertificateFactory(BaseLegacyCertificateFactory):
 
     organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
     organization = factory.SubFactory(OrganizationFactory)
+
+
+class WorkflowFactory(BaseFactory):
+    class Meta:
+        model = Workflow
+
+    workflow_id = Generators.UuidObj
+    workflow_type_id = factory.fuzzy.FuzzyChoice([item.value for item in WorkflowType])
+    current_workflow_state = factory.Faker("sentence", nb_words=3)
+    is_active = True
+
+    class Params:
+        inactive = factory.Trait(is_active=False)
+        opportunity_publish_workflow = factory.Trait(
+            workflow_type_id=WorkflowType.OPPORTUNITY_PUBLISH.value,
+            current_workflow_state="Opportunity published",
+        )
+        application_submission_workflow = factory.Trait(
+            workflow_type_id=WorkflowType.APPLICATION_SUBMISSION.value,
+            current_workflow_state="Application submission received",
+        )
+        initial_prototype_workflow = factory.Trait(
+            workflow_type_id=WorkflowType.INITIAL_PROTOTYPE.value,
+            current_workflow_state="Initial prototype received",
+        )
+
+
+class WorkflowEventHistoryFactory(BaseFactory):
+    class Meta:
+        model = WorkflowEventHistory
+
+    event_id = Generators.UuidObj
+    event_data = factory.LazyFunction(
+        lambda: {"event_type": "state_change", "details": "Sample event data"}
+    )
+    sent_at = factory.LazyFunction(datetime.now)
+    is_successfully_processed = True
+
+    class Params:
+        failed_processing = factory.Trait(is_successfully_processed=False)
+        no_workflow = factory.Trait(workflow=None, workflow_id=None)
+
+
+class WorkflowAuditFactory(BaseFactory):
+    class Meta:
+        model = WorkflowAudit
+
+    workflow_audit_id = Generators.UuidObj
+    acting_user = factory.SubFactory(UserFactory)
+    acting_user_id = factory.LazyAttribute(lambda o: o.acting_user.user_id)
+    transition_event = factory.Faker("sentence", nb_words=3)
+    source_state = factory.Faker("source state")
+    target_state = factory.Faker("target state")
+    audit_metadata = factory.LazyFunction(
+        lambda: {"reason": "Sample audit reason", "details": "Sample audit details"}
+    )
+
+
+class WorkflowApprovalFactory(BaseFactory):
+    class Meta:
+        model = WorkflowApproval
+
+    workflow_approval_id = Generators.UuidObj
+    approving_user = factory.SubFactory(UserFactory)
+    approving_user_id = factory.LazyAttribute(lambda o: o.approving_user.user_id)
+    approval_type_id = factory.fuzzy.FuzzyChoice([item.value for item in ApprovalType])
+    is_still_valid = True
+    approval_response_type_id = factory.fuzzy.FuzzyChoice(
+        [item.value for item in ApprovalResponseType]
+    )
+
+    class Params:
+        approved = factory.Trait(approval_response_type_id=ApprovalResponseType.APPROVED.value)
+        declined = factory.Trait(approval_response_type_id=ApprovalResponseType.DECLINED.value)
+        requires_modification = factory.Trait(
+            approval_response_type_id=ApprovalResponseType.REQUIRES_MODIFICATION.value
+        )
+        invalid = factory.Trait(
+            is_still_valid=False
+        )  # case where a workflow gets kicked back to an earlier state, and requires re-approvals
+
+
+class WorkflowOpportunityFactory(BaseFactory):
+    class Meta:
+        model = WorkflowOpportunity
+
+    workflow_opportunity_id = Generators.UuidObj
+    workflow = factory.SubFactory(WorkflowFactory, opportunity_publish_workflow=True)
+    workflow_id = factory.LazyAttribute(lambda o: o.workflow.workflow_id)
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+
+class WorkflowApplicationFactory(BaseFactory):
+    class Meta:
+        model = WorkflowApplication
+
+    workflow_application_id = Generators.UuidObj
+    workflow = factory.SubFactory(WorkflowFactory, application_submission_workflow=True)
+    workflow_id = factory.LazyAttribute(lambda o: o.workflow.workflow_id)
+    application = factory.SubFactory(ApplicationFactory)
+    application_id = factory.LazyAttribute(lambda o: o.application.application_id)
+
+
+class WorkflowApplicationSubmissionFactory(BaseFactory):
+    class Meta:
+        model = WorkflowApplicationSubmission
+
+    workflow_application_submission_id = Generators.UuidObj
+    workflow = factory.SubFactory(WorkflowFactory, application_submission_workflow=True)
+    workflow_id = factory.LazyAttribute(lambda o: o.workflow.workflow_id)
+    application_submission = factory.SubFactory(ApplicationSubmissionFactory)
+    application_submission_id = factory.LazyAttribute(
+        lambda o: o.application_submission.application_submission_id
+    )
