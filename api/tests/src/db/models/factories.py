@@ -492,6 +492,19 @@ class OpportunityVersionFactory(BaseFactory):
     opportunity_data = factory.LazyAttribute(lambda o: SCHEMA.dump(o.opportunity))
 
 
+class ReferencedOpportunityFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.ReferencedOpportunity
+
+    referenced_opportunity_id = Generators.UuidObj
+
+    original_opportunity = factory.SubFactory(OpportunityFactory)
+    original_opportunity_id = factory.LazyAttribute(lambda a: a.original_opportunity.opportunity_id)
+
+    derived_opportunity = factory.SubFactory(OpportunityFactory)
+    derived_opportunity_id = factory.LazyAttribute(lambda a: a.derived_opportunity.opportunity_id)
+
+
 class OpportunitySummaryFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunitySummary
@@ -2112,17 +2125,6 @@ class TfundinstrFactory(BaseFactory):
     last_upd_id = factory.Faker("first_name")
 
 
-class VOpportunitySummaryFactory(BaseFactory):
-    class Meta:
-        abstract = True
-
-    opportunity_id = factory.Sequence(lambda n: n)
-    is_draft = True
-    fo_last_upd_dt = factory.Faker("date_time_between", start_date="-5y", end_date="-5y")
-    omb_review_status_date = factory.Faker("date_time_between", start_date="-5y", end_date="-5y")
-    omb_review_status_display: None
-
-
 ####################################
 # Staging Table Factories
 ####################################
@@ -2583,13 +2585,6 @@ class ForeignTsynopsisAttachmentFactory(TsynopsisAttachmentFactory):
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
 
-class ForeignVopportunitySummaryFactory(VOpportunitySummaryFactory):
-    class Meta:
-        model = foreign.opportunity.VOpportunitySummary
-
-    opportunity_id = factory.Sequence(lambda n: n)
-
-
 class ForeignTcertificatesFactory(BaseFactory):
     class Meta:
         model = foreign.certificates.Tcertificates
@@ -2857,6 +2852,8 @@ class StagingTinstructionsFactory(AbstractStagingFactory):
     last_update = factory.Faker("date_between", start_date="-1y", end_date="today")
     created_date = factory.Faker("date_time_between", start_date="-2y", end_date="-1y")
 
+    instructions = factory.LazyFunction(lambda: fake.sentence(25).encode())
+
 
 class StagingTcertificatesFactory(AbstractStagingFactory):
     class Meta:
@@ -3081,16 +3078,6 @@ class SuppressedEmailFactory(BaseFactory):
     last_update_time = factory.Faker(
         "date_time_between", start_date="-1y", end_date="now", tzinfo=timezone.utc
     )
-
-
-class ExcludedOpportunityReviewFactory(BaseFactory):
-    class Meta:
-        model = opportunity_models.ExcludedOpportunityReview
-
-    legacy_opportunity_id = factory.Sequence(lambda n: n)
-    omb_review_status_display = factory.Faker("random_element", elements=["RETURNED", "REVIEWABLE"])
-    omb_review_status_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
-    last_update_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
 
 
 class BaseLegacyCertificateFactory(BaseFactory):

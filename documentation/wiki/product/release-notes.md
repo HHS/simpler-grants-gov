@@ -1,5 +1,101 @@
 # Release Notes
 
+## [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - February 4, 2026
+
+February 4th’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.02.04-1): &#x20;
+
+{% columns %}
+{% column width="25%" %}
+#### Announcement
+{% endcolumn %}
+
+{% column width="75%" %}
+### [Simpler.Grants.Gov](http://simpler.grants.gov) hosted a public demonstration
+
+The [Simpler.Grants.gov](http://simpler.grants.gov) team hosted a public demonstration of our newest features and functionality with the [Council on Federal Financial Assistance (COFFA)](https://www.coffa.gov/) and the Department of Health and Human Services (HHS). This virtual session highlighted our progress, shared user research insights, and showcased community engagement efforts.
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+#### Announcement
+{% endcolumn %}
+
+{% column width="75%" %}
+### The [Simpler.Grants.gov Roadmap](https://simpler.grants.gov/roadmap) has been updated
+
+The team updated the roadmap content to reflect updated goals and recent accomplishments to date. [Check out the updated roadmap](https://simpler.grants.gov/roadmap) to see what we’re working on, what we’ve delivered, and more.
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+#### New Feature
+{% endcolumn %}
+
+{% column width="75%" %}
+### Filtering Search Results by Posted Date
+
+In response to a highly requested feature, users may now filter their search queries by Posted Date. Users may now search and click ‘Filter’ to reveal an accordion drop-down menu that can filter funding opportunities within a posted date of 3, 7, 14, 30, or 60 days.
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+#### New Feature
+{% endcolumn %}
+
+{% column width="75%" %}
+### Submitted applications are available to download from application page
+
+Users can now download their submitted application from the application page. This enables applicants to retain their submitted applications offline and provides transparency into what is sent to grantor agencies.
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+#### Improvement
+{% endcolumn %}
+
+{% column width="75%" %}
+### Primary EBIZ POC Role Protections&#x20;
+
+The team has made sure that users cannot be removed from an organization if they are also the EBIZ POC for that organization by disabling the ‘Remove’ button. This will ensure that organizations do not lose access to the EBIZ POC administrative functions required to use and access Simpler Grants. If your EBIZ POC changes in [Sam.gov](https://sam.gov/), that will automatically be reflected in [Simpler.Grants.gov](http://simpler.grants.gov).
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+#### Improvement
+{% endcolumn %}
+
+{% column width="75%" %}
+### Updated logic after applications are submitted&#x20;
+
+The team has improved the view of submitted applications so selections cannot be altered after application is complete and submitted.
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+#### Improvement
+{% endcolumn %}
+
+{% column width="75%" %}
+### Simplified URL structures for applications
+
+The team has updated all application and form pages to point to new routes defined by new information architecture. For example, the previous URL of&#x20;
+
+> _simpler.grants.gov/workspace/applications/application/\[applicationId]_&#x20;
+
+will now be&#x20;
+
+> _simpler.grants.gov/applications/\[applicationId]._&#x20;
+
+All previous URL routes will automatically redirect to the new routes.
+{% endcolumn %}
+{% endcolumns %}
+
 ## [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - December 23, 2025
 
 December 23rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2025.12.23-1): &#x20;

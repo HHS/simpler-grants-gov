@@ -17,7 +17,6 @@ __all__ = [
     "SOAPOperationNotSupported",
     "SOAPInvalidEnvelope",
     "SOAPInvalidRequestOperationName",
-    "SOAPRequest",
     "BaseSOAPSchema",
     "FaultMessage",
     "SOAPResponse",

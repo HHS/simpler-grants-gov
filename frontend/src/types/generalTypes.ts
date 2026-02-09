@@ -1,5 +1,8 @@
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 
+export const iso8601Date =
+  /^\d{4}(-\d\d(-\d\d(T\d\d:\d\d(:\d\d)?(\.\d+)?(([+-]\d\d:\d\d)|Z)?)?)?)?$/;
+
 export type RegexMatchedString<Pattern extends RegExp> = string & {
   __regexPattern: Pattern;
 };

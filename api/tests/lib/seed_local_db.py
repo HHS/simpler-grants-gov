@@ -12,7 +12,7 @@ import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.constants.lookup_constants import CompetitionOpenToApplicant
-from src.db.models.competition_models import Competition, Form, FormInstruction
+from src.db.models.competition_models import Competition, CompetitionForm, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms import get_active_forms
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
@@ -21,6 +21,13 @@ from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_data_utils import CompetitionContainer
 from tests.lib.seed_e2e import _build_users_and_tokens
 from tests.lib.seed_orgs_and_users import _build_organizations_and_users, seed_internal_admin
+
+
+def fetch_competition(db_session, competition_id):
+    return db_session.scalar(
+        select(Competition).where(Competition.competition_id == competition_id)
+    )
+
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +75,16 @@ def _build_opportunities(
         factories.OpportunityFactory.create_batch(
             size=2, agency_code="ARCHIVED", is_archived_non_forecast_summary=True
         )
+
+        # hardcoded id for e2e usage
+        # Check if it already exists before creating to allow running seed multiple times
+        e2e_opportunity_id = uuid.UUID("6a483cd8-9169-418a-8dfb-60fa6e6f51e5")
+        existing_e2e_opportunity = db_session.get(Opportunity, e2e_opportunity_id)
+
+        if not existing_e2e_opportunity:
+            factories.OpportunityFactory.create(
+                has_long_descriptions=True, opportunity_id=e2e_opportunity_id
+            )
 
         # generate a few opportunities with mostly null values
         all_null_opportunities = factories.OpportunityFactory.create_batch(
@@ -299,11 +316,115 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
     return competition
 
 
+# Build custom competitions 8037 for testing 7953
+def does_competition_form_exist(db_session, competition_id, form_id):
+    return (
+        db_session.scalar(
+            select(CompetitionForm).where(
+                CompetitionForm.competition_id == competition_id,
+                CompetitionForm.form_id == form_id,
+            )
+        )
+        is not None
+    )
+
+
+def does_opportunity_exist(db_session: db.Session, opportunity_id: uuid.UUID) -> bool:
+    opportunity = db_session.get(Opportunity, opportunity_id)
+    return opportunity is not None
+
+
+def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
+    logger.info(
+        "Creating custom test opportunities and competitions for Apply Happy Path scenarios"
+    )
+    # Static UUIDs for each opportunity and competition
+    uuid_map = {
+        "TEST-APPLY-ORG-IND-ON01": uuid.UUID("f7a1c2b3-4d5e-6789-8abc-1234567890ab"),
+        "TEST-APPLY-ORG-IND-CT01": uuid.UUID("a2b3c4d5-6e7f-8901-9bcd-2345678901bc"),
+        "TEST-APPLY-ORG-ON01": uuid.UUID("b3c4d5e6-7f80-9012-abcd-3456789012cd"),
+        "TEST-APPLY-ORG-CT01": uuid.UUID("c4d5e6f7-8091-0123-bcde-4567890123de"),
+        "TEST-APPLY-IND-ON01": uuid.UUID("d5e6f7a8-0912-1234-cdef-5678901234ef"),
+        "TEST-APPLY-IND-CT01": uuid.UUID("e6f7a8b9-1023-2345-def0-6789012345f0"),
+    }
+
+    db_session = factories._db_session
+
+    both_competition = fetch_competition(db_session, uuid_map["TEST-APPLY-ORG-IND-CT01"])
+    if not both_competition:
+        both_competition = factories.CompetitionFactory.create(
+            competition_id=uuid_map["TEST-APPLY-ORG-IND-CT01"],
+            opportunity__opportunity_id=uuid_map["TEST-APPLY-ORG-IND-ON01"],
+            opportunity__opportunity_title="TEST-APPLY-ORG-IND-OT01",
+            opportunity__opportunity_number="TEST-APPLY-ORG-IND-ON01",
+            competition_title="TEST-APPLY-ORG-IND-CT01",
+            competition_forms=[],
+            open_to_applicants=[
+                CompetitionOpenToApplicant.ORGANIZATION,
+                CompetitionOpenToApplicant.INDIVIDUAL,
+            ],
+            with_instruction=True,
+        )
+
+    org_competition = fetch_competition(db_session, uuid_map["TEST-APPLY-ORG-CT01"])
+    if not org_competition:
+        org_competition = factories.CompetitionFactory.create(
+            competition_id=uuid_map["TEST-APPLY-ORG-CT01"],
+            opportunity__opportunity_id=uuid_map["TEST-APPLY-ORG-ON01"],
+            opportunity__opportunity_title="TEST-APPLY-ORG-OT01",
+            opportunity__opportunity_number="TEST-APPLY-ORG-ON01",
+            competition_title="TEST-APPLY-ORG-CT01",
+            competition_forms=[],
+            open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
+            with_instruction=True,
+        )
+
+    ind_competition = fetch_competition(db_session, uuid_map["TEST-APPLY-IND-CT01"])
+    if not ind_competition:
+        ind_competition = factories.CompetitionFactory.create(
+            competition_id=uuid_map["TEST-APPLY-IND-CT01"],
+            opportunity__opportunity_id=uuid_map["TEST-APPLY-IND-ON01"],
+            opportunity__opportunity_title="TEST-APPLY-IND-OT01",
+            opportunity__opportunity_number="TEST-APPLY-IND-ON01",
+            competition_title="TEST-APPLY-IND-CT01",
+            competition_forms=[],
+            open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+            with_instruction=True,
+        )
+
+    # Add forms to each competition
+    for competition, opp_num, comp_title in [
+        (both_competition, "TEST-APPLY-ORG-IND-ON01", "TEST-APPLY-ORG-IND-CT01"),
+        (org_competition, "TEST-APPLY-ORG-ON01", "TEST-APPLY-ORG-CT01"),
+        (ind_competition, "TEST-APPLY-IND-ON01", "TEST-APPLY-IND-CT01"),
+    ]:
+        # SF424B
+        sf424b_form = forms["SF424B"]
+        if not does_competition_form_exist(
+            db_session, competition.competition_id, sf424b_form.form_id
+        ):
+            factories.CompetitionFormFactory.create(
+                competition=competition, form=sf424b_form, is_required=True
+            )
+        # SFLLL_2_0
+        sflll_form = forms["SFLLL_2_0"]
+        if not does_competition_form_exist(
+            db_session, competition.competition_id, sflll_form.form_id
+        ):
+            factories.CompetitionFormFactory.create(
+                competition=competition, form=sflll_form, is_required=False
+            )
+        logger.info(
+            f"Created Apply Happy Path competition '{comp_title}' for opportunity '{opp_num}' - http://localhost:3000/opportunity/{competition.opportunity_id}"
+        )
+
+
 def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> CompetitionContainer:
     logger.info("Creating competitions")
     _build_pilot_competition(forms_map)
     _build_individual_only_competition(forms_map)
     _build_organization_only_competition(forms_map)
+    _build_custom_test_competitions(forms_map)
 
     forms = list(forms_map.values())
 
