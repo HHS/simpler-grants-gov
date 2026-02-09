@@ -57,7 +57,6 @@ from src.constants.lookup_constants import (
     SamGovImportType,
     SamGovProcessingStatus,
     UserType,
-    WorkflowType,
 )
 from src.constants.static_role_values import (
     APPLICATION_CONTRIBUTOR,
@@ -3125,22 +3124,22 @@ class WorkflowFactory(BaseFactory):
         model = Workflow
 
     workflow_id = Generators.UuidObj
-    workflow_type_id = factory.fuzzy.FuzzyChoice([item.value for item in WorkflowType])
+    workflow_type_id = factory.fuzzy.FuzzyInteger(1, 3)  # pick a random type
     current_workflow_state = factory.Faker("sentence", nb_words=3)
     is_active = True
 
     class Params:
         inactive = factory.Trait(is_active=False)
         opportunity_publish_workflow = factory.Trait(
-            workflow_type_id=WorkflowType.OPPORTUNITY_PUBLISH.value,
+            workflow_type_id=1,  # opportunity publish workflow
             current_workflow_state="Opportunity published",
         )
         application_submission_workflow = factory.Trait(
-            workflow_type_id=WorkflowType.APPLICATION_SUBMISSION.value,
+            workflow_type_id=2,  # application submission workflow
             current_workflow_state="Application submission received",
         )
         initial_prototype_workflow = factory.Trait(
-            workflow_type_id=WorkflowType.INITIAL_PROTOTYPE.value,
+            workflow_type_id=3,  # initial prototype workflow
             current_workflow_state="Initial prototype received",
         )
 
@@ -3190,10 +3189,10 @@ class WorkflowApprovalFactory(BaseFactory):
     )
 
     class Params:
-        approved = factory.Trait(approval_response_type_id=ApprovalResponseType.APPROVED.value)
-        declined = factory.Trait(approval_response_type_id=ApprovalResponseType.DECLINED.value)
+        approved = factory.Trait(approval_response_type_id=1)  # approved case
+        declined = factory.Trait(approval_response_type_id=2)  # declined case
         requires_modification = factory.Trait(
-            approval_response_type_id=ApprovalResponseType.REQUIRES_MODIFICATION.value
+            approval_response_type_id=3  # requires modification case
         )
         invalid = factory.Trait(
             is_still_valid=False

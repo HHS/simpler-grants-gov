@@ -1,4 +1,4 @@
-from enum import IntEnum, StrEnum
+from enum import StrEnum
 
 
 class OpportunityStatus(StrEnum):
@@ -303,20 +303,20 @@ class OrganizationAuditEvent(StrEnum):
     USER_REMOVED = "user_removed"
 
 
-class WorkflowType(IntEnum):
-    OPPORTUNITY_PUBLISH = 1
-    APPLICATION_SUBMISSION = 2
-    INITIAL_PROTOTYPE = 3
+class WorkflowType(StrEnum):
+    OPPORTUNITY_PUBLISH = "opportunity_publish"
+    APPLICATION_SUBMISSION = "application_submission"
+    INITIAL_PROTOTYPE = "initial_prototype"
 
 
-class ApprovalType(IntEnum):
-    INITIAL_PROTOTYPE_APPROVAL = 1
+class ApprovalType(StrEnum):
+    INITIAL_PROTOTYPE_APPROVAL = "initial_prototype_approval"
 
 
-class ApprovalResponseType(IntEnum):
-    APPROVED = 1
-    DECLINED = 2
-    REQUIRES_MODIFICATION = 3
+class ApprovalResponseType(StrEnum):
+    APPROVED = "approved"
+    DECLINED = "declined"
+    REQUIRES_MODIFICATION = "requires_modification"
 
 
 class WorkflowEntityType(StrEnum):
