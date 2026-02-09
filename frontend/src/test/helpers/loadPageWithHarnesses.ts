@@ -1,7 +1,9 @@
-import type { JSX } from "react";
+import {
+  loadIsolatedPageModule,
+  type Harness,
+} from "src/test/harness/loadIsolatedPageModule";
 
-import type { Harness } from "src/test/harness/loadIsolatedPageModule";
-import { loadIsolatedPageModule } from "src/test/harness/loadIsolatedPageModule";
+import type { JSX } from "react";
 
 export type DefaultPageModule<Params> = {
   default: (args: { params: Promise<Params> }) => Promise<JSX.Element>;
@@ -18,7 +20,7 @@ export type LoadPageWithHarnessesResult<PageModule> = {
  *
  * Most pages only export `default`.
  * If a page exports additional members (e.g. `generateMetadata`),
- * 
+ *
  * callers can provide a `PageModule` type that includes those exports.
  */
 export function loadPageWithHarnesses<
