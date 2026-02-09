@@ -55,6 +55,13 @@ jobs:
         with:
           ref: ${{ inputs.version }}
 
+      - name: Validate environment
+        env:
+          PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        run: |
+          echo $PLAYWRIGHT_TARGET_ENV
+          if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" ]]; then echo "invalid e2e test target provided" && exit 1; fi
+
       - name: Install Node dependencies & Playwright
         uses: actions/setup-node@v4
         with:
@@ -77,7 +84,7 @@ jobs:
           STAGING_TEST_USER_MFA_KEY: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
 
         run: |
-          PLAYWRIGHT_TARGET_ENV != "local" || PLAYWRIGHT_TARGET_ENV != "local" && echo "invalid e2e test target provided" && exit 1
+          echo $STAGING_TEST_USER_EMAIL
           npm run test:e2e
 
       - name: Debug logging on failure
