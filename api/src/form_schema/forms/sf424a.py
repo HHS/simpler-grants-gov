@@ -1077,12 +1077,15 @@ FORM_XML_TRANSFORM_RULES = {
     # Must be LAST per XSD sequence order
     "other_information": {
         "xml_transform": {
+            "type": "conditional",
             "target": "OtherInformation",
+            "conditional_transform": {
             "type": "compose_object",
             "field_mapping": {
                 "OtherDirectChargesExplanation": "direct_charges_explanation",
                 "OtherIndirectChargesExplanation": "indirect_charges_explanation",
-                "Remarks": "remarks",
+                "Remarks": "remarks"
+                }
             },
         },
     },
