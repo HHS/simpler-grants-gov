@@ -2,6 +2,7 @@
 resource "aws_sqs_queue" "dead_letter" {
   name                      = "${var.name}_dlq"
   message_retention_seconds = var.message_retention_seconds
+  sqs_managed_sse_enabled   = true
 }
 
 # Main queue with dead letter queue redrive policy
@@ -9,6 +10,7 @@ resource "aws_sqs_queue" "main" {
   name                       = var.name
   visibility_timeout_seconds = var.visibility_timeout_seconds
   message_retention_seconds  = var.message_retention_seconds
+  sqs_managed_sse_enabled    = true
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dead_letter.arn
