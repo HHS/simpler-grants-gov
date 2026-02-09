@@ -1,10 +1,12 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, ForeignKey, Text
+from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
+from src.constants.lookup_constants import ApprovalResponseType, ApprovalType, WorkflowType
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.competition_models import Application, ApplicationSubmission
 from src.db.models.lookup_models import LkApprovalResponseType, LkApprovalType, LkWorkflowType
@@ -28,18 +30,15 @@ class Workflow(ApiSchemaTable, TimestampMixin):
 
     workflow_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
-    workflow_type_id: Mapped[int] = mapped_column(
-        ForeignKey(LkWorkflowType.workflow_type_id), nullable=False
-    )
-    workflow_type: Mapped[LkWorkflowType] = relationship(
-        LkWorkflowType,
-        primaryjoin="Workflow.workflow_type_id == LkWorkflowType.workflow_type_id",
-        foreign_keys=[workflow_type_id],
+    workflow_type: Mapped[WorkflowType] = mapped_column(
+        "workflow_type_id",
+        LookupColumn(LkWorkflowType),
+        ForeignKey(LkWorkflowType.workflow_type_id),
     )
 
-    current_workflow_state: Mapped[str] = mapped_column(Text, nullable=False)
+    current_workflow_state: Mapped[str]
 
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_active: Mapped[bool]
 
     workflow_event_history: Mapped[list[WorkflowEventHistory]] = relationship(
         back_populates="workflow", uselist=True, cascade="all, delete-orphan"
@@ -82,18 +81,16 @@ class WorkflowEventHistory(ApiSchemaTable, TimestampMixin):
 
     event_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
-    workflow_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID, ForeignKey(Workflow.workflow_id), nullable=True
-    )
+    workflow_id: Mapped[uuid.UUID | None] = mapped_column(UUID, ForeignKey(Workflow.workflow_id))
     workflow: Mapped[Workflow | None] = relationship(
         Workflow, back_populates="workflow_event_history"
     )
 
-    event_data: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    event_data: Mapped[dict] = mapped_column(JSONB)
 
-    sent_at: Mapped[datetime] = mapped_column(nullable=False)
+    sent_at: Mapped[datetime]
 
-    is_successfully_processed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_successfully_processed: Mapped[bool]
 
 
 class WorkflowAudit(ApiSchemaTable, TimestampMixin):
@@ -122,26 +119,18 @@ class WorkflowAudit(ApiSchemaTable, TimestampMixin):
         Workflow, back_populates="workflow_audit", single_parent=True
     )
 
-    acting_user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(User.user_id), nullable=False
-    )
-    acting_user: Mapped[User] = relationship(
-        User,
-        primaryjoin="WorkflowAudit.acting_user_id == User.user_id",
-        foreign_keys=[acting_user_id],
-    )
+    acting_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
+    acting_user: Mapped[User] = relationship(User)
 
-    transition_event: Mapped[str] = mapped_column(Text, nullable=False)
+    transition_event: Mapped[str]
 
-    source_state: Mapped[str] = mapped_column(Text, nullable=False)
+    source_state: Mapped[str]
 
-    target_state: Mapped[str] = mapped_column(Text, nullable=False)
+    target_state: Mapped[str]
 
-    event_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(WorkflowEventHistory.event_id), nullable=False
-    )
+    event_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(WorkflowEventHistory.event_id))
 
-    audit_metadata: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    audit_metadata: Mapped[dict | None] = mapped_column(JSONB)
 
 
 class WorkflowApproval(ApiSchemaTable, TimestampMixin):
@@ -167,42 +156,30 @@ class WorkflowApproval(ApiSchemaTable, TimestampMixin):
     workflow_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Workflow.workflow_id), nullable=False
     )
-    workflow: Mapped[Workflow] = relationship(
-        Workflow, back_populates="workflow_approval", single_parent=True
+    workflow: Mapped[Workflow] = relationship(Workflow)
+
+    approving_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
+    approving_user: Mapped[User] = relationship(User)
+
+    approval_type: Mapped[ApprovalType] = mapped_column(
+        "approval_type_id",
+        LookupColumn(LkApprovalType),
+        ForeignKey(LkApprovalType.approval_type_id),
+        index=True,
     )
 
-    approving_user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(User.user_id), nullable=False
-    )
-    approving_user: Mapped[User] = relationship(
-        User,
-        primaryjoin="WorkflowApproval.approving_user_id == User.user_id",
-        foreign_keys=[approving_user_id],
-    )
-
-    approval_type_id: Mapped[int] = mapped_column(
-        ForeignKey(LkApprovalType.approval_type_id), nullable=False
-    )
-    approval_type: Mapped[LkApprovalType] = relationship(
-        LkApprovalType,
-        primaryjoin="WorkflowApproval.approval_type_id == LkApprovalType.approval_type_id",
-        foreign_keys=[approval_type_id],
-    )
-
-    event_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(WorkflowEventHistory.event_id), nullable=False
-    )
+    event_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(WorkflowEventHistory.event_id))
     event: Mapped[WorkflowEventHistory] = relationship(WorkflowEventHistory)
 
-    is_still_valid: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_still_valid: Mapped[bool]
 
-    approval_response_type_id: Mapped[int] = mapped_column(
-        ForeignKey(LkApprovalResponseType.approval_response_type_id), nullable=False
-    )
-    approval_response_type: Mapped[LkApprovalResponseType] = relationship(
-        LkApprovalResponseType,
-        primaryjoin="WorkflowApproval.approval_response_type_id == LkApprovalResponseType.approval_response_type_id",
-        foreign_keys=[approval_response_type_id],
+    comment: Mapped[str | None]
+
+    approval_response_type: Mapped[ApprovalResponseType] = mapped_column(
+        "approval_response_type_id",
+        LookupColumn(LkApprovalResponseType),
+        ForeignKey(LkApprovalResponseType.approval_response_type_id),
+        index=True,
     )
 
 
@@ -228,6 +205,7 @@ class WorkflowOpportunity(ApiSchemaTable, TimestampMixin):
     )
 
     opportunity_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Opportunity.opportunity_id))
+    opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
 
 class WorkflowApplication(ApiSchemaTable, TimestampMixin):
@@ -252,6 +230,7 @@ class WorkflowApplication(ApiSchemaTable, TimestampMixin):
     )
 
     application_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Application.application_id))
+    application: Mapped[Application] = relationship(Application)
 
 
 class WorkflowApplicationSubmission(ApiSchemaTable, TimestampMixin):
@@ -278,3 +257,4 @@ class WorkflowApplicationSubmission(ApiSchemaTable, TimestampMixin):
     application_submission_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey(ApplicationSubmission.application_submission_id)
     )
+    application_submission: Mapped[ApplicationSubmission] = relationship(ApplicationSubmission)

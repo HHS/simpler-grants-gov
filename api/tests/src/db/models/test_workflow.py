@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
+from src.constants.lookup_constants import ApprovalResponseType, ApprovalType, WorkflowType
 from tests.src.db.models.factories import (
     WorkflowApprovalFactory,
     WorkflowAuditFactory,
@@ -25,7 +26,7 @@ def test_workflow_factory_create(db_session):
 def test_opportunity_workflow_events_audits_approval_create(db_session):
     # 1. Create one opportunity workflow record reaching the final state
     workflow = WorkflowFactory.create(
-        opportunity_publish_workflow=True,
+        workflow_type=WorkflowType.OPPORTUNITY_PUBLISH,
         current_workflow_state="approved",  # Final state - approved
     )
 
@@ -70,8 +71,8 @@ def test_opportunity_workflow_events_audits_approval_create(db_session):
     approval = WorkflowApprovalFactory.create(
         event_id=latest_event.event_id,  # Use the approval/latest event
         workflow_id=workflow.workflow_id,
-        approval_type_id=1,  # approval type
-        approval_response_type_id=1,  # approval response type
+        approval_type=ApprovalType.INITIAL_PROTOTYPE_APPROVAL,
+        approval_response_type=ApprovalResponseType.APPROVED,
     )
 
     # 5. Create the end state in audit, with email sending

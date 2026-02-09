@@ -1,8 +1,8 @@
-"""create workflow management tables
+"""add workflow management tables
 
-Revision ID: 01ceae9892c9
+Revision ID: 7b075965e2ad
 Revises: 1c069c3a6ccc
-Create Date: 2026-02-07 17:32:31.424776
+Create Date: 2026-02-09 21:08:06.883018
 
 """
 
@@ -11,7 +11,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "01ceae9892c9"
+revision = "7b075965e2ad"
 down_revision = "1c069c3a6ccc"
 branch_labels = None
 depends_on = None
@@ -80,6 +80,7 @@ def upgrade():
         sa.Column("approval_type_id", sa.Integer(), nullable=False),
         sa.Column("event_id", sa.UUID(), nullable=False),
         sa.Column("is_still_valid", sa.Boolean(), nullable=False),
+        sa.Column("comment", sa.Text(), nullable=True),
         sa.Column("approval_response_type_id", sa.Integer(), nullable=False),
         sa.Column(
             "created_at",
@@ -119,6 +120,20 @@ def upgrade():
             name=op.f("workflow_approval_workflow_id_workflow_fkey"),
         ),
         sa.PrimaryKeyConstraint("workflow_approval_id", name=op.f("workflow_approval_pkey")),
+        schema="api",
+    )
+    op.create_index(
+        op.f("workflow_approval_approval_response_type_id_idx"),
+        "workflow_approval",
+        ["approval_response_type_id"],
+        unique=False,
+        schema="api",
+    )
+    op.create_index(
+        op.f("workflow_approval_approval_type_id_idx"),
+        "workflow_approval",
+        ["approval_type_id"],
+        unique=False,
         schema="api",
     )
     op.create_table(
@@ -264,6 +279,14 @@ def downgrade():
     op.drop_table("workflow_application", schema="api")
     op.drop_table("workflow_opportunity", schema="api")
     op.drop_table("workflow_audit", schema="api")
+    op.drop_index(
+        op.f("workflow_approval_approval_type_id_idx"), table_name="workflow_approval", schema="api"
+    )
+    op.drop_index(
+        op.f("workflow_approval_approval_response_type_id_idx"),
+        table_name="workflow_approval",
+        schema="api",
+    )
     op.drop_table("workflow_approval", schema="api")
     op.drop_table("workflow_event_history", schema="api")
     op.drop_table("workflow", schema="api")
