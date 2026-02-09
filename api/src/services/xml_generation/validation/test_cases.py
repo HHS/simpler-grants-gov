@@ -1036,8 +1036,7 @@ SF424A_TEST_CASES = [
         "form_name": "SF424A",
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
         "pretty_print": True,
-    }
-
+    },
 ]
 
 # Sample test cases for EPA Form 4700-4 validation

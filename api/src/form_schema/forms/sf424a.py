@@ -1080,12 +1080,12 @@ FORM_XML_TRANSFORM_RULES = {
             "type": "conditional",
             "target": "OtherInformation",
             "conditional_transform": {
-            "type": "compose_object",
-            "field_mapping": {
-                "OtherDirectChargesExplanation": "direct_charges_explanation",
-                "OtherIndirectChargesExplanation": "indirect_charges_explanation",
-                "Remarks": "remarks"
-                }
+                "type": "compose_object",
+                "field_mapping": {
+                    "OtherDirectChargesExplanation": "direct_charges_explanation",
+                    "OtherIndirectChargesExplanation": "indirect_charges_explanation",
+                    "Remarks": "remarks",
+                },
             },
         },
     },

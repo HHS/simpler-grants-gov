@@ -19,12 +19,12 @@ def _transform_nested_field_names(
 ) -> dict[str, Any]:
     """Transform field names in a nested object based on transform rules.
 
-        Args:
-            data: Data dictionary to transform
-            transform_config_root: Root transform configuration
-            field_overrides: Optional dict mapping field names to override target names
-                            (e.g., {"other_amount": "BudgetOtherRequestedAmount"})
-        """
+    Args:
+        data: Data dictionary to transform
+        transform_config_root: Root transform configuration
+        field_overrides: Optional dict mapping field names to override target names
+                        (e.g., {"other_amount": "BudgetOtherRequestedAmount"})
+    """
     if not isinstance(data, dict) or not transform_config_root:
         return data
 
