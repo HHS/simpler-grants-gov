@@ -60,9 +60,7 @@ export const createFakeUserContext = (featureFlags?: FeatureFlags) => {
     },
     featureFlags: {
       ...{
-        authOn: false,
-        opportunityOff: false,
-        searchOff: false,
+        applyFormPrototypeOff: false,
       },
       ...featureFlags,
     },
