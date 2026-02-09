@@ -44,7 +44,7 @@ export const StartApplicationOrganizationInput = ({
         id={"label-for-organization"}
         key={"label-for-organization"}
         htmlFor="application-organization"
-        className="font-sans-sm text-bold"
+        className="font-sans-sm text-bold margin-top-3"
       >
         {t("label")} <span className="text-red">*</span>
       </Label>
@@ -56,6 +56,7 @@ export const StartApplicationOrganizationInput = ({
         name="application-orgnization"
         onChange={onOrganizationChange}
         value={selectedOrganization || 0}
+        style={{ maxWidth: "320px" }}
       >
         {/* Default option */}
         <option key={1} value={0} disabled>

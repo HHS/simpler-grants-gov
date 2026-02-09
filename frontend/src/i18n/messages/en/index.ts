@@ -118,7 +118,7 @@ export const messages = {
       cancelButtonText: "Cancel",
       error: "Error starting the application. Please try again.",
       organizationLoadError:
-        "We couldn't load your organizations right now. Please try again.\n\nIf the problem continues, contact product support, <telephone>1-800-518-4726</telephone> or <email>simpler@grants.gov</email>.",
+        "We couldn't load your organizations right now. Please try again.<br></br>If the problem continues, contact product support, <telephone>1-800-518-4726</telephone> or <email>simpler@grants.gov</email>.",
       login: "Sign in to work on the application",
       loggedOut:
         "You must be logged in to proceed. Please login and start your application again.",

@@ -39,6 +39,7 @@ export const StartApplicationModalControl = ({
   const headerTranslation = useTranslations("HeaderLoginModal");
   const [organizationsLoading, setOrganizationsLoading] = useState<boolean>();
   const [competitionsLoading, setCompetitionLoading] = useState<boolean>();
+  const [organizationsError, setOrganizationsError] = useState<boolean>(false);
   const [competitionApplicantTypes, setCompetitionApplicantTypes] = useState<
     ApplicantTypes[]
   >([]);
@@ -76,14 +77,17 @@ export const StartApplicationModalControl = ({
       return;
     }
     setOrganizationsLoading(true);
+    setOrganizationsError(false);
     fetchUserOrganizations("/api/user/organizations", {
       cache: "no-store",
     })
       .then((organizations) => {
         setUserOrganizations(organizations);
+        setOrganizationsError(false);
       })
       .catch((e) => {
         console.error("Error fetching user organizations", e);
+        setOrganizationsError(true);
       })
       .finally(() => {
         setOrganizationsLoading(false);
@@ -118,6 +122,7 @@ export const StartApplicationModalControl = ({
           applicantTypes={competitionApplicantTypes}
           organizations={userOrganizations}
           loading={organizationsLoading || competitionsLoading || false}
+          organizationsError={organizationsError}
           competitionId={competitionId}
         />
       ) : (

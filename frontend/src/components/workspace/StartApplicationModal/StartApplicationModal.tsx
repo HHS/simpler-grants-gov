@@ -157,7 +157,12 @@ export const StartApplicationModal = ({
     [],
   );
 
-  if (!organizations.length && !applicantTypes.includes("individual")) {
+  // Only show ineligible screen if there's no API error and legitimately no organizations
+  if (
+    !organizationsError &&
+    !organizations.length &&
+    !applicantTypes.includes("individual")
+  ) {
     return (
       <IneligibleApplicationStart
         modalRef={modalRef}
@@ -179,10 +184,17 @@ export const StartApplicationModal = ({
       onClose={onClose}
     >
       {organizationsError && (
-        <Alert type="error" headingLevel="h4" noIcon={false} slim={false}>
+        <Alert
+          type="error"
+          headingLevel="h4"
+          noIcon={true}
+          slim={true}
+          className="margin-bottom-2"
+        >
           {t.rich("organizationLoadError", {
             telephone: (chunk) => <a href="tel:18005184726">{chunk}</a>,
             email: (chunk) => <a href="mailto:simpler@grants.gov">{chunk}</a>,
+            br: () => <br />,
           })}
         </Alert>
       )}
