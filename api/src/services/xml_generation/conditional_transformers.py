@@ -13,7 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 def _transform_nested_field_names(
-    data: dict[str, Any], transform_config_root: dict[str, Any]
+    data: dict[str, Any],
+    transform_config_root: dict[str, Any],
+    field_overrides: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Transform field names in a nested object based on transform rules."""
     if not isinstance(data, dict) or not transform_config_root:
@@ -209,6 +211,7 @@ def _apply_array_decomposition_transform(
         item_attributes = mapping_config.get("item_attributes", [])
         total_field = mapping_config.get("total_field")
         total_wrapper = mapping_config.get("total_wrapper")
+        field_overrides = mapping_config.get("field_overrides")
 
         if not item_field:
             logger.warning(f"Skipping field mapping '{output_field_name}': missing 'item_field'")
@@ -251,7 +254,9 @@ def _apply_array_decomposition_transform(
                         if isinstance(value, dict):
                             # Transform field names if transform config is provided
                             if transform_config_root:
-                                value = _transform_nested_field_names(value, transform_config_root)
+                                value = _transform_nested_field_names(
+                                    value, transform_config_root, field_overrides
+                                )
                             wrapped_value.update(value)
                         else:
                             wrapped_value["value"] = value
@@ -272,7 +277,7 @@ def _apply_array_decomposition_transform(
                         # Transform field names if transform config is provided
                         if transform_config_root:
                             total_value = _transform_nested_field_names(
-                                total_value, transform_config_root
+                                total_value, transform_config_root, field_overrides
                             )
                         wrapped_total.update(total_value)
                     else:

@@ -882,6 +882,162 @@ SF424A_TEST_CASES = [
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
         "pretty_print": True,
     },
+    {
+        "name": "sf424a_complete_all_sections",
+        "json_input": {
+            # Minimal required fields for XSD validation
+            "program_type": "Non-Construction",
+            "form_version_identifier": "1.0",
+            "confirmation": True,
+            # Just the NonFederalResources section to validate
+            "activity_line_items": [
+                {
+                    "activity_title": "Community Outreach",
+                    "assistance_listing_number": "11.111",
+                    # Section A - Budget Summary
+                    "budget_summary": {
+                        "federal_estimated_unobligated_amount": "15000.00",
+                        "non_federal_estimated_unobligated_amount": "5000.00",
+                        "federal_new_or_revised_amount": "20000.00",
+                        "non_federal_new_or_revised_amount": "10000.00",
+                        "total_amount": "50000.00",
+                    },
+                    # Section B - Budget Categories
+                    "budget_categories": {
+                        "personnel_amount": "12000.00",
+                        "fringe_benefits_amount": "3000.00",
+                        "travel_amount": "4000.00",
+                        "equipment_amount": "6000.00",
+                        "supplies_amount": "5000.00",
+                        "contractual_amount": "7000.00",
+                        "construction_amount": "3000.00",
+                        "other_amount": "2000.00",
+                        "total_direct_charge_amount": "42000.00",
+                        "total_indirect_charge_amount": "8000.00",
+                        "total_amount": "50000.00",
+                        "program_income_amount": "0.00",
+                    },
+                    # Section C - Non-Federal Resources
+                    "non_federal_resources": {
+                        "applicant_amount": "7000.00",
+                        "state_amount": "6000.00",
+                        "other_amount": "2000.00",
+                        "total_amount": "15000.00",
+                    },
+                    # Section E - Federal Funds Needed
+                    "federal_fund_estimates": {
+                        "first_year_amount": "12000.00",
+                        "second_year_amount": "12000.00",
+                        "third_year_amount": "8000.00",
+                        "fourth_year_amount": "8000.00",
+                    },
+                },
+                {
+                    "activity_title": "Workforce Training",
+                    "assistance_listing_number": "22.222",
+                    "budget_summary": {
+                        "federal_estimated_unobligated_amount": "10000.00",
+                        "non_federal_estimated_unobligated_amount": "10000.00",
+                        "federal_new_or_revised_amount": "15000.00",
+                        "non_federal_new_or_revised_amount": "15000.00",
+                        "total_amount": "50000.00",
+                    },
+                    "budget_categories": {
+                        "personnel_amount": "15000.00",
+                        "fringe_benefits_amount": "4000.00",
+                        "travel_amount": "3000.00",
+                        "equipment_amount": "8000.00",
+                        "supplies_amount": "6000.00",
+                        "contractual_amount": "9000.00",
+                        "construction_amount": "2000.00",
+                        "other_amount": "3000.00",
+                        "total_direct_charge_amount": "50000.00",
+                        "total_indirect_charge_amount": "0.00",
+                        "total_amount": "50000.00",
+                        "program_income_amount": "0.00",
+                    },
+                    "non_federal_resources": {
+                        "applicant_amount": "10000.00",
+                        "state_amount": "5000.00",
+                        "other_amount": "5000.00",
+                        "total_amount": "20000.00",
+                    },
+                    "federal_fund_estimates": {
+                        "first_year_amount": "15000.00",
+                        "second_year_amount": "15000.00",
+                        "third_year_amount": "10000.00",
+                        "fourth_year_amount": "10000.00",
+                    },
+                },
+            ],
+            # Totals
+            "total_non_federal_resources": {
+                "applicant_amount": "17000.00",
+                "state_amount": "11000.00",
+                "other_amount": "7000.00",
+                "total_amount": "35000.00",
+            },
+            "total_budget_summary": {
+                "federal_estimated_unobligated_amount": "25000.00",
+                "non_federal_estimated_unobligated_amount": "15000.00",
+                "federal_new_or_revised_amount": "35000.00",
+                "non_federal_new_or_revised_amount": "25000.00",
+                "total_amount": "100000.00",
+            },
+            "total_budget_categories": {
+                "personnel_amount": "27000.00",
+                "fringe_benefits_amount": "7000.00",
+                "travel_amount": "7000.00",
+                "equipment_amount": "14000.00",
+                "supplies_amount": "11000.00",
+                "contractual_amount": "16000.00",
+                "construction_amount": "5000.00",
+                "other_amount": "5000.00",
+                "total_direct_charge_amount": "92000.00",
+                "total_indirect_charge_amount": "8000.00",
+                "total_amount": "100000.00",
+                "program_income_amount": "0.00",
+            },
+            # Section D - Forecasted Cash Needs
+            "forecasted_cash_needs": {
+                "federal_forecasted_cash_needs": {
+                    "first_quarter_amount": "9000.00",
+                    "second_quarter_amount": "9000.00",
+                    "third_quarter_amount": "8500.00",
+                    "fourth_quarter_amount": "8500.00",
+                    "total_amount": "35000.00",
+                },
+                "non_federal_forecasted_cash_needs": {
+                    "first_quarter_amount": "6500.00",
+                    "second_quarter_amount": "6500.00",
+                    "third_quarter_amount": "6000.00",
+                    "fourth_quarter_amount": "6000.00",
+                    "total_amount": "25000.00",
+                },
+                "total_forecasted_cash_needs": {
+                    "first_quarter_amount": "15500.00",
+                    "second_quarter_amount": "15500.00",
+                    "third_quarter_amount": "14500.00",
+                    "fourth_quarter_amount": "14500.00",
+                    "total_amount": "60000.00",
+                },
+            },
+            "total_federal_fund_estimates": {
+                "first_year_amount": "27000.00",
+                "second_year_amount": "27000.00",
+                "third_year_amount": "18000.00",
+                "fourth_year_amount": "18000.00",
+            },
+            # Section F - Other Information
+            "direct_charges_explanation": "Updated direct charge explanation",
+            "indirect_charges_explanation": "Updated indirect charge explanation",
+            "remarks": "Updated remarks",
+        },
+        "form_name": "SF424A",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
+        "pretty_print": True,
+    }
+
 ]
 
 # Sample test cases for EPA Form 4700-4 validation
