@@ -23,7 +23,6 @@ from src.task.notifications.constants import (
 )
 from src.util import datetime_util
 from src.util.dict_util import diff_nested_dicts
-from src.util.string_utils import truncate_html_safe
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +78,6 @@ OPPORTUNITY_STATUS_MAP = {
 SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
 BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
 NOT_SPECIFIED = "not specified"  # If None value display this string
-
 TRUNCATION_THRESHOLD = 250
 
 UTM_TAG = "?utm_source=notification&utm_medium=email&utm_campaign=opportunity_update"
@@ -299,27 +297,13 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         return {(row.user_id, row.opportunity_id): row[2] for row in results}
 
-    def _build_description_fields_content(self, description_change: dict, opp_id: UUID) -> str:
+    def _build_description_fields_content(self, description_change: dict) -> str:
         after = description_change["after"]
-        if not after:
-            return ""
-
-        description_section_parts = [
-            SECTION_STYLING.format("Description"),
-            f"{BULLET_POINTS_STYLING} <i>New Description:</i>",
-        ]
-
-        if len(after) > TRUNCATION_THRESHOLD:
-            truncated = truncate_html_safe(after, TRUNCATION_THRESHOLD)
-
-            read_more = f"<a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' style='color:blue;'>...Read full description</a>"
-            description_section_parts.append(
-                f'<div style="padding-left: 40px;">{truncated}{read_more}</div><br>'
-            )
-        else:
-            description_section_parts.append(f'<div style="padding-left: 40px;">{after}</div><br>')
-
-        return "".join(description_section_parts)
+        if after:
+            description_section = SECTION_STYLING.format("Description")
+            description_section += f"{BULLET_POINTS_STYLING} The description has changed.<br>"
+            return description_section
+        return ""
 
     def _normalize_bool_field(self, value: bool | None) -> str:
         if value is None:
@@ -539,11 +523,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 )
             )
         if "summary_description" in changes:
-            sections.append(
-                self._build_description_fields_content(
-                    changes["summary_description"], opp_change.opportunity_id
-                )
-            )
+            sections.append(self._build_description_fields_content(changes["summary_description"]))
         if not sections:
             logger.info(
                 "Opportunity has changes, but none are in fields that trigger user notifications",
