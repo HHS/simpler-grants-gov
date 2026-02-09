@@ -106,13 +106,13 @@ export const StartApplicationNameInput = ({
         id={"label-for-name"}
         key={"label-for-name"}
         htmlFor="application-name"
-        className="font-sans-sm margin-top-3"
+        className="font-sans-sm margin-top-3 text-bold"
       >
-        <span className="text-bold">
-          {t("label")} <span className="text-red">*</span>
-        </span>
-        <div className="font-sans-2xs">{t("description")}</div>
+        {t("label")} <span className="text-red">*</span>
       </Label>
+      <div className="font-sans-2xs" style={{ maxWidth: "550px" }}>
+        {t("description")}
+      </div>
       {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
 
       <TextInput
@@ -121,6 +121,7 @@ export const StartApplicationNameInput = ({
         name="application-name"
         id="application-name"
         onChange={onNameChange}
+        style={{ maxWidth: "550px" }}
       />
     </>
   );
