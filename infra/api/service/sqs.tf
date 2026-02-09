@@ -1,7 +1,7 @@
 locals {
   sqs_config = local.environment_config.sqs_config
   sqs_environment_variables = {
-    WORKFLOW_SQS_QUEUE = module.sqs_queue.queue_name
+    WORKFLOW_QUEUE_URL = module.sqs_queue.queue_url
   }
 }
 
