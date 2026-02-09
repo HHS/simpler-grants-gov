@@ -1162,4 +1162,4 @@ class TestOpportunityNotification:
 
         # Assert correct user saved opportunity is returned
         assert len(results) == 1
-        assert results[0][0].user_id == user.USER_ID
+        assert results[0][0].user_id == user.user_id
