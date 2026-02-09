@@ -313,7 +313,7 @@ class AssistanceListing(ApiSchemaTable, TimestampMixin):
         UUID, primary_key=True, default=uuid.uuid4
     )
 
-    assistance_listing_number: Mapped[str]
+    assistance_listing_number: Mapped[str] = mapped_column(index=True)
     program_title: Mapped[str]
 
 
