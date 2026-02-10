@@ -116,7 +116,7 @@ export const messages = {
     startApplicationModal: {
       startApplicationButtonText: "Start new application",
       cancelButtonText: "Cancel",
-      error: "Error starting the application. Please try again.",
+      error: "Internal error starting application. Please try again later.",
       organizationLoadError:
         "We couldn't load your organizations right now. Please try again.<br></br>If the problem continues, contact product support, <telephone>1-800-518-4726</telephone> or <email>simpler@grants.gov</email>.",
       login: "Sign in to work on the application",
