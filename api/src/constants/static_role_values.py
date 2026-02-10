@@ -121,6 +121,43 @@ LEGACY_AGENCY_S2S_ROLE = Role(
 )
 
 ############################
+# Core Opportunity Roles
+############################
+
+OPPORTUNITY_EDITOR_ID = uuid.UUID("5e612395-9e66-4c12-aae0-b62204221916")
+OPPORTUNITY_EDITOR = Role(
+    role_id=OPPORTUNITY_EDITOR_ID,
+    role_name="Opportunity Editor",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        OPPORTUNITY_EDITOR_ID,
+        [
+            Privilege.VIEW_OPPORTUNITY,
+            Privilege.CREATE_OPPORTUNITY,
+            Privilege.UPDATE_OPPORTUNITY,
+        ],
+    ),
+    link_role_types=[LinkRoleRoleType(role_id=OPPORTUNITY_EDITOR_ID, role_type=RoleType.AGENCY)],
+)
+
+OPPORTUNITY_PUBLISHER_ID = uuid.UUID("d1654d1e-01f8-437c-bdf0-636e1f182451")
+OPPORTUNITY_PUBLISHER = Role(
+    role_id=OPPORTUNITY_PUBLISHER_ID,
+    role_name="Opportunity Publisher",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        OPPORTUNITY_PUBLISHER_ID,
+        [
+            Privilege.VIEW_OPPORTUNITY,
+            Privilege.PUBLISH_OPPORTUNITY,
+            Privilege.CREATE_OPPORTUNITY,
+            Privilege.UPDATE_OPPORTUNITY,
+        ],
+    ),
+    link_role_types=[LinkRoleRoleType(role_id=OPPORTUNITY_PUBLISHER_ID, role_type=RoleType.AGENCY)],
+)
+
+############################
 # Core Internal Roles
 ############################
 
@@ -150,6 +187,19 @@ E2E_TEST_USER_ROLE = Role(
     link_role_types=[LinkRoleRoleType(role_id=E2E_TEST_USER_ROLE_ID, role_type=RoleType.INTERNAL)],
 )
 
+SYSTEM_WORKFLOW_USER_ROLE_ID = uuid.UUID("18258804-a281-41cd-9afb-06061fa7593c")
+SYSTEM_WORKFLOW_USER_ROLE = Role(
+    role_id=SYSTEM_WORKFLOW_USER_ROLE_ID,
+    role_name="System Workflow Role",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        SYSTEM_WORKFLOW_USER_ROLE_ID, [Privilege.INTERNAL_WORKFLOW_ACCESS]
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=SYSTEM_WORKFLOW_USER_ROLE_ID, role_type=RoleType.INTERNAL),
+    ],
+)
+
 CORE_ROLES = [
     ORG_ADMIN,
     ORG_MEMBER,
@@ -157,5 +207,8 @@ CORE_ROLES = [
     APPLICATION_CONTRIBUTOR,
     E2E_TEST_USER_ROLE,
     LEGACY_AGENCY_S2S_ROLE,
+    OPPORTUNITY_EDITOR,
+    OPPORTUNITY_PUBLISHER,
     NAVA_INTERNAL_ROLE,
+    SYSTEM_WORKFLOW_USER_ROLE,
 ]

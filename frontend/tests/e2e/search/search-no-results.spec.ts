@@ -1,6 +1,9 @@
 import { expect, Page, test } from "@playwright/test";
 import { BrowserContextOptions } from "playwright-core";
-import { generateRandomString } from "tests/e2e/playwrightUtils";
+import {
+  generateRandomString,
+  waitForURLContainsQueryParamValue,
+} from "tests/e2e/playwrightUtils";
 
 import {
   fillSearchInputAndSubmit,
@@ -32,7 +35,7 @@ test.describe("Search page no results tests", () => {
       await fillSearchInputAndSubmit(searchTerm, page);
     }
 
-    await page.waitForURL("/search?query=" + searchTerm);
+    await waitForURLContainsQueryParamValue(page, "query", searchTerm);
 
     const resultsHeading = page.getByRole("heading", {
       name: /0 Opportunities/i,

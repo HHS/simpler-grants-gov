@@ -236,6 +236,11 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.MANAGE_INTERNAL_ROLES, 15),
         LookupStr(Privilege.MANAGE_COMPETITION, 16),
         LookupStr(Privilege.READ_TEST_USER_TOKEN, 17),
+        LookupStr(Privilege.VIEW_OPPORTUNITY, 18),
+        LookupStr(Privilege.CREATE_OPPORTUNITY, 19),
+        LookupStr(Privilege.UPDATE_OPPORTUNITY, 20),
+        LookupStr(Privilege.PUBLISH_OPPORTUNITY, 21),
+        LookupStr(Privilege.INTERNAL_WORKFLOW_ACCESS, 22),
     ]
 )
 
@@ -270,6 +275,7 @@ USER_TYPE_CONFIG: LookupConfig[UserType] = LookupConfig(
         LookupStr(UserType.STANDARD, 1),
         LookupStr(UserType.INTERNAL_FRONTEND, 2),
         LookupStr(UserType.LEGACY_CERTIFICATE, 3),
+        LookupStr(UserType.INTERNAL_SYSTEM_USER, 4),
     ]
 )
 
