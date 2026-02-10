@@ -42,9 +42,7 @@ class TestSF424DXMLGeneration:
 
         # Verify root element and attributes
         assert root.tag == "{http://apply.grants.gov/forms/SF424D-V1.1}Assurances"
-        assert (
-            root.get("{http://apply.grants.gov/forms/SF424D-V1.1}programType") == "Construction"
-        )
+        assert root.get("{http://apply.grants.gov/forms/SF424D-V1.1}programType") == "Construction"
         assert root.get("{http://apply.grants.gov/system/Global-V1.0}coreSchemaVersion") == "1.1"
 
         # Verify FormVersionIdentifier is present and is the first child element
