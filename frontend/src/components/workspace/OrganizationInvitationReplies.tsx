@@ -1,6 +1,5 @@
 "use client";
 
-// we can remove the "use client" decorator after we remove the feature flag
 import { completeStatuses, OrganizationInvitation } from "src/types/userTypes";
 
 import { ReactNode } from "react";

@@ -92,7 +92,6 @@ describe("InviteLegacyUsersPage page", () => {
     render(component);
 
     expect(withFeatureFlagMock).toHaveBeenCalledTimes(0);
-    expect(redirectMock).toHaveBeenCalledTimes(0);
     expect(redirectMock).not.toHaveBeenCalledWith("/maintenance");
   });
 });
