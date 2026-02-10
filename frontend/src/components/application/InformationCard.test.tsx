@@ -267,7 +267,7 @@ describe("InformationCard - Submit button", () => {
           application_status: Status.IN_PROGRESS,
           competition: {
             is_open: true,
-            open_to_applicants: ["organization"], // org-only
+            open_to_applicants: ["organization"],
           },
         })}
       />,
