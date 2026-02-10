@@ -64,7 +64,9 @@ export const StartApplicationModal = ({
 
   const handleSubmit = useCallback(() => {
     const valid = validateSubmission();
-    if (!valid) return;
+    if (!valid) {
+      return;
+    }
     setUpdating(true);
     clientFetch("/api/applications/start", {
       method: "POST",
