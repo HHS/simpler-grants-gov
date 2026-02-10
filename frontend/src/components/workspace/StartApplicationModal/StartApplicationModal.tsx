@@ -90,13 +90,13 @@ export const StartApplicationModal = ({
         setUpdating(false);
       });
   }, [
-    clientFetch,
     competitionId,
     router,
     savedApplicationName,
-    selectedOrganization,
     t,
+    selectedOrganization,
     validateSubmission,
+    clientFetch,
   ]);
 
   const onClose = useCallback(() => {
