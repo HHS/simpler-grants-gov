@@ -1,5 +1,6 @@
 "use client";
 
+import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   ApplicationDetail,
   SamGovEntity,
@@ -8,10 +9,19 @@ import {
 import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { Button, Grid, GridContainer, Link } from "@trussworks/react-uswds";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Button,
+  Grid,
+  GridContainer,
+  Link,
+  ModalRef,
+} from "@trussworks/react-uswds";
 
 import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
+import { TransferOwnershipModal } from "src/components/application/transferOwnership/TransferOwnershipModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { TransferOwnershipButton } from "./transferOwnership/TransferOwnershipButton";
 
 type CompetitionDetails = { competition: Competition };
 
@@ -49,11 +59,16 @@ const OrganizationDetailsDisplay = ({
 const ApplicantDetails = ({
   hasOrganization,
   samGovEntity,
+  onOpenTransferModal,
+  canTransferOwnership,
 }: {
   hasOrganization: boolean;
   samGovEntity?: SamGovEntity;
+  onOpenTransferModal: () => void;
+  canTransferOwnership: boolean;
 }) => {
   const t = useTranslations("Application.information");
+
   if (hasOrganization) {
     return <OrganizationDetailsDisplay samGovEntity={samGovEntity} />;
   }
@@ -61,7 +76,12 @@ const ApplicantDetails = ({
   return (
     <div className="margin-bottom-1">
       <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
-      <dd>{t("applicantTypeIndividual")}</dd>
+      <dd>
+        {t("applicantTypeIndividual")}
+        {canTransferOwnership ? (
+          <TransferOwnershipButton onClick={onOpenTransferModal} />
+        ) : null}
+      </dd>
     </div>
   );
 };
@@ -73,6 +93,7 @@ export const InformationCard = ({
   opportunityName,
   submissionLoading,
   instructionsDownloadPath,
+  latestApplicationSubmission,
 }: {
   applicationDetails: ApplicationDetailsCardProps;
   applicationSubmitHandler: () => void;
@@ -80,10 +101,36 @@ export const InformationCard = ({
   opportunityName: string | null;
   submissionLoading: boolean;
   instructionsDownloadPath: string;
+  latestApplicationSubmission: ApplicationSubmission | null;
 }) => {
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
   const { is_open } = applicationDetails.competition;
+  const transferModalRef = useRef<ModalRef | null>(null);
+  const transferModalId = "transfer-ownership-modal";
+  const organizationEligible =
+    applicationDetails.competition.open_to_applicants.includes("organization");
+  const isEditable =
+    applicationDetails.application_status === Status.IN_PROGRESS;
+  const canTransferOwnership =
+    !hasOrganization && organizationEligible && isEditable;
+  const [isTransferModalOpen, setIsTransferModalOpen] =
+    useState<boolean>(false);
+
+  const openTransferModal = useCallback((): void => {
+    setIsTransferModalOpen(true);
+  }, []);
+
+  const handleTransferModalAfterClose = useCallback((): void => {
+    setIsTransferModalOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isTransferModalOpen) {
+      return;
+    }
+    transferModalRef.current?.toggleModal?.();
+  }, [isTransferModalOpen]);
 
   const ApplicationInstructionsDownload = () => {
     return (
@@ -106,6 +153,45 @@ export const InformationCard = ({
           )}
         </dd>
       </div>
+    );
+  };
+
+  /**
+   * Application submission download will only be available when an application has
+   * a status of ACCEPTED. The following are cases of each application status
+   *
+   * IN_PROGRESS
+   *  - Has not been submitted, so do not render anything related to submission.
+   * SUBMITTED
+   *  - Submitted but does not yet have submission db entry and S3 download not available yet.
+   *  - Show message that download is being prepared.
+   * ACCEPTED
+   *  - Download available, render button to download submission zip.
+   */
+  const ApplicationSubmissionDownload = () => {
+    if (applicationDetails.application_status === Status.SUBMITTED)
+      return (
+        <p data-testid={"application-submission-download-message"}>
+          {t("applicationSubmissionZipDownloadLoadingMessage")}
+        </p>
+      );
+    if (
+      latestApplicationSubmission === null ||
+      applicationDetails.application_status === Status.IN_PROGRESS
+    )
+      return null;
+    return (
+      <Link href={latestApplicationSubmission.download_path}>
+        <Button
+          type="button"
+          data-testid="application-submission-download"
+          disabled={submissionLoading}
+          outline
+        >
+          <USWDSIcon name="file_download" />
+          {t("applicationSubmissionZipDownload")}
+        </Button>
+      </Link>
     );
   };
 
@@ -133,13 +219,11 @@ export const InformationCard = ({
 
   const applicationStatus = () => {
     switch (applicationDetails.application_status) {
-      case Status.ACCEPTED:
-        return t("statusAccepted");
       case Status.IN_PROGRESS:
         return t("statusInProgress");
+      case Status.ACCEPTED:
       case Status.SUBMITTED:
         return t("statusSubmitted");
-
       default:
         return "-";
     }
@@ -173,6 +257,8 @@ export const InformationCard = ({
             <ApplicantDetails
               hasOrganization={hasOrganization}
               samGovEntity={applicationDetails.organization?.sam_gov_entity}
+              onOpenTransferModal={openTransferModal}
+              canTransferOwnership={canTransferOwnership}
             />
           </dl>
         </Grid>
@@ -203,6 +289,15 @@ export const InformationCard = ({
           </dl>
         </Grid>
 
+        {isTransferModalOpen ? (
+          <TransferOwnershipModal
+            applicationId={applicationDetails.application_id}
+            modalId={transferModalId}
+            modalRef={transferModalRef}
+            onAfterClose={handleTransferModalAfterClose}
+          />
+        ) : null}
+
         <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
           {applicationDetails.competition.competition_instructions.length ? (
             <ApplicationInstructionsDownload />
@@ -211,7 +306,11 @@ export const InformationCard = ({
           )}
         </Grid>
 
-        <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
+        <Grid
+          tablet={{ col: 6 }}
+          mobile={{ col: 12 }}
+          className={"margin-bottom-2"}
+        >
           {!applicationSubmitted && is_open && (
             <SubmitApplicationButton
               buttonText={t("submit")}
@@ -219,6 +318,7 @@ export const InformationCard = ({
               loading={submissionLoading}
             />
           )}
+          <ApplicationSubmissionDownload />
         </Grid>
       </>
     );

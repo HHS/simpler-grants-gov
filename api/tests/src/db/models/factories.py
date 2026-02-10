@@ -492,6 +492,19 @@ class OpportunityVersionFactory(BaseFactory):
     opportunity_data = factory.LazyAttribute(lambda o: SCHEMA.dump(o.opportunity))
 
 
+class ReferencedOpportunityFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.ReferencedOpportunity
+
+    referenced_opportunity_id = Generators.UuidObj
+
+    original_opportunity = factory.SubFactory(OpportunityFactory)
+    original_opportunity_id = factory.LazyAttribute(lambda a: a.original_opportunity.opportunity_id)
+
+    derived_opportunity = factory.SubFactory(OpportunityFactory)
+    derived_opportunity_id = factory.LazyAttribute(lambda a: a.derived_opportunity.opportunity_id)
+
+
 class OpportunitySummaryFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunitySummary
@@ -544,12 +557,14 @@ class OpportunitySummaryFactory(BaseFactory):
     additional_info_url_description = factory.Faker("additional_info_desc")
 
     funding_category_description = factory.Maybe(
-        decider=factory.LazyAttribute(lambda s: fake.boolean()),  # random chance to include value
+        # random chance to include value
+        decider=factory.LazyAttribute(lambda s: fake.boolean()),
         yes_declaration=factory.Faker("paragraph", nb_sentences=1),
         no_declaration=None,
     )
     applicant_eligibility_description = factory.Maybe(
-        decider=factory.LazyAttribute(lambda s: fake.boolean()),  # random chance to include value
+        # random chance to include value
+        decider=factory.LazyAttribute(lambda s: fake.boolean()),
         yes_declaration=factory.Faker("paragraph", nb_sentences=5),
         no_declaration=None,
     )
@@ -745,6 +760,23 @@ class CurrentOpportunitySummaryFactory(BaseFactory):
 
         has_long_descriptions = factory.Trait(
             opportunity_summary__has_long_descriptions=True,
+        )
+
+
+class AssistanceListingFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.AssistanceListing
+
+    assistance_listing_record_id = Generators.UuidObj
+
+    program_title = factory.Faker("company")
+    assistance_listing_number = factory.Faker("assistance_listing_number")
+
+    class Params:
+        # Set the timestamps in the past rather than using the default of "now"
+        timestamps_in_past = factory.Trait(
+            created_at=factory.Faker("date_time_between", start_date="-5y", end_date="-3y"),
+            updated_at=factory.Faker("date_time_between", start_date="-3y", end_date="-1y"),
         )
 
 
@@ -1202,7 +1234,8 @@ class CompetitionInstructionFactory(BaseFactory):
 
     @classmethod
     def _build(cls, model_class, *args, **kwargs):
-        kwargs.pop("file_contents")  # Don't use file contents for build strategy
+        # Don't use file contents for build strategy
+        kwargs.pop("file_contents")
         return super()._build(model_class, *args, **kwargs)
 
     @classmethod

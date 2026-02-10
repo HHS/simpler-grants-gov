@@ -269,18 +269,27 @@ export const messages = {
       applicantTypeIndividual: "Individual",
       applicationDownloadInstructions: "Download application instructions",
       applicationDownloadInstructionsLabel: "Instructions",
+      applicationSubmissionZipDownload: "Download your submitted application",
+      applicationSubmissionZipDownloadLabel:
+        "Application submission zip download",
+      applicationSubmissionZipDownloadLoadingMessage:
+        "We are preparing your submitted application for download. Please check back later.",
       specialInstructionsLabel: "Special instructions",
       specialInstructions: "No longer accepting applications",
       statusLabel: "Status",
       statusInProgress: "In progress",
       statusSubmitted: "Submitted",
-      statusAccepted: "Accepted",
       uei: "UEI",
       renewal: "Renewal",
       closeDate: "Close date",
       closed: "Closed",
       status: "Status",
       submit: "Submit application",
+      transferApplicaitonOwnership: "Transfer application ownership",
+      unassociatedApplicationAlert: {
+        title: "This application isn't associated with a valid organization.",
+        body: "You can continue working and your progress will be saved, but to submit on behalf of an organization, you must <link>select that organization and transfer ownership</link>.",
+      },
       editApplicationFilingNameModal: {
         buttonText: "Edit filing name",
         title: "Change application filing name",
@@ -407,7 +416,9 @@ export const messages = {
         "Once you assign an organization, that choice is permanent. An application cannot be transferred to another organization or returned to an individual.",
       actionConfirm: "Transfer ownership",
       actionCancel: "Return to application",
-      errorMessage:
+      transferErrorMessage:
+        "We couldn't transfer application ownership right now. Please try again.",
+      failedFetchingOrganizationErrorMessage:
         "We couldn't load your organizations right now. Please try again.",
       contactSupport:
         "If the problem continues, contact product support, <tel>1-800-518-4726</tel> or <link>simpler@grants.gov</link>.",
@@ -1749,6 +1760,32 @@ export const messages = {
       applicationName: "Application filing name",
       type: "Type",
       opportunity: "Opportunity",
+    },
+  },
+  Opportunities: {
+    numOpportunities:
+      "{num, plural, =1 {1 opportunity} other {# opportunities}}",
+    errorMessage:
+      "We have encountered an error loading your opportunities, please try again later.",
+    metaDescription: "View your saved opportunities",
+    noOpportunitiesMessage: {
+      primary: "You have not started any opportunities yet.",
+      secondary:
+        "Opportunities you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
+    },
+    pageHeading: "Opportunities",
+    pageTitle: "Opportunities",
+    tableContents: {
+      agency: "Agency: ",
+      draft: "Draft",
+      individual: "Individual",
+      submitted: "Submitted",
+    },
+    tableHeadings: {
+      agency: "Agency",
+      title: "Title",
+      status: "Status",
+      actions: "Actions",
     },
   },
   Organizations: {
