@@ -241,6 +241,11 @@ class Privilege(StrEnum):
     MANAGE_INTERNAL_ROLES = "manage_internal_roles"
     MANAGE_COMPETITION = "manage_competition"
     READ_TEST_USER_TOKEN = "read_test_user_token"
+    VIEW_OPPORTUNITY = "view_opportunity"
+    CREATE_OPPORTUNITY = "create_opportunity"
+    UPDATE_OPPORTUNITY = "update_opportunity"
+    PUBLISH_OPPORTUNITY = "publish_opportunity"
+    INTERNAL_WORKFLOW_ACCESS = "internal_workflow_access"
 
 
 class RoleType(StrEnum):
@@ -295,6 +300,7 @@ class UserType(StrEnum):
     STANDARD = "standard"
     INTERNAL_FRONTEND = "internal_frontend"
     LEGACY_CERTIFICATE = "legacy_certificate"
+    INTERNAL_SYSTEM_USER = "internal_system_user"
 
 
 class OrganizationAuditEvent(StrEnum):

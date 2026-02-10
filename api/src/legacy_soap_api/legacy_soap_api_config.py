@@ -29,6 +29,9 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
     enable_verbose_logging: bool = Field(default=False, alias="SOAP_ENABLE_VERBOSE_LOGGING")
     use_simpler: bool = Field(default=False, alias="USE_SIMPLER")
 
+    soap_partner_gateway_uri: str = Field("", alias="SOAP_PARTNER_GATEWAY_URI")
+    soap_partner_gateway_auth_key: str = Field("", alias="SOAP_PARTNER_GATEWAY_AUTH_KEY")
+
     @property
     def gg_url(self) -> str:
         # Full url including port for grants.gov S2S SOAP API.
