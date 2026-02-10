@@ -495,7 +495,7 @@ SF424A_TEST_CASES = [
                     "activity_title": "Line 1",
                     "budget_summary": {
                         "federal_estimated_unobligated_amount": "10.00",
-                        "total_new_or_revised_amount": "60.00",
+                        "total_amount": "60.00",
                     },
                     "budget_categories": {
                         "personnel_amount": "20.00",
@@ -514,7 +514,7 @@ SF424A_TEST_CASES = [
                     "activity_title": "Line 2",
                     "budget_summary": {
                         "federal_estimated_unobligated_amount": "30.00",
-                        "total_new_or_revised_amount": "90.00",
+                        "total_amount": "90.00",
                     },
                     "budget_categories": {
                         "personnel_amount": "40.00",
@@ -532,7 +532,7 @@ SF424A_TEST_CASES = [
             ],
             "total_budget_summary": {
                 "federal_estimated_unobligated_amount": "40.00",
-                "total_new_or_revised_amount": "150.00",
+                "total_amount": "150.00",
             },
             "total_budget_categories": {
                 "personnel_amount": "60.00",
@@ -585,7 +585,7 @@ SF424A_TEST_CASES = [
                     "activity_title": "Research Activities",
                     "budget_summary": {
                         "federal_estimated_unobligated_amount": "5000.00",
-                        "total_new_or_revised_amount": "50000.00",
+                        "total_amount": "50000.00",
                     },
                     "budget_categories": {
                         "personnel_amount": "30000.00",
@@ -614,7 +614,7 @@ SF424A_TEST_CASES = [
             ],
             "total_budget_summary": {
                 "federal_estimated_unobligated_amount": "5000.00",
-                "total_new_or_revised_amount": "50000.00",
+                "total_amount": "50000.00",
             },
             "total_budget_categories": {
                 "personnel_amount": "30000.00",
@@ -661,7 +661,7 @@ SF424A_TEST_CASES = [
                         "non_federal_estimated_unobligated_amount": "500.00",
                         "federal_new_or_revised_amount": "50000.00",
                         "non_federal_new_or_revised_amount": "10000.00",
-                        "total_new_or_revised_amount": "61500.00",
+                        "total_amount": "61500.00",
                     },
                     # Section B - Budget Categories
                     "budget_categories": {
@@ -700,7 +700,7 @@ SF424A_TEST_CASES = [
                 "non_federal_estimated_unobligated_amount": "500.00",
                 "federal_new_or_revised_amount": "50000.00",
                 "non_federal_new_or_revised_amount": "10000.00",
-                "total_new_or_revised_amount": "61500.00",
+                "total_amount": "61500.00",
             },
             "total_budget_categories": {
                 "personnel_amount": "30000.00",
@@ -780,7 +780,7 @@ SF424A_TEST_CASES = [
                         "non_federal_estimated_unobligated_amount": "500.00",
                         "federal_new_or_revised_amount": "50000.00",
                         "non_federal_new_or_revised_amount": "10000.00",
-                        "total_new_or_revised_amount": "61500.00",
+                        "total_amount": "61500.00",
                     },
                     # Section B - Budget Categories
                     "budget_categories": {
@@ -819,7 +819,7 @@ SF424A_TEST_CASES = [
                 "non_federal_estimated_unobligated_amount": "500.00",
                 "federal_new_or_revised_amount": "50000.00",
                 "non_federal_new_or_revised_amount": "10000.00",
-                "total_new_or_revised_amount": "61500.00",
+                "total_amount": "61500.00",
             },
             "total_budget_categories": {
                 "personnel_amount": "30000.00",

@@ -808,7 +808,6 @@ FORM_XML_TRANSFORM_RULES = {
         "xml_transform": {
             "target": "FormVersionIdentifier",
             "namespace": "glob",
-            "attributes": {"xmlns:glob": "http://apply.grants.gov/system/Global-V1.0"},
         }
     },
     # Note: program_type is handled as a root attribute via xml_structure.root_attributes
