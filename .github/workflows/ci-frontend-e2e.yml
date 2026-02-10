@@ -37,16 +37,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
-
-      - name: Install dependencies and Playwright
-        run: |
-          npm ci
-          npx playwright install --with-deps
 
       - name: Start API Server for e2e tests
         run: |
