@@ -88,7 +88,7 @@ describe("StartApplicationModal", () => {
   });
   it("displays an API error if API returns an error", async () => {
     clientFetchMock.mockRejectedValue(new Error());
-    const { rerender } = render(
+    render(
       <StartApplicationModal
         competitionId="1"
         opportunityTitle="blessed opportunity"
@@ -103,27 +103,15 @@ describe("StartApplicationModal", () => {
     const saveButton = await screen.findByTestId("application-start-save");
     const input = await screen.findByTestId("textInput");
     await userEvent.type(input, "new application");
-    act(() => saveButton.click());
+    await userEvent.click(saveButton);
 
-    rerender(
-      <StartApplicationModal
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-        modalRef={createRef()}
-        applicantTypes={["individual"]}
-        organizations={[]}
-        token={"a token"}
-        loading={false}
-      />,
-    );
-
-    const error = await screen.findByText("error");
-
-    expect(error).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("error")).toBeInTheDocument();
+    });
   });
   it("displays an login error if API 401", async () => {
     clientFetchMock.mockRejectedValue(new Error("401 error", { cause: "401" }));
-    const { rerender } = render(
+    render(
       <StartApplicationModal
         competitionId="1"
         opportunityTitle="blessed opportunity"
@@ -138,23 +126,11 @@ describe("StartApplicationModal", () => {
     const saveButton = await screen.findByTestId("application-start-save");
     const input = await screen.findByTestId("textInput");
     await userEvent.type(input, "new application");
-    act(() => saveButton.click());
+    await userEvent.click(saveButton);
 
-    rerender(
-      <StartApplicationModal
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-        modalRef={createRef()}
-        applicantTypes={["individual"]}
-        organizations={[]}
-        token={"a token"}
-        loading={false}
-      />,
-    );
-
-    const error = await screen.findByText("loggedOut");
-
-    expect(error).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("loggedOut")).toBeInTheDocument();
+    });
   });
   it("re-routes on successful save", async () => {
     clientFetchMock.mockResolvedValue({ applicationId: "999" });
@@ -319,13 +295,29 @@ describe("StartApplicationModal", () => {
       expect(screen.queryByText("asIndividual")).not.toBeInTheDocument();
     });
 
-    it("shows 'I don't see my org listed' option when organization type is allowed", () => {
+    it("does not show 'I don't see my org listed' option for organization-only competitions", () => {
       render(
         <StartApplicationModal
           competitionId="1"
           opportunityTitle="blessed opportunity"
           modalRef={createRef()}
           applicantTypes={["organization"]}
+          organizations={[fakeUserOrganization]}
+          token={"a token"}
+          loading={false}
+        />,
+      );
+
+      expect(screen.queryByText("notListed")).not.toBeInTheDocument();
+    });
+
+    it("shows 'I don't see my org listed' option for mixed competitions", () => {
+      render(
+        <StartApplicationModal
+          competitionId="1"
+          opportunityTitle="blessed opportunity"
+          modalRef={createRef()}
+          applicantTypes={["individual", "organization"]}
           organizations={[fakeUserOrganization]}
           token={"a token"}
           loading={false}
@@ -353,7 +345,7 @@ describe("StartApplicationModal", () => {
       expect(screen.getByTestId("helpful-tips-banner")).toBeInTheDocument();
     });
 
-    it("button has success styling", () => {
+    it("button has default USWDS styling", () => {
       render(
         <StartApplicationModal
           competitionId="1"
@@ -367,7 +359,7 @@ describe("StartApplicationModal", () => {
       );
 
       const button = screen.getByTestId("application-start-save");
-      expect(button).toHaveClass("bg-success");
+      expect(button).toHaveClass("usa-button");
     });
   });
 });

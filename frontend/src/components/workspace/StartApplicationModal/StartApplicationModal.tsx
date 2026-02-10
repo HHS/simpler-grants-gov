@@ -75,8 +75,13 @@ export const StartApplicationModal = ({
     const isNotListedSelected =
       selectedOrganization === SPECIAL_VALUES.NOT_LISTED;
 
-    // Organization required unless user explicitly selected individual or not-listed
-    const skipOrgValidation = isIndividualSelected || isNotListedSelected;
+    // Skip organization validation if:
+    // 1. Competition is individual-only (no org dropdown shown)
+    // 2. User explicitly selected individual or not-listed
+    const skipOrgValidation =
+      !applicantTypes.includes("organization") ||
+      isIndividualSelected ||
+      isNotListedSelected;
 
     if (!skipOrgValidation && !selectedOrganization) {
       setOrgValidationError(t("fields.organizationSelect.validationError"));
@@ -84,7 +89,7 @@ export const StartApplicationModal = ({
     }
 
     return valid;
-  }, [token, savedApplicationName, selectedOrganization, t]);
+  }, [token, savedApplicationName, selectedOrganization, applicantTypes, t]);
 
   const handleSubmit = useCallback(() => {
     const valid = validateSubmission();
