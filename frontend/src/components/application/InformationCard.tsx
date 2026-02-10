@@ -111,7 +111,7 @@ export const InformationCard = ({
   const organizationEligible =
     applicationDetails.competition.open_to_applicants.includes("organization");
   const isEditable =
-    applicationDetails.application_status === Status.IN_PROGRESS;
+    applicationDetails.application_status === ApplicationStatus.IN_PROGRESS;
   const canTransferOwnership =
     !hasOrganization && organizationEligible && isEditable;
   const [isTransferModalOpen, setIsTransferModalOpen] =
