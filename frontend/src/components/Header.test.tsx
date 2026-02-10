@@ -11,13 +11,7 @@ const props = {
   locale: "en",
 };
 
-const mockUseUser = jest.fn(() => ({
-  user: {
-    token: "faketoken",
-  },
-  hasBeenLoggedOut: false,
-  resetHasBeenLoggedOut: jest.fn(),
-}));
+const mockUseUser = jest.fn();
 
 const mockShowSnackbar = jest.fn();
 
@@ -57,7 +51,7 @@ jest.mock("src/components/RouteChangeWatcher", () => ({
 }));
 
 jest.mock("src/services/auth/useUser", () => ({
-  useUser: () => mockUseUser(),
+  useUser: (): unknown => mockUseUser(),
 }));
 
 jest.mock("src/hooks/useSnackbar", () => ({
@@ -75,6 +69,16 @@ describe("Header", () => {
   });
   afterAll(() => {
     global.fetch = originalFetch;
+  });
+
+  beforeEach(() => {
+    mockUseUser.mockReturnValue({
+      user: {
+        token: "faketoken",
+      },
+      hasBeenLoggedOut: false,
+      resetHasBeenLoggedOut: jest.fn(),
+    });
   });
 
   it("toggles the mobile nav menu", async () => {
@@ -294,5 +298,77 @@ describe("Header", () => {
 
     const testUserDropdown = screen.queryByRole("combobox");
     expect(testUserDropdown).not.toBeInTheDocument();
+  });
+
+  describe("Authentication and nav", () => {
+    it("shows Sign in as a nav link when user is unauthenticated", () => {
+      mockUseUser.mockImplementation(() => ({
+        user: {
+          token: undefined,
+        },
+        hasBeenLoggedOut: false,
+        resetHasBeenLoggedOut: jest.fn(),
+      }));
+      render(<Header {...props} />);
+
+      const signInLinks = screen.getAllByRole("link", { name: /sign in/i });
+      expect(signInLinks.length).toBeGreaterThanOrEqual(1);
+      const navSignInLink = signInLinks.find((el) =>
+        el.getAttribute("class")?.includes("desktop:display-none"),
+      );
+      expect(navSignInLink).toBeInTheDocument();
+      expect(navSignInLink).toHaveAttribute(
+        "href",
+        expect.stringContaining("login"),
+      );
+    });
+
+    it("applies desktop:display-none to Sign in link in nav when unauthenticated so it is only in the menu on mobile", () => {
+      mockUseUser.mockImplementation(() => ({
+        user: {
+          token: undefined,
+        },
+        hasBeenLoggedOut: false,
+        resetHasBeenLoggedOut: jest.fn(),
+      }));
+      render(<Header {...props} />);
+
+      const signInLinks = screen.getAllByRole("link", { name: /sign in/i });
+      const navSignInLink = signInLinks.find((el) =>
+        el.getAttribute("class")?.includes("desktop:display-none"),
+      );
+      expect(navSignInLink).toHaveClass("desktop:display-none");
+    });
+
+    it("shows Account dropdown in nav when user is authenticated", () => {
+      mockUseUser.mockReturnValue({
+        user: { token: "faketoken" },
+        hasBeenLoggedOut: false,
+        resetHasBeenLoggedOut: jest.fn(),
+      });
+      render(<Header {...props} />);
+
+      const accountButton = screen.getByRole("button", { name: /account/i });
+      expect(accountButton).toBeInTheDocument();
+    });
+
+    it("Account dropdown contains Settings and Sign out when opened", async () => {
+      mockUseUser.mockReturnValue({
+        user: { token: "faketoken" },
+        hasBeenLoggedOut: false,
+        resetHasBeenLoggedOut: jest.fn(),
+      });
+      const user = userEvent.setup();
+      render(<Header {...props} />);
+
+      const accountButton = screen.getByRole("button", { name: /account/i });
+      await user.click(accountButton);
+
+      expect(accountButton).toHaveAttribute("aria-expanded", "true");
+      const settingsLink = screen.getByRole("link", { name: /settings/i });
+      expect(settingsLink).toBeInTheDocument();
+      expect(settingsLink).toHaveAttribute("href", "/settings");
+      expect(screen.getByText(/sign out/i)).toBeInTheDocument();
+    });
   });
 });

@@ -1,16 +1,19 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { UserDropdown } from "src/components/user/UserControl";
+import { SignOutNavLink, UserDropdown } from "src/components/user/UserControl";
 
 const mockPush = jest.fn();
+const mockRefresh = jest.fn();
+const mockLogoutLocalUser = jest.fn();
 const mockUseUser = jest.fn(() => ({
   user: {
     token: "faketoken",
   },
   hasBeenLoggedOut: false,
   resetHasBeenLoggedOut: jest.fn(),
+  logoutLocalUser: mockLogoutLocalUser,
 }));
 
 jest.mock("next-intl", () => ({
@@ -26,6 +29,7 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: (url: unknown): unknown => mockPush(url),
+    refresh: mockRefresh,
   }),
 }));
 
@@ -54,5 +58,37 @@ describe("UserDropdown", () => {
     expect(
       screen.getByRole("link", { name: "testApplication" }),
     ).toBeInTheDocument();
+  });
+});
+
+describe("SignOutNavLink", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch = jest.fn(() => Promise.resolve({})) as jest.Mock;
+  });
+
+  it("renders Sign out text", () => {
+    const onClick = jest.fn();
+    render(<SignOutNavLink onClick={onClick} />);
+
+    expect(screen.getByText("logout")).toBeInTheDocument();
+  });
+
+  it("calls onClick when clicked after logout", async () => {
+    const onClick = jest.fn();
+    const user = userEvent.setup();
+    render(<SignOutNavLink onClick={onClick} />);
+
+    const signOutLabel = screen.getByText("logout");
+    await user.click(signOutLabel);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith("/api/auth/logout", {
+        method: "POST",
+      });
+      expect(mockLogoutLocalUser).toHaveBeenCalled();
+      expect(mockRefresh).toHaveBeenCalled();
+      expect(onClick).toHaveBeenCalled();
+    });
   });
 });
