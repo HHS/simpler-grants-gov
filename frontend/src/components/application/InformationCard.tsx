@@ -353,22 +353,24 @@ export const InformationCard = ({
   };
 
   return (
-    <GridContainer
-      data-testid="information-card"
-      className="border radius-md border-base-lighter padding-x-2 margin-y-4"
-    >
+    <>
       {shouldBlockSubmitForOrgOnly ? (
-        <Alert headingLevel="h2" type="warning" slim>
+        <Alert headingLevel="h2" type="warning" noIcon>
           {t("unassociatedApplicationAlert.title")}
           {alertBody}
         </Alert>
       ) : null}
-      <Grid row gap>
-        <InformationCardDetails
-          applicationSubmitHandler={applicationSubmitHandler}
-        />
-      </Grid>
-    </GridContainer>
+      <GridContainer
+        data-testid="information-card"
+        className="border radius-md border-base-lighter padding-x-2 margin-y-4"
+      >
+        <Grid row gap>
+          <InformationCardDetails
+            applicationSubmitHandler={applicationSubmitHandler}
+          />
+        </Grid>
+      </GridContainer>
+    </>
   );
 };
 
