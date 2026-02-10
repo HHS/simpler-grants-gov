@@ -5127,8 +5127,9 @@ components:
             - read_test_user_token
             - view_opportunity
             - create_opportunity
-            - 'update_opportunity '
+            - update_opportunity
             - publish_opportunity
+            - internal_workflow_access
             type:
             - string
     UserOrganization:
@@ -5281,8 +5282,9 @@ components:
             - read_test_user_token
             - view_opportunity
             - create_opportunity
-            - 'update_opportunity '
+            - update_opportunity
             - publish_opportunity
+            - internal_workflow_access
             type:
             - string
     UserCanAccessResponse:
@@ -6289,8 +6291,9 @@ components:
             - read_test_user_token
             - view_opportunity
             - create_opportunity
-            - 'update_opportunity '
+            - update_opportunity
             - publish_opportunity
+            - internal_workflow_access
             type:
             - string
     UserInvitationItem:
@@ -6846,8 +6849,9 @@ components:
             - read_test_user_token
             - view_opportunity
             - create_opportunity
-            - 'update_opportunity '
+            - update_opportunity
             - publish_opportunity
+            - internal_workflow_access
             type:
             - string
     OrganizationUser:
