@@ -109,7 +109,6 @@ describe("StartApplicationModal", () => {
 
     expect(error).toBeInTheDocument();
   });
-
   it("re-routes on successful save", async () => {
     clientFetchMock.mockResolvedValue({ applicationId: "999" });
     render(
@@ -127,7 +126,6 @@ describe("StartApplicationModal", () => {
     const saveButton = await screen.findByTestId("application-start-save");
     const input = await screen.findByTestId("textInput");
     const select = await screen.findByTestId("Select");
-
     await userEvent.type(input, "new application");
     await userEvent.selectOptions(select, fakeUserOrganization.organization_id);
 
@@ -147,7 +145,6 @@ describe("StartApplicationModal", () => {
   });
   it("renders the standard modal for org-only competitions even when user has no organizations", async () => {
     clientFetchMock.mockResolvedValue({ applicationId: "999" });
-
     render(
       <StartApplicationModal
         competitionId="1"
