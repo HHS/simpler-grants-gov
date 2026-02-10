@@ -15,7 +15,6 @@ import {
 } from "@trussworks/react-uswds";
 
 import { SimplerModal } from "src/components/SimplerModal";
-import { IneligibleApplicationStart } from "./IneligibleStartApplicationModal";
 import { StartApplicationDescription } from "./StartApplicationDescription";
 import {
   StartApplicationNameInput,
@@ -46,7 +45,6 @@ export const StartApplicationModal = ({
   );
 
   const [nameValidationError, setNameValidationError] = useState<string>();
-  const [orgValidationError, setOrgValidationError] = useState<string>();
   const [savedApplicationName, setSavedApplicationName] = useState<string>();
   const [selectedOrganization, setSelectedOrganization] = useState<string>();
   const [error, setError] = useState<string>();
@@ -55,38 +53,28 @@ export const StartApplicationModal = ({
   const validateSubmission = useCallback((): boolean => {
     let valid = !!token;
 
-    setOrgValidationError("");
     setNameValidationError("");
 
     if (!savedApplicationName) {
       setNameValidationError(t("fields.name.validationError"));
       valid = false;
     }
-    if (!applicantTypes.includes("individual") && !selectedOrganization) {
-      setOrgValidationError(t("fields.organizationSelect.validationError"));
-      valid = false;
-    }
     return valid;
-  }, [token, savedApplicationName, applicantTypes, selectedOrganization, t]);
+  }, [token, savedApplicationName, t]);
 
   const handleSubmit = useCallback(() => {
     const valid = validateSubmission();
-    if (!valid) {
-      return;
-    }
+    if (!valid) return;
     setUpdating(true);
     clientFetch("/api/applications/start", {
       method: "POST",
       body: JSON.stringify({
         applicationName: savedApplicationName,
         competitionId,
-        organization: selectedOrganization,
+        ...(selectedOrganization ? { organization: selectedOrganization } : {}),
       }),
     })
-      .then((data) => {
-        const { applicationId } = data;
-        router.push(`/applications/${applicationId}`);
-      })
+      .then((data) => router.push(`/applications/${data.applicationId}`))
       .catch((error) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (error.cause === "401") {
@@ -100,21 +88,21 @@ export const StartApplicationModal = ({
         setUpdating(false);
       });
   }, [
+    clientFetch,
     competitionId,
     router,
     savedApplicationName,
-    t,
     selectedOrganization,
+    t,
     validateSubmission,
-    clientFetch,
   ]);
 
   const onClose = useCallback(() => {
     setError("");
     setUpdating(false);
     setNameValidationError("");
-    setOrgValidationError("");
     setSavedApplicationName("");
+    setSelectedOrganization("");
   }, []);
 
   const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,17 +116,6 @@ export const StartApplicationModal = ({
     [],
   );
 
-  if (!organizations.length && !applicantTypes.includes("individual")) {
-    return (
-      <IneligibleApplicationStart
-        modalRef={modalRef}
-        cancelText={t("cancelButtonText")}
-        onClose={onClose}
-        organizations={organizations}
-        applicantTypes={applicantTypes}
-      />
-    );
-  }
   return (
     <SimplerModal
       modalRef={modalRef}
@@ -159,13 +136,13 @@ export const StartApplicationModal = ({
       </p>
       <p className="font-sans-3xs">{t("requiredText")}</p>
       <FormGroup
-        error={!!(nameValidationError || orgValidationError || error)}
+        error={!!(nameValidationError || error)}
         className="margin-top-1"
       >
         {applicantTypes.includes("organization") && (
           <StartApplicationOrganizationInput
             onOrganizationChange={onOrganizationChange}
-            validationError={orgValidationError}
+            validationError={undefined}
             organizations={organizations}
             selectedOrganization={selectedOrganization}
           />
@@ -181,7 +158,7 @@ export const StartApplicationModal = ({
           onClick={handleSubmit}
           type="button"
           data-testid="application-start-save"
-          disabled={!!loading}
+          disabled={!!loading || !!updating}
         >
           {loading || updating ? "Loading..." : t("saveButtonText")}
         </Button>

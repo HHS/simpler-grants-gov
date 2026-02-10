@@ -30,6 +30,7 @@ describe("StartApplicationModal", () => {
   beforeEach(() => {
     mockRouterPush.mockResolvedValue(true);
   });
+
   afterEach(() => {
     jest.resetAllMocks();
   });
@@ -60,39 +61,15 @@ describe("StartApplicationModal", () => {
 
     expect(validationError).toBeInTheDocument();
   });
-  it("displays validation error if submitted without an organization", async () => {
+
+  it("displays an API error if API returns an error", async () => {
+    clientFetchMock.mockRejectedValue(new Error());
+
     render(
       <StartApplicationModal
         competitionId="1"
         opportunityTitle="blessed opportunity"
         modalRef={createRef()}
-        applicantTypes={["organization"]}
-        organizations={[fakeUserOrganization]}
-        token={"a token"}
-        loading={false}
-      />,
-    );
-
-    expect(
-      screen.queryByText("fields.organizationSelect.validationError"),
-    ).not.toBeInTheDocument();
-
-    const saveButton = await screen.findByTestId("application-start-save");
-    act(() => saveButton.click());
-
-    const validationError = await screen.findByText(
-      "fields.organizationSelect.validationError",
-    );
-
-    expect(validationError).toBeInTheDocument();
-  });
-  it("displays an API error if API returns an error", async () => {
-    clientFetchMock.mockRejectedValue(new Error());
-    const { rerender } = render(
-      <StartApplicationModal
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-        modalRef={createRef()}
         applicantTypes={["individual"]}
         organizations={[]}
         token={"a token"}
@@ -103,27 +80,17 @@ describe("StartApplicationModal", () => {
     const saveButton = await screen.findByTestId("application-start-save");
     const input = await screen.findByTestId("textInput");
     await userEvent.type(input, "new application");
-    act(() => saveButton.click());
 
-    rerender(
-      <StartApplicationModal
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-        modalRef={createRef()}
-        applicantTypes={["individual"]}
-        organizations={[]}
-        token={"a token"}
-        loading={false}
-      />,
-    );
+    act(() => saveButton.click());
 
     const error = await screen.findByText("error");
-
     expect(error).toBeInTheDocument();
   });
+
   it("displays an login error if API 401", async () => {
     clientFetchMock.mockRejectedValue(new Error("401 error", { cause: "401" }));
-    const { rerender } = render(
+
+    render(
       <StartApplicationModal
         competitionId="1"
         opportunityTitle="blessed opportunity"
@@ -138,27 +105,17 @@ describe("StartApplicationModal", () => {
     const saveButton = await screen.findByTestId("application-start-save");
     const input = await screen.findByTestId("textInput");
     await userEvent.type(input, "new application");
+
     act(() => saveButton.click());
 
-    rerender(
-      <StartApplicationModal
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-        modalRef={createRef()}
-        applicantTypes={["individual"]}
-        organizations={[]}
-        token={"a token"}
-        loading={false}
-      />,
-    );
-
     const error = await screen.findByText("loggedOut");
-
     expect(error).toBeInTheDocument();
   });
+
   it("re-routes on successful save", async () => {
     clientFetchMock.mockResolvedValue({ applicationId: "999" });
-    const { rerender } = render(
+
+    render(
       <StartApplicationModal
         competitionId="1"
         opportunityTitle="blessed opportunity"
@@ -173,10 +130,12 @@ describe("StartApplicationModal", () => {
     const saveButton = await screen.findByTestId("application-start-save");
     const input = await screen.findByTestId("textInput");
     const select = await screen.findByTestId("Select");
+
     await userEvent.type(input, "new application");
     await userEvent.selectOptions(select, fakeUserOrganization.organization_id);
 
     act(() => saveButton.click());
+
     expect(clientFetchMock).toHaveBeenCalledWith("/api/applications/start", {
       method: "POST",
       body: JSON.stringify({
@@ -186,22 +145,14 @@ describe("StartApplicationModal", () => {
       }),
     });
 
-    rerender(
-      <StartApplicationModal
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-        modalRef={createRef()}
-        applicantTypes={["individual"]}
-        organizations={[]}
-        token={"a token"}
-        loading={false}
-      />,
-    );
     await waitFor(() => {
       expect(mockRouterPush).toHaveBeenCalledWith(`/applications/999`);
     });
   });
-  it("renders an ineligible view if competition is org only and user has no orgs", () => {
+
+  it("renders the standard modal for org-only competitions even when user has no organizations", async () => {
+    clientFetchMock.mockResolvedValue({ applicationId: "999" });
+
     render(
       <StartApplicationModal
         competitionId="1"
@@ -214,7 +165,27 @@ describe("StartApplicationModal", () => {
       />,
     );
 
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-    expect(screen.getByText("ineligibleTitle")).toBeInTheDocument();
+    // Standard modal should render (not an ineligible view)
+    expect(await screen.findByTestId("opportunity-title")).toBeInTheDocument();
+    expect(await screen.findByTestId("textInput")).toBeInTheDocument();
+
+    const saveButton = await screen.findByTestId("application-start-save");
+    const input = await screen.findByTestId("textInput");
+    await userEvent.type(input, "new application");
+
+    act(() => saveButton.click());
+
+    // Because no organization is selected, organization should be omitted from the body
+    expect(clientFetchMock).toHaveBeenCalledWith("/api/applications/start", {
+      method: "POST",
+      body: JSON.stringify({
+        applicationName: "new application",
+        competitionId: "1",
+      }),
+    });
+
+    await waitFor(() => {
+      expect(mockRouterPush).toHaveBeenCalledWith(`/applications/999`);
+    });
   });
 });
