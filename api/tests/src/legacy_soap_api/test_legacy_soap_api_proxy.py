@@ -45,13 +45,12 @@ def test_get_cert_file_returns_cert_data_from_soap_request(enable_factory_create
         assert f.read() == f"{cert_str}\n\n{soap_request.auth.certificate.cert}"
 
 
-def test_get_proxy_response(enable_factory_create, monkeypatch):
+def test_get_proxy_response(enable_factory_create, monkeypatch, db_session):
     soap_request = create_soap_request(SOAP_PAYLOAD)
     legacy_certificate = soap_request.auth.certificate.legacy_certificate
-    cert_str = "-----BEGIN CERTIFICATE-----\nFAKE_CERT\n-----END CERTIFICATE-----"
-    monkeypatch.setenv(
-        "SOAP_PRIVATE_KEYS", f'{{ "{legacy_certificate.legacy_certificate_id}": "{cert_str}" }}'
-    )
+    with db_session.begin():
+        legacy_certificate.legacy_certificate_id = "e57e1c7f-cf2e-455e-9db5-3e03650174a7"
+        db_session.add(legacy_certificate)
     with patch("src.legacy_soap_api.legacy_soap_api_proxy.Session.send") as mock_send:
         get_proxy_response(soap_request)
         args, kwargs = mock_send.call_args
