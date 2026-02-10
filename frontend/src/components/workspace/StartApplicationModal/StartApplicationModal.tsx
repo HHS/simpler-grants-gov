@@ -204,6 +204,7 @@ export const StartApplicationModal = ({
       <StartApplicationDescription
         organizations={organizations}
         applicantTypes={applicantTypes}
+        organizationsError={organizationsError}
       />
       <p className="font-sans-2xs text-base margin-top-1 margin-bottom-0">
         {t("requiredText")}
