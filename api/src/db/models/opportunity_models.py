@@ -306,13 +306,24 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
         return True
 
 
+class AssistanceListing(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "assistance_listing"
+
+    assistance_listing_record_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    assistance_listing_number: Mapped[str] = mapped_column(index=True)
+    program_title: Mapped[str]
+
+
 class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):
     __tablename__ = "opportunity_assistance_listing"
 
     opportunity_assistance_listing_id: Mapped[uuid.UUID] = mapped_column(
         UUID, primary_key=True, default=uuid.uuid4
     )
-    legacy_opportunity_assistance_listing_id: Mapped[int] = mapped_column(
+    legacy_opportunity_assistance_listing_id: Mapped[int | None] = mapped_column(
         BigInteger, index=True, unique=True
     )
 
@@ -323,6 +334,11 @@ class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):
 
     assistance_listing_number: Mapped[str | None]
     program_title: Mapped[str | None]
+
+    assistance_listing_record_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(AssistanceListing.assistance_listing_record_id), index=True
+    )
+    assistance_listing: Mapped[AssistanceListing | None] = relationship(AssistanceListing)
 
 
 class LinkOpportunitySummaryFundingInstrument(ApiSchemaTable, TimestampMixin):
