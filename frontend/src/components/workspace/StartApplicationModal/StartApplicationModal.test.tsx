@@ -30,7 +30,6 @@ describe("StartApplicationModal", () => {
   beforeEach(() => {
     mockRouterPush.mockResolvedValue(true);
   });
-
   afterEach(() => {
     jest.resetAllMocks();
   });
@@ -64,7 +63,6 @@ describe("StartApplicationModal", () => {
 
   it("displays an API error if API returns an error", async () => {
     clientFetchMock.mockRejectedValue(new Error());
-
     render(
       <StartApplicationModal
         competitionId="1"
@@ -89,7 +87,6 @@ describe("StartApplicationModal", () => {
 
   it("displays an login error if API 401", async () => {
     clientFetchMock.mockRejectedValue(new Error("401 error", { cause: "401" }));
-
     render(
       <StartApplicationModal
         competitionId="1"
@@ -109,12 +106,12 @@ describe("StartApplicationModal", () => {
     act(() => saveButton.click());
 
     const error = await screen.findByText("loggedOut");
+
     expect(error).toBeInTheDocument();
   });
 
   it("re-routes on successful save", async () => {
     clientFetchMock.mockResolvedValue({ applicationId: "999" });
-
     render(
       <StartApplicationModal
         competitionId="1"
@@ -135,7 +132,6 @@ describe("StartApplicationModal", () => {
     await userEvent.selectOptions(select, fakeUserOrganization.organization_id);
 
     act(() => saveButton.click());
-
     expect(clientFetchMock).toHaveBeenCalledWith("/api/applications/start", {
       method: "POST",
       body: JSON.stringify({
@@ -149,7 +145,6 @@ describe("StartApplicationModal", () => {
       expect(mockRouterPush).toHaveBeenCalledWith(`/applications/999`);
     });
   });
-
   it("renders the standard modal for org-only competitions even when user has no organizations", async () => {
     clientFetchMock.mockResolvedValue({ applicationId: "999" });
 
