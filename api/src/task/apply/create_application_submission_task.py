@@ -278,6 +278,19 @@ class CreateApplicationSubmissionTask(Task):
                 audit_event=ApplicationAuditEvent.SUBMISSION_CREATED,
             )
 
+        logger.info(
+            "Finished processing application submission",
+            extra={
+                "application_id": application.application_id,
+                "competition_id": application.competition_id,
+                "application_submission_id": submission_id,
+                "submission_location": s3_path,
+                "submitted_by_user_id": application.submitted_by,
+                "is_individual": application.organization_id is None,
+                "organization_id": application.organization_id,
+            },
+        )
+
     def process_application_forms(self, submission: SubmissionContainer) -> None:
         """Turn an application form into a PDF and add to the zip file"""
         log_extra = {
