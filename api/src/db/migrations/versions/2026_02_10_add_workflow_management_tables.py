@@ -1,8 +1,8 @@
 """add workflow management tables
 
-Revision ID: 7b075965e2ad
-Revises: 1c069c3a6ccc
-Create Date: 2026-02-09 21:08:06.883018
+Revision ID: 2f5d2dbd4a75
+Revises: 20990ede6fc3
+Create Date: 2026-02-10 16:32:49.729308
 
 """
 
@@ -11,8 +11,8 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "7b075965e2ad"
-down_revision = "1c069c3a6ccc"
+revision = "2f5d2dbd4a75"
+down_revision = "20990ede6fc3"
 branch_labels = None
 depends_on = None
 

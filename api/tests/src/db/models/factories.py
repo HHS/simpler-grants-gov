@@ -3189,7 +3189,7 @@ class WorkflowOpportunityFactory(BaseFactory):
         model = WorkflowOpportunity
 
     workflow_opportunity_id = Generators.UuidObj
-    workflow = factory.SubFactory(WorkflowFactory, opportunity_publish_workflow=True)
+    workflow = factory.SubFactory(WorkflowFactory)
     workflow_id = factory.LazyAttribute(lambda o: o.workflow.workflow_id)
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
@@ -3200,7 +3200,7 @@ class WorkflowApplicationFactory(BaseFactory):
         model = WorkflowApplication
 
     workflow_application_id = Generators.UuidObj
-    workflow = factory.SubFactory(WorkflowFactory, application_submission_workflow=True)
+    workflow = factory.SubFactory(WorkflowFactory)
     workflow_id = factory.LazyAttribute(lambda o: o.workflow.workflow_id)
     application = factory.SubFactory(ApplicationFactory)
     application_id = factory.LazyAttribute(lambda o: o.application.application_id)
@@ -3211,7 +3211,7 @@ class WorkflowApplicationSubmissionFactory(BaseFactory):
         model = WorkflowApplicationSubmission
 
     workflow_application_submission_id = Generators.UuidObj
-    workflow = factory.SubFactory(WorkflowFactory, application_submission_workflow=True)
+    workflow = factory.SubFactory(WorkflowFactory)
     workflow_id = factory.LazyAttribute(lambda o: o.workflow.workflow_id)
     application_submission = factory.SubFactory(ApplicationSubmissionFactory)
     application_submission_id = factory.LazyAttribute(

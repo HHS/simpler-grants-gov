@@ -2,8 +2,6 @@
 
 from datetime import datetime, timedelta
 
-import pytest
-
 from src.constants.lookup_constants import ApprovalResponseType, ApprovalType, WorkflowType
 from tests.src.db.models.factories import (
     WorkflowApprovalFactory,
@@ -13,8 +11,7 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.usefixtures("enable_factory_create")
-def test_workflow_factory_create(db_session):
+def test_workflow_factory_create(db_session, enable_factory_create):
     """Test that the WorkflowFactory can build a Workflow instance."""
     workflow = WorkflowFactory.create()
     assert workflow.workflow_id is not None
@@ -22,8 +19,7 @@ def test_workflow_factory_create(db_session):
     assert workflow.is_active is True
 
 
-@pytest.mark.usefixtures("enable_factory_create")
-def test_opportunity_workflow_events_audits_approval_create(db_session):
+def test_opportunity_workflow_events_audits_approval_create(db_session, enable_factory_create):
     # 1. Create one opportunity workflow record reaching the final state
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.OPPORTUNITY_PUBLISH,
