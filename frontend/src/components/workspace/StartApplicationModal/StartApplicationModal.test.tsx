@@ -82,9 +82,9 @@ describe("StartApplicationModal", () => {
     act(() => saveButton.click());
 
     const error = await screen.findByText("error");
+
     expect(error).toBeInTheDocument();
   });
-
   it("displays an login error if API 401", async () => {
     clientFetchMock.mockRejectedValue(new Error("401 error", { cause: "401" }));
     render(
