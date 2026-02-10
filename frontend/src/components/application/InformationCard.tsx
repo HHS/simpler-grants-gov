@@ -9,8 +9,9 @@ import {
 import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Button,
   Grid,
   GridContainer,
@@ -53,6 +54,19 @@ const OrganizationDetailsDisplay = ({
         </div>
       </Grid>
     </>
+  );
+};
+
+type InlineActionLinkProps = {
+  onClick: () => void;
+  children: ReactNode;
+};
+
+const InlineActionLink = ({ onClick, children }: InlineActionLinkProps) => {
+  return (
+    <Button type="button" onClick={onClick} className="text-underline" unstyled>
+      {children}
+    </Button>
   );
 };
 
@@ -116,6 +130,13 @@ export const InformationCard = ({
     !hasOrganization && organizationEligible && isEditable;
   const [isTransferModalOpen, setIsTransferModalOpen] =
     useState<boolean>(false);
+  const individualEligible =
+    applicationDetails.competition.open_to_applicants.includes("individual");
+  const isOrganizationOnlyCompetition =
+    organizationEligible && !individualEligible;
+  const isIndividualOwnedApplication = !hasOrganization;
+  const shouldBlockSubmitForOrgOnly =
+    isOrganizationOnlyCompetition && isIndividualOwnedApplication;
 
   const openTransferModal = useCallback((): void => {
     setIsTransferModalOpen(true);
@@ -124,6 +145,12 @@ export const InformationCard = ({
   const handleTransferModalAfterClose = useCallback((): void => {
     setIsTransferModalOpen(false);
   }, []);
+
+  const alertBody: ReactNode = t.rich("unassociatedApplicationAlert.body", {
+    link: (content) => (
+      <InlineActionLink onClick={openTransferModal}>{content}</InlineActionLink>
+    ),
+  });
 
   useEffect(() => {
     if (!isTransferModalOpen) {
@@ -316,6 +343,7 @@ export const InformationCard = ({
               buttonText={t("submit")}
               submitHandler={applicationSubmitHandler}
               loading={submissionLoading}
+              disabled={shouldBlockSubmitForOrgOnly}
             />
           )}
           <ApplicationSubmissionDownload />
@@ -329,6 +357,12 @@ export const InformationCard = ({
       data-testid="information-card"
       className="border radius-md border-base-lighter padding-x-2 margin-y-4"
     >
+      {shouldBlockSubmitForOrgOnly ? (
+        <Alert headingLevel="h2" type="warning" slim>
+          {t("unassociatedApplicationAlert.title")}
+          {alertBody}
+        </Alert>
+      ) : null}
       <Grid row gap>
         <InformationCardDetails
           applicationSubmitHandler={applicationSubmitHandler}
@@ -342,13 +376,19 @@ export const SubmitApplicationButton = ({
   buttonText,
   loading,
   submitHandler,
+  disabled,
 }: {
   buttonText: string;
   loading: boolean;
   submitHandler: () => void;
+  disabled: boolean;
 }) => {
   return (
-    <Button type="button" disabled={!!loading} onClick={submitHandler}>
+    <Button
+      type="button"
+      disabled={!!loading || disabled}
+      onClick={submitHandler}
+    >
       <USWDSIcon name="upload_file" />
       {loading ? "Loading...  " : buttonText}
     </Button>
