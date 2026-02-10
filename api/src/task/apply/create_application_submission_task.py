@@ -282,6 +282,7 @@ class CreateApplicationSubmissionTask(Task):
             "Finished processing application submission",
             extra={
                 "application_id": application.application_id,
+                "opportunity_id": application.competition.opportunity_id,
                 "competition_id": application.competition_id,
                 "application_submission_id": submission_id,
                 "submission_location": s3_path,
