@@ -102,7 +102,7 @@ factories_to_skip = [
 ]
 
 
-def test_factory_create(enable_factory_create):
+def test_factory_create(db_session, enable_factory_create):
     """Iterate over all factories and verify that they are setup
     to work correctly by default. This doesn't guarantee that every
     use case for a given factory works, but is a nice sanity test
@@ -126,7 +126,11 @@ def test_factory_create(enable_factory_create):
                 continue
 
             try:
-                obj.create()
+                instance = obj.create()
+                # Some tests rely on specific data when pulling from a whole table
+                # Avoid breaking those by cleaning up what we just made. Also
+                # tests that deletes work properly for all our models/foreign keys.
+                db_session.delete(instance)
             except Exception:
                 # catch the error to add the factory name to the stack trace
                 # so it's a bit clearer which factory failed.
