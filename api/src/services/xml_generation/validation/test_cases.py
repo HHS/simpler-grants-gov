@@ -887,7 +887,6 @@ SF424A_TEST_CASES = [
         "json_input": {
             # Minimal required fields for XSD validation
             "program_type": "Non-Construction",
-            "form_version_identifier": "1.0",
             "confirmation": True,
             # Just the NonFederalResources section to validate
             "activity_line_items": [
