@@ -28,8 +28,8 @@ export const initializePlaywrightSessionSecrets = () => {
     return;
   }
   // eslint-disable-next-line
-  console.debug("Initializing Session Secrets");
-  clientJwtKey = encodeText(playwrightEnv.clientSessionSecret || "");
+  console.debug("Initializing TESTING Session Secrets");
+  clientJwtKey = encodeText(playwrightEnv.clientSessionSecret);
 };
 
 // 60 minute expiration, could probably do less but needs to be more than 10 mins so that it doesn't trigger a token refresh
