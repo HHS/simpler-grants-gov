@@ -22,6 +22,7 @@ from src.util.datetime_util import get_now_us_eastern_date
 logger = logging.getLogger(__name__)
 
 MTLS_CERT_HEADER_KEY = "X-Amzn-Mtls-Clientcert"
+USE_SOAP_JWT_HEADER_KEY = "Use-Soap-Jwt"
 
 
 class SOAPClientCertificateNotConfigured(Exception):
