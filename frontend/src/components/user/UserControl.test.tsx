@@ -2,7 +2,11 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { SignOutNavLink, UserDropdown } from "src/components/user/UserControl";
+import {
+  SignOutNavLink,
+  UserControl,
+  UserDropdown,
+} from "src/components/user/UserControl";
 
 const mockPush = jest.fn();
 const mockRefresh = jest.fn();
@@ -89,6 +93,52 @@ describe("SignOutNavLink", () => {
       expect(mockLogoutLocalUser).toHaveBeenCalled();
       expect(mockRefresh).toHaveBeenCalled();
       expect(onClick).toHaveBeenCalled();
+    });
+  });
+});
+
+describe("UserControl", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch = jest.fn(() => Promise.resolve({})) as jest.Mock;
+  });
+
+  it("renders LoginButton when user is not authenticated", () => {
+    mockUseUser.mockReturnValue({
+      user: { token: undefined },
+      hasBeenLoggedOut: false,
+      resetHasBeenLoggedOut: jest.fn(),
+      logoutLocalUser: mockLogoutLocalUser,
+    } as unknown as ReturnType<typeof mockUseUser>);
+    render(<UserControl localDev={false} />);
+
+    expect(
+      screen.getByRole("link", { name: "navLinks.login" }),
+    ).toBeInTheDocument();
+  });
+
+  it("calls logout and refresh when clicking logout in user dropdown (LogoutNavItem)", async () => {
+    mockUseUser.mockReturnValue({
+      user: { token: "faketoken" },
+      hasBeenLoggedOut: false,
+      resetHasBeenLoggedOut: jest.fn(),
+      logoutLocalUser: mockLogoutLocalUser,
+    });
+    const user = userEvent.setup();
+    render(<UserControl localDev={false} />);
+
+    const menuButton = screen.getByTestId("navDropDownButton");
+    await user.click(menuButton);
+
+    const logoutLink = screen.getByText("logout");
+    await user.click(logoutLink);
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith("/api/auth/logout", {
+        method: "POST",
+      });
+      expect(mockLogoutLocalUser).toHaveBeenCalled();
+      expect(mockRefresh).toHaveBeenCalled();
     });
   });
 });

@@ -1,7 +1,8 @@
 import userEvent from "@testing-library/user-event";
 import { Response } from "node-fetch";
 import { fakeTestUser } from "src/utils/testing/fixtures";
-import { render, screen, waitFor } from "tests/react-utils";
+import * as userUtils from "src/utils/userUtils";
+import { render, screen, waitFor, within } from "tests/react-utils";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
 
@@ -56,6 +57,10 @@ jest.mock("src/services/auth/useUser", () => ({
 
 jest.mock("src/hooks/useSnackbar", () => ({
   useSnackbar: () => mockUseSnackBar() as unknown,
+}));
+
+jest.mock("src/utils/userUtils", () => ({
+  storeCurrentPage: jest.fn(),
 }));
 
 describe("Header", () => {
@@ -298,6 +303,62 @@ describe("Header", () => {
 
     const testUserDropdown = screen.queryByRole("combobox");
     expect(testUserDropdown).not.toBeInTheDocument();
+  });
+  it("closes mobile nav when Escape is pressed", async () => {
+    const user = userEvent.setup();
+    render(<Header {...props} />);
+    const menuButton = screen.getByTestId("navMenuButton");
+    await user.click(menuButton);
+    expect(
+      document.querySelector(".usa-overlay.is-visible"),
+    ).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+
+    expect(
+      document.querySelector(".usa-overlay.is-visible"),
+    ).not.toBeInTheDocument();
+  });
+  it("closes mobile nav when overlay is clicked", async () => {
+    const user = userEvent.setup();
+    render(<Header {...props} />);
+    const menuButton = screen.getByTestId("navMenuButton");
+    await user.click(menuButton);
+    const overlay = document.querySelector(".usa-overlay.is-visible");
+    expect(overlay).toBeInTheDocument();
+
+    await user.click(overlay as HTMLElement);
+
+    expect(
+      document.querySelector(".usa-overlay.is-visible"),
+    ).not.toBeInTheDocument();
+  });
+  it("calls storeCurrentPage when sign-in is clicked in mobile menu", async () => {
+    (userUtils.storeCurrentPage as jest.Mock).mockClear();
+    mockUseUser.mockReturnValue({
+      user: { token: undefined },
+      hasBeenLoggedOut: false,
+      resetHasBeenLoggedOut: jest.fn(),
+    });
+    const user = userEvent.setup();
+    render(<Header {...props} />);
+    const menuButton = screen.getByTestId("navMenuButton");
+    await user.click(menuButton);
+    const signInLinks = screen.getAllByRole("link", { name: /sign in/i });
+    const mobileSignIn = signInLinks.find((el) =>
+      el.getAttribute("class")?.includes("desktop:display-none"),
+    );
+    expect(mobileSignIn).toBeTruthy();
+    const signInLabel = within(mobileSignIn!).getByText("Sign in");
+    await user.click(signInLabel);
+
+    expect(userUtils.storeCurrentPage).toHaveBeenCalled();
+  });
+  it("renders with locale for language selection", () => {
+    render(<Header locale="es/" />);
+    expect(
+      screen.getByRole("button", { name: /Here’s how you know/i }),
+    ).toBeInTheDocument();
   });
 
   describe("Authentication and nav", () => {
