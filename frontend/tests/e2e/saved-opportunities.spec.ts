@@ -50,7 +50,7 @@ test("Working saved opportunities page link appears in nav when logged in", asyn
   }
 
   // find the Workspace nav dropdown item and open it
-  const dropDownButton = page.locator("#nav-dropdown-button-4");
+  const dropDownButton = page.locator('button:has-text("Workspace"), button[aria-controls="Workspace"]').first();
   await expect(dropDownButton).toBeInViewport();
   await dropDownButton.click();
 
