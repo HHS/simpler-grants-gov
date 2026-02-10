@@ -116,12 +116,6 @@ def set_env_var_defaults(monkeypatch_session):
 
     # We will set this to false so we skip logs during unit tests and keep enabled during dev.
     monkeypatch_session.setenv("SOAP_ENABLE_VERBOSE_LOGGING", "0")
-    monkeypatch_session.setenv("SOAP_PARTNER_GATEWAY_URI", "soap_partner_gateway_uri")
-    monkeypatch_session.setenv("SOAP_PARTNER_GATEWAY_AUTH_KEY", "soap_partner_gateway_auth_key")
-    monkeypatch_session.setenv(
-        "SOAP_PRIVATE_KEYS",
-        '{"0000000000000000000000000000000000000000000000000000000000000000": {}}',
-    )
 
 
 @pytest.fixture
