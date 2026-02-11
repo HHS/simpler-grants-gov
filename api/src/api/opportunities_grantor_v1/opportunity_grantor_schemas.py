@@ -89,7 +89,7 @@ class OpportunityCreateRequestSchema(Schema):
         required=True,
         metadata={
             "description": "The UUID of the agency that will own this opportunity",
-            "example": "550e8400-e29b-41d4-a716-446655440000",
+            "example": "add4b88f-e895-4ca9-92f4-38ed34055247",
         },
     )
     category = fields.Enum(
@@ -129,7 +129,7 @@ class OpportunityGrantorSchema(Schema):
     agency_id = fields.UUID(
         metadata={
             "description": "The UUID of the agency that owns this opportunity",
-            "example": "550e8400-e29b-41d4-a716-446655440000",
+            "example": "add4b88f-e895-4ca9-92f4-38ed34055247",
         },
     )
     agency_code = fields.String(
@@ -168,8 +168,8 @@ class OpportunityCreateResponseSchema(AbstractResponseSchema):
         "opportunity_id": "550e8400-e29b-41d4-a716-446655440000",
         "opportunity_number": "ABC-2026-001",
         "opportunity_title": "Research Grant for Climate Innovation",
-        "agency_id": "550e8400-e29b-41d4-a716-446655440000",
-        "agency_code": "US-ABC",
+        "agency_id": "add4b88f-e895-4ca9-92f4-38ed34055247",
+        "agency_code": "DOC",
         "category": "discretionary",
         "category_explanation": "Competitive research grant",
         "is_draft": true,
