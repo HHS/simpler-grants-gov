@@ -1,0 +1,53 @@
+name: Create Merged Test Report
+on: workflow_call
+
+env:
+  NODE_VERSION: 24
+  LOCKFILE_PATH: ./frontend/package-lock.json
+  PACKAGE_MANAGER: npm
+  NODE_OPTIONS: --dns-result-order=ipv4first
+
+jobs:
+  e2e-create-report:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+
+      - run: |
+          npm ci
+          npx playwright install --with-deps
+
+      - name: Download All Blob Reports
+        uses: actions/download-artifact@v4
+        with:
+          path: frontend/all-blob-reports
+          pattern: blob-report-shard-*
+          merge-multiple: true
+
+      - name: Verify Downloaded Artifacts
+        run: |
+          echo "Contents of all-blob-reports after download:"
+          ls -R all-blob-reports*
+
+      - name: Merge Blob Reports into HTML
+        run: npx playwright merge-reports --reporter html ./all-blob-reports
+
+      - name: Verify Downloaded Artifacts
+        run: |
+          echo "Contents of all-blob-reports after download:"
+          ls -R playwright*
+
+      - name: Upload Merged HTML Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: merged-html-report
+          path: frontend/playwright-report
+          retention-days: 30

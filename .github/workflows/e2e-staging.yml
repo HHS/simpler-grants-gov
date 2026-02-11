@@ -9,16 +9,33 @@ on:
         description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
         required: true
         type: string
+      target:
+        description: "application environment to run tests against (dev / prod TK)"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  e2e-tests-staging:
-    uses: ./.github/workflows/e2e-tests.yml
-    with:
-      version: ${{ inputs.version || github.ref }}
-      target: "staging"
-    secrets: inherit
+  e2e-tests-deployed:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: true
+      matrix:
+        shard: [1, 2, 3, 4]
+        total_shards: [4]
 
+    steps:
+      - uses: ./.github/workflows/e2e
+        with:
+          version: ${{ inputs.version || github.ref }}
+          target: ${{ inputs.target }}
+          total_shards: ${{ matrix.total_shards }}
+          current_shard: ${{ matrix.shard }}
+      - uses: ./.github/workflows/e2e/e2e-create-report.yml
+        if: ${{ !cancelled() }}
