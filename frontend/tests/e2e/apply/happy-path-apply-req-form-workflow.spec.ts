@@ -10,7 +10,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { openMobileNav } from "tests/e2e/playwrightUtils";
 import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
 
-const { targetEnv } = playwrightEnv;
+const { baseUrl, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-BR-8037-OU-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
@@ -27,7 +27,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
   if (targetEnv === "local") {
     // Use test-user spoofing
     await createSpoofedSessionCookie(context);
-    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     // console.log("✓ Local test user session established");
 
     // Fallback: use test-user dropdown if present
@@ -45,7 +45,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
       // console.log("ℹ No test user dropdown found - proceeding with cookie session");
     }
   } else if (targetEnv === "staging") {
-    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const signOutButton = await performStagingLogin(page, !!isMobile);
     if (!signOutButton) {
       throw new Error("signOutButton was not found after performStagingLogin");
@@ -63,7 +63,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
 
   // Step 3: Navigate to opportunity page
   // console.log("Step 3: Navigating to opportunity page...");
-  await page.goto(OPPORTUNITY_URL, {
+  await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
     waitUntil: "domcontentloaded",
   });
   await page.waitForTimeout(3000); // Wait for page to fully load
