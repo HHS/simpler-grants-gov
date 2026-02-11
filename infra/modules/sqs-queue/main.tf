@@ -3,6 +3,10 @@ resource "aws_sqs_queue" "dead_letter" {
   name                      = "${var.name}_dlq"
   message_retention_seconds = var.message_retention_seconds
   sqs_managed_sse_enabled   = true
+
+  tags = {
+    name = "${var.name}_dlq"
+  }
 }
 
 # Main queue with dead letter queue redrive policy
@@ -16,6 +20,10 @@ resource "aws_sqs_queue" "main" {
     deadLetterTargetArn = aws_sqs_queue.dead_letter.arn
     maxReceiveCount     = var.max_receive_count
   })
+
+  tags = {
+    name = var.name
+  }
 }
 
 # Allow the dead letter queue to receive messages from the main queue
@@ -49,4 +57,8 @@ data "aws_iam_policy_document" "access_policy" {
 resource "aws_iam_policy" "access_policy" {
   name   = "${var.name}-access"
   policy = data.aws_iam_policy_document.access_policy.json
+
+  tags = {
+    name = "${var.name}-access"
+  }
 }
