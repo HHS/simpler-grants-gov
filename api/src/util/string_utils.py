@@ -1,19 +1,7 @@
 import re
 import uuid
 
-BLOCK_TAGS = [
-    "p",
-    "div",
-    "section",
-    "article",
-    "header",
-    "footer",
-    "main",
-    "nav",
-    "aside",
-    "blockquote",
-    "ul",
-]
+from bs4 import BeautifulSoup, NavigableString
 
 
 def join_list(joining_list: list | None, join_txt: str = "\n") -> str:
@@ -60,63 +48,58 @@ def _strip_partial_tag(html: str) -> str:
     return html
 
 
-def _truncate_preserving_html(html_str: str) -> str:
-    tag_stack: list = []  # Keep track of open tags
-    output_tokens: list = []  # list of tokens
+def truncate_html_inline(value: str, max_length: int, suffix: str) -> str:
+    """
+    Truncate visible text inside HTML while preserving valid structure.
 
-    # Match any tags or text
-    tag_regex = re.compile(
-        r"<[^>]+>"  # Match one or more HTML tags (starts with < and excludes the closing > while matching everything inside the tag.)
-        r"|"  # Or
-        r"[^<]+"  # Match one or more characters (excluding <)
-    )
-
-    for match in tag_regex.finditer(html_str):
-        token = match.group(0)  # substring matched by regex
-        output_tokens.append(token)
-
-        if token.startswith("<"):  # Open Tag
-            tag_name = re.match(
-                r"</"  # Matches the begining of closing tag of an element
-                r"(\w+)",  # Matches one or more word characters
-                token,
-            )
-            if tag_name and token[1] == "/":  # Closing tag
-                if tag_stack and tag_stack[-1] == tag_name.group(
-                    1
-                ):  # check if closing tag matches the last opened tag
-                    tag_stack.pop()  # remove matched tag
-            else:
-                # Add non self-closing tags
-                tag_name = re.match(
-                    r"<"  # Matches the opening angle bracket of an HTML tag,
-                    r"(\w+)",  # Matches one or more word characters
-                    token,
-                )
-                if tag_name and not token.endswith("/>"):
-                    tag_stack.append(tag_name.group(1))
-
-    # Remove block-level closing tags from the end
-    while output_tokens:
-        last = output_tokens[-1]
-        closing_match = re.match(r"</(\w+)>", last)
-        if closing_match and closing_match.group(1) in BLOCK_TAGS:
-            output_tokens.pop()
-        else:
-            break
-    # Close any remaining open tags (excluding block-level)
-    closing_tags = [f"</{tag}>" for tag in reversed(tag_stack) if tag not in BLOCK_TAGS]
-    return "".join(output_tokens) + "".join(closing_tags)
-
-
-def truncate_html_safe(value: str, max_length: int) -> str:
+    - Only text nodes are truncated (never tags).
+    - HTML structure remains valid.
+    - The suffix is appended inline inside the last text node.
+    """
     if not value or len(value) <= max_length:
         return value
 
-    truncated = value[:max_length]
-    # Prevent cutting in the middle of a tag
-    truncated = _strip_partial_tag(truncated)
-    if contains_regex(truncated, r"<[^>]+>"):
-        truncated = _truncate_preserving_html(truncated)
+    # Parse the HTML into a tree structure
+    soup = BeautifulSoup(value, "html.parser")
 
-    return truncated
+    total_length = 0
+    reached_limit = False
+
+    # Walk through all text nodes in document order
+    for text_node in soup.find_all(string=True):
+
+        if reached_limit:
+            # Remove any remaining text after truncation point
+            text_node.extract()
+            continue
+
+        text = str(text_node)
+        remaining = max_length - total_length
+
+        if len(text) <= remaining:
+            # Entire text node fits within limit
+            total_length += len(text)
+        else:
+            # Truncate inside the text node
+            truncated_text = text[:remaining].rstrip()
+
+            # Create new truncated text node
+            new_text_node = NavigableString(truncated_text)
+
+            # Replace original text node with truncated one
+            text_node.replace_with(new_text_node)
+
+            # Append suffix
+            suffix_fragment = BeautifulSoup(suffix, "html.parser")
+            new_text_node.insert_after(suffix_fragment)
+
+            # Remove all remaining content after this point
+            node = suffix_fragment.next_sibling
+            while node:
+                next_node = node.next_sibling
+                node.extract()
+                node = next_node
+
+            break
+
+    return str(soup)
