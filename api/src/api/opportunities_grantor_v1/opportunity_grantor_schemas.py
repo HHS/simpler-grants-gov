@@ -107,3 +107,75 @@ class OpportunityCreateRequestSchema(Schema):
             "example": "Competitive research grant",
         },
     )
+
+
+class OpportunityGrantorSchema(Schema):
+    """Schema for opportunity data in grantor-facing API responses
+    
+    This schema defines the opportunity fields that are returned in grantor-facing API responses.
+    """
+    opportunity_id = fields.UUID(
+        metadata={"description": "The internal ID of the opportunity"},
+    )
+    opportunity_number = fields.String(
+        metadata={"description": "The funding opportunity number", "example": "ABC-2026-001"},
+    )
+    opportunity_title = fields.String(
+        metadata={
+            "description": "The title of the opportunity",
+            "example": "Research Grant for Climate Innovation",
+        },
+    )
+    agency_id = fields.UUID(
+        metadata={
+            "description": "The UUID of the agency that owns this opportunity",
+            "example": "550e8400-e29b-41d4-a716-446655440000",
+        },
+    )
+    agency_code = fields.String(
+        metadata={"description": "The agency code", "example": "US-ABC"},
+    )
+    category = fields.Enum(
+        OpportunityCategory,
+        metadata={
+            "description": "The opportunity category",
+            "example": OpportunityCategory.DISCRETIONARY,
+        },
+    )
+    category_explanation = fields.String(
+        metadata={
+            "description": "Explanation of the category",
+            "example": "Competitive research grant",
+        },
+    )
+    is_draft = fields.Boolean(
+        metadata={
+            "description": "Whether the opportunity is a draft",
+            "example": True,
+        },
+    )
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
+
+
+class OpportunityCreateResponseSchema(AbstractResponseSchema):
+    """Schema for POST /v1/grantor/opportunities/ response
+    
+    Example Response:
+    {
+      "message": "Success",
+      "data": {
+        "opportunity_id": "550e8400-e29b-41d4-a716-446655440000",
+        "opportunity_number": "ABC-2026-001",
+        "opportunity_title": "Research Grant for Climate Innovation",
+        "agency_id": "550e8400-e29b-41d4-a716-446655440000",
+        "agency_code": "US-ABC",
+        "category": "discretionary",
+        "category_explanation": "Competitive research grant",
+        "is_draft": true,
+        "created_at": "2026-02-10T16:20:00Z",
+        "updated_at": "2026-02-10T16:20:00Z"
+      }
+    }
+    """
+    data = fields.Nested(OpportunityGrantorSchema())
