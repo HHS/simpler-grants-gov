@@ -2,10 +2,6 @@ output "app_name" {
   value = local.app_name
 }
 
-output "account_names_by_environment" {
-  value = local.account_names_by_environment
-}
-
 output "build_repository_config" {
   value = local.build_repository_config
 }
@@ -30,10 +26,6 @@ output "has_incident_management_service" {
   value = local.has_incident_management_service
 }
 
-output "image_repository_name" {
-  value = local.image_repository_name
-}
-
 output "enable_identity_provider" {
   value = local.enable_identity_provider
 }
@@ -45,4 +37,3 @@ output "enable_notifications" {
 output "shared_network_name" {
   value = local.shared_network_name
 }
-
