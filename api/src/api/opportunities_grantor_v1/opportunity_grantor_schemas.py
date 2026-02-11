@@ -1,13 +1,8 @@
 from enum import StrEnum
 
 from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import (
-    AbstractResponseSchema,
-    FileResponseSchema,
-)
-from src.constants.lookup_constants import (
-    OpportunityCategory,
-)
+from src.api.schemas.response_schema import AbstractResponseSchema, FileResponseSchema
+from src.constants.lookup_constants import OpportunityCategory
 
 
 class SearchResponseFormat(StrEnum):

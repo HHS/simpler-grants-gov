@@ -64,6 +64,10 @@ class EndpointConfig(PydanticBaseEnvConfig):
 
     enable_workflow_endpoints: bool = Field(False, alias="ENABLE_WORKFLOW_ENDPOINTS")
 
+    enable_grantor_opportunity_endpoints: bool = Field(
+        False, alias="ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS"
+    )
+
     # Do not ever change this to True, this controls endpoints we only
     # want to exist for local development.
     enable_local_endpoints: bool = Field(False, alias="ENABLE_LOCAL_ENDPOINTS")
@@ -168,15 +172,21 @@ def configure_app(app: APIFlask) -> None:
 
 
 def register_blueprints(app: APIFlask) -> None:
+
+    endpoint_config = EndpointConfig()
+
     app.register_blueprint(healthcheck_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
-    app.register_blueprint(opportunities_grantor_v1_blueprint)
+
+    # Endpoint for Create Opportunity
+    if endpoint_config.enable_grantor_opportunity_endpoints:
+        app.register_blueprint(opportunities_grantor_v1_blueprint)
+
     app.register_blueprint(extracts_v1_blueprint)
     app.register_blueprint(agencies_v1_blueprint)
     app.register_blueprint(organizations_v1_blueprint)
     app.register_blueprint(internal_blueprint)
 
-    endpoint_config = EndpointConfig()
     app.register_blueprint(user_blueprint)
 
     # Endpoints for apply functionality

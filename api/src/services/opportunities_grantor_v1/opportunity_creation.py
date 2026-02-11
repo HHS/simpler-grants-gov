@@ -1,4 +1,3 @@
-
 import src.adapters.db as db
 from src.db.models.opportunity_models import Opportunity
 from src.services.opportunities_grantor_v1.get_agency import get_agency

@@ -1,6 +1,5 @@
 import logging
 
-
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.api.opportunities_grantor_v1.opportunity_grantor_schemas as opportunity_grantor_schemas
