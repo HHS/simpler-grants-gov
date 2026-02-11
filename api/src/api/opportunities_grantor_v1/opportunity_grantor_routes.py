@@ -175,7 +175,7 @@ examples = {
 def opportunity_create(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     """Create a new opportunity"""
     add_extra_data_to_current_request_logs(flatten_dict(json_data, prefix="request.body"))
-    logger.info("POST /v1/grantor/opportunities/")
+    logger.info("POST /v1/grantors/opportunities/")
 
     with db_session.begin():
         from flask_login import current_user

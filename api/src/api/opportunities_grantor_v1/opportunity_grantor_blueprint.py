@@ -5,5 +5,5 @@ opportunity_grantor_blueprint = APIBlueprint(
     __name__,
     tag="Opportunity v1 - for Grantors",
     cli_group="opportunity_grantor_v1",
-    url_prefix="/v1/grantor",
+    url_prefix="/v1/grantors",
 )

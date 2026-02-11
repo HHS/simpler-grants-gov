@@ -31,7 +31,7 @@ class OpportunityAttachmentV1Schema(FileResponseSchema):
 
 
 class OpportunityCreateRequestSchema(Schema):
-    """Schema for POST /v1/grantor/opportunities/ request
+    """Schema for POST /v1/grantors/opportunities/ request
 
     Example Request:
     {
@@ -141,7 +141,7 @@ class OpportunityGrantorSchema(Schema):
 
 
 class OpportunityCreateResponseSchema(AbstractResponseSchema):
-    """Schema for POST /v1/grantor/opportunities/ response
+    """Schema for POST /v1/grantors/opportunities/ response
 
     Example Response:
     {
