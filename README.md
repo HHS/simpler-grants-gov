@@ -1,4 +1,5 @@
 # [Simpler.Grants.gov](https://simpler.grants.gov/)
+[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/HHS/simpler-grants-gov)
 
 A modernization effort for [Grants.gov](https://grants.gov/)
 
