@@ -1,8 +1,6 @@
-import { Meta } from "@storybook/react";
-
 import GrantsIdentifier from "src/components/GrantsIdentifier";
 
-const meta: Meta<typeof GrantsIdentifier> = {
+const meta = {
   title: "Components/Layout/Identifier",
   component: GrantsIdentifier,
 };
