@@ -1,10 +1,8 @@
 import logging
 
 from src.adapters import db
-from src.workflow.state_persistence.base_state_persistence_model import (
-    BaseStatePersistenceModel,
-    Workflow,
-)
+from src.db.models.workflow_models import Workflow
+from src.workflow.state_persistence.base_state_persistence_model import BaseStatePersistenceModel
 from src.workflow.workflow_errors import InvalidEntityForWorkflow
 
 logger = logging.getLogger(__name__)

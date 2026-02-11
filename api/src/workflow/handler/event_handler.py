@@ -7,12 +7,12 @@ from statemachine.exceptions import InvalidStateValue, TransitionNotAllowed
 from src.adapters import db
 from src.constants.lookup_constants import WorkflowEventType, WorkflowType
 from src.db.models.user_models import User
+from src.db.models.workflow_models import Workflow
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_event import WorkflowEvent
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.workflow_service import get_workflow_entities, is_event_valid_for_workflow
-from src.workflow.state_persistence.base_state_persistence_model import Workflow
 from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_constants import WorkflowConstants
 from src.workflow.workflow_errors import (
@@ -144,7 +144,7 @@ class EventHandler:
             is_active=True,
             **workflow_entities
         )
-        # self.db_session.add(workflow) # TODO - when DB table exists
+        self.db_session.add(workflow)
 
         return StateMachineEvent(
             event_to_send=WorkflowConstants.START_WORKFLOW,

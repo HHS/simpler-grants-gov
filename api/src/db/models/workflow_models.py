@@ -1,8 +1,10 @@
 import uuid
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
@@ -44,25 +46,59 @@ class Workflow(ApiSchemaTable, TimestampMixin):
         back_populates="workflow", uselist=True, cascade="all, delete-orphan"
     )
 
-    workflow_audit: Mapped[list[WorkflowAudit]] = relationship(
+    workflow_audits: Mapped[list[WorkflowAudit]] = relationship(
         back_populates="workflow", uselist=True, cascade="all, delete-orphan"
     )
 
-    workflow_approval: Mapped[list[WorkflowApproval]] = relationship(
+    workflow_approvals: Mapped[list[WorkflowApproval]] = relationship(
         back_populates="workflow", uselist=True, cascade="all, delete-orphan"
     )
 
-    workflow_opportunity: Mapped[list[WorkflowOpportunity]] = relationship(
+    workflow_opportunities: Mapped[list[WorkflowOpportunity]] = relationship(
         back_populates="workflow", uselist=True, cascade="all, delete-orphan"
     )
 
-    workflow_application: Mapped[list[WorkflowApplication]] = relationship(
+    workflow_applications: Mapped[list[WorkflowApplication]] = relationship(
         back_populates="workflow", uselist=True, cascade="all, delete-orphan"
     )
 
-    workflow_application_submission: Mapped[list[WorkflowApplicationSubmission]] = relationship(
+    workflow_application_submissions: Mapped[list[WorkflowApplicationSubmission]] = relationship(
         back_populates="workflow", uselist=True, cascade="all, delete-orphan"
     )
+
+    # Create an association proxy for each of the entity relationships
+    # https://docs.sqlalchemy.org/en/20/orm/extensions/associationproxy.html
+    #
+    # This lets us use these values as if they were just ordinary lists on a python
+    # object. For example::
+    #
+    #   workflow.opportunities.append(opportunity)
+    #
+    opportunities: AssociationProxy[list[Opportunity]] = association_proxy(
+        "workflow_opportunities",
+        "opportunity",
+        creator=lambda obj: WorkflowOpportunity(opportunity=obj),
+    )
+
+    applications: AssociationProxy[list[Application]] = association_proxy(
+        "workflow_applications",
+        "application",
+        creator=lambda obj: WorkflowApplication(application=obj),
+    )
+
+    application_submissions: AssociationProxy[list[ApplicationSubmission]] = association_proxy(
+        "workflow_application_submissions",
+        "application_submission",
+        creator=lambda obj: WorkflowApplicationSubmission(application_submission=obj),
+    )
+
+    def get_log_extra(self) -> dict[str, Any]:
+        return {
+            "workflow_id": self.workflow_id,
+            "workflow_type": self.workflow_type,
+            "current_workflow_state": self.current_workflow_state,
+            "is_active": self.is_active,
+        }
 
 
 class WorkflowEventHistory(ApiSchemaTable, TimestampMixin):
@@ -116,7 +152,7 @@ class WorkflowAudit(ApiSchemaTable, TimestampMixin):
         UUID, ForeignKey(Workflow.workflow_id), nullable=False
     )
     workflow: Mapped[Workflow] = relationship(
-        Workflow, back_populates="workflow_audit", single_parent=True
+        Workflow, back_populates="workflow_audits", single_parent=True
     )
 
     acting_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
@@ -201,7 +237,7 @@ class WorkflowOpportunity(ApiSchemaTable, TimestampMixin):
 
     workflow_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Workflow.workflow_id))
     workflow: Mapped[Workflow] = relationship(
-        Workflow, back_populates="workflow_opportunity", single_parent=True
+        Workflow, back_populates="workflow_opportunities", single_parent=True
     )
 
     opportunity_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Opportunity.opportunity_id))
@@ -226,7 +262,7 @@ class WorkflowApplication(ApiSchemaTable, TimestampMixin):
 
     workflow_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Workflow.workflow_id))
     workflow: Mapped[Workflow] = relationship(
-        Workflow, back_populates="workflow_application", single_parent=True
+        Workflow, back_populates="workflow_applications", single_parent=True
     )
 
     application_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Application.application_id))
@@ -251,7 +287,7 @@ class WorkflowApplicationSubmission(ApiSchemaTable, TimestampMixin):
 
     workflow_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Workflow.workflow_id))
     workflow: Mapped[Workflow] = relationship(
-        Workflow, back_populates="workflow_application_submission", single_parent=True
+        Workflow, back_populates="workflow_application_submissions", single_parent=True
     )
 
     application_submission_id: Mapped[uuid.UUID] = mapped_column(

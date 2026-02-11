@@ -1,8 +1,8 @@
 import dataclasses
 
 from src.db.models.user_models import User
+from src.db.models.workflow_models import Workflow
 from src.workflow.base_state_machine import BaseStateMachine
-from src.workflow.state_persistence.base_state_persistence_model import Workflow
 from src.workflow.workflow_config import WorkflowConfig
 
 

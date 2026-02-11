@@ -1,22 +1,14 @@
-import uuid
-
 import pytest
 
-from src.workflow.state_persistence.base_state_persistence_model import Workflow
 from src.workflow.state_persistence.opportunity_persistence_model import OpportunityPersistenceModel
 from src.workflow.workflow_errors import InvalidEntityForWorkflow
-from tests.src.db.models.factories import OpportunityFactory
+from tests.src.db.models.factories import OpportunityFactory, WorkflowFactory
 
 
 def test_opportunity_persistence_model(db_session, enable_factory_create):
     opportunity = OpportunityFactory.create()
-    workflow = Workflow(
-        workflow_id=uuid.uuid4(),
-        workflow_type="whatever",
-        current_workflow_state="start",
-        is_active=True,
-        opportunities=[opportunity],
-    )
+
+    workflow = WorkflowFactory.create(opportunities=[opportunity])
 
     model = OpportunityPersistenceModel(db_session, workflow)
     assert model.opportunity.opportunity_id == opportunity.opportunity_id
@@ -24,14 +16,7 @@ def test_opportunity_persistence_model(db_session, enable_factory_create):
 
 
 def test_opportunity_persistence_no_opportunity(db_session, enable_factory_create):
-
-    workflow = Workflow(
-        workflow_id=uuid.uuid4(),
-        workflow_type="whatever",
-        current_workflow_state="start",
-        is_active=True,
-        opportunities=[],
-    )
+    workflow = WorkflowFactory.create(opportunities=[])
 
     with pytest.raises(
         InvalidEntityForWorkflow, match="Expected only a single opportunity for workflow"
@@ -40,14 +25,7 @@ def test_opportunity_persistence_no_opportunity(db_session, enable_factory_creat
 
 
 def test_opportunity_persistence_multiple_opportunity(db_session, enable_factory_create):
-
-    workflow = Workflow(
-        workflow_id=uuid.uuid4(),
-        workflow_type="whatever",
-        current_workflow_state="start",
-        is_active=True,
-        opportunities=OpportunityFactory.create_batch(size=2),
-    )
+    workflow = WorkflowFactory.create(opportunities=OpportunityFactory.create_batch(size=2))
 
     with pytest.raises(
         InvalidEntityForWorkflow, match="Expected only a single opportunity for workflow"

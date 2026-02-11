@@ -1,4 +1,5 @@
 from enum import StrEnum
+from typing import Any
 
 from statemachine import Event
 from statemachine.states import States
@@ -46,7 +47,7 @@ class InitialPrototypeStateMachine(BaseStateMachine):
         states.MIDDLE.to(states.END),
     )
 
-    def __init__(self, model: OpportunityPersistenceModel, **kwargs):
+    def __init__(self, model: OpportunityPersistenceModel, **kwargs: Any):
         super().__init__(model=model, **kwargs)
         self.opportunity = model.opportunity
         self.db_session = model.db_session

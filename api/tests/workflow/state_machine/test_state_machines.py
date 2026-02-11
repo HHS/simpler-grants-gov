@@ -10,7 +10,7 @@ from enum import StrEnum
 from statemachine import Event
 from statemachine.states import States
 
-from src.constants.lookup_constants import WorkflowEntityType
+from src.constants.lookup_constants import WorkflowEntityType, WorkflowType
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.registry.workflow_registry import WorkflowRegistry
@@ -31,7 +31,7 @@ class BasicState(StrEnum):
 
 
 basic_test_workflow_config = WorkflowConfig(
-    workflow_type="basic_test_workflow",
+    workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
     persistence_model_cls=OpportunityPersistenceModel,
     entity_types=[WorkflowEntityType.OPPORTUNITY],
     approval_mapping={},

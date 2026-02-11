@@ -32,7 +32,7 @@ class WorkflowRegistry:
         """
 
         def decorator(state_machine_cls: type[BaseStateMachine]) -> type[BaseStateMachine]:
-            if state_machine_cls in cls._workflow_registry:
+            if config.workflow_type in cls._workflow_registry:
                 raise Exception(
                     f"Cannot attach workflow config to state machine {state_machine_cls.__name__}, state machine already registered."
                 )

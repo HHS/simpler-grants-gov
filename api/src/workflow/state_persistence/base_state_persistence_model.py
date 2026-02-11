@@ -1,42 +1,10 @@
-import dataclasses
-import uuid
-from abc import ABC
-from typing import Any
-
 import statemachine.state
 
 import src.adapters.db as db
-from src.constants.lookup_constants import WorkflowType
-from src.db.models.competition_models import Application
-from src.db.models.opportunity_models import Opportunity
+from src.db.models.workflow_models import Workflow
 
 
-# TODO - need the workflow table for this
-# until that gets made, make a dummy "workflow"
-# just to have everything wired up
-@dataclasses.dataclass
-class Workflow:
-
-    workflow_id: uuid.UUID
-
-    workflow_type: WorkflowType
-
-    current_workflow_state: str
-    is_active: bool
-
-    opportunities: list[Opportunity] = dataclasses.field(default_factory=list)
-    applications: list[Application] = dataclasses.field(default_factory=list)
-
-    def get_log_extra(self) -> dict[str, Any]:
-        return {
-            "workflow_id": self.workflow_id,
-            "workflow_type": self.workflow_type,
-            "current_workflow_state": self.current_workflow_state,
-            "is_active": self.is_active,
-        }
-
-
-class BaseStatePersistenceModel(ABC):
+class BaseStatePersistenceModel:
     """Base model for handling persistence of workflow state machine
     data to the database.
 

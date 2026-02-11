@@ -1,4 +1,3 @@
-
 from src.constants.lookup_constants import WorkflowType
 from src.workflow.handler.event_handler import EventHandler
 from src.workflow.state_machine.initial_prototype_state_machine import (
@@ -48,4 +47,9 @@ def test_initial_prototype_state_machine(db_session, enable_factory_create):
     assert state_machine.workflow.current_workflow_state == InitialPrototypeState.END
     assert state_machine.workflow.is_active is False
 
-    # TODO - other checks
+    assert len(state_machine.transition_history) == 1
+    state_machine_event = state_machine.transition_history[0]
+    assert state_machine_event.event_to_send == "middle_to_end"
+    assert state_machine_event.acting_user.user_id == user.user_id
+    assert state_machine_event.workflow is state_machine.workflow
+    assert state_machine_event.state_machine_cls is InitialPrototypeStateMachine

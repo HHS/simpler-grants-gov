@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from sqlalchemy import select
 
@@ -22,12 +23,11 @@ logger = logging.getLogger(__name__)
 def get_workflow_entities(
     db_session: db.Session, entities: list[WorkflowEntity], config: WorkflowConfig
 ) -> dict[str, list[ApiSchemaTable]]:
-    # TODO - add details to relevant places that this needs
-    #        to be maintained and updated with new entities
+    """Get the workflow entities for a given workflow type - erroring if the entity can't be found."""
 
     entities_to_add = {e.entity_type for e in entities}
     allowed_entity_types = set(config.entity_types)
-    log_extra = {
+    log_extra: dict[str, Any] = {
         "workflow_type": config.workflow_type,
         "allowed_entity_types": ",".join(allowed_entity_types),
         "entities_to_add": ",".join(entities_to_add),
@@ -70,7 +70,7 @@ def get_workflow_entities(
             workflow_entities["applications"].append(application)
 
         else:  # Any unconfigured entity types will result in an error
-            logger.warning("Entity type is not supported for workflow", extra=log_extra)
+            logger.warning("Entity type is not supported for workflow", extra=log_extra)  # type: ignore[unreachable]
             raise ImplementationMissingError("Entity type is not supported for workflow")
 
     return workflow_entities

@@ -38,7 +38,7 @@ def build_workflow_config(
 
 
 def build_start_workflow_event(
-    workflow_type: WorkflowType | str,
+    workflow_type: WorkflowType,
     user: User | None,
     entities: list,
     exclude_start_workflow_context: bool = False,
@@ -57,18 +57,10 @@ def build_start_workflow_event(
     if exclude_start_workflow_context:
         start_workflow_context = None
     else:
-        # In order to make tests a bit easier to setup and allow
-        # us to define different workflow types just for tests
-        # we pass in a random workflow type, and then assign
-        # the value directly. Pydantic by default does not validate
-        # type on assignment, so this hacky approach works around
-        # a lot of effort to break type checking elsewhere.
-        # https://docs.pydantic.dev/latest/api/config/#pydantic.config.ConfigDict.validate_assignment
         start_workflow_context = StartWorkflowEventContext(
-            workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+            workflow_type=workflow_type,
             entities=entity_list,
         )
-        start_workflow_context.workflow_type = workflow_type
 
     event = WorkflowEvent(
         event_id=uuid.uuid4(),
@@ -84,16 +76,22 @@ def build_process_workflow_event(
     workflow_id: uuid.UUID,
     user: User | None,
     event_to_send: str,
+    exclude_process_workflow_context: bool = False,
 ):
     user_id = user.user_id if user else uuid.uuid4()
+
+    if exclude_process_workflow_context:
+        process_workflow_context = None
+    else:
+        process_workflow_context = ProcessWorkflowEventContext(
+            workflow_id=workflow_id, event_to_send=event_to_send
+        )
 
     event = WorkflowEvent(
         event_id=uuid.uuid4(),
         acting_user_id=user_id,
         event_type=WorkflowEventType.PROCESS_WORKFLOW,
-        process_workflow_context=ProcessWorkflowEventContext(
-            workflow_id=workflow_id, event_to_send=event_to_send
-        ),
+        process_workflow_context=process_workflow_context,
     )
 
     return event
