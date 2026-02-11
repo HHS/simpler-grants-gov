@@ -24,7 +24,7 @@ import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 function toStringArray(selectedValue: unknown): string[] {
   if (Array.isArray(selectedValue)) return selectedValue.map(String);
   if (selectedValue == null || selectedValue === "") return [];
-  return [String(selectedValue)];
+  return [selectedValue as string];
 }
 
 export default function MultiSelect<
@@ -61,7 +61,7 @@ export default function MultiSelect<
   const allOptions: ComboBoxOption[] = useMemo(() => opts ?? [], [opts]);
 
   const [selected, setSelected] = React.useState<string[]>(
-    toStringArray(value),
+    toStringArray(value as string[]),
   );
 
   const comboRef = useRef<ComboBoxRef>(null);

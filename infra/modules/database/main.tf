@@ -33,6 +33,13 @@ resource "aws_rds_cluster" "db" {
   # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.CreateInstance.html
   cluster_identifier = var.name
 
+  lifecycle {
+    ignore_changes = [
+      master_username,
+      cluster_identifier, # also ignore if it changes
+    ]
+  }
+
   engine                      = "aurora-postgresql"
   engine_mode                 = "provisioned"
   engine_version              = local.engine_version

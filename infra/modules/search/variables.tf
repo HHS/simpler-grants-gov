@@ -64,7 +64,7 @@ variable "zone_awareness_enabled" {
 }
 
 variable "ingest_role_arn" {
-  description = "The ARN of the IAM role used for ingesting data into OpenSearch. Defaults to {service_name}-migrator role."
+  description = "The ARN of the IAM role used for ingesting data into OpenSearch. Defaults to {service_name}-opensearch-write role."
   type        = string
   default     = null
 }

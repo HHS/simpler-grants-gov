@@ -19,6 +19,15 @@ resource "aws_iam_role" "migrator_task" {
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
 }
 
+# OpenSearch write role for scheduled jobs that need to write to OpenSearch
+# This role is separate from the migrator role which is now only used for database migrations
+resource "aws_iam_role" "opensearch_write" {
+  count = var.opensearch_ingest_policy_arn != null ? 1 : 0
+
+  name               = "${var.service_name}-opensearch-write"
+  assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
+}
+
 data "aws_iam_policy_document" "ecs_tasks_assume_role_policy" {
   statement {
     sid = "ECSTasksAssumeRole"
