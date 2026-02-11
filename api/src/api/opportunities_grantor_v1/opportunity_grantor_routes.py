@@ -179,61 +179,6 @@ examples = {
     },
 }
 
-
-# @opportunity_grantor_blueprint.post("/search")
-# @opportunity_grantor_blueprint.input(
-#     opportunity_schemas.OpportunitySearchRequestV1Schema,
-#     arg_name="search_params",
-#     examples=examples,
-# )
-# @opportunity_grantor_blueprint.output(opportunity_schemas.OpportunitySearchResponseV1Schema())
-# @api_key_multi_auth.login_required
-# @opportunity_grantor_blueprint.doc(
-#     description=SHARED_ALPHA_DESCRIPTION,
-#     security=api_key_multi_auth_security_schemes,
-#     # This adds a file response schema
-#     # in addition to the one added by the output decorator
-#     responses={200: {"content": {"application/octet-stream": {}}}},  # type: ignore
-# )
-# @flask_opensearch.with_search_client()
-# def opportunity_search(
-#     search_client: search.SearchClient, search_params: dict
-# ) -> response.ApiResponse | Response:
-#     add_extra_data_to_current_request_logs(flatten_dict(search_params, prefix="request.body"))
-#     logger.info("POST /v1/opportunities/search")
-
-#     opportunities, aggregations, pagination_info = search_opportunities(
-#         search_client, search_params
-#     )
-#     add_extra_data_to_current_request_logs(
-#         {
-#             "response.pagination.total_pages": pagination_info.total_pages,
-#             "response.pagination.total_records": pagination_info.total_records,
-#         }
-#     )
-#     logger.info("Successfully fetched opportunities")
-
-#     if search_params.get("format") == opportunity_schemas.SearchResponseFormat.CSV:
-#         # Convert the response into a CSV and return the contents
-#         output = io.StringIO()
-#         opportunities_to_csv(opportunities, output)
-#         timestamp = datetime_util.utcnow().strftime("%Y%m%d-%H%M%S")
-#         return Response(
-#             output.getvalue().encode("utf-8"),
-#             content_type="text/csv",
-#             headers={
-#                 "Content-Disposition": f"attachment; filename=opportunity_search_results_{timestamp}.csv"
-#             },
-#         )
-
-#     return response.ApiResponse(
-#         message="Success",
-#         data=opportunities,
-#         facet_counts=aggregations,
-#         pagination_info=pagination_info,
-#     )
-
-
 @opportunity_grantor_blueprint.post("/opportunities/")
 @opportunity_grantor_blueprint.input(opportunity_grantor_schemas.OpportunityCreateRequestSchema, location="json")
 @opportunity_grantor_blueprint.output(opportunity_grantor_schemas.OpportunityCreateResponseSchema())
@@ -270,26 +215,18 @@ def opportunity_create(db_session: db.Session, json_data: dict) -> response.ApiR
     logger.info("POST /v1/grantor/opportunities/")
 
     with db_session.begin():
-        # Create opportunity directly, bypassing auth checks
+        # TEMPORARY IMPLEMENTATION: Create opportunity directly, bypassing auth checks
         from src.db.models.opportunity_models import Opportunity
-        from src.db.models.agency_models import Agency
+        from src.services.opportunities_grantor_v1.get_agency import get_agency
+        from src.services.opportunities_grantor_v1.get_opportunity import check_opportunity_number_exists
         from src.api.route_utils import raise_flask_error
         
-        # Get the Agency ID, raise 404 error if not found
-        agency = db_session.query(Agency).filter(Agency.agency_id == json_data["agency_id"]).first()
-        if not agency:
-            raise_flask_error(404, f"Agency with ID {json_data['agency_id']} not found")
-            
-        # Check if opportunity number already exists, raise 422 error if it does
-        existing_opportunity = db_session.query(Opportunity).filter(
-            Opportunity.opportunity_number == json_data["opportunity_number"]
-        ).first()
-        if existing_opportunity:
-            raise_flask_error(
-                422,
-                message=f"Opportunity with number '{json_data['opportunity_number']}' already exists"
-            )
-            
+        # Verify agency exists
+        agency = get_agency(db_session, json_data["agency_id"])
+        
+        # Check if opportunity number already exists
+        check_opportunity_number_exists(db_session, json_data["opportunity_number"])
+        
         # Create the opportunity
         opportunity = Opportunity(
             opportunity_number=json_data["opportunity_number"],
