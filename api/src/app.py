@@ -25,8 +25,10 @@ from src.api.form_alpha import form_blueprint
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.internal import internal_blueprint
 from src.api.local import local_blueprint
+from src.api.opportunities_grantor_v1 import (
+    opportunity_grantor_blueprint as opportunities_grantor_v1_blueprint,
+)
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
-from src.api.opportunities_grantor_v1 import opportunity_grantor_blueprint as opportunities_grantor_v1_blueprint
 from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
 from src.api.response import restructure_error_response
 from src.api.schemas import response_schema

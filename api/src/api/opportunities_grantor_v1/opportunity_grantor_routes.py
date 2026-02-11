@@ -8,11 +8,13 @@ import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
-import src.api.opportunities_v1.opportunity_schemas as opportunity_schemas
 import src.api.opportunities_grantor_v1.opportunity_grantor_schemas as opportunity_grantor_schemas
+import src.api.opportunities_v1.opportunity_schemas as opportunity_schemas
 import src.api.response as response
 import src.util.datetime_util as datetime_util
-from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import opportunity_grantor_blueprint
+from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
+    opportunity_grantor_blueprint,
+)
 from src.auth.api_jwt_auth import api_jwt_auth
 from src.auth.multi_auth import (
     api_key_multi_auth,
@@ -179,35 +181,14 @@ examples = {
     },
 }
 
+
 @opportunity_grantor_blueprint.post("/opportunities/")
-@opportunity_grantor_blueprint.input(opportunity_grantor_schemas.OpportunityCreateRequestSchema, location="json")
+@opportunity_grantor_blueprint.input(
+    opportunity_grantor_schemas.OpportunityCreateRequestSchema, location="json"
+)
 @opportunity_grantor_blueprint.output(opportunity_grantor_schemas.OpportunityCreateResponseSchema())
 # @opportunity_grantor_blueprint.auth_required(api_jwt_auth)  # Temporarily commented out for testing
-@opportunity_grantor_blueprint.doc(
-    summary="Create a new opportunity",
-    description="""Create a new opportunity within the specified agency.
-    
-    **Authorization**: Requires the `create_opportunity` privilege for the specified agency.
-    
-    **Logic**:
-    - Fetches the agency by ID (404 if it doesn't exist)
-    - Performs authorization check (403 if user doesn't have the privilege)
-    - Checks if opportunity number already exists (422 if it does)
-    - Creates the opportunity as a draft
-    - Returns the created opportunity
-    
-    **Note**: System will automatically generate: opportunity_id, agency_code, is_draft (always true), 
-    created_at, and updated_at fields.
-    """,
-    responses={
-        200: "Success - Returns the created opportunity",
-        401: "Unauthorized - Authentication required",
-        403: "Forbidden - User doesn't have the create_opportunity privilege for the agency",
-        404: "Not Found - Agency with the specified ID doesn't exist",
-        422: "Unprocessable Entity - Opportunity number already exists",
-        500: "Server Error - An unexpected error occurred"
-    }
-)
+@opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
 @flask_db.with_db_session()
 def opportunity_create(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     """Create a new opportunity"""
@@ -216,33 +197,8 @@ def opportunity_create(db_session: db.Session, json_data: dict) -> response.ApiR
 
     with db_session.begin():
         # TEMPORARY IMPLEMENTATION: Create opportunity directly, bypassing auth checks
-        from src.db.models.opportunity_models import Opportunity
-        from src.services.opportunities_grantor_v1.get_agency import get_agency
-        from src.services.opportunities_grantor_v1.get_opportunity import check_opportunity_number_exists
-        from src.api.route_utils import raise_flask_error
-        
-        # Verify agency exists
-        agency = get_agency(db_session, json_data["agency_id"])
-        
-        # Check if opportunity number already exists
-        check_opportunity_number_exists(db_session, json_data["opportunity_number"])
-        
-        # Create the opportunity
-        opportunity = Opportunity(
-            opportunity_number=json_data["opportunity_number"],
-            opportunity_title=json_data["opportunity_title"],
-            agency_id=agency.agency_id,
-            agency_code=agency.agency_code,
-            category=json_data["category"],
-            category_explanation=json_data.get("category_explanation"),
-            legacy_opportunity_id=None,
-            is_simpler_grants_opportunity=True,
-            is_draft=True,
-        )
-        
-        db_session.add(opportunity)
-        db_session.flush()  # Flush to get the opportunity_id
+        from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
+
+        opportunity = create_opportunity(db_session, json_data)
 
     return response.ApiResponse(message="Success", data=opportunity)
-
-
