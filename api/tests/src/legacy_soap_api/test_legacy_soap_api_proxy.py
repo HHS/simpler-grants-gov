@@ -132,9 +132,10 @@ def test_get_soap_jwt_auth_request_when_use_jwt_is_set_on_headers(enable_factory
         original_payload = jwt.decode(
             decoded_base64, key="soap_partner_gateway_auth_key", algorithms=["HS256"]
         )
+        config = get_soap_config()
         expected = {
             "sub": "partner_soap_call",
-            "iss": "soap_partner_gateway_uri",
+            "iss": config.soap_partner_gateway_uri,
             "exp": 1712145660,
             "certId": legacy_certificate.cert_id,
         }
@@ -159,9 +160,10 @@ def test_request_with_jwt_is_created_when_use_soap_jwt_auth_is_flagged(
         original_payload = jwt.decode(
             decoded_base64, key="soap_partner_gateway_auth_key", algorithms=["HS256"]
         )
+        config = get_soap_config()
         expected = {
             "sub": "partner_soap_call",
-            "iss": "soap_partner_gateway_uri",
+            "iss": config.soap_partner_gateway_uri,
             "exp": 1712145660,
             "certId": legacy_certificate.cert_id,
         }
@@ -171,3 +173,15 @@ def test_request_with_jwt_is_created_when_use_soap_jwt_auth_is_flagged(
             "soap_client_certificate: Sending soap request without client certificate"
             in caplog.messages
         )
+
+
+def test_request_with_jwt_gets_correct_proxy_url(enable_factory_create, caplog):
+    caplog.set_level(logging.INFO)
+    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_jwt=True)
+    with patch(
+        "src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response"
+    ) as mock_get_soap_response:
+        get_proxy_response(soap_request)
+        config = get_soap_config()
+        expected = f"{config.soap_partner_gateway_uri}/{soap_request.full_path.lstrip('/')}"
+        assert mock_get_soap_response.call_args_list[0][0][0].url == expected

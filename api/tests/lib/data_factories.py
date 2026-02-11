@@ -13,6 +13,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPAuth,
     SOAPClientCertificate,
 )
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -152,7 +153,7 @@ def create_soap_request(soap_payload: bytes, use_soap_jwt: bool = False) -> SOAP
     if use_soap_jwt:
         headers.update({f"{USE_SOAP_JWT_HEADER_KEY}": "1"})
     return SOAPRequest(
-        api_name="grantors",
+        api_name=SimplerSoapAPI.GRANTORS,
         headers=headers,
         data=soap_payload,
         full_path="/grantors/x",
