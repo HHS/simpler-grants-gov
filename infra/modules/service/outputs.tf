@@ -30,6 +30,11 @@ output "migrator_role_arn" {
   value       = length(aws_iam_role.migrator_task) > 0 ? aws_iam_role.migrator_task[0].arn : null
 }
 
+output "opensearch_write_role_arn" {
+  description = "ARN for role to use for OpenSearch write operations"
+  value       = length(aws_iam_role.opensearch_write) > 0 ? aws_iam_role.opensearch_write[0].arn : null
+}
+
 output "cluster_arn" {
   value = aws_ecs_cluster.cluster.arn
 }
