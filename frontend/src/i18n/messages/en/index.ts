@@ -136,10 +136,16 @@ export const messages = {
         organizationSelect: {
           label: "Who's applying?",
           default: "-Select-",
-          notListed: "My organization isn't listed",
+          notListed: "I don't see my organization listed",
           validationError:
             "Select an organization. If yours isn't listed, you'll need to apply through Grants.gov.",
         },
+      },
+      notListedOrgAlert: {
+        notListedOrgWarningTitle:
+          "This application must be transferred to an organization before submitting.",
+        notListedOrgWarningBody:
+          "Organizations need a valid UEI (Unique Entity Identifier) to submit applications. You can begin your application while your organization is being verified. Before submitting, you'll be asked to transfer ownership to a verified organization. Visit <link>sam.gov</link> to learn more.",
       },
       description: {
         organizationIntro:

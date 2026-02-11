@@ -18,6 +18,7 @@ import { SimplerModal } from "src/components/SimplerModal";
 import { IneligibleApplicationStart } from "./IneligibleStartApplicationModal";
 import { StartApplicationDescription } from "./StartApplicationDescription";
 import {
+  NOT_LISTED_ORG_VALUE,
   StartApplicationNameInput,
   StartApplicationOrganizationInput,
 } from "./StartApplicationInputs";
@@ -54,6 +55,8 @@ export const StartApplicationModal = ({
 
   const validateSubmission = useCallback((): boolean => {
     let valid = !!token;
+    const hasValidOrgChoice =
+      Boolean(selectedOrganization) && selectedOrganization !== "0";
 
     setOrgValidationError("");
     setNameValidationError("");
@@ -62,7 +65,7 @@ export const StartApplicationModal = ({
       setNameValidationError(t("fields.name.validationError"));
       valid = false;
     }
-    if (!applicantTypes.includes("individual") && !selectedOrganization) {
+    if (!applicantTypes.includes("individual") && !hasValidOrgChoice) {
       setOrgValidationError(t("fields.organizationSelect.validationError"));
       valid = false;
     }
@@ -80,7 +83,13 @@ export const StartApplicationModal = ({
       body: JSON.stringify({
         applicationName: savedApplicationName,
         competitionId,
-        organization: selectedOrganization,
+        ...(selectedOrganization &&
+        selectedOrganization !== NOT_LISTED_ORG_VALUE
+          ? { organization: selectedOrganization }
+          : {}),
+        ...(selectedOrganization === NOT_LISTED_ORG_VALUE
+          ? { intendsToAddOrganizationLater: true }
+          : {}),
       }),
     })
       .then((data) => {

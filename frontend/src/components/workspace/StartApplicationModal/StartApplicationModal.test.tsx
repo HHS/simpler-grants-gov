@@ -5,6 +5,7 @@ import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { createRef } from "react";
 
+import { NOT_LISTED_ORG_VALUE } from "src/components/workspace/StartApplicationModal/StartApplicationInputs";
 import { StartApplicationModal } from "src/components/workspace/StartApplicationModal/StartApplicationModal";
 
 const mockRouterPush = jest.fn();
@@ -216,5 +217,65 @@ describe("StartApplicationModal", () => {
 
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(screen.getByText("ineligibleTitle")).toBeInTheDocument();
+  });
+
+  it("shows the warning alert when 'I don't see my org listed' is selected", async () => {
+    render(
+      <StartApplicationModal
+        competitionId="1"
+        opportunityTitle="blessed opportunity"
+        modalRef={createRef()}
+        applicantTypes={["organization"]}
+        organizations={[fakeUserOrganization]}
+        token={"a token"}
+        loading={false}
+      />,
+    );
+
+    const select = await screen.findByTestId("Select");
+    await userEvent.selectOptions(select, NOT_LISTED_ORG_VALUE);
+
+    const warningAlert = screen.getByTestId("alert");
+
+    expect(warningAlert).toHaveTextContent(
+      "notListedOrgAlert.notListedOrgWarningTitle",
+    );
+    expect(warningAlert).toHaveTextContent(
+      "notListedOrgAlert.notListedOrgWarningBody",
+    );
+  });
+
+  it("starts an application with intendsToAddOrganizationLater when 'I don't see my org listed' is selected", async () => {
+    clientFetchMock.mockResolvedValue({ applicationId: "999" });
+
+    render(
+      <StartApplicationModal
+        competitionId="1"
+        opportunityTitle="blessed opportunity"
+        modalRef={createRef()}
+        applicantTypes={["organization"]}
+        organizations={[fakeUserOrganization]}
+        token={"a token"}
+        loading={false}
+      />,
+    );
+
+    const saveButton = await screen.findByTestId("application-start-save");
+    const input = await screen.findByTestId("textInput");
+    const select = await screen.findByTestId("Select");
+
+    await userEvent.type(input, "new application");
+    await userEvent.selectOptions(select, NOT_LISTED_ORG_VALUE);
+
+    act(() => saveButton.click());
+
+    expect(clientFetchMock).toHaveBeenCalledWith("/api/applications/start", {
+      method: "POST",
+      body: JSON.stringify({
+        applicationName: "new application",
+        competitionId: "1",
+        intendsToAddOrganizationLater: true,
+      }),
+    });
   });
 });

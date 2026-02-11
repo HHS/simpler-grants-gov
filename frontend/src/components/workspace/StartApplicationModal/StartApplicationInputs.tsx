@@ -2,11 +2,14 @@ import { UserOrganization } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import {
+  Alert,
   ErrorMessage,
   Label,
   Select,
   TextInput,
 } from "@trussworks/react-uswds";
+
+export const NOT_LISTED_ORG_VALUE = "not listed";
 
 export const StartApplicationOrganizationInput = ({
   onOrganizationChange,
@@ -16,12 +19,23 @@ export const StartApplicationOrganizationInput = ({
 }: {
   onOrganizationChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   organizations: UserOrganization[];
-  selectedOrganization?: string; // organization_id
+  selectedOrganization?: string;
   validationError?: string;
 }) => {
-  const t = useTranslations(
-    "OpportunityListing.startApplicationModal.fields.organizationSelect",
+  const t = useTranslations("OpportunityListing.startApplicationModal");
+  const isNotListedOrganizationSelected =
+    selectedOrganization === NOT_LISTED_ORG_VALUE;
+  const notListedOrgWarningBody = t.rich(
+    "notListedOrgAlert.notListedOrgWarningBody",
+    {
+      link: (chunk) => (
+        <a target="_blank" rel="noopener noreferrer" href="https://sam.gov">
+          {chunk}
+        </a>
+      ),
+    },
   );
+
   return (
     <>
       <Label
@@ -30,7 +44,7 @@ export const StartApplicationOrganizationInput = ({
         htmlFor="application-organization"
         className="font-sans-2xs"
       >
-        {t("label")}
+        {t("fields.organizationSelect.label")}
       </Label>
       {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
 
@@ -42,7 +56,7 @@ export const StartApplicationOrganizationInput = ({
         value={selectedOrganization || 0}
       >
         <option key={1} value={0} disabled>
-          {t("default")}
+          {t("fields.organizationSelect.default")}
         </option>
         {organizations.length &&
           organizations.map((organization) => (
@@ -53,7 +67,21 @@ export const StartApplicationOrganizationInput = ({
               {organization.sam_gov_entity.legal_business_name}
             </option>
           ))}
+        <option key="not-listed-org" value={NOT_LISTED_ORG_VALUE}>
+          {t("fields.organizationSelect.notListed")}
+        </option>
       </Select>
+      {isNotListedOrganizationSelected ? (
+        <Alert
+          type="warning"
+          noIcon
+          headingLevel="h2"
+          className="margin-top-2"
+          heading={t("notListedOrgAlert.notListedOrgWarningTitle")}
+        >
+          {notListedOrgWarningBody}
+        </Alert>
+      ) : null}
     </>
   );
 };
