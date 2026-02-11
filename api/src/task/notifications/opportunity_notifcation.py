@@ -23,7 +23,7 @@ from src.task.notifications.constants import (
 )
 from src.util import datetime_util
 from src.util.dict_util import diff_nested_dicts
-from src.util.string_utils import truncate_html_safe
+from src.util.string_utils import truncate_html_inline
 
 logger = logging.getLogger(__name__)
 
@@ -310,11 +310,11 @@ class OpportunityNotificationTask(BaseNotificationTask):
         ]
 
         if len(after) > TRUNCATION_THRESHOLD:
-            truncated = truncate_html_safe(after, TRUNCATION_THRESHOLD)
-
             read_more = f"<a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}' style='color:blue;'>...Read full description</a>"
+
+            truncated = truncate_html_inline(after, TRUNCATION_THRESHOLD, read_more)
             description_section_parts.append(
-                f'<div style="padding-left: 40px;">{truncated}{read_more}</div><br>'
+                f'<div style="padding-left: 40px;">{truncated}</div><br>'
             )
         else:
             description_section_parts.append(f'<div style="padding-left: 40px;">{after}</div><br>')
