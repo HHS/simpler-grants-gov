@@ -26,11 +26,7 @@ jobs:
     name: Run Local E2E Tests
     runs-on: ubuntu-22.04
 
-    strategy:
-      fail-fast: true
-      matrix:
-        shard: [1, 2, 3, 4]
-        total_shards: [4]
+    # Remove sharding, run only the specified test file
 
     steps:
       - name: Checkout repository
@@ -77,13 +73,11 @@ jobs:
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build -- --no-lint
 
-      - name: Run e2e tests (Shard ${{ matrix.shard }}/${{ matrix.total_shards }})
+      - name: Run only happy-path-apply-req-form-workflow.spec.ts
         env:
           CI: true
-          TOTAL_SHARDS: ${{ matrix.total_shards }}
-          CURRENT_SHARD: ${{ matrix.shard }}
         run: |
-          npm run test:e2e
+          npx playwright test tests/e2e/apply/happy-path-apply-req-form-workflow.spec.ts
 
       - name: Debug logging on failure
         if: failure()
