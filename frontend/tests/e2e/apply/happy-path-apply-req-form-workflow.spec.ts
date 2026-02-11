@@ -1,8 +1,8 @@
-import { test, expect, type Page, type BrowserContext, type TestInfo, Locator } from "@playwright/test";
+import { test, expect, type Page, type BrowserContext, type TestInfo } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
 import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
-import { openMobileNav, waitForURLChange } from "tests/e2e/playwrightUtils";
+import { openMobileNav } from "tests/e2e/playwrightUtils";
 
 const { targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-BR-8037-OU-ON01
@@ -15,12 +15,12 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
   const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
   // Step 1: Navigate to home page
-  console.log("Step 1: Navigating to home page to establish session...");
+  // console.log("Step 1: Navigating to home page to establish session...");
    if (targetEnv === "local") {
     // Use test-user spoofing
     await createSpoofedSessionCookie(context);
     await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-    console.log("✓ Local test user session established");
+    // console.log("✓ Local test user session established");
 
     // Fallback: use test-user dropdown if present
     const testUserSelect = page.locator(
@@ -30,9 +30,9 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
       await testUserSelect.first().waitFor({ state: "visible", timeout: 10_000 });
       await testUserSelect.first().selectOption("many_app_user");
       await page.waitForTimeout(2000);
-      console.log("✓ Test user selected via dropdown fallback");
+        // console.log("✓ Test user selected via dropdown fallback");
     } else {
-      console.log("ℹ No test user dropdown found - proceeding with cookie session");
+        // console.log("ℹ No test user dropdown found - proceeding with cookie session");
     }
   } else if (targetEnv === "staging") {
     await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
@@ -41,7 +41,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
       throw new Error("signOutButton was not found after performStagingLogin");
     }
     await expect(signOutButton).toHaveCount(1, { timeout: 120_000 });
-    console.log("✓ Staging user logged in");
+    // console.log("✓ Staging user logged in");
   } else {
     throw new Error(`Unsupported env ${targetEnv}`);
   }
@@ -53,56 +53,56 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
   }
 
   // Step 3: Navigate to opportunity page
-  console.log("Step 3: Navigating to opportunity page...");
+  // console.log("Step 3: Navigating to opportunity page...");
   await page.goto(BASE_URL + OPPORTUNITY_URL, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(3000); // Wait for page to fully load
 
-  console.log("✓ Opportunity page loaded!");
+  // console.log("✓ Opportunity page loaded!");
 
   // Step 4: Click "Start new application" button
-  console.log("Step 4: Clicking 'Start new application' button...");
+  // console.log("Step 4: Clicking 'Start new application' button...");
   const startAppButton = page.getByRole("button", {
     name: /start.*application/i,
   });
   await startAppButton.waitFor({ state: "visible", timeout: 15000 });
   await startAppButton.click();
-  console.log("Button clicked");
+  // console.log("Button clicked");
 
   // Step 5: Wait for the Start Application modal to appear
-  console.log("Step 5: Waiting for Start Application modal...");
+  // console.log("Step 5: Waiting for Start Application modal...");
   
   // Wait for the select element inside the modal to be visible
   const modal = page.locator('[role="dialog"].is-visible, #start-application.is-visible');
   await expect(modal.locator('select')).toBeVisible({ timeout: 15000 });
   const modalHtml = await modal.innerHTML();
-  console.log("[DEBUG] Modal HTML:\n", modalHtml);
-  console.log("✓ Modal appeared!");
+  // console.log("[DEBUG] Modal HTML:\n", modalHtml);
+  // console.log("✓ Modal appeared!");
 
   // Step 6: Fill all required fields in Start Application modal
-  console.log("Step 6: Filling required fields in Start Application modal...");
+  // console.log("Step 6: Filling required fields in Start Application modal...");
   // Select 'Sally's Soup Emporium' for Who's applying
   // Use the existing modal locator from earlier in the test
   // ...existing code...
 
    // 4. Select applicant org inside the modal (avoids test user dropdown on page)
-   console.log("Step 6: Filling application details...");
+  // console.log("Step 6: Filling application details...");
 
    // Select applicant organization (should pre-select if user has only one org)
    const orgSelect = modal.locator('select[name*="applicant"], select:nth-of-type(1)');
    const orgSelectCount = await orgSelect.count();
-   console.log(`  Found ${orgSelectCount} organization selects`);
+  // console.log(`  Found ${orgSelectCount} organization selects`);
 
    if (orgSelectCount > 0) {
      await orgSelect.first().waitFor({ state: "visible", timeout: 5000 });
      // Get available options
      const options = await orgSelect.first().locator('option').allTextContents();
-     console.log(`  Available organizations: ${options.join(", ")}`);
+    // console.log(`  Available organizations: ${options.join(", ")}`);
 
      // Select "Sally's Soup Emporium" or the first available option
      const sallysOption = options.find(opt => opt.includes("Sally") || opt.includes("Soup"));
      if (sallysOption) {
        await orgSelect.first().selectOption({ label: sallysOption });
-       console.log(`  ✓ Selected: ${sallysOption}`);
+      // console.log(`  ✓ Selected: ${sallysOption}`);
      }
    }
 
@@ -112,14 +112,14 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     await nameInput.first().waitFor({ state: "visible", timeout: 5000 });
     const uniqueAppName = `TEST-APPLY-ORG-IND-APP${Date.now()}`;
     await nameInput.first().fill(uniqueAppName);
-    console.log(`  ✓ Application name entered: ${uniqueAppName}`);
+    // console.log(`  ✓ Application name entered: ${uniqueAppName}`);
    }
 
   // Fill 'Name of this application'
   
 
   // Step 7: Click Create Application button
-  console.log("Step 7: Clicking Create Application button...");
+  // console.log("Step 7: Clicking Create Application button...");
   const createButton = modal.locator('button:has-text("Create")');
   if (await createButton.count() === 0) {
     // Fallback: look for primary button
@@ -132,26 +132,26 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
 
 
   // Continue workflow after clicking the button
-  console.log("Step 8: Waiting for application page...");
-  await page.waitForURL(/\/applications\/[a-f0-9\-]+/, { timeout: 30000 });
+  // console.log("Step 8: Waiting for application page...");
+  await page.waitForURL(/\/applications\/[a-f0-9-]+/, { timeout: 30000 });
   const appUrl = page.url();
-  console.log(`✓ Application created: ${appUrl}`);
+  // console.log(`✓ Application created: ${appUrl}`);
   await page.waitForLoadState("domcontentloaded");
   await page.waitForTimeout(2000);
 
   // Step 9: Verify we're on the application page
-  console.log("Step 9: Verifying application page loaded...");
+  // console.log("Step 9: Verifying application page loaded...");
   const mainContent = page.locator("main");
   await expect(mainContent).toBeVisible();
   
   // Look for the required forms section
   const requiredFormsHeading = page.locator('text=/Required Forms/i, text=/forms required/i');
   if (await requiredFormsHeading.count() > 0) {
-    console.log("✓ Application page loaded with forms section");
+    // console.log("✓ Application page loaded with forms section");
   }
 
   // Step 10: Click on SF-424B form to fill it
-  console.log("Step 10: Opening SF-424B form...");
+  // console.log("Step 10: Opening SF-424B form...");
   const sf424bLink = page.locator('a, button').filter({ 
     hasText: /SF-424B|Assurances for Non-Construction Programs/i 
   });
@@ -160,17 +160,17 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     await sf424bLink.first().click();
     await page.waitForLoadState("domcontentloaded");
     await page.waitForTimeout(2000);
-    console.log("✓ SF-424B form page loaded");
+    // console.log("✓ SF-424B form page loaded");
 
     // Step 11: Fill SF-424B form fields
-    console.log("Step 11: Filling SF-424B form...");
+    // console.log("Step 11: Filling SF-424B form...");
     // Log the SF-424B form section HTML
     const formSection = page.locator('form, [data-testid*="sf-424b"], section:has-text("SF-424B")');
     if (await formSection.count() > 0) {
       const formHtml = await formSection.first().innerHTML();
-      console.log("[DEBUG] SF-424B form HTML:\n", formHtml);
+      // console.log("[DEBUG] SF-424B form HTML:\n", formHtml);
     } else {
-      console.log("[DEBUG] SF-424B form section not found");
+      // console.log("[DEBUG] SF-424B form section not found");
     }
 
     // Scroll to find form fields
@@ -183,19 +183,19 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     // 1. Try input[name*="title"]
     const titleInputs = page.locator('input[name*="title" i], input[placeholder*="title" i]');
     const titleCount = await titleInputs.count();
-    console.log(`[DEBUG] Found ${titleCount} title input(s)`);
+    // console.log(`[DEBUG] Found ${titleCount} title input(s)`);
     for (let i = 0; i < titleCount; i++) {
       const inputType = await titleInputs.nth(i).getAttribute('type');
       const inputName = await titleInputs.nth(i).getAttribute('name');
       const inputPlaceholder = await titleInputs.nth(i).getAttribute('placeholder');
-      console.log(`[DEBUG] Title input #${i}: type=${inputType}, name=${inputName}, placeholder=${inputPlaceholder}`);
+      // console.log(`[DEBUG] Title input #${i}: type=${inputType}, name=${inputName}, placeholder=${inputPlaceholder}`);
     }
     if (titleCount > 0) {
       const titleField = titleInputs.first();
       await titleField.waitFor({ state: "visible", timeout: 3000 });
       await titleField.fill("TESTER");
       titleFieldFilled = true;
-      console.log("  ✓ Title field filled");
+      // console.log("  ✓ Title field filled");
     }
     // 2. Fallback: Try label-based locator if not filled
     if (!titleFieldFilled) {
@@ -204,15 +204,15 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
         await titleLabelInput.waitFor({ state: "visible", timeout: 3000 });
         await titleLabelInput.fill("TESTER");
         titleFieldFilled = true;
-        console.log("  ✓ Title field filled via label");
+        // console.log("  ✓ Title field filled via label");
       } catch (err) {
-        console.log("[DEBUG] Could not find title field via label.");
+        // console.log("[DEBUG] Could not find title field via label.");
       }
     }
     // 3. If still not filled, print form HTML for debug
     if (!titleFieldFilled) {
       const formHtml = await formSection.first().innerHTML();
-      console.log("[DEBUG] SF-424B form HTML for title field fallback:\n", formHtml);
+      // console.log("[DEBUG] SF-424B form HTML for title field fallback:\n", formHtml);
       throw new Error("Could not fill SF-424B Title field");
     }
 
@@ -223,50 +223,54 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     // Find and fill Applicant Organization
     const orgInputs = page.locator('input[name*="applicant" i], input[name*="organization" i]');
     const orgCount = await orgInputs.count();
-    console.log(`[DEBUG] Found ${orgCount} organization input(s)`);
+    // console.log(`[DEBUG] Found ${orgCount} organization input(s)`);
     for (let i = 0; i < orgCount; i++) {
       const inputType = await orgInputs.nth(i).getAttribute('type');
       const inputName = await orgInputs.nth(i).getAttribute('name');
       const inputPlaceholder = await orgInputs.nth(i).getAttribute('placeholder');
-      console.log(`[DEBUG] Org input #${i}: type=${inputType}, name=${inputName}, placeholder=${inputPlaceholder}`);
+      // console.log(`[DEBUG] Org input #${i}: type=${inputType ?? ""}, name=${inputName ?? ""}, placeholder=${inputPlaceholder ?? ""}`);
     }
     if (orgCount > 0) {
       const orgField = orgInputs.first();
       await orgField.fill("Sally's Soup Emporium");
-      console.log("  ✓ Organization field filled");
+      // console.log("  ✓ Organization field filled");
     }
 
     // Step 12: Save the form
-    console.log("Step 12: Saving SF-424B form...");
+    // console.log("Step 12: Saving SF-424B form...");
     const saveButton = page.getByRole("button", { name: /save/i }).first();
     if (await saveButton.isVisible()) {
       await saveButton.click();
       await page.waitForTimeout(2000);
-      console.log("✓ Form saved");
+      // console.log("✓ Form saved");
       // Verify success and no error messages
       await expect(page.getByText(/form was saved/i)).toBeVisible({ timeout: 10000 });
       await expect(page.getByText(/no errors were detected/i)).toBeVisible({ timeout: 10000 });
-      console.log("✓ 'Form was saved' and 'No errors were detected.' messages are visible");
+      // console.log("✓ 'Form was saved' and 'No errors were detected.' messages are visible");
     }
 
     // After saving, verify 'No issues detected' under the form name on the application landing page
     await page.goBack();
     await page.waitForLoadState("domcontentloaded");
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(10000);
     const landingHtml = await page.content();
-    console.log("[DEBUG] Application landing page HTML after saving SF-424B:\n", landingHtml);
+
+        // Scroll to find status message
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(5000);
+    // console.log("[DEBUG] Application landing page HTML after saving SF-424B:\n", landingHtml);
 
     // Use a global text locator for the status message
     await expect(page.getByText(/no issues detected/i)).toBeVisible({ timeout: 10000 });
-    console.log("✓ 'No issues detected' is visible for SF-424B form");
-    await page.waitForTimeout(5000);
+    // console.log("✓ 'No issues detected' is visible for SF-424B form");
+    await page.waitForTimeout(10000);
 
     // Look for 'No' radio button in the same row as 'Disclosure of Lobbying Activities (SF-LLL)'
     const sfLllRow = page.locator('tr', { hasText: /Disclosure of Lobbying Activities \(SF-LLL\)/i });
     await expect(sfLllRow).toBeVisible({ timeout: 10000 });
     // Print SF-LLL row HTML for debug
     const sfLllRowHtml = await sfLllRow.innerHTML();
-    console.log("[DEBUG] SF-LLL row HTML:\n", sfLllRowHtml);
+    // console.log("[DEBUG] SF-LLL row HTML:\n", sfLllRowHtml);
     // Find all radio buttons in this row
     const radioInputs = sfLllRow.locator('input[type="radio"]');
     const radioCount = await radioInputs.count();
@@ -280,7 +284,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
         return '';
       });
       const checked = await radio.isChecked();
-      console.log(`[DEBUG] Radio #${i} label='${label}' checked=${checked}`);
+      // console.log(`[DEBUG] Radio #${i} label='${label}' checked=${checked}`);
     }
     // Directly click the 'No' label in the SF-LLL row
     const noLabelLocator = sfLllRow.locator('label.usa-radio__label', { hasText: /^No$/i });
@@ -289,7 +293,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
       await noLabelLocator.first().scrollIntoViewIfNeeded();
       await expect(noLabelLocator.first()).toBeVisible({ timeout: 5000 });
       await noLabelLocator.first().click();
-      console.log("[DEBUG] 'No' label clicked for SF-LLL row.");
+      // console.log("[DEBUG] 'No' label clicked for SF-LLL row.");
     } else {
       // Fallback: try selector from debug info
       const fallbackLabel = sfLllRow.locator('label', { hasText: /^No$/i });
@@ -297,7 +301,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
         await fallbackLabel.first().scrollIntoViewIfNeeded();
         await expect(fallbackLabel.first()).toBeVisible({ timeout: 5000 });
         await fallbackLabel.first().click();
-        console.log("[DEBUG] Fallback 'No' label clicked for SF-LLL row.");
+        // console.log("[DEBUG] Fallback 'No' label clicked for SF-LLL row.");
       } else {
         throw new Error("Could not find 'No' label for SF-LLL row");
       }
@@ -307,7 +311,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     // Do not fill or open SF-LLL form
     
     // Step 13: Submit the application
-    console.log("Step 13: Submitting the application...");
+    // console.log("Step 13: Submitting the application...");
     const submitAppButton = page.getByRole("button", { name: /submit application/i });
     await submitAppButton.click();
     await page.waitForLoadState("domcontentloaded");
@@ -315,7 +319,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
 
     // Debug: print page HTML after submission
     const postSubmitHtml = await page.content();
-    console.log("[DEBUG] Page HTML after submitting application:\n", postSubmitHtml);
+    // console.log("[DEBUG] Page HTML after submitting application:\n", postSubmitHtml);
 
     // Step 14: Success message shows up with application ID
     const successHeading = page.getByText(/your application has been submitted/i);
@@ -343,6 +347,6 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     );
   }
 
-  console.log("\n✓ Test completed successfully!");
-  console.log(`Final URL: ${page.url()}`);
+  // console.log("\n✓ Test completed successfully!");
+  // console.log(`Final URL: ${page.url()}`);
 });

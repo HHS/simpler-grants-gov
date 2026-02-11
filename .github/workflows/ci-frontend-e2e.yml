@@ -109,7 +109,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: blob-report-shard-${{ matrix.shard }}
+          name: blob-report
           path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
           retention-days: 1
 
