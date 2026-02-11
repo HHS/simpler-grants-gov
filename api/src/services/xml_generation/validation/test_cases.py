@@ -13,11 +13,11 @@ SF424_TEST_CASES = [
             "organization_name": "Test Organization",
             "employer_taxpayer_identification_number": "123456789",
             "sam_uei": "TEST12345678",
-            "applicant_address": {
+            "applicant": {
                 "street1": "123 Main St",
                 "city": "Washington",
                 "state": "DC: District of Columbia",
-                "zip_postal_code": "20001",
+                "zip_code": "20001",
                 "country": "USA: UNITED STATES",
             },
             "phone_number": "555-123-4567",
@@ -61,11 +61,11 @@ SF424_TEST_CASES = [
             "organization_name": "Test Organization",
             "employer_taxpayer_identification_number": "123456789",
             "sam_uei": "TEST12345678",
-            "applicant_address": {
+            "applicant": {
                 "street1": "123 Main St",
                 "city": "Washington",
                 "state": "DC: District of Columbia",
-                "zip_postal_code": "20001",
+                "zip_code": "20001",
                 "country": "USA: UNITED STATES",
             },
             "phone_number": "555-123-4567",
@@ -111,11 +111,11 @@ SF424_TEST_CASES = [
             "organization_name": "Test Organization",
             "employer_taxpayer_identification_number": "123456789",
             "sam_uei": "TEST12345678",
-            "applicant_address": {
+            "applicant": {
                 "street1": "456 Oak Ave",
                 "city": "Washington",
                 "state": "DC: District of Columbia",
-                "zip_postal_code": "20002",
+                "zip_code": "20002",
                 "country": "USA: UNITED STATES",
             },
             "phone_number": "555-123-4567",
@@ -161,11 +161,11 @@ SF424_TEST_CASES = [
             "organization_name": "Test Organization",
             "employer_taxpayer_identification_number": "123456789",
             "sam_uei": "TEST12345678",
-            "applicant_address": {
+            "applicant": {
                 "street1": "321 Elm St",
                 "city": "Washington",
                 "state": "DC: District of Columbia",
-                "zip_postal_code": "20004",
+                "zip_code": "20004",
                 "country": "USA: UNITED STATES",
             },
             "phone_number": "555-123-4567",
@@ -214,11 +214,11 @@ SF424_TEST_CASES = [
             "organization_name": "Test Organization",
             "employer_taxpayer_identification_number": "123456789",
             "sam_uei": "TEST12345678",
-            "applicant_address": {
+            "applicant": {
                 "street1": "123 Main St",
                 "city": "Washington",
                 "state": "DC: District of Columbia",
-                "zip_postal_code": "20001",
+                "zip_code": "20001",
                 "country": "USA: UNITED STATES",
             },
             "phone_number": "555-123-4567",
@@ -276,11 +276,11 @@ SF424_TEST_CASES = [
             "organization_name": "Test Organization",
             "employer_taxpayer_identification_number": "123456789",
             "sam_uei": "TEST12345678",
-            "applicant_address": {
+            "applicant": {
                 "street1": "123 Main St",
                 "city": "Washington",
                 "state": "DC: District of Columbia",
-                "zip_postal_code": "20001",
+                "zip_code": "20001",
                 "country": "USA: UNITED STATES",
             },
             "phone_number": "555-123-4567",
@@ -348,11 +348,11 @@ SF424_TEST_CASES = [
             "organization_name": "Test Organization",
             "employer_taxpayer_identification_number": "123456789",
             "sam_uei": "TEST12345678",
-            "applicant_address": {
+            "applicant": {
                 "street1": "123 Main St",
                 "city": "Washington",
                 "state": "DC: District of Columbia",
-                "zip_postal_code": "20001",
+                "zip_code": "20001",
                 "country": "USA: UNITED STATES",
             },
             "phone_number": "555-123-4567",
@@ -363,7 +363,7 @@ SF424_TEST_CASES = [
             "funding_opportunity_title": "Test Funding Opportunity",
             "project_title": "Test Project Title",
             "congressional_district_applicant": "DC-00",
-            "congressional_district_program_project": "DC-00, VA-08",
+            "congressional_district_program_project": "DC-00",
             "additional_congressional_districts": "44444444-4444-4444-4444-444444444444",
             "project_start_date": "2024-04-01",
             "project_end_date": "2025-03-31",

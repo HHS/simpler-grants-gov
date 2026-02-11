@@ -34,6 +34,7 @@ tags:
   description: CommonGrants-compliant API routes for searching opportunities to promote
     interoperability across grant systems. Learn more by visiting CommonGrants.org
 - name: LOCAL ONLY
+- name: Workflow
 servers: .
 paths:
   /health:
@@ -1291,7 +1292,7 @@ paths:
       summary: Competition Get
       security:
       - ApiJwtAuth: []
-      - ApiKeyAuth: []
+      - ApiUserKeyAuth: []
   /common-grants/opportunities/{oppId}:
     get:
       parameters:
@@ -4184,6 +4185,12 @@ components:
           - archived
           type: &id006
           - string
+        top_level_agency_code:
+          type:
+          - string
+          - 'null'
+          description: The top-level (parent) agency
+          example: HHS
         created_at:
           type: string
           format: date-time
@@ -5117,6 +5124,12 @@ components:
             - legacy_agency_assigner
             - manage_internal_roles
             - manage_competition
+            - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - update_opportunity
+            - publish_opportunity
+            - internal_workflow_access
             type:
             - string
     UserOrganization:
@@ -5266,6 +5279,12 @@ components:
             - legacy_agency_assigner
             - manage_internal_roles
             - manage_competition
+            - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - update_opportunity
+            - publish_opportunity
+            - internal_workflow_access
             type:
             - string
     UserCanAccessResponse:
@@ -6068,6 +6087,12 @@ components:
           - posted
           enum: *id005
           type: *id006
+        top_level_agency_code:
+          type:
+          - string
+          - 'null'
+          description: The top-level (parent) agency
+          example: HHS
         created_at:
           type: string
           format: date-time
@@ -6263,6 +6288,12 @@ components:
             - legacy_agency_assigner
             - manage_internal_roles
             - manage_competition
+            - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - update_opportunity
+            - publish_opportunity
+            - internal_workflow_access
             type:
             - string
     UserInvitationItem:
@@ -6815,6 +6846,12 @@ components:
             - legacy_agency_assigner
             - manage_internal_roles
             - manage_competition
+            - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - update_opportunity
+            - publish_opportunity
+            - internal_workflow_access
             type:
             - string
     OrganizationUser:

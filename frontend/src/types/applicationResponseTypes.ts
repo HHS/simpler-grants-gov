@@ -1,6 +1,7 @@
-import { APIResponse } from "src/types/apiResponseTypes";
+import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
 
 import { FormValidationWarning } from "src/components/applyForm/types";
+import { ApplicationSubmission } from "./application/applicationSubmissionTypes";
 import { Attachment } from "./attachmentTypes";
 import { Competition } from "./competitionsResponseTypes";
 import { FormDetail } from "./formResponseTypes";
@@ -61,7 +62,7 @@ export interface ApplicationDetail {
   application_status: string;
   competition: Competition;
   form_validation_warnings?: FormValidationWarnings;
-  organization: Organization;
+  organization?: Organization | null;
   users: {
     email: string;
     user_id: string;
@@ -141,4 +142,9 @@ export interface ApplicationDetailApiResponse extends APIResponse {
 
 export interface ApplicationHistoryApiResponse extends APIResponse {
   data: ApplicationHistory[];
+}
+
+export interface ApplicationSubmissionsApiResponse extends APIResponse {
+  data: ApplicationSubmission[];
+  pagination_info: PaginationInfo;
 }

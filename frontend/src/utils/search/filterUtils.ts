@@ -173,6 +173,8 @@ export const formatPillLabel = (
       return `Cost sharing: ${getFilterOptionLabel(value, options)}`;
     case "closeDate":
       return `Closing within ${value} days`;
+    case "postedDate":
+      return `Posted within last ${value} days`;
     case "assistanceListingNumber":
       return `ALN ${value}`;
     case "fundingInstrument":

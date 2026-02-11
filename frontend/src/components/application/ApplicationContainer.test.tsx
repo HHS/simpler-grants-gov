@@ -7,6 +7,7 @@ import {
 } from "src/types/applicationResponseTypes";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
+import { mockApplicationSubmission } from "src/utils/testing/fixtures";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import applicationMock from "stories/components/application/application.mock.json";
 import historyMock from "stories/components/application/history.mock.json";
@@ -114,6 +115,7 @@ describe("ApplicationContainer", () => {
         attachments={mockAttachments}
         opportunity={mockOpportunity}
         applicationHistory={historyMock as ApplicationHistory[]}
+        latestApplicationSubmission={mockApplicationSubmission}
       />,
     );
 
@@ -134,6 +136,7 @@ describe("ApplicationContainer", () => {
           attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -153,6 +156,7 @@ describe("ApplicationContainer", () => {
           attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -172,6 +176,7 @@ describe("ApplicationContainer", () => {
           attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -193,6 +198,7 @@ describe("ApplicationContainer", () => {
           attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -221,6 +227,7 @@ describe("ApplicationContainer", () => {
           attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -254,6 +261,7 @@ describe("ApplicationContainer", () => {
           attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -286,6 +294,7 @@ describe("ApplicationContainer", () => {
           attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -318,6 +327,7 @@ describe("ApplicationContainer", () => {
           attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -365,6 +375,7 @@ describe("ApplicationContainer", () => {
           attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -392,6 +403,7 @@ describe("ApplicationContainer", () => {
           attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
