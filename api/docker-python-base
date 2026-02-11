@@ -6,7 +6,7 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 ARG PYTHON_VERSION=3.14.2
 ARG PY_MM=3.14
 ARG POETRY_VERSION=2.2.1
-ARG PIP_VERSION=25.3
+ARG PIP_VERSION=26.0
 
 SHELL ["/bin/bash", "-eux", "-c"]
 
