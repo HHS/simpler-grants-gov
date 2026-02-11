@@ -3149,6 +3149,19 @@ class WorkflowFactory(BaseFactory):
     current_workflow_state = "start"
     is_active = True
 
+    class Params:
+        is_single_opportunity_workflow = factory.Trait(
+            opportunities=factory.List([factory.SubFactory(OpportunityFactory)])
+        )
+
+        is_single_application_workflow = factory.Trait(
+            applications=factory.List([factory.SubFactory(ApplicationFactory)])
+        )
+
+        is_single_application_submission_workflow = factory.Trait(
+            application_submissions=factory.List([factory.SubFactory(ApplicationSubmissionFactory)])
+        )
+
 
 class WorkflowEventHistoryFactory(BaseFactory):
     class Meta:
