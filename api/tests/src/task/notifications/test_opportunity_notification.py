@@ -1,5 +1,6 @@
 import logging
 from datetime import date, timedelta
+from uuid import UUID
 
 import pytest
 
@@ -942,7 +943,7 @@ class TestOpportunityNotification:
                     "before": "testing",
                     "after": "The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entities.",
                 },
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entiti<a href=\'http://testhost:3000/opportunity/1\' style=\'color:blue;\'>...Read full description</a></div><br>',
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entiti<a href="http://testhost:3000/opportunity/7f3c6a9e-4d2b-4e3a-9a7f-8c4c9f5d2b61" style="color:blue;">...Read full description</a></div><br>',
             ),
             # Truncate with html tag
             (
@@ -950,7 +951,7 @@ class TestOpportunityNotification:
                     "before": "testing",
                     "after": '<p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainable agriculture</strong>, and <u>carbon capture technologies</u>. Open to institutions, nonprofits, and private entities.</p>',
                 },
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;"><p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainab</strong><a href=\'http://testhost:3000/opportunity/1\' style=\'color:blue;\'>...Read full description</a></div><br>',
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;"><p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainable agriculture</strong>, and <u>carbon capture technologies</u>. Open to institutions, nonprofits, and private entit<a href="http://testhost:3000/opportunity/7f3c6a9e-4d2b-4e3a-9a7f-8c4c9f5d2b61" style="color:blue;">...Read full description</a></p></div><br>',
             ),
         ],
     )
@@ -962,7 +963,11 @@ class TestOpportunityNotification:
         set_env_var_for_email_notification_config,
         notification_task,
     ):
-        res = notification_task._build_description_fields_content(description_diffs)
+        op_id = UUID("7f3c6a9e-4d2b-4e3a-9a7f-8c4c9f5d2b61")
+        res = notification_task._build_description_fields_content(description_diffs, op_id)
+        import pdb
+
+        pdb.set_trace()
         assert res == expected_html
 
     @pytest.mark.parametrize(
@@ -1139,6 +1144,10 @@ class TestOpportunityNotification:
                 )
             ]
         )
+        import pdb
+
+        pdb.set_trace()
+
         assert res == expected
 
     def test_get_latest_opportunity_versions_suppressed(
