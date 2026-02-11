@@ -59,7 +59,7 @@ function TextWidget<
   if (type === "number" || type === "integer") {
     inputValue = value || value === 0 ? Number(value) : undefined;
   } else {
-    inputValue = value ? String(value) : undefined;
+    inputValue = value ? String(value as string) : undefined;
   }
 
   let inputType = "text";
