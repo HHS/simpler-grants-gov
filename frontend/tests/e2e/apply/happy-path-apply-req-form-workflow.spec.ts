@@ -20,7 +20,6 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
 }: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
   test.setTimeout(300_000); // 5 min timeout
 
-  const BASE_URL = process.env.BASE_URL ?? "http://127.0.0.1:3000";
   const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
   // Step 1: Navigate to home page
@@ -28,7 +27,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
   if (targetEnv === "local") {
     // Use test-user spoofing
     await createSpoofedSessionCookie(context);
-    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     // console.log("✓ Local test user session established");
 
     // Fallback: use test-user dropdown if present
@@ -46,7 +45,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
       // console.log("ℹ No test user dropdown found - proceeding with cookie session");
     }
   } else if (targetEnv === "staging") {
-    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     const signOutButton = await performStagingLogin(page, !!isMobile);
     if (!signOutButton) {
       throw new Error("signOutButton was not found after performStagingLogin");
@@ -64,7 +63,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
 
   // Step 3: Navigate to opportunity page
   // console.log("Step 3: Navigating to opportunity page...");
-  await page.goto(BASE_URL + OPPORTUNITY_URL, {
+  await page.goto(OPPORTUNITY_URL, {
     waitUntil: "domcontentloaded",
   });
   await page.waitForTimeout(3000); // Wait for page to fully load
