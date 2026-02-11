@@ -48,7 +48,7 @@ export const StartApplicationOrganizationInput = ({
       >
         {t("label")} <span className="text-red">*</span>
       </Label>
-      {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
+      {validationError ? <ErrorMessage>{validationError}</ErrorMessage> : null}
 
       <Select
         validationStatus={validationError ? "error" : undefined}
@@ -74,19 +74,19 @@ export const StartApplicationOrganizationInput = ({
         ))}
 
         {/* Individual option - only if individual applicant type allowed */}
-        {applicantTypes.includes("individual") && (
+        {applicantTypes.includes("individual") ? (
           <option key="individual" value={SPECIAL_VALUES.INDIVIDUAL}>
             {t("asIndividual")}
           </option>
-        )}
+        ) : null}
 
         {/* Not listed option - only if both individual and organization applicant types allowed */}
         {applicantTypes.includes("organization") &&
-          applicantTypes.includes("individual") && (
-            <option key="not-listed" value={SPECIAL_VALUES.NOT_LISTED}>
-              {t("notListed")}
-            </option>
-          )}
+        applicantTypes.includes("individual") ? (
+          <option key="not-listed" value={SPECIAL_VALUES.NOT_LISTED}>
+            {t("notListed")}
+          </option>
+        ) : null}
       </Select>
     </>
   );
@@ -115,7 +115,7 @@ export const StartApplicationNameInput = ({
       <div className="font-sans-2xs" style={{ maxWidth: "550px" }}>
         {t("description")}
       </div>
-      {validationError && <ErrorMessage>{validationError}</ErrorMessage>}
+      {validationError ? <ErrorMessage>{validationError}</ErrorMessage> : null}
 
       <TextInput
         validationStatus={validationError ? "error" : undefined}

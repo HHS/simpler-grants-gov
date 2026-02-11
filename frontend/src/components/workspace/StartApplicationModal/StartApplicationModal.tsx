@@ -188,7 +188,7 @@ export const StartApplicationModal = ({
       }}
       onClose={onClose}
     >
-      {organizationsError && (
+      {organizationsError ? (
         <Alert
           type="error"
           headingLevel="h4"
@@ -202,7 +202,7 @@ export const StartApplicationModal = ({
             br: () => <br />,
           })}
         </Alert>
-      )}
+      ) : null}
       <h1 className="usa-modal__heading" id="start-application-heading">
         {t("title")}
       </h1>
@@ -219,7 +219,7 @@ export const StartApplicationModal = ({
       </p>
       <hr className="margin-y-2 border-base-lighter" />
       <StartApplicationInfoBanner />
-      {applicantTypes.includes("organization") && (
+      {applicantTypes.includes("organization") ? (
         <FormGroup error={!!orgValidationError} className="margin-top-1">
           <StartApplicationOrganizationInput
             onOrganizationChange={onOrganizationChange}
@@ -229,14 +229,14 @@ export const StartApplicationModal = ({
             applicantTypes={applicantTypes}
           />
         </FormGroup>
-      )}
+      ) : null}
       <FormGroup error={!!nameValidationError} className="margin-top-1">
         <StartApplicationNameInput
           validationError={nameValidationError}
           onNameChange={onNameChange}
         />
       </FormGroup>
-      {error && <ErrorMessage>{error}</ErrorMessage>}
+      {error ? <ErrorMessage>{error}</ErrorMessage> : null}
       <ModalFooter>
         <Button
           onClick={handleSubmit}
