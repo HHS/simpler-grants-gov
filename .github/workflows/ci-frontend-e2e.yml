@@ -117,7 +117,7 @@ jobs:
   create-report:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
-    needs: [e2e-tests]
+    needs: [e2e-tests-local]
     runs-on: ubuntu-22.04
 
     steps:

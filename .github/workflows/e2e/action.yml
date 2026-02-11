@@ -1,0 +1,104 @@
+name: Run Playwright
+description: Composite action to run Playwright against specified environment
+
+inputs:
+  version:
+    description: "ref / sha / branch to run tests against"
+    required: true
+  target:
+    description: "application environment to run tests against (dev / prod TK)"
+    required: true
+    default: "local"
+  total_shards:
+    description: "total number of test shards in parent run"
+    default: "1"
+  current_shard:
+    description: "total number of test shards in parent run"
+    default: "1"
+  node_version:
+    description: "node version"
+    default: "24"
+  package_manager:
+    description: "node dependency package manager"
+    default: "npm"
+  lockfile_path:
+    description: "path to package manage lockfile"
+    default: "./frontend/package-lock.json"
+  node_options:
+    description: "options to pass to node"
+    default: "--dns-result-order=ipv4first"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Validate environment
+      shell: bash
+      env:
+        PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+      run: |
+        echo $PLAYWRIGHT_TARGET_ENV
+        if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" ]]; then echo "invalid e2e test target provided" && exit 1; fi
+
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.version }}
+
+    - name: Set up Node
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.NODE_VERSION }}
+        cache: ${{ inputs.PACKAGE_MANAGER }}
+        cache-dependency-path: ${{ inputs.LOCKFILE_PATH }}
+
+    - name: Install Node dependencies & Playwright
+      shell: bash
+      run: |
+        npm ci
+        npx playwright install --with-deps
+
+    - name: Run e2e tests (Shard ${{ inputs.shard }}/${{ inputs.total_shards }})
+      env:
+        CI: true
+        TOTAL_SHARDS: ${{ inputs.total_shards }}
+        CURRENT_SHARD: ${{ inputs.shard }}
+        PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        STAGING_TEST_USER_EMAIL: ${{ inputs.STAGING_TEST_USER_EMAIL }}
+        STAGING_TEST_USER_PASSWORD: ${{ inputs.STAGING_TEST_USER_PASSWORD }}
+        STAGING_TEST_USER_MFA_KEY: ${{ inputs.STAGING_TEST_USER_MFA_KEY }}
+      run: |
+        echo $STAGING_TEST_USER_EMAIL
+        npm run test:e2e
+      shell: bash
+
+    - name: Debug logging on failure
+      if: failure()
+      run: |
+        cd ../api
+        echo "=== API Container Logs ==="
+        docker logs grants-api || echo "Could not retrieve API logs"
+        echo ""
+        echo "=== OpenSearch Container Logs ==="
+        docker logs opensearch-node || echo "Could not retrieve OpenSearch logs"
+        echo ""
+        echo "=== Container Status ==="
+        docker ps -a
+        echo ""
+        echo "=== Disk free ==="
+        df -h
+        echo ""
+      shell: bash
+
+    - name: Verify Blob Report Directory
+      run: |
+        echo "Contents of blob-report directory:"
+        ls -R blob-report || echo "blob-report directory not found"
+      shell: bash
+
+    - name: Upload Blob Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: blob-report-shard-${{ inputs.shard }}
+        path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
+        retention-days: 1
