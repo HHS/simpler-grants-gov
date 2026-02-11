@@ -7,6 +7,7 @@ import src.api.response as response
 from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
     opportunity_grantor_blueprint,
 )
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.util.dict_util import flatten_dict
 
@@ -166,8 +167,10 @@ examples = {
     opportunity_grantor_schemas.OpportunityCreateRequestSchema, location="json"
 )
 @opportunity_grantor_blueprint.output(opportunity_grantor_schemas.OpportunityCreateResponseSchema())
-# @opportunity_grantor_blueprint.auth_required(api_jwt_auth)  # Temporarily commented out for testing
-@opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
+@jwt_or_api_user_key_multi_auth.login_required
+@opportunity_grantor_blueprint.doc(
+    responses=[200, 403, 404, 422, 500], security=jwt_or_api_user_key_security_schemes
+)
 @flask_db.with_db_session()
 def opportunity_create(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     """Create a new opportunity"""
@@ -175,9 +178,10 @@ def opportunity_create(db_session: db.Session, json_data: dict) -> response.ApiR
     logger.info("POST /v1/grantor/opportunities/")
 
     with db_session.begin():
-        # TODO: Add AuthN/AuthZ checks for 403 error
+        from flask_login import current_user
+
         from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
 
-        opportunity = create_opportunity(db_session, json_data)
+        opportunity = create_opportunity(db_session, current_user, json_data)
 
     return response.ApiResponse(message="Success", data=opportunity)
