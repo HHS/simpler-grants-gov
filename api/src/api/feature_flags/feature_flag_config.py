@@ -21,9 +21,6 @@ class FeatureFlagConfig(PydanticBaseEnvConfig):
         False, alias=FeatureFlag.ENABLE_OPPORTUNITY_LOG_MSG.get_env_var_name()
     )
 
-    # ENABLE_WORKFLOW_API
-    enable_workflow_api: bool = Field(False, alias="ENABLE_WORKFLOW_API")
-
 
 # Global, loaded once at startup by calling initialize
 """

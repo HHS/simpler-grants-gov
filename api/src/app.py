@@ -61,6 +61,8 @@ class EndpointConfig(PydanticBaseEnvConfig):
 
     enable_workflow_endpoints: bool = Field(False, alias="ENABLE_WORKFLOW_ENDPOINTS")
 
+    enable_workflow_api: bool = Field(False, alias="ENABLE_WORKFLOW_API")
+
     # Do not ever change this to True, this controls endpoints we only
     # want to exist for local development.
     enable_local_endpoints: bool = Field(False, alias="ENABLE_LOCAL_ENDPOINTS")
@@ -194,7 +196,7 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(task_blueprint)
     app.register_blueprint(load_search_data_blueprint)
 
-    if feature_flag_config.get_feature_flag_config().enable_workflow_api:
+    if endpoint_config.enable_workflow_api:
         app.register_blueprint(workflow_blueprint)
 
 
