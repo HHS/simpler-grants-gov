@@ -11,7 +11,7 @@ from src.adapters.oauth.oauth_client_models import OauthTokenRequest
 from src.api.route_utils import raise_flask_error
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.auth_errors import JwtValidationError
-from src.auth.login_gov_jwt_auth import get_login_gov_client_assertion, validate_token
+from src.auth.login_gov_jwt_auth import get_config, get_login_gov_client_assertion, validate_token
 from src.constants.lookup_constants import ExternalUserType
 from src.db.models.user_models import LinkExternalUser, LoginGovState, User
 from src.services.users.organization_from_ebiz_poc import handle_ebiz_poc_organization_during_login
@@ -101,6 +101,37 @@ def handle_login_gov_callback_request(
     return LoginGovDataContainer(code=callback_params.code, nonce=str(login_gov_state.nonce))
 
 
+def _validate_piv_requirement(user: User, x509_presented: bool | None) -> None:
+    """Validate that agency users authenticate with PIV/CAC when required.
+
+    Args:
+        user: The user attempting to log in
+        x509_presented: Whether the user authenticated with a certificate (PIV/CAC)
+
+    Raises:
+        HTTPError: If an agency user attempts to login without PIV when required
+    """
+    config = get_config()
+
+    # Skip validation if PIV is not required (lower environments)
+    if not config.is_piv_required:
+        return
+
+    # Check if user is an agency user
+    is_agency_user = len(user.agency_users) > 0
+
+    # If user is an agency user and didn't use PIV, reject login
+    if is_agency_user and not x509_presented:
+        logger.info(
+            "Agency user attempted login without PIV",
+            extra={
+                "user_id": str(user.user_id),
+                "x509_presented": x509_presented,
+            },
+        )
+        raise_flask_error(422, "Agency users must authenticate using a PIV/CAC card")
+
+
 def handle_login_gov_token(
     db_session: db.Session, login_gov_data: LoginGovDataContainer
 ) -> LoginGovCallbackResponse:
@@ -142,7 +173,7 @@ def _process_token(db_session: db.Session, token: str, nonce: str) -> LoginGovCa
         # We only support login.gov right now, so this does nothing, but let's
         # be explicit just in case.
         .where(LinkExternalUser.external_user_type == ExternalUserType.LOGIN_GOV)
-        .options(selectinload(LinkExternalUser.user))
+        .options(selectinload(LinkExternalUser.user).selectinload(User.agency_users))
     ).scalar()
 
     is_user_new = external_user is None
@@ -165,6 +196,9 @@ def _process_token(db_session: db.Session, token: str, nonce: str) -> LoginGovCa
     # Only do this for new users
     if is_user_new:
         handle_ebiz_poc_organization_during_login(db_session, external_user.user)
+
+    # Validate PIV requirement for agency users
+    _validate_piv_requirement(external_user.user, login_gov_user.x509_presented)
 
     token, user_token_session = create_jwt_for_user(
         external_user.user, db_session, email=external_user.email
