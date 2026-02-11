@@ -176,7 +176,7 @@ def opportunity_create(db_session: db.Session, json_data: dict) -> response.ApiR
     logger.info("POST /v1/grantor/opportunities/")
 
     with db_session.begin():
-        # TEMPORARY IMPLEMENTATION: Create opportunity directly, bypassing auth checks
+        # TODO: Add AuthN/AuthZ checks for 403 error
         from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
 
         opportunity = create_opportunity(db_session, json_data)
