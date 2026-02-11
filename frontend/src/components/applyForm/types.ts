@@ -9,6 +9,15 @@ import {
 
 import { HTMLAttributes } from "react";
 
+export type GeneralRecord = Record<string, unknown>;
+
+export type BroadlyDefinedWidgetValue =
+  | string
+  | GeneralRecord
+  | string[]
+  | number
+  | boolean;
+
 export type SchemaField = {
   type?: string;
   title?: string;
@@ -104,6 +113,8 @@ export type TextTypes =
   | "tel"
   | "url";
 
+// extends the WidgetProps type from rjsf for USWDS and this project implementation
+// see https://github.com/rjsf-team/react-jsonschema-form/blob/7395afcdee6aaea128d943dd17e126c4ed301e58/packages/utils/src/types.ts#L898
 export interface UswdsWidgetProps<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
@@ -114,7 +125,8 @@ export interface UswdsWidgetProps<
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
   id: string;
-  value?: string | Array<T> | unknown;
+  // this needs to be locked down using a generic eventually
+  value?: BroadlyDefinedWidgetValue;
   type?: string;
   minLength?: number;
   schema: RJSFSchema & {

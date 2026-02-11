@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  ApplicationStatus,
+} from "src/types/applicationResponseTypes";
 import { Competition } from "src/types/competitionsResponseTypes";
 import { mockApplicationSubmission } from "src/utils/testing/fixtures";
 import applicationMock from "stories/components/application/application.mock.json";
@@ -120,7 +123,7 @@ describe("InformationCard - Edit filing name button visibility", () => {
       <InformationCard
         {...defaultProps}
         applicationDetails={makeApplicationDetails({
-          application_status: Status.IN_PROGRESS,
+          application_status: ApplicationStatus.IN_PROGRESS,
         })}
       />,
     );
@@ -133,7 +136,7 @@ describe("InformationCard - Edit filing name button visibility", () => {
       <InformationCard
         {...defaultProps}
         applicationDetails={makeApplicationDetails({
-          application_status: Status.SUBMITTED,
+          application_status: ApplicationStatus.SUBMITTED,
         })}
       />,
     );
@@ -146,7 +149,7 @@ describe("InformationCard - Edit filing name button visibility", () => {
       <InformationCard
         {...defaultProps}
         applicationDetails={makeApplicationDetails({
-          application_status: Status.ACCEPTED,
+          application_status: ApplicationStatus.ACCEPTED,
         })}
       />,
     );
@@ -276,7 +279,7 @@ describe("InformationCard - Transfer ownership UI", () => {
         {...baseProps}
         applicationDetails={makeApplicationDetails({
           organization: null,
-          application_status: Status.IN_PROGRESS,
+          application_status: ApplicationStatus.IN_PROGRESS,
           competition: { open_to_applicants: ["organization"] },
         })}
       />,
@@ -291,7 +294,7 @@ describe("InformationCard - Transfer ownership UI", () => {
         {...baseProps}
         applicationDetails={makeApplicationDetails({
           organization: null,
-          application_status: Status.SUBMITTED,
+          application_status: ApplicationStatus.SUBMITTED,
           competition: { open_to_applicants: ["organization"] },
         })}
       />,
@@ -308,7 +311,7 @@ describe("InformationCard - Transfer ownership UI", () => {
         {...baseProps}
         applicationDetails={makeApplicationDetails({
           organization: null,
-          application_status: Status.ACCEPTED,
+          application_status: ApplicationStatus.ACCEPTED,
           competition: { open_to_applicants: ["organization"] },
         })}
       />,
@@ -325,7 +328,7 @@ describe("InformationCard - Transfer ownership UI", () => {
         {...baseProps}
         applicationDetails={makeApplicationDetails({
           organization: null,
-          application_status: Status.IN_PROGRESS,
+          application_status: ApplicationStatus.IN_PROGRESS,
           competition: { open_to_applicants: ["individual"] },
         })}
       />,
@@ -344,7 +347,7 @@ describe("InformationCard - Transfer ownership UI", () => {
         {...baseProps}
         applicationDetails={makeApplicationDetails({
           organization: null,
-          application_status: Status.IN_PROGRESS,
+          application_status: ApplicationStatus.IN_PROGRESS,
           competition: { open_to_applicants: ["organization"] },
         })}
       />,
@@ -378,7 +381,7 @@ describe("InformationCard - Download submission button visibility and content", 
       <InformationCard
         {...baseProps}
         applicationDetails={makeApplicationDetails({
-          application_status: Status.ACCEPTED,
+          application_status: ApplicationStatus.ACCEPTED,
         })}
       />,
     );
@@ -394,7 +397,7 @@ describe("InformationCard - Download submission button visibility and content", 
       <InformationCard
         {...baseProps}
         applicationDetails={makeApplicationDetails({
-          application_status: Status.SUBMITTED,
+          application_status: ApplicationStatus.SUBMITTED,
         })}
       />,
     );
@@ -410,7 +413,7 @@ describe("InformationCard - Download submission button visibility and content", 
       <InformationCard
         {...baseProps}
         applicationDetails={makeApplicationDetails({
-          application_status: Status.IN_PROGRESS,
+          application_status: ApplicationStatus.IN_PROGRESS,
         })}
       />,
     );

@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { ApplicationStatus } from "src/types/applicationResponseTypes";
 
 import { IncludeFormInSubmissionRadio } from "src/components/application/IncludeFormInSubmissionRadio";
 
@@ -19,7 +20,7 @@ jest.mock("next/navigation", () => ({
 describe("IncludeFormInSubmissionRadio", () => {
   const applicationId = "app-123";
   const formId = "form-456";
-  const applicationStatus = "submitted";
+  const applicationStatus = ApplicationStatus.SUBMITTED;
 
   beforeEach(() => {
     jest.clearAllMocks();
