@@ -193,7 +193,9 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(data_migration_blueprint)
     app.register_blueprint(task_blueprint)
     app.register_blueprint(load_search_data_blueprint)
-    app.register_blueprint(workflow_blueprint)
+
+    if feature_flag_config.get_feature_flag_config().enable_workflow_api:
+        app.register_blueprint(workflow_blueprint)
 
 
 def get_project_root_dir() -> str:
