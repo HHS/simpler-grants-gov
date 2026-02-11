@@ -1,11 +1,8 @@
-import uuid
 
-from sqlalchemy import ColumnExpressionArgument, select
-from sqlalchemy.orm import lazyload, selectinload
+from sqlalchemy import select
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 
 

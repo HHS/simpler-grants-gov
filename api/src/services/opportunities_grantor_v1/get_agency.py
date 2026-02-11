@@ -1,12 +1,10 @@
 import uuid
 
 from sqlalchemy import select
-from sqlalchemy.orm import lazyload, selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.db.models.agency_models import Agency
-from src.db.models.opportunity_models import Opportunity
 
 
 def get_agency(db_session: db.Session, agency_id: uuid.UUID) -> Agency:

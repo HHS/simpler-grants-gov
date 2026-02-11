@@ -1,4 +1,3 @@
-import uuid
 
 import src.adapters.db as db
 from src.db.models.opportunity_models import Opportunity

@@ -1,34 +1,14 @@
-import io
 import logging
-from uuid import UUID
 
-from flask import Response
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
-import src.adapters.search as search
-import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.opportunities_grantor_v1.opportunity_grantor_schemas as opportunity_grantor_schemas
-import src.api.opportunities_v1.opportunity_schemas as opportunity_schemas
 import src.api.response as response
-import src.util.datetime_util as datetime_util
 from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
     opportunity_grantor_blueprint,
 )
-from src.auth.api_jwt_auth import api_jwt_auth
-from src.auth.multi_auth import (
-    api_key_multi_auth,
-    api_key_multi_auth_security_schemes,
-    jwt_or_api_user_key_multi_auth,
-    jwt_or_api_user_key_security_schemes,
-)
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
-from src.services.opportunities_v1.get_opportunity import (
-    get_opportunity,
-    get_opportunity_by_legacy_id,
-)
-from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_csv
-from src.services.opportunities_v1.search_opportunities import search_opportunities
 from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
