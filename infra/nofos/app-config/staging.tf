@@ -12,8 +12,9 @@ module "staging_config" {
   enable_identity_provider        = local.enable_identity_provider
   enable_notifications            = local.enable_notifications
 
-  # Enables ECS Exec access for debugging or jump access.
-  # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
-  # Defaults to `false`. Uncomment the next line to enable.
-  # enable_command_execution = true
+  database_min_capacity   = 1
+  database_max_capacity   = 1
+  database_instance_count = 1
+
+  service_override_extra_environment_variables = {}
 }

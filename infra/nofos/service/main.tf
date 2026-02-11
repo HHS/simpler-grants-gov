@@ -31,9 +31,14 @@ locals {
 
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
-    environment = var.environment_name
-    description = "Application resources created in ${var.environment_name} environment"
+    owner        = "bloomworks"
+    app          = module.app_config.app_name
+    environment  = var.environment_name
+    description  = "Application resources created in ${var.environment_name} environment"
+    service_name = local.service_name
   })
+
+  service_name = "${local.prefix}${module.app_config.app_name}-${var.environment_name}"
 
   # All non-default terraform workspaces are considered temporary.
   # Temporary environments do not have deletion protection enabled.
@@ -53,7 +58,7 @@ locals {
 }
 
 terraform {
-  required_version = "~>1.8.0"
+  required_version = "1.14.3"
 
   required_providers {
     aws = {
@@ -121,14 +126,10 @@ data "aws_acm_certificate" "certificate" {
   domain = local.service_config.domain_name
 }
 
-data "aws_route53_zone" "zone" {
-  count = local.service_config.domain_name != null ? 1 : 0
-  name  = local.network_config.domain_config.hosted_zone
-}
-
 module "service" {
-  source       = "../../modules/service"
-  service_name = local.service_config.service_name
+  source           = "../../modules/service"
+  service_name     = local.service_config.service_name
+  environment_name = var.environment_name
 
   image_repository_arn = local.build_repository_config.repository_arn
   image_repository_url = local.build_repository_config.repository_url
@@ -140,29 +141,36 @@ module "service" {
   private_subnet_ids = data.aws_subnets.private.ids
 
   domain_name     = local.service_config.domain_name
-  hosted_zone_id  = local.service_config.domain_name != null ? data.aws_route53_zone.zone[0].zone_id : null
+  hosted_zone_id  = null
   certificate_arn = local.service_config.enable_https ? data.aws_acm_certificate.certificate[0].arn : null
 
-  cpu                      = local.service_config.cpu
-  memory                   = local.service_config.memory
+  fargate_cpu              = local.service_config.cpu
+  fargate_memory           = local.service_config.memory
   desired_instance_count   = local.service_config.desired_instance_count
   enable_command_execution = local.service_config.enable_command_execution
+  enable_autoscaling       = true
+  max_capacity             = local.service_config.desired_instance_count
+  min_capacity             = local.service_config.desired_instance_count
 
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 
-  file_upload_jobs = local.service_config.file_upload_jobs
-  scheduled_jobs   = local.environment_config.scheduled_jobs
+  file_upload_jobs     = local.service_config.file_upload_jobs
+  scheduled_jobs       = local.environment_config.scheduled_jobs
+  enable_s3_cdn        = false
+  enable_drafts_bucket = false
+
+  readonly_root_filesystem = false
 
   db_vars = module.app_config.has_database ? {
-    security_group_ids         = data.aws_rds_cluster.db_cluster[0].vpc_security_group_ids
-    app_access_policy_arn      = data.aws_iam_policy.app_db_access_policy[0].arn
-    migrator_access_policy_arn = data.aws_iam_policy.migrator_db_access_policy[0].arn
+    security_group_ids         = module.database[0].security_group_ids
+    app_access_policy_arn      = module.database[0].app_access_policy_arn
+    migrator_access_policy_arn = module.database[0].migrator_access_policy_arn
     connection_info = {
-      host        = data.aws_rds_cluster.db_cluster[0].endpoint
-      port        = data.aws_rds_cluster.db_cluster[0].port
-      user        = local.database_config.app_username
-      db_name     = data.aws_rds_cluster.db_cluster[0].database_name
-      schema_name = local.database_config.schema_name
+      host        = module.database[0].host
+      port        = module.database[0].port
+      user        = module.database[0].app_username
+      db_name     = module.database[0].db_name
+      schema_name = module.database[0].schema_name
     }
   } : null
 
@@ -187,9 +195,7 @@ module "service" {
   )
 
   extra_policies = merge(
-    {
-      storage_access = module.storage.access_policy_arn
-    },
+    {},
     module.app_config.enable_identity_provider ? {
       identity_provider_access = module.identity_provider_client[0].access_policy_arn,
     } : {}
@@ -200,17 +206,8 @@ module "service" {
 
 module "monitoring" {
   source = "../../modules/monitoring"
-  #Email subscription list:
-  #email_alerts_subscription_list = ["email1@email.com", "email2@email.com"]
 
-  # Module takes service and ALB names to link all alerts with corresponding targets
   service_name                                = local.service_config.service_name
   load_balancer_arn_suffix                    = module.service.load_balancer_arn_suffix
   incident_management_service_integration_url = module.app_config.has_incident_management_service && !local.is_temporary ? data.aws_ssm_parameter.incident_management_service_integration_url[0].value : null
-}
-
-module "storage" {
-  source       = "../../modules/storage"
-  name         = local.storage_config.bucket_name
-  is_temporary = local.is_temporary
 }

@@ -5,21 +5,16 @@ module "dev_config" {
   default_region                  = module.project_config.default_region
   environment                     = "dev"
   network_name                    = "dev"
-  domain_name                     = null
-  enable_https                    = false
+  domain_name                     = "nofos.dev.simpler.grants.gov"
+  enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_notifications            = local.enable_notifications
+  enable_identity_provider        = local.enable_identity_provider
 
-  # Enable and configure identity provider.
-  enable_identity_provider = local.enable_identity_provider
+  database_min_capacity   = 1
+  database_max_capacity   = 1
+  database_instance_count = 1
 
-  # Support local development against the dev instance.
-  extra_identity_provider_callback_urls = ["http://localhost"]
-  extra_identity_provider_logout_urls   = ["http://localhost"]
-
-  # Enables ECS Exec access for debugging or jump access.
-  # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
-  # Defaults to `false`. Uncomment the next line to enable.
-  # enable_command_execution = true
+  service_override_extra_environment_variables = {}
 }

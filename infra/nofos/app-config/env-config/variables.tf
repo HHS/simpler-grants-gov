@@ -61,11 +61,13 @@ variable "extra_identity_provider_logout_urls" {
 }
 
 variable "has_database" {
-  type = bool
+  type    = bool
+  default = true
 }
 
 variable "has_incident_management_service" {
-  type = bool
+  type    = bool
+  default = false
 }
 
 variable "network_name" {
@@ -79,7 +81,7 @@ variable "project_name" {
 
 variable "service_cpu" {
   type    = number
-  default = 256
+  default = 1024
 }
 
 variable "service_desired_instance_count" {
@@ -89,7 +91,7 @@ variable "service_desired_instance_count" {
 
 variable "service_memory" {
   type    = number
-  default = 512
+  default = 4096
 }
 
 variable "service_override_extra_environment_variables" {
@@ -99,4 +101,30 @@ variable "service_override_extra_environment_variables" {
     Map from environment variable name to environment variable value
   EOT
   default     = {}
+}
+
+# Database variables
+
+variable "database_instance_count" {
+  description = "Number of database instances. Should be 2+ for production environments."
+  type        = number
+  default     = 1
+}
+
+variable "database_max_capacity" {
+  description = "Maximum capacity of the Aurora Serverless v2 cluster"
+  type        = number
+  default     = 1
+}
+
+variable "database_min_capacity" {
+  description = "Minimum capacity of the Aurora Serverless v2 cluster"
+  type        = number
+  default     = 1
+}
+
+variable "database_engine_version" {
+  type        = string
+  description = "Postgres database engine version"
+  default     = "17.5"
 }

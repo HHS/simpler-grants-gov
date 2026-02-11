@@ -15,12 +15,14 @@ data "aws_subnets" "database" {
 
 locals {
   # The prefix key/value pair is used for Terraform Workspaces, which is useful for projects with multiple infrastructure developers.
-  # By default, Terraform creates a workspace named “default.” If a non-default workspace is not created this prefix will equal “default”,
+  # By default, Terraform creates a workspace named "default." If a non-default workspace is not created this prefix will equal "default",
   # if you choose not to use workspaces set this value to "dev"
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
 
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
+    owner       = "bloomworks"
+    app         = module.app_config.app_name
     environment = var.environment_name
     description = "Database resources for the ${var.environment_name} environment"
   })
@@ -33,12 +35,12 @@ locals {
 }
 
 terraform {
-  required_version = "~>1.8.0"
+  required_version = "1.14.3"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~>4.67.0"
+      version = "~> 6.13.0"
     }
   }
 
@@ -80,16 +82,21 @@ module "database" {
   name                        = "${local.prefix}${local.database_config.cluster_name}"
   app_access_policy_name      = "${local.prefix}${local.database_config.app_access_policy_name}"
   migrator_access_policy_name = "${local.prefix}${local.database_config.migrator_access_policy_name}"
-
   # The following are not AWS infra resources and therefore do not need to be
   # isolated via the terraform workspace prefix
-  app_username      = local.database_config.app_username
-  migrator_username = local.database_config.migrator_username
-  schema_name       = local.database_config.schema_name
-
+  app_username                   = local.database_config.app_username
+  migrator_username              = local.database_config.migrator_username
+  schema_name                    = local.database_config.schema_name
+  instance_count                 = local.database_config.instance_count
+  max_capacity                   = local.database_config.max_capacity
+  min_capacity                   = local.database_config.min_capacity
+  enable_http_endpoint           = local.database_config.enable_http_endpoint
   vpc_id                         = data.aws_vpc.network.id
-  database_subnet_group_name     = local.network_config.database_subnet_group_name
+  engine_version                 = local.database_config.engine_version
   private_subnet_ids             = data.aws_subnets.database.ids
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
+  database_subnet_group_name     = var.environment_name
+  environment_name               = var.environment_name
+  grants_gov_oracle_cidr_block   = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
   is_temporary                   = local.is_temporary
 }

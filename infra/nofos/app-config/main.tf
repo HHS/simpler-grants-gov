@@ -3,7 +3,7 @@ locals {
   # the folder under /infra that corresponds to the application
   app_name = regex("/infra/([^/]+)/app-config$", abspath(path.module))[0]
 
-  environments = ["dev", "staging", "prod"]
+  environments = ["dev", "staging", "prod", "training", "grantee1"]
   project_name = module.project_config.project_name
 
   # Whether or not the application has a database
@@ -19,7 +19,7 @@ locals {
   # If enabled, the networks associated with this application's environments
   # will have NAT gateways, which allows the service in the private subnet to
   # make calls to the internet.
-  has_external_non_aws_service = false
+  has_external_non_aws_service = true
 
   has_incident_management_service = false
 
@@ -41,12 +41,26 @@ locals {
   # If enabled:
   # 1. Creates an AWS Pinpoint application
   # 2. Configures email notifications using AWS SES
-  enable_notifications = false
+  enable_notifications = true
 
   environment_configs = {
-    dev     = module.dev_config
-    staging = module.staging_config
-    prod    = module.prod_config
+    dev      = module.dev_config
+    staging  = module.staging_config
+    prod     = module.prod_config
+    training = module.training_config
+    grantee1 = module.grantee1_config
+  }
+
+  # Map from environment name to the account name for the AWS account that
+  # contains the resources for that environment. Resources that are shared
+  # across environments use the key "shared".
+  account_names_by_environment = {
+    shared   = "simpler-grants-gov"
+    dev      = "simpler-grants-gov"
+    staging  = "simpler-grants-gov"
+    prod     = "simpler-grants-gov"
+    training = "simpler-grants-gov"
+    grantee1 = "simpler-grants-gov"
   }
 
   # The name of the network that contains the resources shared across all
