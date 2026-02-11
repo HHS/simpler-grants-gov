@@ -65,3 +65,7 @@ class InvalidEntityForWorkflow(NonRetryableWorkflowError):
 
 class UserDoesNotExist(NonRetryableWorkflowError):
     pass
+
+
+class InactiveWorkflowError(NonRetryableWorkflowError):
+    pass

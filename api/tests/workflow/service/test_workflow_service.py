@@ -4,10 +4,19 @@ import pytest
 
 from src.constants.lookup_constants import WorkflowEntityType
 from src.workflow.event.workflow_event import WorkflowEntity
-from src.workflow.service.workflow_service import get_workflow_entities, is_event_valid_for_workflow
+from src.workflow.service.workflow_service import (
+    get_and_validate_workflow,
+    get_workflow_entities,
+    is_event_valid_for_workflow,
+)
 from src.workflow.state_machine.initial_prototype_state_machine import InitialPrototypeStateMachine
-from src.workflow.workflow_errors import EntityNotFound, InvalidEntityForWorkflow
-from tests.src.db.models.factories import ApplicationFactory, OpportunityFactory
+from src.workflow.workflow_errors import (
+    EntityNotFound,
+    InactiveWorkflowError,
+    InvalidEntityForWorkflow,
+    WorkflowDoesNotExistError,
+)
+from tests.src.db.models.factories import ApplicationFactory, OpportunityFactory, WorkflowFactory
 from tests.workflow.workflow_test_util import build_workflow_config
 
 
@@ -185,3 +194,22 @@ def test_get_workflow_entities_application_missing(db_session, enable_factory_cr
 )
 def test_is_event_valid_for_workflow(event, state_machine_cls, expected_is_valid):
     assert is_event_valid_for_workflow(event, state_machine_cls) == expected_is_valid
+
+
+def test_get_workflow(db_session, enable_factory_create):
+    workflow = WorkflowFactory.create()
+
+    fetched_workflow = get_and_validate_workflow(db_session, workflow.workflow_id)
+    assert fetched_workflow.workflow_id == workflow.workflow_id
+
+
+def test_get_workflow_not_found(db_session):
+    with pytest.raises(WorkflowDoesNotExistError, match="Workflow does not exist"):
+        get_and_validate_workflow(db_session, uuid.uuid4())
+
+
+def test_get_workflow_is_not_active(db_session, enable_factory_create):
+    workflow = WorkflowFactory.create(is_active=False)
+
+    with pytest.raises(InactiveWorkflowError, match="Workflow is not active"):
+        get_and_validate_workflow(db_session, workflow.workflow_id)

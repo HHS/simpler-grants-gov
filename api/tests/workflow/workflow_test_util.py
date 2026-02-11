@@ -77,7 +77,7 @@ def build_process_workflow_event(
     user: User | None,
     event_to_send: str,
     exclude_process_workflow_context: bool = False,
-):
+) -> WorkflowEvent:
     user_id = user.user_id if user else uuid.uuid4()
 
     if exclude_process_workflow_context:

@@ -12,7 +12,11 @@ from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_event import WorkflowEvent
 from src.workflow.registry.workflow_registry import WorkflowRegistry
-from src.workflow.service.workflow_service import get_workflow_entities, is_event_valid_for_workflow
+from src.workflow.service.workflow_service import (
+    get_and_validate_workflow,
+    get_workflow_entities,
+    is_event_valid_for_workflow,
+)
 from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_constants import WorkflowConstants
 from src.workflow.workflow_errors import (
@@ -20,7 +24,6 @@ from src.workflow.workflow_errors import (
     InvalidWorkflowTypeError,
     UnexpectedStateError,
     UserDoesNotExist,
-    WorkflowDoesNotExistError,
 )
 
 logger = logging.getLogger(__name__)
@@ -175,17 +178,9 @@ class EventHandler:
             )
             raise InvalidEventError("Process workflow event has a null process workflow context")
 
-        workflow = self.db_session.scalar(
-            select(Workflow).where(
-                Workflow.workflow_id == self.event.process_workflow_context.workflow_id
-            )
+        workflow = get_and_validate_workflow(
+            self.db_session, self.event.process_workflow_context.workflow_id, log_extra
         )
-
-        if workflow is None:
-            logger.warning("Workflow does not exist - cannot process event", extra=log_extra)
-            raise WorkflowDoesNotExistError(
-                "Workflow does not exist, cannot process events against it"
-            )
 
         config, state_machine_cls = self._get_state_machine_for_workflow_type(
             workflow.workflow_type

@@ -5,6 +5,7 @@ import pytest
 from src.constants.lookup_constants import WorkflowType
 from src.workflow.handler.event_handler import EventHandler
 from src.workflow.workflow_errors import (
+    InactiveWorkflowError,
     InvalidEventError,
     InvalidWorkflowTypeError,
     UnexpectedStateError,
@@ -216,4 +217,23 @@ def test_process_workflow_event_invalid_current_state(db_session, enable_factory
         workflow.workflow_id, user=user, event_to_send="middle_to_end"
     )
     with pytest.raises(UnexpectedStateError, match="Workflow record has an unexpected state"):
+        EventHandler(db_session, event).process()
+
+
+def test_process_workflow_is_already_at_end(db_session, enable_factory_create):
+    user = UserFactory.create()
+
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+        current_workflow_state=BasicState.END,
+        is_single_opportunity_workflow=True,
+        is_active=False,
+    )
+
+    event = build_process_workflow_event(
+        workflow.workflow_id, user=user, event_to_send="middle_to_end"
+    )
+    with pytest.raises(
+        InactiveWorkflowError, match="Workflow is not active - cannot receive events"
+    ):
         EventHandler(db_session, event).process()
