@@ -66,7 +66,7 @@ def test_workflow_event_put_unauthorized(client):
                     * 6,
                 },
             },
-            "maximum length 5",
+            "Length must be between 1 and 5.",
         ),
     ],
 )
