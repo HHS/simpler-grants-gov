@@ -137,12 +137,10 @@ def get_signature(context: JsonRuleContext, json_rule: JsonRule) -> str | None:
     If the submitting user has an associated email, we will sign with that, otherwise
     log that we signed with the unknown value.
     """
-    return (
-        context.application_form.application.submitted_by_user.email
-        if context.application_form.application.submitted_by_user
-        and context.application_form.application.submitted_by_user.email
-        else UNKNOWN_VALUE
-    )
+    application = context.application_form.application
+    if application.submitted_by_user and application.submitted_by_user.email:
+        return application.submitted_by_user.email
+    return UNKNOWN_VALUE
 
 
 def _convert_monetary_field(value: Any) -> Decimal:
