@@ -51,7 +51,7 @@ test.skip("Working saved opportunities page link appears in nav when logged in",
 
   // find the Workspace nav dropdown item and open it
   const dropDownButton = page.locator("#nav-dropdown-button-4");
-  await expect(dropDownButton).not.toBeInViewport();
+  await expect(dropDownButton).toBeInViewport();
   await dropDownButton.click();
 
   // the fourth item in the dropdown should be the saved opportunities link

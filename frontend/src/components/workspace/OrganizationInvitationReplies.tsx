@@ -1,5 +1,3 @@
-"use client";
-
 import { completeStatuses, OrganizationInvitation } from "src/types/userTypes";
 
 import { ReactNode } from "react";

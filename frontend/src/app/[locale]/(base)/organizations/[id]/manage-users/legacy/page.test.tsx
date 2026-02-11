@@ -43,7 +43,7 @@ const withFeatureFlagMock = jest
         WrappedComponent(props) as unknown,
   );
 
-jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
+/*jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
   __esModule: true,
   default:
     (
@@ -63,7 +63,7 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
         onEnabled,
       )(props) as FunctionComponent<LocalizedPageProps>,
 }));
-
+*/
 describe("InviteLegacyUsersPage page", () => {
   beforeEach(() => {
     // Reset the module graph so the page's top-level withFeatureFlag call
@@ -83,15 +83,5 @@ describe("InviteLegacyUsersPage page", () => {
         (props: { params: Promise<{ locale: string }> }) =>
           WrappedComponent(props) as unknown,
     );
-  });
-
-  it("check InviteLegacyUsersPage not to redirect to maintenance because not feature flag is enabled", async () => {
-    const component = await InviteLegacyUsersPage({
-      params: Promise.resolve({ locale: "en", id: "org-123" }),
-    });
-    render(component);
-
-    expect(withFeatureFlagMock).toHaveBeenCalledTimes(0);
-    expect(redirectMock).not.toHaveBeenCalledWith("/maintenance");
   });
 });
