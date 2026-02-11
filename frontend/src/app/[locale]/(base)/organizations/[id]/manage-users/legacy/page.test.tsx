@@ -1,12 +1,13 @@
-import { render } from "@testing-library/react";
-import InviteLegacyUsersPage from "src/app/[locale]/(base)/organizations/[id]/manage-users/legacy/page";
+// import { render } from "@testing-library/react";
+// import InviteLegacyUsersPage from "src/app/[locale]/(base)/organizations/[id]/manage-users/legacy/page";
 import { LocalizedPageProps } from "src/types/intl";
-import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
+// import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { UserDetail } from "src/types/userTypes";
 
-import { FunctionComponent, ReactNode } from "react";
+// import { FunctionComponent, ReactNode } from "react";
+import { FunctionComponent } from "react";
 
-type onEnabled = (props: LocalizedPageProps) => ReactNode;
+//  type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
 const redirectMock = jest.fn();
 
@@ -43,7 +44,7 @@ const withFeatureFlagMock = jest
         WrappedComponent(props) as unknown,
   );
 
-/*jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
+/* jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
   __esModule: true,
   default:
     (
@@ -62,8 +63,8 @@ const withFeatureFlagMock = jest
         featureFlagName,
         onEnabled,
       )(props) as FunctionComponent<LocalizedPageProps>,
-}));
-*/
+})); */
+
 describe("InviteLegacyUsersPage page", () => {
   beforeEach(() => {
     // Reset the module graph so the page's top-level withFeatureFlag call
