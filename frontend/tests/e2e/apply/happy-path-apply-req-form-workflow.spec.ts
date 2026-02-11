@@ -11,7 +11,7 @@ const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async ({ page, context }: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
   test.setTimeout(300_000); // 5 min timeout
 
-  const BASE_URL = process.env.BASE_URL ?? "http://localhost:3001";
+  const BASE_URL = process.env.BASE_URL ?? "http://localhost:3000";
   const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
   // Step 1: Navigate to home page
@@ -74,7 +74,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
   // Wait for the select element inside the modal to be visible
   const modal = page.locator('[role="dialog"].is-visible, #start-application.is-visible');
   await expect(modal.locator('select')).toBeVisible({ timeout: 15000 });
-  const modalHtml = await modal.innerHTML();
+  // const modalHtml = await modal.innerHTML();
   // console.log("[DEBUG] Modal HTML:\n", modalHtml);
   // console.log("✓ Modal appeared!");
 
@@ -134,7 +134,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
   // Continue workflow after clicking the button
   // console.log("Step 8: Waiting for application page...");
   await page.waitForURL(/\/applications\/[a-f0-9-]+/, { timeout: 30000 });
-  const appUrl = page.url();
+  // const appUrl = page.url();
   // console.log(`✓ Application created: ${appUrl}`);
   await page.waitForLoadState("domcontentloaded");
   await page.waitForTimeout(2000);
@@ -167,7 +167,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     // Log the SF-424B form section HTML
     const formSection = page.locator('form, [data-testid*="sf-424b"], section:has-text("SF-424B")');
     if (await formSection.count() > 0) {
-      const formHtml = await formSection.first().innerHTML();
+      // const formHtml = await formSection.first().innerHTML();
       // console.log("[DEBUG] SF-424B form HTML:\n", formHtml);
     } else {
       // console.log("[DEBUG] SF-424B form section not found");
@@ -185,9 +185,9 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     const titleCount = await titleInputs.count();
     // console.log(`[DEBUG] Found ${titleCount} title input(s)`);
     for (let i = 0; i < titleCount; i++) {
-      const inputType = await titleInputs.nth(i).getAttribute('type');
-      const inputName = await titleInputs.nth(i).getAttribute('name');
-      const inputPlaceholder = await titleInputs.nth(i).getAttribute('placeholder');
+      // const inputType = await titleInputs.nth(i).getAttribute('type');
+      // const inputName = await titleInputs.nth(i).getAttribute('name'); // eslint-disable-line @typescript-eslint/no-unused-vars
+      // const inputPlaceholder = await titleInputs.nth(i).getAttribute('placeholder'); // eslint-disable-line @typescript-eslint/no-unused-vars
       // console.log(`[DEBUG] Title input #${i}: type=${inputType}, name=${inputName}, placeholder=${inputPlaceholder}`);
     }
     if (titleCount > 0) {
@@ -211,7 +211,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     }
     // 3. If still not filled, print form HTML for debug
     if (!titleFieldFilled) {
-      const formHtml = await formSection.first().innerHTML();
+      // const formHtml = await formSection.first().innerHTML(); // eslint-disable-line @typescript-eslint/no-unused-vars
       // console.log("[DEBUG] SF-424B form HTML for title field fallback:\n", formHtml);
       throw new Error("Could not fill SF-424B Title field");
     }
@@ -225,9 +225,9 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     const orgCount = await orgInputs.count();
     // console.log(`[DEBUG] Found ${orgCount} organization input(s)`);
     for (let i = 0; i < orgCount; i++) {
-      const inputType = await orgInputs.nth(i).getAttribute('type');
-      const inputName = await orgInputs.nth(i).getAttribute('name');
-      const inputPlaceholder = await orgInputs.nth(i).getAttribute('placeholder');
+      // const inputType = await orgInputs.nth(i).getAttribute('type'); // eslint-disable-line @typescript-eslint/no-unused-vars
+      // const inputName = await orgInputs.nth(i).getAttribute('name'); // eslint-disable-line @typescript-eslint/no-unused-vars
+      // const inputPlaceholder = await orgInputs.nth(i).getAttribute('placeholder'); // eslint-disable-line @typescript-eslint/no-unused-vars
       // console.log(`[DEBUG] Org input #${i}: type=${inputType ?? ""}, name=${inputName ?? ""}, placeholder=${inputPlaceholder ?? ""}`);
     }
     if (orgCount > 0) {
@@ -253,7 +253,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     await page.goBack();
     await page.waitForLoadState("domcontentloaded");
     await page.waitForTimeout(10000);
-    const landingHtml = await page.content();
+    // const landingHtml = await page.content(); // eslint-disable-line @typescript-eslint/no-unused-vars
 
         // Scroll to find status message
     await page.evaluate(() => window.scrollTo(0, 0));
@@ -269,7 +269,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     const sfLllRow = page.locator('tr', { hasText: /Disclosure of Lobbying Activities \(SF-LLL\)/i });
     await expect(sfLllRow).toBeVisible({ timeout: 10000 });
     // Print SF-LLL row HTML for debug
-    const sfLllRowHtml = await sfLllRow.innerHTML();
+    // const sfLllRowHtml = await sfLllRow.innerHTML(); // eslint-disable-line @typescript-eslint/no-unused-vars
     // console.log("[DEBUG] SF-LLL row HTML:\n", sfLllRowHtml);
     // Find all radio buttons in this row
     const radioInputs = sfLllRow.locator('input[type="radio"]');
@@ -277,13 +277,13 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     // After clicking 'No', print checked state for all radios
     for (let i = 0; i < radioCount; i++) {
       const radio = radioInputs.nth(i);
-      const label = await radio.evaluate(node => {
-        if (node instanceof HTMLInputElement && node.labels && node.labels.length > 0) {
-          return node.labels[0].textContent || '';
-        }
-        return '';
-      });
-      const checked = await radio.isChecked();
+      // const label = await radio.evaluate(node => {
+      //   if (node instanceof HTMLInputElement && node.labels && node.labels.length > 0) {
+      //     return node.labels[0].textContent || '';
+      //   }
+      //   return '';
+      // }); // eslint-disable-line @typescript-eslint/no-unused-vars
+      // const checked = await radio.isChecked(); // eslint-disable-line @typescript-eslint/no-unused-vars
       // console.log(`[DEBUG] Radio #${i} label='${label}' checked=${checked}`);
     }
     // Directly click the 'No' label in the SF-LLL row
@@ -318,7 +318,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     await page.waitForTimeout(5000);
 
     // Debug: print page HTML after submission
-    const postSubmitHtml = await page.content();
+    // const postSubmitHtml = await page.content(); // eslint-disable-line @typescript-eslint/no-unused-vars
     // console.log("[DEBUG] Page HTML after submitting application:\n", postSubmitHtml);
 
     // Step 14: Success message shows up with application ID
