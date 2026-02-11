@@ -276,7 +276,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     const radioCount = await radioInputs.count();
     // After clicking 'No', print checked state for all radios
     for (let i = 0; i < radioCount; i++) {
-      const radio = radioInputs.nth(i);
+      // const radio = radioInputs.nth(i); // eslint-disable-line @typescript-eslint/no-unused-vars
       // const label = await radio.evaluate(node => {
       //   if (node instanceof HTMLInputElement && node.labels && node.labels.length > 0) {
       //     return node.labels[0].textContent || '';
