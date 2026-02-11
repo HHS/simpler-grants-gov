@@ -91,7 +91,7 @@ export function requesterForEndpoint({
       let jsonBody;
       try {
         jsonBody = (await response.json()) as APIResponse;
-      } catch (e) {
+      } catch (_e) {
         throw new Error(
           `bad Json from error response at ${url} with status code ${response.status}`,
         );
