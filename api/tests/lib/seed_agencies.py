@@ -6,7 +6,6 @@ import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.static_role_values import OPPORTUNITY_EDITOR, OPPORTUNITY_PUBLISHER
 from src.db.models.agency_models import Agency
-from src.db.models.user_models import User
 from tests.lib.seed_data_utils import UserBuilder
 
 logger = logging.getLogger(__name__)
