@@ -18,10 +18,11 @@ Scenario: Clear Filters button is visible when filters are selected
     Given I have selected one or more filters
     Then the Clear Filters button should be visible
 
-Scenario: Clicking Clear Filters deselects all filters
-    Given I have selected one or more filters
+Scenario: Clicking Clear Filters restores default filters
+    Given the default filters are "Posted" and "Forecasted"
+    And I have selected additional filters
     When I click the Clear Filters button
-    Then all selected filters should be deselected
+    Then only the default filters should remain selected
 
 Scenario: Clicking Clear Filters updates results immediately
     Given I have selected one or more filters
