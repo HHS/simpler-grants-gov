@@ -605,12 +605,12 @@ class TestOpportunityNotification:
                 '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Archived.<br>',
             ),
             (
-                    {"before": OpportunityStatus.FORECASTED, "after": None},
-                    '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to not specified.<br>',
+                {"before": OpportunityStatus.FORECASTED, "after": None},
+                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to not specified.<br>',
             ),
             (
-                    {"before": None, "after": OpportunityStatus.ARCHIVED},
-                    '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from not specified to Archived.<br>',
+                {"before": None, "after": OpportunityStatus.ARCHIVED},
+                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from not specified to Archived.<br>',
             ),
         ],
     )

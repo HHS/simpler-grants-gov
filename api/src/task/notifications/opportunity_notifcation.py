@@ -471,7 +471,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         before = status_change["before"]
         after = status_change["after"]
 
-        def safe_status_display(value):
+        def safe_status_display(value: str | None):
             if value in OPPORTUNITY_STATUS_MAP:
                 return OPPORTUNITY_STATUS_MAP[value]
             if isinstance(value, str):
