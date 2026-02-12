@@ -16,15 +16,9 @@ class TestUserAgenciesGet:
         user = UserFactory.create()
         LinkExternalUserFactory.create(user=user)
 
-        # Create agencies
-        agency_1 = AgencyFactory.create(
-            agency_name="Department of Commerce",
-            agency_code="DOC",
-        )
-        agency_2 = AgencyFactory.create(
-            agency_name="Department of Labor",
-            agency_code="DOL",
-        )
+        # Create agencies (let factory generate unique codes to avoid conflicts)
+        agency_1 = AgencyFactory.create()
+        agency_2 = AgencyFactory.create()
 
         # Create agency-user relationships
         AgencyUserFactory.create(user=user, agency=agency_1)
@@ -43,18 +37,19 @@ class TestUserAgenciesGet:
         assert data["message"] == "Success"
         assert len(data["data"]) == 2
 
-        # Sort by agency_code for consistent testing
-        agencies = sorted(data["data"], key=lambda x: x["agency_code"])
+        # Sort by agency_id for consistent testing
+        agencies = sorted(data["data"], key=lambda x: x["agency_id"])
+        expected_agencies = sorted([agency_1, agency_2], key=lambda x: str(x.agency_id))
 
-        # Check first agency (DOC)
-        assert agencies[0]["agency_id"] == str(agency_1.agency_id)
-        assert agencies[0]["agency_name"] == "Department of Commerce"
-        assert agencies[0]["agency_code"] == "DOC"
+        # Check first agency
+        assert agencies[0]["agency_id"] == str(expected_agencies[0].agency_id)
+        assert agencies[0]["agency_name"] == expected_agencies[0].agency_name
+        assert agencies[0]["agency_code"] == expected_agencies[0].agency_code
 
-        # Check second agency (DOL)
-        assert agencies[1]["agency_id"] == str(agency_2.agency_id)
-        assert agencies[1]["agency_name"] == "Department of Labor"
-        assert agencies[1]["agency_code"] == "DOL"
+        # Check second agency
+        assert agencies[1]["agency_id"] == str(expected_agencies[1].agency_id)
+        assert agencies[1]["agency_name"] == expected_agencies[1].agency_name
+        assert agencies[1]["agency_code"] == expected_agencies[1].agency_code
 
     def test_get_user_agencies_200_empty_list(self, enable_factory_create, client, db_session):
         """Test getting user agencies when user has no agencies"""
