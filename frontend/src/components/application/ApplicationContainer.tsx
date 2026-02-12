@@ -6,7 +6,7 @@ import { ApplicationSubmission } from "src/types/application/applicationSubmissi
 import {
   ApplicationDetail,
   ApplicationHistory,
-  Status,
+  ApplicationStatus,
 } from "src/types/applicationResponseTypes";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
@@ -103,8 +103,9 @@ const ApplicationContainer = ({
   return (
     <>
       {(success ||
-        applicationDetails.application_status === Status.SUBMITTED ||
-        applicationDetails.application_status === Status.ACCEPTED) && (
+        applicationDetails.application_status === ApplicationStatus.SUBMITTED ||
+        applicationDetails.application_status ===
+          ApplicationStatus.ACCEPTED) && (
         <SummaryBox>
           <SummaryBoxHeading headingLevel="h3">
             {t("submissionSuccess.title")}
