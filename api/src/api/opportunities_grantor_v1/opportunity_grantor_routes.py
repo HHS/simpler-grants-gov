@@ -9,6 +9,7 @@ from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
 from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
@@ -30,10 +31,9 @@ def opportunity_create(db_session: db.Session, json_data: dict) -> response.ApiR
     logger.info("POST /v1/grantors/opportunities/")
 
     with db_session.begin():
-        from flask_login import current_user
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
 
-        from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
-
-        opportunity = create_opportunity(db_session, current_user, json_data)
+        opportunity = create_opportunity(db_session, user, json_data)
 
     return response.ApiResponse(message="Success", data=opportunity)
