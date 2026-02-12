@@ -39,6 +39,7 @@ def submit_application(db_session: db.Session, application_id: UUID, user: User)
 
     # This assignment will not persist if any of the form validations fail.
     application.submitted_by_user = user
+    application.submitted_by = user.user_id
 
     # Run validations
     validate_application_in_progress(application, ApplicationAction.SUBMIT)
