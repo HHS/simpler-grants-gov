@@ -965,9 +965,6 @@ class TestOpportunityNotification:
     ):
         op_id = UUID("7f3c6a9e-4d2b-4e3a-9a7f-8c4c9f5d2b61")
         res = notification_task._build_description_fields_content(description_diffs, op_id)
-        import pdb
-
-        pdb.set_trace()
         assert res == expected_html
 
     @pytest.mark.parametrize(
