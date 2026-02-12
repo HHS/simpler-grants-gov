@@ -20,7 +20,7 @@ test("Saved opportunities page shows unauthenticated state if not logged in", as
 });
 
 // will fail when run against staging until after https://github.com/HHS/simpler-grants-gov/issues/7769
-test.skip("Working saved opportunities page link appears in nav when logged in", async ({
+test("Working saved opportunities page link appears in nav when logged in", async ({
   page,
   context,
 }, { project }) => {

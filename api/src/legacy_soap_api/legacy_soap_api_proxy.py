@@ -1,16 +1,21 @@
+import base64
 import logging
 import os
+from datetime import timedelta
 from os.path import join
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 
 from requests import Request, Session
 
+from src.db.models.user_models import LegacyCertificate
 from src.legacy_soap_api.legacy_soap_api_auth import (
     MTLS_CERT_HEADER_KEY,
+    USE_SOAP_JWT_HEADER_KEY,
     SessionResumptionAdapter,
     SOAPAuth,
     SOAPClientCertificateLookupError,
     SOAPClientCertificateNotConfigured,
+    generate_soap_jwt,
 )
 from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig, get_soap_config
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
@@ -20,6 +25,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_soap_error_response,
     get_streamed_soap_response,
 )
+from src.util.datetime_util import utcnow
 
 logger = logging.getLogger(__name__)
 
@@ -37,14 +43,22 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     )
 
     # Exclude header keys that are utilized only in simpler soap api. Not needed for proxy request.
-    proxy_headers = filter_headers(
-        soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
-    )
+    soap_auth = soap_request.auth
+    use_soap_jwt = soap_request.headers.get(USE_SOAP_JWT_HEADER_KEY) == "1"
+    if use_soap_jwt and soap_auth and soap_auth.certificate.legacy_certificate:
+        proxy_headers = {
+            "S2S_PARTNER_CERTID_JWT_B64": get_soap_jwt_auth_jwt(
+                config, soap_auth.certificate.legacy_certificate
+            )
+        }
+    else:
+        proxy_headers = filter_headers(
+            soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
+        )
 
     _request = Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
-    soap_auth = soap_request.auth
 
-    if not soap_auth or config.soap_auth_map == {}:
+    if not soap_auth or config.soap_auth_map == {} or use_soap_jwt:
         logger.info(
             "soap_client_certificate: Sending soap request without client certificate",
             extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITHOUT_CERT},
@@ -109,3 +123,21 @@ def _get_soap_response(
     return get_streamed_soap_response(
         session.send(prepared_request, stream=True, cert=cert, timeout=timeout)
     )
+
+
+def get_soap_jwt_auth_jwt(
+    config: LegacySoapAPIConfig,
+    legacy_certificate: LegacyCertificate,
+) -> str:
+    expiration_time = utcnow() + timedelta(minutes=1)
+    jwt_string = generate_soap_jwt(
+        legacy_certificate.cert_id,
+        expiration_time,
+        config.soap_partner_gateway_uri,
+        config.soap_partner_gateway_auth_key,
+    )
+    logger.info(
+        "soap_client_certificate: created SOAP JWT",
+        extra={"soap_api_event": LegacySoapApiEvent.JWT_CREATED},
+    )
+    return base64.b64encode(jwt_string.encode("utf-8")).decode("utf-8")

@@ -314,6 +314,13 @@ class WorkflowType(StrEnum):
     APPLICATION_SUBMISSION = "application_submission"
     INITIAL_PROTOTYPE = "initial_prototype"
 
+    # Because of how we use the workflow type to find
+    # the state machine and its configuration, we need
+    # to define any workflows for tests here as well.
+    # These workflow types aren't real, and are instead
+    # reserved for testing.
+    BASIC_TEST_WORKFLOW = "basic_test_workflow"
+
 
 class ApprovalType(StrEnum):
     INITIAL_PROTOTYPE_APPROVAL = "initial_prototype_approval"

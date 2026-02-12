@@ -4,6 +4,7 @@ import { useUser } from "src/services/auth/useUser";
 import { filterSearchParams } from "src/utils/search/searchFormatUtils";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { RefObject, useCallback, useRef, useState } from "react";
 import {
@@ -77,7 +78,7 @@ function SuccessContent({
       <p>
         {t.rich("successDescription", {
           workspaceLink: (chunks) => (
-            <a href="/saved-search-queries">{chunks}</a>
+            <Link href="/saved-search-queries">{chunks}</Link>
           ),
         })}
       </p>
