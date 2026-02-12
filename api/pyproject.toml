@@ -47,7 +47,6 @@ jsonref = "^1.1.0"
 pydantic-core = "2.41.5"
 urllib3 = "^2.6.3"
 python-statemachine = "^2.5.0"
-beautifulsoup4 = "^4.14.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
