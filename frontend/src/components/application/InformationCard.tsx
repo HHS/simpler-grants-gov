@@ -3,16 +3,25 @@
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   ApplicationDetail,
+  ApplicationStatus,
   SamGovEntity,
-  Status,
 } from "src/types/applicationResponseTypes";
 import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { Button, Grid, GridContainer, Link } from "@trussworks/react-uswds";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Button,
+  Grid,
+  GridContainer,
+  Link,
+  ModalRef,
+} from "@trussworks/react-uswds";
 
 import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
+import { TransferOwnershipModal } from "src/components/application/transferOwnership/TransferOwnershipModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
+import { TransferOwnershipButton } from "./transferOwnership/TransferOwnershipButton";
 
 type CompetitionDetails = { competition: Competition };
 
@@ -50,11 +59,16 @@ const OrganizationDetailsDisplay = ({
 const ApplicantDetails = ({
   hasOrganization,
   samGovEntity,
+  onOpenTransferModal,
+  canTransferOwnership,
 }: {
   hasOrganization: boolean;
   samGovEntity?: SamGovEntity;
+  onOpenTransferModal: () => void;
+  canTransferOwnership: boolean;
 }) => {
   const t = useTranslations("Application.information");
+
   if (hasOrganization) {
     return <OrganizationDetailsDisplay samGovEntity={samGovEntity} />;
   }
@@ -62,7 +76,12 @@ const ApplicantDetails = ({
   return (
     <div className="margin-bottom-1">
       <dt className="margin-right-1 text-bold">{t("applicant")}: </dt>
-      <dd>{t("applicantTypeIndividual")}</dd>
+      <dd>
+        {t("applicantTypeIndividual")}
+        {canTransferOwnership ? (
+          <TransferOwnershipButton onClick={onOpenTransferModal} />
+        ) : null}
+      </dd>
     </div>
   );
 };
@@ -87,6 +106,31 @@ export const InformationCard = ({
   const t = useTranslations("Application.information");
   const hasOrganization = Boolean(applicationDetails.organization);
   const { is_open } = applicationDetails.competition;
+  const transferModalRef = useRef<ModalRef | null>(null);
+  const transferModalId = "transfer-ownership-modal";
+  const organizationEligible =
+    applicationDetails.competition.open_to_applicants.includes("organization");
+  const isEditable =
+    applicationDetails.application_status === ApplicationStatus.IN_PROGRESS;
+  const canTransferOwnership =
+    !hasOrganization && organizationEligible && isEditable;
+  const [isTransferModalOpen, setIsTransferModalOpen] =
+    useState<boolean>(false);
+
+  const openTransferModal = useCallback((): void => {
+    setIsTransferModalOpen(true);
+  }, []);
+
+  const handleTransferModalAfterClose = useCallback((): void => {
+    setIsTransferModalOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isTransferModalOpen) {
+      return;
+    }
+    transferModalRef.current?.toggleModal?.();
+  }, [isTransferModalOpen]);
 
   const ApplicationInstructionsDownload = () => {
     return (
@@ -125,7 +169,7 @@ export const InformationCard = ({
    *  - Download available, render button to download submission zip.
    */
   const ApplicationSubmissionDownload = () => {
-    if (applicationDetails.application_status === Status.SUBMITTED)
+    if (applicationDetails.application_status === ApplicationStatus.SUBMITTED)
       return (
         <p data-testid={"application-submission-download-message"}>
           {t("applicationSubmissionZipDownloadLoadingMessage")}
@@ -133,7 +177,7 @@ export const InformationCard = ({
       );
     if (
       latestApplicationSubmission === null ||
-      applicationDetails.application_status === Status.IN_PROGRESS
+      applicationDetails.application_status === ApplicationStatus.IN_PROGRESS
     )
       return null;
     return (
@@ -175,10 +219,10 @@ export const InformationCard = ({
 
   const applicationStatus = () => {
     switch (applicationDetails.application_status) {
-      case Status.IN_PROGRESS:
+      case ApplicationStatus.IN_PROGRESS:
         return t("statusInProgress");
-      case Status.ACCEPTED:
-      case Status.SUBMITTED:
+      case ApplicationStatus.ACCEPTED:
+      case ApplicationStatus.SUBMITTED:
         return t("statusSubmitted");
       default:
         return "-";
@@ -198,8 +242,10 @@ export const InformationCard = ({
         <Grid tablet={{ col: 12 }} mobile={{ col: 12 }}>
           <h3 className="margin-top-2">
             {applicationDetails.application_name}
-            {applicationDetails.application_status !== Status.SUBMITTED &&
-              applicationDetails.application_status !== Status.ACCEPTED && (
+            {applicationDetails.application_status !==
+              ApplicationStatus.SUBMITTED &&
+              applicationDetails.application_status !==
+                ApplicationStatus.ACCEPTED && (
                 <EditAppFilingName
                   applicationId={applicationDetails.application_id}
                   applicationName={applicationDetails.application_name}
@@ -213,6 +259,8 @@ export const InformationCard = ({
             <ApplicantDetails
               hasOrganization={hasOrganization}
               samGovEntity={applicationDetails.organization?.sam_gov_entity}
+              onOpenTransferModal={openTransferModal}
+              canTransferOwnership={canTransferOwnership}
             />
           </dl>
         </Grid>
@@ -242,6 +290,15 @@ export const InformationCard = ({
             </div>
           </dl>
         </Grid>
+
+        {isTransferModalOpen ? (
+          <TransferOwnershipModal
+            applicationId={applicationDetails.application_id}
+            modalId={transferModalId}
+            modalRef={transferModalRef}
+            onAfterClose={handleTransferModalAfterClose}
+          />
+        ) : null}
 
         <Grid tablet={{ col: 6 }} mobile={{ col: 12 }}>
           {applicationDetails.competition.competition_instructions.length ? (

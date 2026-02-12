@@ -66,7 +66,7 @@ function SelectWidget<
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { enumOptions: opts, enumDisabled, emptyValue: optEmptyVal } = options;
   const enums = useMemo(() => (opts && opts.length > 0 ? opts : []), [opts]);
-  const selectValue = value ? String(value) : "";
+  const selectValue = value ? (value as string) : "";
   // uswds recommends a combo box for lists larger than 15
   // TODO: renable combobox
   const useCombo = false; // nums && enums.length > 15;
