@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 MTLS_CERT_HEADER_KEY = "X-Amzn-Mtls-Clientcert"
 USE_SOAP_JWT_HEADER_KEY = "Use-Soap-Jwt"
 S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY = "S2S_PARTNER_CERTID_JWT_B64"
+LOG_LOCAL_RESPONSE_HEADER_KEY = "Log-Local-Response"
 
 
 class SOAPClientCertificateNotConfigured(Exception):
