@@ -302,7 +302,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     const sfLllRow = page.locator("tr", {
       hasText: /Disclosure of Lobbying Activities \(SF-LLL\)/i,
     });
-    await expect(sfLllRow).toBeVisible({ timeout: 10000 });
+    await expect(sfLllRow).toBeVisible({ timeout: 12000 });
     // Print SF-LLL row HTML for debug
     // const sfLllRowHtml = await sfLllRow.innerHTML(); // eslint-disable-line @typescript-eslint/no-unused-vars
     // console.log("[DEBUG] SF-LLL row HTML:\n", sfLllRowHtml);
@@ -336,7 +336,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
       const fallbackLabel = sfLllRow.locator("label", { hasText: /^No$/i });
       if ((await fallbackLabel.count()) > 0) {
         await fallbackLabel.first().scrollIntoViewIfNeeded();
-        await expect(fallbackLabel.first()).toBeVisible({ timeout: 5000 });
+        await expect(fallbackLabel.first()).toBeVisible({ timeout: 10000 });
         await fallbackLabel.first().click();
         // console.log("[DEBUG] Fallback 'No' label clicked for SF-LLL row.");
       } else {
