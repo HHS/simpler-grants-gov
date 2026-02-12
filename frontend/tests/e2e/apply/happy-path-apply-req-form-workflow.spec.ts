@@ -329,7 +329,21 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     if (noLabelCount > 0) {
       await noLabelLocator.first().scrollIntoViewIfNeeded();
       await expect(noLabelLocator.first()).toBeVisible({ timeout: 5000 });
+      const includeFormResponsePromise = page.waitForResponse((response) => {
+        const url = response.url();
+        return (
+          response.request().method() === "PUT" &&
+          url.includes("/api/applications/") &&
+          url.includes("/forms/")
+        );
+      });
       await noLabelLocator.first().click();
+      const includeFormResponse = await includeFormResponsePromise;
+      if (includeFormResponse.status() !== 200) {
+        throw new Error(
+          `Include-in-submission update returned status ${includeFormResponse.status()}`,
+        );
+      }
       // console.log("[DEBUG] 'No' label clicked for SF-LLL row.");
     } else {
       // Fallback: try selector from debug info
@@ -337,12 +351,29 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
       if ((await fallbackLabel.count()) > 0) {
         await fallbackLabel.first().scrollIntoViewIfNeeded();
         await expect(fallbackLabel.first()).toBeVisible({ timeout: 10000 });
+        const includeFormResponsePromise = page.waitForResponse((response) => {
+          const url = response.url();
+          return (
+            response.request().method() === "PUT" &&
+            url.includes("/api/applications/") &&
+            url.includes("/forms/")
+          );
+        });
         await fallbackLabel.first().click();
+        const includeFormResponse = await includeFormResponsePromise;
+        if (includeFormResponse.status() !== 200) {
+          throw new Error(
+            `Include-in-submission update returned status ${includeFormResponse.status()}`,
+          );
+        }
         // console.log("[DEBUG] Fallback 'No' label clicked for SF-LLL row.");
       } else {
         throw new Error("Could not find 'No' label for SF-LLL row");
       }
     }
+
+    const noRadio = sfLllRow.getByRole("radio", { name: /^No$/i });
+    await expect(noRadio).toBeChecked({ timeout: 10000 });
 
     // Only select 'No' radio button under 'Submit with application' for SF-LLL
     // Do not fill or open SF-LLL form
@@ -353,7 +384,21 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
       name: /submit application/i,
     });
     await submitAppButton.waitFor({ state: "visible", timeout: 15000 });
+    const submitResponsePromise = page.waitForResponse((response) => {
+      const url = response.url();
+      return (
+        response.request().method() === "POST" &&
+        url.includes("/api/applications/") &&
+        url.includes("/submit")
+      );
+    });
     await submitAppButton.click();
+    const submitResponse = await submitResponsePromise;
+    if (submitResponse.status() !== 200) {
+      throw new Error(
+        `Application submission returned status ${submitResponse.status()}`,
+      );
+    }
     await page.waitForLoadState("domcontentloaded");
     await page.waitForTimeout(5000);
 
@@ -362,9 +407,21 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     // console.log("[DEBUG] Page HTML after submitting application:\n", postSubmitHtml);
 
     // Step 14: Success message shows up with application ID
-    const successHeading = page.getByText(
-      /your application has been submitted/i,
-    );
+    const successHeading = page.getByRole("heading", {
+      name: /your application has been submitted/i,
+    });
+    const validationHeading = page.getByRole("heading", {
+      name: /your application could not be submitted/i,
+    });
+    await Promise.race([
+      successHeading.waitFor({ state: "visible", timeout: 120000 }),
+      validationHeading.waitFor({ state: "visible", timeout: 120000 }),
+    ]);
+    if (await validationHeading.isVisible()) {
+      throw new Error(
+        "Application submission validation errors were displayed after submit",
+      );
+    }
     await expect(successHeading).toBeVisible({ timeout: 120000 });
     await page.waitForTimeout(5000);
 
