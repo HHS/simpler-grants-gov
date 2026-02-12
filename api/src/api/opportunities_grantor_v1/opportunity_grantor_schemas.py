@@ -5,16 +5,6 @@ from src.api.schemas.response_schema import AbstractResponseSchema, FileResponse
 from src.constants.lookup_constants import OpportunityCategory
 
 
-class SearchResponseFormat(StrEnum):
-    JSON = "json"
-    CSV = "csv"
-
-
-class SearchQueryOperator(StrEnum):
-    AND = "AND"
-    OR = "OR"
-
-
 class OpportunityAttachmentV1Schema(FileResponseSchema):
     mime_type = fields.String(
         metadata={"description": "The MIME type of the attachment", "example": "application/pdf"}
