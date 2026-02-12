@@ -1,4 +1,3 @@
-import { Meta } from "@storybook/react";
 import {
   ApplicationDetail,
   ApplicationStatus,
@@ -18,7 +17,7 @@ const applicationDetailsObject: ApplicationDetail = {
 };
 const errors = null;
 
-const meta: Meta<typeof ApplicationFormsTable> = {
+const meta = {
   title: "Components/Application/CompetitionFormsTable",
   component: ApplicationFormsTable,
   args: {
