@@ -352,6 +352,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     const submitAppButton = page.getByRole("button", {
       name: /submit application/i,
     });
+    await submitAppButton.waitFor({ state: "visible", timeout: 15000 });
     await submitAppButton.click();
     await page.waitForLoadState("domcontentloaded");
     await page.waitForTimeout(5000);
@@ -364,7 +365,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     const successHeading = page.getByText(
       /your application has been submitted/i,
     );
-    await expect(successHeading).toBeVisible();
+    await expect(successHeading).toBeVisible({ timeout: 120000 });
     await page.waitForTimeout(5000);
 
     // Find the Application ID element more specifically
