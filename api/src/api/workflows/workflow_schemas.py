@@ -30,13 +30,8 @@ class StartWorkflowContextSchema(Schema):
     entities = fields.List(
         fields.Nested(WorkflowEntitySchema),
         required=True,
-        validate=[validators.Length(min=1, max=5, error="maximum length 5")],
-        metadata={
-            "description": "A list of entities (1-5) to associate with the workflow.",
-            "example": [
-                {"entity_type": "opportunity", "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"}
-            ],
-        },
+        validate=[validators.Length(min=1, max=5)],
+        metadata={"description": "A list of entities (1-5) to associate with the workflow."},
     )
 
 
@@ -66,27 +61,14 @@ class WorkflowEventRequestSchema(Schema):
         StartWorkflowContextSchema,
         required=False,
         metadata={
-            "description": "Context and entities required to initialize a new workflow. Only allowed if event_type is 'start_workflow'.",
-            "example": {
-                "workflow_type": "opportunity_publish",
-                "entities": [
-                    {
-                        "entity_type": "opportunity",
-                        "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                    }
-                ],
-            },
+            "description": "Context and entities required to initialize a new workflow. Only allowed if event_type is 'start_workflow'."
         },
     )
     process_workflow_context = fields.Nested(
         ProcessWorkflowContextSchema,
         required=False,
         metadata={
-            "description": "Information required to progress an existing workflow state. Only allowed if event_type is 'process_workflow'.",
-            "example": {
-                "workflow_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "event_to_send": "approve",
-            },
+            "description": "Information required to progress an existing workflow state. Only allowed if event_type is 'process_workflow'."
         },
     )
     metadata = fields.Dict(
