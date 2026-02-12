@@ -50,6 +50,7 @@ from src.api.users.user_schemas import (
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.users.create_api_key import create_api_key
@@ -229,22 +230,24 @@ def user_get_organizations(db_session: db.Session, user_id: UUID) -> response.Ap
     return response.ApiResponse(message="Success", data=organizations)
 
 
-@user_blueprint.get("/<uuid:user_id>/agencies")
+@user_blueprint.post("/<uuid:user_id>/agencies")
 @user_blueprint.output(UserAgenciesResponseSchema)
-@user_blueprint.doc(responses=[200, 401, 403])
-@user_blueprint.auth_required(api_jwt_auth)
+@user_blueprint.doc(responses=[200, 401, 403], security=jwt_or_api_user_key_security_schemes)
+@jwt_or_api_user_key_multi_auth.login_required
 @flask_db.with_db_session()
 def user_get_agencies(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
-    logger.info("GET /v1/users/:user_id/agencies")
+    logger.info("POST /v1/users/:user_id/agencies")
 
-    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+    # Get user from multi-auth (supports both JWT and User API Key)
+    user = jwt_or_api_user_key_multi_auth.get_user()
 
     # Verify the authenticated user matches the requested user_id
-    if user_token_session.user_id != user_id:
+    if user.user_id != user_id:
         raise_flask_error(403, "Forbidden")
 
     with db_session.begin():
-        agencies = get_user_agencies(db_session, user_id)
+        db_session.add(user)
+        agencies = get_user_agencies(user)
 
     logger.info(
         "Retrieved agencies for user",

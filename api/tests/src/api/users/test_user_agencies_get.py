@@ -29,7 +29,7 @@ class TestUserAgenciesGet:
         db_session.commit()
 
         # Make request
-        resp = client.get(f"/v1/users/{user.user_id}/agencies", headers={"X-SGG-Token": token})
+        resp = client.post(f"/v1/users/{user.user_id}/agencies", headers={"X-SGG-Token": token})
 
         assert resp.status_code == 200
         data = resp.get_json()
@@ -62,7 +62,7 @@ class TestUserAgenciesGet:
         db_session.commit()
 
         # Make request
-        resp = client.get(f"/v1/users/{user.user_id}/agencies", headers={"X-SGG-Token": token})
+        resp = client.post(f"/v1/users/{user.user_id}/agencies", headers={"X-SGG-Token": token})
 
         assert resp.status_code == 200
         data = resp.get_json()
@@ -87,7 +87,7 @@ class TestUserAgenciesGet:
         db_session.commit()
 
         # Try to access user_2's agencies with user_1's token
-        resp = client.get(f"/v1/users/{user_2.user_id}/agencies", headers={"X-SGG-Token": token})
+        resp = client.post(f"/v1/users/{user_2.user_id}/agencies", headers={"X-SGG-Token": token})
 
         assert resp.status_code == 403
 
@@ -95,7 +95,7 @@ class TestUserAgenciesGet:
         """Test that accessing agencies without auth token returns 401"""
         random_user_id = str(uuid.uuid4())
 
-        resp = client.get(f"/v1/users/{random_user_id}/agencies")
+        resp = client.post(f"/v1/users/{random_user_id}/agencies")
 
         assert resp.status_code == 401
 
@@ -103,7 +103,7 @@ class TestUserAgenciesGet:
         """Test that accessing agencies with invalid token returns 401"""
         random_user_id = str(uuid.uuid4())
 
-        resp = client.get(
+        resp = client.post(
             f"/v1/users/{random_user_id}/agencies", headers={"X-SGG-Token": "invalid-token"}
         )
 
