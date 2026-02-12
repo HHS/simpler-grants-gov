@@ -11,7 +11,12 @@ from src.auth.api_jwt_auth import parse_jwt_for_user
 from src.db.models.user_models import LinkExternalUser, LoginGovState
 from src.util import datetime_util
 from tests.lib.auth_test_utils import create_jwt
-from tests.src.db.models.factories import LinkExternalUserFactory, LoginGovStateFactory
+from tests.src.db.models.factories import (
+    AgencyFactory,
+    AgencyUserFactory,
+    LinkExternalUserFactory,
+    LoginGovStateFactory,
+)
 
 ##########################################
 # Full login flow tests
@@ -511,12 +516,6 @@ def test_agency_user_without_piv_fails_when_required(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key, monkeypatch
 ):
     """Agency user logging in without PIV should fail when IS_PIV_REQUIRED=true"""
-    from tests.src.db.models.factories import (
-        AgencyFactory,
-        AgencyUserFactory,
-        LinkExternalUserFactory,
-    )
-
     # Enable PIV requirement
     monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", True)
 
@@ -558,12 +557,6 @@ def test_agency_user_with_piv_succeeds_when_required(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key, monkeypatch
 ):
     """Agency user logging in with PIV should succeed when IS_PIV_REQUIRED=true"""
-    from tests.src.db.models.factories import (
-        AgencyFactory,
-        AgencyUserFactory,
-        LinkExternalUserFactory,
-    )
-
     # Enable PIV requirement
     monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", True)
 
@@ -640,12 +633,6 @@ def test_agency_user_without_piv_succeeds_when_not_required(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key, monkeypatch
 ):
     """Agency user logging in without PIV should succeed when IS_PIV_REQUIRED=false"""
-    from tests.src.db.models.factories import (
-        AgencyFactory,
-        AgencyUserFactory,
-        LinkExternalUserFactory,
-    )
-
     # Disable PIV requirement (default behavior)
     monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", False)
 

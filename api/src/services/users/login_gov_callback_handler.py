@@ -113,23 +113,36 @@ def _validate_piv_requirement(user: User, x509_presented: bool | None) -> None:
     """
     config = get_config()
 
-    # Skip validation if PIV is not required (lower environments)
-    if not config.is_piv_required:
-        return
-
     # Check if user is an agency user
     is_agency_user = len(user.agency_users) > 0
 
-    # If user is an agency user and didn't use PIV, reject login
+    # If user is an agency user and didn't use PIV, reject or log
     if is_agency_user and not x509_presented:
+        if config.is_piv_required:
+            logger.info(
+                "Agency user attempted login without PIV",
+                extra={
+                    "user_id": user.user_id,
+                    "x509_presented": x509_presented,
+                },
+            )
+            raise_flask_error(422, "Agency users must authenticate using a PIV/CAC card")
+        else:
+            logger.info(
+                "Agency user login would have been blocked if PIV were required",
+                extra={
+                    "user_id": user.user_id,
+                    "x509_presented": x509_presented,
+                },
+            )
+    elif is_agency_user and x509_presented:
         logger.info(
-            "Agency user attempted login without PIV",
+            "Agency user logged in with PIV",
             extra={
-                "user_id": str(user.user_id),
+                "user_id": user.user_id,
                 "x509_presented": x509_presented,
             },
         )
-        raise_flask_error(422, "Agency users must authenticate using a PIV/CAC card")
 
 
 def handle_login_gov_token(
