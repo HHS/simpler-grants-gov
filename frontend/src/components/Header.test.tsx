@@ -344,13 +344,9 @@ describe("Header", () => {
     render(<Header {...props} />);
     const menuButton = screen.getByTestId("navMenuButton");
     await user.click(menuButton);
-    const signInLinks = screen.getAllByRole("link", { name: /sign in/i });
-    const mobileSignIn = signInLinks.find((el) =>
-      el.getAttribute("class")?.includes("desktop:display-none"),
-    );
-    expect(mobileSignIn).toBeTruthy();
-    const signInLabel = within(mobileSignIn!).getByText("Sign in");
-    await user.click(signInLabel);
+    const nav = screen.getByRole("navigation");
+    const signInLink = within(nav).getByRole("link", { name: /sign in/i });
+    await user.click(signInLink);
 
     expect(userUtils.storeCurrentPage).toHaveBeenCalled();
   });
@@ -372,19 +368,15 @@ describe("Header", () => {
       }));
       render(<Header {...props} />);
 
-      const signInLinks = screen.getAllByRole("link", { name: /sign in/i });
-      expect(signInLinks.length).toBeGreaterThanOrEqual(1);
-      const navSignInLink = signInLinks.find((el) =>
-        el.getAttribute("class")?.includes("desktop:display-none"),
-      );
-      expect(navSignInLink).toBeInTheDocument();
+      const nav = screen.getByRole("navigation");
+      const navSignInLink = within(nav).getByRole("link", { name: /sign in/i });
       expect(navSignInLink).toHaveAttribute(
         "href",
         expect.stringContaining("login"),
       );
     });
 
-    it("applies desktop:display-none to Sign in link in nav when unauthenticated so it is only in the menu on mobile", () => {
+    it("places Sign in inside the nav when unauthenticated so screen reader announces it as a nav item", () => {
       mockUseUser.mockImplementation(() => ({
         user: {
           token: undefined,
@@ -394,11 +386,13 @@ describe("Header", () => {
       }));
       render(<Header {...props} />);
 
-      const signInLinks = screen.getAllByRole("link", { name: /sign in/i });
-      const navSignInLink = signInLinks.find((el) =>
-        el.getAttribute("class")?.includes("desktop:display-none"),
+      const nav = screen.getByRole("navigation");
+      const navLinks = within(nav).getAllByRole("link");
+      const signInLink = navLinks.find((el) =>
+        el.textContent?.toLowerCase().includes("sign in"),
       );
-      expect(navSignInLink).toHaveClass("desktop:display-none");
+      expect(signInLink).toBeDefined();
+      expect(signInLink).toBeInTheDocument();
     });
 
     it("shows Account dropdown in nav when user is authenticated", () => {

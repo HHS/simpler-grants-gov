@@ -28,7 +28,7 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { TestUserSelect } from "./TestUserSelect";
-import { SignOutNavLink, UserControl } from "./user/UserControl";
+import { SignOutNavLink } from "./user/UserControl";
 
 type PrimaryLink = {
   text?: string;
@@ -57,8 +57,14 @@ const NavLink = ({
   }
 
   return (
-    <Link href={href} key={href} className={classes} target={linkTarget}>
-      <div onClick={onClick} className={iconBtnClass}>
+    <Link
+      href={href}
+      key={href}
+      className={classes}
+      target={linkTarget}
+      onClick={onClick}
+    >
+      <div className={iconBtnClass}>
         {text}
         {isExternalLink(href) && (
           <USWDSIcon name="launch" className="usa-icon--size-2" />
@@ -241,7 +247,7 @@ const NavLinks = ({
     if (!user?.token) {
       items.push(
         <NavLink
-          key="sign-in-mobile"
+          key="sign-in"
           href={LOGIN_URL}
           onClick={() => {
             storeCurrentPage();
@@ -250,7 +256,7 @@ const NavLinks = ({
           text={t("login")}
           classes={clsx({
             "usa-nav__link": true,
-            "desktop:display-none": true,
+            "text-normal": true,
           })}
         />,
       );
@@ -312,7 +318,7 @@ const Header = ({
   const [isMobileNavExpanded, setIsMobileNavExpanded] =
     useState<boolean>(false);
 
-  const { hasBeenLoggedOut, resetHasBeenLoggedOut, user } = useUser();
+  const { hasBeenLoggedOut, resetHasBeenLoggedOut } = useUser();
   const { showSnackbar, Snackbar, hideSnackbar, snackbarIsVisible } =
     useSnackbar();
 
@@ -395,16 +401,6 @@ const Header = ({
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
           />
-          {!user?.token && (
-            <div
-              className={clsx(
-                "usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6",
-                "display-none desktop:display-block",
-              )}
-            >
-              <UserControl localDev={localDev} />
-            </div>
-          )}
         </div>
       </USWDSHeader>
       <Snackbar close={hideSnackbar} isVisible={snackbarIsVisible}>
