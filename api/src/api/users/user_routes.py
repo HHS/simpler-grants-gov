@@ -11,6 +11,7 @@ from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
+    UserAgenciesResponseSchema,
     UserApiKeyCreateRequestSchema,
     UserApiKeyCreateResponseSchema,
     UserApiKeyDeleteResponseSchema,
@@ -61,6 +62,7 @@ from src.services.users.get_roles_and_privileges import get_roles_and_privileges
 from src.services.users.get_saved_opportunities import get_saved_opportunities
 from src.services.users.get_saved_searches import get_saved_searches
 from src.services.users.get_user import get_user
+from src.services.users.get_user_agencies import get_user_agencies
 from src.services.users.get_user_api_keys import get_user_api_keys
 from src.services.users.get_user_applications import get_user_applications
 from src.services.users.get_user_organizations import get_user_organizations
@@ -225,6 +227,34 @@ def user_get_organizations(db_session: db.Session, user_id: UUID) -> response.Ap
     )
 
     return response.ApiResponse(message="Success", data=organizations)
+
+
+@user_blueprint.get("/<uuid:user_id>/agencies")
+@user_blueprint.output(UserAgenciesResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_get_agencies(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
+    logger.info("GET /v1/users/:user_id/agencies")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        agencies = get_user_agencies(db_session, user_id)
+
+    logger.info(
+        "Retrieved agencies for user",
+        extra={
+            "user_id": user_id,
+            "agency_count": len(agencies),
+        },
+    )
+
+    return response.ApiResponse(message="Success", data=agencies)
 
 
 @user_blueprint.post("/<uuid:user_id>/applications")
