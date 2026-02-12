@@ -30,21 +30,21 @@ Scenario: Selecting a sort option updates results
   And screen readers announce the selected sort option
   And focus remains on the dropdown after selection
 
-Scenario : Changing sort multiple times updates results each time
+Scenario: Changing sort multiple times updates results each time
   When I select "<firstSortOption>"
   Then results should be updated according to "<firstSortOption>"
   When I select "<secondSortOption>"
   Then results should be updated according to "<secondSortOption>"
   And the dropdown should show "<secondSortOption>"
 
-Scenario : Sort does not break layout with multiple filters applied
+Scenario: Sort does not break layout with multiple filters applied
   Given multiple filters are applied
   When I select the sort option "<sortOption>"
   Then the page layout should remain correct
   And if "<viewport>" is "mobile" the filter drawer layout should not be broken
   And the sort dropdown should remain visible and functional
 
-Scenario : Data integrity after sorting
+Scenario: Data integrity after sorting
   When I select "<sortOption>"
   Then results should be correctly ordered based on "<sortOption>"
   And sorting works correctly with large result sets
@@ -52,12 +52,12 @@ Scenario : Data integrity after sorting
   And sorting works correctly with partial result sets
   And sorting produces consistent ordering across pages
 
-Scenario : Default sort and reset behavior
+Scenario: Default sort and reset behavior
   Then results should be sorted by "Most relevant"
   When I perform a new search
   Then the sort option should reset to "Most relevant"
 
-Scenario : Sort dropdown functions correctly with empty result sets
+Scenario: Sort dropdown functions correctly with empty result sets
   Given there are no matching search results
   Then the page should remain stable and not break
   And the sort dropdown should be visible and functional
