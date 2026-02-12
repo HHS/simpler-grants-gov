@@ -1,4 +1,3 @@
-import re
 import uuid
 
 from bs4 import BeautifulSoup, NavigableString
@@ -23,29 +22,6 @@ def is_valid_uuid(value: str) -> bool:
         return True
     except ValueError:
         return False
-
-
-def contains_regex(value: str, regex: str) -> bool:
-    return bool(re.search(regex, value))
-
-
-def _strip_partial_tag(html: str) -> str:
-    """
-    Remove a trailing partial HTML tag, if present.
-    Safe for nested and previously closed tags.
-    """
-    i = len(html) - 1
-
-    while i >= 0:
-        if html[i] == ">":
-            # Found a complete tag end before any '<' → safe
-            return html
-        if html[i] == "<":
-            # Found start of a tag with no closing '>' → strip it
-            return html[:i]
-        i -= 1
-
-    return html
 
 
 def truncate_html_inline(value: str, max_length: int, suffix: str) -> str:
