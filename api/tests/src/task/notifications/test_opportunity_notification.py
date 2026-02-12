@@ -1141,9 +1141,6 @@ class TestOpportunityNotification:
                 )
             ]
         )
-        import pdb
-
-        pdb.set_trace()
 
         assert res == expected
 
