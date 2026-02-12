@@ -500,3 +500,172 @@ def test_user_callback_token_fails_validation_no_valid_key_302(
         .one_or_none()
     )
     assert db_state is None
+
+
+##########################################
+# PIV/CAC validation tests
+##########################################
+
+
+def test_agency_user_without_piv_fails_when_required(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key, monkeypatch
+):
+    """Agency user logging in without PIV should fail when IS_PIV_REQUIRED=true"""
+    from tests.src.db.models.factories import AgencyFactory, AgencyUserFactory, LinkExternalUserFactory
+
+    # Enable PIV requirement
+    monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", True)
+
+    # Create state and existing agency user
+    login_gov_state = LoginGovStateFactory.create()
+    login_gov_id = str(uuid.uuid4())
+    external_user = LinkExternalUserFactory.create(external_user_id=login_gov_id)
+
+    # Make the user an agency user
+    agency = AgencyFactory.create()
+    AgencyUserFactory.create(user=external_user.user, agency=agency)
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id=login_gov_id,
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+        x509_presented=False,  # No PIV
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "Agency users must authenticate using a PIV/CAC card"
+
+
+def test_agency_user_with_piv_succeeds_when_required(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key, monkeypatch
+):
+    """Agency user logging in with PIV should succeed when IS_PIV_REQUIRED=true"""
+    from tests.src.db.models.factories import AgencyFactory, AgencyUserFactory, LinkExternalUserFactory
+
+    # Enable PIV requirement
+    monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", True)
+
+    # Create state and existing agency user
+    login_gov_state = LoginGovStateFactory.create()
+    login_gov_id = str(uuid.uuid4())
+    external_user = LinkExternalUserFactory.create(external_user_id=login_gov_id)
+
+    # Make the user an agency user
+    agency = AgencyFactory.create()
+    AgencyUserFactory.create(user=external_user.user, agency=agency)
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id=login_gov_id,
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+        x509_presented=True,  # With PIV
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["message"] == "success"
+    assert resp_json["token"] is not None
+
+
+def test_non_agency_user_without_piv_succeeds_when_required(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key, monkeypatch
+):
+    """Non-agency user logging in without PIV should succeed even when IS_PIV_REQUIRED=true"""
+    # Enable PIV requirement
+    monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", True)
+
+    # Create state (user will be created as new, non-agency user)
+    login_gov_state = LoginGovStateFactory.create()
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id="new-non-agency-user",
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+        x509_presented=False,  # No PIV
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["message"] == "success"
+    assert resp_json["token"] is not None
+
+
+def test_agency_user_without_piv_succeeds_when_not_required(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key, monkeypatch
+):
+    """Agency user logging in without PIV should succeed when IS_PIV_REQUIRED=false"""
+    from tests.src.db.models.factories import AgencyFactory, AgencyUserFactory, LinkExternalUserFactory
+
+    # Disable PIV requirement (default behavior)
+    monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", False)
+
+    # Create state and existing agency user
+    login_gov_state = LoginGovStateFactory.create()
+    login_gov_id = str(uuid.uuid4())
+    external_user = LinkExternalUserFactory.create(external_user_id=login_gov_id)
+
+    # Make the user an agency user
+    agency = AgencyFactory.create()
+    AgencyUserFactory.create(user=external_user.user, agency=agency)
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id=login_gov_id,
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+        x509_presented=False,  # No PIV
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["message"] == "success"
+    assert resp_json["token"] is not None
