@@ -76,8 +76,9 @@ jobs:
       - name: Run only happy-path-apply-req-form-workflow.spec.ts
         env:
           CI: true
+          PLAYWRIGHT_TARGET_ENV: local
         run: |
-          npx playwright test tests/e2e/apply/happy-path-apply-req-form-workflow.spec.ts
+          npx playwright test --config ./tests/playwright.config.ts tests/e2e/apply/happy-path-apply-req-form-workflow.spec.ts
 
       - name: Debug logging on failure
         if: failure()
