@@ -471,8 +471,15 @@ class OpportunityNotificationTask(BaseNotificationTask):
         before = status_change["before"]
         after = status_change["after"]
 
-        before = OPPORTUNITY_STATUS_MAP.get(before, before.capitalize())
-        after = OPPORTUNITY_STATUS_MAP.get(after, after.capitalize())
+        def safe_status_display(value):
+            if value in OPPORTUNITY_STATUS_MAP:
+                return OPPORTUNITY_STATUS_MAP[value]
+            if isinstance(value, str):
+                return value.capitalize()
+            return NOT_SPECIFIED
+
+        before = safe_status_display(before)
+        after = safe_status_display(after)
 
         return (
             SECTION_STYLING.format("Status")
