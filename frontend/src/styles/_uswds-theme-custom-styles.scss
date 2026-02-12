@@ -422,14 +422,6 @@ button.usa-pagination__button.usa-button {
 // these styles are taken from the desktop imlementation of the dropdown and applied at all breakpoints
 .usa-nav__primary {
   .mobile-nav-dropdown-uncollapsed-override {
-    @include at-media("desktop") {
-      button:hover {
-        background-color: white;
-      }
-      .usa-nav__submenu {
-        right: 0;
-      }
-    }
     button[aria-expanded="true"]:hover {
       background-color: color("mint-40");
     }
@@ -472,6 +464,14 @@ button.usa-pagination__button.usa-button {
         color: white;
         line-height: 1.4;
         display: block;
+      }
+    }
+    @include at-media("desktop") {
+      button:hover {
+        background-color: white;
+      }
+      .usa-nav__submenu {
+        right: 0;
       }
     }
   }
@@ -599,17 +599,17 @@ dl {
 .simpler-responsive-table {
   min-width: 100%;
   thead {
+    display: none;
     @include at-media("tablet-lg") {
       display: table-header-group;
     }
-    display: none;
   }
   tr {
+    display: flex;
+    flex-direction: column;
     @include at-media("tablet-lg") {
       display: table-row;
     }
-    display: flex;
-    flex-direction: column;
   }
   tbody {
     td {
