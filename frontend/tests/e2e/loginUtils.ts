@@ -28,12 +28,12 @@ export const initializePlaywrightSessionSecrets = () => {
     return;
   }
   // eslint-disable-next-line
-  console.debug("Initializing Session Secrets");
-  clientJwtKey = encodeText(playwrightEnv.clientSessionSecret || "");
+  console.debug("Initializing TESTING Session Secrets");
+  clientJwtKey = encodeText(playwrightEnv.clientSessionSecret);
 };
 
-// 5 minute expiration, could probably do less but just in case a test runs really long
-export const newExpirationDate = () => new Date(Date.now() + 5 * 60 * 1000);
+// 60 minute expiration, could probably do less but needs to be more than 10 mins so that it doesn't trigger a token refresh
+export const newExpirationDate = () => new Date(Date.now() + 60 * 60 * 1000);
 
 /*
   encrypts an API token passed as an env var into a fake client token

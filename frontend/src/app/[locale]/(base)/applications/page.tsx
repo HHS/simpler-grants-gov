@@ -1,6 +1,9 @@
 import { UnauthorizedError } from "src/errors";
 import { fetchApplications } from "src/services/fetch/fetchers/applicationsFetcher";
-import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  ApplicationStatus,
+} from "src/types/applicationResponseTypes";
 import { LocalizedPageProps, TFn } from "src/types/intl";
 import { formatDate } from "src/utils/dateUtil";
 
@@ -60,7 +63,7 @@ const transformTableRowData = (
       { cellData: formatDate(application.competition.closing_date) },
       {
         cellData:
-          application.application_status === Status.IN_PROGRESS
+          application.application_status === ApplicationStatus.IN_PROGRESS
             ? t("Applications.tableContents.draft")
             : t("Applications.tableContents.submitted"),
       },

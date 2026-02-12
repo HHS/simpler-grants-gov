@@ -1,31 +1,9 @@
 import { render, screen } from "@testing-library/react";
 
-import React from "react";
-
+import { GeneralRecord } from "src/components/applyForm/types";
 import Budget424aSectionE from "src/components/applyForm/widgets/budget/Budget424aSectionE";
 
-type MoneyString = string;
-
-interface FederalFundEstimates {
-  first_year_amount?: MoneyString;
-  second_year_amount?: MoneyString;
-  third_year_amount?: MoneyString;
-  fourth_year_amount?: MoneyString;
-}
-
-interface ActivityItemValue {
-  activity_title?: string;
-  assistance_listing_number?: string;
-  budget_summary?: { total_amount?: MoneyString };
-  federal_fund_estimates?: FederalFundEstimates;
-}
-
-interface SectionEValue {
-  activity_line_items?: ActivityItemValue[];
-  total_federal_fund_estimates?: FederalFundEstimates;
-}
-
-const buildWidgetProps = (value: SectionEValue) => ({
+const buildWidgetProps = (value: GeneralRecord) => ({
   id: "section-e",
   schema: {},
   rawErrors: [],
@@ -35,7 +13,7 @@ const buildWidgetProps = (value: SectionEValue) => ({
 
 describe("Budget424aSectionE", () => {
   it("renders future funding period values per year and totals", () => {
-    const value: SectionEValue = {
+    const value: GeneralRecord = {
       activity_line_items: [
         {
           activity_title: "Project Alpha",
