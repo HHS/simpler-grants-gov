@@ -167,7 +167,7 @@ OPAL_NO_SUMMARY = build_opp_and_version(
     agency_contact_description=None,
     applicant_types=[],
     applicant_eligibility_description=None,
-    additional_info_url=None,
+    additional_info_url="www.help.opal.com",
     summary_description=None,
     has_summary=False,
 )
@@ -1031,6 +1031,15 @@ class TestOpportunityNotification:
                         opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_NO_SUMMARY
                     ),
                     '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to not specified.<br><br><p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from September 1, 2026 to not specified.<br><br><p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $15,000,000 to not specified.<br><p style="padding-left: 40px;">•  The number of expected awards changed from 3 to not specified.<br><p style="padding-left: 40px;">•  The award minimum changed from $50,000 to not specified.<br><p style="padding-left: 40px;">•  The award maximum changed from $5,000,000 to not specified.<br><br><p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to not specified.<br><p style="padding-left: 40px;">•  The funding instrument type has changed from Cooperative agreement to not specified.<br><p style="padding-left: 40px;">•  The category of funding activity has changed from Education to not specified.<br><br><p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: not specified.<br><br><p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and state institutions of higher education].<br><p style="padding-left: 40px;">•  Additional information was deleted.<br>',
+                )
+            ),
+            # OpportunitySummary  Added. Though should not be the case
+            (
+                (
+                    OpportunityVersionChange(
+                        opportunity_id=OPAL.opportunity_id, previous=OPAL_NO_SUMMARY, latest=OPAL
+                    ),
+                    '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from not specified to Open.<br><br><p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from not specified to September 1, 2026.<br><br><p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from not specified to $15,000,000.<br><p style="padding-left: 40px;">•  The number of expected awards changed from not specified to 3.<br><p style="padding-left: 40px;">•  The award minimum changed from not specified to $50,000.<br><p style="padding-left: 40px;">•  The award maximum changed from not specified to $5,000,000.<br><br><p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from not specified to Yes.<br><p style="padding-left: 40px;">•  The funding instrument type has changed from not specified to Cooperative agreement.<br><p style="padding-left: 40px;">•  The category of funding activity has changed from not specified to Education.<br><br><p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: customer service.<br><br><p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br><p style="padding-left: 40px;">•  Additional information was added.<br>',
                 )
             ),
         ],
