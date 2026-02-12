@@ -604,6 +604,14 @@ class TestOpportunityNotification:
                 {"before": OpportunityStatus.FORECASTED, "after": OpportunityStatus.ARCHIVED},
                 '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Archived.<br>',
             ),
+            (
+                {"before": OpportunityStatus.FORECASTED, "after": None},
+                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to not specified.<br>',
+            ),
+            (
+                {"before": None, "after": OpportunityStatus.ARCHIVED},
+                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from not specified to Archived.<br>',
+            ),
         ],
     )
     def test_build_opportunity_status_content(
@@ -615,7 +623,6 @@ class TestOpportunityNotification:
         notification_task,
     ):
         res = notification_task._build_opportunity_status_content(opp_status_diffs)
-
         assert res == expected_html
 
     @pytest.mark.parametrize(
