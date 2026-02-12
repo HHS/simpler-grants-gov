@@ -1851,8 +1851,7 @@ def test_application_submit_success(
         == ApplicationAuditEvent.APPLICATION_SUBMITTED
     )
     assert application.application_audits[0].user_id == user.user_id
-    assert application.submitted_by == user.user_id
-    assert application.submitted_by_user == user
+    assert application.submitted_by_user.user_id == user.user_id
 
 
 def test_application_submit_logging_enhancement(
