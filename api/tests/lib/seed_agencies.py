@@ -1,12 +1,9 @@
 # Called by seed_local_db when running `make seed-db-local`
 import logging
-import uuid
 
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
-from src.constants.static_role_values import OPPORTUNITY_EDITOR, OPPORTUNITY_PUBLISHER
 from src.db.models.agency_models import Agency
-from tests.lib.seed_data_utils import UserBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -48,11 +45,6 @@ AGENCIES_TO_CREATE = [
         "agency_code": "NSF",
         "agency_id": "16945d39-1564-479c-b438-ef8d0804f051",
         "agency_name": "National Science Foundation",
-    },
-    {
-        "agency_code": "USAID",
-        "agency_id": "094f7d5c-afe6-4e40-823b-d830076e9144",
-        "agency_name": "Agency for International Development",
     },
     {
         "agency_code": "USDA",
@@ -341,18 +333,6 @@ AGENCIES_TO_CREATE = [
         "top_level_agency_id": "f331d496-e18e-47d5-95d4-f3b1231db153",
     },
     {
-        "agency_code": "USAID-ETH",
-        "agency_id": "9293aa4d-101b-4507-9725-6a180df2facd",
-        "agency_name": "Ethiopia USAID-Addis Ababa ",
-        "top_level_agency_id": "094f7d5c-afe6-4e40-823b-d830076e9144",
-    },
-    {
-        "agency_code": "USAID-SAF",
-        "agency_id": "31d754a4-6e0d-4593-b344-febef892548d",
-        "agency_name": "South Africa USAID-Pretoria",
-        "top_level_agency_id": "094f7d5c-afe6-4e40-823b-d830076e9144",
-    },
-    {
         "agency_code": "USDA-AMS",
         "agency_id": "1b6c6fc7-4594-4af5-be95-81222fb87101",
         "agency_name": "Agricultural Marketing Service",
@@ -465,135 +445,10 @@ def _build_agencies(db_session: db.Session) -> None:
     # Create a static set of agencies, only if they don't already exist
     agencies = db_session.query(Agency).all()
     agency_codes = set([a.agency_code for a in agencies])
-    agencies_created = []
 
     for agency_to_create in AGENCIES_TO_CREATE:
         if agency_to_create["agency_code"] in agency_codes:
             continue
 
         logger.info("Creating agency %s in agency table", agency_to_create["agency_code"])
-        new_agency = factories.AgencyFactory.create(**agency_to_create)
-        if len(agencies_created) < 5:
-            agencies_created.append(new_agency)
-
-    if len(agencies_created) == 0:
-        agencies_created = agencies
-    _build_agency_users(db_session, agencies_created)
-
-
-def _build_agency_users(db_session: db.Session, agencies_created: list[Agency]) -> None:
-    # Create some users for a few agencies with roles
-    logger.info("Creating/updating agency users")
-    user_scenarios = []
-
-    ###############################
-    # User with a single agency with the opportunity editor role
-    ###############################
-    (
-        UserBuilder(
-            uuid.UUID("25dea202-fac8-48f6-ac52-0ec06d7176e0"),
-            db_session,
-            "user with one agency with the opportunity editor role",
-        )
-        .with_oauth_login("one_agency_opp_edit")
-        .with_api_key("one_agency_opp_edit_key")
-        .with_jwt_auth()
-        .with_agency(agencies_created[0], roles=[OPPORTUNITY_EDITOR])
-        .build()
-    )
-
-    user_scenarios.append(
-        "one_agency_opp_edit - Opportunity Editor for Department of Commerce (DOC)"
-    )
-
-    ###############################
-    # User with a single agency with the opportunity publisher role
-    ###############################
-    (
-        UserBuilder(
-            uuid.UUID("8baafd12-a523-41d6-8c19-bf67fff6ac99"),
-            db_session,
-            "user with one agency with the opportunity publisher role",
-        )
-        .with_oauth_login("one_agency_opp_pub")
-        .with_api_key("one_agency_opp_pub_key")
-        .with_jwt_auth()
-        .with_agency(agencies_created[3], roles=[OPPORTUNITY_PUBLISHER])
-        .build()
-    )
-
-    user_scenarios.append(
-        "one_agency_opp_pub - Opportunity Publisher for Department of Energy (DOE)"
-    )
-
-    ###############################
-    # User with two agencies, opportunity publisher for both
-    ###############################
-    (
-        UserBuilder(
-            uuid.UUID("b6e1561e-65ac-4793-b7c0-c3abced6051f"),
-            db_session,
-            "user with two agencies, opportunity publisher for both",
-        )
-        .with_oauth_login("two_agency_opp_pub")
-        .with_api_key("two_agency_opp_pub_key")
-        .with_jwt_auth()
-        .with_agency(agencies_created[0], roles=[OPPORTUNITY_PUBLISHER])
-        .with_agency(agencies_created[1], roles=[OPPORTUNITY_PUBLISHER])
-        .build()
-    )
-
-    user_scenarios.append("two_agency_opp_pub - Opportunity Publisher for DOC and DOD")
-
-    ###############################
-    # User with three agencies with the opportunity editor role for all
-    ###############################
-    (
-        UserBuilder(
-            uuid.UUID("ae47bc37-2b7e-472a-a93c-d4e9b391b86e"),
-            db_session,
-            "user with three agencies and the opportunity editor role",
-        )
-        .with_oauth_login("three_agency_opp_edit")
-        .with_api_key("three_agency_opp_edit_key")
-        .with_jwt_auth()
-        .with_agency(agencies_created[0], roles=[OPPORTUNITY_EDITOR])
-        .with_agency(agencies_created[1], roles=[OPPORTUNITY_EDITOR])
-        .with_agency(agencies_created[2], roles=[OPPORTUNITY_EDITOR])
-        .build()
-    )
-
-    user_scenarios.append("three_agency_opp_edit - Opportunity Editor for DOC, DOD and DOE")
-
-    ###############################
-    # User with different roles for different agencies
-    ###############################
-    (
-        UserBuilder(
-            uuid.UUID("79a19a2c-d89e-4baf-a32c-091bcfb81f75"),
-            db_session,
-            "user with different roles for different agencies",
-        )
-        .with_oauth_login("mix_agency_roles")
-        .with_api_key("mix_agency_roles_key")
-        .with_jwt_auth()
-        .with_agency(agencies_created[0], roles=[OPPORTUNITY_EDITOR])
-        .with_agency(agencies_created[1], roles=[OPPORTUNITY_PUBLISHER])
-        .with_agency(agencies_created[2], roles=[OPPORTUNITY_EDITOR])
-        .with_agency(agencies_created[3], roles=[OPPORTUNITY_PUBLISHER])
-        .build()
-    )
-
-    user_scenarios.append(
-        "mix_agency_roles - Opportunity Editor for DOC & DOE and Publisher for DOD & DOI"
-    )
-
-    ##############################################################
-    # Log output
-    ##############################################################
-
-    # Log summary of all created user scenarios
-    logger.info("=== USER SCENARIOS SUMMARY ===")
-    logger.info(f"Created {len(user_scenarios)} user scenarios with role-based access:")
-    for scenario in user_scenarios:
-        logger.info(f"• {scenario}")
+        factories.AgencyFactory.create(**agency_to_create)
