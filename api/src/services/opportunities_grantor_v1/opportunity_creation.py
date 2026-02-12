@@ -1,3 +1,4 @@
+import uuid
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
@@ -19,6 +20,7 @@ def create_opportunity(db_session: db.Session, user: User, opportunity_data: dic
 
     # Create the opportunity
     opportunity = Opportunity(
+        opportunity_id=uuid.uuid4(),
         opportunity_number=opportunity_data["opportunity_number"],
         opportunity_title=opportunity_data["opportunity_title"],
         agency_id=agency.agency_id,
@@ -31,7 +33,5 @@ def create_opportunity(db_session: db.Session, user: User, opportunity_data: dic
     )
 
     db_session.add(opportunity)
-    # Push changes
-    db_session.flush()
 
     return opportunity

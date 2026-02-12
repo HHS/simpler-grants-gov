@@ -10,7 +10,6 @@ from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
-from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
 

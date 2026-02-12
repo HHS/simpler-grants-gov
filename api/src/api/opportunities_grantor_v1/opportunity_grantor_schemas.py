@@ -1,4 +1,3 @@
-from enum import StrEnum
 
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema, FileResponseSchema
