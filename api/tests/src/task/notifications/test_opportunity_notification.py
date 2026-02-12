@@ -865,6 +865,21 @@ class TestOpportunityNotification:
                 '<p style="padding-left: 40px;">•  The category of funding activity has changed from Education to Other.<br>'
                 '<p style="padding-left: 40px;">•  The funding activity category explanation has been changed from not specified to To be determined.<br>',
             ),
+            (
+                {
+                    "funding_categories": {
+                        "before": None,
+                        "after": [FundingCategory.EDUCATION],
+                    },
+                    "funding_instruments": {
+                        "before": [FundingInstrument.GRANT],
+                        "after": None,
+                    },
+                },
+                '<p style="padding-left: 20px;">Categorization</p>'
+                '<p style="padding-left: 40px;">•  The category of funding activity has changed from not specified to Education.<br>'
+                '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant to not specified.<br>',
+            ),
         ],
     )
     def test_build_categorization_fields_content(
@@ -955,6 +970,19 @@ class TestOpportunityNotification:
             (
                 {"applicant_eligibility_description": {"before": "Business", "after": None}},
                 '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was deleted.<br>',
+            ),
+            (
+                {
+                    "applicant_types": {
+                        "before": [
+                            ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION,
+                            ApplicantType.OTHER,
+                        ],
+                        "after": None,
+                    }
+                },
+                '<p style="padding-left: 20px;">Eligibility</p>'
+                '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Other, Public and state institutions of higher education].<br>',
             ),
         ],
     )
