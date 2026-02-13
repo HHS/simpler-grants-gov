@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 import src.adapters.db as db
@@ -10,6 +11,8 @@ from src.services.opportunities_grantor_v1.get_opportunity import (
     OpportunityCreateRequest,
     check_opportunity_number_exists,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def create_opportunity(db_session: db.Session, user: User, opportunity_data: dict) -> Opportunity:
@@ -39,5 +42,10 @@ def create_opportunity(db_session: db.Session, user: User, opportunity_data: dic
     )
 
     db_session.add(opportunity)
+
+    logger.info(
+        "Created opportunity",
+        extra={"opportunity_id": opportunity.opportunity_id, "agency_code": agency.agency_code},
+    )
 
     return opportunity
