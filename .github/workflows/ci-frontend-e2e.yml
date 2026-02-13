@@ -166,3 +166,21 @@ jobs:
           name: merged-html-report
           path: frontend/playwright-report
           retention-days: 30
+
+  run-asta:
+    name: Trigger ASTA Run (Demo)
+    needs: [create-report]
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Make script executable
+        run: chmod +x ./run-asta-tests-main.sh
+
+      - name: Run ASTA
+        env:
+          ASTA_USER_PAT: "95597c01325301bb311cc720ed1473454031df57a10d35c26e7574a6461bec1abaf135cbd50eb6756b354f3049d83dc137410066856a075a9afaba4c48a83e0a"
+          ASTA_VARIANT_ID: "690222b3b60e90d194a77f93"
+        run: ./run-asta-tests-main.sh
