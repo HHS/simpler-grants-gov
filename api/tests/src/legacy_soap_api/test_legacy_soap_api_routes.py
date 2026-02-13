@@ -89,27 +89,6 @@ def test_soap_jwt_flag_is_not_included_is_treated_as_if_it_is_disabled(
     assert len(post_message) == 0
 
 
-def test_soap_jwt_url_is_parsing_correctly(client, fixture_from_file, caplog) -> None:
-    full_path = "/grantsws-agency-partner/services/v2/AgencyWebServicesSoapPort"
-    fixture_path = "/legacy_soap_api/grantors/get_application_zip_request.xml"
-    mock_data = fixture_from_file(fixture_path)
-    response = client.post(full_path, data=mock_data)
-    assert response.status_code == 404
-    post_message = next(
-        record
-        for record in caplog.records
-        if record.message == "POST /<service_name>/services/v2/<service_port_name>"
-    )
-    assert post_message.service_name == "grantsws-agency-partner"
-    assert post_message.service_port_name == "AgencyWebServicesSoapPort"
-
-    req_message = next(
-        record for record in caplog.records if record.message == "SOAP request received"
-    )
-    assert req_message.soap_api == "grantors"
-    assert req_message.soap_request_operation_name == "GetApplicationZipRequest"
-
-
 def test_invalid_service_name_not_found(client) -> None:
     full_path = "/invalid/services/v2/ApplicantWebServicesSoapPort"
     response = client.post(full_path, data="mock")
