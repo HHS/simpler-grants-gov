@@ -53,5 +53,5 @@ def opportunities_to_csv(
 
         # Add URL only if requested
         if "url" in csv_fields_set:
-            out_opportunity["url"] = _build_opportunity_url(opp.get("opportunity_id"))
+            out_opportunity["url"] = _build_opportunity_url(opp.get("opportunity_id"), None)
         writer.writerow(out_opportunity)
