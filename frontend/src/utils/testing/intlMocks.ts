@@ -197,4 +197,18 @@ export const mockMessages = {
       "At the end of the session, we will ask you for your verbal permission to use what we learn to make the product better.",
     ],
   },
+  Events: {
+    demo: {
+      watchLinks: [
+        {
+          text: "January 29, 2026",
+          link: "https://youtu.be/LBIqOTKOFf0?si=O0Ec4PaNuAByeHA9",
+        },
+        {
+          text: "January 15, 2025",
+          link: "https://youtu.be/uASJmvcy0aM?si=OniP7Z7KU8ie3FhS",
+        },
+      ],
+    },
+  },
 };
