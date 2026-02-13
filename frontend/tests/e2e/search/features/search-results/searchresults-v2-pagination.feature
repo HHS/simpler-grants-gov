@@ -85,7 +85,6 @@ Examples:
   |  Award maximum (Lowest)      |
   |  Award maximum (Highest)     |
 
-# Awaiting confirmation on expected behavior for below scenario
 Scenario: Page resets to first page when filters change
   Given I am on page 5
   When I change the search filters
