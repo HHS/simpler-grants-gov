@@ -171,11 +171,9 @@ export const StartApplicationModal = ({
           })}
         </Alert>
       ) : null}
-
       <h1 className="usa-modal__heading" id="start-application-heading">
         {t("title")}
       </h1>
-
       <StartApplicationDescription
         organizations={organizations}
         applicantTypes={applicantTypes}
