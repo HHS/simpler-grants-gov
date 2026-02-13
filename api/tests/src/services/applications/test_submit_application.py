@@ -274,8 +274,7 @@ def test_submit_application_signature_post_processing(enable_factory_create, db_
     submitted_application1 = submit_application(
         db_session, application1.application_id, submitting_user_with_email
     )
-    assert submitted_application1.submitted_by == submitting_user_with_email.user_id
-    assert submitted_application1.submitted_by_user == submitting_user_with_email
+    assert submitted_application1.submitted_by_user.user_id == submitting_user_with_email.user_id
     assert submitted_application1.application_forms[0].application_response == {
         "signature": user_email
     }
@@ -299,8 +298,7 @@ def test_submit_application_signature_post_processing(enable_factory_create, db_
     submitted_application2 = submit_application(
         db_session, application2.application_id, submitting_user_without_email
     )
-    assert submitted_application2.submitted_by == submitting_user_without_email.user_id
-    assert submitted_application2.submitted_by_user == submitting_user_without_email
+    assert submitted_application2.submitted_by_user.user_id == submitting_user_without_email.user_id
     assert submitted_application2.application_forms[0].application_response == {
         "signature": UNKNOWN_VALUE
     }
