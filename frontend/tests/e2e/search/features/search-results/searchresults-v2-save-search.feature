@@ -34,25 +34,28 @@ Scenario: Save button remains visible after filters, sorting, and pagination
 
 Scenario: Save a search and verify applied criteria appear in the workspace
   Given I am logged in
-  And I have applied search "<Criteria>" on the Search page
+  And I apply "<Criteria Type>" using "<Value 1>" "<Operator>" "<Value 2>" on the Search page
   When I click the "Save" button
   Then the "Name this search query" modal should be displayed
-  When I enter a valid search name
+  When I enter a new search name "E2E Save Search - Unique"
   And I click "Save" in the modal
   Then a confirmation modal should appear with text "Query successfully saved"
-  And the modal includes a link to "Workspace"
+  And the modal should include a link to "Workspace"
   When I click the "Workspace" link in the confirmation modal
   Then I should be navigated to the Saved Search Queries page
-  And I should see the newly saved search listed
-  And the newly saved search should display the applied "<Criteria>"
+  And I should see "E2E Save Search - Unique" listed
+  And the saved search should reflect the applied "<Criteria Type>" using "<Value 1>" "<Operator>" "<Value 2>"
   And other existing saved searches should remain unchanged
 
 Examples:
-  | Criteria                  |
-  | Keywords                  |
-  | Filters                   |
-  | Sort order                |
-  | Query and/or operator     |
+  | Criteria Type       | Value 1                                   | Operator | Value 2        |
+  | Keyword             | health equity                             |          |                |
+  | Agency              | Department of Health and Human Services   |          |                |
+  | Status              | Open                                      |          |                |
+  | ALN                 | 93.847                                    |          |                |
+  | Sort                | Closing date: soonest first               |          |                |
+  | Query with operator | health                                    | AND      | equity         |
+  | Query with operator | mental                                    | OR       | substance use  |
 
 Scenario: Save search modal prevents saving without a name
   Given I am logged in
@@ -88,6 +91,18 @@ Scenario: Saving a search does not trigger full page reload
   When I save a search
   Then the page should not fully reload
 
+Scenario: Search state is preserved when user logs in mid-search
+  Given I am not logged in
+  And I have applied filters and sorting
+  And I am on page 3 of the results
+  When I initiate login
+  And I complete the login process
+  And I return to the Search Funding Opportunity page
+  Then the previously applied filters should remain
+  And the previously selected sort order should remain
+  And I should remain on page 3
+  And the search results should reflect the previously applied criteria
+
 Scenario: Save button and modal accessibility
   Given I am logged in
   When I focus on the "Save" button via keyboard
@@ -107,15 +122,6 @@ Examples:
   | desktop   |
   | tablet    |
   | mobile    |
-
-# --- reported and awaiting confirmation on expected behavior ---
-Scenario: Clicking Search without modifying criteria re-runs the saved search
-  Given I am logged in
-  And I have selected a saved search "<firstSavedSearch>"
-  And I have not modified the search criteria
-  When I click the Search button next to the search input field
-  Then the search results should refresh using the saved search criteria
-  And the saved search dropdown should remain "<firstSavedSearch>"
 
 # --- reported as issue 8063 ---
 Scenario: Error displayed when search name is a duplicate
@@ -148,3 +154,14 @@ Scenario: Saved search dropdown consistently reflects the applied selection
   # Repeatable behavior check (alternate selection test)
   When I reselect "<secondSavedSearch>"
   Then the dropdown should show "<secondSavedSearch>" as selected
+
+# --- reported and awaiting confirmation on expected behavior ---
+# --- Per reviewer comment this may belong in Search feature instead of Save Search --- 
+# --- Commented out for future discussion ---
+# Scenario: Clicking Search without modifying criteria re-runs the saved search
+#  Given I am logged in
+#  And I have selected a saved search "<firstSavedSearch>"
+#  And I have not modified the search criteria
+#  When I click the Search button next to the search input field
+#  Then the search results should refresh using the saved search criteria
+#  And the saved search dropdown should remain "<firstSavedSearch>"
