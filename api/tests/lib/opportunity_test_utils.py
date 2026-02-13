@@ -87,6 +87,10 @@ def create_opportunity_request(agency_id=None, **kwargs):
         dict: A valid opportunity creation request
     """
 
+    opportunity_number = "TEST-2026-001"
+    opportunity_title = "Research Grant for Climate Innovation"
+    category_explanation = "Competitive research grant"
+
     if not agency_id:
         agency_id = str(uuid.uuid4())
 
@@ -94,18 +98,12 @@ def create_opportunity_request(agency_id=None, **kwargs):
     if not isinstance(agency_id, str):
         agency_id = str(agency_id)
 
-    # Generate a unique opportunity number
-    opportunity_number = f"TEST-{uuid.uuid4()}"
-
     request = {
         "opportunity_number": opportunity_number,
-        "opportunity_title": "Test Opportunity",
+        "opportunity_title": opportunity_title,
         "agency_id": agency_id,
         "category": OpportunityCategory.DISCRETIONARY,
-        "category_explanation": "Test explanation",
+        "category_explanation": category_explanation,
     }
-
-    # Update with any additional fields
-    request.update(kwargs)
 
     return request
