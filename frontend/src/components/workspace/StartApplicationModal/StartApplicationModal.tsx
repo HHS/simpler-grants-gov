@@ -101,27 +101,26 @@ export const StartApplicationModal = ({
         const { applicationId } = data;
         router.push(`/applications/${applicationId}`);
       })
-      .catch((caught: unknown) => {
-        const errorObject = caught as { cause?: unknown };
-        if (errorObject.cause === "401") {
+      .catch((error) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (error.cause === "401") {
           setError(t("loggedOut"));
         } else {
           setError(t("error"));
         }
-        // eslint-disable-next-line no-console
-        console.error(caught);
+        console.error(error);
       })
       .finally(() => {
         setUpdating(false);
       });
   }, [
-    clientFetch,
     competitionId,
     router,
     savedApplicationName,
     selectedOrganization,
     t,
     validateSubmission,
+    clientFetch,
   ]);
 
   const onClose = useCallback(() => {
@@ -133,15 +132,15 @@ export const StartApplicationModal = ({
   }, []);
 
   const onNameChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setSavedApplicationName(event.target.value);
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSavedApplicationName(e.target.value);
     },
     [],
   );
 
   const onOrganizationChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedOrganization(event.target.value);
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedOrganization(e.target.value);
     },
     [],
   );
@@ -151,8 +150,8 @@ export const StartApplicationModal = ({
       modalRef={modalRef}
       className="text-wrap maxw-tablet-lg font-sans-xs"
       modalId={"start-application"}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") handleSubmit();
+      onKeyDown={(e) => {
+        if (e.key === "Enter") handleSubmit();
       }}
       onClose={onClose}
     >
