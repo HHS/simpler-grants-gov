@@ -160,7 +160,6 @@ export default function MultiSelect<
       <ComboBox
         ref={comboRef}
         id={`${id}__combobox`}
-        name={`${id}`}
         options={availableOptions}
         disabled={disabled || readOnly || atMaxSelection}
         onChange={(val?: string) => {
