@@ -2,8 +2,11 @@ import csv
 import io
 import os
 from collections.abc import Sequence
+from typing import cast
 
 from src.util.dict_util import flatten_dict
+
+base_url = os.getenv("FRONTEND_BASE_URL")
 
 
 def _process_assistance_listing(assistance_listings: list[dict]) -> str:
@@ -12,18 +15,18 @@ def _process_assistance_listing(assistance_listings: list[dict]) -> str:
     )
 
 
-def _build_opportunity_url(opportunity_id: str, base_url: str | None = None) -> str:
+def _build_opportunity_url(opportunity_id: str, base_url: str) -> str:
     """
     Build the full frontend URL for an opportunity.
     """
-    if base_url is None:
-        base_url = os.getenv("FRONTEND_BASE_URL")
-
     return f"{base_url}/opportunity/{opportunity_id}"
 
 
 def opportunities_to_csv(
-    opportunities: Sequence[dict], output: io.StringIO, csv_fields: list
+    opportunities: Sequence[dict],
+    output: io.StringIO,
+    csv_fields: list,
+    base_url: str | None = None,
 ) -> None:
     writer = csv.DictWriter(output, fieldnames=csv_fields, quoting=csv.QUOTE_ALL)
     writer.writeheader()
@@ -52,6 +55,8 @@ def opportunities_to_csv(
             out_opportunity[k] = v
 
         # Add URL only if requested
-        if "url" in csv_fields_set:
-            out_opportunity["url"] = _build_opportunity_url(opp.get("opportunity_id"), None)
+        if "url" in csv_fields_set and base_url:
+            out_opportunity["url"] = _build_opportunity_url(
+                cast(str, opp.get("opportunity_id")), base_url
+            )
         writer.writerow(out_opportunity)

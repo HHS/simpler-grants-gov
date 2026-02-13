@@ -1,5 +1,6 @@
 import io
 import logging
+import os
 from uuid import UUID
 
 from flask import Response
@@ -224,7 +225,7 @@ def opportunity_search(
             "award_ceiling",
             "url",
         ]
-        opportunities_to_csv(opportunities, output, csv_fields)
+        opportunities_to_csv(opportunities, output, csv_fields, os.getenv("FRONTEND_BASE_URL"))
         timestamp = datetime_util.utcnow().strftime("%Y%m%d-%H%M%S")
         return Response(
             output.getvalue().encode("utf-8"),

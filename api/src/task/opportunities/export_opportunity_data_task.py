@@ -192,7 +192,7 @@ class ExportOpportunityDataTask(Task):
         logger.info("Creating Opportunity CSV extract", extra={"csv_extract_path": self.csv_file})
 
         with file_util.open_stream(self.csv_file, "w") as outfile:
-            opportunities_to_csv(opportunities, outfile, CSV_FIELDS)
+            opportunities_to_csv(opportunities, outfile, CSV_FIELDS, None)
 
         csv_size = file_util.get_file_length_bytes(self.csv_file)
         return csv_size
