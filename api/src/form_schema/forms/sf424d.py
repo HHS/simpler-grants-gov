@@ -124,6 +124,7 @@ FORM_XML_TRANSFORM_RULES = {
         "namespaces": {
             "default": "http://apply.grants.gov/forms/SF424D-V1.1",
             "SF424D": "http://apply.grants.gov/forms/SF424D-V1.1",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
             "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
             "glob": "http://apply.grants.gov/system/Global-V1.0",
         },
@@ -141,7 +142,14 @@ FORM_XML_TRANSFORM_RULES = {
         },
     },
     # Field mappings - order matches XSD sequence
-    # FormVersionIdentifier is handled by the framework
+    # FormVersionIdentifier (required) - must be first child element per XSD
+    "form_version_identifier": {
+        "xml_transform": {
+            "target": "FormVersionIdentifier",
+            "namespace": "glob",
+            "static_value": "1.1",
+        }
+    },
     # AuthorizedRepresentative (optional) - complex type containing RepresentativeName and RepresentativeTitle
     # Uses compose_object to wrap flat fields (signature, title) into nested XML element
     # Note: Key cannot start with underscore as those are treated as metadata

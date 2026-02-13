@@ -11,7 +11,7 @@ export interface ApplicationResponseDetail {
   [key: string]: string;
 }
 
-export enum Status {
+export enum ApplicationStatus {
   IN_PROGRESS = "in_progress",
   SUBMITTED = "submitted",
   ACCEPTED = "accepted",
@@ -59,10 +59,10 @@ export interface ApplicationDetail {
   application_forms: Array<ApplicationFormDetail>;
   application_id: string;
   application_name: string;
-  application_status: string;
+  application_status: ApplicationStatus;
   competition: Competition;
   form_validation_warnings?: FormValidationWarnings;
-  organization: Organization;
+  organization?: Organization | null;
   users: {
     email: string;
     user_id: string;

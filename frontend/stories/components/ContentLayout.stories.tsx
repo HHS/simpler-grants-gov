@@ -1,8 +1,6 @@
-import { Meta } from "@storybook/react";
-
 import ContentLayout from "src/components/ContentLayout";
 
-const meta: Meta<typeof ContentLayout> = {
+const meta = {
   title: "Components/Layout/ContentLayout",
   component: ContentLayout,
 };
