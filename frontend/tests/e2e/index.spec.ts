@@ -60,7 +60,7 @@ test("displays mobile nav at mobile width", async ({ page }, { project }) => {
     const primaryNavItems = page.locator(
       ".usa-accordion > .usa-nav__primary-item",
     );
-    await expect(primaryNavItems).toHaveCount(4);
+    await expect(primaryNavItems).toHaveCount(5);
     const allNavItems = await page
       .locator(".usa-accordion > .usa-nav__primary-item")
       .all();
