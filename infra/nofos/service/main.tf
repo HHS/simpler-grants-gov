@@ -48,7 +48,6 @@ locals {
   build_repository_config                        = module.app_config.build_repository_config
   environment_config                             = module.app_config.environment_configs[var.environment_name]
   service_config                                 = local.environment_config.service_config
-  database_config                                = local.environment_config.database_config
   storage_config                                 = local.environment_config.storage_config
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
   identity_provider_config                       = local.environment_config.identity_provider_config
