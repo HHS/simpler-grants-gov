@@ -126,6 +126,7 @@ def setup_application_for_form_validation(
     if user_email is not None:
         app_user = ApplicationUserFactory.create(application=application)
         LinkExternalUserFactory.create(email=user_email, user=app_user.user)
+        application.submitted_by_user = app_user.user
 
     return application_form
 
