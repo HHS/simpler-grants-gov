@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { RefObject, useCallback, useState } from "react";
 import {
+  Alert,
   Button,
   ErrorMessage,
   FormGroup,
@@ -15,9 +16,12 @@ import {
 } from "@trussworks/react-uswds";
 
 import { SimplerModal } from "src/components/SimplerModal";
+import { USWDSIcon } from "src/components/USWDSIcon";
 import { IneligibleApplicationStart } from "./IneligibleStartApplicationModal";
 import { StartApplicationDescription } from "./StartApplicationDescription";
+import { StartApplicationInfoBanner } from "./StartApplicationInfoBanner";
 import {
+  SPECIAL_VALUES,
   StartApplicationNameInput,
   StartApplicationOrganizationInput,
 } from "./StartApplicationInputs";
@@ -29,6 +33,7 @@ export const StartApplicationModal = ({
   organizations,
   token,
   loading,
+  organizationsError,
   competitionId,
 }: {
   opportunityTitle: string;
@@ -37,6 +42,7 @@ export const StartApplicationModal = ({
   organizations: UserOrganization[];
   token: string | null;
   loading: boolean;
+  organizationsError?: boolean;
   competitionId: string;
 }) => {
   const t = useTranslations("OpportunityListing.startApplicationModal");
@@ -62,12 +68,28 @@ export const StartApplicationModal = ({
       setNameValidationError(t("fields.name.validationError"));
       valid = false;
     }
-    if (!applicantTypes.includes("individual") && !selectedOrganization) {
+
+    // Check if individual or not-listed was selected
+    const isIndividualSelected =
+      selectedOrganization === SPECIAL_VALUES.INDIVIDUAL;
+    const isNotListedSelected =
+      selectedOrganization === SPECIAL_VALUES.NOT_LISTED;
+
+    // Skip organization validation if:
+    // 1. Competition is individual-only (no org dropdown shown)
+    // 2. User explicitly selected individual or not-listed
+    const skipOrgValidation =
+      !applicantTypes.includes("organization") ||
+      isIndividualSelected ||
+      isNotListedSelected;
+
+    if (!skipOrgValidation && !selectedOrganization) {
       setOrgValidationError(t("fields.organizationSelect.validationError"));
       valid = false;
     }
+
     return valid;
-  }, [token, savedApplicationName, applicantTypes, selectedOrganization, t]);
+  }, [token, savedApplicationName, selectedOrganization, applicantTypes, t]);
 
   const handleSubmit = useCallback(() => {
     const valid = validateSubmission();
@@ -75,12 +97,24 @@ export const StartApplicationModal = ({
       return;
     }
     setUpdating(true);
+
+    // Determine organization_id to send to API
+    let organizationToSend: string | undefined;
+    if (
+      selectedOrganization === SPECIAL_VALUES.INDIVIDUAL ||
+      selectedOrganization === SPECIAL_VALUES.NOT_LISTED
+    ) {
+      organizationToSend = undefined; // Individual applications
+    } else {
+      organizationToSend = selectedOrganization; // Organization applications
+    }
+
     clientFetch("/api/applications/start", {
       method: "POST",
       body: JSON.stringify({
         applicationName: savedApplicationName,
         competitionId,
-        organization: selectedOrganization,
+        organization: organizationToSend,
       }),
     })
       .then((data) => {
@@ -128,7 +162,12 @@ export const StartApplicationModal = ({
     [],
   );
 
-  if (!organizations.length && !applicantTypes.includes("individual")) {
+  // Only show ineligible screen if there's no API error and legitimately no organizations
+  if (
+    !organizationsError &&
+    !organizations.length &&
+    !applicantTypes.includes("individual")
+  ) {
     return (
       <IneligibleApplicationStart
         modalRef={modalRef}
@@ -144,45 +183,72 @@ export const StartApplicationModal = ({
       modalRef={modalRef}
       className="text-wrap maxw-tablet-lg font-sans-xs"
       modalId={"start-application"}
-      titleText={t("title")}
       onKeyDown={(e) => {
         if (e.key === "Enter") handleSubmit();
       }}
       onClose={onClose}
     >
+      {organizationsError ? (
+        <Alert
+          type="error"
+          headingLevel="h4"
+          noIcon={true}
+          slim={true}
+          className="margin-bottom-2"
+        >
+          {t.rich("organizationLoadError", {
+            telephone: (chunk) => <a href="tel:18005184726">{chunk}</a>,
+            email: (chunk) => <a href="mailto:simpler@grants.gov">{chunk}</a>,
+            br: () => <br />,
+          })}
+        </Alert>
+      ) : null}
+      <h1 className="usa-modal__heading" id="start-application-heading">
+        {t("title")}
+      </h1>
       <StartApplicationDescription
         organizations={organizations}
         applicantTypes={applicantTypes}
+        organizationsError={organizationsError}
       />
+      <p className="font-sans-2xs text-base margin-top-1 margin-bottom-0">
+        {t("requiredText")}
+      </p>
       <p className="font-sans-sm text-bold" data-testid="opportunity-title">
         {t("applyingFor")} {opportunityTitle}
       </p>
-      <p className="font-sans-3xs">{t("requiredText")}</p>
-      <FormGroup
-        error={!!(nameValidationError || orgValidationError || error)}
-        className="margin-top-1"
-      >
-        {applicantTypes.includes("organization") && (
+      <hr className="margin-y-2 border-base-lighter" />
+      <StartApplicationInfoBanner />
+      {applicantTypes.includes("organization") ? (
+        <FormGroup error={!!orgValidationError} className="margin-top-1">
           <StartApplicationOrganizationInput
             onOrganizationChange={onOrganizationChange}
             validationError={orgValidationError}
             organizations={organizations}
             selectedOrganization={selectedOrganization}
+            applicantTypes={applicantTypes}
           />
-        )}
+        </FormGroup>
+      ) : null}
+      <FormGroup error={!!nameValidationError} className="margin-top-1">
         <StartApplicationNameInput
           validationError={nameValidationError}
           onNameChange={onNameChange}
         />
-        {error && <ErrorMessage>{error}</ErrorMessage>}
       </FormGroup>
+      {error ? <ErrorMessage>{error}</ErrorMessage> : null}
       <ModalFooter>
         <Button
           onClick={handleSubmit}
           type="button"
           data-testid="application-start-save"
-          disabled={!!loading}
+          disabled={!!loading || !!organizationsError}
         >
+          <USWDSIcon
+            name="add"
+            className="margin-right-05"
+            aria-hidden="true"
+          />
           {loading || updating ? "Loading..." : t("saveButtonText")}
         </Button>
         <ModalToggleButton
