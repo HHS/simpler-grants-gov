@@ -24,11 +24,8 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 
 export const dynamic = "force-dynamic";
 
-type AwardRecommendationPageProps = LocalizedPageProps & WithFeatureFlagProps;
-
-const FallbackPage = () => {
-  redirect("/maintenance");
-};
+export type AwardRecommendationPageProps = LocalizedPageProps &
+  WithFeatureFlagProps;
 
 async function AwardRecommendationPageContent({
   params,
@@ -52,8 +49,12 @@ async function AwardRecommendationPageContent({
   );
 }
 
+function AwardRecommendationFlagDisabled(): never {
+  redirect("/maintenance");
+}
+
 export default withFeatureFlag<AwardRecommendationPageProps, JSX.Element>(
-  FallbackPage,
+  AwardRecommendationFlagDisabled,
   "awardRecommendationOn",
   (props) => <AwardRecommendationPageContent {...props} />,
 );

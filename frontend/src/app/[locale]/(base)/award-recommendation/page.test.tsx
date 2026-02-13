@@ -1,12 +1,14 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { identity } from "lodash";
-import AwardRecommendationPage from "src/app/[locale]/(base)/award-recommendation/page";
-import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
+import AwardRecommendationPage, {
+  AwardRecommendationPageProps,
+} from "src/app/[locale]/(base)/award-recommendation/page";
+import { LocalizedPageProps } from "src/types/intl";
+import { localeParams, useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import * as nextNavigation from "next/navigation";
+import { FunctionComponent, ReactNode } from "react";
 
-let featureFlagEnabled = false;
+type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
@@ -15,111 +17,109 @@ jest.mock("react", () => ({
   })),
 }));
 
-jest.mock("next-intl/server", () => ({
-  getTranslations: () => identity,
-  setRequestLocale: identity,
+const mockRedirect = jest.fn();
+jest.mock("next/navigation", () => ({
+  redirect: (...args: unknown[]) => {
+    mockRedirect(...args);
+    throw new Error("NEXT_REDIRECT");
+  },
+}));
+
+jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
+  __esModule: true,
+  default:
+    (
+      WrappedComponent: FunctionComponent<AwardRecommendationPageProps>,
+      featureFlagName: string,
+      onEnabled: onEnabled,
+    ) =>
+    async (props: AwardRecommendationPageProps) => {
+      const searchParams = props.searchParams
+        ? (await props.searchParams) || {}
+        : {};
+      const isEnabled = searchParams[featureFlagName] === "true";
+
+      // eslint-disable-next-line no-console
+      console.log(
+        `Feature flag "${featureFlagName}" is ${isEnabled ? "enabled" : "disabled"}.`,
+      );
+      if (isEnabled) {
+        const element = onEnabled(props);
+        // Resolve async server components for testing
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+        if (element && typeof (element as any).type === "function") {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
+          return await (element as any).type((element as any).props);
+        }
+        return element;
+      }
+      return WrappedComponent(props);
+    },
 }));
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
-  useMessages: () => mockMessages,
 }));
 
-jest.mock("next/headers", () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn(),
-  })),
+jest.mock("next-intl/server", () => ({
+  getTranslations: jest
+    .fn()
+    .mockImplementation(
+      () => (key: string, opts?: { defaultValue?: string }) =>
+        opts?.defaultValue ?? key,
+    ),
 }));
-
-jest.mock("next/navigation", () => ({
-  redirect: jest.fn(() => {
-    throw new Error("NEXT_REDIRECT");
-  }),
-}));
-
-jest.mock("src/constants/environments", () => ({
-  environment: {
-    NEXT_BUILD: "false",
-  },
-}));
-
-jest.mock("src/services/featureFlags/FeatureFlagManager", () => {
-  class FakeFeatureFlagManager {
-    isFeatureEnabled() {
-      return featureFlagEnabled;
-    }
-  }
-
-  return {
-    featureFlagsManager: new FakeFeatureFlagManager(),
-  };
-});
 
 describe("AwardRecommendationPage", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    featureFlagEnabled = false;
-  });
-
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
-
-  describe("when awardRecommendationOn feature flag is disabled", () => {
-    it("should redirect to maintenance", async () => {
-      featureFlagEnabled = false;
-
-      try {
-        await AwardRecommendationPage({
-          params: Promise.resolve({ locale: "en" }),
-          searchParams: Promise.resolve({}),
-        });
-      } catch (error) {
-        // redirect throws an error, which is expected
-      }
-
-      expect(nextNavigation.redirect).toHaveBeenCalledWith("/maintenance");
-    });
-  });
-
-  describe("when awardRecommendationOn feature flag is enabled", () => {
-    beforeEach(() => {
-      featureFlagEnabled = true;
-    });
-
-    it("renders the page title", async () => {
+  describe("when feature flag is enabled", () => {
+    it("renders page title and description", async () => {
       const component = await AwardRecommendationPage({
-        params: Promise.resolve({ locale: "en" }),
-        searchParams: Promise.resolve({}),
+        params: localeParams,
+        searchParams: Promise.resolve({ awardRecommendationOn: "true" }),
       });
-
       render(component);
-      const title = screen.getByRole("heading", { level: 1 });
-      expect(title).toBeInTheDocument();
-    });
 
-    it("renders a description paragraph", async () => {
-      const component = await AwardRecommendationPage({
-        params: Promise.resolve({ locale: "en" }),
-        searchParams: Promise.resolve({}),
-      });
-
-      render(component);
-      const description = screen.getByText(
-        /Award Recommendation flow coming soon/i,
-      );
-      expect(description).toBeInTheDocument();
+      // eslint-disable-next-line no-console
+      console.log(component);
+      expect(await screen.findByText("Award Recommendation")).toBeVisible();
+      expect(
+        await screen.findByText("Award Recommendation flow coming soon."),
+      ).toBeVisible();
     });
 
     it("passes accessibility scan", async () => {
       const component = await AwardRecommendationPage({
-        params: Promise.resolve({ locale: "en" }),
-        searchParams: Promise.resolve({}),
+        params: localeParams,
+        searchParams: Promise.resolve({ awardRecommendationOn: "true" }),
       });
-
       const { container } = render(component);
       const results = await waitFor(() => axe(container));
+
       expect(results).toHaveNoViolations();
+    });
+  });
+
+  describe("when feature flag is disabled", () => {
+    it("redirects to /maintenance when flag is false", async () => {
+      await expect(
+        AwardRecommendationPage({
+          params: localeParams,
+          searchParams: Promise.resolve({ awardRecommendationOn: "false" }),
+        }),
+      ).rejects.toThrow("NEXT_REDIRECT");
+
+      expect(mockRedirect).toHaveBeenCalledWith("/maintenance");
+    });
+
+    it("redirects to /maintenance when flag is missing", async () => {
+      await expect(
+        AwardRecommendationPage({
+          params: localeParams,
+          searchParams: Promise.resolve({}),
+        }),
+      ).rejects.toThrow("NEXT_REDIRECT");
+
+      expect(mockRedirect).toHaveBeenCalledWith("/maintenance");
     });
   });
 });
