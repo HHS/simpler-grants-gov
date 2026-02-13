@@ -210,7 +210,7 @@ export const StartApplicationModal = ({
           type="button"
           data-testid="application-start-save"
           disabled={
-            Boolean(loading) || Boolean(updating) || Boolean(organizationsError)
+            Boolean(loading || updating || organizationsError)
           }
         >
           <USWDSIcon
