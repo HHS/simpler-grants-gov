@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 class SQSConfig(PydanticBaseEnvConfig):
     # SQS Queue URL will be required by the service using this adapter
     workflow_queue_url: str = Field(alias="WORKFLOW_QUEUE_URL")
+    # SQS Queue name for workflow processing
+    workflow_queue_name: str = Field(alias="WORKFLOW_QUEUE_NAME", default="local_workflow_queue")
 
 
 class SQSMessage(BaseModel):
@@ -31,10 +33,21 @@ class SQSDeleteBatchResponse(BaseModel):
     failed_deletes: set[str] = Field(default_factory=set)
 
 
-def get_boto_sqs_client(session: boto3.Session | None = None) -> botocore.client.BaseClient:
+def get_boto_sqs_client(
+    sqs_config: SQSConfig | None = None, 
+    session: boto3.Session | None = None
+) -> botocore.client.BaseClient:
+    if sqs_config is None:
+        sqs_config = SQSConfig()
+        
+    params = {}
+    if sqs_config.workflow_queue_url is not None:
+        params["endpoint_url"] = sqs_config.workflow_queue_url
+        
     if session is None:
         session = get_boto_session()
-    return session.client("sqs")
+
+    return session.client("sqs", **params)
 
 
 class SQSClient:
