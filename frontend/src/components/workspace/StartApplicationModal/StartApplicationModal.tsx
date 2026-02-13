@@ -131,12 +131,9 @@ export const StartApplicationModal = ({
     setSelectedOrganization("");
   }, []);
 
-  const onNameChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSavedApplicationName(e.target.value);
-    },
-    [],
-  );
+  const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSavedApplicationName(e.target.value);
+  }, []);
 
   const onOrganizationChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -209,9 +206,7 @@ export const StartApplicationModal = ({
           onClick={handleSubmit}
           type="button"
           data-testid="application-start-save"
-          disabled={
-            Boolean(loading || updating || organizationsError)
-          }
+          disabled={Boolean(loading || updating || organizationsError)}
         >
           <USWDSIcon
             name="add"
