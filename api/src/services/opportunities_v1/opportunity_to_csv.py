@@ -6,8 +6,6 @@ from typing import cast
 
 from src.util.dict_util import flatten_dict
 
-base_url = os.getenv("FRONTEND_BASE_URL")
-
 
 def _process_assistance_listing(assistance_listings: list[dict]) -> str:
     return ";".join(
@@ -26,13 +24,12 @@ def opportunities_to_csv(
     opportunities: Sequence[dict],
     output: io.StringIO,
     csv_fields: list,
-    base_url: str | None = None,
 ) -> None:
     writer = csv.DictWriter(output, fieldnames=csv_fields, quoting=csv.QUOTE_ALL)
     writer.writeheader()
 
     csv_fields_set = set(csv_fields)
-
+    base_url = os.getenv("FRONTEND_BASE_URL")
     for opportunity in opportunities:
         opp = flatten_dict(opportunity)
 
