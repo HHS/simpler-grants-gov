@@ -12,7 +12,7 @@ def _process_assistance_listing(assistance_listings: list[dict]) -> str:
     )
 
 
-def _build_opportunity_url(opportunity_id: str , base_url: str | None = None) -> str:
+def _build_opportunity_url(opportunity_id: str, base_url: str | None = None) -> str:
     """
     Build the full frontend URL for an opportunity.
     """
@@ -21,7 +21,10 @@ def _build_opportunity_url(opportunity_id: str , base_url: str | None = None) ->
 
     return f"{base_url}/opportunity/{opportunity_id}"
 
-def opportunities_to_csv(opportunities: Sequence[dict], output: io.StringIO, csv_fields: list) -> None:
+
+def opportunities_to_csv(
+    opportunities: Sequence[dict], output: io.StringIO, csv_fields: list
+) -> None:
     writer = csv.DictWriter(output, fieldnames=csv_fields, quoting=csv.QUOTE_ALL)
     writer.writeheader()
 
@@ -50,7 +53,5 @@ def opportunities_to_csv(opportunities: Sequence[dict], output: io.StringIO, csv
 
         # Add URL only if requested
         if "url" in csv_fields_set:
-            out_opportunity["url"] = _build_opportunity_url(
-                opp.get("opportunity_id")
-            )
+            out_opportunity["url"] = _build_opportunity_url(opp.get("opportunity_id"))
         writer.writerow(out_opportunity)

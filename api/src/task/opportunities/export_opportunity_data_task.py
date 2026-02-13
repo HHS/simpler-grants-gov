@@ -68,6 +68,7 @@ CSV_FIELDS = [
     "summary_description",
 ]
 
+
 @task_blueprint.cli.command(
     "export-opportunity-data",
     help="Generate JSON and CSV files containing an export of all opportunity data",

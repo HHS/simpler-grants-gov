@@ -1887,7 +1887,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert reader.fieldnames == expected_headers
         assert len(reader.fieldnames) == 8
 
-
         for row in rows:
             # assert correct url is configured
             assert row["url"].startswith("https://example.com/opportunity/")
@@ -1905,5 +1904,3 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 assert row["close_date"] is not None
                 assert row["award_floor"] is not None
                 assert row["award_ceiling"] is not None
-
-
