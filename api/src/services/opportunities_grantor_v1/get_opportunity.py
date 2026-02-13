@@ -14,7 +14,7 @@ class OpportunityCreateRequest(BaseModel):
     opportunity_number: str
     opportunity_title: str
     category: OpportunityCategory
-    category_explanation: str = None
+    category_explanation: str | None = None
 
 
 def check_opportunity_number_exists(db_session: db.Session, opportunity_number: str) -> None:
