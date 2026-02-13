@@ -773,13 +773,13 @@ dl {
   }
 }
 
-// force scrolling on some search filters 
+// force scrolling on some search filters
 .usa-accordion__heading.force-scrolling {
-  position: relative; 
+  position: relative;
   z-index: 1;
 }
 .usa-accordion__content.force-scrolling {
-  position: relative; 
-  @include u-maxh('mobile-lg');
-  overflow-y: auto; 
+  position: relative;
+  @include u-maxh("mobile-lg");
+  overflow-y: auto;
 }
