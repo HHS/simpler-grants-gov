@@ -1,7 +1,8 @@
 import userEvent from "@testing-library/user-event";
 import { Response } from "node-fetch";
 import { fakeTestUser } from "src/utils/testing/fixtures";
-import { render, screen, waitFor } from "tests/react-utils";
+import * as userUtils from "src/utils/userUtils";
+import { render, screen, waitFor, within } from "tests/react-utils";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
 
@@ -11,13 +12,7 @@ const props = {
   locale: "en",
 };
 
-const mockUseUser = jest.fn(() => ({
-  user: {
-    token: "faketoken",
-  },
-  hasBeenLoggedOut: false,
-  resetHasBeenLoggedOut: jest.fn(),
-}));
+const mockUseUser = jest.fn();
 
 const mockShowSnackbar = jest.fn();
 
@@ -57,11 +52,15 @@ jest.mock("src/components/RouteChangeWatcher", () => ({
 }));
 
 jest.mock("src/services/auth/useUser", () => ({
-  useUser: () => mockUseUser(),
+  useUser: (): unknown => mockUseUser(),
 }));
 
 jest.mock("src/hooks/useSnackbar", () => ({
   useSnackbar: () => mockUseSnackBar() as unknown,
+}));
+
+jest.mock("src/utils/userUtils", () => ({
+  storeCurrentPage: jest.fn(),
 }));
 
 describe("Header", () => {
@@ -75,6 +74,16 @@ describe("Header", () => {
   });
   afterAll(() => {
     global.fetch = originalFetch;
+  });
+
+  beforeEach(() => {
+    mockUseUser.mockReturnValue({
+      user: {
+        token: "faketoken",
+      },
+      hasBeenLoggedOut: false,
+      resetHasBeenLoggedOut: jest.fn(),
+    });
   });
 
   it("toggles the mobile nav menu", async () => {
@@ -294,5 +303,127 @@ describe("Header", () => {
 
     const testUserDropdown = screen.queryByRole("combobox");
     expect(testUserDropdown).not.toBeInTheDocument();
+  });
+  it("closes mobile nav when Escape is pressed", async () => {
+    const user = userEvent.setup();
+    render(<Header {...props} />);
+    const menuButton = screen.getByTestId("navMenuButton");
+    await user.click(menuButton);
+    expect(
+      document.querySelector(".usa-overlay.is-visible"),
+    ).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+
+    expect(
+      document.querySelector(".usa-overlay.is-visible"),
+    ).not.toBeInTheDocument();
+  });
+  it("closes mobile nav when overlay is clicked", async () => {
+    const user = userEvent.setup();
+    render(<Header {...props} />);
+    const menuButton = screen.getByTestId("navMenuButton");
+    await user.click(menuButton);
+    const overlay = document.querySelector(".usa-overlay.is-visible");
+    expect(overlay).toBeInTheDocument();
+
+    await user.click(overlay as HTMLElement);
+
+    expect(
+      document.querySelector(".usa-overlay.is-visible"),
+    ).not.toBeInTheDocument();
+  });
+  it("calls storeCurrentPage when sign-in is clicked in mobile menu", async () => {
+    (userUtils.storeCurrentPage as jest.Mock).mockClear();
+    mockUseUser.mockReturnValue({
+      user: { token: undefined },
+      hasBeenLoggedOut: false,
+      resetHasBeenLoggedOut: jest.fn(),
+    });
+    const user = userEvent.setup();
+    render(<Header {...props} />);
+    const menuButton = screen.getByTestId("navMenuButton");
+    await user.click(menuButton);
+    const nav = screen.getByRole("navigation");
+    const signInLink = within(nav).getByRole("link", { name: /sign in/i });
+    await user.click(signInLink);
+
+    expect(userUtils.storeCurrentPage).toHaveBeenCalled();
+  });
+  it("renders with locale for language selection", () => {
+    render(<Header locale="es/" />);
+    expect(
+      screen.getByRole("button", { name: /Here’s how you know/i }),
+    ).toBeInTheDocument();
+  });
+
+  describe("Authentication and nav", () => {
+    it("shows Sign in as a nav link when user is unauthenticated", () => {
+      mockUseUser.mockImplementation(() => ({
+        user: {
+          token: undefined,
+        },
+        hasBeenLoggedOut: false,
+        resetHasBeenLoggedOut: jest.fn(),
+      }));
+      render(<Header {...props} />);
+
+      const nav = screen.getByRole("navigation");
+      const navSignInLink = within(nav).getByRole("link", { name: /sign in/i });
+      expect(navSignInLink).toHaveAttribute(
+        "href",
+        expect.stringContaining("login"),
+      );
+    });
+
+    it("places Sign in inside the nav when unauthenticated so screen reader announces it as a nav item", () => {
+      mockUseUser.mockImplementation(() => ({
+        user: {
+          token: undefined,
+        },
+        hasBeenLoggedOut: false,
+        resetHasBeenLoggedOut: jest.fn(),
+      }));
+      render(<Header {...props} />);
+
+      const nav = screen.getByRole("navigation");
+      const navLinks = within(nav).getAllByRole("link");
+      const signInLink = navLinks.find((el) =>
+        el.textContent?.toLowerCase().includes("sign in"),
+      );
+      expect(signInLink).toBeDefined();
+      expect(signInLink).toBeInTheDocument();
+    });
+
+    it("shows Account dropdown in nav when user is authenticated", () => {
+      mockUseUser.mockReturnValue({
+        user: { token: "faketoken" },
+        hasBeenLoggedOut: false,
+        resetHasBeenLoggedOut: jest.fn(),
+      });
+      render(<Header {...props} />);
+
+      const accountButton = screen.getByRole("button", { name: /account/i });
+      expect(accountButton).toBeInTheDocument();
+    });
+
+    it("Account dropdown contains Settings and Sign out when opened", async () => {
+      mockUseUser.mockReturnValue({
+        user: { token: "faketoken" },
+        hasBeenLoggedOut: false,
+        resetHasBeenLoggedOut: jest.fn(),
+      });
+      const user = userEvent.setup();
+      render(<Header {...props} />);
+
+      const accountButton = screen.getByRole("button", { name: /account/i });
+      await user.click(accountButton);
+
+      expect(accountButton).toHaveAttribute("aria-expanded", "true");
+      const settingsLink = screen.getByRole("link", { name: /settings/i });
+      expect(settingsLink).toBeInTheDocument();
+      expect(settingsLink).toHaveAttribute("href", "/settings");
+      expect(screen.getByText(/sign out/i)).toBeInTheDocument();
+    });
   });
 });
