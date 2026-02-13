@@ -1,6 +1,5 @@
 import base64
 import csv
-import io
 import re
 from datetime import date
 
