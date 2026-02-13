@@ -8,6 +8,9 @@ is very much a work-in-progress as we build out the logic.
 
 # How-to
 
+## Add an approval to a workflow state machine
+TODO - write this up
+
 ## Add a new entity type
 Each workflow can connect to entities (eg. opportunity or application).
 If we want to add support for new types of entities, we need to do

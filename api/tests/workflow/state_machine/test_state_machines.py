@@ -27,6 +27,9 @@ from src.workflow.workflow_config import WorkflowConfig
 class BasicState(StrEnum):
     START = "start"
     MIDDLE = "middle"
+
+    APPROVE_BY_PROGRAM_OFFICER = ""
+
     END = "end"
 
 

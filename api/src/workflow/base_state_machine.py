@@ -1,8 +1,10 @@
-from typing import Any, cast
+from typing import Any, cast, TYPE_CHECKING
 
 from statemachine import StateMachine
 
 from src.db.models.workflow_models import Workflow
+from src.workflow.event.state_machine_event import StateMachineEvent
+from src.workflow.processor.approval_processor import ApprovalProcessor
 from src.workflow.state_persistence.base_state_persistence_model import BaseStatePersistenceModel
 
 
@@ -15,6 +17,7 @@ class BaseStateMachine(StateMachine):
 
     def __init__(self, model: BaseStatePersistenceModel, **kwargs: Any):
         super().__init__(model=model, **kwargs)
+        self.db_session = model.db_session
 
     @property
     def workflow(self) -> Workflow:
@@ -31,3 +34,23 @@ class BaseStateMachine(StateMachine):
         # Note mypy thinks events (a property that returns a list) isn't
         # iterable for some reason.
         return {e.id for e in cls.events}  # type: ignore[attr-defined]
+
+    def on_agency_approval_approved(self, state_machine_event: StateMachineEvent) -> None:
+        ApprovalProcessor(
+            db_session=self.db_session,
+            state_machine_event=state_machine_event
+        ).handle_agency_approval_accepted(self.opportunity.agency_record)
+
+    def on_agency_approval_declined(self, state_machine_event: StateMachineEvent) -> None:
+        ApprovalProcessor(
+            db_session=self.db_session,
+            state_machine_event=state_machine_event
+        ).handle_agency_approval_declined(self.opportunity.agency_record)
+
+    def has_enough_approvals(self, state_machine_event: StateMachineEvent) -> bool:
+        return ApprovalProcessor(
+            db_session=self.db_session,
+            state_machine_event=state_machine_event
+        ).has_enough_approvals()
+
+

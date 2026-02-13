@@ -247,6 +247,10 @@ class Privilege(StrEnum):
     PUBLISH_OPPORTUNITY = "publish_opportunity"
     INTERNAL_WORKFLOW_ACCESS = "internal_workflow_access"
 
+    # These privileges are associated with workflow approvals
+    PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
+    BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
+
 
 class RoleType(StrEnum):
     ORGANIZATION = "organization"
@@ -324,6 +328,9 @@ class WorkflowType(StrEnum):
 
 class ApprovalType(StrEnum):
     INITIAL_PROTOTYPE_APPROVAL = "initial_prototype_approval"
+
+    PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
+    BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
 
 
 class ApprovalResponseType(StrEnum):
