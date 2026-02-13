@@ -1,4 +1,5 @@
 import logging
+
 import boto3
 
 from src.adapters.aws import SQSConfig, get_boto_sqs_client
@@ -11,9 +12,11 @@ def test_sqs_queue() -> None:
     sqs_config = SQSConfig()
     # setup local test
     sqs_client = get_boto_sqs_client(
-        sqs_config, boto3.Session(region_name='us-east-1', aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS")
+        sqs_config,
+        boto3.Session(
+            region_name="us-east-1", aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS"
+        ),
     )
-    
 
     response = sqs_client.get_queue_url(QueueName=sqs_config.workflow_queue_name)
     queue_url = response["QueueUrl"]

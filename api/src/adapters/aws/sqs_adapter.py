@@ -34,16 +34,15 @@ class SQSDeleteBatchResponse(BaseModel):
 
 
 def get_boto_sqs_client(
-    sqs_config: SQSConfig | None = None, 
-    session: boto3.Session | None = None
+    sqs_config: SQSConfig | None = None, session: boto3.Session | None = None
 ) -> botocore.client.BaseClient:
     if sqs_config is None:
         sqs_config = SQSConfig()
-        
+
     params = {}
     if sqs_config.workflow_queue_url is not None:
         params["endpoint_url"] = sqs_config.workflow_queue_url
-        
+
     if session is None:
         session = get_boto_session()
 
