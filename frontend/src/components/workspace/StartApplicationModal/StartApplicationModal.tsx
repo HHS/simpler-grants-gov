@@ -117,8 +117,8 @@ export const StartApplicationModal = ({
     competitionId,
     router,
     savedApplicationName,
-    selectedOrganization,
     t,
+    selectedOrganization,
     validateSubmission,
     clientFetch,
   ]);
