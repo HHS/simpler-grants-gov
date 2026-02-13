@@ -1,5 +1,7 @@
 import base64
 import csv
+import io
+import re
 from datetime import date
 
 import pytest
@@ -1856,3 +1858,55 @@ class TestOpportunityRouteSearch(BaseTestClass):
         or top_level_agency_name matches the query.
         """
         call_search_and_validate(client, api_auth_token, search_request, expected_results)
+
+    def test_opportunities_to_csv(self, client, api_auth_token, monkeypatch):
+        monkeypatch.setenv("FRONTEND_BASE_URL", "https://example.com")
+        search_request = get_search_request(is_cost_sharing_one_of=[True, False])
+        search_request["format"] = "csv"
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+
+        assert resp.status_code == 200
+        assert "text/csv" in resp.headers["Content-Type"]
+
+        reader = csv.DictReader(resp.text.split("\n"))
+        rows = list(reader)
+
+        expected_headers = [
+            "close_date",
+            "opportunity_status",
+            "opportunity_title",
+            "opportunity_number",
+            "agency_name",
+            "award_floor",
+            "award_ceiling",
+            "url",
+        ]
+
+        assert reader.fieldnames == expected_headers
+        assert len(reader.fieldnames) == 8
+
+
+        for row in rows:
+            # assert correct url is configured
+            assert row["url"].startswith("https://example.com/opportunity/")
+            # assert date fields are ISO format
+            iso_date_pattern = r"^\d{4}-\d{2}-\d{2}$"
+            if row["close_date"]:
+                assert re.match(iso_date_pattern, row["close_date"])
+            # assert currency fields are raw numbers
+            if row["award_floor"]:
+                assert row["award_floor"].isdigit()
+            if row["award_ceiling"]:
+                assert row["award_ceiling"].isdigit()
+            # Null handling (empty string instead of None)
+            if row["opportunity_number"] == LOC_HIGHER_EDUCATION.opportunity_number:
+                assert row["close_date"] is not None
+                assert row["award_floor"] is not None
+                assert row["award_ceiling"] is not None
+
+
+            import pdb; pdb.set_trace()
+
+
