@@ -73,7 +73,16 @@ export const messages = {
       description:
         "The Simpler.Grants.gov team hosts public demonstrations of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
       watch: "Watch recordings of past Big Demos",
-      watchLink: "January 15, 2025",
+      watchLinks: [
+        {
+          text: "January 29, 2026",
+          link: "https://youtu.be/LBIqOTKOFf0?si=O0Ec4PaNuAByeHA9",
+        },
+        {
+          text: "January 15, 2025",
+          link: "https://youtu.be/uASJmvcy0aM?si=OniP7Z7KU8ie3FhS",
+        },
+      ],
     },
     codingChallenge: {
       title: "Collaborative Coding Challenge",
