@@ -26,7 +26,6 @@ export const envFeatureFlags = {
   applyFormPrototypeOff: FEATURE_APPLY_FORM_PROTOTYPE_OFF,
   opportunitiesListOff: FEATURE_OPPORTUNITIES_LIST_OFF,
   awardRecommendationOn: FEATURE_AWARD_RECOMMENDATION_ON,
-
 };
 
 const legacyHost = (): string => {
