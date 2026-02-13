@@ -58,7 +58,6 @@ class OpportunityCreateRequestSchema(Schema):
         required=True,
         metadata={
             "description": "The UUID of the agency that will own this opportunity",
-            "example": "add4b88f-e895-4ca9-92f4-38ed34055247",
         },
     )
     category = fields.Enum(
@@ -66,7 +65,6 @@ class OpportunityCreateRequestSchema(Schema):
         required=True,
         metadata={
             "description": "The opportunity category",
-            "example": OpportunityCategory.DISCRETIONARY,
         },
     )
     category_explanation = fields.String(
@@ -99,7 +97,6 @@ class OpportunityGrantorSchema(Schema):
     agency_id = fields.UUID(
         metadata={
             "description": "The UUID of the agency that owns this opportunity",
-            "example": "add4b88f-e895-4ca9-92f4-38ed34055247",
         },
     )
     agency_code = fields.String(
@@ -109,7 +106,6 @@ class OpportunityGrantorSchema(Schema):
         OpportunityCategory,
         metadata={
             "description": "The opportunity category",
-            "example": OpportunityCategory.DISCRETIONARY,
         },
     )
     category_explanation = fields.String(
@@ -121,7 +117,6 @@ class OpportunityGrantorSchema(Schema):
     is_draft = fields.Boolean(
         metadata={
             "description": "Whether the opportunity is a draft",
-            "example": True,
         },
     )
     created_at = fields.DateTime(dump_only=True)
