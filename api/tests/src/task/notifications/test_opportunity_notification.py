@@ -1,5 +1,6 @@
 import logging
 from datetime import date, timedelta
+from uuid import UUID
 
 import pytest
 
@@ -31,7 +32,7 @@ from tests.src.db.models.factories import UserFactory
 def build_opp_and_version(
     revision_number: int | None,
     opportunity_title: str | None,
-    opportunity_status: OpportunityStatus,
+    opportunity_status: OpportunityStatus | None,
     close_date: date | None,
     forecasted_award_date: date | None,
     forecasted_project_start_date: date | None,
@@ -53,6 +54,7 @@ def build_opp_and_version(
     additional_info_url: str | None,
     summary_description: str | None,
     has_attachments: bool | None = None,
+    has_summary: bool = True,
     db_session: db.Session | None = None,
 ) -> OpportunityVersion:
     _ = db_session  # Prevent linter warning for unused variable
@@ -66,33 +68,34 @@ def build_opp_and_version(
     if has_attachments:
         factories.OpportunityAttachmentFactory.create(opportunity=opportunity)
 
-    opportunity_summary = factories.OpportunitySummaryFactory.build(
-        opportunity=opportunity,
-        close_date=close_date,
-        forecasted_award_date=forecasted_award_date,
-        forecasted_project_start_date=forecasted_project_start_date,
-        fiscal_year=fiscal_year,
-        estimated_total_program_funding=estimated_total_program_funding,
-        expected_number_of_awards=expected_number_of_awards,
-        award_floor=award_floor,
-        award_ceiling=award_ceiling,
-        is_cost_sharing=is_cost_sharing,
-        funding_instruments=funding_instruments,
-        funding_categories=funding_categories,
-        funding_category_description=funding_category_description,
-        agency_email_address=agency_email_address,
-        agency_contact_description=agency_contact_description,
-        applicant_types=applicant_types,
-        applicant_eligibility_description=applicant_eligibility_description,
-        additional_info_url=additional_info_url,
-        summary_description=summary_description,
-    )
+    if has_summary:
+        opportunity_summary = factories.OpportunitySummaryFactory.build(
+            opportunity=opportunity,
+            close_date=close_date,
+            forecasted_award_date=forecasted_award_date,
+            forecasted_project_start_date=forecasted_project_start_date,
+            fiscal_year=fiscal_year,
+            estimated_total_program_funding=estimated_total_program_funding,
+            expected_number_of_awards=expected_number_of_awards,
+            award_floor=award_floor,
+            award_ceiling=award_ceiling,
+            is_cost_sharing=is_cost_sharing,
+            funding_instruments=funding_instruments,
+            funding_categories=funding_categories,
+            funding_category_description=funding_category_description,
+            agency_email_address=agency_email_address,
+            agency_contact_description=agency_contact_description,
+            applicant_types=applicant_types,
+            applicant_eligibility_description=applicant_eligibility_description,
+            additional_info_url=additional_info_url,
+            summary_description=summary_description,
+        )
 
-    opportunity.current_opportunity_summary = factories.CurrentOpportunitySummaryFactory.build(
-        opportunity_status=opportunity_status,
-        opportunity_summary=opportunity_summary,
-        opportunity=opportunity,
-    )
+        opportunity.current_opportunity_summary = factories.CurrentOpportunitySummaryFactory.build(
+            opportunity_status=opportunity_status,
+            opportunity_summary=opportunity_summary,
+            opportunity=opportunity,
+        )
 
     version = factories.OpportunityVersionFactory.build(opportunity=opportunity)
 
@@ -140,6 +143,35 @@ OPAL_REVISION_NUMB = build_opp_and_version(
     opportunity_status=OpportunityStatus.POSTED,
     **base_opal_fields,
 )
+
+
+OPAL_NO_SUMMARY = build_opp_and_version(
+    revision_number=3,
+    opportunity_title="Opal No Summary",
+    opportunity_status=None,
+    close_date=None,
+    forecasted_award_date=None,
+    forecasted_project_start_date=None,
+    fiscal_year=None,
+    estimated_total_program_funding=None,
+    expected_number_of_awards=None,
+    award_floor=None,
+    award_ceiling=None,
+    is_cost_sharing=None,
+    funding_instruments=[],
+    category=None,
+    category_explanation=None,
+    funding_categories=[],
+    funding_category_description=None,
+    agency_email_address=None,
+    agency_contact_description=None,
+    applicant_types=[],
+    applicant_eligibility_description=None,
+    additional_info_url="www.help.opal.com",
+    summary_description=None,
+    has_summary=False,
+)
+
 
 base_topaz_fields = {
     "revision_number": 1,
@@ -833,6 +865,21 @@ class TestOpportunityNotification:
                 '<p style="padding-left: 40px;">•  The category of funding activity has changed from Education to Other.<br>'
                 '<p style="padding-left: 40px;">•  The funding activity category explanation has been changed from not specified to To be determined.<br>',
             ),
+            (
+                {
+                    "funding_categories": {
+                        "before": None,
+                        "after": [FundingCategory.EDUCATION],
+                    },
+                    "funding_instruments": {
+                        "before": [FundingInstrument.GRANT],
+                        "after": None,
+                    },
+                },
+                '<p style="padding-left: 20px;">Categorization</p>'
+                '<p style="padding-left: 40px;">•  The category of funding activity has changed from not specified to Education.<br>'
+                '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant to not specified.<br>',
+            ),
         ],
     )
     def test_build_categorization_fields_content(
@@ -924,6 +971,19 @@ class TestOpportunityNotification:
                 {"applicant_eligibility_description": {"before": "Business", "after": None}},
                 '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was deleted.<br>',
             ),
+            (
+                {
+                    "applicant_types": {
+                        "before": [
+                            ApplicantType.PUBLIC_AND_STATE_INSTITUTIONS_OF_HIGHER_EDUCATION,
+                            ApplicantType.OTHER,
+                        ],
+                        "after": None,
+                    }
+                },
+                '<p style="padding-left: 20px;">Eligibility</p>'
+                '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Other, Public and state institutions of higher education].<br>',
+            ),
         ],
     )
     def test_build_eligibility_content(
@@ -943,9 +1003,21 @@ class TestOpportunityNotification:
         "description_diffs,expected_html",
         [
             ({"before": "testing", "after": None}, ""),
+            # Truncate
             (
-                {"before": "testing", "after": "Updated description"},
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>',
+                {
+                    "before": "testing",
+                    "after": "The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entities.",
+                },
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entiti<a href="http://testhost:3000/opportunity/7f3c6a9e-4d2b-4e3a-9a7f-8c4c9f5d2b61" style="color:blue;">...Read full description</a></div><br>',
+            ),
+            # Truncate with html tag
+            (
+                {
+                    "before": "testing",
+                    "after": '<p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainable agriculture</strong>, and <u>carbon capture technologies</u>. Open to institutions, nonprofits, and private entities.</p>',
+                },
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;"><p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainable agriculture</strong>, and <u>carbon capture technologies</u>. Open to institutions, nonprofits, and private entit<a href="http://testhost:3000/opportunity/7f3c6a9e-4d2b-4e3a-9a7f-8c4c9f5d2b61" style="color:blue;">...Read full description</a></p></div><br>',
             ),
         ],
     )
@@ -957,7 +1029,8 @@ class TestOpportunityNotification:
         set_env_var_for_email_notification_config,
         notification_task,
     ):
-        res = notification_task._build_description_fields_content(description_diffs)
+        op_id = UUID("7f3c6a9e-4d2b-4e3a-9a7f-8c4c9f5d2b61")
+        res = notification_task._build_description_fields_content(description_diffs, op_id)
         assert res == expected_html
 
     @pytest.mark.parametrize(
@@ -977,6 +1050,24 @@ class TestOpportunityNotification:
                         opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_REVISION_NUMB
                     ),
                     "",
+                )
+            ),
+            # OpportunitySummary Dropped
+            (
+                (
+                    OpportunityVersionChange(
+                        opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_NO_SUMMARY
+                    ),
+                    '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to not specified.<br><br><p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from September 1, 2026 to not specified.<br><br><p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $15,000,000 to not specified.<br><p style="padding-left: 40px;">•  The number of expected awards changed from 3 to not specified.<br><p style="padding-left: 40px;">•  The award minimum changed from $50,000 to not specified.<br><p style="padding-left: 40px;">•  The award maximum changed from $5,000,000 to not specified.<br><br><p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to not specified.<br><p style="padding-left: 40px;">•  The funding instrument type has changed from Cooperative agreement to not specified.<br><p style="padding-left: 40px;">•  The category of funding activity has changed from Education to not specified.<br><br><p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: not specified.<br><br><p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and state institutions of higher education].<br><p style="padding-left: 40px;">•  Additional information was deleted.<br>',
+                )
+            ),
+            # OpportunitySummary  Added. Though should not be the case
+            (
+                (
+                    OpportunityVersionChange(
+                        opportunity_id=OPAL.opportunity_id, previous=OPAL_NO_SUMMARY, latest=OPAL
+                    ),
+                    '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from not specified to Open.<br><br><p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from not specified to September 1, 2026.<br><br><p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from not specified to $15,000,000.<br><p style="padding-left: 40px;">•  The number of expected awards changed from not specified to 3.<br><p style="padding-left: 40px;">•  The award minimum changed from not specified to $50,000.<br><p style="padding-left: 40px;">•  The award maximum changed from not specified to $5,000,000.<br><br><p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from not specified to Yes.<br><p style="padding-left: 40px;">•  The funding instrument type has changed from not specified to Cooperative agreement.<br><p style="padding-left: 40px;">•  The category of funding activity has changed from not specified to Education.<br><br><p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: customer service.<br><br><p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br><p style="padding-left: 40px;">•  Additional information was added.<br>',
                 )
             ),
         ],
@@ -1119,7 +1210,7 @@ class TestOpportunityNotification:
                 '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and indian housing authorities].<br>'
                 '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
                 '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  The description has changed.<br>'
+                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">Climate research in mars</div><br>'
                 "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                 f"<a href='http://testhost:3000{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                 "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
@@ -1134,6 +1225,7 @@ class TestOpportunityNotification:
                 )
             ]
         )
+
         assert res == expected
 
     def test_get_latest_opportunity_versions_suppressed(
