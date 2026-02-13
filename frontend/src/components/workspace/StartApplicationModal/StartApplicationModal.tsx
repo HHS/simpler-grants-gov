@@ -132,9 +132,12 @@ export const StartApplicationModal = ({
     setSelectedOrganization("");
   }, []);
 
-  const onNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setSavedApplicationName(event.target.value);
-  }, []);
+  const onNameChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSavedApplicationName(event.target.value);
+    },
+    [],
+  );
 
   const onOrganizationChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -209,9 +212,15 @@ export const StartApplicationModal = ({
           onClick={handleSubmit}
           type="button"
           data-testid="application-start-save"
-          disabled={Boolean(loading) || Boolean(updating) || Boolean(organizationsError)}
+          disabled={
+            Boolean(loading) || Boolean(updating) || Boolean(organizationsError)
+          }
         >
-          <USWDSIcon name="add" className="margin-right-05" aria-hidden="true" />
+          <USWDSIcon
+            name="add"
+            className="margin-right-05"
+            aria-hidden="true"
+          />
           {loading || updating ? "Loading..." : t("saveButtonText")}
         </Button>
         <ModalToggleButton

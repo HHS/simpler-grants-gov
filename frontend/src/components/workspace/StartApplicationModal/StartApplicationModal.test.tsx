@@ -241,7 +241,7 @@ describe("StartApplicationModal", () => {
         body: JSON.stringify({
           applicationName: "new application",
           competitionId: "1",
-          organization: undefined,
+          intendsToAddOrganizationLater: true,
         }),
       });
     });

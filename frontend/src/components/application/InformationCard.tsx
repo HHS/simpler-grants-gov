@@ -124,19 +124,19 @@ export const InformationCard = ({
   const transferModalId = "transfer-ownership-modal";
   const organizationEligible =
     applicationDetails.competition.open_to_applicants.includes("organization");
+  const individualEligible =
+    applicationDetails.competition.open_to_applicants.includes("individual");
   const isEditable =
     applicationDetails.application_status === ApplicationStatus.IN_PROGRESS;
   const canTransferOwnership =
     !hasOrganization && organizationEligible && isEditable;
-  const [isTransferModalOpen, setIsTransferModalOpen] =
-    useState<boolean>(false);
-  const individualEligible =
-    applicationDetails.competition.open_to_applicants.includes("individual");
   const isOrganizationOnlyCompetition =
     organizationEligible && !individualEligible;
   const isIndividualOwnedApplication = !hasOrganization;
   const shouldBlockSubmitForOrgOnly =
     isOrganizationOnlyCompetition && isIndividualOwnedApplication;
+  const [isTransferModalOpen, setIsTransferModalOpen] =
+    useState<boolean>(false);
 
   const openTransferModal = useCallback((): void => {
     setIsTransferModalOpen(true);
@@ -385,12 +385,12 @@ export const SubmitApplicationButton = ({
   buttonText: string;
   loading: boolean;
   submitHandler: () => void;
-  disabled: boolean;
+  disabled?: boolean;
 }) => {
   return (
     <Button
       type="button"
-      disabled={!!loading || disabled}
+      disabled={Boolean(loading) || Boolean(disabled)}
       onClick={submitHandler}
     >
       <USWDSIcon name="upload_file" />

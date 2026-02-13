@@ -267,7 +267,7 @@ describe("InformationCard - Submit button", () => {
         {...baseProps}
         applicationDetails={makeApplicationDetails({
           organization: null,
-          application_status: Status.IN_PROGRESS,
+          application_status: ApplicationStatus.IN_PROGRESS,
           competition: {
             is_open: true,
             open_to_applicants: ["organization"],
@@ -297,7 +297,7 @@ describe("InformationCard - Org-only competition banner", () => {
         {...baseProps}
         applicationDetails={makeApplicationDetails({
           organization: null,
-          application_status: Status.IN_PROGRESS,
+          application_status: ApplicationStatus.IN_PROGRESS,
           competition: {
             is_open: true,
             open_to_applicants: ["organization"],
@@ -316,7 +316,7 @@ describe("InformationCard - Org-only competition banner", () => {
         {...baseProps}
         applicationDetails={makeApplicationDetails({
           organization: null,
-          application_status: Status.IN_PROGRESS,
+          application_status: ApplicationStatus.IN_PROGRESS,
           competition: {
             is_open: true,
             open_to_applicants: ["individual", "organization"],
@@ -338,7 +338,7 @@ describe("InformationCard - Org-only competition banner", () => {
         {...baseProps}
         applicationDetails={makeApplicationDetails({
           organization: null,
-          application_status: Status.IN_PROGRESS,
+          application_status: ApplicationStatus.IN_PROGRESS,
           competition: {
             is_open: true,
             open_to_applicants: ["organization"],
