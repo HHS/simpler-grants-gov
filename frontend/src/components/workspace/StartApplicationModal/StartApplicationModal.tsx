@@ -242,7 +242,7 @@ export const StartApplicationModal = ({
           onClick={handleSubmit}
           type="button"
           data-testid="application-start-save"
-          disabled={!!loading}
+          disabled={!!loading || !!organizationsError}
         >
           <USWDSIcon
             name="add"
