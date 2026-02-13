@@ -26,6 +26,7 @@ from src.db.models.user_models import User
 from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
 from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0
+from src.form_schema.forms.sf424b import SF424b_v1_1
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_form,
@@ -294,6 +295,12 @@ def _build_organizations_and_users(
             competition=competition_container.get_comp_for_form(SF424a_v1_0),
             app_owner=many_app_user,
             application_name="My really really really long Individual application name that'll take up a lot of space",
+        )
+        _add_application(
+            db_session,
+            competition=competition_container.get_comp_for_form(SF424b_v1_1),
+            app_owner=many_app_user,
+            application_name="App for SF424bv1.1",
         )
         _add_application(
             db_session,
