@@ -356,8 +356,16 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 before = self._normalize_bool_field(before)
                 after = self._normalize_bool_field(after)
             elif field in ["funding_instruments", "funding_categories"]:
-                before = ", ".join([self._format_slug(value) for value in before])
-                after = ", ".join([self._format_slug(value) for value in after])
+                before = (
+                    ", ".join([self._format_slug(value) for value in before])
+                    if before
+                    else NOT_SPECIFIED
+                )
+                after = (
+                    ", ".join([self._format_slug(value) for value in after])
+                    if after
+                    else NOT_SPECIFIED
+                )
             elif field == "category":
                 before = before.capitalize() if before else NOT_SPECIFIED
                 after = after.capitalize() if after else NOT_SPECIFIED
@@ -385,8 +393,11 @@ class OpportunityNotificationTask(BaseNotificationTask):
             before = change["before"]
             after = change["after"]
             if field == "applicant_types":
-                added = sorted(set(after) - set(before))
-                removed = sorted(set(before) - set(after))
+                before_set = set(before or [])
+                after_set = set(after or [])
+
+                added = sorted(after_set - before_set)
+                removed = sorted(before_set - after_set)
                 stmt = ELIGIBILITY_FIELDS["applicant_types"]
                 if added:
                     eligibility_section += f"{BULLET_POINTS_STYLING} Additional {stmt} [{", ".join(f"{self._format_slug(e_type)}" for e_type in added)}].<br>"
@@ -512,7 +523,6 @@ class OpportunityNotificationTask(BaseNotificationTask):
         previous = cast(OpportunityVersion, opp_change.previous)
 
         diffs = diff_nested_dicts(previous.opportunity_data, opp_change.latest.opportunity_data)
-
         # Transform diffs
         changes = self._flatten_and_extract_field_changes(diffs)
         sections = []
