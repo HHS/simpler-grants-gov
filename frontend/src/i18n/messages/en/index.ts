@@ -1796,6 +1796,14 @@ export const messages = {
     pageHeading: "Organizations",
     pageTitle: "Organizations",
   },
+  AwardRecommendation: {
+    errorMessage:
+      "We have encountered an error loading your award recommendations, please try again later.",
+    metaDescription: "View your award recommendations",
+    pageHeading: "Award Recommendations",
+    pageTitle: "Award Recommendations",
+    description: "Award Recommendation flow coming soon.",
+  },
   InviteLegacyUsers: {
     dataLoadingError:
       "We're having trouble loading your team from Grants.gov. Please try again later.",

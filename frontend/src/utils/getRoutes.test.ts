@@ -39,6 +39,7 @@ describe("getNextRoutes", () => {
       "/(base)/unauthenticated",
       "/(base)/vision",
       "/(print)/print/application/[applicationId]/form/[appFormId]",
+      "/(base)/award-recommendation",
     ]);
   });
 });
