@@ -214,7 +214,17 @@ def opportunity_search(
     if search_params.get("format") == opportunity_schemas.SearchResponseFormat.CSV:
         # Convert the response into a CSV and return the contents
         output = io.StringIO()
-        opportunities_to_csv(opportunities, output)
+        csv_fields = [
+            "close_date",
+            "opportunity_status",
+            "opportunity_title",
+            "opportunity_number",
+            "agency_name",
+            "award_floor",
+            "award_ceiling",
+            "url",
+        ]
+        opportunities_to_csv(opportunities, output, csv_fields)
         timestamp = datetime_util.utcnow().strftime("%Y%m%d-%H%M%S")
         return Response(
             output.getvalue().encode("utf-8"),
