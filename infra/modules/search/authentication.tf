@@ -1,8 +1,9 @@
 locals {
   task_executor_role_name = "${var.service_name}-task-executor"
 
-  # Default role ARNs based on service naming convention. The default roles are created in the database module.
-  ingest_role_arn = var.ingest_role_arn != null ? var.ingest_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-migrator"
+  # Default role ARNs based on service naming convention. The default roles are created in the service module.
+  # The opensearch-write role is used for OpenSearch sync jobs, separate from the migrator role which is only for DB migrations
+  ingest_role_arn = var.ingest_role_arn != null ? var.ingest_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-opensearch-write"
   query_role_arn  = var.query_role_arn != null ? var.query_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-app"
 }
 

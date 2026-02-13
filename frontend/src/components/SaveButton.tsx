@@ -8,7 +8,7 @@ import Spinner from "./Spinner";
 import { USWDSIcon } from "./USWDSIcon";
 
 interface SaveButtonProps {
-  buttonClick?: () => Promise<void>;
+  buttonClick?: (() => Promise<void>) | (() => void);
   messageClick: () => void;
   // This is the id of the button which will be tied to the aria-describedby of the alert
   buttonId: string;

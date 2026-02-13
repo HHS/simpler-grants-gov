@@ -70,7 +70,7 @@ const MultipleAttachmentUploadWidget = ({
     let parsedValue: string[] = [];
 
     if (Array.isArray(initialValue)) {
-      parsedValue = initialValue as string[];
+      parsedValue = initialValue;
     } else if (typeof initialValue === "string") {
       try {
         // casting doesn’t fully satisfy the linter because it treats schema as possibly any underneath

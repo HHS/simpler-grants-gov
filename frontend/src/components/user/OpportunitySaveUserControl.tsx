@@ -59,23 +59,25 @@ export const OpportunitySaveUserControl = ({
     setshowMessage(false);
   };
 
-  const userSavedOppCallback = async () => {
+  const userSavedOppCallback = () => {
     setLoading(true);
 
     const method = displayAsSaved ? "DELETE" : "POST";
-    try {
-      const data = await updateSaved("/api/user/saved-opportunities", {
-        method,
-        body: JSON.stringify({ opportunityId }),
+    updateSaved("/api/user/saved-opportunities", {
+      method,
+      body: JSON.stringify({ opportunityId }),
+    })
+      .then((data) => {
+        setLocallySaved(data.type === "save");
+      })
+      .catch((e) => {
+        setSavedError(true);
+        console.error(e);
+      })
+      .finally(() => {
+        setshowMessage(true);
+        setLoading(false);
       });
-      setLocallySaved(data.type === "save");
-    } catch (e) {
-      setSavedError(true);
-      console.error(e);
-    } finally {
-      setshowMessage(true);
-      setLoading(false);
-    }
   };
 
   const messageText = displayAsSaved
@@ -97,9 +99,7 @@ export const OpportunitySaveUserControl = ({
       <>
         {user?.token ? (
           <SaveIcon
-            onClick={() => {
-              userSavedOppCallback().catch(console.error);
-            }}
+            onClick={userSavedOppCallback}
             loading={loading}
             saved={displayAsSaved}
           />
