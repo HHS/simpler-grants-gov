@@ -1830,7 +1830,8 @@ export const messages = {
   },
   ResearchParticipantGuide: {
     pageTitle: "Design Research Participant Guide | Simpler.Grants.gov",
-    pageDescription: "In this guide, research participants can learn more about partcipating in studies.",
+    pageDescription:
+      "In this guide, research participants can learn more about partcipating in studies.",
     h1: "Design Research Participant Guide",
     intro:
       "This guide is for participants in Simpler Grants design research studies. If you have been contacted by the Simpler Grants team to participate in a study, read through these steps to learn more about the process and let us know if you have any questions.",
