@@ -6,7 +6,10 @@ from src.constants.lookup_constants import Privilege
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_agency import get_agency
-from src.services.opportunities_grantor_v1.get_opportunity import check_opportunity_number_exists, OpportunityCreateRequest
+from src.services.opportunities_grantor_v1.get_opportunity import (
+    OpportunityCreateRequest,
+    check_opportunity_number_exists,
+)
 
 
 def create_opportunity(db_session: db.Session, user: User, opportunity_data: dict) -> Opportunity:

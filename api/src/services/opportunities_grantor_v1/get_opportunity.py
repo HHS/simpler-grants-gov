@@ -1,11 +1,12 @@
+import uuid
+
+from pydantic import BaseModel
 from sqlalchemy import select
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.db.models.opportunity_models import Opportunity
-from pydantic import BaseModel
-import uuid
 from src.constants.lookup_constants import OpportunityCategory
+from src.db.models.opportunity_models import Opportunity
 
 
 class OpportunityCreateRequest(BaseModel):

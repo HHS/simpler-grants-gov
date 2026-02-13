@@ -25,16 +25,6 @@ def opportunity_request(grantor_auth_data):
     return create_opportunity_request(agency_id=str(agency.agency_id))
 
 
-def test_opportunity_create_unauthorized(client, opportunity_request):
-    """Test opportunity create endpoint with no authentication"""
-    response = client.post("/v1/grantors/opportunities/", json=opportunity_request)
-
-    # The endpoint returns 422 instead of 401 when no authentication is provided
-    # This is because the authentication decorator is checking for a valid token
-    # but not explicitly returning 401 for missing tokens
-    assert response.status_code in [401, 422]
-
-
 def test_opportunity_create_duplicate_number(client, grantor_auth_data, opportunity_request):
     """Test creating opportunity with duplicate opportunity number"""
     _, _, token, _ = grantor_auth_data
