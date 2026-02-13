@@ -361,5 +361,79 @@ describe("StartApplicationModal", () => {
       const button = screen.getByTestId("application-start-save");
       expect(button).toHaveClass("usa-button");
     });
+
+    it("button is disabled when organizationsError is true", () => {
+      render(
+        <StartApplicationModal
+          competitionId="1"
+          opportunityTitle="blessed opportunity"
+          modalRef={createRef()}
+          applicantTypes={["organization"]}
+          organizations={[fakeUserOrganization]}
+          token={"a token"}
+          loading={false}
+          organizationsError={true}
+        />,
+      );
+
+      const button = screen.getByTestId("application-start-save");
+      expect(button).toBeDisabled();
+    });
+
+    it("button is enabled when organizationsError is false", () => {
+      render(
+        <StartApplicationModal
+          competitionId="1"
+          opportunityTitle="blessed opportunity"
+          modalRef={createRef()}
+          applicantTypes={["organization"]}
+          organizations={[fakeUserOrganization]}
+          token={"a token"}
+          loading={false}
+          organizationsError={false}
+        />,
+      );
+
+      const button = screen.getByTestId("application-start-save");
+      expect(button).not.toBeDisabled();
+    });
+
+    it("button is enabled when organizationsError is undefined", () => {
+      render(
+        <StartApplicationModal
+          competitionId="1"
+          opportunityTitle="blessed opportunity"
+          modalRef={createRef()}
+          applicantTypes={["organization"]}
+          organizations={[fakeUserOrganization]}
+          token={"a token"}
+          loading={false}
+        />,
+      );
+
+      const button = screen.getByTestId("application-start-save");
+      expect(button).not.toBeDisabled();
+    });
+
+    it("shows main modal with error banner when organizationsError is true with empty organizations", () => {
+      render(
+        <StartApplicationModal
+          competitionId="1"
+          opportunityTitle="blessed opportunity"
+          modalRef={createRef()}
+          applicantTypes={["organization"]}
+          organizations={[]}
+          token={"a token"}
+          loading={false}
+          organizationsError={true}
+        />,
+      );
+
+      // Should show error banner, not ineligible modal
+      expect(screen.queryByText(/not eligible/i)).not.toBeInTheDocument();
+      // Button should be disabled
+      const button = screen.getByTestId("application-start-save");
+      expect(button).toBeDisabled();
+    });
   });
 });
