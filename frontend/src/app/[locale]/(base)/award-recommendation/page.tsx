@@ -30,9 +30,8 @@ export type AwardRecommendationPageProps = LocalizedPageProps &
 async function AwardRecommendationPageContent({
   params,
 }: AwardRecommendationPageProps) {
-  const resolvedParams = await params;
-  // eslint-disable-next-line no-console
-  console.log("AwardRecommendationPage params:", resolvedParams);
+  await params;
+
   const t = await getTranslations("AwardRecommendation");
 
   return (
