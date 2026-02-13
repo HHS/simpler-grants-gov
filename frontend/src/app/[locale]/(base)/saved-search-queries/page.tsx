@@ -62,7 +62,7 @@ export default async function SavedSearchQueries({
 
   try {
     savedSearches = await fetchSavedSearches();
-  } catch (e) {
+  } catch (_e) {
     return (
       <>
         <GridContainer>

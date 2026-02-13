@@ -121,12 +121,12 @@ export const TransferOwnershipModal = ({
     () =>
       t.rich("contactSupport", {
         tel: (content) => {
-          const phoneNumber = String(content);
-          return <a href={`tel:${phoneNumber}`}>{phoneNumber}</a>;
+          const telephoneNumber = content as string;
+          return <a href={`tel:${telephoneNumber}`}>{content}</a>;
         },
         link: (content) => {
-          const email = String(content);
-          return <a href={`mailto:${email}`}>{email}</a>;
+          const email = content as string;
+          return <a href={`mailto:${email}`}>{content}</a>;
         },
       }),
     [t],

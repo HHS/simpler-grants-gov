@@ -3,8 +3,8 @@
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   ApplicationDetail,
+  ApplicationStatus,
   SamGovEntity,
-  Status,
 } from "src/types/applicationResponseTypes";
 import { Competition } from "src/types/competitionsResponseTypes";
 
@@ -125,7 +125,7 @@ export const InformationCard = ({
   const organizationEligible =
     applicationDetails.competition.open_to_applicants.includes("organization");
   const isEditable =
-    applicationDetails.application_status === Status.IN_PROGRESS;
+    applicationDetails.application_status === ApplicationStatus.IN_PROGRESS;
   const canTransferOwnership =
     !hasOrganization && organizationEligible && isEditable;
   const [isTransferModalOpen, setIsTransferModalOpen] =
@@ -196,7 +196,7 @@ export const InformationCard = ({
    *  - Download available, render button to download submission zip.
    */
   const ApplicationSubmissionDownload = () => {
-    if (applicationDetails.application_status === Status.SUBMITTED)
+    if (applicationDetails.application_status === ApplicationStatus.SUBMITTED)
       return (
         <p data-testid={"application-submission-download-message"}>
           {t("applicationSubmissionZipDownloadLoadingMessage")}
@@ -204,7 +204,7 @@ export const InformationCard = ({
       );
     if (
       latestApplicationSubmission === null ||
-      applicationDetails.application_status === Status.IN_PROGRESS
+      applicationDetails.application_status === ApplicationStatus.IN_PROGRESS
     )
       return null;
     return (
@@ -246,10 +246,10 @@ export const InformationCard = ({
 
   const applicationStatus = () => {
     switch (applicationDetails.application_status) {
-      case Status.IN_PROGRESS:
+      case ApplicationStatus.IN_PROGRESS:
         return t("statusInProgress");
-      case Status.ACCEPTED:
-      case Status.SUBMITTED:
+      case ApplicationStatus.ACCEPTED:
+      case ApplicationStatus.SUBMITTED:
         return t("statusSubmitted");
       default:
         return "-";
@@ -269,8 +269,10 @@ export const InformationCard = ({
         <Grid tablet={{ col: 12 }} mobile={{ col: 12 }}>
           <h3 className="margin-top-2">
             {applicationDetails.application_name}
-            {applicationDetails.application_status !== Status.SUBMITTED &&
-              applicationDetails.application_status !== Status.ACCEPTED && (
+            {applicationDetails.application_status !==
+              ApplicationStatus.SUBMITTED &&
+              applicationDetails.application_status !==
+                ApplicationStatus.ACCEPTED && (
                 <EditAppFilingName
                   applicationId={applicationDetails.application_id}
                   applicationName={applicationDetails.application_name}

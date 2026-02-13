@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { RefObject, useCallback, useState } from "react";
 import {
+  Alert,
   Button,
   ErrorMessage,
   FormGroup,
@@ -15,8 +16,11 @@ import {
 } from "@trussworks/react-uswds";
 
 import { SimplerModal } from "src/components/SimplerModal";
+import { USWDSIcon } from "src/components/USWDSIcon";
 import { StartApplicationDescription } from "./StartApplicationDescription";
+import { StartApplicationInfoBanner } from "./StartApplicationInfoBanner";
 import {
+  SPECIAL_VALUES,
   StartApplicationNameInput,
   StartApplicationOrganizationInput,
 } from "./StartApplicationInputs";
@@ -28,6 +32,7 @@ export const StartApplicationModal = ({
   organizations,
   token,
   loading,
+  organizationsError,
   competitionId,
 }: {
   opportunityTitle: string;
@@ -36,6 +41,7 @@ export const StartApplicationModal = ({
   organizations: UserOrganization[];
   token: string | null;
   loading: boolean;
+  organizationsError?: boolean;
   competitionId: string;
 }) => {
   const t = useTranslations("OpportunityListing.startApplicationModal");
@@ -48,55 +54,74 @@ export const StartApplicationModal = ({
   const [savedApplicationName, setSavedApplicationName] = useState<string>();
   const [selectedOrganization, setSelectedOrganization] = useState<string>();
   const [error, setError] = useState<string>();
-  const [updating, setUpdating] = useState<boolean>();
+  const [updating, setUpdating] = useState<boolean>(false);
 
   const validateSubmission = useCallback((): boolean => {
-    let valid = !!token;
+    let isValid = Boolean(token);
 
     setNameValidationError("");
 
     if (!savedApplicationName) {
       setNameValidationError(t("fields.name.validationError"));
-      valid = false;
+      isValid = false;
     }
-    return valid;
-  }, [token, savedApplicationName, t]);
+
+    return isValid;
+  }, [savedApplicationName, t, token]);
 
   const handleSubmit = useCallback(() => {
-    const valid = validateSubmission();
-    if (!valid) {
+    const isValid = validateSubmission();
+    if (!isValid) {
       return;
     }
     setUpdating(true);
+    const isIndividualSelected =
+      selectedOrganization === SPECIAL_VALUES.INDIVIDUAL;
+    const isNotListedSelected =
+      selectedOrganization === SPECIAL_VALUES.NOT_LISTED;
+
+    const organizationToSend: string | undefined =
+      !selectedOrganization ||
+      selectedOrganization === "0" ||
+      isIndividualSelected ||
+      isNotListedSelected
+        ? undefined
+        : selectedOrganization;
+
     clientFetch("/api/applications/start", {
       method: "POST",
       body: JSON.stringify({
         applicationName: savedApplicationName,
         competitionId,
-        ...(selectedOrganization ? { organization: selectedOrganization } : {}),
+        ...(organizationToSend ? { organization: organizationToSend } : {}),
+        ...(isNotListedSelected ? { intendsToAddOrganizationLater: true } : {}),
       }),
     })
-      .then((data) => router.push(`/applications/${data.applicationId}`))
-      .catch((error) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (error.cause === "401") {
+      .then((data) => {
+        const { applicationId } = data;
+        router.push(`/applications/${applicationId}`);
+      })
+      .catch((caught: unknown) => {
+        const errorObject = caught as { cause?: unknown };
+        if (errorObject.cause === "401") {
           setError(t("loggedOut"));
         } else {
           setError(t("error"));
         }
-        console.error(error);
+        // eslint-disable-next-line no-console
+        console.error(caught);
       })
       .finally(() => {
         setUpdating(false);
       });
   }, [
+    clientFetch,
     competitionId,
     router,
     savedApplicationName,
-    t,
     selectedOrganization,
+    t,
     validateSubmission,
-    clientFetch,
   ]);
 
   const onClose = useCallback(() => {
@@ -107,13 +132,13 @@ export const StartApplicationModal = ({
     setSelectedOrganization("");
   }, []);
 
-  const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSavedApplicationName(e.target.value);
+  const onNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setSavedApplicationName(event.target.value);
   }, []);
 
   const onOrganizationChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedOrganization(e.target.value);
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedOrganization(event.target.value);
     },
     [],
   );
@@ -123,45 +148,70 @@ export const StartApplicationModal = ({
       modalRef={modalRef}
       className="text-wrap maxw-tablet-lg font-sans-xs"
       modalId={"start-application"}
-      titleText={t("title")}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") handleSubmit();
+      onKeyDown={(event) => {
+        if (event.key === "Enter") handleSubmit();
       }}
       onClose={onClose}
     >
+      {organizationsError ? (
+        <Alert
+          type="error"
+          headingLevel="h4"
+          noIcon={true}
+          slim={true}
+          className="margin-bottom-2"
+        >
+          {t.rich("organizationLoadError", {
+            telephone: (chunk) => <a href="tel:18005184726">{chunk}</a>,
+            email: (chunk) => <a href="mailto:simpler@grants.gov">{chunk}</a>,
+            br: () => <br />,
+          })}
+        </Alert>
+      ) : null}
+
+      <h1 className="usa-modal__heading" id="start-application-heading">
+        {t("title")}
+      </h1>
+
       <StartApplicationDescription
         organizations={organizations}
         applicantTypes={applicantTypes}
+        organizationsError={organizationsError}
       />
+      <p className="font-sans-2xs text-base margin-top-1 margin-bottom-0">
+        {t("requiredText")}
+      </p>
       <p className="font-sans-sm text-bold" data-testid="opportunity-title">
         {t("applyingFor")} {opportunityTitle}
       </p>
-      <p className="font-sans-3xs">{t("requiredText")}</p>
-      <FormGroup
-        error={!!(nameValidationError || error)}
-        className="margin-top-1"
-      >
-        {applicantTypes.includes("organization") && (
+      <hr className="margin-y-2 border-base-lighter" />
+      <StartApplicationInfoBanner />
+      {applicantTypes.includes("organization") ? (
+        <FormGroup className="margin-top-1">
           <StartApplicationOrganizationInput
             onOrganizationChange={onOrganizationChange}
             validationError={undefined}
             organizations={organizations}
             selectedOrganization={selectedOrganization}
+            applicantTypes={applicantTypes}
           />
-        )}
+        </FormGroup>
+      ) : null}
+      <FormGroup error={Boolean(nameValidationError)} className="margin-top-1">
         <StartApplicationNameInput
           validationError={nameValidationError}
           onNameChange={onNameChange}
         />
-        {error && <ErrorMessage>{error}</ErrorMessage>}
       </FormGroup>
+      {error ? <ErrorMessage>{error}</ErrorMessage> : null}
       <ModalFooter>
         <Button
           onClick={handleSubmit}
           type="button"
           data-testid="application-start-save"
-          disabled={!!loading || !!updating}
+          disabled={Boolean(loading) || Boolean(updating) || Boolean(organizationsError)}
         >
+          <USWDSIcon name="add" className="margin-right-05" aria-hidden="true" />
           {loading || updating ? "Loading..." : t("saveButtonText")}
         </Button>
         <ModalToggleButton

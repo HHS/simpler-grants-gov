@@ -14,7 +14,7 @@ import {
   SearchAPIResponse,
 } from "src/types/search/searchRequestTypes";
 
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { Accordion } from "@trussworks/react-uswds";
 
@@ -32,7 +32,7 @@ export async function SearchDrawerFilters({
   searchResultsPromise: Promise<SearchAPIResponse>;
   agencyListPromise: Promise<RelevantAgencyRecord[]>;
 }) {
-  const t = useTranslations("Search");
+  const t = await getTranslations("Search");
   const {
     eligibility,
     fundingInstrument,
