@@ -1907,6 +1907,3 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 assert row["award_ceiling"] is not None
 
 
-            import pdb; pdb.set_trace()
-
-
