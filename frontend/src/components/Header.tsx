@@ -64,12 +64,12 @@ const NavLink = ({
       target={linkTarget}
       onClick={onClick}
     >
-      <div className={iconBtnClass}>
+      <span className={iconBtnClass}>
         {text}
         {isExternalLink(href) && (
           <USWDSIcon name="launch" className="usa-icon--size-2" />
         )}
-      </div>
+      </span>
     </Link>
   );
 };

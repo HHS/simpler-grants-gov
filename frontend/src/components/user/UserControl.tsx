@@ -114,7 +114,7 @@ export const SignOutNavLink = ({ onClick }: { onClick: () => void }) => {
         handleLogout().catch(() => undefined);
       }}
     >
-      <div>{t("logout")}</div>
+      {t("logout")}
     </Link>
   );
 };
