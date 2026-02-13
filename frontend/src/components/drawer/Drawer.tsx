@@ -35,13 +35,20 @@ export function Drawer({
       renderToPortal={!isSSR}
     >
       <div className="width-full display-flex flex-column height-full">
-        <div className="flex-auto">
+        <div className="flex-auto border-bottom-05 border-base-lightest padding-bottom-1">
           <ModalHeading id={`${drawerId}-heading`}>{headingText}</ModalHeading>
         </div>
-        <div className="overflow-auto border-top-05 flex-fill border-bottom-05 border-base-lightest padding-bottom-1">
+        <div className="
+          overflow-y-scroll  
+          flex-fill 
+          padding-right-2 
+          padding-bottom-3 
+          padding-left-05 
+          margin-left-neg-05
+        ">
           {children}
         </div>
-        <div className="flex-auto">
+        <div className="flex-auto border-top-05 border-base-lightest">
           <ModalFooter>
             <ModalToggleButton
               modalRef={drawerRef}
