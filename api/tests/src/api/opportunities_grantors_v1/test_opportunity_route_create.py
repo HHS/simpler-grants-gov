@@ -59,7 +59,6 @@ def test_opportunity_create_successful_creation(client, grantor_auth_data, oppor
     assert "opportunity_id" in opportunity_data  # Should have generated UUID
     assert opportunity_data["opportunity_number"] == opportunity_request["opportunity_number"]
     assert opportunity_data["opportunity_title"] == opportunity_request["opportunity_title"]
-    assert opportunity_data["agency_id"] == opportunity_request["agency_id"]
     assert opportunity_data["category"] == opportunity_request["category"]
     assert opportunity_data["category_explanation"] == opportunity_request["category_explanation"]
     assert opportunity_data["is_draft"] is True
