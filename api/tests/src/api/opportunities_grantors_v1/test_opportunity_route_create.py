@@ -1,4 +1,3 @@
-
 import pytest
 
 from src.constants.lookup_constants import Privilege

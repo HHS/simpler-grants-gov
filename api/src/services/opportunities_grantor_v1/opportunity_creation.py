@@ -2,7 +2,8 @@ import logging
 import uuid
 
 from pydantic import BaseModel
-from sqlalchemy.orm import joinedload
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
@@ -53,19 +54,19 @@ def create_opportunity(db_session: db.Session, user: User, opportunity_data: dic
     db_session.flush()
 
     # Reload the opportunity with all necessary relationships
-    opportunity = (
-        db_session.query(Opportunity)
+    stmt = (
+        select(Opportunity)
         .options(
-            joinedload(Opportunity.agency_record).joinedload(Agency.top_level_agency),
-            joinedload(Opportunity.opportunity_attachments),
-            joinedload(Opportunity.opportunity_assistance_listings),
-            joinedload(Opportunity.current_opportunity_summary),
-            joinedload(Opportunity.all_opportunity_summaries),
-            joinedload(Opportunity.competitions),
+            selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency),
+            selectinload(Opportunity.opportunity_attachments),
+            selectinload(Opportunity.opportunity_assistance_listings),
+            selectinload(Opportunity.current_opportunity_summary),
+            selectinload(Opportunity.all_opportunity_summaries),
+            selectinload(Opportunity.competitions),
         )
         .filter(Opportunity.opportunity_id == opportunity.opportunity_id)
-        .one()
     )
+    opportunity = db_session.execute(stmt).scalar_one()
 
     logger.info(
         "Created opportunity",
