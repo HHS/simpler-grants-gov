@@ -1,4 +1,3 @@
-import uuid
 
 import pytest
 
@@ -11,20 +10,13 @@ from tests.src.db.models.factories import AgencyFactory
 
 
 @pytest.fixture
-def test_agency(db_session, enable_factory_create):
-    """Create test agency"""
-    return AgencyFactory.create(agency_id=uuid.uuid4())
+def grantor_auth_data(db_session, enable_factory_create):
 
-
-@pytest.fixture
-def grantor_auth_data(db_session, enable_factory_create, test_agency):
-
-    agency = test_agency
+    agency = AgencyFactory.create()
 
     """Create a user with CREATE_OPPORTUNITY permission and return auth data"""
     user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,
-        agency=test_agency,
         privileges=[Privilege.CREATE_OPPORTUNITY],
     )
     return user, agency, token, api_key_id
@@ -119,11 +111,10 @@ def test_opportunity_create_invalid_data(client, grantor_auth_data):
     )
 
 
-def test_opportunity_create_no_permissions(client, db_session, enable_factory_create, test_agency):
+def test_opportunity_create_no_permissions(client, db_session, enable_factory_create):
     # Create a user without CREATE_OPPORTUNITY privilege
     user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,
-        agency=test_agency,
         privileges=[],  # No privileges
     )
 
