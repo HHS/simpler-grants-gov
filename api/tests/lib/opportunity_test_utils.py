@@ -133,7 +133,7 @@ def create_opportunity_request(
         "opportunity_number": opportunity_number,
         "opportunity_title": opportunity_title,
         "agency_id": str(agency_id),
-        "category": OpportunityCategory.DISCRETIONARY,
+        "category": category,
         "category_explanation": category_explanation,
     }
 
