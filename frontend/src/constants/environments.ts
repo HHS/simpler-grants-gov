@@ -12,6 +12,7 @@ const {
   NEXT_PUBLIC_BASE_URL,
   ENVIRONMENT = "dev",
   FEATURE_APPLY_FORM_PROTOTYPE_OFF,
+  FEATURE_AWARD_RECOMMENDATION_ON,
   FEATURE_MANAGE_USERS_OFF,
   FEATURE_OPPORTUNITIES_LIST_OFF,
   AUTH_LOGIN_URL,
@@ -26,6 +27,7 @@ export const envFeatureFlags = {
   applyFormPrototypeOff: FEATURE_APPLY_FORM_PROTOTYPE_OFF,
   opportunitiesListOff: FEATURE_OPPORTUNITIES_LIST_OFF,
   manageUsersOff: FEATURE_MANAGE_USERS_OFF,
+  awardRecommendationOn: FEATURE_AWARD_RECOMMENDATION_ON,
 };
 
 const legacyHost = (): string => {

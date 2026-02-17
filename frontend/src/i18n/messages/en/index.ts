@@ -73,7 +73,16 @@ export const messages = {
       description:
         "The Simpler.Grants.gov team hosts public demonstrations of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
       watch: "Watch recordings of past Big Demos",
-      watchLink: "January 15, 2025",
+      watchLinks: [
+        {
+          text: "January 29, 2026",
+          link: "https://youtu.be/LBIqOTKOFf0?si=O0Ec4PaNuAByeHA9",
+        },
+        {
+          text: "January 15, 2025",
+          link: "https://youtu.be/uASJmvcy0aM?si=OniP7Z7KU8ie3FhS",
+        },
+      ],
     },
     codingChallenge: {
       title: "Collaborative Coding Challenge",
@@ -1829,8 +1838,9 @@ export const messages = {
     },
   },
   ResearchParticipantGuide: {
-    metaTitle: "Legacy invite | Simpler.Grants.gov",
-    metaDescription: "Manage users from legacy integrations",
+    pageTitle: "Design Research Participant Guide | Simpler.Grants.gov",
+    pageDescription:
+      "In this guide, research participants can learn more about partcipating in studies.",
     h1: "Design Research Participant Guide",
     intro:
       "This guide is for participants in Simpler Grants design research studies. If you have been contacted by the Simpler Grants team to participate in a study, read through these steps to learn more about the process and let us know if you have any questions.",
