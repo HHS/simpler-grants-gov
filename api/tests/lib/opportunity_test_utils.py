@@ -92,16 +92,12 @@ def create_opportunity_request(agency_id=None, **kwargs):
     category_explanation = "Competitive research grant"
 
     if not agency_id:
-        agency_id = str(uuid.uuid4())
-
-    # Ensure agency_id is a string, not a UUID object
-    if not isinstance(agency_id, str):
-        agency_id = str(agency_id)
+        agency_id = uuid.uuid4()
 
     request = {
         "opportunity_number": opportunity_number,
         "opportunity_title": opportunity_title,
-        "agency_id": agency_id,
+        "agency_id": str(agency_id),
         "category": OpportunityCategory.DISCRETIONARY,
         "category_explanation": category_explanation,
     }
