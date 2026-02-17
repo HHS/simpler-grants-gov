@@ -23,10 +23,6 @@ jest.mock("next-intl/server", () => ({
   setRequestLocale: (_locale: string) => undefined,
 }));
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
-
 jest.mock("src/services/auth/session", () => ({
   getSession: () => authentication() as Promise<UserDetail>,
 }));

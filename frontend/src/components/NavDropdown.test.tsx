@@ -1,6 +1,6 @@
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { IndexType } from "src/types/generalTypes";
-import { render, screen, waitFor } from "tests/react-utils";
 
 import { useState } from "react";
 

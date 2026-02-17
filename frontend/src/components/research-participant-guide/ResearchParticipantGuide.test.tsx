@@ -1,4 +1,4 @@
-import { render, screen } from "tests/react-utils";
+import { render, screen } from "@testing-library/react";
 
 import ResearchParticipantGuide from "src/components/research-participant-guide/ResearchParticipantGuide";
 
