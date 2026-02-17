@@ -4,7 +4,7 @@
 
 // ---- Imports ----
 // import { test, expect } from '@playwright/test';
-import testConfig from '../../test-data/test-config.json' with { type: 'json' };
+import testConfig from 'tests/e2e/test-data/test-config.json' with { type: 'json' };
 import {
   expect,
   test,
@@ -29,7 +29,7 @@ import {
   safeHelp_safeWaitForLoadState,
   safeHelp_clickLink,
   safeHelp_clickButton,
-} from '../../helpers/safeHelp';
+} from 'tests/e2e/helpers/safeHelp';
 
 // ---- Environment Configuration ----
 const BASE_DOMAIN = testConfig.environment.baseDomain;
