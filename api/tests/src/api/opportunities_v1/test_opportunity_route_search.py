@@ -38,7 +38,6 @@ def validate_search_response(
     assert search_response.status_code == expected_status_code
 
     expected_ids = [str(exp.opportunity_id) for exp in expected_results]
-    response_ids = []
     if is_csv_response:
         reader = csv.DictReader(search_response.text.split("\n"))
         opportunities = [record for record in reader]
