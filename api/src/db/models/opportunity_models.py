@@ -17,7 +17,6 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.agency_models import Agency
 from src.db.models.base import ApiSchemaTable, TimestampMixin
-from src.db.models.entity_models import OrganizationSavedOpportunity
 from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,
@@ -29,6 +28,7 @@ from src.util.file_util import presign_or_s3_cdnify_url
 
 if TYPE_CHECKING:
     from src.db.models.competition_models import Competition
+    from src.db.models.entity_models import OrganizationSavedOpportunity
     from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
 
 
