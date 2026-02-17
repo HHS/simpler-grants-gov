@@ -807,3 +807,8 @@ dl {
   @include u-maxh("mobile-lg");
   overflow-y: auto;
 }
+
+// override skipnav's hardcoded `z-index:100`
+.usa-skipnav {
+  z-index: z-index("top");
+}
