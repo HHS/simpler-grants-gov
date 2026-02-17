@@ -5,7 +5,6 @@ import uuid
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.agency_models import Agency
-from tests.src.db.models import factories
 from tests.src.db.models.factories import (
     AgencyFactory,
     AgencyUserFactory,
@@ -74,7 +73,13 @@ def create_user_with_agency_privileges(
     return user, agency, token, api_key.key_id
 
 
-def create_opportunity_request(agency_id=None, **kwargs):
+def create_opportunity_request(
+    agency_id=None,
+    opportunity_number=None,
+    opportunity_title="Research Grant for Climate Innovation",
+    category=OpportunityCategory.DISCRETIONARY,
+    category_explanation="Competitive research grant",
+):
     """Create a valid opportunity creation request.
 
     Args:
@@ -85,12 +90,11 @@ def create_opportunity_request(agency_id=None, **kwargs):
         dict: A valid opportunity creation request
     """
 
-    opportunity_number = "TEST-2026-001"
-    opportunity_title = "Research Grant for Climate Innovation"
-    category_explanation = "Competitive research grant"
-
     if not agency_id:
         agency_id = uuid.uuid4()
+
+    if not opportunity_number:
+        opportunity_number = f"TEST-{uuid.uuid4().hex[:3]}"
 
     request = {
         "opportunity_number": opportunity_number,
