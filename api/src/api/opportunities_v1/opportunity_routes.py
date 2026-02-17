@@ -223,6 +223,8 @@ def opportunity_search(
             "award_floor",
             "award_ceiling",
             "url",
+            "opportunity_id",
+            "post_date",
         ]
         opportunities_to_csv(opportunities, output, csv_fields)
         timestamp = datetime_util.utcnow().strftime("%Y%m%d-%H%M%S")

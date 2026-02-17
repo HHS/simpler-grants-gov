@@ -37,7 +37,7 @@ def validate_search_response(
 ):
     assert search_response.status_code == expected_status_code
 
-    expected_ids = [str(exp.opportunity_number) for exp in expected_results]
+    expected_ids = [str(exp.opportunity_id) for exp in expected_results]
     response_ids = []
     if is_csv_response:
         reader = csv.DictReader(search_response.text.split("\n"))
@@ -46,7 +46,7 @@ def validate_search_response(
         response_json = search_response.get_json()
         opportunities = response_json["data"]
 
-    response_ids = [str(opp["opportunity_number"]) for opp in opportunities]
+    response_ids = [str(opp["opportunity_id"]) for opp in opportunities]
 
     for opp in opportunities:
         if "summary" in opp:
@@ -1881,10 +1881,12 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "award_floor",
             "award_ceiling",
             "url",
+            "opportunity_id",
+            "post_date",
         ]
 
         assert reader.fieldnames == expected_headers
-        assert len(reader.fieldnames) == 8
+        assert len(reader.fieldnames) == 10
 
         for row in rows:
             # assert correct url is configured
@@ -1899,7 +1901,8 @@ class TestOpportunityRouteSearch(BaseTestClass):
             if row["award_ceiling"]:
                 assert row["award_ceiling"].isdigit()
             # Null handling (empty string instead of None)
-            if row["opportunity_number"] == LOC_HIGHER_EDUCATION.opportunity_number:
+            if row["opportunity_id"] == LOC_HIGHER_EDUCATION.opportunity_id:
                 assert row["close_date"] is not None
                 assert row["award_floor"] is not None
                 assert row["award_ceiling"] is not None
+                assert row["post_date"] is not None
