@@ -49,5 +49,6 @@ jobs:
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
 
-      - uses: ./.github/workflows/e2e/e2e-create-report.yml
+      - name: Create Merge Report
+        uses: ./.github/workflows/e2e/e2e-create-report.yml
         if: ${{ !cancelled() }}
