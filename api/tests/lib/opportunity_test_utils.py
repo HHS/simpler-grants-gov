@@ -2,73 +2,106 @@
 
 import uuid
 
+from src.adapters import db
 from src.auth.api_jwt_auth import create_jwt_for_user
-from src.constants.lookup_constants import OpportunityCategory
+from src.constants.lookup_constants import OpportunityCategory, Privilege
 from src.db.models.agency_models import Agency
+from src.db.models.user_models import Role, User
 from tests.src.db.models.factories import (
     AgencyFactory,
     AgencyUserFactory,
     AgencyUserRoleFactory,
+    LinkExternalUserFactory,
     RoleFactory,
     UserApiKeyFactory,
     UserFactory,
+    UserProfileFactory,
 )
 
 
-def create_user_with_agency_privileges(
-    db_session, agency_id=None, privileges=None, email=None, **kwargs
-) -> tuple:
-    """Create a user with specified privileges for an agency.
-
-    This utility function reduces the boilerplate of creating a user, agency,
-    role, and all the necessary relationships for testing agency-related endpoints.
-
-    Args:
-        db_session: Database session for creating objects and JWT token
-        agency_id: UUID of existing agency to use (creates new one if None)
-        privileges: List of privileges to grant the user
-        email: Optional email address for the user
-        **kwargs: Additional arguments passed to factory creation
-
-    Returns:
-        tuple: (user, agency, token, api_key_id) - The created user, agency, JWT token, and API key ID
-    """
-
-    # Create user
+def create_user_in_agency(
+    agency: Agency | None = None,
+    role: Role | None = None,
+    privileges: list[Privilege] | None = None,
+    email: str | None = None,
+    first_name: str | None = None,
+    last_name: str | None = None,
+) -> tuple[User, Agency]:
     user = UserFactory.create()
 
-    # Create or use existing agency
-    if agency_id:
-        existing_agency = db_session.query(Agency).filter_by(agency_id=uuid.UUID(agency_id)).first()
+    link_kwargs = {"user": user}
+    if email is not None:
+        link_kwargs["email"] = email
+    LinkExternalUserFactory.create(**link_kwargs)
 
-        if existing_agency:
-            agency = existing_agency
-        else:
-            # Create a new agency with the specified ID
-            agency = AgencyFactory.create(agency_id=uuid.UUID(agency_id))
-    else:
-        # Create a new agency
+    # Create user profile if first_name or last_name provided
+    if first_name is not None or last_name is not None:
+        profile_kwargs = {"user": user}
+        if first_name is not None:
+            profile_kwargs["first_name"] = first_name
+        if last_name is not None:
+            profile_kwargs["last_name"] = last_name
+        UserProfileFactory.create(**profile_kwargs)
+
+    if agency is None:
         agency = AgencyFactory.create()
 
-    # Create role with specified privileges (only if privileges provided)
-    if privileges:
-        role = RoleFactory.create(privileges=privileges)
-    else:
-        role = None
-
-    # Create agency-user relationship
     agency_user = AgencyUserFactory.create(user=user, agency=agency)
 
-    # Assign role to agency-user if privileges were provided
-    if privileges and role:
+    if privileges:
+        role = RoleFactory.create(privileges=privileges, is_agency_role=True)
+
+    if role is not None:
         AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
+
+    return user, agency
+
+
+def create_user_in_agency_with_jwt(
+    db_session: db.Session,
+    agency: Agency | None = None,
+    role: Role | None = None,
+    privileges: list[Privilege] | None = None,
+    email: str | None = None,
+    first_name: str | None = None,
+    last_name: str | None = None,
+) -> tuple[User, Agency, str]:
+    user, agency = create_user_in_agency(
+        agency=agency,
+        role=role,
+        privileges=privileges,
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+    )
+
+    token, _ = create_jwt_for_user(user, db_session)
+    db_session.commit()  # commit to push JWT to DB
+
+    return user, agency, token
+
+
+def create_user_in_agency_with_jwt_and_api_key(
+    db_session: db.Session,
+    agency: Agency | None = None,
+    role: Role | None = None,
+    privileges: list[Privilege] | None = None,
+    email: str | None = None,
+    first_name: str | None = None,
+    last_name: str | None = None,
+) -> tuple[User, Agency, str, str]:
+    user, agency, token = create_user_in_agency_with_jwt(
+        db_session=db_session,
+        agency=agency,
+        role=role,
+        privileges=privileges,
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+    )
 
     # Create API key for the user
     api_key = UserApiKeyFactory.create(user=user)
-
-    # Create JWT token
-    token, _ = create_jwt_for_user(user, db_session)
-    db_session.commit()
 
     return user, agency, token, api_key.key_id
 

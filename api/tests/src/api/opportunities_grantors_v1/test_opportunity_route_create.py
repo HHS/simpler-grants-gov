@@ -1,18 +1,30 @@
+import uuid
+
 import pytest
 
 from src.constants.lookup_constants import Privilege
 from tests.lib.opportunity_test_utils import (
     create_opportunity_request,
-    create_user_with_agency_privileges,
+    create_user_in_agency_with_jwt_and_api_key,
 )
+from tests.src.db.models.factories import AgencyFactory
 
 
 @pytest.fixture
-def grantor_auth_data(db_session, enable_factory_create):
+def test_agency(db_session, enable_factory_create):
+    """Create test agency"""
+    return AgencyFactory.create(agency_id=uuid.uuid4())
+
+
+@pytest.fixture
+def grantor_auth_data(db_session, enable_factory_create, test_agency):
+
+    agency = test_agency
+
     """Create a user with CREATE_OPPORTUNITY permission and return auth data"""
-    user, agency, token, api_key_id = create_user_with_agency_privileges(
+    user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,
-        agency_id="add4b88f-e895-4ca9-92f4-38ed34055247",
+        agency=test_agency,
         privileges=[Privilege.CREATE_OPPORTUNITY],
     )
     return user, agency, token, api_key_id
@@ -108,11 +120,11 @@ def test_opportunity_create_invalid_data(client, grantor_auth_data):
     )
 
 
-def test_opportunity_create_no_permissions(client, db_session, enable_factory_create):
+def test_opportunity_create_no_permissions(client, db_session, enable_factory_create, test_agency):
     # Create a user without CREATE_OPPORTUNITY privilege
-    user, agency, token, api_key_id = create_user_with_agency_privileges(
+    user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,
-        agency_id="add4b88f-e895-4ca9-92f4-38ed34055247",
+        agency=test_agency,
         privileges=[],  # No privileges
     )
 
