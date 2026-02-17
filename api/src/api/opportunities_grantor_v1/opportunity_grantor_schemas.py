@@ -1,22 +1,7 @@
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema, FileResponseSchema
+from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import OpportunityCategory
-
-
-class OpportunityAttachmentV1Schema(FileResponseSchema):
-    mime_type = fields.String(
-        metadata={"description": "The MIME type of the attachment", "example": "application/pdf"}
-    )
-    file_name = fields.String(
-        metadata={"description": "The name of the attachment file", "example": "my_NOFO.pdf"}
-    )
-    file_description = fields.String(
-        metadata={
-            "description": "A description of the attachment",
-            "example": "The full announcement NOFO",
-        }
-    )
 
 
 class OpportunityCreateRequestSchema(Schema):
