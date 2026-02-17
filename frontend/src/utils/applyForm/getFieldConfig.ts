@@ -20,6 +20,14 @@ import {
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
+type FieldInfo<V extends BroadlyDefinedWidgetValue> = {
+  value?: V;
+  fieldSchema: RJSFSchema;
+  rawErrors: string[];
+  fieldName: string;
+  htmlFieldName: string;
+};
+
 // json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
   uiFieldObject,
@@ -122,14 +130,7 @@ export const getNameFromDef = ({
       : "untitled";
 };
 
-type FieldInfo<V extends BroadlyDefinedWidgetValue> = {
-  value?: V;
-  fieldSchema: RJSFSchema;
-  rawErrors: string[];
-  fieldName: string;
-  htmlFieldName: string;
-};
-
+// for a non-multifield field, gather all necessary data for rendering
 const getBasicFieldInfo = ({
   uiFieldObject,
   formSchema,
@@ -181,6 +182,7 @@ const getBasicFieldInfo = ({
   };
 };
 
+// for a multifield field, gather all necessary data for rendering
 const getBasicMultifieldInfo = ({
   uiFieldObject,
   formSchema,
@@ -241,6 +243,8 @@ const getBasicMultifieldInfo = ({
   };
 };
 
+// if a field is of a type that requires enum options (select, mulitselect, radio)
+// this function will format the options correctly based on the json schema
 const getEnumOptions = ({
   widgetType,
   fieldSchema,
@@ -335,6 +339,7 @@ const getFieldInfo = ({
   );
 };
 
+// returns widget type and props for rendering data for a given JSON schema field
 export const getFieldConfig = <V extends string | Record<string, unknown>>({
   errors,
   formSchema,
