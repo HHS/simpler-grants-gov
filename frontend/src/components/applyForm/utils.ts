@@ -589,20 +589,3 @@ export function addPrintWidgetToFields(uiSchema: UiSchema): UiSchema {
     return item;
   });
 }
-
-export const isMultifield = (uiFieldObject: UiSchemaField): boolean => {
-  const { definition, type: uiSchemaFieldType } = uiFieldObject;
-  if (
-    uiSchemaFieldType === "multiField" &&
-    definition &&
-    Array.isArray(definition)
-  ) {
-    return true;
-  }
-  if (typeof definition === "string") {
-    return false;
-  }
-  throw new Error(
-    `non basic, non multifield field encountered: ${uiSchemaFieldType}`,
-  );
-};

@@ -5,7 +5,7 @@ import React, { JSX } from "react";
 import { Alert } from "@trussworks/react-uswds";
 
 import { FormattedFormValidationWarning, UiSchema } from "./types";
-import { getRequiredProperties, isFieldRequired, isMultifield } from "./utils";
+import { getRequiredProperties, isFieldRequired } from "./utils";
 import { renderWidget, wrapSection } from "./widgets/WidgetRenderers";
 
 type RootBudgetFormContext = {
