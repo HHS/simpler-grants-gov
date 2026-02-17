@@ -2,12 +2,13 @@ import logging
 import uuid
 
 from pydantic import BaseModel
+from sqlalchemy.orm import joinedload
 
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import OpportunityCategory, Privilege
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.user_models import User
+from src.db.models.user_models import Agency, User
 from src.services.opportunities_grantor_v1.get_agency import get_agency
 from src.services.opportunities_grantor_v1.get_opportunity import check_opportunity_number_exists
 
@@ -49,6 +50,22 @@ def create_opportunity(db_session: db.Session, user: User, opportunity_data: dic
     )
 
     db_session.add(opportunity)
+    db_session.flush()
+
+    # Reload the opportunity with all necessary relationships
+    opportunity = (
+        db_session.query(Opportunity)
+        .options(
+            joinedload(Opportunity.agency_record).joinedload(Agency.top_level_agency),
+            joinedload(Opportunity.opportunity_attachments),
+            joinedload(Opportunity.opportunity_assistance_listings),
+            joinedload(Opportunity.current_opportunity_summary),
+            joinedload(Opportunity.all_opportunity_summaries),
+            joinedload(Opportunity.competitions),
+        )
+        .filter(Opportunity.opportunity_id == opportunity.opportunity_id)
+        .one()
+    )
 
     logger.info(
         "Created opportunity",

@@ -1,3 +1,4 @@
+from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema, FileResponseSchema
 from src.constants.lookup_constants import OpportunityCategory
@@ -76,51 +77,14 @@ class OpportunityCreateRequestSchema(Schema):
     )
 
 
-class OpportunityGrantorSchema(Schema):
-    """Schema for opportunity data in grantor-facing API responses
+class OpportunityGrantorSchema(OpportunityV1Schema):
+    """Schema for opportunity data in grantor-facing API responses"""
 
-    This schema defines the opportunity fields that are returned in grantor-facing API responses.
-    """
-
-    opportunity_id = fields.UUID(
-        metadata={"description": "The internal ID of the opportunity"},
-    )
-    opportunity_number = fields.String(
-        metadata={"description": "The funding opportunity number", "example": "ABC-2026-001"},
-    )
-    opportunity_title = fields.String(
-        metadata={
-            "description": "The title of the opportunity",
-            "example": "Research Grant for Climate Innovation",
-        },
-    )
-    agency_id = fields.UUID(
-        metadata={
-            "description": "The UUID of the agency that owns this opportunity",
-        },
-    )
-    agency_code = fields.String(
-        metadata={"description": "The agency code", "example": "US-ABC"},
-    )
-    category = fields.Enum(
-        OpportunityCategory,
-        metadata={
-            "description": "The opportunity category",
-        },
-    )
-    category_explanation = fields.String(
-        metadata={
-            "description": "Explanation of the category",
-            "example": "Competitive research grant",
-        },
-    )
     is_draft = fields.Boolean(
         metadata={
             "description": "Whether the opportunity is a draft",
         },
     )
-    created_at = fields.DateTime(dump_only=True)
-    updated_at = fields.DateTime(dump_only=True)
 
 
 class OpportunityCreateResponseSchema(AbstractResponseSchema):
