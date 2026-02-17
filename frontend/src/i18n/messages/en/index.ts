@@ -73,7 +73,16 @@ export const messages = {
       description:
         "The Simpler.Grants.gov team hosts public demonstrations of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
       watch: "Watch recordings of past Big Demos",
-      watchLink: "January 15, 2025",
+      watchLinks: [
+        {
+          text: "January 29, 2026",
+          link: "https://youtu.be/LBIqOTKOFf0?si=O0Ec4PaNuAByeHA9",
+        },
+        {
+          text: "January 15, 2025",
+          link: "https://youtu.be/uASJmvcy0aM?si=OniP7Z7KU8ie3FhS",
+        },
+      ],
     },
     codingChallenge: {
       title: "Collaborative Coding Challenge",
@@ -116,36 +125,49 @@ export const messages = {
     startApplicationModal: {
       startApplicationButtonText: "Start new application",
       cancelButtonText: "Cancel",
-      error: "Error starting the application. Please try again.",
+      error: "Internal error starting application. Please try again later.",
+      organizationLoadError:
+        "We couldn't load your organizations right now. Please try again.<br></br>If the problem continues, contact product support, <telephone>1-800-518-4726</telephone> or <email>simpler@grants.gov</email>.",
       login: "Sign in to work on the application",
       loggedOut:
         "You must be logged in to proceed. Please login and start your application again.",
       requiredText: "All fields are required.",
-      saveButtonText: "Create Application",
+      saveButtonText: "Create application",
       title: "Start a new application",
+      helpfulTips: {
+        title: "Helpful tips to get started:",
+        bullet1:
+          "You don't need to finish an application in one session, easily save and return to make changes.",
+        bullet2:
+          "All draft and past applications can be accessed from your <applicationsPageLink>Applications</applicationsPageLink> page.",
+        bullet3:
+          "Only create a new application if you're applying for the first time or need to submit a separate application.",
+      },
       ineligibleTitle:
         "It looks like you're not eligible to start a new application through this site",
       applyingFor: "Applying for: ",
       fields: {
         name: {
-          label: "Name of this application",
+          label: "Name this application",
           description:
-            "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
-          validationError: "Enter a filing name. You can change this later.",
+            "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track (e.g. NAA Tech Tribes 2025). You can change this later.",
+          validationError:
+            "Please enter a name to create an application, you may change this anytime.",
         },
         organizationSelect: {
-          label: "Who's applying?",
+          label: "Who is applying?",
           default: "-Select-",
-          notListed: "My organization isn't listed",
+          asIndividual: "As an individual (myself)",
+          notListed: "I don't see my organization listed",
           validationError:
-            "Select an organization. If yours isn't listed, you'll need to apply through Grants.gov.",
+            "Select an applicant type, you can add your organization later if it isn't listed.",
         },
       },
       description: {
         organizationIntro:
           "This opportunity is part of a pilot program. To apply through Simpler.Grants.gov, you must:",
         pilotIntro:
-          "Welcome to our new, simpler application process. In partnership with the agency, we ensure your application is processed normally.",
+          "Welcome to our new, simpler application process. In partnership with the grantor agency, we ensure your application is processed by the agency.",
         organizationApply: "To apply as part of an organization you must:",
         applyingForOrg:
           "Be applying on behalf of an organization (individual applications aren't accepted at this time)",
@@ -1814,5 +1836,30 @@ export const messages = {
       email: "Email",
       name: "Name",
     },
+  },
+  ResearchParticipantGuide: {
+    pageTitle: "Design Research Participant Guide | Simpler.Grants.gov",
+    pageDescription:
+      "In this guide, research participants can learn more about partcipating in studies.",
+    h1: "Design Research Participant Guide",
+    intro:
+      "This guide is for participants in Simpler Grants design research studies. If you have been contacted by the Simpler Grants team to participate in a study, read through these steps to learn more about the process and let us know if you have any questions.",
+    beforeHeader: "Before the interview",
+    beforeItems: [
+      "You will or already have received an email asking for your participation in a user interview.",
+      "Taking part in a research study is voluntary. If you opt-in to participate, you'll receive an emailed invitation with your scheduled time.",
+      "For remote studies, you will receive a Zoom link to participate.",
+      "For in person studies, we will coordinate logistics with you.",
+      "If you require an accommodation, let us know at least 2 days prior to the interview.",
+      "The interview will be conducted via Zoom by a member of our team. One person will be conducting the interview, and one or more team members will be taking notes.",
+    ],
+    duringHeader: "During the interview",
+    duringItems: [
+      "The researcher will walk you through what the process looks like at the beginning of the study and ask for your verbal permission to record the session.",
+      "The goal of design research is to understand how people use the products we make in the real world so that we can make them better for everyone who uses them.",
+      "The study will be focused on understanding your work and how you use our products in your work. We will ask you questions and/or have you use working software or prototypes of improvements we're working on.",
+      "At the end of the session, we will ask you for your verbal permission to use what we learn to make the product better.",
+      "If you opt in to using what we learn, your feedback will be anonymized and included in our research findings as part of trends we see across many participants.",
+    ],
   },
 };

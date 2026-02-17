@@ -53,12 +53,8 @@ const UserAccountItem = ({ isSubnav }: { isSubnav: boolean }) => {
         "border-y-0": isSubnav,
       })}
     >
-      <USWDSIcon
-        name="account_circle"
-        className="usa-icon--size-3 display-block"
-      />
       <div
-        className={clsx("padding-left-1", {
+        className={clsx({
           "display-none": !isSubnav,
           "desktop:display-block": !isSubnav,
         })}
@@ -94,6 +90,32 @@ const LogoutNavItem = () => {
       <USWDSIcon name="logout" className="usa-icon--size-3 display-block" />
       {t("logout")}
     </a>
+  );
+};
+
+/** Sign out as a nav dropdown child—same structure as NavLink (Link + div) so it matches other menu items */
+export const SignOutNavLink = ({ onClick }: { onClick: () => void }) => {
+  const t = useTranslations("Header.navLinks");
+  const { logoutLocalUser } = useUser();
+  const router = useRouter();
+
+  const handleLogout = useCallback(async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    logoutLocalUser();
+    router.refresh();
+    onClick();
+  }, [logoutLocalUser, router, onClick]);
+
+  return (
+    <Link
+      href="#"
+      onClick={(e) => {
+        e.preventDefault();
+        handleLogout().catch(() => undefined);
+      }}
+    >
+      {t("logout")}
+    </Link>
   );
 };
 

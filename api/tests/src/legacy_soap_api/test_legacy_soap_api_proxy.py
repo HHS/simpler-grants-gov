@@ -132,9 +132,10 @@ def test_get_soap_jwt_auth_request_when_use_jwt_is_set_on_headers(enable_factory
         original_payload = jwt.decode(
             decoded_base64, key="soap_partner_gateway_auth_key", algorithms=["HS256"]
         )
+        config = get_soap_config()
         expected = {
             "sub": "partner_soap_call",
-            "iss": "soap_partner_gateway_uri",
+            "iss": config.soap_partner_gateway_uri,
             "exp": 1712145660,
             "certId": legacy_certificate.cert_id,
         }
@@ -159,9 +160,10 @@ def test_request_with_jwt_is_created_when_use_soap_jwt_auth_is_flagged(
         original_payload = jwt.decode(
             decoded_base64, key="soap_partner_gateway_auth_key", algorithms=["HS256"]
         )
+        config = get_soap_config()
         expected = {
             "sub": "partner_soap_call",
-            "iss": "soap_partner_gateway_uri",
+            "iss": config.soap_partner_gateway_uri,
             "exp": 1712145660,
             "certId": legacy_certificate.cert_id,
         }
@@ -171,3 +173,43 @@ def test_request_with_jwt_is_created_when_use_soap_jwt_auth_is_flagged(
             "soap_client_certificate: Sending soap request without client certificate"
             in caplog.messages
         )
+
+
+def test_request_with_jwt_gets_correct_proxy_url(enable_factory_create, caplog):
+    caplog.set_level(logging.INFO)
+    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_jwt=True)
+    with patch(
+        "src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response"
+    ) as mock_get_soap_response:
+        get_proxy_response(soap_request)
+        config = get_soap_config()
+        expected = f"{config.soap_partner_gateway_uri}/grantsws-agency-partner/services/v2/AgencyWebServicesSoapPort"
+        assert mock_get_soap_response.call_args_list[0][0][0].url == expected
+
+
+def test_request_with_jwt_does_not_log_locally_when_header_is_not_set(
+    enable_factory_create, caplog
+):
+    caplog.set_level(logging.INFO)
+    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_jwt=True)
+    with patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response") as _, patch(
+        "src.legacy_soap_api.legacy_soap_api_proxy.log_local"
+    ) as mock_log_local:
+        get_proxy_response(soap_request)
+        mock_log_local.assert_not_called()
+
+
+def test_request_with_jwt_logs_locally_when_header_is_set(enable_factory_create, caplog):
+    caplog.set_level(logging.INFO)
+    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_jwt=True, log_local=True)
+    config = get_soap_config()
+    config.enable_verbose_logging = True
+    response_bytes = (
+        b"<soap:Envelope><Body><GetOpportunityListResponse><OpportunityDetails>"
+        b"<ns5:OpeningDate>2025-07-20-04:00</ns5:OpeningDate>"
+        b"</OpportunityDetails></GetOpportunityListResponse></Body></soap:Envelope>"
+    )
+    with patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response") as mock_get_response:
+        mock_get_response.return_value.to_bytes.return_value = response_bytes
+        get_proxy_response(soap_request)
+        assert f"\nsoap jwt proxy response:\n{response_bytes.decode('utf-8')}" in caplog.messages
