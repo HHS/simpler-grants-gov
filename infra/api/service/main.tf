@@ -223,6 +223,7 @@ module "service" {
     },
     # local.identity_provider_environment_variables,
     local.notifications_environment_variables,
+    local.sqs_environment_variables,
     local.service_config.extra_environment_variables,
   )
 
@@ -245,6 +246,7 @@ module "service" {
   extra_policies = merge(
     {
       # storage_access = module.storage.access_policy_arn
+      sqs_access = module.sqs_queue.access_policy_arn
     },
     module.app_config.enable_identity_provider ? {
       # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
