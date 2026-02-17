@@ -9,6 +9,12 @@ inputs:
     description: "application environment to run tests against (dev / prod TK)"
     required: true
     default: "local"
+  staging_test_user_email:
+    description: "email for staging test user"
+  staging_test_user_password:
+    description: "password for staging test user"
+  staging_test_user_mfa_key:
+    description: "mfa key for staging test user"
   total_shards:
     description: "total number of test shards in parent run"
     default: "1"
@@ -27,6 +33,10 @@ inputs:
   node_options:
     description: "options to pass to node"
     default: "--dns-result-order=ipv4first"
+
+defaults:
+  run:
+    working-directory: ./frontend
 
 runs:
   using: "composite"
@@ -53,19 +63,21 @@ runs:
 
     - name: Install Node dependencies & Playwright
       shell: bash
+      working-directory: ./frontend
       run: |
         npm ci
         npx playwright install --with-deps
 
     - name: Run e2e tests (Shard ${{ inputs.shard }}/${{ inputs.total_shards }})
+      working-directory: ./frontend
       env:
         CI: true
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.shard }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
-        STAGING_TEST_USER_EMAIL: ${{ inputs.STAGING_TEST_USER_EMAIL }}
-        STAGING_TEST_USER_PASSWORD: ${{ inputs.STAGING_TEST_USER_PASSWORD }}
-        STAGING_TEST_USER_MFA_KEY: ${{ inputs.STAGING_TEST_USER_MFA_KEY }}
+        STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
+        STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
+        STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
       run: |
         echo $STAGING_TEST_USER_EMAIL
         npm run test:e2e
@@ -73,6 +85,7 @@ runs:
 
     - name: Debug logging on failure
       if: failure()
+      working-directory: ./frontend
       run: |
         cd ../api
         echo "=== API Container Logs ==="
@@ -90,6 +103,7 @@ runs:
       shell: bash
 
     - name: Verify Blob Report Directory
+      working-directory: ./frontend
       run: |
         echo "Contents of blob-report directory:"
         ls -R blob-report || echo "blob-report directory not found"
