@@ -52,6 +52,13 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
             config.soap_partner_gateway_uri,
             "grantsws-agency-partner/services/v2/AgencyWebServicesSoapPort",
         )
+        logger.info(
+            "soap_client_certificate: inside check",
+            extra={
+                "proxy_url": proxy_url,
+                "cert_id": soap_auth.certificate.legacy_certificate.cert_id[:10],
+            },
+        )
     else:
         # Exclude header keys that are utilized only in simpler soap api. Not needed for proxy request.
         proxy_headers = filter_headers(
