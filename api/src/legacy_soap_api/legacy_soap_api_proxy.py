@@ -56,7 +56,7 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
             "soap_client_certificate: inside check",
             extra={
                 "proxy_url": proxy_url,
-                "cert_id": soap_auth.certificate.legacy_certificate.cert_id[:10],
+                "cert_id": str(soap_auth.certificate.legacy_certificate.cert_id)[:10],
             },
         )
     else:
