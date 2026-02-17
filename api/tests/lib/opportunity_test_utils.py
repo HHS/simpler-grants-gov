@@ -34,8 +34,6 @@ def create_user_with_agency_privileges(
     Returns:
         tuple: (user, agency, token, api_key_id) - The created user, agency, JWT token, and API key ID
     """
-    # Initialize factory db_session
-    factories._db_session = db_session
 
     # Create user
     user = UserFactory.create()
