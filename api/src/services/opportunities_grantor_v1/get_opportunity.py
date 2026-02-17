@@ -1,20 +1,9 @@
-import uuid
 
-from pydantic import BaseModel
 from sqlalchemy import select
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
-from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.opportunity_models import Opportunity
-
-
-class OpportunityCreateRequest(BaseModel):
-    agency_id: uuid.UUID
-    opportunity_number: str
-    opportunity_title: str
-    category: OpportunityCategory
-    category_explanation: str | None = None
 
 
 def check_opportunity_number_exists(db_session: db.Session, opportunity_number: str) -> None:

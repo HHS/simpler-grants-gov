@@ -1,18 +1,25 @@
 import logging
 import uuid
 
+from pydantic import BaseModel
+
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import OpportunityCategory, Privilege
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_agency import get_agency
-from src.services.opportunities_grantor_v1.get_opportunity import (
-    OpportunityCreateRequest,
-    check_opportunity_number_exists,
-)
+from src.services.opportunities_grantor_v1.get_opportunity import check_opportunity_number_exists
 
 logger = logging.getLogger(__name__)
+
+
+class OpportunityCreateRequest(BaseModel):
+    agency_id: uuid.UUID
+    opportunity_number: str
+    opportunity_title: str
+    category: OpportunityCategory
+    category_explanation: str | None = None
 
 
 def create_opportunity(db_session: db.Session, user: User, opportunity_data: dict) -> Opportunity:
