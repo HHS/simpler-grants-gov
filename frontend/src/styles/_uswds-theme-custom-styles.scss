@@ -381,12 +381,14 @@ h6 {
 
 .usa-pagination button.usa-current,
 .usa-pagination .usa-current {
+  color: color("mint-70");
+  &:focus,
+  &:active {
+    background-color: color("mint-80") !important;
+    color: white;
+  }
+  &:hover {
     color: color("mint-70");
-    &:hover,
-    &:focus,
-    &:active {
-      background-color: color("mint-80") !important;
-      color: white;
   }
 }
 
