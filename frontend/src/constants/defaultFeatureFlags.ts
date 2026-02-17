@@ -4,5 +4,5 @@ export const defaultFeatureFlags: FeatureFlags = {
   applyFormPrototypeOff: false,
   opportunitiesListOff: false,
   manageUsersOff: false,
-  awardRecommendationOn: true,
+  awardRecommendationOff: false,
 };

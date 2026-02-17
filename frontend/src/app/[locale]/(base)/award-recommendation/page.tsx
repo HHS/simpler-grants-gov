@@ -5,7 +5,6 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { JSX } from "react";
 import { GridContainer } from "@trussworks/react-uswds";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
@@ -48,12 +47,8 @@ async function AwardRecommendationPageContent({
   );
 }
 
-function AwardRecommendationFlagDisabled(): never {
-  redirect("/maintenance");
-}
-
-export default withFeatureFlag<AwardRecommendationPageProps, JSX.Element>(
-  AwardRecommendationFlagDisabled,
-  "awardRecommendationOn",
-  (props) => <AwardRecommendationPageContent {...props} />,
+export default withFeatureFlag<AwardRecommendationPageProps, never>(
+  AwardRecommendationPageContent,
+  "awardRecommendationOff",
+  () => redirect("/maintenance"),
 );
