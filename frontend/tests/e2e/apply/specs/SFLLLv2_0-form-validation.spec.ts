@@ -29,7 +29,7 @@ import {
   safeHelp_safeWaitForLoadState,
   safeHelp_clickLink,
   safeHelp_clickButton,
-} from '../../helpers/safeHelp';
+} from 'tests/e2e/helpers/safeHelp';
 
 // ---- Environment Configuration ----
 const BASE_DOMAIN = testConfig.environment.baseDomain;
