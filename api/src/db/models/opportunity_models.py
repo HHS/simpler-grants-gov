@@ -17,6 +17,7 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.agency_models import Agency
 from src.db.models.base import ApiSchemaTable, TimestampMixin
+from src.db.models.entity_models import OrganizationSavedOpportunity
 from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,
@@ -124,6 +125,12 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         uselist=True,
         cascade="all, delete-orphan",
         foreign_keys="[ReferencedOpportunity.derived_opportunity_id]",
+    )
+    saved_opportunities_by_organizations: Mapped[list[OrganizationSavedOpportunity]] = relationship(
+        "OrganizationSavedOpportunity",
+        back_populates="opportunity",
+        uselist=True,
+        cascade="all, delete-orphan",
     )
 
     @property
