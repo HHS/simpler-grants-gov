@@ -1,35 +1,23 @@
 from enum import StrEnum
 from typing import Any
 
-from sqlalchemy import select
 from statemachine import Event
 from statemachine.states import States
 
-from src.auth.endpoint_access_util import can_access
-from src.constants.lookup_constants import (
-    ApprovalResponseType,
-    ApprovalType,
-    Privilege,
-    WorkflowEntityType,
-    WorkflowType,
-)
-from src.db.models.workflow_models import WorkflowApproval, WorkflowEventHistory
+from src.constants.lookup_constants import ApprovalType, Privilege, WorkflowEntityType, WorkflowType
 from src.workflow.base_state_machine import BaseStateMachine
-from src.workflow.event.state_machine_event import StateMachineEvent
-from src.workflow.processor.approval_processor import ApprovalProcessor
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.state_persistence.opportunity_persistence_model import OpportunityPersistenceModel
 from src.workflow.workflow_config import ApprovalConfig, WorkflowConfig
 
 
 class InitialPrototypeState(StrEnum):
-    ### States
     START = "start"
 
     PENDING_PROGRAM_OFFICER_APPROVAL = "pending_program_officer_approval"
     PENDING_BUDGET_OFFICER_APPROVAL = "pending_budget_officer_approval"
 
-    # END States
+    # End States
     DECLINED = "declined"
     END = "end"
 
@@ -48,7 +36,7 @@ initial_prototype_state_machine_config = WorkflowConfig(
         InitialPrototypeState.PENDING_BUDGET_OFFICER_APPROVAL: ApprovalConfig(
             approval_type=ApprovalType.BUDGET_OFFICER_APPROVAL,
             required_privileges=[Privilege.BUDGET_OFFICER_APPROVAL],
-        )
+        ),
     },
 )
 
@@ -68,54 +56,65 @@ class InitialPrototypeStateMachine(BaseStateMachine):
         states.START.to(states.PENDING_PROGRAM_OFFICER_APPROVAL),
     )
 
-    ## Program officer approval transitions
+    ## Program officer approvals
     receive_program_officer_approval = Event(
+        # If Approved -> Add approval event and then check if enough approvals have occurred to determine next state
         states.PENDING_PROGRAM_OFFICER_APPROVAL.to.itself(
+            cond="is_approval_event_approved",
             on="on_agency_approval_approved",
-            # after running this event, run another that checks
-            # the total count of approvals and can move the state.
-            after="check_program_officer_approval"
-        ),
+            after="check_program_officer_approval",
+        )
+        |
+        # If Declined -> Add approval event and move to Declined state
+        states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
+            states.DECLINED, cond="is_approval_event_declined", on="on_agency_approval_declined"
+        )
+        |
+        # If Requires Modification -> Add approval event and move back to Start
+        states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
+            states.START,
+            cond="is_approval_event_requires_modification",
+            on="on_agency_approval_requires_modification",
+        )
     )
 
     check_program_officer_approval = Event(
+        # If it has enough approvals, go to the Budget officer approval
         states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
             states.PENDING_BUDGET_OFFICER_APPROVAL, cond="has_enough_approvals"
         )
+        # If not, stay in this state
         | states.PENDING_PROGRAM_OFFICER_APPROVAL.to.itself(),
     )
 
-    receive_program_officer_declined = Event(
-        states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
-            states.DECLINED,
-            on="on_agency_approval_declined"
-        )
-    )
-
-    ## Budget officer approval transitions
+    ## Budget officer approvals
     receive_budget_officer_approval = Event(
+        # If Approved -> Add approval event and then check if enough approvals have occurred to determine next state
         states.PENDING_BUDGET_OFFICER_APPROVAL.to.itself(
+            cond="is_approval_event_approved",
             on="on_agency_approval_approved",
-            # after running this event, run another that checks
-            # the total count of approvals and can move the state.
-            after="check_budget_officer_approval"
-        ),
+            after="check_budget_officer_approval",
+        )
+        |
+        # If Declined -> Add approval event and move to End state
+        states.PENDING_BUDGET_OFFICER_APPROVAL.to(
+            states.DECLINED, cond="is_approval_event_declined", on="on_agency_approval_declined"
+        )
+        |
+        # If Requires Modification -> Add approval event and move back to Start
+        states.PENDING_BUDGET_OFFICER_APPROVAL.to(
+            states.START,
+            cond="is_approval_event_requires_modification",
+            on="on_agency_approval_requires_modification",
+        )
     )
 
     check_budget_officer_approval = Event(
-        states.PENDING_BUDGET_OFFICER_APPROVAL.to(
-            states.END, cond="has_enough_approvals"
-        )
+        # If it has enough approvals, go to the End state
+        states.PENDING_BUDGET_OFFICER_APPROVAL.to(states.END, cond="has_enough_approvals")
+        # If not, stay in this state
         | states.PENDING_BUDGET_OFFICER_APPROVAL.to.itself(),
     )
-
-    receive_budget_officer_declined = Event(
-        states.PENDING_BUDGET_OFFICER_APPROVAL.to(
-            states.DECLINED,
-            on="on_agency_approval_declined"
-        )
-    )
-
 
     def __init__(self, model: OpportunityPersistenceModel, **kwargs: Any):
         super().__init__(model=model, **kwargs)

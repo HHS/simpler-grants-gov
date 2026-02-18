@@ -8,6 +8,7 @@ from src.workflow.workflow_config import WorkflowConfig
 if TYPE_CHECKING:
     from src.workflow.base_state_machine import BaseStateMachine
 
+
 @dataclasses.dataclass
 class StateMachineEvent:
     """
@@ -48,3 +49,10 @@ class StateMachineEvent:
             "event_to_send": self.event_to_send,
             "event_id": self.workflow_history_event.event_id,
         } | self.workflow.get_log_extra()
+
+    def get_metadata_value(self, field: str) -> Any:
+        """Util method for getting the value from the metadata."""
+        if self.metadata is None:
+            return None
+
+        return self.metadata.get(field, None)

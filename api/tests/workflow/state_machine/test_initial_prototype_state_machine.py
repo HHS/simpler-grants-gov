@@ -1,23 +1,21 @@
-from src.constants.lookup_constants import Privilege, WorkflowType
+import pytest
+
+from src.constants.lookup_constants import ApprovalResponseType, ApprovalType, WorkflowType
 from src.workflow.handler.event_handler import EventHandler
-from src.workflow.state_machine.initial_prototype_state_machine import (
-    InitialPrototypeState,
-    InitialPrototypeStateMachine,
-)
-from tests.lib.agency_test_utils import create_user_in_agency
-from tests.src.db.models.factories import OpportunityFactory, UserFactory, WorkflowFactory
+from src.workflow.state_machine.initial_prototype_state_machine import InitialPrototypeState
+from src.workflow.workflow_errors import InvalidEventError
+from tests.src.db.models.factories import UserFactory, WorkflowFactory
 from tests.workflow.workflow_test_util import (
-    build_process_workflow_event,
-    build_start_workflow_event, send_process_event,
+    build_start_workflow_event,
+    send_process_event,
+    validate_approvals,
 )
 
 
-def test_initial_prototype_state_machine(db_session, enable_factory_create):
+def test_initial_prototype_state_machine_happy_path(
+    db_session, agency, program_officer, budget_officer, opportunity
+):
     """Happy path, verifies it can move through the states."""
-    program_officer, agency = create_user_in_agency(privileges=[Privilege.PROGRAM_OFFICER_APPROVAL])
-    budget_officer, _ = create_user_in_agency(agency=agency, privileges=[Privilege.BUDGET_OFFICER_APPROVAL])
-    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
-
     workflow_event, history_event = build_start_workflow_event(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         user=program_officer,
@@ -31,18 +29,200 @@ def test_initial_prototype_state_machine(db_session, enable_factory_create):
         event_to_send="receive_program_officer_approval",
         workflow_id=state_machine.workflow.workflow_id,
         user=program_officer,
-        expected_state=InitialPrototypeState.PENDING_BUDGET_OFFICER_APPROVAL
+        approval_response_type=ApprovalResponseType.APPROVED,
+        expected_state=InitialPrototypeState.PENDING_BUDGET_OFFICER_APPROVAL,
     )
 
-    send_process_event(
+    state_machine = send_process_event(
         db_session=db_session,
         event_to_send="receive_budget_officer_approval",
         workflow_id=state_machine.workflow.workflow_id,
         user=budget_officer,
+        approval_response_type=ApprovalResponseType.APPROVED,
         expected_state=InitialPrototypeState.END,
-        expected_is_active=False
+        expected_is_active=False,
     )
 
-    approvals = state_machine.workflow.workflow_approvals
-    assert len(approvals) == 2
-    assert
+    validate_approvals(
+        state_machine,
+        [
+            {
+                "approving_user_id": program_officer.user_id,
+                "approval_type": ApprovalType.PROGRAM_OFFICER_APPROVAL,
+                "is_still_valid": True,
+                "approval_response_type": ApprovalResponseType.APPROVED,
+            },
+            {
+                "approving_user_id": budget_officer.user_id,
+                "approval_type": ApprovalType.BUDGET_OFFICER_APPROVAL,
+                "is_still_valid": True,
+                "approval_response_type": ApprovalResponseType.APPROVED,
+            },
+        ],
+    )
+
+
+def test_initial_prototype_state_machine_program_officer_decline(
+    db_session, agency, program_officer, opportunity
+):
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+        current_workflow_state=InitialPrototypeState.PENDING_PROGRAM_OFFICER_APPROVAL,
+        opportunities=[opportunity],
+    )
+
+    state_machine = send_process_event(
+        db_session=db_session,
+        event_to_send="receive_program_officer_approval",
+        workflow_id=workflow.workflow_id,
+        user=program_officer,
+        approval_response_type=ApprovalResponseType.DECLINED,
+        expected_state=InitialPrototypeState.DECLINED,
+        expected_is_active=False,
+    )
+
+    validate_approvals(
+        state_machine,
+        [
+            {
+                "approving_user_id": program_officer.user_id,
+                "approval_type": ApprovalType.PROGRAM_OFFICER_APPROVAL,
+                "is_still_valid": True,
+                "approval_response_type": ApprovalResponseType.DECLINED,
+            },
+        ],
+    )
+
+
+def test_initial_prototype_state_machine_budget_officer_decline(
+    db_session, agency, budget_officer, opportunity
+):
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+        current_workflow_state=InitialPrototypeState.PENDING_BUDGET_OFFICER_APPROVAL,
+        opportunities=[opportunity],
+    )
+
+    state_machine = send_process_event(
+        db_session=db_session,
+        event_to_send="receive_budget_officer_approval",
+        workflow_id=workflow.workflow_id,
+        user=budget_officer,
+        approval_response_type=ApprovalResponseType.DECLINED,
+        expected_state=InitialPrototypeState.DECLINED,
+        expected_is_active=False,
+    )
+
+    validate_approvals(
+        state_machine,
+        [
+            {
+                "approving_user_id": budget_officer.user_id,
+                "approval_type": ApprovalType.BUDGET_OFFICER_APPROVAL,
+                "is_still_valid": True,
+                "approval_response_type": ApprovalResponseType.DECLINED,
+            },
+        ],
+    )
+
+
+def test_initial_prototype_state_machine_program_officer_requires_modification(
+    db_session, agency, program_officer, opportunity
+):
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+        current_workflow_state=InitialPrototypeState.PENDING_PROGRAM_OFFICER_APPROVAL,
+        opportunities=[opportunity],
+    )
+
+    state_machine = send_process_event(
+        db_session=db_session,
+        event_to_send="receive_program_officer_approval",
+        workflow_id=workflow.workflow_id,
+        user=program_officer,
+        approval_response_type=ApprovalResponseType.REQUIRES_MODIFICATION,
+        comment="Needs modification",
+        expected_state=InitialPrototypeState.START,
+    )
+
+    validate_approvals(
+        state_machine,
+        [
+            {
+                "approving_user_id": program_officer.user_id,
+                "approval_type": ApprovalType.PROGRAM_OFFICER_APPROVAL,
+                "is_still_valid": False,
+                "approval_response_type": ApprovalResponseType.REQUIRES_MODIFICATION,
+                "comment": "Needs modification",
+            },
+        ],
+    )
+
+
+def test_initial_prototype_state_machine_budget_officer_requires_modification(
+    db_session, agency, budget_officer, opportunity
+):
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+        current_workflow_state=InitialPrototypeState.PENDING_BUDGET_OFFICER_APPROVAL,
+        opportunities=[opportunity],
+    )
+
+    state_machine = send_process_event(
+        db_session=db_session,
+        event_to_send="receive_budget_officer_approval",
+        workflow_id=workflow.workflow_id,
+        user=budget_officer,
+        approval_response_type=ApprovalResponseType.REQUIRES_MODIFICATION,
+        comment="Needs more work",
+        expected_state=InitialPrototypeState.START,
+    )
+
+    validate_approvals(
+        state_machine,
+        [
+            {
+                "approving_user_id": budget_officer.user_id,
+                "approval_type": ApprovalType.BUDGET_OFFICER_APPROVAL,
+                "is_still_valid": False,
+                "approval_response_type": ApprovalResponseType.REQUIRES_MODIFICATION,
+                "comment": "Needs more work",
+            },
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    "event_to_send",
+    [
+        # These are real events, but not valid when in the start state
+        "receive_budget_officer_approval",
+        "receive_program_officer_approval",
+        # Just bad events
+        "not-a-real-event",
+        "hello",
+    ],
+)
+def test_initial_prototype_state_machine_invalid_events(
+    db_session, agency, opportunity, event_to_send
+):
+    # a random user, privileges won't matter as it won't get that far
+    user = UserFactory.create()
+
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+        current_workflow_state=InitialPrototypeState.START,
+        opportunities=[opportunity],
+    )
+
+    with pytest.raises(InvalidEventError, match="Event is not valid for current state of workflow"):
+        send_process_event(
+            db_session=db_session,
+            event_to_send="receive_budget_officer_approval",
+            workflow_id=workflow.workflow_id,
+            user=user,
+            expected_state=InitialPrototypeState.START,
+        )
+
+    # No approvals added due to error
+    assert len(workflow.workflow_approvals) == 0
