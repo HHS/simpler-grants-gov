@@ -9,6 +9,7 @@ from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.state_persistence.opportunity_persistence_model import OpportunityPersistenceModel
 from src.workflow.workflow_config import ApprovalConfig, WorkflowConfig
+from src.workflow.workflow_constants import WorkflowConstants
 
 
 class InitialPrototypeState(StrEnum):
@@ -60,28 +61,30 @@ class InitialPrototypeStateMachine(BaseStateMachine):
     receive_program_officer_approval = Event(
         # If Approved -> Add approval event and then check if enough approvals have occurred to determine next state
         states.PENDING_PROGRAM_OFFICER_APPROVAL.to.itself(
-            cond="is_approval_event_approved",
-            on="on_agency_approval_approved",
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_APPROVED,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_APPROVED,
             after="check_program_officer_approval",
         )
         |
         # If Declined -> Add approval event and move to Declined state
         states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
-            states.DECLINED, cond="is_approval_event_declined", on="on_agency_approval_declined"
+            states.DECLINED,
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_DECLINED,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_DECLINED,
         )
         |
         # If Requires Modification -> Add approval event and move back to Start
         states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
             states.START,
-            cond="is_approval_event_requires_modification",
-            on="on_agency_approval_requires_modification",
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_REQUIRES_MODIFICATION,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_REQUIRES_MODIFICATION,
         )
     )
 
     check_program_officer_approval = Event(
         # If it has enough approvals, go to the Budget officer approval
         states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
-            states.PENDING_BUDGET_OFFICER_APPROVAL, cond="has_enough_approvals"
+            states.PENDING_BUDGET_OFFICER_APPROVAL, cond=WorkflowConstants.HAS_ENOUGH_APPROVALS
         )
         # If not, stay in this state
         | states.PENDING_PROGRAM_OFFICER_APPROVAL.to.itself(),
@@ -91,27 +94,31 @@ class InitialPrototypeStateMachine(BaseStateMachine):
     receive_budget_officer_approval = Event(
         # If Approved -> Add approval event and then check if enough approvals have occurred to determine next state
         states.PENDING_BUDGET_OFFICER_APPROVAL.to.itself(
-            cond="is_approval_event_approved",
-            on="on_agency_approval_approved",
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_APPROVED,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_APPROVED,
             after="check_budget_officer_approval",
         )
         |
         # If Declined -> Add approval event and move to End state
         states.PENDING_BUDGET_OFFICER_APPROVAL.to(
-            states.DECLINED, cond="is_approval_event_declined", on="on_agency_approval_declined"
+            states.DECLINED,
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_DECLINED,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_DECLINED,
         )
         |
         # If Requires Modification -> Add approval event and move back to Start
         states.PENDING_BUDGET_OFFICER_APPROVAL.to(
             states.START,
-            cond="is_approval_event_requires_modification",
-            on="on_agency_approval_requires_modification",
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_REQUIRES_MODIFICATION,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_REQUIRES_MODIFICATION,
         )
     )
 
     check_budget_officer_approval = Event(
         # If it has enough approvals, go to the End state
-        states.PENDING_BUDGET_OFFICER_APPROVAL.to(states.END, cond="has_enough_approvals")
+        states.PENDING_BUDGET_OFFICER_APPROVAL.to(
+            states.END, cond=WorkflowConstants.HAS_ENOUGH_APPROVALS
+        )
         # If not, stay in this state
         | states.PENDING_BUDGET_OFFICER_APPROVAL.to.itself(),
     )
