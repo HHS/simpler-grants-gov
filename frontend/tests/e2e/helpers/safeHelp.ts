@@ -218,7 +218,7 @@ async function executeStep(
     const durationMs = endTime.getTime() - startTime.getTime();
     //console.log(
       // `${SYMBOL_TIMER} ${MSG_STEP_ENDED} [${label}] at ${formatTimestamp(endTime)} (${durationMs} ms)`
-    );
+    // );
   }
 }
 
