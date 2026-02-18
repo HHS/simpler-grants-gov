@@ -284,36 +284,36 @@ export async function safeHelp_attachTestSummary(
   startTime?: Date
 ): Promise<void> {
   const softFailCount = Math.max(failureCount, getSoftFailCount(testInfo));
-// export async function safeHelp_attachTestSummary(
-//   testInfo: TestInfo,
-//   failureCount: number,
-//   startTime?: Date
-// ): Promise<void> {
-//   const softFailCount = Math.max(failureCount, getSoftFailCount(testInfo));
-//   // Remove these unused variables:
-//   // const reportPath = `${REPORT_BASE_URL}/#?testId=${testInfo.testId}`.replace(/\\/g, '/');
-//   // const testTitle = testInfo.title;
-//   // const endTime = new Date();
-//   // const endStamp = formatTimestamp(endTime);
-//   // const startStamp = startTime ? formatTimestamp(startTime) : 'unknown';
-//   // const durationMs = startTime ? endTime.getTime() - startTime.getTime() : undefined;
+export async function safeHelp_attachTestSummary(
+  testInfo: TestInfo,
+  failureCount: number,
+  startTime?: Date
+): Promise<void> {
+  const softFailCount = Math.max(failureCount, getSoftFailCount(testInfo));
+  // Remove these unused variables:
+  // const reportPath = `${REPORT_BASE_URL}/#?testId=${testInfo.testId}`.replace(/\\/g, '/');
+  // const testTitle = testInfo.title;
+  const endTime = new Date();
+  // const endStamp = formatTimestamp(endTime);
+  // const startStamp = startTime ? formatTimestamp(startTime) : 'unknown';
+  // const durationMs = startTime ? endTime.getTime() - startTime.getTime() : undefined;
   
-//   // Keep only the code that uses softFailCount
-//   if (softFailCount > 0) {
-//     await testInfo.attach(ATTACHMENT_TEST_SUMMARY, {
-//       body: `${MSG_TEST_COMPLETED_WITH_FAILURES} ${softFailCount} ${MSG_FAILURE_PLURAL}.\n${MSG_FAILURES_LOGGED}`,
-//       contentType: 'text/plain',
-//     });
-//   }
-// }
-//   const durationMs = startTime ? endTime.getTime() - startTime.getTime() : undefined;
+  // Keep only the code that uses softFailCount
+  if (softFailCount > 0) {
+    await testInfo.attach(ATTACHMENT_TEST_SUMMARY, {
+      body: `${MSG_TEST_COMPLETED_WITH_FAILURES} ${softFailCount} ${MSG_FAILURE_PLURAL}.\n${MSG_FAILURES_LOGGED}`,
+      contentType: 'text/plain',
+    });
+  }
+}
+  const durationMs = startTime ? endTime.getTime() - startTime.getTime() : undefined;
 
-//   if (softFailCount > 0) {
-//     await testInfo.attach(ATTACHMENT_TEST_SUMMARY, {
-//       body: `${MSG_TEST_COMPLETED_WITH_FAILURES} ${softFailCount} ${MSG_FAILURE_PLURAL}.\n${MSG_FAILURES_LOGGED}`,
-//       contentType: 'text/plain',
-//     });
-//   }
+  if (softFailCount > 0) {
+    await testInfo.attach(ATTACHMENT_TEST_SUMMARY, {
+      body: `${MSG_TEST_COMPLETED_WITH_FAILURES} ${softFailCount} ${MSG_FAILURE_PLURAL}.\n${MSG_FAILURES_LOGGED}`,
+      contentType: 'text/plain',
+    });
+  }
 
 //   // console.log(`\n========================================`);
 //   // console.log(`           TEST SUMMARY`);
