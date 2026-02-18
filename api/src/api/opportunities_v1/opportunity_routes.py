@@ -25,7 +25,6 @@ from src.services.opportunities_v1.get_opportunity import (
 )
 from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_csv
 from src.services.opportunities_v1.search_opportunities import search_opportunities
-from src.task.opportunities.export_opportunity_data_task import CSV_FIELDS
 from src.util.dict_util import flatten_dict
 
 logger = logging.getLogger(__name__)
@@ -215,8 +214,7 @@ def opportunity_search(
     if search_params.get("format") == opportunity_schemas.SearchResponseFormat.CSV:
         # Convert the response into a CSV and return the contents
         output = io.StringIO()
-        output_fields = CSV_FIELDS[:-1] + ["url"]
-        opportunities_to_csv(opportunities, output, output_fields)
+        opportunities_to_csv(opportunities, output, False)
         timestamp = datetime_util.utcnow().strftime("%Y%m%d-%H%M%S")
         return Response(
             output.getvalue().encode("utf-8"),

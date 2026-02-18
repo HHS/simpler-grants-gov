@@ -24,51 +24,6 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
 
-CSV_FIELDS = [
-    "opportunity_id",
-    "opportunity_number",
-    "opportunity_title",
-    "opportunity_status",
-    "agency_code",
-    "category",
-    "category_explanation",
-    "post_date",
-    "close_date",
-    "close_date_description",
-    "archive_date",
-    "is_cost_sharing",
-    "expected_number_of_awards",
-    "estimated_total_program_funding",
-    "award_floor",
-    "award_ceiling",
-    "additional_info_url",
-    "additional_info_url_description",
-    "opportunity_assistance_listings",
-    "funding_instruments",
-    "funding_categories",
-    "funding_category_description",
-    "applicant_types",
-    "applicant_eligibility_description",
-    "agency_name",
-    "top_level_agency_name",
-    "agency_contact_description",
-    "agency_email_address",
-    "agency_email_address_description",
-    "is_forecast",
-    "forecasted_post_date",
-    "forecasted_close_date",
-    "forecasted_close_date_description",
-    "forecasted_award_date",
-    "forecasted_project_start_date",
-    "fiscal_year",
-    "created_at",
-    "updated_at",
-    # We put the description at the end as it's the longest value
-    # which can help improve readability of other fields
-    "summary_description",
-]
-
-
 @task_blueprint.cli.command(
     "export-opportunity-data",
     help="Generate JSON and CSV files containing an export of all opportunity data",
@@ -192,7 +147,7 @@ class ExportOpportunityDataTask(Task):
         logger.info("Creating Opportunity CSV extract", extra={"csv_extract_path": self.csv_file})
 
         with file_util.open_stream(self.csv_file, "w") as outfile:
-            opportunities_to_csv(opportunities, outfile, CSV_FIELDS)
+            opportunities_to_csv(opportunities, outfile, True)
 
         csv_size = file_util.get_file_length_bytes(self.csv_file)
         return csv_size
