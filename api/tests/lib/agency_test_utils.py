@@ -9,6 +9,7 @@ from tests.src.db.models.factories import (
     AgencyUserRoleFactory,
     LinkExternalUserFactory,
     RoleFactory,
+    UserApiKeyFactory,
     UserFactory,
     UserProfileFactory,
 )
@@ -74,3 +75,49 @@ def create_user_in_agency_with_jwt(
     db_session.commit()  # commit to push JWT to DB
 
     return user, agency, token
+
+
+def create_user_in_agency_with_api_key(
+    agency: Agency | None = None,
+    role: Role | None = None,
+    privileges: list[Privilege] | None = None,
+    email: str | None = None,
+    first_name: str | None = None,
+    last_name: str | None = None,
+) -> tuple[User, Agency, str]:
+    user, agency = create_user_in_agency(
+        agency=agency,
+        role=role,
+        privileges=privileges,
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+    )
+
+    api_key = UserApiKeyFactory.create(user=user)
+    user, agency, api_key.key_id
+
+
+def create_user_in_agency_with_jwt_and_api_key(
+    db_session: db.Session,
+    agency: Agency | None = None,
+    role: Role | None = None,
+    privileges: list[Privilege] | None = None,
+    email: str | None = None,
+    first_name: str | None = None,
+    last_name: str | None = None,
+) -> tuple[User, Agency, str, str]:
+    user, agency, token = create_user_in_agency_with_jwt(
+        db_session=db_session,
+        agency=agency,
+        role=role,
+        privileges=privileges,
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+    )
+
+    # Create API key for the user
+    api_key = UserApiKeyFactory.create(user=user)
+
+    return user, agency, token, api_key.key_id
