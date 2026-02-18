@@ -243,7 +243,6 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.INTERNAL_WORKFLOW_ACCESS, 22),
         LookupStr(Privilege.VIEW_ORG_SAVED_OPPORTUNITIES, 23),
         LookupStr(Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES, 24),
-
     ]
 )
 
