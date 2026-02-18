@@ -218,7 +218,7 @@ test('SFLLLv2_0-form-user-interface', async ({ page }, testInfo) => {
   await safeHelp_safeExpect(testInfo, async () => expect(page.locator('#label-for-signature_block--telephone')).toContainText('Telephone No.'));
   await safeHelp_safeExpect(testInfo, async () => expect(page.locator('#form-section-Signature')).toContainText('Enter the telephone number of the certifying official.'));
   await safeHelp_safeExpect(testInfo, async () => expect(page.locator('#label-for-signature_block--signed_date')).toContainText('Signature Date'));
-  await safeHelp_safeExpect(testInfo, async () => expect(page.locator('#Testfail----form-section-Signature')).toContainText('Completed by Grants.gov upon submission.'));
+  await safeHelp_safeExpect(testInfo, async () => expect(page.locator('#form-section-Signature')).toContainText('Completed by Grants.gov upon submission.'));
     });
   } catch (error) {
     const errorMsg = String(error);
