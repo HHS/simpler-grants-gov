@@ -11,10 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class SQSConfig(PydanticBaseEnvConfig):
-    # SQS Queue URL will be required by the service using this adapter
-    workflow_queue_url: str = Field(alias="WORKFLOW_QUEUE_URL")
-    # SQS Queue name for workflow processing
-    workflow_queue_name: str = Field(alias="WORKFLOW_QUEUE_NAME", default="local_workflow_queue")
+    workflow_queue_url: str = Field(alias="WORKFLOW_SQS_QUEUE")
+    s3_endpoint_url: str = Field(alias="S3_ENDPOINT_URL")
 
 
 class SQSMessage(BaseModel):
@@ -40,8 +38,8 @@ def get_boto_sqs_client(
         sqs_config = SQSConfig()
 
     params = {}
-    if sqs_config.workflow_queue_url is not None:
-        params["endpoint_url"] = sqs_config.workflow_queue_url
+    if sqs_config.s3_endpoint_url is not None:
+        params["endpoint_url"] = sqs_config.s3_endpoint_url
 
     if session is None:
         session = get_boto_session()

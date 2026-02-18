@@ -62,14 +62,16 @@ def setup_sqs() -> None:
         ),
     )
 
+    if sqs_config.workflow_queue_url is None:
+        raise ValueError("WORKFLOW_QUEUE_URL environment variable must be set to setup SQS")
+    workflow_queue_name = sqs_config.workflow_queue_url.split("/")[-1]
+
     try:
-        sqs_client.get_queue_url(QueueName=sqs_config.workflow_queue_name)
-        logger.info(
-            "SQS queue %s already exists - skipping creation", sqs_config.workflow_queue_name
-        )
+        sqs_client.get_queue_url(QueueName=workflow_queue_name)
+        logger.info("SQS queue %s already exists - skipping creation", workflow_queue_name)
     except sqs_client.exceptions.QueueDoesNotExist:
-        logger.info("Creating SQS queue %s", sqs_config.workflow_queue_name)
-        sqs_client.create_queue(QueueName=sqs_config.workflow_queue_name)
+        logger.info("Creating SQS queue %s", workflow_queue_name)
+        sqs_client.create_queue(QueueName=workflow_queue_name)
 
 
 def main() -> None:
