@@ -3,19 +3,19 @@
 // ============================================================================
 
 // ---- Imports ----
-// import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import testConfig from 'tests/e2e/test-data/test-config.json' with { type: 'json' };
-import {
-  expect,
-  test,
-  type BrowserContext,
-  type Page,
-  type TestInfo,
-} from "@playwright/test";
-import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
-import playwrightEnv from "tests/e2e/playwright-env";
-import { openMobileNav } from "tests/e2e/playwrightUtils";
-import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
+// import {
+//   expect,
+//   test,
+//   type BrowserContext,
+//   type Page,
+//   type TestInfo,
+// } from "@playwright/test";
+// import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
+// import playwrightEnv from "tests/e2e/playwright-env";
+// import { openMobileNav } from "tests/e2e/playwrightUtils";
+// import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
 import {
   safeHelp_safeExpect,
   safeHelp_safeStep,
@@ -278,7 +278,7 @@ test('SFLLLv2_0-form-filling', async ({ page }, testInfo) => {
       body: errorMsg,
       contentType: 'text/plain',
     });
-    console.log(`❌ ${errorMsg}`);
+    // console.log(`❌ ${errorMsg}`);
     // Softfail: Do not re-throw error to allow test to pass
   } finally {
     await safeHelp_attachTestSummary(testInfo, 0, startTime);
