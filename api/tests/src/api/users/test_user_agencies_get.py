@@ -85,13 +85,13 @@ class TestUserAgenciesGet:
 
         assert resp.status_code == 401
 
-    def test_get_user_agencies_200_api_key_happy_path(self, enable_factory_create, client, db_session):
+    def test_get_user_agencies_200_api_key_happy_path(
+        self, enable_factory_create, client, db_session
+    ):
         """Test getting user agencies works with API key auth"""
         user, agency, _, api_key_id = create_user_in_agency_with_jwt_and_api_key(db_session)
 
-        resp = client.post(
-            f"/v1/users/{user.user_id}/agencies", headers={"X-API-Key": api_key_id}
-        )
+        resp = client.post(f"/v1/users/{user.user_id}/agencies", headers={"X-API-Key": api_key_id})
 
         assert resp.status_code == 200
         data = resp.get_json()
@@ -99,7 +99,9 @@ class TestUserAgenciesGet:
         assert len(data["data"]) == 1
         assert data["data"][0]["agency_id"] == str(agency.agency_id)
 
-    def test_get_user_agencies_403_api_key_wrong_user(self, enable_factory_create, client, db_session):
+    def test_get_user_agencies_403_api_key_wrong_user(
+        self, enable_factory_create, client, db_session
+    ):
         """Test that API key auth returns 403 when user_id doesn't match authenticated user"""
         _, _, _, api_key_id = create_user_in_agency_with_jwt_and_api_key(db_session)
         other_user, _, _ = create_user_in_agency_with_jwt(db_session)
