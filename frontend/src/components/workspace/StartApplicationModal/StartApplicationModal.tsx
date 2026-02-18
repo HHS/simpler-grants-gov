@@ -57,36 +57,37 @@ export const StartApplicationModal = ({
   const [updating, setUpdating] = useState<boolean>(false);
 
   const validateSubmission = useCallback((): boolean => {
-    let isValid = Boolean(token);
+    let isValidToken = Boolean(token);
 
     setNameValidationError("");
 
     if (!savedApplicationName) {
       setNameValidationError(t("fields.name.validationError"));
-      isValid = false;
+      isValidToken = false;
     }
 
-    return isValid;
+    return isValidToken;
   }, [savedApplicationName, t, token]);
 
   const handleSubmit = useCallback(() => {
-    const isValid = validateSubmission();
-    if (!isValid) {
+    const isValidSubmission = validateSubmission();
+    if (!isValidSubmission) {
       return;
     }
     setUpdating(true);
-    const isIndividualSelected =
-      selectedOrganization === SPECIAL_VALUES.INDIVIDUAL;
-    const isNotListedSelected =
-      selectedOrganization === SPECIAL_VALUES.NOT_LISTED;
+    // Determine organization_id to send to API
+    let organizationToSend: string | undefined;
 
-    const organizationToSend: string | undefined =
+    if (
+      SPECIAL_VALUES.INDIVIDUAL ||
+      SPECIAL_VALUES.NOT_LISTED ||
       !selectedOrganization ||
-      selectedOrganization === "0" ||
-      isIndividualSelected ||
-      isNotListedSelected
-        ? undefined
-        : selectedOrganization;
+      selectedOrganization === "0"
+    ) {
+      organizationToSend = undefined;
+    } else {
+      organizationToSend = selectedOrganization;
+    }
 
     clientFetch("/api/applications/start", {
       method: "POST",
@@ -94,7 +95,9 @@ export const StartApplicationModal = ({
         applicationName: savedApplicationName,
         competitionId,
         ...(organizationToSend ? { organization: organizationToSend } : {}),
-        ...(isNotListedSelected ? { intendsToAddOrganizationLater: true } : {}),
+        ...(SPECIAL_VALUES.NOT_LISTED
+          ? { intendsToAddOrganizationLater: true }
+          : {}),
       }),
     })
       .then((data) => {
