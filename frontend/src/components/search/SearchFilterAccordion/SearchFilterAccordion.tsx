@@ -69,7 +69,7 @@ export function BasicSearchFilterAccordion({
       bordered={true}
       items={accordionOptions}
       multiselectable={true}
-      className={clsx("margin-top-4", className)}
+      className={clsx("margin-top-3", className)}
     />
   );
 }

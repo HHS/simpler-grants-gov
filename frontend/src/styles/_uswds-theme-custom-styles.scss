@@ -421,6 +421,16 @@ button.usa-pagination__button.usa-button {
 // we are implementing the uswds nav drop down at mobile widths, which is not ordinarily supported
 // these styles are taken from the desktop imlementation of the dropdown and applied at all breakpoints
 .usa-nav__primary {
+  // Match the exact USWDS selector .usa-nav__primary button:hover
+  // Use the same color as .usa-nav__primary a:not(.usa-button):not(.usa-current) (#76766a)
+  @include at-media-max($theme-header-min-width) {
+    button:hover,
+    button:focus:hover,
+    button:active:hover {
+      color: #76766a;
+      background-color: transparent;
+    }
+  }
   .mobile-nav-dropdown-uncollapsed-override {
     button[aria-expanded="true"]:hover {
       background-color: color("mint-40");
@@ -485,6 +495,20 @@ button.usa-pagination__button.usa-button {
     bottom: -0.25rem;
     left: 0;
     right: 0;
+  }
+  // Hide the ::after border on mobile
+  @include at-media-max($theme-header-min-width) {
+    .usa-accordion__button[aria-expanded="true"]::after {
+      display: none;
+    }
+  }
+
+  // Match padding of non-dropdown nav links (Home, Search, Sign In) to dropdown items on mobile (12px)
+  @include at-media-max($theme-header-min-width) {
+    .usa-nav__primary-item > .usa-nav__link {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
   }
 }
 
@@ -771,4 +795,20 @@ dl {
     border-color: #e6e6e2;
     background-image: none;
   }
+}
+
+// force scrolling on some search filters
+.usa-accordion__heading.force-scrolling {
+  position: relative;
+  z-index: 1;
+}
+.usa-accordion__content.force-scrolling {
+  position: relative;
+  @include u-maxh("mobile-lg");
+  overflow-y: auto;
+}
+
+// override skipnav's hardcoded `z-index:100`
+.usa-skipnav {
+  z-index: z-index("top");
 }
