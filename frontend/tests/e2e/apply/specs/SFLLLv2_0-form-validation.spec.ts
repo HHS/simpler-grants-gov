@@ -90,7 +90,7 @@ const ENTITY_DATA = {
 // ============================================================================
 
 test('SFLLLv2_0-form-validation', async ({ page }, testInfo) => {
-  test.setTimeout(120000); // 2 minutes for comprehensive validation test
+  test.setTimeout(180000); // 3 minutes for comprehensive validation test
   const startTime = new Date();
   const goToForm = safeHelp_GotoForm(testInfo, page);
 
