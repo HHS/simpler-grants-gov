@@ -3,7 +3,7 @@
 // ============================================================================
 
 // ---- Imports ----
-import { test, expect, Page, TestInfo, Locator } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import testConfig from 'tests/e2e/test-data/test-config.json' with { type: 'json' };
 // import {
 //   expect,
