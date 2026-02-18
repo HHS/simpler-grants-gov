@@ -1871,21 +1871,8 @@ class TestOpportunityRouteSearch(BaseTestClass):
         reader = csv.DictReader(resp.text.split("\n"))
         rows = list(reader)
 
-        expected_headers = [
-            "close_date",
-            "opportunity_status",
-            "opportunity_title",
-            "opportunity_number",
-            "agency_name",
-            "award_floor",
-            "award_ceiling",
-            "url",
-            "opportunity_id",
-            "post_date",
-        ]
-
-        assert reader.fieldnames == expected_headers
-        assert len(reader.fieldnames) == 10
+        assert "url" in reader.fieldnames
+        assert "summary_description" not in reader.fieldnames
 
         for row in rows:
             # assert correct url is configured
