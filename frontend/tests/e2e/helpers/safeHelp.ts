@@ -23,19 +23,19 @@ type WaitState = typeof WAIT_STATES[keyof typeof WAIT_STATES];
 
 // Report settings
 const REPORT_BASE_URL = 'http://localhost:9323';
-const REPORT_PORT = 9323;
+// const REPORT_PORT = 9323;
 
 // Timestamp formats
-const TIMESTAMP_FORMAT = 'YYYY-MM-DD HH:MM:SS';
-const TIMESTAMP_WITH_TIME_FORMAT = 'YYYY-DD-MM - at HH:MM:SS';
+// const TIMESTAMP_FORMAT = 'YYYY-MM-DD HH:MM:SS';
+// const TIMESTAMP_WITH_TIME_FORMAT = 'YYYY-DD-MM - at HH:MM:SS';
 
 // Fiscal year configuration
 const FISCAL_YEAR_START_MONTH = 9; // October (0-indexed as 9)
-const FISCAL_YEAR_END_MONTH = 8; // September (0-indexed as 8)
+// const FISCAL_YEAR_END_MONTH = 8; // September (0-indexed as 8)
 
 // Error messages
 const ERROR_ELEMENT_NOT_FOUND = 'element not found within';
-const ERROR_OPTION_NOT_FOUND = 'option not found or element not available within';
+// const ERROR_OPTION_NOT_FOUND = 'option not found or element not available within';
 
 // Annotation types
 const ANNOTATION_SOFT_FAIL = 'soft-fail';
@@ -47,26 +47,26 @@ const ATTACHMENT_SKIPPED_FIELD = 'skipped-field-log';
 const ATTACHMENT_TEST_SUMMARY = 'test-summary';
 
 // //console symbols
-const SYMBOL_SUCCESS = '✅';
-const SYMBOL_WARNING = '⚠️';
-const SYMBOL_TIMER = '⏱️';
-const SYMBOL_CHART = '📊';
-const SYMBOL_COUNTER = '🧮';
-const SYMBOL_FAILURE = '❌';
+// const SYMBOL_SUCCESS = '✅';
+// const SYMBOL_WARNING = '⚠️';
+// const SYMBOL_TIMER = '⏱️';
+// const SYMBOL_CHART = '📊';
+// const SYMBOL_COUNTER = '🧮';
+// const SYMBOL_FAILURE = '❌';
 
 // Test report message templates
 const MSG_TEST_COMPLETED_WITH_FAILURES = 'Test completed with';
 const MSG_FAILURE_PLURAL = 'failure(s)';
 const MSG_FAILURES_LOGGED = 'All failures have been logged to the report.';
-const MSG_TEST_STARTED = 'Test started at';
-const MSG_TEST_ENDED = 'Test ended at';
-const MSG_TEST_PASSED = 'Test passed with no failures, run npx playwright show-report to view details';
-const MSG_TEST_FAILED = 'Test fail with';
-const MSG_SOFTFAIL_COUNT = 'Softfail count:';
+// const MSG_TEST_STARTED = 'Test started at';
+// const MSG_TEST_ENDED = 'Test ended at';
+// const MSG_TEST_PASSED = 'Test passed with no failures, run npx playwright show-report to view details';
+// const MSG_TEST_FAILED = 'Test fail with';
+// const MSG_SOFTFAIL_COUNT = 'Softfail count:';
 
 // Step messages
-const MSG_STEP_STARTED = 'Step started';
-const MSG_STEP_ENDED = 'Step ended';
+// const MSG_STEP_STARTED = 'Step started';
+// const MSG_STEP_ENDED = 'Step ended';
 const MSG_FILLED_SUCCESSFULLY = 'Filled';
 const MSG_SELECTED_SUCCESSFULLY = 'Selected';
 const MSG_TIMEOUT_NOT_FOUND = 'TIMEOUT/NOT FOUND:';
@@ -168,7 +168,7 @@ export async function safeHelp_safeExpect(
       type: ANNOTATION_SOFT_FAIL,
       description: details,
     });
-    //console.log(`${SYMBOL_WARNING} ${details}`);
+    // console.log(`${SYMBOL_WARNING} ${details}`);
     await testInfo.attach(ATTACHMENT_SOFT_FAIL, {
       body: details,
       contentType: 'text/plain',
@@ -343,7 +343,7 @@ async function handleFieldOperation(
   try {
     await locator.waitFor({ state: 'attached', timeout });
     await operation(locator);
-    //console.log(`${SYMBOL_SUCCESS} ${fieldType} successfully (${lineLabel})`);
+    // console.log(`${SYMBOL_SUCCESS} ${fieldType} successfully (${lineLabel})`);
     return true;
   } catch (error) {
     incrementSoftFail(testInfo);
@@ -356,7 +356,7 @@ async function handleFieldOperation(
       body: errorMsg,
       contentType: 'text/plain',
     });
-    //console.log(`${SYMBOL_WARNING} ${errorMsg}`);
+    // console.log(`${SYMBOL_WARNING} ${errorMsg}`);
     return false;
   }
 }
