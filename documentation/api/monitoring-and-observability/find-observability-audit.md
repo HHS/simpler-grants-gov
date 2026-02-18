@@ -13,6 +13,7 @@
 5. [Existing Metabase Dashboards](#5-existing-metabase-dashboards)
 6. [Gaps Identified](#6-gaps-identified)
 7. [Recommendations](#7-recommendations)
+8. [Next Steps](#8-next-steps)
 
 ---
 
@@ -20,7 +21,7 @@
 
 > **Note:** All dashboards below are manually configured in the NR UI — none are defined as code (no Terraform NR provider, no dashboard JSON/HCL in `infra/`). This was confirmed during the codebase audit and is surfaced as a gap in [Section 6](#6-gaps-identified).
 
-### 1.1 Search Parameters  - Find-Specific
+### 1.1 Search Parameters — Find-Specific
 
 **Purpose:** Dedicated search intent analysis dashboard.
 
@@ -35,7 +36,7 @@
 
 ---
 
-### 1.2 User/Usage Metrics  - Find-Specific
+### 1.2 User/Usage Metrics — Find-Specific
 
 **Purpose:** Business engagement metrics including search and user activity.
 
@@ -45,7 +46,7 @@
 
 ---
 
-### 1.3 API Dashboard  - Find-Relevant
+### 1.3 API Dashboard — Find-Relevant
 
 **Purpose:** Technical health monitoring for all API endpoints, with dedicated tabs for opportunity and user endpoints.
 
@@ -55,7 +56,7 @@
 
 ---
 
-### 1.4 Browser Overview  - Find-Relevant
+### 1.4 Browser Overview — Find-Relevant
 
 **Purpose:** Frontend performance and traffic analysis across all pages.
 
@@ -83,7 +84,7 @@
 
 **Key widgets:** Application starts/submissions, submission issues, attachment counts.
 
-**Relevance:** Monitors the primary conversion action (applying) that follows a successful Find experience.
+**Relevance:** Monitors the primary conversion action (applying) that follows a successful Find experience. This dashboard serves as the model for the recommended Find product metrics dashboard (see [Section 7](#7-recommendations)).
 
 **Screenshot:**
 
@@ -178,15 +179,38 @@ Key settings:
 
 ## 3. Existing Custom Instrumentation
 
-### 3.1 Backend: Structured Logging
+### 3.1 Backend: Structured Logging in Routes
 
-The search service (`api/src/services/opportunities_v1/search_opportunities.py`) emits one structured log:
+The search route ([`api/src/api/opportunities_v1/opportunity_routes.py`](../../api/src/api/opportunities_v1/opportunity_routes.py)) uses `add_extra_data_to_current_request_logs` to attach structured data to every request log, providing meaningful backend observability:
 
+**On every search request:**
 ```python
-logger.info("Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias})
+add_extra_data_to_current_request_logs(flatten_dict(search_params, prefix="request.body"))
+```
+This logs all search parameters (query text, filters, pagination) as structured attributes on the request log.
+
+**On every search response:**
+```python
+add_extra_data_to_current_request_logs({
+    "response.pagination.total_pages": pagination_info.total_pages,
+    "response.pagination.total_records": pagination_info.total_records,
+})
+```
+This logs result counts on every search response, enabling queries like:
+
+```sql
+-- Result count distribution (zero-result searches, high-result searches, etc.)
+SELECT count(*) FROM Log
+WHERE request.url_rule = '/v1/opportunities/search'
+  AND environment = 'prod'
+  AND response.status_code = 200
+FACET buckets(response.pagination.total_records, 1000, 10)
+SINCE 1 day ago
 ```
 
-This log is forwarded to both New Relic Logs and CloudWatch via FluentBit, but contains no business-level information (no query text, filter details, result counts, etc.).
+Similarly, opportunity GET routes log `opportunity_id` and `legacy_opportunity_id` as structured attributes on each request.
+
+All of these logs are forwarded to New Relic Logs and CloudWatch via the FluentBit sidecar and are queryable via NRQL.
 
 ### 3.2 Frontend: New Relic Browser Custom Attributes
 
@@ -222,37 +246,39 @@ The frontend sends two GA events related to Find:
 3. Truncates large SQL parameter lists via Lua script
 4. Forwards to **three destinations**: New Relic Logs, CloudWatch, and stdout
 
-This means all structured log attributes (from Python `extra={}` kwargs) are queryable in NR Logs, but as noted above, very little business-level data is being logged for Find endpoints.
+All structured log attributes (from `add_extra_data_to_current_request_logs` and Python `extra={}` kwargs) are queryable in NR Logs via NRQL.
 
 ---
 
 ## 4. Existing Business Metrics
 
-### Summary: No Dedicated Find Business Metrics Exist
+### What Is Currently Tracked
 
-After auditing the entire codebase, **no explicit business metrics are being tracked for Find functionality** beyond the basic frontend analytics described above. Specifically:
+The backend already logs meaningful search metrics via `add_extra_data_to_current_request_logs` in the route layer. Combined with NR APM and frontend instrumentation, the following is available:
 
-| Metric Category | Tracked? | Details |
-|-----------------|----------|---------|
-| Search volume (total searches) | No dedicated tracking | Only derivable from NR APM transaction counts for the search endpoint |
-| Popular search queries | No | Query text is not logged or sent to NR from the API |
-| Zero-result searches | No | Result counts are not captured |
-| Search filters usage | Partial | Frontend GA event sends filter keys; NR browser has param attributes |
-| Opportunity view counts | No dedicated tracking | Only derivable from NR APM transaction counts |
-| Save opportunity rates | No | No custom events for save/unsave actions |
-| Saved search usage | No | No custom events for saved search CRUD operations |
+| Metric Category | Tracked? | Source |
+|-----------------|----------|--------|
+| Search volume (total searches) | Yes | NR APM transaction counts + NR Logs |
+| Search query text | Yes | `request.body.query` in NR Logs |
+| Search filters used | Yes | `request.body.filters.*` in NR Logs |
+| Search result counts | Yes | `response.pagination.total_records` in NR Logs |
+| Zero-result searches | Derivable | Query NR Logs for `total_records = 0` |
+| Search filters usage (frontend) | Partial | NR Browser custom attributes, GA events |
+| Opportunity view counts | Yes | NR APM transaction counts + NR Logs (`opportunity_id`) |
+| Save opportunity rates | No | No logging on save/unsave endpoints |
+| Saved search usage | No | No logging on saved search CRUD endpoints |
 | Search-to-view conversion | No | No funnel tracking exists |
-| OpenSearch performance metrics | Partial | Available as external service calls in NR APM, but not dashboarded |
+| OpenSearch performance metrics | Partial | Available as external service calls in NR APM; OpenSearch-native metrics not yet imported |
 
 ### Existing Data Sources That Could Power Metrics
 
 | Source | What It Contains | Accessibility |
 |--------|-----------------|---------------|
 | NR APM Transactions | Per-endpoint throughput, latency, errors | NRQL queries |
+| NR Logs (via FluentBit) | Search params, result counts, opportunity IDs per request | NRQL queries on Log type |
 | NR Browser | Page views, search param custom attributes | NRQL queries |
-| NR Logs (via FluentBit) | Structured application logs with request IDs | NRQL queries on Log type |
 | Google Analytics | `search_attempt` and `search_term` events | GA Dashboard |
-| API Database | Saved opportunities, saved searches tables | Direct SQL or Metabase |
+| API Database | Saved opportunities, saved searches tables | Direct SQL |
 | OpenSearch | Search index data, query logs | OpenSearch Dashboards (if enabled) |
 
 ### External Reference
@@ -265,78 +291,87 @@ An API Metrics Google Sheet exists: [API Metrics by Sprint](https://docs.google.
 
 Metabase was selected as the BI tool per [ADR 2024-04-10](../../wiki/product/decisions/adr/2024-04-10-dashboard-tool.md), with Postgres as the analytics data store per [ADR 2024-03-19](../../wiki/product/decisions/adr/2024-03-19-dashboard-storage.md).
 
+> **Note:** The current Metabase integration is brittle and poorly maintained. Any Find-specific Metabase work would require first building a proper data pipeline as a prerequisite.
+
+No Metabase dashboards exist for Find functionality. All existing queries focus on delivery, sprint, ETL, and project management operations.
+
 ---
 
 ## 6. Gaps Identified
 
 ### Critical Gaps
 
-1. **No custom business events emitted from the API** — `record_custom_event` helper is built but unused. Zero backend custom events flow to NR. All existing search analytics rely on frontend-only instrumentation (NR Browser + GA).
-2. **No zero-result search tracking** — Zero-result searches are invisible. There is no way to identify queries that produce no results.
-3. **No search-to-view-to-save funnel** — While the User/Usage Metrics dashboard tracks search CTR, there is no connected funnel showing: search → click result → view opportunity → save opportunity → apply.
-4. **No dashboards-as-code** — All 8 NR dashboards are manually created in the UI with no version control. Changes cannot be code-reviewed and are at risk of being accidentally modified or deleted.
+1. **No dedicated Find product metrics dashboard** — No NR dashboard equivalent to the Apply Metrics dashboard exists for Find. Search and opportunity view metrics are spread across multiple dashboards rather than consolidated into a single product view.
+2. **No search-to-view-to-save funnel** — While the User/Usage Metrics dashboard tracks search CTR, there is no connected funnel showing: search → click result → view opportunity → save opportunity → apply.
+3. **No Find-specific alerts** — Basic system alerts exist, but no alerts are configured specifically for Find functionality (e.g., search error rate spike, zero-result rate increase, search latency degradation).
 
 ### Moderate Gaps
 
-5. **No Metabase dashboards for Find** — All 88 Metabase queries are delivery/sprint/ETL focused. No queries exist for saved opportunities, saved searches, or search pattern analysis from the database.
-6. **Search logging underutilized** — The search service emits only one log (index alias name). No query details, filter types, result counts, or response times are logged as structured attributes.
-7. **Frontend analytics split across two systems** — Search data is split between NR Browser (custom attributes) and Google Analytics (`search_attempt`, `search_term` events), making holistic analysis difficult.
+4. **Save/unsave and saved search endpoints not logged** — Unlike the search and opportunity view routes, the saved opportunities and saved search routes do not log structured business attributes. Save rates and saved search usage patterns are not trackable.
+5. **Frontend analytics split across two systems** — Search data is split between NR Browser (custom attributes) and Google Analytics (`search_attempt`, `search_term` events), making holistic analysis difficult.
+6. **No dashboard backups** — All 8 NR dashboards are manually created in the UI with no backup or version history. Changes are at risk of being accidentally lost.
+7. **OpenSearch-native metrics not imported** — OpenSearch has its own metrics (index health, query performance, shard stats) that are not yet imported into New Relic.
 
 ### Existing Coverage
 
-8. **Search Parameters dashboard exists** — Tracks top search terms and recent queries across environments.
-9. **User/Usage Metrics dashboard exists** — Provides search CTR (37.3%), filter usage breakdown, device distribution, search bar usage (211k), and top keywords.
-10. **API Dashboard covers all Find endpoints** — Dedicated tabs for opportunity and user endpoints with throughput, success rates, and error patterns.
-11. **Browser Overview confirms Find dominance** — `/opportunity/*` (92.5k) and `/search` (72.5k) are the #1 and #2 highest-traffic page groups.
+8. **Backend search logging** — Search route logs all request params and result counts as structured attributes, queryable via NRQL.
+9. **Search Parameters dashboard** — Tracks top search terms and recent queries across environments.
+10. **User/Usage Metrics dashboard** — Search CTR (37.3%), filter usage, device distribution, search bar usage (211k), top keywords.
+11. **API Dashboard** — Covers all Find endpoints with throughput, success rates, and error patterns.
+12. **Browser Overview** — `/opportunity/*` (92.5k) and `/search` (72.5k) are the top two traffic page groups.
 
 ---
 
 ## 7. Recommendations
 
-### 7.1 Dashboard Improvements
+### 7.1 Build a Dedicated Find Product Metrics Dashboard
 
-#### Enhance Existing Find Dashboards
-The existing Search Parameters and User/Usage Metrics dashboards should be augmented with:
-- **Zero-result search rate** (requires #7.2 below)
-- **Search latency percentiles** (p50, p95, p99) from APM data
-- **OpenSearch external service call performance** from APM data
-- **Save/unsave rates** per opportunity (requires #7.2 below)
+Model a new NR dashboard after the existing Apply Metrics dashboard, consolidating Find-specific metrics into a single product view. Suggested panels:
 
-**NRQL example for search latency percentiles:**
+- Search volume over time (from NR Logs: `request.url_rule = '/v1/opportunities/search'`)
+- Zero-result search rate (from NR Logs: `response.pagination.total_records = 0`)
+- Search result count distribution (bucketed)
+- Top search queries and filters (from NR Logs: `request.body.*`)
+- Opportunity view counts over time
+- Search latency percentiles (p50, p95, p99) from NR APM
+
+**Example NRQL for zero-result searches:**
+```sql
+SELECT count(*) FROM Log
+WHERE request.url_rule = '/v1/opportunities/search'
+  AND environment = 'prod'
+  AND response.pagination.total_records = 0
+TIMESERIES AUTO
+```
+
+**Example NRQL for search latency percentiles:**
 ```sql
 SELECT percentile(duration, 50, 95, 99) FROM Transaction
 WHERE name LIKE '%opportunity_search%' TIMESERIES AUTO
 ```
 
-#### Dashboards-as-Code
-Export the existing 8 NR dashboards and manage them via the [New Relic Terraform provider](https://registry.terraform.io/providers/newrelic/newrelic/latest/docs) in the `infra/` directory. This would:
-- Prevent accidental dashboard drift
-- Enable code review for dashboard changes
-- Make dashboards reproducible across accounts
+### 7.2 Add Find-Specific Alerts
 
+Basic system alerts exist but none are Find-specific. Alerts should be managed as code (unlike dashboards, where editing in the UI is preferred). Recommended alerts:
 
+| Alert | Condition | Priority |
+|-------|-----------|----------|
+| Search error rate | >5% 5xx errors on `/v1/opportunities/search` for 5 min | High |
+| Search latency | p95 > 3s for 10 min | Medium |
+| Zero-result rate spike | >50% of searches return 0 results for 15 min | Medium |
+| Opportunity view errors | >5% 5xx on opportunity GET endpoints for 5 min | High |
 
-### 7.2 Business Metrics Collection
+### 7.3 Add Logging to Save/Unsave and Saved Search Endpoints
 
-#### Activate `record_custom_event` for Find Events
+Extend the existing `add_extra_data_to_current_request_logs` pattern (already used in opportunity routes) to the saved opportunities and saved search routes. This would enable tracking save rates and saved search usage without any new infrastructure.
 
-The existing `record_custom_event` helper in `api/src/adapters/newrelic/events.py` should be used to emit events for:
+### 7.4 Dashboard Backups
 
-| Event Type | Trigger | Attributes to Capture |
-|------------|---------|----------------------|
-| `SearchOpportunity` | Search endpoint response | query (hashed), filters used, result_count, page_offset, response_time_ms, scoring_rule |
-| `ViewOpportunity` | Opportunity GET response | opportunity_id, opportunity_status, agency_code |
-| `SaveOpportunity` | Save opportunity POST | opportunity_id, user_id (hashed) |
-| `UnsaveOpportunity` | Delete saved opportunity | opportunity_id |
-| `SaveSearch` | Save search POST | filter_summary, result_count |
-| `DeleteSavedSearch` | Delete saved search | saved_search_id |
-| `ZeroResultSearch` | Search with 0 results | query (hashed), filters_used |
+Export NR dashboard JSON periodically and store in the repository for backup and diff purposes. This is lower overhead than full Terraform management (which would make dashboard editing cumbersome) while still providing a history of changes.
 
-#### Enhance Structured Logging
-Add structured log attributes to Find service functions following the existing [logging conventions](./logging-conventions.md):
-- Log search result counts, filter types used, and pagination info
-- Log opportunity view with opportunity metadata
-- Log saved item operations with entity identifiers
+### 7.5 OpenSearch Metrics (Future)
+
+OpenSearch has its own metrics (index health, query performance, shard stats) that could eventually be imported into New Relic for a complete picture of search infrastructure performance. Existing tickets track this work.
 
 ---
 
@@ -344,12 +379,12 @@ Add structured log attributes to Find service functions following the existing [
 
 ### Existing Companion Tickets
 
-1. **[#8231 — Define Find Funnel Metrics and User Events](https://github.com/HHS/simpler-grants-gov/issues/8231)** — Use the gaps from Section 6 to define exactly which events to track. The event table in Section 7.2 is a starting point.
-2. **[#8247 — Event Instrumentation](https://github.com/HHS/simpler-grants-gov/issues/8247)** — Wire up `record_custom_event` calls for the event types listed in Section 7.2.
+1. **[#8231 — Define Find Funnel Metrics and User Events](https://github.com/HHS/simpler-grants-gov/issues/8231)** — Use the gaps from Section 6 to define exactly which metrics to surface in the new Find dashboard.
+2. **[#8247 — Event Instrumentation](https://github.com/HHS/simpler-grants-gov/issues/8247)** — Coordinate with this ticket on any new instrumentation needed to power the Find dashboard.
 
 ### Recommended New Tickets
 
-3. **Activate `record_custom_event` for Find Endpoints** (~3 points) — Add calls to the existing helper in the search, opportunity view, save/unsave, and saved search handlers. Purely backend work that directly unblocks better dashboard data.
-4. **Enhance Search Structured Logging** (~2 points) — Add result count, filter types, pagination info, and response time as `extra={}` kwargs in `search_opportunities.py`. Low risk since FluentBit already forwards everything to NR Logs.
-5. **Add Zero-Result Search Tracking** (~1 point) — Emit a `ZeroResultSearch` custom event when result count is 0. The single most valuable missing metric for search quality.
-6. **Dashboards-as-Code: Export NR Dashboards to Terraform** (~3 points) — Export all 8 dashboards via the NR API and manage them in `infra/` using the Terraform provider.
+3. **Build Find Product Metrics Dashboard** (~3 points) — Create a dedicated NR dashboard modeled after Apply Metrics, using existing NR Logs data (search params, result counts) and APM data. No new instrumentation required for the initial version.
+4. **Add Find-Specific Alerts as Code** (~3 points) — Define and deploy NR alerts for search error rate, latency, zero-result rate, and opportunity view errors via the NR Terraform provider (alerts, unlike dashboards, are well-suited to code management).
+5. **Add Logging to Saved Opportunities/Searches Routes** (~2 points) — Extend `add_extra_data_to_current_request_logs` to save/unsave and saved search endpoints, following the existing pattern in `opportunity_routes.py`.
+6. **Dashboard Backups** (~1 point) — Script a periodic export of NR dashboard JSON to the repository for backup and diff history.
