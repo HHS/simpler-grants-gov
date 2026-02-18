@@ -14,7 +14,6 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import LkOrganizationAuditEvent, LkSamGovImportType
-from src.db.models.opportunity_models import Opportunity
 from src.util.datetime_util import utcnow
 
 # Add conditional import for type checking to avoid circular imports
@@ -101,12 +100,6 @@ class Organization(ApiSchemaTable, TimestampMixin):
         "OrganizationAudit",
         uselist=True,
         back_populates="organization",
-        cascade="all, delete-orphan",
-    )
-    saved_opportunities: Mapped[list[OrganizationSavedOpportunity]] = relationship(
-        "OrganizationSavedOpportunity",
-        back_populates="organization",
-        uselist=True,
         cascade="all, delete-orphan",
     )
 
@@ -242,21 +235,3 @@ class OrganizationAudit(ApiSchemaTable, TimestampMixin):
     )
     target_user: Mapped[User | None] = relationship("User", foreign_keys=[target_user_id])
     audit_metadata: Mapped[dict | None] = mapped_column(JSONB)
-
-
-class OrganizationSavedOpportunity(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "organization_saved_opportunity"
-
-    organization_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey(Organization.organization_id), primary_key=True
-    )
-    organization: Mapped[Organization] = relationship(
-        Organization, back_populates="saved_opportunities"
-    )
-
-    opportunity_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey(Opportunity.opportunity_id), primary_key=True
-    )
-    opportunity: Mapped[Opportunity] = relationship(
-        "Opportunity", back_populates="saved_opportunities_by_organizations"
-    )
