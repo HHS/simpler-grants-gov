@@ -79,14 +79,14 @@ export const StartApplicationModal = ({
     let organizationToSend: string | undefined;
 
     if (
-      SPECIAL_VALUES.INDIVIDUAL ||
-      SPECIAL_VALUES.NOT_LISTED ||
+      selectedOrganization === SPECIAL_VALUES.INDIVIDUAL ||
+      selectedOrganization === SPECIAL_VALUES.NOT_LISTED ||
       !selectedOrganization ||
       selectedOrganization === "0"
     ) {
-      organizationToSend = undefined;
+      organizationToSend = undefined; // Individual applications
     } else {
-      organizationToSend = selectedOrganization;
+      organizationToSend = selectedOrganization; // Organization applications
     }
 
     clientFetch("/api/applications/start", {
