@@ -2,6 +2,12 @@
 /* eslint-disable testing-library/no-node-access */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { RJSFSchema } from "@rjsf/utils";
+import {
+  determineFieldType,
+  getFieldConfig,
+  getNameFromDef,
+  getWarningsForField,
+} from "src/utils/applyForm/getFieldConfig";
 
 import sflllSchema from "src/components/applyForm/sflll.mock.json";
 import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
@@ -9,16 +15,12 @@ import {
   addPrintWidgetToFields,
   buildWarningTree,
   condenseFormSchemaProperties,
-  determineFieldType,
-  getFieldConfig,
   getFieldNameForHtml,
   getFieldPathFromHtml,
   getFieldSchema,
   getFieldsForNav,
   getKeyParentPath,
-  getNameFromDef,
   getRequiredProperties,
-  getWarningsForField,
   isFieldRequired,
   jsonSchemaPointerToPath,
   pointerToFieldName,
