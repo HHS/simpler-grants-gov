@@ -217,7 +217,7 @@ async function executeStep(
     const endTime = new Date();
     const durationMs = endTime.getTime() - startTime.getTime();
     //console.log(
-      `${SYMBOL_TIMER} ${MSG_STEP_ENDED} [${label}] at ${formatTimestamp(endTime)} (${durationMs} ms)`
+      // `${SYMBOL_TIMER} ${MSG_STEP_ENDED} [${label}] at ${formatTimestamp(endTime)} (${durationMs} ms)`
     );
   }
 }
@@ -305,8 +305,8 @@ export async function safeHelp_attachTestSummary(
 
   if (softFailCount > 0) {
     //console.log(
-      `${SYMBOL_FAILURE} ${MSG_TEST_FAILED} ${softFailCount} softfail(s), run npx playwright show-report to view details`
-    );
+      // `${SYMBOL_FAILURE} ${MSG_TEST_FAILED} ${softFailCount} softfail(s), run npx playwright show-report to view details`
+    // );
   } else {
     //console.log(`${SYMBOL_SUCCESS} ${MSG_TEST_PASSED}`);
   }
