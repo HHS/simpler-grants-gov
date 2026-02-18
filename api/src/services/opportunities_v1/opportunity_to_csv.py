@@ -78,7 +78,7 @@ def opportunities_to_csv(
     writer = csv.DictWriter(output, fieldnames=output_fields, quoting=csv.QUOTE_ALL)
     writer.writeheader()
 
-    csv_fields_set = set(CSV_FIELDS)
+    csv_fields_set = set(output_fields)
     base_url = os.getenv("FRONTEND_BASE_URL")
     for opportunity in opportunities:
         opp = flatten_dict(opportunity)
