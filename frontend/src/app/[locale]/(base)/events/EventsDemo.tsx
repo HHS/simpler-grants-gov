@@ -1,13 +1,13 @@
 import EventsDemoImg from "public/img/events-demo.png";
 
-import { useTranslations } from "next-intl";
+import { useMessages, useTranslations } from "next-intl";
 import Image from "next/image";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-const demoLink = "https://youtu.be/uASJmvcy0aM?si=OniP7Z7KU8ie3FhS";
-
 export default function EventsDemo() {
   const t = useTranslations("Events.demo");
+  const messages = useMessages() as unknown as IntlMessages;
+  const { watchLinks } = messages.Events.demo;
 
   return (
     <GridContainer
@@ -31,16 +31,20 @@ export default function EventsDemo() {
               {t("description")}
             </p>
             <h3>{t("watch")}</h3>
-            <p>
-              <a
-                href={demoLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-sans-md line-height-sans-4"
-              >
-                {t("watchLink")}
-              </a>
-            </p>
+            <ul className="font-sans-md line-height-sans-4">
+              {watchLinks.map((_watchLinks, watchLinkIdx) => (
+                <li key={`big-demo-${watchLinkIdx}`}>
+                  <a
+                    href={watchLinks[watchLinkIdx].link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="usa-link--external"
+                  >
+                    {t(`watchLinks.${watchLinkIdx}.text`)}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </Grid>
         </Grid>
       </Grid>

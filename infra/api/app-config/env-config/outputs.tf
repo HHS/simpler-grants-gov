@@ -81,3 +81,7 @@ output "incident_management_service_integration" {
     integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
   } : null
 }
+
+output "sqs_config" {
+  value = local.sqs_config
+}
