@@ -199,6 +199,7 @@ export async function getNumberOfOpportunitySearchResults(page: Page) {
   await waitForLoaderToBeHidden(page);
   const opportunitiesText = await page
     .locator("div[data-testid='search-results-controls'] h3")
+    .first()  // Add this to handle multiple matches
     .textContent();
   return opportunitiesText
     ? parseInt(opportunitiesText.replace(/\D/g, ""), 10)
