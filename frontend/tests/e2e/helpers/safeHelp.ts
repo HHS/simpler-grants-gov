@@ -267,23 +267,23 @@ export async function safeHelp_safeStep(
   await executeStep(testInfo, label, action);
 }
 
-// // ============================================================================
-// // TEST SUMMARY
-// // ============================================================================
+// ============================================================================
+// TEST SUMMARY
+// ============================================================================
 
-// /**
-//  * Utility to attach a test summary to the report
-//  *
-//  * @param testInfo - Playwright TestInfo object
-//  * @param failureCount - Number of failures that occurred
-//  * @param startTime - Test start time
-//  */
-// export async function safeHelp_attachTestSummary(
-//   testInfo: TestInfo,
-//   failureCount: number,
-//   startTime?: Date
-// ): Promise<void> {
-//   const softFailCount = Math.max(failureCount, getSoftFailCount(testInfo));
+/**
+ * Utility to attach a test summary to the report
+ *
+ * @param testInfo - Playwright TestInfo object
+ * @param failureCount - Number of failures that occurred
+ * @param startTime - Test start time
+ */
+export async function safeHelp_attachTestSummary(
+  testInfo: TestInfo,
+  failureCount: number,
+  startTime?: Date
+): Promise<void> {
+  const softFailCount = Math.max(failureCount, getSoftFailCount(testInfo));
 // export async function safeHelp_attachTestSummary(
 //   testInfo: TestInfo,
 //   failureCount: number,
@@ -407,13 +407,13 @@ export async function safeHelp_safeFill(
   value: string,
   timeoutMs?: number
 ): Promise<boolean> {
-  return handleFieldOperation(
-    testInfo: TestInfo,
-    locator: Locator,
-    (loc) => loc.fill(value),
-    MSG_FILLED_SUCCESSFULLY,
-    timeoutMs
-  );
+return handleFieldOperation(
+  testInfo,
+  locator,
+  (loc) => loc.fill(value),
+  MSG_FILLED_SUCCESSFULLY,
+  timeoutMs
+);
 }
 
 /**
@@ -472,13 +472,13 @@ export async function safeHelp_safeSelectOption(
   value: string,
   timeoutMs?: number
 ): Promise<boolean> {
-  return handleFieldOperation(
-    testInfo: TestInfo,
-    locator: Locator,
-    (loc) => loc.selectOption(value),
-    MSG_SELECTED_SUCCESSFULLY,
-    timeoutMs
-  );
+return handleFieldOperation(
+  testInfo,
+  locator,
+  (loc) => loc.selectOption(value),
+  MSG_SELECTED_SUCCESSFULLY,
+  timeoutMs
+);
 }
 
 /**
