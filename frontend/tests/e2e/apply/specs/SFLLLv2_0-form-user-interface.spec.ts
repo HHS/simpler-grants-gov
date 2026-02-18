@@ -3,35 +3,35 @@
 // ============================================================================
 
 // // ---- Imports ----
-// import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import testConfig from 'tests/e2e/test-data/test-config.json' with { type: 'json' };
-import {
-  expect,
-  test,
-  type BrowserContext,
-  type Page,
-  type TestInfo,
-} from "@playwright/test";
-import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
-import playwrightEnv from "tests/e2e/playwright-env";
-import { openMobileNav } from "tests/e2e/playwrightUtils";
-import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
+// import {
+//   expect,
+//   test,
+//   type BrowserContext,
+//   type Page,
+//   type TestInfo,
+// } from "@playwright/test";
+// import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
+// import playwrightEnv from "tests/e2e/playwright-env";
+// import { openMobileNav } from "tests/e2e/playwrightUtils";
+// import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
 import {
   safeHelp_safeExpect,
   safeHelp_safeStep,
   safeHelp_attachTestSummary,
   safeHelp_updateApplicationName,
   safeHelp_GotoForm,
-  safeHelp_selectDropdownLocator,
-  safeHelp_fillFieldsByTestId,
-  safeHelp_ValidateTextAtLocator,
+  // safeHelp_selectDropdownLocator,
+  // safeHelp_fillFieldsByTestId,
+  // safeHelp_ValidateTextAtLocator,
   safeHelp_safeGoto,
   safeHelp_safeWaitForLoadState,
   safeHelp_clickLink,
-  safeHelp_clickButton,
+  // safeHelp_clickButton,
 } from 'tests/e2e/helpers/safeHelp';
 
-const { baseUrl, targetEnv } = playwrightEnv;
+// const { baseUrl, targetEnv } = playwrightEnv;
 
 // ---- Environment Configuration ----
 const BASE_DOMAIN = testConfig.environment.baseDomain;
@@ -59,7 +59,8 @@ test('SFLLLv2_0-form-user-interface', async ({ page }, testInfo) => {
     await safeHelp_clickLink(testInfo, page.getByRole('link', { name: 'Sign in' }));
 
     // ---- Step 2: Update Application Name ----
-    const { appLinkName, prevYear, quarter, lastDayOfPrevQuarter } = await safeHelp_updateApplicationName(
+    // const { appLinkName, prevYear, quarter, lastDayOfPrevQuarter } = 
+	await safeHelp_updateApplicationName(
       testInfo,
       page
     );
@@ -230,7 +231,7 @@ test('SFLLLv2_0-form-user-interface', async ({ page }, testInfo) => {
       body: errorMsg,
       contentType: 'text/plain',
     });
-    console.log(`❌ ${errorMsg}`);
+    // console.log(`❌ ${errorMsg}`);
     // Softfail: Do not re-throw error to allow test to pass
   } finally {
     await safeHelp_attachTestSummary(testInfo, 0, startTime);
