@@ -70,9 +70,11 @@ def opportunities_to_csv(
     output: io.StringIO,
     has_full_fields: bool,
 ) -> None:
-    csv_fields = CSV_FIELDS if has_full_fields else [
-        field for field in CSV_FIELDS if field != "summary_description"
-    ]
+    csv_fields = (
+        CSV_FIELDS
+        if has_full_fields
+        else [field for field in CSV_FIELDS if field != "summary_description"]
+    )
     writer = csv.DictWriter(output, fieldnames=csv_fields, quoting=csv.QUOTE_ALL)
     writer.writeheader()
 
