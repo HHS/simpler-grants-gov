@@ -40,17 +40,13 @@ class TestGetBotoSQSClient:
         mock_get_session.return_value = mock_session
         get_boto_sqs_client()
         mock_get_session.assert_called_once()
-        mock_session.client.assert_called_once_with(
-            "sqs", endpoint_url=SQSConfig().workflow_queue_url
-        )
+        mock_session.client.assert_called_once_with("sqs", endpoint_url=SQSConfig().s3_endpoint_url)
 
     def test_uses_provided_session(self):
         """Verify that the factory function uses a specifically provided AWS session."""
         mock_session = Mock()
         get_boto_sqs_client(session=mock_session)
-        mock_session.client.assert_called_once_with(
-            "sqs", endpoint_url=SQSConfig().workflow_queue_url
-        )
+        mock_session.client.assert_called_once_with("sqs", endpoint_url=SQSConfig().s3_endpoint_url)
 
 
 class TestSQSClient:
@@ -80,7 +76,8 @@ class TestSQSClient:
     def test_receive_messages_logs_on_error(self, mock_sqs, caplog):
         """Verify that failed receive attempts raise a ClientError and log the queue URL as extra context."""
         invalid_url = "https://sqs.us-east-1.amazonaws.com/123456789012/non-existent"
-        sqs_client = SQSClient(queue_url=invalid_url)
+        boto_client = boto3.client("sqs", region_name="us-east-1")
+        sqs_client = SQSClient(queue_url=invalid_url, sqs_client=boto_client)
 
         with pytest.raises(ClientError):
             with caplog.at_level(logging.ERROR):

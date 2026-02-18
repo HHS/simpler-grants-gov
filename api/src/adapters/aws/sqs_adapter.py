@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class SQSConfig(PydanticBaseEnvConfig):
-    workflow_queue_url: str = Field(alias="WORKFLOW_SQS_QUEUE")
+    workflow_queue_url: str = Field(alias="WORKFLOW_QUEUE_URL")
     s3_endpoint_url: str = Field(alias="S3_ENDPOINT_URL")
 
 
