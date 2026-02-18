@@ -33,7 +33,7 @@ export function RadioButtonFilter({
       queryParamKey={queryParamKey}
       title={title}
       expanded={!!query.size}
-      className="width-100 padding-right-5"
+      className="width-100"
       contentClassName={contentClassName}
     >
       <div data-testid={`${title}-filter`}>

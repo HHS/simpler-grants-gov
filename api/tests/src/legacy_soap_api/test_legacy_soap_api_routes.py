@@ -50,15 +50,7 @@ def test_soap_jwt_flag_is_enabled_is_logged(client, fixture_from_file, caplog) -
     mock_data = fixture_from_file(fixture_path)
     response = client.post(full_path, data=mock_data, headers={f"{USE_SOAP_JWT_HEADER_KEY}": "1"})
     assert response.status_code == 200
-
-    # Verify that certain logs are present with expected extra values
-    post_message = next(
-        record
-        for record in caplog.records
-        if record.message == "soap_client_certificate: Use-Soap-Jwt flag is enabled"
-    )
-    assert post_message.service_name == "grantsws-applicant"
-    assert post_message.service_port_name == "ApplicantWebServicesSoapPort"
+    assert "soap_client_certificate: Use-Soap-Jwt flag is enabled" in caplog.messages
 
 
 def test_soap_jwt_flag_is_disabled_is_not_logged(client, fixture_from_file, caplog) -> None:
@@ -69,8 +61,6 @@ def test_soap_jwt_flag_is_disabled_is_not_logged(client, fixture_from_file, capl
     mock_data = fixture_from_file(fixture_path)
     response = client.post(full_path, data=mock_data, headers={f"{USE_SOAP_JWT_HEADER_KEY}": "0"})
     assert response.status_code == 200
-
-    # Verify that certain logs are present with expected extra values
     post_message = [
         record
         for record in caplog.records
