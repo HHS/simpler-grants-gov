@@ -17,10 +17,6 @@ on:
         options:
           - staging
 
-defaults:
-  run:
-    working-directory: ./frontend
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -34,11 +30,16 @@ jobs:
         shard: [1, 2, 3, 4]
         total_shards: [4]
 
+    outputs:
+      artifact-ids:
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
       - name: Set target
-        run: if [[ -z "${{ inputs.target }}" ]]; then echo "defaulted_target=staging" >> $GITHUB_ENV; else echo "defaulted_target=${{ inputs.target }}" >> $GITHUB_ENV; fi
+        run: if [[ -z "${{ inputs.target }}" ]]; then echo "defaulted_target=staging" >> "$GITHUB_ENV"; else echo 'defaulted_target="${{ inputs.target }}"' >> "$GITHUB_ENV"; fi
+
       - uses: ./.github/actions/e2e
         with:
           version: ${{ inputs.version || github.ref }}
@@ -49,6 +50,12 @@ jobs:
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
 
-      - name: Create Merge Report
-        uses: ./.github/workflows/e2e/e2e-create-report.yml
-        if: ${{ !cancelled() }}
+  create-report:
+    name: Create Merged Test Report
+    if: ${{ !cancelled() }}
+    needs: e2e-tests-deployed
+    uses: ./.github/workflows/e2e-create-report.yml
+    secrets: inherit
+    with:
+      run_id: ${{ github.run_id }}
+      # artifact-ids: ${{ needs.e2e-tests-deployed.outputs.artifact-ids }}

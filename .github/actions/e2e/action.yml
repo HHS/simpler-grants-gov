@@ -33,10 +33,10 @@ inputs:
   node_options:
     description: "options to pass to node"
     default: "--dns-result-order=ipv4first"
-
-defaults:
-  run:
-    working-directory: ./frontend
+outputs:
+  artifact-id:
+    description: "artifact ids for uploaded test reports"
+    value: ${{ steps.upload-blob-report.outputs.artifact-id }}
 
 runs:
   using: "composite"
@@ -50,7 +50,7 @@ runs:
         if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" ]]; then echo "invalid e2e test target provided" && exit 1; fi
 
     - name: Check out code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         ref: ${{ inputs.version }}
 
@@ -73,7 +73,7 @@ runs:
       env:
         CI: true
         TOTAL_SHARDS: ${{ inputs.total_shards }}
-        CURRENT_SHARD: ${{ inputs.shard }}
+        CURRENT_SHARD: ${{ inputs.current_shard }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
         STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
@@ -110,9 +110,10 @@ runs:
       shell: bash
 
     - name: Upload Blob Report
+      id: upload-blob-report
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
-        name: blob-report-shard-${{ inputs.shard }}
+        name: blob-report-shard-${{ inputs.current_shard }}
         path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
         retention-days: 1

@@ -61,6 +61,11 @@ jobs:
           ../api/bin/wait-for-api.sh
         shell: bash
 
+      - name: Install dependencies and Playwright
+        run: |
+          npm ci
+          npx playwright install --with-deps
+
       - name: Build a prod version of the site
         run: |
           {
