@@ -45,7 +45,7 @@ class ValidationTestRunner:
 
         Args:
             xsd_cache_dir: Directory containing cached XSD files.
-                          XSD files must be pre-downloaded using 'flask task fetch-xsds'.
+                          XSD files must be pre-downloaded using 'make fetch-xsds'.
 
         Raises:
             XSDValidationError: If cache directory doesn't exist
@@ -70,12 +70,26 @@ class ValidationTestRunner:
 
         converted = {}
         for uuid, data in attachment_mapping.items():
+            # Handle HashValue as dict (with @hashAlgorithm and #text) or plain string
+            hash_value_data = data.get("HashValue", "")
+            if isinstance(hash_value_data, dict):
+                hash_value = hash_value_data.get("#text", "")
+                hash_algorithm = hash_value_data.get("@hashAlgorithm", "SHA-1")
+            else:
+                hash_value = hash_value_data
+                hash_algorithm = data.get("HashAlgorithm", "SHA-1")
+
+            # Handle FileLocation as dict (with @href) or plain string
+            file_location = data.get("FileLocation", "")
+            if isinstance(file_location, dict):
+                file_location = file_location.get("@href", "")
+
             converted[uuid] = AttachmentInfo(
                 filename=data.get("FileName", ""),
                 mime_type=data.get("MimeType", ""),
-                file_location=data.get("FileLocation", ""),
-                hash_value=data.get("HashValue", ""),
-                hash_algorithm=data.get("HashAlgorithm", "SHA-1"),
+                file_location=file_location,
+                hash_value=hash_value,
+                hash_algorithm=hash_algorithm,
             )
         return converted
 

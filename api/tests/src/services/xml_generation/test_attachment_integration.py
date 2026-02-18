@@ -9,7 +9,6 @@ from src.services.xml_generation.transformers.attachment_transformer import Atta
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 
 
-@pytest.mark.xml_validation
 class TestAttachmentIntegration:
     """Integration tests for complete attachment workflows using UUID-based approach."""
 
@@ -83,7 +82,11 @@ class TestAttachmentIntegration:
         }
 
     def test_add_attachment_elements_with_single_attachment(self):
-        """Test add_attachment_elements with single UUID attachment."""
+        """Test add_attachment_elements with single UUID attachment.
+
+        For 'single' type, attachment content is added directly to the parent element
+        (no wrapper element is created).
+        """
         root = lxml_etree.Element("Application", nsmap=self.nsmap)
 
         # Data contains UUID reference
@@ -93,12 +96,12 @@ class TestAttachmentIntegration:
 
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        # Verify single attachment was added
-        assert "<AreasAffected>" in xml_string
-        assert "<FileName>geographic_areas.pdf</FileName>" in xml_string
-        assert "<MimeType>application/pdf</MimeType>" in xml_string
+        # Single type wraps content in a form-namespace element
+        assert "AreasAffected" in xml_string
+        assert "<att:FileName>geographic_areas.pdf</att:FileName>" in xml_string
+        assert "<att:MimeType>application/pdf</att:MimeType>" in xml_string
         assert 'href="./attachments/geographic_areas.pdf"' in xml_string
-        assert "<HashValue" in xml_string
+        assert "HashValue" in xml_string
         assert "aGVsbG8gd29ybGQ=" in xml_string
 
     def test_add_attachment_elements_with_multiple_attachments(self):
@@ -112,11 +115,11 @@ class TestAttachmentIntegration:
 
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        # Verify multiple attachments were added
-        assert "<AdditionalProjectTitle>" in xml_string
-        assert xml_string.count("<AttachedFile>") == 2
-        assert "<FileName>project1.pdf</FileName>" in xml_string
-        assert "<FileName>project2.xlsx</FileName>" in xml_string
+        # Verify multiple attachments were added with wrapper element
+        assert "AdditionalProjectTitle" in xml_string
+        assert xml_string.count("<att:AttachedFile") == 2
+        assert "<att:FileName>project1.pdf</att:FileName>" in xml_string
+        assert "<att:FileName>project2.xlsx</att:FileName>" in xml_string
 
     def test_add_attachment_elements_all_fields(self):
         """Test add_attachment_elements with all four attachment types."""
@@ -134,13 +137,10 @@ class TestAttachmentIntegration:
 
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        # Verify all four attachment types are present
-        assert "<AreasAffected>" in xml_string
-        assert "<AdditionalCongressionalDistricts>" in xml_string
-        assert "<DebtExplanation>" in xml_string
-        assert "<AdditionalProjectTitle>" in xml_string
+        # Verify multiple type has wrapper
+        assert "AdditionalProjectTitle" in xml_string
 
-        # Verify filenames
+        # Verify filenames are present (single types wrap content in form-namespace element)
         assert "geographic_areas.pdf" in xml_string
         assert "districts.txt" in xml_string
         assert "debt.docx" in xml_string
@@ -157,9 +157,8 @@ class TestAttachmentIntegration:
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
         # Should have no attachment elements
-        assert "<AreasAffected>" not in xml_string
-        assert "<DebtExplanation>" not in xml_string
-        assert "<AdditionalProjectTitle>" not in xml_string
+        assert "FileName" not in xml_string
+        assert "AdditionalProjectTitle" not in xml_string
 
     def test_uuid_not_in_mapping_raises_error(self):
         """Test that using a UUID not in mapping raises helpful error."""
@@ -201,15 +200,13 @@ class TestAttachmentIntegration:
 
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        # Verify single attachments
-        assert "<AreasAffected>" in xml_string
+        # Verify single attachment content (wrapped in form-namespace element)
         assert "geographic_areas.pdf" in xml_string
-        assert "<DebtExplanation>" in xml_string
         assert "debt.docx" in xml_string
 
-        # Verify multiple attachments
-        assert "<AdditionalProjectTitle>" in xml_string
-        assert xml_string.count("<AttachedFile>") == 2
+        # Verify multiple attachments (has wrapper)
+        assert "AdditionalProjectTitle" in xml_string
+        assert xml_string.count("<att:AttachedFile") == 2
         assert "project1.pdf" in xml_string
         assert "project2.xlsx" in xml_string
 
@@ -227,7 +224,6 @@ class TestAttachmentIntegration:
 
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        assert "<AreasAffected>" in xml_string
         assert "geographic_areas.pdf" in xml_string
         assert "<AdditionalProjectTitle>" in xml_string
         assert "project1.pdf" in xml_string

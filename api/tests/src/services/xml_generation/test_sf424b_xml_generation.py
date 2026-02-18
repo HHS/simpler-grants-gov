@@ -31,7 +31,6 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
 class TestSF424BXMLGeneration:
     """Test cases for SF-424B XML generation service."""
 
@@ -385,14 +384,12 @@ class TestSF424BXSDValidation:
         """Create XSD validator with cache directory."""
         xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
         if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
+            pytest.skip("XSD cache directory not found. Run 'make fetch-xsds' to download schemas.")
         # Check if SF424B XSD exists
         sf424b_xsd_path = xsd_cache_dir / "SF424B-V1.1.xsd"
         if not sf424b_xsd_path.exists():
             pytest.skip(
-                "SF424B-V1.1.xsd not found in cache. Run 'flask task fetch-xsds' to download schemas."
+                "SF424B-V1.1.xsd not found in cache. Run 'make fetch-xsds' to download schemas."
             )
         return XSDValidator(xsd_cache_dir)
 

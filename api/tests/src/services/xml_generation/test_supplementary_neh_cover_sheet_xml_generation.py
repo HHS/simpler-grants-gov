@@ -27,7 +27,6 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
 class TestSupplementaryNEHCoverSheetXMLGeneration:
     """Test cases for Supplementary Cover Sheet for NEH Grant Programs XML generation service."""
 
@@ -482,15 +481,13 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
         """Create XSD validator with cache directory."""
         xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
         if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
+            pytest.skip("XSD cache directory not found. Run 'make fetch-xsds' to download schemas.")
         # Check if NEH Cover Sheet XSD exists
         xsd_path = xsd_cache_dir / "SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0.xsd"
         if not xsd_path.exists():
             pytest.skip(
                 "SupplementaryCoverSheetforNEHGrantPrograms_3_0-V3.0.xsd not found in cache. "
-                "Run 'flask task fetch-xsds' to download schemas."
+                "Run 'make fetch-xsds' to download schemas."
             )
         return XSDValidator(xsd_cache_dir)
 

@@ -58,7 +58,6 @@ def _create_sample_contact_person(prefix="Dr.", first_name="John", last_name="Sm
     }
 
 
-@pytest.mark.xml_validation
 class TestEPAKeyContactsXMLGeneration:
     """Test cases for EPA Key Contacts XML generation service."""
 
@@ -285,14 +284,12 @@ class TestEPAKeyContactsXSDValidation:
         """Create XSD validator with cache directory."""
         xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
         if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
+            pytest.skip("XSD cache directory not found. Run 'make fetch-xsds' to download schemas.")
         xsd_path = xsd_cache_dir / "EPA_KeyContacts_2_0-V2.0.xsd"
         if not xsd_path.exists():
             pytest.skip(
                 "EPA_KeyContacts_2_0-V2.0.xsd not found in cache. "
-                "Run 'flask task fetch-xsds' to download schemas."
+                "Run 'make fetch-xsds' to download schemas."
             )
         return XSDValidator(xsd_cache_dir)
 

@@ -12,7 +12,6 @@ from src.services.xml_generation.models.attachment import (
 )
 
 
-@pytest.mark.xml_validation
 class TestAttachmentFile:
     """Test cases for AttachmentFile model."""
 
@@ -113,7 +112,6 @@ class TestAttachmentFile:
             AttachmentFile.from_file_path(nonexistent_path)
 
 
-@pytest.mark.xml_validation
 class TestAttachmentGroup:
     """Test cases for AttachmentGroup model."""
 
@@ -192,7 +190,6 @@ class TestAttachmentGroup:
         ]
 
 
-@pytest.mark.xml_validation
 class TestAttachmentData:
     """Test cases for AttachmentData model."""
 

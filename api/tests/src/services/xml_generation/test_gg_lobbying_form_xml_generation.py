@@ -33,7 +33,6 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
 class TestGGLobbyingFormXMLGeneration:
     """Test cases for GG_LobbyingForm XML generation service."""
 
@@ -203,14 +202,12 @@ class TestGGLobbyingFormXSDValidation:
         """Create XSD validator with cache directory."""
         xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
         if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
+            pytest.skip("XSD cache directory not found. Run 'make fetch-xsds' to download schemas.")
         # Check if GG_LobbyingForm XSD exists
         gg_lobbying_form_xsd_path = xsd_cache_dir / "GG_LobbyingForm-V1.1.xsd"
         if not gg_lobbying_form_xsd_path.exists():
             pytest.skip(
-                "GG_LobbyingForm-V1.1.xsd not found in cache. Run 'flask task fetch-xsds' to download schemas."
+                "GG_LobbyingForm-V1.1.xsd not found in cache. Run 'make fetch-xsds' to download schemas."
             )
         return XSDValidator(xsd_cache_dir)
 

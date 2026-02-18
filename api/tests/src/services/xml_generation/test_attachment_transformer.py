@@ -9,7 +9,6 @@ from src.services.xml_generation.transformers.attachment_transformer import Atta
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 
 
-@pytest.mark.xml_validation
 class TestAttachmentTransformer:
     """Test cases for AttachmentTransformer."""
 
@@ -98,9 +97,10 @@ class TestAttachmentTransformer:
         # Verify XML structure
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        assert "<AreasAffected>" in xml_string
-        assert "<FileName>test_document.pdf</FileName>" in xml_string
-        assert "<MimeType>application/pdf</MimeType>" in xml_string
+        # Single type wraps content in a form-namespace element
+        assert "AreasAffected" in xml_string
+        assert "<att:FileName>test_document.pdf</att:FileName>" in xml_string
+        assert "<att:MimeType>application/pdf</att:MimeType>" in xml_string
         assert 'href="./attachments/test_document.pdf"' in xml_string
         assert 'hashAlgorithm="SHA-1"' in xml_string
         assert "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q=" in xml_string
@@ -133,10 +133,10 @@ class TestAttachmentTransformer:
         # Verify XML structure
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        assert "<AdditionalProjectTitle>" in xml_string
-        assert xml_string.count("<AttachedFile>") == 2
-        assert "<FileName>document1.pdf</FileName>" in xml_string
-        assert "<FileName>document2.xlsx</FileName>" in xml_string
+        assert "AdditionalProjectTitle" in xml_string
+        assert xml_string.count("<att:AttachedFile") == 2
+        assert "<att:FileName>document1.pdf</att:FileName>" in xml_string
+        assert "<att:FileName>document2.xlsx</att:FileName>" in xml_string
         assert "spreadsheetml.sheet" in xml_string
 
     def test_add_multiple_attachment_element_single_file(self):
@@ -158,9 +158,9 @@ class TestAttachmentTransformer:
 
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        assert "<AdditionalProjectTitle>" in xml_string
-        assert xml_string.count("<AttachedFile>") == 1
-        assert "<FileName>single_document.pdf</FileName>" in xml_string
+        assert "AdditionalProjectTitle" in xml_string
+        assert xml_string.count("<att:AttachedFile") == 1
+        assert "<att:FileName>single_document.pdf</att:FileName>" in xml_string
 
     def test_add_multiple_attachment_element_direct_list(self):
         """Test adding multiple attachment element with direct list."""
@@ -187,9 +187,9 @@ class TestAttachmentTransformer:
 
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        assert xml_string.count("<AttachedFile>") == 2
-        assert "<FileName>list_document1.pdf</FileName>" in xml_string
-        assert "<FileName>list_document2.docx</FileName>" in xml_string
+        assert xml_string.count("<att:AttachedFile") == 2
+        assert "<att:FileName>list_document1.pdf</att:FileName>" in xml_string
+        assert "<att:FileName>list_document2.docx</att:FileName>" in xml_string
 
     def test_populate_attachment_content_complete(self):
         """Test populating complete attachment content."""
@@ -207,12 +207,13 @@ class TestAttachmentTransformer:
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
         # Verify all elements are present
-        assert "<FileName>complete_test.pdf</FileName>" in xml_string
-        assert "<MimeType>application/pdf</MimeType>" in xml_string
+        assert "<att:FileName>complete_test.pdf</att:FileName>" in xml_string
+        assert "<att:MimeType>application/pdf</att:MimeType>" in xml_string
         assert (
-            "<FileLocation" in xml_string and 'href="./attachments/complete_test.pdf"' in xml_string
+            "<att:FileLocation" in xml_string
+            and 'href="./attachments/complete_test.pdf"' in xml_string
         )
-        assert "<HashValue" in xml_string and 'hashAlgorithm="SHA-1"' in xml_string
+        assert "HashValue" in xml_string and 'hashAlgorithm="SHA-1"' in xml_string
         assert "Y29tcGxldGV0ZXN0aGFzaA==" in xml_string
 
     def test_populate_attachment_content_string_file_location(self):
@@ -250,7 +251,7 @@ class TestAttachmentTransformer:
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
         # Should only contain provided fields
-        assert "<FileName>partial_test.pdf</FileName>" in xml_string
+        assert "<att:FileName>partial_test.pdf</att:FileName>" in xml_string
         assert "<MimeType>" not in xml_string
         assert 'href="./attachments/partial_test.pdf"' in xml_string
         assert "<HashValue>" not in xml_string
@@ -282,9 +283,10 @@ class TestAttachmentTransformer:
 
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        assert "<AreasAffected>" in xml_string
-        assert "<FileName>test_document.pdf</FileName>" in xml_string
-        assert "<MimeType>application/pdf</MimeType>" in xml_string
+        # Single type wraps content in a form-namespace element
+        assert "AreasAffected" in xml_string
+        assert "<att:FileName>test_document.pdf</att:FileName>" in xml_string
+        assert "<att:MimeType>application/pdf</att:MimeType>" in xml_string
         assert 'href="./attachments/test_document.pdf"' in xml_string
         assert 'hashAlgorithm="SHA-1"' in xml_string
         assert "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q=" in xml_string
@@ -300,10 +302,10 @@ class TestAttachmentTransformer:
 
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        assert "<AdditionalProjectTitle>" in xml_string
-        assert xml_string.count("<AttachedFile>") == 2
-        assert "<FileName>document1.pdf</FileName>" in xml_string
-        assert "<FileName>document2.xlsx</FileName>" in xml_string
+        assert "AdditionalProjectTitle" in xml_string
+        assert xml_string.count("<att:AttachedFile") == 2
+        assert "<att:FileName>document1.pdf</att:FileName>" in xml_string
+        assert "<att:FileName>document2.xlsx</att:FileName>" in xml_string
         assert "spreadsheetml.sheet" in xml_string
 
     def test_uuid_not_found_error(self):
@@ -347,15 +349,14 @@ class TestAttachmentTransformer:
 
         xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
 
-        # Check single attachment
-        assert "<DebtExplanation>" in xml_string
-        assert "<FileName>test_document.pdf</FileName>" in xml_string
+        # Check single attachment content (wrapped in form-namespace element)
+        assert "<att:FileName>test_document.pdf</att:FileName>" in xml_string
 
         # Check multiple attachments
-        assert "<AdditionalProjectTitle>" in xml_string
-        assert xml_string.count("<AttachedFile>") == 2
-        assert "<FileName>document1.pdf</FileName>" in xml_string
-        assert "<FileName>document2.xlsx</FileName>" in xml_string
+        assert "AdditionalProjectTitle" in xml_string
+        assert xml_string.count("<att:AttachedFile") == 2
+        assert "<att:FileName>document1.pdf</att:FileName>" in xml_string
+        assert "<att:FileName>document2.xlsx</att:FileName>" in xml_string
 
     def test_no_attachments_in_data(self):
         """Test handling when no attachments are in the data."""

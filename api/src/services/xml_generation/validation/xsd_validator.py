@@ -38,7 +38,7 @@ class XSDValidator:
         if not self.xsd_cache_dir.exists():
             raise XSDValidationError(
                 f"XSD cache directory does not exist: {xsd_cache_dir}. "
-                "Run 'flask task fetch-xsds' to download XSD files first."
+                "Run 'make fetch-xsds' to download XSD files first."
             )
 
         self._schemas: dict[str, xmlschema.XMLSchema] = {}
@@ -61,7 +61,7 @@ class XSDValidator:
         if not xsd_path.exists():
             raise XSDValidationError(
                 f"XSD file not found: {xsd_path}. "
-                f"Run 'flask task fetch-xsds' to download XSD files first."
+                f"Run 'make fetch-xsds' to download XSD files first."
             )
 
         return xsd_path

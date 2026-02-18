@@ -135,7 +135,7 @@ def generate_xml_command(
 @click.option(
     "--cache-dir",
     type=click.Path(),
-    help="Directory containing cached XSD files (default: ./xsd_cache). Run 'flask task fetch-xsds' first.",
+    help="Directory containing cached XSD files (default: ./xsd_cache). Run 'make fetch-xsds' first.",
 )
 @click.option(
     "--output",
@@ -157,7 +157,7 @@ def validate_xml_generation_command(
 ) -> None:
     """Run XML validation tests against XSD schemas.
 
-    **Prerequisites**: Run 'flask task fetch-xsds' first to download XSD files.
+    **Prerequisites**: Run 'make fetch-xsds' first to download XSD files.
 
     This validates that generated XML conforms to Grants.gov XSD schemas.
     Flask handles DB/logging setup automatically.
@@ -193,7 +193,7 @@ def validate_xml_generation_command(
         if not cache_path.exists():
             click.echo(
                 f"Error: XSD cache directory not found: {cache_dir}\n"
-                "Run 'flask task fetch-xsds' first to download XSD files.",
+                "Run 'make fetch-xsds' first to download XSD files.",
                 err=True,
             )
             sys.exit(1)
@@ -272,13 +272,13 @@ def fetch_xsds_command(
 
     Examples:
         # Fetch all XSD files (uses ./xsd_cache by default)
-        flask task fetch-xsds
+        make fetch-xsds
 
         # Fetch XSDs to a specific cache directory
-        flask task fetch-xsds --cache-dir /tmp/xsd_cache
+        make fetch-xsds --cache-dir /tmp/xsd_cache
 
         # Fetch XSD for a specific form
-        flask task fetch-xsds --form SF424_4_0
+        make fetch-xsds --form SF424_4_0
     """
     logger = logging.getLogger(__name__)
 
