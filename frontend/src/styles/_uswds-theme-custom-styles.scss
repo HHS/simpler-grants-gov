@@ -796,3 +796,19 @@ dl {
     background-image: none;
   }
 }
+
+// force scrolling on some search filters
+.usa-accordion__heading.force-scrolling {
+  position: relative;
+  z-index: 1;
+}
+.usa-accordion__content.force-scrolling {
+  position: relative;
+  @include u-maxh("mobile-lg");
+  overflow-y: auto;
+}
+
+// override skipnav's hardcoded `z-index:100`
+.usa-skipnav {
+  z-index: z-index("top");
+}
