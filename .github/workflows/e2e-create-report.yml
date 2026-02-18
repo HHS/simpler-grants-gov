@@ -1,5 +1,10 @@
 name: Create Merged Test Report
-on: workflow_call
+on:
+  workflow_call:
+    inputs:
+      run_id:
+        description: "github actions id for run to grab artifacts from"
+        type: number
 
 env:
   NODE_VERSION: 24
@@ -29,6 +34,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: frontend/all-blob-reports
+          run-id: ${{ inputs.run_id || github.run_id }}
           pattern: blob-report-shard-*
           merge-multiple: true
 
