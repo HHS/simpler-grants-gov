@@ -2,10 +2,11 @@
 
 import { useUser } from "src/services/auth/useUser";
 import { submitApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
+import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   ApplicationDetail,
   ApplicationHistory,
-  Status,
+  ApplicationStatus,
 } from "src/types/applicationResponseTypes";
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
@@ -36,16 +37,19 @@ const ApplicationContainer = ({
   attachments,
   opportunity,
   applicationHistory,
+  latestApplicationSubmission,
 }: {
   applicationDetails: ApplicationDetail;
   attachments: Attachment[];
   opportunity: OpportunityDetail;
   applicationHistory: ApplicationHistory[];
+  latestApplicationSubmission: ApplicationSubmission | null;
 }) => {
   const forms = applicationDetails.competition.competition_forms;
   const applicationForms = applicationDetails.application_forms;
   const applicationId = applicationDetails.application_id;
   const applicationStatus = applicationDetails.application_status;
+  const applicationDetailsObject = applicationDetails;
 
   const { user } = useUser();
   const token = user?.token || null;
@@ -99,8 +103,9 @@ const ApplicationContainer = ({
   return (
     <>
       {(success ||
-        applicationDetails.application_status === Status.SUBMITTED ||
-        applicationDetails.application_status === Status.ACCEPTED) && (
+        applicationDetails.application_status === ApplicationStatus.SUBMITTED ||
+        applicationDetails.application_status ===
+          ApplicationStatus.ACCEPTED) && (
         <SummaryBox>
           <SummaryBoxHeading headingLevel="h3">
             {t("submissionSuccess.title")}
@@ -164,14 +169,14 @@ const ApplicationContainer = ({
         submissionLoading={loading}
         opportunityName={opportunity.opportunity_title}
         instructionsDownloadPath={instructionsDownloadPath}
+        latestApplicationSubmission={latestApplicationSubmission}
       />
       <OpportunityCard opportunityOverview={opportunity} />
       <ApplicationFormsTable
         applicationForms={applicationForms}
-        applicationId={applicationId}
-        forms={forms}
-        errors={validationErrors}
         competitionInstructionsDownloadPath={instructionsDownloadPath}
+        errors={validationErrors}
+        applicationDetailsObject={applicationDetailsObject}
       />
       <AttachmentsCard
         applicationId={applicationId}

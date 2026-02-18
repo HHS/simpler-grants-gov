@@ -26,6 +26,7 @@ from src.db.models.user_models import User
 from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
 from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0
+from src.form_schema.forms.sf424b import SF424b_v1_1
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_form,
@@ -297,6 +298,12 @@ def _build_organizations_and_users(
         )
         _add_application(
             db_session,
+            competition=competition_container.get_comp_for_form(SF424b_v1_1),
+            app_owner=many_app_user,
+            application_name="App for SF424bv1.1",
+        )
+        _add_application(
+            db_session,
             competition=competition_container.get_comp_for_form(SF424_v4_0),
             app_owner=org3,
             application_name="My quite long organization application name that'll take up almost as much space",
@@ -347,6 +354,25 @@ def _build_organizations_and_users(
     )
 
     user_scenarios.append("api_user - API-only user (no OAuth, API key only)")
+
+    ###############################
+    # Workflow management user
+    ###############################
+    (
+        UserBuilder(
+            uuid.UUID("aed2ad32-8427-41bd-aee7-199310292941"),
+            db_session,
+            "Workflow Management System User",
+        )
+        .with_api_key("local-workflow-user-api-key")
+        .with_profile(first_name="System", last_name="User")
+        .with_internal_role(
+            "Workflow internal role", privileges=[Privilege.INTERNAL_WORKFLOW_ACCESS]
+        )
+        .build()
+    )
+
+    user_scenarios.append("Workflow management user - Needed for certain workflow related tasks")
 
     ##############################################################
     # Log output

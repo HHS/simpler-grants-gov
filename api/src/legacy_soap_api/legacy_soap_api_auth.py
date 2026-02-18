@@ -1,8 +1,10 @@
 import logging
 import ssl
+from datetime import datetime
 from typing import Any
 from urllib.parse import unquote
 
+import jwt
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
@@ -20,6 +22,9 @@ from src.util.datetime_util import get_now_us_eastern_date
 logger = logging.getLogger(__name__)
 
 MTLS_CERT_HEADER_KEY = "X-Amzn-Mtls-Clientcert"
+USE_SOAP_JWT_HEADER_KEY = "Use-Soap-Jwt"
+S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY = "S2S_PARTNER_CERTID_JWT_B64"
+LOG_LOCAL_RESPONSE_HEADER_KEY = "Log-Local-Response"
 
 
 class SOAPClientCertificateNotConfigured(Exception):
@@ -32,7 +37,7 @@ class SOAPClientCertificateLookupError(Exception):
 
 class SOAPClientCertificate(BaseModel):
     cert: str
-    serial_number: int
+    serial_number: str
     fingerprint: str
     legacy_certificate: LegacyCertificate | None = None
 
@@ -109,9 +114,9 @@ def get_soap_client_certificate(
 ) -> SOAPClientCertificate:
     cert_str = unquote(urlencoded_cert)
     cert = load_pem_x509_certificate(cert_str.encode(), default_backend())
-
+    serial_number_hex = format(int(cert.serial_number), "032x")
     legacy_certificate = db_session.execute(
-        select(LegacyCertificate).where(LegacyCertificate.serial_number == str(cert.serial_number))
+        select(LegacyCertificate).where(LegacyCertificate.serial_number == str(serial_number_hex))
     ).scalar_one_or_none()
     if legacy_certificate:
         add_extra_data_to_current_request_logs(
@@ -130,7 +135,7 @@ def get_soap_client_certificate(
         cert=cert_str,
         fingerprint=cert.fingerprint(hashes.SHA256()).hex(),
         issuer=cert.issuer.rfc4514_string(),
-        serial_number=cert.serial_number,
+        serial_number=str(serial_number_hex),
         legacy_certificate=legacy_certificate,
     )
 
@@ -168,3 +173,18 @@ def validate_certificate(
         raise SOAPClientCertificateLookupError("certificate does not have agency")
 
     return legacy_certificate
+
+
+def generate_soap_jwt(
+    cert_id: str,
+    expiration_time: datetime,
+    soap_partner_gateway_uri: str,
+    soap_partner_gateway_auth_key: str,
+) -> str:
+    payload = {
+        "sub": "partner_soap_call",
+        "iss": soap_partner_gateway_uri,
+        "exp": expiration_time,
+        "certId": cert_id,
+    }
+    return jwt.encode(payload=payload, key=soap_partner_gateway_auth_key, algorithm="HS256")

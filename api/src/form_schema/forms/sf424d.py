@@ -4,9 +4,11 @@ from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
 from src.form_schema.shared import COMMON_SHARED_V1
 
-DIRECTIONS = """Public reporting burden for this collection of information is estimated to average 15 minutes per response, including time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information. Send comments regarding the burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to the Office of Management and Budget, Paperwork Reduction Project (0348-0042), Washington, DC 20503.
+BURDEN_STATEMENT = """Public reporting burden for this collection of information is estimated to average 15 minutes per response, including time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information. Send comments regarding the burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to the Office of Management and Budget, Paperwork Reduction Project (0348-0042), Washington, DC 20503."""
 
-NOTE: Certain of these assurances may not be applicable to your project or program. If you have questions, please contact the Awarding Agency. Further, certain Federal assistance awarding agencies may require applicants to certify to additional assurances. If such is the case, you will be notified.
+DIRECTIONS = """NOTE: Certain of these assurances may not be applicable to your project or program. If you have questions, please contact the Awarding Agency. Further, certain Federal assistance awarding agencies may require applicants to certify to additional assurances. If such is the case, you will be notified.
+
+As the duly authorized representative of the applicant, I certify that the applicant:
 
 1. Has the legal authority to apply for Federal assistance, and the institutional, managerial and financial capability (including funds sufficient to pay the non-Federal share of project costs) to ensure proper planning, management and completion of project described in this application.
 
@@ -72,7 +74,7 @@ FORM_JSON_SCHEMA = {
         },
         "date_signed": {
             "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("submitted_date")}],
-            "title": "Date Signed",
+            "title": "Date Submitted",
         },
     },
 }
@@ -80,14 +82,21 @@ FORM_JSON_SCHEMA = {
 FORM_UI_SCHEMA = [
     {
         "type": "section",
-        "label": "1. Directions",
+        "label": "1. Burden Statement",
+        "name": "burdenStatement",
+        "description": BURDEN_STATEMENT,
+        "children": [],
+    },
+    {
+        "type": "section",
+        "label": "2. Acknowledgement and assurances",
         "name": "directions",
         "description": DIRECTIONS,
         "children": [],
     },
     {
         "type": "section",
-        "label": "2. Signature",
+        "label": "3. Signature",
         "name": "signature",
         "children": [
             {"type": "null", "definition": "/properties/signature"},
@@ -115,6 +124,7 @@ FORM_XML_TRANSFORM_RULES = {
         "namespaces": {
             "default": "http://apply.grants.gov/forms/SF424D-V1.1",
             "SF424D": "http://apply.grants.gov/forms/SF424D-V1.1",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
             "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
             "glob": "http://apply.grants.gov/system/Global-V1.0",
         },
@@ -132,7 +142,14 @@ FORM_XML_TRANSFORM_RULES = {
         },
     },
     # Field mappings - order matches XSD sequence
-    # FormVersionIdentifier is handled by the framework
+    # FormVersionIdentifier (required) - must be first child element per XSD
+    "form_version_identifier": {
+        "xml_transform": {
+            "target": "FormVersionIdentifier",
+            "namespace": "glob",
+            "static_value": "1.1",
+        }
+    },
     # AuthorizedRepresentative (optional) - complex type containing RepresentativeName and RepresentativeTitle
     # Uses compose_object to wrap flat fields (signature, title) into nested XML element
     # Note: Key cannot start with underscore as those are treated as metadata

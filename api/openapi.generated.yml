@@ -22,6 +22,7 @@ info:
 tags:
 - name: Health
 - name: Opportunity v1
+- name: Opportunity v1 - for Grantors
 - name: Extract v1
 - name: Agency v1
 - name: Organization v1
@@ -34,6 +35,7 @@ tags:
   description: CommonGrants-compliant API routes for searching opportunities to promote
     interoperability across grant systems. Learn more by visiting CommonGrants.org
 - name: LOCAL ONLY
+- name: Workflow
 servers: .
 paths:
   /health:
@@ -230,6 +232,52 @@ paths:
       security:
       - ApiUserKeyAuth: []
       - ApiKeyAuth: []
+  /v1/workflows/events:
+    put:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowEventResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+      tags:
+      - Workflow
+      summary: Send Workflow Event
+      description: Trigger a new workflow or progress an existing one.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowEventRequest'
+      security:
+      - ApiJwtAuth: []
+      - ApiUserKeyAuth: []
   /v1/users/token/logout:
     post:
       parameters: []
@@ -515,6 +563,57 @@ paths:
               $ref: '#/components/schemas/ApplicationStartRequest'
       security:
       - ApiJwtAuth: []
+  /v1/grantors/opportunities/:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityCreateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal Server Error
+      tags:
+      - Opportunity v1 - for Grantors
+      summary: Create a new opportunity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunityCreateRequest'
+      security:
+      - ApiJwtAuth: []
+      - ApiUserKeyAuth: []
   /alpha/forms/{form_id}:
     get:
       parameters:
@@ -1291,7 +1390,7 @@ paths:
       summary: Competition Get
       security:
       - ApiJwtAuth: []
-      - ApiKeyAuth: []
+      - ApiUserKeyAuth: []
   /common-grants/opportunities/{oppId}:
     get:
       parameters:
@@ -1562,6 +1661,49 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CompetitionFlagUpdate'
+      security:
+      - ApiUserKeyAuth: []
+  /alpha/competitions/{competition_id}/forms:
+    put:
+      parameters:
+      - in: path
+        name: competition_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetitionResponseAlpha'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+      tags:
+      - Competition Alpha
+      summary: Put Competition Forms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetitionFormsSetRequest'
       security:
       - ApiUserKeyAuth: []
   /alpha/applications/{application_id}/submit:
@@ -3363,6 +3505,122 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    WorkflowEntity:
+      type: object
+      properties:
+        entity_type:
+          description: The type of entity to associate with the workflow - different
+            workflows require different entities.
+          enum:
+          - opportunity
+          - application
+          type:
+          - string
+        entity_id:
+          type: string
+          format: uuid
+          description: The ID of the entity, for example an opportunity_id
+          example: 123e4567-e89b-12d3-a456-426614174000
+      required:
+      - entity_id
+      - entity_type
+    StartWorkflowContext:
+      type: object
+      properties:
+        workflow_type:
+          description: The type of workflow to initiate
+          enum:
+          - opportunity_publish
+          - application_submission
+          - initial_prototype
+          - basic_test_workflow
+          type:
+          - string
+        entities:
+          type: array
+          minItems: 1
+          maxItems: 5
+          description: A list of entities (1-5) to associate with the workflow.
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/WorkflowEntity'
+      required:
+      - entities
+      - workflow_type
+    ProcessWorkflowContext:
+      type: object
+      properties:
+        workflow_id:
+          type: string
+          format: uuid
+          description: The ID of the existing workflow to progress
+          example: 123e4567-e89b-12d3-a456-426614174000
+        event_to_send:
+          type: string
+          minLength: 1
+          description: The specific event/action to trigger in the state machine
+          example: approve
+      required:
+      - event_to_send
+      - workflow_id
+    WorkflowEventRequest:
+      type: object
+      properties:
+        event_type:
+          description: 'The category of event: either starting a new workflow or processing
+            an existing one'
+          enum:
+          - start_workflow
+          - process_workflow
+          type:
+          - string
+        start_workflow_context:
+          description: Context and entities required to initialize a new workflow.
+            Only allowed if event_type is 'start_workflow'.
+          type:
+          - object
+          $ref: '#/components/schemas/StartWorkflowContext'
+        process_workflow_context:
+          description: Information required to progress an existing workflow state.
+            Only allowed if event_type is 'process_workflow'.
+          type:
+          - object
+          $ref: '#/components/schemas/ProcessWorkflowContext'
+        metadata:
+          type: object
+          default: {}
+          description: 'A freeform JSON object for the particular event, if needed[cite:
+            127].'
+          example:
+            source_system: grants_solutions
+            priority: high
+          additionalProperties: {}
+      required:
+      - event_type
+    WorkflowEventResponseData:
+      type: object
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          description: The tracking ID for the workflow event
+          example: 123e4567-e89b-12d3-a456-426614174000
+    WorkflowEventResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/WorkflowEventResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserTokenLogoutResponse:
       type: object
       properties:
@@ -4141,6 +4399,12 @@ components:
           - archived
           type: &id006
           - string
+        top_level_agency_code:
+          type:
+          - string
+          - 'null'
+          description: The top-level (parent) agency
+          example: HHS
         created_at:
           type: string
           format: date-time
@@ -4205,6 +4469,11 @@ components:
         close_date:
           type: object
           description: The counts of close_date values in the full response
+          additionalProperties:
+            type: integer
+        post_date:
+          type: object
+          description: The counts of post_date values in the full response
           additionalProperties:
             type: integer
     OpportunitySearchResponseV1:
@@ -4339,6 +4608,153 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationStartResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OpportunityCreateRequest:
+      type: object
+      properties:
+        opportunity_number:
+          type: string
+          maxLength: 40
+          description: The funding opportunity number (must be unique)
+          example: ABC-2026-001
+        opportunity_title:
+          type: string
+          maxLength: 255
+          description: The title of the opportunity
+          example: Research Grant for Climate Innovation
+        agency_id:
+          type: string
+          format: uuid
+          description: The UUID of the agency that will own this opportunity
+          example: 123e4567-e89b-12d3-a456-426614174000
+        category:
+          description: The opportunity category
+          enum:
+          - discretionary
+          - mandatory
+          - continuation
+          - earmark
+          - other
+          type:
+          - string
+        category_explanation:
+          type: string
+          maxLength: 255
+          description: Explanation of the category (required when category is 'other')
+          example: Competitive research grant
+      required:
+      - agency_id
+      - category
+      - opportunity_number
+      - opportunity_title
+    OpportunityGrantor:
+      type: object
+      properties:
+        opportunity_id:
+          type: string
+          format: uuid
+          description: The internal ID of the opportunity
+          example: 123e4567-e89b-12d3-a456-426614174000
+        legacy_opportunity_id:
+          type: integer
+          description: The internal legacy ID of the opportunity
+          example: 12345
+        opportunity_number:
+          type:
+          - string
+          - 'null'
+          description: The funding opportunity number
+          example: ABC-123-XYZ-001
+        opportunity_title:
+          type:
+          - string
+          - 'null'
+          description: The title of the opportunity
+          example: Research into conservation techniques
+        agency:
+          type:
+          - string
+          - 'null'
+          description: 'DEPRECATED - use: agency_code'
+          example: US-ABC
+        agency_code:
+          type:
+          - string
+          - 'null'
+          description: The agency who created the opportunity
+          example: US-ABC
+        agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the agency who created the opportunity
+          example: Department of Examples
+        top_level_agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the top level agency who created the oppportunity
+          example: Department of Examples
+        category:
+          description: The opportunity category
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
+          - discretionary
+          enum: *id002
+          type:
+          - string
+          - 'null'
+          - 'null'
+        category_explanation:
+          type:
+          - string
+          - 'null'
+          description: Explanation of the category when the category is 'O' (other)
+          example: null
+        opportunity_assistance_listings:
+          type: array
+          items:
+            type: *id003
+            $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+        summary:
+          type: *id004
+          $ref: '#/components/schemas/OpportunitySummaryV1'
+        opportunity_status:
+          description: The current status of the opportunity
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+          - posted
+          enum: *id005
+          type: *id006
+        top_level_agency_code:
+          type:
+          - string
+          - 'null'
+          description: The top-level (parent) agency
+          example: HHS
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_draft:
+          type: boolean
+          description: Whether the opportunity is a draft
+    OpportunityCreateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityGrantor'
         status_code:
           type: integer
           description: The HTTP status code
@@ -5069,6 +5485,12 @@ components:
             - legacy_agency_assigner
             - manage_internal_roles
             - manage_competition
+            - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - update_opportunity
+            - publish_opportunity
+            - internal_workflow_access
             type:
             - string
     UserOrganization:
@@ -5218,6 +5640,12 @@ components:
             - legacy_agency_assigner
             - manage_internal_roles
             - manage_competition
+            - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - update_opportunity
+            - publish_opportunity
+            - internal_workflow_access
             type:
             - string
     UserCanAccessResponse:
@@ -6020,6 +6448,12 @@ components:
           - posted
           enum: *id005
           type: *id006
+        top_level_agency_code:
+          type:
+          - string
+          - 'null'
+          description: The top-level (parent) agency
+          example: HHS
         created_at:
           type: string
           format: date-time
@@ -6215,6 +6649,12 @@ components:
             - legacy_agency_assigner
             - manage_internal_roles
             - manage_competition
+            - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - update_opportunity
+            - publish_opportunity
+            - internal_workflow_access
             type:
             - string
     UserInvitationItem:
@@ -6767,6 +7207,12 @@ components:
             - legacy_agency_assigner
             - manage_internal_roles
             - manage_competition
+            - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - update_opportunity
+            - publish_opportunity
+            - internal_workflow_access
             type:
             - string
     OrganizationUser:
@@ -6837,6 +7283,33 @@ components:
           description: Whether simpler grants are enabled for this competition
       required:
       - is_simpler_grants_enabled
+    FormReplace:
+      type: object
+      properties:
+        form_id:
+          type: string
+          format: uuid
+          description: The primary key ID of the form
+          example: 123e4567-e89b-12d3-a456-426614174000
+        is_required:
+          type: boolean
+          description: Whether the form is required
+      required:
+      - form_id
+      - is_required
+    CompetitionFormsSetRequest:
+      type: object
+      properties:
+        forms:
+          type: array
+          minItems: 1
+          description: List of forms to set on the competition
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/FormReplace'
+      required:
+      - forms
     AbstractResponse:
       type: object
       properties:

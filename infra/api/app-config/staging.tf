@@ -46,7 +46,7 @@ module "staging_config" {
     # Login.gov OAuth
     ENABLE_XML_GENERATION = 1
 
-
+    ENABLE_WORKFLOW_ENDPOINTS = 1
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"
@@ -55,6 +55,9 @@ module "staging_config" {
     FRONTEND_URL             = "https://staging.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
+
+    # Workflow
+    WORKFLOW_SERVICE_INTERNAL_USER_ID = "903bf2e6-b213-4744-9f95-66ccfd98a819"
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

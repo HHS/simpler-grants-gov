@@ -73,7 +73,16 @@ export const messages = {
       description:
         "The Simpler.Grants.gov team hosts public demonstrations of our newest features and functionality.  These virtual sessions highlight our progress, share user research insights, and showcase community engagement efforts. ",
       watch: "Watch recordings of past Big Demos",
-      watchLink: "January 15, 2025",
+      watchLinks: [
+        {
+          text: "January 29, 2026",
+          link: "https://youtu.be/LBIqOTKOFf0?si=O0Ec4PaNuAByeHA9",
+        },
+        {
+          text: "January 15, 2025",
+          link: "https://youtu.be/uASJmvcy0aM?si=OniP7Z7KU8ie3FhS",
+        },
+      ],
     },
     codingChallenge: {
       title: "Collaborative Coding Challenge",
@@ -116,36 +125,49 @@ export const messages = {
     startApplicationModal: {
       startApplicationButtonText: "Start new application",
       cancelButtonText: "Cancel",
-      error: "Error starting the application. Please try again.",
+      error: "Internal error starting application. Please try again later.",
+      organizationLoadError:
+        "We couldn't load your organizations right now. Please try again.<br></br>If the problem continues, contact product support, <telephone>1-800-518-4726</telephone> or <email>simpler@grants.gov</email>.",
       login: "Sign in to work on the application",
       loggedOut:
         "You must be logged in to proceed. Please login and start your application again.",
       requiredText: "All fields are required.",
-      saveButtonText: "Create Application",
+      saveButtonText: "Create application",
       title: "Start a new application",
+      helpfulTips: {
+        title: "Helpful tips to get started:",
+        bullet1:
+          "You don't need to finish an application in one session, easily save and return to make changes.",
+        bullet2:
+          "All draft and past applications can be accessed from your <applicationsPageLink>Applications</applicationsPageLink> page.",
+        bullet3:
+          "Only create a new application if you're applying for the first time or need to submit a separate application.",
+      },
       ineligibleTitle:
         "It looks like you're not eligible to start a new application through this site",
       applyingFor: "Applying for: ",
       fields: {
         name: {
-          label: "Name of this application",
+          label: "Name this application",
           description:
-            "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track.",
-          validationError: "Enter a filing name. You can change this later.",
+            "Create a unique and descriptive application filing name so it is easy for you and the granting agency to track (e.g. NAA Tech Tribes 2025). You can change this later.",
+          validationError:
+            "Please enter a name to create an application, you may change this anytime.",
         },
         organizationSelect: {
-          label: "Who's applying?",
+          label: "Who is applying?",
           default: "-Select-",
-          notListed: "My organization isn't listed",
+          asIndividual: "As an individual (myself)",
+          notListed: "I don't see my organization listed",
           validationError:
-            "Select an organization. If yours isn't listed, you'll need to apply through Grants.gov.",
+            "Select an applicant type, you can add your organization later if it isn't listed.",
         },
       },
       description: {
         organizationIntro:
           "This opportunity is part of a pilot program. To apply through Simpler.Grants.gov, you must:",
         pilotIntro:
-          "Welcome to our new, simpler application process. In partnership with the agency, we ensure your application is processed normally.",
+          "Welcome to our new, simpler application process. In partnership with the grantor agency, we ensure your application is processed by the agency.",
         organizationApply: "To apply as part of an organization you must:",
         applyingForOrg:
           "Be applying on behalf of an organization (individual applications aren't accepted at this time)",
@@ -269,18 +291,27 @@ export const messages = {
       applicantTypeIndividual: "Individual",
       applicationDownloadInstructions: "Download application instructions",
       applicationDownloadInstructionsLabel: "Instructions",
+      applicationSubmissionZipDownload: "Download your submitted application",
+      applicationSubmissionZipDownloadLabel:
+        "Application submission zip download",
+      applicationSubmissionZipDownloadLoadingMessage:
+        "We are preparing your submitted application for download. Please check back later.",
       specialInstructionsLabel: "Special instructions",
       specialInstructions: "No longer accepting applications",
       statusLabel: "Status",
       statusInProgress: "In progress",
       statusSubmitted: "Submitted",
-      statusAccepted: "Accepted",
       uei: "UEI",
       renewal: "Renewal",
       closeDate: "Close date",
       closed: "Closed",
       status: "Status",
       submit: "Submit application",
+      transferApplicaitonOwnership: "Transfer application ownership",
+      unassociatedApplicationAlert: {
+        title: "This application isn't associated with a valid organization.",
+        body: "You can continue working and your progress will be saved, but to submit on behalf of an organization, you must <link>select that organization and transfer ownership</link>.",
+      },
       editApplicationFilingNameModal: {
         buttonText: "Edit filing name",
         title: "Change application filing name",
@@ -396,6 +427,23 @@ export const messages = {
       navTitle: "Sections in this form",
       unsavedChangesWarning:
         "You have unsaved changes or attachments that will be lost if you select OK.",
+    },
+    transferOwnershipModal: {
+      title: "Transfer application ownership",
+      body: "<p>Choose the organization that should own this application. After ownership is transferred, you can continue your work and prepare for submission.</p> <p><strong>Don't see your organization?</strong> If your organization isn't listed, it may not be verified yet, or you may not have been invited. Contact your eBizPOC if you have questions about access.</p>",
+      selectTitle: "Who is applying?",
+      default: "- Select -",
+      warningTitle: "Important to know about ownership",
+      warningBody:
+        "Once you assign an organization, that choice is permanent. An application cannot be transferred to another organization or returned to an individual.",
+      actionConfirm: "Transfer ownership",
+      actionCancel: "Return to application",
+      transferErrorMessage:
+        "We couldn't transfer application ownership right now. Please try again.",
+      failedFetchingOrganizationErrorMessage:
+        "We couldn't load your organizations right now. Please try again.",
+      contactSupport:
+        "If the problem continues, contact product support, <tel>1-800-518-4726</tel> or <link>simpler@grants.gov</link>.",
     },
   },
   Index: {
@@ -774,6 +822,7 @@ export const messages = {
         agency: "Agency",
         category: "Category",
         status: "Opportunity status",
+        postedDate: "Posted Date",
         closeDate: "Closing date range",
         costSharing: "Cost sharing",
       },
@@ -833,7 +882,7 @@ export const messages = {
     validationError: "Search Validation Error",
     tooLongError: "Search terms must be no longer than 100 characters.",
     exportButton: {
-      title: "Export results",
+      title: "Export results as .csv",
     },
     betaAlert: {
       alertTitle: "How can we build a simpler search experience?",
@@ -909,6 +958,7 @@ export const messages = {
       page: "Page",
       sortby: "Sort by",
       closeDate: "Close date",
+      postedDate: "Posted date",
       costSharing: "Cost sharing",
       topLevelAgency: "Top level agency",
       andOr: "Query and/or operator",
@@ -958,103 +1008,163 @@ export const messages = {
       progress: {
         title: "What we're working on",
         contentItems: [
-          [
-            {
-              title: "Beta launch of Simpler Search on Grants.gov",
-              content:
-                "<p>We're launching Simpler Search directly on Grants.gov alongside the classic search experience. This gives users a choice, helps us test traffic, and supports tools to improve usability and iterate more quickly based on user data.</p><p><linkGithub4571>Follow #4571 on GitHub</linkGithub4571></p>",
-            },
-            {
-              title: "New opportunities for open-source collaboration",
-              content:
-                "<p>We're strengthening our open-source community by hosting our Discourse forum on a .gov domain and establishing regular public meetings to foster collaboration and transparency.</p><p><linkGithub4577>Follow #4577 on GitHub</linkGithub4577></p>",
-            },
-          ],
-          [
-            {
-              title: "An 'Apply' workflow pilot",
-              content:
-                "<p>We're piloting the end-to-end grant application journey with grant seekers, testing submissions to help scale future support for all agencies.</p><p><linkGithub4572>Follow #4572 on GitHub</linkGithub4572></p>",
-            },
-            {
-              title: "SOAP Proxy for the 'Apply' workflow",
-              content:
-                "<p>We're building a SOAP proxy to route all external applicant API traffic through Simpler.Grants.gov, setting the stage for a smooth shift to a modern REST interface.</p><p><linkGithub4575>Follow #4575 on GitHub</linkGithub4575></p>",
-            },
-          ],
-          [
-            {
-              title: "User research on permissions",
-              content:
-                "<p>We're researching how users manage roles and permissions, shaping a new model to support most Grants.gov applicants and simplify authorization.</p><p><linkGithub4576>Follow #4576 on GitHub</linkGithub4576></p>",
-            },
-            {
-              title: "Automated API key management",
-              content:
-                "<p>We're building tools so authorized users can securely generate and manage their API keys independently without admin support.</p><p><linkGithub4579>Follow #4579 on GitHub</linkGithub4579></p>",
-            },
-          ],
+          {
+            title: "Piloting smarter, easier budget forms",
+            content:
+              "<p>In collaboration with users from the Simpler Grants Co-Design Group, we're prototyping a smarter, easier-to-use budget form to directly address the most common challenges applicants face. The redesigned form will incorporate clearer instructions, simplified user flow, and auto-calculation of fields to reduce confusion and errors.</p><p><linkGithub7832>Follow #7832 on GitHub</linkGithub7832></p>",
+          },
+          {
+            title:
+              "Improve users' confidence in choosing competitive, relevant opportunities",
+            content:
+              "<p>We're excited to help you find and get opportunities you need. We are developing user-requested enhancements to Simpler Search, and we're also developing a new set of initiatives to help organizations find opportunities that are better tailored to their needs. This will result in reducing the time and effort required to discover opportunities, determine whether they're a strong fit, and align as a team to pursue them.</p><p><linkGithub7830>Follow #7830 on GitHub</linkGithub7830></p>",
+          },
+          {
+            title: "Scale opportunity coverage and form creation",
+            content:
+              "<p>Simpler's new, streamlined application experience will support enough forms to cover 35% of competitions on Grants.gov, enabling opportunities to be supported from more grantor agencies. This will be made possible with the addition of internal tools that reduce the manual effort needed to launch opportunities between different environments.</p><p><linkGithub7831>Follow #7831 on GitHub</linkGithub7831></p>",
+          },
+          {
+            title:
+              "Community-prioritized improvements & open source involvement",
+            content:
+              "<p>We remain committed to open, participatory software development. We have deepened our collaboration with the Co-Design Group by establishing routine check-ins and workshops that directly involved them in the agile delivery process. We selected a key agile deliverable to pilot our co-planning methodology and successfully advanced community-prioritized improvements by delivering two highly voted items from the public voting board (known as our <fiderBoardLink>Fider board</fiderBoardLink>). We will continue to host co-planning and working sessions, and increase community engagement.</p><p><linkGithub7790>Follow #7790 on GitHub</linkGithub7790></p>",
+          },
+          {
+            title: "Reducing burden of starting an application",
+            content:
+              "<p>We're making it easier for you to find the right opportunity and start an application. Each opportunity page will contain more information to help you decide if it meets your needs, and guide you through the process of starting an application when you're ready to apply. Usability testing will continue improving our forms so they're approachable and easy to follow. Our workflow will make it faster and easier to fill out applications, with improved navigation, helpful guidance, and clear status indicators.</p><p><linkGithub7906>Follow #7906 on GitHub</linkGithub7906></p>",
+          },
         ],
         link: "View all deliverables on GitHub",
       },
       milestones: {
         title: "What we've delivered",
-        contentTitle: "Early 2025",
+        contentTitle: "Late 2025",
         releaseNotesLink: "Read the latest release notes on our public wiki",
         contentItems: [
           {
-            title: "Simpler application workflow prototype",
+            title: "Launched Release Notes",
             content:
-              "We created a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we prototyped an application form with persistent data storage and scoped a pilot for a small subset of opportunities.",
+              "<p>We proudly announced the launch of release notes for Simpler.Grants.Gov! Our goal for these updates is to regularly showcase new features, important bug fixes, improvements to enhance your experience, and more. <releaseNotesLink>Read the latest release notes on our public wiki</releaseNotesLink>.</p>",
           },
           {
-            title:
-              "Full support for opportunity page attachments (NOFOs/downloads)",
+            title: "Improving the application workflow",
             content:
-              "The opportunity listings on Simpler.Grants.gov now show all of the information and file attachments available on Grants.gov. Design updates made the Notice of Funding Opportunity (NOFO) easier to access.",
+              "<p>We built on lessons learned from our 'Apply' workflow pilot, launching two opportunities for application through Simpler.Grants.gov while adding features based on direct user feedback and testing. We prepared to scale up to support more agencies. And we added an activity history that improves collaborating on applications.</p>",
           },
           {
-            title: "Authentication via Login.gov",
+            title: "Accelerating form development",
             content:
-              "Finalizing authentication enabled grant seekers to create an account using Login.gov's single sign-on platform. This move reduced the steps and friction users experience when signing up.",
+              "<p>We scaled our form repository to 15 commonly used forms, unlocking additional agency partnership opportunities for applications in the future. Using a shared JSON schema, our tool now instantly renders the form, letting developers and program staff build and preview forms in real time. This also allows Simpler data to map to the <commonGrantsProtocolLink>CommonGrants Protocol</commonGrantsProtocolLink>.</p>",
           },
           {
-            title: "Search & opportunity page improvements",
+            title: "Simplifying user permissions",
             content:
-              "Applying feedback from the community, we iterated on improvements that made it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.",
+              "<p>Grants.gov user roles and permissions can be cumbersome and may not align with how organizations work. We co-designed a new experience with applicants and grantors to simplify onboarding, improve visibility into organizational access, and make collaboration easier and more intuitive.</p>",
+          },
+          {
+            title: "Launched new changes to the Activity Dashboard",
+            content:
+              "<p>The Simpler.Grants.gov team has created a hub that allows users to quickly access saved searches and applications. To solve for the key pain point of finding active grants and managing work, this Activity Dashboard centralizes where users can manage their work and track their progress.</p>",
           },
         ],
-        archivedRoadmapTitle: "Late 2024",
-        archivedRoadmapItems: [
+        archivedRoadmapSections: [
           {
-            title: "RESTful API launch",
-            content:
-              "Our new modern API makes grants opportunity data more accessible, with an API‑first approach that prioritizes data and ensures that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data.",
+            sectionTitle: "Mid 2025",
+            sectionItems: [
+              {
+                title: "Beta launch of Simpler Search on Grants.gov",
+                content:
+                  "<p>We launched Simpler Search directly on Grants.gov alongside the classic search experience. This gave users a choice, helped us test traffic, and supported tools to improve usability and iterate more quickly based on user data.</p>",
+              },
+              {
+                title: "New opportunities for open-source collaboration",
+                content:
+                  "<p>We strengthened our open-source community by hosting our Discourse forum on a .gov domain and establishing regular public meetings to foster collaboration and transparency.</p>",
+              },
+              {
+                title: "An 'Apply' workflow pilot",
+                content:
+                  "<p>We piloted the end-to-end grant application journey with grant seekers, testing submissions to help scale future support for all agencies.</p>",
+              },
+              {
+                title: "SOAP Proxy for the 'Apply' workflow",
+                content:
+                  "<p>We built a SOAP proxy to route all external applicant API traffic through Simpler.Grants.gov, setting the stage for a smooth shift to a modern REST interface.</p>",
+              },
+              {
+                title: "User research on permissions",
+                content:
+                  "<p>We researched how users manage roles and permissions, shaping a new model to support most Grants.gov applicants and simplify authorization.</p>",
+              },
+              {
+                title: "Automated API key management",
+                content:
+                  "<p>We built tools so authorized users can securely generate and manage their API keys independently without admin support.</p>",
+              },
+            ],
           },
           {
-            title: "Coding Challenge pilot",
-            content:
-              "We're excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.",
+            sectionTitle: "Early 2025",
+            sectionItems: [
+              {
+                title: "Simpler application workflow prototype",
+                content:
+                  "<p>We created a comprehensive service blueprint showing how the existing Grants.gov application process could be simplified. Then, we prototyped an application form with persistent data storage and scoped a pilot for a small subset of opportunities.</p>",
+              },
+              {
+                title:
+                  "Full support for opportunity page  attachments (NOFOs/downloads)",
+                content:
+                  "<p>The opportunity listings on Simpler.Grants.gov now show all of the information and file attachments available on Grants.gov. Design updates made the Notice of Funding Opportunity (NOFO) easier to access.</p>",
+              },
+              {
+                title: "Authentication via Login.gov",
+                content:
+                  "<p>Finalizing authentication enabled grant seekers to create an account using Login.gov's single sign-on platform. This move reduced the steps and friction users experience when signing up.</p>",
+              },
+              {
+                title: "Search & opportunity page improvements",
+                content:
+                  "<p>Applying feedback from the community, we iterated on improvements that made it easier to adjust search filter criteria, share search results, and save relevant results and opportunities.</p>",
+              },
+            ],
           },
           {
-            title: "Search UI usability test",
-            content:
-              "We've conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.",
-          },
-          {
-            title: "Opportunity page launch",
-            content:
-              "You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.",
-          },
-          {
-            title: "First Co-Design Group recruitment",
-            content:
-              "We've recruited a cohort of community members with lived experience using Grants.gov to participate in the design process. Through a long-term engagement, these co-designers will ensure what we build delivers the most value to grant seekers who struggle most with the grants experience.",
-          },
-          {
-            title: "Search interface launch",
-            content:
-              "Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.",
+            sectionTitle: "Late 2024",
+            sectionItems: [
+              {
+                title: "RESTful API launch",
+                content:
+                  "<p>Our new modern API makes grants opportunity data more accessible, with an API‑first approach that prioritizes data and ensures that the Grants.gov website, 3rd‑party apps, and other services can more easily access grants data.</p>",
+              },
+              {
+                title: "Coding Challenge pilot",
+                content:
+                  "<p>We're excited to announce the successful pilot of the Collaborative Coding Challenge, which laid the groundwork for a scalable framework to support future open-source contributions. This event was conducted in a fully remote environment to bring together participants who engaged in innovative problem-solving and collaboration.</p>",
+              },
+              {
+                title: "Search UI usability test",
+                content:
+                  "<p>We've conducted sessions with grant seekers, grantors, and HHS staff to test the new design. This study revealed findings and uncovered tangible issues to be resolved in the next Search UI iteration.</p>",
+              },
+              {
+                title: "Opportunity page launch",
+                content:
+                  "<p>You can now view opportunity details on Simpler.Grants.gov, with action-oriented information in the right column and detailed content on the left. With this new design, grant seekers can make faster, more informed decisions about opportunities.</p>",
+              },
+              {
+                title: "First Co-Design Group recruitment",
+                content:
+                  "<p>We've recruited a cohort of community members with lived experience using Grants.gov to participate in the design process. Through a long-term engagement, these co-designers will ensure what we build delivers the most value to grant seekers who struggle most with the grants experience.</p>",
+              },
+              {
+                title: "Search interface launch",
+                content:
+                  "<p>Simpler.Grants.gov now has improved search capabilities that make it easier to find funding opportunities published by Grants.gov.</p>",
+              },
+            ],
           },
         ],
       },
@@ -1083,7 +1193,7 @@ export const messages = {
           {
             title: "Co-planning",
             content:
-              "We prioritize improvements to align with user needs through public ranking. Let us know what’s important to you.",
+              "We prioritize improvements to align with user needs through public ranking. Let us know what's important to you.",
             link: "https://simplergrants.fider.io",
             linkText: "Vote on our proposals board",
           },
@@ -1093,22 +1203,22 @@ export const messages = {
         title: "Key milestones",
         contentItems: [
           {
-            date: "Summer 2025",
-            title: "Simpler search, by default",
+            date: "Early 2026",
+            title: "A new way to apply",
             content:
-              "<p>Our easier-to-use search experience will become the default way to discover funding opportunities on Grants.gov. It's built to deliver stronger results with less fuss.</p><p><link-search>Try the new search now</link-search>.</p>",
+              "<p>Simpler Search is now the default search for funding opportunities, and we're testing a simpler, more intuitive application workflow with a small number of partner agencies and funding opportunities.</p>",
           },
           {
-            date: "Fall 2025",
-            title: "Piloting a new way to apply",
+            date: "Mid-2026",
+            title: "Expanding the Simpler experience",
             content:
-              "<p>We'll test a simpler, more intuitive application workflow with a small group of partner agencies and funding opportunities.</p><p>Is your agency interested in participating? <link-form>Complete our interest form</link-form>, and we'll be in touch.</p>",
+              "<p>We'll pilot new budget forms and support scaling for all agencies to increase the number of opportunities that can be applied for through Simpler.Grants.gov.</p>",
           },
           {
-            date: "Next year",
-            title: "A better application experience for everyone",
+            date: "2027",
+            title: "Simpler Grants replaces legacy Grants.gov",
             content:
-              "<p>All applicants will have the option to use our simpler workflow when applying through Grants.gov. We'll continue scaling up to support the needs of all agencies.</p>",
+              "<p>The Simpler.Grants.gov experience becomes the default experience of Grants.gov, providing a modern, consistent experience for all users.</p>",
           },
         ],
       },
@@ -1557,7 +1667,7 @@ export const messages = {
     uei: "UEI",
     expiration: "Exp",
     visitSam:
-      "Visit <link>sam.gov</link> to make changes to your organization’s details.",
+      "Visit <link>sam.gov</link> to make changes to your organization's details.",
     rosterTable: {
       title: "Organization roster",
       explanation: "Your organization's active members are listed below.",
@@ -1674,6 +1784,32 @@ export const messages = {
       opportunity: "Opportunity",
     },
   },
+  Opportunities: {
+    numOpportunities:
+      "{num, plural, =1 {1 opportunity} other {# opportunities}}",
+    errorMessage:
+      "We have encountered an error loading your opportunities, please try again later.",
+    metaDescription: "View your saved opportunities",
+    noOpportunitiesMessage: {
+      primary: "You have not started any opportunities yet.",
+      secondary:
+        "Opportunities you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
+    },
+    pageHeading: "Opportunities",
+    pageTitle: "Opportunities",
+    tableContents: {
+      agency: "Agency: ",
+      draft: "Draft",
+      individual: "Individual",
+      submitted: "Submitted",
+    },
+    tableHeadings: {
+      agency: "Agency",
+      title: "Title",
+      status: "Status",
+      actions: "Actions",
+    },
+  },
   Organizations: {
     errorMessage:
       "We have encountered an error loading your organizations, please try again later.",
@@ -1682,17 +1818,25 @@ export const messages = {
     pageHeading: "Organizations",
     pageTitle: "Organizations",
   },
+  AwardRecommendation: {
+    errorMessage:
+      "We have encountered an error loading your award recommendations, please try again later.",
+    metaDescription: "View your award recommendations",
+    pageHeading: "Award Recommendations",
+    pageTitle: "Award Recommendations",
+    description: "Award Recommendation flow coming soon.",
+  },
   InviteLegacyUsers: {
     dataLoadingError:
-      "We’re having trouble loading your team from Grants.gov. Please try again later.",
+      "We're having trouble loading your team from Grants.gov. Please try again later.",
     emptyLegacyUsers:
       "It looks like there are no team members to import. Your organization does not have a legacy roster in Grants.gov, so there are no contacts available to add here. You can still invite people directly on your <manageUsersLink>Manage users page</manageUsersLink>.",
     inviteYourTeam: "Invite your team from Grants.gov",
     inviteYourTeamDetails:
-      "Add your team from Grants.gov to your organization in Simpler or remove anyone who’s no longer actively working with your team. Select the people to invite, and they’ll get an invitation to join you here in Simpler.",
+      "Add your team from Grants.gov to your organization in Simpler or remove anyone who's no longer actively working with your team. Select the people to invite, and they'll get an invitation to join you here in Simpler.",
     keyInformation: "Key information",
     keyInformationDetails:
-      "At this time, anyone you invite from Grants.gov will join Simpler as a member. You can adjust their permissions after they’ve been added.",
+      "At this time, anyone you invite from Grants.gov will join Simpler as a member. You can adjust their permissions after they've been added.",
     metaDescription: "Manage users from legacy integrations",
     pageHeading: "Legacy invite",
     pageTitle: "Legacy invite | Simpler.Grants.gov",
@@ -1700,5 +1844,30 @@ export const messages = {
       email: "Email",
       name: "Name",
     },
+  },
+  ResearchParticipantGuide: {
+    pageTitle: "Design Research Participant Guide | Simpler.Grants.gov",
+    pageDescription:
+      "In this guide, research participants can learn more about partcipating in studies.",
+    h1: "Design Research Participant Guide",
+    intro:
+      "This guide is for participants in Simpler Grants design research studies. If you have been contacted by the Simpler Grants team to participate in a study, read through these steps to learn more about the process and let us know if you have any questions.",
+    beforeHeader: "Before the interview",
+    beforeItems: [
+      "You will or already have received an email asking for your participation in a user interview.",
+      "Taking part in a research study is voluntary. If you opt-in to participate, you'll receive an emailed invitation with your scheduled time.",
+      "For remote studies, you will receive a Zoom link to participate.",
+      "For in person studies, we will coordinate logistics with you.",
+      "If you require an accommodation, let us know at least 2 days prior to the interview.",
+      "The interview will be conducted via Zoom by a member of our team. One person will be conducting the interview, and one or more team members will be taking notes.",
+    ],
+    duringHeader: "During the interview",
+    duringItems: [
+      "The researcher will walk you through what the process looks like at the beginning of the study and ask for your verbal permission to record the session.",
+      "The goal of design research is to understand how people use the products we make in the real world so that we can make them better for everyone who uses them.",
+      "The study will be focused on understanding your work and how you use our products in your work. We will ask you questions and/or have you use working software or prototypes of improvements we're working on.",
+      "At the end of the session, we will ask you for your verbal permission to use what we learn to make the product better.",
+      "If you opt in to using what we learn, your feedback will be anonymized and included in our research findings as part of trends we see across many participants.",
+    ],
   },
 };

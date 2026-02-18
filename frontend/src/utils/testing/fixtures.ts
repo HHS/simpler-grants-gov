@@ -1,6 +1,7 @@
 import { JSONSchema7 } from "json-schema";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
+import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import { Organization } from "src/types/applicationResponseTypes";
 import { UserProfile } from "src/types/authTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
@@ -53,6 +54,7 @@ export const searchFetcherParams: QueryParamData = {
   category: new Set(),
   eligibility: new Set(),
   closeDate: new Set(),
+  postedDate: new Set(),
   costSharing: new Set(),
   topLevelAgency: new Set(),
   query: "research",
@@ -137,6 +139,9 @@ export const fakeFacetCounts = {
     arbitraryKey: 1,
   },
   close_date: {
+    arbitraryKey: 1,
+  },
+  post_date: {
     arbitraryKey: 1,
   },
   is_cost_sharing: {
@@ -715,4 +720,11 @@ export const fakeTestUser: TestUser = {
 export const fakeUserProfile: UserProfile = {
   token: "a token",
   user_id: "an id",
+};
+
+export const mockApplicationSubmission: ApplicationSubmission = {
+  application_submission_id: "uuid-13",
+  download_path: "http://s3signedurl.com/download.zip",
+  file_size_bytes: 10,
+  legacy_tracking_number: 1,
 };

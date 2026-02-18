@@ -240,6 +240,12 @@ class Privilege(StrEnum):
     LEGACY_AGENCY_ASSIGNER = "legacy_agency_assigner"
     MANAGE_INTERNAL_ROLES = "manage_internal_roles"
     MANAGE_COMPETITION = "manage_competition"
+    READ_TEST_USER_TOKEN = "read_test_user_token"
+    VIEW_OPPORTUNITY = "view_opportunity"
+    CREATE_OPPORTUNITY = "create_opportunity"
+    UPDATE_OPPORTUNITY = "update_opportunity"
+    PUBLISH_OPPORTUNITY = "publish_opportunity"
+    INTERNAL_WORKFLOW_ACCESS = "internal_workflow_access"
 
 
 class RoleType(StrEnum):
@@ -294,9 +300,43 @@ class UserType(StrEnum):
     STANDARD = "standard"
     INTERNAL_FRONTEND = "internal_frontend"
     LEGACY_CERTIFICATE = "legacy_certificate"
+    INTERNAL_SYSTEM_USER = "internal_system_user"
 
 
 class OrganizationAuditEvent(StrEnum):
     USER_ADDED = "user_added"
     USER_UPDATED = "user_updated"
     USER_REMOVED = "user_removed"
+
+
+class WorkflowType(StrEnum):
+    OPPORTUNITY_PUBLISH = "opportunity_publish"
+    APPLICATION_SUBMISSION = "application_submission"
+    INITIAL_PROTOTYPE = "initial_prototype"
+
+    # Because of how we use the workflow type to find
+    # the state machine and its configuration, we need
+    # to define any workflows for tests here as well.
+    # These workflow types aren't real, and are instead
+    # reserved for testing.
+    BASIC_TEST_WORKFLOW = "basic_test_workflow"
+
+
+class ApprovalType(StrEnum):
+    INITIAL_PROTOTYPE_APPROVAL = "initial_prototype_approval"
+
+
+class ApprovalResponseType(StrEnum):
+    APPROVED = "approved"
+    DECLINED = "declined"
+    REQUIRES_MODIFICATION = "requires_modification"
+
+
+class WorkflowEntityType(StrEnum):
+    OPPORTUNITY = "opportunity"
+    APPLICATION = "application"
+
+
+class WorkflowEventType(StrEnum):
+    START_WORKFLOW = "start_workflow"
+    PROCESS_WORKFLOW = "process_workflow"

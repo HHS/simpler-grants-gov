@@ -173,8 +173,25 @@ export const formatPillLabel = (
       return `Cost sharing: ${getFilterOptionLabel(value, options)}`;
     case "closeDate":
       return `Closing within ${value} days`;
+    case "postedDate":
+      return `Posted within last ${value} days`;
     case "assistanceListingNumber":
       return `ALN ${value}`;
+    case "fundingInstrument":
+      if (value === "other") {
+        return "Other - Funding instrument";
+      }
+      return getFilterOptionLabel(value, options);
+    case "eligibility":
+      if (value === "other") {
+        return "Other - Eligibility";
+      }
+      return getFilterOptionLabel(value, options);
+    case "category":
+      if (value === "other") {
+        return "Other - Category";
+      }
+      return getFilterOptionLabel(value, options);
     default:
       return getFilterOptionLabel(value, options);
   }

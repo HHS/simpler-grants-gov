@@ -109,7 +109,7 @@ const headers = [
   },
   // don't cache user specific pages: saved-opportunities, saved-search-queries
   {
-    source: "/saved:path*",
+    source: "/saved/:path*",
     headers: [
       {
         key: "Cache-Control",
@@ -215,6 +215,11 @@ const nextConfig = {
       {
         source: "/organization/:segments*",
         destination: "/organizations/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/workspace/applications/application/:segments*",
+        destination: "/applications/:segments*",
         permanent: false,
       },
     ];

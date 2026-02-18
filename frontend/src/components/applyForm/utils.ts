@@ -1,4 +1,3 @@
-import $Refparser from "@apidevtools/json-schema-ref-parser";
 import { EnumOptionsType, RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
@@ -10,6 +9,7 @@ import { isBasicallyAnObject } from "src/utils/generalUtils";
 
 import { formDataToObject } from "./formDataToJson";
 import {
+  BroadlyDefinedWidgetValue,
   FormattedFormValidationWarning,
   FormValidationWarning,
   SchemaField,
@@ -99,7 +99,7 @@ const formatValidationWarning = (
 const validationWarningOverrides = (
   message: string,
   fieldName: string,
-  title?: string | null | undefined,
+  title?: string | null,
 ) => {
   const formattedTitle = title ? title.replace("?", "") : "Field";
   return message
@@ -438,7 +438,7 @@ export const getFieldConfig = ({
   let fieldSchema = {} as RJSFSchema;
   let fieldName = "";
   let htmlFieldName = "";
-  let value = "" as string | number | object | undefined;
+  let value = "" as BroadlyDefinedWidgetValue;
   let rawErrors: string[] | FormattedFormValidationWarning[] = [];
 
   if (fieldType === "multiField" && definition && Array.isArray(definition)) {
@@ -482,7 +482,7 @@ export const getFieldConfig = ({
     fieldName = getNameFromDef({ definition, schema });
     htmlFieldName = getFieldNameForHtml({ definition, schema });
     const formDataPath = getFieldPathFromHtml(htmlFieldName);
-    value = getByPointer(formData, formDataPath) as string | number | undefined;
+    value = getByPointer(formData, formDataPath) as BroadlyDefinedWidgetValue;
 
     const fieldType =
       typeof fieldSchema?.type === "string"
@@ -757,39 +757,43 @@ export const isFieldRequired = (
     .some((clean) => requiredFields.includes(clean));
 };
 
-// dereferences all def links so that all necessary property definitions
-// can be found directly within the property without referencing $defs.
-// also resolves "allOf" references within "properties" or "$defs" fields.
-// not merging the entire schema because many schemas have top level
-// "allOf" blocks that often contain "if"/"then" statements or other things
-// that the mergeAllOf library can't handle out of the box, and we don't need
-// to condense in any case
-export const processFormSchema = async (
+/*
+  Our backend provides schemas with $ref already resolved.
+
+  On the frontend we still:
+    1) strip / extract complex conditionals (if/then/else) for separate handling, and
+    2) run mergeAllOf only on the 'properties' subtree to flatten *safe* 'allOf' usage.
+
+  We intentionally do NOT merge the entire schema because allOf-merging across the full
+  schema can interact badly with complex conditionals and other constructs we don’t need
+  to condense for rendering/saving.
+ */
+export const processFormSchema = (
   formSchema: RJSFSchema,
-): Promise<{
+): {
   formSchema: RJSFSchema;
   conditionalValidationRules: RJSFSchema;
-}> => {
+} => {
   try {
-    const dereferenced = await $Refparser.dereference(formSchema);
     const { propertiesWithoutComplexConditionals, conditionalValidationRules } =
       extricateConditionalValidationRules(
-        dereferenced.properties as JSONSchema7,
+        (formSchema.properties ?? {}) as JSONSchema7,
       );
     const condensedProperties = mergeAllOf({
       properties: propertiesWithoutComplexConditionals,
     } as JSONSchema7);
-    const condensed = {
-      ...dereferenced,
-      ...condensedProperties,
+    return {
+      formSchema: {
+        ...formSchema,
+        ...condensedProperties,
+      },
+      conditionalValidationRules,
     };
-    return { formSchema: condensed as RJSFSchema, conditionalValidationRules };
   } catch (e) {
     console.error("Error processing schema");
     throw e;
   }
 };
-
 /*
   this will flatten any properties objects so that we can directly reference field paths
   within a json schema without traversing nested "properties". Any other object attributes
