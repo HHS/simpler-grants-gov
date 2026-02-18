@@ -134,6 +134,7 @@ describe("StartApplicationModal", () => {
         applicationName: "new application",
         competitionId: "1",
         organization: fakeUserOrganization.organization_id,
+        intendsToAddOrganizationLater: true
       }),
     });
 
@@ -171,6 +172,7 @@ describe("StartApplicationModal", () => {
       body: JSON.stringify({
         applicationName: "new application",
         competitionId: "1",
+        intendsToAddOrganizationLater: true
       }),
     });
 
@@ -209,6 +211,7 @@ describe("StartApplicationModal", () => {
           applicationName: "new application",
           competitionId: "1",
           organization: undefined,
+          intendsToAddOrganizationLater: true
         }),
       });
     });
