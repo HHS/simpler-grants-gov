@@ -186,7 +186,7 @@ export async function safeHelp_safeExpect(
  */
 export async function safeHelp_ValidateTextAtLocator(
   testInfo: TestInfo,
-  Locator,
+  locator: Locator,
   label?: string
 ): Promise<void> {
   const description = label ?? 'Verify locator count is 0';
@@ -348,7 +348,7 @@ export async function safeHelp_attachTestSummary(
  */
 async function handleFieldOperation(
   testInfo: TestInfo,
-  Locator,
+  locator: Locator,
   operation: (loc: any) => Promise<void>,
   fieldType: string,
   timeoutMs?: number
@@ -403,13 +403,13 @@ async function handleFieldOperation(
  */
 export async function safeHelp_safeFill(
   testInfo: TestInfo,
-  Locator,
+  locator: Locator,
   value: string,
   timeoutMs?: number
 ): Promise<boolean> {
   return handleFieldOperation(
-    testInfo,
-    locator,
+    testInfo: TestInfo,
+    locator: Locator,
     (loc) => loc.fill(value),
     MSG_FILLED_SUCCESSFULLY,
     timeoutMs
@@ -468,13 +468,13 @@ export async function safeHelp_fillFieldsByTestId(
  */
 export async function safeHelp_safeSelectOption(
   testInfo: TestInfo,
-  Locator,
+  locator: Locator,
   value: string,
   timeoutMs?: number
 ): Promise<boolean> {
   return handleFieldOperation(
-    testInfo,
-    locator,
+    testInfo: TestInfo,
+    locator: Locator,
     (loc) => loc.selectOption(value),
     MSG_SELECTED_SUCCESSFULLY,
     timeoutMs
