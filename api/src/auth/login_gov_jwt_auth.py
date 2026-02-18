@@ -35,7 +35,8 @@ class LoginGovConfig(PydanticBaseEnvConfig):
 
     client_id: str = Field(alias="LOGIN_GOV_CLIENT_ID")
     acr_value: str = Field(alias="LOGIN_GOV_ACR_VALUE", default="urn:acr.login.gov:auth-only")
-    scope: str = Field(alias="LOGIN_GOV_SCOPE", default="openid email")
+    scope: str = Field(alias="LOGIN_GOV_SCOPE", default="openid email x509:presented")
+    is_piv_required: bool = Field(alias="IS_PIV_REQUIRED", default=False)
 
     # While all of these endpoints are under the same root, we define the full
     # path each time because the local mock uses a different naming convention
@@ -91,6 +92,7 @@ def get_config() -> LoginGovConfig:
 class LoginGovUser:
     user_id: str
     email: str
+    x509_presented: bool | None = None
 
 
 def _refresh_keys(config: LoginGovConfig) -> None:
@@ -274,8 +276,9 @@ def _validate_token_with_key(
 
         user_id = payload["sub"]
         email = payload["email"]
+        x509_presented = payload.get("x509_presented")
 
-        return LoginGovUser(user_id=user_id, email=email)
+        return LoginGovUser(user_id=user_id, email=email, x509_presented=x509_presented)
 
     # Most exceptions will result in an outright error
     # as the only change to calls to this function are the public keys
