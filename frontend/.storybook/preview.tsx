@@ -7,7 +7,7 @@ import { Loader, Preview } from "@storybook/react";
 import "src/styles/styles.scss";
 
 import { defaultLocale, locales } from "src/i18n/config";
-import { getMessagesWithFallbacks } from "src/i18n/getMessagesWithFallbacks";
+import { messages } from "src/i18n/messages/en";
 
 import I18nStoryWrapper from "./I18nStoryWrapper";
 
@@ -43,10 +43,9 @@ const parameters = {
   },
 };
 
-const i18nMessagesLoader: Loader = async (context) => {
-  const messages = await getMessagesWithFallbacks(
-    context.globals.locale as string,
-  );
+// not using `getMessagesWithFallbacks` as the import asset paths in there
+// cause problems during vite compilation. Hardcoding to english for now
+const i18nMessagesLoader: Loader = () => {
   return { messages };
 };
 
