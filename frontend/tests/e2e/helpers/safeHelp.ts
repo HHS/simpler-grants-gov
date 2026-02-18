@@ -49,7 +49,7 @@ const ATTACHMENT_TEST_SUMMARY = 'test-summary';
 // console symbols
 // const SYMBOL_SUCCESS = '✅';
 // const SYMBOL_WARNING = '⚠️';
-// const SYMBOL_TIMER = '⏱️';
+const SYMBOL_TIMER = '⏱️';
 // const SYMBOL_CHART = '📊';
 // const SYMBOL_COUNTER = '🧮';
 // const SYMBOL_FAILURE = '❌';
@@ -347,7 +347,7 @@ async function handleFieldOperation(
     return true;
   } catch (error) {
     incrementSoftFail(testInfo);
-    const errorMsg = `${SYMBOL_TIMER} ${MSG_TIMEOUT_NOT_FOUND} ${lineLabel} - ${ERROR_ELEMENT_NOT_FOUND} ${timeout}ms, ${MSG_SKIPPING}`;
+    const errorMsg = `${SYMBOL_TIMER} ${MSG_TIMEOUT_NOT_FOUND} ${lineLabel} {fieldType} - ${ERROR_ELEMENT_NOT_FOUND} ${timeout}ms, ${MSG_SKIPPING}`;
     testInfo.annotations.push({
       type: ANNOTATION_SKIPPED_FIELD,
       description: errorMsg,
