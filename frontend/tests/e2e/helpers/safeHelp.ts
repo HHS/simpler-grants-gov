@@ -5,7 +5,7 @@
 // with soft error handling that logs failures without stopping test execution
 // ============================================================================
 
-import { expect, TestInfo, Locator } from '@playwright/test';
+import { expect, TestInfo, Locator, Page } from '@playwright/test';
 import { getTimeout } from './timeoutHelp';
 
 // ============================================================================
@@ -186,7 +186,7 @@ export async function safeHelp_safeExpect(
  */
 export async function safeHelp_ValidateTextAtLocator(
   testInfo: TestInfo,
-  locator: any,
+  Locator,
   label?: string
 ): Promise<void> {
   const description = label ?? 'Verify locator count is 0';
@@ -214,8 +214,8 @@ async function executeStep(
     });
     // console.log(`${SYMBOL_WARNING} ${label}: ${String(error)}`);
   } finally {
-    const endTime = new Date();
-    const durationMs = endTime.getTime() - startTime.getTime();
+    // const endTime = new Date();
+    // const durationMs = endTime.getTime() - startTime.getTime();
     // console.log(
       // `${SYMBOL_TIMER} ${MSG_STEP_ENDED} [${label}] at ${formatTimestamp(endTime)} (${durationMs} ms)`
     // );
@@ -284,11 +284,28 @@ export async function safeHelp_attachTestSummary(
   startTime?: Date
 ): Promise<void> {
   const softFailCount = Math.max(failureCount, getSoftFailCount(testInfo));
-  const reportPath = `${REPORT_BASE_URL}/#?testId=${testInfo.testId}`.replace(/\\/g, '/');
-  const testTitle = testInfo.title;
-  const endTime = new Date();
-  const endStamp = formatTimestamp(endTime);
-  const startStamp = startTime ? formatTimestamp(startTime) : 'unknown';
+export async function safeHelp_attachTestSummary(
+  testInfo: TestInfo,
+  failureCount: number,
+  startTime?: Date
+): Promise<void> {
+  const softFailCount = Math.max(failureCount, getSoftFailCount(testInfo));
+  // Remove these unused variables:
+  // const reportPath = `${REPORT_BASE_URL}/#?testId=${testInfo.testId}`.replace(/\\/g, '/');
+  // const testTitle = testInfo.title;
+  // const endTime = new Date();
+  // const endStamp = formatTimestamp(endTime);
+  // const startStamp = startTime ? formatTimestamp(startTime) : 'unknown';
+  // const durationMs = startTime ? endTime.getTime() - startTime.getTime() : undefined;
+  
+  // Keep only the code that uses softFailCount
+  if (softFailCount > 0) {
+    await testInfo.attach(ATTACHMENT_TEST_SUMMARY, {
+      body: `${MSG_TEST_COMPLETED_WITH_FAILURES} ${softFailCount} ${MSG_FAILURE_PLURAL}.\n${MSG_FAILURES_LOGGED}`,
+      contentType: 'text/plain',
+    });
+  }
+}
   const durationMs = startTime ? endTime.getTime() - startTime.getTime() : undefined;
 
   if (softFailCount > 0) {
@@ -331,7 +348,7 @@ export async function safeHelp_attachTestSummary(
  */
 async function handleFieldOperation(
   testInfo: TestInfo,
-  locator: any,
+  Locator,
   operation: (loc: any) => Promise<void>,
   fieldType: string,
   timeoutMs?: number
@@ -386,14 +403,14 @@ async function handleFieldOperation(
  */
 export async function safeHelp_safeFill(
   testInfo: TestInfo,
-  locator: any,
+  Locator,
   value: string,
   timeoutMs?: number
 ): Promise<boolean> {
   return handleFieldOperation(
     testInfo,
     locator,
-    async (loc) => loc.fill(value),
+    (loc) => loc.fill(value),
     MSG_FILLED_SUCCESSFULLY,
     timeoutMs
   );
@@ -422,7 +439,7 @@ export async function safeHelp_safeFill(
  */
 export async function safeHelp_fillFieldsByTestId(
   testInfo: TestInfo,
-  page: any,
+  page: Page,
   fields: Array<{ testId: string; value: string }>,
   timeoutMs?: number
 ): Promise<void> {
@@ -451,14 +468,14 @@ export async function safeHelp_fillFieldsByTestId(
  */
 export async function safeHelp_safeSelectOption(
   testInfo: TestInfo,
-  locator: any,
+  Locator,
   value: string,
   timeoutMs?: number
 ): Promise<boolean> {
   return handleFieldOperation(
     testInfo,
     locator,
-    async (loc) => loc.selectOption(value),
+    (loc) => loc.selectOption(value),
     MSG_SELECTED_SUCCESSFULLY,
     timeoutMs
   );
@@ -484,7 +501,7 @@ export async function safeHelp_safeSelectOption(
  */
 export async function safeHelp_selectDropdownLocator(
   testInfo: TestInfo,
-  page: any,
+  page: Page,
   selector: string,
   value: string,
   timeoutMs?: number
@@ -566,7 +583,7 @@ export function safeHelp_getFiscalYearQuarter(): {
  */
 export async function safeHelp_updateApplicationName(
   testInfo: TestInfo,
-  page: any
+  page: Page
 ): Promise<{
   appLinkName: string;
   prevYear: string;
@@ -597,7 +614,7 @@ export async function safeHelp_updateApplicationName(
  */
 export async function safeHelp_navigateToForm(
   testInfo: TestInfo,
-  page: any,
+  page: Page,
   linkName: string
 ): Promise<void> {
   await safeHelp_safeStep(testInfo, `navigate to ${linkName}`, async () => {
@@ -619,7 +636,7 @@ export async function safeHelp_navigateToForm(
  */
 export function safeHelp_GotoForm(
   testInfo: TestInfo,
-  page: any
+  page: Page
 ): (formName: string) => Promise<void> {
   return (formName: string) => safeHelp_navigateToForm(testInfo, page, formName);
 }
@@ -657,7 +674,7 @@ export function safeHelp_GotoForm(
  */
 export async function safeHelp_safeGoto(
   testInfo: TestInfo,
-  page: any,
+  page: Page,
   url: string,
   waitState: WaitState = WAIT_STATES.LOAD,
   timeoutMs?: number
@@ -697,7 +714,7 @@ export async function safeHelp_safeGoto(
  */
 export async function safeHelp_safeWaitForLoadState(
   testInfo: TestInfo,
-  page: any,
+  page: Page,
   waitState: WaitState = WAIT_STATES.LOAD,
   timeoutMs?: number
 ): Promise<void> {
@@ -727,7 +744,7 @@ export async function safeHelp_safeWaitForLoadState(
  */
 export async function safeHelp_saveForm(
   testInfo: TestInfo,
-  page: any,
+  page: Page,
   timeoutMs?: number
 ): Promise<void> {
   const timeout = timeoutMs ?? getTimeout('DEFAULT');
@@ -775,7 +792,7 @@ export async function safeHelp_clickLink(
  */
 export async function safeHelp_clickButton(
   testInfo: TestInfo,
-  page: any,
+  page: Page,
   stepName: string,
   testId: string
 ): Promise<void> {
