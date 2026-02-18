@@ -20,7 +20,9 @@ def get_approvals_for_workflow(
     approving_user: User | None = None,
     is_valid_events: bool = True,
 ) -> list[WorkflowApproval]:
-    """TODO"""
+    """Get a list of approvals for a given workflow."""
+    # We query the DB rather than using workflow.workflow_approvals
+    # so we can filter.
     stmt = (
         select(WorkflowApproval)
         .where(WorkflowApproval.workflow == workflow)
