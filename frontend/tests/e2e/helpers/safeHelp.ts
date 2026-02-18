@@ -46,7 +46,7 @@ const ATTACHMENT_SOFT_FAIL = 'soft-fail-log';
 const ATTACHMENT_SKIPPED_FIELD = 'skipped-field-log';
 const ATTACHMENT_TEST_SUMMARY = 'test-summary';
 
-// //console symbols
+// console symbols
 // const SYMBOL_SUCCESS = '✅';
 // const SYMBOL_WARNING = '⚠️';
 // const SYMBOL_TIMER = '⏱️';
@@ -203,7 +203,7 @@ async function executeStep(
   action: () => Promise<void>
 ): Promise<void> {
   const startTime = new Date();
-  //console.log(`${SYMBOL_TIMER} ${MSG_STEP_STARTED} [${label}] at ${formatTimestamp(startTime)}`);
+  // console.log(`${SYMBOL_TIMER} ${MSG_STEP_STARTED} [${label}] at ${formatTimestamp(startTime)}`);
   try {
     await action();
   } catch (error) {
@@ -212,11 +212,11 @@ async function executeStep(
       type: ANNOTATION_SOFT_FAIL,
       description: `${label}: ${String(error)}`,
     });
-    //console.log(`${SYMBOL_WARNING} ${label}: ${String(error)}`);
+    // console.log(`${SYMBOL_WARNING} ${label}: ${String(error)}`);
   } finally {
     const endTime = new Date();
     const durationMs = endTime.getTime() - startTime.getTime();
-    //console.log(
+    // console.log(
       // `${SYMBOL_TIMER} ${MSG_STEP_ENDED} [${label}] at ${formatTimestamp(endTime)} (${durationMs} ms)`
     // );
   }
@@ -298,28 +298,28 @@ export async function safeHelp_attachTestSummary(
     });
   }
 
-  //console.log(`\n========================================`);
-  //console.log(`           TEST SUMMARY`);
-  //console.log(`========================================`);
-  //console.log(`${SYMBOL_COUNTER} ${MSG_SOFTFAIL_COUNT} ${softFailCount}`);
+  // console.log(`\n========================================`);
+  // console.log(`           TEST SUMMARY`);
+  // console.log(`========================================`);
+  // console.log(`${SYMBOL_COUNTER} ${MSG_SOFTFAIL_COUNT} ${softFailCount}`);
 
   if (softFailCount > 0) {
-    //console.log(
+    // console.log(
       // `${SYMBOL_FAILURE} ${MSG_TEST_FAILED} ${softFailCount} softfail(s), run npx playwright show-report to view details`
     // );
   } else {
-    //console.log(`${SYMBOL_SUCCESS} ${MSG_TEST_PASSED}`);
+    // console.log(`${SYMBOL_SUCCESS} ${MSG_TEST_PASSED}`);
   }
 
   if (durationMs !== undefined) {
-    //console.log(`${SYMBOL_TIMER} ${MSG_TEST_STARTED} ${startStamp}`);
-    //console.log(`${SYMBOL_TIMER} ${MSG_TEST_ENDED} ${endStamp} (${durationMs} ms)`);
+    // console.log(`${SYMBOL_TIMER} ${MSG_TEST_STARTED} ${startStamp}`);
+    // console.log(`${SYMBOL_TIMER} ${MSG_TEST_ENDED} ${endStamp} (${durationMs} ms)`);
   } else {
-    //console.log(`${SYMBOL_TIMER} ${MSG_TEST_ENDED} ${endStamp}`);
+    // console.log(`${SYMBOL_TIMER} ${MSG_TEST_ENDED} ${endStamp}`);
   }
 
-  //console.log(`${SYMBOL_CHART} Test report: ${reportPath}`);
-  //console.log(`========================================\n`);
+  // console.log(`${SYMBOL_CHART} Test report: ${reportPath}`);
+  // console.log(`========================================\n`);
 }
 
 // ============================================================================
