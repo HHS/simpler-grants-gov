@@ -265,8 +265,8 @@ The backend already logs meaningful search metrics via `add_extra_data_to_curren
 | Zero-result searches | Derivable | Query NR Logs for `total_records = 0` |
 | Search filters usage (frontend) | Partial | NR Browser custom attributes, GA events |
 | Opportunity view counts | Yes | NR APM transaction counts + NR Logs (`opportunity_id`) |
-| Save opportunity rates | No | No logging on save/unsave endpoints |
-| Saved search usage | No | No logging on saved search CRUD endpoints |
+| Save opportunity rates | Partial | Auto-logged: URL rule, duration, `auth.user_id`. Not attached: opportunity ID (would need explicit instrumentation; not available from response code) |
+| Saved search usage | Partial | Auto-logged: URL rule, duration, `auth.user_id`. Not attached: search request params (could follow same pattern as search endpoint) |
 | Search-to-view conversion | No | No funnel tracking exists |
 | OpenSearch performance metrics | Partial | Available as external service calls in NR APM; OpenSearch-native metrics not yet imported |
 
@@ -307,7 +307,7 @@ No Metabase dashboards exist for Find functionality. All existing queries focus 
 
 ### Moderate Gaps
 
-4. **Save/unsave and saved search endpoints not logged** — Unlike the search and opportunity view routes, the saved opportunities and saved search routes do not log structured business attributes. Save rates and saved search usage patterns are not trackable.
+4. **Save/unsave and saved search endpoints lack structured business attributes** — Unlike search and opportunity view routes, these endpoints don't attach key business attributes: save endpoints omit the opportunity ID, and saved search endpoints omit the search request. Adding this instrumentation would enable save rate and usage pattern analysis.
 5. **Frontend analytics split across two systems** — Search data is split between NR Browser (custom attributes) and Google Analytics (`search_attempt`, `search_term` events), making holistic analysis difficult.
 6. **No dashboard backups** — All 8 NR dashboards are manually created in the UI with no backup or version history. Changes are at risk of being accidentally lost.
 7. **OpenSearch-native metrics not imported** — OpenSearch has its own metrics (index health, query performance, shard stats) that are not yet imported into New Relic.
