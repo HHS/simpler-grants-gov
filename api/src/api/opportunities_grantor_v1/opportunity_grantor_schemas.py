@@ -72,6 +72,36 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
     )
 
 
+class OpportunityUpdateRequestSchema(Schema):
+    """Schema for PUT /v1/grantors/opportunities/<opportunity_id> request"""
+
+    opportunity_title = fields.String(
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "The title of the opportunity",
+            "example": "Updated Research Grant for Climate Innovation",
+        },
+    )
+    category = fields.Enum(
+        OpportunityCategory,
+        metadata={
+            "description": "The opportunity category",
+        },
+    )
+    category_explanation = fields.String(
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "Explanation of the category (required when category is 'other')",
+        },
+    )
+
+
+class OpportunityUpdateResponseSchema(AbstractResponseSchema):
+    """Schema for PUT /v1/grantors/opportunities/<opportunity_id> response"""
+
+    data = fields.Nested(OpportunityGrantorSchema())
+
+
 class OpportunityCreateResponseSchema(AbstractResponseSchema):
     """Schema for POST /v1/grantors/opportunities/ response
 
