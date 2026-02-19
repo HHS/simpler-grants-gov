@@ -423,7 +423,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 CompetitionContainer(
                     competition_title="TEST-APPLY-ORG-IND-CT01",
                     required_form_ids=[SF424_v4_0.form_id],
-                    optional_form_ids=[SFLLL_2_0.form_id],
+                    optional_form_ids=[SFLLL_v2_0.form_id],
                     open_to_applicants=[
                         CompetitionOpenToApplicant.ORGANIZATION,
                         CompetitionOpenToApplicant.INDIVIDUAL,
@@ -443,7 +443,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 CompetitionContainer(
                     competition_title="TEST-APPLY-ORG-CT01",
                     required_form_ids=[SF424_v4_0.form_id],
-                    optional_form_ids=[SFLLL_2_0.form_id],
+                    optional_form_ids=[SFLLL_v2_0.form_id],
                     open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
                 )
             ],
@@ -460,7 +460,7 @@ class BuildAutomaticOpportunitiesTask(Task):
                 CompetitionContainer(
                     competition_title="TEST-APPLY-IND-CT01",
                     required_form_ids=[SF424_v4_0.form_id],
-                    optional_form_ids=[SFLLL_2_0.form_id],
+                    optional_form_ids=[SFLLL_v2_0.form_id],
                     open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
                 )
             ],
