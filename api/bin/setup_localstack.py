@@ -5,7 +5,7 @@ import botocore.client
 import botocore.exceptions
 
 import src.logging
-from src.adapters.aws import S3Config, get_s3_client
+from src.adapters.aws import S3Config, SQSConfig, get_boto_sqs_client, get_s3_client
 from src.util import file_util
 from src.util.local import error_if_not_local
 
@@ -52,10 +52,33 @@ def setup_s3() -> None:
     )
 
 
+def setup_sqs() -> None:
+    sqs_config = SQSConfig()
+    # As the S3 setup, override the access keys explicitly to avoid any accidental running of commands here
+    sqs_client = get_boto_sqs_client(
+        sqs_config,
+        boto3.Session(
+            region_name="us-east-1", aws_access_key_id="NO_CREDS", aws_secret_access_key="NO_CREDS"
+        ),
+    )
+
+    if sqs_config.workflow_queue_url is None:
+        raise ValueError("WORKFLOW_QUEUE_URL environment variable must be set to setup SQS")
+    workflow_queue_name = sqs_config.workflow_queue_url.split("/")[-1]
+
+    try:
+        sqs_client.get_queue_url(QueueName=workflow_queue_name)
+        logger.info("SQS queue %s already exists - skipping creation", workflow_queue_name)
+    except sqs_client.exceptions.QueueDoesNotExist:
+        logger.info("Creating SQS queue %s", workflow_queue_name)
+        sqs_client.create_queue(QueueName=workflow_queue_name)
+
+
 def main() -> None:
     with src.logging.init("setup_localstack"):
         error_if_not_local()
         setup_s3()
+        setup_sqs()
 
 
 if __name__ == "__main__":
