@@ -243,6 +243,8 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.INTERNAL_WORKFLOW_ACCESS, 22),
         LookupStr(Privilege.PROGRAM_OFFICER_APPROVAL, 23),
         LookupStr(Privilege.BUDGET_OFFICER_APPROVAL, 24),
+        LookupStr(Privilege.VIEW_ORG_SAVED_OPPORTUNITIES, 25),
+        LookupStr(Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES, 26),
     ]
 )
 

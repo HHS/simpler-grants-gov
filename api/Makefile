@@ -204,15 +204,13 @@ start-opensearch-dashboards:
 # Localstack
 ##################################################
 
-init-localstack: start-localstack setup-localstack ## Start localstack (local s3) and setup buckets
+init-localstack: start-localstack setup-localstack ## Start localstack (local s3, sqs) and setup buckets, queues
 
 start-localstack:
 	docker compose up --detach localstack
 
 setup-localstack:
 	$(PY_RUN_CMD) setup-localstack
-
-
 ##################################################
 # Form Schema
 # Example usage:

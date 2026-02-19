@@ -3122,6 +3122,17 @@ class OrganizationAuditFactory(BaseFactory):
         )
 
 
+class OrganizationSavedOpportunityFactory(BaseFactory):
+    class Meta:
+        model = entity_models.OrganizationSavedOpportunity
+
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+
 class SuppressedEmailFactory(BaseFactory):
     class Meta:
         model = user_models.SuppressedEmail
