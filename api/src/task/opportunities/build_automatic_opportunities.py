@@ -411,71 +411,60 @@ class BuildAutomaticOpportunitiesTask(Task):
             ],
         )
 
-    ### --- Apply Happy Path scenarios from local seed ---
-    uuid_map = {
-        "TEST-APPLY-ORG-IND-ON01": uuid.UUID("f7a1c2b3-4d5e-6789-8abc-1234567890ab"),
-        "TEST-APPLY-ORG-IND-CT01": uuid.UUID("a2b3c4d5-6e7f-8901-9bcd-2345678901bc"),
-        "TEST-APPLY-ORG-ON01": uuid.UUID("b3c4d5e6-7f80-9012-abcd-3456789012cd"),
-        "TEST-APPLY-ORG-CT01": uuid.UUID("c4d5e6f7-8091-0123-bcde-4567890123de"),
-        "TEST-APPLY-IND-ON01": uuid.UUID("d5e6f7a8-0912-1234-cdef-5678901234ef"),
-        "TEST-APPLY-IND-CT01": uuid.UUID("e6f7a8b9-1023-2345-def0-6789012345f0"),
-    }
+    ### --- Apply Happy Path data similar to local seed ---
+        # Opportunity with static OpportunityID open to both orgs and individuals
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-APPLY-ORG-IND-OT01",
+                opportunity_number="TEST-APPLY-ORG-IND-ON01",
+                opportunity_id=uuid.UUID("f7a1c2b3-4d5e-6789-8abc-1234567890ab"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-APPLY-ORG-IND-CT01",
+                    required_form_ids=[SF424_v4_0.form_id],
+                    optional_form_ids=[SFLLL_2_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                    ],
+                )
+            ],
+        )
 
-    forms_map = {f.short_form_name: f.form_id for f in self.db_session.scalars(select(Form)).all()}
+        # Opportunity with static OpportunityID open to orgs only
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-APPLY-ORG-OT01",
+                opportunity_number="TEST-APPLY-ORG-ON01",
+                opportunity_id=uuid.UUID("b3c4d5e6-7f80-9012-abcd-3456789012cd"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-APPLY-ORG-CT01",
+                    required_form_ids=[SF424_v4_0.form_id],
+                    optional_form_ids=[SFLLL_2_0.form_id],
+                    open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
+                )
+            ],
+        )
 
-    # Opportunity open to both orgs and individuals
-    self.create_opportunity(
-        OpportunityContainer(
-            opportunity_title="TEST-APPLY-ORG-IND-OT01",
-            opportunity_number="TEST-APPLY-ORG-IND-ON01",
-            opportunity_id=uuid_map["TEST-APPLY-ORG-IND-ON01"],
-        ),
-        competitions=[
-            CompetitionContainer(
-                competition_title="TEST-APPLY-ORG-IND-CT01",
-                required_form_ids=[forms_map["SF424B"]],
-                optional_form_ids=[forms_map["SFLLL_2_0"]],
-                open_to_applicants=[
-                    CompetitionOpenToApplicant.ORGANIZATION,
-                    CompetitionOpenToApplicant.INDIVIDUAL,
-                ],
-            )
-        ],
-    )
-
-    # Opportunity open to orgs only
-    self.create_opportunity(
-        OpportunityContainer(
-            opportunity_title="TEST-APPLY-ORG-OT01",
-            opportunity_number="TEST-APPLY-ORG-ON01",
-            opportunity_id=uuid_map["TEST-APPLY-ORG-ON01"],
-        ),
-        competitions=[
-            CompetitionContainer(
-                competition_title="TEST-APPLY-ORG-CT01",
-                required_form_ids=[forms_map["SF424B"]],
-                optional_form_ids=[forms_map["SFLLL_2_0"]],
-                open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
-            )
-        ],
-    )
-
-    # Opportunity open to individuals only
-    self.create_opportunity(
-        OpportunityContainer(
-            opportunity_title="TEST-APPLY-IND-OT01",
-            opportunity_number="TEST-APPLY-IND-ON01",
-            opportunity_id=uuid_map["TEST-APPLY-IND-ON01"],
-        ),
-        competitions=[
-            CompetitionContainer(
-                competition_title="TEST-APPLY-IND-CT01",
-                required_form_ids=[forms_map["SF424B"]],
-                optional_form_ids=[forms_map["SFLLL_2_0"]],
-                open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
-            )
-        ],
-    )
+        # Opportunity with static OpportunityID open to individuals only
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-APPLY-IND-OT01",
+                opportunity_number="TEST-APPLY-IND-ON01",
+                opportunity_id=uuid.UUID("d5e6f7a8-0912-1234-cdef-5678901234ef"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-APPLY-IND-CT01",
+                    required_form_ids=[SF424_v4_0.form_id],
+                    optional_form_ids=[SFLLL_2_0.form_id],
+                    open_to_applicants=[CompetitionOpenToApplicant.INDIVIDUAL],
+                )
+            ],
+        )
 
     def create_opportunity(
         self,
