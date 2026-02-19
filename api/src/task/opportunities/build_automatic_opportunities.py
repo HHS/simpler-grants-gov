@@ -411,7 +411,7 @@ class BuildAutomaticOpportunitiesTask(Task):
             ],
         )
 
-    ### --- Apply Happy Path data similar to local seed ---
+        ### --- Apply Happy Path data similar to local seed ---
         # Opportunity with static OpportunityID open to both orgs and individuals
         self.create_opportunity(
             OpportunityContainer(
