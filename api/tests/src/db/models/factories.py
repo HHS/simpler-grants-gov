@@ -62,6 +62,8 @@ from src.constants.lookup_constants import (
 from src.constants.static_role_values import (
     APPLICATION_CONTRIBUTOR,
     APPLICATION_OWNER,
+    OPPORTUNITY_EDITOR,
+    OPPORTUNITY_PUBLISHER,
     ORG_ADMIN,
     ORG_MEMBER,
 )
@@ -1820,6 +1822,26 @@ class AgencyUserFactory(BaseFactory):
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda u: u.user.user_id)
 
+    class Params:
+        # New traits for role assignment
+        as_opportunity_editor = factory.Trait(
+            agency_user_roles=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.AgencyUserRoleFactory",
+                factory_related_name="agency_user",
+                size=1,
+                role_id=OPPORTUNITY_EDITOR.role_id,
+            ),
+        )
+
+        as_opportunity_publisher = factory.Trait(
+            agency_user_roles=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.AgencyUserRoleFactory",
+                factory_related_name="agency_user",
+                size=1,
+                role_id=OPPORTUNITY_PUBLISHER.role_id,
+            ),
+        )
+
 
 class AgencyUserRoleFactory(BaseFactory):
     class Meta:
@@ -3098,6 +3120,17 @@ class OrganizationAuditFactory(BaseFactory):
             target_user=factory.SubFactory(UserFactory, with_profile=True),
             target_user_id=factory.LazyAttribute(lambda o: o.target_user.user_id),
         )
+
+
+class OrganizationSavedOpportunityFactory(BaseFactory):
+    class Meta:
+        model = entity_models.OrganizationSavedOpportunity
+
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
 
 class SuppressedEmailFactory(BaseFactory):

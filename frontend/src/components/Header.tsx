@@ -2,12 +2,14 @@
 
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
+import { LOGIN_URL } from "src/constants/auth";
 import { ExternalRoutes } from "src/constants/routes";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
 import { IndexType } from "src/types/generalTypes";
 import { TestUser } from "src/types/userTypes";
 import { isCurrentPath, isExternalLink } from "src/utils/generalUtils";
+import { storeCurrentPage } from "src/utils/userUtils";
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -26,7 +28,7 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { TestUserSelect } from "./TestUserSelect";
-import { UserControl } from "./user/UserControl";
+import { SignOutNavLink } from "./user/UserControl";
 
 type PrimaryLink = {
   text?: string;
@@ -55,13 +57,19 @@ const NavLink = ({
   }
 
   return (
-    <Link href={href} key={href} className={classes} target={linkTarget}>
-      <div onClick={onClick} className={iconBtnClass}>
+    <Link
+      href={href}
+      key={href}
+      className={classes}
+      target={linkTarget}
+      onClick={onClick}
+    >
+      <span className={iconBtnClass}>
         {text}
         {isExternalLink(href) && (
           <USWDSIcon name="launch" className="usa-icon--size-2" />
         )}
-      </div>
+      </span>
     </Link>
   );
 };
@@ -191,12 +199,12 @@ const NavLinks = ({
   }, [closeMobileNav]);
 
   const navItems = useMemo(() => {
-    return navLinkList.map((link: PrimaryLink, index: number) => {
+    const items = navLinkList.map((link: PrimaryLink, index: number) => {
       if (!link.text) {
         return <></>;
       }
       if (link.children) {
-        const items = link.children.map((childLink) => {
+        const childItems = link.children.map((childLink) => {
           if (!childLink.text) {
             return <></>;
           }
@@ -216,7 +224,7 @@ const NavLinks = ({
             index={index}
             isCurrent={currentNavItemIndex === index}
             linkText={link.text}
-            menuItems={items}
+            menuItems={childItems}
             setActiveNavDropdownIndex={setActiveNavDropdownIndex}
           />
         );
@@ -230,16 +238,62 @@ const NavLinks = ({
           classes={clsx({
             "usa-nav__link": true,
             "usa-current": currentNavItemIndex === index,
+            "text-bold": true,
           })}
         />
       );
     });
+
+    if (!user?.token) {
+      items.push(
+        <NavLink
+          key="sign-in"
+          href={LOGIN_URL}
+          onClick={() => {
+            storeCurrentPage();
+            closeDropdownAndMobileNav();
+          }}
+          text={t("login")}
+          classes={clsx({
+            "usa-nav__link": true,
+            "text-normal": true,
+          })}
+        />,
+      );
+    }
+
+    if (user?.token) {
+      const accountIndex = navLinkList.length;
+      items.push(
+        <NavDropdown
+          key="account"
+          activeNavDropdownIndex={activeNavDropdownIndex}
+          index={accountIndex}
+          isCurrent={false}
+          linkText={t("account")}
+          menuItems={[
+            <NavLink
+              href="/settings"
+              key="settings"
+              onClick={closeDropdownAndMobileNav}
+              text={t("settings")}
+            />,
+            <SignOutNavLink key="logout" onClick={closeDropdownAndMobileNav} />,
+          ]}
+          setActiveNavDropdownIndex={setActiveNavDropdownIndex}
+        />,
+      );
+    }
+
+    return items;
   }, [
     activeNavDropdownIndex,
     closeDropdownAndMobileNav,
     currentNavItemIndex,
     navLinkList,
     setActiveNavDropdownIndex,
+    t,
+    user?.token,
   ]);
 
   return (
@@ -342,9 +396,6 @@ const Header = ({
               label={t("navLinks.menuToggle")}
               className="usa-menu-btn"
             />
-          </div>
-          <div className="usa-nav__primary margin-top-0 padding-bottom-0 desktop:padding-bottom-05 text-no-wrap desktop:order-last margin-left-auto desktop:height-auto height-6">
-            <UserControl localDev={localDev} />
           </div>
           <NavLinks
             mobileExpanded={isMobileNavExpanded}

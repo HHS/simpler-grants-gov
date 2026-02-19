@@ -61,7 +61,7 @@ services:
       # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
       - DEBUG=${DEBUG:-0}
       # To improve startup time, only add services we use
-      - SERVICES=s3
+      - SERVICES=s3,sqs
       - EAGER_SERVICES_LOADING=1
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"

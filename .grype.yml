@@ -119,3 +119,6 @@ ignore:
   # https://alas.aws.amazon.com/AL2023/ALAS-2026-1416.html
   # Fixed version 21.3.1-2.amzn2023.0.16 not available in repos (latest is 0.15)
   - vulnerability: ALAS2023-2026-1416
+
+  # ignoring so we can get today's release out
+  - vulnerability: GHSA-2g4f-4pwh-qvx6

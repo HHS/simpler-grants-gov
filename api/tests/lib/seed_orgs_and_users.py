@@ -26,6 +26,7 @@ from src.db.models.user_models import User
 from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
 from src.form_schema.forms.sf424 import SF424_v4_0
 from src.form_schema.forms.sf424a import SF424a_v1_0
+from src.form_schema.forms.sf424b import SF424b_v1_1
 from src.services.applications.application_validation import (
     ApplicationAction,
     validate_application_form,
@@ -133,6 +134,7 @@ def _build_organizations_and_users(
         legal_business_name="Michelangelo's Moderately Malevolent Moving Marketplace",
         uei="FAKEUEI33333",
     )
+    _add_saved_opportunities(org3, db_session)
 
     ##############################################################
     # Users
@@ -297,6 +299,12 @@ def _build_organizations_and_users(
         )
         _add_application(
             db_session,
+            competition=competition_container.get_comp_for_form(SF424b_v1_1),
+            app_owner=many_app_user,
+            application_name="App for SF424bv1.1",
+        )
+        _add_application(
+            db_session,
             competition=competition_container.get_comp_for_form(SF424_v4_0),
             app_owner=org3,
             application_name="My quite long organization application name that'll take up almost as much space",
@@ -378,7 +386,9 @@ def _build_organizations_and_users(
         logger.info(f"• {scenario}")
 
 
-def _add_saved_opportunities(user: User, db_session: db.Session, count: int = 5) -> None:
+def _add_saved_opportunities(
+    owner: User | Organization, db_session: db.Session, count: int = 5
+) -> None:
     # Grab some recently made opportunities
     opportunities: list = (
         db_session.execute(
@@ -397,7 +407,7 @@ def _add_saved_opportunities(user: User, db_session: db.Session, count: int = 5)
         .all()
     )
 
-    current_saved_opportunity_ids = {o.opportunity_id for o in user.saved_opportunities}
+    current_saved_opportunity_ids = {o.opportunity_id for o in owner.saved_opportunities}
 
     added_saved_opps_count = 0
     for opportunity in opportunities:
@@ -406,8 +416,17 @@ def _add_saved_opportunities(user: User, db_session: db.Session, count: int = 5)
         # If they already have that opportunity ID saved, don't try to add it again
         if opportunity.opportunity_id in current_saved_opportunity_ids:
             continue
-
-        factories.UserSavedOpportunityFactory.create(user=user, opportunity=opportunity)
+        #  Create the correct saved-opportunity record depending on whether the owner is an individual user or an organization
+        if isinstance(owner, User):
+            factories.UserSavedOpportunityFactory.create(
+                user=owner,
+                opportunity=opportunity,
+            )
+        else:
+            factories.OrganizationSavedOpportunityFactory.create(
+                organization=owner,
+                opportunity=opportunity,
+            )
         added_saved_opps_count += 1
 
 

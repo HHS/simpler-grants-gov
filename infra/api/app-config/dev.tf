@@ -43,9 +43,6 @@ module "dev_config" {
 
   service_override_extra_environment_variables = {
 
-    # Login.gov OAuth
-    ENABLE_XML_GENERATION = 1
-
     ENABLE_WORKFLOW_ENDPOINTS = 1
 
     # Email notification
@@ -55,6 +52,9 @@ module "dev_config" {
     FRONTEND_URL             = "https://dev.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
+
+    # Workflow
+    WORKFLOW_SERVICE_INTERNAL_USER_ID = "5711f79c-2445-47c7-bbcb-c8caa293ffad"
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
