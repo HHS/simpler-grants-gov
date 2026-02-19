@@ -61,6 +61,33 @@ describe("StartApplicationModal", () => {
     expect(validationError).toBeInTheDocument();
   });
 
+  it("displays validation error if submitted without an organization", async () => {
+    render(
+      <StartApplicationModal
+        competitionId="1"
+        opportunityTitle="blessed opportunity"
+        modalRef={createRef()}
+        applicantTypes={["organization"]}
+        organizations={[fakeUserOrganization]}
+        token={"a token"}
+        loading={false}
+      />,
+    );
+
+    expect(
+      screen.queryByText("fields.organizationSelect.validationError"),
+    ).not.toBeInTheDocument();
+
+    const saveButton = await screen.findByTestId("application-start-save");
+    act(() => saveButton.click());
+
+    const validationError = await screen.findByText(
+      "fields.organizationSelect.validationError",
+    );
+
+    expect(validationError).toBeInTheDocument();
+  });
+
   it("displays an API error if API returns an error", async () => {
     clientFetchMock.mockRejectedValue(new Error());
     render(
@@ -163,6 +190,8 @@ describe("StartApplicationModal", () => {
     const saveButton = await screen.findByTestId("application-start-save");
     const input = await screen.findByTestId("textInput");
     await userEvent.type(input, "new application");
+    const select = await screen.findByTestId("Select");
+    await userEvent.selectOptions(select, "NOT_LISTED");
 
     act(() => saveButton.click());
 
@@ -284,7 +313,7 @@ describe("StartApplicationModal", () => {
       expect(screen.queryByText("asIndividual")).not.toBeInTheDocument();
     });
 
-    it("does not show 'I don't see my org listed' option for organization-only competitions", () => {
+    it("shows 'I don't see my org listed' option for organization-only competitions", () => {
       render(
         <StartApplicationModal
           competitionId="1"
@@ -297,7 +326,7 @@ describe("StartApplicationModal", () => {
         />,
       );
 
-      expect(screen.queryByText("notListed")).not.toBeInTheDocument();
+      expect(screen.queryByText("notListed")).toBeInTheDocument();
     });
 
     it("shows 'I don't see my org listed' option for mixed competitions", () => {

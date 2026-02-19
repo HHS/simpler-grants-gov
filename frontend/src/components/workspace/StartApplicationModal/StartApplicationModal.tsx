@@ -51,6 +51,7 @@ export const StartApplicationModal = ({
   );
 
   const [nameValidationError, setNameValidationError] = useState<string>();
+  const [orgValidationError, setOrgValidationError] = useState<string>();
   const [savedApplicationName, setSavedApplicationName] = useState<string>();
   const [selectedOrganization, setSelectedOrganization] = useState<string>();
   const [error, setError] = useState<string>();
@@ -60,14 +61,20 @@ export const StartApplicationModal = ({
     let isValidToken = Boolean(token);
 
     setNameValidationError("");
+    setOrgValidationError("");
 
     if (!savedApplicationName) {
       setNameValidationError(t("fields.name.validationError"));
       isValidToken = false;
     }
 
+    if (applicantTypes.includes("organization") && !selectedOrganization) {
+      setOrgValidationError(t("fields.organizationSelect.validationError"));
+      isValidToken = false;
+    }
+
     return isValidToken;
-  }, [savedApplicationName, t, token]);
+  }, [applicantTypes, savedApplicationName, selectedOrganization, t, token]);
 
   const handleSubmit = useCallback(() => {
     const isValidSubmission = validateSubmission();
@@ -80,9 +87,7 @@ export const StartApplicationModal = ({
 
     if (
       selectedOrganization === SPECIAL_VALUES.INDIVIDUAL ||
-      selectedOrganization === SPECIAL_VALUES.NOT_LISTED ||
-      !selectedOrganization ||
-      selectedOrganization === "0"
+      selectedOrganization === SPECIAL_VALUES.NOT_LISTED
     ) {
       organizationToSend = undefined; // Individual applications
     } else {
@@ -94,7 +99,7 @@ export const StartApplicationModal = ({
       body: JSON.stringify({
         applicationName: savedApplicationName,
         competitionId,
-        ...(organizationToSend ? { organization: organizationToSend } : {}),
+        organization: organizationToSend,
         ...(SPECIAL_VALUES.NOT_LISTED
           ? { intendsToAddOrganizationLater: true }
           : {}),
@@ -130,6 +135,7 @@ export const StartApplicationModal = ({
     setError("");
     setUpdating(false);
     setNameValidationError("");
+    setOrgValidationError("");
     setSavedApplicationName("");
     setSelectedOrganization("");
   }, []);
@@ -187,10 +193,10 @@ export const StartApplicationModal = ({
       <hr className="margin-y-2 border-base-lighter" />
       <StartApplicationInfoBanner />
       {applicantTypes.includes("organization") ? (
-        <FormGroup className="margin-top-1">
+        <FormGroup error={Boolean(orgValidationError)} className="margin-top-1">
           <StartApplicationOrganizationInput
             onOrganizationChange={onOrganizationChange}
-            validationError={undefined}
+            validationError={orgValidationError}
             organizations={organizations}
             selectedOrganization={selectedOrganization}
             applicantTypes={applicantTypes}
