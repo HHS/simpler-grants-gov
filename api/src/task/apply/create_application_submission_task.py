@@ -71,8 +71,6 @@ class ApplicationSubmissionConfig(PydanticBaseEnvConfig):
     application_submission_batch_size: int = 25  # APPLICATION_SUBMISSION_BATCH_SIZE
     application_submission_max_batches: int = 100  # APPLICATION_SUBMISSION_MAX_BATCHES
 
-    enable_xml_generation: bool = True  # ENABLE_XML_GENERATION
-
 
 class CreateApplicationSubmissionTask(Task):
 
@@ -383,12 +381,6 @@ class CreateApplicationSubmissionTask(Task):
             "application_id": submission.application.application_id,
             "competition_id": submission.application.competition_id,
         }
-        if not self.app_submission_config.enable_xml_generation:
-            logger.info(
-                "Skipping XML generation - feature flag disabled",
-                extra=log_extra,
-            )
-            return
 
         logger.info("Generating XML for application submission", extra=log_extra)
 
