@@ -25,7 +25,8 @@ Scenario: Selecting a sort option updates results
   And sorting works correctly with applied filters
   And sorting persists after saving the search if "<viewport>" is "desktop"
   And sorting persists when navigating to an Opportunity Detail page and back if "<viewport>" is "mobile"
-  And sorting resets when a new search is performed
+  When I click "Search" from the top navigation
+  Then sorting should reset to the default option "Most relevant"
   And the dropdown is keyboard-navigable
   And screen readers announce the selected sort option
   And focus remains on the dropdown after selection
@@ -56,6 +57,14 @@ Scenario: Default sort and reset behavior
   Then results should be sorted by "Most relevant"
   When I perform a new search
   Then the sort option should reset to "Most relevant"
+
+Scenario: Flipping sort order reverses the result order
+  Given search results are displayed
+  When I select "Opportunity title (A to Z)" from the "Sort by" dropdown
+  And I capture the first result title as "<firstTitle>"
+  When I select "Opportunity title (Z to A)" from the "Sort by" dropdown
+  And I capture the last result title as "<lastTitle>"
+  Then "<lastTitle>" should match "<firstTitle>"
 
 Scenario: Sort dropdown functions correctly with empty result sets
   Given there are no matching search results
