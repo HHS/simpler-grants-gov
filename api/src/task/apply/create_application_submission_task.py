@@ -71,7 +71,7 @@ class ApplicationSubmissionConfig(PydanticBaseEnvConfig):
     application_submission_batch_size: int = 25  # APPLICATION_SUBMISSION_BATCH_SIZE
     application_submission_max_batches: int = 100  # APPLICATION_SUBMISSION_MAX_BATCHES
 
-    enable_xml_generation: bool = False  # ENABLE_XML_GENERATION
+    enable_xml_generation: bool = True  # ENABLE_XML_GENERATION
 
 
 class CreateApplicationSubmissionTask(Task):

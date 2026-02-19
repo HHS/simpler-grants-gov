@@ -43,9 +43,6 @@ module "dev_config" {
 
   service_override_extra_environment_variables = {
 
-    # Login.gov OAuth
-    ENABLE_XML_GENERATION = 1
-
     ENABLE_WORKFLOW_ENDPOINTS = 1
 
     # Email notification
