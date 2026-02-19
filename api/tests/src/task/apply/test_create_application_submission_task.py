@@ -1,14 +1,11 @@
 import zipfile
-from datetime import date
 from io import BytesIO
 
 import pytest
-from lxml import etree as lxml_etree
 from sqlalchemy import update
 
 from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
 from src.db.models.competition_models import Application
-from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.task.apply.create_application_submission_task import (
     ApplicationSubmissionConfig,
@@ -20,16 +17,10 @@ from src.task.apply.create_application_submission_task import (
 from src.util import file_util
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
-    AgencyFactory,
     ApplicationAttachmentFactory,
     ApplicationFactory,
     ApplicationFormFactory,
     ApplicationSubmissionFactory,
-    CompetitionFactory,
-    CompetitionFormFactory,
-    FormFactory,
-    OpportunityAssistanceListingFactory,
-    OpportunityFactory,
 )
 
 
