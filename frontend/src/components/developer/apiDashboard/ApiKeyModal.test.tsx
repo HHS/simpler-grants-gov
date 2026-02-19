@@ -13,6 +13,13 @@ import ApiKeyModal from "src/components/developer/apiDashboard/ApiKeyModal";
 // Mock dependencies
 const mockClientFetch = jest.fn();
 const mockToggleModal = jest.fn();
+const mockWriteText = jest.fn(() => Promise.resolve());
+
+Object.defineProperty(navigator, "clipboard", {
+  value: { writeText: mockWriteText },
+  writable: true,
+  configurable: true,
+});
 
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: jest.fn(),
@@ -614,6 +621,113 @@ describe("ApiKeyModal", () => {
       // Should make the API call
       await waitFor(() => {
         expect(mockClientFetch).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe("Success Content with API Key ID", () => {
+    it("displays the API key ID after successful creation", async () => {
+      const user = userEvent.setup();
+      const createdApiKey = {
+        ...mockApiKey,
+        key_name: "New API Key",
+        key_id: "new-secret-key-123",
+      };
+      mockClientFetch.mockResolvedValue({ data: createdApiKey });
+
+      renderModal("create");
+
+      await user.click(screen.getByTestId("open-create-api-key-modal-button"));
+
+      const nameInput = screen.getByPlaceholderText("e.g., Production API Key");
+      await user.type(nameInput, "New API Key");
+      await user.click(screen.getByTestId("create-api-key-submit-button"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("API Key Created Successfully"),
+        ).toBeInTheDocument();
+      });
+
+      expect(screen.getByText("new-secret-key-123")).toBeInTheDocument();
+    });
+
+    it("renders a copy icon next to the API key ID on create success", async () => {
+      const user = userEvent.setup();
+      const createdApiKey = {
+        ...mockApiKey,
+        key_name: "New API Key",
+        key_id: "copy-this-key",
+      };
+      mockClientFetch.mockResolvedValue({ data: createdApiKey });
+
+      renderModal("create");
+
+      await user.click(screen.getByTestId("open-create-api-key-modal-button"));
+
+      const nameInput = screen.getByPlaceholderText("e.g., Production API Key");
+      await user.type(nameInput, "New API Key");
+      await user.click(screen.getByTestId("create-api-key-submit-button"));
+
+      await waitFor(() => {
+        expect(screen.getByText("copy-this-key")).toBeInTheDocument();
+      });
+
+      const modal = screen.getByRole("dialog");
+      const copyIcon = modal.querySelector("svg use[href*='content_copy']");
+      expect(copyIcon).toBeInTheDocument();
+    });
+
+    it("does not display the API key ID after successful edit", async () => {
+      const user = userEvent.setup();
+      const renamedApiKey = {
+        ...mockApiKey,
+        key_name: "Renamed Key",
+        key_id: "edit-key-456",
+      };
+      mockClientFetch.mockResolvedValue({ data: renamedApiKey });
+
+      renderModal("edit", mockApiKey);
+
+      await user.click(
+        screen.getByTestId("open-edit-api-key-modal-button-test-api-key-id"),
+      );
+
+      const nameInput = screen.getByDisplayValue("Test API Key");
+      await user.clear(nameInput);
+      await user.type(nameInput, "Renamed Key");
+      await user.click(screen.getByTestId("edit-api-key-submit-button"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("API Key Renamed Successfully"),
+        ).toBeInTheDocument();
+      });
+
+      expect(screen.queryByText("edit-key-456")).not.toBeInTheDocument();
+    });
+
+    it("shows close button in success content", async () => {
+      const user = userEvent.setup();
+      const createdApiKey = {
+        ...mockApiKey,
+        key_name: "New Key",
+        key_id: "success-key",
+      };
+      mockClientFetch.mockResolvedValue({ data: createdApiKey });
+
+      renderModal("create");
+
+      await user.click(screen.getByTestId("open-create-api-key-modal-button"));
+
+      const nameInput = screen.getByPlaceholderText("e.g., Production API Key");
+      await user.type(nameInput, "New Key");
+      await user.click(screen.getByTestId("create-api-key-submit-button"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("close-create-api-key-modal-button"),
+        ).toBeInTheDocument();
       });
     });
   });

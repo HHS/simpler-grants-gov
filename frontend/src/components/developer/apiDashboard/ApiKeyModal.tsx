@@ -22,6 +22,7 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
+import CopyIcon from "src/components/CopyIcon";
 import { LoadingButton } from "src/components/LoadingButton";
 import SimplerAlert from "src/components/SimplerAlert";
 import { SimplerModal } from "src/components/SimplerModal";
@@ -129,6 +130,7 @@ function SuccessContent({
   mode,
   keyName,
   originalName = "",
+  apiKeyId,
 }: {
   modalRef: RefObject<ModalRef | null>;
   modalId: string;
@@ -136,11 +138,11 @@ function SuccessContent({
   mode: "create" | "edit" | "delete";
   keyName: string;
   originalName?: string;
+  apiKeyId: string;
 }) {
   const isCreate = mode === "create";
   const isDelete = mode === "delete";
   const t = useTranslations("ApiDashboard.modal");
-
   let heading: string;
   if (isCreate) {
     heading = t("createSuccessHeading");
@@ -163,6 +165,14 @@ function SuccessContent({
     <>
       <ModalHeading id={`${modalId}-heading`}>{heading}</ModalHeading>
       <p>{message}</p>
+      {isCreate && apiKeyId && (
+        <div className="grid-row">
+          <div className="font-sans-s text-bold">
+            <span className="margin-right-3">{apiKeyId}</span>
+            <CopyIcon content={apiKeyId} className="usa-icon--size-2" />
+          </div>
+        </div>
+      )}
       <ModalFooter>
         <ModalToggleButton
           modalRef={modalRef}
@@ -189,6 +199,7 @@ export default function ApiKeyModal({
 
   const [validationError, setValidationError] = useState<string>();
   const [apiKeyName, setApiKeyName] = useState<string>();
+  const [apiKeyId, setApiKeyId] = useState<string>();
   const [deleteConfirmation, setDeleteConfirmation] = useState<string>();
   const [apiError, setApiError] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>();
@@ -274,6 +285,7 @@ export default function ApiKeyModal({
             key_name: nameToSubmit,
           }),
         });
+        setApiKeyId((response as { data: ApiKey }).data.key_id);
       }
 
       if (response && (isDelete || (response as { data: ApiKey }).data)) {
@@ -349,10 +361,7 @@ export default function ApiKeyModal({
     edit: {
       className: "padding-1 hover:bg-base-lightest",
       children: (
-        <>
-          <USWDSIcon name="edit" className="margin-right-05" />
-          {t("editNameButtonText")}
-        </>
+        <USWDSIcon name="edit" className="usa-icon--size-3 margin-right-05" />
       ),
       unstyled: true,
       "data-testid": `open-edit-api-key-modal-button-${apiKey?.api_key_id ?? "unknown"}`,
@@ -360,10 +369,7 @@ export default function ApiKeyModal({
     delete: {
       className: "padding-1 hover:bg-base-lightest",
       children: (
-        <>
-          <USWDSIcon className="usa-icon margin-right-05" name="delete" />
-          {t("deleteButtonText")}
-        </>
+        <USWDSIcon className="usa-icon--size-3 margin-right-05" name="delete" />
       ),
       unstyled: true,
       title: t("deleteTitle"),
@@ -402,6 +408,7 @@ export default function ApiKeyModal({
             onClose={onClose}
             mode={mode}
             keyName={apiKeyName || apiKey?.key_name || ""}
+            apiKeyId={apiKeyId || ""}
             originalName={originalName}
           />
         ) : (
