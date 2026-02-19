@@ -3223,11 +3223,18 @@ class WorkflowApprovalFactory(BaseFactory):
         model = WorkflowApproval
 
     workflow_approval_id = Generators.UuidObj
+
+    workflow = factory.SubFactory(WorkflowFactory)
+    workflow_id = factory.LazyAttribute(lambda a: a.workflow.workflow_id)
+
     approving_user = factory.SubFactory(UserFactory)
-    approving_user_id = factory.LazyAttribute(lambda o: o.approving_user.user_id)
+    approving_user_id = factory.LazyAttribute(lambda a: a.approving_user.user_id)
     approval_type = factory.fuzzy.FuzzyChoice(ApprovalType)
     is_still_valid = True
-    approval_response_type = factory.fuzzy.FuzzyChoice(ApprovalResponseType)
+    approval_response_type = ApprovalResponseType.APPROVED
+
+    event = factory.SubFactory(WorkflowEventHistoryFactory)
+    event_id = factory.LazyAttribute(lambda a: a.event.event_id)
 
 
 class WorkflowOpportunityFactory(BaseFactory):
