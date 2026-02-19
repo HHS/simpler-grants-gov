@@ -1,0 +1,58 @@
+name: Return first file that exists
+description: Check given list of files in order and return first one that exists.
+
+inputs:
+  files:
+    required: true
+    type: string
+    description: |
+      The list of files to check, in the order to check for them.
+
+      File names should be properly quoted\escaped and either space or newline
+      separated.
+
+      Either:
+      ```yaml
+      files: my_file.txt some_other_file.txt
+      ```
+
+      Or:
+      ```yaml
+      files: |-
+        my_file.txt
+        some_other_file.txt
+      ```
+
+outputs:
+  found_file:
+    description: "Path of first file found."
+    value: ${{ steps.find-file.outputs.found_file }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get file list
+      id: file-list
+      shell: bash
+      run: |
+        # Get file list
+        # https://github.com/actions/runner/issues/1877
+        files=$(printf %s "${{ inputs.files }}" | tr '\n' ' ')
+        echo "File list: ${files}"
+        echo "files=${files}" >> "$GITHUB_OUTPUT"
+
+    - name: Check file list
+      id: find-file
+      shell: bash
+      run: |
+        # Check file list
+        # https://github.com/actions/runner/issues/1877
+        for f in ${{ steps.file-list.outputs.files }}; do
+          if [[ -e "${f}" ]]; then
+            found_file="${f}"
+            break
+          fi
+        done
+
+        echo "found_file=${found_file}"
+        echo "found_file=${found_file}" >> "$GITHUB_OUTPUT"

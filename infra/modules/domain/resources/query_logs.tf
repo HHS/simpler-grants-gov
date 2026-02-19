@@ -4,7 +4,7 @@ resource "aws_cloudwatch_log_group" "dns_query_logging" {
   count = var.manage_dns ? 1 : 0
 
   name              = "/dns/${var.name}"
-  retention_in_days = 1827
+  retention_in_days = 365
 
   # checkov:skip=CKV_AWS_158:No need to manage KMS key for DNS query logs or audit access to these logs
 }

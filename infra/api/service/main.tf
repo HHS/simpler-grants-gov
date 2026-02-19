@@ -58,8 +58,7 @@ locals {
   incident_management_service_integration_config = local.environment_config.incident_management_service_integration
   identity_provider_config                       = local.environment_config.identity_provider_config
   notifications_config                           = local.environment_config.notifications_config
-
-  network_config = module.project_config.network_configs[local.environment_config.network_name]
+  network_config                                 = module.project_config.network_configs[local.environment_config.network_name]
 }
 
 terraform {
@@ -161,9 +160,8 @@ module "service" {
 
   image_tag = local.image_tag
 
-  vpc_id             = data.aws_vpc.network.id
-  public_subnet_ids  = data.aws_subnets.public.ids
-  private_subnet_ids = data.aws_subnets.private.ids
+  network_name = local.environment_config.network_name
+  project_name = module.project_config.project_name
 
   certificate_arn        = local.service_config.enable_https == true ? data.aws_acm_certificate.cert[0].arn : null
   domain_name            = local.service_config.domain_name
@@ -219,7 +217,7 @@ module "service" {
 
   extra_environment_variables = merge(
     {
-      BUCKET_NAME = local.storage_config.bucket_name
+      BUCKET_NAME = local.bucket_name
     },
     # local.identity_provider_environment_variables,
     local.notifications_environment_variables,
@@ -228,10 +226,11 @@ module "service" {
   )
 
   secrets = concat(
-    [for secret_name in keys(local.service_config.secrets) : {
+    [for secret_name, secret_arn in module.secrets.secret_arns : {
       name      = secret_name
-      valueFrom = module.secrets[secret_name].secret_arn
+      valueFrom = secret_arn
     }],
+    local.feature_flags_secrets,
     module.app_config.enable_identity_provider ? [{
       # name      = "COGNITO_CLIENT_SECRET"
       # valueFrom = module.identity_provider_client[0].client_secret_arn
