@@ -627,10 +627,16 @@ export const messages = {
     errorLoadingKeys: "Failed to load API keys",
     table: {
       headers: {
-        apiKey: "API Key",
-        dates: "Dates",
-        editName: "Edit Name",
-        deleteKey: "Delete Key",
+        apiKey: "Name",
+        status: "Status",
+        secret: "Secret",
+        created: "Created",
+        lastUsed: "Last used",
+        modify: "Modify",
+      },
+      statuses: {
+        active: "Active",
+        inactive: "Inactive",
       },
       dateLabels: {
         created: "Created:",
@@ -649,10 +655,10 @@ export const messages = {
       createDescription:
         "Create a new key for use with the Simpler.Grants.gov API",
       editDescription: "Change the name of your Simpler.Grants.gov API key",
-      createSuccessHeading: "API Key Created Successfully",
+      createSuccessHeading: "Save your key",
       editSuccessHeading: "API Key Renamed Successfully",
       createSuccessMessage:
-        'Your API key "{keyName}" has been created successfully.',
+        'Your API key "{keyName}" has been created successfully. Please save your secret key in a safe place. Keep it secure, as anyone with your API key can make requests on your behalf.',
       editSuccessMessage:
         'Your API key has been renamed from "{originalName}" to "{keyName}".',
       close: "Close",
