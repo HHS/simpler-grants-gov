@@ -1,5 +1,6 @@
 import base64
 import csv
+import re
 from datetime import date
 
 import pytest
@@ -37,7 +38,6 @@ def validate_search_response(
     assert search_response.status_code == expected_status_code
 
     expected_ids = [str(exp.opportunity_id) for exp in expected_results]
-
     if is_csv_response:
         reader = csv.DictReader(search_response.text.split("\n"))
         opportunities = [record for record in reader]
@@ -1856,3 +1856,39 @@ class TestOpportunityRouteSearch(BaseTestClass):
         or top_level_agency_name matches the query.
         """
         call_search_and_validate(client, api_auth_token, search_request, expected_results)
+
+    def test_opportunities_to_csv(self, client, api_auth_token, monkeypatch):
+        monkeypatch.setenv("FRONTEND_BASE_URL", "https://example.com")
+        search_request = get_search_request(is_cost_sharing_one_of=[True, False])
+        search_request["format"] = "csv"
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+
+        assert resp.status_code == 200
+        assert "text/csv" in resp.headers["Content-Type"]
+
+        reader = csv.DictReader(resp.text.split("\n"))
+        rows = list(reader)
+
+        assert "url" in reader.fieldnames
+        assert "summary_description" not in reader.fieldnames
+
+        for row in rows:
+            # assert correct url is configured
+            assert row["url"].startswith("https://example.com/opportunity/")
+            # assert date fields are ISO format
+            iso_date_pattern = r"^\d{4}-\d{2}-\d{2}$"
+            if row["close_date"]:
+                assert re.match(iso_date_pattern, row["close_date"])
+            # assert currency fields are raw numbers
+            if row["award_floor"]:
+                assert row["award_floor"].isdigit()
+            if row["award_ceiling"]:
+                assert row["award_ceiling"].isdigit()
+            # Null handling (empty string instead of None)
+            if row["opportunity_id"] == LOC_HIGHER_EDUCATION.opportunity_id:
+                assert row["close_date"] is not None
+                assert row["award_floor"] is not None
+                assert row["award_ceiling"] is not None
+                assert row["post_date"] is not None
