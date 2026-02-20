@@ -306,8 +306,9 @@ describe("InformationCard - Org-only competition banner", () => {
       />,
     );
 
-    const alert = screen.getByTestId("alert");
-    expect(alert).toHaveTextContent("unassociatedApplicationAlert.title");
+    expect(
+      screen.queryByText(/unassociatedApplicationAlert\.title/),
+    ).toBeInTheDocument();
   });
 
   it("does not show the org-only banner when individuals are eligible", () => {

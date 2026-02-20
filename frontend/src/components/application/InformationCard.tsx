@@ -11,12 +11,14 @@ import { Competition } from "src/types/competitionsResponseTypes";
 import { useTranslations } from "next-intl";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Button,
   Grid,
   GridContainer,
   Link,
   ModalRef,
+  SummaryBox,
+  SummaryBoxContent,
+  SummaryBoxHeading,
 } from "@trussworks/react-uswds";
 
 import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
@@ -133,8 +135,8 @@ export const InformationCard = ({
   const isOrganizationOnlyCompetition =
     organizationEligible && !individualEligible;
   const isIndividualOwnedApplication = !hasOrganization;
-  const shouldBlockSubmitForOrgOnly =
-    isOrganizationOnlyCompetition && isIndividualOwnedApplication;
+  const shouldBlockSubmitForTransferOwnership =
+    isIndividualOwnedApplication && isOrganizationOnlyCompetition;
   const [isTransferModalOpen, setIsTransferModalOpen] =
     useState<boolean>(false);
 
@@ -145,12 +147,6 @@ export const InformationCard = ({
   const handleTransferModalAfterClose = useCallback((): void => {
     setIsTransferModalOpen(false);
   }, []);
-
-  const alertBody: ReactNode = t.rich("unassociatedApplicationAlert.body", {
-    link: (content) => (
-      <InlineActionLink onClick={openTransferModal}>{content}</InlineActionLink>
-    ),
-  });
 
   useEffect(() => {
     if (!isTransferModalOpen) {
@@ -256,6 +252,29 @@ export const InformationCard = ({
     }
   };
 
+  const NeedsTransferOwnershipCta = () => {
+    return (
+      <SummaryBox className="simpler-summary-box-yellow">
+        <SummaryBoxHeading headingLevel="h5" className="font-sans-md">
+          {t("unassociatedApplicationAlert.title")}
+        </SummaryBoxHeading>
+        <SummaryBoxContent>
+          {t.rich("unassociatedApplicationAlert.body", {
+            link: (content) => (
+              <InlineActionLink
+                onClick={() => {
+                  setIsTransferModalOpen(true);
+                }}
+              >
+                {content}
+              </InlineActionLink>
+            ),
+          })}
+        </SummaryBoxContent>
+      </SummaryBox>
+    );
+  };
+
   const InformationCardDetails = ({
     applicationSubmitHandler,
   }: {
@@ -345,7 +364,7 @@ export const InformationCard = ({
               buttonText={t("submit")}
               submitHandler={applicationSubmitHandler}
               loading={submissionLoading}
-              disabled={shouldBlockSubmitForOrgOnly}
+              disabled={shouldBlockSubmitForTransferOwnership}
             />
           )}
           <ApplicationSubmissionDownload />
@@ -356,11 +375,8 @@ export const InformationCard = ({
 
   return (
     <>
-      {shouldBlockSubmitForOrgOnly ? (
-        <Alert headingLevel="h2" type="warning" noIcon>
-          {t("unassociatedApplicationAlert.title")}
-          {alertBody}
-        </Alert>
+      {shouldBlockSubmitForTransferOwnership ? (
+        <NeedsTransferOwnershipCta />
       ) : null}
       <GridContainer
         data-testid="information-card"
