@@ -100,9 +100,6 @@ export const StartApplicationModal = ({
         applicationName: savedApplicationName,
         competitionId,
         organization: organizationToSend,
-        ...(SPECIAL_VALUES.NOT_LISTED
-          ? { intendsToAddOrganizationLater: true }
-          : {}),
       }),
     })
       .then((data) => {
