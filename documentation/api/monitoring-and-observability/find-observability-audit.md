@@ -144,7 +144,7 @@ New Relic APM is enabled for all non-local environments and automatically provid
 
 ### Configuration Details
 
-Source: [`api/newrelic.ini`](../../api/newrelic.ini)
+Source: [`api/newrelic.ini`](../../../api/newrelic.ini)
 
 Key settings:
 - `transaction_tracer.enabled = true`
@@ -181,7 +181,7 @@ Key settings:
 
 ### 3.1 Backend: Structured Logging in Routes
 
-The search route ([`api/src/api/opportunities_v1/opportunity_routes.py`](../../api/src/api/opportunities_v1/opportunity_routes.py)) uses `add_extra_data_to_current_request_logs` to attach structured data to every request log, providing meaningful backend observability:
+The search route ([`api/src/api/opportunities_v1/opportunity_routes.py`](../../../api/src/api/opportunities_v1/opportunity_routes.py)) uses `add_extra_data_to_current_request_logs` to attach structured data to every request log, providing meaningful backend observability:
 
 **On every search request:**
 ```python
