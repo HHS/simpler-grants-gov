@@ -1,12 +1,14 @@
 import dataclasses
 
-from src.constants.lookup_constants import WorkflowEntityType, WorkflowType
+from src.constants.lookup_constants import ApprovalType, Privilege, WorkflowEntityType, WorkflowType
 from src.workflow.state_persistence.base_state_persistence_model import BaseStatePersistenceModel
 
 
 @dataclasses.dataclass
 class ApprovalConfig:
-    pass
+    approval_type: ApprovalType
+    required_privileges: list[Privilege]
+    minimum_approvals_required: int = 1
 
 
 @dataclasses.dataclass
