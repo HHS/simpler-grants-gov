@@ -29,7 +29,7 @@ def test_start_workflow_entity_not_found(db_session: db.Session):
         ingest_workflow_event(db_session, payload)
 
     assert exc_info.value.status_code == 404
-    assert "Opportunity not found" in exc_info.value.message
+    assert exc_info.value.message == "The specified resource was not found"
 
 
 def test_start_workflow_invalid_workflow_type(db_session: db.Session):
@@ -49,7 +49,7 @@ def test_start_workflow_invalid_workflow_type(db_session: db.Session):
         ingest_workflow_event(db_session, payload)
 
     assert exc_info.value.status_code == 422
-    assert "does not map to an actual state machine" in exc_info.value.message
+    assert exc_info.value.message == "Invalid workflow type specified"
 
 
 def test_start_workflow_entity_type_mismatch(db_session: db.Session, enable_factory_create):
@@ -74,7 +74,7 @@ def test_start_workflow_entity_type_mismatch(db_session: db.Session, enable_fact
         ingest_workflow_event(db_session, payload)
 
     assert exc_info.value.status_code == 422
-    assert "do not match expected types" in exc_info.value.message
+    assert exc_info.value.message == "The provided entities are not valid for this workflow type"
 
 
 def test_start_workflow_valid_entity(db_session: db.Session, enable_factory_create):
@@ -119,7 +119,7 @@ def test_process_workflow_workflow_not_found(db_session: db.Session):
         ingest_workflow_event(db_session, payload)
 
     assert exc_info.value.status_code == 404
-    assert "Workflow does not exist" in exc_info.value.message
+    assert exc_info.value.message == "The specified workflow was not found"
 
 
 def test_process_workflow_workflow_inactive(db_session: db.Session, enable_factory_create):
@@ -138,7 +138,7 @@ def test_process_workflow_workflow_inactive(db_session: db.Session, enable_facto
         ingest_workflow_event(db_session, payload)
 
     assert exc_info.value.status_code == 422
-    assert "not active" in exc_info.value.message
+    assert exc_info.value.message == "This workflow is not currently active"
 
 
 def test_process_workflow_invalid_event(db_session: db.Session, enable_factory_create):
@@ -157,7 +157,7 @@ def test_process_workflow_invalid_event(db_session: db.Session, enable_factory_c
         ingest_workflow_event(db_session, payload)
 
     assert exc_info.value.status_code == 422
-    assert "not valid for this workflow" in exc_info.value.message
+    assert exc_info.value.message == "The specified event is not valid for this workflow"
 
 
 def test_process_workflow_valid_event(db_session: db.Session, enable_factory_create):

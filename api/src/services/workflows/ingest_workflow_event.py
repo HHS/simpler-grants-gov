@@ -6,6 +6,7 @@ import src.workflow.state_machine  # noqa: F401  # Import to register all state 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import WorkflowEventType
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.workflow.event.workflow_event import ProcessWorkflowEventContext, StartWorkflowEventContext
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.workflow_service import (
@@ -17,7 +18,6 @@ from src.workflow.workflow_errors import (
     EntityNotFound,
     InactiveWorkflowError,
     InvalidEntityForWorkflow,
-    InvalidEventError,
     InvalidWorkflowTypeError,
     WorkflowDoesNotExistError,
 )
@@ -41,10 +41,8 @@ def ingest_workflow_event(db_session: db.Session, json_data: dict[str, Any]) -> 
     event_id = uuid.uuid4()
     event_type = json_data.get("event_type")
 
-    logger.info(
-        "Ingesting workflow event",
-        extra={"event_id": event_id, "event_type": event_type},
-    )
+    add_extra_data_to_current_request_logs({"event_id": event_id, "event_type": event_type})
+    logger.info("Ingesting workflow event")
 
     try:
         if event_type == WorkflowEventType.START_WORKFLOW:
@@ -53,30 +51,29 @@ def ingest_workflow_event(db_session: db.Session, json_data: dict[str, Any]) -> 
             _validate_process_workflow_event(db_session, json_data)
 
     except EntityNotFound as e:
-        logger.warning("Entity not found for workflow event", extra={"event_id": event_id})
-        raise_flask_error(404, str(e))
+        logger.info("Entity not found for workflow event", extra={"error": str(e)})
+        raise_flask_error(404, "The specified resource was not found")
     except WorkflowDoesNotExistError as e:
-        logger.warning("Workflow does not exist", extra={"event_id": event_id})
-        raise_flask_error(404, str(e))
-    except (
-        InvalidWorkflowTypeError,
-        InvalidEntityForWorkflow,
-        InactiveWorkflowError,
-        InvalidEventError,
-    ) as e:
-        logger.warning("Invalid workflow event", extra={"event_id": event_id})
-        raise_flask_error(422, str(e))
+        logger.info("Workflow does not exist", extra={"error": str(e)})
+        raise_flask_error(404, "The specified workflow was not found")
+    except InvalidWorkflowTypeError as e:
+        logger.info("Invalid workflow type", extra={"error": str(e)})
+        raise_flask_error(422, "Invalid workflow type specified")
+    except InvalidEntityForWorkflow as e:
+        logger.info("Invalid entities for workflow", extra={"error": str(e)})
+        raise_flask_error(422, "The provided entities are not valid for this workflow type")
+    except InactiveWorkflowError as e:
+        logger.info("Workflow is not active", extra={"error": str(e)})
+        raise_flask_error(422, "This workflow is not currently active")
 
-    logger.info(
-        "Successfully validated workflow event",
-        extra={"event_id": event_id, "event_type": event_type},
-    )
+    logger.info("Successfully validated workflow event")
 
     return event_id
 
 
 def _validate_start_workflow_event(db_session: db.Session, json_data: dict[str, Any]) -> None:
     """Validate a start_workflow event."""
+    # Note: start_workflow_context is guaranteed to be present due to schema validation
     start_context_data = json_data.get("start_workflow_context", {})
     start_context = StartWorkflowEventContext(**start_context_data)
 
@@ -89,6 +86,7 @@ def _validate_start_workflow_event(db_session: db.Session, json_data: dict[str, 
 
 def _validate_process_workflow_event(db_session: db.Session, json_data: dict[str, Any]) -> None:
     """Validate a process_workflow event."""
+    # Note: process_context_data is guaranteed to be present due to schema validation
     process_context_data = json_data.get("process_workflow_context", {})
     process_context = ProcessWorkflowEventContext(**process_context_data)
 
@@ -102,6 +100,10 @@ def _validate_process_workflow_event(db_session: db.Session, json_data: dict[str
 
     # Validate the event is valid for this workflow
     if not is_event_valid_for_workflow(process_context.event_to_send, state_machine_cls):
-        raise InvalidEventError(
-            f"Event '{process_context.event_to_send}' is not valid for this workflow"
+        logger.info(
+            "Invalid event for workflow",
+            extra={
+                "error": f"Event '{process_context.event_to_send}' is not valid for this workflow"
+            },
         )
+        raise_flask_error(422, "The specified event is not valid for this workflow")
