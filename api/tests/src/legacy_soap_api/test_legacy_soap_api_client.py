@@ -1,3 +1,4 @@
+import io
 import logging
 import uuid
 from collections.abc import Iterator
@@ -28,6 +29,7 @@ from src.legacy_soap_api.legacy_soap_api_client import (
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_utils import SoapRequestStreamer
 from src.util.datetime_util import parse_grants_gov_date
 from tests.lib.data_factories import setup_cert_user
 from tests.lib.db_testing import cascade_delete_from_db_table
@@ -67,7 +69,7 @@ def get_simpler_applicants_soap_client(request_data, db_session):
     soap_request = SOAPRequest(
         method="POST",
         headers={},
-        data=request_data,
+        data=SoapRequestStreamer(io.BytesIO(request_data)),
         full_path="/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort",
         api_name=SimplerSoapAPI.APPLICANTS,
     )
@@ -311,6 +313,26 @@ class TestSimplerBaseSOAPClient:
         }
         assert proxy_soap_response_dict == expected
 
+    def test_client_get_soap_request_dict_handles_streaming_data(self, db_session):
+        request_data = (
+            b"<soap:Envelope><Body><GetOpportunityListRequest>"
+            b"<app1:OpportunityFilter>"
+            b"<gran:CFDANumber>12345</gran:CFDANumber>"
+            b"</app1:OpportunityFilter>"
+            b"</GetOpportunityListRequest></Body></soap:Envelope>"
+            b"a" * 9000
+        )
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(io.BytesIO(request_data)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.APPLICANTS,
+            operation_name="GetOpportunityListRequest",
+        )
+        client = BaseSOAPClient(soap_request, db_session)
+        assert client.get_soap_request_dict() == {"OpportunityFilter": {"CFDANumber": "12345"}}
+
     def test_get_simpler_soap_response_when_operation_is_get_opportunity_list_request_compares_responses(
         self, db_session, caplog
     ):
@@ -408,7 +430,7 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -459,7 +481,7 @@ class TestSimplerSOAPGetApplicationZip:
         wrong_privileges = {Privilege.LEGACY_AGENCY_VIEWER}
         user, _, soap_client_certificate = setup_cert_user(agency, wrong_privileges)
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -498,7 +520,7 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -537,7 +559,7 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -567,7 +589,7 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -645,7 +667,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -725,7 +747,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -823,7 +845,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -960,7 +982,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -1076,7 +1098,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -1148,7 +1170,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -1225,7 +1247,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
