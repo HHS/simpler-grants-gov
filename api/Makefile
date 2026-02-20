@@ -401,4 +401,4 @@ run-xml-validator: ## Run XML validator tool directly
 #####################
 
 create-workflow-diagrams: ## Create diagrams of all of our defined workflows
-	$(FLASK_CMD) workflow create-workflow-diagrams
+	$(PY_RUN_CMD) create-workflow-diagrams
