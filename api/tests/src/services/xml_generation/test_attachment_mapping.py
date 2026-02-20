@@ -197,4 +197,3 @@ class TestCreateAttachmentMapping:
         mapping = create_attachment_mapping(app, filename_overrides={str(att_id): "renamed.pdf"})
 
         assert mapping[str(att_id)].filename == "renamed.pdf"
-
