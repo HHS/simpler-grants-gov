@@ -1,9 +1,11 @@
+import io
 import uuid
 from unittest.mock import Mock, patch
 
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import (
     HIDDEN_VALUE,
+    SoapRequestStreamer,
     _hide_value,
     bool_to_string,
     diff_list_of_dicts,
@@ -273,3 +275,241 @@ def test_diff_soap_dicts_list_of_dicts_with_value_diff():
 def test_hidden_value():
     assert _hide_value("a", False) == "a"
     assert _hide_value("a", True) == HIDDEN_VALUE
+
+
+def test_soap_request_streamer_head_defaults_to_10000_chars():
+    data_1 = (
+        b"--uuid:a1368612-206e-4fa7-b8c5-4aec08409929\r\n"
+        b'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        b"Content-Transfer-Encoding: 8bit\r\n"
+        b"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        b'<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        b'xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" '
+        b'xmlns:glob="http://apply.grants.gov/system/Global-V1.0" '
+        b'xmlns:head="http://apply.grants.gov/system/Header-V1.0" '
+        b'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" '
+        b'xmlns:ns2="http://apply.grants.gov/services/ApplicantWebServices-V2.0" '
+        b'xmlns:ns3="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        b"<soapenv:Header>"
+        b"<head:GrantSubmissionHeader>"
+        b"<head:OpportunityID>SIMP-COPYING</head:OpportunityID>"
+        b'<glob:HashValue glob:hashAlgorithm="SHA-1">nZXaeALvYJz6QQFdf1bUvr7S6ts=</glob:HashValue>'
+        b"<head:SubmissionTitle>go get it</head:SubmissionTitle>"
+        b"</head:GrantSubmissionHeader>"
+        b"</soapenv:Header>"
+        b"<soapenv:Body>"
+        b"<app:SubmitApplicationRequest>"
+        b"<app:GrantApplicationXML>"
+        b"&lt;test"
+        b"</app:GrantApplicationXML>"
+        b"<gran:Attachment>"
+        b"<gran:FileContentId>budget</gran:FileContentId>"
+        b"<gran:FileDataHandler>"
+        b'<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:1157990985709"/>'
+        b"</gran:FileDataHandler>"
+        b"</gran:Attachment>"
+        b"</app:SubmitApplicationRequest>"
+        b"</soapenv:Body>"
+        b"\r\n--uuid:a1368612-206e-4fa7-b8c5-4aec08409929\r\n"
+        b"Content-Type: application/octet-stream\r\n"
+        b"Content-Transfer-Encoding: binary\r\n"
+        b"Content-ID: <1157990985709>\r\n\r\n"
+        b"text"
+    )
+    data_2 = b"a" * 9000
+    fake_stream = io.BytesIO(data_1 + data_2)
+    soap_request_streamer = SoapRequestStreamer(fake_stream)
+    expected = data_1 + b"a" * 8534
+    assert len(soap_request_streamer.head()) == 10000
+    assert soap_request_streamer.head() == expected
+
+
+def test_soap_request_streamer_head_can_set_max_size_by_chunks():
+    data_1 = (
+        b"--uuid:a1368612-206e-4fa7-b8c5-4aec08409929\r\n"
+        b'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        b"Content-Transfer-Encoding: 8bit\r\n"
+        b"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        b'<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        b'xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" '
+        b'xmlns:glob="http://apply.grants.gov/system/Global-V1.0" '
+        b'xmlns:head="http://apply.grants.gov/system/Header-V1.0" '
+        b'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" '
+        b'xmlns:ns2="http://apply.grants.gov/services/ApplicantWebServices-V2.0" '
+        b'xmlns:ns3="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        b"<soapenv:Header>"
+        b"<head:GrantSubmissionHeader>"
+        b"<head:OpportunityID>SIMP-COPYING</head:OpportunityID>"
+        b'<glob:HashValue glob:hashAlgorithm="SHA-1">nZXaeALvYJz6QQFdf1bUvr7S6ts=</glob:HashValue>'
+        b"<head:SubmissionTitle>go get it</head:SubmissionTitle>"
+        b"</head:GrantSubmissionHeader>"
+        b"</soapenv:Header>"
+        b"<soapenv:Body>"
+        b"<app:SubmitApplicationRequest>"
+        b"<app:GrantApplicationXML>"
+        b"&lt;test"
+        b"</app:GrantApplicationXML>"
+        b"<gran:Attachment>"
+        b"<gran:FileContentId>budget</gran:FileContentId>"
+        b"<gran:FileDataHandler>"
+        b'<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:1157990985709"/>'
+        b"</gran:FileDataHandler>"
+        b"</gran:Attachment>"
+        b"</app:SubmitApplicationRequest>"
+        b"</soapenv:Body>"
+        b"\r\n--uuid:a1368612-206e-4fa7-b8c5-4aec08409929\r\n"
+        b"Content-Type: application/octet-stream\r\n"
+        b"Content-Transfer-Encoding: binary\r\n"
+        b"Content-ID: <1157990985709>\r\n\r\n"
+        b"text"
+    )
+    data_2 = b"a" * 9000
+    fake_stream = io.BytesIO(data_1 + data_2)
+    soap_request_streamer = SoapRequestStreamer(fake_stream, chunk_count=1)
+    expected = data_1 + b"a" * 2534
+    assert len(soap_request_streamer.head()) == 4000
+    assert soap_request_streamer.head() == expected
+
+
+def test_soap_request_streamer_head_terminates_if_it_finds_the_soapenv_envelope_closed_tag():
+    data_1 = (
+        b"--uuid:a1368612-206e-4fa7-b8c5-4aec08409929\r\n"
+        b'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        b"Content-Transfer-Encoding: 8bit\r\n"
+        b"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        b'<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        b'xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" '
+        b'xmlns:glob="http://apply.grants.gov/system/Global-V1.0" '
+        b'xmlns:head="http://apply.grants.gov/system/Header-V1.0" '
+        b'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" '
+        b'xmlns:ns2="http://apply.grants.gov/services/ApplicantWebServices-V2.0" '
+        b'xmlns:ns3="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        b"<soapenv:Header>"
+        b"<head:GrantSubmissionHeader>"
+        b"<head:OpportunityID>SIMP-COPYING</head:OpportunityID>"
+        b'<glob:HashValue glob:hashAlgorithm="SHA-1">nZXaeALvYJz6QQFdf1bUvr7S6ts=</glob:HashValue>'
+        b"<head:SubmissionTitle>go get it</head:SubmissionTitle>"
+        b"</head:GrantSubmissionHeader>"
+        b"</soapenv:Header>"
+        b"<soapenv:Body>"
+        b"<app:SubmitApplicationRequest>"
+        b"<app:GrantApplicationXML>"
+        b"&lt;test"
+        b"</app:GrantApplicationXML>"
+        b"<gran:Attachment>"
+        b"<gran:FileContentId>budget</gran:FileContentId>"
+        b"<gran:FileDataHandler>"
+        b'<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:1157990985709"/>'
+        b"</gran:FileDataHandler>"
+        b"</gran:Attachment>"
+        b"</app:SubmitApplicationRequest>"
+        b"</soapenv:Body>"
+        # terminator tag
+        b"</soapenv:Envelope>"
+        b"\r\n--uuid:a1368612-206e-4fa7-b8c5-4aec08409929\r\n"
+        b"Content-Type: application/octet-stream\r\n"
+        b"Content-Transfer-Encoding: binary\r\n"
+        b"Content-ID: <1157990985709>\r\n\r\n"
+        b"text"
+    )
+    data_2 = b"a" * 9000
+    fake_stream = io.BytesIO(data_1 + data_2)
+    soap_request_streamer = SoapRequestStreamer(fake_stream)
+    expected = data_1 + b"a" * 515
+    assert len(soap_request_streamer.head()) == 2000
+    assert soap_request_streamer.head() == expected
+
+
+def test_soap_request_streamer_head_terminates_if_it_finds_the_env_envelope_closed_tag():
+    data_1 = (
+        b"--uuid:a1368612-206e-4fa7-b8c5-4aec08409929\r\n"
+        b'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        b"Content-Transfer-Encoding: 8bit\r\n"
+        b"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        b'<env:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        b'xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" '
+        b'xmlns:glob="http://apply.grants.gov/system/Global-V1.0" '
+        b'xmlns:head="http://apply.grants.gov/system/Header-V1.0" '
+        b'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" '
+        b'xmlns:ns2="http://apply.grants.gov/services/ApplicantWebServices-V2.0" '
+        b'xmlns:ns3="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        b"<soapenv:Header>"
+        b"<head:GrantSubmissionHeader>"
+        b"<head:OpportunityID>SIMP-COPYING</head:OpportunityID>"
+        b'<glob:HashValue glob:hashAlgorithm="SHA-1">nZXaeALvYJz6QQFdf1bUvr7S6ts=</glob:HashValue>'
+        b"<head:SubmissionTitle>go get it</head:SubmissionTitle>"
+        b"</head:GrantSubmissionHeader>"
+        b"</soapenv:Header>"
+        b"<soapenv:Body>"
+        b"<app:SubmitApplicationRequest>"
+        b"<app:GrantApplicationXML>"
+        b"&lt;test"
+        b"</app:GrantApplicationXML>"
+        b"<gran:Attachment>"
+        b"<gran:FileContentId>budget</gran:FileContentId>"
+        b"<gran:FileDataHandler>"
+        b'<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:1157990985709"/>'
+        b"</gran:FileDataHandler>"
+        b"</gran:Attachment>"
+        b"</app:SubmitApplicationRequest>"
+        b"</soapenv:Body>"
+        # terminator tag
+        b"</env:Envelope>"
+        b"\r\n--uuid:a1368612-206e-4fa7-b8c5-4aec08409929\r\n"
+        b"Content-Type: application/octet-stream\r\n"
+        b"Content-Transfer-Encoding: binary\r\n"
+        b"Content-ID: <1157990985709>\r\n\r\n"
+        b"text"
+    )
+    data_2 = b"a" * 9000
+    fake_stream = io.BytesIO(data_1 + data_2)
+    soap_request_streamer = SoapRequestStreamer(fake_stream)
+    expected = data_1 + b"a" * 523
+    assert len(soap_request_streamer.head()) == 2000
+    assert soap_request_streamer.head() == expected
+
+
+def test_soap_request_streamer_reconstructs_head_with_the_rest_of_the_stream():
+    data_1 = (
+        b"--uuid:a1368612-206e-4fa7-b8c5-4aec08409929\r\n"
+        b'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        b"Content-Transfer-Encoding: 8bit\r\n"
+        b"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        b'<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        b'xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" '
+        b'xmlns:glob="http://apply.grants.gov/system/Global-V1.0" '
+        b'xmlns:head="http://apply.grants.gov/system/Header-V1.0" '
+        b'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" '
+        b'xmlns:ns2="http://apply.grants.gov/services/ApplicantWebServices-V2.0" '
+        b'xmlns:ns3="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        b"<soapenv:Header>"
+        b"<head:GrantSubmissionHeader>"
+        b"<head:OpportunityID>SIMP-COPYING</head:OpportunityID>"
+        b'<glob:HashValue glob:hashAlgorithm="SHA-1">nZXaeALvYJz6QQFdf1bUvr7S6ts=</glob:HashValue>'
+        b"<head:SubmissionTitle>go get it</head:SubmissionTitle>"
+        b"</head:GrantSubmissionHeader>"
+        b"</soapenv:Header>"
+        b"<soapenv:Body>"
+        b"<app:SubmitApplicationRequest>"
+        b"<app:GrantApplicationXML>"
+        b"&lt;test"
+        b"</app:GrantApplicationXML>"
+        b"<gran:Attachment>"
+        b"<gran:FileContentId>budget</gran:FileContentId>"
+        b"<gran:FileDataHandler>"
+        b'<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:1157990985709"/>'
+        b"</gran:FileDataHandler>"
+        b"</gran:Attachment>"
+        b"</app:SubmitApplicationRequest>"
+        b"</soapenv:Body>"
+        b"\r\n--uuid:a1368612-206e-4fa7-b8c5-4aec08409929\r\n"
+        b"Content-Type: application/octet-stream\r\n"
+        b"Content-Transfer-Encoding: binary\r\n"
+        b"Content-ID: <1157990985709>\r\n\r\n"
+        b"text"
+    )
+    data_2 = b"a" * 9000
+    fake_stream = io.BytesIO(data_1 + data_2)
+    soap_request_streamer = SoapRequestStreamer(fake_stream)
+    assert len(soap_request_streamer.head()) == 10000
+    assert b"".join(soap_request_streamer) == data_1 + data_2

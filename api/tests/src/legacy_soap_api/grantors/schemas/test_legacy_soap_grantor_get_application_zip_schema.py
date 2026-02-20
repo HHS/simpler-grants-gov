@@ -1,3 +1,4 @@
+import io
 import uuid
 from unittest.mock import patch
 
@@ -7,7 +8,7 @@ from src.legacy_soap_api.grantors import schemas as grantors_schemas
 from src.legacy_soap_api.legacy_soap_api_client import SimplerGrantorsS2SClient
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
-from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
+from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException, SoapRequestStreamer
 
 GRANTS_GOV_TRACKING_NUMBER = "GRANT80000000"
 CID_UUID = "aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
@@ -27,7 +28,7 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -64,7 +65,7 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -90,7 +91,7 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -114,7 +115,7 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
