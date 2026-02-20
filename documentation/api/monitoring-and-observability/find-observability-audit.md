@@ -19,7 +19,7 @@
 
 ## 1. Existing New Relic Dashboards
 
-> **Note:** All dashboards below are manually configured in the NR UI — none are defined as code (no Terraform NR provider, no dashboard JSON/HCL in `infra/`). This was confirmed during the codebase audit and is surfaced as a gap in [Section 6](#6-gaps-identified).
+> **Note:** All dashboards below are manually configured in the NR UI — none are defined as code (no Terraform NR provider, no dashboard JSON/HCL in `infra/`).
 
 ### 1.1 Search Parameters — Find-Specific
 
@@ -371,7 +371,7 @@ Export NR dashboard JSON periodically and store in the repository for backup and
 
 ### 7.5 OpenSearch Metrics (Future)
 
-OpenSearch has its own metrics (index health, query performance, shard stats) that could eventually be imported into New Relic for a complete picture of search infrastructure performance. Existing tickets track this work.
+OpenSearch has its own metrics (index health, query performance, shard stats) that could eventually be imported into New Relic for a complete picture of search infrastructure performance. See [#8250](https://github.com/HHS/simpler-grants-gov/issues/8250) for ongoing investigation.
 
 ---
 
@@ -384,7 +384,7 @@ OpenSearch has its own metrics (index health, query performance, shard stats) th
 
 ### Recommended New Tickets
 
-3. **Build Find Product Metrics Dashboard** (~3 points) — Create a dedicated NR dashboard modeled after Apply Metrics, using existing NR Logs data (search params, result counts) and APM data. No new instrumentation required for the initial version.
-4. **Add Find-Specific Alerts as Code** (~3 points) — Define and deploy NR alerts for search error rate, latency, zero-result rate, and opportunity view errors via the NR Terraform provider (alerts, unlike dashboards, are well-suited to code management).
-5. **Add Logging to Saved Opportunities/Searches Routes** (~2 points) — Extend `add_extra_data_to_current_request_logs` to save/unsave and saved search endpoints, following the existing pattern in `opportunity_routes.py`.
-6. **Dashboard Backups** (~1 point) — Script a periodic export of NR dashboard JSON to the repository for backup and diff history.
+3. **Build Find Product Metrics Dashboard** — Create a dedicated NR dashboard modeled after Apply Metrics, using existing NR Logs data (search params, result counts) and APM data. No new instrumentation required for the initial version.
+4. **Add Find-Specific Alerts as Code** — Define and deploy NR alerts for search error rate, latency, zero-result rate, and opportunity view errors via the NR Terraform provider (alerts, unlike dashboards, are well-suited to code management).
+5. **Add Logging to Saved Opportunities/Searches Routes** — Extend `add_extra_data_to_current_request_logs` to save/unsave and saved search endpoints, following the existing pattern in `opportunity_routes.py`.
+6. **Dashboard Backups** — Script a periodic export of NR dashboard JSON to the repository for backup and diff history.
