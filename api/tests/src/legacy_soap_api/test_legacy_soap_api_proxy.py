@@ -183,7 +183,7 @@ def test_request_with_jwt_gets_correct_proxy_url(enable_factory_create, caplog):
     ) as mock_get_soap_response:
         get_proxy_response(soap_request)
         config = get_soap_config()
-        expected = f"{config.soap_partner_gateway_uri}/{soap_request.full_path.lstrip('/')}"
+        expected = f"{config.soap_partner_gateway_uri}/grantsws-agency-partner/services/v2/AgencyWebServicesSoapPort"
         assert mock_get_soap_response.call_args_list[0][0][0].url == expected
 
 

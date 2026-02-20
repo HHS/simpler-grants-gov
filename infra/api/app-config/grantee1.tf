@@ -43,11 +43,6 @@ module "grantee1_config" {
   search_engine_version = "OpenSearch_2.15"
 
   service_override_extra_environment_variables = {
-    # Login.gov OAuth
-    ENABLE_XML_GENERATION = 1
-
-
-
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"
 

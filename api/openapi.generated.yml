@@ -22,6 +22,7 @@ info:
 tags:
 - name: Health
 - name: Opportunity v1
+- name: Opportunity v1 - for Grantors
 - name: Extract v1
 - name: Agency v1
 - name: Organization v1
@@ -562,6 +563,57 @@ paths:
               $ref: '#/components/schemas/ApplicationStartRequest'
       security:
       - ApiJwtAuth: []
+  /v1/grantors/opportunities/:
+    post:
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityCreateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal Server Error
+      tags:
+      - Opportunity v1 - for Grantors
+      summary: Create a new opportunity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunityCreateRequest'
+      security:
+      - ApiJwtAuth: []
+      - ApiUserKeyAuth: []
   /alpha/forms/{form_id}:
     get:
       parameters:
@@ -730,6 +782,45 @@ paths:
               $ref: '#/components/schemas/UserUpdateProfileRequest'
       security:
       - ApiJwtAuth: []
+  /v1/users/{user_id}/agencies:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAgenciesResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: User Get Agencies
+      security:
+      - ApiJwtAuth: []
+      - ApiUserKeyAuth: []
   /v1/users/{user_id}/api-keys:
     post:
       parameters:
@@ -4560,6 +4651,153 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OpportunityCreateRequest:
+      type: object
+      properties:
+        opportunity_number:
+          type: string
+          maxLength: 40
+          description: The funding opportunity number (must be unique)
+          example: ABC-2026-001
+        opportunity_title:
+          type: string
+          maxLength: 255
+          description: The title of the opportunity
+          example: Research Grant for Climate Innovation
+        agency_id:
+          type: string
+          format: uuid
+          description: The UUID of the agency that will own this opportunity
+          example: 123e4567-e89b-12d3-a456-426614174000
+        category:
+          description: The opportunity category
+          enum:
+          - discretionary
+          - mandatory
+          - continuation
+          - earmark
+          - other
+          type:
+          - string
+        category_explanation:
+          type: string
+          maxLength: 255
+          description: Explanation of the category (required when category is 'other')
+          example: Competitive research grant
+      required:
+      - agency_id
+      - category
+      - opportunity_number
+      - opportunity_title
+    OpportunityGrantor:
+      type: object
+      properties:
+        opportunity_id:
+          type: string
+          format: uuid
+          description: The internal ID of the opportunity
+          example: 123e4567-e89b-12d3-a456-426614174000
+        legacy_opportunity_id:
+          type: integer
+          description: The internal legacy ID of the opportunity
+          example: 12345
+        opportunity_number:
+          type:
+          - string
+          - 'null'
+          description: The funding opportunity number
+          example: ABC-123-XYZ-001
+        opportunity_title:
+          type:
+          - string
+          - 'null'
+          description: The title of the opportunity
+          example: Research into conservation techniques
+        agency:
+          type:
+          - string
+          - 'null'
+          description: 'DEPRECATED - use: agency_code'
+          example: US-ABC
+        agency_code:
+          type:
+          - string
+          - 'null'
+          description: The agency who created the opportunity
+          example: US-ABC
+        agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the agency who created the opportunity
+          example: Department of Examples
+        top_level_agency_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the top level agency who created the oppportunity
+          example: Department of Examples
+        category:
+          description: The opportunity category
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
+          - discretionary
+          enum: *id002
+          type:
+          - string
+          - 'null'
+          - 'null'
+        category_explanation:
+          type:
+          - string
+          - 'null'
+          description: Explanation of the category when the category is 'O' (other)
+          example: null
+        opportunity_assistance_listings:
+          type: array
+          items:
+            type: *id003
+            $ref: '#/components/schemas/OpportunityAssistanceListingV1'
+        summary:
+          type: *id004
+          $ref: '#/components/schemas/OpportunitySummaryV1'
+        opportunity_status:
+          description: The current status of the opportunity
+          example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
+          - posted
+          enum: *id005
+          type: *id006
+        top_level_agency_code:
+          type:
+          - string
+          - 'null'
+          description: The top-level (parent) agency
+          example: HHS
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_draft:
+          type: boolean
+          description: Whether the opportunity is a draft
+    OpportunityCreateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityGrantor'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     FormInstruction:
       type: object
       properties:
@@ -5191,6 +5429,39 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    UserAgency:
+      type: object
+      properties:
+        agency_id:
+          type: string
+          description: The internal ID of the agency
+          example: 123e4567-e89b-12d3-a456-426614174000
+        agency_name:
+          type: string
+          description: The name of the agency
+          example: Department of Commerce
+        agency_code:
+          type: string
+          description: The unique code for the agency
+          example: DOC
+    UserAgenciesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of agencies the user is associated with
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserAgency'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserApiKeyCreateRequest:
       type: object
       properties:
@@ -5292,6 +5563,10 @@ components:
             - update_opportunity
             - publish_opportunity
             - internal_workflow_access
+            - view_org_saved_opportunities
+            - modify_org_saved_opportunities
+            - program_officer_approval
+            - budget_officer_approval
             type:
             - string
     UserOrganization:
@@ -5339,7 +5614,7 @@ components:
         agency_id:
           type: string
           description: The internal ID of the agency
-    UserAgency:
+    UserAgency1:
       type: object
       properties:
         agency:
@@ -5381,7 +5656,7 @@ components:
             description: List of agencies and the user's roles in each
             type:
             - object
-            $ref: '#/components/schemas/UserAgency'
+            $ref: '#/components/schemas/UserAgency1'
         internal_user_roles:
           type: array
           items:
@@ -5447,6 +5722,10 @@ components:
             - update_opportunity
             - publish_opportunity
             - internal_workflow_access
+            - view_org_saved_opportunities
+            - modify_org_saved_opportunities
+            - program_officer_approval
+            - budget_officer_approval
             type:
             - string
     UserCanAccessResponse:
@@ -6456,6 +6735,10 @@ components:
             - update_opportunity
             - publish_opportunity
             - internal_workflow_access
+            - view_org_saved_opportunities
+            - modify_org_saved_opportunities
+            - program_officer_approval
+            - budget_officer_approval
             type:
             - string
     UserInvitationItem:
@@ -7014,6 +7297,10 @@ components:
             - update_opportunity
             - publish_opportunity
             - internal_workflow_access
+            - view_org_saved_opportunities
+            - modify_org_saved_opportunities
+            - program_officer_approval
+            - budget_officer_approval
             type:
             - string
     OrganizationUser:
