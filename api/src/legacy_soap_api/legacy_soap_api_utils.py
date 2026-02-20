@@ -3,9 +3,9 @@ import json
 import logging
 import re
 import uuid
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Generator, Iterator
 from enum import StrEnum
-from typing import Any
+from typing import IO, Any, BinaryIO
 
 import requests
 from defusedxml import minidom
@@ -322,7 +322,7 @@ def get_gov_grants_tracking_number(xml_bytes: bytes) -> str | None:
 
 
 def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | None:
-    xml_bytes = extract_soap_xml(soap_request.data)
+    xml_bytes = extract_soap_xml(soap_request.data.head())
     if not xml_bytes:
         return None
     if soap_request.operation_name in AlternateSoapOperation:
@@ -350,3 +350,50 @@ def to_snake_case(name: str) -> str:
     """
     sub = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", sub).lower()
+
+
+class SoapRequestStreamer:
+    def __init__(
+        self, stream: BinaryIO | IO[bytes], chunk_count: int = 4, content_length: int | None = None
+    ) -> None:
+        self.stream = stream
+        self.terminators = [b"</soapenv:Envelope>", b"</env:Envelope>"]
+        self.chunk_count = chunk_count
+        self.chunk_size = 2000
+        self._consumed_head = False
+        self.head_bytes = self.get_head_bytes()
+        self.total_length = content_length
+
+    def get_head_bytes(self) -> bytes:
+        buffer = io.BytesIO()
+        chunk_count = 0
+        while chunk_count <= self.chunk_count:
+            chunk = self.stream.read(self.chunk_size)
+            if not chunk:
+                break
+            buffer.write(chunk)
+            content = buffer.getvalue()
+            for terminator in self.terminators:
+                if terminator in content:
+                    return content
+            chunk_count += 1
+        return content
+
+    def head(self) -> bytes:
+        return self.head_bytes
+
+    def __iter__(self) -> Generator[bytes]:
+        if not self._consumed_head:
+            yield self.head_bytes
+            self._consumed_head = True
+
+        while True:
+            chunk = self.stream.read(self.chunk_size)
+            if not chunk:
+                break
+            yield chunk
+
+    def __len__(self) -> int:
+        if self.total_length is not None:
+            return self.total_length
+        return 0
