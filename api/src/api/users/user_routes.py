@@ -385,8 +385,14 @@ def user_get_saved_opportunities(
     if user_token_session.user_id != user_id:
         raise_flask_error(403, "Forbidden")
 
-    # Get all saved opportunities for the user with their related opportunity data
-    saved_opportunities, pagination_info = get_saved_opportunities(db_session, user_id, json_data)
+    with db_session.begin():
+        # Add the user from the token session to our current session
+        db_session.add(user_token_session)
+
+        # Get all saved opportunities for the user with their related opportunity data
+        saved_opportunities, pagination_info = get_saved_opportunities(
+            db_session, user_token_session.user, json_data
+        )
 
     return response.ApiResponse(
         message="Success",

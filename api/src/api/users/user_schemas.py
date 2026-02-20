@@ -156,7 +156,7 @@ class UserSavedOpportunitiesFilterSchema(Schema):
 
 class UserSavedOpportunitiesRequestSchema(Schema):
     filters = fields.Nested(UserSavedOpportunitiesFilterSchema(), required=False, allow_none=True)
-
+    organization_ids = fields.List(fields.UUID(required=False), allow_none=True)
     pagination = fields.Nested(
         generate_pagination_schema(
             "UserGetSavedOpportunityPaginationV1Schema",
