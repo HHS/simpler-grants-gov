@@ -309,8 +309,8 @@ export const messages = {
       submit: "Submit application",
       transferApplicaitonOwnership: "Transfer application ownership",
       unassociatedApplicationAlert: {
-        title: "This application isn't associated with a valid organization.",
-        body: "You can continue working and your progress will be saved, but to submit on behalf of an organization, you must <link>select that organization and transfer ownership</link>.",
+        title: "This application isn't associated with an organization.",
+        body: "You can continue working and your progress will be saved, but to submit on behalf of an organization you must select that organization and transfer ownership. <link>Click here to transfer application ownership.</link>",
       },
       editApplicationFilingNameModal: {
         buttonText: "Edit filing name",
