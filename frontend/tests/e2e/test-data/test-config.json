@@ -1,7 +1,6 @@
 {
   "environment": {
     "baseDomain": "staging.simpler.grants.gov",
-    "applicationId": "f0e1a2c3-4b5d-6e7f-8a9b-0c1d2a3b4c5d",
     "NofoId": "f7a1c2b3-4d5e-6789-8abc-1234567890ab"
   }
 }
