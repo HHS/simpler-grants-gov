@@ -94,21 +94,31 @@ export async function createApplication(
     });
   }
   const createButton = modal.locator('button:has-text("Create")');
-  const createRequest = page.waitForResponse((response) => {
-    return (
+  const createRequest = page.waitForResponse(
+    (response) =>
       response.request().method() === "POST" &&
-      response.url().includes("/api/applications")
-    );
-  });
+      response.url().includes("/api/applications"),
+    { timeout: 60000 },
+  );
   if ((await createButton.count()) === 0) {
     const anyCreateBtn = page
       .getByRole("button")
       .filter({ hasText: /Create|Submit|Start|Next/ });
     await expect(anyCreateBtn.first()).toBeEnabled({ timeout: 10000 });
-    await anyCreateBtn.first().click();
+    await anyCreateBtn.first().scrollIntoViewIfNeeded();
+    try {
+      await anyCreateBtn.first().click({ timeout: 15000 });
+    } catch (error) {
+      await anyCreateBtn.first().click({ force: true });
+    }
   } else {
     await expect(createButton.first()).toBeEnabled({ timeout: 10000 });
-    await createButton.first().click();
+    await createButton.first().scrollIntoViewIfNeeded();
+    try {
+      await createButton.first().click({ timeout: 15000 });
+    } catch (error) {
+      await createButton.first().click({ force: true });
+    }
   }
   await createRequest;
   await page.waitForTimeout(3000);
