@@ -47,7 +47,13 @@ async function safeLog(
 // ============================================================================
 const BASE_DOMAIN = testConfig.environment.baseDomain;
 const NOFO_ID = testConfig.environment.NofoId;
-const Nofo_directPageUrl = `https://${BASE_DOMAIN}/opportunity/${NOFO_ID}`;
+/**
+ * Returns the direct opportunity URL using the current page's origin.
+ * @param page Playwright Page object
+ */
+function getNofoDirectPageUrl(page: Page): string {
+  return `${page.url().split("/").slice(0, 3).join("/")}/opportunity/${NOFO_ID}`;
+}
 
 // ============================================================================
 // HELPER FUNCTION
@@ -87,8 +93,7 @@ export async function Help_createNewApplication(
     "open-start-application-modal-button"
   );
 
-  // const appLinkName = `Test at ${safeHelp_getTimestamp()}`;
-  const appLinkName = `Test at ABCD`;
+  const appLinkName = `Test at ${safeHelp_getTimestamp()}`;
   await page.getByTestId("textInput").fill(appLinkName);
   await safeHelp_clickButton(
     testInfo,
@@ -215,7 +220,7 @@ export async function Help_createNewApplication(
 
   return {
     appLinkName,
-    Nofo_directPageUrl,
+    Nofo_directPageUrl: getNofoDirectPageUrl(page),
     applicationId: applicationIdFromUrl,
   };
 }
