@@ -157,6 +157,7 @@ def test_get_saved_opportunities_unauthorized_user(client, enable_factory_create
     assert response.status_code == 403
     assert response.json["message"] == "Forbidden"
 
+
 def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_saves(
     client, enable_factory_create, db_session, user, user_auth_token
 ):
@@ -456,6 +457,7 @@ def test_user_get_saved_opportunities_no_filter_returns_all(
 
     assert response.status_code == 200
     assert len(response.json["data"]) == 2
+
 
 def test_user_get_saved_opportunities_org_only(client, enable_factory_create, db_session):
     """Test user can get organization saved opportunities with no duplicates"""

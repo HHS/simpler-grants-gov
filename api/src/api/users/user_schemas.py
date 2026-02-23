@@ -160,7 +160,7 @@ class UserSavedOpportunitiesRequestSchema(Schema):
     pagination = fields.Nested(
         generate_pagination_schema(
             "UserGetSavedOpportunityPaginationV1Schema",
-            ["created_at", "updated_at", "opportunity_title", "close_date"],
+            ["created_at", "opportunity_title", "close_date"],
             default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
         ),
         required=True,
