@@ -14,15 +14,8 @@ import {
   safeHelp_getTimestamp,
   safeHelp_safeExpect,
   safeHelp_safeSelectOption,
-  safeHelp_safeStep,
-  safeHelp_attachTestSummary,
-  safeHelp_updateApplicationName,
-  safeHelp_GotoForm,
-  safeHelp_selectDropdownLocator,
   safeHelp_fillFieldsByTestId,
   safeHelp_safeGoto,
-  safeHelp_safeWaitForLoadState,
-  safeHelp_clickLink,
 } from "tests/e2e/helpers/safeHelp";
 
 // ============================================================================
@@ -119,23 +112,25 @@ export async function Help_createNewApplication(
   );
 
   const originalUrl = page.url();
+  let urlChanged = false;
   try {
     await page.waitForURL(
       (url) => {
         const urlStr = url.toString();
-        return (
-          (urlStr.includes("/application/") ||
-            urlStr.includes("/applications/")) &&
-          urlStr !== originalUrl
-        );
+        const changed =
+          (urlStr.includes("/application/") || urlStr.includes("/applications/")) &&
+          urlStr !== originalUrl;
+        urlChanged = changed;
+        return changed;
       },
-      { timeout: 30000 }
+      { timeout: 60000 }
     );
   } catch (error) {
+    urlChanged = false;
     await safeLog(
       testInfo,
-      "⚠️  URL didn't change to application page within 30 seconds",
-      "warn"
+      "❌ URL did not change to application page within 60 seconds. Application creation failed. Current URL: " + page.url(),
+      "error"
     );
   }
 
@@ -145,101 +140,116 @@ export async function Help_createNewApplication(
   const urlParts = currentUrl.split("/").filter((part) => part.length > 0);
 
   let applicationIdFromUrl = "unknown";
-  const appIndex = urlParts.indexOf("application");
-  if (appIndex !== -1 && appIndex + 1 < urlParts.length) {
-    applicationIdFromUrl = urlParts[appIndex + 1];
-  } else {
-    const appsIndex = urlParts.indexOf("applications");
-    if (appsIndex !== -1 && appsIndex + 1 < urlParts.length) {
-      applicationIdFromUrl = urlParts[appsIndex + 1];
-    } else if (urlParts.length > 0) {
-      const lastSegment = urlParts[urlParts.length - 1];
-      if (
-        lastSegment &&
-        !lastSegment.includes(".") &&
-        !lastSegment.includes(":")
-      ) {
-        applicationIdFromUrl = lastSegment;
+  if (urlChanged) {
+    const appIndex = urlParts.indexOf("application");
+    if (appIndex !== -1 && appIndex + 1 < urlParts.length) {
+      applicationIdFromUrl = urlParts[appIndex + 1];
+    } else {
+      const appsIndex = urlParts.indexOf("applications");
+      if (appsIndex !== -1 && appsIndex + 1 < urlParts.length) {
+        applicationIdFromUrl = urlParts[appsIndex + 1];
+      } else if (urlParts.length > 0) {
+        const lastSegment = urlParts[urlParts.length - 1];
+        if (
+          lastSegment &&
+          !lastSegment.includes(".") &&
+          !lastSegment.includes(":")
+        ) {
+          applicationIdFromUrl = lastSegment;
+        }
       }
     }
+    await safeLog(testInfo, `📍 Application URL changed: ${currentUrl}`);
+    await safeLog(testInfo, `📝 Extracted Application ID: ${applicationIdFromUrl}`);
+  } else {
+    await safeLog(testInfo, `❌ Application creation failed: URL did not change. Still at: ${currentUrl}`, "error");
+    applicationIdFromUrl = "unknown";
   }
 
-  await safeLog(testInfo, `📍 Application URL: ${currentUrl}`);
-  await safeLog(testInfo, `📝 Extracted Application ID: ${applicationIdFromUrl}`);
-
-  await safeHelp_safeExpect(testInfo, async () =>
-    expect(
-      page.getByTestId("information-card").getByRole("heading")
-    ).toContainText(`This is a test-${appLinkName}Edit filing name`)
-  );
-
-  await safeHelp_safeExpect(testInfo, async () =>
-    expect(
-      page.getByTestId("information-card").getByTestId("button")
-    ).toContainText("Submit application")
-  );
-
-  const successMessage = `✅ Successfully created application: ${appLinkName}\nOpportunity ID: ${NOFO_ID}\nApplication ID: ${applicationIdFromUrl}\nURL: ${currentUrl}\nTime: ${new Date().toISOString()}`;
-  await safeLog(testInfo, successMessage);
-  await testInfo.attach("application-created", {
-    body: successMessage,
-    contentType: "text/plain",
-  });
-
-  try {
-    const configPath = path.resolve(
-      __dirname,
-      "../test-data/applicationCreatedFromTest.json"
+  if (urlChanged) {
+    await safeHelp_safeExpect(testInfo, async () =>
+      expect(
+        page.getByTestId("information-card").getByRole("heading")
+      ).toContainText(`This is a test-${appLinkName}Edit filing name`)
     );
 
-    let fileContent: {
-      baseDomain: string;
-      NofoId: string;
-      createdApplications: Array<{
-        applicationId: string;
-        applicationName: string;
-        createdAt: string;
-      }>;
-    };
+    await safeHelp_safeExpect(testInfo, async () =>
+      expect(
+        page.getByTestId("information-card").getByTestId("button")
+      ).toContainText("Submit application")
+    );
+
+    const successMessage = `✅ Successfully created application: ${appLinkName}\nOpportunity ID: ${NOFO_ID}\nApplication ID: ${applicationIdFromUrl}\nURL: ${currentUrl}\nTime: ${new Date().toISOString()}`;
+    await safeLog(testInfo, successMessage);
+    await testInfo.attach("application-created", {
+      body: successMessage,
+      contentType: "text/plain",
+    });
+  } else {
+    const failMessage = `❌ Failed to create application: ${appLinkName}\nOpportunity ID: ${NOFO_ID}\nURL: ${currentUrl}\nTime: ${new Date().toISOString()}`;
+    await safeLog(testInfo, failMessage, "error");
+    await testInfo.attach("application-creation-failed", {
+      body: failMessage,
+      contentType: "text/plain",
+    });
+  }
+
+  if (urlChanged) {
     try {
-      const existingData = fs.readFileSync(configPath, "utf-8");
-      fileContent = JSON.parse(existingData);
-    } catch (readError) {
-      fileContent = {
-        baseDomain: BASE_DOMAIN,
-        NofoId: NOFO_ID,
-        createdApplications: [],
+      const configPath = path.resolve(
+        __dirname,
+        "../test-data/applicationCreatedFromTest.json"
+      );
+
+      let fileContent: {
+        baseDomain: string;
+        NofoId: string;
+        createdApplications: Array<{
+          applicationId: string;
+          applicationName: string;
+          createdAt: string;
+        }>;
       };
+      try {
+        const existingData = fs.readFileSync(configPath, "utf-8");
+        fileContent = JSON.parse(existingData);
+      } catch (readError) {
+        fileContent = {
+          baseDomain: BASE_DOMAIN,
+          NofoId: NOFO_ID,
+          createdApplications: [],
+        };
+      }
+
+      const newApplicationEntry = {
+        applicationId: applicationIdFromUrl,
+        applicationName: appLinkName,
+        createdAt: new Date().toISOString(),
+      };
+
+      if (!Array.isArray(fileContent.createdApplications)) {
+        fileContent.createdApplications = [];
+      }
+      fileContent.createdApplications.push(newApplicationEntry);
+
+      fs.writeFileSync(configPath, JSON.stringify(fileContent, null, 2));
+      await safeLog(
+        testInfo,
+        "💾 Application data added to applicationCreatedFromTest.json"
+      );
+      await safeLog(testInfo, `   - Application ID: ${applicationIdFromUrl}`);
+      await safeLog(testInfo, `   - Application Name: ${appLinkName}`);
+      await safeLog(
+        testInfo,
+        `   - Total applications created: ${fileContent.createdApplications.length}`
+      );
+    } catch (error) {
+      await safeLog(
+        testInfo,
+        `⚠️  Could not save to applicationCreatedFromTest.json: ${String(error)}`,
+        "warn"
+      );
     }
-
-    const newApplicationEntry = {
-      applicationId: applicationIdFromUrl,
-      applicationName: appLinkName,
-      createdAt: new Date().toISOString(),
-    };
-
-    if (!Array.isArray(fileContent.createdApplications)) {
-      fileContent.createdApplications = [];
-    }
-    fileContent.createdApplications.push(newApplicationEntry);
-
-    fs.writeFileSync(configPath, JSON.stringify(fileContent, null, 2));
-    await safeLog(
-      testInfo,
-      "💾 Application data added to applicationCreatedFromTest.json"
-    );
-    await safeLog(testInfo, `   - Application ID: ${applicationIdFromUrl}`);
-    await safeLog(testInfo, `   - Application Name: ${appLinkName}`);
-    await safeLog(
-      testInfo,
-      `   - Total applications created: ${fileContent.createdApplications.length}`
-    );
-  } catch (error) {
-    await safeLog(
-      testInfo,
-      `⚠️  Could not save to applicationCreatedFromTest.json: ${String(error)}`,
-      "warn"
-    );
   }
 
   return {
