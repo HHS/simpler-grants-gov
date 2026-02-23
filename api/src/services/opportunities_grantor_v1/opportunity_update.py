@@ -32,6 +32,10 @@ def update_opportunity(
     # Check if user has permission to update opportunities for this agency
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
 
+    # Only draft opportunities can be updated
+    if not opportunity.is_draft:
+        raise_flask_error(422, message="Only draft opportunities can be updated")
+
     # Apply updates — only update fields that were provided
     if "opportunity_title" in opportunity_data:
         opportunity.opportunity_title = opportunity_data["opportunity_title"]
