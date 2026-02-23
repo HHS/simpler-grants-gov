@@ -297,6 +297,7 @@ export async function Help_createNewApplication(
  * @returns Promise<boolean>
  */
 async function isChromeBrowser(page: Page): Promise<boolean> {
+  if (page.isClosed()) return false;
   const userAgent = await page.evaluate(() => navigator.userAgent);
   return userAgent.includes("Chrome");
 }
