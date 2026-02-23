@@ -183,7 +183,7 @@ const getBasicFieldInfo = ({
 };
 
 // for a multifield field, gather all necessary data for rendering
-const getBasicMultifieldInfo = ({
+export const getBasicMultifieldInfo = ({
   uiFieldObject,
   formSchema,
   formData,
@@ -207,8 +207,14 @@ const getBasicMultifieldInfo = ({
     throw new Error("Could not build field");
   }
   const fieldSchema = definition
-    .map((def) => getSchemaObjectFromPointer(formSchema, def) as RJSFSchema)
-    .reduce((acc, schema) => ({ ...acc, ...schema }), {});
+    .map((def) => {
+      const ref = getSchemaObjectFromPointer(formSchema, def) as RJSFSchema;
+      return ref;
+    })
+    .reduce((acc, schema) => {
+      const newAcc = { ...acc, ...schema };
+      return newAcc;
+    }, {});
   const value = definition
     .map((def) => {
       const defName = getNameFromDef({ definition: def, schema });
@@ -235,6 +241,7 @@ const getBasicMultifieldInfo = ({
     : [];
   return {
     value,
+    // not used downstream on sf424a, and not valid see https://github.com/HHS/simpler-grants-gov/issues/8624
     fieldSchema,
     rawErrors,
     fieldName,
@@ -245,7 +252,7 @@ const getBasicMultifieldInfo = ({
 
 // if a field is of a type that requires enum options (select, mulitselect, radio)
 // this function will format the options correctly based on the json schema
-const getEnumOptions = ({
+export const getEnumOptions = ({
   widgetType,
   fieldSchema,
 }: {
@@ -282,17 +289,17 @@ const getEnumOptions = ({
   }
 
   const enumOptions: EnumOptionsType<RJSFSchema>[] = enums.map(
-    (label: string) => {
-      const display =
+    (enumValue: string) => {
+      const label =
         fieldSchema.type === "boolean"
-          ? label === "true"
+          ? enumValue === "true"
             ? "Yes"
             : "No"
           : getSimpleTranslationsSync({
               nameSpace: "Form",
-              translateableString: label,
+              translateableString: enumValue,
             });
-      return { value: label, label: display };
+      return { value: enumValue, label };
     },
   );
 
