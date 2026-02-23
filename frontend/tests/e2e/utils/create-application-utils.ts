@@ -1,7 +1,6 @@
 // Utility function for application creation
 // Usage: await createApplication(page, opportunityUrl, orgLabelLocal, orgLabelStaging);
 import { expect } from "@playwright/test";
-
 import playwrightEnv from "tests/e2e/playwright-env";
 
 const { baseUrl, targetEnv } = playwrightEnv;

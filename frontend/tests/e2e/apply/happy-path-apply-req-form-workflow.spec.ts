@@ -72,7 +72,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     page,
     OPPORTUNITY_URL,
     "Sally",
-    "Automatic staging Organization for UEI AUTOHQDCCHBY"
+    "Automatic staging Organization for UEI AUTOHQDCCHBY",
   );
 
   // Step 10: Click on SF-424B form to fill it
@@ -100,7 +100,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     await selectFormInclusionOption(
       page,
       "Disclosure of Lobbying Activities (SF-LLL)",
-      "No"
+      "No",
     );
 
     // Submit the application and verify success
