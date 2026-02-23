@@ -1837,6 +1837,7 @@ export const messages = {
       create: "Create recommendation",
     },
     description: "Award Recommendation flow coming soon.",
+    opportunity: "Opportunity",
   },
   InviteLegacyUsers: {
     dataLoadingError:

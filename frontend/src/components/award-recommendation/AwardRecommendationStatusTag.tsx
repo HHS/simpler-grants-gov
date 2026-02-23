@@ -51,9 +51,7 @@ const AwardRecommendationStatusTag = ({ status }: Props) => {
     }
   };
 
-  return (
-    <div data-testid="award-recommendation-status-tag">{statusTag()}</div>
-  );
+  return <div data-testid="award-recommendation-status-tag">{statusTag()}</div>;
 };
 
 export default AwardRecommendationStatusTag;

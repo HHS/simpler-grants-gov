@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
 import AwardRecommendationStatusTag, {
   type AwardRecommendationStatus,
 } from "./AwardRecommendationStatusTag";
@@ -22,7 +23,20 @@ export default function AwardRecommendationHero({
     <div className="text-dark bg-base-lightest padding-y-4 tablet:padding-y-6">
       <GridContainer>
         <Grid>
-          <Grid>~~~breadcrumbs~~~</Grid>
+          <Breadcrumbs
+            className="padding-y-0 bg-transparent font-sans-sm"
+            breadcrumbList={[
+              {
+                title: t("opportunity", { defaultValue: "Opportunity" }),
+                path: "/",
+              },
+              {
+                title: `${t("heroTitle", { defaultValue: "Award Recommendation" })}: ${recordNumber}`,
+                // TODO: add link to opportunity
+                path: `/`,
+              },
+            ]}
+          />
           <Grid className="padding-y-2 tablet:padding-y-3">
             <h1>
               {t("heroTitle", { defaultValue: "Award Recommendation" })}:{" "}
@@ -47,9 +61,11 @@ export default function AwardRecommendationHero({
               </Grid>
             </Grid>
             <Grid tablet={{ col: "auto" }} className="flex-align-self-end">
+              {/* TODO: add save functionality when endpoint is available */}
               <Button type="button" outline className="margin-top-2">
                 {t("heroButtons.save")}
               </Button>
+              {/* TODO: add create functionality when endpoint is available */}
               <Button type="button" className="margin-top-1">
                 {t("heroButtons.create")}
               </Button>
