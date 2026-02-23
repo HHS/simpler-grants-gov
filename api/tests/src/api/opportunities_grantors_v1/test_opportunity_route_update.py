@@ -3,7 +3,7 @@ import uuid
 import pytest
 
 from src.constants.lookup_constants import Privilege
-from tests.lib.opportunity_test_utils import create_user_in_agency_with_jwt_and_api_key
+from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.src.db.models.factories import OpportunityFactory
 
 
