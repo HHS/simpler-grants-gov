@@ -9,12 +9,12 @@
  * Define standard timeout values for different types of operations
  */
 const TIMEOUTS = {
-  INSTANT: 5000,       // Quick operations (5 seconds)
-  FAST: 10000,         // Fast-loading fields (10 seconds)
-  DEFAULT: 30000,      // Default timeout for most operations (30 seconds)
-  SLOW: 60000,         // Slow-loading fields (60 seconds)
-  EXTENDED: 120000,    // Extended timeout for complex operations (2 minutes)
-  TEST: 120000,        // Test execution timeout (2 minutes)
+  INSTANT: 5000, // Quick operations (5 seconds)
+  FAST: 10000, // Fast-loading fields (10 seconds)
+  DEFAULT: 30000, // Default timeout for most operations (30 seconds)
+  SLOW: 60000, // Slow-loading fields (60 seconds)
+  EXTENDED: 120000, // Extended timeout for complex operations (2 minutes)
+  TEST: 120000, // Test execution timeout (2 minutes)
 } as const;
 
 type TimeoutPreset = keyof typeof TIMEOUTS;
