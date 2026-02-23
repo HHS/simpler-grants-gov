@@ -1,4 +1,4 @@
-import { Page, expect } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 
 /**
  * Navigate back to application page and verify "No issues detected" status for a form.
@@ -7,7 +7,7 @@ import { Page, expect } from "@playwright/test";
  */
 export async function verifyFormStatusAfterSave(
   page: Page,
-  formName: string
+  formName: string,
 ): Promise<void> {
   await page.goBack();
   await page.waitForLoadState("domcontentloaded");
@@ -21,12 +21,14 @@ export async function verifyFormStatusAfterSave(
   // Look for the row that contains both the form name AND a link to the form
   const escapedFormName = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const flexiblePattern = escapedFormName.replace(/\s+/g, "\\s*");
-  const formRow = page.locator("tr", {
-    hasText: new RegExp(flexiblePattern, "i"),
-  }).filter({
-    has: page.locator('a[href*="/form/"]'),
-  });
-  
+  const formRow = page
+    .locator("tr", {
+      hasText: new RegExp(flexiblePattern, "i"),
+    })
+    .filter({
+      has: page.locator('a[href*="/form/"]'),
+    });
+
   await expect(formRow).toBeVisible({ timeout: 10000 });
   await expect(formRow.getByText(/no issues detected/i)).toBeVisible({
     timeout: 10000,

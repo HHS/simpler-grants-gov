@@ -1,6 +1,7 @@
 // Utility function for application creation
 // Usage: await createApplication(page, opportunityUrl, orgLabelLocal, orgLabelStaging);
 import { expect } from "@playwright/test";
+
 import playwrightEnv from "../playwright-env";
 
 const { baseUrl, targetEnv } = playwrightEnv;
@@ -16,25 +17,37 @@ export async function createApplication(
   page: import("@playwright/test").Page,
   opportunityUrl: string,
   orgLabelLocal: string,
-  orgLabelStaging: string
+  orgLabelStaging: string,
 ) {
-  await page.goto(`${baseUrl}${opportunityUrl}`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${baseUrl}${opportunityUrl}`, {
+    waitUntil: "domcontentloaded",
+  });
   await page.waitForTimeout(3000);
-  const startAppButton = page.getByRole("button", { name: /start.*application/i });
+  const startAppButton = page.getByRole("button", {
+    name: /start.*application/i,
+  });
   await startAppButton.waitFor({ state: "visible", timeout: 15000 });
   await startAppButton.click();
-  const modal = page.locator('[role="dialog"].is-visible, #start-application.is-visible');
+  const modal = page.locator(
+    '[role="dialog"].is-visible, #start-application.is-visible',
+  );
   await expect(modal.locator("select")).toBeVisible({ timeout: 15000 });
-  const orgSelect = modal.locator('select[name*="applicant"], select:nth-of-type(1)');
+  const orgSelect = modal.locator(
+    'select[name*="applicant"], select:nth-of-type(1)',
+  );
   const orgSelectCount = await orgSelect.count();
   if (orgSelectCount > 0) {
     await orgSelect.first().waitFor({ state: "visible", timeout: 5000 });
     const options = await orgSelect.first().locator("option").allTextContents();
     let orgLabel = "";
     if (targetEnv === "local") {
-      orgLabel = options.find((opt: string) => opt.includes(orgLabelLocal)) || options[0];
+      orgLabel =
+        options.find((opt: string) => opt.includes(orgLabelLocal)) ||
+        options[0];
     } else if (targetEnv === "staging") {
-      orgLabel = options.find((opt: string) => opt.includes(orgLabelStaging)) || options[0];
+      orgLabel =
+        options.find((opt: string) => opt.includes(orgLabelStaging)) ||
+        options[0];
     } else {
       orgLabel = options[0];
     }
@@ -42,7 +55,9 @@ export async function createApplication(
       await orgSelect.first().selectOption({ label: orgLabel });
     }
   }
-  const nameInput = modal.locator('input[name*="name"], input[placeholder*="application"], input[type="text"]:nth-of-type(1)');
+  const nameInput = modal.locator(
+    'input[name*="name"], input[placeholder*="application"], input[type="text"]:nth-of-type(1)',
+  );
   if ((await nameInput.count()) > 0) {
     await nameInput.first().waitFor({ state: "visible", timeout: 5000 });
     const uniqueAppName = `TEST-APPLY-ORG-IND-APP${Date.now()}`;
@@ -50,7 +65,9 @@ export async function createApplication(
   }
   const createButton = modal.locator('button:has-text("Create")');
   if ((await createButton.count()) === 0) {
-    const anyCreateBtn = page.getByRole("button").filter({ hasText: /Create|Submit|Start|Next/ });
+    const anyCreateBtn = page
+      .getByRole("button")
+      .filter({ hasText: /Create|Submit|Start|Next/ });
     await anyCreateBtn.first().click();
   } else {
     await createButton.first().click();
@@ -61,7 +78,9 @@ export async function createApplication(
   await page.waitForTimeout(2000);
   const mainContent = page.locator("main");
   await expect(mainContent).toBeVisible();
-  const requiredFormsHeading = page.locator("text=/Required Forms/i, text=/forms required/i");
+  const requiredFormsHeading = page.locator(
+    "text=/Required Forms/i, text=/forms required/i",
+  );
   if ((await requiredFormsHeading.count()) > 0) {
     // Application page loaded with forms section
   }

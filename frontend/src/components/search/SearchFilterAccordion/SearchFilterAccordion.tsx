@@ -21,16 +21,14 @@ export interface CommonSearchFilterAccordionProps {
   title: string; // Title in header of accordion
 }
 
-export interface BasicSearchFilterAccordionProps
-  extends CommonSearchFilterAccordionProps {
+export interface BasicSearchFilterAccordionProps extends CommonSearchFilterAccordionProps {
   className?: string;
   contentClassName?: string;
   expanded?: boolean;
   children: React.ReactNode;
 }
 
-export interface SearchAccordionContentProps
-  extends CommonSearchFilterAccordionProps {
+export interface SearchAccordionContentProps extends CommonSearchFilterAccordionProps {
   filterOptions: FilterOption[];
   facetCounts?: { [key: string]: number };
   defaultEmptySelection?: Set<string>;

@@ -1,4 +1,4 @@
-import { Page, expect } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 
 /**
  * Select Yes or No option for including a form in application submission.
@@ -9,7 +9,7 @@ import { Page, expect } from "@playwright/test";
 export async function selectFormInclusionOption(
   page: Page,
   formName: string,
-  option: "Yes" | "No" = "Yes"
+  option: "Yes" | "No" = "Yes",
 ): Promise<void> {
   // Look for the form row by its text content (works across all tables)
   // Note: The text content may not have spaces, so use a flexible regex
@@ -47,7 +47,7 @@ export async function selectFormInclusionOption(
 
     if (includeFormResponse.status() !== 200) {
       throw new Error(
-        `Include-in-submission update returned status ${includeFormResponse.status()}`
+        `Include-in-submission update returned status ${includeFormResponse.status()}`,
       );
     }
   } else {
@@ -74,7 +74,7 @@ export async function selectFormInclusionOption(
 
       if (includeFormResponse.status() !== 200) {
         throw new Error(
-          `Include-in-submission update returned status ${includeFormResponse.status()}`
+          `Include-in-submission update returned status ${includeFormResponse.status()}`,
         );
       }
     } else {

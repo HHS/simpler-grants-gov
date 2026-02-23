@@ -5,16 +5,16 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import { fillSf424bForm } from "../utils/forms/fill-sf424b-form-utils";
-import { saveForm } from "../utils/forms/save-form-utils";
-import { verifyFormStatusAfterSave } from "../utils/forms/verify-form-status-utils";
-import { selectFormInclusionOption } from "../utils/forms/select-form-inclusion-utils";
-import { submitApplicationAndVerify } from "../utils/submit-application-utils";
-import { createApplication } from "../utils/create-application-utils";
 import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { openMobileNav } from "tests/e2e/playwrightUtils";
+import { createApplication } from "tests/e2e/utils/create-application-utils";
+import { fillSf424bForm } from "tests/e2e/utils/forms/fill-sf424b-form-utils";
+import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
+import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
+import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
+import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
 
 const { baseUrl, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
@@ -67,13 +67,12 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     await openMobileNav(page);
   }
 
-
   // Call reusable create application function from utils
   await createApplication(
     page as Page,
     OPPORTUNITY_URL,
     "Sally",
-    "Automatic staging Organization for UEI AUTOHQDCCHBY"
+    "Automatic staging Organization for UEI AUTOHQDCCHBY",
   );
 
   // Step 10: Click on SF-424B form to fill it
@@ -101,7 +100,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     await selectFormInclusionOption(
       page,
       "Disclosure of Lobbying Activities (SF-LLL)",
-      "No"
+      "No",
     );
 
     // Submit the application and verify success

@@ -125,13 +125,17 @@ export interface ApplicationSubmitResponse {
   internal_request_id?: string;
 }
 
-export interface ApplicationSubmitApiResponse
-  extends Omit<APIResponse, "errors"> {
+export interface ApplicationSubmitApiResponse extends Omit<
+  APIResponse,
+  "errors"
+> {
   data: ApplicationSubmitResponse;
 }
 
-export interface ApplicationFormDetailApiResponse
-  extends Omit<APIResponse, "warnings"> {
+export interface ApplicationFormDetailApiResponse extends Omit<
+  APIResponse,
+  "warnings"
+> {
   data: ApplicationFormDetail;
   warnings: FormValidationWarnings;
 }

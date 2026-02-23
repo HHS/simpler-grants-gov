@@ -1,4 +1,4 @@
-import { Page, expect } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 
 /**
  * Submit the application and verify success message with application ID.
@@ -26,7 +26,7 @@ export async function submitApplicationAndVerify(page: Page): Promise<string> {
 
   if (submitResponse.status() !== 200) {
     throw new Error(
-      `Application submission returned status ${submitResponse.status()}`
+      `Application submission returned status ${submitResponse.status()}`,
     );
   }
 
@@ -48,7 +48,7 @@ export async function submitApplicationAndVerify(page: Page): Promise<string> {
 
   if (await validationHeading.isVisible()) {
     throw new Error(
-      "Application submission validation errors were displayed after submit"
+      "Application submission validation errors were displayed after submit",
     );
   }
 
@@ -62,7 +62,7 @@ export async function submitApplicationAndVerify(page: Page): Promise<string> {
     const text = await el.textContent();
     if (
       /Application ID #: [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(
-        text || ""
+        text || "",
       )
     ) {
       appIdMessage = el;
@@ -79,7 +79,7 @@ export async function submitApplicationAndVerify(page: Page): Promise<string> {
   // Extract and verify application ID format (UUID)
   const appIdText = await appIdMessage.textContent();
   const appIdMatch = appIdText?.match(
-    /Application ID #: ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i
+    /Application ID #: ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i,
   );
 
   if (!appIdMatch || !appIdMatch[1]) {
