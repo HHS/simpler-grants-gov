@@ -7,6 +7,7 @@ import {
 } from "@playwright/test";
 import { fillSf424bForm } from "../utils/forms/fill-sf424b-form-utils";
 import { saveForm } from "../utils/forms/save-form-utils";
+import { fillSflllForm } from "../utils/forms/fill-sflll-form-utils";
 import { verifyFormStatusAfterSave } from "../utils/forms/verify-form-status-utils";
 import { selectFormInclusionOption } from "../utils/forms/select-form-inclusion-utils";
 import { submitApplicationAndVerify } from "../utils/submit-application-utils";
@@ -94,19 +95,24 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     // Verify form status after save
     await verifyFormStatusAfterSave(page, "SF-424B");
 
-    // Extra wait for page to fully render forms table after navigation
-    await page.waitForTimeout(10000);
-
-    // Select 'No' for including SF-LLL form in submission
+    // Select 'Yes' for including SF-LLL form in submission
     await selectFormInclusionOption(
       page,
       "Disclosure of Lobbying Activities (SF-LLL)",
-      "No"
+      "Yes"
     );
 
-    // Submit the application and verify success
+    // Now open and fill the SF-LLL (Disclosure of Lobbying) form
+    const sfLllFormLink = page.getByRole('link', { name: /Disclosure of Lobbying/i });
+    await sfLllFormLink.click();
+    await page.waitForLoadState("domcontentloaded");
+    await fillSflllForm(page);
+    await saveForm(page);
+    // Verify form status after save
+    await verifyFormStatusAfterSave(page, "SF-LLL");
+
+    // Submit the application and get the application ID
     const appId = await submitApplicationAndVerify(page);
-    // Application ID is now available in appId variable for further use if needed
   }
 
   // console.log("\n✓ Test completed successfully!");
