@@ -6,10 +6,16 @@ import AwardRecommendationStatusTag, {
 } from "./AwardRecommendationStatusTag";
 
 type Props = {
-  status?: AwardRecommendationStatus;
+  recordNumber: string;
+  datePrepared: string; // formatted as MM/DD/YYYY
+  status: AwardRecommendationStatus;
 };
 
-export default function AwardRecommendationHero({ status = "draft" }: Props) {
+export default function AwardRecommendationHero({
+  recordNumber,
+  datePrepared,
+  status,
+}: Props) {
   const t = useTranslations("AwardRecommendation");
 
   return (
@@ -19,22 +25,22 @@ export default function AwardRecommendationHero({ status = "draft" }: Props) {
           <Grid>~~~breadcrumbs~~~</Grid>
           <Grid className="padding-y-2 tablet:padding-y-3">
             <h1>
-              {t("heroTitle", { defaultValue: "Award Recommendation" })}:
-              AR-XX-XXXX
+              {t("heroTitle", { defaultValue: "Award Recommendation" })}:{" "}
+              {recordNumber}
             </h1>
           </Grid>
           <Grid row gap>
             <Grid tablet={{ col: "fill" }}>
               <Grid>
                 <strong>
-                  {t("datePrepared", { defaultValue: "Date Prepared" })}:
+                  {t("datePrepared", { defaultValue: "Date Prepared" })}:{" "}
                 </strong>
                 <span className="margin-left-1 display-inline-flex flex-align-center">
-                  01/08/2026
+                  {datePrepared}
                 </span>
               </Grid>
               <Grid className="padding-top-1 tablet:padding-top-2 display-flex flex-align-center">
-                <strong>{t("status", { defaultValue: "Status" })}:</strong>
+                <strong>{t("status", { defaultValue: "Status" })}:</strong>{" "}
                 <span className="margin-left-1 display-inline-flex flex-align-center">
                   <AwardRecommendationStatusTag status={status} />
                 </span>
