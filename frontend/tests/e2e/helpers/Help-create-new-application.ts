@@ -87,7 +87,8 @@ export async function Help_createNewApplication(
     "open-start-application-modal-button"
   );
 
-  const appLinkName = `Test at ${safeHelp_getTimestamp()}`;
+  // const appLinkName = `Test at ${safeHelp_getTimestamp()}`;
+  const appLinkName = `Test at ABCD`;
   await page.getByTestId("textInput").fill(appLinkName);
   await safeHelp_clickButton(
     testInfo,
