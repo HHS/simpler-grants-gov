@@ -34,7 +34,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     // Use test-user spoofing
     await createSpoofedSessionCookie(context);
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-    // console.log("✓ Local test user session established");
+    // console.log(" Local test user session established");
 
     // Fallback: use test-user dropdown if present
     const testUserSelect = page.locator(
@@ -44,9 +44,17 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
       await testUserSelect
         .first()
         .waitFor({ state: "visible", timeout: 10_000 });
-      await testUserSelect.first().selectOption("many_app_user");
+      const loginResponse = page.waitForResponse((response) => {
+        return (
+          response.request().method() === "POST" &&
+          response.url().includes("/api/user/local-quick-login")
+        );
+      });
+      await testUserSelect.first().selectOption({ label: "many_app_user" });
+      await loginResponse;
+      await page.waitForLoadState("networkidle");
       await page.waitForTimeout(2000);
-      // console.log("✓ Test user selected via dropdown fallback");
+      // console.log(" Test user selected via dropdown fallback");
     } else {
       // console.log("ℹ No test user dropdown found - proceeding with cookie session");
     }
@@ -57,7 +65,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
       throw new Error("signOutButton was not found after performStagingLogin");
     }
     await expect(signOutButton).toHaveCount(1, { timeout: 120_000 });
-    // console.log("✓ Staging user logged in");
+    // console.log(" Staging user logged in");
   } else {
     throw new Error(`Unsupported env ${targetEnv}`);
   }
@@ -82,7 +90,13 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
   });
 
   if ((await sf424bLink.count()) > 0) {
-    await sf424bLink.first().click();
+    await sf424bLink.first().waitFor({ state: "visible", timeout: 60000 });
+    await Promise.all([
+      page.waitForURL(/\/applications\/[a-f0-9-]+\/form\/[a-f0-9-]+/, {
+        timeout: 30000,
+      }),
+      sf424bLink.first().click(),
+    ]);
     await page.waitForLoadState("domcontentloaded");
     await page.waitForTimeout(2000);
     // Fill SF-424B form fields using helper
@@ -108,6 +122,6 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     // Application ID is now available in appId variable for further use if needed
   }
 
-  // console.log("\n✓ Test completed successfully!");
+  // console.log("\n Test completed successfully!");
   // console.log(`Final URL: ${page.url()}`);
 });

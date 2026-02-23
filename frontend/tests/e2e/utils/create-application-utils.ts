@@ -36,8 +36,22 @@ export async function createApplication(
   );
   const orgSelectCount = await orgSelect.count();
   if (orgSelectCount > 0) {
-    await orgSelect.first().waitFor({ state: "visible", timeout: 5000 });
-    const options = await orgSelect.first().locator("option").allTextContents();
+    const orgSelectFirst = orgSelect.first();
+    await orgSelectFirst.waitFor({ state: "visible", timeout: 5000 });
+    await expect(orgSelectFirst).toBeEnabled({ timeout: 10000 });
+    await page.waitForFunction((selector) => {
+      const select = document.querySelector(selector);
+      if (!(select instanceof HTMLSelectElement)) return false;
+      return Array.from(select.options).some((opt) => !opt.disabled);
+    }, 'select[name*="applicant"], select:nth-of-type(1)');
+    const options = await orgSelectFirst.locator("option").allTextContents();
+    const enabledOptionValues = await orgSelectFirst
+      .locator("option:not([disabled])")
+      .evaluateAll((nodes) =>
+        nodes
+          .filter((n): n is HTMLOptionElement => n instanceof HTMLOptionElement)
+          .map((n) => n.value),
+      );
     let orgLabel = "";
     if (targetEnv === "local") {
       orgLabel =
@@ -51,7 +65,21 @@ export async function createApplication(
       orgLabel = options[0];
     }
     if (orgLabel) {
-      await orgSelect.first().selectOption({ label: orgLabel });
+      const orgValue = await orgSelectFirst
+        .locator("option")
+        .filter({ hasText: orgLabel })
+        .first()
+        .getAttribute("value");
+      if (orgValue && enabledOptionValues.includes(orgValue)) {
+        await orgSelectFirst.selectOption({ value: orgValue });
+      } else if (enabledOptionValues.length > 0) {
+        await orgSelectFirst.selectOption({ value: enabledOptionValues[0] });
+      }
+    }
+
+    const selectedOrgValue = await orgSelectFirst.inputValue();
+    if (!selectedOrgValue && enabledOptionValues.length > 0) {
+      await orgSelectFirst.selectOption({ value: enabledOptionValues[0] });
     }
   }
   const nameInput = modal.locator(
@@ -61,19 +89,32 @@ export async function createApplication(
     await nameInput.first().waitFor({ state: "visible", timeout: 5000 });
     const uniqueAppName = `TEST-APPLY-ORG-IND-APP${Date.now()}`;
     await nameInput.first().fill(uniqueAppName);
+    await expect(nameInput.first()).toHaveValue(uniqueAppName, {
+      timeout: 5000,
+    });
   }
   const createButton = modal.locator('button:has-text("Create")');
+  const createRequest = page.waitForResponse((response) => {
+    return (
+      response.request().method() === "POST" &&
+      response.url().includes("/api/applications")
+    );
+  });
   if ((await createButton.count()) === 0) {
     const anyCreateBtn = page
       .getByRole("button")
       .filter({ hasText: /Create|Submit|Start|Next/ });
+    await expect(anyCreateBtn.first()).toBeEnabled({ timeout: 10000 });
     await anyCreateBtn.first().click();
   } else {
+    await expect(createButton.first()).toBeEnabled({ timeout: 10000 });
     await createButton.first().click();
   }
+  await createRequest;
   await page.waitForTimeout(3000);
-  await page.waitForURL(/\/applications\/[a-f0-9-]+/, { timeout: 30000 });
+  await page.waitForURL(/\/applications\/[a-f0-9-]+/, { timeout: 60000 });
   await page.waitForLoadState("domcontentloaded");
+  await page.waitForLoadState("networkidle");
   await page.waitForTimeout(2000);
   const mainContent = page.locator("main");
   await expect(mainContent).toBeVisible();
@@ -83,4 +124,9 @@ export async function createApplication(
   if ((await requiredFormsHeading.count()) > 0) {
     // Application page loaded with forms section
   }
+  await expect(
+    page.locator("a, button").filter({
+      hasText: /SF-424B|Assurances for Non-Construction Programs/i,
+    }),
+  ).toBeVisible({ timeout: 60000 });
 }

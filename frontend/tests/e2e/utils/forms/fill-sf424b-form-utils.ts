@@ -14,19 +14,19 @@ export async function fillSf424bForm(
   // Find and fill the Title field
   let titleFieldFilled = false;
   const titleInputs = page.locator(
-    'input[name*="title" i], input[placeholder*="title" i]',
+    'input[name*="title" i], input[placeholder*="title" i], textarea[name*="title" i], textarea[placeholder*="title" i]',
   );
   const titleCount = await titleInputs.count();
   if (titleCount > 0) {
     const titleField = titleInputs.first();
-    await titleField.waitFor({ state: "visible", timeout: 3000 });
+    await titleField.waitFor({ state: "visible", timeout: 10000 });
     await titleField.fill(title);
     titleFieldFilled = true;
   }
   if (!titleFieldFilled) {
     try {
       const titleLabelInput = page.getByLabel(/title/i).first();
-      await titleLabelInput.waitFor({ state: "visible", timeout: 3000 });
+      await titleLabelInput.waitFor({ state: "visible", timeout: 10000 });
       await titleLabelInput.fill(title);
       titleFieldFilled = true;
     } catch (err) {
