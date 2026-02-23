@@ -19,7 +19,7 @@ const AwardRecommendationStatusTag = ({ status }: Props) => {
       case "draft":
         return (
           <div
-            className="usa-tag bg-base-dark text-white radius-2 border-base-lightest radius-md margin-right-0 font-sans-sm text-no-uppercase display-flex flex-align-center gap-1"
+            className="usa-tag bg-base-dark text-white radius-2 border-base-lightest font-sans-sm text-no-uppercase display-flex flex-align-center"
             data-testid="award-recommendation-status-draft"
           >
             <USWDSIcon name="edit" className="margin-right-05" />
@@ -29,7 +29,7 @@ const AwardRecommendationStatusTag = ({ status }: Props) => {
       case "in_progress":
         return (
           <div
-            className="usa-tag bg-accent-warm-light text-ink radius-md margin-right-0 font-sans-sm text-no-uppercase display-flex flex-align-center gap-1"
+            className="usa-tag bg-accent-warm-light text-ink radius-2 font-sans-sm text-no-uppercase display-flex flex-align-center"
             data-testid="award-recommendation-status-in-progress"
           >
             <USWDSIcon name="schedule" className="margin-right-05" />
@@ -39,7 +39,7 @@ const AwardRecommendationStatusTag = ({ status }: Props) => {
       case "pending_review":
         return (
           <div
-            className="usa-tag bg-error-dark text-white radius-md margin-right-0 font-sans-sm text-no-uppercase display-flex flex-align-center gap-1"
+            className="usa-tag bg-error-dark text-white radius-2 font-sans-sm text-no-uppercase display-flex flex-align-center"
             data-testid="award-recommendation-status-pending-review"
           >
             <USWDSIcon name="visibility" className="margin-right-05" />
@@ -52,7 +52,7 @@ const AwardRecommendationStatusTag = ({ status }: Props) => {
   };
 
   return (
-    <div data-testid="award-recommendation-status-widget">{statusTag()}</div>
+    <div data-testid="award-recommendation-status-tag">{statusTag()}</div>
   );
 };
 
