@@ -1824,6 +1824,13 @@ export const messages = {
     metaDescription: "View your award recommendations",
     pageHeading: "Award Recommendations",
     pageTitle: "Award Recommendations",
+    heroTitle: "Award Rec #",
+    datePrepared: "Date prepared",
+    status: "Status",
+    heroButtons: {
+      save: "Save and finish later",
+      create: "Create recommendation",
+    },
     description: "Award Recommendation flow coming soon.",
   },
   InviteLegacyUsers: {

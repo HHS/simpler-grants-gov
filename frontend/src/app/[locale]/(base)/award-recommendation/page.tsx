@@ -7,6 +7,8 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
+import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
+
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
@@ -34,16 +36,19 @@ async function AwardRecommendationPageContent({
   const t = await getTranslations("AwardRecommendation");
 
   return (
-    <GridContainer>
-      <h1 className="margin-top-9 margin-bottom-7">
-        {t("pageTitle", { defaultValue: "Award Recommendation" })}
-      </h1>
-      <p>
-        {t("description", {
-          defaultValue: "Award Recommendation flow coming soon.",
-        })}
-      </p>
-    </GridContainer>
+    <>
+      <AwardRecommendationHero />
+      <GridContainer>
+        <h1 className="margin-top-9 margin-bottom-7">
+          {t("pageTitle", { defaultValue: "Award Recommendation" })}
+        </h1>
+        <p>
+          {t("description", {
+            defaultValue: "Award Recommendation flow coming soon.",
+          })}
+        </p>
+      </GridContainer>
+    </>
   );
 }
 
