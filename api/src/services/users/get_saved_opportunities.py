@@ -3,9 +3,9 @@ import uuid
 from collections.abc import Sequence
 
 from pydantic import BaseModel
-from sqlalchemy import and_, asc, desc, exists, nulls_last, or_, select
+from sqlalchemy import asc, desc, func, nulls_last, select
 from sqlalchemy.orm import selectinload
-from sqlalchemy.sql import Select
+from sqlalchemy.sql import Select, Subquery, union_all
 
 from src.adapters import db
 from src.auth.endpoint_access_util import check_user_access
@@ -35,16 +35,20 @@ class SavedOpportunityListParams(BaseModel):
     pagination: PaginationParams
 
 
-def add_sort_order(stmt: Select, sort_order: list) -> Select:
+def add_sort_order(stmt: Select, sort_order: list, saved_union: Subquery) -> Select:
     model_mapping = {"opportunity_title": Opportunity, "close_date": OpportunitySummary}
 
     order_cols: list = []
     for order in sort_order:
-        column = (
-            getattr(model_mapping[order.order_by], order.order_by)
-            if order.order_by in model_mapping
-            else getattr(UserSavedOpportunity, order.order_by)
-        )
+        if order.order_by == "created_at":
+            # Most recent save event across user + org
+            column = saved_union.c.saved_at
+        else:
+            column = (
+                getattr(model_mapping[order.order_by], order.order_by)
+                if order.order_by in model_mapping
+                else getattr(UserSavedOpportunity, order.order_by)
+            )
 
         if (
             order.sort_direction == SortDirection.ASCENDING
@@ -110,27 +114,77 @@ def _check_access(db_session: db.Session, user: User, organization_ids: list) ->
         )
 
 
+def _build_saved_union_subquery(
+    user_id: uuid.UUID, org_ids_to_use: list, include_user_saved_opps: bool
+) -> Subquery:
+    """Returns a saved_union subquery with one row per opportunity and a saved_at timestamp that combines user + org saves based on org_ids_to_use."""
+
+    subqueries = []
+
+    # Add org saved subquery if applicable
+    if org_ids_to_use:
+        subqueries.append(
+            select(
+                OrganizationSavedOpportunity.opportunity_id.label("opportunity_id"),
+                OrganizationSavedOpportunity.created_at.label("saved_at"),
+            ).where(OrganizationSavedOpportunity.organization_id.in_(org_ids_to_use))
+        )
+
+    # Add user saved subquery if applicable
+    if include_user_saved_opps:
+        subqueries.append(
+            select(
+                UserSavedOpportunity.opportunity_id.label("opportunity_id"),
+                UserSavedOpportunity.created_at.label("saved_at"),
+            ).where(
+                UserSavedOpportunity.user_id == user_id, UserSavedOpportunity.is_deleted.isnot(True)
+            )
+        )
+
+    # Combine subqueries
+    saved_sq = union_all(*subqueries).subquery()
+
+    # Aggregate to get one row per opportunity
+    saved_union = (
+        select(
+            saved_sq.c.opportunity_id,
+            func.max(saved_sq.c.saved_at).label("saved_at"),
+        )
+        .group_by(saved_sq.c.opportunity_id)
+        .subquery()
+    )
+
+    return saved_union
+
+
 def get_saved_opportunities(
     db_session: db.Session, user: User, raw_opportunity_params: dict
 ) -> tuple[Sequence[Opportunity], PaginationInfo]:
-    user_id = user.user_id
-    logger.info(f"Getting saved opportunities for user {user_id}")
-
     opportunity_params = SavedOpportunityListParams.model_validate(raw_opportunity_params)
     org_ids_param = opportunity_params.organization_ids
-
+    user_org_ids = [ou.organization_id for ou in user.organization_users]
+    user_id = user.user_id
+    logger.info(f"Getting saved opportunities for user {user_id}")
+    include_user_saved_opps = True
+    # Determine which orgs to consider
     if org_ids_param is None:
-        # Not provided, get all orgs the user is a member of
-        org_ids = [ou.organization_id for ou in user.organization_users]
-    elif not org_ids_param:
-        # Explicit empty list, only user saved opportunities
-        org_ids = []
+        # User did not specify, consider all orgs they belong too
+        org_ids_to_use = user_org_ids
+    elif org_ids_param:
+        # User specified orgs, verify access
+        org_ids_to_use = org_ids_param
+        include_user_saved_opps = False
     else:
-        # Explicit organization ids provided, verify access
-        org_ids = org_ids_param
-        _check_access(db_session, user, org_ids)
+        # Explicitly empty list, consider only user saved opps
+        org_ids_to_use = []
 
-    # Base query
+    if org_ids_to_use:
+        _check_access(db_session, user, org_ids_to_use)
+
+    # Build saved_union subquery
+    saved_union = _build_saved_union_subquery(user_id, org_ids_to_use, include_user_saved_opps)
+
+    # Base opportunity query
     stmt = (
         select(Opportunity)
         .join(
@@ -142,6 +196,7 @@ def get_saved_opportunities(
             CurrentOpportunitySummary.opportunity_summary_id
             == OpportunitySummary.opportunity_summary_id,
         )
+        .join(saved_union, saved_union.c.opportunity_id == Opportunity.opportunity_id)
         .options(
             selectinload(Opportunity.current_opportunity_summary).selectinload(
                 CurrentOpportunitySummary.opportunity_summary
@@ -149,42 +204,15 @@ def get_saved_opportunities(
         )
     )
 
-    user_saved = exists().where(
-        and_(
-            UserSavedOpportunity.user_id == user.user_id,
-            UserSavedOpportunity.is_deleted.isnot(True),
-            UserSavedOpportunity.opportunity_id == Opportunity.opportunity_id,
-        )
-    )
-
-    org_saved = exists().where(
-        and_(
-            OrganizationSavedOpportunity.opportunity_id == Opportunity.opportunity_id,
-            OrganizationSavedOpportunity.organization_id.in_(org_ids),
-        )
-    )
-
-    if org_ids_param == []:
-        # Only user saved
-        stmt = stmt.where(user_saved)
-
-    elif org_ids_param is None:
-        # Both user and org saved
-        stmt = stmt.where(or_(user_saved, org_saved))
-
-    else:
-        # Only provided orgs
-        stmt = stmt.where(org_saved)
-
+    # Apply filters and sorting
     stmt = add_opportunity_status_filter(stmt, opportunity_params.filters)
-    stmt = add_sort_order(stmt, opportunity_params.pagination.sort_order)
+    stmt = add_sort_order(stmt, opportunity_params.pagination.sort_order, saved_union=saved_union)
 
+    # Paginate
     paginator: Paginator[Opportunity] = Paginator(
         Opportunity, stmt, db_session, page_size=opportunity_params.pagination.page_size
     )
-
     paginated_search = paginator.page_at(page_offset=opportunity_params.pagination.page_offset)
-
     pagination_info = PaginationInfo.from_pagination_params(
         opportunity_params.pagination, paginator
     )
