@@ -13,11 +13,9 @@ import {
   safeHelp_selectDropdownLocator,
   safeHelp_fillFieldsByTestId,
   safeHelp_ValidateTextAtLocator,
-  safeHelp_safeGoto,
   safeHelp_safeWaitForLoadState,
   safeHelp_clickLink,
   safeHelp_clickButton,
-  // safeHelp_calculateYearData,
 } from "tests/e2e/helpers/safeHelp";
 
 // ---- Test Data ----
