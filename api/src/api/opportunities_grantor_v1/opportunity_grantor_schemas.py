@@ -76,6 +76,7 @@ class OpportunityUpdateRequestSchema(Schema):
     """Schema for PUT /v1/grantors/opportunities/<opportunity_id> request"""
 
     opportunity_title = fields.String(
+        required=True,
         validate=validators.Length(max=255),
         metadata={
             "description": "The title of the opportunity",
@@ -84,6 +85,7 @@ class OpportunityUpdateRequestSchema(Schema):
     )
     category = fields.Enum(
         OpportunityCategory,
+        required=True,
         metadata={
             "description": "The opportunity category",
         },

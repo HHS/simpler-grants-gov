@@ -46,30 +46,13 @@ def test_opportunity_update_200_full_update(client, grantor_auth_data, existing_
     assert data["data"]["category_explanation"] == "Updated explanation"
 
 
-def test_opportunity_update_200_partial_update(client, grantor_auth_data, existing_opportunity):
-    """Test that only provided fields are updated"""
-    _, _, token, _ = grantor_auth_data
-    original_category = existing_opportunity.category
-
-    resp = client.put(
-        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}",
-        json={"opportunity_title": "Only Title Changed"},
-        headers={"X-SGG-Token": token},
-    )
-
-    assert resp.status_code == 200
-    data = resp.get_json()
-    assert data["data"]["opportunity_title"] == "Only Title Changed"
-    assert data["data"]["category"] == original_category.value
-
-
 def test_opportunity_update_200_api_key_auth(client, grantor_auth_data, existing_opportunity):
     """Test that API key auth works for update"""
     _, _, _, api_key_id = grantor_auth_data
 
     resp = client.put(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}",
-        json={"opportunity_title": "Updated via API Key"},
+        json={"opportunity_title": "Updated via API Key", "category": "discretionary"},
         headers={"X-API-Key": api_key_id},
     )
 
@@ -81,7 +64,7 @@ def test_opportunity_update_401_no_token(client, existing_opportunity):
     """Test that missing auth returns 401"""
     resp = client.put(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}",
-        json={"opportunity_title": "No Auth"},
+        json={"opportunity_title": "No Auth", "category": "discretionary"},
     )
 
     assert resp.status_code == 401
@@ -91,7 +74,7 @@ def test_opportunity_update_401_invalid_token(client, existing_opportunity):
     """Test that invalid token returns 401"""
     resp = client.put(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}",
-        json={"opportunity_title": "Bad Token"},
+        json={"opportunity_title": "Bad Token", "category": "discretionary"},
         headers={"X-SGG-Token": "invalid-token"},
     )
 
@@ -115,7 +98,7 @@ def test_opportunity_update_403_no_permission(
 
     resp = client.put(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}",
-        json={"opportunity_title": "No Permission"},
+        json={"opportunity_title": "No Permission", "category": "discretionary"},
         headers={"X-SGG-Token": token},
     )
 
@@ -128,7 +111,7 @@ def test_opportunity_update_404_not_found(client, grantor_auth_data):
 
     resp = client.put(
         f"/v1/grantors/opportunities/{uuid.uuid4()}",
-        json={"opportunity_title": "Does Not Exist"},
+        json={"opportunity_title": "Does Not Exist", "category": "discretionary"},
         headers={"X-SGG-Token": token},
     )
 
@@ -141,7 +124,7 @@ def test_opportunity_update_422_field_too_long(client, grantor_auth_data, existi
 
     resp = client.put(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}",
-        json={"opportunity_title": "x" * 256},  # max is 255
+        json={"opportunity_title": "x" * 256, "category": "discretionary"},  # title exceeds max 255
         headers={"X-SGG-Token": token},
     )
 
@@ -157,7 +140,7 @@ def test_opportunity_update_422_not_draft(client, grantor_auth_data, enable_fact
 
     resp = client.put(
         f"/v1/grantors/opportunities/{published_opportunity.opportunity_id}",
-        json={"opportunity_title": "Trying to update published"},
+        json={"opportunity_title": "Trying to update published", "category": "discretionary"},
         headers={"X-SGG-Token": token},
     )
 
