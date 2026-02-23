@@ -8,20 +8,21 @@
 // ============================================================================
 // ---- Imports ----
 import { test, expect } from "@playwright/test";
-import { safeHelp_attachTestSummary, safeHelp_clickLink } from "tests/e2e/helpers/safeHelp";
 import { Help_createNewApplication } from "tests/e2e/helpers/Help-create-new-application";
+import { safeHelp_safeExpect } from "tests/e2e/helpers/safeHelp";
 
 // ============================================================================
 // Main Test
 // ============================================================================
 
 test.describe("Create New Application Flow", () => {
-  test("should create a new application and verify creation", async ({ page }, testInfo) => {
-    const { appLinkName, Nofo_directPageUrl, applicationId } = await Help_createNewApplication(testInfo, page);
+  test("Create a new application and verify creation", async ({ page }, testInfo) => {
+    const applicantType = "INDIVIDUAL"; // Change to "ORGANIZATION" as needed
+    const { appLinkName, Nofo_directPageUrl, applicationId } = await Help_createNewApplication(testInfo, page, applicantType);
 
-    expect(appLinkName).toBeDefined();
-    expect(Nofo_directPageUrl).toContain("/opportunity/");
-    expect(applicationId).not.toBe("unknown");
+    await safeHelp_safeExpect(testInfo, async () => expect(appLinkName).toBeDefined());
+    await safeHelp_safeExpect(testInfo, async () => expect(Nofo_directPageUrl).toContain("/opportunity/"));
+    await safeHelp_safeExpect(testInfo, async () => expect(applicationId).not.toBe("unknown"));
 
     await testInfo.attach("application-details", {
       body: `App Name: ${appLinkName}\nDirect URL: ${Nofo_directPageUrl}\nApplication ID: ${applicationId}`,
