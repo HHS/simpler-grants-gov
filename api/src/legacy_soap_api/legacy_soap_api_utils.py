@@ -377,7 +377,7 @@ class SoapRequestStreamer:
                 if terminator in content:
                     return content
             chunk_count += 1
-        return content
+        return buffer.getvalue()
 
     def head(self) -> bytes:
         return self.head_bytes
