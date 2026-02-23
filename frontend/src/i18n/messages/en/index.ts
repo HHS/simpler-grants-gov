@@ -1827,6 +1827,11 @@ export const messages = {
     heroTitle: "Award Rec #",
     datePrepared: "Date prepared",
     status: "Status",
+    statusTag: {
+      draft: "Draft",
+      inProgress: "In progress",
+      pendingReview: "Pending review",
+    },
     heroButtons: {
       save: "Save and finish later",
       create: "Create recommendation",
