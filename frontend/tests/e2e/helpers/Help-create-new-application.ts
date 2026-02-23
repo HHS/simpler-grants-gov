@@ -11,10 +11,18 @@ import * as fs from "fs";
 import * as path from "path";
 import {
   safeHelp_clickButton,
-  safeHelp_clickLink,
   safeHelp_getTimestamp,
   safeHelp_safeExpect,
+  safeHelp_safeSelectOption,
+  safeHelp_safeStep,
+  safeHelp_attachTestSummary,
+  safeHelp_updateApplicationName,
+  safeHelp_GotoForm,
+  safeHelp_selectDropdownLocator,
+  safeHelp_fillFieldsByTestId,
   safeHelp_safeGoto,
+  safeHelp_safeWaitForLoadState,
+  safeHelp_clickLink,
 } from "tests/e2e/helpers/safeHelp";
 
 // ============================================================================
@@ -65,11 +73,13 @@ function getNofoDirectPageUrl(page: Page): string {
  *
  * @param testInfo - Playwright TestInfo object for attaching to report
  * @param page - Playwright Page object
+ * @param applicantType - Applicant type (INDIVIDUAL, ORGANIZATION)
  * @returns Promise that resolves to object containing appLinkName, Nofo_directPageUrl, and applicationId (from URL)
  */
 export async function Help_createNewApplication(
   testInfo: TestInfo,
-  page: Page
+  page: Page,
+  applicantType: string = "INDIVIDUAL"
 ): Promise<{
   appLinkName: string;
   Nofo_directPageUrl: string;
@@ -78,8 +88,7 @@ export async function Help_createNewApplication(
   const opportunityId = testConfig.environment.NofoId;
   const opportunityUrl = `/opportunity/${opportunityId}`;
 
-  await page.goto(opportunityUrl);
-
+  await safeHelp_safeGoto(testInfo, page, opportunityUrl);
   await safeHelp_safeExpect(testInfo, async () =>
     expect(page.getByTestId("open-start-application-modal-button")).toContainText(
       "Start new application"
@@ -93,10 +102,15 @@ export async function Help_createNewApplication(
     "open-start-application-modal-button"
   );
 
-  const appLinkName = `Test at ${safeHelp_getTimestamp()}`;
-  // Wait for the input to be visible before filling
-  await page.getByTestId("textInput").waitFor({ state: "visible", timeout: 15000 });
-  await page.getByTestId("textInput").fill(appLinkName);
+  const appLinkName = `Automate Test data at ${safeHelp_getTimestamp()}`;
+  await safeHelp_safeSelectOption(testInfo, page.getByTestId('Select'), applicantType);
+  await safeHelp_safeExpect(testInfo, async () =>
+    expect(page.getByTestId("textInput")).toBeVisible()
+  );
+  await safeHelp_fillFieldsByTestId(testInfo, page, [
+    { testId: "textInput", value: appLinkName }
+  ]);
+
   await safeHelp_clickButton(
     testInfo,
     page,
@@ -178,7 +192,15 @@ export async function Help_createNewApplication(
       "../test-data/applicationCreatedFromTest.json"
     );
 
-    let fileContent;
+    let fileContent: {
+      baseDomain: string;
+      NofoId: string;
+      createdApplications: Array<{
+        applicationId: string;
+        applicationName: string;
+        createdAt: string;
+      }>;
+    };
     try {
       const existingData = fs.readFileSync(configPath, "utf-8");
       fileContent = JSON.parse(existingData);
