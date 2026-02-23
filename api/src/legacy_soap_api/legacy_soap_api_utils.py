@@ -21,6 +21,8 @@ BASE_SOAP_API_RESPONSE_HEADERS = {
     "Content-Type": 'multipart/related; type="application/xop+xml"',
 }
 HIDDEN_VALUE = "hidden"
+TERMINATOR_TAGS = [b"</soapenv:Envelope>", b"</env:Envelope>"]
+CHUNK_SIZE = 2000
 
 
 class AlternateSoapOperation(StrEnum):
@@ -357,9 +359,7 @@ class SoapRequestStreamer:
         self, stream: BinaryIO | IO[bytes], chunk_count: int = 4, content_length: int | None = None
     ) -> None:
         self.stream = stream
-        self.terminators = [b"</soapenv:Envelope>", b"</env:Envelope>"]
         self.chunk_count = chunk_count
-        self.chunk_size = 2000
         self._consumed_head = False
         self.head_bytes = self.get_head_bytes()
         self.total_length = content_length
@@ -368,12 +368,12 @@ class SoapRequestStreamer:
         buffer = io.BytesIO()
         chunk_count = 0
         while chunk_count <= self.chunk_count:
-            chunk = self.stream.read(self.chunk_size)
+            chunk = self.stream.read(CHUNK_SIZE)
             if not chunk:
                 break
             buffer.write(chunk)
             content = buffer.getvalue()
-            for terminator in self.terminators:
+            for terminator in TERMINATOR_TAGS:
                 if terminator in content:
                     return content
             chunk_count += 1
@@ -388,7 +388,7 @@ class SoapRequestStreamer:
             self._consumed_head = True
 
         while True:
-            chunk = self.stream.read(self.chunk_size)
+            chunk = self.stream.read(CHUNK_SIZE)
             if not chunk:
                 break
             yield chunk
