@@ -87,6 +87,10 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-apply-form-prototype-off"
     },
+    FEATURE_AWARD_RECOMMENDATION_OFF = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-award-recommendation-off"
+    },
     FEATURE_SEARCH_DRAWER_ON = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-search-drawer-on"

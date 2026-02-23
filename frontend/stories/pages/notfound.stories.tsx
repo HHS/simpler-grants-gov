@@ -1,7 +1,6 @@
-import { Meta } from "@storybook/react";
 import NotFound from "src/app/[locale]/(base)/not-found";
 
-const meta: Meta<typeof NotFound> = {
+const meta = {
   title: "Pages/Not Found",
   component: NotFound,
 };

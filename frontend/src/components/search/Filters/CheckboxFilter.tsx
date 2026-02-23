@@ -88,7 +88,7 @@ export function CheckboxFilter({
       title={title}
       contentClassName={contentClassName}
       expanded={!!query.size}
-      className="width-100 padding-right-5"
+      className="width-100"
     >
       <CheckboxFilterBody
         query={query}

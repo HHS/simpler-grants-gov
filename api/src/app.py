@@ -25,6 +25,9 @@ from src.api.form_alpha import form_blueprint
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.internal import internal_blueprint
 from src.api.local import local_blueprint
+from src.api.opportunities_grantor_v1 import (
+    opportunity_grantor_blueprint as opportunities_grantor_v1_blueprint,
+)
 from src.api.opportunities_v1 import opportunity_blueprint as opportunities_v1_blueprint
 from src.api.organizations_v1 import organization_blueprint as organizations_v1_blueprint
 from src.api.response import restructure_error_response
@@ -60,6 +63,11 @@ class EndpointConfig(PydanticBaseEnvConfig):
     domain_verification_map: dict = Field(default_factory=dict)
 
     enable_workflow_endpoints: bool = Field(False, alias="ENABLE_WORKFLOW_ENDPOINTS")
+
+    enable_grantor_opportunity_endpoints: bool = Field(
+        False, alias="ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS"
+    )
+    enable_workflow_api: bool = Field(False, alias="ENABLE_WORKFLOW_API")
 
     # Do not ever change this to True, this controls endpoints we only
     # want to exist for local development.
@@ -165,14 +173,21 @@ def configure_app(app: APIFlask) -> None:
 
 
 def register_blueprints(app: APIFlask) -> None:
+
+    endpoint_config = EndpointConfig()
+
     app.register_blueprint(healthcheck_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
+
+    # Endpoint for Create Opportunity
+    if endpoint_config.enable_grantor_opportunity_endpoints:
+        app.register_blueprint(opportunities_grantor_v1_blueprint)
+
     app.register_blueprint(extracts_v1_blueprint)
     app.register_blueprint(agencies_v1_blueprint)
     app.register_blueprint(organizations_v1_blueprint)
     app.register_blueprint(internal_blueprint)
 
-    endpoint_config = EndpointConfig()
     app.register_blueprint(user_blueprint)
 
     # Endpoints for apply functionality
@@ -193,7 +208,9 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(data_migration_blueprint)
     app.register_blueprint(task_blueprint)
     app.register_blueprint(load_search_data_blueprint)
-    app.register_blueprint(workflow_blueprint)
+
+    if endpoint_config.enable_workflow_api:
+        app.register_blueprint(workflow_blueprint)
 
 
 def get_project_root_dir() -> str:
