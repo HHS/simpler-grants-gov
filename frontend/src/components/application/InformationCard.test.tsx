@@ -260,6 +260,102 @@ describe("InformationCard - Submit button", () => {
 
     expect(screen.getByRole("button", { name: /loading/i })).toBeDisabled();
   });
+
+  it("disables submit when competition is org-only and application belongs to an individual", () => {
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={makeApplicationDetails({
+          organization: null,
+          application_status: ApplicationStatus.IN_PROGRESS,
+          competition: {
+            is_open: true,
+            open_to_applicants: ["organization"],
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "submit" })).toBeDisabled();
+  });
+});
+
+describe("InformationCard - Org-only competition banner", () => {
+  const baseProps = {
+    applicationDetails: mockApplicationDetails,
+    applicationSubmitHandler: jest.fn(),
+    applicationSubmitted: false,
+    opportunityName: "Test Opportunity",
+    submissionLoading: false,
+    instructionsDownloadPath: "http://path-to-instructions.com",
+    latestApplicationSubmission: mockApplicationSubmission,
+  };
+
+  it("shows the org-only banner when competition is org-only and application belongs to an individual", () => {
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={makeApplicationDetails({
+          organization: null,
+          application_status: ApplicationStatus.IN_PROGRESS,
+          competition: {
+            is_open: true,
+            open_to_applicants: ["organization"],
+          },
+        })}
+      />,
+    );
+
+    expect(
+      screen.queryByText(/unassociatedApplicationAlert\.title/),
+    ).toBeInTheDocument();
+  });
+
+  it("does not show the org-only banner when individuals are eligible", () => {
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={makeApplicationDetails({
+          organization: null,
+          application_status: ApplicationStatus.IN_PROGRESS,
+          competition: {
+            is_open: true,
+            open_to_applicants: ["individual", "organization"],
+          },
+        })}
+      />,
+    );
+
+    expect(
+      screen.queryByText(/unassociatedApplicationAlert\.title/),
+    ).not.toBeInTheDocument();
+  });
+
+  it("opens the transfer modal when clicking the banner link", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <InformationCard
+        {...baseProps}
+        applicationDetails={makeApplicationDetails({
+          organization: null,
+          application_status: ApplicationStatus.IN_PROGRESS,
+          competition: {
+            is_open: true,
+            open_to_applicants: ["organization"],
+          },
+        })}
+      />,
+    );
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "Click here to transfer application ownership",
+      }),
+    );
+
+    expect(screen.getByTestId("transfer-ownership-modal")).toBeInTheDocument();
+  });
 });
 
 describe("InformationCard - Transfer ownership UI", () => {
