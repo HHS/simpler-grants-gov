@@ -16,7 +16,8 @@ interface ModalFooterProps {
   children: ReactNode;
 }
 
-interface BasicButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface BasicButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
 }
 

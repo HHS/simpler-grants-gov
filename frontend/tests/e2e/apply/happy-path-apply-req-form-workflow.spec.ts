@@ -69,10 +69,10 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
 
   // Call reusable create application function from utils
   await createApplication(
-    page as Page,
+    page,
     OPPORTUNITY_URL,
     "Sally",
-    "Automatic staging Organization for UEI AUTOHQDCCHBY",
+    "Automatic staging Organization for UEI AUTOHQDCCHBY"
   );
 
   // Step 10: Click on SF-424B form to fill it
@@ -100,11 +100,11 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     await selectFormInclusionOption(
       page,
       "Disclosure of Lobbying Activities (SF-LLL)",
-      "No",
+      "No"
     );
 
     // Submit the application and verify success
-    const appId = await submitApplicationAndVerify(page);
+    await submitApplicationAndVerify(page);
     // Application ID is now available in appId variable for further use if needed
   }
 
