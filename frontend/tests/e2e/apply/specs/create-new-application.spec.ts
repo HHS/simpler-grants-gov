@@ -16,19 +16,19 @@ import { safeHelp_safeExpect } from "tests/e2e/helpers/safeHelp";
 // ============================================================================
 
 test.describe("Create New Application Flow", () => {
+  test.afterEach(async ({ page }) => {
+    if (!page.isClosed()) {
+      await page.close();
+    }
+  });
+
   test("Create a new application and verify creation", async ({ page }, testInfo) => {
     const applicantType = "INDIVIDUAL"; // Change to "ORGANIZATION" as needed
     const { appLinkName, Nofo_directPageUrl, applicationId } = await Help_createNewApplication(testInfo, page, applicantType);
 
-    await safeHelp_safeExpect(testInfo, async () => {
-      expect(appLinkName).toBeDefined();
-    });
-    await safeHelp_safeExpect(testInfo, async () => {
-      expect(Nofo_directPageUrl).toContain("/opportunity/");
-    });
-    await safeHelp_safeExpect(testInfo, async () => {
-      expect(applicationId).not.toBe("unknown");
-    });
+    await safeHelp_safeExpect(testInfo, async () => { expect(appLinkName).toBeDefined(); });
+    await safeHelp_safeExpect(testInfo, async () => { expect(Nofo_directPageUrl).toContain("/opportunity/"); });
+    await safeHelp_safeExpect(testInfo, async () => { expect(applicationId).not.toBe("unknown"); });
 
     await testInfo.attach("application-details", {
       body: `App Name: ${appLinkName}\nDirect URL: ${Nofo_directPageUrl}\nApplication ID: ${applicationId}`,
