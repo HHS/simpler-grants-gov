@@ -21,9 +21,6 @@ const WAIT_STATES = {
 
 type WaitState = 'domcontentloaded' | 'load';
 
-// Report settings
-const REPORT_BASE_URL = 'http://localhost:9323';
-
 // Fiscal year configuration
 const FISCAL_YEAR_START_MONTH = 9; // October (0-indexed as 9)
 
@@ -55,21 +52,6 @@ const MSG_SKIPPING = 'skipping';
 // ============================================================================
 // PRIVATE/INTERNAL HELPER FUNCTIONS
 // ============================================================================
-
-/**
- * Format timestamp string in format: YYYY-MM-DD - at HH:MM:SS
- * @param date - Date object to format
- * @returns Formatted timestamp string
- */
-function formatTimestamp(date: Date): string {
-  const year = date.getFullYear();
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-  return `${year}-${day}-${month} - at ${hours}:${minutes}:${seconds}`;
-}
 
 /**
  * Extracts line number from the call stack
