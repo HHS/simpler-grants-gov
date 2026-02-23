@@ -9,9 +9,13 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     OpportunityStatus,
 )
+from tests.lib.organization_test_utils import create_user_in_org
 from tests.src.api.opportunities_v1.test_opportunity_route_search import build_opp
 from tests.src.db.models.factories import (
     OpportunityFactory,
+    OrganizationSavedOpportunityFactory,
+    OrganizationUserFactory,
+    RoleFactory,
     UserFactory,
     UserSavedOpportunityFactory,
 )
@@ -88,6 +92,7 @@ def user_auth_token(user, db_session):
 def test_user_get_saved_opportunities(
     client, user, user_auth_token, enable_factory_create, db_session
 ):
+    """Test that a user can retrieve their own saved opportunities"""
     # Create an opportunity and save it for the user
     opportunity = OpportunityFactory.create(opportunity_title="Test Opportunity")
     UserSavedOpportunityFactory.create(user=user, opportunity=opportunity)
@@ -151,6 +156,32 @@ def test_get_saved_opportunities_unauthorized_user(client, enable_factory_create
 
     assert response.status_code == 403
     assert response.json["message"] == "Forbidden"
+
+def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_saves(
+    client, enable_factory_create, db_session, user, user_auth_token
+):
+    """Test that when organization_ids is empty, only user saved opportunities should be returned"""
+
+    # User save
+    user_saved_opp = UserSavedOpportunityFactory.create(user=user)
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": user_auth_token},
+        json={
+            "organization_ids": [],
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+
+    assert len(data) == 1
+    assert data[0]["opportunity_id"] == str(user_saved_opp.opportunity_id)
 
 
 @pytest.mark.parametrize(
@@ -425,3 +456,158 @@ def test_user_get_saved_opportunities_no_filter_returns_all(
 
     assert response.status_code == 200
     assert len(response.json["data"]) == 2
+
+def test_user_get_saved_opportunities_org_only(client, enable_factory_create, db_session):
+    """Test user can get organization saved opportunities with no duplicates"""
+    user, orga, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+    orgb_user = OrganizationUserFactory(user=user, as_admin=True)
+    orgc_user = OrganizationUserFactory(user=user, as_admin=True)
+
+    org_saved_opp1 = OrganizationSavedOpportunityFactory.create(organization=orga)
+    org_saved_opp2 = OrganizationSavedOpportunityFactory.create(
+        organization=orgb_user.organization, opportunity=org_saved_opp1.opportunity
+    )  # same opp different org
+    org_saved_opp3 = OrganizationSavedOpportunityFactory.create(
+        organization=orgc_user.organization
+    )  # different opp, different org
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={"pagination": {"page_offset": 1, "page_size": 25}},
+    )
+    data = response.json["data"]
+
+    assert response.status_code == 200
+    assert len(data) == 2
+    assert [opp["opportunity_id"] for opp in data] == [
+        str(opp) for opp in [org_saved_opp3.opportunity_id, org_saved_opp2.opportunity_id]
+    ]
+
+
+def test_user_get_saved_opportunities_org_only_403(
+    client, enable_factory_create, db_session, org_a, org_b
+):
+    """Test user can not get organization saved opportunities without proper privileges"""
+    user, org, token = create_user_in_org(db_session, organization=org_a)
+    OrganizationSavedOpportunityFactory.create(organization=org)
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={"pagination": {"page_offset": 1, "page_size": 25}},
+    )
+
+    assert response.status_code == 403
+
+
+def test_user_get_saved_opportunities_user_and_org(client, enable_factory_create, db_session):
+    """Test with user and org saved opportunities"""
+    user, org, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+
+    org_saved_oppa = OrganizationSavedOpportunityFactory.create(organization=org)
+    org_saved_oppb = OrganizationSavedOpportunityFactory.create(organization=org)
+
+    UserSavedOpportunityFactory.create(
+        user=user, opportunity=org_saved_oppa.opportunity
+    )  # same opp as org
+    uso2 = UserSavedOpportunityFactory.create(user=user)
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={"pagination": {"page_offset": 1, "page_size": 25}},
+    )
+    assert response.status_code == 200
+    data = response.json["data"]
+    assert len(data) == 3
+    # Both user and org opps are returned with no duplicate
+    assert [opp["opportunity_id"] for opp in data] == [
+        str(opp)
+        for opp in [
+            uso2.opportunity_id,
+            org_saved_oppa.opportunity_id,
+            org_saved_oppb.opportunity_id,
+        ]
+    ]
+
+
+def test_user_get_saved_opportunities_specific_org(client, enable_factory_create, db_session):
+    """Test user can get saved opportunities for specific orgs (user saves excluded)"""
+
+    user, orga, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+    orgb_user = OrganizationUserFactory(user=user, as_admin=True)
+
+    org_saved_opp1 = OrganizationSavedOpportunityFactory.create(organization=orga)
+    OrganizationSavedOpportunityFactory.create(organization=orgb_user.organization)
+
+    # User save should NOT appear when org filter is present
+    UserSavedOpportunityFactory.create(user=user)
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={
+            "organization_ids": [orga.organization_id],
+            "pagination": {"page_offset": 1, "page_size": 25},
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+    assert len(data) == 1
+    assert data[0]["opportunity_id"] == str(org_saved_opp1.opportunity_id)
+
+
+def test_user_and_org_save_timestamp_precedence(
+    client,
+    enable_factory_create,
+    db_session,
+):
+    """
+    Test if the same opportunity is saved by both the user and the org,
+    the most recent saved_at across both tables should determine sort order.
+    """
+
+    user, org, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+
+    # Same opportunity saved by both user and org
+    # User saves earlier
+    user_saved_opp = UserSavedOpportunityFactory.create(
+        user=user,
+        created_at="2024-01-01",
+    )
+
+    # Org saves later
+    org_saved_opp = OrganizationSavedOpportunityFactory.create(
+        organization=org,
+        opportunity=user_saved_opp.opportunity,
+        created_at="2024-12-01",
+    )
+
+    # Another opportunity saved only by user with mid timestamp
+    uso = UserSavedOpportunityFactory.create(
+        user=user,
+        created_at="2024-06-01",
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            }
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+
+    # Should return 2 unique opportunities
+    assert len(data) == 2
+
+    # opp_a should come first because org saved it most recently (2024-12-01)
+    assert data[0]["opportunity_id"] == str(org_saved_opp.opportunity_id)
+    assert data[1]["opportunity_id"] == str(uso.opportunity_id)
