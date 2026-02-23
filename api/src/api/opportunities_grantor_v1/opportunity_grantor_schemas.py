@@ -1,4 +1,7 @@
-from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.api.opportunities_v1.opportunity_schemas import (
+    OpportunitySummaryV1Schema,
+    OpportunityV1Schema,
+)
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.constants.lookup_constants import OpportunityCategory
@@ -71,6 +74,24 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
         },
     )
 
+    forecast_summary = fields.Nested(
+        OpportunitySummaryV1Schema(),
+        allow_none=True,
+        attribute="forecast_summary",
+        metadata={
+            "description": "The forecast summary of the opportunity (if available)",
+        },
+    )
+
+    non_forecast_summary = fields.Nested(
+        OpportunitySummaryV1Schema(),
+        allow_none=True,
+        attribute="non_forecast_summary",
+        metadata={
+            "description": "The non-forecast summary of the opportunity (if available)",
+        },
+    )
+
 
 class OpportunityCreateResponseSchema(AbstractResponseSchema):
     """Schema for POST /v1/grantors/opportunities/ response
@@ -89,6 +110,28 @@ class OpportunityCreateResponseSchema(AbstractResponseSchema):
         "is_draft": true,
         "created_at": "2026-02-10T16:20:00Z",
         "updated_at": "2026-02-10T16:20:00Z"
+      }
+    }
+    """
+
+    data = fields.Nested(OpportunityGrantorSchema())
+
+
+class OpportunityGetResponseSchema(AbstractResponseSchema):
+    """Schema for GET /v1/grantors/opportunities/:opportunity_id/grantor response
+
+    Example Response:
+    {
+      "message": "Success",
+      "data": {
+        "opportunity_number": "ABC-2026-001",
+        "opportunity_title": "Research Grant for Climate Innovation",
+        "agency_id": "550e8400-e29b-41d4-a716-446655440000",
+        "category": "discretionary",
+        "category_explanation": "Competitive research grant",
+        "is_draft": true,
+        "created_at": "2026-01-27T22:11:58.119Z",
+        "updated_at": "2026-01-27T22:11:58.119Z"
       }
     }
     """

@@ -163,15 +163,33 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     @property
     def all_forecasts(self) -> list[OpportunitySummary]:
-        # Utility method for getting all forecasted summary records attached to the opportunity
-        # Note this will include historical and deleted records.
-        return [summary for summary in self.all_opportunity_summaries if summary.is_forecast]
+        """
+        Get the forecast summary for this opportunity.
+        Returns a list with at most one item.
+        """
+        forecasts = [summary for summary in self.all_opportunity_summaries if summary.is_forecast]
+        return forecasts[:1] if forecasts else []
 
     @property
     def all_non_forecasts(self) -> list[OpportunitySummary]:
-        # Utility method for getting all forecasted summary records attached to the opportunity
-        # Note this will include historical and deleted records.
-        return [summary for summary in self.all_opportunity_summaries if not summary.is_forecast]
+        """
+        Get the non-forecast summary for this opportunity.
+        Returns a list with at most one item.
+        """
+        non_forecasts = [
+            summary for summary in self.all_opportunity_summaries if not summary.is_forecast
+        ]
+        return non_forecasts[:1] if non_forecasts else []
+
+    @property
+    def forecast_summary(self) -> OpportunitySummary | None:
+        forecasts = self.all_forecasts
+        return forecasts[0] if forecasts else None
+
+    @property
+    def non_forecast_summary(self) -> OpportunitySummary | None:
+        non_forecasts = self.all_non_forecasts
+        return non_forecasts[0] if non_forecasts else None
 
     @property
     def top_level_agency_code(self) -> str | None:
