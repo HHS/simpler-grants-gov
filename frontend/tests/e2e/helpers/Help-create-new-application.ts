@@ -94,6 +94,8 @@ export async function Help_createNewApplication(
   );
 
   const appLinkName = `Test at ${safeHelp_getTimestamp()}`;
+  // Wait for the input to be visible before filling
+  await page.getByTestId("textInput").waitFor({ state: "visible", timeout: 15000 });
   await page.getByTestId("textInput").fill(appLinkName);
   await safeHelp_clickButton(
     testInfo,
