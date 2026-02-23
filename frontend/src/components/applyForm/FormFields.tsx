@@ -79,7 +79,7 @@ export const FormFields = ({
 
         const field = renderWidget({
           type: widgetConfig.type,
-          props: { ...widgetConfig.props, formContext },
+          props: { ...widgetConfig.props, formContext, isFormLocked },
           definition: node.definition,
         });
 
@@ -116,7 +116,7 @@ export const FormFields = ({
 
         return renderWidget({
           type: widgetConfig.type,
-          props: { ...widgetConfig.props, formContext },
+          props: { ...widgetConfig.props, formContext, isFormLocked },
           definition: node.definition,
         });
       });
