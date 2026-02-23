@@ -5,7 +5,8 @@
 // with soft error handling that logs failures without stopping test execution
 // ============================================================================
 
-import { expect, TestInfo, Locator, Page } from '@playwright/test';
+import { expect, Locator, Page, TestInfo } from '@playwright/test';
+
 import { getTimeout } from './timeoutHelp';
 
 // ============================================================================
@@ -14,28 +15,20 @@ import { getTimeout } from './timeoutHelp';
 
 // Wait State Configuration
 const WAIT_STATES = {
-  LOAD: 'load',           // Wait for load event
-  DOMCONTENTLOADED: 'domcontentloaded', // Wait for DOM content loaded
-  // NETWORKIDLE: 'networkidle', // Wait for network to be idle (no pending requests)
+  DOMCONTENTLOADED: 'domcontentloaded',
+  LOAD: 'load',
 } as const;
 
-type WaitState = typeof WAIT_STATES[keyof typeof WAIT_STATES];
+type WaitState = 'domcontentloaded' | 'load';
 
 // Report settings
 const REPORT_BASE_URL = 'http://localhost:9323';
-// const REPORT_PORT = 9323;
-
-// Timestamp formats
-// const TIMESTAMP_FORMAT = 'YYYY-MM-DD HH:MM:SS';
-// const TIMESTAMP_WITH_TIME_FORMAT = 'YYYY-DD-MM - at HH:MM:SS';
 
 // Fiscal year configuration
 const FISCAL_YEAR_START_MONTH = 9; // October (0-indexed as 9)
-// const FISCAL_YEAR_END_MONTH = 8; // September (0-indexed as 8)
 
 // Error messages
 const ERROR_ELEMENT_NOT_FOUND = 'element not found within';
-// const ERROR_OPTION_NOT_FOUND = 'option not found or element not available within';
 
 // Annotation types
 const ANNOTATION_SOFT_FAIL = 'soft-fail';
@@ -46,27 +39,14 @@ const ATTACHMENT_SOFT_FAIL = 'soft-fail-log';
 const ATTACHMENT_SKIPPED_FIELD = 'skipped-field-log';
 const ATTACHMENT_TEST_SUMMARY = 'test-summary';
 
-// console symbols
-// const SYMBOL_SUCCESS = '✅';
-// const SYMBOL_WARNING = '⚠️';
 const SYMBOL_TIMER = '⏱️';
-// const SYMBOL_CHART = '📊';
-// const SYMBOL_COUNTER = '🧮';
-// const SYMBOL_FAILURE = '❌';
 
 // Test report message templates
 const MSG_TEST_COMPLETED_WITH_FAILURES = 'Test completed with';
 const MSG_FAILURE_PLURAL = 'failure(s)';
 const MSG_FAILURES_LOGGED = 'All failures have been logged to the report.';
-// const MSG_TEST_STARTED = 'Test started at';
-// const MSG_TEST_ENDED = 'Test ended at';
-// const MSG_TEST_PASSED = 'Test passed with no failures, run npx playwright show-report to view details';
-// const MSG_TEST_FAILED = 'Test fail with';
-// const MSG_SOFTFAIL_COUNT = 'Softfail count:';
 
 // Step messages
-// const MSG_STEP_STARTED = 'Step started';
-// const MSG_STEP_ENDED = 'Step ended';
 const MSG_FILLED_SUCCESSFULLY = 'Filled';
 const MSG_SELECTED_SUCCESSFULLY = 'Selected';
 const MSG_TIMEOUT_NOT_FOUND = 'TIMEOUT/NOT FOUND:';
@@ -98,7 +78,6 @@ function formatTimestamp(date: Date): string {
 function extractLineNumber(): number | undefined {
   const stack = new Error().stack || '';
   const lines = stack.split('\n');
-
   for (const line of lines) {
     if (line.includes('safeHelp.ts')) {
       continue;
@@ -108,7 +87,6 @@ function extractLineNumber(): number | undefined {
       return parseInt(match[1], 10);
     }
   }
-
   return undefined;
 }
 
@@ -168,7 +146,6 @@ export async function safeHelp_safeExpect(
       type: ANNOTATION_SOFT_FAIL,
       description: details,
     });
-    // console.log(`${SYMBOL_WARNING} ${details}`);
     await testInfo.attach(ATTACHMENT_SOFT_FAIL, {
       body: details,
       contentType: 'text/plain',
@@ -190,7 +167,11 @@ export async function safeHelp_ValidateTextAtLocator(
   label?: string
 ): Promise<void> {
   const description = label ?? 'Verify locator count is 0';
-  await safeHelp_safeExpect(testInfo, async () => expect(locator).toHaveCount(0), description);
+  await safeHelp_safeExpect(
+    testInfo,
+    async () => expect(locator).toHaveCount(0),
+    description
+  );
 }
 
 /**
@@ -203,7 +184,6 @@ async function executeStep(
   action: () => Promise<void>
 ): Promise<void> {
   const startTime = new Date();
-  // console.log(`${SYMBOL_TIMER} ${MSG_STEP_STARTED} [${label}] at ${formatTimestamp(startTime)}`);
   try {
     await action();
   } catch (error) {
@@ -212,13 +192,13 @@ async function executeStep(
       type: ANNOTATION_SOFT_FAIL,
       description: `${label}: ${String(error)}`,
     });
-    // console.log(`${SYMBOL_WARNING} ${label}: ${String(error)}`);
   } finally {
-    // const endTime = new Date();
-    // const durationMs = endTime.getTime() - startTime.getTime();
-    // console.log(
-      // `${SYMBOL_TIMER} ${MSG_STEP_ENDED} [${label}] at ${formatTimestamp(endTime)} (${durationMs} ms)`
-    // );
+    const endTime = new Date();
+    const durationMs = endTime.getTime() - startTime.getTime();
+    await testInfo.attach(`${label} - timing`, {
+      body: `Step "${label}" completed in ${durationMs}ms`,
+      contentType: 'text/plain',
+    });
   }
 }
 
@@ -276,29 +256,14 @@ export async function safeHelp_safeStep(
  *
  * @param testInfo - Playwright TestInfo object
  * @param failureCount - Number of failures that occurred
- * @param startTime - Test start time
+ * @param _startTime - Test start time (unused, kept for API compatibility)
  */
 export async function safeHelp_attachTestSummary(
   testInfo: TestInfo,
   failureCount: number,
-  startTime?: Date
+  _startTime?: Date
 ): Promise<void> {
   const softFailCount = Math.max(failureCount, getSoftFailCount(testInfo));
-export async function safeHelp_attachTestSummary(
-  testInfo: TestInfo,
-  failureCount: number,
-  startTime?: Date
-): Promise<void> {
-  const softFailCount = Math.max(failureCount, getSoftFailCount(testInfo));
-  // Remove these unused variables:
-  // const reportPath = `${REPORT_BASE_URL}/#?testId=${testInfo.testId}`.replace(/\\/g, '/');
-  // const testTitle = testInfo.title;
-  const endTime = new Date();
-  // const endStamp = formatTimestamp(endTime);
-  // const startStamp = startTime ? formatTimestamp(startTime) : 'unknown';
-  // const durationMs = startTime ? endTime.getTime() - startTime.getTime() : undefined;
-  
-  // Keep only the code that uses softFailCount
   if (softFailCount > 0) {
     await testInfo.attach(ATTACHMENT_TEST_SUMMARY, {
       body: `${MSG_TEST_COMPLETED_WITH_FAILURES} ${softFailCount} ${MSG_FAILURE_PLURAL}.\n${MSG_FAILURES_LOGGED}`,
@@ -306,38 +271,6 @@ export async function safeHelp_attachTestSummary(
     });
   }
 }
-  const durationMs = startTime ? endTime.getTime() - startTime.getTime() : undefined;
-
-  if (softFailCount > 0) {
-    await testInfo.attach(ATTACHMENT_TEST_SUMMARY, {
-      body: `${MSG_TEST_COMPLETED_WITH_FAILURES} ${softFailCount} ${MSG_FAILURE_PLURAL}.\n${MSG_FAILURES_LOGGED}`,
-      contentType: 'text/plain',
-    });
-  }
-
-//   // console.log(`\n========================================`);
-//   // console.log(`           TEST SUMMARY`);
-//   // console.log(`========================================`);
-//   // console.log(`${SYMBOL_COUNTER} ${MSG_SOFTFAIL_COUNT} ${softFailCount}`);
-
-//   if (softFailCount > 0) {
-//     // console.log(
-//       // `${SYMBOL_FAILURE} ${MSG_TEST_FAILED} ${softFailCount} softfail(s), run npx playwright show-report to view details`
-//     // );
-//   } else {
-//     // console.log(`${SYMBOL_SUCCESS} ${MSG_TEST_PASSED}`);
-//   }
-
-//   if (durationMs !== undefined) {
-//     // console.log(`${SYMBOL_TIMER} ${MSG_TEST_STARTED} ${startStamp}`);
-//     // console.log(`${SYMBOL_TIMER} ${MSG_TEST_ENDED} ${endStamp} (${durationMs} ms)`);
-//   } else {
-//     // console.log(`${SYMBOL_TIMER} ${MSG_TEST_ENDED} ${endStamp}`);
-//   }
-
-//   // console.log(`${SYMBOL_CHART} Test report: ${reportPath}`);
-//   // console.log(`========================================\n`);
-// }
 
 // ============================================================================
 // FORM FILLING HELPERS
@@ -349,7 +282,7 @@ export async function safeHelp_attachTestSummary(
 async function handleFieldOperation(
   testInfo: TestInfo,
   locator: Locator,
-  operation: (loc: any) => Promise<void>,
+  operation: (loc: Locator) => Promise<void>,
   fieldType: string,
   timeoutMs?: number
 ): Promise<boolean> {
@@ -360,11 +293,10 @@ async function handleFieldOperation(
   try {
     await locator.waitFor({ state: 'attached', timeout });
     await operation(locator);
-    // console.log(`${SYMBOL_SUCCESS} ${fieldType} successfully (${lineLabel})`);
     return true;
   } catch (error) {
     incrementSoftFail(testInfo);
-    const errorMsg = `${SYMBOL_TIMER} ${MSG_TIMEOUT_NOT_FOUND} ${lineLabel} {fieldType} - ${ERROR_ELEMENT_NOT_FOUND} ${timeout}ms, ${MSG_SKIPPING}`;
+    const errorMsg = `${SYMBOL_TIMER} ${MSG_TIMEOUT_NOT_FOUND} ${lineLabel} ${fieldType} - ${ERROR_ELEMENT_NOT_FOUND} ${timeout}ms, ${MSG_SKIPPING}`;
     testInfo.annotations.push({
       type: ANNOTATION_SKIPPED_FIELD,
       description: errorMsg,
@@ -373,7 +305,6 @@ async function handleFieldOperation(
       body: errorMsg,
       contentType: 'text/plain',
     });
-    // console.log(`${SYMBOL_WARNING} ${errorMsg}`);
     return false;
   }
 }
@@ -407,13 +338,13 @@ export async function safeHelp_safeFill(
   value: string,
   timeoutMs?: number
 ): Promise<boolean> {
-return handleFieldOperation(
-  testInfo,
-  locator,
-  (loc) => loc.fill(value),
-  MSG_FILLED_SUCCESSFULLY,
-  timeoutMs
-);
+  return handleFieldOperation(
+    testInfo,
+    locator,
+    (loc) => loc.fill(value),
+    MSG_FILLED_SUCCESSFULLY,
+    timeoutMs
+  );
 }
 
 /**
@@ -444,7 +375,12 @@ export async function safeHelp_fillFieldsByTestId(
   timeoutMs?: number
 ): Promise<void> {
   for (const field of fields) {
-    await safeHelp_safeFill(testInfo, page.getByTestId(field.testId), field.value, timeoutMs);
+    await safeHelp_safeFill(
+      testInfo,
+      page.getByTestId(field.testId),
+      field.value,
+      timeoutMs
+    );
   }
 }
 
@@ -472,13 +408,15 @@ export async function safeHelp_safeSelectOption(
   value: string,
   timeoutMs?: number
 ): Promise<boolean> {
-return handleFieldOperation(
-  testInfo,
-  locator,
-  (loc) => loc.selectOption(value),
-  MSG_SELECTED_SUCCESSFULLY,
-  timeoutMs
-);
+  return handleFieldOperation(
+    testInfo,
+    locator,
+    async (loc) => {
+      await loc.selectOption(value);
+    },
+    MSG_SELECTED_SUCCESSFULLY,
+    timeoutMs
+  );
 }
 
 /**
@@ -523,9 +461,9 @@ export async function safeHelp_selectDropdownLocator(
 export function safeHelp_getTimestamp(): string {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(
-    d.getMinutes()
-  )}:${pad(d.getSeconds())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
 /**
@@ -533,40 +471,45 @@ export function safeHelp_getTimestamp(): string {
  * Fiscal year runs from Oct 1 - Sep 30
  *
  * @returns Object with prevYear, quarter, and lastDayOfPrevQuarter
- *
- * @example
- * const { prevYear, quarter, lastDayOfPrevQuarter } = safeHelp_getFiscalYearQuarter();
- * // Feb 2026: prevYear = "2025", quarter = "2", lastDayOfPrevQuarter = "2025-12-31"
  */
-export function safeHelp_getFiscalYearQuarter(): {
+export function safeHelp_calculateYearData(): {
+  lastDayOfPrevQuarter: string;
   prevYear: string;
   quarter: string;
-  lastDayOfPrevQuarter: string;
 } {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const fiscalYear = month >= FISCAL_YEAR_START_MONTH ? year + 1 : year;
-  const prevYear = (fiscalYear - 1).toString();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
 
-  let quarter: string;
-  let lastDayOfPrevQuarter: string;
+  // Fiscal year starts in October (month 9)
+  const fiscalYear =
+    currentMonth >= FISCAL_YEAR_START_MONTH ? currentYear + 1 : currentYear;
+  const prevYear = String(fiscalYear - 1);
 
-  if (month >= FISCAL_YEAR_START_MONTH && month <= 11) {
-    quarter = '1';
-    lastDayOfPrevQuarter = `${year - 1}-09-30`;
-  } else if (month >= 0 && month <= 2) {
-    quarter = '2';
-    lastDayOfPrevQuarter = `${year - 1}-12-31`;
-  } else if (month >= 3 && month <= 5) {
-    quarter = '3';
-    lastDayOfPrevQuarter = `${year}-03-31`;
-  } else {
-    quarter = '4';
-    lastDayOfPrevQuarter = `${year}-06-30`;
-  }
+  // Calculate quarter (1-4)
+  const quarterMonth = (currentMonth - FISCAL_YEAR_START_MONTH + 12) % 12;
+  const quarter = String(Math.floor(quarterMonth / 3) + 1);
 
-  return { prevYear, quarter, lastDayOfPrevQuarter };
+  // Calculate last day of previous quarter
+  const prevQuarterEndMonth = FISCAL_YEAR_START_MONTH + (parseInt(quarter, 10) - 2) * 3 + 2;
+  const prevQuarterEndDate = new Date(currentYear, prevQuarterEndMonth + 1, 0);
+  const lastDayOfPrevQuarter = `${prevQuarterEndDate.getFullYear()}-${String(
+    prevQuarterEndDate.getMonth() + 1
+  ).padStart(2, '0')}-${String(prevQuarterEndDate.getDate()).padStart(2, '0')}`;
+
+  return { lastDayOfPrevQuarter, prevYear, quarter };
+}
+
+/**
+ * Get current fiscal year and quarter (alias for calculateYearData)
+ * @returns Object with prevYear, quarter, and lastDayOfPrevQuarter
+ */
+export function safeHelp_getFiscalYearQuarter(): {
+  lastDayOfPrevQuarter: string;
+  prevYear: string;
+  quarter: string;
+} {
+  return safeHelp_calculateYearData();
 }
 
 /**
@@ -575,23 +518,18 @@ export function safeHelp_getFiscalYearQuarter(): {
  *
  * @param testInfo - Playwright TestInfo object for attaching to report
  * @param page - Playwright Page object
- * @returns Object with appLinkName, prevYear, quarter, and lastDayOfPrevQuarter
+ * @returns Object with appLinkName only
  *
  * @example
- * const { appLinkName, prevYear, quarter, lastDayOfPrevQuarter } =
- *   await safeHelp_updateApplicationName(testInfo, page);
+ * const { appLinkName } = await safeHelp_updateApplicationName(testInfo, page);
  */
 export async function safeHelp_updateApplicationName(
   testInfo: TestInfo,
   page: Page
 ): Promise<{
   appLinkName: string;
-  prevYear: string;
-  quarter: string;
-  lastDayOfPrevQuarter: string;
 }> {
   const appLinkName = `Test at ${safeHelp_getTimestamp()}`;
-  const { prevYear, quarter, lastDayOfPrevQuarter } = safeHelp_getFiscalYearQuarter();
 
   await safeHelp_safeStep(testInfo, 'create application link', async () => {
     await page.getByTestId('sign-in-button').click();
@@ -599,7 +537,7 @@ export async function safeHelp_updateApplicationName(
     await page.getByRole('button', { name: 'Save' }).click();
   });
 
-  return { appLinkName, prevYear, quarter, lastDayOfPrevQuarter };
+  return { appLinkName };
 }
 
 /**
@@ -652,7 +590,7 @@ export function safeHelp_GotoForm(
  * @param testInfo - Playwright TestInfo object
  * @param page - Playwright Page object
  * @param url - URL to navigate to
- * @param waitState - Wait state: 'load', 'domcontentloaded', or 'networkidle' (default: 'networkidle')
+ * @param waitState - Wait state: 'load' or 'domcontentloaded' (default: 'load')
  * @param timeoutMs - Optional timeout in milliseconds. If not provided, uses DEFAULT timeout (30000ms)
  * @returns Promise that resolves when navigation completes
  *
@@ -661,16 +599,12 @@ export function safeHelp_GotoForm(
  * await safeHelp_safeGoto(testInfo, page, 'https://example.com');
  *
  * @example
- * // Wait for load event only (faster)
- * await safeHelp_safeGoto(testInfo, page, 'https://example.com', 'load');
+ * // Wait for domcontentloaded event only (faster)
+ * await safeHelp_safeGoto(testInfo, page, 'https://example.com', 'domcontentloaded');
  *
  * @example
  * // With custom timeout
- * await safeHelp_safeGoto(testInfo, page, 'https://example.com', 'networkidle', getTimeout('SLOW'));
- *
- * @example
- * // Or use TIMEOUTS constant directly
- * await safeHelp_safeGoto(testInfo, page, 'https://example.com', 'networkidle', TIMEOUTS.SLOW);
+ * await safeHelp_safeGoto(testInfo, page, 'https://example.com', 'load', getTimeout('SLOW'));
  */
 export async function safeHelp_safeGoto(
   testInfo: TestInfo,
@@ -683,6 +617,22 @@ export async function safeHelp_safeGoto(
 
   await safeHelp_safeStep(testInfo, `navigate to ${url}`, async () => {
     await page.goto(url, { waitUntil: waitState, timeout });
+
+    // Capture page header after navigation
+    try {
+      const header = await page
+        .locator('h1')
+        .first()
+        .textContent({ timeout: getTimeout('FAST') });
+      if (header) {
+        await testInfo.attach('page-header', {
+          body: `Found page header: ${header.trim()}`,
+          contentType: 'text/plain',
+        });
+      }
+    } catch (error) {
+      // Header not found or timeout - continue silently
+    }
   });
 }
 
@@ -692,7 +642,7 @@ export async function safeHelp_safeGoto(
  *
  * @param testInfo - Playwright TestInfo object
  * @param page - Playwright Page object
- * @param waitState - Wait state: 'load', 'domcontentloaded', or 'networkidle' (default: 'networkidle')
+ * @param waitState - Wait state: 'load' or 'domcontentloaded' (default: 'load')
  * @param timeoutMs - Optional timeout in milliseconds. If not provided, uses DEFAULT timeout (30000ms)
  * @returns Promise that resolves when load state is reached
  *
@@ -701,16 +651,12 @@ export async function safeHelp_safeGoto(
  * await safeHelp_safeWaitForLoadState(testInfo, page);
  *
  * @example
- * // Wait for load event only (faster)
- * await safeHelp_safeWaitForLoadState(testInfo, page, 'load');
+ * // Wait for domcontentloaded event only (faster)
+ * await safeHelp_safeWaitForLoadState(testInfo, page, 'domcontentloaded');
  *
  * @example
  * // Wait for load with custom timeout
- * await safeHelp_safeWaitForLoadState(testInfo, page, 'networkidle', getTimeout('SLOW'));
- *
- * @example
- * // Or use TIMEOUTS constant directly
- * await safeHelp_safeWaitForLoadState(testInfo, page, 'networkidle', TIMEOUTS.EXTENDED);
+ * await safeHelp_safeWaitForLoadState(testInfo, page, 'load', getTimeout('SLOW'));
  */
 export async function safeHelp_safeWaitForLoadState(
   testInfo: TestInfo,
@@ -773,7 +719,8 @@ export async function safeHelp_clickLink(
 ): Promise<void> {
   await safeHelp_safeStep(testInfo, 'click link', async () => {
     await locator.click();
-    await locator.page().waitForTimeout(500); // Wait for scroll/focus animation
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await locator.page()?.waitForTimeout(500); // Wait for scroll/focus animation
   });
 }
 
@@ -800,3 +747,4 @@ export async function safeHelp_clickButton(
     await page.getByTestId(testId).click();
   });
 }
+
