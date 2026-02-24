@@ -14,7 +14,54 @@ from src.legacy_soap_api.legacy_soap_api_schemas import (
     SoapRequestStreamer,
     SOAPResponse,
 )
-from tests.fixtures.legacy_soap_api.mtom_attachment import add_filler, get_base_body
+
+
+def get_base_body(append_to_end: bytes | None = None) -> bytes:
+    base_body = (
+        b"--uuid:a1368612-206e-4fa7-b8c5-4aec08409929\r\n"
+        b'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        b"Content-Transfer-Encoding: 8bit\r\n"
+        b"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        b'<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        b'xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" '
+        b'xmlns:glob="http://apply.grants.gov/system/Global-V1.0" '
+        b'xmlns:head="http://apply.grants.gov/system/Header-V1.0" '
+        b'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" '
+        b'xmlns:ns2="http://apply.grants.gov/services/ApplicantWebServices-V2.0" '
+        b'xmlns:ns3="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        b"<soapenv:Header>"
+        b"<head:GrantSubmissionHeader>"
+        b"<head:OpportunityID>SIMP-COPYING</head:OpportunityID>"
+        b'<glob:HashValue glob:hashAlgorithm="SHA-1">nZXaeALvYJz6QQFdf1bUvr7S6ts=</glob:HashValue>'
+        b"<head:SubmissionTitle>go get it</head:SubmissionTitle>"
+        b"</head:GrantSubmissionHeader>"
+        b"</soapenv:Header>"
+        b"<soapenv:Body>"
+        b"<app:SubmitApplicationRequest>"
+        b"<app:GrantApplicationXML>"
+        b"&lt;test"
+        b"</app:GrantApplicationXML>"
+        b"<gran:Attachment>"
+        b"<gran:FileContentId>budget</gran:FileContentId>"
+        b"<gran:FileDataHandler>"
+        b'<xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:1157990985709"/>'
+        b"</gran:FileDataHandler>"
+        b"</gran:Attachment>"
+        b"</app:SubmitApplicationRequest>"
+        b"</soapenv:Body>"
+        b"\r\n--uuid:a1368612-206e-4fa7-b8c5-4aec08409929\r\n"
+        b"Content-Type: application/octet-stream\r\n"
+        b"Content-Transfer-Encoding: binary\r\n"
+        b"Content-ID: <1157990985709>\r\n\r\n"
+        b"text"
+    )
+    if append_to_end:
+        base_body += append_to_end
+    return base_body
+
+
+def add_filler(base_body: bytes, size: int = 10000) -> bytes:
+    return base_body + b"a" * size
 
 
 def xml_bytes() -> bytes:
