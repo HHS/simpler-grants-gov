@@ -1,22 +1,68 @@
 // Utility function for application creation
-// Usage: await createApplication(page, opportunityUrl, orgLabelLocal, orgLabelStaging);
-import { expect } from "@playwright/test";
+// Usage: await createApplication(page, opportunityUrl, orgLabel);
+import { expect, type Locator, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 
-const { baseUrl, targetEnv } = playwrightEnv;
+const { baseUrl } = playwrightEnv;
+
+async function selectOptionByLabelSubstring(
+  selectLocator: Locator,
+  labelSubstring: string,
+) {
+  const select = selectLocator.first();
+  await select.waitFor({ state: "visible", timeout: 5000 });
+  await expect(select).toBeEnabled({ timeout: 10000 });
+  await expect
+    .poll(async () =>
+      select.evaluate((el) => {
+        if (!(el instanceof HTMLSelectElement)) return false;
+        return Array.from(el.options).some((opt) => !opt.disabled);
+      }),
+    )
+    .toBe(true);
+
+  const options = await select.locator("option").allTextContents();
+  const enabledOptionValues = await select
+    .locator("option:not([disabled])")
+    .evaluateAll((nodes) =>
+      nodes
+        .filter((n): n is HTMLOptionElement => n instanceof HTMLOptionElement)
+        .map((n) => n.value),
+    );
+
+  const resolvedLabel =
+    options.find((opt: string) => opt.includes(labelSubstring)) || options[0];
+
+  if (resolvedLabel) {
+    const value = await select
+      .locator("option")
+      .filter({ hasText: resolvedLabel })
+      .first()
+      .getAttribute("value");
+
+    if (value && enabledOptionValues.includes(value)) {
+      await select.selectOption({ value });
+    } else if (enabledOptionValues.length > 0) {
+      await select.selectOption({ value: enabledOptionValues[0] });
+    }
+  }
+
+  const selectedValue = await select.inputValue();
+  if (!selectedValue && enabledOptionValues.length > 0) {
+    await select.selectOption({ value: enabledOptionValues[0] });
+  }
+}
 
 /**
  * Creates a new application for the given opportunity.
  * @param page Playwright Page object
  * @param opportunityUrl Opportunity URL (e.g. "/opportunity/abc123")
- * @param orgLabelLocal Organization label for local environment
- * @param orgLabelStaging Organization label for staging environment
+ * @param orgLabel Organization label to select
  */
 export async function createApplication(
-  page: import("@playwright/test").Page,
+  page: Page,
   opportunityUrl: string,
-  orgLabelLocal: string,
-  orgLabelStaging: string,
+  orgLabel: string,
 ) {
   await page.goto(`${baseUrl}${opportunityUrl}`, {
     waitUntil: "domcontentloaded",
@@ -36,51 +82,7 @@ export async function createApplication(
   );
   const orgSelectCount = await orgSelect.count();
   if (orgSelectCount > 0) {
-    const orgSelectFirst = orgSelect.first();
-    await orgSelectFirst.waitFor({ state: "visible", timeout: 5000 });
-    await expect(orgSelectFirst).toBeEnabled({ timeout: 10000 });
-    await page.waitForFunction((selector) => {
-      const select = document.querySelector(selector);
-      if (!(select instanceof HTMLSelectElement)) return false;
-      return Array.from(select.options).some((opt) => !opt.disabled);
-    }, 'select[name*="applicant"], select:nth-of-type(1)');
-    const options = await orgSelectFirst.locator("option").allTextContents();
-    const enabledOptionValues = await orgSelectFirst
-      .locator("option:not([disabled])")
-      .evaluateAll((nodes) =>
-        nodes
-          .filter((n): n is HTMLOptionElement => n instanceof HTMLOptionElement)
-          .map((n) => n.value),
-      );
-    let orgLabel = "";
-    if (targetEnv === "local") {
-      orgLabel =
-        options.find((opt: string) => opt.includes(orgLabelLocal)) ||
-        options[0];
-    } else if (targetEnv === "staging") {
-      orgLabel =
-        options.find((opt: string) => opt.includes(orgLabelStaging)) ||
-        options[0];
-    } else {
-      orgLabel = options[0];
-    }
-    if (orgLabel) {
-      const orgValue = await orgSelectFirst
-        .locator("option")
-        .filter({ hasText: orgLabel })
-        .first()
-        .getAttribute("value");
-      if (orgValue && enabledOptionValues.includes(orgValue)) {
-        await orgSelectFirst.selectOption({ value: orgValue });
-      } else if (enabledOptionValues.length > 0) {
-        await orgSelectFirst.selectOption({ value: enabledOptionValues[0] });
-      }
-    }
-
-    const selectedOrgValue = await orgSelectFirst.inputValue();
-    if (!selectedOrgValue && enabledOptionValues.length > 0) {
-      await orgSelectFirst.selectOption({ value: enabledOptionValues[0] });
-    }
+    await selectOptionByLabelSubstring(orgSelect, orgLabel);
   }
   const nameInput = modal.locator(
     'input[name*="name"], input[placeholder*="application"], input[type="text"]:nth-of-type(1)',
@@ -93,32 +95,30 @@ export async function createApplication(
       timeout: 5000,
     });
   }
-  const createButton = modal.locator('button:has-text("Create")');
+  const createButton = modal.getByRole("button", {
+    name: /create|submit|start|next/i,
+  });
   const createRequest = page.waitForResponse(
     (response) =>
       response.request().method() === "POST" &&
       response.url().includes("/api/applications"),
     { timeout: 60000 },
   );
-  if ((await createButton.count()) === 0) {
-    const anyCreateBtn = page
-      .getByRole("button")
-      .filter({ hasText: /Create|Submit|Start|Next/ });
-    await expect(anyCreateBtn.first()).toBeEnabled({ timeout: 10000 });
-    await anyCreateBtn.first().scrollIntoViewIfNeeded();
-    try {
-      await anyCreateBtn.first().click({ timeout: 15000 });
-    } catch (error) {
-      await anyCreateBtn.first().click({ force: true });
-    }
-  } else {
-    await expect(createButton.first()).toBeEnabled({ timeout: 10000 });
-    await createButton.first().scrollIntoViewIfNeeded();
-    try {
-      await createButton.first().click({ timeout: 15000 });
-    } catch (error) {
-      await createButton.first().click({ force: true });
-    }
+  await expect(createButton.first()).toBeEnabled({ timeout: 10000 });
+  await modal.scrollIntoViewIfNeeded();
+  await modal
+    .locator(".usa-modal__main, .usa-modal__content, .usa-modal__body")
+    .first()
+    .evaluate((el) => {
+      (el as HTMLElement).scrollTop = (el as HTMLElement).scrollHeight;
+    })
+    .catch(() => undefined);
+  await createButton.first().scrollIntoViewIfNeeded();
+  try {
+    await createButton.first().click({ timeout: 15000 });
+  } catch (error) {
+    await createButton.first().click({ force: true });
+    await createButton.first().evaluate((el) => (el as HTMLElement).click());
   }
   await createRequest;
   await page.waitForTimeout(3000);

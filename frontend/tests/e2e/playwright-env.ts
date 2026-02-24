@@ -39,6 +39,8 @@ const playwrightEnv = {
   testUserEmail: process.env.STAGING_TEST_USER_EMAIL || "",
   testUserPassword: process.env.STAGING_TEST_USER_PASSWORD || "",
   testUserAuthKey: process.env.STAGING_TEST_USER_MFA_KEY || "",
+  localTestOrgLabel: process.env.LOCAL_TEST_ORG_LABEL || "",
+  stagingTestOrgLabel: process.env.STAGING_TEST_ORG_LABEL || "",
 };
 
 export default playwrightEnv;

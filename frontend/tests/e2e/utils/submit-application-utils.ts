@@ -1,4 +1,5 @@
 import { expect, Page } from "@playwright/test";
+import { UUID_REGEX } from "tests/e2e/utils/regex-utils";
 
 /**
  * Submit the application and verify success message with application ID.
@@ -10,6 +11,7 @@ export async function submitApplicationAndVerify(page: Page): Promise<string> {
     name: /submit application/i,
   });
   await submitAppButton.waitFor({ state: "visible", timeout: 15000 });
+  await expect(submitAppButton).toBeEnabled({ timeout: 15000 });
 
   // Wait for the submission response
   const submitResponsePromise = page.waitForResponse((response) => {
@@ -60,11 +62,7 @@ export async function submitApplicationAndVerify(page: Page): Promise<string> {
   let appIdMessage = null;
   for (const el of appIdMessages) {
     const text = await el.textContent();
-    if (
-      /Application ID #: [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(
-        text || "",
-      )
-    ) {
+    if (new RegExp(`Application ID #:\\s*${UUID_REGEX.source}`, "i").test(text || "")) {
       appIdMessage = el;
       break;
     }
@@ -79,7 +77,7 @@ export async function submitApplicationAndVerify(page: Page): Promise<string> {
   // Extract and verify application ID format (UUID)
   const appIdText = await appIdMessage.textContent();
   const appIdMatch = appIdText?.match(
-    /Application ID #: ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i,
+    new RegExp(`Application ID #:\\s*(${UUID_REGEX.source})`, "i"),
   );
 
   if (!appIdMatch || !appIdMatch[1]) {

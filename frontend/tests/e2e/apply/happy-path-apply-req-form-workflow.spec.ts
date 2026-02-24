@@ -14,9 +14,10 @@ import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
 import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
+import { selectLocalTestUser } from "tests/e2e/utils/select-local-test-user-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
 
-const { baseUrl, targetEnv } = playwrightEnv;
+const { baseUrl, targetEnv, localTestOrgLabel, stagingTestOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
@@ -28,36 +29,15 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
 
   const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
-  // Step 1: Navigate to home page
-  // console.log("Step 1: Navigating to home page to establish session...");
+  // Navigate to home page
+  // console.log("Navigating to home page to establish session...");
   if (targetEnv === "local") {
     // Use test-user spoofing
     await createSpoofedSessionCookie(context);
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     // console.log(" Local test user session established");
 
-    // Fallback: use test-user dropdown if present
-    const testUserSelect = page.locator(
-      'select[id*="test-user"], select[aria-label*="test-user"], combobox[aria-label*="test"]',
-    );
-    if ((await testUserSelect.count()) > 0) {
-      await testUserSelect
-        .first()
-        .waitFor({ state: "visible", timeout: 10_000 });
-      const loginResponse = page.waitForResponse((response) => {
-        return (
-          response.request().method() === "POST" &&
-          response.url().includes("/api/user/local-quick-login")
-        );
-      });
-      await testUserSelect.first().selectOption({ label: "many_app_user" });
-      await loginResponse;
-      await page.waitForLoadState("networkidle");
-      await page.waitForTimeout(2000);
-      // console.log(" Test user selected via dropdown fallback");
-    } else {
-      // console.log("ℹ No test user dropdown found - proceeding with cookie session");
-    }
+    await selectLocalTestUser(page, "many_app_user");
   } else if (targetEnv === "staging") {
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const signOutButton = await performStagingLogin(page, !!isMobile);
@@ -70,21 +50,22 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     throw new Error(`Unsupported env ${targetEnv}`);
   }
 
-  // ---------------- Step 2: Open mobile nav if needed ----------------
+  // Open mobile nav if needed
   if (isMobile) {
     await openMobileNav(page);
   }
 
   // Call reusable create application function from utils
-  await createApplication(
-    page,
-    OPPORTUNITY_URL,
-    "Sally",
-    "Automatic staging Organization for UEI AUTOHQDCCHBY",
-  );
+  const orgLabel =
+    targetEnv === "staging"
+      ? stagingTestOrgLabel || "Automatic staging Organization for UEI AUTOHQDCCHBY"
+      : localTestOrgLabel || "Sally's Soup Emporium";
 
-  // Step 10: Click on SF-424B form to fill it
-  // console.log("Step 10: Opening SF-424B form...");
+  await createApplication(page, OPPORTUNITY_URL, orgLabel);
+  const applicationUrl = page.url();
+
+  // Click on SF-424B form to fill it
+  // console.log("Opening SF-424B form...");
   const sf424bLink = page.locator("a, button").filter({
     hasText: /SF-424B|Assurances for Non-Construction Programs/i,
   });
@@ -99,13 +80,15 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     ]);
     await page.waitForLoadState("domcontentloaded");
     await page.waitForTimeout(2000);
+
     // Fill SF-424B form fields using helper
-    await fillSf424bForm(page, "TESTER", "Sally's Soup Emporium");
+    await fillSf424bForm(page, "TESTER", orgLabel);
+
     // Save the form using helper
     await saveForm(page);
 
     // Verify form status after save
-    await verifyFormStatusAfterSave(page, "SF-424B");
+    await verifyFormStatusAfterSave(page, "SF-424B", applicationUrl);
 
     // Extra wait for page to fully render forms table after navigation
     await page.waitForTimeout(10000);

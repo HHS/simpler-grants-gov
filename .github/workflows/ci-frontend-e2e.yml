@@ -77,6 +77,8 @@ jobs:
         env:
           CI: true
           PLAYWRIGHT_TARGET_ENV: local
+          LOCAL_TEST_ORG_LABEL: Sally's Soup Emporium
+          STAGING_TEST_ORG_LABEL: Automatic staging Organization for UEI AUTOHQDCCHBY
         run: |
           npx playwright test --config ./tests/playwright.config.ts \
           tests/e2e/apply/happy-path-apply-req-form-workflow.spec.ts \

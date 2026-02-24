@@ -1,4 +1,31 @@
-import { expect, Page } from "@playwright/test";
+import { expect, Locator, Page } from "@playwright/test";
+
+async function clickInclusionOption(
+  page: Page,
+  label: Locator,
+  visibleTimeout: number,
+) {
+  await label.scrollIntoViewIfNeeded();
+  await expect(label).toBeVisible({ timeout: visibleTimeout });
+
+  const includeFormResponsePromise = page.waitForResponse((response) => {
+    const url = response.url();
+    return (
+      response.request().method() === "PUT" &&
+      url.includes("/api/applications/") &&
+      url.includes("/forms/")
+    );
+  });
+
+  await label.click();
+  const includeFormResponse = await includeFormResponsePromise;
+
+  if (includeFormResponse.status() !== 200) {
+    throw new Error(
+      `Include-in-submission update returned status ${includeFormResponse.status()}`,
+    );
+  }
+}
 
 /**
  * Select Yes or No option for including a form in application submission.
@@ -29,27 +56,7 @@ export async function selectFormInclusionOption(
   });
 
   if ((await optionLabel.count()) > 0) {
-    await optionLabel.first().scrollIntoViewIfNeeded();
-    await expect(optionLabel.first()).toBeVisible({ timeout: 5000 });
-
-    // Wait for the response when updating the form inclusion
-    const includeFormResponsePromise = page.waitForResponse((response) => {
-      const url = response.url();
-      return (
-        response.request().method() === "PUT" &&
-        url.includes("/api/applications/") &&
-        url.includes("/forms/")
-      );
-    });
-
-    await optionLabel.first().click();
-    const includeFormResponse = await includeFormResponsePromise;
-
-    if (includeFormResponse.status() !== 200) {
-      throw new Error(
-        `Include-in-submission update returned status ${includeFormResponse.status()}`,
-      );
-    }
+    await clickInclusionOption(page, optionLabel.first(), 5000);
   } else {
     // Fallback: try without class selector
     const fallbackLabel = formRow.locator("label", {
@@ -57,26 +64,7 @@ export async function selectFormInclusionOption(
     });
 
     if ((await fallbackLabel.count()) > 0) {
-      await fallbackLabel.first().scrollIntoViewIfNeeded();
-      await expect(fallbackLabel.first()).toBeVisible({ timeout: 10000 });
-
-      const includeFormResponsePromise = page.waitForResponse((response) => {
-        const url = response.url();
-        return (
-          response.request().method() === "PUT" &&
-          url.includes("/api/applications/") &&
-          url.includes("/forms/")
-        );
-      });
-
-      await fallbackLabel.first().click();
-      const includeFormResponse = await includeFormResponsePromise;
-
-      if (includeFormResponse.status() !== 200) {
-        throw new Error(
-          `Include-in-submission update returned status ${includeFormResponse.status()}`,
-        );
-      }
+      await clickInclusionOption(page, fallbackLabel.first(), 10000);
     } else {
       throw new Error(`Could not find '${option}' label for ${formName} row`);
     }
