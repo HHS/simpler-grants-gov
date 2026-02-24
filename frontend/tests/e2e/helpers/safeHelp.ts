@@ -278,7 +278,7 @@ async function handleFieldOperation(
     return true;
   } catch (error) {
     incrementSoftFail(testInfo);
-    const errorMsg = `${SYMBOL_TIMER} ${MSG_TIMEOUT_NOT_FOUND} ${lineLabel} ${fieldType} - ${ERROR_ELEMENT_NOT_FOUND} ${timeout}ms, ${MSG_SKIPPING}`;
+    const errorMsg = `${SYMBOL_TIMER} ${MSG_TIMEOUT_NOT_FOUND} ${lineLabel} ${fieldType} - ${ERROR_ELEMENT_NOT_FOUND} ${timeout}ms, ${MSG_SKIPPING}, locator: ${locator.toString()}`;
     testInfo.annotations.push({
       type: ANNOTATION_SKIPPED_FIELD,
       description: errorMsg,
