@@ -1819,6 +1819,7 @@ export const messages = {
     pageTitle: "Organizations",
   },
   AwardRecommendation: {
+    awardRecommendation: "Award Recommendation",
     errorMessage:
       "We have encountered an error loading your award recommendations, please try again later.",
     metaDescription: "View your award recommendations",

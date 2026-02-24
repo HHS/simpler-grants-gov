@@ -16,10 +16,10 @@ export default async function AwardRecommendationHero() {
       <GridContainer>
         <Grid>
           <Breadcrumbs
-            className="padding-y-0 bg-transparent font-sans-sm"
+            className="padding-y-0 bg-transparent"
             breadcrumbList={[
               {
-                title: t("opportunity", { defaultValue: "Opportunity" }),
+                title: t("awardRecommendation", { defaultValue: "Award Recommendation" }),
                 path: "/",
               },
               {
