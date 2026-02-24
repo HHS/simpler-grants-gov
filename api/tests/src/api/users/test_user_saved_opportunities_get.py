@@ -195,7 +195,7 @@ def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_sa
                 {"order_by": "created_at", "sort_direction": "ascending"},
                 {"order_by": "opportunity_title", "sort_direction": "ascending"},
             ],
-            [ NATURE, AWARD, EMBASSY],
+            [NATURE, AWARD, EMBASSY],
         ),
         # Order by close_date, None should be last
         (
@@ -211,13 +211,19 @@ def test_get_saved_opportunities_sorting(
 ):
 
     UserSavedOpportunityFactory.create(
-        user=user, opportunity=NATURE, created_at="2024-05-01",
+        user=user,
+        opportunity=NATURE,
+        created_at="2024-05-01",
     )
     UserSavedOpportunityFactory.create(
-        user=user, opportunity=AWARD, created_at="2024-05-08",
+        user=user,
+        opportunity=AWARD,
+        created_at="2024-05-08",
     )
     UserSavedOpportunityFactory.create(
-        user=user, opportunity=EMBASSY, created_at="2024-12-01",
+        user=user,
+        opportunity=EMBASSY,
+        created_at="2024-12-01",
     )
     # Make the request
     pagination = {"pagination": {"page_offset": 1, "page_size": 25}}
@@ -488,7 +494,9 @@ def test_user_get_saved_opportunities_org_only(client, enable_factory_create, db
 
 
 def test_user_get_saved_opportunities_org_only_403(
-    client, enable_factory_create, db_session,
+    client,
+    enable_factory_create,
+    db_session,
 ):
     """Test user can not get organization saved opportunities without proper privileges"""
     user, org, token = create_user_in_org(db_session)

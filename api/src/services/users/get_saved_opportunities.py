@@ -8,9 +8,8 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select, Subquery, union_all
 
 from src.adapters import db
-from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege
-from src.db.models.entity_models import Organization, OrganizationSavedOpportunity
+from src.db.models.entity_models import OrganizationSavedOpportunity
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
@@ -20,7 +19,7 @@ from src.db.models.user_models import User, UserSavedOpportunity
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.pagination.paginator import Paginator
 from src.search.search_models import StrSearchFilter
-from src.services.organizations_v1.get_organization import get_organization
+from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 
 logger = logging.getLogger(__name__)
 
@@ -74,37 +73,6 @@ def add_opportunity_status_filter(
         )
 
     return stmt
-
-
-def get_organization_and_verify_access(
-    db_session: db.Session, user: User, organization_id: uuid.UUID, privilege: set[Privilege]
-) -> Organization:
-    """Get organization by ID and verify user has access, raising appropriate errors if not.
-
-    Args:
-        db_session: Database session
-        user: User requesting access
-        organization_id: UUID of the organization to retrieve
-        privilege: set of Privileges to check against
-
-    Returns:
-        Organization: The organization with SAM.gov entity data loaded
-
-    Raises:
-        FlaskError: 404 if organization not found, 403 if access denied
-    """
-    # First get the organization
-    organization = get_organization(db_session, organization_id)
-
-    # Check if user has the correct privilege for this organization
-    check_user_access(
-        db_session,
-        user,
-        privilege,
-        organization,
-    )
-
-    return organization
 
 
 def _check_access(db_session: db.Session, user: User, organization_ids: list) -> None:

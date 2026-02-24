@@ -23,6 +23,7 @@ from src.api.organizations_v1.organization_schemas import (
     OrganizationUsersResponseSchema,
 )
 from src.auth.api_jwt_auth import api_jwt_auth
+from src.constants.lookup_constants import Privilege
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.organizations_v1.create_organization_invitation import (
@@ -72,7 +73,7 @@ def organization_get(db_session: db.Session, organization_id: UUID) -> response.
 
         # Get organization and verify access using service layer
         organization = get_organization_and_verify_access(
-            db_session, user_token_session.user, organization_id
+            db_session, user_token_session.user, organization_id, {Privilege.VIEW_ORG_MEMBERSHIP}
         )
 
     return response.ApiResponse(message="Success", data=organization)
