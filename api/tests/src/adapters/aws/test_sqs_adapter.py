@@ -1,3 +1,4 @@
+import json
 import logging
 from unittest.mock import Mock, patch
 
@@ -10,6 +11,7 @@ from src.adapters.aws.sqs_adapter import (
     SQSClient,
     SQSConfig,
     SQSDeleteBatchResponse,
+    SQSSendMessageResponse,
     get_boto_sqs_client,
 )
 
@@ -131,3 +133,82 @@ class TestSQSClient:
 
         assert valid_handle in results.successful_deletes
         assert invalid_handle in results.failed_deletes
+
+    def test_send_message_success(self, workflow_sqs_queue):
+        """Verify that send_message successfully sends a message and returns an SQSSendMessageResponse."""
+        boto_client = boto3.client("sqs", region_name="us-east-1")
+        sqs_client = SQSClient(queue_url=workflow_sqs_queue, sqs_client=boto_client)
+
+        message_body = {"event_type": "workflow_started", "workflow_id": "12345"}
+        response = sqs_client.send_message(message_body)
+
+        assert isinstance(response, SQSSendMessageResponse)
+        assert response.message_id is not None
+        assert response.md5_of_message_body is not None
+        assert len(response.message_id) > 0
+        assert len(response.md5_of_message_body) == 32  # MD5 hash is 32 characters
+
+    def test_send_message_returns_all_response_fields(self, workflow_sqs_queue):
+        """Verify that send_message response includes all expected fields from boto3."""
+        boto_client = boto3.client("sqs", region_name="us-east-1")
+        sqs_client = SQSClient(queue_url=workflow_sqs_queue, sqs_client=boto_client)
+
+        message_body = {"test": "data"}
+        response = sqs_client.send_message(message_body)
+
+        # Required fields
+        assert hasattr(response, "message_id")
+        assert hasattr(response, "md5_of_message_body")
+        # Optional fields (may be None for standard queues)
+        assert hasattr(response, "md5_of_message_attributes")
+        assert hasattr(response, "sequence_number")
+        assert hasattr(response, "md5_of_message_system_attributes")
+
+    def test_send_message_can_be_received(self, workflow_sqs_queue):
+        """Verify that a message sent via send_message can be successfully received."""
+        boto_client = boto3.client("sqs", region_name="us-east-1")
+        sqs_client = SQSClient(queue_url=workflow_sqs_queue, sqs_client=boto_client)
+
+        message_body = {"event_type": "test_event", "data": {"key": "value"}}
+        send_response = sqs_client.send_message(message_body)
+
+        messages = sqs_client.receive_messages(max_messages=1, wait_time=0)
+
+        assert len(messages) == 1
+        assert messages[0].message_id == send_response.message_id
+
+        received_body = json.loads(messages[0].body)
+        assert received_body == message_body
+
+    def test_send_message_logs_on_error(self, mock_sqs, caplog):
+        """Verify that failed send attempts raise a ClientError and log the queue URL as extra context."""
+        invalid_url = "https://sqs.us-east-1.amazonaws.com/123456789012/non-existent"
+        boto_client = boto3.client("sqs", region_name="us-east-1")
+        sqs_client = SQSClient(queue_url=invalid_url, sqs_client=boto_client)
+
+        message_body = {"test": "data"}
+
+        with pytest.raises(ClientError):
+            with caplog.at_level(logging.ERROR):
+                sqs_client.send_message(message_body)
+
+        assert "Failed to send message to SQS" in caplog.text
+        sqs_record = next(r for r in caplog.records if r.message == "Failed to send message to SQS")
+        assert sqs_record.queue_url == invalid_url
+
+    def test_send_message_logs_success(self, workflow_sqs_queue, caplog):
+        """Verify that successful message sends are logged with the message ID."""
+        boto_client = boto3.client("sqs", region_name="us-east-1")
+        sqs_client = SQSClient(queue_url=workflow_sqs_queue, sqs_client=boto_client)
+
+        message_body = {"event_type": "test"}
+
+        with caplog.at_level(logging.INFO):
+            response = sqs_client.send_message(message_body)
+
+        assert "Successfully sent message to SQS" in caplog.text
+        success_record = next(
+            r for r in caplog.records if r.message == "Successfully sent message to SQS"
+        )
+        assert success_record.queue_url == workflow_sqs_queue
+        assert success_record.message_id == response.message_id

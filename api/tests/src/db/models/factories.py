@@ -1550,7 +1550,7 @@ class ApplicationAttachmentFactory(BaseFactory):
     @classmethod
     def _build(cls, model_class, *args, **kwargs):
         kwargs.pop("file_contents")  # Don't file for build strategy
-        super()._build(model_class, *args, **kwargs)
+        return super()._build(model_class, *args, **kwargs)
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
