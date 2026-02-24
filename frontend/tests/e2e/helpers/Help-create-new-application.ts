@@ -56,7 +56,8 @@ const NOFO_ID = testConfig.environment.NofoId;
  * @param page Playwright Page object
  */
 function getNofoDirectPageUrl(page: Page): string {
-  return `${page.url().split("/").slice(0, 3).join("/")}/opportunity/${NOFO_ID}`;
+  const NofoPage = `${page.url().split("/").slice(0, 3).join("/")}/opportunity/${NOFO_ID}`;
+  return NofoPage;
 }
 
 // ============================================================================
@@ -82,13 +83,21 @@ export async function Help_createNewApplication(
   Nofo_directPageUrl: string;
   applicationId: string;
 }> {
+  const originalUrl = page.url();
+  const currentUrl = page.url();
+  const urlParts = currentUrl.split("/").filter((part) => part.length > 0);
+
   // Ensure the page is not closed before proceeding
   if (page.isClosed()) {
     throw new Error(
       "The page is already closed at the start of Help_createNewApplication.",
     );
   }
-
+    await safeLog(
+      testInfo,
+      `❌ Application creation failed: URL did not change. Still at: ${currentUrl}`,
+      "error",
+    );
   const opportunityId = testConfig.environment.NofoId;
   const opportunityUrl = `/opportunity/${opportunityId}`;
   // Navigate to the opportunity page and verify the "Start new application" button is visible
@@ -169,7 +178,7 @@ export async function Help_createNewApplication(
     );
   }
 
-  const originalUrl = page.url();
+  // const originalUrl = page.url();
   let urlChanged = false;
   try {
     await page.waitForURL(
@@ -189,15 +198,15 @@ export async function Help_createNewApplication(
     await safeLog(
       testInfo,
       "❌ URL did not change to application page within 60 seconds. Application creation failed. Current URL: " +
-        page.url(),
+      page.url(),
       "error",
     );
   }
 
   await page.waitForLoadState("load");
 
-  const currentUrl = page.url();
-  const urlParts = currentUrl.split("/").filter((part) => part.length > 0);
+  // const currentUrl = page.url();
+  // const urlParts = currentUrl.split("/").filter((part) => part.length > 0);
 
   let applicationIdFromUrl = "unknown";
   if (urlChanged) {
