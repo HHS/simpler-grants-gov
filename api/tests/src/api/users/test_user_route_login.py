@@ -507,6 +507,28 @@ def test_user_callback_token_fails_validation_no_valid_key_302(
     assert db_state is None
 
 
+def test_user_callback_null_code_302(client):
+    resp = client.get(f"/v1/users/login/callback?state={uuid.uuid4()}", follow_redirects=True)
+
+    # The final endpoint returns a 200 even when erroring as it is just a GET endpoint
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "Missing code in request"
+
+
+def test_user_callback_null_state_302(client):
+    resp = client.get("/v1/users/login/callback?code=abc123", follow_redirects=True)
+
+    # The final endpoint returns a 200 even when erroring as it is just a GET endpoint
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "Missing state in request"
+
+
 ##########################################
 # PIV/CAC validation tests
 ##########################################
