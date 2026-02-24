@@ -35,7 +35,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     // Use test-user spoofing
     await createSpoofedSessionCookie(context);
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-  
+
     await selectLocalTestUser(page, "many_app_user");
   } else if (targetEnv === "staging") {
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
@@ -44,7 +44,6 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
       throw new Error("signOutButton was not found after performStagingLogin");
     }
     await expect(signOutButton).toHaveCount(1, { timeout: 120_000 });
-  
   } else {
     throw new Error(`Unsupported env ${targetEnv}`);
   }
@@ -103,5 +102,4 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     await submitApplicationAndVerify(page);
     // Application ID is now available in appId variable for further use if needed
   }
-
 });
