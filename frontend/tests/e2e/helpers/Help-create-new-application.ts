@@ -99,7 +99,7 @@ export async function Help_createNewApplication(
     ).toContainText("Start new application"),
   );
   // Handle potential mobile Chrome click issues with a fallback to JS click
-  const viewport = await page.viewportSize();
+  const viewport = page.viewportSize();
   const isMobile = viewport && viewport.width <= 600;
   const isChrome = await isChromeBrowser(page);
 
@@ -156,7 +156,7 @@ export async function Help_createNewApplication(
           testInfo,
         );
       })(),
-      new Promise((_, reject) =>
+      new Promise((_resolve, reject) =>
         setTimeout(() => reject(new Error("Timeout exceeded")), 10000),
       ),
     ]);
@@ -350,7 +350,7 @@ async function mobileChromeAction(
   _unused?: undefined,
   testInfo?: TestInfo,
 ): Promise<void> {
-  const viewport = await page.viewportSize();
+  const viewport = page.viewportSize();
   const isMobile = viewport && viewport.width <= 600;
   const isChrome = await isChromeBrowser(page);
 
