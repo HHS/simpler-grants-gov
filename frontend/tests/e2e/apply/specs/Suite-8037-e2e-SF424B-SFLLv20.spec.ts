@@ -1,7 +1,7 @@
 // ============================================================================
 // This test suite verifies the creation of a new application and the completion of the SFLL v2.0 form.
 // ============================================================================
-import { expect, test } from "@playwright/test";
+import { test } from "@playwright/test";
 import { Help_completeSFLLv20Form } from "tests/e2e/helpers/Help-complete-SFLLv20-form";
 import { Help_createNewApplication } from "tests/e2e/helpers/Help-create-new-application";
 import { ensurePageClosedAfterEach } from "tests/e2e/helpers/safeHelp";
