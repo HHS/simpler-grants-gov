@@ -117,7 +117,6 @@ export const StartApplicationNameInput = ({
       {validationError ? <ErrorMessage>{validationError}</ErrorMessage> : null}
 
       <TextInput
-        data-testid="textInput"
         validationStatus={validationError ? "error" : undefined}
         type="text"
         name="application-name"
