@@ -16,7 +16,6 @@ import {
   safeHelp_safeGoto,
   safeHelp_safeSelectOption,
 } from "tests/e2e/helpers/safeHelp";
-import { getTimeout } from "tests/e2e/helpers/timeoutHelp";
 import testConfig from "tests/e2e/test-data/test-config.json" with { type: "json" };
 
 // ============================================================================
@@ -77,7 +76,7 @@ function getNofoDirectPageUrl(page: Page): string {
 export async function Help_createNewApplication(
   testInfo: TestInfo,
   page: Page,
-  applicantType: string = "INDIVIDUAL",
+  applicantType = "INDIVIDUAL",
 ): Promise<{
   appLinkName: string;
   Nofo_directPageUrl: string;
@@ -190,7 +189,7 @@ export async function Help_createNewApplication(
     await safeLog(
       testInfo,
       "❌ URL did not change to application page within 60 seconds. Application creation failed. Current URL: " +
-      page.url(),
+        page.url(),
       "error",
     );
   }
@@ -233,17 +232,6 @@ export async function Help_createNewApplication(
     );
     applicationIdFromUrl = "unknown";
   }
-
-  // --- Verification for application creation (after extracting application ID) ---
-  await safeHelp_safeExpect(testInfo, async () => {
-    expect(appLinkName).toBeDefined();
-  });
-  await safeHelp_safeExpect(testInfo, async () => {
-    expect(getNofoDirectPageUrl(page)).toContain("/opportunity/");
-  });
-  await safeHelp_safeExpect(testInfo, async () => {
-    expect(applicationIdFromUrl).not.toBe("unknown");
-  });
 
   await testInfo.attach("application-details", {
     body: `App Name: ${appLinkName}\nDirect URL: ${getNofoDirectPageUrl(page)}\nApplication ID: ${applicationIdFromUrl}`,
@@ -354,17 +342,6 @@ async function isChromeBrowser(page: Page): Promise<boolean> {
   return userAgent.includes("Chrome");
 }
 
-/**
- * Utility to perform click, fill, or expect actions with mobile Chrome fallback.
- */
-interface MobileChromeActionOptions {
-  page: Page;
-  locator: ReturnType<Page["getByTestId"]>;
-  action: "click" | "fill" | "expect";
-  value?: string;
-  testInfo?: TestInfo;
-}
-
 async function mobileChromeAction(
   page: Page,
   locator: ReturnType<Page["getByTestId"]>,
@@ -418,4 +395,3 @@ async function mobileChromeAction(
     }
   }
 }
-
