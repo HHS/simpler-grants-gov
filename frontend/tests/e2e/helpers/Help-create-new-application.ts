@@ -284,7 +284,15 @@ export async function Help_createNewApplication(
       };
       try {
         const existingData = fs.readFileSync(configPath, "utf-8");
-        fileContent = JSON.parse(existingData);
+        fileContent = JSON.parse(existingData) as {
+          baseDomain: string;
+          NofoId: string;
+          createdApplications: Array<{
+            applicationId: string;
+            applicationName: string;
+            createdAt: string;
+          }>;
+        };
       } catch (readError) {
         fileContent = {
           baseDomain: BASE_DOMAIN,
