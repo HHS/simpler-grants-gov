@@ -110,28 +110,6 @@ def paginate_python(
     )
 
 
-# def get_organization_and_verify_access(
-#     db_session: db.Session, user: User, organization_id: uuid.UUID
-# ) -> Organization:
-#     """Get organization by ID and verify user has MANAGE_ORG_MEMBERS access."""
-#     # First get the organization
-#     stmt = select(Organization).where(Organization.organization_id == organization_id)
-#     organization = db_session.execute(stmt).scalar_one_or_none()
-#
-#     if organization is None:
-#         raise_flask_error(404, message=f"Could not find Organization with ID {organization_id}")
-#
-#     # Check if user has required privilege for this organization
-#     check_user_access(
-#         db_session,
-#         user,
-#         {Privilege.MANAGE_ORG_MEMBERS},
-#         organization,
-#     )
-#
-#     return organization
-
-
 def list_organization_invitations_with_filters(
     db_session: db.Session,
     organization_id: uuid.UUID,
