@@ -1,3 +1,4 @@
+import uuid
 from datetime import date
 
 import pytest
@@ -191,10 +192,10 @@ def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_sa
         (
             # Multi-Sort
             [
-                {"order_by": "updated_at", "sort_direction": "ascending"},
-                {"order_by": "opportunity_title", "sort_direction": "descending"},
+                {"order_by": "created_at", "sort_direction": "ascending"},
+                {"order_by": "opportunity_title", "sort_direction": "ascending"},
             ],
-            [AWARD, NATURE, EMBASSY],
+            [ NATURE, AWARD, EMBASSY],
         ),
         # Order by close_date, None should be last
         (
@@ -210,15 +211,14 @@ def test_get_saved_opportunities_sorting(
 ):
 
     UserSavedOpportunityFactory.create(
-        user=user, opportunity=NATURE, updated_at="2024-10-01", created_at="2024-01-01"
+        user=user, opportunity=NATURE, created_at="2024-05-01",
     )
     UserSavedOpportunityFactory.create(
-        user=user, opportunity=AWARD, updated_at="2024-05-01", created_at="2024-01-02"
+        user=user, opportunity=AWARD, created_at="2024-05-08",
     )
     UserSavedOpportunityFactory.create(
-        user=user, opportunity=EMBASSY, updated_at="2024-12-01", created_at="2024-01-03"
+        user=user, opportunity=EMBASSY, created_at="2024-12-01",
     )
-
     # Make the request
     pagination = {"pagination": {"page_offset": 1, "page_size": 25}}
     if sort_order:
@@ -488,10 +488,10 @@ def test_user_get_saved_opportunities_org_only(client, enable_factory_create, db
 
 
 def test_user_get_saved_opportunities_org_only_403(
-    client, enable_factory_create, db_session, org_a, org_b
+    client, enable_factory_create, db_session,
 ):
     """Test user can not get organization saved opportunities without proper privileges"""
-    user, org, token = create_user_in_org(db_session, organization=org_a)
+    user, org, token = create_user_in_org(db_session)
     OrganizationSavedOpportunityFactory.create(organization=org)
 
     response = client.post(
@@ -613,3 +613,23 @@ def test_user_and_org_save_timestamp_precedence(
     # opp_a should come first because org saved it most recently (2024-12-01)
     assert data[0]["opportunity_id"] == str(org_saved_opp.opportunity_id)
     assert data[1]["opportunity_id"] == str(uso.opportunity_id)
+
+
+def test_user_get_saved_opportunities_nonexistent_org(client, enable_factory_create, db_session):
+    """Test that fetching saved opportunities for a non-existent org returns 404"""
+
+    # Create a user and get token
+    user, org, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+
+    # Make the request specifying the non-existent org
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={
+            "organization_ids": [uuid.uuid4()],
+            "pagination": {"page_offset": 1, "page_size": 25},
+        },
+    )
+
+    # Verify response
+    assert response.status_code == 404

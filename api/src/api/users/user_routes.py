@@ -371,7 +371,7 @@ def user_delete_saved_opportunity_legacy(
 @user_blueprint.post("/<uuid:user_id>/saved-opportunities/list")
 @user_blueprint.input(UserSavedOpportunitiesRequestSchema, location="json")
 @user_blueprint.output(UserSavedOpportunitiesResponseSchema)
-@user_blueprint.doc(responses=[200, 403])
+@user_blueprint.doc(responses=[200, 403, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_get_saved_opportunities(
