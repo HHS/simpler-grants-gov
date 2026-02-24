@@ -1,11 +1,7 @@
 import { useTranslations } from "next-intl";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
-
-export type AwardRecommendationStatus =
-  | "draft"
-  | "in_progress"
-  | "pending_review";
+import { AwardRecommendationStatus } from "src/types/awardRecommendationTypes";
 
 type Props = {
   status: AwardRecommendationStatus;

@@ -2,22 +2,13 @@ import { useTranslations } from "next-intl";
 import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
-import AwardRecommendationStatusTag, {
-  type AwardRecommendationStatus,
-} from "./AwardRecommendationStatusTag";
+import AwardRecommendationStatusTag from "./AwardRecommendationStatusTag";
+import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
 
-type Props = {
-  recordNumber: string;
-  datePrepared: string; // formatted as MM/DD/YYYY
-  status: AwardRecommendationStatus;
-};
-
-export default function AwardRecommendationHero({
-  recordNumber,
-  datePrepared,
-  status,
-}: Props) {
+export default async function AwardRecommendationHero() {
   const t = useTranslations("AwardRecommendation");
+  const { recordNumber, datePrepared, status } =
+    await getAwardRecommendationDetails();
 
   return (
     <div className="text-dark bg-base-lightest padding-y-4 tablet:padding-y-6">
@@ -31,7 +22,7 @@ export default function AwardRecommendationHero({
                 path: "/",
               },
               {
-                title: `${t("heroTitle", { defaultValue: "Award Recommendation" })}: ${recordNumber}`,
+                title: `${t("heroTitle", { defaultValue: "Award Rec #" })}: ${recordNumber}`,
                 // TODO: add link to opportunity
                 path: `/`,
               },
@@ -39,7 +30,7 @@ export default function AwardRecommendationHero({
           />
           <Grid className="padding-y-2 tablet:padding-y-3">
             <h1>
-              {t("heroTitle", { defaultValue: "Award Recommendation" })}:{" "}
+              {t("heroTitle", { defaultValue: "Award Rec #" })}:{" "}
               {recordNumber}
             </h1>
           </Grid>
