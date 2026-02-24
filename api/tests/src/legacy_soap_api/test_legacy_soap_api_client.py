@@ -295,7 +295,11 @@ class TestSimplerBaseSOAPClient:
 
     def test_get_proxy_soap_response_dict_handles_data_that_is_generator(self, db_session):
         soap_request = SOAPRequest(
-            data=b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>",
+            data=SoapRequestStreamer(
+                stream=io.BytesIO(
+                    b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>"
+                )
+            ),
             full_path="x",
             headers={},
             method="POST",
@@ -340,7 +344,11 @@ class TestSimplerBaseSOAPClient:
         self, db_session, caplog
     ):
         soap_request = SOAPRequest(
-            data=b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>",
+            data=SoapRequestStreamer(
+                stream=io.BytesIO(
+                    b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>"
+                )
+            ),
             full_path="x",
             headers={},
             method="POST",
@@ -379,7 +387,11 @@ class TestSimplerBaseSOAPClient:
                 },
             )
             soap_request = SOAPRequest(
-                data=b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>",
+                data=SoapRequestStreamer(
+                    stream=io.BytesIO(
+                        b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>"
+                    )
+                ),
                 full_path="x",
                 headers={},
                 method="POST",
