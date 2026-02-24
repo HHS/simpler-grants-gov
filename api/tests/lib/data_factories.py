@@ -4,6 +4,8 @@ To help simplify setup when we need many factories repeatedly
 with only a few alterations.
 """
 
+import io
+
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import ApplicationForm
@@ -15,7 +17,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientCertificate,
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SoapRequestStreamer
 from tests.src.db.models.factories import (
     AgencyFactory,
     AgencyUserFactory,
@@ -161,7 +163,7 @@ def create_soap_request(
     return SOAPRequest(
         api_name=SimplerSoapAPI.GRANTORS,
         headers=headers,
-        data=soap_payload,
+        data=SoapRequestStreamer(stream=io.BytesIO(soap_payload)),
         full_path="/grantors/x",
         method="POST",
         auth=SOAPAuth(certificate=soap_certificate),
