@@ -152,9 +152,7 @@ def get_organization_users_and_verify_access(
     params = OrganizationUsersListParams.model_validate(request_data)
 
     # Check if user has VIEW_ORG_MEMBERSHIP privilege for this organization
-    organization = get_organization_and_verify_access(
-        db_session, user, organization_id, {Privilege.VIEW_ORG_MEMBERSHIP}
-    )
+    organization = get_organization_and_verify_access(db_session, user, organization_id)
 
     # Build base query with joins for sorting
     stmt = _build_organization_users_query(organization_id)

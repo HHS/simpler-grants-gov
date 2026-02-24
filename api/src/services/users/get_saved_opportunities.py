@@ -121,7 +121,6 @@ def _build_saved_union_subquery(
         .group_by(saved_sq.c.opportunity_id)
         .subquery()
     )
-
     return saved_union
 
 
@@ -132,7 +131,7 @@ def get_saved_opportunities(
     org_ids_param = opportunity_params.organization_ids
     user_org_ids = [ou.organization_id for ou in user.organization_users]
     user_id = user.user_id
-    logger.info(f"Getting saved opportunities for user {user_id}")
+    logger.info("Getting saved opportunities for user")
     include_user_saved_opps = True
     # Determine which orgs to consider
     if org_ids_param is None:
