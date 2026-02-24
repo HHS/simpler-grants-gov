@@ -192,6 +192,7 @@ class SubmissionIssue(StrEnum):
     APPLICATION_FORM_NOT_FOUND_NO_RESPONSE = "application_form_not_found_no_response"
     INVALID_FILE_NAME = "invalid_file_name"
     ATTACHMENT_NOT_FOUND = "attachment_not_found"
+    ATTACHMENT_LIMIT_EXCEEDED = "attachment_limit_exceeded"
 
 
 class SamGovExtractType(StrEnum):
@@ -248,6 +249,10 @@ class Privilege(StrEnum):
     INTERNAL_WORKFLOW_ACCESS = "internal_workflow_access"
     VIEW_ORG_SAVED_OPPORTUNITIES = "view_org_saved_opportunities"
     MODIFY_ORG_SAVED_OPPORTUNITIES = "modify_org_saved_opportunities"
+
+    # These privileges are associated with workflow approvals
+    PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
+    BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
 
 
 class RoleType(StrEnum):
@@ -326,6 +331,9 @@ class WorkflowType(StrEnum):
 
 class ApprovalType(StrEnum):
     INITIAL_PROTOTYPE_APPROVAL = "initial_prototype_approval"
+
+    PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
+    BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
 
 
 class ApprovalResponseType(StrEnum):
