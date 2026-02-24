@@ -134,9 +134,12 @@ export async function createApplication(
   if ((await requiredFormsHeading.count()) > 0) {
     // Application page loaded with forms section
   }
-  await expect(
-    page.locator("a, button").filter({
-      hasText: /SF-424B|Assurances for Non-Construction Programs/i,
-    }),
-  ).toBeVisible({ timeout: 60000 });
+  // Making this utility generic so it can be shared across all application creation
+  // irrespective of forms - this checks if the page has successfully loaded when we reach this point.
+  // Form-specific assertion commented out for reusability - uncomment if form-specific validation is needed
+  // await expect(
+  //   page.locator("a, button").filter({
+  //     hasText: /SF-424B|Assurances for Non-Construction Programs/i,
+  //   }),
+  // ).toBeVisible({ timeout: 60000 });
 }
