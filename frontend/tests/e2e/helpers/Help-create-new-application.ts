@@ -189,7 +189,7 @@ export async function Help_createNewApplication(
     await safeLog(
       testInfo,
       "❌ URL did not change to application page within 60 seconds. Application creation failed. Current URL: " +
-        page.url(),
+      page.url(),
       "error",
     );
   }
