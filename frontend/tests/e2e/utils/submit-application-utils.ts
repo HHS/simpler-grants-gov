@@ -62,7 +62,11 @@ export async function submitApplicationAndVerify(page: Page): Promise<string> {
   let appIdMessage = null;
   for (const el of appIdMessages) {
     const text = await el.textContent();
-    if (new RegExp(`Application ID #:\\s*${UUID_REGEX.source}`, "i").test(text || "")) {
+    if (
+      new RegExp(`Application ID #:\\s*${UUID_REGEX.source}`, "i").test(
+        text || "",
+      )
+    ) {
       appIdMessage = el;
       break;
     }

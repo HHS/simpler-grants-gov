@@ -17,7 +17,8 @@ import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
 import { selectLocalTestUser } from "tests/e2e/utils/select-local-test-user-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
 
-const { baseUrl, targetEnv, localTestOrgLabel, stagingTestOrgLabel } = playwrightEnv;
+const { baseUrl, targetEnv, localTestOrgLabel, stagingTestOrgLabel } =
+  playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
@@ -58,7 +59,8 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
   // Call reusable create application function from utils
   const orgLabel =
     targetEnv === "staging"
-      ? stagingTestOrgLabel || "Automatic staging Organization for UEI AUTOHQDCCHBY"
+      ? stagingTestOrgLabel ||
+        "Automatic staging Organization for UEI AUTOHQDCCHBY"
       : localTestOrgLabel || "Sally's Soup Emporium";
 
   await createApplication(page, OPPORTUNITY_URL, orgLabel);
