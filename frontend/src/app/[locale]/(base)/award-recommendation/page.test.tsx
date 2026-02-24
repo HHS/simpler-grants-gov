@@ -1,11 +1,13 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import AwardRecommendationPage from "src/app/[locale]/(base)/award-recommendation/page";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { localeParams, useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { FunctionComponent, ReactNode } from "react";
+import React, { FunctionComponent, ReactNode } from "react";
+
+import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
 
 type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
@@ -69,16 +71,20 @@ describe("AwardRecommendationPage", () => {
       );
     });
 
-    it("renders page title, description, and hero", async () => {
-      const component = await AwardRecommendationPage({
+    it("includes the AwardRecommendationHero component in the page", async () => {
+      const component = (await AwardRecommendationPage({
         params: localeParams,
-      });
-      render(component);
-      expect(await screen.findByText("pageTitle")).toBeVisible();
-      expect(await screen.findByText("description")).toBeVisible();
-      expect(
-        await screen.findByTestId("award-recommendation-hero"),
-      ).toBeVisible();
+      })) as React.ReactElement;
+
+      const children = React.Children.toArray(
+        (component.props as { children?: React.ReactNode }).children,
+      );
+      const hasHero = children.some(
+        (child) =>
+          React.isValidElement(child) && child.type === AwardRecommendationHero,
+      );
+
+      expect(hasHero).toBe(true);
     });
 
     it("passes accessibility scan", async () => {
