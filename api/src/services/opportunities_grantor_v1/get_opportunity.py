@@ -1,8 +1,7 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import ColumnExpressionArgument, select
 from sqlalchemy.orm import selectinload
-from sqlalchemy.sql.elements import ColumnExpressionArgument
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
