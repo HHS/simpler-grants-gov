@@ -1,7 +1,8 @@
+import { AwardRecommendationStatus } from "src/types/awardRecommendationTypes";
+
 import { useTranslations } from "next-intl";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { AwardRecommendationStatus } from "src/types/awardRecommendationTypes";
 
 type Props = {
   status: AwardRecommendationStatus;

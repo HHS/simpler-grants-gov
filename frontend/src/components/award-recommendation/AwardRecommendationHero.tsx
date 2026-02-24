@@ -1,9 +1,10 @@
+import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+
 import { useTranslations } from "next-intl";
 import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import AwardRecommendationStatusTag from "./AwardRecommendationStatusTag";
-import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
 
 export default async function AwardRecommendationHero() {
   const t = useTranslations("AwardRecommendation");
@@ -30,8 +31,7 @@ export default async function AwardRecommendationHero() {
           />
           <Grid className="padding-y-2 tablet:padding-y-3">
             <h1>
-              {t("heroTitle", { defaultValue: "Award Rec #" })}:{" "}
-              {recordNumber}
+              {t("heroTitle", { defaultValue: "Award Rec #" })}: {recordNumber}
             </h1>
           </Grid>
           <Grid row gap>
