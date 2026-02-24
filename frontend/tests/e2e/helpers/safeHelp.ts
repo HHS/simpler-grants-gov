@@ -701,7 +701,6 @@ export async function safeHelp_clickLink(
 ): Promise<void> {
   await safeHelp_safeStep(testInfo, 'click link', async () => {
     await locator.click();
-    // eslint-disable-next-line playwright/no-wait-for-timeout
     await locator.page()?.waitForTimeout(500); // Wait for scroll/focus animation
   });
 }
@@ -734,9 +733,9 @@ export async function safeHelp_clickButton(
  * Ensures that the page is closed after each test to prevent resource leaks.
  * Call this helper at the top of your test files: ensurePageClosedAfterEach(test);
  */
-export function ensurePageClosedAfterEach(test: TestType<{ page: Page }, {}>) {
+export function ensurePageClosedAfterEach(test: TestType<{ page: Page }, object>) {
   test.afterEach(async ({ page }) => {
-    if (!page.isClosed()) {
+    if (typeof page.isClosed === "function" && !page.isClosed()) {
       await page.close();
     }
   });
