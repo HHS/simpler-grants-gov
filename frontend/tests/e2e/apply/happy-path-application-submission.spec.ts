@@ -31,13 +31,11 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
   const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
   // Navigate to home page
-  // console.log("Navigating to home page to establish session...");
   if (targetEnv === "local") {
     // Use test-user spoofing
     await createSpoofedSessionCookie(context);
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-    // console.log(" Local test user session established");
-
+  
     await selectLocalTestUser(page, "many_app_user");
   } else if (targetEnv === "staging") {
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
@@ -46,7 +44,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
       throw new Error("signOutButton was not found after performStagingLogin");
     }
     await expect(signOutButton).toHaveCount(1, { timeout: 120_000 });
-    // console.log(" Staging user logged in");
+  
   } else {
     throw new Error(`Unsupported env ${targetEnv}`);
   }
@@ -67,7 +65,6 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
   const applicationUrl = page.url();
 
   // Click on SF-424B form to fill it
-  // console.log("Opening SF-424B form...");
   const sf424bLink = page.locator("a, button").filter({
     hasText: /SF-424B|Assurances for Non-Construction Programs/i,
   });
@@ -107,6 +104,4 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     // Application ID is now available in appId variable for further use if needed
   }
 
-  // console.log("\n Test completed successfully!");
-  // console.log(`Final URL: ${page.url()}`);
 });

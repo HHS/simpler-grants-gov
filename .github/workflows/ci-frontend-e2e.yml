@@ -73,7 +73,7 @@ jobs:
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build -- --no-lint
 
-      - name: Run only happy-path-apply-req-form-workflow.spec.ts
+      - name: Run only happy-path-application-submission.spec.ts
         env:
           CI: true
           PLAYWRIGHT_TARGET_ENV: local
@@ -81,7 +81,7 @@ jobs:
           STAGING_TEST_ORG_LABEL: Automatic staging Organization for UEI AUTOHQDCCHBY
         run: |
           npx playwright test --config ./tests/playwright.config.ts \
-          tests/e2e/apply/happy-path-apply-req-form-workflow.spec.ts \
+          tests/e2e/apply/happy-path-application-submission.spec.ts \
           --reporter=list,blob
 
       - name: Debug logging on failure
