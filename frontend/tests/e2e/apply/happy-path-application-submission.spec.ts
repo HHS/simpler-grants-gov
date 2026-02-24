@@ -9,7 +9,11 @@ import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { openMobileNav } from "tests/e2e/playwrightUtils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import { fillSf424bForm } from "tests/e2e/utils/forms/fill-sf424b-form-utils";
+import {
+  fillSf424bForm,
+  getSf424bFormLink,
+  verifySf424bFormVisible,
+} from "tests/e2e/utils/forms/fill-sf424b-form-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
 import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
@@ -63,10 +67,11 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
   await createApplication(page, OPPORTUNITY_URL, orgLabel);
   const applicationUrl = page.url();
 
+  // Verify SF-424B form is visible on the application page
+  await verifySf424bFormVisible(page);
+
   // Click on SF-424B form to fill it
-  const sf424bLink = page.locator("a, button").filter({
-    hasText: /SF-424B|Assurances for Non-Construction Programs/i,
-  });
+  const sf424bLink = getSf424bFormLink(page);
 
   if ((await sf424bLink.count()) > 0) {
     await sf424bLink.first().waitFor({ state: "visible", timeout: 60000 });

@@ -1,4 +1,23 @@
-import { Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
+
+/**
+ * Gets the SF-424B form link element.
+ * @param page Playwright Page object
+ * @returns Locator for the SF-424B form link
+ */
+export function getSf424bFormLink(page: Page): Locator {
+  return page.locator("a, button").filter({
+    hasText: /SF-424B|Assurances for Non-Construction Programs/i,
+  });
+}
+
+/**
+ * Verifies that the SF-424B form link is visible on the page.
+ * @param page Playwright Page object
+ */
+export async function verifySf424bFormVisible(page: Page) {
+  await expect(getSf424bFormLink(page)).toBeVisible({ timeout: 60000 });
+}
 
 /**
  * Fills the SF-424B form fields.
