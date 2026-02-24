@@ -10,6 +10,10 @@ import { ReadonlyURLSearchParams } from "next/navigation";
 
 import { AgencyFilterAccordion } from "src/components/search/SearchFilterAccordion/AgencyFilterAccordion";
 
+jest.mock("next-intl/server", () => ({
+  getTranslations: () => identity,
+}));
+
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
     searchParams: new ReadonlyURLSearchParams(),
@@ -20,10 +24,6 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
-}));
-
-jest.mock("next-intl/server", () => ({
-  getTranslations: () => identity,
 }));
 
 describe("AgencyFilterAccordion", () => {
