@@ -12,14 +12,19 @@ export default async function AwardRecommendationHero() {
     await getAwardRecommendationDetails();
 
   return (
-    <div className="text-dark bg-base-lightest padding-y-4 tablet:padding-y-6">
+    <div
+      data-testid="award-recommendation-hero"
+      className="text-dark bg-base-lightest padding-y-4 tablet:padding-y-6"
+    >
       <GridContainer>
         <Grid>
           <Breadcrumbs
             className="padding-y-0 bg-transparent"
             breadcrumbList={[
               {
-                title: t("awardRecommendation", { defaultValue: "Award Recommendation" }),
+                title: t("awardRecommendation", {
+                  defaultValue: "Award Recommendation",
+                }),
                 path: "/",
               },
               {

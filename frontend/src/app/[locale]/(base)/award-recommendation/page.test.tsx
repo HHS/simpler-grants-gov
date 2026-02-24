@@ -69,13 +69,16 @@ describe("AwardRecommendationPage", () => {
       );
     });
 
-    it("renders page title and description", async () => {
+    it("renders page title, description, and hero", async () => {
       const component = await AwardRecommendationPage({
         params: localeParams,
       });
       render(component);
       expect(await screen.findByText("pageTitle")).toBeVisible();
       expect(await screen.findByText("description")).toBeVisible();
+      expect(
+        await screen.findByTestId("award-recommendation-hero"),
+      ).toBeVisible();
     });
 
     it("passes accessibility scan", async () => {
