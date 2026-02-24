@@ -93,11 +93,11 @@ export async function Help_createNewApplication(
       "The page is already closed at the start of Help_createNewApplication.",
     );
   }
-    await safeLog(
-      testInfo,
-      `❌ Application creation failed: URL did not change. Still at: ${currentUrl}`,
-      "error",
-    );
+  await safeLog(
+    testInfo,
+    `❌ Application creation failed: URL did not change. Still at: ${currentUrl}`,
+    "error",
+  );
   const opportunityId = testConfig.environment.NofoId;
   const opportunityUrl = `/opportunity/${opportunityId}`;
   // Navigate to the opportunity page and verify the "Start new application" button is visible
