@@ -3,8 +3,9 @@ from src.api.opportunities_v1.opportunity_schemas import (
     OpportunityV1Schema,
 )
 from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.constants.lookup_constants import OpportunityCategory
+from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class OpportunityCreateRequestSchema(Schema):
@@ -137,3 +138,36 @@ class OpportunityGetResponseSchema(AbstractResponseSchema):
     """
 
     data = fields.Nested(OpportunityGrantorSchema())
+
+
+class OpportunityListRequestSchema(Schema):
+    """Schema for POST /v1/grantors/opportunities/:agency_id/opportunities request"""
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "OpportunityListPaginationSchema",
+            [
+                "opportunity_id",
+                "opportunity_number",
+                "opportunity_title",
+                "created_at",
+                "updated_at",
+            ],
+            default_sort_order=[{"order_by": "opportunity_id", "sort_direction": "ascending"}],
+            default_page_size=25,
+            default_page_offset=1,
+        ),
+        required=True,
+        metadata={
+            "description": "Pagination parameters for opportunity list (default sort: opportunity_id ascending)"
+        },
+    )
+
+
+class OpportunityListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    """Schema for POST /v1/grantors/opportunities/:agency_id/opportunities response"""
+
+    data = fields.List(
+        fields.Nested(OpportunityGrantorSchema),
+        metadata={"description": "List of opportunities"},
+    )

@@ -11,6 +11,9 @@ from src.api.opportunities_grantor_v1.opportunity_grantor_blueprint import (
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
+from src.services.opportunities_grantor_v1.get_opportunity_list import (
+    get_opportunity_list_for_grantors,
+)
 from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
 
 logger = logging.getLogger(__name__)
@@ -40,26 +43,34 @@ def opportunity_create(db_session: db.Session, json_data: dict) -> response.ApiR
     return response.ApiResponse(message="Success", data=opportunity)
 
 
-# TODO : Implement Get All Agencies
-# @opportunity_grantor_blueprint.post("/opportunities/<uuid:agency_id>/agency")
-# @jwt_or_api_user_key_multi_auth.login_required
-# @opportunity_grantor_blueprint.doc(
-#     responses=[200, 403, 404, 500], security=jwt_or_api_user_key_security_schemes
-# )
-# @flask_db.with_db_session()
-# def opportunity_get_list_by_agency(
-#     db_session: db.Session, opportunity_id: UUID
-# ) -> response.ApiResponse:
-#     """Get all opportunities by agency"""
-#     logger.info("POST /v1/grantors/opportunities/{opportunity_id}/grantor")
+@opportunity_grantor_blueprint.post("/agencies/<uuid:agency_id>/opportunities")
+@opportunity_grantor_blueprint.input(
+    opportunity_grantor_schemas.OpportunityListRequestSchema, location="json"
+)
+@opportunity_grantor_blueprint.output(opportunity_grantor_schemas.OpportunityListResponseSchema())
+@jwt_or_api_user_key_multi_auth.login_required
+@opportunity_grantor_blueprint.doc(
+    responses=[200, 403, 404, 500], security=jwt_or_api_user_key_security_schemes
+)
+@flask_db.with_db_session()
+def opportunity_get_list_by_agency(
+    db_session: db.Session, agency_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Get paginated list of opportunities by agency"""
+    add_extra_data_to_current_request_logs({"agency_id": agency_id})
+    logger.info("POST /v1/grantors/agencies/{agency_id}/opportunities")
 
-#     with db_session.begin():
-#         user = jwt_or_api_user_key_multi_auth.get_user()
-#         db_session.add(user)
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
 
-#         opportunity = None
+        opportunities, pagination_info = get_opportunity_list_for_grantors(
+            db_session, user, agency_id, json_data
+        )
 
-#     return response.ApiResponse(message="Success", data=opportunity)
+    return response.ApiResponse(
+        message="Success", data=opportunities, pagination_info=pagination_info
+    )
 
 
 @opportunity_grantor_blueprint.get("/opportunities/<uuid:opportunity_id>/grantor")

@@ -1,7 +1,11 @@
 import pytest
 
 from src.constants.lookup_constants import Privilege
-from tests.lib.opportunity_test_utils import create_user_in_agency_with_jwt_and_api_key
+from tests.lib.opportunity_test_utils import (
+    build_opportunity_list_request_body,
+    create_test_opportunities,
+    create_user_in_agency_with_jwt_and_api_key,
+)
 from tests.src.db.models.factories import AgencyFactory, OpportunityFactory
 
 
@@ -26,10 +30,17 @@ def opportunity(db_session, enable_factory_create, grantor_auth_data):
     return opportunity
 
 
-# TODO: Add test_opportunity_get_successful_with_jwt
+@pytest.fixture
+def test_opportunities(db_session, enable_factory_create, grantor_auth_data):
+    """Create test opportunities for the agency in grantor_auth_data."""
+    user, agency, token, _ = grantor_auth_data
+    return create_test_opportunities(db_session, agency)
 
 
-def test_opportunity_get_with_invalid_jwt_token(client, opportunity):
+# TODO: Add test_get_opportunity_success
+
+
+def test_get_opportunity_with_invalid_jwt_token(client, opportunity):
     """Test opportunity retrieval with invalid JWT token"""
     response = client.get(
         f"/v1/grantors/opportunities/{opportunity.opportunity_id}/grantor",
@@ -37,3 +48,75 @@ def test_opportunity_get_with_invalid_jwt_token(client, opportunity):
     )
 
     assert response.status_code == 401
+
+
+def test_get_opportunity_list_success(client, grantor_auth_data, test_opportunities):
+    """Test successful opportunity list retrieval with JWT"""
+    user, agency, token, _ = grantor_auth_data
+
+    request_json = build_opportunity_list_request_body()
+    response = client.post(
+        f"/v1/grantors/agencies/{agency.agency_id}/opportunities",
+        headers={"X-SGG-Token": token},
+        json=request_json,
+    )
+
+    # Verify response
+    assert response.status_code == 200
+    response_json = response.get_json()
+    assert response_json["message"] == "Success"
+
+    # Verify pagination info
+    assert "pagination_info" in response_json
+    pagination = response_json["pagination_info"]
+    assert pagination["total_records"] >= len(test_opportunities)
+    assert pagination["page_offset"] == 1
+    assert pagination["page_size"] == 25
+
+    # Verify opportunity data fields
+    returned_opportunities = response_json["data"]
+    for opp in returned_opportunities:
+        assert "opportunity_id" in opp
+        assert "opportunity_number" in opp
+        assert "opportunity_title" in opp
+        assert "agency_code" in opp
+        assert "category" in opp
+
+    # Verify all created opportunities are in the response
+    returned_ids = {opp["opportunity_id"] for opp in returned_opportunities}
+    created_ids = {str(opp.opportunity_id) for opp in test_opportunities}
+    assert returned_ids.issuperset(created_ids)
+
+
+def test_get_opportunity_list_with_invalid_jwt_token(client, db_session, enable_factory_create):
+    """Test opportunity list retrieval with invalid JWT token"""
+    agency = AgencyFactory.create()
+
+    request_json = build_opportunity_list_request_body()
+    response = client.post(
+        f"/v1/grantors/agencies/{agency.agency_id}/opportunities",
+        headers={"X-SGG-Token": "invalid_token_value"},
+        json=request_json,
+    )
+
+    assert response.status_code == 401
+
+
+def test_get_opportunity_list_no_permission(client, db_session, enable_factory_create):
+    """Test that user without VIEW_OPPORTUNITY privilege gets 403"""
+    # Create user without VIEW_OPPORTUNITY privilege
+    user, agency, token, _ = create_user_in_agency_with_jwt_and_api_key(
+        db_session=db_session,
+        privileges=[],  # No privileges
+    )
+
+    request_json = build_opportunity_list_request_body()
+    response = client.post(
+        f"/v1/grantors/agencies/{agency.agency_id}/opportunities",
+        headers={"X-SGG-Token": token},
+        json=request_json,
+    )
+
+    assert response.status_code == 403
+    response_json = response.get_json()
+    assert "forbidden" in str(response_json).lower()

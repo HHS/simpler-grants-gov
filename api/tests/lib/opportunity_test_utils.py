@@ -12,6 +12,7 @@ from tests.src.db.models.factories import (
     AgencyUserFactory,
     AgencyUserRoleFactory,
     LinkExternalUserFactory,
+    OpportunityFactory,
     RoleFactory,
     UserApiKeyFactory,
     UserFactory,
@@ -138,3 +139,61 @@ def create_opportunity_request(
     }
 
     return request
+
+
+def build_opportunity_list_request_body(
+    page_offset=1,
+    page_size=25,
+    sort_order=None,
+    filters=None,
+):
+    """Create a valid list opportunities request.
+
+    Args:
+        page_offset: Page offset (default: 1)
+        page_size: Page size (default: 25)
+        sort_order: Optional list of sort orders
+        filters: Optional filters
+
+    Returns:
+        Dictionary with the request JSON
+    """
+    request = {
+        "pagination": {
+            "page_offset": page_offset,
+            "page_size": page_size,
+        }
+    }
+
+    if sort_order:
+        request["pagination"]["sort_order"] = sort_order
+
+    if filters:
+        request["filters"] = filters
+
+    return request
+
+
+def create_test_opportunities(db_session, agency, count=3, prefix="TEST-2026"):
+    """Create test opportunities for an agency.
+
+    Args:
+        db_session: Database session
+        agency: Agency object to create opportunities for
+        count: Number of opportunities to create (default: 3)
+        prefix: Prefix for opportunity numbers (default: "TEST-2026")
+
+    Returns:
+        List of created Opportunity objects
+    """
+    opportunities = []
+    for i in range(count):
+        opportunity = OpportunityFactory.create(
+            agency_id=agency.agency_id,
+            opportunity_number=f"{prefix}-{i:03d}",
+            opportunity_title=f"Test Opportunity {i}",
+        )
+        opportunities.append(opportunity)
+
+    db_session.commit()
+    return opportunities
