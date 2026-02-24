@@ -5,7 +5,7 @@
 // with soft error handling that logs failures without stopping test execution
 // ============================================================================
 
-import { expect, Locator, Page, TestInfo } from '@playwright/test';
+import { expect, Locator, Page, TestInfo, TestType } from '@playwright/test';
 
 import { getTimeout } from './timeoutHelp';
 
@@ -734,11 +734,10 @@ export async function safeHelp_clickButton(
  * Ensures that the page is closed after each test to prevent resource leaks.
  * Call this helper at the top of your test files: ensurePageClosedAfterEach(test);
  */
-export function ensurePageClosedAfterEach(test: any) {
-  test.afterEach(async ({ page }: { page: any }) => {
+export function ensurePageClosedAfterEach(test: TestType<{ page: Page }, {}>) {
+  test.afterEach(async ({ page }) => {
     if (!page.isClosed()) {
       await page.close();
     }
   });
 }
-
