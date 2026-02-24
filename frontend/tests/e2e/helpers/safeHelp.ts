@@ -5,9 +5,9 @@
 // with soft error handling that logs failures without stopping test execution
 // ============================================================================
 
-import { expect, Locator, Page, TestInfo, TestType } from '@playwright/test';
+import { expect, Locator, Page, TestInfo, TestType } from "@playwright/test";
 
-import { getTimeout } from './timeoutHelp';
+import { getTimeout } from "./timeoutHelp";
 
 // ============================================================================
 // CONFIGURATION & CONSTANTS
@@ -15,39 +15,39 @@ import { getTimeout } from './timeoutHelp';
 
 // Wait State Configuration
 const WAIT_STATES = {
-  DOMCONTENTLOADED: 'domcontentloaded',
-  LOAD: 'load',
+  DOMCONTENTLOADED: "domcontentloaded",
+  LOAD: "load",
 } as const;
 
-type WaitState = 'domcontentloaded' | 'load';
+type WaitState = "domcontentloaded" | "load";
 
 // Fiscal year configuration
 const FISCAL_YEAR_START_MONTH = 9; // October (0-indexed as 9)
 
 // Error messages
-const ERROR_ELEMENT_NOT_FOUND = 'element not found within';
+const ERROR_ELEMENT_NOT_FOUND = "element not found within";
 
 // Annotation types
-const ANNOTATION_SOFT_FAIL = 'soft-fail';
-const ANNOTATION_SKIPPED_FIELD = 'skipped-field';
+const ANNOTATION_SOFT_FAIL = "soft-fail";
+const ANNOTATION_SKIPPED_FIELD = "skipped-field";
 
 // Attachment types
-const ATTACHMENT_SOFT_FAIL = 'soft-fail-log';
-const ATTACHMENT_SKIPPED_FIELD = 'skipped-field-log';
-const ATTACHMENT_TEST_SUMMARY = 'test-summary';
+const ATTACHMENT_SOFT_FAIL = "soft-fail-log";
+const ATTACHMENT_SKIPPED_FIELD = "skipped-field-log";
+const ATTACHMENT_TEST_SUMMARY = "test-summary";
 
-const SYMBOL_TIMER = '⏱️';
+const SYMBOL_TIMER = "⏱️";
 
 // Test report message templates
-const MSG_TEST_COMPLETED_WITH_FAILURES = 'Test completed with';
-const MSG_FAILURE_PLURAL = 'failure(s)';
-const MSG_FAILURES_LOGGED = 'All failures have been logged to the report.';
+const MSG_TEST_COMPLETED_WITH_FAILURES = "Test completed with";
+const MSG_FAILURE_PLURAL = "failure(s)";
+const MSG_FAILURES_LOGGED = "All failures have been logged to the report.";
 
 // Step messages
-const MSG_FILLED_SUCCESSFULLY = 'Filled';
-const MSG_SELECTED_SUCCESSFULLY = 'Selected';
-const MSG_TIMEOUT_NOT_FOUND = 'TIMEOUT/NOT FOUND:';
-const MSG_SKIPPING = 'skipping';
+const MSG_FILLED_SUCCESSFULLY = "Filled";
+const MSG_SELECTED_SUCCESSFULLY = "Selected";
+const MSG_TIMEOUT_NOT_FOUND = "TIMEOUT/NOT FOUND:";
+const MSG_SKIPPING = "skipping";
 
 // ============================================================================
 // PRIVATE/INTERNAL HELPER FUNCTIONS
@@ -58,10 +58,10 @@ const MSG_SKIPPING = 'skipping';
  * @returns Line number where function was called, or undefined if not found
  */
 function extractLineNumber(): number | undefined {
-  const stack = new Error().stack || '';
-  const lines = stack.split('\n');
+  const stack = new Error().stack || "";
+  const lines = stack.split("\n");
   for (const line of lines) {
-    if (line.includes('safeHelp.ts')) {
+    if (line.includes("safeHelp.ts")) {
       continue;
     }
     const match = line.match(/:(\d+):\d+\)?$/);
@@ -117,7 +117,7 @@ function getSoftFailCount(testInfo: TestInfo): number {
 export async function safeHelp_safeExpect(
   testInfo: TestInfo,
   fn: () => Promise<void>,
-  label?: string
+  label?: string,
 ): Promise<void> {
   try {
     await fn();
@@ -130,7 +130,7 @@ export async function safeHelp_safeExpect(
     });
     await testInfo.attach(ATTACHMENT_SOFT_FAIL, {
       body: details,
-      contentType: 'text/plain',
+      contentType: "text/plain",
     });
   }
 }
@@ -146,13 +146,13 @@ export async function safeHelp_safeExpect(
 export async function safeHelp_ValidateTextAtLocator(
   testInfo: TestInfo,
   locator: Locator,
-  label?: string
+  label?: string,
 ): Promise<void> {
-  const description = label ?? 'Verify locator count is 0';
+  const description = label ?? "Verify locator count is 0";
   await safeHelp_safeExpect(
     testInfo,
     async () => expect(locator).toHaveCount(0),
-    description
+    description,
   );
 }
 
@@ -163,7 +163,7 @@ export async function safeHelp_ValidateTextAtLocator(
 async function executeStep(
   testInfo: TestInfo,
   label: string,
-  action: () => Promise<void>
+  action: () => Promise<void>,
 ): Promise<void> {
   const startTime = new Date();
   try {
@@ -179,7 +179,7 @@ async function executeStep(
     const durationMs = endTime.getTime() - startTime.getTime();
     await testInfo.attach(`${label} - timing`, {
       body: `Step "${label}" completed in ${durationMs}ms`,
-      contentType: 'text/plain',
+      contentType: "text/plain",
     });
   }
 }
@@ -200,7 +200,7 @@ async function executeStep(
 export async function safeHelp_softStep(
   testInfo: TestInfo,
   label: string,
-  action: () => Promise<void>
+  action: () => Promise<void>,
 ): Promise<void> {
   await executeStep(testInfo, label, action);
 }
@@ -224,7 +224,7 @@ export async function safeHelp_softStep(
 export async function safeHelp_safeStep(
   testInfo: TestInfo,
   label: string,
-  action: () => Promise<void>
+  action: () => Promise<void>,
 ): Promise<void> {
   await executeStep(testInfo, label, action);
 }
@@ -243,13 +243,13 @@ export async function safeHelp_safeStep(
 export async function safeHelp_attachTestSummary(
   testInfo: TestInfo,
   failureCount: number,
-  _startTime?: Date
+  _startTime?: Date,
 ): Promise<void> {
   const softFailCount = Math.max(failureCount, getSoftFailCount(testInfo));
   if (softFailCount > 0) {
     await testInfo.attach(ATTACHMENT_TEST_SUMMARY, {
       body: `${MSG_TEST_COMPLETED_WITH_FAILURES} ${softFailCount} ${MSG_FAILURE_PLURAL}.\n${MSG_FAILURES_LOGGED}`,
-      contentType: 'text/plain',
+      contentType: "text/plain",
     });
   }
 }
@@ -266,14 +266,14 @@ async function handleFieldOperation(
   locator: Locator,
   operation: (loc: Locator) => Promise<void>,
   fieldType: string,
-  timeoutMs?: number
+  timeoutMs?: number,
 ): Promise<boolean> {
-  const timeout = timeoutMs ?? getTimeout('DEFAULT');
+  const timeout = timeoutMs ?? getTimeout("DEFAULT");
   const lineNumber = extractLineNumber();
-  const lineLabel = lineNumber ? `Line ${lineNumber}` : 'Line unknown';
+  const lineLabel = lineNumber ? `Line ${lineNumber}` : "Line unknown";
 
   try {
-    await locator.waitFor({ state: 'attached', timeout });
+    await locator.waitFor({ state: "attached", timeout });
     await operation(locator);
     return true;
   } catch (error) {
@@ -285,7 +285,7 @@ async function handleFieldOperation(
     });
     await testInfo.attach(ATTACHMENT_SKIPPED_FIELD, {
       body: errorMsg,
-      contentType: 'text/plain',
+      contentType: "text/plain",
     });
     return false;
   }
@@ -318,14 +318,14 @@ export async function safeHelp_safeFill(
   testInfo: TestInfo,
   locator: Locator,
   value: string,
-  timeoutMs?: number
+  timeoutMs?: number,
 ): Promise<boolean> {
   return handleFieldOperation(
     testInfo,
     locator,
     (loc) => loc.fill(value),
     MSG_FILLED_SUCCESSFULLY,
-    timeoutMs
+    timeoutMs,
   );
 }
 
@@ -354,14 +354,14 @@ export async function safeHelp_fillFieldsByTestId(
   testInfo: TestInfo,
   page: Page,
   fields: Array<{ testId: string; value: string }>,
-  timeoutMs?: number
+  timeoutMs?: number,
 ): Promise<void> {
   for (const field of fields) {
     await safeHelp_safeFill(
       testInfo,
       page.getByTestId(field.testId),
       field.value,
-      timeoutMs
+      timeoutMs,
     );
   }
 }
@@ -388,7 +388,7 @@ export async function safeHelp_safeSelectOption(
   testInfo: TestInfo,
   locator: Locator,
   value: string,
-  timeoutMs?: number
+  timeoutMs?: number,
 ): Promise<boolean> {
   return handleFieldOperation(
     testInfo,
@@ -397,7 +397,7 @@ export async function safeHelp_safeSelectOption(
       await loc.selectOption(value);
     },
     MSG_SELECTED_SUCCESSFULLY,
-    timeoutMs
+    timeoutMs,
   );
 }
 
@@ -424,9 +424,14 @@ export async function safeHelp_selectDropdownLocator(
   page: Page,
   selector: string,
   value: string,
-  timeoutMs?: number
+  timeoutMs?: number,
 ): Promise<boolean> {
-  return safeHelp_safeSelectOption(testInfo, page.locator(selector), value, timeoutMs);
+  return safeHelp_safeSelectOption(
+    testInfo,
+    page.locator(selector),
+    value,
+    timeoutMs,
+  );
 }
 
 // ============================================================================
@@ -442,9 +447,9 @@ export async function safeHelp_selectDropdownLocator(
  */
 export function safeHelp_getTimestamp(): string {
   const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, '0');
+  const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
-    d.getHours()
+    d.getHours(),
   )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
@@ -473,11 +478,12 @@ export function safeHelp_calculateYearData(): {
   const quarter = String(Math.floor(quarterMonth / 3) + 1);
 
   // Calculate last day of previous quarter
-  const prevQuarterEndMonth = FISCAL_YEAR_START_MONTH + (parseInt(quarter, 10) - 2) * 3 + 2;
+  const prevQuarterEndMonth =
+    FISCAL_YEAR_START_MONTH + (parseInt(quarter, 10) - 2) * 3 + 2;
   const prevQuarterEndDate = new Date(currentYear, prevQuarterEndMonth + 1, 0);
   const lastDayOfPrevQuarter = `${prevQuarterEndDate.getFullYear()}-${String(
-    prevQuarterEndDate.getMonth() + 1
-  ).padStart(2, '0')}-${String(prevQuarterEndDate.getDate()).padStart(2, '0')}`;
+    prevQuarterEndDate.getMonth() + 1,
+  ).padStart(2, "0")}-${String(prevQuarterEndDate.getDate()).padStart(2, "0")}`;
 
   return { lastDayOfPrevQuarter, prevYear, quarter };
 }
@@ -507,16 +513,16 @@ export function safeHelp_getFiscalYearQuarter(): {
  */
 export async function safeHelp_updateApplicationName(
   testInfo: TestInfo,
-  page: Page
+  page: Page,
 ): Promise<{
   appLinkName: string;
 }> {
   const appLinkName = `Test at ${safeHelp_getTimestamp()}`;
 
-  await safeHelp_safeStep(testInfo, 'create application link', async () => {
-    await page.getByTestId('sign-in-button').click();
-    await page.getByTestId('textInput').fill(appLinkName);
-    await page.getByRole('button', { name: 'Save' }).click();
+  await safeHelp_safeStep(testInfo, "create application link", async () => {
+    await page.getByTestId("sign-in-button").click();
+    await page.getByTestId("textInput").fill(appLinkName);
+    await page.getByRole("button", { name: "Save" }).click();
   });
 
   return { appLinkName };
@@ -535,10 +541,10 @@ export async function safeHelp_updateApplicationName(
 export async function safeHelp_navigateToForm(
   testInfo: TestInfo,
   page: Page,
-  linkName: string
+  linkName: string,
 ): Promise<void> {
   await safeHelp_safeStep(testInfo, `navigate to ${linkName}`, async () => {
-    await page.getByRole('link', { name: linkName }).click();
+    await page.getByRole("link", { name: linkName }).click();
   });
 }
 
@@ -556,9 +562,10 @@ export async function safeHelp_navigateToForm(
  */
 export function safeHelp_GotoForm(
   testInfo: TestInfo,
-  page: Page
+  page: Page,
 ): (formName: string) => Promise<void> {
-  return (formName: string) => safeHelp_navigateToForm(testInfo, page, formName);
+  return (formName: string) =>
+    safeHelp_navigateToForm(testInfo, page, formName);
 }
 
 // ============================================================================
@@ -593,9 +600,9 @@ export async function safeHelp_safeGoto(
   page: Page,
   url: string,
   waitState: WaitState = WAIT_STATES.LOAD,
-  timeoutMs?: number
+  timeoutMs?: number,
 ): Promise<void> {
-  const timeout = timeoutMs ?? getTimeout('DEFAULT');
+  const timeout = timeoutMs ?? getTimeout("DEFAULT");
 
   await safeHelp_safeStep(testInfo, `navigate to ${url}`, async () => {
     await page.goto(url, { waitUntil: waitState, timeout });
@@ -603,13 +610,13 @@ export async function safeHelp_safeGoto(
     // Capture page header after navigation
     try {
       const header = await page
-        .locator('h1')
+        .locator("h1")
         .first()
-        .textContent({ timeout: getTimeout('FAST') });
+        .textContent({ timeout: getTimeout("FAST") });
       if (header) {
-        await testInfo.attach('page-header', {
+        await testInfo.attach("page-header", {
           body: `Found page header: ${header.trim()}`,
-          contentType: 'text/plain',
+          contentType: "text/plain",
         });
       }
     } catch (error) {
@@ -644,9 +651,9 @@ export async function safeHelp_safeWaitForLoadState(
   testInfo: TestInfo,
   page: Page,
   waitState: WaitState = WAIT_STATES.LOAD,
-  timeoutMs?: number
+  timeoutMs?: number,
 ): Promise<void> {
-  const timeout = timeoutMs ?? getTimeout('DEFAULT');
+  const timeout = timeoutMs ?? getTimeout("DEFAULT");
   const label = `wait for page load state: ${waitState}`;
 
   await safeHelp_safeStep(testInfo, label, async () => {
@@ -673,13 +680,13 @@ export async function safeHelp_safeWaitForLoadState(
 export async function safeHelp_saveForm(
   testInfo: TestInfo,
   page: Page,
-  timeoutMs?: number
+  timeoutMs?: number,
 ): Promise<void> {
-  const timeout = timeoutMs ?? getTimeout('DEFAULT');
+  const timeout = timeoutMs ?? getTimeout("DEFAULT");
 
-  await safeHelp_safeStep(testInfo, 'save form', async () => {
-    const saveButton = page.getByTestId('apply-form-save');
-    await saveButton.waitFor({ state: 'visible', timeout });
+  await safeHelp_safeStep(testInfo, "save form", async () => {
+    const saveButton = page.getByTestId("apply-form-save");
+    await saveButton.waitFor({ state: "visible", timeout });
     await saveButton.click();
   });
 }
@@ -697,9 +704,9 @@ export async function safeHelp_saveForm(
  */
 export async function safeHelp_clickLink(
   testInfo: TestInfo,
-  locator: Locator
+  locator: Locator,
 ): Promise<void> {
-  await safeHelp_safeStep(testInfo, 'click link', async () => {
+  await safeHelp_safeStep(testInfo, "click link", async () => {
     await locator.click();
     await locator.page()?.waitForTimeout(500); // Wait for scroll/focus animation
   });
@@ -722,7 +729,7 @@ export async function safeHelp_clickButton(
   testInfo: TestInfo,
   page: Page,
   stepName: string,
-  testId: string
+  testId: string,
 ): Promise<void> {
   await safeHelp_safeStep(testInfo, stepName, async () => {
     await page.getByTestId(testId).click();
@@ -733,7 +740,9 @@ export async function safeHelp_clickButton(
  * Ensures that the page is closed after each test to prevent resource leaks.
  * Call this helper at the top of your test files: ensurePageClosedAfterEach(test);
  */
-export function ensurePageClosedAfterEach(test: TestType<{ page: Page }, object>) {
+export function ensurePageClosedAfterEach(
+  test: TestType<{ page: Page }, object>,
+) {
   test.afterEach(async ({ page }) => {
     if (typeof page.isClosed === "function" && !page.isClosed()) {
       await page.close();
