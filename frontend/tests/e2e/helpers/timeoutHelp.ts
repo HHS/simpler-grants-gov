@@ -37,7 +37,7 @@ type TimeoutPreset = keyof typeof TIMEOUTS;
  * // Use in navigation
  * await safeGoto(testInfo, page, url, 'networkidle', getTimeout('SLOW'));
  */
-function getTimeout(preset: TimeoutPreset = 'DEFAULT'): number {
+function getTimeout(preset: TimeoutPreset = "DEFAULT"): number {
   return TIMEOUTS[preset];
 }
 
