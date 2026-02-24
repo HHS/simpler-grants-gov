@@ -1,3 +1,4 @@
+import io
 import logging
 from datetime import datetime
 
@@ -14,6 +15,7 @@ from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPInvalidEnvelope,
     SOAPRequest,
+    SoapRequestStreamer,
     SOAPResponse,
 )
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_dict
@@ -97,7 +99,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -186,7 +188,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -282,7 +284,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -393,7 +395,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -471,7 +473,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -551,7 +553,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -630,7 +632,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -712,7 +714,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -794,7 +796,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -876,7 +878,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -966,7 +968,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -1077,7 +1079,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -1144,7 +1146,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -1227,7 +1229,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -1294,7 +1296,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -1362,7 +1364,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -1444,7 +1446,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -1519,7 +1521,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -1581,7 +1583,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",
@@ -1641,7 +1643,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         )
         soap_request = SOAPRequest(
-            data=request_xml,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml)),
             full_path="x",
             headers={},
             method="POST",

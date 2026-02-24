@@ -1,6 +1,8 @@
-from typing import Any
+import io
+from collections.abc import Generator
+from typing import IO, Annotated, BinaryIO
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, SkipValidation
 
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
 from src.legacy_soap_api.legacy_soap_api_config import (
@@ -9,6 +11,9 @@ from src.legacy_soap_api.legacy_soap_api_config import (
     get_soap_operation_config,
 )
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
+
+TERMINATOR_TAGS = [b"</soapenv:Envelope>", b"</env:Envelope>"]
+CHUNK_SIZE = 2000
 
 
 class SOAPClientCertificateNotConfigured(Exception):
@@ -31,8 +36,60 @@ class SOAPInvalidRequestOperationName(Exception):
     pass
 
 
+class SoapRequestStreamer(BaseModel):
+    # Using Annotated here to keep the type hint but avoid issue where
+    # BinaryIO doesn't match typing BinaryIO https://github.com/pydantic/pydantic/issues/5443
+    stream: Annotated[BinaryIO | IO[bytes], SkipValidation()]
+    chunk_count: int = 5
+    _consumed_head: bool = False
+    head_bytes: bytes = b""
+    total_length: int = 0
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    def get_head_bytes(self) -> bytes:
+        buffer = io.BytesIO()
+        chunk_count = 0
+        tail = b""
+        overlap_size = max(len(tag) for tag in TERMINATOR_TAGS)
+        while chunk_count < self.chunk_count:
+            chunk = self.stream.read(CHUNK_SIZE)
+            if not chunk:
+                break
+
+            window = tail + chunk
+            for terminator in TERMINATOR_TAGS:
+                if terminator in window:
+                    buffer.write(chunk)
+                    return buffer.getvalue()
+            tail = chunk[-overlap_size:] if len(chunk) >= overlap_size else chunk
+
+            chunk_count += 1
+            buffer.write(chunk)
+        return buffer.getvalue()
+
+    def head(self) -> bytes:
+        if not self.head_bytes:
+            self.head_bytes = self.get_head_bytes()
+        return self.head_bytes
+
+    def __iter__(self) -> Generator:
+        if not self._consumed_head:
+            yield self.head_bytes
+            self._consumed_head = True
+
+        while True:
+            chunk = self.stream.read(CHUNK_SIZE)
+            if not chunk:
+                break
+            yield chunk
+
+    def __len__(self) -> int:
+        return self.total_length
+
+
 class SOAPRequest(BaseModel):
-    data: Any
+    data: SoapRequestStreamer
     full_path: str
     headers: dict
     method: str

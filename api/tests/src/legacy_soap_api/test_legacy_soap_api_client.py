@@ -28,8 +28,11 @@ from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerGrantorsS2SClient,
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
-from src.legacy_soap_api.legacy_soap_api_utils import SoapRequestStreamer
+from src.legacy_soap_api.legacy_soap_api_schemas import (
+    SOAPRequest,
+    SoapRequestStreamer,
+    SOAPResponse,
+)
 from src.util.datetime_util import parse_grants_gov_date
 from tests.lib.data_factories import setup_cert_user
 from tests.lib.db_testing import cascade_delete_from_db_table
@@ -69,7 +72,7 @@ def get_simpler_applicants_soap_client(request_data, db_session):
     soap_request = SOAPRequest(
         method="POST",
         headers={},
-        data=SoapRequestStreamer(io.BytesIO(request_data)),
+        data=SoapRequestStreamer(stream=io.BytesIO(request_data)),
         full_path="/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort",
         api_name=SimplerSoapAPI.APPLICANTS,
     )
@@ -323,7 +326,7 @@ class TestSimplerBaseSOAPClient:
             b"a" * 9000
         )
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_data)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_data)),
             full_path="x",
             headers={},
             method="POST",
@@ -430,7 +433,7 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -481,7 +484,7 @@ class TestSimplerSOAPGetApplicationZip:
         wrong_privileges = {Privilege.LEGACY_AGENCY_VIEWER}
         user, _, soap_client_certificate = setup_cert_user(agency, wrong_privileges)
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -520,7 +523,7 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -559,7 +562,7 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -589,7 +592,7 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -667,7 +670,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -747,7 +750,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -845,7 +848,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -982,7 +985,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -1098,7 +1101,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -1170,7 +1173,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -1247,7 +1250,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=SoapRequestStreamer(io.BytesIO(request_xml_bytes)),
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",

@@ -1,8 +1,13 @@
+import io
 from unittest.mock import patch
 
 from src.legacy_soap_api import legacy_soap_api_config as soap_api_config
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import (
+    SOAPRequest,
+    SoapRequestStreamer,
+    SOAPResponse,
+)
 from src.legacy_soap_api.simpler_soap_api import get_simpler_soap_response
 
 
@@ -23,7 +28,7 @@ class TestSimplerSoapApi:
             "utf-8"
         )
         soap_request = SOAPRequest(
-            data=envelope,
+            data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
             headers={},
             method="POST",
@@ -58,7 +63,7 @@ class TestSimplerSoapApi:
             "utf-8"
         )
         soap_request = SOAPRequest(
-            data=envelope,
+            data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
             headers={},
             method="POST",
@@ -91,7 +96,7 @@ class TestSimplerSoapApi:
             "utf-8"
         )
         soap_request = SOAPRequest(
-            data=envelope,
+            data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
             headers={},
             method="POST",
@@ -123,7 +128,7 @@ class TestSimplerSoapApi:
             "utf-8"
         )
         soap_request = SOAPRequest(
-            data=envelope,
+            data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
             headers={},
             method="POST",
@@ -155,7 +160,7 @@ class TestSimplerSoapApi:
             "utf-8"
         )
         soap_request = SOAPRequest(
-            data=envelope,
+            data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
             headers={},
             method="POST",
@@ -187,7 +192,7 @@ class TestSimplerSoapApi:
             "utf-8"
         )
         soap_request = SOAPRequest(
-            data=envelope,
+            data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
             headers={},
             method="POST",

@@ -13,9 +13,8 @@ from src.legacy_soap_api.legacy_soap_api_blueprint import legacy_soap_api_bluepr
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_proxy import get_proxy_response
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.legacy_soap_api_utils import (
-    SoapRequestStreamer,
     get_alternate_proxy_response,
     get_invalid_path_response,
     get_soap_error_response,
@@ -56,7 +55,7 @@ def simpler_soap_api_route(
         return get_invalid_path_response().to_flask_response()
 
     soap_request_stream = SoapRequestStreamer(
-        request.stream, content_length=int(request.headers.get("Content-Length", 0))
+        stream=request.stream, total_length=int(request.headers.get("Content-Length", 0))
     )
     operation_name = get_soap_operation_name(soap_request_stream.head())
     add_extra_data_to_current_request_logs(

@@ -3,9 +3,9 @@ import json
 import logging
 import re
 import uuid
-from collections.abc import Callable, Generator, Iterator
+from collections.abc import Callable, Iterator
 from enum import StrEnum
-from typing import IO, Any, BinaryIO
+from typing import Any
 
 import requests
 from defusedxml import minidom
@@ -21,8 +21,6 @@ BASE_SOAP_API_RESPONSE_HEADERS = {
     "Content-Type": 'multipart/related; type="application/xop+xml"',
 }
 HIDDEN_VALUE = "hidden"
-TERMINATOR_TAGS = [b"</soapenv:Envelope>", b"</env:Envelope>"]
-CHUNK_SIZE = 2000
 
 
 class AlternateSoapOperation(StrEnum):
@@ -352,48 +350,3 @@ def to_snake_case(name: str) -> str:
     """
     sub = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", sub).lower()
-
-
-class SoapRequestStreamer:
-    def __init__(
-        self, stream: BinaryIO | IO[bytes], chunk_count: int = 4, content_length: int | None = None
-    ) -> None:
-        self.stream = stream
-        self.chunk_count = chunk_count
-        self._consumed_head = False
-        self.head_bytes = self.get_head_bytes()
-        self.total_length = content_length
-
-    def get_head_bytes(self) -> bytes:
-        buffer = io.BytesIO()
-        chunk_count = 0
-        while chunk_count <= self.chunk_count:
-            chunk = self.stream.read(CHUNK_SIZE)
-            if not chunk:
-                break
-            buffer.write(chunk)
-            content = buffer.getvalue()
-            for terminator in TERMINATOR_TAGS:
-                if terminator in content:
-                    return content
-            chunk_count += 1
-        return buffer.getvalue()
-
-    def head(self) -> bytes:
-        return self.head_bytes
-
-    def __iter__(self) -> Generator[bytes]:
-        if not self._consumed_head:
-            yield self.head_bytes
-            self._consumed_head = True
-
-        while True:
-            chunk = self.stream.read(CHUNK_SIZE)
-            if not chunk:
-                break
-            yield chunk
-
-    def __len__(self) -> int:
-        if self.total_length is not None:
-            return self.total_length
-        return 0
