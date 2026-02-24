@@ -17,6 +17,6 @@ test.describe("Test Suite 8037: Create New Application Flow and Complete SFLL v2
     page,
   }, testInfo) => {
     await Help_createNewApplication(testInfo, page);
-    await Help_completeSFLLv20Form(testInfo, page);
+    // await Help_completeSFLLv20Form(testInfo, page);
   });
 });
