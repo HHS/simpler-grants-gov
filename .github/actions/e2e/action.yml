@@ -65,7 +65,7 @@ runs:
       shell: bash
       working-directory: ./frontend
       run: |
-        npm ci
+        npm install @playwright/test
         npx playwright install --with-deps
 
     - name: Run e2e tests (Shard ${{ inputs.shard }}/${{ inputs.total_shards }})
