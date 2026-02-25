@@ -107,7 +107,26 @@ def _check_access(db_session: db.Session, user: User, organization_ids: list) ->
 def _build_saved_union_subquery(
     user_id: uuid.UUID, org_ids_to_use: list, include_user_saved_opps: bool
 ) -> Subquery:
-    """Returns a saved_union subquery with one row per opportunity and a saved_at timestamp that combines user + org saves based on org_ids_to_use."""
+    """
+    Returns a saved_union subquery with one row per opportunity and a saved_at timestamp that combines user + org saves based on org_ids_to_use.
+    Example query generated:
+    SELECT anon_1.opportunity_id, max(anon_1.saved_at) AS saved_at
+            FROM (
+                SELECT organization_saved_opportunity.opportunity_id AS opportunity_id,
+                       organization_saved_opportunity.created_at AS saved_at
+                FROM organization_saved_opportunity
+                WHERE organization_saved_opportunity.organization_id IN (__[POSTCOMPILE_organization_id_1])
+
+                UNION ALL
+
+                SELECT user_saved_opportunity.opportunity_id AS opportunity_id,
+                       user_saved_opportunity.created_at AS saved_at
+                FROM user_saved_opportunity
+                WHERE user_saved_opportunity.user_id = :user_id_1
+                  AND user_saved_opportunity.is_deleted IS NOT true
+            ) AS anon_1
+            GROUP BY anon_1.opportunity_id
+    """
 
     subqueries = []
 
