@@ -148,4 +148,4 @@ def test_get_opportunity_list_no_permission(client, db_session, enable_factory_c
 
     assert response.status_code == 403
     response_json = response.get_json()
-    assert "forbidden" in str(response_json).lower()
+    assert response_json["message"] == "Forbidden"
