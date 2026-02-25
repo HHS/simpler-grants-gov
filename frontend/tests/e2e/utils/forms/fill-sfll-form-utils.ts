@@ -116,18 +116,38 @@ export async function fillSfllFormUtils(
     // Fill form fields
     await safeHelp_safeStep(testInfo, "Fill form fields", async () => {
       // Section 1: Type of Federal Action
-      await safeHelp_selectDropdownLocator(testInfo, page, "#federal_action_type", ENTITY_DATA.federalAction.type);
+      await safeHelp_selectDropdownLocator(
+        testInfo,
+        page,
+        "#federal_action_type",
+        ENTITY_DATA.federalAction.type,
+      );
       // Section 2: Status of Federal Action
-      await safeHelp_selectDropdownLocator(testInfo, page, "#federal_action_status", ENTITY_DATA.federalAction.status);
+      await safeHelp_selectDropdownLocator(
+        testInfo,
+        page,
+        "#federal_action_status",
+        ENTITY_DATA.federalAction.status,
+      );
       // Section 3: Report Type
-      await safeHelp_selectDropdownLocator(testInfo, page, "#report_type", ENTITY_DATA.federalAction.reportType);
+      await safeHelp_selectDropdownLocator(
+        testInfo,
+        page,
+        "#report_type",
+        ENTITY_DATA.federalAction.reportType,
+      );
       await safeHelp_fillFieldsByTestId(testInfo, page, [
         { testId: "material_change_year", value: "2025" },
         { testId: "material_change_quarter", value: "1" },
         { testId: "last_report_date", value: "2025-03-31" },
       ]);
       // Section 4: Reporting Entity
-      await safeHelp_selectDropdownLocator(testInfo, page, "#reporting_entity--entity_type", ENTITY_DATA.reportingEntity.type);
+      await safeHelp_selectDropdownLocator(
+        testInfo,
+        page,
+        "#reporting_entity--entity_type",
+        ENTITY_DATA.reportingEntity.type,
+      );
       await safeHelp_fillFieldsByTestId(testInfo, page, [
         { testId: "reporting_entity--tier", value: ENTITY_DATA.reportingEntity.tier },
         { testId: "reporting_entity--applicant_reporting_entity--organization_name", value: ENTITY_DATA.reportingEntity.orgName },
@@ -135,7 +155,12 @@ export async function fillSfllFormUtils(
         { testId: "reporting_entity--applicant_reporting_entity--address--street2", value: ENTITY_DATA.reportingEntity.street2 },
         { testId: "reporting_entity--applicant_reporting_entity--address--city", value: ENTITY_DATA.reportingEntity.city },
       ]);
-      await safeHelp_selectDropdownLocator(testInfo, page, "#reporting_entity--applicant_reporting_entity--address--state", ENTITY_DATA.reportingEntity.state);
+      await safeHelp_selectDropdownLocator(
+        testInfo,
+        page,
+        "#reporting_entity--applicant_reporting_entity--address--state",
+        ENTITY_DATA.reportingEntity.state,
+      );
       await safeHelp_fillFieldsByTestId(testInfo, page, [
         { testId: "reporting_entity--applicant_reporting_entity--address--zip_code", value: ENTITY_DATA.reportingEntity.zip },
         { testId: "reporting_entity--applicant_reporting_entity--congressional_district", value: ENTITY_DATA.reportingEntity.district },
@@ -147,7 +172,12 @@ export async function fillSfllFormUtils(
         { testId: "reporting_entity--prime_reporting_entity--address--street2", value: ENTITY_DATA.primeEntity.street2 },
         { testId: "reporting_entity--prime_reporting_entity--address--city", value: ENTITY_DATA.primeEntity.city },
       ]);
-      await safeHelp_selectDropdownLocator(testInfo, page, "#reporting_entity--prime_reporting_entity--address--state", ENTITY_DATA.primeEntity.state);
+      await safeHelp_selectDropdownLocator(
+        testInfo,
+        page,
+        "#reporting_entity--prime_reporting_entity--address--state",
+        ENTITY_DATA.primeEntity.state,
+      );
       await safeHelp_fillFieldsByTestId(testInfo, page, [
         { testId: "reporting_entity--prime_reporting_entity--address--zip_code", value: ENTITY_DATA.primeEntity.zip },
         { testId: "reporting_entity--prime_reporting_entity--congressional_district", value: ENTITY_DATA.primeEntity.district },
@@ -171,7 +201,12 @@ export async function fillSfllFormUtils(
         { testId: "lobbying_registrant--address--street2", value: ENTITY_DATA.lobbyingRegistrant.street2 },
         { testId: "lobbying_registrant--address--city", value: ENTITY_DATA.lobbyingRegistrant.city },
       ]);
-      await safeHelp_selectDropdownLocator(testInfo, page, "#lobbying_registrant--address--state", ENTITY_DATA.lobbyingRegistrant.state);
+      await safeHelp_selectDropdownLocator(
+        testInfo,
+        page,
+        "#lobbying_registrant--address--state",
+        ENTITY_DATA.lobbyingRegistrant.state,
+      );
       await safeHelp_fillFieldsByTestId(testInfo, page, [
         { testId: "lobbying_registrant--address--zip_code", value: ENTITY_DATA.lobbyingRegistrant.zip },
       ]);
@@ -186,7 +221,12 @@ export async function fillSfllFormUtils(
         { testId: "individual_performing_service--address--street2", value: ENTITY_DATA.performingService.street2 },
         { testId: "individual_performing_service--address--city", value: ENTITY_DATA.performingService.city },
       ]);
-      await safeHelp_selectDropdownLocator(testInfo, page, "#individual_performing_service--address--state", ENTITY_DATA.performingService.state);
+      await safeHelp_selectDropdownLocator(
+        testInfo,
+        page,
+        "#individual_performing_service--address--state",
+        ENTITY_DATA.performingService.state,
+      );
       await safeHelp_fillFieldsByTestId(testInfo, page, [
         { testId: "individual_performing_service--address--zip_code", value: ENTITY_DATA.performingService.zip },
       ]);
@@ -206,15 +246,25 @@ export async function fillSfllFormUtils(
     await safeHelp_clickButton(testInfo, page, "save form", "apply-form-save");
 
     // Verify save was successful with no validation errors
-    await safeHelp_ValidateTextAtLocator(testInfo, page.locator("#alert"), "Verify no validation alerts");
+    await safeHelp_ValidateTextAtLocator(
+      testInfo,
+      page.locator("#alert"),
+      "Verify no validation alerts",
+    );
     await safeHelp_safeExpect(
       testInfo,
-      async () => expect(page.getByTestId("alert").getByRole("heading")).toContainText("Form was saved"),
+      async () =>
+        expect(page.getByTestId("alert").getByRole("heading")).toContainText(
+          "Form was saved",
+        ),
       "Verify save success message",
     );
     await safeHelp_safeExpect(
       testInfo,
-      async () => expect(page.getByTestId("alert").getByRole("paragraph")).toContainText("No errors were detected."),
+      async () =>
+        expect(page.getByTestId("alert").getByRole("paragraph")).toContainText(
+          "No errors were detected.",
+        ),
       "Verify no errors message",
     );
   } finally {
