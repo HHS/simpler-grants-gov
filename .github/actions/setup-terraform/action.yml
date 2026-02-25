@@ -1,12 +1,16 @@
 name: "Set up Terraform"
 description: "Set up Terraform with the version stored in the .terraform-version file"
+inputs:
+  version-file:
+    description: "File containing the terraform version to use."
+    default: ".terraform-version"
 runs:
   using: "composite"
   steps:
-    - name: Get .terraform-version
+    - name: Get Terraform version
       id: get-terraform-version
       run: |
-        terraform_version="$(cat .terraform-version)"
+        terraform_version="$(cat ${{ inputs.version-file }})"
         echo "Terraform version: ${terraform_version}"
         echo "terraform_version=${terraform_version}" >> "$GITHUB_OUTPUT"
       shell: bash

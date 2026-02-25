@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# https://tldp.org/LDP/abs/html/devref1.html
+
+# open connection
+exec 3<>/dev/tcp/127.0.0.1/${PORT}
+
+# send request
+echo -e "GET /health HTTP/1.1\r\nHost: http://localhost\r\nConnection: close\r\n\r\n" >&3
+
+# read response
+#
+# one could use grep, like:
+#
+#   grep "HTTP/1.1 200 OK" <&3
+#
+# but we'll rely purely on bash builtins
+
+# read the first line
+read -u 3 status_line
+
+# be a good citizen, close the file descriptor as soon as we are done with it
+exec 3<&-
+
+# check for a 200 OK status response
+[[ "$status_line" =~ ^HTTP/.*\ 200\ OK ]]

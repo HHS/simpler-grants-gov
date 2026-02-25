@@ -1,0 +1,65 @@
+name: Build release candidate
+description: Builds a docker image and leverages the build cache to re-use cached layers from previous builds.
+
+inputs:
+  app_name:
+    required: true
+    type: string
+    description: "name of application folder under infra directory"
+  commit_hash:
+    required: false
+    type: string
+    description: 'The commit hash'
+    default: ${{ github.sha }}
+outputs:
+  image:
+    description: the identifier of the docker image, in 'name:tag' format
+    value: ${{ steps.get-image-identifier.outputs.image }}
+runs:
+  using: "composite"
+  steps:
+
+    - id: get-image-identifier
+      shell: bash
+      run: |
+        IMAGE_NAME=$(make APP_NAME=${{ inputs.app_name }} release-image-name)
+        IMAGE_TAG=$(make release-image-tag)
+        echo "image=$IMAGE_NAME:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Restore from Cache
+      id: cache-buildx
+      uses: actions/cache@v4
+      with:
+        path: /tmp/.buildx-cache
+        key: container-build-${{ inputs.app_name }}-${{ inputs.commit_hash }}
+        restore-keys: |
+          container-build-${{ inputs.app_name }}-
+
+    - name: Ensure Buildx cache exists
+      shell: bash
+      run: |
+        mkdir -p /tmp/.buildx-cache
+
+    - name: Build and tag Docker image for scanning
+      shell: bash
+      run: |
+        make APP_NAME=${{ inputs.app_name }} release-build OPTS="\
+        --cache-from=type=local,src=/tmp/.buildx-cache \
+        --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
+        --load"
+
+    - name: Replace the cache
+      shell: bash
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+    - name: List layers in the docker image
+      shell: bash
+      run: |
+        docker inspect ${{ steps.get-image-identifier.outputs.image }} \
+        | jq -r '.[] | .RootFS.Layers | to_entries[] | "\(.key): \(.value)"'

@@ -27,6 +27,7 @@ set -euo pipefail
 # Parse optional parameters
 environment_variables=""
 task_role_arn=""
+workspace_name=""
 while :; do
   case "$1" in
   --environment-variables)
@@ -58,7 +59,19 @@ echo "  environment=${environment}"
 echo "  command=${command}"
 echo "  environment_variables=${environment_variables:-}"
 echo "  task_role_arn=${task_role_arn:-}"
+echo "  workspace_name=${workspace_name:-}"
 echo
+
+# Initialize terraform and select workspace if specified
+./bin/terraform-init "infra/${app_name}/service" "${environment}"
+
+if [ -n "${workspace_name}" ]; then
+  # Set up trap to restore workspace on script exit
+  original_workspace=$(terraform -chdir="infra/${app_name}/service" workspace show)
+  trap 'terraform -chdir="infra/${app_name}/service" workspace select "${original_workspace}"' EXIT
+
+  terraform -chdir="infra/${app_name}/service" workspace select "${workspace_name}"
+fi
 
 # Use the same cluster, task definition, and network configuration that the application service uses
 cluster_name=$(terraform -chdir="infra/${app_name}/service" output -raw service_cluster_name)

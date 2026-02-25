@@ -7,6 +7,8 @@
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
+GITHUB_STEP_SUMMARY=${GITHUB_STEP_SUMMARY:-/dev/null}
+
 app_name="$1"
 
 echo "::group::Initialize Terraform"
@@ -17,7 +19,9 @@ echo "::endgroup::"
 echo "::group::List PRs with PR environments"
 echo terraform -chdir="infra/${app_name}/service" workspace list
 workspaces="$(terraform -chdir="infra/${app_name}/service" workspace list)"
-pr_nums="$(echo "${workspaces}" | grep -o 'p-[0-9]\+' | sed 's/p-//')"
+# grep will exit with code `1` if there's no match, so ignore that for when
+# there are no PR workspaces for the application
+pr_nums="$(echo "${workspaces}" | { grep -o 'p-[0-9]\+' || test $? = 1; } | sed 's/p-//')"
 echo "PRs"
 echo "${pr_nums}"
 echo "::endgroup::"
@@ -28,7 +32,7 @@ for pr_num in $pr_nums; do
   pr_status="$(gh pr view "$pr_num" --json state --jq ".state")"
   echo "PR ${pr_num}: ${pr_status}"
 
-  if [ "$pr_status" == "CLOSED" ]; then
+  if [ "$pr_status" == "CLOSED" ] || [ "$pr_status" == "MERGED" ]; then
     closed_prs+=("$pr_num")
   fi
 done
@@ -36,10 +40,10 @@ echo "::endgroup::"
 
 # if closed_prs is not empty exit with 1 otherwise exit with 0
 if [ ${#closed_prs[@]} -gt 0 ]; then
-  echo "Found orphaned PR environments for the following PRs: ${closed_prs[*]}"
-  echo "Found orphaned PR environments for the following PRs: ${closed_prs[*]}" >> "${GITHUB_STEP_SUMMARY}"
+  echo "🧹 Found orphaned PR environments for the following PRs: **${closed_prs[*]}**"
+  echo "🧹 Found orphaned PR environments for the following PRs: **${closed_prs[*]}**" >> "${GITHUB_STEP_SUMMARY}"
   exit 1
 fi
 
-echo "No orphaned PR environments"
-echo "No orphaned PR environments" >> "${GITHUB_STEP_SUMMARY}"
+echo "✅ No orphaned PR environments"
+echo "✅ No orphaned PR environments" >> "${GITHUB_STEP_SUMMARY}"

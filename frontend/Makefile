@@ -1,4 +1,4 @@
-.PHONY : \
+.PHONY: \
 	release-build
 
 # Docker user configuration
