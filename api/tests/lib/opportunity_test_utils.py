@@ -195,5 +195,4 @@ def create_test_opportunities(db_session, agency, count=3, prefix="TEST-2026"):
         )
         opportunities.append(opportunity)
 
-    db_session.commit()
     return opportunities
