@@ -304,12 +304,12 @@ def organization_ignore_legacy_user(
 @organization_blueprint.post("/<uuid:organization_id>/saved-opportunities")
 @organization_blueprint.input(OrganizationSaveOpportunityRequestSchema, location="json")
 @organization_blueprint.output(OrganizationSaveOpportunityResponseSchema)
-@organization_blueprint.doc(responses=[200, 201, 401, 403, 404, 422])
+@organization_blueprint.doc(responses=[200, 401, 403, 404, 422])
 @organization_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def organization_save_opportunity(
     db_session: db.Session, organization_id: UUID, json_data: dict
-) -> tuple[response.ApiResponse, int]:
+) -> response.ApiResponse:
     """Save an opportunity for an organization"""
     add_extra_data_to_current_request_logs({"organization_id": organization_id})
     logger.info("POST /v1/organizations/:organization_id/saved-opportunities")
@@ -326,5 +326,5 @@ def organization_save_opportunity(
         )
 
     if is_new:
-        return response.ApiResponse(message="Success", data={}), 201
-    return response.ApiResponse(message="Opportunity already saved to organization", data={}), 200
+        return response.ApiResponse(message="Success", data={})
+    return response.ApiResponse(message="Opportunity already saved to organization", data={})
