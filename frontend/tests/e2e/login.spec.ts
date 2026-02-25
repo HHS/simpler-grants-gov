@@ -2,11 +2,13 @@ import { expect, Page, test } from "@playwright/test";
 
 import playwrightEnv from "./playwright-env";
 
-const { baseUrl } = playwrightEnv;
+const { baseUrl, targetEnv } = playwrightEnv;
+
+const TEST_REDIRECT_TIMEOUT = targetEnv === "local" ? 5000 : 30000;
 
 const setupLoginRedirectSpoof = async (page: Page) => {
   // Clear session storage before each test
-  await page.goto(`/`, { waitUntil: "domcontentloaded" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await page.evaluate(() => {
     if (window.sessionStorage) {
       window.sessionStorage.clear();
@@ -45,15 +47,15 @@ test.describe("Login Page Redirect", () => {
   test("should redirect to home page when no redirect URL is stored", async ({
     page,
   }) => {
-    await page.goto(`/login`);
-    await expect(page).toHaveURL(`/`);
+    await page.goto("/login");
+    await expect(page).toHaveURL("/");
   });
 
   test("should redirect to stored URL after login", async ({ page }) => {
     await page.evaluate(() => {
       sessionStorage.setItem("login-redirect", "/opportunities");
     });
-    await page.goto(`/login`);
+    await page.goto("/login");
     await expect(page).toHaveURL(`/opportunities`);
   });
 
@@ -63,8 +65,9 @@ test.describe("Login Page Redirect", () => {
     await page.evaluate(() => {
       sessionStorage.setItem("login-redirect", "/");
     });
-    await page.goto(`/login`);
-    await expect(page).toHaveURL(`/`);
+    await page.goto("/login");
+    await page.waitForTimeout(TEST_REDIRECT_TIMEOUT);
+    await expect(page).toHaveURL("/", { timeout: TEST_REDIRECT_TIMEOUT });
   });
 
   test("should redirect to home page when stored URL is external", async ({
@@ -73,10 +76,9 @@ test.describe("Login Page Redirect", () => {
     await page.evaluate(() => {
       sessionStorage.setItem("login-redirect", "https://external.com");
     });
-    await page.goto(`/login`);
-    // Wait longer on staging for redirect to occur
-    await page.waitForTimeout(5000);
-    await expect(page).toHaveURL(`/`, { timeout: 30000 });
+    await page.goto("/login");
+    await page.waitForTimeout(TEST_REDIRECT_TIMEOUT);
+    await expect(page).toHaveURL("/", { timeout: TEST_REDIRECT_TIMEOUT });
   });
 
   test('should display "Redirecting..." text while redirecting', async ({
@@ -86,7 +88,7 @@ test.describe("Login Page Redirect", () => {
       sessionStorage.setItem("login-redirect", "/opportunities");
     });
 
-    await page.goto(`/login`);
+    await page.goto("/login");
     const redirectingText = page.getByText("Redirecting...");
     const redirectResult = await Promise.race([
       redirectingText
