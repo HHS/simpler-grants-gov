@@ -43,6 +43,8 @@ def _get_opportunity_for_grantors(
             selectinload(Opportunity.current_opportunity_summary).selectinload(
                 CurrentOpportunitySummary.opportunity_summary
             ),
+            selectinload(Opportunity.opportunity_attachments),
+            selectinload(Opportunity.competitions),
         )
     )
 

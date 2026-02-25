@@ -1,4 +1,6 @@
+from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.opportunities_v1.opportunity_schemas import (
+    OpportunityAttachmentV1Schema,
     OpportunitySummaryV1Schema,
     OpportunityV1Schema,
 )
@@ -94,6 +96,21 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
     )
 
 
+class OpportunityGrantorWithAttachmentsSchema(OpportunityGrantorSchema):
+    """Schema for opportunity data in grantor-facing API responses with attachments and competitions"""
+
+    attachments = fields.List(
+        fields.Nested(OpportunityAttachmentV1Schema),
+        attribute="opportunity_attachments",
+        metadata={"description": "List of attachments associated with the opportunity"},
+    )
+
+    competitions = fields.List(
+        fields.Nested(CompetitionAlphaSchema),
+        metadata={"description": "List of competitions associated with the opportunity"},
+    )
+
+
 class OpportunityCreateResponseSchema(AbstractResponseSchema):
     """Schema for POST /v1/grantors/opportunities/ response
 
@@ -137,7 +154,7 @@ class OpportunityGetResponseSchema(AbstractResponseSchema):
     }
     """
 
-    data = fields.Nested(OpportunityGrantorSchema())
+    data = fields.Nested(OpportunityGrantorWithAttachmentsSchema())
 
 
 class OpportunityListRequestSchema(Schema):
