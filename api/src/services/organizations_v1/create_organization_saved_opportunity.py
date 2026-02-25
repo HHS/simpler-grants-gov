@@ -27,7 +27,7 @@ def create_organization_saved_opportunity(
     Returns True if a new record was created, False if already saved.
     """
     # Validate organization exists and fetch it
-    organization = get_organization_and_verify_access(db_session, user, organization_id)
+    get_organization_and_verify_access(db_session, user, organization_id)
 
     # Validate opportunity exists and is not in draft status
     opportunity_id = json_data["opportunity_id"]
