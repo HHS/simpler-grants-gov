@@ -1,12 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { fakeOrganizationDetailsResponse } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { OrganizationInfo } from "src/components/organization/OrganizationInfo";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 describe("OragnizationInfo", () => {
   it("displays all necessary organization data", () => {

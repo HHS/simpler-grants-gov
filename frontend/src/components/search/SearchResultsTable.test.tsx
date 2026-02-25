@@ -1,14 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { mockOpportunity } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { SearchResultsTable } from "src/components/search/SearchResultsTable";
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 jest.mock("src/components/user/OpportunitySaveUserControl", () => ({
   OpportunitySaveUserControl: jest

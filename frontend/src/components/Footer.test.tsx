@@ -1,4 +1,4 @@
-import { render, screen } from "tests/react-utils";
+import { render, screen } from "@testing-library/react";
 
 import Footer from "src/components/Footer";
 

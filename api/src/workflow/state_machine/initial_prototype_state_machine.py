@@ -29,12 +29,12 @@ initial_prototype_state_machine_config = WorkflowConfig(
     entity_types=[WorkflowEntityType.OPPORTUNITY],
     approval_mapping={
         # Program Officer Approvals
-        InitialPrototypeState.PENDING_PROGRAM_OFFICER_APPROVAL: ApprovalConfig(
+        "receive_program_officer_approval": ApprovalConfig(
             approval_type=ApprovalType.PROGRAM_OFFICER_APPROVAL,
             required_privileges=[Privilege.PROGRAM_OFFICER_APPROVAL],
         ),
         # Budget Officer Approvals
-        InitialPrototypeState.PENDING_BUDGET_OFFICER_APPROVAL: ApprovalConfig(
+        "receive_budget_officer_approval": ApprovalConfig(
             approval_type=ApprovalType.BUDGET_OFFICER_APPROVAL,
             required_privileges=[Privilege.BUDGET_OFFICER_APPROVAL],
         ),
