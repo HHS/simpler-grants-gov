@@ -1,17 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-import React from "react";
-
 import "@testing-library/jest-dom";
-
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import type { RoleChangeModalProps } from "src/components/manageUsers/RoleChangeModal";
 import { RoleManager } from "src/components/manageUsers/RoleManager";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 let lastModalProps: RoleChangeModalProps | null = null;
 

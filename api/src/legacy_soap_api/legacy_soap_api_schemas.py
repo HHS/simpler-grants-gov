@@ -1,4 +1,5 @@
 from collections.abc import Iterator
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -8,10 +9,7 @@ from src.legacy_soap_api.legacy_soap_api_config import (
     SOAPOperationConfig,
     get_soap_operation_config,
 )
-from src.legacy_soap_api.soap_payload_handler import (
-    get_soap_envelope_from_payload,
-    get_soap_operation_name,
-)
+from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
 
 
 class SOAPClientCertificateNotConfigured(Exception):
@@ -35,7 +33,7 @@ class SOAPInvalidRequestOperationName(Exception):
 
 
 class SOAPRequest(BaseModel):
-    data: bytes
+    data: Any
     full_path: str
     headers: dict
     method: str
@@ -56,12 +54,10 @@ class SOAPRequest(BaseModel):
 
         These configs store data for processing SOAP XML data within simpler.
         """
-        envelope = get_soap_envelope_from_payload(self.data.decode()).envelope
-        if not envelope:
-            raise SOAPInvalidEnvelope(f"Error processing SOAP envelope for {self.api_name.value}")
-
         operation_name = (
-            get_soap_operation_name(envelope) if not self.operation_name else self.operation_name
+            get_soap_operation_name(self.data.head().decode())
+            if not self.operation_name
+            else self.operation_name
         )
         if not operation_name:
             raise SOAPInvalidRequestOperationName(
