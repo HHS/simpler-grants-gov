@@ -17,6 +17,8 @@ from src.api.organizations_v1.organization_schemas import (
     OrganizationInvitationListResponseSchema,
     OrganizationListRolesResponseSchema,
     OrganizationRemoveUserResponseSchema,
+    OrganizationSaveOpportunityRequestSchema,
+    OrganizationSaveOpportunityResponseSchema,
     OrganizationUpdateUserRolesRequestSchema,
     OrganizationUpdateUserRolesResponseSchema,
     OrganizationUsersListRequestSchema,
@@ -27,6 +29,9 @@ from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.organizations_v1.create_organization_invitation import (
     create_organization_invitation,
+)
+from src.services.organizations_v1.create_organization_saved_opportunity import (
+    create_organization_saved_opportunity,
 )
 from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 from src.services.organizations_v1.ignore_legacy_user_organization import (
@@ -294,3 +299,32 @@ def organization_ignore_legacy_user(
         )
 
     return response.ApiResponse(message="Success")
+
+
+@organization_blueprint.post("/<uuid:organization_id>/saved-opportunities")
+@organization_blueprint.input(OrganizationSaveOpportunityRequestSchema, location="json")
+@organization_blueprint.output(OrganizationSaveOpportunityResponseSchema)
+@organization_blueprint.doc(responses=[200, 201, 401, 403, 404, 422])
+@organization_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def organization_save_opportunity(
+    db_session: db.Session, organization_id: UUID, json_data: dict
+) -> tuple[response.ApiResponse, int]:
+    """Save an opportunity for an organization"""
+    add_extra_data_to_current_request_logs({"organization_id": organization_id})
+    logger.info("POST /v1/organizations/:organization_id/saved-opportunities")
+
+    # Get authenticated user
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    with db_session.begin():
+        # Add the user from the token session to our current session
+        db_session.add(user_token_session)
+
+        is_new = create_organization_saved_opportunity(
+            db_session, user_token_session.user, organization_id, json_data
+        )
+
+    if is_new:
+        return response.ApiResponse(message="Success", data={}), 201
+    return response.ApiResponse(message="Opportunity already saved to organization", data={}), 200
