@@ -10,7 +10,7 @@ from sqlalchemy.sql import Select, Subquery, union_all
 from src.adapters import db
 from src.auth.endpoint_access_util import can_access, check_user_access
 from src.constants.lookup_constants import Privilege
-from src.db.models.entity_models import Organization, OrganizationSavedOpportunity
+from src.db.models.entity_models import OrganizationSavedOpportunity
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
@@ -78,12 +78,16 @@ def add_opportunity_status_filter(
 
 def _get_accessible_org_ids(
     user: User,
-    orgs: list[Organization],
-) -> list[Organization]:
+    org_users: list,
+) -> list[uuid.UUID]:
     """
-    Returns only the organizations the user has required access to.
+    Returns only the organization ids the user has required access to.
     """
-    return [org for org in orgs if can_access(user, {Privilege.VIEW_ORG_SAVED_OPPORTUNITIES}, org)]
+    return [
+        org_user.organization_id
+        for org_user in org_users
+        if can_access(user, {Privilege.VIEW_ORG_SAVED_OPPORTUNITIES}, org_user.organization)
+    ]
 
 
 def _check_access(db_session: db.Session, user: User, organization_ids: list) -> None:
@@ -91,7 +95,7 @@ def _check_access(db_session: db.Session, user: User, organization_ids: list) ->
         # Retrieve organization (raises 404 if not found)
         organization = get_organization(db_session, org_id)
 
-        # Check if user has VIEW_ORG_MEMBERSHIP privilege for this organization
+        # Check if user has VIEW_ORG_SAVED_OPPORTUNITIES privilege for this organization
         check_user_access(
             db_session,
             user,
@@ -152,11 +156,7 @@ def get_saved_opportunities(
     include_user_saved_opps = True
     # Determine which orgs to consider
     if org_ids_param is None:
-        # User did not specify, consider all orgs they belong too
-        relevant_orgs = _get_accessible_org_ids(
-            user, [ou.organization for ou in user.organization_users]
-        )
-        org_ids_to_use = [org.organization_id for org in relevant_orgs]
+        org_ids_to_use = _get_accessible_org_ids(user, user.organization_users)
     elif org_ids_param:
         # User specified orgs, verify access
         _check_access(db_session, user, org_ids_param)

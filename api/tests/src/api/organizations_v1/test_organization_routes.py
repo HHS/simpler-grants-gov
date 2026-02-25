@@ -267,7 +267,6 @@ class TestOrganizationGet:
             f"/v1/organizations/{organization.organization_id}",
             headers={"X-SGG-Token": token},
         )
-
         assert resp.status_code == expected_status
 
         if expected_status == 200:
