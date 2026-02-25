@@ -6,7 +6,6 @@
 // ============================================================================
 
 import { expect, Locator, Page, TestInfo, TestType } from "@playwright/test";
-
 import { getTimeout } from "tests/e2e/utils/timeout-utils";
 
 // ============================================================================
