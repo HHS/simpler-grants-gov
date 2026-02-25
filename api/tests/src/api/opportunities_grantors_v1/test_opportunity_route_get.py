@@ -37,7 +37,36 @@ def test_opportunities(db_session, enable_factory_create, grantor_auth_data):
     return create_test_opportunities(db_session, agency)
 
 
-# TODO: Add test_get_opportunity_success
+def test_get_opportunity_success(client, db_session, grantor_auth_data, enable_factory_create):
+    """Test successful opportunity retrieval with JWT"""
+    user, agency, token, _ = grantor_auth_data
+
+    # Create a test opportunity with the correct agency
+    test_opportunity = OpportunityFactory.create(
+        agency_id=agency.agency_id,
+        agency_code=agency.agency_code,
+        opportunity_number="TEST-2026-123",
+        opportunity_title="Test Opportunity for GET",
+    )
+
+    test_opportunity.agency_record = agency
+
+    response = client.get(
+        f"/v1/grantors/opportunities/{test_opportunity.opportunity_id}/grantor",
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    response_json = response.get_json()
+    assert response_json["message"] == "Success"
+
+    response_data = response_json["data"]
+
+    assert response_data["opportunity_id"] == str(test_opportunity.opportunity_id)
+    assert response_data["opportunity_number"] == test_opportunity.opportunity_number
+    assert response_data["opportunity_title"] == test_opportunity.opportunity_title
+    assert response_data["agency_code"] == test_opportunity.agency_code
+    assert response_data["category"] == test_opportunity.category.value
 
 
 def test_get_opportunity_with_invalid_jwt_token(client, opportunity):
