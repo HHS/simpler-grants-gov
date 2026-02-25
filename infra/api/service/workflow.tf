@@ -61,10 +61,6 @@ resource "aws_ecs_task_definition" "workflow" {
         {
           name  = "TMPDIR"
           value = "/tmp"
-        },
-        {
-          name  = "ENABLE_WORKFLOW_API"
-          value = "true"
         }
       ]),
 
@@ -99,12 +95,7 @@ resource "aws_ecs_task_definition" "workflow" {
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = false,
-      healthCheck = {
-        timeout     = 5,
-        interval    = 10,
-        startPeriod = 30,
-        command     = ["CMD-SHELL", "curl http://localhost:80/api/v1/health"]
-      },
+      healthCheck = null,
       firelensConfiguration = {
         type = "fluentbit",
         options = {
