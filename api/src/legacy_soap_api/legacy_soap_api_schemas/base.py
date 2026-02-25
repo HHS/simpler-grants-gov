@@ -13,7 +13,7 @@ from src.legacy_soap_api.legacy_soap_api_config import (
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
 
 TERMINATOR_TAGS = [b"</soapenv:Envelope>", b"</env:Envelope>"]
-CHUNK_SIZE = 2000
+CHUNK_SIZE = 8000
 
 
 class SOAPClientCertificateNotConfigured(Exception):
@@ -40,7 +40,7 @@ class SoapRequestStreamer(BaseModel):
     # Using Annotated here to keep the type hint but avoid issue where
     # BinaryIO doesn't match typing BinaryIO https://github.com/pydantic/pydantic/issues/5443
     stream: Annotated[BinaryIO | IO[bytes], SkipValidation()]
-    chunk_count: int = 5
+    chunk_count: int = 2
     _consumed_head: bool = False
     head_bytes: bytes = b""
     total_length: int = 0
