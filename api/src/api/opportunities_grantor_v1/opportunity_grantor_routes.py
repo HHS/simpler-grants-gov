@@ -19,7 +19,7 @@ from src.services.opportunities_grantor_v1.opportunity_creation import create_op
 logger = logging.getLogger(__name__)
 
 
-@opportunity_grantor_blueprint.post("/opportunities/")
+@opportunity_grantor_blueprint.post("/opportunities")
 @opportunity_grantor_blueprint.input(
     opportunity_grantor_schemas.OpportunityCreateRequestSchema, location="json"
 )
