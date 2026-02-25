@@ -7,7 +7,7 @@ from statemachine.exceptions import InvalidStateValue, TransitionNotAllowed
 from src.adapters import db
 from src.constants.lookup_constants import WorkflowEventType, WorkflowType
 from src.db.models.user_models import User
-from src.db.models.workflow_models import Workflow
+from src.db.models.workflow_models import Workflow, WorkflowEventHistory
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_event import WorkflowEvent
@@ -55,9 +55,12 @@ class EventHandler:
              ...
     """
 
-    def __init__(self, db_session: db.Session, event: WorkflowEvent):
+    def __init__(
+        self, db_session: db.Session, event: WorkflowEvent, history_event: WorkflowEventHistory
+    ):
         self.db_session = db_session
         self.event = event
+        self.history_event = history_event
 
     def process(self) -> BaseStateMachine:
         """Process an event."""
@@ -66,6 +69,9 @@ class EventHandler:
 
     def _process_event(self, state_machine_event: StateMachineEvent) -> BaseStateMachine:
         """Run the state machine event against the state machine."""
+        # Attach the workflow to the history event.
+        self.history_event.workflow = state_machine_event.workflow
+
         persistence_model = state_machine_event.config.persistence_model_cls(
             db_session=self.db_session, workflow=state_machine_event.workflow
         )
@@ -155,6 +161,7 @@ class EventHandler:
             workflow=workflow,
             config=config,
             state_machine_cls=state_machine_cls,
+            workflow_history_event=self.history_event,
             metadata=self.event.metadata,
         )
 
@@ -192,6 +199,7 @@ class EventHandler:
             workflow=workflow,
             config=config,
             state_machine_cls=state_machine_cls,
+            workflow_history_event=self.history_event,
             metadata=self.event.metadata,
         )
 

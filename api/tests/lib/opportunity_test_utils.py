@@ -105,6 +105,7 @@ def create_user_in_agency_with_jwt_and_api_key(
     api_key = UserApiKeyFactory.create(user=user)
 
     return user, agency, token, api_key.key_id
+from src.constants.lookup_constants import OpportunityCategory
 
 
 def create_opportunity_request(

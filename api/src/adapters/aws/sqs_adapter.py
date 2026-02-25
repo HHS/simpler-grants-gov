@@ -1,3 +1,4 @@
+import json
 import logging
 
 import boto3
@@ -11,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class SQSConfig(PydanticBaseEnvConfig):
-    # SQS Queue URL will be required by the service using this adapter
     workflow_queue_url: str = Field(alias="WORKFLOW_QUEUE_URL")
+    s3_endpoint_url: str = Field(alias="S3_ENDPOINT_URL")
 
 
 class SQSMessage(BaseModel):
@@ -31,10 +32,32 @@ class SQSDeleteBatchResponse(BaseModel):
     failed_deletes: set[str] = Field(default_factory=set)
 
 
-def get_boto_sqs_client(session: boto3.Session | None = None) -> botocore.client.BaseClient:
+class SQSSendMessageResponse(BaseModel):
+    """Represents the response from sending a message to SQS."""
+
+    message_id: str = Field(alias="MessageId")
+    md5_of_message_body: str = Field(alias="MD5OfMessageBody")
+    md5_of_message_attributes: str | None = Field(alias="MD5OfMessageAttributes", default=None)
+    sequence_number: str | None = Field(alias="SequenceNumber", default=None)
+    md5_of_message_system_attributes: str | None = Field(
+        alias="MD5OfMessageSystemAttributes", default=None
+    )
+
+
+def get_boto_sqs_client(
+    sqs_config: SQSConfig | None = None, session: boto3.Session | None = None
+) -> botocore.client.BaseClient:
+    if sqs_config is None:
+        sqs_config = SQSConfig()
+
+    params = {}
+    if sqs_config.s3_endpoint_url is not None:
+        params["endpoint_url"] = sqs_config.s3_endpoint_url
+
     if session is None:
         session = get_boto_session()
-    return session.client("sqs")
+
+    return session.client("sqs", **params)
 
 
 class SQSClient:
@@ -95,4 +118,26 @@ class SQSClient:
 
         except Exception:
             logger.exception("Failed to delete message batch", extra={"queue_url": self.queue_url})
+            raise
+
+    def send_message(self, message_body: dict) -> SQSSendMessageResponse:
+        """
+        Sends a message to the SQS queue and returns the response.
+        """
+        try:
+            message_body_str = json.dumps(message_body)
+
+            response = self.client.send_message(
+                QueueUrl=self.queue_url, MessageBody=message_body_str
+            )
+
+            logger.info(
+                "Successfully sent message to SQS",
+                extra={"queue_url": self.queue_url, "message_id": response.get("MessageId")},
+            )
+
+            return SQSSendMessageResponse.model_validate(response)
+
+        except Exception:
+            logger.exception("Failed to send message to SQS", extra={"queue_url": self.queue_url})
             raise

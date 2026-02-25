@@ -782,6 +782,45 @@ paths:
               $ref: '#/components/schemas/UserUpdateProfileRequest'
       security:
       - ApiJwtAuth: []
+  /v1/users/{user_id}/agencies:
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAgenciesResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: User Get Agencies
+      security:
+      - ApiJwtAuth: []
+      - ApiUserKeyAuth: []
   /v1/users/{user_id}/api-keys:
     post:
       parameters:
@@ -5390,6 +5429,39 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    UserAgency:
+      type: object
+      properties:
+        agency_id:
+          type: string
+          description: The internal ID of the agency
+          example: 123e4567-e89b-12d3-a456-426614174000
+        agency_name:
+          type: string
+          description: The name of the agency
+          example: Department of Commerce
+        agency_code:
+          type: string
+          description: The unique code for the agency
+          example: DOC
+    UserAgenciesResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: List of agencies the user is associated with
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/UserAgency'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserApiKeyCreateRequest:
       type: object
       properties:
@@ -5491,6 +5563,10 @@ components:
             - update_opportunity
             - publish_opportunity
             - internal_workflow_access
+            - view_org_saved_opportunities
+            - modify_org_saved_opportunities
+            - program_officer_approval
+            - budget_officer_approval
             type:
             - string
     UserOrganization:
@@ -5538,7 +5614,7 @@ components:
         agency_id:
           type: string
           description: The internal ID of the agency
-    UserAgency:
+    UserAgency1:
       type: object
       properties:
         agency:
@@ -5580,7 +5656,7 @@ components:
             description: List of agencies and the user's roles in each
             type:
             - object
-            $ref: '#/components/schemas/UserAgency'
+            $ref: '#/components/schemas/UserAgency1'
         internal_user_roles:
           type: array
           items:
@@ -5646,6 +5722,10 @@ components:
             - update_opportunity
             - publish_opportunity
             - internal_workflow_access
+            - view_org_saved_opportunities
+            - modify_org_saved_opportunities
+            - program_officer_approval
+            - budget_officer_approval
             type:
             - string
     UserCanAccessResponse:
@@ -6655,6 +6735,10 @@ components:
             - update_opportunity
             - publish_opportunity
             - internal_workflow_access
+            - view_org_saved_opportunities
+            - modify_org_saved_opportunities
+            - program_officer_approval
+            - budget_officer_approval
             type:
             - string
     UserInvitationItem:
@@ -7213,6 +7297,10 @@ components:
             - update_opportunity
             - publish_opportunity
             - internal_workflow_access
+            - view_org_saved_opportunities
+            - modify_org_saved_opportunities
+            - program_officer_approval
+            - budget_officer_approval
             type:
             - string
     OrganizationUser:

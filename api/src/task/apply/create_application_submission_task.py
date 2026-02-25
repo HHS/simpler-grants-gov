@@ -21,7 +21,7 @@ from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.pdf_generation.models import PdfGenerationResponse
 from src.services.pdf_generation.service import generate_application_form_pdf
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
-from src.services.xml_generation.utils.attachment_mapping import create_attachment_mapping_from_list
+from src.services.xml_generation.utils.attachment_mapping import create_attachment_mapping
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
@@ -70,8 +70,6 @@ class ApplicationSubmissionConfig(PydanticBaseEnvConfig):
 
     application_submission_batch_size: int = 25  # APPLICATION_SUBMISSION_BATCH_SIZE
     application_submission_max_batches: int = 100  # APPLICATION_SUBMISSION_MAX_BATCHES
-
-    enable_xml_generation: bool = False  # ENABLE_XML_GENERATION
 
 
 class CreateApplicationSubmissionTask(Task):
@@ -383,18 +381,14 @@ class CreateApplicationSubmissionTask(Task):
             "application_id": submission.application.application_id,
             "competition_id": submission.application.competition_id,
         }
-        if not self.app_submission_config.enable_xml_generation:
-            logger.info(
-                "Skipping XML generation - feature flag disabled",
-                extra=log_extra,
-            )
-            return
 
         logger.info("Generating XML for application submission", extra=log_extra)
 
         # Create attachment mapping once for all forms
-        attachment_mapping = create_attachment_mapping_from_list(
-            submission.application.application_attachments,
+        # Orphaned attachments (not referenced in any form's application_response)
+        # are automatically excluded by create_attachment_mapping.
+        attachment_mapping = create_attachment_mapping(
+            submission.application,
             filename_overrides=submission.attachment_filename_overrides,
         )
 
