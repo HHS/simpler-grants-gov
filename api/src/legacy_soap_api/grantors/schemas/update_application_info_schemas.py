@@ -16,7 +16,7 @@ class UpdateApplicationInfoRequest(BaseSOAPSchema):
     assign_agency_tracking_number: str | None = Field(
         default=None, alias="AssignAgencyTrackingNumber"
     )
-    save_agency_notes: str | None = Field(default=None, alias="SaveAgencyNotes", min=1)
+    save_agency_notes: str | None = Field(default=None, alias="SaveAgencyNotes", min_length=1)
 
 
 class SaveAgencyNotesResult(BaseSOAPSchema):
