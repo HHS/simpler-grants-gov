@@ -19,7 +19,7 @@ def test_initial_prototype_state_machine_happy_path(
     workflow_event, history_event = build_start_workflow_event(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         user=program_officer,
-        entities=[opportunity],
+        entity=opportunity,
     )
 
     state_machine = EventHandler(db_session, workflow_event, history_event).process()
@@ -68,7 +68,7 @@ def test_initial_prototype_state_machine_program_officer_decline(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         current_workflow_state=InitialPrototypeState.PENDING_PROGRAM_OFFICER_APPROVAL,
-        opportunities=[opportunity],
+        workflow_entity__opportunity=opportunity,
     )
 
     state_machine = send_process_event(
@@ -100,7 +100,7 @@ def test_initial_prototype_state_machine_budget_officer_decline(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         current_workflow_state=InitialPrototypeState.PENDING_BUDGET_OFFICER_APPROVAL,
-        opportunities=[opportunity],
+        workflow_entity__opportunity=opportunity,
     )
 
     state_machine = send_process_event(
@@ -132,7 +132,7 @@ def test_initial_prototype_state_machine_program_officer_requires_modification(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         current_workflow_state=InitialPrototypeState.PENDING_PROGRAM_OFFICER_APPROVAL,
-        opportunities=[opportunity],
+        workflow_entity__opportunity=opportunity,
     )
 
     state_machine = send_process_event(
@@ -165,7 +165,7 @@ def test_initial_prototype_state_machine_budget_officer_requires_modification(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         current_workflow_state=InitialPrototypeState.PENDING_BUDGET_OFFICER_APPROVAL,
-        opportunities=[opportunity],
+        workflow_entity__opportunity=opportunity,
     )
 
     state_machine = send_process_event(
@@ -212,7 +212,7 @@ def test_initial_prototype_state_machine_invalid_events(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         current_workflow_state=InitialPrototypeState.START,
-        opportunities=[opportunity],
+        workflow_entity__opportunity=opportunity,
     )
 
     with pytest.raises(InvalidEventError, match="Event is not valid for current state of workflow"):

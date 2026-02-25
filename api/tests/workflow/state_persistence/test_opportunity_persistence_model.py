@@ -8,7 +8,7 @@ from tests.src.db.models.factories import OpportunityFactory, WorkflowFactory
 def test_opportunity_persistence_model(db_session, enable_factory_create):
     opportunity = OpportunityFactory.create()
 
-    workflow = WorkflowFactory.create(opportunities=[opportunity])
+    workflow = WorkflowFactory.create(workflow_entity__opportunity=opportunity)
 
     model = OpportunityPersistenceModel(db_session, workflow)
     assert model.opportunity.opportunity_id == opportunity.opportunity_id
@@ -16,18 +16,9 @@ def test_opportunity_persistence_model(db_session, enable_factory_create):
 
 
 def test_opportunity_persistence_no_opportunity(db_session, enable_factory_create):
-    workflow = WorkflowFactory.create(opportunities=[])
+    workflow = WorkflowFactory.create(has_application=True)
 
     with pytest.raises(
-        InvalidEntityForWorkflow, match="Expected only a single opportunity for workflow"
-    ):
-        OpportunityPersistenceModel(db_session, workflow)
-
-
-def test_opportunity_persistence_multiple_opportunity(db_session, enable_factory_create):
-    workflow = WorkflowFactory.create(opportunities=OpportunityFactory.create_batch(size=2))
-
-    with pytest.raises(
-        InvalidEntityForWorkflow, match="Expected only a single opportunity for workflow"
+        InvalidEntityForWorkflow, match="Expected the workflow entity to be an opportunity"
     ):
         OpportunityPersistenceModel(db_session, workflow)

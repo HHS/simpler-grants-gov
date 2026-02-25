@@ -33,6 +33,7 @@ def _get_opportunity(
             lazyload(Opportunity.saved_opportunities_by_users),
             lazyload(Opportunity.versions),
             lazyload(Opportunity.saved_opportunities_by_organizations),
+            lazyload(Opportunity.workflow_entities),
         )
     )
 

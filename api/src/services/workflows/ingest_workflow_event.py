@@ -11,7 +11,7 @@ from src.workflow.event.workflow_event import ProcessWorkflowEventContext, Start
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.workflow_service import (
     get_and_validate_workflow,
-    get_workflow_entities,
+    get_workflow_entity,
     is_event_valid_for_workflow,
 )
 from src.workflow.workflow_errors import (
@@ -61,7 +61,7 @@ def ingest_workflow_event(db_session: db.Session, json_data: dict[str, Any]) -> 
         raise_flask_error(422, "Invalid workflow type specified")
     except InvalidEntityForWorkflow as e:
         logger.info("Invalid entities for workflow", extra={"error": str(e)})
-        raise_flask_error(422, "The provided entities are not valid for this workflow type")
+        raise_flask_error(422, "The provided entity is not valid for this workflow type")
     except InactiveWorkflowError as e:
         logger.info("Workflow is not active", extra={"error": str(e)})
         raise_flask_error(422, "This workflow is not currently active")
@@ -80,8 +80,13 @@ def _validate_start_workflow_event(db_session: db.Session, json_data: dict[str, 
     # Get the workflow config and state machine class - validates that the workflow type is real and configured
     config, _ = WorkflowRegistry.get_state_machine_for_workflow_type(start_context.workflow_type)
 
-    # Validate entities exist and match the workflow's allowed entity types
-    get_workflow_entities(db_session, start_context.entities, config)
+    # Validate entity exists and matches the workflow's allowed entity type
+    get_workflow_entity(
+        db_session,
+        entity_type=start_context.entity_type,
+        entity_id=start_context.entity_id,
+        config=config,
+    )
 
 
 def _validate_process_workflow_event(db_session: db.Session, json_data: dict[str, Any]) -> None:
