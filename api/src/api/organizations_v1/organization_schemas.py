@@ -456,6 +456,4 @@ class OrganizationSaveOpportunityRequestSchema(Schema):
 class OrganizationSaveOpportunityResponseSchema(AbstractResponseSchema):
     """Schema for POST /organizations/:organization_id/saved-opportunities response"""
 
-    data = fields.Raw(
-        allow_none=True, metadata={"description": "No data returned", "example": {}}
-    )
+    data = fields.Raw(allow_none=True, metadata={"description": "No data returned", "example": {}})
