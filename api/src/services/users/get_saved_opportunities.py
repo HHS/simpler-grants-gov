@@ -8,9 +8,9 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select, Subquery, union_all
 
 from src.adapters import db
-from src.auth.endpoint_access_util import check_user_access
+from src.auth.endpoint_access_util import can_access, check_user_access
 from src.constants.lookup_constants import Privilege
-from src.db.models.entity_models import OrganizationSavedOpportunity
+from src.db.models.entity_models import Organization, OrganizationSavedOpportunity
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
@@ -20,7 +20,7 @@ from src.db.models.user_models import User, UserSavedOpportunity
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.pagination.paginator import Paginator
 from src.search.search_models import StrSearchFilter
-from src.services.organizations_v1.get_organization import get_organization_and_verify_access, get_organization
+from src.services.organizations_v1.get_organization import get_organization
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +74,16 @@ def add_opportunity_status_filter(
         )
 
     return stmt
+
+
+def _get_accessible_org_ids(
+    user: User,
+    orgs: list[Organization],
+) -> list[Organization]:
+    """
+    Returns only the organizations the user has required access to.
+    """
+    return [org for org in orgs if can_access(user, {Privilege.VIEW_ORG_SAVED_OPPORTUNITIES}, org)]
 
 
 def _check_access(db_session: db.Session, user: User, organization_ids: list) -> None:
@@ -137,24 +147,24 @@ def get_saved_opportunities(
 ) -> tuple[Sequence[Opportunity], PaginationInfo]:
     opportunity_params = SavedOpportunityListParams.model_validate(raw_opportunity_params)
     org_ids_param = opportunity_params.organization_ids
-    user_org_ids = [ou.organization_id for ou in user.organization_users]
     user_id = user.user_id
     logger.info("Getting saved opportunities for user")
     include_user_saved_opps = True
     # Determine which orgs to consider
     if org_ids_param is None:
         # User did not specify, consider all orgs they belong too
-        org_ids_to_use = user_org_ids
+        relevant_orgs = _get_accessible_org_ids(
+            user, [ou.organization for ou in user.organization_users]
+        )
+        org_ids_to_use = [org.organization_id for org in relevant_orgs]
     elif org_ids_param:
         # User specified orgs, verify access
+        _check_access(db_session, user, org_ids_param)
         org_ids_to_use = org_ids_param
         include_user_saved_opps = False
     else:
         # Explicitly empty list, consider only user saved opps
         org_ids_to_use = []
-
-    if org_ids_to_use:
-        _check_access(db_session, user, org_ids_to_use)
 
     # Build saved_union subquery
     saved_union = _build_saved_union_subquery(user_id, org_ids_to_use, include_user_saved_opps)

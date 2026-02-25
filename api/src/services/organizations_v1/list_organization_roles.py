@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from src.adapters import db
 from src.auth.endpoint_access_util import check_user_access
-from src.constants.lookup_constants import RoleType, Privilege
+from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.user_models import LinkRoleRoleType, Role, User
 from src.services.organizations_v1.get_organization import get_organization
 
@@ -24,7 +24,7 @@ def get_organization_roles_and_verify_access(
     check_user_access(
         db_session,
         user,
-        {Privilege.MANAGE_ORG_MEMBERS},
+        {Privilege.VIEW_ORG_MEMBERSHIP},
         organization,
     )
     return get_organization_roles(db_session)

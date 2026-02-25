@@ -159,7 +159,7 @@ def get_organization_users_and_verify_access(
     check_user_access(
         db_session,
         user,
-        {Privilege.MANAGE_ORG_MEMBERS},
+        {Privilege.VIEW_ORG_MEMBERSHIP},
         organization,
     )
 

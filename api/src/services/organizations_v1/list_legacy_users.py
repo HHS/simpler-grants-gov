@@ -16,6 +16,7 @@ from src.db.models.entity_models import IgnoredLegacyOrganizationUser, Organizat
 from src.db.models.staging.user import TuserProfile, VuserAccount
 from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
+from src.services.organizations_v1.get_organization import get_organization
 
 logger = logging.getLogger(__name__)
 

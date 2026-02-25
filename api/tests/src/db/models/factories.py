@@ -1117,7 +1117,7 @@ class RoleFactory(BaseFactory):
                 Privilege.VIEW_ORG_MEMBERSHIP,
                 Privilege.VIEW_ORG_SAVED_OPPORTUNITIES,
                 Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES,
-                Privilege.VIEW_ORGANIZATION
+                Privilege.VIEW_ORGANIZATION,
             ],
             role_types=[RoleType.ORGANIZATION],
         )
