@@ -8,6 +8,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select, Subquery, union_all
 
 from src.adapters import db
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import OrganizationSavedOpportunity
 from src.db.models.opportunity_models import (
@@ -19,7 +20,7 @@ from src.db.models.user_models import User, UserSavedOpportunity
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.pagination.paginator import Paginator
 from src.search.search_models import StrSearchFilter
-from src.services.organizations_v1.get_organization import get_organization_and_verify_access
+from src.services.organizations_v1.get_organization import get_organization_and_verify_access, get_organization
 
 logger = logging.getLogger(__name__)
 
@@ -77,8 +78,15 @@ def add_opportunity_status_filter(
 
 def _check_access(db_session: db.Session, user: User, organization_ids: list) -> None:
     for org_id in organization_ids:
-        get_organization_and_verify_access(
-            db_session, user, org_id, {Privilege.VIEW_ORG_SAVED_OPPORTUNITIES}
+        # Retrieve organization (raises 404 if not found)
+        organization = get_organization(db_session, org_id)
+
+        # Check if user has VIEW_ORG_MEMBERSHIP privilege for this organization
+        check_user_access(
+            db_session,
+            user,
+            {Privilege.VIEW_ORG_SAVED_OPPORTUNITIES},
+            organization,
         )
 
 

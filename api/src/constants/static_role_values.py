@@ -25,6 +25,7 @@ ORG_ADMIN = Role(
     link_privileges=get_link_privileges(
         ORG_ADMIN_ID,
         [
+            Privilege.VIEW_ORGANIZATION,
             Privilege.MANAGE_ORG_MEMBERS,
             Privilege.VIEW_ORG_MEMBERSHIP,
             Privilege.START_APPLICATION,
@@ -47,6 +48,7 @@ ORG_MEMBER = Role(
     link_privileges=get_link_privileges(
         ORG_MEMBER_ID,
         [
+            Privilege.VIEW_ORGANIZATION,
             Privilege.VIEW_ORG_MEMBERSHIP,
             Privilege.START_APPLICATION,
             Privilege.LIST_APPLICATION,

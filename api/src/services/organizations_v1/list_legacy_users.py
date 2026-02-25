@@ -10,12 +10,12 @@ from sqlalchemy.sql import Select
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import LegacyProfileType, LegacyUserStatus, Privilege
 from src.db.models.entity_models import IgnoredLegacyOrganizationUser, OrganizationInvitation
 from src.db.models.staging.user import TuserProfile, VuserAccount
 from src.db.models.user_models import LinkExternalUser, OrganizationUser, User
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
-from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 
 logger = logging.getLogger(__name__)
 
@@ -233,9 +233,15 @@ def list_legacy_users_and_verify_access(
         404: Organization not found
         400: Organization does not have a UEI
     """
-    # Get organization and verify access
-    organization = get_organization_and_verify_access(
-        db_session, user, organization_id, {Privilege.MANAGE_ORG_MEMBERS}
+    # Retrieve organization (raises 404 if not found)
+    organization = get_organization(db_session, organization_id)
+
+    # Enforce privilege check
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.MANAGE_ORG_MEMBERS},
+        organization,
     )
 
     # Get organization UEI from SAM.gov entity

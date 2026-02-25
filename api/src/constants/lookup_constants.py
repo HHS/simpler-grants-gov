@@ -227,6 +227,7 @@ class ApplicationFormStatus(StrEnum):
 class Privilege(StrEnum):
     MANAGE_ORG_MEMBERS = "manage_org_members"
     MANAGE_ORG_ADMIN_MEMBERS = "manage_org_admin_members"
+    VIEW_ORGANIZATION = "view_organization"
     VIEW_ORG_MEMBERSHIP = "view_org_membership"
     START_APPLICATION = "start_application"
     LIST_APPLICATION = "list_application"

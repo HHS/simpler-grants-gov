@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
+from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import (
     LinkOrganizationInvitationToRole,
@@ -17,7 +18,7 @@ from src.db.models.entity_models import (
 from src.db.models.user_models import User
 from src.pagination.pagination_models import PaginationInfo, SortOrder, SortOrderParams
 from src.search.search_models import StrSearchFilter
-from src.services.organizations_v1.get_organization import get_organization_and_verify_access
+from src.services.organizations_v1.get_organization import get_organization
 
 
 class OrganizationInvitationFilters(BaseModel):
@@ -200,9 +201,15 @@ def list_organization_invitations_and_verify_access(
     # Validate parameters
     params = ListOrganizationsParams.model_validate(json_data)
 
+    # Retrieve organization (raises 404 if not found)
+    organization = get_organization(db_session, organization_id)
+
     # First verify the user has access to manage organization members
-    get_organization_and_verify_access(
-        db_session, user, organization_id, {Privilege.MANAGE_ORG_MEMBERS}
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.MANAGE_ORG_MEMBERS},
+        organization,
     )
 
     # Get the raw invitations with filters and pagination

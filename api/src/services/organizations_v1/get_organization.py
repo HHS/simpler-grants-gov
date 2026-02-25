@@ -42,15 +42,12 @@ def get_organization_and_verify_access(
     db_session: db.Session,
     user: User,
     organization_id: uuid.UUID,
-    privilege: set[Privilege] | None = None,
 ) -> Organization:
-    """Get organization by ID and verify user access.If additional privileges are provided, those are enforced.Otherwise, basic VIEW_ORG_MEMBERSHIP access is required.
-
+    """Get organization by ID and verify user access.
     Args:
         db_session: Database session
         user: User requesting access
         organization_id: UUID of the organization to retrieve
-        privilege: Optional set of privileges required for this action
 
     Returns:
         Organization: The organization with SAM.gov entity data loaded
@@ -62,14 +59,11 @@ def get_organization_and_verify_access(
     # Retrieve organization (raises 404 if not found)
     organization = get_organization(db_session, organization_id)
 
-    # Determine which privileges to enforce
-    required_privileges = privilege or {Privilege.VIEW_ORG_MEMBERSHIP}
-
     # Enforce privilege check
     check_user_access(
         db_session,
         user,
-        required_privileges,
+        {Privilege.VIEW_ORGANIZATION},
         organization,
     )
 
