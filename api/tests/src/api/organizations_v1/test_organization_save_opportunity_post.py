@@ -13,8 +13,8 @@ from tests.src.db.models.factories import (
 class TestOrganizationSaveOpportunityPost:
     """Test POST /v1/organizations/:organization_id/saved-opportunities endpoint"""
 
-    def test_save_opportunity_201_new(self, enable_factory_create, client, db_session):
-        """New save returns 201 with Success message"""
+    def test_save_opportunity_200_new(self, enable_factory_create, client, db_session):
+        """New save returns 200 with Success message"""
         opportunity = OpportunityFactory.create(is_draft=False)
         user, organization, token = create_user_in_org(
             privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
@@ -27,7 +27,7 @@ class TestOrganizationSaveOpportunityPost:
             json={"opportunity_id": str(opportunity.opportunity_id)},
         )
 
-        assert resp.status_code == 201
+        assert resp.status_code == 200
         assert resp.get_json()["message"] == "Success"
 
         saved = (
