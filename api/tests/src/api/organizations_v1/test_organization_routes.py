@@ -27,7 +27,7 @@ class TestOrganizationGet:
 
         # Create user in organization with required privileges
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.VIEW_ORGANIZATION],
             db_session=db_session,
             sam_gov_entity=sam_gov_entity,
         )
@@ -56,7 +56,7 @@ class TestOrganizationGet:
         """Test getting organization without SAM.gov entity data"""
         # Create user in organization with required privileges - no SAM.gov entity
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.VIEW_ORGANIZATION],
             db_session=db_session,
             without_sam_gov_entity=True,
         )
@@ -75,8 +75,8 @@ class TestOrganizationGet:
         assert data["data"]["sam_gov_entity"] is None
 
     def test_get_organization_403_no_privilege(self, enable_factory_create, client, db_session):
-        """Test that user without VIEW_ORG_MEMBERSHIP privilege gets 403"""
-        # Create user in organization with wrong privilege (not VIEW_ORG_MEMBERSHIP)
+        """Test that user without VIEW_ORGANIZATION privilege gets 403"""
+        # Create user in organization with wrong privilege (not VIEW_ORGANIZATION)
         user, organization, token = create_user_in_org(
             privileges=[Privilege.VIEW_APPLICATION],
             db_session=db_session,
@@ -114,7 +114,7 @@ class TestOrganizationGet:
         """Test that user cannot access a different organization"""
         # Create user in one organization with proper privileges
         user, user_organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.VIEW_ORGANIZATION],
             db_session=db_session,
         )
 
@@ -180,11 +180,11 @@ class TestOrganizationGet:
     def test_get_organization_with_multiple_privileges(
         self, enable_factory_create, client, db_session
     ):
-        """Test that user with multiple privileges including VIEW_ORG_MEMBERSHIP can access"""
-        # Create user in organization with multiple privileges including VIEW_ORG_MEMBERSHIP
+        """Test that user with multiple privileges including VIEW_ORGANIZATION can access"""
+        # Create user in organization with multiple privileges including VIEW_ORGANIZATION
         user, organization, token = create_user_in_org(
             privileges=[
-                Privilege.VIEW_ORG_MEMBERSHIP,
+                Privilege.VIEW_ORGANIZATION,
                 Privilege.MANAGE_ORG_MEMBERS,
                 Privilege.VIEW_APPLICATION,
             ],
@@ -206,7 +206,7 @@ class TestOrganizationGet:
         """Test that organization owner with proper privilege can access"""
         # Create user in organization as owner with required privileges
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.VIEW_ORGANIZATION],
             db_session=db_session,
         )
 
@@ -224,10 +224,10 @@ class TestOrganizationGet:
     def test_get_organization_non_owner_can_access_with_privilege(
         self, enable_factory_create, client, db_session
     ):
-        """Test that non-owner with VIEW_ORG_MEMBERSHIP privilege can access"""
+        """Test that non-owner with VIEW_ORGANIZATION privilege can access"""
         # Create user in organization as non-owner with required privileges
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.VIEW_ORGANIZATION],
             db_session=db_session,
         )
 
@@ -245,17 +245,17 @@ class TestOrganizationGet:
     @pytest.mark.parametrize(
         "privilege_set,expected_status",
         [
-            ([Privilege.VIEW_ORG_MEMBERSHIP], 200),
+            ([Privilege.VIEW_ORGANIZATION], 200),
             ([Privilege.MANAGE_ORG_MEMBERS], 403),
             ([Privilege.VIEW_APPLICATION], 403),
-            ([Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS], 200),
+            ([Privilege.VIEW_ORGANIZATION, Privilege.MANAGE_ORG_MEMBERS], 200),
             ([], 403),
         ],
     )
     def test_get_organization_privilege_requirements(
         self, enable_factory_create, client, db_session, privilege_set, expected_status
     ):
-        """Test various privilege combinations to ensure only VIEW_ORG_MEMBERSHIP grants access"""
+        """Test various privilege combinations to ensure only VIEW_ORGANIZATION grants access"""
         # Create user in organization with specified privileges
         user, organization, token = create_user_in_org(
             privileges=privilege_set,

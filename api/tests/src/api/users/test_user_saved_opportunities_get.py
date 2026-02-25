@@ -505,7 +505,10 @@ def test_user_get_saved_opportunities_org_only_403(
     response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": token},
-        json={"pagination": {"page_offset": 1, "page_size": 25}},
+        json={
+            "organization_ids": [org.organization_id],
+            "pagination": {"page_offset": 1, "page_size": 25},
+        },
     )
 
     assert response.status_code == 403
@@ -641,3 +644,49 @@ def test_user_get_saved_opportunities_nonexistent_org(client, enable_factory_cre
 
     # Verify response
     assert response.status_code == 404
+
+
+def test_user_saved_opportunities_respect_org_privileges(
+    client,
+    enable_factory_create,
+    db_session,
+):
+    """
+    Test that a user only sees saved opportunities from organizations
+    for which they have the correct VIEW_ORG_SAVED_OPPORTUNITIES privilege.
+    """
+
+    # Create user and two orgs
+    user, org_allowed, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+    org_user_no_role = OrganizationUserFactory(user=user)
+
+    # Opportunities saved in both orgs
+    org_allowed_saved = OrganizationSavedOpportunityFactory.create(
+        organization=org_allowed,
+    )
+    OrganizationSavedOpportunityFactory.create(
+        organization=org_user_no_role.organization,
+    )
+
+    # User also saves an opportunity themselves
+    user_saved_opp = UserSavedOpportunityFactory.create(
+        user=user,
+    )
+
+    # Request saved opportunities list
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={
+            "pagination": {"page_offset": 1, "page_size": 25},
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+
+    # Should return only 2 opportunities:
+    returned_ids = {item["opportunity_id"] for item in data}
+    expected_ids = {str(org_allowed_saved.opportunity_id), str(user_saved_opp.opportunity_id)}
+
+    assert returned_ids == expected_ids
