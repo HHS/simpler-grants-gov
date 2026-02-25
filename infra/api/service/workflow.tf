@@ -95,7 +95,7 @@ resource "aws_ecs_task_definition" "workflow" {
       networkMode            = "awsvpc",
       essential              = true,
       readonlyRootFilesystem = false,
-      healthCheck = null,
+      healthCheck            = null,
       firelensConfiguration = {
         type = "fluentbit",
         options = {
