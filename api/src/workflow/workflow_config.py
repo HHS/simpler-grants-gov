@@ -20,4 +20,5 @@ class WorkflowConfig:
 
     entity_type: WorkflowEntityType
 
+    # A mapping of events to approval configs
     approval_mapping: dict[str, ApprovalConfig] = dataclasses.field(default_factory=dict)

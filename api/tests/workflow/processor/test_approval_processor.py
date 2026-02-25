@@ -6,11 +6,7 @@ from src.constants.lookup_constants import (
     Privilege,
     WorkflowType,
 )
-from src.workflow.workflow_errors import (
-    DuplicateApprovalError,
-    InvalidWorkflowResponseTypeError,
-    UserAccessError,
-)
+from src.workflow.workflow_errors import DuplicateApprovalError, InvalidWorkflowResponseTypeError
 from tests.lib.agency_test_utils import create_user_in_agency
 from tests.src.db.models.factories import (
     OpportunityFactory,
@@ -365,30 +361,6 @@ def test_agency_approval_approve_then_decline(db_session, agency, program_office
             },
         ],
     )
-
-
-def test_agency_approval_missing_required_privilege(
-    db_session, agency, budget_officer, opportunity
-):
-    workflow = WorkflowFactory.create(
-        workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
-        current_workflow_state=BasicState.PENDING_PROGRAM_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
-    )
-
-    with pytest.raises(
-        UserAccessError, match="User does not have access to approve workflow for given state"
-    ):
-        send_process_event(
-            db_session=db_session,
-            event_to_send="receive_program_officer_approval",
-            workflow_id=workflow.workflow_id,
-            user=budget_officer,
-            expected_state=BasicState.PENDING_PROGRAM_OFFICER_APPROVAL,
-            approval_response_type=ApprovalResponseType.APPROVED,
-        )
-
-    assert len(workflow.workflow_approvals) == 0
 
 
 def test_agency_approval_invalid_response_type(db_session, agency, budget_officer, opportunity):

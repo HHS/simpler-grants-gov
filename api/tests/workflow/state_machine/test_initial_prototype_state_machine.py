@@ -2,7 +2,12 @@ import pytest
 
 from src.constants.lookup_constants import ApprovalResponseType, ApprovalType, WorkflowType
 from src.workflow.handler.event_handler import EventHandler
-from src.workflow.state_machine.initial_prototype_state_machine import InitialPrototypeState
+from src.workflow.service.approval_service import can_user_do_agency_approval
+from src.workflow.state_machine.initial_prototype_state_machine import (
+    InitialPrototypeState,
+    InitialPrototypeStateMachine,
+    initial_prototype_state_machine_config,
+)
 from src.workflow.workflow_errors import InvalidEventError
 from tests.src.db.models.factories import UserFactory, WorkflowFactory
 from tests.workflow.workflow_test_util import (
@@ -226,3 +231,48 @@ def test_initial_prototype_state_machine_invalid_events(
 
     # No approvals added due to error
     assert len(workflow.workflow_approvals) == 0
+
+
+def test_initial_prototype_state_privileges(
+    db_session, agency, opportunity, budget_officer, program_officer
+):
+    """Test that we've configured the privileges as expected."""
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.INITIAL_PROTOTYPE,
+        workflow_entity__opportunity=opportunity,
+    )
+    config = initial_prototype_state_machine_config
+
+    assert (
+        can_user_do_agency_approval(
+            program_officer, workflow, config, "receive_budget_officer_approval"
+        )
+        is False
+    )
+    assert (
+        can_user_do_agency_approval(
+            budget_officer, workflow, config, "receive_budget_officer_approval"
+        )
+        is True
+    )
+
+    assert (
+        can_user_do_agency_approval(
+            program_officer, workflow, config, "receive_program_officer_approval"
+        )
+        is True
+    )
+    assert (
+        can_user_do_agency_approval(
+            budget_officer, workflow, config, "receive_program_officer_approval"
+        )
+        is False
+    )
+
+    for event in InitialPrototypeStateMachine.get_valid_events():
+        # checked these above
+        if event in ["receive_program_officer_approval", "receive_budget_officer_approval"]:
+            continue
+
+        assert can_user_do_agency_approval(program_officer, workflow, config, event) is False
+        assert can_user_do_agency_approval(budget_officer, workflow, config, event) is False
