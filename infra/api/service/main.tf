@@ -60,6 +60,22 @@ locals {
   notifications_config                           = local.environment_config.notifications_config
 
   network_config = module.project_config.network_configs[local.environment_config.network_name]
+
+  container_secrets = concat(
+    [for secret_name in keys(local.service_config.secrets) : {
+      name      = secret_name
+      valueFrom = module.secrets[secret_name].secret_arn
+    }],
+    module.app_config.enable_identity_provider ? [{
+      # name      = "COGNITO_CLIENT_SECRET"
+      # valueFrom = module.identity_provider_client[0].client_secret_arn
+    }] : [],
+    # OpenSearch endpoint
+    local.search_config != null ? [{
+      name      = "SEARCH_ENDPOINT"
+      valueFrom = data.aws_ssm_parameter.search_endpoint_arn[0].arn
+    }] : []
+  )
 }
 
 terraform {
@@ -138,6 +154,9 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
   count = module.app_config.has_incident_management_service ? 1 : 0
   name  = local.incident_management_service_integration_config.integration_url_param_name
 }
+
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
 data "aws_security_groups" "aws_services" {
   filter {
@@ -227,21 +246,7 @@ module "service" {
     local.service_config.extra_environment_variables,
   )
 
-  secrets = concat(
-    [for secret_name in keys(local.service_config.secrets) : {
-      name      = secret_name
-      valueFrom = module.secrets[secret_name].secret_arn
-    }],
-    module.app_config.enable_identity_provider ? [{
-      # name      = "COGNITO_CLIENT_SECRET"
-      # valueFrom = module.identity_provider_client[0].client_secret_arn
-    }] : [],
-    # OpenSearch endpoint
-    local.search_config != null ? [{
-      name      = "SEARCH_ENDPOINT"
-      valueFrom = data.aws_ssm_parameter.search_endpoint_arn[0].arn
-    }] : []
-  )
+  secrets = local.container_secrets
 
   extra_policies = merge(
     {
