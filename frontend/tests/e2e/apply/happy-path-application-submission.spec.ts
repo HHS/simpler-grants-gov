@@ -18,15 +18,13 @@ import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
 import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
-import { selectLocalTestUser } from "tests/e2e/utils/select-local-test-user-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
 
-const { baseUrl, targetEnv, localTestOrgLabel, stagingTestOrgLabel } =
-  playwrightEnv;
+const { baseUrl, targetEnv, testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
-test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async ({
+test("Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL", async ({
   page,
   context,
 }: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
@@ -39,8 +37,6 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     // Use test-user spoofing
     await createSpoofedSessionCookie(context);
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-
-    await selectLocalTestUser(page, "many_app_user");
   } else if (targetEnv === "staging") {
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const signOutButton = await performStagingLogin(page, !!isMobile);
@@ -58,13 +54,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
   }
 
   // Call reusable create application function from utils
-  const orgLabel =
-    targetEnv === "staging"
-      ? stagingTestOrgLabel ||
-        "Automatic staging Organization for UEI AUTOHQDCCHBY"
-      : localTestOrgLabel || "Sally's Soup Emporium";
-
-  await createApplication(page, OPPORTUNITY_URL, orgLabel);
+  await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
   const applicationUrl = page.url();
 
   // Verify SF-424B form is visible on the application page
@@ -85,7 +75,7 @@ test("happy path apply workflow - Organization User (SF424B and SF-LLL)", async 
     await page.waitForTimeout(2000);
 
     // Fill SF-424B form fields using helper
-    await fillSf424bForm(page, "TESTER", orgLabel);
+    await fillSf424bForm(page, "TESTER", testOrgLabel);
 
     // Save the form using helper
     await saveForm(page);

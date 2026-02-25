@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from "@playwright/test";
+import { getFormLink } from "./form-link-utils";
 
 /**
  * Gets the SF-424B form link element.
@@ -6,9 +7,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
  * @returns Locator for the SF-424B form link
  */
 export function getSf424bFormLink(page: Page): Locator {
-  return page.locator("a, button").filter({
-    hasText: /SF-424B|Assurances for Non-Construction Programs/i,
-  });
+  return getFormLink(page, "SF-424B|Assurances for Non-Construction Programs");
 }
 
 /**
