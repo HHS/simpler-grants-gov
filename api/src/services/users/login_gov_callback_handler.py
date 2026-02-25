@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class CallbackParams(BaseModel):
     code: str | None = None
-    state: str
+    state: str | None = None
     error: str | None = None
     error_description: str | None = None
 
@@ -70,9 +70,13 @@ def handle_login_gov_callback_request(
         error_message = f"{callback_params.error} {callback_params.error_description}"
         raise_flask_error(500, error_message)
 
-    # This shouldn't be possible, if there is no error, this should always be set
+    # This should only ever happen if someone directly calls the API
+    # We can't validate the request like normal due to the redirect nature
+    # of these endpoints.
     if callback_params.code is None:
-        raise_flask_error(500, "Missing code in request")
+        raise_flask_error(422, "Missing code in request")
+    if callback_params.state is None:
+        raise_flask_error(422, "Missing state in request")
 
     # If the state value we received isn't a valid UUID
     # then it's likely someone randomly calling the endpoint

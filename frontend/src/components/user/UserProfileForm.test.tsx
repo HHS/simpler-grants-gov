@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { noop } from "lodash";
 import { fakeUserWithProfile } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { UserProfileForm } from "src/components/user/UserProfileForm";
 
@@ -14,10 +13,6 @@ jest.mock("react", () => ({
 
 jest.mock("src/app/[locale]/(base)/settings/actions", () => ({
   userProfileAction: noop,
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 describe("userProfileForm", () => {

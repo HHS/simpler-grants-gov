@@ -53,6 +53,12 @@ def create_user_in_agency(
     return user, agency
 
 
+def give_user_privilege_in_agency(user: User, agency: Agency, privileges: list[Privilege]) -> None:
+    agency_user = AgencyUserFactory.create(user=user, agency=agency)
+    role = RoleFactory.create(privileges=privileges)
+    AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
+
+
 def create_user_in_agency_with_jwt(
     db_session: db.Session,
     agency: Agency | None = None,
