@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { noop } from "lodash";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { createRef } from "react";
 
@@ -22,10 +21,6 @@ jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
     clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
   }),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/hooks/useFeatureFlags", () => ({

@@ -1,5 +1,4 @@
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
-import { render, screen } from "tests/react-utils";
+import { render, screen } from "@testing-library/react";
 
 import { JSX } from "react";
 
@@ -9,11 +8,6 @@ const mockGetSession = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => mockGetSession(),
-}));
-
-jest.mock("next-intl", () => ({
-  ...jest.requireActual<typeof import("next-intl")>("next-intl"),
-  useTranslations: () => useTranslationsMock(),
 }));
 
 describe("AuthenticationGate", () => {

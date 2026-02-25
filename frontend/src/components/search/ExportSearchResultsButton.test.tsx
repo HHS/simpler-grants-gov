@@ -1,6 +1,6 @@
+import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { getConfiguredDayJs } from "src/utils/dateUtil";
-import { render, screen, waitFor } from "tests/react-utils";
 
 import { ExportSearchResultsButton } from "src/components/search/ExportSearchResultsButton";
 
