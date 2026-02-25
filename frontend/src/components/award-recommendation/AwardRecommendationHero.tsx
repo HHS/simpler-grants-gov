@@ -22,14 +22,14 @@ export default async function AwardRecommendationHero() {
             className="padding-y-0 bg-transparent"
             breadcrumbList={[
               {
-                title: t("awardRecommendation", {
-                  defaultValue: "Award Recommendation",
+                title: t("awardRecs", {
+                  defaultValue: "Award Recs",
                 }),
+                // TODO: add link to award recommendations page
                 path: "/",
               },
               {
                 title: `${t("heroTitle", { defaultValue: "Award Rec #" })}: ${recordNumber}`,
-                // TODO: add link to opportunity
                 path: `/`,
               },
             ]}

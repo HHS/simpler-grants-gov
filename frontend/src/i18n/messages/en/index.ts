@@ -1819,7 +1819,7 @@ export const messages = {
     pageTitle: "Organizations",
   },
   AwardRecommendation: {
-    awardRecommendation: "Award Recommendation",
+    awardRecs: "Award Recs",
     errorMessage:
       "We have encountered an error loading your award recommendations, please try again later.",
     metaDescription: "View your award recommendations",
@@ -1835,7 +1835,7 @@ export const messages = {
     },
     heroButtons: {
       save: "Save and finish later",
-      create: "Create recommendation",
+      create: "Create",
     },
     description: "Award Recommendation flow coming soon.",
     opportunity: "Opportunity",
