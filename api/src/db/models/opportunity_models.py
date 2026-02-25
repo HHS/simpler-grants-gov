@@ -169,33 +169,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         return self.current_opportunity_summary.opportunity_status
 
     @property
-    def all_forecasts(self) -> list[OpportunitySummary]:
-        """
-        Get the forecast summary for this opportunity.
-        Returns a list with at most one item.
-        """
-        forecasts = [summary for summary in self.all_opportunity_summaries if summary.is_forecast]
-        return forecasts[:1] if forecasts else []
-
-    @property
-    def all_non_forecasts(self) -> list[OpportunitySummary]:
-        """
-        Get the non-forecast summary for this opportunity.
-        Returns a list with at most one item.
-        """
-        non_forecasts = [
-            summary for summary in self.all_opportunity_summaries if not summary.is_forecast
-        ]
-        return non_forecasts[:1] if non_forecasts else []
-
-    @property
     def forecast_summary(self) -> OpportunitySummary | None:
-        forecasts = self.all_forecasts
+        forecasts = [summary for summary in self.all_opportunity_summaries if summary.is_forecast]
         return forecasts[0] if forecasts else None
 
     @property
     def non_forecast_summary(self) -> OpportunitySummary | None:
-        non_forecasts = self.all_non_forecasts
+        non_forecasts = [summary for summary in self.all_opportunity_summaries if not summary.is_forecast]
         return non_forecasts[0] if non_forecasts else None
 
     @property
