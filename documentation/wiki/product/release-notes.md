@@ -1,8 +1,60 @@
 # Release Notes
 
+## [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - February 23, 2026
+
+February 23rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.02.18-1):&#x20;
+
+{% columns %}
+{% column width="25%" %}
+#### Announcement
+{% endcolumn %}
+
+{% column width="75%" %}
+### Watch the [Simpler.Grants.Gov](http://simpler.grants.gov) public demonstration
+
+The [Simpler.Grants.gov](http://simpler.grants.gov) team gave a public demonstration of our newest features and functionality hosted by the [Council on Federal Financial Assistance (COFFA)](https://www.coffa.gov/). This virtual session highlighted our progress, shared user research insights, and showcased community engagement efforts. [You can watch the video from January 29, 2026 here](https://simpler.grants.gov/events).&#x20;
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+#### Improvement
+{% endcolumn %}
+
+{% column width="75%" %}
+### Accessibility and navigation improvements
+
+This release includes accessibility improvements to help users who navigate with the keyboard — especially people that rely on screen readers and keyboard-first users seeking navigation efficiency. Improvements include [making the "Skip to main" content more visually accessible](https://github.com/HHS/simpler-grants-gov/pull/8565), and [improving the focus styles that make it easier to navigate between search filters](https://github.com/HHS/simpler-grants-gov/pull/8550).
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+#### Improvement
+{% endcolumn %}
+
+{% column width="75%" %}
+### A better header menu design
+
+On [Simpler.Grants.gov](http://simpler.grants.gov), both mobile and desktop, the team reformatted the account dropdown menu to be consistent with the rest of the navigation dropdown items and moved ‘Sign in’ after other menu items for more logical keyboard navigation. On mobile, the ‘Sign In’ was moved to the burger menu with other aesthetic and dropdown formatting improvements.
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+#### Bug Fix
+{% endcolumn %}
+
+{% column width="75%" %}
+### ‘Start Application’ is disabled when organization data fails to load
+
+This update prevents users from submitting the ‘Start Application’ modal when organization data fails to load, preventing users from interacting with an incomplete form and avoiding a misleading user experience.
+{% endcolumn %}
+{% endcolumns %}
+
 ## [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - February 4, 2026
 
-February 4th’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.02.04-1): &#x20;
+February 4th’s update brings [several new changes:](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.02.04-1) &#x20;
 
 {% columns %}
 {% column width="25%" %}
