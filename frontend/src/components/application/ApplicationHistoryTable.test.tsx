@@ -1,16 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { ApplicationHistory } from "src/types/applicationResponseTypes";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import historyMock from "stories/components/application/history.mock.json";
 
 import { ApplicationHistoryTable } from "src/components/application/ApplicationHistoryTable";
 
 const applicationHistory = historyMock as ApplicationHistory[];
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 describe("ApplicationHistoryTable", () => {
   it("should not have accessibility violations", async () => {

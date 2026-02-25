@@ -1,12 +1,11 @@
 import "@testing-library/jest-dom";
 
-import { fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 import {
   FakeQueryProvider,
   mockUpdateQueryTerm,
 } from "src/utils/testing/providerMocks";
-import { render, screen } from "tests/react-utils";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
 import React from "react";
