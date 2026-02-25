@@ -168,7 +168,6 @@ class OpportunityListRequestSchema(Schema):
                 "opportunity_number",
                 "opportunity_title",
                 "created_at",
-                "updated_at",
             ],
             default_sort_order=[{"order_by": "opportunity_id", "sort_direction": "ascending"}],
             default_page_size=25,
