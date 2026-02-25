@@ -482,7 +482,7 @@ def test_user_get_saved_opportunities_org_only(client, enable_factory_create, db
     response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": token},
-        json={"pagination": {"page_offset": 1, "page_size": 25}},
+        json={"organization_ids": [], "pagination": {"page_offset": 1, "page_size": 25}},
     )
     data = response.json["data"]
 
@@ -529,7 +529,7 @@ def test_user_get_saved_opportunities_user_and_org(client, enable_factory_create
     response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": token},
-        json={"pagination": {"page_offset": 1, "page_size": 25}},
+        json={"organization_ids": [], "pagination": {"page_offset": 1, "page_size": 25}},
     )
     assert response.status_code == 200
     data = response.json["data"]
@@ -608,10 +608,11 @@ def test_user_and_org_save_timestamp_precedence(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": token},
         json={
+            "organization_ids": [],
             "pagination": {
                 "page_offset": 1,
                 "page_size": 25,
-            }
+            },
         },
     )
 
@@ -678,6 +679,7 @@ def test_user_saved_opportunities_respect_org_privileges(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": token},
         json={
+            "organization_ids": [],
             "pagination": {"page_offset": 1, "page_size": 25},
         },
     )

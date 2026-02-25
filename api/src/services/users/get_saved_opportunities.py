@@ -156,15 +156,16 @@ def get_saved_opportunities(
     include_user_saved_opps = True
     # Determine which orgs to consider
     if org_ids_param is None:
-        org_ids_to_use = _get_accessible_org_ids(user, user.organization_users)
+        logger.info("User saved opportunities requested")
+        org_ids_to_use = []
     elif org_ids_param:
-        # User specified orgs, verify access
+        logger.info("Organization saved opportunities requested")
         _check_access(db_session, user, org_ids_param)
         org_ids_to_use = org_ids_param
         include_user_saved_opps = False
     else:
-        # Explicitly empty list, consider only user saved opps
-        org_ids_to_use = []
+        logger.info("All saved opportunities requested")
+        org_ids_to_use = _get_accessible_org_ids(user, user.organization_users)
 
     # Build saved_union subquery
     saved_union = _build_saved_union_subquery(user_id, org_ids_to_use, include_user_saved_opps)
