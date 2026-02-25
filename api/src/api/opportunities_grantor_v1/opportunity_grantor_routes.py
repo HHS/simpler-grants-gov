@@ -73,7 +73,7 @@ def opportunity_get_list_by_agency(
     )
 
 
-@opportunity_grantor_blueprint.get("/opportunities/<uuid:opportunity_id>/grantor")
+@opportunity_grantor_blueprint.get("/opportunities/<uuid:opportunity_id>")
 @opportunity_grantor_blueprint.output(opportunity_grantor_schemas.OpportunityGetResponseSchema())
 @jwt_or_api_user_key_multi_auth.login_required
 @opportunity_grantor_blueprint.doc(
