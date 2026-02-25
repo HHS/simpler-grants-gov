@@ -192,6 +192,7 @@ describe("AwardRecommendationPage", () => {
         params: localeParams,
         searchParams: Promise.resolve({ id: "123" }),
       });
+
       render(component);
 
       expect(consoleSpy).toHaveBeenCalledWith(
