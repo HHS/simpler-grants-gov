@@ -482,7 +482,7 @@ describe("InformationCard - Download submission button visibility and content", 
       />,
     );
 
-    expect(screen.queryByTestId(submissionButtonTestId)).toBeInTheDocument();
+    expect(screen.getByTestId(submissionButtonTestId)).toBeInTheDocument();
     expect(
       screen.queryByTestId(submissionMessageTestId),
     ).not.toBeInTheDocument();
@@ -501,7 +501,7 @@ describe("InformationCard - Download submission button visibility and content", 
     expect(
       screen.queryByTestId(submissionButtonTestId),
     ).not.toBeInTheDocument();
-    expect(screen.queryByTestId(submissionMessageTestId)).toBeInTheDocument();
+    expect(screen.getByTestId(submissionMessageTestId)).toBeInTheDocument();
   });
 
   it("does not render download submission section if application is in in_progress status", () => {

@@ -1,17 +1,10 @@
 import { render, screen } from "@testing-library/react";
 
-import React from "react";
-
 import "@testing-library/jest-dom";
 
 import { axe } from "jest-axe";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { InviteLegacyUsersErrorPage } from "src/components/manageUsers/inviteLegacyUsers/InviteLegacyUsersErrorPage";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 type Breadcrumb = { title: string; path: string };
 type BreadcrumbsProps = { breadcrumbList: Breadcrumb[] };
