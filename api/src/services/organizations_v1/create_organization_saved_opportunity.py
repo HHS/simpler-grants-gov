@@ -10,6 +10,7 @@ from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import Organization, OrganizationSavedOpportunity
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
+from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 
 logger = logging.getLogger(__name__)
 
