@@ -75,7 +75,7 @@ def list_opportunities_with_filters(
     stmt = apply_sorting(stmt, Opportunity, params.pagination.sort_order)
 
     # Use the paginator
-    paginator = Paginator(
+    paginator: Paginator[Opportunity] = Paginator(
         table_model=Opportunity,
         stmt=stmt,
         db_session=db_session,
