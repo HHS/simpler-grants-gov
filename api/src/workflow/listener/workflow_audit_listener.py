@@ -25,46 +25,22 @@ class WorkflowAuditListener:
         """
         self.db_session = db_session
 
-    def on_transition(self, event_data: EventData) -> None:
+    def on_transition(self, state_machine_event: StateMachineEvent, event_data: EventData) -> None:
         """
         Called automatically by the state machine when a transition occurs.
         """
-        # Extract the state_machine_event from the extended_kwargs
-        state_machine_event: StateMachineEvent | None = event_data.extended_kwargs.get(
-            "state_machine_event"
-        )
-
-        if state_machine_event is None:
-            logger.warning(
-                "State machine event not found in transition data, skipping audit record creation",
-                extra={
-                    "source_state": event_data.source.value if event_data.source else None,
-                    "target_state": event_data.target.value if event_data.target else None,
-                    "event_name": event_data.event.name if event_data.event else None,
-                },
-            )
-            return
 
         # Create the audit record
         workflow_audit = WorkflowAudit(
-            workflow_id=state_machine_event.workflow.workflow_id,
-            acting_user_id=state_machine_event.acting_user.user_id,
+            workflow=state_machine_event.workflow,
+            acting_user=state_machine_event.acting_user,
             transition_event=event_data.event.name,
             source_state=event_data.source.value,
             target_state=event_data.target.value,
-            event_id=state_machine_event.workflow_history_event.event_id,
+            event=state_machine_event.workflow_history_event,
             audit_metadata=state_machine_event.metadata,
         )
 
         self.db_session.add(workflow_audit)
 
-        logger.info(
-            "Created workflow audit record for transition",
-            extra={
-                "workflow_id": state_machine_event.workflow.workflow_id,
-                "source_state": event_data.source.value,
-                "target_state": event_data.target.value,
-                "transition_event": event_data.event.name,
-                "acting_user_id": state_machine_event.acting_user.user_id,
-            },
-        )
+        logger.info("Created workflow audit record for transition")
