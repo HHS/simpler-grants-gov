@@ -1,9 +1,8 @@
-import math
 import uuid
 from collections.abc import Sequence
 
 from pydantic import BaseModel, Field
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
@@ -16,11 +15,8 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.db.models.user_models import User
-from src.pagination.pagination_models import (
-    PaginationInfo,
-    PaginationParams,
-    SortOrder,
-)
+from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
+from src.pagination.paginator import Paginator
 from src.services.opportunities_grantor_v1.get_agency import get_agency
 from src.services.service_utils import apply_sorting
 
@@ -78,33 +74,22 @@ def list_opportunities_with_filters(
     # Apply sorting in the database query
     stmt = apply_sorting(stmt, Opportunity, params.pagination.sort_order)
 
-    # Get total count for pagination
-    count_stmt = select(func.count()).select_from(
-        select(Opportunity.opportunity_id).where(Opportunity.agency_id == agency_id).subquery()
+    # Use the paginator
+    paginator = Paginator(
+        table_model=Opportunity,
+        stmt=stmt,
+        db_session=db_session,
+        page_size=params.pagination.page_size,
     )
-    total_records = db_session.execute(count_stmt).scalar_one()
 
-    # Apply pagination
-    offset = (params.pagination.page_offset - 1) * params.pagination.page_size
-    stmt = stmt.offset(offset).limit(params.pagination.page_size)
+    opportunities = paginator.page_at(params.pagination.page_offset)
 
-    # Execute query to get all opportunities
-    opportunities = db_session.execute(stmt).scalars().all()
-
-    # Placeholder to apply filters if needed
-    # if params.filters:
-    #     opportunities = [
-    #         opportunity for opportunity in opportunities
-    #         if filter_condition(opportunity)
-    #     ]
-
-    # Pagination
-    total_pages = math.ceil(total_records / params.pagination.page_size) if total_records > 0 else 0
+    # Create pagination info
     pagination_info = PaginationInfo(
-        total_records=total_records,
+        total_records=paginator.total_records,
         page_offset=params.pagination.page_offset,
         page_size=params.pagination.page_size,
-        total_pages=total_pages,
+        total_pages=paginator.total_pages,
         sort_order=[SortOrder(p.order_by, p.sort_direction) for p in params.pagination.sort_order],
     )
 
