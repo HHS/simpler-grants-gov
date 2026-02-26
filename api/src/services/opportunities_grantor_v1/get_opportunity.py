@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import ColumnExpressionArgument, select
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
@@ -27,11 +27,11 @@ def check_opportunity_number_exists(db_session: db.Session, opportunity_number: 
 
 
 def _get_opportunity_for_grantors(
-    db_session: db.Session, where_clause: ColumnExpressionArgument[bool]
+    db_session: db.Session, opportunity_id: uuid.UUID
 ) -> Opportunity | None:
     stmt = (
         select(Opportunity)
-        .where(where_clause)
+        .where(Opportunity.opportunity_id == opportunity_id)
         .options(
             selectinload(Opportunity.all_opportunity_summaries).options(
                 selectinload(OpportunitySummary.link_funding_instruments),
@@ -58,7 +58,7 @@ def get_opportunity_for_grantors(
 ) -> Opportunity:
     opportunity = _get_opportunity_for_grantors(
         db_session,
-        where_clause=Opportunity.opportunity_id == opportunity_id,
+        opportunity_id,
     )
     if opportunity is None:
         raise_flask_error(404, message=f"Could not find Opportunity with ID {opportunity_id}")
