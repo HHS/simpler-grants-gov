@@ -17,7 +17,6 @@ import {
 
 import { SimplerModal } from "src/components/SimplerModal";
 import { USWDSIcon } from "src/components/USWDSIcon";
-import { IneligibleApplicationStart } from "./IneligibleStartApplicationModal";
 import { StartApplicationDescription } from "./StartApplicationDescription";
 import { StartApplicationInfoBanner } from "./StartApplicationInfoBanner";
 import {
@@ -56,50 +55,36 @@ export const StartApplicationModal = ({
   const [savedApplicationName, setSavedApplicationName] = useState<string>();
   const [selectedOrganization, setSelectedOrganization] = useState<string>();
   const [error, setError] = useState<string>();
-  const [updating, setUpdating] = useState<boolean>();
+  const [updating, setUpdating] = useState<boolean>(false);
 
   const validateSubmission = useCallback((): boolean => {
-    let valid = !!token;
+    let isValidToken = Boolean(token);
 
-    setOrgValidationError("");
     setNameValidationError("");
+    setOrgValidationError("");
 
     if (!savedApplicationName) {
       setNameValidationError(t("fields.name.validationError"));
-      valid = false;
+      isValidToken = false;
     }
 
-    // Check if individual or not-listed was selected
-    const isIndividualSelected =
-      selectedOrganization === SPECIAL_VALUES.INDIVIDUAL;
-    const isNotListedSelected =
-      selectedOrganization === SPECIAL_VALUES.NOT_LISTED;
-
-    // Skip organization validation if:
-    // 1. Competition is individual-only (no org dropdown shown)
-    // 2. User explicitly selected individual or not-listed
-    const skipOrgValidation =
-      !applicantTypes.includes("organization") ||
-      isIndividualSelected ||
-      isNotListedSelected;
-
-    if (!skipOrgValidation && !selectedOrganization) {
+    if (applicantTypes.includes("organization") && !selectedOrganization) {
       setOrgValidationError(t("fields.organizationSelect.validationError"));
-      valid = false;
+      isValidToken = false;
     }
 
-    return valid;
-  }, [token, savedApplicationName, selectedOrganization, applicantTypes, t]);
+    return isValidToken;
+  }, [applicantTypes, savedApplicationName, selectedOrganization, t, token]);
 
   const handleSubmit = useCallback(() => {
-    const valid = validateSubmission();
-    if (!valid) {
+    const isValidSubmission = validateSubmission();
+    if (!isValidSubmission) {
       return;
     }
     setUpdating(true);
-
     // Determine organization_id to send to API
     let organizationToSend: string | undefined;
+
     if (
       selectedOrganization === SPECIAL_VALUES.INDIVIDUAL ||
       selectedOrganization === SPECIAL_VALUES.NOT_LISTED
@@ -149,6 +134,7 @@ export const StartApplicationModal = ({
     setNameValidationError("");
     setOrgValidationError("");
     setSavedApplicationName("");
+    setSelectedOrganization("");
   }, []);
 
   const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,22 +148,6 @@ export const StartApplicationModal = ({
     [],
   );
 
-  // Only show ineligible screen if there's no API error and legitimately no organizations
-  if (
-    !organizationsError &&
-    !organizations.length &&
-    !applicantTypes.includes("individual")
-  ) {
-    return (
-      <IneligibleApplicationStart
-        modalRef={modalRef}
-        cancelText={t("cancelButtonText")}
-        onClose={onClose}
-        organizations={organizations}
-        applicantTypes={applicantTypes}
-      />
-    );
-  }
   return (
     <SimplerModal
       modalRef={modalRef}
@@ -220,7 +190,7 @@ export const StartApplicationModal = ({
       <hr className="margin-y-2 border-base-lighter" />
       <StartApplicationInfoBanner />
       {applicantTypes.includes("organization") ? (
-        <FormGroup error={!!orgValidationError} className="margin-top-1">
+        <FormGroup error={Boolean(orgValidationError)} className="margin-top-1">
           <StartApplicationOrganizationInput
             onOrganizationChange={onOrganizationChange}
             validationError={orgValidationError}
@@ -230,7 +200,7 @@ export const StartApplicationModal = ({
           />
         </FormGroup>
       ) : null}
-      <FormGroup error={!!nameValidationError} className="margin-top-1">
+      <FormGroup error={Boolean(nameValidationError)} className="margin-top-1">
         <StartApplicationNameInput
           validationError={nameValidationError}
           onNameChange={onNameChange}
@@ -242,7 +212,7 @@ export const StartApplicationModal = ({
           onClick={handleSubmit}
           type="button"
           data-testid="application-start-save"
-          disabled={!!loading || !!organizationsError}
+          disabled={Boolean(loading || updating || organizationsError)}
         >
           <USWDSIcon
             name="add"

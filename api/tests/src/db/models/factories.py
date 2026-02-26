@@ -1548,7 +1548,7 @@ class ApplicationAttachmentFactory(BaseFactory):
     @classmethod
     def _build(cls, model_class, *args, **kwargs):
         kwargs.pop("file_contents")  # Don't file for build strategy
-        super()._build(model_class, *args, **kwargs)
+        return super()._build(model_class, *args, **kwargs)
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
@@ -3122,6 +3122,17 @@ class OrganizationAuditFactory(BaseFactory):
         )
 
 
+class OrganizationSavedOpportunityFactory(BaseFactory):
+    class Meta:
+        model = entity_models.OrganizationSavedOpportunity
+
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+
 class SuppressedEmailFactory(BaseFactory):
     class Meta:
         model = user_models.SuppressedEmail
@@ -3212,11 +3223,18 @@ class WorkflowApprovalFactory(BaseFactory):
         model = WorkflowApproval
 
     workflow_approval_id = Generators.UuidObj
+
+    workflow = factory.SubFactory(WorkflowFactory)
+    workflow_id = factory.LazyAttribute(lambda a: a.workflow.workflow_id)
+
     approving_user = factory.SubFactory(UserFactory)
-    approving_user_id = factory.LazyAttribute(lambda o: o.approving_user.user_id)
+    approving_user_id = factory.LazyAttribute(lambda a: a.approving_user.user_id)
     approval_type = factory.fuzzy.FuzzyChoice(ApprovalType)
     is_still_valid = True
-    approval_response_type = factory.fuzzy.FuzzyChoice(ApprovalResponseType)
+    approval_response_type = ApprovalResponseType.APPROVED
+
+    event = factory.SubFactory(WorkflowEventHistoryFactory)
+    event_id = factory.LazyAttribute(lambda a: a.event.event_id)
 
 
 class WorkflowOpportunityFactory(BaseFactory):

@@ -150,7 +150,8 @@ const ApplicationContainer = ({
         </Alert>
       )}
       {validationErrors.length > 0 &&
-        applicationDetails.application_status === "in_progress" &&
+        applicationDetails.application_status ===
+          ApplicationStatus.IN_PROGRESS &&
         !success && (
           <ApplicationValidationAlert
             applicationForms={applicationForms}
@@ -162,8 +163,8 @@ const ApplicationContainer = ({
         applicationDetails={applicationDetails}
         applicationSubmitHandler={handleSubmit}
         applicationSubmitted={
-          applicationStatus === "submitted" ||
-          applicationStatus === "accepted" ||
+          applicationStatus === ApplicationStatus.SUBMITTED ||
+          applicationStatus === ApplicationStatus.ACCEPTED ||
           success
         }
         submissionLoading={loading}

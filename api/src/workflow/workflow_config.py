@@ -1,12 +1,14 @@
 import dataclasses
 
-from src.constants.lookup_constants import WorkflowEntityType, WorkflowType
+from src.constants.lookup_constants import ApprovalType, Privilege, WorkflowEntityType, WorkflowType
 from src.workflow.state_persistence.base_state_persistence_model import BaseStatePersistenceModel
 
 
 @dataclasses.dataclass
 class ApprovalConfig:
-    pass
+    approval_type: ApprovalType
+    required_privileges: list[Privilege]
+    minimum_approvals_required: int = 1
 
 
 @dataclasses.dataclass
@@ -21,4 +23,5 @@ class WorkflowConfig:
     # For now, this assumes exactly 1 of the entity type
     entity_types: list[WorkflowEntityType] = dataclasses.field(default_factory=list)
 
+    # A mapping of events to approval configs
     approval_mapping: dict[str, ApprovalConfig] = dataclasses.field(default_factory=dict)

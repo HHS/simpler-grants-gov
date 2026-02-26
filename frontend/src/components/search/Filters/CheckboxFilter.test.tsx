@@ -1,7 +1,6 @@
-import { fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { initialFilterOptions } from "src/utils/testing/fixtures";
-import { render, screen } from "tests/react-utils";
 
 import React from "react";
 
@@ -100,7 +99,7 @@ describe("CheckboxFilter", () => {
     const accordionToggleButton = screen.getByRole("button");
     fireEvent.click(accordionToggleButton);
     const anyCheckbox = screen.getByRole("checkbox", {
-      name: "Any test accordion",
+      name: "any test accordion",
     });
     expect(anyCheckbox).toBeInTheDocument();
   });

@@ -19,6 +19,14 @@ const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
 const baseUrl = BASE_URLS[targetEnv] || BASE_URLS.local;
 
+// Test organization labels for each environment
+const TEST_ORG_LABELS: Record<string, string> = {
+  local: "Sally's Soup Emporium",
+  staging: "Automatic staging Organization for UEI AUTOHQDCCHBY",
+};
+
+const testOrgLabel = TEST_ORG_LABELS[targetEnv];
+
 // Environment for web server
 const webServerEnv: Record<string, string> = Object.fromEntries(
   Object.entries({
@@ -31,6 +39,7 @@ const playwrightEnv = {
   webServerEnv,
   baseUrl,
   targetEnv,
+  testOrgLabel,
   isCi: process.env.CI,
   totalShards: process.env.TOTAL_SHARDS,
   currentShard: process.env.CURRENT_SHARD,
