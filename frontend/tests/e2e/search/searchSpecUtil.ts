@@ -12,7 +12,12 @@ import {
 
 const { targetEnv } = playwrightEnv;
 
-const FILTER_OPTIONS_TIMEOUT = targetEnv === "staging" ? 30000 : 10000;
+const FILTER_OPTIONS_TIMEOUT = targetEnv === "staging" ? 30000 : 20000;
+
+// Detect browser type for Firefox-specific handling
+const isBrowserFirefox = (page: Page): boolean => {
+  return page.context().browser()?.browserType().name() === "firefox";
+};
 
 export async function toggleFilterDrawer(page: Page) {
   const modalOpen = await page
@@ -44,11 +49,31 @@ export function getSearchInput(page: Page) {
 export async function fillSearchInputAndSubmit(term: string, page: Page) {
   const searchInput = getSearchInput(page);
   const submitButton = page.locator(".usa-search > button[type='submit']");
+  
+  // Firefox/Webkit need extra handling
+  const browserType = page.context().browser()?.browserType().name();
+  if (browserType === "firefox" || browserType === "webkit") {
+    await searchInput.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+  }
+  
   // this needs to be `pressSequentially` rather than `fill` because `fill` was not
   // reliably triggering onChange handlers in webkit
   await searchInput.pressSequentially(term);
-  await expect(searchInput).toHaveValue(term);
-  await submitButton.click();
+  await expect(searchInput).toHaveValue(term, { timeout: 10000 });
+  
+  // Webkit needs extra wait before clicking submit
+  if (browserType === "webkit") {
+    await page.waitForTimeout(500);
+    // For Webkit, wait for URL to change after clicking
+    await Promise.all([
+      page.waitForURL(/.*query=.*/, { timeout: 30000 }).catch(() => {}),
+      submitButton.click(),
+    ]);
+    await page.waitForTimeout(1000);
+  } else {
+    await submitButton.click();
+  }
 }
 
 export function expectURLContainsQueryParam(
@@ -125,10 +150,23 @@ export async function toggleCheckboxes(
 
 export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBox = page.locator(`label[for=${idWithoutHash}]`);
-  const timeout = targetEnv === "staging" ? 120000 : 15000;
+  const timeout = targetEnv === "staging" ? 120000 : 20000;
+  
+  // Webkit needs extra handling for visibility
+  const browserType = page.context().browser()?.browserType().name();
+  if (browserType === "webkit") {
+    await checkBox.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+  }
+  
   await checkBox.waitFor({ state: "visible", timeout });
   await expect(checkBox).toBeEnabled();
   await checkBox.click();
+  
+  // Webkit needs extra wait after click
+  if (browserType === "webkit") {
+    await page.waitForTimeout(300);
+  }
 }
 
 export async function selectSortBy(
@@ -326,10 +364,31 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
   const filterButton = page.locator(
     `button[aria-controls="opportunity-filter-${filterType}"]`,
   );
-  await filterButton.waitFor({
-    state: "visible",
-    timeout: FILTER_OPTIONS_TIMEOUT,
-  });
+  
+  // Firefox and Webkit need extra scroll/wait handling for visibility
+  const browserType = page.context().browser()?.browserType().name();
+  if (browserType === "firefox" || browserType === "webkit") {
+    await filterButton.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+  }
+  
+  // For concurrent test execution, we need to be more patient
+  // Try to wait for it to be visible, but handle cases where it might be hidden by other elements
+  try {
+    await filterButton.waitFor({
+      state: "visible",
+      timeout: FILTER_OPTIONS_TIMEOUT,
+    });
+  } catch (e) {
+    // If visibility check fails, try scrolling again and waiting
+    await filterButton.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    await filterButton.waitFor({
+      state: "attached",
+      timeout: FILTER_OPTIONS_TIMEOUT,
+    });
+  }
+  
   await filterButton.click();
 
   const filterOptions = page.locator(`input[name="${filterType}-*"]`);

@@ -16,9 +16,34 @@ import {
 } from "tests/e2e/search/searchSpecUtil";
 
 const searchTerm = "education";
+
+// Old test filter values (multi-value for full coverage)
+const statusCheckboxesMulti = {
+  "status-closed": "closed",
+  "status-forecasted": "forecasted",
+  "status-posted": "posted",
+};
+
+const fundingInstrumentCheckboxesMulti = {
+  "funding-instrument-grant": "grant",
+  "funding-instrument-other": "other",
+};
+
+const eligibilityCheckboxesMulti = {
+  "eligibility-county_governments": "county_governments",
+  "eligibility-state_governments": "state_governments",
+};
+
+const categoryCheckboxesMulti = {
+  "category-agriculture": "agriculture",
+  "category-recovery_act": "recovery_act",
+};
+
+// Simplified filter values (single-value for stability)
 const statusCheckboxes = {
   "status-closed": "closed",
 };
+
 const fundingInstrumentCheckboxes = {
   "funding-instrument-grant": "grant",
 };
@@ -26,6 +51,7 @@ const fundingInstrumentCheckboxes = {
 const eligibilityCheckboxes = {
   "eligibility-county_governments": "county_governments",
 };
+
 const categoryCheckboxes = {
   "category-agriculture": "agriculture",
 };
@@ -69,6 +95,14 @@ const ensureAccordionExpanded = async (
     `button.usa-accordion__button:has-text("${accordionTitle}")`,
   );
   await button.waitFor({ state: "visible", timeout: 15000 });
+  
+  // Firefox needs extra scroll/wait handling
+  const browserType = page.context().browser()?.browserType().name();
+  if (browserType === "firefox" || browserType === "webkit") {
+    await button.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+  }
+  
   const expanded = await button.getAttribute("aria-expanded");
   if (expanded !== "true") {
     await button.click();
@@ -379,6 +413,114 @@ test.describe("Search page - state persistence after refresh", () => {
     expectURLQueryParamValues(page, "agency", [agencyId]);
     expectURLQueryParamValues(page, "category", [
       "agriculture",
+    ]);
+  });
+
+  // Full coverage test matching the original mega-test with all multi-value filters
+  // This test covers all filter combinations from the old test
+  // PR: search-sort-state-persistence - Full filter coverage test
+  test("should retain all multi-value filters and inputs after refresh", async ({
+    page,
+  }, { project }) => {
+    const isMobile = !!project.name.match(/[Mm]obile/);
+    
+    // Navigate to search
+    await goToSearch(page);
+    await waitForSearchResultsInitialLoad(page);
+
+    // Set search input and sort
+    await fillSearchInputAndSubmit(searchTerm, page);
+    if (isMobile) {
+      await ensureFilterDrawerOpen(page);
+    }
+    await selectSortBy(page, "awardCeilingDesc", isMobile);
+    if (!isMobile) {
+      await ensureFilterDrawerOpen(page);
+    }
+
+    // Set all filters with MULTIPLE values (comprehensive coverage)
+    await ensureAccordionExpanded(page, "Opportunity status");
+    await toggleCheckboxGroup(
+      page,
+      statusCheckboxesMulti,
+    );
+
+    await ensureAccordionExpanded(page, "Funding instrument");
+    await toggleCheckboxGroup(
+      page,
+      fundingInstrumentCheckboxesMulti,
+    );
+
+    await ensureAccordionExpanded(page, "Eligibility");
+    await toggleCheckboxGroup(
+      page,
+      eligibilityCheckboxesMulti,
+    );
+
+    await ensureAccordionExpanded(page, "Agency");
+    const agencyId = await getFirstNonNumericAgencyCheckboxId(page);
+    expect(agencyId).toBeTruthy();
+    if (!agencyId) {
+      throw new Error("Could not find agency checkbox");
+    }
+    const agencyCheckboxes = { [agencyId]: agencyId };
+    await toggleCheckboxGroup(page, agencyCheckboxes);
+
+    await ensureAccordionExpanded(page, "Category");
+    await toggleCheckboxGroup(
+      page,
+      categoryCheckboxesMulti,
+    );
+
+    // Refresh and verify all filters persist with multiple values
+    await refreshPageWithCurrentURL(page);
+    await waitForSearchResultsInitialLoad(page);
+
+    if (isMobile) {
+      await ensureFilterDrawerOpen(page);
+    }
+    await expectSortBy(page, "awardCeilingDesc", isMobile);
+    const searchInput = getSearchInput(page);
+    await expect(searchInput).toHaveValue(searchTerm, { timeout: 60000 });
+
+    if (!isMobile) {
+      await ensureFilterDrawerOpen(page);
+    }
+
+    // Verify all multi-value filters are retained
+    await ensureAccordionExpanded(page, "Opportunity status");
+    await expectCheckboxesChecked(page, statusCheckboxesMulti);
+
+    await ensureAccordionExpanded(page, "Funding instrument");
+    await expectCheckboxesChecked(page, fundingInstrumentCheckboxesMulti);
+
+    await ensureAccordionExpanded(page, "Eligibility");
+    await expectCheckboxesChecked(page, eligibilityCheckboxesMulti);
+
+    await ensureAccordionExpanded(page, "Agency");
+    await expectCheckboxesChecked(page, agencyCheckboxes);
+
+    await ensureAccordionExpanded(page, "Category");
+    await expectCheckboxesChecked(page, categoryCheckboxesMulti);
+
+    // Verify URL has all multi-value filter params
+    expectURLQueryParamValues(page, "status", [
+      "closed",
+      "forecasted",
+      "posted",
+    ]);
+    expectURLQueryParamValues(page, "fundingInstrument", [
+      "grant",
+      "other",
+    ]);
+    expectURLQueryParamValues(page, "eligibility", [
+      "county_governments",
+      "state_governments",
+    ]);
+    expectURLQueryParamValues(page, "agency", [agencyId]);
+    expectURLQueryParamValues(page, "category", [
+      "agriculture",
+      "recovery_act",
     ]);
   });
 });
