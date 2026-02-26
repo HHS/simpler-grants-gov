@@ -1,13 +1,13 @@
 import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
 
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import AwardRecommendationStatusTag from "./AwardRecommendationStatusTag";
 
 export default async function AwardRecommendationHero() {
-  const t = useTranslations("AwardRecommendation");
+  const t = await getTranslations("AwardRecommendation");
   const { recordNumber, datePrepared, status } =
     await getAwardRecommendationDetails();
 

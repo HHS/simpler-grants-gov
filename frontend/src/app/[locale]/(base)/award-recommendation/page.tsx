@@ -14,9 +14,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import ContentDisplayToggle from "src/components/ContentDisplayToggle";
-
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
+import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;

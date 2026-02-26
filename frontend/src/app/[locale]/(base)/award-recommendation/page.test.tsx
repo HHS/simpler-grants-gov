@@ -61,7 +61,7 @@ jest.mock("src/components/award-recommendation/AwardRecommendationHero", () => {
   const React = jest.requireActual<typeof import("react")>("react");
   return {
     __esModule: true,
-    default: () => <div data-testid="award-recommendation-hero-mock" />
+    default: () => <div data-testid="award-recommendation-hero-mock" />,
   };
 });
 

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
+import { identity } from "lodash";
 
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
 
@@ -14,8 +14,8 @@ jest.mock("react", () => ({
   })),
 }));
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
+jest.mock("next-intl/server", () => ({
+  getTranslations: () => identity,
 }));
 
 jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
@@ -39,6 +39,11 @@ describe("AwardRecommendationHero", () => {
     expect(
       screen.getByTestId("award-recommendation-status-in-progress"),
     ).toBeInTheDocument();
+  });
+
+  it("renders buttons", async () => {
+    const component = await AwardRecommendationHero();
+    render(component);
 
     const buttons = screen.getAllByRole("button");
     expect(buttons.length).toEqual(2);
