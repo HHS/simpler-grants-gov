@@ -27,3 +27,5 @@ threads = 4
 
 # timeout to 80 seconds
 timeout = 80
+# timeout for graceful dirty worker shutdown
+dirty_graceful_timeout = 120
