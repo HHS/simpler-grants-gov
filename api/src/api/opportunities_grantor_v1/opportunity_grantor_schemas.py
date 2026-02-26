@@ -95,10 +95,6 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
         },
     )
 
-
-class OpportunityGrantorWithAttachmentsSchema(OpportunityGrantorSchema):
-    """Schema for opportunity data in grantor-facing API responses with attachments and competitions"""
-
     attachments = fields.List(
         fields.Nested(OpportunityAttachmentV1Schema),
         attribute="opportunity_attachments",
@@ -154,7 +150,7 @@ class OpportunityGetResponseSchema(AbstractResponseSchema):
     }
     """
 
-    data = fields.Nested(OpportunityGrantorWithAttachmentsSchema())
+    data = fields.Nested(OpportunityGrantorSchema())
 
 
 class OpportunityListRequestSchema(Schema):
