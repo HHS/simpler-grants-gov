@@ -48,7 +48,7 @@ def _get_opportunity_for_grantors(
         )
     )
 
-    opportunity = db_session.execute(stmt).unique().scalar_one_or_none()
+    opportunity = db_session.execute(stmt).scalar_one_or_none()
 
     return opportunity
 
