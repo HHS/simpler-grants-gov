@@ -439,3 +439,9 @@ class LegacyUsersListResponseSchema(AbstractResponseSchema, PaginationMixinSchem
         fields.Nested(LegacyUserDataSchema),
         metadata={"description": "List of legacy users"},
     )
+
+
+class OrganizationDeleteSavedOpportunityResponseSchema(AbstractResponseSchema):
+    """Schema for DELETE /organizations/:organization_id/saved-opportunities/:opportunity_id response"""
+
+    data = fields.Raw(allow_none=True, metadata={"description": "No data returned", "example": {}})
