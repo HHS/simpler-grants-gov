@@ -17,7 +17,7 @@ class TestOrganizationDeleteSavedOpportunity:
         """Deleting an existing saved opportunity returns 200"""
         opportunity = OpportunityFactory.create(is_draft=False)
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES],
             db_session=db_session,
         )
         OrganizationSavedOpportunityFactory.create(
@@ -46,7 +46,7 @@ class TestOrganizationDeleteSavedOpportunity:
         """Deleting a non-existent saved opportunity (valid IDs) returns 200 gracefully"""
         opportunity = OpportunityFactory.create(is_draft=False)
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES],
             db_session=db_session,
         )
 
@@ -120,7 +120,7 @@ class TestOrganizationDeleteSavedOpportunity:
     ):
         """Non-existent opportunity returns 404"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES],
             db_session=db_session,
         )
 

@@ -5,10 +5,12 @@ from sqlalchemy import select
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
+from src.auth.endpoint_access_util import check_user_access
+from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import OrganizationSavedOpportunity
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
-from src.services.organizations_v1.get_organization import get_organization_and_verify_access
+from src.services.organizations_v1.get_organization import get_organization
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +27,8 @@ def delete_organization_saved_opportunity(
     Validates the organization and opportunity exist, checks user access,
     then removes the saved opportunity if present (graceful if not found).
     """
-    get_organization_and_verify_access(db_session, user, organization_id)
+    organization = get_organization(db_session, organization_id)
+    check_user_access(db_session, user, {Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES}, organization)
 
     opportunity = db_session.execute(
         select(Opportunity).where(Opportunity.opportunity_id == opportunity_id)
