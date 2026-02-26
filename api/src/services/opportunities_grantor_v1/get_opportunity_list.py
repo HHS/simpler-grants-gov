@@ -1,10 +1,9 @@
 import math
 import uuid
 from collections.abc import Sequence
-from typing import Any
 
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
@@ -21,9 +20,9 @@ from src.pagination.pagination_models import (
     PaginationInfo,
     PaginationParams,
     SortOrder,
-    SortOrderParams,
 )
 from src.services.opportunities_grantor_v1.get_agency import get_agency
+from src.services.service_utils import apply_sorting
 
 
 class OpportunityFilterSchema(BaseModel):
@@ -40,74 +39,6 @@ class ListOpportunitiesParams(BaseModel):
         default_factory=lambda: PaginationParams(page_offset=1, page_size=25)
     )
     filters: OpportunityFilterSchema | None = Field(default=None)
-
-
-def apply_sorting_python(items: Sequence[Any], sort_order: list[SortOrderParams]) -> Sequence[Any]:
-    """
-    Generic multi-field sorting for Python objects.
-
-    Args:
-        items: A sequence of Python objects
-        sort_order: A list of sort rules where each rule contains:
-            - order_by: attribute name (supports dotted paths like "user.email")
-            - sort_direction: "ascending" | "descending"
-
-    Returns:
-        A new, sorted list of items.
-    """
-    # Apply sorts in reverse order
-    for rule in reversed(sort_order):
-        attr_path = rule.order_by
-        reverse = rule.sort_direction == "descending"
-
-        def get_value(obj: Any, path: str = attr_path) -> Any:
-            """Traverse dotted attributes safely (e.g., 'user.profile.email')."""
-            value = obj
-            for part in path.split("."):
-                value = getattr(value, part, None)
-                if value is None:
-                    break
-            return value
-
-        # Sort with safe handling for None (None always goes last)
-        items = sorted(
-            items,
-            key=lambda i: (get_value(i) is None, get_value(i)),
-            reverse=reverse,
-        )
-
-    return items
-
-
-def paginate_python(
-    items: Sequence[Any], page_offset: int, page_size: int, sort_order: list[SortOrderParams]
-) -> tuple[Sequence[Any], PaginationInfo]:
-    """
-    Paginate a list of Python objects.
-
-    Args:
-        items: A list of Python objects
-        page_offset: The offset of the current page
-        page_size: The size of the current page
-        sort_order: Sorting rules applied
-
-    Returns:
-        Paginated list of items
-        PaginationInfo Object
-    """
-    total_records = len(items)
-    total_pages = math.ceil(total_records / page_size) if total_records > 0 else 0
-    start = (page_offset - 1) * page_size
-    end = start + page_size
-    page_items = items[start:end]
-
-    return page_items, PaginationInfo(
-        total_records=total_records,
-        page_offset=page_offset,
-        page_size=page_size,
-        total_pages=total_pages,
-        sort_order=[SortOrder(p.order_by, p.sort_direction) for p in sort_order],
-    )
 
 
 def list_opportunities_with_filters(
@@ -144,29 +75,40 @@ def list_opportunities_with_filters(
         .where(Opportunity.agency_id == agency_id)
     )
 
+    # Apply sorting in the database query
+    stmt = apply_sorting(stmt, Opportunity, params.pagination.sort_order)
+
+    # Get total count for pagination
+    count_stmt = select(func.count()).select_from(
+        select(Opportunity.opportunity_id).where(Opportunity.agency_id == agency_id).subquery()
+    )
+    total_records = db_session.execute(count_stmt).scalar_one()
+
+    # Apply pagination
+    offset = (params.pagination.page_offset - 1) * params.pagination.page_size
+    stmt = stmt.offset(offset).limit(params.pagination.page_size)
+
     # Execute query to get all opportunities
     opportunities = db_session.execute(stmt).scalars().all()
 
-    # TODO : Remove if not needed.
-    # Apply filters if needed
+    # Placeholder to apply filters if needed
     # if params.filters:
     #     opportunities = [
     #         opportunity for opportunity in opportunities
     #         if filter_condition(opportunity)
     #     ]
 
-    # Apply sort using Python
-    opportunities = apply_sorting_python(opportunities, params.pagination.sort_order)
-
     # Pagination
-    paginated_opportunities, pagination_info = paginate_python(
-        opportunities,
-        params.pagination.page_offset,
-        params.pagination.page_size,
-        params.pagination.sort_order,
+    total_pages = math.ceil(total_records / params.pagination.page_size) if total_records > 0 else 0
+    pagination_info = PaginationInfo(
+        total_records=total_records,
+        page_offset=params.pagination.page_offset,
+        page_size=params.pagination.page_size,
+        total_pages=total_pages,
+        sort_order=[SortOrder(p.order_by, p.sort_direction) for p in params.pagination.sort_order],
     )
 
-    return paginated_opportunities, pagination_info
+    return opportunities, pagination_info
 
 
 def get_opportunity_list_for_grantors(
