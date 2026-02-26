@@ -17,7 +17,12 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.db.models.user_models import User
-from src.pagination.pagination_models import PaginationInfo, SortOrder, SortOrderParams
+from src.pagination.pagination_models import (
+    PaginationInfo,
+    PaginationParams,
+    SortOrder,
+    SortOrderParams,
+)
 from src.services.opportunities_grantor_v1.get_agency import get_agency
 
 
@@ -28,22 +33,12 @@ class OpportunityFilterSchema(BaseModel):
     pass
 
 
-class OpportunityPaginationParams(BaseModel):
-    """Pagination parameters for opportunity list"""
-
-    sort_order: list[SortOrderParams] = Field(
-        default_factory=lambda: [
-            SortOrderParams(order_by="opportunity_id", sort_direction="ascending")
-        ]
-    )
-    page_size: int = Field(default=25)
-    page_offset: int = Field(default=1)
-
-
 class ListOpportunitiesParams(BaseModel):
     """Parameters for listing opportunities"""
 
-    pagination: OpportunityPaginationParams = Field(default_factory=OpportunityPaginationParams)
+    pagination: PaginationParams = Field(
+        default_factory=lambda: PaginationParams(page_offset=1, page_size=25)
+    )
     filters: OpportunityFilterSchema | None = Field(default=None)
 
 
