@@ -7,7 +7,15 @@ import {
   OpportunityApiResponse,
 } from "src/types/opportunity/opportunityResponseTypes";
 import { mockOpportunity } from "src/utils/testing/fixtures";
-import { localeParams, mockUseTranslations } from "src/utils/testing/intlMocks";
+import {
+  localeParams,
+  mockUseTranslations,
+  useTranslationsMock,
+} from "src/utils/testing/intlMocks";
+
+jest.mock("next-intl", () => ({
+  useTranslations: () => useTranslationsMock(),
+}));
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => mockUseTranslations,

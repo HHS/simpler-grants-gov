@@ -2,6 +2,7 @@
 
 import { Organization } from "src/types/applicationResponseTypes";
 
+import { useTranslations } from "next-intl";
 import { RefObject } from "react";
 import {
   Alert,
@@ -13,7 +14,6 @@ import {
 } from "@trussworks/react-uswds";
 
 import { SimplerModal } from "src/components/SimplerModal";
-import { useTranslations } from "next-intl";
 
 const MODAL_ID = "share-opportunity-to-organizations";
 
@@ -34,7 +34,7 @@ export function ShareOpportunityToOrganizationsModal({
   hasOrganizationsError,
   opportunityTitle,
 }: ShareOpportunityToOrganizationsModalProps) {
-  const t = useTranslations("ShareOpportunityToOrganization")
+  const t = useTranslations("ShareOpportunityToOrganization");
   const modalContent = () => {
     if (hasOrganizationsError) {
       return (
@@ -53,14 +53,17 @@ export function ShareOpportunityToOrganizationsModal({
     }
 
     return (
-      <Fieldset legend="Which organization should see this?" className="display-block">
+      <Fieldset
+        legend="Which organization should see this?"
+        className="display-block"
+      >
         <ul className="padding-0 margin-0">
           {organizations.map((organization) => {
             const isDisabled = true;
 
             return (
               <li
-                  key={organization.organization_id}
+                key={organization.organization_id}
                 className={[
                   "display-block",
                   "border",
@@ -102,10 +105,12 @@ export function ShareOpportunityToOrganizationsModal({
 
       {opportunityTitle ? (
         <>
-        <p className="margin-top-1">
-          <strong>{t("modal.opportunity")} {opportunityTitle}</strong>
-        </p>
-        <hr />
+          <p className="margin-top-1">
+            <strong>
+              {t("modal.opportunity")} {opportunityTitle}
+            </strong>
+          </p>
+          <hr />
         </>
       ) : null}
 

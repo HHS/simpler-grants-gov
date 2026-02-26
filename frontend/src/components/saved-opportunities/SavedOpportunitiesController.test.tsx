@@ -25,7 +25,6 @@ const clientFetchMock = jest.fn();
 
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
-    // IMPORTANT: always return a Promise so `.then()` exists
     clientFetch: (...args: unknown[]) =>
       Promise.resolve(clientFetchMock(...args)) as unknown,
   }),
@@ -176,7 +175,6 @@ const mockOrganizations: UserOrganization[] = [
 
 describe("SavedOpportunitiesController", () => {
   beforeEach(() => {
-    // default: effect fetch resolves (so component can mount cleanly)
     clientFetchMock.mockResolvedValue([]);
   });
 
@@ -190,7 +188,7 @@ describe("SavedOpportunitiesController", () => {
     render(<SavedOpportunitiesController opportunities={mockOpportunities} />);
 
     const shareButtons = await screen.findAllByRole("button", {
-      name: "Share with organizations",
+      name: "callToAction.shareWithOrganization",
     });
 
     expect(shareButtons).toHaveLength(2);
@@ -204,7 +202,7 @@ describe("SavedOpportunitiesController", () => {
     expect(screen.queryByRole("dialog")).toHaveClass("is-hidden");
 
     const shareButtons = await screen.findAllByRole("button", {
-      name: "Share with organizations",
+      name: "callToAction.shareWithOrganization",
     });
 
     act(() => {
@@ -220,7 +218,7 @@ describe("SavedOpportunitiesController", () => {
     render(<SavedOpportunitiesController opportunities={mockOpportunities} />);
 
     const shareButtons = await screen.findAllByRole("button", {
-      name: "Share with organizations",
+      name: "callToAction.shareWithOrganization",
     });
 
     act(() => {
@@ -228,7 +226,11 @@ describe("SavedOpportunitiesController", () => {
     });
 
     const dialog = screen.getByRole("dialog");
-    expect(within(dialog).getByText("Opportunity Two")).toBeInTheDocument();
+    expect(
+      within(dialog).getByText((content) =>
+        content.includes("Opportunity Two"),
+      ),
+    ).toBeInTheDocument();
   });
 
   it("renders disabled checkboxes once organizations are loaded", async () => {
@@ -237,7 +239,7 @@ describe("SavedOpportunitiesController", () => {
     render(<SavedOpportunitiesController opportunities={mockOpportunities} />);
 
     const shareButtons = await screen.findAllByRole("button", {
-      name: "Share with organizations",
+      name: "callToAction.shareWithOrganization",
     });
 
     act(() => {

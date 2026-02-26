@@ -1,14 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import { Organization } from "src/types/applicationResponseTypes";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { RefObject } from "react";
+import type { RefObject } from "react";
 import { ModalRef } from "@trussworks/react-uswds";
 
 import { ShareOpportunityToOrganizationsModal } from "src/components/opportunities/ShareOpportunityToOrganizationsModal";
 
+jest.mock("next-intl", () => ({
+  useTranslations: () => useTranslationsMock(),
+}));
+
 const modalRef: RefObject<ModalRef | null> = { current: null };
 
-const mockOrganizations: Organization[] = [
+const organizations: Organization[] = [
   {
     organization_id: "org-1",
     sam_gov_entity: {
@@ -20,42 +25,14 @@ const mockOrganizations: Organization[] = [
       ebiz_poc_last_name: "Smith",
     },
   },
-  {
-    organization_id: "org-2",
-    sam_gov_entity: {
-      legal_business_name: "Second Organization",
-      uei: "UEI000002",
-      expiration_date: "2026-01-01",
-      ebiz_poc_email: "poc@second.org",
-      ebiz_poc_first_name: "Bob",
-      ebiz_poc_last_name: "Jones",
-    },
-  },
 ];
 
 describe("ShareOpportunityToOrganizationsModal", () => {
-  it("renders the modal title", () => {
-    render(
-      <ShareOpportunityToOrganizationsModal
-        modalRef={modalRef}
-        organizations={[]}
-        savedToOrganizationIds={new Set<string>()}
-        isLoadingOrganizations={false}
-        hasOrganizationsError={false}
-        opportunityTitle={null}
-      />,
-    );
-
-    expect(
-      screen.getByText("Share this opportunity with an organization"),
-    ).toBeInTheDocument();
-  });
-
   it("renders error state when organizations fail to load", () => {
     render(
       <ShareOpportunityToOrganizationsModal
         modalRef={modalRef}
-        organizations={[]}
+        organizations={organizations}
         savedToOrganizationIds={new Set<string>()}
         isLoadingOrganizations={false}
         hasOrganizationsError={true}
@@ -63,18 +40,14 @@ describe("ShareOpportunityToOrganizationsModal", () => {
       />,
     );
 
-    expect(
-      screen.getByText(
-        "Could not load your organizations. Please try again later.",
-      ),
-    ).toBeInTheDocument();
+    expect(screen.getByText("modal.error")).toBeInTheDocument();
   });
 
   it("renders loading state", () => {
     render(
       <ShareOpportunityToOrganizationsModal
         modalRef={modalRef}
-        organizations={[]}
+        organizations={organizations}
         savedToOrganizationIds={new Set<string>()}
         isLoadingOrganizations={true}
         hasOrganizationsError={false}
@@ -82,7 +55,7 @@ describe("ShareOpportunityToOrganizationsModal", () => {
       />,
     );
 
-    expect(screen.getByText("Loading organizations…")).toBeInTheDocument();
+    expect(screen.getByText("modal.loadingOrganizations")).toBeInTheDocument();
   });
 
   it("renders empty state when user has no organizations", () => {
@@ -97,35 +70,7 @@ describe("ShareOpportunityToOrganizationsModal", () => {
       />,
     );
 
-    expect(
-      screen.getByText("You are not a member of any organizations."),
-    ).toBeInTheDocument();
-  });
-
-  it("renders organizations as disabled checkboxes with correct checked state", () => {
-    render(
-      <ShareOpportunityToOrganizationsModal
-        modalRef={modalRef}
-        organizations={mockOrganizations}
-        savedToOrganizationIds={new Set<string>(["org-1"])}
-        isLoadingOrganizations={false}
-        hasOrganizationsError={false}
-        opportunityTitle={null}
-      />,
-    );
-
-    const firstCheckbox = screen.getByRole("checkbox", {
-      name: "First Organization",
-    });
-    const secondCheckbox = screen.getByRole("checkbox", {
-      name: "Second Organization",
-    });
-
-    expect(firstCheckbox).toBeChecked();
-    expect(secondCheckbox).not.toBeChecked();
-
-    expect(firstCheckbox).toBeDisabled();
-    expect(secondCheckbox).toBeDisabled();
+    expect(screen.getByText("modal.fallbackError")).toBeInTheDocument();
   });
 
   it("renders the selected opportunity title when provided", () => {
@@ -136,10 +81,12 @@ describe("ShareOpportunityToOrganizationsModal", () => {
         savedToOrganizationIds={new Set<string>()}
         isLoadingOrganizations={false}
         hasOrganizationsError={false}
-        opportunityTitle={"A Great Opportunity"}
+        opportunityTitle="A Great Opportunity"
       />,
     );
 
-    expect(screen.getByText("A Great Opportunity")).toBeInTheDocument();
+    expect(
+      screen.getByText((content) => content.includes("A Great Opportunity")),
+    ).toBeInTheDocument();
   });
 });

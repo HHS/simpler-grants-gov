@@ -271,7 +271,7 @@ export const messages = {
       loadingOrganizations: "Loading organizations...",
       fallbackError: "You are not a member of any organizations.",
       close: "Close",
-    }
+    },
   },
   Application: {
     title: "Application",
@@ -859,7 +859,7 @@ export const messages = {
     },
     callToAction: {
       title: "Search funding opportunities",
-      shareWithOrganization: "Share with organizations"
+      shareWithOrganization: "Share with organizations",
     },
     opportunitySaved: "Saved",
     resultsHeader: {
