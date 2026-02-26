@@ -169,13 +169,13 @@ class OpportunityListRequestSchema(Schema):
                 "opportunity_title",
                 "created_at",
             ],
-            default_sort_order=[{"order_by": "opportunity_id", "sort_direction": "ascending"}],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
             default_page_size=25,
             default_page_offset=1,
         ),
         required=True,
         metadata={
-            "description": "Pagination parameters for opportunity list (default sort: opportunity_id ascending)"
+            "description": "Pagination parameters for opportunity list (default sort: created_at descending)"
         },
     )
 
