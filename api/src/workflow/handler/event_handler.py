@@ -15,7 +15,7 @@ from src.workflow.listener.workflow_audit_listener import WorkflowAuditListener
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.workflow_service import (
     get_and_validate_workflow,
-    get_workflow_entities,
+    get_workflow_entity,
     is_event_valid_for_workflow,
 )
 from src.workflow.workflow_config import WorkflowConfig
@@ -147,7 +147,12 @@ class EventHandler:
 
         config, state_machine_cls = self._get_state_machine_for_workflow_type(context.workflow_type)
 
-        workflow_entities = get_workflow_entities(self.db_session, context.entities, config)
+        workflow_entity = get_workflow_entity(
+            self.db_session,
+            entity_type=context.entity_type,
+            entity_id=context.entity_id,
+            config=config,
+        )
 
         workflow = Workflow(
             workflow_id=uuid.uuid4(),
@@ -157,7 +162,7 @@ class EventHandler:
             # otherwise won't realize the StrEnum is also a string and error.
             current_workflow_state=state_machine_cls.initial_state.value,
             is_active=True,
-            **workflow_entities
+            **workflow_entity
         )
         self.db_session.add(workflow)
 

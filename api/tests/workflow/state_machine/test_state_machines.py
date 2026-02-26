@@ -39,7 +39,7 @@ class BasicState(StrEnum):
 basic_test_workflow_config = WorkflowConfig(
     workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
     persistence_model_cls=OpportunityPersistenceModel,
-    entity_types=[WorkflowEntityType.OPPORTUNITY],
+    entity_type=WorkflowEntityType.OPPORTUNITY,
     approval_mapping={
         # Program Officer Approvals
         "receive_program_officer_approval": ApprovalConfig(

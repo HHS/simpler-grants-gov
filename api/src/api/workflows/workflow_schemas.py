@@ -9,7 +9,10 @@ from src.constants.lookup_constants import WorkflowEntityType, WorkflowEventType
 from src.validation.validation_constants import ValidationErrorType
 
 
-class WorkflowEntitySchema(Schema):
+class StartWorkflowContextSchema(Schema):
+    workflow_type = fields.Enum(
+        WorkflowType, required=True, metadata={"description": "The type of workflow to initiate"}
+    )
     entity_type = fields.Enum(
         WorkflowEntityType,
         required=True,
@@ -20,18 +23,6 @@ class WorkflowEntitySchema(Schema):
     entity_id = fields.UUID(
         required=True,
         metadata={"description": "The ID of the entity, for example an opportunity_id"},
-    )
-
-
-class StartWorkflowContextSchema(Schema):
-    workflow_type = fields.Enum(
-        WorkflowType, required=True, metadata={"description": "The type of workflow to initiate"}
-    )
-    entities = fields.List(
-        fields.Nested(WorkflowEntitySchema),
-        required=True,
-        validate=[validators.Length(min=1, max=5)],
-        metadata={"description": "A list of entities (1-5) to associate with the workflow."},
     )
 
 
