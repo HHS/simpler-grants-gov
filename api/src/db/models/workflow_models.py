@@ -2,9 +2,8 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import CheckConstraint, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
@@ -30,6 +29,43 @@ class Workflow(ApiSchemaTable, TimestampMixin):
 
     __tablename__ = "workflow"
 
+    #############
+    # WARNING
+    #############
+    # Alembic (our tool that generates migrations) cannot detect if you make
+    # changes to this CheckConstraint. If you add a new column to this constraint,
+    # you MUST generate a new migration and then manually add the command to delete the old constraint
+    # and then add the new constraint.
+    #
+    # To do this, add the following to the upgrade() of the migration AFTER everything automatically generated
+    """
+        op.drop_constraint(
+        "workflow_exactly_one_nonnull_entity_check",
+        table_name="workflow",
+        schema="api",
+    )
+    op.create_check_constraint(
+        "workflow_exactly_one_nonnull_entity_check",
+        table_name="workflow",
+        schema="api",
+        # THIS NEEDS TO MATCH WHATEVER COLUMNS YOU ADDED BELOW
+        condition="num_nonnulls(opportunity_id, application_id, application_submission_id) = 1",
+    )
+    """
+    # In addition, you need to add the same thing to the downgrade() function
+    # but with the condition set to whatever it was before your change.
+    # Put this at the TOP of the downgrade before any column changes.
+    __table_args__ = (
+        CheckConstraint(
+            # This check constraint ensures that exactly 1 of the entity columns is not null, no more, no less.
+            "num_nonnulls(opportunity_id, application_id, application_submission_id) = 1",
+            name="exactly_one_nonnull_entity",
+        ),
+        # Need to define the table args like this to inherit whatever we set on the super table
+        # otherwise we end up overwriting things and Alembic remakes the whole table
+        ApiSchemaTable.__table_args__,
+    )
+
     workflow_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
     workflow_type: Mapped[WorkflowType] = mapped_column(
@@ -54,42 +90,17 @@ class Workflow(ApiSchemaTable, TimestampMixin):
         back_populates="workflow", uselist=True, cascade="all, delete-orphan"
     )
 
-    workflow_opportunities: Mapped[list[WorkflowOpportunity]] = relationship(
-        back_populates="workflow", uselist=True, cascade="all, delete-orphan"
-    )
+    opportunity_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey(Opportunity.opportunity_id))
+    opportunity: Mapped[Opportunity | None] = relationship(Opportunity)
 
-    workflow_applications: Mapped[list[WorkflowApplication]] = relationship(
-        back_populates="workflow", uselist=True, cascade="all, delete-orphan"
-    )
+    application_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey(Application.application_id))
+    application: Mapped[Application | None] = relationship(Application)
 
-    workflow_application_submissions: Mapped[list[WorkflowApplicationSubmission]] = relationship(
-        back_populates="workflow", uselist=True, cascade="all, delete-orphan"
+    application_submission_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey(ApplicationSubmission.application_submission_id)
     )
-
-    # Create an association proxy for each of the entity relationships
-    # https://docs.sqlalchemy.org/en/20/orm/extensions/associationproxy.html
-    #
-    # This lets us use these values as if they were just ordinary lists on a python
-    # object. For example::
-    #
-    #   workflow.opportunities.append(opportunity)
-    #
-    opportunities: AssociationProxy[list[Opportunity]] = association_proxy(
-        "workflow_opportunities",
-        "opportunity",
-        creator=lambda obj: WorkflowOpportunity(opportunity=obj),
-    )
-
-    applications: AssociationProxy[list[Application]] = association_proxy(
-        "workflow_applications",
-        "application",
-        creator=lambda obj: WorkflowApplication(application=obj),
-    )
-
-    application_submissions: AssociationProxy[list[ApplicationSubmission]] = association_proxy(
-        "workflow_application_submissions",
-        "application_submission",
-        creator=lambda obj: WorkflowApplicationSubmission(application_submission=obj),
+    application_submission: Mapped[ApplicationSubmission | None] = relationship(
+        ApplicationSubmission
     )
 
     def get_log_extra(self) -> dict[str, Any]:
@@ -98,6 +109,9 @@ class Workflow(ApiSchemaTable, TimestampMixin):
             "workflow_type": self.workflow_type,
             "current_workflow_state": self.current_workflow_state,
             "is_active": self.is_active,
+            "opportunity_id": self.opportunity_id,
+            "application_id": self.application_id,
+            "application_submission_id": self.application_submission_id,
         }
 
 
@@ -216,80 +230,3 @@ class WorkflowApproval(ApiSchemaTable, TimestampMixin):
         ForeignKey(LkApprovalResponseType.approval_response_type_id),
         index=True,
     )
-
-
-class WorkflowOpportunity(ApiSchemaTable, TimestampMixin):
-    """
-    WorkflowOpportunity model for linking workflows to opportunities.
-
-    Attributes:
-        workflow_opportunity_id: Primary key, UUID
-        workflow_id: Foreign key to workflow table
-        opportunity_id: UUID field indicating the associated opportunity
-    """
-
-    __tablename__ = "workflow_opportunity"
-
-    workflow_opportunity_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, primary_key=True, default=uuid.uuid4
-    )
-
-    workflow_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Workflow.workflow_id))
-    workflow: Mapped[Workflow] = relationship(
-        Workflow, back_populates="workflow_opportunities", single_parent=True
-    )
-
-    opportunity_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Opportunity.opportunity_id))
-    opportunity: Mapped[Opportunity] = relationship(Opportunity)
-
-
-class WorkflowApplication(ApiSchemaTable, TimestampMixin):
-    """
-    WorkflowApplication model for linking workflows to applications.
-
-    Attributes:
-        workflow_application_id: Primary key, UUID
-        workflow_id: Foreign key to workflow table
-        application_id: UUID field indicating the associated application
-    """
-
-    __tablename__ = "workflow_application"
-
-    workflow_application_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, primary_key=True, default=uuid.uuid4
-    )
-
-    workflow_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Workflow.workflow_id))
-    workflow: Mapped[Workflow] = relationship(
-        Workflow, back_populates="workflow_applications", single_parent=True
-    )
-
-    application_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Application.application_id))
-    application: Mapped[Application] = relationship(Application)
-
-
-class WorkflowApplicationSubmission(ApiSchemaTable, TimestampMixin):
-    """
-    WorkflowApplicationSubmission model for linking workflows to application submissions.
-
-    Attributes:
-        workflow_application_submission_id: Primary key, UUID
-        workflow_id: Foreign key to workflow table
-        application_submission_id: UUID field indicating the associated application submission
-    """
-
-    __tablename__ = "workflow_application_submission"
-
-    workflow_application_submission_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, primary_key=True, default=uuid.uuid4
-    )
-
-    workflow_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(Workflow.workflow_id))
-    workflow: Mapped[Workflow] = relationship(
-        Workflow, back_populates="workflow_application_submissions", single_parent=True
-    )
-
-    application_submission_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey(ApplicationSubmission.application_submission_id)
-    )
-    application_submission: Mapped[ApplicationSubmission] = relationship(ApplicationSubmission)

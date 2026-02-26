@@ -19,9 +19,8 @@ def test_start_workflow_entity_not_found(db_session: db.Session):
         "event_type": WorkflowEventType.START_WORKFLOW,
         "start_workflow_context": {
             "workflow_type": WorkflowType.INITIAL_PROTOTYPE,
-            "entities": [
-                {"entity_type": WorkflowEntityType.OPPORTUNITY, "entity_id": str(uuid.uuid4())}
-            ],
+            "entity_type": WorkflowEntityType.OPPORTUNITY,
+            "entity_id": str(uuid.uuid4()),
         },
     }
 
@@ -39,9 +38,8 @@ def test_start_workflow_invalid_workflow_type(db_session: db.Session):
         "event_type": WorkflowEventType.START_WORKFLOW,
         "start_workflow_context": {
             "workflow_type": WorkflowType.OPPORTUNITY_PUBLISH,
-            "entities": [
-                {"entity_type": WorkflowEntityType.OPPORTUNITY, "entity_id": str(uuid.uuid4())}
-            ],
+            "entity_type": WorkflowEntityType.OPPORTUNITY,
+            "entity_id": str(uuid.uuid4()),
         },
     }
 
@@ -61,12 +59,8 @@ def test_start_workflow_entity_type_mismatch(db_session: db.Session, enable_fact
         "event_type": WorkflowEventType.START_WORKFLOW,
         "start_workflow_context": {
             "workflow_type": WorkflowType.INITIAL_PROTOTYPE,
-            "entities": [
-                {
-                    "entity_type": WorkflowEntityType.APPLICATION,
-                    "entity_id": str(application.application_id),
-                }
-            ],
+            "entity_type": WorkflowEntityType.APPLICATION,
+            "entity_id": str(application.application_id),
         },
     }
 
@@ -74,7 +68,7 @@ def test_start_workflow_entity_type_mismatch(db_session: db.Session, enable_fact
         ingest_workflow_event(db_session, payload)
 
     assert exc_info.value.status_code == 422
-    assert exc_info.value.message == "The provided entities are not valid for this workflow type"
+    assert exc_info.value.message == "The provided entity is not valid for this workflow type"
 
 
 def test_start_workflow_valid_entity(db_session: db.Session, enable_factory_create):
@@ -85,12 +79,8 @@ def test_start_workflow_valid_entity(db_session: db.Session, enable_factory_crea
         "event_type": WorkflowEventType.START_WORKFLOW,
         "start_workflow_context": {
             "workflow_type": WorkflowType.INITIAL_PROTOTYPE,
-            "entities": [
-                {
-                    "entity_type": WorkflowEntityType.OPPORTUNITY,
-                    "entity_id": str(opportunity.opportunity_id),
-                }
-            ],
+            "entity_type": WorkflowEntityType.OPPORTUNITY,
+            "entity_id": str(opportunity.opportunity_id),
         },
     }
 
