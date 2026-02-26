@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 
 from src.constants.lookup_constants import Privilege
@@ -83,6 +85,18 @@ def test_get_opportunity_with_invalid_jwt_token(client, opportunity):
     )
 
     assert response.status_code == 401
+
+
+def test_get_opportunity_not_found(client, grantor_auth_data):
+    """Test 404 response when opportunity doesn't exist"""
+    user, agency, token, _ = grantor_auth_data
+    opportunity_id = uuid.uuid4()
+    response = client.get(
+        f"/v1/grantors/opportunities/{opportunity_id}",
+        headers={"X-SGG-Token": token},
+    )
+    assert response.status_code == 404
+    assert response.get_json()["message"] == f"Could not find Opportunity with ID {opportunity_id}"
 
 
 def test_get_opportunity_list_success(client, grantor_auth_data, test_opportunities):
