@@ -1,6 +1,10 @@
 import { UnauthorizedError } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
+import {
+  fetchUserAgencies,
+  UserAgency,
+} from "src/services/fetch/fetchers/userAgenciesFetcher";
 import { LocalizedPageProps, TFn } from "src/types/intl";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
@@ -15,6 +19,7 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
+import { AgencySelector } from "src/components/workspace/AgencySelector";
 
 type OpportunitiesListProps = LocalizedPageProps & WithFeatureFlagProps;
 
@@ -49,6 +54,34 @@ const OpportunitiesErrorPage = () => {
       <div className="margin-bottom-15">
         <Alert slim={true} headingLevel="h6" noIcon={true} type="error">
           {t("errorMessage")}
+        </Alert>
+      </div>
+    </OpportunitiesPageWrapper>
+  );
+};
+
+const AgencyNotAuthorizedPage = () => {
+  const t = useTranslations("Opportunities");
+
+  return (
+    <OpportunitiesPageWrapper>
+      <div className="margin-bottom-15">
+        <Alert slim={true} headingLevel="h6" noIcon={true} type="error">
+          {t("agencyNotAuthorized")}
+        </Alert>
+      </div>
+    </OpportunitiesPageWrapper>
+  );
+};
+
+const NoAgenciesPage = () => {
+  const t = useTranslations("Opportunities");
+
+  return (
+    <OpportunitiesPageWrapper>
+      <div className="margin-bottom-15">
+        <Alert slim={true} headingLevel="h6" noIcon={true} type="error">
+          {t("noAgencies")}
         </Alert>
       </div>
     </OpportunitiesPageWrapper>
@@ -107,14 +140,45 @@ const OpportunitiesTable = ({
   );
 };
 
-async function OpportunitiesListPage(_props: OpportunitiesListProps) {
-  const searchParams = convertSearchParamsToProperTypes({});
+async function OpportunitiesListPage(props: OpportunitiesListProps) {
+  const { searchParams } = props;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const selectedAgencyId = resolvedSearchParams.agency;
+
+  let userAgencies: UserAgency[];
+  try {
+    userAgencies = await fetchUserAgencies();
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      throw error;
+    }
+    return <OpportunitiesErrorPage />;
+  }
+
+  if (!userAgencies.length) {
+    return <NoAgenciesPage />;
+  }
+
+  if (!selectedAgencyId) {
+    redirect(`?agency=${userAgencies[0].agency_id}`);
+  }
+
+  const selectedAgency = userAgencies.find(
+    (a) => a.agency_id === selectedAgencyId,
+  );
+
+  if (!selectedAgency) {
+    return <AgencyNotAuthorizedPage />;
+  }
+
+  const opportunitySearchParams = convertSearchParamsToProperTypes({
+    agency: selectedAgency.agency_code,
+  });
 
   let userOpportunities: BaseOpportunity[];
   try {
-    userOpportunities = (await searchForOpportunities(searchParams)).data
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 5);
+    userOpportunities = (await searchForOpportunities(opportunitySearchParams))
+      .data;
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       throw error;
@@ -124,7 +188,13 @@ async function OpportunitiesListPage(_props: OpportunitiesListProps) {
 
   return (
     <OpportunitiesPageWrapper>
-      {userOpportunities?.length ? (
+      {userAgencies.length > 1 && (
+        <AgencySelector
+          agencies={userAgencies}
+          currentAgencyId={selectedAgencyId}
+        />
+      )}
+      {userOpportunities.length ? (
         <OpportunitiesTable userOpportunities={userOpportunities} />
       ) : (
         <NoStartedOpportunities />
