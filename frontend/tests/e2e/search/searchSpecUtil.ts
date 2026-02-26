@@ -25,6 +25,18 @@ export async function toggleFilterDrawer(page: Page) {
   await filterDrawerButton.click();
 }
 
+export async function ensureFilterDrawerOpen(page: Page) {
+  const modalOpen = await page
+    .locator('.usa-modal-overlay[aria-controls="search-filter-drawer"]')
+    .isVisible();
+  if (!modalOpen) {
+    const filterDrawerButton = page.locator(
+      "button[data-testid='toggle-drawer']",
+    );
+    await filterDrawerButton.click();
+  }
+}
+
 export function getSearchInput(page: Page) {
   return page.locator("#query");
 }
@@ -53,6 +65,42 @@ export async function expectCheckboxIDIsChecked(
 ) {
   const checkbox: Locator = page.locator(idWithHash).first();
   await expect(checkbox).toBeChecked();
+}
+
+export async function expectCheckboxesChecked(
+  page: Page,
+  checkboxObject: Record<string, string>,
+) {
+  for (const [checkboxID] of Object.entries(checkboxObject)) {
+    await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
+  }
+}
+
+export async function expectURLQueryParamValue(
+  page: Page,
+  queryParamName: string,
+  queryParamValue: string,
+) {
+  const url = new URL(page.url());
+  const params = new URLSearchParams(url.search);
+  const actualValue = params.get(queryParamName);
+  expect(actualValue).toBe(queryParamValue);
+}
+
+export async function expectURLQueryParamValues(
+  page: Page,
+  queryParamName: string,
+  expectedValues: string[],
+) {
+  const url = new URL(page.url());
+  const params = new URLSearchParams(url.search);
+  const actualValue = params.get(queryParamName) ?? "";
+  const actualValues = actualValue
+    .split(",")
+    .filter((value) => value.length > 0)
+    .sort();
+  const sortedExpected = [...expectedValues].sort();
+  expect(actualValues).toEqual(sortedExpected);
 }
 
 export async function toggleCheckboxes(
@@ -126,6 +174,20 @@ export async function clickAccordionWithTitle(
   );
   await button.waitFor({ state: "visible", timeout: 15000 });
   await button.click();
+}
+
+export async function ensureAccordionExpanded(
+  page: Page,
+  accordionTitle: string,
+) {
+  const button = page.locator(
+    `button.usa-accordion__button:has-text("${accordionTitle}")`,
+  );
+  await button.waitFor({ state: "visible", timeout: 15000 });
+  const expanded = await button.getAttribute("aria-expanded");
+  if (expanded !== "true") {
+    await button.click();
+  }
 }
 
 export async function clickPaginationPageNumber(
@@ -279,3 +341,19 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
   await filterOptions.isVisible();
   await filterButton.click();
 };
+
+export async function getFirstNonNumericAgencyCheckboxId(
+  page: Page,
+): Promise<string | null> {
+  const agencyInputs = page.locator(
+    "div[data-testid='Agency-filter'] > ul > li ul input",
+  );
+  const count = await agencyInputs.count();
+  for (let i = 0; i < count; i += 1) {
+    const id = await agencyInputs.nth(i).getAttribute("id");
+    if (id && Number.isNaN(Number.parseInt(id[0], 10))) {
+      return id;
+    }
+  }
+  return null;
+}
