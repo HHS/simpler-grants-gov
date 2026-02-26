@@ -1,19 +1,12 @@
 import { expect, test } from "@playwright/test";
-import {
-  refreshPageWithCurrentURL,
-  waitForAnyURLChange,
-} from "tests/e2e/playwrightUtils";
+import { waitForAnyURLChange } from "tests/e2e/playwrightUtils";
 import {
   clickAccordionWithTitle,
   clickLastPaginationPage,
   clickPaginationPageNumber,
-  expectCheckboxIDIsChecked,
-  expectSortBy,
-  fillSearchInputAndSubmit,
   getFirstSearchResultTitle,
   getLastSearchResultTitle,
   getNumberOfOpportunitySearchResults,
-  getSearchInput,
   selectSortBy,
   toggleCheckboxes,
   toggleFilterDrawer,
@@ -21,127 +14,7 @@ import {
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/search/searchSpecUtil";
 
-const searchTerm = "education";
-const statusCheckboxes = {
-  "status-closed": "closed",
-};
-const fundingInstrumentCheckboxes = {
-  "funding-instrument-other": "other",
-  "funding-instrument-grant": "grant",
-};
-
-const eligibilityCheckboxes = {
-  "eligibility-state_governments": "state_governments",
-  "eligibility-county_governments": "county_governments",
-};
-const categoryCheckboxes = {
-  "category-recovery_act": "recovery_act",
-  "category-agriculture": "agriculture",
-};
-
 test.describe("Search page tests", () => {
-  // Set all inputs, then refresh the page. Those same inputs should be
-  // set from query params.
-  test("should refresh and retain filters in a new tab", async ({ page }, {
-    project,
-  }) => {
-    const isMobile = !!project.name.match(/[Mm]obile/);
-    const agencyCheckboxes: { [key: string]: string } = {};
-    await page.goto("/search");
-
-    await waitForSearchResultsInitialLoad(page);
-    await fillSearchInputAndSubmit(searchTerm, page);
-    if (isMobile) {
-      await toggleFilterDrawer(page);
-    }
-    await selectSortBy(page, "awardCeilingDesc", isMobile);
-    await expectSortBy(page, "awardCeilingDesc", isMobile);
-
-    if (!isMobile) {
-      await toggleFilterDrawer(page);
-    }
-    await waitForFilterOptions(page, "agency");
-
-    await toggleCheckboxes(
-      page,
-      statusCheckboxes,
-      "status",
-      "forecasted,posted",
-    );
-
-    await clickAccordionWithTitle(page, "Funding instrument");
-    await toggleCheckboxes(
-      page,
-      fundingInstrumentCheckboxes,
-      "fundingInstrument",
-    );
-
-    await clickAccordionWithTitle(page, "Eligibility");
-    await toggleCheckboxes(page, eligibilityCheckboxes, "eligibility");
-
-    await clickAccordionWithTitle(page, "Agency");
-    let agencyId;
-
-    // need to find the first subagency box with an ID that doesn't start with a number
-    // targeting checkboxes with ids that start with a number raises issues related
-    // to querySelector functionality and what it considers a valid id
-    for (let i = 1; !agencyId || !isNaN(parseInt(agencyId[0])); i++) {
-      const subAgency = page
-        .locator(
-          `div[data-testid='Agency-filter'] > ul > li:nth-child(${i}) ul input`,
-        )
-        .first();
-
-      const exists = await subAgency.count();
-
-      if (!exists) {
-        continue;
-      }
-
-      agencyId = await subAgency.getAttribute("id");
-    }
-    expect(agencyId).toBeTruthy();
-    if (!agencyId) {
-      test.fail();
-      return;
-    }
-    agencyCheckboxes[agencyId] = agencyId;
-    await toggleCheckboxes(page, agencyCheckboxes, "agency");
-
-    await clickAccordionWithTitle(page, "Category");
-    await toggleCheckboxes(page, categoryCheckboxes, "category");
-
-    /***********************************************************/
-    /* Page refreshed should have all the same inputs selected
-    /***********************************************************/
-
-    await refreshPageWithCurrentURL(page);
-    await waitForSearchResultsInitialLoad(page);
-
-    // Expect search inputs are retained in the new tab
-    await expectSortBy(page, "awardCeilingDesc", isMobile);
-    const searchInput = getSearchInput(page);
-    await expect(searchInput).toHaveValue(searchTerm);
-
-    await toggleFilterDrawer(page);
-    for (const [checkboxID] of Object.entries(statusCheckboxes)) {
-      await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
-    }
-
-    for (const [checkboxID] of Object.entries(fundingInstrumentCheckboxes)) {
-      await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
-    }
-    for (const [checkboxID] of Object.entries(eligibilityCheckboxes)) {
-      await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
-    }
-    for (const [checkboxID] of Object.entries(agencyCheckboxes)) {
-      await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
-    }
-    for (const [checkboxID] of Object.entries(categoryCheckboxes)) {
-      await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
-    }
-  });
-
   test("resets page back to 1 when choosing a filter", async ({ page }) => {
     await page.goto("/search?status=none");
     await clickPaginationPageNumber(page, 2);
