@@ -28,7 +28,7 @@ def test_start_workflow_event(db_session, enable_factory_create):
     event, history_event = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=user,
-        entities=[opportunity],
+        entity=opportunity,
     )
 
     event_handler = EventHandler(db_session, event, history_event)
@@ -54,7 +54,7 @@ def test_process_workflow_event(db_session, enable_factory_create):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        is_single_opportunity_workflow=True,
+        has_opportunity=True,
     )
 
     event, history_event = build_process_workflow_event(
@@ -81,7 +81,7 @@ def test_start_workflow_event_missing_start_context(db_session, enable_factory_c
     event, history_event = build_start_workflow_event(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         user=user,
-        entities=[opportunity],
+        entity=opportunity,
         exclude_start_workflow_context=True,
     )
 
@@ -96,7 +96,7 @@ def test_process_workflow_event_missing_process_context(db_session, enable_facto
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        is_single_opportunity_workflow=True,
+        has_opportunity=True,
     )
 
     event, history_event = build_process_workflow_event(
@@ -116,11 +116,13 @@ def test_process_workflow_event_missing_process_context(db_session, enable_facto
 def test_start_workflow_event_invalid_workflow_type(db_session, enable_factory_create):
     user = UserFactory.create()
 
+    opportunity = OpportunityFactory.create()
+
     event, history_event = build_start_workflow_event(
         # We'll override this below
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=user,
-        entities=[],
+        entity=opportunity,
     )
     # Pydantic doesn't validate on assignment, so change it to something invalid here
     event.start_workflow_context.workflow_type = "not-a-valid-workflow-type"
@@ -138,7 +140,7 @@ def test_start_workflow_event_missing_user(db_session, enable_factory_create):
     event, history_event = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=None,  # A random ID will be added
-        entities=[opportunity],
+        entity=opportunity,
     )
 
     event_handler = EventHandler(db_session, event, history_event)
@@ -150,7 +152,7 @@ def test_process_workflow_event_missing_user(db_session, enable_factory_create):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        is_single_opportunity_workflow=True,
+        has_opportunity=True,
     )
 
     event, history_event = build_process_workflow_event(
@@ -177,7 +179,7 @@ def test_process_workflow_event_invalid_event(db_session, enable_factory_create)
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        is_single_opportunity_workflow=True,
+        has_opportunity=True,
     )
 
     event, history_event = build_process_workflow_event(
@@ -193,7 +195,7 @@ def test_process_workflow_event_invalid_event_for_current_state(db_session, enab
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        is_single_opportunity_workflow=True,
+        has_opportunity=True,
     )
 
     # start_workflow is valid, just not for the current state
@@ -210,7 +212,7 @@ def test_process_workflow_event_invalid_current_state(db_session, enable_factory
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state="not-a-valid-state",
-        is_single_opportunity_workflow=True,
+        has_opportunity=True,
     )
 
     event, history_event = build_process_workflow_event(
@@ -226,7 +228,7 @@ def test_process_workflow_is_already_at_end(db_session, enable_factory_create):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.END,
-        is_single_opportunity_workflow=True,
+        has_opportunity=True,
         is_active=False,
     )
 
