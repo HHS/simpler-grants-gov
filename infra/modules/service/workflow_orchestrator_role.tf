@@ -4,9 +4,13 @@
 # This role and policy are used by the Step Functions state machine that manages the scheduled jobs workflow.
 
 resource "aws_iam_role" "workflow_orchestrator" {
-  name                = "${var.service_name}-workflow-orchestrator"
-  managed_policy_arns = [aws_iam_policy.workflow_orchestrator.arn]
-  assume_role_policy  = data.aws_iam_policy_document.workflow_orchestrator_assume_role.json
+  name               = "${var.service_name}-workflow-orchestrator"
+  assume_role_policy = data.aws_iam_policy_document.workflow_orchestrator_assume_role.json
+}
+
+resource "aws_iam_role_policy_attachment" "workflow_orchestrator" {
+  role       = aws_iam_role.workflow_orchestrator.name
+  policy_arn = aws_iam_policy.workflow_orchestrator.arn
 }
 
 data "aws_iam_policy_document" "workflow_orchestrator_assume_role" {
