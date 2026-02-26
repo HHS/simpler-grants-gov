@@ -307,7 +307,7 @@ describe("InformationCard - Org-only competition banner", () => {
     );
 
     expect(
-      screen.queryByText(/unassociatedApplicationAlert\.title/),
+      screen.getByText(/unassociatedApplicationAlert\.title/),
     ).toBeInTheDocument();
   });
 
