@@ -3,7 +3,6 @@ import pytest
 from src.constants.lookup_constants import Privilege
 from tests.lib.opportunity_test_utils import (
     build_opportunity_list_request_body,
-    create_test_opportunities,
     create_user_in_agency_with_jwt_and_api_key,
 )
 from tests.src.db.models.factories import AgencyFactory, OpportunityFactory
@@ -34,7 +33,14 @@ def opportunity(db_session, enable_factory_create, grantor_auth_data):
 def test_opportunities(db_session, enable_factory_create, grantor_auth_data):
     """Create test opportunities for the agency in grantor_auth_data."""
     user, agency, token, _ = grantor_auth_data
-    return create_test_opportunities(db_session, agency)
+
+    opportunities = OpportunityFactory.create_batch(
+        size=3,
+        agency_id=agency.agency_id,
+        agency_code=agency.agency_code,
+    )
+
+    return opportunities
 
 
 def test_get_opportunity_success(client, db_session, grantor_auth_data, enable_factory_create):

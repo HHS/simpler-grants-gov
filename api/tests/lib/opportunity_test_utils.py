@@ -12,7 +12,6 @@ from tests.src.db.models.factories import (
     AgencyUserFactory,
     AgencyUserRoleFactory,
     LinkExternalUserFactory,
-    OpportunityFactory,
     RoleFactory,
     UserApiKeyFactory,
     UserFactory,
@@ -172,27 +171,3 @@ def build_opportunity_list_request_body(
         request["filters"] = filters
 
     return request
-
-
-def create_test_opportunities(db_session, agency, count=3, prefix="TEST-2026"):
-    """Create test opportunities for an agency.
-
-    Args:
-        db_session: Database session
-        agency: Agency object to create opportunities for
-        count: Number of opportunities to create (default: 3)
-        prefix: Prefix for opportunity numbers (default: "TEST-2026")
-
-    Returns:
-        List of created Opportunity objects
-    """
-    opportunities = []
-    for i in range(count):
-        opportunity = OpportunityFactory.create(
-            agency_id=agency.agency_id,
-            opportunity_number=f"{prefix}-{i:03d}",
-            opportunity_title=f"Test Opportunity {i}",
-        )
-        opportunities.append(opportunity)
-
-    return opportunities

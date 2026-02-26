@@ -175,7 +175,9 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     @property
     def non_forecast_summary(self) -> OpportunitySummary | None:
-        non_forecasts = [summary for summary in self.all_opportunity_summaries if not summary.is_forecast]
+        non_forecasts = [
+            summary for summary in self.all_opportunity_summaries if not summary.is_forecast
+        ]
         return non_forecasts[0] if non_forecasts else None
 
     @property
