@@ -3,11 +3,9 @@ import AwardRecommendationPage from "src/app/[locale]/(base)/award-recommendatio
 import * as opportunityFetcher from "src/services/fetch/fetchers/opportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
-import { localeParams, useTranslationsMock } from "src/utils/testing/intlMocks";
+import { localeParams } from "src/utils/testing/intlMocks";
 
-import React, { FunctionComponent, ReactNode } from "react";
-
-import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
+import { FunctionComponent, ReactNode } from "react";
 
 type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
@@ -49,11 +47,23 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
       )(props) as FunctionComponent<LocalizedPageProps>,
 }));
 
-jest.mock("next-intl/server", () => ({
-  getTranslations: jest.fn(() => useTranslationsMock()),
+jest.mock("src/services/fetch/fetchers/opportunityFetcher");
+
+jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
+  getAwardRecommendationDetails: jest.fn().mockResolvedValue({
+    recordNumber: "AR-26-0001",
+    datePrepared: "01/01/2026",
+    status: "in_progress" as const,
+  }),
 }));
 
-jest.mock("src/services/fetch/fetchers/opportunityFetcher");
+jest.mock("src/components/award-recommendation/AwardRecommendationHero", () => {
+  const React = jest.requireActual<typeof import("react")>("react");
+  return {
+    __esModule: true,
+    default: () => <div data-testid="award-recommendation-hero-mock" />
+  };
+});
 
 const mockOpportunityDetail = {
   opportunity_id: "123",
@@ -131,19 +141,13 @@ describe("AwardRecommendationPage", () => {
     });
 
     it("includes the AwardRecommendationHero component in the page", async () => {
-      const component = (await AwardRecommendationPage({
+      const component = await AwardRecommendationPage({
         params: localeParams,
-      })) as React.ReactElement;
-
-      const children = React.Children.toArray(
-        (component.props as { children?: React.ReactNode }).children,
-      );
-      const hasHero = children.some(
-        (child) =>
-          React.isValidElement(child) && child.type === AwardRecommendationHero,
-      );
-
-      expect(hasHero).toBe(true);
+      });
+      render(component);
+      expect(
+        screen.getByTestId("award-recommendation-hero-mock"),
+      ).toBeInTheDocument();
     });
 
     it("renders page title", async () => {

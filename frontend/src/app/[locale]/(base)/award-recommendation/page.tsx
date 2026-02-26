@@ -8,6 +8,7 @@ import { OpportunityDetail } from "src/types/opportunity/opportunityResponseType
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { splitMarkup } from "src/utils/generalUtils";
 
+import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -185,7 +186,7 @@ async function AwardRecommendationPageContent({
 }: AwardRecommendationPageProps) {
   const { locale } = await params;
 
-  const t = await getTranslations("AwardRecommendation");
+  const t = useTranslations("AwardRecommendation");
   const resolvedSearchParams = (await (searchParams ||
     Promise.resolve({}))) as { id?: string };
   const opportunityId = resolvedSearchParams.id;
