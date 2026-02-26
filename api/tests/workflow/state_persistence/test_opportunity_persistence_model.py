@@ -8,7 +8,7 @@ from tests.src.db.models.factories import OpportunityFactory, WorkflowFactory
 def test_opportunity_persistence_model(db_session, enable_factory_create):
     opportunity = OpportunityFactory.create()
 
-    workflow = WorkflowFactory.create(workflow_entity__opportunity=opportunity)
+    workflow = WorkflowFactory.create(opportunity=opportunity)
 
     model = OpportunityPersistenceModel(db_session, workflow)
     assert model.opportunity.opportunity_id == opportunity.opportunity_id

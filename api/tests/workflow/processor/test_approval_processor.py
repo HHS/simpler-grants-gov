@@ -21,7 +21,7 @@ def test_agency_approval_approved_simple(db_session, agency, budget_officer, opp
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     state_machine = send_process_event(
@@ -51,7 +51,7 @@ def test_agency_approval_declined(db_session, agency, budget_officer, opportunit
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     state_machine = send_process_event(
@@ -81,7 +81,7 @@ def test_agency_approval_requires_modification(db_session, agency, budget_office
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     # add a prior approval that will be invalidated
@@ -128,7 +128,7 @@ def test_agency_approval_approved_simple_with_prior_invalid_history(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     prior_approval = WorkflowApprovalFactory.create(
@@ -175,7 +175,7 @@ def test_agency_approval_approved_multiple_approvals_required(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.PENDING_PROGRAM_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     send_process_event(
@@ -236,7 +236,7 @@ def test_agency_approval_approved_user_already_approved(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.PENDING_PROGRAM_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     # Approve with that user
@@ -280,7 +280,7 @@ def test_agency_approval_approved_user_has_different_approval(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     # Add a prior approval of a different type
@@ -323,7 +323,7 @@ def test_agency_approval_approve_then_decline(db_session, agency, program_office
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.PENDING_PROGRAM_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     send_process_event(
@@ -367,7 +367,7 @@ def test_agency_approval_invalid_response_type(db_session, agency, budget_office
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     with pytest.raises(
@@ -389,7 +389,7 @@ def test_agency_approval_null_response_type(db_session, agency, budget_officer, 
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     with pytest.raises(

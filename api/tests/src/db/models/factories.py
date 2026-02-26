@@ -3165,34 +3165,6 @@ class LegacyOrganizationCertificateFactory(BaseLegacyCertificateFactory):
     organization = factory.SubFactory(OrganizationFactory)
 
 
-class WorkflowEntityFactory(BaseFactory):
-    class Meta:
-        model = workflow_models.WorkflowEntity
-
-    workflow_entity_id = Generators.UuidObj
-
-    workflow = factory.SubFactory("tests.src.db.models.factories.WorkflowFactory")
-    workflow_id = factory.LazyAttribute(lambda e: e.workflow.workflow_id)
-
-    class Params:
-        has_opportunity = factory.Trait(
-            opportunity=factory.SubFactory(OpportunityFactory),
-            opportunity_id=factory.LazyAttribute(lambda e: e.opportunity.opportunity_id),
-        )
-
-        has_application = factory.Trait(
-            application=factory.SubFactory(ApplicationFactory),
-            application_id=factory.LazyAttribute(lambda e: e.application.application_id),
-        )
-
-        has_application_submission = factory.Trait(
-            application_submission=factory.SubFactory(ApplicationSubmissionFactory),
-            application_submission_id=factory.LazyAttribute(
-                lambda e: e.application_submission.application_submission_id
-            ),
-        )
-
-
 class WorkflowFactory(BaseFactory):
     class Meta:
         model = workflow_models.Workflow
@@ -3203,28 +3175,30 @@ class WorkflowFactory(BaseFactory):
     is_active = True
 
     # By default, we'll associate a workflow with an opportunity
-    # Use the params below to change this.
-    workflow_entity = factory.RelatedFactory(
-        WorkflowEntityFactory, has_opportunity=True, factory_related_name="workflow"
+    # Use the params below to change this, or pass in your own.
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(
+        lambda e: e.opportunity.opportunity_id if e.opportunity is not None else None
     )
 
     class Params:
         has_opportunity = factory.Trait(
-            workflow_entity=factory.RelatedFactory(
-                WorkflowEntityFactory, has_opportunity=True, factory_related_name="workflow"
-            )
+            opportunity=factory.SubFactory(OpportunityFactory),
+            opportunity_id=factory.LazyAttribute(lambda e: e.opportunity.opportunity_id),
         )
+
         has_application = factory.Trait(
-            workflow_entity=factory.RelatedFactory(
-                WorkflowEntityFactory, has_application=True, factory_related_name="workflow"
-            )
+            application=factory.SubFactory(ApplicationFactory),
+            application_id=factory.LazyAttribute(lambda e: e.application.application_id),
+            opportunity=None,
         )
+
         has_application_submission = factory.Trait(
-            workflow_entity=factory.RelatedFactory(
-                WorkflowEntityFactory,
-                has_application_submission=True,
-                factory_related_name="workflow",
-            )
+            application_submission=factory.SubFactory(ApplicationSubmissionFactory),
+            application_submission_id=factory.LazyAttribute(
+                lambda e: e.application_submission.application_submission_id
+            ),
+            opportunity=None,
         )
 
 

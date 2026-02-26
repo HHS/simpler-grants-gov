@@ -29,7 +29,7 @@ def test_get_workflow_entity_opportunity(db_session, enable_factory_create):
         config=config,
     )
 
-    assert result.opportunity.opportunity_id == opportunity.opportunity_id
+    assert result["opportunity"].opportunity_id == opportunity.opportunity_id
 
 
 def test_get_workflow_entity_application(db_session, enable_factory_create):
@@ -42,7 +42,7 @@ def test_get_workflow_entity_application(db_session, enable_factory_create):
         config=config,
     )
 
-    assert result.application.application_id == application.application_id
+    assert result["application"].application_id == application.application_id
 
 
 def test_get_workflow_entity_not_valid_for_config(db_session, enable_factory_create):

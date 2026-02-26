@@ -73,7 +73,7 @@ def test_initial_prototype_state_machine_program_officer_decline(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         current_workflow_state=InitialPrototypeState.PENDING_PROGRAM_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     state_machine = send_process_event(
@@ -105,7 +105,7 @@ def test_initial_prototype_state_machine_budget_officer_decline(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         current_workflow_state=InitialPrototypeState.PENDING_BUDGET_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     state_machine = send_process_event(
@@ -137,7 +137,7 @@ def test_initial_prototype_state_machine_program_officer_requires_modification(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         current_workflow_state=InitialPrototypeState.PENDING_PROGRAM_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     state_machine = send_process_event(
@@ -170,7 +170,7 @@ def test_initial_prototype_state_machine_budget_officer_requires_modification(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         current_workflow_state=InitialPrototypeState.PENDING_BUDGET_OFFICER_APPROVAL,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     state_machine = send_process_event(
@@ -217,7 +217,7 @@ def test_initial_prototype_state_machine_invalid_events(
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         current_workflow_state=InitialPrototypeState.START,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
 
     with pytest.raises(InvalidEventError, match="Event is not valid for current state of workflow"):
@@ -239,7 +239,7 @@ def test_initial_prototype_state_privileges(
     """Test that we've configured the privileges as expected."""
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
-        workflow_entity__opportunity=opportunity,
+        opportunity=opportunity,
     )
     config = initial_prototype_state_machine_config
 

@@ -14,10 +14,10 @@ class OpportunityPersistenceModel(BaseStatePersistenceModel):
     def __init__(self, db_session: db.Session, workflow: Workflow):
         super().__init__(db_session, workflow)
 
-        if workflow.workflow_entity.opportunity is None:
+        if workflow.opportunity is None:
             logger.warning(
                 "Expected the workflow entity to be an opportunity", extra=workflow.get_log_extra()
             )
             raise InvalidEntityForWorkflow("Expected the workflow entity to be an opportunity")
 
-        self.opportunity = workflow.workflow_entity.opportunity
+        self.opportunity = workflow.opportunity

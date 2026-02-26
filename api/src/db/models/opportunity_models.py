@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from src.db.models.competition_models import Competition
     from src.db.models.entity_models import OrganizationSavedOpportunity
     from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
-    from src.db.models.workflow_models import WorkflowEntity
+    from src.db.models.workflow_models import Workflow
 
 
 class Opportunity(ApiSchemaTable, TimestampMixin):
@@ -136,8 +136,8 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     # We mostly add this so if we delete an opportunity, any corresponding
     # workflows are deleted as well.
-    workflow_entities: Mapped[list[WorkflowEntity]] = relationship(
-        "WorkflowEntity",
+    workflows: Mapped[list[Workflow]] = relationship(
+        "Workflow",
         back_populates="opportunity",
         uselist=True,
         cascade="all, delete-orphan",

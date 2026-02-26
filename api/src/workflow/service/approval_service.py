@@ -71,18 +71,15 @@ def get_approval_response_type(state_machine_event: StateMachineEvent) -> Approv
 
 
 def _get_agency_for_workflow(workflow: Workflow) -> Agency:
-
-    workflow_entity = workflow.workflow_entity
-
     # From the workflow entity, find the opportunity
     # which we'll in turn use to get the agency
     opportunity: Opportunity | None = None
-    if workflow_entity.opportunity is not None:
-        opportunity = workflow_entity.opportunity
-    elif workflow_entity.application is not None:
-        opportunity = workflow_entity.application.competition.opportunity
-    elif workflow_entity.application_submission is not None:
-        opportunity = workflow_entity.application_submission.application.competition.opportunity
+    if workflow.opportunity is not None:
+        opportunity = workflow.opportunity
+    elif workflow.application is not None:
+        opportunity = workflow.application.competition.opportunity
+    elif workflow.application_submission is not None:
+        opportunity = workflow.application_submission.application.competition.opportunity
 
     if opportunity is None:
         raise ImplementationMissingError("No approach implemented to find agency for workflow")

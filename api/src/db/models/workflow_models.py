@@ -15,8 +15,19 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
 
 
-class WorkflowEntity(ApiSchemaTable, TimestampMixin):
-    __tablename__ = "workflow_entity"
+class Workflow(ApiSchemaTable, TimestampMixin):
+    """
+    Workflow model for tracking the state of a given instance of a workflow.
+    Each entity (e.g. opportunity) has its own, one single workflow instance in this table.
+
+    Attributes:
+        workflow_id: Primary key, UUID
+        workflow_type_id: Foreign key to lk_workflow_type table
+        current_workflow_state: Text field describing the current state of the workflow
+        is_active: Boolean flag indicating if the workflow is active, set to False when the workflow hits an end state
+    """
+
+    __tablename__ = "workflow"
 
     #############
     # WARNING
@@ -29,13 +40,13 @@ class WorkflowEntity(ApiSchemaTable, TimestampMixin):
     # To do this, add the following to the upgrade() of the migration AFTER everything automatically generated
     """
         op.drop_constraint(
-        "workflow_entity_exactly_one_nonnull_entity_check",
-        table_name="workflow_entity",
+        "workflow_exactly_one_nonnull_entity_check",
+        table_name="workflow",
         schema="api",
     )
     op.create_check_constraint(
-        "workflow_entity_exactly_one_nonnull_entity_check",
-        table_name="workflow_entity",
+        "workflow_exactly_one_nonnull_entity_check",
+        table_name="workflow",
         schema="api",
         # THIS NEEDS TO MATCH WHATEVER COLUMNS YOU ADDED BELOW
         condition="num_nonnulls(opportunity_id, application_id, application_submission_id) = 1",
@@ -54,51 +65,6 @@ class WorkflowEntity(ApiSchemaTable, TimestampMixin):
         # otherwise we end up overwriting things and Alembic remakes the whole table
         ApiSchemaTable.__table_args__,
     )
-
-    workflow_entity_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, primary_key=True, default=uuid.uuid4
-    )
-
-    workflow_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("api.workflow.workflow_id"), unique=True
-    )
-    workflow: Mapped[Workflow] = relationship()
-
-    opportunity_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey(Opportunity.opportunity_id))
-    opportunity: Mapped[Opportunity | None] = relationship(Opportunity)
-
-    application_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey(Application.application_id))
-    application: Mapped[Application | None] = relationship(Application)
-
-    application_submission_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey(ApplicationSubmission.application_submission_id)
-    )
-    application_submission: Mapped[ApplicationSubmission | None] = relationship(
-        ApplicationSubmission
-    )
-
-    def get_log_extra(self) -> dict[str, Any]:
-        return {
-            "workflow_entity_id": self.workflow_entity_id,
-            "opportunity_id": self.opportunity_id,
-            "application_id": self.application_id,
-            "application_submission_id": self.application_submission_id,
-        }
-
-
-class Workflow(ApiSchemaTable, TimestampMixin):
-    """
-    Workflow model for tracking the state of a given instance of a workflow.
-    Each entity (e.g. opportunity) has its own, one single workflow instance in this table.
-
-    Attributes:
-        workflow_id: Primary key, UUID
-        workflow_type_id: Foreign key to lk_workflow_type table
-        current_workflow_state: Text field describing the current state of the workflow
-        is_active: Boolean flag indicating if the workflow is active, set to False when the workflow hits an end state
-    """
-
-    __tablename__ = "workflow"
 
     workflow_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
@@ -124,8 +90,17 @@ class Workflow(ApiSchemaTable, TimestampMixin):
         back_populates="workflow", uselist=True, cascade="all, delete-orphan"
     )
 
-    workflow_entity: Mapped[WorkflowEntity] = relationship(
-        back_populates="workflow", uselist=False, cascade="all, delete-orphan"
+    opportunity_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey(Opportunity.opportunity_id))
+    opportunity: Mapped[Opportunity | None] = relationship(Opportunity)
+
+    application_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey(Application.application_id))
+    application: Mapped[Application | None] = relationship(Application)
+
+    application_submission_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey(ApplicationSubmission.application_submission_id)
+    )
+    application_submission: Mapped[ApplicationSubmission | None] = relationship(
+        ApplicationSubmission
     )
 
     def get_log_extra(self) -> dict[str, Any]:
@@ -134,7 +109,10 @@ class Workflow(ApiSchemaTable, TimestampMixin):
             "workflow_type": self.workflow_type,
             "current_workflow_state": self.current_workflow_state,
             "is_active": self.is_active,
-        } | self.workflow_entity.get_log_extra()
+            "opportunity_id": self.opportunity_id,
+            "application_id": self.application_id,
+            "application_submission_id": self.application_submission_id,
+        }
 
 
 class WorkflowEventHistory(ApiSchemaTable, TimestampMixin):

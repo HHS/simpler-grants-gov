@@ -31,7 +31,7 @@ from src.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 # Add conditional import for type checking
 if TYPE_CHECKING:
     from src.db.models.user_models import ApplicationUser, User
-    from src.db.models.workflow_models import WorkflowEntity
+    from src.db.models.workflow_models import Workflow
 
 
 class Competition(ApiSchemaTable, TimestampMixin):
@@ -320,8 +320,8 @@ class Application(ApiSchemaTable, TimestampMixin):
 
     # We mostly add this so if we delete an application, any corresponding
     # workflows are deleted as well.
-    workflow_entities: Mapped[list[WorkflowEntity]] = relationship(
-        "WorkflowEntity",
+    workflows: Mapped[list[Workflow]] = relationship(
+        "Workflow",
         back_populates="application",
         uselist=True,
         cascade="all, delete-orphan",
@@ -437,8 +437,8 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
 
     # We mostly add this so if we delete a submission, any corresponding
     # workflows are deleted as well.
-    workflow_entities: Mapped[list[WorkflowEntity]] = relationship(
-        "WorkflowEntity",
+    workflows: Mapped[list[Workflow]] = relationship(
+        "Workflow",
         back_populates="application_submission",
         uselist=True,
         cascade="all, delete-orphan",

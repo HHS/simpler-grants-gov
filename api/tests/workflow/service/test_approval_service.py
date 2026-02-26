@@ -44,7 +44,7 @@ def test_can_user_do_agency_approval_opportunity(
     config = basic_test_workflow_config
 
     opportunity_workflow = WorkflowFactory.create(
-        workflow_type=WorkflowType.BASIC_TEST_WORKFLOW, workflow_entity__opportunity=opportunity
+        workflow_type=WorkflowType.BASIC_TEST_WORKFLOW, opportunity=opportunity
     )
 
     all_events = BasicTestStateMachine.get_valid_events()
@@ -101,7 +101,7 @@ def test_can_user_do_agency_approval_application(
 
     application_workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
-        workflow_entity__application=application,
+        application=application,
         has_application=True,
     )
 
@@ -160,7 +160,7 @@ def test_can_user_do_agency_approval_application_submission(
 
     application_workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
-        workflow_entity__application_submission=application_submission,
+        application_submission=application_submission,
         has_application_submission=True,
     )
 
@@ -210,7 +210,7 @@ def test_can_user_do_agency_approval_with_null_opp_agency(db_session, enable_fac
         agency_id=None, agency_code="a-code-that-won't-connect-to-anything"
     )
     workflow = WorkflowFactory.create(
-        workflow_type=WorkflowType.BASIC_TEST_WORKFLOW, workflow_entity__opportunity=opportunity
+        workflow_type=WorkflowType.BASIC_TEST_WORKFLOW, opportunity=opportunity
     )
 
     verify_can_do_only(

@@ -6,9 +6,10 @@ from sqlalchemy import select
 
 from src.adapters import db
 from src.constants.lookup_constants import WorkflowEntityType
+from src.db.models.base import ApiSchemaTable
 from src.db.models.competition_models import Application
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.workflow_models import Workflow, WorkflowEntity
+from src.db.models.workflow_models import Workflow
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_errors import (
@@ -27,11 +28,15 @@ def get_workflow_entity(
     entity_type: WorkflowEntityType,
     entity_id: uuid.UUID,
     config: WorkflowConfig,
-) -> WorkflowEntity:
-    """Get a workflow entity object connected to the provided entity, erroring if not found.
+) -> dict[str, ApiSchemaTable]:
+    """Get a workflow entity map that can be used to create a workflow.
 
-    Note: this makes a new workflow entity that needs to be added to the DB session, it does not
-    find an existing one.
+    Handles validating and making sure exactly one entity is found.
+
+    Expected usage:
+
+        workflow_entity = get_workflow_entity(...)
+        workflow = Workflow(..., **workflow_entity)
     """
 
     log_extra: dict[str, Any] = {
@@ -52,7 +57,7 @@ def get_workflow_entity(
             logger.warning("Opportunity not found for entity", extra=log_extra)
             raise EntityNotFound("Opportunity not found")
 
-        return WorkflowEntity(opportunity=opportunity)
+        return {"opportunity": opportunity}
 
     elif entity_type == WorkflowEntityType.APPLICATION:
         application = db_session.scalar(
@@ -62,7 +67,7 @@ def get_workflow_entity(
             logger.warning("Application not found for entity", extra=log_extra)
             raise EntityNotFound("Application not found")
 
-        return WorkflowEntity(application=application)
+        return {"application": application}
 
     else:  # Any unconfigured entity types will result in an error
         logger.warning("Entity type is not supported for workflow", extra=log_extra)  # type: ignore[unreachable]
