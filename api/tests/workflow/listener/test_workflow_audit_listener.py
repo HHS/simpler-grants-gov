@@ -19,7 +19,7 @@ def test_workflow_audit_created_on_start_workflow(db_session, enable_factory_cre
     event, history_event = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=user,
-        entities=[opportunity],
+        entity=opportunity,
     )
 
     event_handler = EventHandler(db_session, event, history_event)
@@ -54,7 +54,7 @@ def test_workflow_audit_created_on_process_workflow(db_session, enable_factory_c
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        is_single_opportunity_workflow=True,
+        has_opportunity=True,
     )
 
     event, history_event = build_process_workflow_event(
@@ -91,7 +91,7 @@ def test_workflow_audit_captures_metadata(db_session, enable_factory_create):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.MIDDLE,
-        is_single_opportunity_workflow=True,
+        has_opportunity=True,
     )
 
     # Create event with metadata
@@ -121,7 +121,7 @@ def test_workflow_audit_multiple_transitions(db_session, enable_factory_create):
     event, history_event = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=user,
-        entities=[opportunity],
+        entity=opportunity,
     )
 
     event_handler = EventHandler(db_session, event, history_event)
@@ -168,7 +168,7 @@ def test_workflow_audit_with_approval_workflow(db_session, enable_factory_create
     event, history_event = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=user,
-        entities=[opportunity],
+        entity=opportunity,
     )
 
     event_handler = EventHandler(db_session, event, history_event)
@@ -216,7 +216,7 @@ def test_workflow_audit_different_users(db_session, enable_factory_create):
     event, history_event = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=user1,
-        entities=[opportunity],
+        entity=opportunity,
     )
 
     event_handler = EventHandler(db_session, event, history_event)
