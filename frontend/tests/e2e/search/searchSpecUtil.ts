@@ -32,19 +32,19 @@ export function getSearchInput(page: Page) {
 export async function fillSearchInputAndSubmit(term: string, page: Page) {
   const searchInput = getSearchInput(page);
   const submitButton = page.locator(".usa-search > button[type='submit']");
-  
+
   // Firefox/Webkit need extra handling
   const browserType = page.context().browser()?.browserType().name();
   if (browserType === "firefox" || browserType === "webkit") {
     await searchInput.scrollIntoViewIfNeeded();
     await page.waitForTimeout(200);
   }
-  
+
   // this needs to be `pressSequentially` rather than `fill` because `fill` was not
   // reliably triggering onChange handlers in webkit
   await searchInput.pressSequentially(term);
   await expect(searchInput).toHaveValue(term, { timeout: 10000 });
-  
+
   // Webkit needs extra wait before clicking submit
   if (browserType === "webkit") {
     await page.waitForTimeout(500);
@@ -113,11 +113,26 @@ export async function selectSortBy(
   const sortSelectElement = drawer
     ? page.locator("#search-sort-by-select-drawer")
     : page.locator("#search-sort-by-select").first();
+
+  // Webkit needs extra handling for form interactions
+  const browserType = page.context().browser()?.browserType().name();
+  if (browserType === "webkit") {
+    await sortSelectElement.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+  }
+
   await sortSelectElement.selectOption(sortByValue);
+
   // For mobile drawer on staging, wait longer as it can be very slow
   if (drawer && targetEnv === "staging") {
     await page.waitForTimeout(5000);
   }
+
+  // Webkit needs extra wait for the selection to register
+  if (browserType === "webkit") {
+    await page.waitForTimeout(500);
+  }
+
   await expect(sortSelectElement).toHaveValue(sortByValue, timeoutOption);
 }
 
