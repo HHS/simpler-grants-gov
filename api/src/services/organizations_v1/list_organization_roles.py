@@ -4,10 +4,9 @@ from uuid import UUID
 from sqlalchemy import select
 
 from src.adapters import db
-from src.auth.endpoint_access_util import check_user_access
-from src.constants.lookup_constants import Privilege, RoleType
+from src.constants.lookup_constants import RoleType
 from src.db.models.user_models import LinkRoleRoleType, Role, User
-from src.services.organizations_v1.get_organization import get_organization
+from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 
 
 def get_organization_roles_and_verify_access(
@@ -17,16 +16,7 @@ def get_organization_roles_and_verify_access(
     then returns the roles associated with that organization.
 
     Note: Currently only core (default) roles are returned, not custom roles."""
-    # Retrieve organization (raises 404 if not found)
-    organization = get_organization(db_session, organization_id)
-
-    # Enforce privilege check
-    check_user_access(
-        db_session,
-        user,
-        {Privilege.VIEW_ORG_MEMBERSHIP},
-        organization,
-    )
+    get_organization_and_verify_access(db_session, user, organization_id)
     return get_organization_roles(db_session)
 
 

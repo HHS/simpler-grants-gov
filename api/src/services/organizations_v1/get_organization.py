@@ -39,11 +39,10 @@ def get_organization(db_session: db.Session, organization_id: uuid.UUID) -> Orga
 
 
 def get_organization_and_verify_access(
-    db_session: db.Session,
-    user: User,
-    organization_id: uuid.UUID,
+    db_session: db.Session, user: User, organization_id: uuid.UUID
 ) -> Organization:
-    """Get organization by ID and verify user access.
+    """Get organization by ID and verify user has access, raising appropriate errors if not.
+
     Args:
         db_session: Database session
         user: User requesting access
@@ -54,16 +53,15 @@ def get_organization_and_verify_access(
 
     Raises:
         FlaskError: 404 if organization not found, 403 if access denied
-
     """
-    # Retrieve organization (raises 404 if not found)
+    # First get the organization
     organization = get_organization(db_session, organization_id)
 
-    # Enforce privilege check
+    # Check if user has VIEW_ORG_MEMBERSHIP privilege for this organization
     check_user_access(
         db_session,
         user,
-        {Privilege.VIEW_ORGANIZATION},
+        {Privilege.VIEW_ORG_MEMBERSHIP},
         organization,
     )
 

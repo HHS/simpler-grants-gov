@@ -245,7 +245,6 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.BUDGET_OFFICER_APPROVAL, 24),
         LookupStr(Privilege.VIEW_ORG_SAVED_OPPORTUNITIES, 25),
         LookupStr(Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES, 26),
-        LookupStr(Privilege.VIEW_ORGANIZATION, 27),
     ]
 )
 

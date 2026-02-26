@@ -8,7 +8,6 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.selectable import Select
 
 import src.adapters.db as db
-from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import ExternalUserType, Privilege
 from src.db.models.entity_models import Organization
 from src.db.models.user_models import (
@@ -21,7 +20,7 @@ from src.db.models.user_models import (
 from src.pagination.pagination_models import PaginationInfo, PaginationParams
 from src.pagination.paginator import Paginator
 from src.pagination.sorting_util import apply_sorting
-from src.services.organizations_v1.get_organization import get_organization
+from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 
 
 @dataclass
@@ -152,16 +151,8 @@ def get_organization_users_and_verify_access(
     # Validate and parse request parameters
     params = OrganizationUsersListParams.model_validate(request_data)
 
-    # Retrieve organization (raises 404 if not found)
-    organization = get_organization(db_session, organization_id)
-
-    # Check if user has VIEW_ORG_MEMBERSHIP privilege for this organization check
-    check_user_access(
-        db_session,
-        user,
-        {Privilege.VIEW_ORG_MEMBERSHIP},
-        organization,
-    )
+    # Check if user has VIEW_ORG_MEMBERSHIP privilege for this organization
+    organization = get_organization_and_verify_access(db_session, user, organization_id)
 
     # Build base query with joins for sorting
     stmt = _build_organization_users_query(organization_id)

@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
+from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import (
@@ -18,7 +19,6 @@ from src.db.models.entity_models import (
 from src.db.models.user_models import User
 from src.pagination.pagination_models import PaginationInfo, SortOrder, SortOrderParams
 from src.search.search_models import StrSearchFilter
-from src.services.organizations_v1.get_organization import get_organization
 
 
 class OrganizationInvitationFilters(BaseModel):
@@ -111,6 +111,28 @@ def paginate_python(
     )
 
 
+def get_organization_and_verify_access(
+    db_session: db.Session, user: User, organization_id: uuid.UUID
+) -> Organization:
+    """Get organization by ID and verify user has MANAGE_ORG_MEMBERS access."""
+    # First get the organization
+    stmt = select(Organization).where(Organization.organization_id == organization_id)
+    organization = db_session.execute(stmt).scalar_one_or_none()
+
+    if organization is None:
+        raise_flask_error(404, message=f"Could not find Organization with ID {organization_id}")
+
+    # Check if user has required privilege for this organization
+    check_user_access(
+        db_session,
+        user,
+        {Privilege.MANAGE_ORG_MEMBERS},
+        organization,
+    )
+
+    return organization
+
+
 def list_organization_invitations_with_filters(
     db_session: db.Session,
     organization_id: uuid.UUID,
@@ -201,16 +223,8 @@ def list_organization_invitations_and_verify_access(
     # Validate parameters
     params = ListOrganizationsParams.model_validate(json_data)
 
-    # Retrieve organization (raises 404 if not found)
-    organization = get_organization(db_session, organization_id)
-
     # First verify the user has access to manage organization members
-    check_user_access(
-        db_session,
-        user,
-        {Privilege.MANAGE_ORG_MEMBERS},
-        organization,
-    )
+    get_organization_and_verify_access(db_session, user, organization_id)
 
     # Get the raw invitations with filters and pagination
     invitations, pagination_info = list_organization_invitations_with_filters(
