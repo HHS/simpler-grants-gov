@@ -5,10 +5,12 @@ from sqlalchemy import select
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
+from src.auth.endpoint_access_util import check_user_access
+from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import OrganizationSavedOpportunity
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
-from src.services.organizations_v1.get_organization import get_organization_and_verify_access
+from src.services.organizations_v1.get_organization import get_organization
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +26,8 @@ def create_organization_saved_opportunity(
 
     Returns True if a new record was created, False if already saved.
     """
-    # Validate organization exists and fetch it
-    get_organization_and_verify_access(db_session, user, organization_id)
+    organization = get_organization(db_session, organization_id)
+    check_user_access(db_session, user, {Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES}, organization)
 
     # Validate opportunity exists and is not in draft status
     opportunity_id = json_data["opportunity_id"]

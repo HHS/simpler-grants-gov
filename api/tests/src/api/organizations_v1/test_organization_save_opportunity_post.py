@@ -17,7 +17,7 @@ class TestOrganizationSaveOpportunityPost:
         """New save returns 200 with Success message"""
         opportunity = OpportunityFactory.create(is_draft=False)
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES],
             db_session=db_session,
         )
 
@@ -44,7 +44,7 @@ class TestOrganizationSaveOpportunityPost:
         """Saving an already-saved opportunity returns 200 without creating a duplicate"""
         opportunity = OpportunityFactory.create(is_draft=False)
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES],
             db_session=db_session,
         )
         OrganizationSavedOpportunityFactory.create(
@@ -135,7 +135,7 @@ class TestOrganizationSaveOpportunityPost:
     ):
         """Non-existent opportunity returns 404"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES],
             db_session=db_session,
         )
 
@@ -153,7 +153,7 @@ class TestOrganizationSaveOpportunityPost:
         """Draft opportunity returns 404"""
         opportunity = OpportunityFactory.create(is_draft=True)
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES],
             db_session=db_session,
         )
 
@@ -170,7 +170,7 @@ class TestOrganizationSaveOpportunityPost:
     ):
         """Missing opportunity_id in request body returns 422"""
         user, organization, token = create_user_in_org(
-            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            privileges=[Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES],
             db_session=db_session,
         )
 
