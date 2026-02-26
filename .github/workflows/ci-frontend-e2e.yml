@@ -29,8 +29,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        shard: [1]
-        total_shards: [1]
+        shard: [1, 2, 3, 4]
+        total_shards: [4]
 
     steps:
       - name: Checkout repository
@@ -83,7 +83,7 @@ jobs:
           TOTAL_SHARDS: ${{ matrix.total_shards }}
           CURRENT_SHARD: ${{ matrix.shard }}
         run: |
-          npm run test:e2e -- tests/e2e/search/search-state-persistence.spec.ts
+          npm run test:e2e
 
       - name: Debug logging on failure
         if: failure()
