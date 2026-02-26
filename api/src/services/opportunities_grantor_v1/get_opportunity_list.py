@@ -67,6 +67,8 @@ def list_opportunities_with_filters(
             selectinload(Opportunity.current_opportunity_summary).selectinload(
                 CurrentOpportunitySummary.opportunity_summary
             ),
+            selectinload(Opportunity.opportunity_attachments),
+            selectinload(Opportunity.competitions),
         )
         .where(Opportunity.agency_id == agency_id)
     )

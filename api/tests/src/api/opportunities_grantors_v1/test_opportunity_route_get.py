@@ -277,9 +277,8 @@ def test_get_opportunity_list_sort_by_created_at_descending(client, db_session, 
     returned_ids = [opp["opportunity_id"] for opp in response_json["data"]]
     created_ids = [str(opp.opportunity_id) for opp in reversed(opportunities)]
 
-    # The most recently created opportunities should appear first
-    for created_id in created_ids:
-        assert created_id in returned_ids
+    # Check that the ordering matches (newest first)
+    assert returned_ids == created_ids
 
 
 def test_get_opportunity_list_pagination(client, db_session, grantor_auth_data):
