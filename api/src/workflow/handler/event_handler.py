@@ -11,6 +11,7 @@ from src.db.models.workflow_models import Workflow, WorkflowEventHistory
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_event import WorkflowEvent
+from src.workflow.listener.workflow_audit_listener import WorkflowAuditListener
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.workflow_service import (
     get_and_validate_workflow,
@@ -76,7 +77,12 @@ class EventHandler:
             db_session=self.db_session, workflow=state_machine_event.workflow
         )
 
-        state_machine = state_machine_event.state_machine_cls(persistence_model)
+        # Create the audit listener to track all state transitions
+        audit_listener = WorkflowAuditListener(db_session=self.db_session)
+
+        state_machine = state_machine_event.state_machine_cls(
+            persistence_model, listeners=[audit_listener]
+        )
         log_extra = self.event.get_log_extra() | {"current_workflow_state": persistence_model.state}
 
         if not is_event_valid_for_workflow(state_machine_event.event_to_send, state_machine):

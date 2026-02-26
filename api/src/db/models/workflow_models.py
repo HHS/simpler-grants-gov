@@ -165,9 +165,7 @@ class WorkflowAudit(ApiSchemaTable, TimestampMixin):
     workflow_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Workflow.workflow_id), nullable=False
     )
-    workflow: Mapped[Workflow] = relationship(
-        Workflow, back_populates="workflow_audits", single_parent=True
-    )
+    workflow: Mapped[Workflow] = relationship(Workflow, back_populates="workflow_audits")
 
     acting_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id))
     acting_user: Mapped[User] = relationship(User)
@@ -179,6 +177,7 @@ class WorkflowAudit(ApiSchemaTable, TimestampMixin):
     target_state: Mapped[str]
 
     event_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(WorkflowEventHistory.event_id))
+    event: Mapped[WorkflowEventHistory] = relationship(WorkflowEventHistory)
 
     audit_metadata: Mapped[dict | None] = mapped_column(JSONB)
 

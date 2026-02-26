@@ -1,4 +1,4 @@
-variable "email_alerts_subscription_list" {
+variable "email_alert_recipients" {
   type        = set(string)
   default     = []
   description = "List of emails to subscribe to alerts"
