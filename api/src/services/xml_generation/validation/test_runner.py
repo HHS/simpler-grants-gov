@@ -7,15 +7,7 @@ from typing import Any
 
 import click
 
-from src.form_schema.forms.attachment_form import (
-    FORM_XML_TRANSFORM_RULES as ATTACHMENT_FORM_TRANSFORM_RULES,
-)
-from src.form_schema.forms.epa_form_4700_4 import (
-    FORM_XML_TRANSFORM_RULES as EPA4700_4_TRANSFORM_RULES,
-)
-from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
-from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
-from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
+from src.services.xml_generation.config import _build_xml_form_map
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
@@ -24,14 +16,13 @@ from .xsd_validator import XSDValidator
 
 logger = logging.getLogger(__name__)
 
-# Map form names to their transform rules
-FORM_TRANSFORM_RULES = {
-    "SF424_4_0": SF424_TRANSFORM_RULES,
-    "SF424A": SF424A_TRANSFORM_RULES,
-    "EPA4700_4": EPA4700_4_TRANSFORM_RULES,
-    "SFLLL_2_0": SFLLL_TRANSFORM_RULES,
-    "AttachmentForm_1_2": ATTACHMENT_FORM_TRANSFORM_RULES,
-}
+# Build form map dynamically from all registered forms (case-insensitive keyed by short_form_name)
+_XML_FORM_MAP = _build_xml_form_map()
+
+
+def _get_transform_config(form_name: str) -> dict | None:
+    """Return transform config for a form, matching case-insensitively."""
+    return _XML_FORM_MAP.get(form_name.upper())
 
 
 class ValidationTestRunner:
@@ -105,7 +96,7 @@ class ValidationTestRunner:
 
         try:
             # Get transform rules for the form
-            transform_config = FORM_TRANSFORM_RULES.get(form_name)
+            transform_config = _get_transform_config(form_name)
             if not transform_config:
                 return {
                     "test_name": test_name,

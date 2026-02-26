@@ -1,7 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { noop } from "lodash";
 import { fakeSavedSearch } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { ReadonlyURLSearchParams } from "next/navigation";
 
@@ -18,10 +17,6 @@ let fakeSearchParams = new ReadonlyURLSearchParams();
 
 jest.mock("src/services/auth/useUser", () => ({
   useUser: (): unknown => mockUseUser(),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/hooks/useSearchParamUpdater", () => ({

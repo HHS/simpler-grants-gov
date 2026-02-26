@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "tests/react-utils";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import SaveIcon from "src/components/SaveIcon";
 

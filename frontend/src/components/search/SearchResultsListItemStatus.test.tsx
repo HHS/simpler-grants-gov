@@ -1,5 +1,5 @@
+import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { render, screen, waitFor } from "tests/react-utils";
 
 import SearchResultListItemStatus from "src/components/search/SearchResultListItemStatus";
 

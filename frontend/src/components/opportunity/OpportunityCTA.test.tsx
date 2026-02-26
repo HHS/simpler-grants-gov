@@ -1,13 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import OpportunityCTA, {
   OpportunityContentBox,
 } from "src/components/opportunity/OpportunityCTA";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 describe("OpportunityCTA", () => {
   it("renders the expected content and title", () => {
