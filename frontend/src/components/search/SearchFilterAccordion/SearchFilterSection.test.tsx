@@ -1,10 +1,8 @@
 import "@testing-library/jest-dom";
 
+import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
-import { render, screen } from "tests/react-utils";
-
-import React from "react";
 
 import SearchFilterSection from "src/components/search/SearchFilterAccordion/SearchFilterSection";
 
@@ -50,6 +48,10 @@ const defaultProps = {
   },
 };
 
+const ActualAllOptionCheckbox = jest.requireActual<
+  typeof import("src/components/search/SearchFilterAccordion/AllOptionCheckbox")
+>("src/components/search/SearchFilterAccordion/AllOptionCheckbox");
+
 jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
     setQueryParam: mockSetQueryParam,
@@ -59,12 +61,8 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
 describe("SearchFilterSection", () => {
   beforeEach(() => {
     AllOptionCheckboxMock.mockImplementation((props) =>
-      // eslint-disable-next-line
-      jest
-        .requireActual(
-          "src/components/search/SearchFilterAccordion/AllOptionCheckbox",
-        )
-        .AllOptionCheckbox(props),
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      ActualAllOptionCheckbox.AllOptionCheckbox(props),
     );
   });
   afterEach(() => jest.resetAllMocks());

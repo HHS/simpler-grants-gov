@@ -1,4 +1,4 @@
-import { render, screen } from "tests/react-utils";
+import { render, screen } from "@testing-library/react";
 
 import RoadmapHeader from "src/components/roadmap/sections/RoadmapHeader";
 
@@ -7,7 +7,7 @@ describe("RoadmapHeader Content", () => {
     render(<RoadmapHeader />);
     const RoadmapH1 = screen.getByRole("heading", {
       level: 1,
-      name: /Product roadmap?/i,
+      name: "pageHeaderTitle",
     });
 
     expect(RoadmapH1).toBeInTheDocument();
