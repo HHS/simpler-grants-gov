@@ -10,8 +10,8 @@ import Link from "next/link";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
+import { SavedOpportunitiesController } from "src/components/saved-opportunities/SavedOpportunitiesController";
 import SavedOpportunityStatusFilter from "src/components/saved-opportunities/SavedOpportunityStatusFilter";
-import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 export const dynamic = "force-dynamic";
@@ -36,26 +36,6 @@ const NoSavedOpportunities = () => {
       </div>
     </>
   );
-};
-
-const SavedOpportunitiesList = ({
-  opportunities,
-}: {
-  opportunities: SearchResponseData;
-}) => {
-  const savedOpportunitiesListItems = opportunities.map(
-    (opportunity, index) =>
-      opportunity && (
-        <li key={opportunity.opportunity_id}>
-          <SearchResultsListItem
-            opportunity={opportunity}
-            saved={true}
-            index={index}
-          />
-        </li>
-      ),
-  );
-  return <ul className="usa-list--unstyled">{savedOpportunitiesListItems}</ul>;
 };
 
 type SavedOpportunitiesPageProps = LocalizedPageProps & {
@@ -103,7 +83,9 @@ export default async function SavedOpportunities({
               <SavedOpportunityStatusFilter status={status || null} />
             </div>
             {resolvedOpportunities.length > 0 ? (
-              <SavedOpportunitiesList opportunities={resolvedOpportunities} />
+              <SavedOpportunitiesController
+                opportunities={resolvedOpportunities}
+              />
             ) : (
               <p>{t("SavedOpportunities.noMatchingStatus")}</p>
             )}

@@ -791,3 +791,18 @@ dl {
   background-color: color("yellow-5v");
   border-color: color("orange-30v");
 }
+
+// shared opportunity styles
+// https://www.figma.com/design/bQUTJCMj0JYbAAnJQ4p4tX/Grantee-Designs-%7C-Quad-5-%7C-Simpler-Grants-2026?node-id=2741-59715&t=1CauPpl4XzKK9eoF-4
+.share-opportunity-modal .usa-modal__main {
+  margin: 0;
+}
+.share-opportunity-item--disabled,
+.share-opportunity-item--disabled .usa-checkbox {
+  background-color: #f0f0f0;
+  opacity: 0.8;
+}
+
+.share-opportunity-checkboxes .usa-checkbox__label {
+  margin-top: 0;
+}

@@ -27,6 +27,20 @@ jest.mock("next-intl", () => ({
 const savedOpportunities = jest.fn().mockResolvedValue([]);
 const opportunity = jest.fn().mockResolvedValue({ data: [] });
 const mockUseSearchParams = jest.fn().mockReturnValue(new URLSearchParams());
+const clientFetchMock = jest.fn().mockResolvedValue([]);
+
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
+  }),
+}));
+
+jest.mock(
+  "src/components/opportunities/ShareOpportunityToOrganizationsModal",
+  () => ({
+    ShareOpportunityToOrganizationsModal: () => null,
+  }),
+);
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams() as unknown,
