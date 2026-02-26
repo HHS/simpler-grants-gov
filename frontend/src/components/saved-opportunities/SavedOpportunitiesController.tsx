@@ -20,8 +20,10 @@ export function SavedOpportunitiesController({
 }: SavedOpportunitiesControllerProps) {
   const modalRef = useRef<ModalRef>(null);
 
-  const [selectedOpportunity, setSelectedOpportunity] =
-    useState<BaseOpportunity | null>(null);
+  const [
+    selectedOpportunity,
+    // setSelectedOpportunity
+  ] = useState<BaseOpportunity | null>(null);
 
   const { clientFetch: fetchUserOrganizations } = useClientFetch<
     UserOrganization[]
@@ -56,10 +58,10 @@ export function SavedOpportunitiesController({
     return new Set(savedToOrganizations.map((entry) => entry.organization_id));
   }, [selectedOpportunity]);
 
-  const handleShareClick = (opportunity: BaseOpportunity) => {
-    setSelectedOpportunity(opportunity);
-    modalRef.current?.toggleModal();
-  };
+  //   const handleShareClick = (opportunity: BaseOpportunity) => {
+  //     setSelectedOpportunity(opportunity);
+  //     modalRef.current?.toggleModal();
+  //   };
 
   return (
     <>
@@ -70,7 +72,7 @@ export function SavedOpportunitiesController({
               opportunity={opportunity}
               saved={true}
               index={index}
-              onShareClick={() => handleShareClick(opportunity)}
+              // onShareClick={() => handleShareClick(opportunity)}
             />
           </li>
         ))}

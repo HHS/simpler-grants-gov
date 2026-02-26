@@ -15,7 +15,7 @@ interface SearchResultsListItemProps {
   saved?: boolean;
   index: number;
   page?: number;
-  onShareClick?: () => void;
+  // onShareClick?: () => void;
 }
 
 const metadataBorderClasses = `
@@ -42,7 +42,7 @@ export default function SearchResultsListItem({
   saved = false,
   index,
   page = 1,
-  onShareClick,
+  // onShareClick,
 }: SearchResultsListItemProps) {
   const t = useTranslations("Search");
 
