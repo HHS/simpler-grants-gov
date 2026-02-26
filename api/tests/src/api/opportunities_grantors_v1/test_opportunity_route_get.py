@@ -52,7 +52,7 @@ def test_get_opportunity_success(client, db_session, grantor_auth_data, enable_f
     test_opportunity.agency_record = agency
 
     response = client.get(
-        f"/v1/grantors/opportunities/{test_opportunity.opportunity_id}/grantor",
+        f"/v1/grantors/opportunities/{test_opportunity.opportunity_id}",
         headers={"X-SGG-Token": token},
     )
 
@@ -72,7 +72,7 @@ def test_get_opportunity_success(client, db_session, grantor_auth_data, enable_f
 def test_get_opportunity_with_invalid_jwt_token(client, opportunity):
     """Test opportunity retrieval with invalid JWT token"""
     response = client.get(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/grantor",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}",
         headers={"X-SGG-Token": "invalid_token_value"},
     )
 
