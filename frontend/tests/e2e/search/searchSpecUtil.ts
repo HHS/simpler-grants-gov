@@ -147,16 +147,30 @@ export async function selectSortBy(
     await page.waitForTimeout(200);
   }
 
-  await sortSelectElement.selectOption(sortByValue);
+  await sortSelectElement.click();
+  await page.waitForTimeout(200);
+
+  // Webkit needs special handling for selectOption - use keyboard navigation
+  if (browserType === "webkit") {
+    // Press down arrow to cycle through options
+    for (let i = 0; i < 20; i++) {
+      const currentValue = await sortSelectElement.inputValue();
+      if (currentValue === sortByValue) {
+        await page.waitForTimeout(300);
+        await sortSelectElement.press("Enter");
+        break;
+      }
+      await sortSelectElement.press("ArrowDown");
+      await page.waitForTimeout(150);
+    }
+    await page.waitForTimeout(1500);
+  } else {
+    await sortSelectElement.selectOption(sortByValue);
+  }
 
   // For mobile drawer on staging, wait longer as it can be very slow
   if (drawer && targetEnv === "staging") {
     await page.waitForTimeout(5000);
-  }
-
-  // Webkit needs extra wait for the selection to register
-  if (browserType === "webkit") {
-    await page.waitForTimeout(1500);
   }
 
   await expect(sortSelectElement).toHaveValue(sortByValue, timeoutOption);
@@ -172,6 +186,10 @@ export async function expectSortBy(page: Page, value: string, drawer = false) {
 }
 
 export async function waitForSearchResultsInitialLoad(page: Page) {
+  // Wait for page to stabilize before looking for results - helps with Firefox
+  await page.waitForLoadState("networkidle", { timeout: 30000 }).catch(() => undefined);
+  await page.waitForTimeout(500);
+  
   const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
   const timeout = targetEnv === "staging" ? 180000 : 60000;
   await resultsHeading.waitFor({ state: "visible", timeout });
