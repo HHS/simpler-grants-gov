@@ -3,6 +3,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import {
   refreshPageWithCurrentURL,
   waitForURLContainsQueryParamValue,
+  expectURLQueryParamValue,
 } from "tests/e2e/playwrightUtils";
 import {
   expectCheckboxIDIsChecked,
@@ -39,17 +40,6 @@ const goToSearch = async (page: Page) => {
       throw error;
     }
   }
-};
-
-const expectURLQueryParamValue = (
-  page: Page,
-  queryParamName: string,
-  queryParamValue: string,
-) => {
-  const url = new URL(page.url());
-  const params = new URLSearchParams(url.search);
-  const actualValue = params.get(queryParamName);
-  expect(actualValue).toBe(queryParamValue);
 };
 
 test.describe("Search page - state persistence after refresh", () => {
