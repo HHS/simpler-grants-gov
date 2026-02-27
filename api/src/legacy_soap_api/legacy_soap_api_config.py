@@ -151,6 +151,11 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             is_mtom=True,
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
         ),
+        "UpdateApplicationInfoRequest": SOAPOperationConfig(
+            request_operation_name="UpdateApplicationInfoRequest",
+            response_operation_name="UpdateApplicationInfoResponse",
+            privileges=set(),
+        ),
     },
 }
 
