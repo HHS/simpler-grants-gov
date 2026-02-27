@@ -7,7 +7,6 @@ from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 
 GET_APPLICATION_ZIP_REQUEST_ERR = "No grants_gov_tracking_number provided."
-RESPONSE_OPERATION_NAME = "ConfirmApplicationDeliveryResponse"
 
 
 class ConfirmApplicationDeliveryResponse(BaseSOAPSchema):
