@@ -8,9 +8,10 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select, Subquery, union_all
 
 from src.adapters import db
+from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access, check_user_access
 from src.constants.lookup_constants import Privilege
-from src.db.models.entity_models import OrganizationSavedOpportunity
+from src.db.models.entity_models import Organization, OrganizationSavedOpportunity
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
@@ -20,17 +21,16 @@ from src.db.models.user_models import User, UserSavedOpportunity
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.pagination.paginator import Paginator
 from src.search.search_models import StrSearchFilter
-from src.services.organizations_v1.get_organization import get_organization
 
 logger = logging.getLogger(__name__)
 
 
 class SavedOpportunityFilterParams(BaseModel):
     opportunity_status: StrSearchFilter | None = None
+    organization_ids: list[uuid.UUID] | None = None
 
 
 class SavedOpportunityListParams(BaseModel):
-    organization_ids: list[uuid.UUID] | None = None
     filters: SavedOpportunityFilterParams | None = None
     pagination: PaginationParams
 
@@ -44,11 +44,7 @@ def add_sort_order(stmt: Select, sort_order: list, saved_union: Subquery) -> Sel
             # Most recent save event across user + org
             column = saved_union.c.saved_at
         else:
-            column = (
-                getattr(model_mapping[order.order_by], order.order_by)
-                if order.order_by in model_mapping
-                else getattr(UserSavedOpportunity, order.order_by)
-            )
+            column = getattr(model_mapping[order.order_by], order.order_by)
 
         if (
             order.sort_direction == SortDirection.ASCENDING
@@ -91,16 +87,25 @@ def _get_accessible_org_ids(
 
 
 def _check_access(db_session: db.Session, user: User, organization_ids: list) -> None:
-    for org_id in organization_ids:
-        # Retrieve organization (raises 404 if not found)
-        organization = get_organization(db_session, org_id)
+    # Fetch all organizations in one query
+    organizations = (
+        db_session.query(Organization)
+        .filter(Organization.organization_id.in_(organization_ids))
+        .all()
+    )
+    org_map = {org.organization_id: org for org in organizations}
 
+    missing_ids = set(organization_ids) - org_map.keys()
+    if missing_ids:
+        raise raise_flask_error(404, f"Organization(s) not found: {missing_ids}")
+
+    for org in organizations:
         # Check if user has VIEW_ORG_SAVED_OPPORTUNITIES privilege for this organization
         check_user_access(
             db_session,
             user,
             {Privilege.VIEW_ORG_SAVED_OPPORTUNITIES},
-            organization,
+            org,
         )
 
 
@@ -169,23 +174,22 @@ def get_saved_opportunities(
     db_session: db.Session, user: User, raw_opportunity_params: dict
 ) -> tuple[Sequence[Opportunity], PaginationInfo]:
     opportunity_params = SavedOpportunityListParams.model_validate(raw_opportunity_params)
-    org_ids_param = opportunity_params.organization_ids
+    org_ids_param = opportunity_params.filters and opportunity_params.filters.organization_ids
     user_id = user.user_id
     logger.info("Getting saved opportunities for user")
     include_user_saved_opps = True
     # Determine which orgs to consider
     if org_ids_param is None:
-        logger.info("User saved opportunities requested")
-        org_ids_to_use = []
+        logger.info("All saved opportunities requested")
+        org_ids_to_use = _get_accessible_org_ids(user, user.organization_users)
     elif org_ids_param:
         logger.info("Organization saved opportunities requested")
         _check_access(db_session, user, org_ids_param)
         org_ids_to_use = org_ids_param
         include_user_saved_opps = False
     else:
-        logger.info("All saved opportunities requested")
-        org_ids_to_use = _get_accessible_org_ids(user, user.organization_users)
-
+        logger.info("User saved opportunities requested")
+        org_ids_to_use = []
     # Build saved_union subquery
     saved_union = _build_saved_union_subquery(user_id, org_ids_to_use, include_user_saved_opps)
 
