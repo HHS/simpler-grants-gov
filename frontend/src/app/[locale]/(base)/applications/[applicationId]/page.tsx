@@ -117,7 +117,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
         <ApplicationContainer
           applicationDetails={details}
           opportunity={opportunity}
-          attachments={attachments}
+          // attachments={attachments}
           applicationHistory={historyDetails}
           latestApplicationSubmission={latestApplicationSubmission}
         />

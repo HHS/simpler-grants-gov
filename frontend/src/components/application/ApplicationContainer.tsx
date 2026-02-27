@@ -34,13 +34,13 @@ const MY_APPLICATIONS_LINK = "/applications";
 
 const ApplicationContainer = ({
   applicationDetails,
-  //attachments,
+  // attachments,
   opportunity,
   applicationHistory,
   latestApplicationSubmission,
 }: {
   applicationDetails: ApplicationDetail;
-  //attachments: Attachment[];
+  // attachments: Attachment[];
   opportunity: OpportunityDetail;
   applicationHistory: ApplicationHistory[];
   latestApplicationSubmission: ApplicationSubmission | null;
