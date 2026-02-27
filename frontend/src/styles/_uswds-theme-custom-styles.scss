@@ -395,16 +395,6 @@ h6 {
 // we are implementing the uswds nav drop down at mobile widths, which is not ordinarily supported
 // these styles are taken from the desktop imlementation of the dropdown and applied at all breakpoints
 .usa-nav__primary {
-  // Match the exact USWDS selector .usa-nav__primary button:hover
-  // Use the same color as .usa-nav__primary a:not(.usa-button):not(.usa-current) (#76766a)
-  @include at-media-max($theme-header-min-width) {
-    button:hover,
-    button:focus:hover,
-    button:active:hover {
-      color: #76766a;
-      background-color: transparent;
-    }
-  }
   .mobile-nav-dropdown-uncollapsed-override {
     button[aria-expanded="true"]:hover {
       background-color: color("mint-40");
@@ -482,6 +472,16 @@ h6 {
     .usa-nav__primary-item > .usa-nav__link {
       padding-top: 0.75rem;
       padding-bottom: 0.75rem;
+    }
+  }
+  // Match the exact USWDS selector .usa-nav__primary button:hover
+  // Use the same color as .usa-nav__primary a:not(.usa-button):not(.usa-current) (#76766a)
+  @include at-media-max($theme-header-min-width) {
+    button:hover,
+    button:focus:hover,
+    button:active:hover {
+      color: #76766a;
+      background-color: transparent;
     }
   }
 }
