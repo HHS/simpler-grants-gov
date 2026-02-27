@@ -64,6 +64,17 @@ export async function waitForURLContainsQueryParamValue(
   return expect(actualValue).toBe(queryParamValue);
 }
 
+export const expectURLQueryParamValue = (
+  page: Page,
+  queryParamName: string,
+  queryParamValue: string,
+): void => {
+  const url = new URL(page.url());
+  const params = new URLSearchParams(url.search);
+  const actualValue = params.get(queryParamName);
+  expect(actualValue).toBe(queryParamValue);
+};
+
 export async function waitForUrl(
   page: Page,
   url: string,
