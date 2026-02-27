@@ -1819,10 +1819,23 @@ export const messages = {
     pageTitle: "Organizations",
   },
   AwardRecommendation: {
+    awardRecs: "Award Recs",
     errorMessage:
       "We have encountered an error loading your award recommendations, please try again later.",
     metaDescription: "View your award recommendations",
     pageHeading: "Award Recommendations",
+    heroTitle: "Award Rec #",
+    datePrepared: "Date prepared",
+    status: "Status",
+    statusTag: {
+      draft: "Draft",
+      inProgress: "In progress",
+      pendingReview: "Pending review",
+    },
+    heroButtons: {
+      save: "Save and finish later",
+      create: "Create",
+    },
     pageTitle: "Review your Recommendation",
     description: "Award Recommendation flow coming soon.",
     opportunitySummary: "Opportunity summary",

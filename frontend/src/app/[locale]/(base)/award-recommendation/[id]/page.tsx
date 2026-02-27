@@ -3,7 +3,6 @@ import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { LocalizedPageProps } from "src/types/intl";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { splitMarkup } from "src/utils/generalUtils";
@@ -13,9 +12,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
+import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 
-export async function generateMetadata({ params }: LocalizedPageProps) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id?: string }>;
+}) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
@@ -31,8 +35,9 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 
 export const dynamic = "force-dynamic";
 
-export type AwardRecommendationPageProps = LocalizedPageProps &
-  WithFeatureFlagProps & {
+export type AwardRecommendationPageProps = {
+  params: Promise<{ locale: string; id?: string }>;
+} & WithFeatureFlagProps & {
     searchParams?: Promise<{ id?: string }>;
   };
 
@@ -183,7 +188,10 @@ async function AwardRecommendationPageContent({
 }: AwardRecommendationPageProps) {
   const { locale } = await params;
 
-  const t = await getTranslations("AwardRecommendation");
+  const t = await getTranslations({
+    locale,
+    namespace: "AwardRecommendation",
+  });
   const resolvedSearchParams = (await (searchParams ||
     Promise.resolve({}))) as { id?: string };
   const opportunityId = resolvedSearchParams.id;
@@ -202,18 +210,21 @@ async function AwardRecommendationPageContent({
   }
 
   return (
-    <GridContainer>
-      <h1 className="margin-top-9 margin-bottom-7">
-        {t("pageTitle", { defaultValue: "Review your recommendation" })}
-      </h1>
+    <>
+      <AwardRecommendationHero />
+      <GridContainer>
+        <h1 className="margin-top-9 margin-bottom-7">
+          {t("pageTitle", { defaultValue: "Review your recommendation" })}
+        </h1>
 
-      {opportunityData && (
-        <OpportunitySectionComponent
-          opportunityData={opportunityData}
-          locale={locale}
-        />
-      )}
-    </GridContainer>
+        {opportunityData && (
+          <OpportunitySectionComponent
+            opportunityData={opportunityData}
+            locale={locale}
+          />
+        )}
+      </GridContainer>
+    </>
   );
 }
 
