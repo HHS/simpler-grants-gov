@@ -14,6 +14,23 @@ const { targetEnv } = playwrightEnv;
 
 const FILTER_OPTIONS_TIMEOUT = targetEnv === "staging" ? 30000 : 10000;
 
+const getBrowserType = (page: Page, projectName?: string) => {
+  if (projectName) {
+    const normalized = projectName.toLowerCase();
+    if (normalized.includes("webkit")) {
+      return "webkit";
+    }
+    if (normalized.includes("firefox")) {
+      return "firefox";
+    }
+    if (normalized.includes("chrome") || normalized.includes("chromium")) {
+      return "chromium";
+    }
+  }
+
+  return page.context().browser()?.browserType().name();
+};
+
 export async function toggleFilterDrawer(page: Page) {
   const modalOpen = await page
     .locator('.usa-modal-overlay[aria-controls="search-filter-drawer"]')
@@ -29,12 +46,16 @@ export function getSearchInput(page: Page) {
   return page.locator("#query");
 }
 
-export async function fillSearchInputAndSubmit(term: string, page: Page) {
+export async function fillSearchInputAndSubmit(
+  term: string,
+  page: Page,
+  projectName?: string,
+) {
   const searchInput = getSearchInput(page);
   const submitButton = page.locator(".usa-search > button[type='submit']");
 
   // Firefox/Webkit need extra handling
-  const browserType = page.context().browser()?.browserType().name();
+  const browserType = getBrowserType(page, projectName);
   if (browserType === "firefox" || browserType === "webkit") {
     await searchInput.scrollIntoViewIfNeeded();
     await page.waitForTimeout(200);
@@ -45,7 +66,7 @@ export async function fillSearchInputAndSubmit(term: string, page: Page) {
   await searchInput.pressSequentially(term);
   await expect(searchInput).toHaveValue(term, { timeout: 10000 });
 
-  // Webkit needs extra wait before clicking submit
+  // Webkit needs extra handling
   if (browserType === "webkit") {
     await page.waitForTimeout(500);
     // For Webkit, wait for URL to change after clicking
@@ -107,6 +128,7 @@ export async function selectSortBy(
   page: Page,
   sortByValue: string,
   drawer = false,
+  projectName?: string,
 ) {
   const timeoutOption =
     targetEnv === "staging" ? { timeout: 60000 } : { timeout: 10000 };
@@ -114,8 +136,12 @@ export async function selectSortBy(
     ? page.locator("#search-sort-by-select-drawer")
     : page.locator("#search-sort-by-select").first();
 
+  // Wait for the element to be visible and stable before interacting
+  await sortSelectElement.waitFor({ state: "visible", timeout: 30000 });
+  await page.waitForTimeout(300);
+
   // Webkit needs extra handling for form interactions
-  const browserType = page.context().browser()?.browserType().name();
+  const browserType = getBrowserType(page, projectName);
   if (browserType === "webkit") {
     await sortSelectElement.scrollIntoViewIfNeeded();
     await page.waitForTimeout(200);
@@ -228,6 +254,20 @@ export async function waitForLoaderToBeHidden(page: Page) {
     ".display-flex.flex-align-center.flex-justify-center.margin-bottom-15.margin-top-15",
     { state: "hidden" },
   );
+}
+
+export async function ensureAccordionExpanded(
+  page: Page,
+  accordionTitle: string,
+) {
+  const button = page.locator(
+    `button.usa-accordion__button:has-text("${accordionTitle}")`,
+  );
+  await button.waitFor({ state: "visible", timeout: 15000 });
+  const expanded = await button.getAttribute("aria-expanded");
+  if (expanded !== "true") {
+    await button.click();
+  }
 }
 
 export async function getNumberOfOpportunitySearchResults(page: Page) {
