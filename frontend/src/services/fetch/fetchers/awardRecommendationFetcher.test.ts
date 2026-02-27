@@ -6,7 +6,7 @@ describe("getAwardRecommendationDetails", () => {
   });
 
   it("returns the expected mock details", async () => {
-    const result = await getAwardRecommendationDetails();
+    const result = await getAwardRecommendationDetails("an id");
 
     expect(result).toEqual({
       recordNumber: "AR-26-0002",
