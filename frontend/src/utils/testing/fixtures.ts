@@ -3,6 +3,10 @@ import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import { Organization } from "src/types/applicationResponseTypes";
+import {
+  AwardRecommendationDetails,
+  AwardRecommendationStatus,
+} from "src/types/awardRecommendationTypes";
 import { UserProfile } from "src/types/authTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
@@ -30,6 +34,15 @@ import {
 } from "src/types/userTypes";
 
 import { FormattedFormValidationWarning } from "src/components/applyForm/types";
+
+export const mockAwardRecommendationStatus: AwardRecommendationStatus =
+  "in_progress";
+
+export const mockAwardRecommendationDetails: AwardRecommendationDetails = {
+  recordNumber: "AR-26-0001",
+  datePrepared: "01/01/2026",
+  status: mockAwardRecommendationStatus,
+};
 
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: "63588df8-f2d1-44ed-a201-5804abba696a",

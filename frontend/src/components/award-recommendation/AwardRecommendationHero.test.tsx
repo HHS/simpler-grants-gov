@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
+import { mockAwardRecommendationDetails } from "src/utils/testing/fixtures";
 
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
 
@@ -19,11 +20,9 @@ jest.mock("next-intl/server", () => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
-  getAwardRecommendationDetails: jest.fn().mockResolvedValue({
-    recordNumber: "AR-26-0001",
-    datePrepared: "01/01/2026",
-    status: "in_progress" as const,
-  }),
+  getAwardRecommendationDetails: jest
+    .fn()
+    .mockResolvedValue(mockAwardRecommendationDetails),
 }));
 
 describe("AwardRecommendationHero", () => {
@@ -32,9 +31,13 @@ describe("AwardRecommendationHero", () => {
     render(component);
 
     const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading).toHaveTextContent("AR-26-0001");
+    expect(heading).toHaveTextContent(
+      mockAwardRecommendationDetails.recordNumber,
+    );
 
-    expect(screen.getByText("01/01/2026")).toBeInTheDocument();
+    expect(
+      screen.getByText(mockAwardRecommendationDetails.datePrepared),
+    ).toBeInTheDocument();
 
     expect(
       screen.getByTestId("award-recommendation-status-in-progress"),
