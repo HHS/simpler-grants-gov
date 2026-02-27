@@ -23,14 +23,14 @@ describe("AwardRecommendationStatusTag", () => {
   });
 
   it("renders in progress status tag", () => {
-    render(<AwardRecommendationStatusTag status="in_progress" />);
+    render(<AwardRecommendationStatusTag status="inProgress" />);
 
     const tag = screen.getByTestId("award-recommendation-status-in-progress");
     expect(tag).toBeInTheDocument();
   });
 
   it("renders pending review status tag", () => {
-    render(<AwardRecommendationStatusTag status="pending_review" />);
+    render(<AwardRecommendationStatusTag status="pendingReview" />);
 
     const tag = screen.getByTestId(
       "award-recommendation-status-pending-review",

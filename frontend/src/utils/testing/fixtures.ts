@@ -36,7 +36,7 @@ import {
 import { FormattedFormValidationWarning } from "src/components/applyForm/types";
 
 export const mockAwardRecommendationStatus: AwardRecommendationStatus =
-  "in_progress";
+  "inProgress";
 
 export const mockAwardRecommendationDetails: AwardRecommendationDetails = {
   recordNumber: "AR-26-0001",

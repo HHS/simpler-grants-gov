@@ -23,7 +23,7 @@ const AwardRecommendationStatusTag = ({ status }: Props) => {
             {t("draft")}
           </div>
         );
-      case "in_progress":
+      case "inProgress":
         return (
           <div
             className="usa-tag bg-accent-warm-light text-ink radius-2 font-sans-sm text-no-uppercase display-flex flex-align-center"
@@ -33,7 +33,7 @@ const AwardRecommendationStatusTag = ({ status }: Props) => {
             {t("inProgress")}
           </div>
         );
-      case "pending_review":
+      case "pendingReview":
         return (
           <div
             className="usa-tag bg-error-dark text-white radius-2 font-sans-sm text-no-uppercase display-flex flex-align-center"
