@@ -9,23 +9,15 @@ logger = logging.getLogger(__name__)
 
 
 class OpportunityPersistenceModel(BaseStatePersistenceModel):
-    """A persistence model for workflows where the entity
-    is a single opportunity.
-    """
+    """A persistence model for workflows where the entity is an opportunity"""
 
     def __init__(self, db_session: db.Session, workflow: Workflow):
         super().__init__(db_session, workflow)
 
-        if len(workflow.opportunities) != 1:
+        if workflow.opportunity is None:
             logger.warning(
-                "Expected only a single opportunity for workflow",
-                extra=workflow.get_log_extra()
-                | {
-                    "opportunity_ids": ",".join(
-                        [str(o.opportunity_id) for o in workflow.opportunities]
-                    )
-                },
+                "Expected the workflow entity to be an opportunity", extra=workflow.get_log_extra()
             )
-            raise InvalidEntityForWorkflow("Expected only a single opportunity for workflow")
+            raise InvalidEntityForWorkflow("Expected the workflow entity to be an opportunity")
 
-        self.opportunity = workflow.opportunities[0]
+        self.opportunity = workflow.opportunity
