@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from src.constants.lookup_constants import ApprovalResponseType, UserType, WorkflowType
+from src.constants.lookup_constants import ApprovalResponseType, WorkflowType
 from src.db.models.workflow_models import WorkflowAudit
 from src.workflow.handler.event_handler import EventHandler
 from tests.src.db.models.factories import OpportunityFactory, UserFactory, WorkflowFactory
@@ -246,10 +246,11 @@ def test_workflow_audit_different_users(db_session, enable_factory_create):
     assert audit_records[1].acting_user_id == user2.user_id
 
 
-def test_workflow_audit_automatic_transitions_use_system_user(db_session, enable_factory_create):
+def test_workflow_audit_automatic_transitions_use_system_user(
+    db_session, enable_factory_create, workflow_user
+):
     """Test that automatic transitions (via 'after' parameter) use the system user."""
-    # Create a system user for the test
-    system_user = UserFactory.create(user_type=UserType.INTERNAL_SYSTEM_USER)
+    # The workflow_user fixture automatically creates the system user and sets up the env var
 
     # Create a regular user who will initiate the workflow
     regular_user = UserFactory.create()
@@ -316,8 +317,8 @@ def test_workflow_audit_automatic_transitions_use_system_user(db_session, enable
     assert audit_records[2].acting_user_id == regular_user.user_id
     assert audit_records[2].transition_event == "Receive program officer approval"
 
-    # Verify the automatic transition uses the system user
-    assert audit_records[3].acting_user_id == system_user.user_id
+    # Verify the automatic transition uses the system user (from the workflow_user fixture)
+    assert audit_records[3].acting_user_id == workflow_user.user_id
     assert audit_records[3].transition_event == "Check program officer approval"
     assert audit_records[3].source_state == BasicState.PENDING_PROGRAM_OFFICER_APPROVAL
     # The target state depends on whether has_enough_approvals is true

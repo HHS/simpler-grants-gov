@@ -43,12 +43,6 @@ class StateMachineEvent:
     # Metadata for processing an event.
     metadata: dict | None = None
 
-    # Track the number of transitions that have occurred for this event.
-    # This is used to determine if we're in an automatic transition (e.g., via 'after' parameter)
-    # versus the initial user-triggered transition. Mutable so it can be incremented.
-    # Value of 0 = first transition (user-initiated), >0 = automatic transitions
-    transition_count: int = dataclasses.field(default=0)
-
     def get_log_extra(self) -> dict[str, Any]:
         return {
             "acting_user_id": self.acting_user.user_id,

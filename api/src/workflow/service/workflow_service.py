@@ -5,11 +5,10 @@ from typing import Any
 from sqlalchemy import select
 
 from src.adapters import db
-from src.constants.lookup_constants import UserType, WorkflowEntityType
+from src.constants.lookup_constants import WorkflowEntityType
 from src.db.models.base import ApiSchemaTable
 from src.db.models.competition_models import Application
 from src.db.models.opportunity_models import Opportunity
-from src.db.models.user_models import User
 from src.db.models.workflow_models import Workflow
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.workflow_config import WorkflowConfig
@@ -109,16 +108,3 @@ def get_and_validate_workflow(
         raise InactiveWorkflowError("Workflow is not active - cannot receive events")
 
     return workflow
-
-
-def get_system_workflow_user(db_session: db.Session) -> User:
-    """Get the system workflow user for automated workflow actions."""
-    system_user = db_session.scalar(
-        select(User).where(User.user_type == UserType.INTERNAL_SYSTEM_USER)
-    )
-
-    if system_user is None:
-        logger.error("System workflow user not found in database")
-        raise RuntimeError("System workflow user not found - this is a critical system error")
-
-    return system_user
