@@ -9,7 +9,7 @@ import AwardRecommendationStatusTag from "./AwardRecommendationStatusTag";
 export default async function AwardRecommendationHero() {
   const t = await getTranslations("AwardRecommendation");
   const { recordNumber, datePrepared, status } =
-    await getAwardRecommendationDetails();
+    await getAwardRecommendationDetails("an id");
 
   return (
     <div

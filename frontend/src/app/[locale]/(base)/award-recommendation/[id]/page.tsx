@@ -3,7 +3,6 @@ import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { LocalizedPageProps } from "src/types/intl";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { splitMarkup } from "src/utils/generalUtils";
@@ -16,7 +15,11 @@ import { Grid, GridContainer } from "@trussworks/react-uswds";
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 
-export async function generateMetadata({ params }: LocalizedPageProps) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id?: string }>;
+}) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
@@ -32,10 +35,11 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 
 export const dynamic = "force-dynamic";
 
-export type AwardRecommendationPageProps = LocalizedPageProps &
-  WithFeatureFlagProps & {
-    searchParams?: Promise<{ id?: string }>;
-  };
+export type AwardRecommendationPageProps = {
+  params: Promise<{ locale: string; id?: string }>;
+} & WithFeatureFlagProps & {
+  searchParams?: Promise<{ id?: string }>;
+};
 
 const SummaryDescriptionDisplay = ({
   summaryDescription = "",
@@ -229,3 +233,4 @@ export default withFeatureFlag<AwardRecommendationPageProps, never>(
   "awardRecommendationOff",
   () => redirect("/maintenance"),
 );
+

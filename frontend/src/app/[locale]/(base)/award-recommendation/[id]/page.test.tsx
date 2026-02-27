@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import AwardRecommendationPage from "src/app/[locale]/(base)/award-recommendation/page";
+import AwardRecommendationPage from "src/app/[locale]/(base)/award-recommendation/[id]/page";
 import * as opportunityFetcher from "src/services/fetch/fetchers/opportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
@@ -256,3 +256,4 @@ describe("AwardRecommendationPage", () => {
     });
   });
 });
+
