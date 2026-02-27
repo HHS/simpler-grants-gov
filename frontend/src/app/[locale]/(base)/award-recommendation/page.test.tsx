@@ -4,10 +4,15 @@ import * as opportunityFetcher from "src/services/fetch/fetchers/opportunityFetc
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { localeParams } from "src/utils/testing/intlMocks";
+import { identity } from "lodash";
 
 import { FunctionComponent, ReactNode } from "react";
 
 type onEnabled = (props: LocalizedPageProps) => ReactNode;
+
+jest.mock("next-intl/server", () => ({
+  getTranslations: () => identity,
+}));
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
