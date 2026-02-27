@@ -1,20 +1,21 @@
 from typing import Self
 
-from pydantic import AliasChoices, BaseModel, Field, model_validator
+from pydantic import AliasChoices, Field, model_validator
 
 from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
+from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 
 GET_APPLICATION_ZIP_REQUEST_ERR = "No grants_gov_tracking_number provided."
 RESPONSE_OPERATION_NAME = "ConfirmApplicationDeliveryResponse"
 
 
-class ConfirmApplicationDeliveryResponse(BaseModel):
+class ConfirmApplicationDeliveryResponse(BaseSOAPSchema):
     grants_gov_tracking_number: str | None = Field(default=None, alias="GrantsGovTrackingNumber")
     response_message: str | None = Field(default=None, alias="ResponseMessage")
 
 
-class ConfirmApplicationDeliveryResponseSOAPBody(BaseModel):
+class ConfirmApplicationDeliveryResponseSOAPBody(BaseSOAPSchema):
     confirm_application_delivery_response: ConfirmApplicationDeliveryResponse = Field(
         alias="ns2:ConfirmApplicationDeliveryResponse",
         # From testing it looks like the response comes in with the namespace ns2 but when we convert
@@ -26,15 +27,15 @@ class ConfirmApplicationDeliveryResponseSOAPBody(BaseModel):
     )
 
 
-class ConfirmApplicationDeliveryResponseSOAPEnvelope(BaseModel):
-    Body: ConfirmApplicationDeliveryResponseSOAPBody
+class ConfirmApplicationDeliveryResponseSOAPEnvelope(BaseSOAPSchema):
+    body: ConfirmApplicationDeliveryResponseSOAPBody = Field(alias="Body")
 
     def to_soap_envelope_dict(self, operation_name: str) -> dict:
         envelope_dict = {"Envelope": self.model_dump(by_alias=True)}
         return envelope_dict
 
 
-class ConfirmApplicationDeliveryRequest(BaseModel):
+class ConfirmApplicationDeliveryRequest(BaseSOAPSchema):
     grants_gov_tracking_number: str | None = Field(default=None, alias="GrantsGovTrackingNumber")
 
     @model_validator(mode="after")
