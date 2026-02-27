@@ -26,7 +26,7 @@ import { FormValidationWarning } from "src/components/applyForm/types";
 import { ApplicationFormsTable } from "./ApplicationFormsTable";
 import { ApplicationHistoryTable } from "./ApplicationHistoryTable";
 import ApplicationValidationAlert from "./ApplicationValidationAlert";
-import { AttachmentsCard } from "./attachments/AttachmentsCard";
+//import { AttachmentsCard } from "./attachments/AttachmentsCard";
 import { InformationCard } from "./InformationCard";
 import { OpportunityCard } from "./OpportunityCard";
 
@@ -34,13 +34,13 @@ const MY_APPLICATIONS_LINK = "/applications";
 
 const ApplicationContainer = ({
   applicationDetails,
-  attachments,
+  //attachments,
   opportunity,
   applicationHistory,
   latestApplicationSubmission,
 }: {
   applicationDetails: ApplicationDetail;
-  attachments: Attachment[];
+  //attachments: Attachment[];
   opportunity: OpportunityDetail;
   applicationHistory: ApplicationHistory[];
   latestApplicationSubmission: ApplicationSubmission | null;
@@ -178,11 +178,6 @@ const ApplicationContainer = ({
         competitionInstructionsDownloadPath={instructionsDownloadPath}
         errors={validationErrors}
         applicationDetailsObject={applicationDetailsObject}
-      />
-      <AttachmentsCard
-        applicationId={applicationId}
-        attachments={attachments}
-        competitionInstructionsDownloadPath={instructionsDownloadPath}
       />
       <ApplicationHistoryTable applicationHistory={applicationHistory} />
     </>
