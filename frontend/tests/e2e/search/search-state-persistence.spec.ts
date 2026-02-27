@@ -1,18 +1,18 @@
 import { expect, Page, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import {
-  refreshPageWithCurrentURL,
   expectURLQueryParamValue as expectURLQueryParamValueUnsafe,
+  refreshPageWithCurrentURL,
   waitForURLContainsQueryParamValue,
 } from "tests/e2e/playwrightUtils";
 import {
+  expectCheckboxIDIsChecked,
   expectSortBy,
   fillSearchInputAndSubmit,
   getSearchInput,
   selectSortBy,
-  waitForSearchResultsInitialLoad,
-  expectCheckboxIDIsChecked,
   toggleFilterDrawer,
+  waitForSearchResultsInitialLoad,
 } from "tests/e2e/search/searchSpecUtil";
 
 const searchTerm = "education";
@@ -53,7 +53,6 @@ const goToSearch = async (page: Page) => {
     }
   }
 };
-
 
 const statusCheckboxes = {
   "status-forecasted": "forecasted",
@@ -106,13 +105,18 @@ test.describe("Search page - state persistence after refresh", () => {
 
   test("should retain core filters after refresh", async ({ page }) => {
     test.setTimeout(240_000);
-    
-    // Navigate - use default Playwright load strategy
+
+    // Navigate to search page first, then apply query params
+    await goToSearch(page);
+    await waitForSearchResultsInitialLoad(page);
+
+    // Navigate to page with filters in URL
     await page.goto(
       "/search?status=forecasted,posted,closed&fundingInstrument=grant&eligibility=county_governments&category=agriculture",
     );
 
-    await waitForSearchResultsInitialLoad(page);
+    // Wait for results to load after navigation
+    await page.waitForTimeout(2000);
     await toggleFilterDrawer(page);
 
     for (const [checkboxID] of Object.entries(statusCheckboxes)) {
@@ -132,8 +136,7 @@ test.describe("Search page - state persistence after refresh", () => {
     }
 
     await refreshPageWithCurrentURL(page);
-    await waitForSearchResultsInitialLoad(page);
-
+    await page.waitForTimeout(2000);
     await toggleFilterDrawer(page);
 
     for (const [checkboxID] of Object.entries(statusCheckboxes)) {

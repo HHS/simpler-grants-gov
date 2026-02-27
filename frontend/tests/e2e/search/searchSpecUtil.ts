@@ -70,7 +70,7 @@ export async function fillSearchInputAndSubmit(
   if (browserType === "webkit") {
     await page.waitForTimeout(500);
   }
-  
+
   await submitButton.click();
 }
 
