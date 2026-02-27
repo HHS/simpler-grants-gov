@@ -138,7 +138,7 @@ export async function selectSortBy(
 
   // Wait for the element to be visible and stable before interacting
   await sortSelectElement.waitFor({ state: "visible", timeout: 30000 });
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(1000);
 
   // Webkit needs extra handling for form interactions
   const browserType = getBrowserType(page, projectName);
@@ -156,7 +156,7 @@ export async function selectSortBy(
 
   // Webkit needs extra wait for the selection to register
   if (browserType === "webkit") {
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1500);
   }
 
   await expect(sortSelectElement).toHaveValue(sortByValue, timeoutOption);

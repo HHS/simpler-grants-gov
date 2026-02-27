@@ -91,7 +91,7 @@ test.describe("Search page - state persistence after refresh", () => {
       searchTerm,
       queryTimeout,
     );
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1500);
     await toggleFilterDrawer(page);
     await selectSortBy(page, "awardCeilingDesc", isMobile, project.name);
     await expectSortBy(page, "awardCeilingDesc", isMobile);
@@ -116,6 +116,7 @@ test.describe("Search page - state persistence after refresh", () => {
     test.setTimeout(240_000);
     await page.goto(
       "/search?status=forecasted,posted,closed&fundingInstrument=grant&eligibility=county_governments&category=agriculture",
+      { waitUntil: "domcontentloaded" },
     );
 
     await waitForSearchResultsInitialLoad(page);
