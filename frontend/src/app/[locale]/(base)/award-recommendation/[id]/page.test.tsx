@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
+import { identity } from "lodash";
 import AwardRecommendationPage from "src/app/[locale]/(base)/award-recommendation/[id]/page";
 import * as opportunityFetcher from "src/services/fetch/fetchers/opportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { localeParams } from "src/utils/testing/intlMocks";
-import { identity } from "lodash";
 
 import { FunctionComponent, ReactNode } from "react";
 
@@ -256,4 +256,3 @@ describe("AwardRecommendationPage", () => {
     });
   });
 });
-

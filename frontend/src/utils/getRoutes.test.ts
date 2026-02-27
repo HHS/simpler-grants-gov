@@ -14,7 +14,7 @@ describe("getNextRoutes", () => {
       "/(base)/applications/[applicationId]/form/[appFormId]/success",
       "/(base)/applications/[applicationId]",
       "/(base)/applications",
-      "/(base)/award-recommendation/[awardRecommendationId]",
+      "/(base)/award-recommendation/1",
       "/(base)/dashboard",
       "/(base)/dev/feature-flags",
       "/(base)/developer",

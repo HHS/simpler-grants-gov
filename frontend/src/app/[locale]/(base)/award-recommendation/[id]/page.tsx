@@ -38,8 +38,8 @@ export const dynamic = "force-dynamic";
 export type AwardRecommendationPageProps = {
   params: Promise<{ locale: string; id?: string }>;
 } & WithFeatureFlagProps & {
-  searchParams?: Promise<{ id?: string }>;
-};
+    searchParams?: Promise<{ id?: string }>;
+  };
 
 const SummaryDescriptionDisplay = ({
   summaryDescription = "",
@@ -233,4 +233,3 @@ export default withFeatureFlag<AwardRecommendationPageProps, never>(
   "awardRecommendationOff",
   () => redirect("/maintenance"),
 );
-

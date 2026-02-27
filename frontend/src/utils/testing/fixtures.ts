@@ -3,11 +3,11 @@ import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import { Organization } from "src/types/applicationResponseTypes";
+import { UserProfile } from "src/types/authTypes";
 import {
   AwardRecommendationDetails,
   AwardRecommendationStatus,
 } from "src/types/awardRecommendationTypes";
-import { UserProfile } from "src/types/authTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
