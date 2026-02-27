@@ -53,8 +53,8 @@
     "next-intl": "^3.2.1",
     "next-navigation-guard": "^0.2.0",
     "pino": "^9.6.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
     "server-only": "^0.0.1",
     "sharp": "^0.34.0",
     "zod": "^3.23.8"
@@ -80,7 +80,7 @@
     "@types/newrelic": "^9.14.6",
     "@types/node": "^24.10.8",
     "@types/node-fetch": "^2.6.11",
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8",
@@ -112,7 +112,7 @@
     "vite": "^7.0.0"
   },
   "overrides": {
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3"
   }
 }
