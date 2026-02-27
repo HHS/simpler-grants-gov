@@ -186,12 +186,7 @@ export async function expectSortBy(page: Page, value: string, drawer = false) {
 }
 
 export async function waitForSearchResultsInitialLoad(page: Page) {
-  // Wait for page to stabilize before looking for results - helps with Firefox
-  await page
-    .waitForLoadState("networkidle", { timeout: 30000 })
-    .catch(() => undefined);
-  await page.waitForTimeout(500);
-
+  // Wait for the page and results to load
   const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
   const timeout = targetEnv === "staging" ? 180000 : 60000;
   await resultsHeading.waitFor({ state: "visible", timeout });
