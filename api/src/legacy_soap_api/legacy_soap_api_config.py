@@ -151,6 +151,12 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             is_mtom=True,
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
         ),
+        "ConfirmApplicationDeliveryRequest": SOAPOperationConfig(
+            request_operation_name="ConfirmApplicationDeliveryRequest",
+            response_operation_name="ConfirmApplicationDeliveryResponse",
+            is_mtom=True,
+            privileges=set(),
+        ),
     },
 }
 
