@@ -1,18 +1,18 @@
 import { expect, Page, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import {
-  refreshPageWithCurrentURL,
   expectURLQueryParamValue as expectURLQueryParamValueUnsafe,
+  refreshPageWithCurrentURL,
   waitForURLContainsQueryParamValue,
 } from "tests/e2e/playwrightUtils";
 import {
+  expectCheckboxIDIsChecked,
   expectSortBy,
   fillSearchInputAndSubmit,
   getSearchInput,
   selectSortBy,
-  waitForSearchResultsInitialLoad,
-  expectCheckboxIDIsChecked,
   toggleFilterDrawer,
+  waitForSearchResultsInitialLoad,
 } from "tests/e2e/search/searchSpecUtil";
 
 const searchTerm = "education";
@@ -53,7 +53,6 @@ const goToSearch = async (page: Page) => {
     }
   }
 };
-
 
 const statusCheckboxes = {
   "status-forecasted": "forecasted",
@@ -114,10 +113,23 @@ test.describe("Search page - state persistence after refresh", () => {
 
   test("should retain core filters after refresh", async ({ page }) => {
     test.setTimeout(240_000);
-    await page.goto(
-      "/search?status=forecasted,posted,closed&fundingInstrument=grant&eligibility=county_governments&category=agriculture",
-      { waitUntil: "domcontentloaded" },
-    );
+
+    // Navigate with retry for Firefox which can have issues with multiple query params
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      try {
+        await page.goto(
+          "/search?status=forecasted,posted,closed&fundingInstrument=grant&eligibility=county_governments&category=agriculture",
+          { waitUntil: "domcontentloaded", timeout: 90000 },
+        );
+        break;
+      } catch (error) {
+        if (attempt < 2) {
+          await page.waitForTimeout(1000);
+          continue;
+        }
+        throw error;
+      }
+    }
 
     await waitForSearchResultsInitialLoad(page);
     await toggleFilterDrawer(page);
