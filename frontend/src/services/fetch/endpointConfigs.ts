@@ -22,6 +22,13 @@ export const fetchCompetitionEndpoint = {
   method: "GET" as ApiMethod,
 };
 
+export const fetchAwardRecommendationEndpoint = {
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "award-recommendations",
+  method: "GET" as ApiMethod,
+};
+
 export const toDynamicApplicationsEndpoint = (
   type: "POST" | "GET" | "PUT" | "DELETE",
 ) => {
