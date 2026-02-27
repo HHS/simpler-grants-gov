@@ -1,9 +1,9 @@
 import { expect, Page, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import {
+  expectURLQueryParamValue,
   refreshPageWithCurrentURL,
   waitForURLContainsQueryParamValue,
-  expectURLQueryParamValue,
 } from "tests/e2e/playwrightUtils";
 import {
   expectCheckboxIDIsChecked,
