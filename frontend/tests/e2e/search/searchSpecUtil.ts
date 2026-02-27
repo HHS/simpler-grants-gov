@@ -340,3 +340,60 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
   await filterOptions.isVisible();
   await filterButton.click();
 };
+
+export async function ensureFilterDrawerOpen(page: Page) {
+  const modalOpen = await page
+    .locator('.usa-modal-overlay[aria-controls="search-filter-drawer"]')
+    .isVisible();
+  if (!modalOpen) {
+    await toggleFilterDrawer(page);
+  }
+}
+
+export async function toggleCheckboxGroup(
+  page: Page,
+  checkboxObject: Record<string, string>,
+) {
+  for (const [checkboxID] of Object.entries(checkboxObject)) {
+    await toggleCheckbox(page, checkboxID);
+  }
+}
+
+export async function expectCheckboxesChecked(
+  page: Page,
+  checkboxObject: Record<string, string>,
+) {
+  for (const [checkboxID] of Object.entries(checkboxObject)) {
+    await expectCheckboxIDIsChecked(page, `#${checkboxID}`);
+  }
+}
+
+export async function getFirstNonNumericAgencyCheckboxId(
+  page: Page,
+): Promise<string | null> {
+  // Find the first subagency checkbox with an ID that doesn't start with a number
+  // Targeting checkboxes with ids that start with a number raises issues related
+  // to querySelector functionality and what it considers a valid id
+  for (let i = 1; i <= 50; i++) {
+    const subAgency = page
+      .locator(
+        `div[data-testid='Agency-filter'] > ul > li:nth-child(${i}) ul input`,
+      )
+      .first();
+
+    const exists = await subAgency.count();
+
+    if (!exists) {
+      continue;
+    }
+
+    const agencyId = await subAgency.getAttribute("id");
+    if (agencyId && !isNaN(parseInt(agencyId[0]))) {
+      continue;
+    }
+
+    return agencyId;
+  }
+
+  return null;
+}

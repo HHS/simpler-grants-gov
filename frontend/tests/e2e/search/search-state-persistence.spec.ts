@@ -2,21 +2,46 @@ import { expect, Page, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import {
   expectURLQueryParamValue,
+  expectURLQueryParamValues,
   refreshPageWithCurrentURL,
   waitForURLContainsQueryParamValue,
+  waitForURLContainsQueryParamValues,
 } from "tests/e2e/playwrightUtils";
 import {
+  ensureAccordionExpanded,
+  ensureFilterDrawerOpen,
+  expectCheckboxesChecked,
   expectCheckboxIDIsChecked,
   expectSortBy,
   fillSearchInputAndSubmit,
+  getFirstNonNumericAgencyCheckboxId,
   getSearchInput,
   selectSortBy,
-  toggleCheckbox,
+  toggleCheckboxGroup,
   toggleFilterDrawer,
+  waitForFilterOptions,
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/search/searchSpecUtil";
 
 const searchTerm = "education";
+
+const statusCheckboxes = {
+  "status-forecasted": "forecasted",
+  "status-open": "posted",
+  "status-closed": "closed",
+};
+
+const fundingInstrumentCheckboxes = {
+  "funding-instrument-grant": "grant",
+};
+
+const eligibilityCheckboxes = {
+  "eligibility-county_governments": "county_governments",
+};
+
+const categoryCheckboxes = {
+  "category-agriculture": "agriculture",
+};
 
 const { baseUrl, targetEnv } = playwrightEnv;
 
@@ -80,26 +105,84 @@ test.describe("Search page - state persistence after refresh", () => {
     await goToSearch(page);
 
     await waitForSearchResultsInitialLoad(page);
-    await toggleFilterDrawer(page);
+    await ensureFilterDrawerOpen(page);
+    await waitForFilterOptions(page, "agency");
 
-    // Toggle status filter
-    await toggleCheckbox(page, "status-closed");
+    await ensureAccordionExpanded(page, "Opportunity status");
+    await toggleCheckboxGroup(page, statusCheckboxes);
+    await waitForURLContainsQueryParamValues(page, "status", [
+      "forecasted",
+      "posted",
+      "closed",
+    ]);
 
-    // Verify status filter is in URL
-    await waitForURLContainsQueryParamValue(
-      page,
-      "status",
-      "forecasted,posted,closed",
-      120000,
-    );
+    await ensureAccordionExpanded(page, "Funding instrument");
+    await toggleCheckboxGroup(page, fundingInstrumentCheckboxes);
+    await waitForURLContainsQueryParamValues(page, "fundingInstrument", [
+      "grant",
+    ]);
 
-    // Refresh page
+    await ensureAccordionExpanded(page, "Eligibility");
+    await toggleCheckboxGroup(page, eligibilityCheckboxes);
+    await waitForURLContainsQueryParamValues(page, "eligibility", [
+      "county_governments",
+    ]);
+
+    await ensureAccordionExpanded(page, "Category");
+    await toggleCheckboxGroup(page, categoryCheckboxes);
+    await waitForURLContainsQueryParamValues(page, "category", ["agriculture"]);
+
     await refreshPageWithCurrentURL(page);
     await waitForSearchResultsInitialLoad(page);
-    await toggleFilterDrawer(page);
 
-    // Verify filter is still checked
-    await expectCheckboxIDIsChecked(page, "#status-closed");
-    expectURLQueryParamValue(page, "status", "forecasted,posted,closed");
+    await ensureFilterDrawerOpen(page);
+    await ensureAccordionExpanded(page, "Opportunity status");
+    await expectCheckboxesChecked(page, statusCheckboxes);
+
+    await ensureAccordionExpanded(page, "Funding instrument");
+    await expectCheckboxesChecked(page, fundingInstrumentCheckboxes);
+
+    await ensureAccordionExpanded(page, "Eligibility");
+    await expectCheckboxesChecked(page, eligibilityCheckboxes);
+
+    await ensureAccordionExpanded(page, "Category");
+    await expectCheckboxesChecked(page, categoryCheckboxes);
+
+    expectURLQueryParamValues(page, "status", [
+      "forecasted",
+      "posted",
+      "closed",
+    ]);
+    expectURLQueryParamValues(page, "fundingInstrument", ["grant"]);
+    expectURLQueryParamValues(page, "eligibility", ["county_governments"]);
+    expectURLQueryParamValues(page, "category", ["agriculture"]);
+  });
+
+  test("should retain agency filter after refresh", async ({ page }) => {
+    test.setTimeout(240_000);
+    await goToSearch(page);
+
+    await waitForSearchResultsInitialLoad(page);
+    await ensureFilterDrawerOpen(page);
+    await waitForFilterOptions(page, "agency");
+
+    await ensureAccordionExpanded(page, "Agency");
+    const agencyId = await getFirstNonNumericAgencyCheckboxId(page);
+    expect(agencyId).toBeTruthy();
+    if (!agencyId) {
+      test.fail();
+      return;
+    }
+    const agencyCheckboxes = { [agencyId]: agencyId };
+    await toggleCheckboxGroup(page, agencyCheckboxes);
+    await waitForURLContainsQueryParamValues(page, "agency", [agencyId]);
+
+    await refreshPageWithCurrentURL(page);
+    await waitForSearchResultsInitialLoad(page);
+
+    await ensureFilterDrawerOpen(page);
+    await ensureAccordionExpanded(page, "Agency");
+    await expectCheckboxesChecked(page, agencyCheckboxes);
+    expectURLQueryParamValues(page, "agency", [agencyId]);
   });
 });
