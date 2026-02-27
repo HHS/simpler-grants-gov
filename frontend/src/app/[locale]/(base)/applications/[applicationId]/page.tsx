@@ -45,7 +45,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   let details = {} as ApplicationDetailsCardProps;
   let historyDetails = [] as ApplicationHistoryCardProps;
   let opportunity = {} as OpportunityDetail;
-  let attachments = [] as Attachment[];
+  // let attachments = [] as Attachment[];
 
   try {
     const response = await getApplicationDetails(
@@ -73,7 +73,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       return <TopLevelError />;
     }
     opportunity = opportunityResponse.data;
-    attachments = response.data.application_attachments;
+    // attachments = response.data.application_attachments;
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(

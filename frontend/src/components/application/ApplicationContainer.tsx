@@ -8,7 +8,7 @@ import {
   ApplicationHistory,
   ApplicationStatus,
 } from "src/types/applicationResponseTypes";
-import { Attachment } from "src/types/attachmentTypes";
+// import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
