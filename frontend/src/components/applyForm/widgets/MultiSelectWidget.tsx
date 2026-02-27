@@ -132,6 +132,9 @@ export default function MultiSelect<
     allOptions.find((option) => String(option.value) === value)?.label ?? value;
 
   // ComboBox widget changes the id which breaks handling of idFor and anchor links
+  // this component creates a <select> with the name attached to the <ComboBox> component
+  // when selecting the code takes the value and creates a hidden input based on the index of the selection and the id
+  // component tracks selected option internally, set the name to "" to not set the value of the select.
   const idFor = `${id}__combobox`;
 
   return (
