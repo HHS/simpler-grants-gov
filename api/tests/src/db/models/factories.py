@@ -1107,6 +1107,8 @@ class RoleFactory(BaseFactory):
                 Privilege.MANAGE_ORG_MEMBERS,
                 Privilege.MANAGE_ORG_ADMIN_MEMBERS,
                 Privilege.VIEW_ORG_MEMBERSHIP,
+                Privilege.VIEW_ORG_SAVED_OPPORTUNITIES,
+                Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES,
             ],
             role_types=[RoleType.ORGANIZATION],
         )
