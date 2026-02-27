@@ -114,8 +114,12 @@ const transformTableRowData = (
 
 const OpportunitiesTable = ({
   userOpportunities,
+  agencyName,
+  isSingleAgency,
 }: {
   userOpportunities: BaseOpportunity[];
+  agencyName: string;
+  isSingleAgency: boolean;
 }) => {
   const t = useTranslations("Opportunities");
 
@@ -129,7 +133,9 @@ const OpportunitiesTable = ({
   return (
     <div>
       <span className="font-sans-lg text-bold">
-        {t("numOpportunities", { num: userOpportunities.length })}
+        {isSingleAgency
+          ? t("showingOpportunitiesFor", { agencyName })
+          : t("numOpportunities", { num: userOpportunities.length })}
       </span>
 
       <TableWithResponsiveHeader
@@ -195,7 +201,11 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
         />
       )}
       {userOpportunities.length ? (
-        <OpportunitiesTable userOpportunities={userOpportunities} />
+        <OpportunitiesTable
+          userOpportunities={userOpportunities}
+          agencyName={selectedAgency.agency_name}
+          isSingleAgency={userAgencies.length === 1}
+        />
       ) : (
         <NoStartedOpportunities />
       )}

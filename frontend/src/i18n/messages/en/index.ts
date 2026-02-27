@@ -1795,6 +1795,7 @@ export const messages = {
       secondary:
         "Opportunities you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
     },
+    showingOpportunitiesFor: "Showing opportunities for {agencyName}",
     agencySelector: "Select agency",
     agencyNotAuthorized:
       "You do not have access to this agency's opportunities.",

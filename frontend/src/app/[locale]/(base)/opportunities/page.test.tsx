@@ -205,6 +205,19 @@ describe("Opportunities", () => {
       expect(await screen.findByText("Test Opportunity")).toBeVisible();
     });
 
+    it("renders agency name label instead of opportunity count", async () => {
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+      });
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(await screen.findByText("showingOpportunitiesFor")).toBeVisible();
+    });
+
     it("renders no opportunities message when list is empty", async () => {
       mockSearchForOpportunities.mockResolvedValue({ data: [] });
       const component = await OpportunitiesListPage({
