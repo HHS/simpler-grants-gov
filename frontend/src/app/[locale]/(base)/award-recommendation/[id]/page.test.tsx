@@ -4,6 +4,7 @@ import AwardRecommendationPage from "src/app/[locale]/(base)/award-recommendatio
 import * as opportunityFetcher from "src/services/fetch/fetchers/opportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
+import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 import { localeParams } from "src/utils/testing/intlMocks";
 
 import { FunctionComponent, ReactNode } from "react";
@@ -245,14 +246,12 @@ describe("AwardRecommendationPage", () => {
     });
 
     it("redirects to /maintenance", async () => {
-      try {
-        await AwardRecommendationPage({
+      await wrapForExpectedError(() => {
+        return AwardRecommendationPage({
           params: localeParams,
         });
-        throw new Error("Expected redirect to throw");
-      } catch (error) {
-        expect(mockRedirect).toHaveBeenCalledWith("/maintenance");
-      }
+      });
+      expect(mockRedirect).toHaveBeenCalledWith("/maintenance");
     });
   });
 });

@@ -439,3 +439,27 @@ class LegacyUsersListResponseSchema(AbstractResponseSchema, PaginationMixinSchem
         fields.Nested(LegacyUserDataSchema),
         metadata={"description": "List of legacy users"},
     )
+
+
+class OrganizationSaveOpportunityRequestSchema(Schema):
+    """Schema for POST /organizations/:organization_id/saved-opportunities request"""
+
+    opportunity_id = fields.UUID(
+        required=True,
+        metadata={
+            "description": "Opportunity unique identifier to save",
+            "example": "942e4567-e89b-12d3-a456-426614174000",
+        },
+    )
+
+
+class OrganizationSaveOpportunityResponseSchema(AbstractResponseSchema):
+    """Schema for POST /organizations/:organization_id/saved-opportunities response"""
+
+    data = fields.Raw(allow_none=True, metadata={"description": "No data returned", "example": {}})
+
+
+class OrganizationDeleteSavedOpportunityResponseSchema(AbstractResponseSchema):
+    """Schema for DELETE /organizations/:organization_id/saved-opportunities/:opportunity_id response"""
+
+    data = fields.Raw(allow_none=True, metadata={"description": "No data returned", "example": {}})

@@ -116,7 +116,7 @@ export async function createApplication(
   await createButton.first().scrollIntoViewIfNeeded();
   try {
     await createButton.first().click({ timeout: 15000 });
-  } catch (error) {
+  } catch (_error) {
     await createButton.first().click({ force: true });
     await createButton.first().evaluate((el) => (el as HTMLElement).click());
   }

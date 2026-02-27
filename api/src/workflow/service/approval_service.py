@@ -6,12 +6,14 @@ from src.adapters import db
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import ApprovalResponseType, ApprovalType
 from src.db.models.agency_models import Agency
+from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
 from src.db.models.workflow_models import Workflow, WorkflowApproval
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_constants import WorkflowConstants
 from src.workflow.workflow_errors import (
+    ImplementationMissingError,
     InvalidWorkflowResponseTypeError,
     OpportunityWithoutAgencyError,
 )
@@ -68,23 +70,24 @@ def get_approval_response_type(state_machine_event: StateMachineEvent) -> Approv
         raise InvalidWorkflowResponseTypeError("Approval response type is not a valid value") from e
 
 
-def _get_agencies_for_workflow(workflow: Workflow) -> list[Agency]:
-    agencies_map = {}
+def _get_agency_for_workflow(workflow: Workflow) -> Agency:
+    # From the workflow entity, find the opportunity
+    # which we'll in turn use to get the agency
+    opportunity: Opportunity | None = None
+    if workflow.opportunity is not None:
+        opportunity = workflow.opportunity
+    elif workflow.application is not None:
+        opportunity = workflow.application.competition.opportunity
+    elif workflow.application_submission is not None:
+        opportunity = workflow.application_submission.application.competition.opportunity
 
-    for opportunity in workflow.opportunities:
-        if opportunity.agency_record is None:
-            raise OpportunityWithoutAgencyError("Opportunity does not have an agency record")
+    if opportunity is None:
+        raise ImplementationMissingError("No approach implemented to find agency for workflow")
 
-        agencies_map[opportunity.agency_record.agency_id] = opportunity.agency_record
+    if opportunity.agency_record is None:
+        raise OpportunityWithoutAgencyError("Opportunity does not have an agency record")
 
-    for application in workflow.applications:
-        opportunity = application.competition.opportunity
-        if opportunity.agency_record is None:
-            raise OpportunityWithoutAgencyError("Opportunity does not have an agency record")
-
-        agencies_map[opportunity.agency_record.agency_id] = opportunity.agency_record
-
-    return list(agencies_map.values())
+    return opportunity.agency_record
 
 
 def can_user_do_agency_approval(
@@ -103,21 +106,25 @@ def can_user_do_agency_approval(
     # As a safety precaution, if we ever see this, disallow access
     # regardless of the other agencies that might be present.
     try:
-        agencies = _get_agencies_for_workflow(workflow)
+        agency = _get_agency_for_workflow(workflow)
     except OpportunityWithoutAgencyError:
         logger.warning("Opportunity associated with workflow has no agency", extra=log_extra)
         return False
+    except ImplementationMissingError:
+        logger.warning("No way to determine agency for workflow", extra=log_extra)
+        return False
+
+    log_extra |= {
+        "agency_id": agency.agency_id,
+        "agency_code": agency.agency_code,
+    }
 
     required_privileges = set(approval_config.required_privileges)
-    for agency in agencies:
-        agency_log_extra = log_extra | {
-            "agency_id": agency.agency_id,
-            "agency_code": agency.agency_code,
-        }
-        logger.info("Checking if user can access agency for approvals", extra=agency_log_extra)
-        if not can_access(user, required_privileges, agency):
-            logger.info("User cannot access agency for approvals", extra=agency_log_extra)
-            return False
+
+    logger.info("Checking if user can access agency for approvals", extra=log_extra)
+    if not can_access(user, required_privileges, agency):
+        logger.info("User cannot access agency for approvals", extra=log_extra)
+        return False
 
     logger.info("User can access agencies for approvals", extra=log_extra)
     return True
