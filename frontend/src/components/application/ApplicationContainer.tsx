@@ -8,7 +8,6 @@ import {
   ApplicationHistory,
   ApplicationStatus,
 } from "src/types/applicationResponseTypes";
-// import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -26,7 +25,6 @@ import { FormValidationWarning } from "src/components/applyForm/types";
 import { ApplicationFormsTable } from "./ApplicationFormsTable";
 import { ApplicationHistoryTable } from "./ApplicationHistoryTable";
 import ApplicationValidationAlert from "./ApplicationValidationAlert";
-// import { AttachmentsCard } from "./attachments/AttachmentsCard";
 import { InformationCard } from "./InformationCard";
 import { OpportunityCard } from "./OpportunityCard";
 
@@ -34,13 +32,11 @@ const MY_APPLICATIONS_LINK = "/applications";
 
 const ApplicationContainer = ({
   applicationDetails,
-  // attachments,
   opportunity,
   applicationHistory,
   latestApplicationSubmission,
 }: {
   applicationDetails: ApplicationDetail;
-  // attachments: Attachment[];
   opportunity: OpportunityDetail;
   applicationHistory: ApplicationHistory[];
   latestApplicationSubmission: ApplicationSubmission | null;

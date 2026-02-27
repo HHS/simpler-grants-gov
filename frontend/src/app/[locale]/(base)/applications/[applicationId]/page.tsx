@@ -10,7 +10,6 @@ import {
   getLatestApplicationSubmission,
 } from "src/services/fetch/fetchers/applicationFetcher";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-// import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -117,7 +116,6 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
         <ApplicationContainer
           applicationDetails={details}
           opportunity={opportunity}
-          // attachments={attachments}
           applicationHistory={historyDetails}
           latestApplicationSubmission={latestApplicationSubmission}
         />

@@ -6,7 +6,6 @@ import {
   ApplicationHistory,
   ApplicationStatus,
 } from "src/types/applicationResponseTypes";
-// import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { mockApplicationSubmission } from "src/utils/testing/fixtures";
 import applicationMock from "stories/components/application/application.mock.json";
@@ -35,11 +34,6 @@ jest.mock("src/services/auth/useUser", () => ({
     },
   }),
 }));
-
-// Mock the components that have dependencies on jose/session
-// jest.mock("src/components/application/attachments/AttachmentsCard", () => ({
-//  AttachmentsCard: () => <div data-testid="attachments-card">Attachments</div>,
-// }));
 
 jest.mock("src/components/application/ApplicationFormsTable", () => ({
   ApplicationFormsTable: () => <div data-testid="forms-table">Forms Table</div>,
@@ -87,7 +81,6 @@ global.fetch = jest.fn();
 
 const mockApplicationDetails = applicationMock as unknown as ApplicationDetail;
 const mockOpportunity = opportunityMock as unknown as OpportunityDetail;
-// const mockAttachments: Attachment[] = [];
 
 describe("ApplicationContainer", () => {
   beforeEach(() => {
@@ -108,7 +101,6 @@ describe("ApplicationContainer", () => {
     const { container } = render(
       <ApplicationContainer
         applicationDetails={mockApplicationDetails}
-        // attachments={mockAttachments}
         opportunity={mockOpportunity}
         applicationHistory={historyMock as ApplicationHistory[]}
         latestApplicationSubmission={mockApplicationSubmission}
@@ -129,7 +121,6 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          // attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
           latestApplicationSubmission={mockApplicationSubmission}
@@ -149,7 +140,6 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={submittedApplication}
-          // attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
           latestApplicationSubmission={mockApplicationSubmission}
@@ -169,7 +159,6 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={acceptedApplication}
-          // attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
           latestApplicationSubmission={mockApplicationSubmission}
@@ -191,7 +180,6 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          // attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
           latestApplicationSubmission={mockApplicationSubmission}
@@ -220,7 +208,6 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          // attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
           latestApplicationSubmission={mockApplicationSubmission}
@@ -254,7 +241,6 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          // attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
           latestApplicationSubmission={mockApplicationSubmission}
@@ -287,7 +273,6 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          // attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
           latestApplicationSubmission={mockApplicationSubmission}
@@ -320,7 +305,6 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          // attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
           latestApplicationSubmission={mockApplicationSubmission}
@@ -368,7 +352,6 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          // attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
           latestApplicationSubmission={mockApplicationSubmission}
@@ -396,7 +379,6 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          // attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
           latestApplicationSubmission={mockApplicationSubmission}
