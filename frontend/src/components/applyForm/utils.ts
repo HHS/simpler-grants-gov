@@ -8,7 +8,6 @@ import { isBasicallyAnObject } from "src/utils/generalUtils";
 
 import { formDataToObject } from "./formDataToJson";
 import {
-  BroadlyDefinedWidgetValue,
   FormattedFormValidationWarning,
   FormValidationWarning,
   SchemaField,
