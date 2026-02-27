@@ -66,18 +66,12 @@ export async function fillSearchInputAndSubmit(
   await searchInput.pressSequentially(term);
   await expect(searchInput).toHaveValue(term, { timeout: 10000 });
 
-  // Webkit needs extra handling
+  // Webkit needs extra wait before clicking submit
   if (browserType === "webkit") {
     await page.waitForTimeout(500);
-    // For Webkit, wait for URL to change after clicking
-    await Promise.all([
-      page.waitForURL(/.*query=.*/, { timeout: 30000 }).catch(() => undefined),
-      submitButton.click(),
-    ]);
-    await page.waitForTimeout(1000);
-  } else {
-    await submitButton.click();
   }
+  
+  await submitButton.click();
 }
 
 export function expectURLContainsQueryParam(
@@ -136,10 +130,6 @@ export async function selectSortBy(
     ? page.locator("#search-sort-by-select-drawer")
     : page.locator("#search-sort-by-select").first();
 
-  // Wait for the element to be visible and stable before interacting
-  await sortSelectElement.waitFor({ state: "visible", timeout: 30000 });
-  await page.waitForTimeout(1000);
-
   // Webkit needs extra handling for form interactions
   const browserType = getBrowserType(page, projectName);
   if (browserType === "webkit") {
@@ -147,26 +137,7 @@ export async function selectSortBy(
     await page.waitForTimeout(200);
   }
 
-  await sortSelectElement.click();
-  await page.waitForTimeout(200);
-
-  // Webkit needs special handling for selectOption - use keyboard navigation
-  if (browserType === "webkit") {
-    // Press down arrow to cycle through options
-    for (let i = 0; i < 20; i++) {
-      const currentValue = await sortSelectElement.inputValue();
-      if (currentValue === sortByValue) {
-        await page.waitForTimeout(300);
-        await sortSelectElement.press("Enter");
-        break;
-      }
-      await sortSelectElement.press("ArrowDown");
-      await page.waitForTimeout(150);
-    }
-    await page.waitForTimeout(1500);
-  } else {
-    await sortSelectElement.selectOption(sortByValue);
-  }
+  await sortSelectElement.selectOption(sortByValue);
 
   // For mobile drawer on staging, wait longer as it can be very slow
   if (drawer && targetEnv === "staging") {

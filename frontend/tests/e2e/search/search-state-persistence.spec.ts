@@ -39,7 +39,7 @@ const goToSearch = async (page: Page) => {
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
-      await page.goto(`${baseUrl}/search`, { waitUntil: "domcontentloaded" });
+      await page.goto(`${baseUrl}/search`);
       return;
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
@@ -79,27 +79,19 @@ test.describe("Search page - state persistence after refresh", () => {
   }) => {
     test.setTimeout(240_000);
     const isMobile = !!project.name.match(/[Mm]obile/);
-    const isWebkit = !!project.name.match(/Webkit/i);
-    const queryTimeout = isWebkit ? 180000 : 120000;
     await goToSearch(page);
 
     await waitForSearchResultsInitialLoad(page);
-    await fillSearchInputAndSubmit(searchTerm, page, project.name);
-    await waitForURLContainsQueryParamValue(
-      page,
-      "query",
-      searchTerm,
-      queryTimeout,
-    );
-    await page.waitForTimeout(1500);
+    await fillSearchInputAndSubmit(searchTerm, page);
+    await waitForURLContainsQueryParamValue(page, "query", searchTerm, 120000);
     await toggleFilterDrawer(page);
-    await selectSortBy(page, "awardCeilingDesc", isMobile, project.name);
+    await selectSortBy(page, "awardCeilingDesc", isMobile);
     await expectSortBy(page, "awardCeilingDesc", isMobile);
     await waitForURLContainsQueryParamValue(
       page,
       "sortby",
       "awardCeilingDesc",
-      queryTimeout,
+      120000,
     );
 
     await refreshPageWithCurrentURL(page);
@@ -115,10 +107,9 @@ test.describe("Search page - state persistence after refresh", () => {
   test("should retain core filters after refresh", async ({ page }) => {
     test.setTimeout(240_000);
     
-    // Navigate with longer timeout for pages with multiple query params
+    // Navigate - use default Playwright load strategy
     await page.goto(
       "/search?status=forecasted,posted,closed&fundingInstrument=grant&eligibility=county_governments&category=agriculture",
-      { waitUntil: "domcontentloaded", timeout: 120000 },
     );
 
     await waitForSearchResultsInitialLoad(page);
