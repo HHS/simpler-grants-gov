@@ -16,7 +16,23 @@ This section covers development using Docker. There are a number of Docker comma
 
 ### Setup
 
-These scripts depend on having `postgresql` installed in your environment as a pre-requisite. Install instructions for your particular operating system can be found on the [Postgres website](https://www.postgresql.org/download/)
+The following must be installed in order to run the API locally, these instructions
+focus on setting up on a Mac, but most of this would be applicable regardless of system
+although the installation method will vary. The exact approach detailed here may not
+match exactly what you do, it's one way of getting the tools, some have multiple installation methods.
+
+* Install [xcode-select](https://developer.apple.com/documentation/xcode/installing-the-command-line-tools/) - these are the developer tools needed for most command line tools.
+* Install [Homebrew](https://brew.sh/) - for installing several packages
+* Install [postgres](https://www.postgresql.org/download/macosx/) - Can use brew, make sure to specify the version in our docker-compose (eg. `brew install postgresql@17`)
+* Install [libpq](https://formulae.brew.sh/formula/libpq) - Postgres utils, including one used by a script to verify the DB is ready
+* Install [docker](https://docs.docker.com/engine/install/)
+* Install [poetry](https://python-poetry.org/docs/) - For managing packages
+
+These aren't required, but relevant:
+* Install [git](https://git-scm.com/install/mac)
+* Install [pyenv](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation) - for managing multiple python versions / makes upgrading python much easier
+
+---
 
 Run `make init && make run-logs` to start the local containers and watch logs. The application will be available at `http://localhost:8080` and API documentation at `http://localhost:8080/docs`.
 
@@ -28,8 +44,15 @@ This stands up the following services:
 * Postgres database
 * OpenSearch node
 * OpenSearch Dashboard (http://localhost:5601)
-* [localstack](https://www.localstack.cloud) for mocking s3 actions locally
+* [localstack](https://www.localstack.cloud) for mocking s3/sqs actions locally
 * [mock oauth2 server](https://github.com/navikt/mock-oauth2-server) (http://localhost:5001)
+
+
+> [!NOTE]
+> `make init` runs through and sets up every service.
+> If one isn't running, run `make init`, you usually don't need to run
+> many of the direct setup commands unless you are reworking our local setup.
+
 
 ### Seed data
 
@@ -42,6 +65,8 @@ This API uses a very simple [ApiKey authentication approach](https://apiflask.co
 ### User Authentication
 
 Run `make setup-env-override-file` to create the `override.env` file which will include the necessary JWT keys for running user authentication within the app.
+
+Note that this runs as part of `make init` so generally does not need to be done separately.
 
 ### Accessing the API through swagger docs
 
@@ -70,7 +95,8 @@ Errors in standing up the API can originate from an out of date container, datab
 * **db-check-migrations** - check if migrations are out of sync
 * **volume-recreate** - delete all existing volumes and data
 * **remake-backend** - delete all data (`volume-recreate`) and load data (`db-seed-local` and `populate-search-opportunities`)
-   - This may be needed if you are experiencing errors from the API indicating data not found.
+   - Note this drops all data in the DB and fully remakes it. If you are missing data, try just running `make db-seed-local` first.
+   - This script should be seen as a last resort for getting the API into a healthy state.
 
 ### VSCode Remote Attach Container Debugging
 
@@ -116,7 +142,22 @@ Running in the native/local approach may require additional packages to be insta
    curl -sSL https://install.python-poetry.org | python3 -
    ```
 
-4. You'll also need [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+4. This still requires Docker as the database and services all still run within Docker.
+5. Certain environment variables require different paths when running outside of Docker.
+   You can handle this by setting these into your `override.env` file.
+
+```dotenv
+DB_HOST=localhost
+S3_ENDPOINT_URL=http://localhost:4566
+LOGIN_GOV_JWK_ENDPOINT=http://localhost:5001/issuer1/jwks
+
+SEARCH_ENDPOINT=localhost
+OPENSEARCH_HOST=localhost
+
+# This needs to be set explicitly as "export PY_RUN_APPROACH=local"
+# in your shell, or via some other mechanism - setting it here won't work.
+PY_RUN_APPROACH=local
+```
 
 **Note:** All the following commands should be run from the `/api` directory.
 
