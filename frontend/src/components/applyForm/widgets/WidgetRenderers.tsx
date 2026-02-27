@@ -13,12 +13,12 @@ import { widgetComponents } from "./Widgets";
 export const wrapSection = ({
   label,
   fieldName,
-  tree,
+  sectionFields,
   description,
 }: {
   label: string;
   fieldName: string;
-  tree: JSX.Element | undefined;
+  sectionFields: JSX.Element | undefined;
   description?: string;
 }) => {
   const uniqueKey = `${fieldName}-fieldset`;
@@ -29,7 +29,7 @@ export const wrapSection = ({
       label={label}
       description={description}
     >
-      {tree}
+      {sectionFields}
     </FieldsetWidget>
   );
 };
