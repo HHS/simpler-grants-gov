@@ -1,9 +1,12 @@
 import dataclasses
+from typing import TYPE_CHECKING, Any
 
 from src.db.models.user_models import User
-from src.db.models.workflow_models import Workflow
-from src.workflow.base_state_machine import BaseStateMachine
+from src.db.models.workflow_models import Workflow, WorkflowEventHistory
 from src.workflow.workflow_config import WorkflowConfig
+
+if TYPE_CHECKING:
+    from src.workflow.base_state_machine import BaseStateMachine
 
 
 @dataclasses.dataclass
@@ -35,5 +38,21 @@ class StateMachineEvent:
     config: WorkflowConfig
     state_machine_cls: type[BaseStateMachine]
 
+    workflow_history_event: WorkflowEventHistory
+
     # Metadata for processing an event.
     metadata: dict | None = None
+
+    def get_log_extra(self) -> dict[str, Any]:
+        return {
+            "acting_user_id": self.acting_user.user_id,
+            "event_to_send": self.event_to_send,
+            "event_id": self.workflow_history_event.event_id,
+        } | self.workflow.get_log_extra()
+
+    def get_metadata_value(self, field: str) -> Any:
+        """Util method for getting the value from the metadata."""
+        if self.metadata is None:
+            return None
+
+        return self.metadata.get(field, None)

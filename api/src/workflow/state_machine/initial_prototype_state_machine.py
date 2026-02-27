@@ -4,27 +4,41 @@ from typing import Any
 from statemachine import Event
 from statemachine.states import States
 
-from src.constants.lookup_constants import WorkflowEntityType, WorkflowType
+from src.constants.lookup_constants import ApprovalType, Privilege, WorkflowEntityType, WorkflowType
 from src.workflow.base_state_machine import BaseStateMachine
-from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.state_persistence.opportunity_persistence_model import OpportunityPersistenceModel
-from src.workflow.workflow_config import WorkflowConfig
+from src.workflow.workflow_config import ApprovalConfig, WorkflowConfig
+from src.workflow.workflow_constants import WorkflowConstants
 
 
 class InitialPrototypeState(StrEnum):
-    # Will add more states as we build functionality
-    # and need a place to test it.
     START = "start"
-    MIDDLE = "middle"
+
+    PENDING_PROGRAM_OFFICER_APPROVAL = "pending_program_officer_approval"
+    PENDING_BUDGET_OFFICER_APPROVAL = "pending_budget_officer_approval"
+
+    # End States
+    DECLINED = "declined"
     END = "end"
 
 
 initial_prototype_state_machine_config = WorkflowConfig(
     workflow_type=WorkflowType.INITIAL_PROTOTYPE,
     persistence_model_cls=OpportunityPersistenceModel,
-    entity_types=[WorkflowEntityType.OPPORTUNITY],
-    approval_mapping={},
+    entity_type=WorkflowEntityType.OPPORTUNITY,
+    approval_mapping={
+        # Program Officer Approvals
+        "receive_program_officer_approval": ApprovalConfig(
+            approval_type=ApprovalType.PROGRAM_OFFICER_APPROVAL,
+            required_privileges=[Privilege.PROGRAM_OFFICER_APPROVAL],
+        ),
+        # Budget Officer Approvals
+        "receive_budget_officer_approval": ApprovalConfig(
+            approval_type=ApprovalType.BUDGET_OFFICER_APPROVAL,
+            required_privileges=[Privilege.BUDGET_OFFICER_APPROVAL],
+        ),
+    },
 )
 
 
@@ -34,26 +48,81 @@ class InitialPrototypeStateMachine(BaseStateMachine):
     states = States.from_enum(
         InitialPrototypeState,
         initial=InitialPrototypeState.START,
-        final=[InitialPrototypeState.END],
+        final=[InitialPrototypeState.END, InitialPrototypeState.DECLINED],
         use_enum_instance=True,
     )
 
     ### Events + transitions
     start_workflow = Event(
-        states.START.to(states.MIDDLE),
+        states.START.to(states.PENDING_PROGRAM_OFFICER_APPROVAL),
     )
 
-    middle_to_end = Event(
-        states.MIDDLE.to(states.END),
+    ## Program officer approvals
+    receive_program_officer_approval = Event(
+        # If Approved -> Add approval event and then check if enough approvals have occurred to determine next state
+        states.PENDING_PROGRAM_OFFICER_APPROVAL.to.itself(
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_APPROVED,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_APPROVED,
+            after="check_program_officer_approval",
+        )
+        |
+        # If Declined -> Add approval event and move to Declined state
+        states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
+            states.DECLINED,
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_DECLINED,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_DECLINED,
+        )
+        |
+        # If Requires Modification -> Add approval event and move back to Start
+        states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
+            states.START,
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_REQUIRES_MODIFICATION,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_REQUIRES_MODIFICATION,
+        )
+    )
+
+    check_program_officer_approval = Event(
+        # If it has enough approvals, go to the Budget officer approval
+        states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
+            states.PENDING_BUDGET_OFFICER_APPROVAL, cond=WorkflowConstants.HAS_ENOUGH_APPROVALS
+        )
+        # If not, stay in this state
+        | states.PENDING_PROGRAM_OFFICER_APPROVAL.to.itself(),
+    )
+
+    ## Budget officer approvals
+    receive_budget_officer_approval = Event(
+        # If Approved -> Add approval event and then check if enough approvals have occurred to determine next state
+        states.PENDING_BUDGET_OFFICER_APPROVAL.to.itself(
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_APPROVED,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_APPROVED,
+            after="check_budget_officer_approval",
+        )
+        |
+        # If Declined -> Add approval event and move to End state
+        states.PENDING_BUDGET_OFFICER_APPROVAL.to(
+            states.DECLINED,
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_DECLINED,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_DECLINED,
+        )
+        |
+        # If Requires Modification -> Add approval event and move back to Start
+        states.PENDING_BUDGET_OFFICER_APPROVAL.to(
+            states.START,
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_REQUIRES_MODIFICATION,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_REQUIRES_MODIFICATION,
+        )
+    )
+
+    check_budget_officer_approval = Event(
+        # If it has enough approvals, go to the End state
+        states.PENDING_BUDGET_OFFICER_APPROVAL.to(
+            states.END, cond=WorkflowConstants.HAS_ENOUGH_APPROVALS
+        )
+        # If not, stay in this state
+        | states.PENDING_BUDGET_OFFICER_APPROVAL.to.itself(),
     )
 
     def __init__(self, model: OpportunityPersistenceModel, **kwargs: Any):
         super().__init__(model=model, **kwargs)
         self.opportunity = model.opportunity
-        self.db_session = model.db_session
-
-        # For testing purposes, store the transition events.
-        self.transition_history: list[StateMachineEvent] = []
-
-    def on_transition(self, state_machine_event: StateMachineEvent) -> None:
-        self.transition_history.append(state_machine_event)

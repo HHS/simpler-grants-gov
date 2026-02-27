@@ -7,14 +7,15 @@ from statemachine.exceptions import InvalidStateValue, TransitionNotAllowed
 from src.adapters import db
 from src.constants.lookup_constants import WorkflowEventType, WorkflowType
 from src.db.models.user_models import User
-from src.db.models.workflow_models import Workflow
+from src.db.models.workflow_models import Workflow, WorkflowEventHistory
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_event import WorkflowEvent
+from src.workflow.listener.workflow_audit_listener import WorkflowAuditListener
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.workflow_service import (
     get_and_validate_workflow,
-    get_workflow_entities,
+    get_workflow_entity,
     is_event_valid_for_workflow,
 )
 from src.workflow.workflow_config import WorkflowConfig
@@ -55,9 +56,12 @@ class EventHandler:
              ...
     """
 
-    def __init__(self, db_session: db.Session, event: WorkflowEvent):
+    def __init__(
+        self, db_session: db.Session, event: WorkflowEvent, history_event: WorkflowEventHistory
+    ):
         self.db_session = db_session
         self.event = event
+        self.history_event = history_event
 
     def process(self) -> BaseStateMachine:
         """Process an event."""
@@ -66,11 +70,19 @@ class EventHandler:
 
     def _process_event(self, state_machine_event: StateMachineEvent) -> BaseStateMachine:
         """Run the state machine event against the state machine."""
+        # Attach the workflow to the history event.
+        self.history_event.workflow = state_machine_event.workflow
+
         persistence_model = state_machine_event.config.persistence_model_cls(
             db_session=self.db_session, workflow=state_machine_event.workflow
         )
 
-        state_machine = state_machine_event.state_machine_cls(persistence_model)
+        # Create the audit listener to track all state transitions
+        audit_listener = WorkflowAuditListener(db_session=self.db_session)
+
+        state_machine = state_machine_event.state_machine_cls(
+            persistence_model, listeners=[audit_listener]
+        )
         log_extra = self.event.get_log_extra() | {"current_workflow_state": persistence_model.state}
 
         if not is_event_valid_for_workflow(state_machine_event.event_to_send, state_machine):
@@ -135,7 +147,12 @@ class EventHandler:
 
         config, state_machine_cls = self._get_state_machine_for_workflow_type(context.workflow_type)
 
-        workflow_entities = get_workflow_entities(self.db_session, context.entities, config)
+        workflow_entity = get_workflow_entity(
+            self.db_session,
+            entity_type=context.entity_type,
+            entity_id=context.entity_id,
+            config=config,
+        )
 
         workflow = Workflow(
             workflow_id=uuid.uuid4(),
@@ -145,7 +162,7 @@ class EventHandler:
             # otherwise won't realize the StrEnum is also a string and error.
             current_workflow_state=state_machine_cls.initial_state.value,
             is_active=True,
-            **workflow_entities
+            **workflow_entity
         )
         self.db_session.add(workflow)
 
@@ -155,6 +172,7 @@ class EventHandler:
             workflow=workflow,
             config=config,
             state_machine_cls=state_machine_cls,
+            workflow_history_event=self.history_event,
             metadata=self.event.metadata,
         )
 
@@ -192,6 +210,7 @@ class EventHandler:
             workflow=workflow,
             config=config,
             state_machine_cls=state_machine_cls,
+            workflow_history_event=self.history_event,
             metadata=self.event.metadata,
         )
 

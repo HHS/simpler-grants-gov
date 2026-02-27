@@ -30,6 +30,7 @@ import src.db.models.sam_extract_models as sam_extract_models
 import src.db.models.staging as staging
 import src.db.models.task_models as task_models
 import src.db.models.user_models as user_models
+import src.db.models.workflow_models as workflow_models
 import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
 from src.constants.lookup_constants import (
@@ -70,15 +71,6 @@ from src.constants.static_role_values import (
 from src.db.models import agency_models
 from src.db.models.lookup.lookup_registry import LookupRegistry
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
-from src.db.models.workflow_models import (
-    Workflow,
-    WorkflowApplication,
-    WorkflowApplicationSubmission,
-    WorkflowApproval,
-    WorkflowAudit,
-    WorkflowEventHistory,
-    WorkflowOpportunity,
-)
 from src.util import file_util
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
@@ -1548,7 +1540,7 @@ class ApplicationAttachmentFactory(BaseFactory):
     @classmethod
     def _build(cls, model_class, *args, **kwargs):
         kwargs.pop("file_contents")  # Don't file for build strategy
-        super()._build(model_class, *args, **kwargs)
+        return super()._build(model_class, *args, **kwargs)
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
@@ -3122,6 +3114,17 @@ class OrganizationAuditFactory(BaseFactory):
         )
 
 
+class OrganizationSavedOpportunityFactory(BaseFactory):
+    class Meta:
+        model = entity_models.OrganizationSavedOpportunity
+
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+
 class SuppressedEmailFactory(BaseFactory):
     class Meta:
         model = user_models.SuppressedEmail
@@ -3164,30 +3167,44 @@ class LegacyOrganizationCertificateFactory(BaseLegacyCertificateFactory):
 
 class WorkflowFactory(BaseFactory):
     class Meta:
-        model = Workflow
+        model = workflow_models.Workflow
 
     workflow_id = Generators.UuidObj
     workflow_type = factory.fuzzy.FuzzyChoice(WorkflowType)
     current_workflow_state = "start"
     is_active = True
 
+    # By default, we'll associate a workflow with an opportunity
+    # Use the params below to change this, or pass in your own.
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(
+        lambda e: e.opportunity.opportunity_id if e.opportunity is not None else None
+    )
+
     class Params:
-        is_single_opportunity_workflow = factory.Trait(
-            opportunities=factory.List([factory.SubFactory(OpportunityFactory)])
+        has_opportunity = factory.Trait(
+            opportunity=factory.SubFactory(OpportunityFactory),
+            opportunity_id=factory.LazyAttribute(lambda e: e.opportunity.opportunity_id),
         )
 
-        is_single_application_workflow = factory.Trait(
-            applications=factory.List([factory.SubFactory(ApplicationFactory)])
+        has_application = factory.Trait(
+            application=factory.SubFactory(ApplicationFactory),
+            application_id=factory.LazyAttribute(lambda e: e.application.application_id),
+            opportunity=None,
         )
 
-        is_single_application_submission_workflow = factory.Trait(
-            application_submissions=factory.List([factory.SubFactory(ApplicationSubmissionFactory)])
+        has_application_submission = factory.Trait(
+            application_submission=factory.SubFactory(ApplicationSubmissionFactory),
+            application_submission_id=factory.LazyAttribute(
+                lambda e: e.application_submission.application_submission_id
+            ),
+            opportunity=None,
         )
 
 
 class WorkflowEventHistoryFactory(BaseFactory):
     class Meta:
-        model = WorkflowEventHistory
+        model = workflow_models.WorkflowEventHistory
 
     event_id = Generators.UuidObj
     event_data = {}
@@ -3197,7 +3214,7 @@ class WorkflowEventHistoryFactory(BaseFactory):
 
 class WorkflowAuditFactory(BaseFactory):
     class Meta:
-        model = WorkflowAudit
+        model = workflow_models.WorkflowAudit
 
     workflow_audit_id = Generators.UuidObj
     acting_user = factory.SubFactory(UserFactory)
@@ -3209,46 +3226,18 @@ class WorkflowAuditFactory(BaseFactory):
 
 class WorkflowApprovalFactory(BaseFactory):
     class Meta:
-        model = WorkflowApproval
+        model = workflow_models.WorkflowApproval
 
     workflow_approval_id = Generators.UuidObj
+
+    workflow = factory.SubFactory(WorkflowFactory)
+    workflow_id = factory.LazyAttribute(lambda a: a.workflow.workflow_id)
+
     approving_user = factory.SubFactory(UserFactory)
-    approving_user_id = factory.LazyAttribute(lambda o: o.approving_user.user_id)
+    approving_user_id = factory.LazyAttribute(lambda a: a.approving_user.user_id)
     approval_type = factory.fuzzy.FuzzyChoice(ApprovalType)
     is_still_valid = True
-    approval_response_type = factory.fuzzy.FuzzyChoice(ApprovalResponseType)
+    approval_response_type = ApprovalResponseType.APPROVED
 
-
-class WorkflowOpportunityFactory(BaseFactory):
-    class Meta:
-        model = WorkflowOpportunity
-
-    workflow_opportunity_id = Generators.UuidObj
-    workflow = factory.SubFactory(WorkflowFactory)
-    workflow_id = factory.LazyAttribute(lambda o: o.workflow.workflow_id)
-    opportunity = factory.SubFactory(OpportunityFactory)
-    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
-
-
-class WorkflowApplicationFactory(BaseFactory):
-    class Meta:
-        model = WorkflowApplication
-
-    workflow_application_id = Generators.UuidObj
-    workflow = factory.SubFactory(WorkflowFactory)
-    workflow_id = factory.LazyAttribute(lambda o: o.workflow.workflow_id)
-    application = factory.SubFactory(ApplicationFactory)
-    application_id = factory.LazyAttribute(lambda o: o.application.application_id)
-
-
-class WorkflowApplicationSubmissionFactory(BaseFactory):
-    class Meta:
-        model = WorkflowApplicationSubmission
-
-    workflow_application_submission_id = Generators.UuidObj
-    workflow = factory.SubFactory(WorkflowFactory)
-    workflow_id = factory.LazyAttribute(lambda o: o.workflow.workflow_id)
-    application_submission = factory.SubFactory(ApplicationSubmissionFactory)
-    application_submission_id = factory.LazyAttribute(
-        lambda o: o.application_submission.application_submission_id
-    )
+    event = factory.SubFactory(WorkflowEventHistoryFactory)
+    event_id = factory.LazyAttribute(lambda a: a.event.event_id)

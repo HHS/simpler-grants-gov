@@ -1,7 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { fakeUserOrganization } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { createRef } from "react";
 
@@ -14,10 +13,6 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockRouterPush,
   }),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/hooks/useClientFetch", () => ({
@@ -60,6 +55,7 @@ describe("StartApplicationModal", () => {
 
     expect(validationError).toBeInTheDocument();
   });
+
   it("displays validation error if submitted without an organization", async () => {
     render(
       <StartApplicationModal
@@ -86,6 +82,7 @@ describe("StartApplicationModal", () => {
 
     expect(validationError).toBeInTheDocument();
   });
+
   it("displays an API error if API returns an error", async () => {
     clientFetchMock.mockRejectedValue(new Error());
     render(
@@ -134,7 +131,7 @@ describe("StartApplicationModal", () => {
   });
   it("re-routes on successful save", async () => {
     clientFetchMock.mockResolvedValue({ applicationId: "999" });
-    const { rerender } = render(
+    render(
       <StartApplicationModal
         competitionId="1"
         opportunityTitle="blessed opportunity"
@@ -162,22 +159,12 @@ describe("StartApplicationModal", () => {
       }),
     });
 
-    rerender(
-      <StartApplicationModal
-        competitionId="1"
-        opportunityTitle="blessed opportunity"
-        modalRef={createRef()}
-        applicantTypes={["individual"]}
-        organizations={[]}
-        token={"a token"}
-        loading={false}
-      />,
-    );
     await waitFor(() => {
       expect(mockRouterPush).toHaveBeenCalledWith(`/applications/999`);
     });
   });
-  it("renders an ineligible view if competition is org only and user has no orgs", () => {
+  it("renders the standard modal for org-only competitions even when user has no organizations", async () => {
+    clientFetchMock.mockResolvedValue({ applicationId: "999" });
     render(
       <StartApplicationModal
         competitionId="1"
@@ -190,8 +177,30 @@ describe("StartApplicationModal", () => {
       />,
     );
 
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-    expect(screen.getByText("ineligibleTitle")).toBeInTheDocument();
+    // Standard modal should render (not an ineligible view)
+    expect(await screen.findByTestId("opportunity-title")).toBeInTheDocument();
+    expect(await screen.findByTestId("textInput")).toBeInTheDocument();
+
+    const saveButton = await screen.findByTestId("application-start-save");
+    const input = await screen.findByTestId("textInput");
+    await userEvent.type(input, "new application");
+    const select = await screen.findByTestId("Select");
+    await userEvent.selectOptions(select, "NOT_LISTED");
+
+    act(() => saveButton.click());
+
+    // Because no organization is selected, organization should be omitted from the body
+    expect(clientFetchMock).toHaveBeenCalledWith("/api/applications/start", {
+      method: "POST",
+      body: JSON.stringify({
+        applicationName: "new application",
+        competitionId: "1",
+      }),
+    });
+
+    await waitFor(() => {
+      expect(mockRouterPush).toHaveBeenCalledWith(`/applications/999`);
+    });
   });
 
   describe("Individual selection", () => {
@@ -295,7 +304,7 @@ describe("StartApplicationModal", () => {
       expect(screen.queryByText("asIndividual")).not.toBeInTheDocument();
     });
 
-    it("does not show 'I don't see my org listed' option for organization-only competitions", () => {
+    it("shows 'I don't see my org listed' option for organization-only competitions", () => {
       render(
         <StartApplicationModal
           competitionId="1"
@@ -308,7 +317,7 @@ describe("StartApplicationModal", () => {
         />,
       );
 
-      expect(screen.queryByText("notListed")).not.toBeInTheDocument();
+      expect(screen.queryByText("notListed")).toBeInTheDocument();
     });
 
     it("shows 'I don't see my org listed' option for mixed competitions", () => {

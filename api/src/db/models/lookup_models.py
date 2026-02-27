@@ -241,6 +241,10 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.UPDATE_OPPORTUNITY, 20),
         LookupStr(Privilege.PUBLISH_OPPORTUNITY, 21),
         LookupStr(Privilege.INTERNAL_WORKFLOW_ACCESS, 22),
+        LookupStr(Privilege.PROGRAM_OFFICER_APPROVAL, 23),
+        LookupStr(Privilege.BUDGET_OFFICER_APPROVAL, 24),
+        LookupStr(Privilege.VIEW_ORG_SAVED_OPPORTUNITIES, 25),
+        LookupStr(Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES, 26),
     ]
 )
 
@@ -291,6 +295,8 @@ WORKFLOW_TYPE_CONFIG: LookupConfig[WorkflowType] = LookupConfig(
 APPROVAL_TYPE_CONFIG: LookupConfig[ApprovalType] = LookupConfig(
     [
         LookupStr(ApprovalType.INITIAL_PROTOTYPE_APPROVAL, 1),
+        LookupStr(ApprovalType.PROGRAM_OFFICER_APPROVAL, 2),
+        LookupStr(ApprovalType.BUDGET_OFFICER_APPROVAL, 3),
     ]
 )
 

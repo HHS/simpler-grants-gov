@@ -1,4 +1,4 @@
-import { render, screen } from "tests/react-utils";
+import { render, screen } from "@testing-library/react";
 
 import RoadmapMilestones from "src/components/roadmap/sections/RoadmapMilestones";
 
@@ -7,7 +7,7 @@ describe("RoadmapMilestones Content", () => {
     render(<RoadmapMilestones />);
     const RoadmapMilestonesH2 = screen.getByRole("heading", {
       level: 2,
-      name: /What we've delivered?/i,
+      name: "title",
     });
 
     expect(RoadmapMilestonesH2).toBeInTheDocument();

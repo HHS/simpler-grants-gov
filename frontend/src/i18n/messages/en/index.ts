@@ -309,8 +309,8 @@ export const messages = {
       submit: "Submit application",
       transferApplicaitonOwnership: "Transfer application ownership",
       unassociatedApplicationAlert: {
-        title: "This application isn't associated with a valid organization.",
-        body: "You can continue working and your progress will be saved, but to submit on behalf of an organization, you must <link>select that organization and transfer ownership</link>.",
+        title: "This application isn't associated with an organization.",
+        body: "You can continue working and your progress will be saved, but to submit on behalf of an organization you must select that organization and transfer ownership. <link>Click here to transfer application ownership.</link>",
       },
       editApplicationFilingNameModal: {
         buttonText: "Edit filing name",
@@ -1823,8 +1823,18 @@ export const messages = {
       "We have encountered an error loading your award recommendations, please try again later.",
     metaDescription: "View your award recommendations",
     pageHeading: "Award Recommendations",
-    pageTitle: "Award Recommendations",
+    pageTitle: "Review your Recommendation",
     description: "Award Recommendation flow coming soon.",
+    opportunitySummary: "Opportunity summary",
+    selectionMethod: "Selection method",
+    viewFullDetails: "View Full Details",
+    opportunityStatus: "Status",
+    agency: "Agency",
+    closeDate: "Closing Date",
+    readMore: "Read more",
+    showLess: "Show less",
+    opportunity: "Opportunity",
+    editOpportunityDetails: "Edit opportunity details",
   },
   InviteLegacyUsers: {
     dataLoadingError:
