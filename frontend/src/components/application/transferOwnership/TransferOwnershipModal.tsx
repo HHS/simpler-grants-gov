@@ -88,7 +88,7 @@ export const TransferOwnershipModal = ({
         modalRef.current?.toggleModal?.();
         onAfterClose();
         router.refresh();
-      } catch (error: unknown) {
+      } catch (_error) {
         setSubmitErrorMessage(t("transferErrorMessage"));
       } finally {
         setIsSubmittingTransfer(false);

@@ -149,6 +149,7 @@ describe("StartApplicationModalControl", () => {
   // array, tests pass, but I'd rather have that in place and skip this test for now.
   // In the future we could make this more testable by encapsulating the onMount
   // fetch functionality into its own hook - DWS
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip("calls fetch functions correctly", async () => {
     const spy = jest.spyOn(mocks, "clientFetchMock");
 

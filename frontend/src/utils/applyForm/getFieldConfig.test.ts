@@ -59,7 +59,7 @@ describe("getWarningsForField", () => {
       }),
     ).toEqual([]);
   });
-  // eslint-disable-next-line
+
   it.skip("does something with arrays?", () => {});
   it("returns warnings that directly reference the field name", () => {
     expect(

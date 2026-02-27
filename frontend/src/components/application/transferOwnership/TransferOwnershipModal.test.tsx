@@ -267,7 +267,7 @@ describe("TransferOwnershipModal", () => {
     });
 
     const confirmButton = screen.getByTestId("transfer-ownership-confirm");
-    expect(confirmButton).not.toBeDisabled();
+    expect(confirmButton).toBeEnabled();
 
     fireEvent.click(confirmButton);
 
