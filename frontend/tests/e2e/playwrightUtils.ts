@@ -75,6 +75,57 @@ export const expectURLQueryParamValue = (
   expect(actualValue).toBe(queryParamValue);
 };
 
+export async function waitForURLContainsQueryParamValues(
+  page: Page,
+  queryParamName: string,
+  queryParamValues: string[],
+  timeoutOverride?: number,
+) {
+  const timeout = timeoutOverride ?? (targetEnv === "staging" ? 300000 : 60000);
+
+  const expectedSorted = [...queryParamValues].sort();
+
+  const changeCheck = (pageUrl: string): boolean => {
+    const url = new URL(pageUrl);
+    const params = new URLSearchParams(url.search);
+    const actualValue = params.get(queryParamName);
+    if (!actualValue) {
+      return false;
+    }
+
+    const actualSorted = actualValue.split(",").filter(Boolean).sort();
+    return JSON.stringify(actualSorted) === JSON.stringify(expectedSorted);
+  };
+
+  try {
+    await waitForURLChange(page, changeCheck, timeout);
+  } catch (_e) {
+    throw new Error(
+      `Url did not change to contain ${queryParamName}:${queryParamValues.join(",")} as expected`,
+    );
+  }
+
+  const url = new URL(page.url());
+  const params = new URLSearchParams(url.search);
+  const actualValue = params.get(queryParamName) || "";
+  const actualSorted = actualValue.split(",").filter(Boolean).sort();
+  return expect(actualSorted).toEqual(expectedSorted);
+}
+
+export const expectURLQueryParamValues = (
+  page: Page,
+  queryParamName: string,
+  queryParamValues: string[],
+): void => {
+  const url = new URL(page.url());
+  const params = new URLSearchParams(url.search);
+  const actualValue = params.get(queryParamName) || "";
+
+  const actualSorted = actualValue.split(",").filter(Boolean).sort();
+  const expectedSorted = [...queryParamValues].sort();
+  expect(actualSorted).toEqual(expectedSorted);
+};
+
 export async function waitForUrl(
   page: Page,
   url: string,
@@ -196,46 +247,3 @@ export async function refreshPageWithCurrentURL(page: Page) {
   }); // go to new url in same tab
   return page;
 }
-
-export async function waitForURLContainsQueryParamValues(
-  page: Page,
-  queryParamName: string,
-  queryParamValues: string[],
-  timeoutOverride?: number,
-) {
-  // Use longer timeout for staging environment due to slower response times
-  const timeout = timeoutOverride ?? (targetEnv === "staging" ? 300000 : 60000);
-
-  const changeCheck = (pageUrl: string): boolean => {
-    const url = new URL(pageUrl);
-    const params = new URLSearchParams(url.search);
-    const actualValue = params.get(queryParamName);
-
-    if (!actualValue) return false;
-
-    const actualValues = actualValue.split(",").sort();
-    const expectedValues = queryParamValues.sort();
-
-    return (
-      actualValues.length === expectedValues.length &&
-      actualValues.every((val, idx) => val === expectedValues[idx])
-    );
-  };
-
-  await waitForURLChange(page, changeCheck, timeout);
-}
-
-export const expectURLQueryParamValues = (
-  page: Page,
-  queryParamName: string,
-  queryParamValues: string[],
-): void => {
-  const url = new URL(page.url());
-  const params = new URLSearchParams(url.search);
-  const actualValue = params.get(queryParamName);
-
-  const actualValues = actualValue ? actualValue.split(",").sort() : [];
-  const expectedValues = queryParamValues.sort();
-
-  expect(actualValues).toEqual(expectedValues);
-};
