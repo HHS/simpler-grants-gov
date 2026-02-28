@@ -3029,6 +3029,49 @@ paths:
       summary: Add an organization to an application
       security:
       - ApiJwtAuth: []
+  /v1/organizations/{organization_id}/saved-opportunities/{opportunity_id}:
+    delete:
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: opportunity_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDeleteSavedOpportunityResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Organization v1
+      summary: Delete a saved opportunity for an organization
+      security:
+      - ApiJwtAuth: []
   /alpha/applications/{application_id}/attachments/{application_attachment_id}:
     get:
       parameters:
@@ -9022,6 +9065,20 @@ components:
           type:
           - object
           $ref: '#/components/schemas/ApplicationUpdateResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OrganizationDeleteSavedOpportunityResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: No data returned
+          example: {}
         status_code:
           type: integer
           description: The HTTP status code
