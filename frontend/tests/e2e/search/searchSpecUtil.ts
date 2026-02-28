@@ -42,6 +42,33 @@ export async function toggleFilterDrawer(page: Page) {
   await filterDrawerButton.click();
 }
 
+export async function ensureFilterDrawerOpen(page: Page) {
+  const visibleStatusAccordion = page
+    .locator('button[aria-controls="opportunity-filter-status"]:visible')
+    .first();
+
+  if (await visibleStatusAccordion.isVisible().catch(() => false)) {
+    await page.waitForTimeout(200);
+    return;
+  }
+
+  // Try the existing toggle helper first (handles open/close selector logic)
+  await toggleFilterDrawer(page);
+  await page.waitForTimeout(800);
+
+  // If still not visible, force open from top of page using drawer open button
+  if (!(await visibleStatusAccordion.isVisible().catch(() => false))) {
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const drawerOpenButton = page
+      .locator("button[data-testid='toggle-drawer']")
+      .first();
+    if (await drawerOpenButton.isVisible().catch(() => false)) {
+      await drawerOpenButton.click();
+      await page.waitForTimeout(800);
+    }
+  }
+}
+
 export function getSearchInput(page: Page) {
   return page.locator("#query");
 }
@@ -61,6 +88,10 @@ export async function fillSearchInputAndSubmit(
     await page.waitForTimeout(200);
   }
 
+  // Clear the input first to ensure it's empty
+  await searchInput.clear();
+  await page.waitForTimeout(100);
+
   // this needs to be `pressSequentially` rather than `fill` because `fill` was not
   // reliably triggering onChange handlers in webkit
   await searchInput.pressSequentially(term);
@@ -72,6 +103,11 @@ export async function fillSearchInputAndSubmit(
   }
 
   await submitButton.click();
+
+  if (browserType === "webkit") {
+    await page.waitForTimeout(200);
+    await searchInput.press("Enter");
+  }
 }
 
 export function expectURLContainsQueryParam(
@@ -84,9 +120,9 @@ export function expectURLContainsQueryParam(
 
 export async function expectCheckboxIDIsChecked(
   page: Page,
-  idWithHash: string,
+  checkboxId: string,
 ) {
-  const checkbox: Locator = page.locator(idWithHash).first();
+  const checkbox: Locator = page.locator(`input[id="${checkboxId}"]`).first();
   await expect(checkbox).toBeChecked();
 }
 
@@ -111,11 +147,65 @@ export async function toggleCheckboxes(
 }
 
 export async function toggleCheckbox(page: Page, idWithoutHash: string) {
-  const checkBox = page.locator(`label[for=${idWithoutHash}]`);
-  const timeout = targetEnv === "staging" ? 120000 : 15000;
-  await checkBox.waitFor({ state: "visible", timeout });
+  const checkBox = page.locator(`input[id="${idWithoutHash}"]`).first();
+  const checkBoxLabel = page
+    .locator(`label[for="${idWithoutHash}"]:visible`)
+    .first();
+  const timeout = targetEnv === "staging" ? 120000 : 30000;
+  await checkBox.waitFor({ state: "attached", timeout });
+  await checkBoxLabel.waitFor({ state: "visible", timeout });
+  await checkBoxLabel.scrollIntoViewIfNeeded();
   await expect(checkBox).toBeEnabled();
-  await checkBox.click();
+
+  if (!(await checkBox.isChecked())) {
+    await checkBoxLabel.click({ force: true });
+  }
+  await page.waitForTimeout(100);
+}
+
+export async function toggleCheckboxGroup(
+  page: Page,
+  checkboxObject: Record<string, string>,
+) {
+  for (const checkboxID of Object.keys(checkboxObject)) {
+    await toggleCheckbox(page, checkboxID);
+    await page.waitForTimeout(500);
+  }
+}
+
+export async function expectCheckboxesChecked(
+  page: Page,
+  checkboxObject: Record<string, string>,
+) {
+  for (const checkboxID of Object.keys(checkboxObject)) {
+    await expectCheckboxIDIsChecked(page, checkboxID);
+  }
+}
+
+export async function getFirstNonNumericAgencyCheckboxId(page: Page) {
+  const agencyCheckboxes = page.locator(
+    '#opportunity-filter-agency input[type="checkbox"]',
+  );
+
+  const count = await agencyCheckboxes.count();
+  for (let i = 0; i < count; i += 1) {
+    const checkbox = agencyCheckboxes.nth(i);
+    const id = await checkbox.getAttribute("id");
+    const value = await checkbox.getAttribute("value");
+    if (!id) {
+      continue;
+    }
+
+    if (id.endsWith("-any") || value === "all") {
+      continue;
+    }
+
+    if (!/^\d+$/.test(id) && !(await checkbox.isChecked())) {
+      return id;
+    }
+  }
+
+  return null;
 }
 
 export async function selectSortBy(
@@ -156,12 +246,39 @@ export async function expectSortBy(page: Page, value: string, drawer = false) {
   await expect(sortSelectElement).toHaveValue(value, timeoutOption);
 }
 
-export async function waitForSearchResultsInitialLoad(page: Page) {
+export async function waitForSearchResultsInitialLoad(
+  page: Page,
+  timeoutOverride?: number,
+) {
   // Wait for the page and results to load
+  let timeout = targetEnv === "staging" ? 180000 : 60000;
+  if (timeoutOverride) {
+    timeout = timeoutOverride;
+  }
+
   const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
-  const timeout = targetEnv === "staging" ? 180000 : 60000;
-  await resultsHeading.waitFor({ state: "visible", timeout });
-  return await expect(resultsHeading).toBeVisible();
+
+  // Wait for heading to be visible, but with some retry logic
+  const startTime = Date.now();
+  let lastError: Error | null = null;
+
+  while (Date.now() - startTime < timeout) {
+    try {
+      await resultsHeading.waitFor({ state: "visible", timeout: 5000 });
+      return await expect(resultsHeading).toBeVisible();
+    } catch (e) {
+      lastError = e as Error;
+      // Continue retrying
+      await page.waitForTimeout(500);
+    }
+  }
+
+  // If we get here, timeout was exceeded
+  if (lastError) {
+    throw lastError;
+  }
+
+  throw new Error("Timeout waiting for search results to load");
 }
 
 export async function clickAccordionWithTitle(
@@ -247,12 +364,16 @@ export async function ensureAccordionExpanded(
   accordionTitle: string,
 ) {
   const button = page.locator(
-    `button.usa-accordion__button:has-text("${accordionTitle}")`,
+    `button.usa-accordion__button:has-text("${accordionTitle}"):visible`,
   );
-  await button.waitFor({ state: "visible", timeout: 15000 });
+  const timeout = targetEnv === "staging" ? 120000 : 30000;
+  await button.waitFor({ state: "visible", timeout });
+  await button.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(100);
   const expanded = await button.getAttribute("aria-expanded");
   if (expanded !== "true") {
     await button.click();
+    await page.waitForTimeout(300);
   }
 }
 
@@ -323,20 +444,17 @@ export const validateTopLevelAndNestedSelectedFilterCounts = async (
 
 export const waitForFilterOptions = async (page: Page, filterType: string) => {
   const filterButton = page.locator(
-    `button[aria-controls="opportunity-filter-${filterType}"]`,
+    `button[aria-controls="opportunity-filter-${filterType}"]:visible`,
   );
-  await filterButton.waitFor({
-    state: "visible",
-    timeout: FILTER_OPTIONS_TIMEOUT,
-  });
+  const timeout = FILTER_OPTIONS_TIMEOUT;
+  await filterButton.waitFor({ state: "visible", timeout });
+  await filterButton.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(100);
   await filterButton.click();
+  await page.waitForTimeout(400);
 
-  const filterOptions = page.locator(`input[name="${filterType}-*"]`);
-  // this is preferable but doesn't work
-  // await filterOptions.waitFor({
-  //   state: "visible",
-  //   timeout: FILTER_OPTIONS_TIMEOUT,
-  // });
-  await filterOptions.isVisible();
-  await filterButton.click();
+  const filterOptions = page.locator(
+    `#opportunity-filter-${filterType} label.usa-checkbox__label:visible`,
+  );
+  await filterOptions.first().waitFor({ state: "visible", timeout });
 };

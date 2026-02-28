@@ -75,6 +75,57 @@ export const expectURLQueryParamValue = (
   expect(actualValue).toBe(queryParamValue);
 };
 
+export async function waitForURLContainsQueryParamValues(
+  page: Page,
+  queryParamName: string,
+  queryParamValues: string[],
+  timeoutOverride?: number,
+) {
+  const timeout = timeoutOverride ?? (targetEnv === "staging" ? 300000 : 60000);
+
+  const expectedSorted = [...queryParamValues].sort();
+
+  const changeCheck = (pageUrl: string): boolean => {
+    const url = new URL(pageUrl);
+    const params = new URLSearchParams(url.search);
+    const actualValue = params.get(queryParamName);
+    if (!actualValue) {
+      return false;
+    }
+
+    const actualSorted = actualValue.split(",").filter(Boolean).sort();
+    return JSON.stringify(actualSorted) === JSON.stringify(expectedSorted);
+  };
+
+  try {
+    await waitForURLChange(page, changeCheck, timeout);
+  } catch (_e) {
+    throw new Error(
+      `Url did not change to contain ${queryParamName}:${queryParamValues.join(",")} as expected`,
+    );
+  }
+
+  const url = new URL(page.url());
+  const params = new URLSearchParams(url.search);
+  const actualValue = params.get(queryParamName) || "";
+  const actualSorted = actualValue.split(",").filter(Boolean).sort();
+  return expect(actualSorted).toEqual(expectedSorted);
+}
+
+export const expectURLQueryParamValues = (
+  page: Page,
+  queryParamName: string,
+  queryParamValues: string[],
+): void => {
+  const url = new URL(page.url());
+  const params = new URLSearchParams(url.search);
+  const actualValue = params.get(queryParamName) || "";
+
+  const actualSorted = actualValue.split(",").filter(Boolean).sort();
+  const expectedSorted = [...queryParamValues].sort();
+  expect(actualSorted).toEqual(expectedSorted);
+};
+
 export async function waitForUrl(
   page: Page,
   url: string,
@@ -190,6 +241,6 @@ export const openMobileNav = async (page: Page) => {
 
 export async function refreshPageWithCurrentURL(page: Page) {
   const currentURL = page.url();
-  await page.goto(currentURL); // go to new url in same tab
+  await page.goto(currentURL, { waitUntil: "networkidle", timeout: 60000 }); // go to new url in same tab
   return page;
 }
