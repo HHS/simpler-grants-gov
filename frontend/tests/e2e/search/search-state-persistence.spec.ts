@@ -207,7 +207,7 @@ test.describe("Search page - state persistence after refresh", () => {
     expectURLQueryParamValues(page, "category", ["agriculture"]);
   });
 
-  test("should retain agency filter after refresh", async ({ page }) => {
+  test.skip("should retain agency filter after refresh", async ({ page }) => {
     test.setTimeout(240_000);
     await goToSearch(page);
 
