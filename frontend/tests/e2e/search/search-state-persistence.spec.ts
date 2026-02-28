@@ -246,7 +246,7 @@ test.describe("Search page - state persistence after refresh", () => {
     });
 
     await refreshPageWithCurrentURL(page);
-
+    
     // Check if page crashed
     if (pageError) {
       throw new Error(pageError);
@@ -254,16 +254,14 @@ test.describe("Search page - state persistence after refresh", () => {
 
     // Wait for page to stabilize - try to find any content indicator, not just Opportunities heading
     try {
-      await page
-        .waitForLoadState("networkidle", { timeout: 30000 })
-        .catch(() => {});
+      await page.waitForLoadState("networkidle", { timeout: 30000 }).catch(() => {});
       // Try to find either the results or an error message
       const pageContent = await page.content();
       if (pageContent.includes("error") || pageContent.includes("Error")) {
         // Page loaded but with error - still try to proceed
         await page.waitForTimeout(2000);
       }
-    } catch (e) {
+    } catch (_e) {
       // Ignore timeout, page might still be responsive
     }
 
