@@ -11,7 +11,6 @@ import {
   ensureAccordionExpanded,
   ensureFilterDrawerOpen,
   expectCheckboxesChecked,
-  expectCheckboxIDIsChecked,
   expectSortBy,
   fillSearchInputAndSubmit,
   getFirstNonNumericAgencyCheckboxId,
