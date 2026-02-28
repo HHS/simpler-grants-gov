@@ -247,6 +247,9 @@ export async function waitForSearchResultsInitialLoad(
   timeoutOverride?: number,
 ) {
   // Wait for the page and results to load
+  // First, wait for the page to stabilize
+  await page.waitForLoadState("networkidle", { timeout: 30000 }).catch(() => {});
+  
   const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
   let timeout = targetEnv === "staging" ? 180000 : 60000;
   if (timeoutOverride) {
@@ -431,5 +434,7 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
   const filterOptions = page.locator(
     `#opportunity-filter-${filterType} label.usa-checkbox__label:visible`,
   );
-  await filterOptions.first().waitFor({ state: "visible", timeout });
+  await filterOptions
+    .first()
+    .waitFor({ state: "visible", timeout });
 };

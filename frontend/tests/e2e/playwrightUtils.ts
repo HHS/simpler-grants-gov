@@ -241,9 +241,6 @@ export const openMobileNav = async (page: Page) => {
 
 export async function refreshPageWithCurrentURL(page: Page) {
   const currentURL = page.url();
-  await page.goto(currentURL, {
-    waitUntil: "domcontentloaded",
-    timeout: 30000,
-  }); // go to new url in same tab
+  await page.goto(currentURL, { waitUntil: "networkidle", timeout: 60000 }); // go to new url in same tab
   return page;
 }
