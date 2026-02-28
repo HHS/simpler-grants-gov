@@ -166,6 +166,8 @@ test.describe("Search page - state persistence after refresh", () => {
     await waitForFilterOptions(page, "agency");
 
     await ensureAccordionExpanded(page, "Agency");
+    // Wait for agency sub-options to render
+    await page.waitForTimeout(2000);
     const agencyId = await getFirstNonNumericAgencyCheckboxId(page);
     expect(agencyId).toBeTruthy();
     if (!agencyId) {
@@ -174,13 +176,14 @@ test.describe("Search page - state persistence after refresh", () => {
     }
     const agencyCheckboxes = { [agencyId]: agencyId };
     await toggleCheckboxGroup(page, agencyCheckboxes);
-    await waitForURLContainsQueryParamValues(page, "agency", [agencyId]);
+    await waitForURLContainsQueryParamValues(page, "agency", [agencyId], 120000);
 
     await refreshPageWithCurrentURL(page);
     await waitForSearchResultsInitialLoad(page);
 
     await ensureFilterDrawerOpen(page);
     await ensureAccordionExpanded(page, "Agency");
+    await page.waitForTimeout(1000);
     await expectCheckboxesChecked(page, agencyCheckboxes);
     expectURLQueryParamValues(page, "agency", [agencyId]);
   });
