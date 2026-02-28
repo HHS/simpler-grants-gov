@@ -13,9 +13,9 @@ import {
   expectCheckboxesChecked,
   expectSortBy,
   fillSearchInputAndSubmit,
-  getFirstNonNumericAgencyCheckboxId,
   getSearchInput,
   selectSortBy,
+  toggleCheckbox,
   toggleCheckboxGroup,
   toggleFilterDrawer,
   waitForFilterOptions,
@@ -62,6 +62,45 @@ const goToSearch = async (page: Page) => {
       throw error;
     }
   }
+};
+
+const getFirstSubAgencySelection = async (page: Page) => {
+  const subAgencyCheckboxes = page.locator(
+    '#opportunity-filter-agency input[type="checkbox"]:not([id$="-any"]):not([id$="-all"])',
+  );
+
+  const count = await subAgencyCheckboxes.count();
+  for (let i = 0; i < count; i += 1) {
+    const checkbox = subAgencyCheckboxes.nth(i);
+    const id = await checkbox.getAttribute("id");
+    const value = await checkbox.getAttribute("value");
+
+    if (!id || !value) {
+      continue;
+    }
+
+    // A sub-agency code includes a top-level prefix, e.g. "USAID-ETH".
+    if (!value.includes("-")) {
+      continue;
+    }
+
+    const labelText =
+      (await page.locator(`label[for="${id}"]`).first().textContent()) || "";
+
+    // Prefer visible sub-agencies with non-zero count, e.g. "... [2]".
+    const countMatch = labelText.match(/\[(\d+)\]\s*$/);
+    if (!countMatch || Number(countMatch[1]) <= 0) {
+      continue;
+    }
+
+    if (await checkbox.isChecked()) {
+      continue;
+    }
+
+    return { id, value };
+  }
+
+  return null;
 };
 
 test.describe("Search page - state persistence after refresh", () => {
@@ -216,63 +255,92 @@ test.describe("Search page - state persistence after refresh", () => {
     await waitForFilterOptions(page, "agency");
 
     await ensureAccordionExpanded(page, "Agency");
-    // Wait for agency sub-options to render
+
+    // Wait for agency options to render
     await page.waitForTimeout(2000);
-    const agencyId = await getFirstNonNumericAgencyCheckboxId(page);
-    expect(agencyId).toBeTruthy();
-    if (!agencyId) {
+
+    // Find the first top-level agency "All" checkbox (more reliable than sub-agencies)
+    // These checkboxes control the topLevelAgency query parameter
+    const allAgencyCheckbox = page
+      .locator('input[type="checkbox"][id$="-all"]')
+      .first();
+
+    const allCheckboxId = await allAgencyCheckbox.getAttribute("id");
+    expect(allCheckboxId).toBeTruthy();
+    if (!allCheckboxId) {
       test.fail();
       return;
     }
-    const selectedAgencyValue =
-      (await page
-        .locator(`input[id="${agencyId}"]`)
-        .first()
-        .getAttribute("value")) || agencyId;
 
-    const agencyCheckboxes = { [agencyId]: selectedAgencyValue };
-    await toggleCheckboxGroup(page, agencyCheckboxes);
-    await waitForURLContainsQueryParamValues(
-      page,
-      "agency",
-      [selectedAgencyValue],
-      120000,
+    // Click the top-level "All" checkbox
+    await toggleCheckbox(page, allCheckboxId);
+
+    // Wait for URL to contain the topLevelAgency parameter
+    // The "All" checkbox sets topLevelAgency, not agency
+    await page.waitForFunction(
+      () => {
+        const url = new URL(window.location.href);
+        return url.searchParams.has("topLevelAgency");
+      },
+      { timeout: 120000 },
     );
 
-    // Add error handler before refresh to catch page crashes
-    let pageError: string | null = null;
-    page.once("crash", () => {
-      pageError = "Page crashed";
-    });
+    // Get the topLevelAgency value from URL to verify later
+    const urlBeforeRefresh = new URL(page.url());
+    const topLevelAgencyValues =
+      urlBeforeRefresh.searchParams.get("topLevelAgency")?.split(",") || [];
+    expect(topLevelAgencyValues.length).toBeGreaterThan(0);
 
     await refreshPageWithCurrentURL(page);
-
-    // Check if page crashed
-    if (pageError) {
-      throw new Error(pageError);
-    }
-
-    // Wait for page to stabilize - try to find any content indicator, not just Opportunities heading
-    try {
-      await page
-        .waitForLoadState("networkidle", { timeout: 30000 })
-        .catch(() => {});
-      // Try to find either the results or an error message
-      const pageContent = await page.content();
-      if (pageContent.includes("error") || pageContent.includes("Error")) {
-        // Page loaded but with error - still try to proceed
-        await page.waitForTimeout(2000);
-      }
-    } catch (_e) {
-      // Ignore timeout, page might still be responsive
-    }
-
     await waitForSearchResultsInitialLoad(page, 180000);
 
     await ensureFilterDrawerOpen(page);
     await ensureAccordionExpanded(page, "Agency");
     await page.waitForTimeout(1000);
-    await expectCheckboxesChecked(page, agencyCheckboxes);
-    expectURLQueryParamValues(page, "agency", [selectedAgencyValue]);
+
+    // Verify the "All" checkbox is still checked
+    const isChecked = await page
+      .locator(`input[id="${allCheckboxId}"]`)
+      .isChecked();
+    expect(isChecked).toBe(true);
+
+    // Verify URL still contains the topLevelAgency parameter with same values
+    expectURLQueryParamValues(page, "topLevelAgency", topLevelAgencyValues);
+  });
+
+  test("should retain sub-agency filter after refresh", async ({ page }) => {
+    test.setTimeout(240_000);
+    await goToSearch(page);
+
+    await waitForSearchResultsInitialLoad(page);
+    await ensureFilterDrawerOpen(page);
+    await waitForFilterOptions(page, "agency");
+
+    await ensureAccordionExpanded(page, "Agency");
+    await page.waitForTimeout(2000);
+
+    const subAgency = await getFirstSubAgencySelection(page);
+    expect(subAgency).toBeTruthy();
+    if (!subAgency) {
+      test.fail();
+      return;
+    }
+
+    await toggleCheckbox(page, subAgency.id);
+    await waitForURLContainsQueryParamValues(
+      page,
+      "agency",
+      [subAgency.value],
+      120000,
+    );
+
+    await refreshPageWithCurrentURL(page);
+    await waitForSearchResultsInitialLoad(page, 180000);
+
+    await ensureFilterDrawerOpen(page);
+    await ensureAccordionExpanded(page, "Agency");
+    await expect(page.locator(`input[id="${subAgency.id}"]`)).toBeChecked();
+
+    expectURLQueryParamValues(page, "agency", [subAgency.value]);
   });
 });
