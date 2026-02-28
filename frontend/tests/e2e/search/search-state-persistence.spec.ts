@@ -207,7 +207,7 @@ test.describe("Search page - state persistence after refresh", () => {
     expectURLQueryParamValues(page, "category", ["agriculture"]);
   });
 
-  test.skip("should retain agency filter after refresh", async ({ page }) => {
+  test("should retain agency filter after refresh", async ({ page }) => {
     test.setTimeout(240_000);
     await goToSearch(page);
 
@@ -239,7 +239,32 @@ test.describe("Search page - state persistence after refresh", () => {
       120000,
     );
 
+    // Add error handler before refresh to catch page crashes
+    let pageError: string | null = null;
+    page.once("crash", () => {
+      pageError = "Page crashed";
+    });
+
     await refreshPageWithCurrentURL(page);
+    
+    // Check if page crashed
+    if (pageError) {
+      throw new Error(pageError);
+    }
+
+    // Wait for page to stabilize - try to find any content indicator, not just Opportunities heading
+    try {
+      await page.waitForLoadState("networkidle", { timeout: 30000 }).catch(() => {});
+      // Try to find either the results or an error message
+      const pageContent = await page.content();
+      if (pageContent.includes("error") || pageContent.includes("Error")) {
+        // Page loaded but with error - still try to proceed
+        await page.waitForTimeout(2000);
+      }
+    } catch (e) {
+      // Ignore timeout, page might still be responsive
+    }
+
     await waitForSearchResultsInitialLoad(page, 180000);
 
     await ensureFilterDrawerOpen(page);

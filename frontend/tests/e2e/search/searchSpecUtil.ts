@@ -247,18 +247,34 @@ export async function waitForSearchResultsInitialLoad(
   timeoutOverride?: number,
 ) {
   // Wait for the page and results to load
-  // First, wait for the page to stabilize
-  await page
-    .waitForLoadState("networkidle", { timeout: 30000 })
-    .catch(() => {});
-
-  const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
   let timeout = targetEnv === "staging" ? 180000 : 60000;
   if (timeoutOverride) {
     timeout = timeoutOverride;
   }
-  await resultsHeading.waitFor({ state: "visible", timeout });
-  return await expect(resultsHeading).toBeVisible();
+  
+  const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
+  
+  // Wait for heading to be visible, but with some retry logic
+  const startTime = Date.now();
+  let lastError: Error | null = null;
+  
+  while (Date.now() - startTime < timeout) {
+    try {
+      await resultsHeading.waitFor({ state: "visible", timeout: 5000 });
+      return await expect(resultsHeading).toBeVisible();
+    } catch (e) {
+      lastError = e as Error;
+      // Continue retrying
+      await page.waitForTimeout(500);
+    }
+  }
+  
+  // If we get here, timeout was exceeded
+  if (lastError) {
+    throw lastError;
+  }
+  
+  throw new Error("Timeout waiting for search results to load");
 }
 
 export async function clickAccordionWithTitle(
@@ -436,5 +452,7 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
   const filterOptions = page.locator(
     `#opportunity-filter-${filterType} label.usa-checkbox__label:visible`,
   );
-  await filterOptions.first().waitFor({ state: "visible", timeout });
+  await filterOptions
+    .first()
+    .waitFor({ state: "visible", timeout });
 };
