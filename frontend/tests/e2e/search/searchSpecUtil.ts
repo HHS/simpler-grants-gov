@@ -88,6 +88,10 @@ export async function fillSearchInputAndSubmit(
     await page.waitForTimeout(200);
   }
 
+  // Clear the input first to ensure it's empty
+  await searchInput.clear();
+  await page.waitForTimeout(100);
+
   // this needs to be `pressSequentially` rather than `fill` because `fill` was not
   // reliably triggering onChange handlers in webkit
   await searchInput.pressSequentially(term);
@@ -251,13 +255,13 @@ export async function waitForSearchResultsInitialLoad(
   if (timeoutOverride) {
     timeout = timeoutOverride;
   }
-  
+
   const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
-  
+
   // Wait for heading to be visible, but with some retry logic
   const startTime = Date.now();
   let lastError: Error | null = null;
-  
+
   while (Date.now() - startTime < timeout) {
     try {
       await resultsHeading.waitFor({ state: "visible", timeout: 5000 });
@@ -268,12 +272,12 @@ export async function waitForSearchResultsInitialLoad(
       await page.waitForTimeout(500);
     }
   }
-  
+
   // If we get here, timeout was exceeded
   if (lastError) {
     throw lastError;
   }
-  
+
   throw new Error("Timeout waiting for search results to load");
 }
 
@@ -452,7 +456,5 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
   const filterOptions = page.locator(
     `#opportunity-filter-${filterType} label.usa-checkbox__label:visible`,
   );
-  await filterOptions
-    .first()
-    .waitFor({ state: "visible", timeout });
+  await filterOptions.first().waitFor({ state: "visible", timeout });
 };
