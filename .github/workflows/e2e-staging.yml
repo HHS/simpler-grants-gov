@@ -1,0 +1,61 @@
+name: E2E Tests (Deployed)
+on:
+  push:
+    branches:
+      - "dschrashun/7973-e2e-ci-staging-refactor"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
+        required: true
+        type: string
+      target:
+        description: "application environment to run tests against (dev / prod TK)"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-tests-deployed:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: true
+      matrix:
+        shard: [1, 2, 3, 4]
+        total_shards: [4]
+
+    outputs:
+      artifact-ids:
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set target
+        run: if [[ -z "${{ inputs.target }}" ]]; then echo "defaulted_target=staging" >> "$GITHUB_ENV"; else echo 'defaulted_target="${{ inputs.target }}"' >> "$GITHUB_ENV"; fi
+
+      - uses: ./.github/actions/e2e
+        with:
+          version: ${{ inputs.version || github.ref }}
+          target: ${{ env.defaulted_target }}
+          total_shards: ${{ matrix.total_shards }}
+          current_shard: ${{ matrix.shard }}
+          staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
+          staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
+          staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
+
+  create-report:
+    name: Create Merged Test Report
+    if: ${{ !cancelled() }}
+    needs: e2e-tests-deployed
+    uses: ./.github/workflows/e2e-create-report.yml
+    secrets: inherit
+    with:
+      run_id: ${{ github.run_id }}
+      # artifact-ids: ${{ needs.e2e-tests-deployed.outputs.artifact-ids }}
