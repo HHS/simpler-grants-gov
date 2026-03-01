@@ -15,6 +15,7 @@ interface SearchResultsListItemProps {
   saved?: boolean;
   index: number;
   page?: number;
+  // onShareClick?: () => void;
 }
 
 const metadataBorderClasses = `
@@ -41,6 +42,7 @@ export default function SearchResultsListItem({
   saved = false,
   index,
   page = 1,
+  // onShareClick,
 }: SearchResultsListItemProps) {
   const t = useTranslations("Search");
 
@@ -119,6 +121,17 @@ export default function SearchResultsListItem({
               {opportunity?.summary?.award_floor?.toLocaleString() || "--"}
             </span>
           </div>
+          {/* {saved && onShareClick ? (
+            <div className="margin-top-1 text-right">
+              <button
+                type="button"
+                className="usa-button usa-button--unstyled font-sans-2xs"
+                onClick={onShareClick}
+              >
+                {t("callToAction.shareWithOrganization")}
+              </button>
+            </div>
+          ) : null} */}
         </div>
       </div>
     </div>

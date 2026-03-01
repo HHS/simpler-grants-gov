@@ -263,6 +263,16 @@ export const messages = {
     },
     genericErrorCta: "Please try refreshing the page.",
   },
+  ShareOpportunityToOrganization: {
+    modal: {
+      description: "Select organizations to share this opportunity with.",
+      opportunity: "Opportunity:",
+      error: "Could not load your organizations. Please try again later.",
+      loadingOrganizations: "Loading organizations...",
+      fallbackError: "You are not a member of any organizations.",
+      close: "Close",
+    },
+  },
   Application: {
     title: "Application",
     submissionValidationError: {
@@ -849,6 +859,7 @@ export const messages = {
     },
     callToAction: {
       title: "Search funding opportunities",
+      shareWithOrganization: "Share with organizations",
     },
     opportunitySaved: "Saved",
     resultsHeader: {
