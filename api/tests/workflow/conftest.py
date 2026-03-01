@@ -15,11 +15,14 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def workflow_user(enable_factory_create, monkeypatch) -> User:
     """Get the workflow user, setting them up with expected params
 
     Also sets the workflow user ID env var to the user created here.
+
+    This fixture has autouse=True so it's automatically available for all
+    workflow tests without needing to explicitly request it.
     """
     user = UserFactory.create()
     UserProfileFactory.create(user=user, first_name="System", last_name="User")

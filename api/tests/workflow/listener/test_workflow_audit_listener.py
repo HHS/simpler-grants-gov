@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from src.constants.lookup_constants import WorkflowType
+from src.constants.lookup_constants import ApprovalResponseType, WorkflowType
 from src.db.models.workflow_models import WorkflowAudit
 from src.workflow.handler.event_handler import EventHandler
 from tests.src.db.models.factories import OpportunityFactory, UserFactory, WorkflowFactory
@@ -244,3 +244,83 @@ def test_workflow_audit_different_users(db_session, enable_factory_create):
     assert len(audit_records) == 2
     assert audit_records[0].acting_user_id == user1.user_id
     assert audit_records[1].acting_user_id == user2.user_id
+
+
+def test_workflow_audit_automatic_transitions_use_system_user(
+    db_session, enable_factory_create, workflow_user
+):
+    """Test that automatic transitions (via 'after' parameter) use the system user."""
+    # The workflow_user fixture automatically creates the system user and sets up the env var
+
+    # Create a regular user who will initiate the workflow
+    regular_user = UserFactory.create()
+    opportunity = OpportunityFactory.create()
+
+    # Start the workflow - this will create one audit record
+    event, history_event = build_start_workflow_event(
+        workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+        user=regular_user,
+        entity=opportunity,
+    )
+
+    event_handler = EventHandler(db_session, event, history_event)
+    state_machine = event_handler.process()
+    workflow_id = state_machine.workflow.workflow_id
+
+    # Move to program officer approval state
+    event2, history_event2 = build_process_workflow_event(
+        workflow_id, user=regular_user, event_to_send="middle_to_program_officer_approval"
+    )
+
+    event_handler2 = EventHandler(db_session, event2, history_event2)
+    event_handler2.process()
+
+    # Now send an approval event that will trigger an automatic transition via 'after'
+    # This approval event should create 2 audit records:
+    # 1. The approval itself (user-initiated) - should use regular_user
+    # 2. The check_program_officer_approval (automatic via 'after') - should use system_user
+    event3, history_event3 = build_process_workflow_event(
+        workflow_id,
+        user=regular_user,
+        event_to_send="receive_program_officer_approval",
+        metadata={
+            "approval_response_type": ApprovalResponseType.APPROVED,
+        },
+    )
+
+    event_handler3 = EventHandler(db_session, event3, history_event3)
+    event_handler3.process()
+
+    # Query for all audit records
+    audit_records = list(
+        db_session.execute(
+            select(WorkflowAudit)
+            .where(WorkflowAudit.workflow_id == workflow_id)
+            .order_by(WorkflowAudit.created_at)
+        ).scalars()
+    )
+
+    # We should have 4 audit records total:
+    # 1. start_workflow -> regular_user
+    # 2. middle_to_program_officer_approval -> regular_user
+    # 3. receive_program_officer_approval (stays in same state) -> regular_user
+    # 4. check_program_officer_approval (automatic) -> system_user
+    assert len(audit_records) == 4
+
+    # Verify first three transitions use the regular user
+    assert audit_records[0].acting_user_id == regular_user.user_id
+    assert audit_records[0].transition_event == "Start workflow"
+
+    assert audit_records[1].acting_user_id == regular_user.user_id
+    assert audit_records[1].transition_event == "Middle to program officer approval"
+
+    assert audit_records[2].acting_user_id == regular_user.user_id
+    assert audit_records[2].transition_event == "Receive program officer approval"
+
+    # Verify the automatic transition uses the system user (from the workflow_user fixture)
+    assert audit_records[3].acting_user_id == workflow_user.user_id
+    assert audit_records[3].transition_event == "Check program officer approval"
+    assert audit_records[3].source_state == BasicState.PENDING_PROGRAM_OFFICER_APPROVAL
+    # The target state depends on whether has_enough_approvals is true
+    # In this test, it likely stays in the same state since we need 3 approvals
+    assert audit_records[3].target_state == BasicState.PENDING_PROGRAM_OFFICER_APPROVAL
