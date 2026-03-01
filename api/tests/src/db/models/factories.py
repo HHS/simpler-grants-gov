@@ -69,8 +69,6 @@ from src.constants.static_role_values import (
     ORG_MEMBER,
 )
 from src.db.models import agency_models
-from src.db.models.lookup.lookup_registry import LookupRegistry
-from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.util import file_util
 
 # Needed for generating Opportunity Json Blob for OpportunityVersion
@@ -1045,7 +1043,7 @@ class UserSavedSearchFactory(BaseFactory):
 
     name = factory.Faker("sentence")
 
-    search_query = factory.LazyAttribute(lambda s: s.search_query)
+    search_query = {"query": "example"}
 
     last_notified_at = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
 
@@ -1305,22 +1303,6 @@ class FormInstructionFactory(BaseFactory):
             ) from e
 
         return obj
-
-
-class LinkCompetitionOpenToApplicantFactory(BaseFactory):
-    class Meta:
-        model = competition_models.LinkCompetitionOpenToApplicant
-
-    competition = factory.SubFactory(CompetitionFactory)
-    competition_id = factory.LazyAttribute(lambda o: o.competition.competition_id)
-
-    # We need to get both the ID and the relationship object
-    competition_open_to_applicant_id = factory.LazyFunction(
-        lambda: LookupRegistry.get_lookup_int_for_enum(
-            LkCompetitionOpenToApplicant,
-            random.choice(list(lookup_models.CompetitionOpenToApplicant)),
-        )
-    )
 
 
 class FormFactory(BaseFactory):
@@ -1866,6 +1848,7 @@ class JobLogFactory(BaseFactory):
         model = task_models.JobLog
 
     job_id = Generators.UuidObj
+    job_type = "ExampleTask"
     job_status = factory.lazy_attribute(lambda _: JobStatus.COMPLETED)
     metrics = None
 
@@ -2606,11 +2589,11 @@ class ForeignTfundinstrForecastHistFactory(ForeignTfundinstrForecastFactory):
 
 class ForeignTfundinstrSynopsisFactory(TfundinstrFactory):
     class Meta:
-        model = staging.synopsis.TfundinstrSynopsis
+        model = foreign.synopsis.TfundinstrSynopsis
 
     fi_syn_id = factory.Sequence(lambda n: n)
 
-    synopsis = factory.SubFactory(StagingTsynopsisFactory)
+    synopsis = factory.SubFactory(ForeignTsynopsisFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.synopsis.opportunity_id)
 
 
