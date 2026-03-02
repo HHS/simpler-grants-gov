@@ -1,4 +1,4 @@
-name: E2E Tests (Deployed)
+name: E2E Tests (Deployed Target)
 on:
   push:
     branches:
