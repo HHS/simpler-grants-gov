@@ -62,3 +62,6 @@ ignore:
 
   # ignoring so we can get today's release out
   - vulnerability: GHSA-2g4f-4pwh-qvx6
+
+  # serialize-javascript subdependency via terser-webpack-plugin. The vuln is patched in serialize-javascript but terser-webpack-plugin has not bumped to the next major version for serialize-javascript to remediate the vuln coming down from webpack. Dev only webpack issue, safe to ignore for now
+  - vulnerability: GHSA-5c6j-r48x-rmvq
