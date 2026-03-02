@@ -52,7 +52,7 @@ const OpportunitySectionComponent = async ({
   const fundingOppName =
     opportunityData.opportunity_title || "Funding Opportunity";
   const fundingOppNumber = opportunityData.opportunity_number || "--";
-  let summaryDescription = opportunityData.summary?.summary_description || "";
+  const summaryDescription = opportunityData.summary?.summary_description || "";
   const hasSummary = !!summaryDescription;
 
   return (
