@@ -49,6 +49,7 @@ describe("Maintenance", () => {
     expect(content).toBeInTheDocument();
   });
 
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip("redirects when not in maintenance", () => {
     // set a major feature offline so we don't redirect to homepage
     render(

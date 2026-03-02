@@ -317,7 +317,7 @@ describe("StartApplicationModal", () => {
         />,
       );
 
-      expect(screen.queryByText("notListed")).toBeInTheDocument();
+      expect(screen.getByText("notListed")).toBeInTheDocument();
     });
 
     it("shows 'I don't see my org listed' option for mixed competitions", () => {
@@ -404,7 +404,7 @@ describe("StartApplicationModal", () => {
       );
 
       const button = screen.getByTestId("application-start-save");
-      expect(button).not.toBeDisabled();
+      expect(button).toBeEnabled();
     });
 
     it("button is enabled when organizationsError is undefined", () => {
@@ -421,7 +421,7 @@ describe("StartApplicationModal", () => {
       );
 
       const button = screen.getByTestId("application-start-save");
-      expect(button).not.toBeDisabled();
+      expect(button).toBeEnabled();
     });
 
     it("shows main modal with error banner when organizationsError is true with empty organizations", () => {

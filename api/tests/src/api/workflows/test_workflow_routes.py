@@ -12,9 +12,8 @@ def test_workflow_event_put_unauthorized(client):
         "event_type": WorkflowEventType.START_WORKFLOW,
         "start_workflow_context": {
             "workflow_type": WorkflowType.INITIAL_PROTOTYPE,
-            "entities": [
-                {"entity_type": WorkflowEntityType.OPPORTUNITY, "entity_id": str(uuid.uuid4())}
-            ],
+            "entity_type": WorkflowEntityType.OPPORTUNITY,
+            "entity_id": str(uuid.uuid4()),
         },
     }
     response = client.put("/v1/workflows/events", json=payload)
@@ -34,12 +33,8 @@ def test_workflow_event_put_unauthorized(client):
                 "event_type": WorkflowEventType.START_WORKFLOW,
                 "start_workflow_context": {
                     "workflow_type": WorkflowType.OPPORTUNITY_PUBLISH,
-                    "entities": [
-                        {
-                            "entity_type": WorkflowEntityType.OPPORTUNITY,
-                            "entity_id": str(uuid.uuid4()),
-                        }
-                    ],
+                    "entity_type": WorkflowEntityType.OPPORTUNITY,
+                    "entity_id": str(uuid.uuid4()),
                 },
                 "process_workflow_context": {
                     "workflow_id": str(uuid.uuid4()),
@@ -47,17 +42,6 @@ def test_workflow_event_put_unauthorized(client):
                 },
             },
             "process_workflow_context should not be provided",
-        ),
-        (
-            {
-                "event_type": WorkflowEventType.START_WORKFLOW,
-                "start_workflow_context": {
-                    "workflow_type": WorkflowType.OPPORTUNITY_PUBLISH,
-                    "entities": [{"entity_type": "opportunity", "entity_id": str(uuid.uuid4())}]
-                    * 6,
-                },
-            },
-            "Length must be between 1 and 5.",
         ),
     ],
 )
@@ -83,12 +67,8 @@ def test_start_workflow_integration(client, user_auth_token, enable_factory_crea
         "event_type": WorkflowEventType.START_WORKFLOW,
         "start_workflow_context": {
             "workflow_type": WorkflowType.INITIAL_PROTOTYPE,
-            "entities": [
-                {
-                    "entity_type": WorkflowEntityType.OPPORTUNITY,
-                    "entity_id": str(opportunity.opportunity_id),
-                }
-            ],
+            "entity_type": WorkflowEntityType.OPPORTUNITY,
+            "entity_id": str(opportunity.opportunity_id),
         },
     }
 

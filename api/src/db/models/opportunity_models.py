@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from src.db.models.competition_models import Competition
     from src.db.models.entity_models import OrganizationSavedOpportunity
     from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
+    from src.db.models.workflow_models import Workflow
 
 
 class Opportunity(ApiSchemaTable, TimestampMixin):
@@ -133,6 +134,15 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
+    # We mostly add this so if we delete an opportunity, any corresponding
+    # workflows are deleted as well.
+    workflows: Mapped[list[Workflow]] = relationship(
+        "Workflow",
+        back_populates="opportunity",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
     @property
     def top_level_agency_name(self) -> str | None:
         if self.agency_record is not None and self.agency_record.top_level_agency is not None:
@@ -169,16 +179,16 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
         return self.current_opportunity_summary.opportunity_status
 
     @property
-    def all_forecasts(self) -> list[OpportunitySummary]:
-        # Utility method for getting all forecasted summary records attached to the opportunity
-        # Note this will include historical and deleted records.
-        return [summary for summary in self.all_opportunity_summaries if summary.is_forecast]
+    def forecast_summary(self) -> OpportunitySummary | None:
+        forecasts = [summary for summary in self.all_opportunity_summaries if summary.is_forecast]
+        return forecasts[0] if forecasts else None
 
     @property
-    def all_non_forecasts(self) -> list[OpportunitySummary]:
-        # Utility method for getting all forecasted summary records attached to the opportunity
-        # Note this will include historical and deleted records.
-        return [summary for summary in self.all_opportunity_summaries if not summary.is_forecast]
+    def non_forecast_summary(self) -> OpportunitySummary | None:
+        non_forecasts = [
+            summary for summary in self.all_opportunity_summaries if not summary.is_forecast
+        ]
+        return non_forecasts[0] if non_forecasts else None
 
     @property
     def top_level_agency_code(self) -> str | None:

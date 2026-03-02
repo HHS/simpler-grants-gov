@@ -26,6 +26,10 @@ jest.mock("react", () => ({
   Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
 }));
 
+jest.mock("next-intl/server", () => ({
+  getTranslations: () => identity,
+}));
+
 describe("AgencyFilterAccordion", () => {
   it("is accessible", async () => {
     const component = await AgencyFilterAccordion({

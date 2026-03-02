@@ -18,10 +18,7 @@ class WorkflowConfig:
 
     persistence_model_cls: type[BaseStatePersistenceModel]
 
-    # Likely we'll want entity type to be a bit more flexible in the future
-    # if we want to limit to 1 or more of a given entity type
-    # For now, this assumes exactly 1 of the entity type
-    entity_types: list[WorkflowEntityType] = dataclasses.field(default_factory=list)
+    entity_type: WorkflowEntityType
 
     # A mapping of events to approval configs
     approval_mapping: dict[str, ApprovalConfig] = dataclasses.field(default_factory=dict)

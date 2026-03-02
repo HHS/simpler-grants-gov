@@ -37,3 +37,36 @@ def create_opportunity_request(
     }
 
     return request
+
+
+def build_opportunity_list_request_body(
+    page_offset=1,
+    page_size=25,
+    sort_order=None,
+    filters=None,
+):
+    """Create a valid list opportunities request.
+
+    Args:
+        page_offset: Page offset (default: 1)
+        page_size: Page size (default: 25)
+        sort_order: Optional list of sort orders
+        filters: Optional filters
+
+    Returns:
+        Dictionary with the request JSON
+    """
+    request = {
+        "pagination": {
+            "page_offset": page_offset,
+            "page_size": page_size,
+        }
+    }
+
+    if sort_order:
+        request["pagination"]["sort_order"] = sort_order
+
+    if filters:
+        request["filters"] = filters
+
+    return request

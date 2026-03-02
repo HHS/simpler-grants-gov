@@ -48,7 +48,7 @@ export async function fillSf424bForm(
       await titleLabelInput.waitFor({ state: "visible", timeout: 10000 });
       await titleLabelInput.fill(title);
       titleFieldFilled = true;
-    } catch (err) {
+    } catch (_err) {
       // Could not find title field via label
     }
   }

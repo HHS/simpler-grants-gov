@@ -50,11 +50,11 @@ test.describe("Search page tests", () => {
     await page.goto("/search");
 
     await waitForSearchResultsInitialLoad(page);
-    await fillSearchInputAndSubmit(searchTerm, page);
+    await fillSearchInputAndSubmit(searchTerm, page, project.name);
     if (isMobile) {
       await toggleFilterDrawer(page);
     }
-    await selectSortBy(page, "awardCeilingDesc", isMobile);
+    await selectSortBy(page, "awardCeilingDesc", isMobile, project.name);
     await expectSortBy(page, "awardCeilingDesc", isMobile);
 
     if (!isMobile) {

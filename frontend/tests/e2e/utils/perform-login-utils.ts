@@ -1,6 +1,7 @@
 import { Locator, Page } from "@playwright/test";
 import { authenticator } from "otplib";
 import playwrightEnv from "tests/e2e/playwright-env";
+import { openMobileNav } from "tests/e2e/playwrightUtils";
 
 // Error if env missing and running against staging
 if (
@@ -126,6 +127,9 @@ export const performStagingLogin = async (
   page: Page,
   isMobileProject: boolean,
 ) => {
+  if (isMobileProject) {
+    await openMobileNav(page);
+  }
   const signInReady = await clickSignIn(page);
   if (!signInReady) {
     console.error("unable to access login gov sign in");

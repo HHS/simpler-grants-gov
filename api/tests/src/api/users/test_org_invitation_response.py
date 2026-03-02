@@ -53,9 +53,9 @@ def test_org_invitation_response_accepted(
     assert res.invitee_email == user.email
     assert len(user.organization_users) == 1
     assert user.organization_users[0].user_id == user.user_id
-    assert [role.role_id for role in user.organization_users[0].roles] == [
+    assert {role.role_id for role in user.organization_users[0].roles} == {
         role.role_id for role in inv.linked_roles
-    ]
+    }
 
     # Verify response data
     data = resp.get_json()["data"]

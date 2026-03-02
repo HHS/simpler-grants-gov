@@ -1,7 +1,13 @@
-from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
+from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
+from src.api.opportunities_v1.opportunity_schemas import (
+    OpportunityAttachmentV1Schema,
+    OpportunitySummaryV1Schema,
+    OpportunityV1Schema,
+)
 from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.constants.lookup_constants import OpportunityCategory
+from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class OpportunityCreateRequestSchema(Schema):
@@ -71,6 +77,35 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
         },
     )
 
+    forecast_summary = fields.Nested(
+        OpportunitySummaryV1Schema(),
+        allow_none=True,
+        attribute="forecast_summary",
+        metadata={
+            "description": "The forecast summary of the opportunity (if available)",
+        },
+    )
+
+    non_forecast_summary = fields.Nested(
+        OpportunitySummaryV1Schema(),
+        allow_none=True,
+        attribute="non_forecast_summary",
+        metadata={
+            "description": "The non-forecast summary of the opportunity (if available)",
+        },
+    )
+
+    attachments = fields.List(
+        fields.Nested(OpportunityAttachmentV1Schema),
+        attribute="opportunity_attachments",
+        metadata={"description": "List of attachments associated with the opportunity"},
+    )
+
+    competitions = fields.List(
+        fields.Nested(CompetitionAlphaSchema),
+        metadata={"description": "List of competitions associated with the opportunity"},
+    )
+
 
 class OpportunityCreateResponseSchema(AbstractResponseSchema):
     """Schema for POST /v1/grantors/opportunities/ response
@@ -94,3 +129,57 @@ class OpportunityCreateResponseSchema(AbstractResponseSchema):
     """
 
     data = fields.Nested(OpportunityGrantorSchema())
+
+
+class OpportunityGetResponseSchema(AbstractResponseSchema):
+    """Schema for GET /v1/grantors/opportunities/:opportunity_id/grantor response
+
+    Example Response:
+    {
+      "message": "Success",
+      "data": {
+        "opportunity_number": "ABC-2026-001",
+        "opportunity_title": "Research Grant for Climate Innovation",
+        "agency_id": "550e8400-e29b-41d4-a716-446655440000",
+        "category": "discretionary",
+        "category_explanation": "Competitive research grant",
+        "is_draft": true,
+        "created_at": "2026-01-27T22:11:58.119Z",
+        "updated_at": "2026-01-27T22:11:58.119Z"
+      }
+    }
+    """
+
+    data = fields.Nested(OpportunityGrantorSchema())
+
+
+class OpportunityListRequestSchema(Schema):
+    """Schema for POST /v1/grantors/opportunities/:agency_id/opportunities request"""
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "OpportunityListPaginationSchema",
+            [
+                "opportunity_id",
+                "opportunity_number",
+                "opportunity_title",
+                "created_at",
+            ],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+            default_page_size=25,
+            default_page_offset=1,
+        ),
+        required=True,
+        metadata={
+            "description": "Pagination parameters for opportunity list (default sort: created_at descending)"
+        },
+    )
+
+
+class OpportunityListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    """Schema for POST /v1/grantors/opportunities/:agency_id/opportunities response"""
+
+    data = fields.List(
+        fields.Nested(OpportunityGrantorSchema),
+        metadata={"description": "List of opportunities"},
+    )

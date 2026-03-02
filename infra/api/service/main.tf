@@ -179,9 +179,8 @@ module "service" {
 
   image_tag = local.image_tag
 
-  vpc_id             = data.aws_vpc.network.id
-  public_subnet_ids  = data.aws_subnets.public.ids
-  private_subnet_ids = data.aws_subnets.private.ids
+  network_name = local.environment_config.network_name
+  project_name = module.project_config.project_name
 
   certificate_arn        = local.service_config.enable_https == true ? data.aws_acm_certificate.cert[0].arn : null
   domain_name            = local.service_config.domain_name
