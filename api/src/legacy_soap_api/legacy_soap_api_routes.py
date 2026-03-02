@@ -4,12 +4,16 @@ from flask import request
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
-from src.legacy_soap_api.legacy_soap_api_auth import MTLS_CERT_HEADER_KEY, get_soap_auth
+from src.legacy_soap_api.legacy_soap_api_auth import (
+    MTLS_CERT_HEADER_KEY,
+    USE_SOAP_JWT_HEADER_KEY,
+    get_soap_auth,
+)
 from src.legacy_soap_api.legacy_soap_api_blueprint import legacy_soap_api_blueprint
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_proxy import get_proxy_response
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.legacy_soap_api_utils import (
     get_alternate_proxy_response,
     get_invalid_path_response,
@@ -35,6 +39,13 @@ def simpler_soap_api_route(
     )
     logger.info("POST /<service_name>/services/v2/<service_port_name>")
 
+    use_soap_jwt = request.headers.get(USE_SOAP_JWT_HEADER_KEY) == "1"
+    if use_soap_jwt:
+        logger.info(
+            "soap_client_certificate: Use-Soap-Jwt flag is enabled",
+            extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_JWT},
+        )
+
     api_name = SimplerSoapAPI.get_soap_api(service_name, service_port_name)
     if not api_name:
         logger.info(
@@ -43,7 +54,10 @@ def simpler_soap_api_route(
         )
         return get_invalid_path_response().to_flask_response()
 
-    operation_name = get_soap_operation_name(request.data)
+    soap_request_stream = SoapRequestStreamer(
+        stream=request.stream, total_length=int(request.headers.get("Content-Length", 0))
+    )
+    operation_name = get_soap_operation_name(soap_request_stream.head())
     add_extra_data_to_current_request_logs(
         {
             "soap_api": api_name,
@@ -58,7 +72,7 @@ def simpler_soap_api_route(
             method="POST",
             full_path=request.full_path,
             headers=dict(request.headers),
-            data=request.data,
+            data=soap_request_stream,
             auth=get_soap_auth(request.headers.get(MTLS_CERT_HEADER_KEY), db_session=db_session),
             operation_name=operation_name,
         )

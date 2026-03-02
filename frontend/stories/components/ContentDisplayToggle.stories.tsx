@@ -1,9 +1,8 @@
-import { Meta } from "@storybook/react";
 import { identity } from "lodash";
 
 import ContentDisplayToggle from "src/components/ContentDisplayToggle";
 
-const meta: Meta<typeof ContentDisplayToggle> = {
+const meta = {
   title: "Components/ContentDisplayToggle",
   component: ContentDisplayToggle,
 };

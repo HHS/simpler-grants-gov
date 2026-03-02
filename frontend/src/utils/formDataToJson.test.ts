@@ -5,7 +5,6 @@ import { formDataToObject } from "src/components/applyForm/formDataToJson";
 const mockHandleFormAction = jest.fn();
 const mockRevalidateTag = jest.fn();
 const getSessionMock = jest.fn();
-const mockDereference = jest.fn();
 const mockMergeAllOf = jest.fn();
 
 // all of these mocks should not be necessary but are currently because of cascading imports
@@ -27,10 +26,6 @@ jest.mock("react", () => ({
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
-}));
-
-jest.mock("@apidevtools/json-schema-ref-parser", () => ({
-  dereference: () => mockDereference() as unknown,
 }));
 
 jest.mock("json-schema-merge-allof", () => ({

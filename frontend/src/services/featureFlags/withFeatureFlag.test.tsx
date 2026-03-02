@@ -1,7 +1,7 @@
+import { render } from "@testing-library/react";
 import Cookies from "js-cookie";
 import { identity } from "lodash";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { render } from "tests/react-utils";
 
 let enableFeature = false;
 
@@ -38,18 +38,16 @@ describe("WithFeatureFlag", () => {
     const searchParams = { any: "param" };
     const WrappedComponent = withFeatureFlag(
       OriginalComponent,
-      "searchOff",
+      "applyFormPrototypeOff",
       identity,
     );
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const component = await WrappedComponent({
       searchParams: searchPromise(searchParams),
     });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     render(component);
     expect(OriginalComponent).toHaveBeenCalledTimes(1);
     expect(OriginalComponent).toHaveBeenCalledWith(
@@ -64,18 +62,16 @@ describe("WithFeatureFlag", () => {
     const searchParams = { any: "param" };
     const WrappedComponent = withFeatureFlag(
       OriginalComponent,
-      "searchOff",
+      "applyFormPrototypeOff",
       onEnabled,
     );
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const component = await WrappedComponent({
       searchParams: searchPromise(searchParams),
     });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     render(component);
     expect(onEnabled).toHaveBeenCalledTimes(1);
   });
@@ -85,18 +81,16 @@ describe("WithFeatureFlag", () => {
     const searchParams = { any: "param" };
     const WrappedComponent = withFeatureFlag(
       OriginalComponent,
-      "searchOff",
+      "applyFormPrototypeOff",
       onEnabled,
     );
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const component = await WrappedComponent({
       searchParams: searchPromise(searchParams),
     });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     render(component);
     expect(onEnabled).toHaveBeenCalledTimes(0);
   });
@@ -108,16 +102,14 @@ describe("WithFeatureFlag", () => {
     // const searchParams = { any: "param" };
     const WrappedComponent = withFeatureFlag(
       OriginalComponent,
-      "searchOff",
+      "applyFormPrototypeOff",
       onEnabled,
     );
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const component = await WrappedComponent({});
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     render(component);
     expect(onEnabled).toHaveBeenCalledTimes(1);
   });

@@ -4,10 +4,32 @@
 
 import { expect, Locator, Page } from "@playwright/test";
 import { camelCase } from "lodash";
+import playwrightEnv from "tests/e2e/playwright-env";
 import {
   waitForURLContainsQueryParam,
   waitForURLContainsQueryParamValue,
 } from "tests/e2e/playwrightUtils";
+
+const { targetEnv } = playwrightEnv;
+
+const FILTER_OPTIONS_TIMEOUT = targetEnv === "staging" ? 30000 : 10000;
+
+const getBrowserType = (page: Page, projectName?: string) => {
+  if (projectName) {
+    const normalized = projectName.toLowerCase();
+    if (normalized.includes("webkit")) {
+      return "webkit";
+    }
+    if (normalized.includes("firefox")) {
+      return "firefox";
+    }
+    if (normalized.includes("chrome") || normalized.includes("chromium")) {
+      return "chromium";
+    }
+  }
+
+  return page.context().browser()?.browserType().name();
+};
 
 export async function toggleFilterDrawer(page: Page) {
   const modalOpen = await page
@@ -24,13 +46,31 @@ export function getSearchInput(page: Page) {
   return page.locator("#query");
 }
 
-export async function fillSearchInputAndSubmit(term: string, page: Page) {
+export async function fillSearchInputAndSubmit(
+  term: string,
+  page: Page,
+  projectName?: string,
+) {
   const searchInput = getSearchInput(page);
   const submitButton = page.locator(".usa-search > button[type='submit']");
+
+  // Firefox/Webkit need extra handling
+  const browserType = getBrowserType(page, projectName);
+  if (browserType === "firefox" || browserType === "webkit") {
+    await searchInput.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+  }
+
   // this needs to be `pressSequentially` rather than `fill` because `fill` was not
   // reliably triggering onChange handlers in webkit
   await searchInput.pressSequentially(term);
-  await expect(searchInput).toHaveValue(term);
+  await expect(searchInput).toHaveValue(term, { timeout: 10000 });
+
+  // Webkit needs extra wait before clicking submit
+  if (browserType === "webkit") {
+    await page.waitForTimeout(500);
+  }
+
   await submitButton.click();
 }
 
@@ -46,7 +86,7 @@ export async function expectCheckboxIDIsChecked(
   page: Page,
   idWithHash: string,
 ) {
-  const checkbox: Locator = page.locator(idWithHash);
+  const checkbox: Locator = page.locator(idWithHash).first();
   await expect(checkbox).toBeChecked();
 }
 
@@ -72,6 +112,8 @@ export async function toggleCheckboxes(
 
 export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBox = page.locator(`label[for=${idWithoutHash}]`);
+  const timeout = targetEnv === "staging" ? 120000 : 15000;
+  await checkBox.waitFor({ state: "visible", timeout });
   await expect(checkBox).toBeEnabled();
   await checkBox.click();
 }
@@ -80,33 +122,57 @@ export async function selectSortBy(
   page: Page,
   sortByValue: string,
   drawer = false,
+  projectName?: string,
 ) {
-  await page
-    .locator(`#search-sort-by-select${drawer ? "-drawer" : ""}`)
-    .selectOption(sortByValue);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const timeoutOption =
+    targetEnv === "staging" ? { timeout: 60000 } : { timeout: 10000 };
+  const sortSelectElement = drawer
+    ? page.locator("#search-sort-by-select-drawer")
+    : page.locator("#search-sort-by-select").first();
+
+  // Webkit needs extra handling for form interactions
+  const browserType = getBrowserType(page, projectName);
+  if (browserType === "webkit") {
+    await sortSelectElement.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+  }
+
+  await sortSelectElement.selectOption(sortByValue);
+
+  // For mobile drawer on staging, wait longer as it can be very slow
+  if (drawer && targetEnv === "staging") {
+    await page.waitForTimeout(5000);
+  }
+
+  await expect(sortSelectElement).toHaveValue(sortByValue, timeoutOption);
 }
 
 export async function expectSortBy(page: Page, value: string, drawer = false) {
-  const sortSelectElement = page.locator(
-    `#search-sort-by-select${drawer ? "-drawer" : ""}`,
-  );
-  await expect(sortSelectElement).toHaveValue(value);
+  const timeoutOption =
+    targetEnv === "staging" ? { timeout: 60000 } : { timeout: 10000 };
+  const sortSelectElement = drawer
+    ? page.locator("#search-sort-by-select-drawer")
+    : page.locator("#search-sort-by-select").first();
+  await expect(sortSelectElement).toHaveValue(value, timeoutOption);
 }
 
 export async function waitForSearchResultsInitialLoad(page: Page) {
-  // Wait for number of opportunities to show
-  const resultsHeading = page.locator('h3:has-text("Opportunities")');
-  await resultsHeading.waitFor({ state: "visible", timeout: 60000 });
+  // Wait for the page and results to load
+  const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
+  const timeout = targetEnv === "staging" ? 180000 : 60000;
+  await resultsHeading.waitFor({ state: "visible", timeout });
+  return await expect(resultsHeading).toBeVisible();
 }
 
 export async function clickAccordionWithTitle(
   page: Page,
   accordionTitle: string,
 ) {
-  await page
-    .locator(`button.usa-accordion__button:has-text("${accordionTitle}")`)
-    .click();
+  const button = page.locator(
+    `button.usa-accordion__button:has-text("${accordionTitle}")`,
+  );
+  await button.waitFor({ state: "visible", timeout: 15000 });
+  await button.click();
 }
 
 export async function clickPaginationPageNumber(
@@ -117,9 +183,7 @@ export async function clickPaginationPageNumber(
     `button[data-testid="pagination-page-number"][aria-label="Page ${pageNumber}"]`,
   );
   await paginationButton.first().click();
-
-  // Delay for pagination debounce
-  await page.waitForTimeout(400);
+  await waitForURLContainsQueryParamValue(page, "page", pageNumber.toString());
 }
 
 export async function clickLastPaginationPage(page: Page) {
@@ -129,10 +193,15 @@ export async function clickLastPaginationPage(page: Page) {
   // must be more than 1 page
   if (count > 2) {
     const button = paginationButtons.nth(count - 1);
+    const pageNumber = await button.textContent();
+    if (!pageNumber) {
+      throw new Error("unable to click pagination button, button has no label");
+    }
     await button.click();
+    await waitForURLContainsQueryParamValue(page, "page", pageNumber);
+  } else {
+    console.error("not clicking on last page, only one page exists!");
   }
-  // Delay for pagination debounce
-  await page.waitForTimeout(400);
 }
 
 export async function getFirstSearchResultTitle(page: Page) {
@@ -171,6 +240,20 @@ export async function waitForLoaderToBeHidden(page: Page) {
     ".display-flex.flex-align-center.flex-justify-center.margin-bottom-15.margin-top-15",
     { state: "hidden" },
   );
+}
+
+export async function ensureAccordionExpanded(
+  page: Page,
+  accordionTitle: string,
+) {
+  const button = page.locator(
+    `button.usa-accordion__button:has-text("${accordionTitle}")`,
+  );
+  await button.waitFor({ state: "visible", timeout: 15000 });
+  const expanded = await button.getAttribute("aria-expanded");
+  if (expanded !== "true") {
+    await button.click();
+  }
 }
 
 export async function getNumberOfOpportunitySearchResults(page: Page) {
@@ -242,8 +325,18 @@ export const waitForFilterOptions = async (page: Page, filterType: string) => {
   const filterButton = page.locator(
     `button[aria-controls="opportunity-filter-${filterType}"]`,
   );
+  await filterButton.waitFor({
+    state: "visible",
+    timeout: FILTER_OPTIONS_TIMEOUT,
+  });
   await filterButton.click();
+
   const filterOptions = page.locator(`input[name="${filterType}-*"]`);
+  // this is preferable but doesn't work
+  // await filterOptions.waitFor({
+  //   state: "visible",
+  //   timeout: FILTER_OPTIONS_TIMEOUT,
+  // });
   await filterOptions.isVisible();
   await filterButton.click();
 };

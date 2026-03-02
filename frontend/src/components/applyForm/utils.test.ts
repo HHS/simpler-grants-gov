@@ -1,24 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable testing-library/no-node-access */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { RJSFSchema } from "@rjsf/utils";
 
 import sflllSchema from "src/components/applyForm/sflll.mock.json";
-import { UiSchema, UiSchemaField } from "src/components/applyForm/types";
+import { UiSchema } from "src/components/applyForm/types";
 import {
   addPrintWidgetToFields,
   buildWarningTree,
   condenseFormSchemaProperties,
-  determineFieldType,
-  getFieldConfig,
   getFieldNameForHtml,
   getFieldPathFromHtml,
   getFieldSchema,
   getFieldsForNav,
   getKeyParentPath,
-  getNameFromDef,
   getRequiredProperties,
-  getWarningsForField,
   isFieldRequired,
   jsonSchemaPointerToPath,
   pointerToFieldName,
@@ -27,13 +20,8 @@ import {
   shapeFormData,
 } from "src/components/applyForm/utils";
 
-const mockDereference = jest.fn();
 const mockMergeAllOf = jest.fn();
 const mockExtricateConditionalValidationRules = jest.fn();
-
-jest.mock("@apidevtools/json-schema-ref-parser", () => ({
-  dereference: () => mockDereference() as unknown,
-}));
 
 jest.mock("json-schema-merge-allof", () => ({
   __esModule: true,
@@ -112,202 +100,6 @@ describe("shapeFormData", () => {
 
     const data = shapeFormData(formData, {});
     expect(data).toMatchObject(shapedFormData);
-  });
-});
-
-describe("getFieldConfig", () => {
-  // TODO: should add tests around
-  // * radio buttons
-  // * multifield
-
-  it("should build a config with basic properties", () => {
-    const uiFieldObject: UiSchemaField = {
-      type: "field",
-      definition: "/properties/name",
-      schema: {
-        type: "string",
-        title: "Name",
-        maxLength: 50,
-      },
-    };
-
-    const formSchema: RJSFSchema = {
-      type: "object",
-      properties: {
-        name: { type: "string", title: "Name", maxLength: 50 },
-      },
-      required: ["name"],
-    };
-
-    const errors = null;
-    const formData = { name: "Jane Doe" };
-
-    const { type, props } = getFieldConfig({
-      uiFieldObject,
-      formSchema,
-      errors,
-      formData,
-      requiredField: true,
-    });
-
-    expect(type).toEqual("Text");
-    expect(props).toEqual({
-      id: "name",
-      key: "name",
-      disabled: false,
-      required: true,
-      maxLength: 50,
-      schema: { type: "string", title: "Name", maxLength: 50 },
-      rawErrors: [],
-      value: "Jane Doe",
-      options: {},
-    });
-  });
-
-  it("should handle fields with errors", () => {
-    const uiFieldObject: UiSchemaField = {
-      type: "field",
-      definition: "/properties/email",
-    };
-
-    const formSchema: RJSFSchema = {
-      type: "object",
-      properties: {
-        email: { type: "string", title: "Email" },
-      },
-    };
-
-    const errors = [
-      {
-        field: "$.email",
-        message: "'invalid' email format",
-        type: "",
-        value: "",
-        htmlField: "email",
-        formatted: "Invalid email format",
-        definition: "/properties/email",
-      },
-    ];
-
-    const formData = { email: "invalid-email" };
-
-    const { type, props } = getFieldConfig({
-      uiFieldObject,
-      formSchema,
-      errors,
-      formData,
-      requiredField: false,
-    });
-
-    expect(type).toEqual("Text");
-    expect(props).toEqual({
-      id: "email",
-      key: "email",
-      disabled: false,
-      required: false,
-      schema: { type: "string", title: "Email" },
-      rawErrors: ["Invalid email format"],
-      value: "invalid-email",
-      options: {},
-    });
-  });
-
-  it("should handle field types with options", () => {
-    const uiFieldObject: UiSchemaField = {
-      type: "field",
-      definition: "/properties/pickOneOfTheOptions",
-    };
-
-    const formSchema: RJSFSchema = {
-      type: "object",
-      properties: {
-        pickOneOfTheOptions: {
-          type: "string",
-          title: "select field",
-          enum: ["first option", "second option"],
-        },
-      },
-    };
-
-    const errors = null;
-    const formData = {
-      pickOneOfTheOptions: "first option",
-    };
-
-    const { type, props } = getFieldConfig({
-      uiFieldObject,
-      formSchema,
-      errors,
-      formData,
-      requiredField: false,
-    });
-
-    expect(type).toEqual("Select");
-    expect(props).toEqual({
-      id: "pickOneOfTheOptions",
-      key: "pickOneOfTheOptions",
-      disabled: false,
-      required: false,
-      schema: {
-        type: "string",
-        title: "select field",
-        enum: ["first option", "second option"],
-      },
-      rawErrors: [],
-      value: "first option",
-      options: {
-        enumOptions: [
-          { label: "first option", value: "first option" },
-          {
-            label: "second option",
-            value: "second option",
-          },
-        ],
-        emptyValue: "- Select -",
-      },
-    });
-  });
-});
-
-describe("determineFieldType", () => {
-  it("should return proper fields", () => {
-    const uiFieldObject: UiSchemaField = {
-      type: "field",
-      definition: "/properties/test",
-    };
-    const fieldSchema: RJSFSchema = {
-      type: "string" as const,
-      title: "test",
-    };
-    const textField = determineFieldType({ uiFieldObject, fieldSchema });
-    expect(textField).toEqual("Text");
-    const selectFieldSchema: RJSFSchema = {
-      ...fieldSchema,
-      enum: ["test"],
-    };
-    const selectField = determineFieldType({
-      uiFieldObject,
-      fieldSchema: selectFieldSchema,
-    });
-    expect(selectField).toEqual("Select");
-    const checkboxFieldSchema: RJSFSchema = {
-      ...fieldSchema,
-      type: "boolean",
-    };
-    const checkboxField = determineFieldType({
-      uiFieldObject,
-      fieldSchema: checkboxFieldSchema,
-    });
-    expect(checkboxField).toEqual("Checkbox");
-    const textAreaFieldSchema: RJSFSchema = {
-      ...fieldSchema,
-      maxLength: 256,
-    };
-    const textAreaField = determineFieldType({
-      uiFieldObject,
-      fieldSchema: textAreaFieldSchema,
-    });
-    expect(textAreaField).toEqual("TextArea");
   });
 });
 
@@ -488,23 +280,8 @@ describe("getFieldNameForHtml", () => {
 
 describe("processFormSchema", () => {
   beforeEach(() => {
-    mockDereference.mockResolvedValue({
-      others: {
-        just: "for fun",
-      },
-      properties: {
-        dereferenced: "stuff",
-        allOf: "things",
-      },
-    });
-    mockMergeAllOf.mockImplementation(
-      (processMe: { properties?: { allOf: unknown } }): unknown => {
-        if (processMe.properties) {
-          delete processMe.properties.allOf;
-        }
-        return processMe;
-      },
-    );
+    mockMergeAllOf.mockImplementation((input: unknown) => input);
+
     mockExtricateConditionalValidationRules.mockImplementation(
       (properties: RJSFSchema) => ({
         propertiesWithoutComplexConditionals: properties,
@@ -512,34 +289,86 @@ describe("processFormSchema", () => {
       }),
     );
   });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it("calls the dereference function", async () => {
-    await processFormSchema({});
-    expect(mockDereference).toHaveBeenCalled();
-  });
-  it("calls allOf merge function", async () => {
-    await processFormSchema({ properties: {} });
-    expect(mockMergeAllOf).toHaveBeenCalledTimes(1);
-  });
-  it("calls mockExtricateConditionalValidationRules function", async () => {
-    await processFormSchema({ properties: {} });
+
+  it("calls extricateConditionalValidationRules with formSchema.properties", () => {
+    const properties: NonNullable<RJSFSchema["properties"]> = {
+      foo: { type: "string" },
+    };
+
+    processFormSchema({ properties });
+
     expect(mockExtricateConditionalValidationRules).toHaveBeenCalledTimes(1);
+    expect(mockExtricateConditionalValidationRules).toHaveBeenCalledWith(
+      properties,
+    );
   });
-  it("returns the expected combination of values from the dereferenced and merged schemas", async () => {
-    const processed = await processFormSchema({});
-    expect(processed.formSchema).toEqual({
-      others: {
-        just: "for fun",
-      },
+
+  it("defaults to empty properties when formSchema.properties is undefined", () => {
+    processFormSchema({});
+
+    expect(mockExtricateConditionalValidationRules).toHaveBeenCalledTimes(1);
+    expect(mockExtricateConditionalValidationRules).toHaveBeenCalledWith({});
+  });
+
+  it("calls mergeAllOf with the properties returned from extricateConditionalValidationRules", () => {
+    const propertiesWithoutComplexConditionals: NonNullable<
+      RJSFSchema["properties"]
+    > = {
+      keepMe: { type: "string" },
+      allOf: { type: "string" },
+    };
+
+    mockExtricateConditionalValidationRules.mockReturnValue({
+      propertiesWithoutComplexConditionals,
+      conditionalValidationRules: { path: [{ rule: "something " }] },
+    });
+
+    processFormSchema({ properties: { ignored: { type: "string" } } });
+
+    expect(mockMergeAllOf).toHaveBeenCalledTimes(1);
+    expect(mockMergeAllOf).toHaveBeenCalledWith({
+      properties: propertiesWithoutComplexConditionals,
+    });
+  });
+
+  it("returns the expected combination of original schema and merged properties", () => {
+    mockMergeAllOf.mockImplementation((input: unknown) => {
+      const typedInput = input as { properties?: Record<string, unknown> };
+      const copiedProperties = { ...(typedInput.properties ?? {}) };
+      delete copiedProperties.allOf;
+      return { properties: copiedProperties };
+    });
+
+    const processed = processFormSchema({
+      others: { just: "for fun" },
       properties: {
-        dereferenced: "stuff",
+        dereferenced: { type: "string" },
+        allOf: { type: "string" },
       },
     });
+
+    expect(processed.formSchema).toEqual({
+      others: { just: "for fun" },
+      properties: {
+        dereferenced: { type: "string" },
+      },
+    });
+
     expect(processed.conditionalValidationRules).toEqual({
       path: [{ rule: "something " }],
     });
+  });
+
+  it("rethrows if a processor throws", () => {
+    mockExtricateConditionalValidationRules.mockImplementation(() => {
+      throw new Error("boom");
+    });
+
+    expect(() => processFormSchema({ properties: {} })).toThrow("boom");
   });
 });
 
@@ -609,69 +438,6 @@ describe("getRequiredProperties", () => {
   });
 });
 
-describe("getWarningsForField", () => {
-  it("returns an empty array if there are not any warnings", () => {
-    expect(
-      getWarningsForField({
-        errors: [],
-        fieldName: "$.field_name",
-        fieldType: "string",
-        definition: "/properties/field_name",
-      }),
-    ).toEqual([]);
-    expect(
-      getWarningsForField({
-        errors: null,
-        fieldName: "$.field_name",
-        definition: "/properties/field_name",
-        fieldType: "string",
-      }),
-    ).toEqual([]);
-  });
-  // eslint-disable-next-line
-  it.skip("does something with arrays?", () => {});
-  it("returns warnings that directly reference the field name", () => {
-    expect(
-      getWarningsForField({
-        errors: [
-          {
-            field: "$.field_name",
-            message: "something went wrong",
-            formatted: "something went wrong",
-            htmlField: "field_name",
-            type: "generic",
-            value: "not sure",
-            definition: "/properties/field_name",
-          },
-        ],
-        fieldName: "field_name",
-        definition: "/properties/field_name",
-        fieldType: "string",
-      }),
-    ).toEqual(["something went wrong"]);
-  });
-  it("if a field is required, returns `required` warnings that reference the field's parent paths", () => {
-    expect(
-      getWarningsForField({
-        errors: [
-          {
-            field: "$.parent.field_name",
-            message: "parent is required",
-            formatted: "parent is required",
-            htmlField: "parent--field_name",
-            type: "required",
-            value: "not sure",
-            definition: "/properties/parent/properties/field_name",
-          },
-        ],
-        fieldName: "field_name",
-        definition: "/properties/parent/properties/field_name",
-        fieldType: "string",
-      }),
-    ).toEqual(["parent is required"]);
-  });
-});
-
 describe("getFieldPathFromHtml", () => {
   it("converts field name to JSON pointer path", () => {
     expect(getFieldPathFromHtml("foo--bar")).toBe("/foo/bar");
@@ -682,24 +448,6 @@ describe("jsonPointerToPath", () => {
   it("converts pointer to JSON path", () => {
     expect(jsonSchemaPointerToPath("/properties/foo/properties/bar")).toBe(
       "$.foo.bar",
-    );
-  });
-});
-
-describe("getNameFromDef", () => {
-  it("gets name from definition", () => {
-    expect(
-      getNameFromDef({ definition: "/properties/foo", schema: undefined }),
-    ).toBe("foo");
-  });
-  it("gets name from schema title", () => {
-    expect(
-      getNameFromDef({ definition: undefined, schema: { title: "My Field" } }),
-    ).toBe("My-Field");
-  });
-  it("returns 'untitled' if no info", () => {
-    expect(getNameFromDef({ definition: undefined, schema: {} })).toBe(
-      "untitled",
     );
   });
 });

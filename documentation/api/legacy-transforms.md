@@ -164,7 +164,7 @@ For anything else, consult the [oracle_fdw](https://github.com/laurenz/oracle_fd
 
 # Create Foreign Data Wrappers Script
 * Running locally: `make cmd args="data-migration setup-foreign-tables"`
-* Running in ECS (python command portion only): `["poetry", "run", "flask", "data-migration", "setup-foreign-tables"]`
+* Running in ECS: See [Running setup-foreign-tables in ECS](/documentation/api/legacy-transforms.md#running-setup-foreign-tables-in-ecs)
 
 [setup_foreign_tables.py](/api/src/data_migration/setup_foreign_tables.py) is a script that
 will go through each table that is derived from the `ForeignBase` class and automatically generate
@@ -190,6 +190,20 @@ generate it again. No data is stored in these "tables" as they're just
 wrappers/connectors to the actual tables that exist in Oracle.
 
 **Locally we have no Oracle database, so instead of creating foreign tables, it just creates Postgres tables**
+
+## Running setup-foreign-tables in ECS
+
+The `setup-foreign-tables` command requires the **migrator role** to have the necessary database permissions.
+This is a manual step that must be run when setting up a new environment or adding new foreign tables.
+
+Run the following make target:
+```sh
+make release-run-setup-foreign-tables APP_NAME=api ENVIRONMENT=<environment>
+```
+
+This uses [bin/run-setup-foreign-tables](/bin/run-setup-foreign-tables) which retrieves the migrator role ARN
+from terraform and passes it to `run-command`, following the same pattern as
+[bin/run-database-migrations](/bin/run-database-migrations).
 
 # Load-transform job
 * Running locally: `make cmd args="data-migration load-transform --no-load --no-transform --no-set-current --no-store-version"`
@@ -359,7 +373,7 @@ if the opportunity info stored in the version table differs from whatever alread
 2. Using the existing schema, [follow the steps](#staging--foreign-table-setup) for setting up a foreign table.
 3. Create a destination table in our API schema.
 4. Build the transform class for processing the table from the staging table to our destination API table.
-5. Run the `setup-foreign-tables` script to generate the Oracle foreign data wrapper table to the Oracle DB (required in all envs - manually run)
+5. Run the `setup-foreign-tables` script to generate the Oracle foreign data wrapper table to the Oracle DB (required in all envs - manually run). See [Running setup-foreign-tables in ECS](/documentation/api/legacy-transforms.md#running-setup-foreign-tables-in-ecs) for how to run this with the migrator role.
 6. Manually test loading the table by running the job with load oracle data job with the following command `["poetry", "run", "flask", "data-migration", "load-transform", "--load", "--no-transform", "--no-set-current", "--no-store-version", "-t", "<TABLE_NAME>"]`
 7. Manually test transforming the table by enabling the transformation task (env var based - see the config) and running `["poetry", "run", "flask", "data-migration", "load-transform", "--no-load", "--transform", "--no-set-current", "--no-store-version"]`
 8. Enable the jobs to run automatically by adding updating the [LoadOracleDataTask config](https://github.com/HHS/simpler-grants-gov/blob/main/api/src/data_migration/load/load_oracle_data_task.py#L21) to include the job and the [TransformOracleDataTaskConfig](https://github.com/HHS/simpler-grants-gov/blob/main/api/src/data_migration/transformation/transform_oracle_data_task.py) to enable the transformation

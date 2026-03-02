@@ -7,7 +7,6 @@ from src.search.backend.load_opportunities_to_index import (
 from tests.conftest import BaseTestClass
 from tests.src.db.models.factories import (
     AgencyFactory,
-    ExcludedOpportunityReviewFactory,
     OpportunityChangeAuditFactory,
     OpportunityFactory,
 )
@@ -31,7 +30,12 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         load_opportunities_to_index,
     ):
         # Create an agency that some records will be connected to
-        agency = AgencyFactory.create(agency_code="FUN-AGENCY", is_test_agency=False)
+        parent_agency = AgencyFactory.create(agency_code="FUN")
+        agency = AgencyFactory.create(
+            agency_code=f"{parent_agency.agency_code}-AGENCY",
+            is_test_agency=False,
+            top_level_agency=parent_agency,
+        )
 
         # Create 25 opportunities we will load into the search index
         opportunities = []
@@ -62,7 +66,7 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
             OpportunityFactory.create_batch(
                 size=6,
                 is_archived_forecast_summary=True,
-                agency_code=agency.agency_code,
+                agency_code=parent_agency.agency_code,
                 opportunity_attachments=[],
             )
         )
@@ -98,6 +102,10 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
         assert set([str(opp.opportunity_id) for opp in opportunities]) == set(
             [record["opportunity_id"] for record in resp.records]
         )
+
+        first_record = resp.records[0]
+        assert "top_level_agency_code" in first_record
+        assert first_record["top_level_agency_code"] == parent_agency.agency_code
 
         # Rerunning without changing anything about the data in the DB doesn't meaningfully change anything
         load_opportunities_to_index.index_name = load_opportunities_to_index.index_name + "-another"
@@ -149,17 +157,6 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
             size=3, is_posted_summary=True, opportunity_attachments=[]
         )
 
-        # Create opportunities that should be excluded from indexing
-        excluded_opportunities = OpportunityFactory.create_batch(
-            size=2, is_posted_summary=True, opportunity_attachments=[]
-        )
-
-        # Add the excluded opportunities to the ExcludedOpportunityReview table
-        for opportunity in excluded_opportunities:
-            ExcludedOpportunityReviewFactory.create(
-                legacy_opportunity_id=opportunity.legacy_opportunity_id
-            )
-
         # Ensure we have a unique index name for this test to avoid conflicts
         load_opportunities_to_index.index_name = (
             load_opportunities_to_index.index_name + "-excluded-test"
@@ -174,21 +171,9 @@ class TestLoadOpportunitiesToIndexFullRefresh(BaseTestClass):
 
         # Convert our test opportunities to string IDs for comparison
         expected_included_ids = set([str(opp.opportunity_id) for opp in included_opportunities])
-        expected_excluded_ids = set([str(opp.opportunity_id) for opp in excluded_opportunities])
 
         # Verify that ALL of our expected opportunities are present in the index
         missing_included = expected_included_ids - all_indexed_opportunity_ids
         assert (
             not missing_included
         ), f"Expected opportunities missing from index: {missing_included}"
-
-        # Verify that NONE of our excluded opportunities are present in the index
-        incorrectly_included = expected_excluded_ids & all_indexed_opportunity_ids
-        assert (
-            not incorrectly_included
-        ), f"Excluded opportunities found in index: {incorrectly_included}"
-
-        # Additional verification: ensure the sets are disjoint (no overlap)
-        assert expected_included_ids.isdisjoint(
-            expected_excluded_ids
-        ), "Test setup error: included and excluded sets overlap"

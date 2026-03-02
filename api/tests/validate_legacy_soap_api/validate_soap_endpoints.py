@@ -1,3 +1,4 @@
+import io
 import logging
 import os
 import re
@@ -14,7 +15,7 @@ import src.logging
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.legacy_soap_api_utils import get_alternate_proxy_response
 from src.util.local import error_if_not_local
 
@@ -136,7 +137,11 @@ def validate_grantor_get_application_zip_request_not_found(
         method="POST",
         full_path=SOAP_URI,
         headers=HEADERS,
-        data=get_grantors_get_application_zip_request_data(simpler_tracking_number),
+        data=SoapRequestStreamer(
+            stream=io.BytesIO(
+                get_grantors_get_application_zip_request_data(simpler_tracking_number)
+            )
+        ),
         operation_name="GetApplicationZipRequest",
     )
     simpler_resp = get_alternate_proxy_response(soap_request)

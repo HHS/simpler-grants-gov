@@ -1,5 +1,6 @@
 import base64
 import csv
+import re
 from datetime import date
 
 import pytest
@@ -37,7 +38,6 @@ def validate_search_response(
     assert search_response.status_code == expected_status_code
 
     expected_ids = [str(exp.opportunity_id) for exp in expected_results]
-
     if is_csv_response:
         reader = csv.DictReader(search_response.text.split("\n"))
         opportunities = [record for record in reader]
@@ -119,7 +119,6 @@ def build_opp(
         award_floor=award_floor,
         award_ceiling=award_ceiling,
         estimated_total_program_funding=estimated_total_program_funding,
-        agency_phone_number=agency_phone_number,
     )
 
     opportunity.current_opportunity_summary = CurrentOpportunitySummaryFactory.build(
@@ -411,6 +410,16 @@ class TestOpportunityRouteSearch(BaseTestClass):
                     "data": base64.b64encode(attachment_contents).decode("utf-8"),
                 }
             ]
+
+            if opportunity.opportunity_id in [
+                DOC_SPACE_COAST.opportunity_id,
+                DOC_MANUFACTURING.opportunity_id,
+            ]:
+                json_record["top_level_agency_name"] = "Department of Commerce"
+                json_record["top_level_agency_code"] = DOC_TOP_LEVEL.agency_code
+            if opportunity.opportunity_id == DOC_TOP_LEVEL.opportunity_id:
+                json_record["agency_name"] = "Department of Commerce"
+                json_record["top_level_agency_code"] = None
 
             json_records.append(json_record)
 
@@ -1692,6 +1701,7 @@ class TestOpportunityRouteSearch(BaseTestClass):
             "opportunity_status",
             "is_cost_sharing",
             "close_date",
+            "post_date",
         }
 
     @pytest.mark.parametrize(
@@ -1760,3 +1770,125 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert [opp["opportunity_id"] for opp in data] == [
             opp.opportunity_id for opp in [DOS_DIGITAL_LITERACY, DOC_SPACE_COAST, DOC_MANUFACTURING]
         ]
+
+    @pytest.mark.parametrize(
+        "search_request, expected_results",
+        [
+            (
+                get_search_request(
+                    sort_order=[
+                        {"order_by": "opportunity_id", "sort_direction": SortDirection.ASCENDING}
+                    ],
+                    query="DOC",  # search by top-level agency code
+                ),
+                [
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
+                ],
+            ),
+        ],
+        ids=["top_level_agency_doc"],
+    )
+    def test_search_by_top_level_agency(
+        self, client, api_auth_token, search_request, expected_results
+    ):
+        """
+        Test that searching by a top-level agency code (DOC) returns all opportunities
+        for its sub-agencies and itself.
+        """
+        call_search_and_validate(client, api_auth_token, search_request, expected_results)
+
+    @pytest.mark.parametrize(
+        "search_request, expected",
+        [
+            (
+                get_search_request(
+                    sort_order=[
+                        {"order_by": "relevancy", "sort_direction": SortDirection.DESCENDING}
+                    ],
+                    query="DOC",
+                ),
+                DOC_TOP_LEVEL,
+            ),
+        ],
+        ids=["top_level_doc_first"],
+    )
+    def test_top_level_agency_returns_first(self, client, api_auth_token, search_request, expected):
+        """
+        Test that when searching by a top-level agency (DOC), the top-level agency's
+        own opportunities are returned before its sub-agencies.
+        """
+        resp = client.post(
+            "/v1/opportunities/search",
+            json=search_request,
+            headers={"X-Auth": api_auth_token},
+        )
+        response_json = resp.get_json()
+        opportunities = response_json["data"]
+        first_opportunity = opportunities[0]
+        assert first_opportunity["opportunity_id"] == str(expected.opportunity_id)
+
+    @pytest.mark.parametrize(
+        "search_request, expected_results",
+        [
+            (
+                get_search_request(
+                    sort_order=[
+                        {"order_by": "opportunity_id", "sort_direction": SortDirection.ASCENDING}
+                    ],
+                    query="Department of Commerce",
+                ),
+                [
+                    DOC_SPACE_COAST,
+                    DOC_MANUFACTURING,
+                    DOC_TOP_LEVEL,
+                ],
+            ),
+        ],
+        ids=["agency_name_doc"],
+    )
+    def test_search_by_agency_name(self, client, api_auth_token, search_request, expected_results):
+        """
+        Test that searching by an agency name returns matching opportunities.
+
+        This test validates that opportunities are returned when their agency_name
+        or top_level_agency_name matches the query.
+        """
+        call_search_and_validate(client, api_auth_token, search_request, expected_results)
+
+    def test_opportunities_to_csv(self, client, api_auth_token, monkeypatch):
+        monkeypatch.setenv("FRONTEND_BASE_URL", "https://example.com")
+        search_request = get_search_request(is_cost_sharing_one_of=[True, False])
+        search_request["format"] = "csv"
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-Auth": api_auth_token}
+        )
+
+        assert resp.status_code == 200
+        assert "text/csv" in resp.headers["Content-Type"]
+
+        reader = csv.DictReader(resp.text.split("\n"))
+        rows = list(reader)
+
+        assert "url" in reader.fieldnames
+        assert "summary_description" not in reader.fieldnames
+
+        for row in rows:
+            # assert correct url is configured
+            assert row["url"].startswith("https://example.com/opportunity/")
+            # assert date fields are ISO format
+            iso_date_pattern = r"^\d{4}-\d{2}-\d{2}$"
+            if row["close_date"]:
+                assert re.match(iso_date_pattern, row["close_date"])
+            # assert currency fields are raw numbers
+            if row["award_floor"]:
+                assert row["award_floor"].isdigit()
+            if row["award_ceiling"]:
+                assert row["award_ceiling"].isdigit()
+            # Null handling (empty string instead of None)
+            if row["opportunity_id"] == LOC_HIGHER_EDUCATION.opportunity_id:
+                assert row["close_date"] is not None
+                assert row["award_floor"] is not None
+                assert row["award_ceiling"] is not None
+                assert row["post_date"] is not None

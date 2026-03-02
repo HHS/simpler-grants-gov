@@ -55,6 +55,7 @@ def test_save_opportunity_version(db_session, enable_factory_create):
             }
         ],
         "opportunity_attachments": [],
+        "top_level_agency_code": agency_top.agency_code,
     }
 
     # Save opportunity into opportunity_version table

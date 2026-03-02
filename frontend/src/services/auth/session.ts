@@ -13,7 +13,6 @@ import { postTokenRefresh } from "src/services/fetch/fetchers/fetchers";
 import { SimplerJwtPayload, UserSession } from "src/types/authTypes";
 import { encodeText } from "src/utils/generalUtils";
 
-// note that cookies will be async in Next 15
 import { cookies } from "next/headers";
 
 let clientJwtKey: Uint8Array;

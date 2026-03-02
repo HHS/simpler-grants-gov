@@ -130,13 +130,16 @@ def get_competition_title(context: JsonRuleContext, json_rule: JsonRule) -> str 
 
 
 def get_signature(context: JsonRuleContext, json_rule: JsonRule) -> str | None:
-    """Get the name of the owner of the application"""
-    # TODO - we don't yet have users names, so this arbitrarily grabs
-    # one users email attached to the app - not ideal, will fix when we can.
-    app_users = context.application_form.application.application_users
-    if len(app_users) > 0:
-        return app_users[0].user.email
+    """Get the signature of the user submitting the application
 
+    Signatures occur during the POST_PROCESSING of application submissions.
+
+    If the submitting user has an associated email, we will sign with that, otherwise
+    log that we signed with the unknown value.
+    """
+    application = context.application_form.application
+    if application.submitted_by_user and application.submitted_by_user.email:
+        return application.submitted_by_user.email
     return UNKNOWN_VALUE
 
 

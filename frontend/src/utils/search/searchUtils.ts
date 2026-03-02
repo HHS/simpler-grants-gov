@@ -34,6 +34,7 @@ export function convertSearchParamsToProperTypes(
     agency: paramToSet(params.agency),
     category: paramToSet(params.category),
     closeDate: paramToDateRange(params.closeDate),
+    postedDate: paramToDateRange(params.postedDate),
     costSharing: paramToSet(params.costSharing),
     andOr: (params.andOr as QueryOperator) || "",
     topLevelAgency: paramToSet(params.topLevelAgency),

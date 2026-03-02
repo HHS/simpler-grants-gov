@@ -261,6 +261,34 @@ class UserOrganizationsResponseSchema(AbstractResponseSchema):
     )
 
 
+class UserAgencySchema(Schema):
+    agency_id = fields.String(
+        metadata={
+            "description": "The internal ID of the agency",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    agency_name = fields.String(
+        metadata={
+            "description": "The name of the agency",
+            "example": "Department of Commerce",
+        }
+    )
+    agency_code = fields.String(
+        metadata={
+            "description": "The unique code for the agency",
+            "example": "DOC",
+        }
+    )
+
+
+class UserAgenciesResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(UserAgencySchema),
+        metadata={"description": "List of agencies the user is associated with"},
+    )
+
+
 class UserApplicationFilterSchema(Schema):
     application_status = fields.Nested(
         StrSearchSchemaBuilder("UserApplicationApplicationStatusFiilterSchema")

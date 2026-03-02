@@ -21,6 +21,7 @@ on:
         options:
           - dev
           - training
+          - grantee1
           - prod
       version:
         description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"

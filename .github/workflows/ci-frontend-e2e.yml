@@ -1,4 +1,4 @@
-name: Frontend E2E Tests
+name: E2E Tests (Local)
 on:
   workflow_dispatch:
   workflow_call:
@@ -12,7 +12,7 @@ defaults:
     working-directory: ./frontend
 
 env:
-  NODE_VERSION: 22
+  NODE_VERSION: 24
   LOCKFILE_PATH: ./frontend/package-lock.json
   PACKAGE_MANAGER: npm
   NODE_OPTIONS: --dns-result-order=ipv4first
@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  e2e-tests:
-    name: Run E2E Tests
+  e2e-tests-local:
+    name: Run Local E2E Tests
     runs-on: ubuntu-22.04
 
     strategy:
@@ -33,19 +33,15 @@ jobs:
         total_shards: [4]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
-
-      - run: |
-          npm ci
-          npx playwright install --with-deps
-          docker rmi node:22 node:20 node:18
 
       - name: Start API Server for e2e tests
         run: |
@@ -64,6 +60,11 @@ jobs:
           chmod +x ../api/bin/wait-for-api.sh
           ../api/bin/wait-for-api.sh
         shell: bash
+
+      - name: Install dependencies and Playwright
+        run: |
+          npm ci
+          npx playwright install --with-deps
 
       - name: Build a prod version of the site
         run: |
@@ -97,6 +98,9 @@ jobs:
           echo "=== Container Status ==="
           docker ps -a
           echo ""
+          echo "=== Images ==="
+          docker image ls
+          echo ""
           echo "=== Disk free ==="
           df -h
           echo ""
@@ -118,7 +122,7 @@ jobs:
   create-report:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
-    needs: [e2e-tests]
+    needs: [e2e-tests-local]
     runs-on: ubuntu-22.04
 
     steps:
@@ -151,9 +155,9 @@ jobs:
       - name: Merge Blob Reports into HTML
         run: npx playwright merge-reports --reporter html ./all-blob-reports
 
-      - name: Verify Downloaded Artifacts
+      - name: Verify merged HTML report
         run: |
-          echo "Contents of all-blob-reports after download:"
+          echo "Contents of the merged Playwright HTML report:"
           ls -R playwright*
 
       - name: Upload Merged HTML Report

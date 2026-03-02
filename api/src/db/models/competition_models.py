@@ -31,6 +31,7 @@ from src.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
 # Add conditional import for type checking
 if TYPE_CHECKING:
     from src.db.models.user_models import ApplicationUser, User
+    from src.db.models.workflow_models import Workflow
 
 
 class Competition(ApiSchemaTable, TimestampMixin):
@@ -157,6 +158,11 @@ class CompetitionInstruction(ApiSchemaTable, TimestampMixin):
 
     file_location: Mapped[str]
     file_name: Mapped[str]
+
+    # In grants.gov, a competition could only have one instruction record
+    # and it reused the competition ID as its primary key. We copy that over
+    # when transforming as it makes joining the data much simpler.
+    legacy_competition_id: Mapped[int | None] = mapped_column(index=True)
 
     @property
     def download_path(self) -> str:
@@ -312,6 +318,15 @@ class Application(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
+    # We mostly add this so if we delete an application, any corresponding
+    # workflows are deleted as well.
+    workflows: Mapped[list[Workflow]] = relationship(
+        "Workflow",
+        back_populates="application",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
     @property
     def users(self) -> list[User]:
         """Return the list of User objects associated with this application"""
@@ -418,6 +433,15 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
         BigInteger,
         legacy_tracking_number_seq,
         server_default=legacy_tracking_number_seq.next_value(),
+    )
+
+    # We mostly add this so if we delete a submission, any corresponding
+    # workflows are deleted as well.
+    workflows: Mapped[list[Workflow]] = relationship(
+        "Workflow",
+        back_populates="application_submission",
+        uselist=True,
+        cascade="all, delete-orphan",
     )
 
     @property

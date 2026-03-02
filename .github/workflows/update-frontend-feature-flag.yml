@@ -27,6 +27,7 @@ on:
         options:
           - dev
           - staging
+          - grantee1
       value:
         description: Feature flag value
         required: true

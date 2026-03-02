@@ -159,8 +159,7 @@ def user_token_logout(db_session: db.Session) -> response.ApiResponse:
 ```
 
 # System-to-system Auth
-Our system-to-system (S2S) authentication approach right now is in development, while a basic key auth
-approach currently exists, further improvements are being scoped out.
+Our system supports database-based API Key authentication. These are linked to specific users and can be passed via the X-API-Key header.
 
 
 # Supporting multiple authentication schemes on an endpoint
@@ -175,16 +174,18 @@ We can work around this by not using the APIFlask decorator for your endpoint an
 from typing import cast
 import src.api.response as response
 
-from src.auth.multi_auth import jwt_or_key_multi_auth, jwt_or_key_security_schemes, AuthType
+from src.auth.multi_auth import jwt_or_user_api_key_multi_auth, jwt_or_user_api_key_security_schemes, AuthType
 
-@jwt_or_key_multi_auth.login_required
-@example_blueprint.doc(security=jwt_or_key_security_schemes)
+@jwt_or_user_api_key_multi_auth.login_required
+@example_blueprint.doc(security=jwt_or_user_api_key_security_schemes)
 def my_example_endpoint() -> response.ApiResponse:
-    user_container = jwt_or_key_multi_auth.get_user()
-    if user_container.auth_type == AuthType.API_KEY_AUTH:
-        user = cast(ApiKeyUser, user_container.user)
+    user_container = jwt_or_user_api_key_multi_auth.get_user()
+    if user_container.auth_type == AuthType.API_USER_KEY_AUTH:
+        # User authenticated via X-API-Key header
+        user_session = cast(UserApiKey, user_container.user)
     elif user_container.auth_type == AuthType.USER_JWT_AUTH:
-        user = cast(UserTokenSession, user_container.user)
+        # User authenticated via X-SGG-Token header
+        user_session = cast(UserTokenSession, user_container.user)
 
     # do auth stuff dependent on the type of user
 

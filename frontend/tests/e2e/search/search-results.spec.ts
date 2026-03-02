@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { waitForURLContainsQueryParamValue } from "tests/e2e/playwrightUtils";
 
 import {
   fillSearchInputAndSubmit,
@@ -15,15 +16,11 @@ test.beforeEach(async ({ page }) => {
   // this way we avoid an arbitrary timeout, and do not slow down the other tests
   try {
     await fillSearchInputAndSubmit(searchTerm, page);
-  } catch (e) {
+  } catch (_e) {
     await fillSearchInputAndSubmit(searchTerm, page);
   }
 
-  await page.waitForURL("/search?query=" + searchTerm);
-});
-
-test.afterEach(async ({ context }) => {
-  await context.close();
+  await waitForURLContainsQueryParamValue(page, "query", searchTerm);
 });
 
 test.describe("Search page results tests", () => {

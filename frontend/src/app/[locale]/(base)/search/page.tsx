@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { environment } from "src/constants/environments";
 import { getSession } from "src/services/auth/session";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
 import { getSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
@@ -12,7 +11,6 @@ import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { redirect } from "next/navigation";
 import { Suspense, use } from "react";
 
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
@@ -131,8 +129,4 @@ function Search({ searchParams, params }: SearchPageProps) {
   );
 }
 
-export default withFeatureFlag<SearchPageProps, never>(
-  Search,
-  "searchOff",
-  () => redirect("/maintenance"),
-);
+export default Search;

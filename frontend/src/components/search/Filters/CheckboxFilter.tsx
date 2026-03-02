@@ -27,7 +27,11 @@ export function CheckboxFilterBody({
 
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
     const newParamValue = new Set(query);
-    isChecked ? newParamValue.add(value) : newParamValue.delete(value);
+    if (isChecked) {
+      newParamValue.add(value);
+    } else {
+      newParamValue.delete(value);
+    }
     // handle status filter custom behavior to set param when all options are unselected
     const updatedParamValue =
       !newParamValue.size && defaultEmptySelection?.size
@@ -84,7 +88,7 @@ export function CheckboxFilter({
       title={title}
       contentClassName={contentClassName}
       expanded={!!query.size}
-      className="width-100 padding-right-5"
+      className="width-100"
     >
       <CheckboxFilterBody
         query={query}

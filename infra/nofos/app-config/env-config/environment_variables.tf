@@ -22,6 +22,16 @@ locals {
       secret_store_name = "/nofos/${var.environment}/docraptor-api-key"
     }
 
+    GRABZIT_APPLICATION_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/nofos/${var.environment}/grabzit-application-key"
+    }
+
+    GRABZIT_APPLICATION_SECRET = {
+      manage_method     = "manual"
+      secret_store_name = "/nofos/${var.environment}/grabzit-application-secret"
+    }
+
     SECRET_KEY = {
       manage_method     = "manual"
       secret_store_name = "/nofos/${var.environment}/secret-key"

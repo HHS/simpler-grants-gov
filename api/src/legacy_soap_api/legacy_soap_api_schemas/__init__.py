@@ -7,6 +7,7 @@ from src.legacy_soap_api.legacy_soap_api_schemas.base import (
     SOAPInvalidRequestOperationName,
     SOAPOperationNotSupported,
     SOAPRequest,
+    SoapRequestStreamer,
 )
 from src.legacy_soap_api.legacy_soap_api_schemas.response import SOAPResponse
 
@@ -17,8 +18,8 @@ __all__ = [
     "SOAPOperationNotSupported",
     "SOAPInvalidEnvelope",
     "SOAPInvalidRequestOperationName",
-    "SOAPRequest",
     "BaseSOAPSchema",
     "FaultMessage",
     "SOAPResponse",
+    "SoapRequestStreamer",
 ]

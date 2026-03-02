@@ -80,6 +80,14 @@ STATIC_DATE_RANGES: list = [
     {"from": "now", "to": "now+120d/d", "key": "120"},
 ]
 
+STATIC_POSTED_DATE_RANGES: list = [
+    {"from": "now-3d/d", "to": "now", "key": "3"},
+    {"from": "now-7d/d", "to": "now", "key": "7"},
+    {"from": "now-14d/d", "to": "now", "key": "14"},
+    {"from": "now-30d/d", "to": "now", "key": "30"},
+    {"from": "now-60d/d", "to": "now", "key": "60"},
+]
+
 SCHEMA = OpportunityV1Schema()
 
 
@@ -158,6 +166,11 @@ def _add_aggregations(builder: search.SearchQueryBuilder) -> None:
         "close_date",
         _adjust_field_name("close_date", OPP_REQUEST_FIELD_NAME_MAPPING),
         STATIC_DATE_RANGES,
+    )
+    builder.aggregation_relative_date_range(
+        "post_date",
+        _adjust_field_name("post_date", OPP_REQUEST_FIELD_NAME_MAPPING),
+        STATIC_POSTED_DATE_RANGES,
     )
 
 

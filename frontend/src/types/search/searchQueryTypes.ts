@@ -10,6 +10,7 @@ export interface FilterQueryParamData {
   assistanceListingNumber: Set<string>;
   category: Set<string>;
   closeDate: Set<string>;
+  postedDate: Set<string>;
   costSharing: Set<string>;
   topLevelAgency: Set<string>;
 }

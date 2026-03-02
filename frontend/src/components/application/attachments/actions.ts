@@ -81,7 +81,7 @@ export const uploadAttachmentAction = async (
     revalidateTag(`application-${applicationId}`);
 
     return { success: true, error: undefined, uploads: uploadState };
-  } catch (error) {
+  } catch (_e) {
     return {
       success: false,
       error: "Failed to upload attachment.",
@@ -120,7 +120,7 @@ export const deleteAttachmentAction = async (
     revalidateTag(`application-${applicationId}`);
 
     return { success: true, error: null };
-  } catch (error) {
+  } catch (_e) {
     return { success: false, error: "Failed to delete attachment." };
   }
 };

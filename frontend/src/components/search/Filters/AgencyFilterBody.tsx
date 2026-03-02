@@ -44,7 +44,11 @@ export function AgencyFilterBody({
 
   const toggleOptionChecked = (value: string, isChecked: boolean) => {
     const newParamValue = new Set(query);
-    isChecked ? newParamValue.add(value) : newParamValue.delete(value);
+    if (isChecked) {
+      newParamValue.add(value);
+    } else {
+      newParamValue.delete(value);
+    }
     // happy path a normal checkbox experience
     if (isChecked || !topLevelQuery || !isParentAgencySelected(value)) {
       return updateQueryParams(newParamValue, "agency", queryTerm);

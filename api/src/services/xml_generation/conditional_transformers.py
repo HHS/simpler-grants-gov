@@ -13,9 +13,18 @@ logger = logging.getLogger(__name__)
 
 
 def _transform_nested_field_names(
-    data: dict[str, Any], transform_config_root: dict[str, Any]
+    data: dict[str, Any],
+    transform_config_root: dict[str, Any],
+    field_overrides: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    """Transform field names in a nested object based on transform rules."""
+    """Transform field names in a nested object based on transform rules.
+
+    Args:
+        data: Data dictionary to transform
+        transform_config_root: Root transform configuration
+        field_overrides: Optional dict mapping field names to override target names
+                        (e.g., {"other_amount": "BudgetOtherRequestedAmount"})
+    """
     if not isinstance(data, dict) or not transform_config_root:
         return data
 
@@ -38,8 +47,13 @@ def _transform_nested_field_names(
         if isinstance(field_config, dict):
             xml_transform = field_config.get("xml_transform", {})
             target_name = xml_transform.get("target")
+
+            # Check for field override (takes precedence over config target)
+            if field_overrides and field_name in field_overrides:
+                target_name = field_overrides[field_name]
+
             if target_name and xml_transform.get("type") != "attribute":
-                # Use transformed name
+                # Use transformed name (either from override or config)
                 result[target_name] = field_value
                 processed_fields.add(field_name)
                 continue
@@ -209,6 +223,7 @@ def _apply_array_decomposition_transform(
         item_attributes = mapping_config.get("item_attributes", [])
         total_field = mapping_config.get("total_field")
         total_wrapper = mapping_config.get("total_wrapper")
+        field_overrides = mapping_config.get("field_overrides")
 
         if not item_field:
             logger.warning(f"Skipping field mapping '{output_field_name}': missing 'item_field'")
@@ -251,7 +266,9 @@ def _apply_array_decomposition_transform(
                         if isinstance(value, dict):
                             # Transform field names if transform config is provided
                             if transform_config_root:
-                                value = _transform_nested_field_names(value, transform_config_root)
+                                value = _transform_nested_field_names(
+                                    value, transform_config_root, field_overrides
+                                )
                             wrapped_value.update(value)
                         else:
                             wrapped_value["value"] = value
@@ -272,7 +289,7 @@ def _apply_array_decomposition_transform(
                         # Transform field names if transform config is provided
                         if transform_config_root:
                             total_value = _transform_nested_field_names(
-                                total_value, transform_config_root
+                                total_value, transform_config_root, field_overrides
                             )
                         wrapped_total.update(total_value)
                     else:

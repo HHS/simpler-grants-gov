@@ -1,10 +1,8 @@
-import $Refparser from "@apidevtools/json-schema-ref-parser";
-import { EnumOptionsType, RJSFSchema } from "@rjsf/utils";
+import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
-import { filter, get, isArray, isObject } from "lodash";
-import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
+import { isArray, isObject } from "lodash";
 import { extricateConditionalValidationRules } from "src/utils/applyForm/formSchemaProcessors";
 import { isBasicallyAnObject } from "src/utils/generalUtils";
 
@@ -16,11 +14,7 @@ import {
   UiSchema,
   UiSchemaField,
   UiSchemaSection,
-  UswdsWidgetProps,
-  WidgetTypes,
 } from "./types";
-
-type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
 
 const nestedWarningForField = ({
   definition,
@@ -96,10 +90,11 @@ const formatValidationWarning = (
   return validationWarningOverrides(message, fieldName, title);
 };
 
+// formats warning messages for more helpful display
 const validationWarningOverrides = (
   message: string,
   fieldName: string,
-  title?: string | null | undefined,
+  title?: string | null,
 ) => {
   const formattedTitle = title ? title.replace("?", "") : "Field";
   return message
@@ -239,69 +234,6 @@ export const buildWarningTree = (
   return [];
 };
 
-// json schema doesn't describe UI so types are infered if widget not supplied
-export const determineFieldType = ({
-  uiFieldObject,
-  fieldSchema,
-}: {
-  uiFieldObject: UiSchemaField;
-  fieldSchema: RJSFSchema;
-}): WidgetTypes => {
-  if ("widget" in uiFieldObject && uiFieldObject.widget) {
-    return uiFieldObject.widget;
-  }
-
-  // 1) Single attachment
-  if (fieldSchema.type === "string" && fieldSchema.format === "uuid") {
-    return "Attachment";
-  }
-
-  // 2) Arrays
-  if (fieldSchema.type === "array" && fieldSchema.items) {
-    const item = Array.isArray(fieldSchema.items)
-      ? fieldSchema.items[0]
-      : fieldSchema.items;
-
-    if (item && typeof item === "object") {
-      const itemSchema = item as RJSFSchema;
-
-      // 2a) Attachment array
-      if (itemSchema.type === "string" && itemSchema.format === "uuid") {
-        return "AttachmentArray";
-      }
-
-      // 2b) Enum array -> MultiSelect
-      if (Array.isArray(itemSchema.enum) && itemSchema.enum.length > 0) {
-        return "MultiSelect";
-      }
-    }
-
-    // 2c) Fallback for other arrays
-    return "Select";
-  }
-
-  // 3) Single enum -> Select
-  if (Array.isArray(fieldSchema.enum) && fieldSchema.enum.length > 0) {
-    return "Select";
-  }
-
-  // 4) Boolean
-  if (fieldSchema.type === "boolean") {
-    return "Checkbox";
-  }
-
-  // 5) Long text
-  if (
-    typeof fieldSchema.maxLength === "number" &&
-    fieldSchema.maxLength > 255
-  ) {
-    return "TextArea";
-  }
-
-  // 6) Default
-  return "Text";
-};
-
 // either schema or definition is required, and schema fields take precedence
 export const getFieldSchema = ({
   definition,
@@ -323,24 +255,7 @@ export const getFieldSchema = ({
   return schema as RJSFSchema;
 };
 
-export const getNameFromDef = ({
-  definition,
-  schema,
-}: {
-  definition: string | undefined;
-  schema: SchemaField | undefined;
-}) => {
-  return definition
-    ? definition.split("/")[definition.split("/").length - 1]
-    : typeof schema === "object" &&
-        schema !== null &&
-        "title" in schema &&
-        typeof (schema as { title?: string }).title === "string"
-      ? ((schema as { title?: string }).title as string).replace(/ /g, "-")
-      : "untitled";
-};
-
-// new, not used in multifield
+// not used in multifield
 export const getFieldNameForHtml = ({
   definition,
   schema,
@@ -419,183 +334,6 @@ const jsonPointerToPath = (jsonPointer: string) => {
   }
 
   return jsonPath;
-};
-
-export const getFieldConfig = ({
-  errors,
-  formSchema,
-  formData,
-  uiFieldObject,
-  requiredField,
-}: {
-  errors: FormattedFormValidationWarning[] | null;
-  formSchema: RJSFSchema;
-  formData: object;
-  uiFieldObject: UiSchemaField;
-  requiredField: boolean;
-}) => {
-  const { definition, schema, type: fieldType } = uiFieldObject;
-  let fieldSchema = {} as RJSFSchema;
-  let fieldName = "";
-  let htmlFieldName = "";
-  let value = "" as string | number | object | undefined;
-  let rawErrors: string[] | FormattedFormValidationWarning[] = [];
-
-  if (fieldType === "multiField" && definition && Array.isArray(definition)) {
-    fieldName = uiFieldObject.name ? uiFieldObject.name : "";
-    if (!fieldName) {
-      console.error("name misssing from multiField definition");
-      throw new Error("Could not build field");
-    }
-    fieldSchema = definition
-      .map((def) => getSchemaObjectFromPointer(formSchema, def) as RJSFSchema)
-      .reduce((acc, schema) => ({ ...acc, ...schema }), {});
-    value = definition
-      .map((def) => {
-        const defName = getNameFromDef({ definition: def, schema });
-        const result = get(formData, defName) as unknown;
-        return typeof result === "object" && result !== null
-          ? (result as Record<string, unknown>)
-          : {};
-      })
-      .reduce<Record<string, unknown>>(
-        (acc, value) => ({ ...acc, ...value }),
-        {},
-      );
-    // multifield needs to retain field location for errors.
-    // this may not work with nested required fields
-    rawErrors = definition
-      .map((def) => {
-        const defName = getNameFromDef({ definition: def, schema });
-        return filter(
-          errors,
-          (warning) => warning.field.indexOf(defName) !== -1,
-        ) as unknown as string[];
-      })
-      .flat();
-  } else if (typeof definition === "string") {
-    fieldSchema = getFieldSchema({
-      definition,
-      schema,
-      formSchema,
-    }) as RJSFSchema;
-    fieldName = getNameFromDef({ definition, schema });
-    htmlFieldName = getFieldNameForHtml({ definition, schema });
-    const formDataPath = getFieldPathFromHtml(htmlFieldName);
-    value = getByPointer(formData, formDataPath) as string | number | undefined;
-
-    const fieldType =
-      typeof fieldSchema?.type === "string"
-        ? fieldSchema.type
-        : Array.isArray(fieldSchema?.type)
-          ? (fieldSchema.type[0] ?? "")
-          : "";
-
-    rawErrors = getWarningsForField({
-      errors,
-      fieldName,
-      definition,
-      fieldType,
-    });
-  }
-
-  if (!fieldSchema || typeof fieldSchema !== "object") {
-    console.error("Invalid field schema for:", definition);
-    throw new Error("Invalid or missing field schema");
-  }
-
-  // fields that have no definition won't have a name, but will have a schema
-  if ((!fieldName || !fieldSchema) && definition) {
-    console.error("no field name or schema for: ", definition);
-    throw new Error("Could not build field");
-  }
-
-  // should filter and match warnings to field earlier in the process
-  const type = determineFieldType({ uiFieldObject, fieldSchema });
-
-  // TODO: move schema mutations to own function
-  const disabled = fieldType === "null";
-  let options = {};
-
-  // Provide enumOptions for Select, MultiSelect, and Radio
-  if (type === "Select" || type === "MultiSelect" || type === "Radio") {
-    let enums: string[] = [];
-
-    if (fieldSchema.type === "boolean") {
-      // Keep as strings to align with RadioWidget hidden input/value handling
-      enums = ["true", "false"];
-    } else if (fieldSchema.type === "array") {
-      const item = Array.isArray(fieldSchema.items)
-        ? fieldSchema.items[0]
-        : fieldSchema.items;
-      if (
-        item &&
-        typeof item === "object" &&
-        Array.isArray((item as { enum?: unknown[] }).enum)
-      ) {
-        enums = ((item as { enum?: unknown[] }).enum ?? []).map(String);
-      }
-    } else if (Array.isArray(fieldSchema.enum)) {
-      enums = fieldSchema.enum.map(String);
-    }
-
-    const enumOptions: EnumOptionsType<RJSFSchema>[] = enums.map(
-      (label: string) => {
-        const display =
-          fieldSchema.type === "boolean"
-            ? label === "true"
-              ? "Yes"
-              : "No"
-            : getSimpleTranslationsSync({
-                nameSpace: "Form",
-                translateableString: label,
-              });
-        return { value: label, label: display };
-      },
-    );
-
-    options =
-      type === "Select"
-        ? ({ enumOptions, emptyValue: "- Select -" } as WidgetOptions)
-        : ({ enumOptions } as WidgetOptions);
-  }
-  return {
-    type,
-    props: {
-      id: htmlFieldName,
-      key: htmlFieldName,
-      disabled,
-      required: requiredField,
-      minLength: fieldSchema?.minLength,
-      maxLength: fieldSchema?.maxLength,
-      schema: fieldSchema,
-      rawErrors,
-      value,
-      options,
-    },
-  };
-};
-
-export const getWarningsForField = ({
-  errors,
-  definition,
-}: {
-  fieldName: string;
-  definition: string;
-  fieldType: string;
-  errors: FormattedFormValidationWarning[] | null;
-}): string[] => {
-  if (!errors || errors.length < 1) {
-    return [];
-  }
-
-  const warningsforField = errors.filter(
-    (error) => error.definition === definition,
-  );
-
-  return warningsforField.map((warning) => {
-    return warning.formatted || warning.message;
-  });
 };
 
 export function getFieldsForNav(
@@ -757,39 +495,43 @@ export const isFieldRequired = (
     .some((clean) => requiredFields.includes(clean));
 };
 
-// dereferences all def links so that all necessary property definitions
-// can be found directly within the property without referencing $defs.
-// also resolves "allOf" references within "properties" or "$defs" fields.
-// not merging the entire schema because many schemas have top level
-// "allOf" blocks that often contain "if"/"then" statements or other things
-// that the mergeAllOf library can't handle out of the box, and we don't need
-// to condense in any case
-export const processFormSchema = async (
+/*
+  Our backend provides schemas with $ref already resolved.
+
+  On the frontend we still:
+    1) strip / extract complex conditionals (if/then/else) for separate handling, and
+    2) run mergeAllOf only on the 'properties' subtree to flatten *safe* 'allOf' usage.
+
+  We intentionally do NOT merge the entire schema because allOf-merging across the full
+  schema can interact badly with complex conditionals and other constructs we don’t need
+  to condense for rendering/saving.
+ */
+export const processFormSchema = (
   formSchema: RJSFSchema,
-): Promise<{
+): {
   formSchema: RJSFSchema;
   conditionalValidationRules: RJSFSchema;
-}> => {
+} => {
   try {
-    const dereferenced = await $Refparser.dereference(formSchema);
     const { propertiesWithoutComplexConditionals, conditionalValidationRules } =
       extricateConditionalValidationRules(
-        dereferenced.properties as JSONSchema7,
+        (formSchema.properties ?? {}) as JSONSchema7,
       );
     const condensedProperties = mergeAllOf({
       properties: propertiesWithoutComplexConditionals,
     } as JSONSchema7);
-    const condensed = {
-      ...dereferenced,
-      ...condensedProperties,
+    return {
+      formSchema: {
+        ...formSchema,
+        ...condensedProperties,
+      },
+      conditionalValidationRules,
     };
-    return { formSchema: condensed as RJSFSchema, conditionalValidationRules };
   } catch (e) {
     console.error("Error processing schema");
     throw e;
   }
 };
-
 /*
   this will flatten any properties objects so that we can directly reference field paths
   within a json schema without traversing nested "properties". Any other object attributes

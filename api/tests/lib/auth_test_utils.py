@@ -23,6 +23,7 @@ def create_jwt(
     # in conftest.py::setup_login_gov_auth
     issuer: str | None = None,
     audience: str | None = None,
+    x509_presented: bool | None = None,
 ):
     """Create a JWT in roughly the format login.gov will give us"""
 
@@ -56,6 +57,10 @@ def create_jwt(
         "c_hash": "abc123",
         "acr": "urn:acr.login.gov:auth-only",
     }
+
+    # Only include x509_presented if explicitly set (login.gov only includes it when requested)
+    if x509_presented is not None:
+        payload["x509_presented"] = x509_presented
 
     return jwt.encode(payload, private_key, algorithm="RS256", headers={"kid": "test-key-id"})
 

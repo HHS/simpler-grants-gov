@@ -21,3 +21,10 @@ class InternalRoleAssignmentRequestSchema(Schema):
 
 class InternalRoleAssignmentResponseSchema(AbstractResponseSchema):
     pass
+
+
+class E2ETokenResponseSchema(AbstractResponseSchema):
+    token = fields.String(metadata={"description": "The viable JWT auth token"})
+    expires_at = fields.DateTime(
+        metadata={"description": "The expiration timestamp of the session"}
+    )

@@ -295,6 +295,11 @@ class OpportunityV1Schema(Schema):
         },
     )
 
+    top_level_agency_code = fields.String(
+        allow_none=True,
+        metadata={"description": "The top-level (parent) agency", "example": "HHS"},
+    )
+
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
@@ -459,6 +464,14 @@ class OpportunityFacetV1Schema(Schema):
         values=fields.Integer(),
         metadata={
             "description": "The counts of close_date values in the full response",
+        },
+    )
+
+    post_date = fields.Dict(
+        keys=fields.String(),
+        values=fields.Integer(),
+        metadata={
+            "description": "The counts of post_date values in the full response",
         },
     )
 

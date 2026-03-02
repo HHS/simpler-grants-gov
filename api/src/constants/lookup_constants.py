@@ -192,6 +192,7 @@ class SubmissionIssue(StrEnum):
     APPLICATION_FORM_NOT_FOUND_NO_RESPONSE = "application_form_not_found_no_response"
     INVALID_FILE_NAME = "invalid_file_name"
     ATTACHMENT_NOT_FOUND = "attachment_not_found"
+    ATTACHMENT_LIMIT_EXCEEDED = "attachment_limit_exceeded"
 
 
 class SamGovExtractType(StrEnum):
@@ -240,6 +241,18 @@ class Privilege(StrEnum):
     LEGACY_AGENCY_ASSIGNER = "legacy_agency_assigner"
     MANAGE_INTERNAL_ROLES = "manage_internal_roles"
     MANAGE_COMPETITION = "manage_competition"
+    READ_TEST_USER_TOKEN = "read_test_user_token"
+    VIEW_OPPORTUNITY = "view_opportunity"
+    CREATE_OPPORTUNITY = "create_opportunity"
+    UPDATE_OPPORTUNITY = "update_opportunity"
+    PUBLISH_OPPORTUNITY = "publish_opportunity"
+    INTERNAL_WORKFLOW_ACCESS = "internal_workflow_access"
+    VIEW_ORG_SAVED_OPPORTUNITIES = "view_org_saved_opportunities"
+    MODIFY_ORG_SAVED_OPPORTUNITIES = "modify_org_saved_opportunities"
+
+    # These privileges are associated with workflow approvals
+    PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
+    BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
 
 
 class RoleType(StrEnum):
@@ -294,9 +307,46 @@ class UserType(StrEnum):
     STANDARD = "standard"
     INTERNAL_FRONTEND = "internal_frontend"
     LEGACY_CERTIFICATE = "legacy_certificate"
+    INTERNAL_SYSTEM_USER = "internal_system_user"
 
 
 class OrganizationAuditEvent(StrEnum):
     USER_ADDED = "user_added"
     USER_UPDATED = "user_updated"
     USER_REMOVED = "user_removed"
+
+
+class WorkflowType(StrEnum):
+    OPPORTUNITY_PUBLISH = "opportunity_publish"
+    APPLICATION_SUBMISSION = "application_submission"
+    INITIAL_PROTOTYPE = "initial_prototype"
+
+    # Because of how we use the workflow type to find
+    # the state machine and its configuration, we need
+    # to define any workflows for tests here as well.
+    # These workflow types aren't real, and are instead
+    # reserved for testing.
+    BASIC_TEST_WORKFLOW = "basic_test_workflow"
+
+
+class ApprovalType(StrEnum):
+    INITIAL_PROTOTYPE_APPROVAL = "initial_prototype_approval"
+
+    PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
+    BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
+
+
+class ApprovalResponseType(StrEnum):
+    APPROVED = "approved"
+    DECLINED = "declined"
+    REQUIRES_MODIFICATION = "requires_modification"
+
+
+class WorkflowEntityType(StrEnum):
+    OPPORTUNITY = "opportunity"
+    APPLICATION = "application"
+
+
+class WorkflowEventType(StrEnum):
+    START_WORKFLOW = "start_workflow"
+    PROCESS_WORKFLOW = "process_workflow"

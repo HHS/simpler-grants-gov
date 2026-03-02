@@ -44,7 +44,7 @@ class BaseSOAPClient:
 
     def get_soap_request_dict(self) -> dict:
         return get_soap_operation_dict(
-            self.soap_request.data.decode(), self.operation_config.request_operation_name
+            self.soap_request.data.head().decode(), self.operation_config.request_operation_name
         )
 
     def get_soap_response_dict(self, proxy_response: SOAPResponse | None = None) -> dict:

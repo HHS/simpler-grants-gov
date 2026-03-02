@@ -16,3 +16,6 @@ class AppConfig(PydanticBaseEnvConfig):
 
     # Maximum file upload size in bytes (2 GB)
     max_file_upload_size_bytes: int = 2 * 1024 * 1024 * 1024
+
+    # Maximum number of attachments allowed per application
+    max_attachments_per_application: int = 150

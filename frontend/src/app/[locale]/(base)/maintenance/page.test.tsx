@@ -3,11 +3,7 @@ import { axe } from "jest-axe";
 import { identity } from "lodash";
 import Maintenance from "src/app/[locale]/(base)/maintenance/page";
 import { UserContext } from "src/services/auth/useUser";
-import {
-  localeParams,
-  mockMessages,
-  useTranslationsMock,
-} from "src/utils/testing/intlMocks";
+import { localeParams } from "src/utils/testing/intlMocks";
 import { createFakeUserContext } from "src/utils/testing/providerMocks";
 
 jest.mock("next-intl/server", () => ({
@@ -40,11 +36,6 @@ jest.mock("next/navigation", () => ({
   RedirectType: { push: "PUSH" },
 }));
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-  useMessages: () => mockMessages,
-}));
-
 describe("Maintenance", () => {
   it("renders intro text", () => {
     // set a major feature offline so we don't redirect to homepage
@@ -58,6 +49,7 @@ describe("Maintenance", () => {
     expect(content).toBeInTheDocument();
   });
 
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip("redirects when not in maintenance", () => {
     // set a major feature offline so we don't redirect to homepage
     render(
@@ -83,9 +75,7 @@ describe("Maintenance", () => {
             throw new Error("Function not implemented.");
           },
           featureFlags: {
-            authOn: true,
-            opportunityOff: false,
-            searchOff: false,
+            applyFormPrototypeOff: false,
           },
           userFeatureFlags: {},
           defaultFeatureFlags: {},

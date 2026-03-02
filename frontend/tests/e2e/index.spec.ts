@@ -1,13 +1,13 @@
 import { expect, test } from "@playwright/test";
 
+import playwrightEnv from "./playwright-env";
 import { openMobileNav } from "./playwrightUtils";
 
-test.beforeEach(async ({ page }) => {
-  await page.goto("/");
-});
+const { targetEnv } = playwrightEnv;
 
-test.afterEach(async ({ context }) => {
-  await context.close();
+test.beforeEach(async ({ page }) => {
+  const timeout = targetEnv === "staging" ? 180000 : 60000;
+  await page.goto("/", { waitUntil: "domcontentloaded", timeout });
 });
 
 test("has title", async ({ page }) => {
@@ -35,7 +35,7 @@ test("skips to main content when navigating via keyboard", async ({
   // Firefox does not tab through links automatically and requires updating preferences at the
   // system settings level; https://www.a11yproject.com/posts/macos-browser-keyboard-navigation/
   test.skip(
-    browserName === "firefox" && !process.env.CI,
+    browserName === "firefox" && !playwrightEnv.isCi,
     "Firefox's built-in tabbing focuses only on buttons and inputs",
   );
 
@@ -60,7 +60,7 @@ test("displays mobile nav at mobile width", async ({ page }, { project }) => {
     const primaryNavItems = page.locator(
       ".usa-accordion > .usa-nav__primary-item",
     );
-    await expect(primaryNavItems).toHaveCount(4);
+    await expect(primaryNavItems).toHaveCount(5);
     const allNavItems = await page
       .locator(".usa-accordion > .usa-nav__primary-item")
       .all();

@@ -1,10 +1,10 @@
 "use client";
 
 import { useApplicationAttachments } from "src/hooks/ApplicationAttachments";
-import { useApplicationId } from "src/hooks/useApplicationId";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
 
+import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import {
   FileInput,
@@ -48,7 +48,7 @@ const MultipleAttachmentUploadWidget = ({
 
   const fileInputRef = useRef<FileInputRef | null>(null);
   const deleteModalRef = useRef<ModalRef | null>(null);
-  const applicationId = useApplicationId();
+  const { applicationId } = useParams<{ applicationId: string }>();
   const { uploadAttachment } = useAttachmentUpload();
   const { deleteState, deletePending, deleteAttachment } =
     useAttachmentDelete();
@@ -70,7 +70,7 @@ const MultipleAttachmentUploadWidget = ({
     let parsedValue: string[] = [];
 
     if (Array.isArray(initialValue)) {
-      parsedValue = initialValue as string[];
+      parsedValue = initialValue;
     } else if (typeof initialValue === "string") {
       try {
         // casting doesn’t fully satisfy the linter because it treats schema as possibly any underneath
@@ -124,7 +124,10 @@ const MultipleAttachmentUploadWidget = ({
   ]);
 
   const handleFileChange = async (files: FileList | null): Promise<void> => {
-    if (!files || !applicationId) return;
+    if (!files || !applicationId) {
+      console.error("file object or application id missing");
+      return;
+    }
 
     const newFiles: UploadedFile[] = [];
 

@@ -16,7 +16,7 @@ const UseUserConsumer = () => {
     <>
       <div data-testid="error">{error?.toString() || ""}</div>
       <div data-testid="isLoading">{isLoading.toString()}</div>
-      <div data-testid="user">{user?.toString() || ""}</div>
+      <div data-testid="user">{user?.email?.toString() || ""}</div>
     </>
   );
 };
@@ -42,7 +42,9 @@ const wrapper = ({ children }: PropsWithChildren) => (
 describe("useUser", () => {
   afterEach(() => jest.clearAllMocks());
   it("renders with the expected state on successful fetch", async () => {
-    debouncedUserFetcherMock.mockResolvedValue("this is where a user would be");
+    debouncedUserFetcherMock.mockResolvedValue({
+      email: "this is where a user email would be",
+    });
 
     renderWrappedConsumer();
 
@@ -50,7 +52,9 @@ describe("useUser", () => {
     const userDisplay = await screen.findByTestId("user");
 
     await waitFor(() => {
-      expect(userDisplay).toHaveTextContent("this is where a user would be");
+      expect(userDisplay).toHaveTextContent(
+        "this is where a user email would be",
+      );
     });
 
     expect(errorDisplay).toBeEmptyDOMElement();

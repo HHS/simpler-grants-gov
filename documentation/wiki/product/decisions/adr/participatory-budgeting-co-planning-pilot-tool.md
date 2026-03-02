@@ -103,8 +103,7 @@ Cons:
 
 * Requires time to evaluate and implement
 * Potential hosting/infrastructure needs
-* Too complex for rapid pilot deployment\
-
+* Too complex for rapid pilot deployment<br>
 
 ### Links
 

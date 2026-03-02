@@ -14,7 +14,7 @@ from tests.src.data_migration.transformation.conftest import (
 )
 
 
-class TestTransformOpportunitySummary(BaseTransformTestClass):
+class TestTransformOpportunityAttachment(BaseTransformTestClass):
 
     @pytest.fixture
     def transform_opportunity_attachment(self, transform_oracle_data_task, s3_config):

@@ -60,7 +60,7 @@ locals {
 }
 
 terraform {
-  required_version = "1.13.5"
+  required_version = "1.14.3"
 
   required_providers {
     aws = {
@@ -106,8 +106,8 @@ module "service" {
   vpc_id                   = data.aws_vpc.network.id
   public_subnet_ids        = data.aws_subnets.public.ids
   private_subnet_ids       = data.aws_subnets.private.ids
-  cpu                      = 1024
-  memory                   = 2048
+  fargate_cpu              = 2048
+  fargate_memory           = 4096
   container_port           = 3000
   readonly_root_filesystem = false
   drop_linux_capabilities  = false

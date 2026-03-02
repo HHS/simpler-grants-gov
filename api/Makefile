@@ -195,19 +195,22 @@ start-opensearch:
 	docker compose up --detach opensearch-node
 	./bin/wait-for-local-opensearch.sh
 
+init-opensearch-dashboards: start-opensearch-dashboards
+
+start-opensearch-dashboards:
+	docker compose up --detach opensearch-dashboards
+
 ##################################################
 # Localstack
 ##################################################
 
-init-localstack: start-localstack setup-localstack ## Start localstack (local s3) and setup buckets
+init-localstack: start-localstack setup-localstack ## Start localstack (local s3, sqs) and setup buckets, queues
 
 start-localstack:
 	docker compose up --detach localstack
 
 setup-localstack:
 	$(PY_RUN_CMD) setup-localstack
-
-
 ##################################################
 # Form Schema
 # Example usage:
@@ -391,3 +394,11 @@ validate-xml-generation: ## Run XML generation validation tests
 
 run-xml-validator: ## Run XML validator tool directly
 	$(PY_RUN_CMD) python tool/xml_validator.py
+
+
+#####################
+# Workflow State Machine
+#####################
+
+create-workflow-diagrams: ## Create diagrams of all of our defined workflows
+	$(PY_RUN_CMD) create-workflow-diagrams

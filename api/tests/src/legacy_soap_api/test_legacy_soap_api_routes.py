@@ -2,6 +2,7 @@ from unittest import mock
 
 from lxml import etree
 
+from src.legacy_soap_api.legacy_soap_api_auth import USE_SOAP_JWT_HEADER_KEY
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
 
 NSMAP = {
@@ -39,6 +40,53 @@ def test_successful_request(client, fixture_from_file, caplog) -> None:
     )
     assert req_message.soap_api == "applicants"
     assert req_message.soap_request_operation_name == "GetOpportunityListRequest"
+
+
+def test_soap_jwt_flag_is_enabled_is_logged(client, fixture_from_file, caplog) -> None:
+    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
+    fixture_path = (
+        "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
+    )
+    mock_data = fixture_from_file(fixture_path)
+    response = client.post(full_path, data=mock_data, headers={f"{USE_SOAP_JWT_HEADER_KEY}": "1"})
+    assert response.status_code == 200
+    assert "soap_client_certificate: Use-Soap-Jwt flag is enabled" in caplog.messages
+
+
+def test_soap_jwt_flag_is_disabled_is_not_logged(client, fixture_from_file, caplog) -> None:
+    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
+    fixture_path = (
+        "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
+    )
+    mock_data = fixture_from_file(fixture_path)
+    response = client.post(full_path, data=mock_data, headers={f"{USE_SOAP_JWT_HEADER_KEY}": "0"})
+    assert response.status_code == 200
+    post_message = [
+        record
+        for record in caplog.records
+        if record.message == "soap_client_certificate: Use-Soap-Jwt flag is enabled"
+    ]
+    assert len(post_message) == 0
+
+
+def test_soap_jwt_flag_is_not_included_is_treated_as_if_it_is_disabled(
+    client, fixture_from_file, caplog
+) -> None:
+    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
+    fixture_path = (
+        "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
+    )
+    mock_data = fixture_from_file(fixture_path)
+    response = client.post(full_path, data=mock_data)
+    assert response.status_code == 200
+
+    # Verify that certain logs are present with expected extra values
+    post_message = [
+        record
+        for record in caplog.records
+        if record.message == "soap_client_certificate: use_soap_jwt flag is enabled"
+    ]
+    assert len(post_message) == 0
 
 
 def test_invalid_service_name_not_found(client) -> None:

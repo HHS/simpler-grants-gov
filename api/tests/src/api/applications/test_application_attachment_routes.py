@@ -147,6 +147,79 @@ def test_application_attachment_create_403_not_the_owner(
     assert response.json["message"] == "Forbidden"
 
 
+def test_application_attachment_create_422_attachment_limit_exceeded(
+    db_session, enable_factory_create, client, s3_config, monkeypatch
+):
+    """Test that creating an attachment is blocked when the application has reached the limit."""
+    monkeypatch.setenv("MAX_ATTACHMENTS_PER_APPLICATION", "3")
+
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
+    # Create 3 non-deleted attachments (at the limit)
+    for _ in range(3):
+        ApplicationAttachmentFactory.create(application=application)
+
+    response = client.post(
+        f"/alpha/applications/{application.application_id}/attachments",
+        headers={"X-SGG-Token": token},
+        data={"file_attachment": (attachment_dir / "text_file.txt").open("rb")},
+    )
+
+    assert response.status_code == 422
+    assert (
+        response.json["message"] == "Application has reached the maximum number of attachments (3)"
+    )
+
+
+def test_application_attachment_create_422_limit_excludes_deleted(
+    db_session, enable_factory_create, client, s3_config, monkeypatch
+):
+    """Test that deleted attachments don't count toward the limit."""
+    monkeypatch.setenv("MAX_ATTACHMENTS_PER_APPLICATION", "3")
+
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
+    # Create 3 deleted attachments + 2 non-deleted (under limit)
+    for _ in range(3):
+        ApplicationAttachmentFactory.create(application=application, setup_deleted=True)
+    for _ in range(2):
+        ApplicationAttachmentFactory.create(application=application)
+
+    response = client.post(
+        f"/alpha/applications/{application.application_id}/attachments",
+        headers={"X-SGG-Token": token},
+        data={"file_attachment": (attachment_dir / "text_file.txt").open("rb")},
+    )
+
+    assert response.status_code == 200
+
+
+def test_application_attachment_update_allowed_at_limit(
+    db_session, enable_factory_create, client, s3_config, monkeypatch
+):
+    """Test that updating an existing attachment still works when at the limit."""
+    monkeypatch.setenv("MAX_ATTACHMENTS_PER_APPLICATION", "3")
+
+    user, application, token = create_user_in_app(
+        db_session, privileges=[Privilege.MODIFY_APPLICATION]
+    )
+    # Create 3 attachments (at the limit)
+    existing_attachment = ApplicationAttachmentFactory.create(application=application)
+    for _ in range(2):
+        ApplicationAttachmentFactory.create(application=application)
+
+    # Updating an existing attachment should succeed even at the limit
+    response = client.put(
+        f"/alpha/applications/{application.application_id}/attachments/{existing_attachment.application_attachment_id}",
+        headers={"X-SGG-Token": token},
+        data={"file_attachment": (attachment_dir / "text_file.txt").open("rb")},
+    )
+
+    assert response.status_code == 200
+
+
 ##########################################
 # Get application attachment tests
 ##########################################

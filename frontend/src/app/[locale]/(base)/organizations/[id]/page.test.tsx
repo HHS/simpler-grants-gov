@@ -23,10 +23,6 @@ jest.mock("next-intl/server", () => ({
   setRequestLocale: (_locale: string) => undefined,
 }));
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
-}));
-
 jest.mock("src/services/auth/session", () => ({
   getSession: () => authentication() as Promise<UserDetail>,
 }));
@@ -104,30 +100,6 @@ describe("Organizations page feature flag wiring", () => {
         (props: { params: Promise<{ locale: string }> }) =>
           WrappedComponent(props) as unknown,
     );
-  });
-
-  it("check OrganizationsPage redirects to maintenance if manageUsersOff is enabled", async () => {
-    const component = await OrganizationsPage({
-      params: Promise.resolve({ locale: "en" }),
-    });
-    render(component);
-
-    expect(withFeatureFlagMock).toHaveBeenCalledTimes(1);
-
-    const [wrappedComponent, flagName, onEnabled] = withFeatureFlagMock.mock
-      .calls[0] as [
-      FunctionComponent<LocalizedPageProps>,
-      string,
-      (props: LocalizedPageProps) => ReactNode,
-    ];
-
-    expect(flagName).toBe("manageUsersOff");
-    expect(typeof wrappedComponent).toBe("function");
-    expect(typeof onEnabled).toBe("function");
-
-    (onEnabled as () => void)();
-    expect(redirectMock).toHaveBeenCalledTimes(1);
-    expect(redirectMock).toHaveBeenCalledWith("/maintenance");
   });
 
   it("the happy path page should have a table and heading", async () => {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useClientFetch } from "src/hooks/useClientFetch";
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { useIsSSR } from "src/hooks/useIsSSR";
 import { useLoginModal } from "src/services/auth/LoginModalProvider";
 import { useUser } from "src/services/auth/useUser";
@@ -60,23 +59,25 @@ export const OpportunitySaveUserControl = ({
     setshowMessage(false);
   };
 
-  const userSavedOppCallback = async () => {
+  const userSavedOppCallback = () => {
     setLoading(true);
 
     const method = displayAsSaved ? "DELETE" : "POST";
-    try {
-      const data = await updateSaved("/api/user/saved-opportunities", {
-        method,
-        body: JSON.stringify({ opportunityId }),
+    updateSaved("/api/user/saved-opportunities", {
+      method,
+      body: JSON.stringify({ opportunityId }),
+    })
+      .then((data) => {
+        setLocallySaved(data.type === "save");
+      })
+      .catch((e) => {
+        setSavedError(true);
+        console.error(e);
+      })
+      .finally(() => {
+        setshowMessage(true);
+        setLoading(false);
       });
-      setLocallySaved(data.type === "save");
-    } catch (e) {
-      setSavedError(true);
-      console.error(e);
-    } finally {
-      setshowMessage(true);
-      setLoading(false);
-    }
   };
 
   const messageText = displayAsSaved
@@ -93,17 +94,12 @@ export const OpportunitySaveUserControl = ({
       ? t("saveMessage.errorSave")
       : t("saveMessage.unsave");
 
-  const { checkFeatureFlag } = useFeatureFlags();
-  if (!checkFeatureFlag("savedOpportunitiesOn")) return null;
-
   if (type === "icon") {
     return (
       <>
         {user?.token ? (
           <SaveIcon
-            onClick={() => {
-              userSavedOppCallback().catch(console.error);
-            }}
+            onClick={userSavedOppCallback}
             loading={loading}
             saved={displayAsSaved}
           />
