@@ -45,32 +45,24 @@ class WorkflowAuditListener:
         # Determine which user to use for this transition
         # If this is the first transition (transition_count == 0), use the original acting user
         # Otherwise, use the system user ID for automatic transitions
+        audit_kwargs = {
+            "workflow": state_machine_event.workflow,
+            "transition_event": event_data.event.name,
+            "source_state": event_data.source.value,
+            "target_state": event_data.target.value,
+            "event": state_machine_event.workflow_history_event,
+            "audit_metadata": state_machine_event.metadata,
+        }
         if self.transition_count == 0:
             # First transition - use the actual user who triggered the workflow
-            audit_kwargs = {
-                "workflow": state_machine_event.workflow,
-                "acting_user": state_machine_event.acting_user,
-                "transition_event": event_data.event.name,
-                "source_state": event_data.source.value,
-                "target_state": event_data.target.value,
-                "event": state_machine_event.workflow_history_event,
-                "audit_metadata": state_machine_event.metadata,
-            }
+            audit_kwargs["acting_user"] = state_machine_event.acting_user
             acting_user_id = state_machine_event.acting_user.user_id
         else:
             # Subsequent automatic transitions - use the system user ID from config
             # This avoids a DB query and will fail at commit time if the user doesn't exist
             config = WorkflowServiceConfig()
-            audit_kwargs = {
-                "workflow": state_machine_event.workflow,
-                "acting_user_id": config.workflow_service_internal_user_id,
-                "transition_event": event_data.event.name,
-                "source_state": event_data.source.value,
-                "target_state": event_data.target.value,
-                "event": state_machine_event.workflow_history_event,
-                "audit_metadata": state_machine_event.metadata,
-            }
             acting_user_id = config.workflow_service_internal_user_id
+            audit_kwargs["acting_user_id"] = acting_user_id
 
         # Increment the transition count for subsequent transitions
         self.transition_count += 1
