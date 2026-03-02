@@ -14,6 +14,7 @@ import { OpportunityEligibility } from "./OpportunityEligibility";
 type OpportunityDescriptionProps = {
   summary: Summary;
   attachments: OpportunityDocument[];
+  summaryOnly?: boolean;
 };
 
 const SummaryDescriptionDisplay = ({
@@ -74,8 +75,17 @@ const SummaryDescriptionDisplay = ({
 const OpportunityDescription = ({
   summary,
   attachments,
+  summaryOnly = false,
 }: OpportunityDescriptionProps) => {
   const t = useTranslations("OpportunityListing.description");
+
+  if (summaryOnly) {
+    return (
+      <SummaryDescriptionDisplay
+        summaryDescription={summary.summary_description || ""}
+      />
+    );
+  }
 
   const additionalInformationOnEligibility =
     summary.applicant_eligibility_description ?? "--";

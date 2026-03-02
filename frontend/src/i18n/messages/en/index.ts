@@ -1835,6 +1835,8 @@ export const messages = {
     showLess: "Show less",
     opportunity: "Opportunity",
     editOpportunityDetails: "Edit opportunity details",
+    organizationFetchError:
+      "Error fetching organization data. Please try refreshing the page.",
   },
   InviteLegacyUsers: {
     dataLoadingError:
