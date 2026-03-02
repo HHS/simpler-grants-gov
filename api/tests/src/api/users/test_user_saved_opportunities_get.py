@@ -171,7 +171,7 @@ def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_sa
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": user_auth_token},
         json={
-            "organization_ids": [],
+            "filters": {"organization_ids": []},
             "pagination": {
                 "page_offset": 1,
                 "page_size": 25,

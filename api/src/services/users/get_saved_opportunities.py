@@ -97,7 +97,7 @@ def _check_access(db_session: db.Session, user: User, organization_ids: list) ->
 
     missing_ids = set(organization_ids) - org_map.keys()
     if missing_ids:
-        raise raise_flask_error(404, f"Organization(s) not found: {missing_ids}")
+        raise_flask_error(404, f"Organization(s) not found: {missing_ids}")
 
     for org in organizations:
         # Check if user has VIEW_ORG_SAVED_OPPORTUNITIES privilege for this organization
