@@ -146,6 +146,43 @@ export async function toggleCheckboxes(
   }
 }
 
+/**
+ * Returns the first sub-agency that has results (>0)
+ * Example HTMLs in UI:
+ * <span class="text-base-dark padding-left-05">[5]</span>
+ */
+export async function getFirstSubAgencyWithResults(page: Page) {
+  const subAgencies = page.locator(
+    "#opportunity-filter-agency li div.usa-checkbox",
+  );
+
+  const count = await subAgencies.count();
+
+  for (let i = 0; i < count; i++) {
+    const checkbox = subAgencies.nth(i).locator('input[type="checkbox"]');
+    const value = await checkbox.getAttribute("value");
+
+    const labelSpan = subAgencies.nth(i).locator("span.text-base-dark").first();
+
+    const text = await labelSpan.textContent();
+    if (!text) continue;
+
+    // Extract number from [n], e.g., "[5]" -> 5
+    const match = text.match(/\[(\d+)\]/);
+    if (!match) continue;
+
+    const numResults = parseInt(match[1], 10);
+    if (numResults > 0 && value) {
+      const id = await checkbox.getAttribute("id");
+      if (id) {
+        return { id, value };
+      }
+    }
+  }
+
+  throw new Error("No sub-agency with results > 0 found");
+}
+
 export async function toggleCheckbox(page: Page, idWithoutHash: string) {
   const checkBox = page.locator(`input[id="${idWithoutHash}"]`).first();
   const checkBoxLabel = page
