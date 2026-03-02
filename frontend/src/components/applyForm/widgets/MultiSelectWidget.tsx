@@ -131,10 +131,16 @@ export default function MultiSelect<
   const getLabelForValue = (value: string) =>
     allOptions.find((option) => String(option.value) === value)?.label ?? value;
 
-  // ComboBox widget changes the id which breaks handling of idFor and anchor links
-  // this component creates a <select> with the name attached to the <ComboBox> component
-  // when selecting the code takes the value and creates a hidden input based on the index of the selection and the id
-  // component tracks selected option internally, set the name to "" to not set the value of the select.
+  /** ComboBox widget changes the id which breaks handling of idFor and anchor links
+    * this component creates a <select> with the name attached to the <ComboBox> component
+    * when selecting the code takes the value and creates a hidden input based on the index of the selection and the id
+    * trussworks component uses the top value option available from the select and then sets that data in DOM
+    * component tracks selected option internally, set the name to "" to not set the value of the select.
+    * when setting the name value within the code to "" (empty string), this will effectively not set the top value available in the DOM from the select
+    * @param {string} id - name of the fieldName
+    * @type {string} idFor
+    * @type {string} label
+  */
   const idFor = `${id}__combobox`;
 
   return (
