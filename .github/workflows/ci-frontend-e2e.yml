@@ -1,6 +1,10 @@
 name: E2E Tests (Local Github Target)
 on:
   workflow_dispatch:
+    inputs:
+      api_logs:
+        description: "print api logs on failure?"
+        type: string
   workflow_call:
   pull_request:
     paths:
@@ -84,6 +88,7 @@ jobs:
           needs_node_setup: "false"
           total_shards: ${{ matrix.total_shards }}
           current_shard: ${{ matrix.shard }}
+          api_logs: ${{ inputs.api_logs }}
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}

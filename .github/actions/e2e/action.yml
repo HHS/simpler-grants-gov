@@ -24,6 +24,9 @@ inputs:
   needs_node_setup:
     description: "does this action need to set up node and install deps"
     default: "true"
+  api_logs:
+    description: "print api logs on failure?"
+    default: "false"
   node_version:
     description: "node version"
     default: "24"
@@ -90,7 +93,7 @@ runs:
       shell: bash
 
     - name: Debug logging on failure
-      if: failure()
+      if:  ${{ failure() && inputs.api_logs == 'true' }}
       working-directory: ./frontend
       run: |
         cd ../api
