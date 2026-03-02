@@ -50,16 +50,14 @@ def get_agency_search_request(
         ("POST", "/v1/agencies/search", get_agency_search_request()),
     ],
 )
-def test_agency_search_unauthorized_401_env_key(client, api_auth_token, method, url, body):
-    """Test agency search endpoint with invalid environment API key (X-Auth header)"""
-    # open is just the generic method that post/get/etc. call under the hood
-    response = client.open(url, method=method, json=body, headers={"X-Auth": "incorrect token"})
+def test_agency_search_unauthorized_401_jwt(client, method, url, body):
+    """Test agency search endpoint with invalid JWT token (X-SGG-Token header)"""
+    response = client.open(
+        url, method=method, json=body, headers={"X-SGG-Token": "invalid-jwt-token"}
+    )
 
     assert response.status_code == 401
-    assert (
-        response.get_json()["message"]
-        == "The server could not verify that you are authorized to access the URL requested"
-    )
+    assert response.get_json()["message"] == "Unable to process token"
 
 
 @pytest.mark.parametrize(

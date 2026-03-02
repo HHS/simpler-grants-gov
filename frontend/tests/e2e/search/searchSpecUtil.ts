@@ -14,6 +14,23 @@ const { targetEnv } = playwrightEnv;
 
 const FILTER_OPTIONS_TIMEOUT = targetEnv === "staging" ? 30000 : 10000;
 
+const getBrowserType = (page: Page, projectName?: string) => {
+  if (projectName) {
+    const normalized = projectName.toLowerCase();
+    if (normalized.includes("webkit")) {
+      return "webkit";
+    }
+    if (normalized.includes("firefox")) {
+      return "firefox";
+    }
+    if (normalized.includes("chrome") || normalized.includes("chromium")) {
+      return "chromium";
+    }
+  }
+
+  return page.context().browser()?.browserType().name();
+};
+
 export async function toggleFilterDrawer(page: Page) {
   const modalOpen = await page
     .locator('.usa-modal-overlay[aria-controls="search-filter-drawer"]')
@@ -29,12 +46,16 @@ export function getSearchInput(page: Page) {
   return page.locator("#query");
 }
 
-export async function fillSearchInputAndSubmit(term: string, page: Page) {
+export async function fillSearchInputAndSubmit(
+  term: string,
+  page: Page,
+  projectName?: string,
+) {
   const searchInput = getSearchInput(page);
   const submitButton = page.locator(".usa-search > button[type='submit']");
 
   // Firefox/Webkit need extra handling
-  const browserType = page.context().browser()?.browserType().name();
+  const browserType = getBrowserType(page, projectName);
   if (browserType === "firefox" || browserType === "webkit") {
     await searchInput.scrollIntoViewIfNeeded();
     await page.waitForTimeout(200);
@@ -48,15 +69,9 @@ export async function fillSearchInputAndSubmit(term: string, page: Page) {
   // Webkit needs extra wait before clicking submit
   if (browserType === "webkit") {
     await page.waitForTimeout(500);
-    // For Webkit, wait for URL to change after clicking
-    await Promise.all([
-      page.waitForURL(/.*query=.*/, { timeout: 30000 }).catch(() => undefined),
-      submitButton.click(),
-    ]);
-    await page.waitForTimeout(1000);
-  } else {
-    await submitButton.click();
   }
+
+  await submitButton.click();
 }
 
 export function expectURLContainsQueryParam(
@@ -107,6 +122,7 @@ export async function selectSortBy(
   page: Page,
   sortByValue: string,
   drawer = false,
+  projectName?: string,
 ) {
   const timeoutOption =
     targetEnv === "staging" ? { timeout: 60000 } : { timeout: 10000 };
@@ -115,7 +131,7 @@ export async function selectSortBy(
     : page.locator("#search-sort-by-select").first();
 
   // Webkit needs extra handling for form interactions
-  const browserType = page.context().browser()?.browserType().name();
+  const browserType = getBrowserType(page, projectName);
   if (browserType === "webkit") {
     await sortSelectElement.scrollIntoViewIfNeeded();
     await page.waitForTimeout(200);
@@ -126,11 +142,6 @@ export async function selectSortBy(
   // For mobile drawer on staging, wait longer as it can be very slow
   if (drawer && targetEnv === "staging") {
     await page.waitForTimeout(5000);
-  }
-
-  // Webkit needs extra wait for the selection to register
-  if (browserType === "webkit") {
-    await page.waitForTimeout(500);
   }
 
   await expect(sortSelectElement).toHaveValue(sortByValue, timeoutOption);
@@ -146,6 +157,7 @@ export async function expectSortBy(page: Page, value: string, drawer = false) {
 }
 
 export async function waitForSearchResultsInitialLoad(page: Page) {
+  // Wait for the page and results to load
   const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
   const timeout = targetEnv === "staging" ? 180000 : 60000;
   await resultsHeading.waitFor({ state: "visible", timeout });
@@ -228,6 +240,20 @@ export async function waitForLoaderToBeHidden(page: Page) {
     ".display-flex.flex-align-center.flex-justify-center.margin-bottom-15.margin-top-15",
     { state: "hidden" },
   );
+}
+
+export async function ensureAccordionExpanded(
+  page: Page,
+  accordionTitle: string,
+) {
+  const button = page.locator(
+    `button.usa-accordion__button:has-text("${accordionTitle}")`,
+  );
+  await button.waitFor({ state: "visible", timeout: 15000 });
+  const expanded = await button.getAttribute("aria-expanded");
+  if (expanded !== "true") {
+    await button.click();
+  }
 }
 
 export async function getNumberOfOpportunitySearchResults(page: Page) {
