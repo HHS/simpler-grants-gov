@@ -153,9 +153,9 @@ class UserSavedOpportunitiesFilterSchema(Schema):
         .build()
     )
     organization_ids = fields.Nested(
-            UuidSearchSchemaBuilder("UserSavedOpportunitiesOrganizationIDSFilterSchema")
-            .with_one_of()
-            .build()
+        UuidSearchSchemaBuilder("UserSavedOpportunitiesOrganizationIDSFilterSchema")
+        .with_one_of()
+        .build()
     )
 
 
