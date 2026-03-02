@@ -5,7 +5,6 @@ import * as opportunityFetcher from "src/services/fetch/fetchers/opportunityFetc
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
-import { localeParams } from "src/utils/testing/intlMocks";
 
 import { FunctionComponent, ReactNode } from "react";
 
