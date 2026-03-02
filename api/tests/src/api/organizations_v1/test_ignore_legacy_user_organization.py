@@ -14,7 +14,9 @@ class TestIgnoreLegacyUserOrganization:
 
     @pytest.fixture
     def user_org_a(self, db_session):
-        user, org, token = create_user_in_org(db_session, privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS])
+        user, org, token = create_user_in_org(
+            db_session, privileges=[Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS]
+        )
         return user, org, token
 
     def test_ignore_legacy_user_organization_200(

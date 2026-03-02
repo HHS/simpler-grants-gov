@@ -13,7 +13,11 @@ from tests.lib.organization_test_utils import create_user_in_org
         # VIEW is always required — user with VIEW and no extra arg succeeds
         ([Privilege.VIEW_ORG_MEMBERSHIP], None, 200),
         # Both VIEW and MANAGE required — user with both succeeds
-        ([Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS], {Privilege.MANAGE_ORG_MEMBERS}, 200),
+        (
+            [Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
+            {Privilege.MANAGE_ORG_MEMBERS},
+            200,
+        ),
         # MANAGE-only user fails the base VIEW check
         ([Privilege.MANAGE_ORG_MEMBERS], None, 403),
         # VIEW-only user fails the additional MANAGE check

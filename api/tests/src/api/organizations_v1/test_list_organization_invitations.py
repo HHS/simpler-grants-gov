@@ -356,7 +356,10 @@ class TestListOrganizationInvitations:
     @pytest.mark.parametrize(
         "privilege_set,expected_status",
         [
-            ([Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS], 200),  # Correct privilege
+            (
+                [Privilege.VIEW_ORG_MEMBERSHIP, Privilege.MANAGE_ORG_MEMBERS],
+                200,
+            ),  # Correct privilege
             ([Privilege.VIEW_ORG_MEMBERSHIP], 403),  # Wrong privilege
             ([], 403),  # No privileges
         ],
