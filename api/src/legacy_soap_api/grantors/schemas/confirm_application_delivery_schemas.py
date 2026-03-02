@@ -1,10 +1,15 @@
+import re
+
 from pydantic import AliasChoices, Field, field_validator
 
 from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
 from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 
-GET_APPLICATION_ZIP_REQUEST_ERR = "No grants_gov_tracking_number provided."
+CONFIRM_APPLICATION_DELIVERY_NO_TRACKING_NUMBER_ERR = "No grants_gov_tracking_number provided."
+CONFIRM_APPLICATION_DELIVERY_INVALID_TRACKING_NUMBER_ERR = (
+    "Invalid grants_gov_tracking_number provided."
+)
 
 
 class ConfirmApplicationDeliveryResponse(BaseSOAPSchema):
@@ -28,21 +33,23 @@ class ConfirmApplicationDeliveryResponseSOAPEnvelope(BaseSOAPSchema):
     body: ConfirmApplicationDeliveryResponseSOAPBody = Field(alias="Body")
 
     def to_soap_envelope_dict(self, operation_name: str) -> dict:
-        envelope_dict = {"Envelope": self.model_dump(by_alias=True)}
-        return envelope_dict
+        return {"Envelope": self.model_dump(by_alias=True)}
 
 
 class ConfirmApplicationDeliveryRequest(BaseSOAPSchema):
-    grants_gov_tracking_number: str | None = Field(
-        default=None, pattern=r"^GRANT[0-9]{8}$", alias="GrantsGovTrackingNumber"
-    )
+    grants_gov_tracking_number: str | None = Field(default=None, alias="GrantsGovTrackingNumber")
 
     @field_validator("grants_gov_tracking_number", mode="after")
     @classmethod
     def validate_required_properties(cls, value: str) -> str:
         if not value:
             raise SOAPFaultException(
-                GET_APPLICATION_ZIP_REQUEST_ERR,
+                CONFIRM_APPLICATION_DELIVERY_NO_TRACKING_NUMBER_ERR,
+                fault=OpportunityListRequestInvalidParams,
+            )
+        if not re.fullmatch(r"GRANT[0-9]{8}", value):
+            raise SOAPFaultException(
+                CONFIRM_APPLICATION_DELIVERY_INVALID_TRACKING_NUMBER_ERR,
                 fault=OpportunityListRequestInvalidParams,
             )
         return value

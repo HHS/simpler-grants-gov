@@ -1,5 +1,4 @@
 import pytest
-from pydantic import ValidationError
 
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
@@ -111,19 +110,9 @@ class TestLegacySoapGrantorConfirmApplicationRequestSchema:
         soap_operation_dict = get_soap_operation_dict(
             request_xml, "ConfirmApplicationDeliveryRequest"
         )
-        with pytest.raises(ValidationError) as e:
+        with pytest.raises(SOAPFaultException) as e:
             grantors_schemas.ConfirmApplicationDeliveryRequest(**soap_operation_dict)
-        expected = {
-            "ctx": {
-                "pattern": "^GRANT[0-9]{8}$",
-            },
-            "input": BAD_NUMBER,
-            "loc": ("GrantsGovTrackingNumber",),
-            "msg": "String should match pattern '^GRANT[0-9]{8}$'",
-            "type": "string_pattern_mismatch",
-            "url": "https://errors.pydantic.dev/2.12/v/string_pattern_mismatch",
-        }
-        assert e.value.errors()[0] == expected
+        assert e.value.message == "Invalid grants_gov_tracking_number provided."
 
 
 class TestLegacySoapGrantorConfirmApplicationResponseSchema:
