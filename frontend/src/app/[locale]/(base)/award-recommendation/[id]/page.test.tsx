@@ -1,14 +1,18 @@
 import { render, screen } from "@testing-library/react";
-import AwardRecommendationPage from "src/app/[locale]/(base)/award-recommendation/page";
+import { identity } from "lodash";
+import AwardRecommendationPage from "src/app/[locale]/(base)/award-recommendation/[id]/page";
 import * as opportunityFetcher from "src/services/fetch/fetchers/opportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
-import { localeParams, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { FunctionComponent, ReactNode } from "react";
 
 type onEnabled = (props: LocalizedPageProps) => ReactNode;
+
+jest.mock("next-intl/server", () => ({
+  getTranslations: () => identity,
+}));
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
@@ -48,11 +52,23 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
       )(props) as FunctionComponent<LocalizedPageProps>,
 }));
 
-jest.mock("next-intl/server", () => ({
-  getTranslations: jest.fn(() => useTranslationsMock()),
+jest.mock("src/services/fetch/fetchers/opportunityFetcher");
+
+jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
+  getAwardRecommendationDetails: jest.fn().mockResolvedValue({
+    recordNumber: "AR-26-0001",
+    datePrepared: "01/01/2026",
+    status: "in_progress" as const,
+  }),
 }));
 
-jest.mock("src/services/fetch/fetchers/opportunityFetcher");
+jest.mock("src/components/award-recommendation/AwardRecommendationHero", () => {
+  const React = jest.requireActual<typeof import("react")>("react");
+  return {
+    __esModule: true,
+    default: () => <div data-testid="award-recommendation-hero-mock" />,
+  };
+});
 
 const mockOpportunityDetail = {
   opportunity_id: "123",
@@ -111,6 +127,11 @@ const mockOpportunityData = {
   status_code: 200,
 };
 
+const awardRecommendationParams = Promise.resolve({
+  locale: "en",
+  id: "AR-26-0001",
+});
+
 describe("AwardRecommendationPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -129,9 +150,19 @@ describe("AwardRecommendationPage", () => {
       );
     });
 
+    it("includes the AwardRecommendationHero component in the page", async () => {
+      const component = await AwardRecommendationPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+      expect(
+        screen.getByTestId("award-recommendation-hero-mock"),
+      ).toBeInTheDocument();
+    });
+
     it("renders page title", async () => {
       const component = await AwardRecommendationPage({
-        params: localeParams,
+        params: awardRecommendationParams,
       });
       render(component);
       expect(await screen.findByText("pageTitle")).toBeVisible();
@@ -139,7 +170,7 @@ describe("AwardRecommendationPage", () => {
 
     it("does not fetch opportunity when no id search param provided", async () => {
       const component = await AwardRecommendationPage({
-        params: localeParams,
+        params: awardRecommendationParams,
         searchParams: Promise.resolve({}),
       });
       render(component);
@@ -154,7 +185,7 @@ describe("AwardRecommendationPage", () => {
         .mockResolvedValue(mockOpportunityData);
 
       await AwardRecommendationPage({
-        params: localeParams,
+        params: awardRecommendationParams,
         searchParams: Promise.resolve({ id: "123" }),
       });
 
@@ -172,7 +203,7 @@ describe("AwardRecommendationPage", () => {
         });
 
       const component = await AwardRecommendationPage({
-        params: localeParams,
+        params: awardRecommendationParams,
         searchParams: Promise.resolve({ id: "non-existent" }),
       });
       render(component);
@@ -188,7 +219,7 @@ describe("AwardRecommendationPage", () => {
         .mockRejectedValue(new Error("Network error"));
 
       const component = await AwardRecommendationPage({
-        params: localeParams,
+        params: awardRecommendationParams,
         searchParams: Promise.resolve({ id: "123" }),
       });
 
@@ -219,7 +250,7 @@ describe("AwardRecommendationPage", () => {
     it("redirects to /maintenance", async () => {
       await wrapForExpectedError(() => {
         return AwardRecommendationPage({
-          params: localeParams,
+          params: awardRecommendationParams,
         });
       });
       expect(mockRedirect).toHaveBeenCalledWith("/maintenance");
