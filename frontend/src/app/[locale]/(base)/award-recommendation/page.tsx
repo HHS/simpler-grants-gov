@@ -9,7 +9,12 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ErrorMessage, Grid, GridContainer } from "@trussworks/react-uswds";
+import {
+  Alert,
+  ErrorMessage,
+  Grid,
+  GridContainer,
+} from "@trussworks/react-uswds";
 
 import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
 
@@ -137,6 +142,16 @@ async function AwardRecommendationPageContent({
       if (parseErrorStatus(error as ApiRequestError) === 404) {
         opportunityData = null;
       }
+      return (
+        <Alert
+          heading={t("errorHeadingOppurtunity")}
+          headingLevel="h2"
+          type="warning"
+          validation
+        >
+          {t("oppurtunityFetchError")}
+        </Alert>
+      );
     }
   }
 
@@ -146,13 +161,11 @@ async function AwardRecommendationPageContent({
         {t("pageTitle", { defaultValue: "Review your recommendation" })}
       </h1>
 
-      {opportunityData ? (
+      {opportunityData && (
         <OpportunitySectionComponent
           opportunityData={opportunityData}
           locale={locale}
         />
-      ) : (
-        <ErrorMessage>{t("organizationFetchError")}</ErrorMessage>
       )}
     </GridContainer>
   );
