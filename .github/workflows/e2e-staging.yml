@@ -30,9 +30,6 @@ jobs:
         shard: [1, 2, 3, 4]
         total_shards: [4]
 
-    outputs:
-      artifact-ids:
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -58,4 +55,3 @@ jobs:
     secrets: inherit
     with:
       run_id: ${{ github.run_id }}
-      # artifact-ids: ${{ needs.e2e-tests-deployed.outputs.artifact-ids }}
