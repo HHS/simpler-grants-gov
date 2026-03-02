@@ -1,6 +1,4 @@
-from typing import Self
-
-from pydantic import AliasChoices, Field, model_validator
+from pydantic import AliasChoices, Field, field_validator
 
 from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
 from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema
@@ -35,13 +33,16 @@ class ConfirmApplicationDeliveryResponseSOAPEnvelope(BaseSOAPSchema):
 
 
 class ConfirmApplicationDeliveryRequest(BaseSOAPSchema):
-    grants_gov_tracking_number: str | None = Field(default=None, alias="GrantsGovTrackingNumber")
+    grants_gov_tracking_number: str | None = Field(
+        default=None, pattern=r"^GRANT[0-9]{8}$", alias="GrantsGovTrackingNumber"
+    )
 
-    @model_validator(mode="after")
-    def validate_required_properties(self) -> Self:
-        if not self.grants_gov_tracking_number:
+    @field_validator("grants_gov_tracking_number", mode="after")
+    @classmethod
+    def validate_required_properties(cls, value: str) -> str:
+        if not value:
             raise SOAPFaultException(
                 GET_APPLICATION_ZIP_REQUEST_ERR,
                 fault=OpportunityListRequestInvalidParams,
             )
-        return self
+        return value

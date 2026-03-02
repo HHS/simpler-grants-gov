@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
@@ -67,7 +68,7 @@ class TestLegacySoapGrantorConfirmApplicationRequestSchema:
             "grants_gov_tracking_number": f"{GRANTS_GOV_TRACKING_NUMBER}"
         }
 
-    def test_confirm_application_delivery_request_validates_there_is_a_grants_gov_tracking_number(
+    def test_confirm_application_delivery_request_validates_there_is_a_grants_gov_tracking_number_exists(
         self, db_session
     ):
         request_xml = (
@@ -90,15 +91,39 @@ class TestLegacySoapGrantorConfirmApplicationRequestSchema:
             grantors_schemas.ConfirmApplicationDeliveryRequest(**soap_operation_dict)
         assert e.value.message == "No grants_gov_tracking_number provided."
 
-    def test_confirm_application_delivery_request_raises_validation_error_when_invalid_data(
+    def test_confirm_application_delivery_request_validates_there_is_a_grants_gov_tracking_number_is_in_correct_format(
         self, db_session
     ):
-        request_xml = ""
+        BAD_NUMBER = "123456"
+        request_xml = (
+            "<soapenv:Envelope "
+            'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+            'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:ConfirmApplicationDeliveryRequest>"
+            f"<gran:GrantsGovTrackingNumber>{BAD_NUMBER}</gran:GrantsGovTrackingNumber>"
+            "</agen:ConfirmApplicationDeliveryRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        )
         soap_operation_dict = get_soap_operation_dict(
             request_xml, "ConfirmApplicationDeliveryRequest"
         )
-        with pytest.raises(SOAPFaultException):
+        with pytest.raises(ValidationError) as e:
             grantors_schemas.ConfirmApplicationDeliveryRequest(**soap_operation_dict)
+        expected = {
+            "ctx": {
+                "pattern": "^GRANT[0-9]{8}$",
+            },
+            "input": BAD_NUMBER,
+            "loc": ("GrantsGovTrackingNumber",),
+            "msg": "String should match pattern '^GRANT[0-9]{8}$'",
+            "type": "string_pattern_mismatch",
+            "url": "https://errors.pydantic.dev/2.12/v/string_pattern_mismatch",
+        }
+        assert e.value.errors()[0] == expected
 
 
 class TestLegacySoapGrantorConfirmApplicationResponseSchema:
@@ -131,7 +156,7 @@ class TestLegacySoapGrantorConfirmApplicationResponseSchema:
         ).encode("utf-8")
         soap_payload_dict = SOAPPayload(soap_payload=response_xml_bytes.decode()).to_dict()
         schema = grantors_schemas.ConfirmApplicationDeliveryResponseSOAPEnvelope(
-            Body=soap_payload_dict.get("Envelope", {}).get("Body")
+            body=soap_payload_dict.get("Envelope", {}).get("Body")
         )
         assert (
             schema.body.confirm_application_delivery_response.grants_gov_tracking_number
