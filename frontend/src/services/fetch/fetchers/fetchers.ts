@@ -3,6 +3,7 @@ import "server-only";
 import { ApiRequestError } from "src/errors";
 import {
   EndpointConfig,
+  fetchAwardRecommendationEndpoint,
   fetchCompetitionEndpoint,
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
@@ -127,6 +128,10 @@ export const fetchApplicationWithMethod = (
 
 export const fetchOpportunitySearch = requesterForEndpoint(
   opportunitySearchEndpoint,
+);
+
+export const fetchAwardRecommendation = cache(
+  requesterForEndpoint(fetchAwardRecommendationEndpoint),
 );
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
