@@ -38,7 +38,7 @@ type FieldConfig = {
     required?: boolean;
     minLength?: number;
     maxLength?: number;
-    schema?: RJSFSchema;
+    schema: RJSFSchema;
     rawErrors?: string[] | FormattedFormValidationWarning[] | undefined;
     value?: BroadlyDefinedWidgetValue;
     options?: WidgetOptions;
@@ -381,6 +381,11 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
       props: {
         id: uiFieldObject.name,
         key: uiFieldObject.name,
+        schema: {
+          type: "array",
+          title: uiFieldObject.label,
+          description: uiFieldObject.description,
+        },
         label: uiFieldObject.label,
         description: uiFieldObject.description,
         defaultSize: uiFieldObject.defaultSize,
