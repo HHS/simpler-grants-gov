@@ -58,18 +58,24 @@ def get_organization_and_verify_access(
     Raises:
         FlaskError: 404 if organization not found, 403 if access denied
     """
-    if privileges is None:
-        privileges = {Privilege.VIEW_ORG_MEMBERSHIP}
-
     # First get the organization
     organization = get_organization(db_session, organization_id)
 
-    # Check if user has the required privilege for this organization
+    # VIEW_ORG_MEMBERSHIP is always required
     check_user_access(
         db_session,
         user,
-        privileges,
+        {Privilege.VIEW_ORG_MEMBERSHIP},
         organization,
     )
+
+    # Optionally enforce additional privilege requirements
+    if privileges is not None:
+        check_user_access(
+            db_session,
+            user,
+            privileges,
+            organization,
+        )
 
     return organization
