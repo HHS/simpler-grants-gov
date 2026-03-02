@@ -171,7 +171,7 @@ def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_sa
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": user_auth_token},
         json={
-            "filters": {"organization_ids": []},
+            "filters": {"organization_ids": {"one_of": []}},
             "pagination": {
                 "page_offset": 1,
                 "page_size": 25,
@@ -506,7 +506,11 @@ def test_user_get_saved_opportunities_org_only_403(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": token},
         json={
-            "filters": {"organization_ids": [org.organization_id]},
+            "filters": {
+                "organization_ids": {
+                    "one_of": [org.organization_id],
+                },
+            },
             "pagination": {"page_offset": 1, "page_size": 25},
         },
     )
@@ -560,7 +564,7 @@ def test_user_get_saved_opportunities_specific_org(client, enable_factory_create
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": token},
         json={
-            "filters": {"organization_ids": [orga.organization_id]},
+            "filters": {"organization_ids": {"one_of": [orga.organization_id]}},
             "pagination": {"page_offset": 1, "page_size": 25},
         },
     )
@@ -636,7 +640,7 @@ def test_user_get_saved_opportunities_nonexistent_org(client, enable_factory_cre
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": token},
         json={
-            "filters": {"organization_ids": [uuid.uuid4()]},
+            "filters": {"organization_ids": {"one_of": [uuid.uuid4()]}},
             "pagination": {"page_offset": 1, "page_size": 25},
         },
     )
