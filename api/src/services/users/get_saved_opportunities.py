@@ -20,14 +20,14 @@ from src.db.models.opportunity_models import (
 from src.db.models.user_models import User, UserSavedOpportunity
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.pagination.paginator import Paginator
-from src.search.search_models import StrSearchFilter
+from src.search.search_models import StrSearchFilter, UuidSearchFilter
 
 logger = logging.getLogger(__name__)
 
 
 class SavedOpportunityFilterParams(BaseModel):
     opportunity_status: StrSearchFilter | None = None
-    organization_ids: list[uuid.UUID] | None = None
+    organization_ids: UuidSearchFilter | None = None
 
 
 class SavedOpportunityListParams(BaseModel):
@@ -174,7 +174,11 @@ def get_saved_opportunities(
     db_session: db.Session, user: User, raw_opportunity_params: dict
 ) -> tuple[Sequence[Opportunity], PaginationInfo]:
     opportunity_params = SavedOpportunityListParams.model_validate(raw_opportunity_params)
-    org_ids_param = opportunity_params.filters and opportunity_params.filters.organization_ids
+    org_ids_param = (
+        opportunity_params.filters
+        and opportunity_params.filters.organization_ids
+        and opportunity_params.filters.organization_ids.one_of
+    )
     user_id = user.user_id
     logger.info("Getting saved opportunities for user")
     include_user_saved_opps = True
