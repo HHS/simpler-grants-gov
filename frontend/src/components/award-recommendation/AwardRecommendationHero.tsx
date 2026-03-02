@@ -6,10 +6,16 @@ import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import AwardRecommendationStatusTag from "./AwardRecommendationStatusTag";
 
-export default async function AwardRecommendationHero() {
+interface AwardRecommendationHeroProps {
+  awardRecommendationId: string;
+}
+
+export default async function AwardRecommendationHero({
+  awardRecommendationId,
+}: AwardRecommendationHeroProps) {
   const t = await getTranslations("AwardRecommendation");
   const { recordNumber, datePrepared, status } =
-    await getAwardRecommendationDetails("an id");
+    await getAwardRecommendationDetails(awardRecommendationId);
 
   return (
     <div

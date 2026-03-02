@@ -128,6 +128,11 @@ const mockOpportunityData = {
   status_code: 200,
 };
 
+const awardRecommendationParams = Promise.resolve({
+  locale: "en",
+  id: "AR-26-0001",
+});
+
 describe("AwardRecommendationPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -148,7 +153,7 @@ describe("AwardRecommendationPage", () => {
 
     it("includes the AwardRecommendationHero component in the page", async () => {
       const component = await AwardRecommendationPage({
-        params: localeParams,
+        params: awardRecommendationParams,
       });
       render(component);
       expect(
@@ -158,7 +163,7 @@ describe("AwardRecommendationPage", () => {
 
     it("renders page title", async () => {
       const component = await AwardRecommendationPage({
-        params: localeParams,
+        params: awardRecommendationParams,
       });
       render(component);
       expect(await screen.findByText("pageTitle")).toBeVisible();
@@ -166,7 +171,7 @@ describe("AwardRecommendationPage", () => {
 
     it("does not fetch opportunity when no id search param provided", async () => {
       const component = await AwardRecommendationPage({
-        params: localeParams,
+        params: awardRecommendationParams,
         searchParams: Promise.resolve({}),
       });
       render(component);
@@ -181,7 +186,7 @@ describe("AwardRecommendationPage", () => {
         .mockResolvedValue(mockOpportunityData);
 
       await AwardRecommendationPage({
-        params: localeParams,
+        params: awardRecommendationParams,
         searchParams: Promise.resolve({ id: "123" }),
       });
 
@@ -199,7 +204,7 @@ describe("AwardRecommendationPage", () => {
         });
 
       const component = await AwardRecommendationPage({
-        params: localeParams,
+        params: awardRecommendationParams,
         searchParams: Promise.resolve({ id: "non-existent" }),
       });
       render(component);
@@ -217,7 +222,7 @@ describe("AwardRecommendationPage", () => {
         .mockRejectedValue(new Error("Network error"));
 
       const component = await AwardRecommendationPage({
-        params: localeParams,
+        params: awardRecommendationParams,
         searchParams: Promise.resolve({ id: "123" }),
       });
 
@@ -248,7 +253,7 @@ describe("AwardRecommendationPage", () => {
     it("redirects to /maintenance", async () => {
       await wrapForExpectedError(() => {
         return AwardRecommendationPage({
-          params: localeParams,
+          params: awardRecommendationParams,
         });
       });
       expect(mockRedirect).toHaveBeenCalledWith("/maintenance");

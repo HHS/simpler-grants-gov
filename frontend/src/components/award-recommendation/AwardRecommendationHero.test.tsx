@@ -27,7 +27,9 @@ jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
 
 describe("AwardRecommendationHero", () => {
   it("renders hero using details from getAwardRecommendationDetails", async () => {
-    const component = await AwardRecommendationHero();
+    const component = await AwardRecommendationHero({
+      awardRecommendationId: "AR-26-0001",
+    });
     render(component);
 
     const heading = screen.getByRole("heading", { level: 1 });
@@ -45,7 +47,9 @@ describe("AwardRecommendationHero", () => {
   });
 
   it("renders buttons", async () => {
-    const component = await AwardRecommendationHero();
+    const component = await AwardRecommendationHero({
+      awardRecommendationId: "AR-26-0001",
+    });
     render(component);
 
     const buttons = screen.getAllByRole("button");

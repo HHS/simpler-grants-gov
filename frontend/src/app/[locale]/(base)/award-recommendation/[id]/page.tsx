@@ -186,7 +186,7 @@ async function AwardRecommendationPageContent({
   params,
   searchParams,
 }: AwardRecommendationPageProps) {
-  const { locale } = await params;
+  const { locale, id: awardRecommendationId } = await params;
 
   const t = await getTranslations({
     locale,
@@ -211,7 +211,11 @@ async function AwardRecommendationPageContent({
 
   return (
     <>
-      <AwardRecommendationHero />
+      {awardRecommendationId && (
+        <AwardRecommendationHero
+          awardRecommendationId={awardRecommendationId}
+        />
+      )}
       <GridContainer>
         <h1 className="margin-top-9 margin-bottom-7">
           {t("pageTitle", { defaultValue: "Review your recommendation" })}
