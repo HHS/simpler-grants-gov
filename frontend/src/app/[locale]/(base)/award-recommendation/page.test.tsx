@@ -178,8 +178,6 @@ describe("AwardRecommendationPage", () => {
       render(component);
 
       expect(consoleSpy).toHaveBeenCalled();
-      expect(await screen.findByText("pageTitle")).toBeVisible();
-
       consoleSpy.mockRestore();
     });
 

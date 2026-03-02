@@ -9,14 +9,11 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  Alert,
-  ErrorMessage,
-  Grid,
-  GridContainer,
-} from "@trussworks/react-uswds";
+import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
-import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
+import OpportunityDescription, {
+  SummaryDescriptionDisplay,
+} from "src/components/opportunity/OpportunityDescription";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
@@ -52,7 +49,7 @@ const OpportunitySectionComponent = async ({
   const fundingOppName =
     opportunityData.opportunity_title || "Funding Opportunity";
   const fundingOppNumber = opportunityData.opportunity_number || "--";
-  const summaryDescription = opportunityData.summary.summary_description || "";
+  let summaryDescription = opportunityData.summary?.summary_description || "";
   const hasSummary = !!summaryDescription;
 
   return (
@@ -100,10 +97,8 @@ const OpportunitySectionComponent = async ({
               </p>
               <div className="margin-bottom-3">
                 {hasSummary ? (
-                  <OpportunityDescription
-                    summary={opportunityData.summary}
-                    attachments={[]}
-                    summaryOnly={true}
+                  <SummaryDescriptionDisplay
+                    summaryDescription={summaryDescription || ""}
                   />
                 ) : (
                   <div>No summary available</div>
