@@ -2,7 +2,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 
-// JSON Schema for the UiSchema, accepts either a "field" or "section"
+// JSON Schema for the UiSchema, accepts either a "field", "fieldList", or "section"
 export const UiJsonSchema: RJSFSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
   type: "array",
@@ -10,6 +10,9 @@ export const UiJsonSchema: RJSFSchema = {
     anyOf: [
       {
         $ref: "#/$defs/field",
+      },
+      {
+        $ref: "#/$defs/fieldList",
       },
       {
         $ref: "#/$defs/section",
@@ -127,6 +130,9 @@ export const UiJsonSchema: RJSFSchema = {
                 $ref: "#/$defs/field",
               },
               {
+                $ref: "#/$defs/fieldList",
+              },
+              {
                 $ref: "#/$defs/section",
               },
             ],
@@ -134,6 +140,43 @@ export const UiJsonSchema: RJSFSchema = {
         },
       },
       required: ["type", "label", "name", "children"],
+      additionalProperties: false,
+    },
+    fieldList: {
+      type: "object",
+      properties: {
+        type: {
+          type: "string",
+          enum: ["fieldList"],
+        },
+        label: {
+          type: "string",
+        },
+        name: {
+          type: "string",
+        },
+        description: {
+          type: "string",
+        },
+        defaultSize: { type: "integer", minimum: 0 },
+        children: {
+          type: "array",
+          items: {
+            anyOf: [
+              {
+                $ref: "#/$defs/field",
+              },
+              {
+                $ref: "#/$defs/fieldList",
+              },
+              {
+                $ref: "#/$defs/section",
+              },
+            ],
+          },
+        },
+      },
+      required: ["type", "label", "name", "children", "defaultSize"],
       additionalProperties: false,
     },
   },

@@ -9,6 +9,7 @@ import Budget424aSectionD from "./budget/Budget424aSectionD";
 import Budget424aSectionE from "./budget/Budget424aSectionE";
 import Budget424aSectionF from "./budget/Budget424aSectionF";
 import CheckboxWidget from "./CheckboxWidget";
+import FieldListWidget from "./FieldListWidget";
 import AttachmentArrayWidget from "./MultipleAttachmentUploadWidget";
 import MultiSelect from "./MultiSelectWidget";
 import PrintAttachmentWidget from "./PrintAttachmentWidget";
@@ -46,4 +47,5 @@ export const widgetComponents: Record<
   Budget424aSectionF: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionF(widgetProps),
   MultiSelect: (widgetProps: UswdsWidgetProps) => MultiSelect(widgetProps),
+  FieldList: (widgetProps: UswdsWidgetProps) => FieldListWidget(widgetProps),
 };

@@ -72,7 +72,8 @@ export type WidgetTypes =
   | "Budget424aSectionC"
   | "Budget424aSectionD"
   | "Budget424aSectionE"
-  | "Budget424aSectionF";
+  | "Budget424aSectionF"
+  | "FieldList";
 
 type PropertyPath = `/properties/${string}`;
 
@@ -98,11 +99,21 @@ export interface UiSchemaSection {
   type: "section";
   label: string;
   name: string;
-  children: Array<UiSchemaField | UiSchemaSection>;
+  children: UiSchema;
   description?: string;
 }
 
-export type UiSchema = Array<UiSchemaSection | UiSchemaField>;
+export interface UiSchemaFieldList {
+  type: "fieldList";
+  label: string;
+  name: string;
+  description?: string;
+  defaultSize: number;
+  children: UiSchema;
+}
+
+export type UiSchemaNode = UiSchemaField | UiSchemaSection | UiSchemaFieldList;
+export type UiSchema = UiSchemaNode[];
 
 export type TextTypes =
   | "text"

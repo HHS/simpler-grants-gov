@@ -12,8 +12,7 @@ import {
   FormValidationWarning,
   SchemaField,
   UiSchema,
-  UiSchemaField,
-  UiSchemaSection,
+  UiSchemaNode,
 } from "./types";
 
 const nestedWarningForField = ({
@@ -148,15 +147,8 @@ const findValidationError = (
 };
 
 export const buildWarningTree = (
-  uiSchema:
-    | Array<UiSchemaSection | UiSchemaField>
-    | UiSchemaSection
-    | UiSchemaField,
-  parent:
-    | Array<UiSchemaSection | UiSchemaField>
-    | UiSchemaSection
-    | UiSchemaField
-    | null,
+  uiSchema: UiSchema | UiSchemaNode,
+  parent: UiSchema | UiSchemaNode | null,
   formValidationWarnings: FormValidationWarning[],
   formSchema: RJSFSchema,
 ): FormattedFormValidationWarning[] => {
@@ -582,6 +574,11 @@ export function addPrintWidgetToFields(uiSchema: UiSchema): UiSchema {
         widget: "Print",
       };
     } else if (item.type === "section") {
+      return {
+        ...item,
+        children: addPrintWidgetToFields(item.children),
+      };
+    } else if (item.type === "fieldList") {
       return {
         ...item,
         children: addPrintWidgetToFields(item.children),

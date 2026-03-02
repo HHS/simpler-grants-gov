@@ -10,7 +10,10 @@ import {
 } from "src/utils/applyForm/getFieldConfig";
 import { fakeValidationError } from "src/utils/testing/fixtures";
 
-import { UiSchemaField } from "src/components/applyForm/types";
+import {
+  UiSchemaField,
+  UiSchemaFieldList,
+} from "src/components/applyForm/types";
 
 const mockGetSimpleTranslationsSync = jest.fn().mockImplementation(identity);
 
@@ -293,6 +296,40 @@ describe("getFieldConfig", () => {
         ],
         emptyValue: "- Select -",
       },
+    });
+  });
+
+  it("returns FieldList config for a fieldList node", () => {
+    const uiSchemaFieldList: UiSchemaFieldList = {
+      type: "fieldList",
+      name: "contacts",
+      label: "Contacts",
+      description: "Add one or more contacts.",
+      defaultSize: 2,
+      children: [
+        {
+          type: "field",
+          definition: "/properties/firstName",
+          schema: { title: "First Name", type: "string" },
+        },
+      ],
+    };
+
+    const result = getFieldConfig({
+      errors: null,
+      formSchema: {},
+      formData: {},
+      uiFieldObject: uiSchemaFieldList,
+      requiredField: false,
+    });
+
+    expect(result.type).toBe("FieldList");
+    expect(result.props).toMatchObject({
+      id: "contacts",
+      key: "contacts",
+      label: "Contacts",
+      description: "Add one or more contacts.",
+      defaultSize: 2,
     });
   });
 });

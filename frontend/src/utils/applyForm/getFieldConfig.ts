@@ -8,6 +8,7 @@ import {
   FormattedFormValidationWarning,
   SchemaField,
   UiSchemaField,
+  UiSchemaFieldList,
   UswdsWidgetProps,
   WidgetTypes,
 } from "src/components/applyForm/types";
@@ -26,6 +27,25 @@ type FieldInfo<V extends BroadlyDefinedWidgetValue> = {
   rawErrors: string[];
   fieldName: string;
   htmlFieldName: string;
+};
+
+type FieldConfig = {
+  type: WidgetTypes;
+  props: {
+    id: string;
+    key: string;
+    disabled?: boolean;
+    required?: boolean;
+    minLength?: number;
+    maxLength?: number;
+    schema?: RJSFSchema;
+    rawErrors?: string[] | FormattedFormValidationWarning[] | undefined;
+    value?: BroadlyDefinedWidgetValue;
+    options?: WidgetOptions;
+    label?: string;
+    description?: string;
+    defaultSize?: number;
+  };
 };
 
 // json schema doesn't describe UI so types are infered if widget not supplied
@@ -352,14 +372,28 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
   errors: FormattedFormValidationWarning[] | null;
   formSchema: RJSFSchema;
   formData: object;
-  uiFieldObject: UiSchemaField;
+  uiFieldObject: UiSchemaField | UiSchemaFieldList;
   requiredField: boolean;
-}) => {
-  const { definition, type: uiSchemaFieldType } = uiFieldObject;
+}): FieldConfig => {
+  if (uiFieldObject.type === "fieldList") {
+    return {
+      type: "FieldList",
+      props: {
+        id: uiFieldObject.name,
+        key: uiFieldObject.name,
+        label: uiFieldObject.label,
+        description: uiFieldObject.description,
+        defaultSize: uiFieldObject.defaultSize,
+      },
+    };
+  }
+
+  const fieldNode: UiSchemaField = uiFieldObject;
+  const { definition } = fieldNode;
 
   const { value, fieldSchema, fieldName, rawErrors, htmlFieldName } =
     getFieldInfo({
-      uiFieldObject,
+      uiFieldObject: fieldNode,
       formData,
       errors,
       formSchema,
@@ -377,7 +411,10 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
   }
 
   // should filter and match warnings to field earlier in the process
-  const widgetType = determineFieldType({ uiFieldObject, fieldSchema });
+  const widgetType = determineFieldType({
+    uiFieldObject: fieldNode,
+    fieldSchema,
+  });
 
   // if the widget type requires an option list, generate it here
   const options =
@@ -395,7 +432,7 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
     props: {
       id: htmlFieldName,
       key: htmlFieldName,
-      disabled: uiSchemaFieldType === "null",
+      disabled: fieldNode.type === "null",
       required: requiredField,
       minLength: fieldSchema?.minLength,
       maxLength: fieldSchema?.maxLength,
