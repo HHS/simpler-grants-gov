@@ -7,14 +7,17 @@ import { NextRequest } from "next/server";
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token");
   if (!token) {
+    const errorMessage = request.nextUrl.searchParams.get("error_description");
+    if (
+      errorMessage === "Agency users must authenticate using a PIV/CAC card"
+    ) {
+      return redirect("/login?piverror=true");
+    }
     return redirect("/unauthenticated");
   }
   try {
     await createSession(token, newExpirationDate());
   } catch (_e) {
-    if (_e instanceof Error && _e.message === "PIV Required") {
-      return redirect("/login?piverror=true");
-    }
     console.error("Error creating session for token", { token });
     console.error(_e);
     return redirect("/error");

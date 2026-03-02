@@ -170,7 +170,7 @@ describe("createAndReturnSession", () => {
       arbitrary: "stuff",
     });
     const session = await createAndReturnSession("nothingSpecial", new Date(1));
-    expect(decryptMock).toHaveBeenCalledTimes(2);
+    expect(decryptMock).toHaveBeenCalledTimes(1);
     expect(decryptMock).toHaveBeenCalledWith([
       "nothingSpecial",
       "api secret",
@@ -221,7 +221,7 @@ describe("refreshSession", () => {
       arbitrary: "stuff",
     });
     const session = await createAndReturnSession("nothingSpecial", new Date(1));
-    expect(decryptMock).toHaveBeenCalledTimes(2);
+    expect(decryptMock).toHaveBeenCalledTimes(1);
     expect(decryptMock).toHaveBeenCalledWith([
       "nothingSpecial",
       "api secret",
