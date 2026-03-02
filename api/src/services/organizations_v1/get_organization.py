@@ -39,7 +39,10 @@ def get_organization(db_session: db.Session, organization_id: uuid.UUID) -> Orga
 
 
 def get_organization_and_verify_access(
-    db_session: db.Session, user: User, organization_id: uuid.UUID
+    db_session: db.Session,
+    user: User,
+    organization_id: uuid.UUID,
+    privileges: set[Privilege] | None = None,
 ) -> Organization:
     """Get organization by ID and verify user has access, raising appropriate errors if not.
 
@@ -47,6 +50,7 @@ def get_organization_and_verify_access(
         db_session: Database session
         user: User requesting access
         organization_id: UUID of the organization to retrieve
+        privileges: Set of privileges required. Defaults to {Privilege.VIEW_ORG_MEMBERSHIP}.
 
     Returns:
         Organization: The organization with SAM.gov entity data loaded
@@ -54,14 +58,17 @@ def get_organization_and_verify_access(
     Raises:
         FlaskError: 404 if organization not found, 403 if access denied
     """
+    if privileges is None:
+        privileges = {Privilege.VIEW_ORG_MEMBERSHIP}
+
     # First get the organization
     organization = get_organization(db_session, organization_id)
 
-    # Check if user has VIEW_ORG_MEMBERSHIP privilege for this organization
+    # Check if user has the required privilege for this organization
     check_user_access(
         db_session,
         user,
-        {Privilege.VIEW_ORG_MEMBERSHIP},
+        privileges,
         organization,
     )
 
