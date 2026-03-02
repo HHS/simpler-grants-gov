@@ -152,12 +152,10 @@ class UserSavedOpportunitiesFilterSchema(Schema):
         .with_one_of(allowed_values=OpportunityStatus, example=OpportunityStatus.POSTED)
         .build()
     )
-    organization_ids = fields.List(
-        fields.Nested(
+    organization_ids = fields.Nested(
             UuidSearchSchemaBuilder("UserSavedOpportunitiesOrganizationIDSFilterSchema")
             .with_one_of()
             .build()
-        )
     )
 
 
