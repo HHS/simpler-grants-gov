@@ -60,6 +60,7 @@ class OpportunityCreateRequestSchema(Schema):
         },
     )
     category_explanation = fields.String(
+        allow_none=True,
         validate=validators.Length(max=255),
         metadata={
             "description": "Explanation of the category (required when category is 'other')",
@@ -126,6 +127,8 @@ class OpportunityUpdateRequestSchema(Schema):
         },
     )
     category_explanation = fields.String(
+        allow_none=True,
+        load_default=None,
         validate=validators.Length(max=255),
         metadata={
             "description": "Explanation of the category (required when category is 'other')",

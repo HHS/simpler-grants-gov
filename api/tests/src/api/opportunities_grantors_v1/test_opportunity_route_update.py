@@ -12,7 +12,7 @@ def grantor_auth_data(db_session, enable_factory_create):
     """Create a user with UPDATE_OPPORTUNITY permission and return auth data"""
     user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,
-        privileges=[Privilege.UPDATE_OPPORTUNITY],
+        privileges=[Privilege.VIEW_OPPORTUNITY, Privilege.UPDATE_OPPORTUNITY],
     )
     return user, agency, token, api_key_id
 
