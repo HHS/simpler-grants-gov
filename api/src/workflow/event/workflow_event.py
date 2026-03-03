@@ -6,14 +6,10 @@ from pydantic import BaseModel
 from src.constants.lookup_constants import WorkflowEntityType, WorkflowEventType, WorkflowType
 
 
-class WorkflowEntity(BaseModel):
-    entity_type: WorkflowEntityType
-    entity_id: uuid.UUID
-
-
 class StartWorkflowEventContext(BaseModel):
     workflow_type: WorkflowType
-    entities: list[WorkflowEntity]
+    entity_type: WorkflowEntityType
+    entity_id: uuid.UUID
 
 
 class ProcessWorkflowEventContext(BaseModel):
@@ -43,9 +39,9 @@ class WorkflowEvent(BaseModel):
         }
         if self.start_workflow_context is not None:
             log_extra |= {
-                "workflow_type": self.start_workflow_context.workflow_type
-                # entities being a list makes logging it tricky
-                # will deal with later with second logging pass ticket
+                "workflow_type": self.start_workflow_context.workflow_type,
+                "entity_type": self.start_workflow_context.entity_type,
+                "entity_id": self.start_workflow_context.entity_id,
             }
         if self.process_workflow_context is not None:
             log_extra |= {

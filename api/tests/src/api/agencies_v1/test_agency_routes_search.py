@@ -178,9 +178,9 @@ class TestAgencyRoutesSearch(BaseTestClass):
             ),
         ],
     )
-    def test_search_agencies(self, client, api_auth_token, search_request, expected_result):
+    def test_search_agencies(self, client, user_api_key_id, search_request, expected_result):
         resp = client.post(
-            "/v1/agencies/search", json=search_request, headers={"X-Auth": api_auth_token}
+            "/v1/agencies/search", json=search_request, headers={"X-API-Key": user_api_key_id}
         )
         data = resp.json["data"]
         assert resp.status_code == 200

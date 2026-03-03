@@ -9,7 +9,6 @@ import {
 import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { mockApplicationSubmission } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import applicationMock from "stories/components/application/application.mock.json";
 import historyMock from "stories/components/application/history.mock.json";
 import opportunityMock from "stories/components/application/opportunity.mock.json";
@@ -19,10 +18,6 @@ import ApplicationContainer from "src/components/application/ApplicationContaine
 // Mock dependencies
 const mockRefresh = jest.fn();
 const mockPush = jest.fn();
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({

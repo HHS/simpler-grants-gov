@@ -1,3 +1,4 @@
+import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import SavedOpportunities from "src/app/[locale]/(base)/saved-opportunities/page";
 import {
@@ -11,22 +12,32 @@ import {
   mockUseTranslations,
   useTranslationsMock,
 } from "src/utils/testing/intlMocks";
-import { render, screen, waitFor } from "tests/react-utils";
 
-import { ReactNode } from "react";
+jest.mock("next-intl", () => ({
+  useTranslations: () => useTranslationsMock(),
+}));
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => mockUseTranslations,
 }));
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-  NextIntlClientProvider: ({ children }: { children: ReactNode }) => children, // this is a dumb workaround for a global wrapper we're using
-}));
-
 const savedOpportunities = jest.fn().mockResolvedValue([]);
 const opportunity = jest.fn().mockResolvedValue({ data: [] });
 const mockUseSearchParams = jest.fn().mockReturnValue(new URLSearchParams());
+const clientFetchMock = jest.fn().mockResolvedValue([]);
+
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
+  }),
+}));
+
+jest.mock(
+  "src/components/opportunities/ShareOpportunityToOrganizationsModal",
+  () => ({
+    ShareOpportunityToOrganizationsModal: () => null,
+  }),
+);
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams() as unknown,

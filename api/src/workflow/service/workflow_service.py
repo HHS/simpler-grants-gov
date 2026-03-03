@@ -11,7 +11,6 @@ from src.db.models.competition_models import Application
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.workflow_models import Workflow
 from src.workflow.base_state_machine import BaseStateMachine
-from src.workflow.event.workflow_event import WorkflowEntity
 from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_errors import (
     EntityNotFound,
@@ -24,60 +23,55 @@ from src.workflow.workflow_errors import (
 logger = logging.getLogger(__name__)
 
 
-def get_workflow_entities(
-    db_session: db.Session, entities: list[WorkflowEntity], config: WorkflowConfig
-) -> dict[str, list[ApiSchemaTable]]:
-    """Get the workflow entities for a given workflow type - erroring if the entity can't be found."""
+def get_workflow_entity(
+    db_session: db.Session,
+    entity_type: WorkflowEntityType,
+    entity_id: uuid.UUID,
+    config: WorkflowConfig,
+) -> dict[str, ApiSchemaTable]:
+    """Get a workflow entity map that can be used to create a workflow.
 
-    entities_to_add = {e.entity_type for e in entities}
-    allowed_entity_types = set(config.entity_types)
+    Handles validating and making sure exactly one entity is found.
+
+    Expected usage:
+
+        workflow_entity = get_workflow_entity(...)
+        workflow = Workflow(..., **workflow_entity)
+    """
+
     log_extra: dict[str, Any] = {
         "workflow_type": config.workflow_type,
-        "allowed_entity_types": ",".join(allowed_entity_types),
-        "entities_to_add": ",".join(entities_to_add),
+        "allowed_entity_type": config.entity_type,
+        "entity_type": entity_type,
     }
 
-    # Verify that the entities we have match those
-    # on the configuration to avoid setting a workflow
-    # up incorrectly.
+    if entity_type != config.entity_type:
+        logger.warning("Entity given for workflow does not match expected type", extra=log_extra)
+        raise InvalidEntityForWorkflow("Entity given for workflow does not match expected type")
 
-    if entities_to_add != allowed_entity_types:
-        logger.warning("Entities given for workflow do not match expected types", extra=log_extra)
-        raise InvalidEntityForWorkflow("Entities given for workflow do not match expected types")
+    if entity_type == WorkflowEntityType.OPPORTUNITY:
+        opportunity = db_session.scalar(
+            select(Opportunity).where(Opportunity.opportunity_id == entity_id)
+        )
+        if opportunity is None:
+            logger.warning("Opportunity not found for entity", extra=log_extra)
+            raise EntityNotFound("Opportunity not found")
 
-    workflow_entities: dict[str, list[ApiSchemaTable]] = {"opportunities": [], "applications": []}
+        return {"opportunity": opportunity}
 
-    for entity in entities:
-        log_extra |= {
-            "entity_type": entity.entity_type,
-            "entity_id": entity.entity_id,
-        }
+    elif entity_type == WorkflowEntityType.APPLICATION:
+        application = db_session.scalar(
+            select(Application).where(Application.application_id == entity_id)
+        )
+        if application is None:
+            logger.warning("Application not found for entity", extra=log_extra)
+            raise EntityNotFound("Application not found")
 
-        if entity.entity_type == WorkflowEntityType.OPPORTUNITY:
-            opportunity = db_session.scalar(
-                select(Opportunity).where(Opportunity.opportunity_id == entity.entity_id)
-            )
-            if opportunity is None:
-                logger.warning("Opportunity not found for entity", extra=log_extra)
-                raise EntityNotFound("Opportunity not found")
+        return {"application": application}
 
-            workflow_entities["opportunities"].append(opportunity)
-
-        elif entity.entity_type == WorkflowEntityType.APPLICATION:
-            application = db_session.scalar(
-                select(Application).where(Application.application_id == entity.entity_id)
-            )
-            if application is None:
-                logger.warning("Application not found for entity", extra=log_extra)
-                raise EntityNotFound("Application not found")
-
-            workflow_entities["applications"].append(application)
-
-        else:  # Any unconfigured entity types will result in an error
-            logger.warning("Entity type is not supported for workflow", extra=log_extra)  # type: ignore[unreachable]
-            raise ImplementationMissingError("Entity type is not supported for workflow")
-
-    return workflow_entities
+    else:  # Any unconfigured entity types will result in an error
+        logger.warning("Entity type is not supported for workflow", extra=log_extra)  # type: ignore[unreachable]
+        raise ImplementationMissingError("Entity type is not supported for workflow")
 
 
 def is_event_valid_for_workflow(

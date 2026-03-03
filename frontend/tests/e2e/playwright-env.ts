@@ -17,7 +17,21 @@ const BASE_URLS: Record<string, string> = {
 // Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
 const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
-const baseUrl = BASE_URLS[targetEnv] || BASE_URLS.local;
+if (!Object.prototype.hasOwnProperty.call(BASE_URLS, targetEnv)) {
+  throw new Error(
+    `Unsupported PLAYWRIGHT_TARGET_ENV: ${targetEnv}. Allowed values: ${Object.keys(BASE_URLS).join(", ")}`,
+  );
+}
+
+const baseUrl = BASE_URLS[targetEnv];
+
+// Test organization labels for each environment
+const TEST_ORG_LABELS: Record<string, string> = {
+  local: "Sally's Soup Emporium",
+  staging: "Automatic staging Organization for UEI AUTOHQDCCHBY",
+};
+
+const testOrgLabel = TEST_ORG_LABELS[targetEnv];
 
 // Environment for web server
 const webServerEnv: Record<string, string> = Object.fromEntries(
@@ -31,6 +45,7 @@ const playwrightEnv = {
   webServerEnv,
   baseUrl,
   targetEnv,
+  testOrgLabel,
   isCi: process.env.CI,
   totalShards: process.env.TOTAL_SHARDS,
   currentShard: process.env.CURRENT_SHARD,

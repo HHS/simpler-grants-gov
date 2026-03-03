@@ -32,6 +32,6 @@ def workflow_event_put(db_session: db.Session, json_data: dict) -> response.ApiR
     logger.info("PUT /v1/workflows/events")
 
     with db_session.begin():
-        event_id = ingest_workflow_event(json_data)
+        event_id = ingest_workflow_event(db_session, json_data)
 
     return response.ApiResponse(message="Event received", data={"event_id": event_id})

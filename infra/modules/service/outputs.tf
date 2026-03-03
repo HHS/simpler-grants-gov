@@ -58,3 +58,18 @@ output "app_security_group_id" {
 output "service_logs_arn" {
   value = aws_cloudwatch_log_group.service_logs.arn
 }
+
+output "image_url" {
+  description = "image url for the app container"
+  value       = local.image_url
+}
+
+output "fluent_bit_image_url" {
+  description = "image url for the Fluent Bit sidecar"
+  value       = local.fluent_bit_image_url
+}
+
+output "environment_variables" {
+  description = "environment variable for the app container"
+  value       = local.environment_variables
+}

@@ -394,3 +394,11 @@ validate-xml-generation: ## Run XML generation validation tests
 
 run-xml-validator: ## Run XML validator tool directly
 	$(PY_RUN_CMD) python tool/xml_validator.py
+
+
+#####################
+# Workflow State Machine
+#####################
+
+create-workflow-diagrams: ## Create diagrams of all of our defined workflows
+	$(PY_RUN_CMD) create-workflow-diagrams
