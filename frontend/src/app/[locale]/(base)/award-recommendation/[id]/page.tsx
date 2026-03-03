@@ -5,6 +5,7 @@ import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFe
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
+import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -42,11 +43,11 @@ interface OpportunitySectionProps {
   locale: string;
 }
 
-const OpportunitySectionComponent = async ({
+const OpportunitySectionComponent = ({
   opportunityData,
-  locale,
+  locale: _locale,
 }: OpportunitySectionProps) => {
-  const t = await getTranslations({ locale, namespace: "AwardRecommendation" });
+  const t = useTranslations("AwardRecommendation");
   const fundingOppName =
     opportunityData.opportunity_title || "Funding Opportunity";
   const fundingOppNumber = opportunityData.opportunity_number || "--";

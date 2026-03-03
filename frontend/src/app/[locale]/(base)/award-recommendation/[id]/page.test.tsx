@@ -11,7 +11,7 @@ import { FunctionComponent, ReactNode } from "react";
 type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: () => identity,
+  getTranslations: () => Promise.resolve(identity),
 }));
 
 jest.mock("react", () => ({
@@ -62,6 +62,30 @@ jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
   }),
 }));
 
+jest.mock("next-intl", () => ({
+  useTranslations: () => identity,
+}));
+
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => <a href={href}>{children}</a>,
+}));
+
+jest.mock("src/components/opportunity/OpportunityDescription", () => ({
+  __esModule: true,
+  SummaryDescriptionDisplay: ({
+    summaryDescription,
+  }: {
+    summaryDescription: string;
+  }) => <div data-testid="summary-description-mock">{summaryDescription}</div>,
+}));
+
 jest.mock("src/components/award-recommendation/AwardRecommendationHero", () => {
   const React = jest.requireActual<typeof import("react")>("react");
   return {
@@ -87,7 +111,7 @@ const mockOpportunityDetail = {
   attachments: [],
   competitions: null,
   summary: {
-    summary_description: "<p>This is a test opportunity summary.</p>",
+    summary_description: "",
     close_date: null,
     is_forecast: false,
     post_date: "2024-01-01",
