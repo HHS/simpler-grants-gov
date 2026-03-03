@@ -6,6 +6,7 @@ import {
   Dispatch,
   JSX,
   MouseEvent,
+  ReactNode,
   SetStateAction,
   useEffect,
   useState,
@@ -17,7 +18,7 @@ interface NavDropdownProps {
   index: number;
   isCurrent: boolean;
   linkText: string;
-  menuItems: JSX.Element[];
+  menuItems: ReactNode[];
   setActiveNavDropdownIndex: Dispatch<SetStateAction<IndexType>>;
 }
 
