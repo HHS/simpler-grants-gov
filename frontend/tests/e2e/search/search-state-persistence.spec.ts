@@ -348,11 +348,22 @@ test.describe("Search page - state persistence after refresh", () => {
     for (let attempt = 1; attempt <= 2; attempt += 1) {
       // Ensure unchecked before clicking
       if (await checkbox.isChecked()) {
-        await checkboxLabel.click();
+        await checkbox.click({ force: true });
         await expect(checkbox).not.toBeChecked({ timeout: 10000 });
       }
 
-      await checkboxLabel.click();
+      // Click the checkbox input directly rather than the label,
+      // since the label contains nested spans that can intercept the click
+      await checkbox.scrollIntoViewIfNeeded();
+      await checkbox.click({ force: true });
+      await page.waitForTimeout(300);
+
+      if (!(await checkbox.isChecked())) {
+        // JS dispatch as fallback
+        await checkbox.dispatchEvent("click");
+        await page.waitForTimeout(300);
+      }
+
       await expect(checkbox).toBeChecked({ timeout: 15000 });
 
       try {

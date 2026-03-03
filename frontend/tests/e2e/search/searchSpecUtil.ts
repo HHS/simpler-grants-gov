@@ -258,45 +258,15 @@ export async function waitForSearchResultsInitialLoad(
   page: Page,
   timeoutOverride?: number,
 ) {
-  // Wait for the page and results to load
   let timeout = targetEnv === "staging" ? 180000 : 60000;
   if (timeoutOverride) {
     timeout = timeoutOverride;
   }
 
-  const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
-
-  const noResultsIndicator = page
-    .locator(
-      '[data-testid="search-no-results"], .usa-alert--info, h2:has-text("no results"), p:has-text("no results")',
-    )
-    .first();
-
-  // Wait for heading to be visible, but with some retry logic
-  const startTime = Date.now();
-  let lastError: Error | null = null;
-  const innerTimeout = 15000;
-
-  while (Date.now() - startTime < timeout) {
-    try {
-      await Promise.race([
-        resultsHeading.waitFor({ state: "visible", timeout: innerTimeout }),
-        noResultsIndicator.waitFor({ state: "visible", timeout: innerTimeout }),
-      ]);
-      return;
-    } catch (e) {
-      lastError = e as Error;
-      // Continue retrying
-      await page.waitForTimeout(500);
-    }
-  }
-
-  // If we get here, timeout was exceeded
-  if (lastError) {
-    throw lastError;
-  }
-
-  throw new Error("Timeout waiting for search results to load");
+  await page.waitForSelector('h3:has-text("Opportunities")', {
+    state: "visible",
+    timeout,
+  });
 }
 
 export async function clickAccordionWithTitle(
