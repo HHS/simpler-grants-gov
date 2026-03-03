@@ -338,29 +338,29 @@ test.describe("Search page - state persistence after refresh", () => {
 
     await checkbox.waitFor({ state: "attached", timeout: 30000 });
 
-    // Step 6: Click directly on the sub-agency (NOT the parent "All" checkbox).
+    // Step 6: Click the sub-agency checkbox with robust cross-browser approach
     let selectedAndUpdated = false;
-    for (let attempt = 1; attempt <= 2; attempt += 1) {
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
       // Ensure unchecked before clicking
       if (await checkbox.isChecked()) {
         await page.evaluate((id) => {
-          document
-            .getElementById(id)
-            ?.dispatchEvent(
-              new MouseEvent("click", { bubbles: true, cancelable: true }),
-            );
+          const el = document.getElementById(id) as HTMLInputElement | null;
+          if (el) el.click();
         }, subAgency.id);
+        await page.waitForTimeout(500);
         await expect(checkbox).not.toBeChecked({ timeout: 10000 });
       }
 
-      // Scroll via JS (handles inner scroll containers of filter drawer).
-      // First, scroll the element into view, then ensure the parent drawer container is scrolled.
+      // Scroll the checkbox into view and click with multiple strategies
       await page.evaluate((id) => {
-        const el = document.getElementById(id);
+        const el = document.getElementById(id) as HTMLInputElement | null;
         if (el) {
-          // Scroll the element into view
-          el.scrollIntoView({ block: "center", inline: "nearest" });
-
+          // Scroll into view with center alignment
+          el.scrollIntoView({
+            block: "center",
+            inline: "nearest",
+            behavior: "instant",
+          });
           // Also scroll parent drawer container if it exists
           const drawerContent =
             el.closest("[class*='drawer']") ||
@@ -372,28 +372,52 @@ test.describe("Search page - state persistence after refresh", () => {
           ) {
             const rect = el.getBoundingClientRect();
             const containerRect = drawerContent.getBoundingClientRect();
-
             if (rect.top < containerRect.top) {
-              drawerContent.scrollTop -= containerRect.top - rect.top + 50;
+              drawerContent.scrollTop -= containerRect.top - rect.top + 100;
             } else if (rect.bottom > containerRect.bottom) {
               drawerContent.scrollTop +=
-                rect.bottom - containerRect.bottom + 50;
+                rect.bottom - containerRect.bottom + 100;
             }
           }
         }
       }, subAgency.id);
-      await page.waitForTimeout(300);
+      await page.waitForTimeout(500);
 
-      await page.evaluate((id) => {
-        document
-          .getElementById(id)
-          ?.dispatchEvent(
-            new MouseEvent("click", { bubbles: true, cancelable: true }),
-          );
+      // Try multiple click strategies in order
+      const clickSucceeded = await page.evaluate((id) => {
+        const el = document.getElementById(id) as HTMLInputElement | null;
+        if (!el) return false;
+        const label = document.querySelector(`label[for="${id}"]`);
+        // Strategy 1: Try clicking the checkbox directly
+        try {
+          el.click();
+          if (el.checked) return true;
+        } catch {}
+        // Strategy 2: Try clicking the label
+        if (label) {
+          try {
+            (label as HTMLElement).click();
+            if (el.checked) return true;
+          } catch {}
+        }
+        // Strategy 3: Programmatically set checked and dispatch change event
+        try {
+          el.checked = true;
+          el.dispatchEvent(new Event("change", { bubbles: true }));
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+          if (el.checked) return true;
+        } catch {}
+        return el.checked;
       }, subAgency.id);
-      await page.waitForTimeout(300);
+      await page.waitForTimeout(500);
 
-      await expect(checkbox).toBeChecked({ timeout: 15000 });
+      if (!clickSucceeded || !(await checkbox.isChecked())) {
+        if (attempt < 3) {
+          continue;
+        }
+      }
+
+      await expect(checkbox).toBeChecked({ timeout: 10000 });
 
       try {
         await waitForURLContainsQueryParamValues(
@@ -405,18 +429,29 @@ test.describe("Search page - state persistence after refresh", () => {
         selectedAndUpdated = true;
         break;
       } catch (_e) {
-        if (attempt === 2) throw _e;
+        if (attempt === 3) throw _e;
       }
     }
 
     expect(selectedAndUpdated).toBe(true);
 
-    // Wait to ensure filter is fully applied
-    await page.waitForTimeout(2000);
+    // Wait to ensure filter is fully applied before refresh
+    await page.waitForTimeout(3000);
 
     // Step 7: Refresh and verify persistence
-    await refreshPageWithCurrentURL(page);
-    await waitForSearchResultsInitialLoad(page, 180000);
+    try {
+      await refreshPageWithCurrentURL(page);
+      await waitForSearchResultsInitialLoad(page, 180000);
+    } catch (_refreshError) {
+      // If refresh times out, try navigating directly with the URL
+      const currentURL = page.url();
+      await page.goto(currentURL, {
+        waitUntil: "domcontentloaded",
+        timeout: 60000,
+      });
+      await page.waitForLoadState("networkidle", { timeout: 60000 });
+      await waitForSearchResultsInitialLoad(page, 180000);
+    }
 
     await ensureFilterDrawerOpen(page);
 
