@@ -1,6 +1,7 @@
 import logging
 import uuid
 from collections.abc import Sequence
+from dataclasses import dataclass, field
 
 from pydantic import BaseModel
 from sqlalchemy import asc, desc, func, nulls_last, select
@@ -10,7 +11,7 @@ from sqlalchemy.sql import Select, Subquery, union_all
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import can_access, check_user_access
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import OpportunityStatus, Privilege
 from src.db.models.entity_models import Organization, OrganizationSavedOpportunity
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
@@ -20,19 +21,30 @@ from src.db.models.opportunity_models import (
 from src.db.models.user_models import User, UserSavedOpportunity
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.pagination.paginator import Paginator
-from src.search.search_models import StrSearchFilter
+from src.search.search_models import StrSearchFilter, UuidSearchFilter
 
 logger = logging.getLogger(__name__)
 
 
 class SavedOpportunityFilterParams(BaseModel):
     opportunity_status: StrSearchFilter | None = None
-    organization_ids: list[uuid.UUID] | None = None
+    organization_ids: UuidSearchFilter | None = None
 
 
 class SavedOpportunityListParams(BaseModel):
     filters: SavedOpportunityFilterParams | None = None
     pagination: PaginationParams
+
+
+@dataclass
+class SavedOpportunity:
+    """Opportunity enriched with saved_to_organizations fields for serialization."""
+
+    opportunity_id: uuid.UUID
+    opportunity_title: str | None = None
+    opportunity_status: OpportunityStatus | None = None
+    summary: OpportunitySummary | None = None
+    saved_to_organizations: list[dict] | None = field(default=None)
 
 
 def add_sort_order(stmt: Select, sort_order: list, saved_union: Subquery) -> Select:
@@ -158,8 +170,8 @@ def _build_saved_union_subquery(
     # Combine subqueries
     saved_sq = union_all(*subqueries).subquery()
 
-    # Aggregate to get one row per opportunity
-    saved_union = (
+    # Aggregate to latest save per opportunity
+    latest_saved = (
         select(
             saved_sq.c.opportunity_id,
             func.max(saved_sq.c.saved_at).label("saved_at"),
@@ -167,14 +179,63 @@ def _build_saved_union_subquery(
         .group_by(saved_sq.c.opportunity_id)
         .subquery()
     )
-    return saved_union
+
+    return latest_saved
+
+
+def _enrich_with_saved_organizations(
+    opportunities: Sequence[Opportunity],
+    org_ids_to_use: list[uuid.UUID],
+) -> list[SavedOpportunity]:
+    """
+    Convert a list of Opportunity ORM objects into SavedOpportunity DTOs
+      and attach a `saved_to_organizations` field only for the organizations
+      in `org_ids_to_use` that have saved the opportunity.
+    """
+    response: list[SavedOpportunity] = []
+
+    for opp in opportunities:
+        saved_opp = SavedOpportunity(
+            opportunity_id=opp.opportunity_id,
+            opportunity_title=opp.opportunity_title,
+            opportunity_status=opp.opportunity_status,
+            summary=opp.summary,
+        )
+
+        if org_ids_to_use:
+            saved_orgs: list[dict] = [
+                {
+                    "organization_id": save.organization_id,
+                    "organization_name": (
+                        save.organization.organization_name if save.organization else None
+                    ),
+                }
+                for save in opp.saved_opportunities_by_organizations
+                if save.organization_id in org_ids_to_use
+            ]
+
+            # If org filter was applied, include field (even if empty)
+            saved_opp.saved_to_organizations = saved_orgs
+
+        # If org_ids_to_use is empty → don't touch saved_to_organizations (leave as None)
+        response.append(saved_opp)
+
+    return response
 
 
 def get_saved_opportunities(
     db_session: db.Session, user: User, raw_opportunity_params: dict
-) -> tuple[Sequence[Opportunity], PaginationInfo]:
+) -> tuple[list[SavedOpportunity], PaginationInfo]:
+    """
+    Returns paginated saved opportunities for a user, enriched with
+    saved_to_organizations when relevant.
+    """
     opportunity_params = SavedOpportunityListParams.model_validate(raw_opportunity_params)
-    org_ids_param = opportunity_params.filters and opportunity_params.filters.organization_ids
+    org_ids_param = (
+        opportunity_params.filters
+        and opportunity_params.filters.organization_ids
+        and opportunity_params.filters.organization_ids.one_of
+    )
     user_id = user.user_id
     logger.info("Getting saved opportunities for user")
     include_user_saved_opps = True
@@ -211,6 +272,11 @@ def get_saved_opportunities(
                 CurrentOpportunitySummary.opportunity_summary
             )
         )
+        .options(
+            selectinload(Opportunity.saved_opportunities_by_organizations).selectinload(
+                OrganizationSavedOpportunity.organization
+            )
+        )
     )
 
     # Apply filters and sorting
@@ -226,4 +292,10 @@ def get_saved_opportunities(
         opportunity_params.pagination, paginator
     )
 
-    return paginated_search, pagination_info
+    # Enrich paginated opportunities with saved_to_organizations
+    enriched_opportunity = _enrich_with_saved_organizations(
+        paginated_search,
+        org_ids_to_use,
+    )
+
+    return enriched_opportunity, pagination_info

@@ -569,6 +569,16 @@ class SavedOpportunitySummaryV1Schema(Schema):
     )
 
 
+class SavedOpportunityOrganizationSchema(Schema):
+    organization_id = fields.UUID(
+        metadata={"description": "The ID of the organization"}, allow_none=False
+    )
+    organization_name = fields.String(
+        metadata={"description": "The name of the organization", "example": "Department of Health"},
+        allow_none=True,
+    )
+
+
 class SavedOpportunityResponseV1Schema(Schema):
     opportunity_id = fields.UUID(metadata={"description": "The ID of the saved opportunity"})
     opportunity_title = fields.String(
@@ -584,6 +594,9 @@ class SavedOpportunityResponseV1Schema(Schema):
     )
 
     summary = fields.Nested(SavedOpportunitySummaryV1Schema())
+    saved_to_organizations = fields.Nested(
+        SavedOpportunityOrganizationSchema, many=True, allow_none=True, missing=missing
+    )
 
 
 class OpportunityVersionAttachmentSchema(Schema):
