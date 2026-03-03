@@ -393,12 +393,11 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
     };
   }
 
-  const fieldNode: UiSchemaField = uiFieldObject;
-  const { definition } = fieldNode;
+  const { definition } = uiFieldObject;
 
   const { value, fieldSchema, fieldName, rawErrors, htmlFieldName } =
     getFieldInfo({
-      uiFieldObject: fieldNode,
+      uiFieldObject,
       formData,
       errors,
       formSchema,
@@ -417,7 +416,7 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
 
   // should filter and match warnings to field earlier in the process
   const widgetType = determineFieldType({
-    uiFieldObject: fieldNode,
+    uiFieldObject,
     fieldSchema,
   });
 
@@ -437,7 +436,7 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
     props: {
       id: htmlFieldName,
       key: htmlFieldName,
-      disabled: fieldNode.type === "null",
+      disabled: uiFieldObject.type === "null",
       required: requiredField,
       minLength: fieldSchema?.minLength,
       maxLength: fieldSchema?.maxLength,
