@@ -65,37 +65,32 @@ const goToSearch = async (page: Page) => {
 };
 
 const getFirstSubAgencySelection = async (page: Page) => {
-  const subAgencyCheckboxes = page.locator(
-    '#opportunity-filter-agency input[type="checkbox"]:not([id$="-any"]):not([id$="-all"])',
+  // Sub-agencies live inside nested lists: ul.margin-left-4 > li
+  // The count span has class "text-base-dark" and looks like "[5]"
+  const subAgencyItems = page.locator(
+    "#opportunity-filter-agency ul.margin-left-4 > li",
   );
 
-  const count = await subAgencyCheckboxes.count();
+  const count = await subAgencyItems.count();
   for (let i = 0; i < count; i += 1) {
-    const checkbox = subAgencyCheckboxes.nth(i);
+    const item = subAgencyItems.nth(i);
+    const checkbox = item.locator('input[type="checkbox"]').first();
+    const countSpan = item.locator("span.text-base-dark").first();
+
     const id = await checkbox.getAttribute("id");
     const value = await checkbox.getAttribute("value");
 
-    if (!id || !value) {
-      continue;
-    }
+    if (!id || !value) continue;
+    if (await checkbox.isChecked()) continue;
 
-    // A sub-agency code includes a top-level prefix, e.g. "USAID-ETH".
-    if (!value.includes("-")) {
-      continue;
-    }
+    // Only pick sub-agencies with count > 0
+    const countText = (await countSpan.textContent()) ?? "";
+    const countMatch = countText.match(/\[(\d+)\]/);
+    if (!countMatch || Number(countMatch[1]) <= 0) continue;
 
-    const labelText =
-      (await page.locator(`label[for="${id}"]`).first().textContent()) || "";
-
-    // Prefer visible sub-agencies with non-zero count, e.g. "... [2]".
-    const countMatch = labelText.match(/\[(\d+)\]\s*$/);
-    if (!countMatch || Number(countMatch[1]) <= 0) {
-      continue;
-    }
-
-    if (await checkbox.isChecked()) {
-      continue;
-    }
+    // Verify the label is visible before selecting
+    const label = item.locator(`label[for="${id}"]`).first();
+    if (!(await label.isVisible().catch(() => false))) continue;
 
     return { id, value };
   }
@@ -313,16 +308,24 @@ test.describe("Search page - state persistence after refresh", () => {
     await goToSearch(page);
 
     await waitForSearchResultsInitialLoad(page);
+
+    // Step 1: Open filter drawer
     await ensureFilterDrawerOpen(page);
+
+    // Step 2: Wait for agency filter options to load, which expands the accordion
     await waitForFilterOptions(page, "agency");
 
+    // Step 3: Ensure Agency accordion is expanded (waitForFilterOptions clicks it,
+    // but ensure it's open in case it was already open and got toggled closed)
     await ensureAccordionExpanded(page, "Agency");
 
-    const visibleAgencyOptions = page.locator(
-      "#opportunity-filter-agency label.usa-checkbox__label:visible",
+    // Step 4: Wait for sub-agency nested lists to be visible
+    await page.waitForSelector(
+      "#opportunity-filter-agency ul.margin-left-4 > li",
+      { state: "visible", timeout: 30000 },
     );
-    await expect(visibleAgencyOptions.first()).toBeVisible({ timeout: 30000 });
 
+    // Step 5: Find first sub-agency with count > 0
     const subAgency = await getFirstSubAgencySelection(page);
     expect(subAgency).toBeTruthy();
     if (!subAgency) {
@@ -339,9 +342,10 @@ test.describe("Search page - state persistence after refresh", () => {
     await checkboxLabel.waitFor({ state: "visible", timeout: 30000 });
     await checkboxLabel.scrollIntoViewIfNeeded();
 
-    // Retry once if click does not propagate to URL in time (seen in CI)
+    // Step 6: Click directly on the sub-agency (NOT the parent "All" checkbox)
     let selectedAndUpdated = false;
     for (let attempt = 1; attempt <= 2; attempt += 1) {
+      // Ensure unchecked before clicking
       if (await checkbox.isChecked()) {
         await checkboxLabel.click();
         await expect(checkbox).not.toBeChecked({ timeout: 10000 });
@@ -360,26 +364,31 @@ test.describe("Search page - state persistence after refresh", () => {
         selectedAndUpdated = true;
         break;
       } catch (_e) {
-        if (attempt === 2) {
-          throw _e;
-        }
+        if (attempt === 2) throw _e;
       }
     }
 
     expect(selectedAndUpdated).toBe(true);
 
-    // Additional wait to ensure filter is fully applied before refresh
+    // Wait to ensure filter is fully applied
     await page.waitForTimeout(2000);
 
-    // Refresh and wait for page to load
+    // Step 7: Refresh and verify persistence
     await refreshPageWithCurrentURL(page);
     await waitForSearchResultsInitialLoad(page, 180000);
 
     await ensureFilterDrawerOpen(page);
-    await ensureAccordionExpanded(page, "Agency");
-    await expect(visibleAgencyOptions.first()).toBeVisible({ timeout: 30000 });
 
-    // Verify by stable identifier (value) instead of pre-refresh id
+    // Step 8: Re-expand Agency accordion and wait for sub-agencies to render
+    await waitForFilterOptions(page, "agency");
+    await ensureAccordionExpanded(page, "Agency");
+    await page.waitForSelector(
+      "#opportunity-filter-agency ul.margin-left-4 > li",
+      { state: "visible", timeout: 30000 },
+    );
+    await page.waitForTimeout(1000);
+
+    // Step 9: Verify sub-agency is still checked after refresh
     const checkedSubAgencyByValue = page
       .locator(
         `#opportunity-filter-agency input[type="checkbox"][value="${subAgency.value}"]`,
