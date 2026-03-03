@@ -1,5 +1,15 @@
 name: E2E Tests (Local Github Target)
 on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "api/**"
+      - "frontend/**"
+      - "infra/api/**"
+      - "infra/frontend/**"
+      - "infra/modules/**"
+      - ".github/workflows/ci-frontend-e2e.yml"
   workflow_dispatch:
     inputs:
       api_logs:
