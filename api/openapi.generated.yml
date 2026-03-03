@@ -230,8 +230,8 @@ paths:
                     page_offset: 1
                     page_size: 25
       security:
+      - ApiJwtAuth: []
       - ApiUserKeyAuth: []
-      - ApiKeyAuth: []
   /v1/workflows/events:
     put:
       parameters: []
