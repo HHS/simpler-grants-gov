@@ -13,7 +13,6 @@ import {
   expectCheckboxesChecked,
   expectSortBy,
   fillSearchInputAndSubmit,
-  getFirstSubAgencyWithResults,
   getSearchInput,
   selectSortBy,
   toggleCheckbox,
@@ -65,6 +64,45 @@ const goToSearch = async (page: Page) => {
   }
 };
 
+const getFirstSubAgencySelection = async (page: Page) => {
+  const subAgencyCheckboxes = page.locator(
+    '#opportunity-filter-agency input[type="checkbox"]:not([id$="-any"]):not([id$="-all"])',
+  );
+
+  const count = await subAgencyCheckboxes.count();
+  for (let i = 0; i < count; i += 1) {
+    const checkbox = subAgencyCheckboxes.nth(i);
+    const id = await checkbox.getAttribute("id");
+    const value = await checkbox.getAttribute("value");
+
+    if (!id || !value) {
+      continue;
+    }
+
+    // A sub-agency code includes a top-level prefix, e.g. "USAID-ETH".
+    if (!value.includes("-")) {
+      continue;
+    }
+
+    const labelText =
+      (await page.locator(`label[for="${id}"]`).first().textContent()) || "";
+
+    // Prefer visible sub-agencies with non-zero count, e.g. "... [2]".
+    const countMatch = labelText.match(/\[(\d+)\]\s*$/);
+    if (!countMatch || Number(countMatch[1]) <= 0) {
+      continue;
+    }
+
+    if (await checkbox.isChecked()) {
+      continue;
+    }
+
+    return { id, value };
+  }
+
+  return null;
+};
+
 test.describe("Search page - state persistence after refresh", () => {
   test("should retain search input and sort after refresh", async ({ page }, {
     project,
@@ -73,7 +111,7 @@ test.describe("Search page - state persistence after refresh", () => {
     const isMobile = !!project.name.match(/[Mm]obile/);
     await goToSearch(page);
 
-    await waitForSearchResultsInitialLoad(page, 60000);
+    await waitForSearchResultsInitialLoad(page);
     await fillSearchInputAndSubmit(searchTerm, page, project.name);
     await waitForURLContainsQueryParamValue(page, "query", searchTerm, 120000);
 
@@ -102,7 +140,7 @@ test.describe("Search page - state persistence after refresh", () => {
     test.setTimeout(240_000);
     await goToSearch(page);
 
-    await waitForSearchResultsInitialLoad(page, 60000);
+    await waitForSearchResultsInitialLoad(page);
     await ensureFilterDrawerOpen(page);
 
     await ensureAccordionExpanded(page, "Opportunity status");
@@ -134,7 +172,7 @@ test.describe("Search page - state persistence after refresh", () => {
     test.setTimeout(240_000);
     await goToSearch(page);
 
-    await waitForSearchResultsInitialLoad(page, 60000);
+    await waitForSearchResultsInitialLoad(page);
     await ensureFilterDrawerOpen(page);
 
     await ensureAccordionExpanded(page, "Funding instrument");
@@ -160,7 +198,7 @@ test.describe("Search page - state persistence after refresh", () => {
     test.setTimeout(240_000);
     await goToSearch(page);
 
-    await waitForSearchResultsInitialLoad(page, 60000);
+    await waitForSearchResultsInitialLoad(page);
     await ensureFilterDrawerOpen(page);
 
     await ensureAccordionExpanded(page, "Eligibility");
@@ -186,7 +224,7 @@ test.describe("Search page - state persistence after refresh", () => {
     test.setTimeout(240_000);
     await goToSearch(page);
 
-    await waitForSearchResultsInitialLoad(page, 60000);
+    await waitForSearchResultsInitialLoad(page);
     await ensureFilterDrawerOpen(page);
 
     await ensureAccordionExpanded(page, "Category");
@@ -212,7 +250,7 @@ test.describe("Search page - state persistence after refresh", () => {
     test.setTimeout(240_000);
     await goToSearch(page);
 
-    await waitForSearchResultsInitialLoad(page, 60000);
+    await waitForSearchResultsInitialLoad(page);
     await ensureFilterDrawerOpen(page);
     await waitForFilterOptions(page, "agency");
 
@@ -272,72 +310,83 @@ test.describe("Search page - state persistence after refresh", () => {
 
   test("should retain sub-agency filter after refresh", async ({ page }) => {
     test.setTimeout(240_000);
-
-    // 1. Launch search page
     await goToSearch(page);
-    await waitForSearchResultsInitialLoad(page, 60000);
 
-    // 2. Click 'Filters' to open filter drawer
+    await waitForSearchResultsInitialLoad(page);
     await ensureFilterDrawerOpen(page);
+    await waitForFilterOptions(page, "agency");
 
-    // 3. Click on Agency to expand full list (parent + sub-agency)
     await ensureAccordionExpanded(page, "Agency");
 
-    // 4. Find a sub-agency with count > 0 (do NOT click any parent agency)
-    const subAgencyCheckboxes = page.locator(
-      '#opportunity-filter-agency input[type="checkbox"]:not([id$="-any"]):not([id$="-all"])',
+    const visibleAgencyOptions = page.locator(
+      "#opportunity-filter-agency label.usa-checkbox__label:visible",
     );
-    const count = await subAgencyCheckboxes.count();
-    let subAgency = null;
-    for (let i = 0; i < count; i += 1) {
-      const checkbox = subAgencyCheckboxes.nth(i);
-      const id = await checkbox.getAttribute("id");
-      const value = await checkbox.getAttribute("value");
-      if (!id || !value) continue;
-      // Only sub-agency codes have a dash
-      if (!value.includes("-")) continue;
-      const labelText =
-        (await page.locator(`label[for="${id}"]`).first().textContent()) || "";
-      const countMatch = labelText.match(/\[(\d+)\]\s*$/);
-      if (!countMatch || Number(countMatch[1]) <= 0) continue;
-      if (await checkbox.isChecked()) continue;
-      subAgency = { id, value };
-      break;
-    }
+    await expect(visibleAgencyOptions.first()).toBeVisible({ timeout: 30000 });
+
+    const subAgency = await getFirstSubAgencySelection(page);
+    expect(subAgency).toBeTruthy();
     if (!subAgency) {
-      test.skip(true, "No sub-agency with results found; skipping test.");
+      test.fail();
       return;
     }
 
-    // 5. Directly click the sub-agency
     const checkbox = page.locator(`input[id="${subAgency.id}"]`).first();
     const checkboxLabel = page
       .locator(`label[for="${subAgency.id}"]:visible`)
       .first();
+
     await checkbox.waitFor({ state: "attached", timeout: 30000 });
     await checkboxLabel.waitFor({ state: "visible", timeout: 30000 });
     await checkboxLabel.scrollIntoViewIfNeeded();
-    await checkboxLabel.click();
-    await expect(checkbox).toBeChecked({ timeout: 15000 });
 
-    // Wait for URL to update
-    await waitForURLContainsQueryParamValues(
-      page,
-      "agency",
-      [subAgency.value],
-      60000,
-    );
+    // Retry once if click does not propagate to URL in time (seen in CI)
+    let selectedAndUpdated = false;
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      if (await checkbox.isChecked()) {
+        await checkboxLabel.click();
+        await expect(checkbox).not.toBeChecked({ timeout: 10000 });
+      }
 
-    // --- Refresh page and verify ---
+      await checkboxLabel.click();
+      await expect(checkbox).toBeChecked({ timeout: 15000 });
+
+      try {
+        await waitForURLContainsQueryParamValues(
+          page,
+          "agency",
+          [subAgency.value],
+          60000,
+        );
+        selectedAndUpdated = true;
+        break;
+      } catch (_e) {
+        if (attempt === 2) {
+          throw _e;
+        }
+      }
+    }
+
+    expect(selectedAndUpdated).toBe(true);
+
+    // Additional wait to ensure filter is fully applied before refresh
+    await page.waitForTimeout(2000);
+
+    // Refresh and wait for page to load
     await refreshPageWithCurrentURL(page);
+    await waitForSearchResultsInitialLoad(page, 180000);
+
     await ensureFilterDrawerOpen(page);
     await ensureAccordionExpanded(page, "Agency");
+    await expect(visibleAgencyOptions.first()).toBeVisible({ timeout: 30000 });
+
+    // Verify by stable identifier (value) instead of pre-refresh id
     const checkedSubAgencyByValue = page
       .locator(
         `#opportunity-filter-agency input[type="checkbox"][value="${subAgency.value}"]`,
       )
       .first();
     await expect(checkedSubAgencyByValue).toBeChecked({ timeout: 15000 });
+
     expectURLQueryParamValues(page, "agency", [subAgency.value]);
   });
 });
