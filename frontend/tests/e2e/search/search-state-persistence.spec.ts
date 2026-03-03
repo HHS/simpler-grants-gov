@@ -335,34 +335,39 @@ test.describe("Search page - state persistence after refresh", () => {
     }
 
     const checkbox = page.locator(`input[id="${subAgency.id}"]`).first();
-    const checkboxLabel = page
-      .locator(`label[for="${subAgency.id}"]:visible`)
-      .first();
 
     await checkbox.waitFor({ state: "attached", timeout: 30000 });
-    await checkboxLabel.waitFor({ state: "visible", timeout: 30000 });
-    await checkboxLabel.scrollIntoViewIfNeeded();
 
-    // Step 6: Click directly on the sub-agency (NOT the parent "All" checkbox)
+    // Step 6: Click directly on the sub-agency (NOT the parent "All" checkbox).
     let selectedAndUpdated = false;
     for (let attempt = 1; attempt <= 2; attempt += 1) {
       // Ensure unchecked before clicking
       if (await checkbox.isChecked()) {
-        await checkbox.click({ force: true });
+        await page.evaluate((id) => {
+          document
+            .getElementById(id)
+            ?.dispatchEvent(
+              new MouseEvent("click", { bubbles: true, cancelable: true }),
+            );
+        }, subAgency.id);
         await expect(checkbox).not.toBeChecked({ timeout: 10000 });
       }
 
-      // Click the checkbox input directly rather than the label,
-      // since the label contains nested spans that can intercept the click
-      await checkbox.scrollIntoViewIfNeeded();
-      await checkbox.click({ force: true });
+      // Scroll via JS (handles inner scroll containers) then dispatch click event.
+      await page.evaluate((id) => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ block: "center", inline: "nearest" });
+      }, subAgency.id);
       await page.waitForTimeout(300);
 
-      if (!(await checkbox.isChecked())) {
-        // JS dispatch as fallback
-        await checkbox.dispatchEvent("click");
-        await page.waitForTimeout(300);
-      }
+      await page.evaluate((id) => {
+        document
+          .getElementById(id)
+          ?.dispatchEvent(
+            new MouseEvent("click", { bubbles: true, cancelable: true }),
+          );
+      }, subAgency.id);
+      await page.waitForTimeout(300);
 
       await expect(checkbox).toBeChecked({ timeout: 15000 });
 
