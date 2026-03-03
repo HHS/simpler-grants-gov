@@ -220,9 +220,7 @@ class CustomFieldType(fields.String):
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(
-            validate=validate.OneOf(
-                ["string", "number", "integer", "boolean", "object", "array"]
-            ),
+            validate=validate.OneOf(["string", "number", "integer", "boolean", "object", "array"]),
             metadata={
                 "description": "The JSON schema type to use when de-serializing the value field"
             },
@@ -235,12 +233,8 @@ class CustomField(Schema):
 
     name = fields.String(required=True, metadata={"example": "eligible_applicants"})
     fieldType = CustomFieldType(required=True)
-    schema = fields.URL(
-        allow_none=True, metadata={"example": "https://example.com/schema"}
-    )
-    value = fields.Raw(
-        required=True, metadata={"example": "nonprofits, state governments"}
-    )
+    schema = fields.URL(allow_none=True, metadata={"example": "https://example.com/schema"})
+    value = fields.Raw(required=True, metadata={"example": "nonprofits, state governments"})
     description = fields.String(
         allow_none=True,
         metadata={"example": "The types of organizations eligible to apply"},
@@ -292,9 +286,7 @@ class OppStatus(Schema):
             "example": "active, forecasted, closed",
         },
     )
-    customValue = fields.String(
-        allow_none=True, metadata={"description": "A custom status value"}
-    )
+    customValue = fields.String(allow_none=True, metadata={"description": "A custom status value"})
     description = fields.String(
         allow_none=True,
         metadata={"description": "A human-readable description of the status"},
@@ -314,9 +306,7 @@ class OppFunding(Schema):
     totalAmountAvailable = fields.Nested(
         Money,
         allow_none=True,
-        metadata={
-            "description": "Total amount of funding available for this opportunity"
-        },
+        metadata={"description": "Total amount of funding available for this opportunity"},
     )
     minAwardAmount = fields.Nested(
         Money,
@@ -351,9 +341,7 @@ class OppTimeline(Schema):
     postDate = fields.Nested(
         SingleDateEvent,
         allow_none=True,
-        metadata={
-            "description": "The date (and time) at which the opportunity is posted"
-        },
+        metadata={"description": "The date (and time) at which the opportunity is posted"},
     )
     closeDate = fields.Nested(
         SingleDateEvent,
@@ -431,9 +419,7 @@ class OpportunityBase(Schema):
         keys=fields.String(),
         values=fields.Nested(CustomField),
         allow_none=True,
-        metadata={
-            "description": "Additional custom fields specific to this opportunity"
-        },
+        metadata={"description": "Additional custom fields specific to this opportunity"},
     )
 
 
@@ -472,9 +458,7 @@ class ArrayOperator(fields.String):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             validate=validate.OneOf(["in", "notIn"]),
-            metadata={
-                "description": "Operators that filter a field based on an array of values"
-            },
+            metadata={"description": "Operators that filter a field based on an array of values"},
             **kwargs
         )
 
@@ -485,9 +469,7 @@ class StringOperator(fields.String):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             validate=validate.OneOf(["like", "notLike"]),
-            metadata={
-                "description": "Operators that filter a field based on a string value"
-            },
+            metadata={"description": "Operators that filter a field based on a string value"},
             **kwargs
         )
 
@@ -498,9 +480,7 @@ class RangeOperator(fields.String):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             validate=validate.OneOf(["between", "outside"]),
-            metadata={
-                "description": "Operators that filter a field based on a range of values"
-            },
+            metadata={"description": "Operators that filter a field based on a range of values"},
             **kwargs
         )
 
@@ -711,9 +691,7 @@ class OppDefaultFilters(Schema):
     totalFundingAvailableRange = fields.Nested(
         MoneyRangeFilter,
         allow_none=True,
-        metadata={
-            "description": "`funding.totalAmountAvailable` is between the given range"
-        },
+        metadata={"description": "`funding.totalAmountAvailable` is between the given range"},
     )
     minAwardAmountRange = fields.Nested(
         MoneyRangeFilter,
@@ -743,9 +721,7 @@ class OppFilters(Schema):
     totalFundingAvailableRange = fields.Nested(
         MoneyRangeFilter,
         allow_none=True,
-        metadata={
-            "description": "`funding.totalAmountAvailable` is between the given range"
-        },
+        metadata={"description": "`funding.totalAmountAvailable` is between the given range"},
     )
     minAwardAmountRange = fields.Nested(
         MoneyRangeFilter,
@@ -1027,9 +1003,7 @@ class Filtered(Sorted):
 class OpportunitiesListResponse(Schema):
     """Response schema for listing opportunities."""
 
-    status = fields.Integer(
-        required=True, metadata={"description": "The HTTP status code"}
-    )
+    status = fields.Integer(required=True, metadata={"description": "The HTTP status code"})
     message = fields.String(required=True, metadata={"description": "The message"})
     items = fields.List(
         fields.Nested(OpportunityBase),
@@ -1046,9 +1020,7 @@ class OpportunitiesListResponse(Schema):
 class OpportunitiesSearchResponse(Schema):
     """Response schema for searching opportunities."""
 
-    status = fields.Integer(
-        required=True, metadata={"description": "The HTTP status code"}
-    )
+    status = fields.Integer(required=True, metadata={"description": "The HTTP status code"})
     message = fields.String(required=True, metadata={"description": "The message"})
     items = fields.List(
         fields.Nested(OpportunityBase),
@@ -1075,9 +1047,7 @@ class OpportunitiesSearchResponse(Schema):
 class OpportunityResponse(Schema):
     """Response schema for a single opportunity."""
 
-    status = fields.Integer(
-        required=True, metadata={"description": "The HTTP status code"}
-    )
+    status = fields.Integer(required=True, metadata={"description": "The HTTP status code"})
     message = fields.String(required=True, metadata={"description": "The message"})
     data = fields.Nested(
         OpportunityBase, required=True, metadata={"description": "The opportunity"}
@@ -1092,23 +1062,15 @@ class OpportunityResponse(Schema):
 class Error(Schema):
     """Standard error response schema."""
 
-    status = fields.Integer(
-        required=True, metadata={"description": "The HTTP status code"}
-    )
-    message = fields.String(
-        required=True, metadata={"description": "Human-readable error message"}
-    )
-    errors = fields.List(
-        fields.Raw, required=True, metadata={"description": "List of errors"}
-    )
+    status = fields.Integer(required=True, metadata={"description": "The HTTP status code"})
+    message = fields.String(required=True, metadata={"description": "Human-readable error message"})
+    errors = fields.List(fields.Raw, required=True, metadata={"description": "List of errors"})
 
 
 class ValidationError(Schema):
     """Validation error schema."""
 
-    loc = fields.List(
-        fields.Raw, required=True, metadata={"description": "Location of the error"}
-    )
+    loc = fields.List(fields.Raw, required=True, metadata={"description": "Location of the error"})
     msg = fields.String(required=True, metadata={"description": "Error message"})
     type = fields.String(required=True, metadata={"description": "Error type"})
 
@@ -1127,12 +1089,8 @@ class HTTPError(Schema):
     """APIFlask HTTP error schema."""
 
     status = fields.Integer(required=True, metadata={"description": "HTTP status code"})
-    message = fields.String(
-        required=True, metadata={"description": "Human-readable error message"}
-    )
-    errors = fields.List(
-        fields.Raw, required=True, metadata={"description": "List of errors"}
-    )
+    message = fields.String(required=True, metadata={"description": "Human-readable error message"})
+    errors = fields.List(fields.Raw, required=True, metadata={"description": "List of errors"})
 
 
 # =============================================================================
