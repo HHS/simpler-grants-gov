@@ -242,6 +242,7 @@ describe("AwardRecommendationPage", () => {
           params: awardRecommendationParams,
         });
       });
+
       expect(mockRedirect).toHaveBeenCalledWith("/maintenance");
     });
   });
