@@ -27,7 +27,8 @@ class Money(Schema):
     """Represents a monetary amount in a specific currency."""
 
     amount = fields.String(
-        required=True, metadata={"description": "The amount of money", "example": "1000000.0"}
+        required=True,
+        metadata={"description": "The amount of money", "example": "1000000.0"},
     )
     currency = fields.String(
         required=True,
@@ -46,7 +47,8 @@ class SingleDateEvent(Schema):
         },
     )
     eventType = fields.String(
-        allow_none=True, metadata={"description": "Type of event", "example": "singleDate"}
+        allow_none=True,
+        metadata={"description": "Type of event", "example": "singleDate"},
     )
     description = fields.String(
         allow_none=True,
@@ -80,11 +82,17 @@ class DateRange(Schema):
     # currently known workaround is to use the `Raw` type instead
     min = fields.Raw(
         allow_none=True,
-        metadata={"description": "The minimum date in the range", "example": "2021-01-01"},
+        metadata={
+            "description": "The minimum date in the range",
+            "example": "2021-01-01",
+        },
     )
     max = fields.Raw(
         allow_none=True,
-        metadata={"description": "The maximum date in the range", "example": "2021-01-02"},
+        metadata={
+            "description": "The maximum date in the range",
+            "example": "2021-01-02",
+        },
     )
 
 
@@ -212,7 +220,9 @@ class CustomFieldType(fields.String):
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(
-            validate=validate.OneOf(["string", "number", "integer", "boolean", "object", "array"]),
+            validate=validate.OneOf(
+                ["string", "number", "integer", "boolean", "object", "array"]
+            ),
             metadata={
                 "description": "The JSON schema type to use when de-serializing the value field"
             },
@@ -225,10 +235,15 @@ class CustomField(Schema):
 
     name = fields.String(required=True, metadata={"example": "eligible_applicants"})
     fieldType = CustomFieldType(required=True)
-    schema = fields.URL(allow_none=True, metadata={"example": "https://example.com/schema"})
-    value = fields.Raw(required=True, metadata={"example": "nonprofits, state governments"})
+    schema = fields.URL(
+        allow_none=True, metadata={"example": "https://example.com/schema"}
+    )
+    value = fields.Raw(
+        required=True, metadata={"example": "nonprofits, state governments"}
+    )
     description = fields.String(
-        allow_none=True, metadata={"example": "The types of organizations eligible to apply"}
+        allow_none=True,
+        metadata={"example": "The types of organizations eligible to apply"},
     )
 
 
@@ -277,7 +292,9 @@ class OppStatus(Schema):
             "example": "active, forecasted, closed",
         },
     )
-    customValue = fields.String(allow_none=True, metadata={"description": "A custom status value"})
+    customValue = fields.String(
+        allow_none=True, metadata={"description": "A custom status value"}
+    )
     description = fields.String(
         allow_none=True,
         metadata={"description": "A human-readable description of the status"},
@@ -297,7 +314,9 @@ class OppFunding(Schema):
     totalAmountAvailable = fields.Nested(
         Money,
         allow_none=True,
-        metadata={"description": "Total amount of funding available for this opportunity"},
+        metadata={
+            "description": "Total amount of funding available for this opportunity"
+        },
     )
     minAwardAmount = fields.Nested(
         Money,
@@ -319,7 +338,10 @@ class OppFunding(Schema):
     )
     estimatedAwardCount = fields.Integer(
         allow_none=True,
-        metadata={"description": "Estimated number of awards that will be granted", "example": 5},
+        metadata={
+            "description": "Estimated number of awards that will be granted",
+            "example": 5,
+        },
     )
 
 
@@ -329,7 +351,9 @@ class OppTimeline(Schema):
     postDate = fields.Nested(
         SingleDateEvent,
         allow_none=True,
-        metadata={"description": "The date (and time) at which the opportunity is posted"},
+        metadata={
+            "description": "The date (and time) at which the opportunity is posted"
+        },
     )
     closeDate = fields.Nested(
         SingleDateEvent,
@@ -407,7 +431,9 @@ class OpportunityBase(Schema):
         keys=fields.String(),
         values=fields.Nested(CustomField),
         allow_none=True,
-        metadata={"description": "Additional custom fields specific to this opportunity"},
+        metadata={
+            "description": "Additional custom fields specific to this opportunity"
+        },
     )
 
 
@@ -446,7 +472,9 @@ class ArrayOperator(fields.String):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             validate=validate.OneOf(["in", "notIn"]),
-            metadata={"description": "Operators that filter a field based on an array of values"},
+            metadata={
+                "description": "Operators that filter a field based on an array of values"
+            },
             **kwargs
         )
 
@@ -457,7 +485,9 @@ class StringOperator(fields.String):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             validate=validate.OneOf(["like", "notLike"]),
-            metadata={"description": "Operators that filter a field based on a string value"},
+            metadata={
+                "description": "Operators that filter a field based on a string value"
+            },
             **kwargs
         )
 
@@ -468,7 +498,9 @@ class RangeOperator(fields.String):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             validate=validate.OneOf(["between", "outside"]),
-            metadata={"description": "Operators that filter a field based on a range of values"},
+            metadata={
+                "description": "Operators that filter a field based on a range of values"
+            },
             **kwargs
         )
 
@@ -478,11 +510,17 @@ class DefaultFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The operator to apply to the filter value", "example": "eq"},
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "eq",
+        },
     )
     value = fields.Raw(
         required=True,
-        metadata={"description": "The value to use for the filter operation", "example": "open"},
+        metadata={
+            "description": "The value to use for the filter operation",
+            "example": "open",
+        },
     )
 
 
@@ -491,12 +529,18 @@ class StringArrayFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The operator to apply to the filter value", "example": "in"},
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "in",
+        },
     )
     value = fields.List(
         fields.String,
         required=True,
-        metadata={"description": "The array of string values", "example": ["open", "forecasted"]},
+        metadata={
+            "description": "The array of string values",
+            "example": ["open", "forecasted"],
+        },
     )
 
 
@@ -505,11 +549,17 @@ class StringComparisonFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The operator to apply to the filter value", "example": "like"},
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "like",
+        },
     )
     value = fields.String(
         required=True,
-        metadata={"description": "The string value to compare against", "example": "health"},
+        metadata={
+            "description": "The string value to compare against",
+            "example": "health",
+        },
     )
 
 
@@ -533,11 +583,17 @@ class DateComparisonFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The operator to apply to the filter value", "example": "gte"},
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "gte",
+        },
     )
     value = fields.Date(
         required=True,
-        metadata={"description": "The date value to compare against", "example": "2026-01-01"},
+        metadata={
+            "description": "The date value to compare against",
+            "example": "2026-01-01",
+        },
     )
 
 
@@ -561,7 +617,10 @@ class MoneyComparisonFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The operator to apply to the filter value", "example": "gte"},
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "gte",
+        },
     )
     value = fields.Nested(
         Money,
@@ -595,7 +654,10 @@ class NumberComparisonFilter(Schema):
     )
     value: Any = fields.Float(
         required=True,
-        metadata={"description": "The numeric value to compare against", "example": 1000},
+        metadata={
+            "description": "The numeric value to compare against",
+            "example": 1000,
+        },
     )
 
 
@@ -621,7 +683,10 @@ class NumberArrayFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The operator to apply to the filter value", "example": "in"},
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "in",
+        },
     )
     value = fields.List(
         fields.Float,
@@ -646,7 +711,9 @@ class OppDefaultFilters(Schema):
     totalFundingAvailableRange = fields.Nested(
         MoneyRangeFilter,
         allow_none=True,
-        metadata={"description": "`funding.totalAmountAvailable` is between the given range"},
+        metadata={
+            "description": "`funding.totalAmountAvailable` is between the given range"
+        },
     )
     minAwardAmountRange = fields.Nested(
         MoneyRangeFilter,
@@ -676,7 +743,9 @@ class OppFilters(Schema):
     totalFundingAvailableRange = fields.Nested(
         MoneyRangeFilter,
         allow_none=True,
-        metadata={"description": "`funding.totalAmountAvailable` is between the given range"},
+        metadata={
+            "description": "`funding.totalAmountAvailable` is between the given range"
+        },
     )
     minAwardAmountRange = fields.Nested(
         MoneyRangeFilter,
@@ -690,7 +759,10 @@ class OppFilters(Schema):
     )
     customFilters = fields.Dict(
         allow_none=True,
-        metadata={"description": "Additional custom filters to apply to the search", "example": {}},
+        metadata={
+            "description": "Additional custom filters to apply to the search",
+            "example": {},
+        },
     )
 
 
@@ -737,10 +809,12 @@ class PaginatedResultsInfo(Schema):
         metadata={"description": "The number of items per page", "example": 10},
     )
     totalItems = fields.Integer(
-        required=True, metadata={"description": "The total number of items", "example": 100}
+        required=True,
+        metadata={"description": "The total number of items", "example": 100},
     )
     totalPages = fields.Integer(
-        required=True, metadata={"description": "The total number of pages", "example": 10}
+        required=True,
+        metadata={"description": "The total number of pages", "example": 10},
     )
 
 
@@ -769,7 +843,10 @@ class SortBase(Schema):
     )
     customSortBy = fields.String(
         allow_none=True,
-        metadata={"description": "Implementation-defined sort key", "example": "custom_field_1"},
+        metadata={
+            "description": "Implementation-defined sort key",
+            "example": "custom_field_1",
+        },
     )
 
 
@@ -839,11 +916,17 @@ class SortedResultsInfo(Schema):
     )
     customSortBy = fields.String(
         allow_none=True,
-        metadata={"description": "Implementation-defined sort key", "example": "custom_field_1"},
+        metadata={
+            "description": "Implementation-defined sort key",
+            "example": "custom_field_1",
+        },
     )
     sortOrder = fields.String(
         required=True,
-        metadata={"description": "The order in which the results are sorted", "example": "desc"},
+        metadata={
+            "description": "The order in which the results are sorted",
+            "example": "desc",
+        },
     )
     errors = fields.List(
         fields.String,
@@ -944,7 +1027,9 @@ class Filtered(Sorted):
 class OpportunitiesListResponse(Schema):
     """Response schema for listing opportunities."""
 
-    status = fields.Integer(required=True, metadata={"description": "The HTTP status code"})
+    status = fields.Integer(
+        required=True, metadata={"description": "The HTTP status code"}
+    )
     message = fields.String(required=True, metadata={"description": "The message"})
     items = fields.List(
         fields.Nested(OpportunityBase),
@@ -961,7 +1046,9 @@ class OpportunitiesListResponse(Schema):
 class OpportunitiesSearchResponse(Schema):
     """Response schema for searching opportunities."""
 
-    status = fields.Integer(required=True, metadata={"description": "The HTTP status code"})
+    status = fields.Integer(
+        required=True, metadata={"description": "The HTTP status code"}
+    )
     message = fields.String(required=True, metadata={"description": "The message"})
     items = fields.List(
         fields.Nested(OpportunityBase),
@@ -988,7 +1075,9 @@ class OpportunitiesSearchResponse(Schema):
 class OpportunityResponse(Schema):
     """Response schema for a single opportunity."""
 
-    status = fields.Integer(required=True, metadata={"description": "The HTTP status code"})
+    status = fields.Integer(
+        required=True, metadata={"description": "The HTTP status code"}
+    )
     message = fields.String(required=True, metadata={"description": "The message"})
     data = fields.Nested(
         OpportunityBase, required=True, metadata={"description": "The opportunity"}
@@ -1003,15 +1092,23 @@ class OpportunityResponse(Schema):
 class Error(Schema):
     """Standard error response schema."""
 
-    status = fields.Integer(required=True, metadata={"description": "The HTTP status code"})
-    message = fields.String(required=True, metadata={"description": "Human-readable error message"})
-    errors = fields.List(fields.Raw, required=True, metadata={"description": "List of errors"})
+    status = fields.Integer(
+        required=True, metadata={"description": "The HTTP status code"}
+    )
+    message = fields.String(
+        required=True, metadata={"description": "Human-readable error message"}
+    )
+    errors = fields.List(
+        fields.Raw, required=True, metadata={"description": "List of errors"}
+    )
 
 
 class ValidationError(Schema):
     """Validation error schema."""
 
-    loc = fields.List(fields.Raw, required=True, metadata={"description": "Location of the error"})
+    loc = fields.List(
+        fields.Raw, required=True, metadata={"description": "Location of the error"}
+    )
     msg = fields.String(required=True, metadata={"description": "Error message"})
     type = fields.String(required=True, metadata={"description": "Error type"})
 
@@ -1030,8 +1127,12 @@ class HTTPError(Schema):
     """APIFlask HTTP error schema."""
 
     status = fields.Integer(required=True, metadata={"description": "HTTP status code"})
-    message = fields.String(required=True, metadata={"description": "Human-readable error message"})
-    errors = fields.List(fields.Raw, required=True, metadata={"description": "List of errors"})
+    message = fields.String(
+        required=True, metadata={"description": "Human-readable error message"}
+    )
+    errors = fields.List(
+        fields.Raw, required=True, metadata={"description": "List of errors"}
+    )
 
 
 # =============================================================================
