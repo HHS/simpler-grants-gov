@@ -1,19 +1,13 @@
-import clsx from "clsx";
-import { noop } from "lodash";
-import { applicationTestUserId, testApplicationId } from "src/constants/auth";
+import { testApplicationId } from "src/constants/auth";
 import { useUser } from "src/services/auth/useUser";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
-import { Menu, NavDropDownButton } from "@trussworks/react-uswds";
-
-import { LoginButton } from "src/components/LoginButton";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { useCallback } from "react";
 
 // links directly to a test application, only used in local environments when logged in as specific test user
-const TestApplicationLink = () => {
+export const TestApplicationLink = () => {
   const t = useTranslations("Header.navLinks");
   return (
     <Link
@@ -22,74 +16,6 @@ const TestApplicationLink = () => {
     >
       {t("testApplication")}
     </Link>
-  );
-};
-
-const SettingsNavLink = () => {
-  const t = useTranslations("Header.navLinks");
-  return (
-    <Link
-      className="display-flex usa-button usa-button--unstyled text-no-underline"
-      href="/settings"
-    >
-      {t("settings")}
-    </Link>
-  );
-};
-
-// used in three different places
-// 1. on desktop - nav item drop down button content
-// 2. on mobile - nav item drop down button content, without email text
-// 3. on mobile - nav sub item content
-const UserAccountItem = ({ isSubnav }: { isSubnav: boolean }) => {
-  const t = useTranslations("Header.navLinks");
-  return (
-    <a
-      className={clsx("flex-align-center", "display-flex", {
-        "padding-x-0": !isSubnav,
-        "desktop:display-none": isSubnav,
-        "usa-nav__submenu-item": isSubnav,
-        "usa-button": isSubnav,
-        "border-y-0": isSubnav,
-      })}
-    >
-      <div
-        className={clsx({
-          "display-none": !isSubnav,
-          "desktop:display-block": !isSubnav,
-        })}
-      >
-        {t("account")}
-      </div>
-    </a>
-  );
-};
-
-const LogoutNavItem = () => {
-  const t = useTranslations("Header.navLinks");
-
-  const { logoutLocalUser } = useUser();
-  const router = useRouter();
-
-  const logout = useCallback(async (): Promise<void> => {
-    // this isn't using the clientFetch hook because we don't really need all that added functionality here
-    await fetch("/api/auth/logout", {
-      method: "POST",
-    });
-
-    logoutLocalUser();
-    router.refresh();
-  }, [logoutLocalUser, router]);
-
-  return (
-    <a
-      className="display-flex usa-button usa-button--unstyled text-no-underline"
-      // eslint-disable-next-line
-      onClick={() => logout()}
-    >
-      <USWDSIcon name="logout" className="usa-icon--size-3 display-block" />
-      {t("logout")}
-    </a>
   );
 };
 
@@ -116,74 +42,5 @@ export const SignOutNavLink = ({ onClick }: { onClick: () => void }) => {
     >
       {t("logout")}
     </Link>
-  );
-};
-
-export const UserDropdown = ({
-  isApplicationTestUser,
-}: {
-  isApplicationTestUser: boolean;
-}) => {
-  const [userProfileMenuOpen, setUserProfileMenuOpen] = useState(false);
-
-  return (
-    <div className="usa-nav__primary-item border-top-0 mobile-nav-dropdown-uncollapsed-override position-relative">
-      <NavDropDownButton
-        className="padding-y-0 padding-x-2 margin-right-2 height-6"
-        // The NavDropDownButton needlessly restricts the label to a string, when passing an Element works
-        // perfectly well.
-        // eslint-disable-next-line
-        // @ts-ignore: Type 'Element' is not assignable to type 'string'
-        label={<UserAccountItem isSubnav={false} />}
-        isOpen={userProfileMenuOpen}
-        onClick={(e) => {
-          if (!userProfileMenuOpen) {
-            setUserProfileMenuOpen(true);
-            e.stopPropagation();
-            requestAnimationFrame(() =>
-              document.addEventListener(
-                "click",
-                () => {
-                  setUserProfileMenuOpen(false);
-                },
-                { once: true },
-              ),
-            );
-          }
-        }}
-        onToggle={noop}
-        isCurrent={false}
-        menuId="user-control"
-      />
-      <Menu
-        className="position-absolute desktop:width-full z-200 right-0"
-        id="user-control"
-        items={[
-          <UserAccountItem key="account" isSubnav={true} />,
-          <SettingsNavLink key="settings" />,
-          isApplicationTestUser && <TestApplicationLink />,
-          <LogoutNavItem key="logout" />,
-        ].filter(Boolean)}
-        type="subnav"
-        isOpen={userProfileMenuOpen}
-      />
-    </div>
-  );
-};
-
-export const UserControl = ({ localDev }: { localDev: boolean }) => {
-  const t = useTranslations("Header");
-
-  const { user } = useUser();
-
-  const isApplicationTestUser =
-    localDev && user?.user_id === applicationTestUserId;
-  return (
-    <>
-      {!user?.token && <LoginButton navLoginLinkText={t("navLinks.login")} />}
-      {!!user?.token && (
-        <UserDropdown isApplicationTestUser={isApplicationTestUser} />
-      )}
-    </>
   );
 };
