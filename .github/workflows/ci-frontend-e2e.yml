@@ -1,6 +1,10 @@
-name: E2E Tests (Local)
+name: E2E Tests (Local Github Target)
 on:
   workflow_dispatch:
+    inputs:
+      api_logs:
+        description: "print api logs on failure?"
+        type: string
   workflow_call:
   pull_request:
     paths:
@@ -34,8 +38,8 @@ jobs:
  
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
- 
+        uses: actions/checkout@v6
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
