@@ -186,7 +186,7 @@ describe("AwardRecommendationPage", () => {
 
       await AwardRecommendationPage({
         params: awardRecommendationParams,
-        searchParams: Promise.resolve({ id: "123" }),
+        searchParams: Promise.resolve({ opportunityId: "123" }),
       });
 
       expect(opportunityFetcher.getOpportunityDetails).toHaveBeenCalledWith(
@@ -204,7 +204,7 @@ describe("AwardRecommendationPage", () => {
 
       const component = await AwardRecommendationPage({
         params: awardRecommendationParams,
-        searchParams: Promise.resolve({ id: "non-existent" }),
+        searchParams: Promise.resolve({ opportunityId: "non-existent" }),
       });
       render(component);
 
@@ -220,7 +220,7 @@ describe("AwardRecommendationPage", () => {
 
       const component = await AwardRecommendationPage({
         params: awardRecommendationParams,
-        searchParams: Promise.resolve({ id: "123" }),
+        searchParams: Promise.resolve({ opportunityId: "123" }),
       });
 
       render(component);
