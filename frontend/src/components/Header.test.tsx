@@ -460,7 +460,7 @@ describe("Header", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("displays test application link if for a test application user", async () => {
+    it("displays test application link for a test application user if local dev", async () => {
       mockUseUser.mockReturnValue({
         user: { token: "faketoken", id: applicationTestUserId },
         hasBeenLoggedOut: false,
