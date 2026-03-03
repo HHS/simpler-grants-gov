@@ -148,6 +148,10 @@ describe("AwardRecommendationPage", () => {
           (props: { params: Promise<{ locale: string }> }) =>
             WrappedComponent(props) as unknown,
       );
+
+      jest
+        .spyOn(opportunityFetcher, "getOpportunityDetails")
+        .mockResolvedValue(mockOpportunityData);
     });
 
     it("includes the AwardRecommendationHero component in the page", async () => {
