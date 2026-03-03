@@ -117,7 +117,7 @@ describe("validateFormData", () => {
     });
 
     it("should invalidate fieldList with section children", () => {
-      const invalidUiSchema = [
+      const invalidUiSchema: UiSchema = [
         {
           type: "fieldList",
           label: "Test",
@@ -135,7 +135,19 @@ describe("validateFormData", () => {
       ];
 
       const errors = validateUiSchema(invalidUiSchema);
+
       expect(Array.isArray(errors)).toBe(true);
+
+      const hasFieldListChildrenError =
+        Array.isArray(errors) &&
+        errors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+            // only allows fields
+          return instancePath.startsWith("/0/children/0");
+        });
+
+      expect(hasFieldListChildrenError).toBe(true);
     });
   });
 });
