@@ -507,7 +507,11 @@ def test_user_get_saved_opportunities_org_only_403(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": token},
         json={
-            "filters": {"organization_ids": {"one_of": [org.organization_id]}},
+            "filters": {
+                "organization_ids": {
+                    "one_of": [org.organization_id],
+                },
+            },
             "pagination": {"page_offset": 1, "page_size": 25},
         },
     )

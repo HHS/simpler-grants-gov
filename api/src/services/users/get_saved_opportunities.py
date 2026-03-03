@@ -170,8 +170,8 @@ def _build_saved_union_subquery(
     # Combine subqueries
     saved_sq = union_all(*subqueries).subquery()
 
-    # Aggregate to latest save per opportunity
-    latest_saved = (
+    # Aggregate to get one row per opportunity
+    saved_union = (
         select(
             saved_sq.c.opportunity_id,
             func.max(saved_sq.c.saved_at).label("saved_at"),
@@ -179,9 +179,7 @@ def _build_saved_union_subquery(
         .group_by(saved_sq.c.opportunity_id)
         .subquery()
     )
-
-    return latest_saved
-
+    return saved_union
 
 def _enrich_with_saved_organizations(
     opportunities: Sequence[Opportunity],
@@ -221,7 +219,6 @@ def _enrich_with_saved_organizations(
         response.append(saved_opp)
 
     return response
-
 
 def get_saved_opportunities(
     db_session: db.Session, user: User, raw_opportunity_params: dict
