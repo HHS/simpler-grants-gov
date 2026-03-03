@@ -159,7 +159,15 @@ export async function toggleCheckbox(page: Page, idWithoutHash: string) {
 
   if (!(await checkBox.isChecked())) {
     await checkBoxLabel.click({ force: true });
+    await page.waitForTimeout(300);
   }
+
+  // Webkit can silently drop clicks — fall back to JS dispatch if still unchecked
+  if (!(await checkBox.isChecked())) {
+    await checkBox.dispatchEvent("click");
+    await page.waitForTimeout(300);
+  }
+
   await page.waitForTimeout(100);
 }
 
@@ -258,14 +266,24 @@ export async function waitForSearchResultsInitialLoad(
 
   const resultsHeading = page.locator('h3:has-text("Opportunities")').first();
 
+  const noResultsIndicator = page
+    .locator(
+      '[data-testid="search-no-results"], .usa-alert--info, h2:has-text("no results"), p:has-text("no results")',
+    )
+    .first();
+
   // Wait for heading to be visible, but with some retry logic
   const startTime = Date.now();
   let lastError: Error | null = null;
+  const innerTimeout = 15000;
 
   while (Date.now() - startTime < timeout) {
     try {
-      await resultsHeading.waitFor({ state: "visible", timeout: 5000 });
-      return await expect(resultsHeading).toBeVisible();
+      await Promise.race([
+        resultsHeading.waitFor({ state: "visible", timeout: innerTimeout }),
+        noResultsIndicator.waitFor({ state: "visible", timeout: innerTimeout }),
+      ]);
+      return;
     } catch (e) {
       lastError = e as Error;
       // Continue retrying

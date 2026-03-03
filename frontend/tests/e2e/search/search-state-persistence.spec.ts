@@ -65,8 +65,8 @@ const goToSearch = async (page: Page) => {
 };
 
 const getFirstSubAgencySelection = async (page: Page) => {
-  // Sub-agencies live inside nested lists: ul.margin-left-4 > li
-  // The count span has class "text-base-dark" and looks like "[5]"
+  // Sub-agencies are rendered in nested lists: ul.margin-left-4 > li
+  // The result count is in a dedicated span.text-base-dark, e.g. "[5]"
   const subAgencyItems = page.locator(
     "#opportunity-filter-agency ul.margin-left-4 > li",
   );
@@ -83,14 +83,15 @@ const getFirstSubAgencySelection = async (page: Page) => {
     if (!id || !value) continue;
     if (await checkbox.isChecked()) continue;
 
-    // Only pick sub-agencies with count > 0
-    const countText = (await countSpan.textContent()) ?? "";
+    // Only pick sub-agencies that actually have results
+    const countText = (await countSpan.textContent().catch(() => "")) ?? "";
     const countMatch = countText.match(/\[(\d+)\]/);
     if (!countMatch || Number(countMatch[1]) <= 0) continue;
 
-    // Verify the label is visible before selecting
+    // Confirm the label is visible before we try to interact
     const label = item.locator(`label[for="${id}"]`).first();
-    if (!(await label.isVisible().catch(() => false))) continue;
+    const isVisible = await label.isVisible().catch(() => false);
+    if (!isVisible) continue;
 
     return { id, value };
   }
