@@ -7,11 +7,7 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
-from src.constants.lookup_constants import (
-    ApplicationStatus,
-    LegacyUserStatus,
-    OpportunityStatus,
-)
+from src.constants.lookup_constants import ApplicationStatus, LegacyUserStatus, OpportunityStatus
 from src.constants.static_role_values import (
     INTERNAL_WORKFLOW_USER_ROLE,
     NAVA_INTERNAL_ROLE,
