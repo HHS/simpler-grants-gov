@@ -128,7 +128,7 @@ export async function safeHelp_safeGoto(
           contentType: "text/plain",
         });
       }
-    } catch (error) {
+    } catch (_error) {
       // Header not found or timeout - continue silently
     }
   });
