@@ -8,7 +8,7 @@ from src.api.workflows.workflow_schemas import (
     WorkflowEventRequestSchema,
     WorkflowEventResponseSchema,
 )
-from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_user_api_key_security_schemes
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.workflows.ingest_workflow_event import ingest_workflow_event
 
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 @workflow_blueprint.doc(
     summary="Send Workflow Event",
     description="Trigger a new workflow or progress an existing one.",
-    security=jwt_or_user_api_key_security_schemes,
+    security=jwt_or_api_user_key_security_schemes,
     responses=[200, 401, 403, 404, 422],
 )
 @jwt_or_api_user_key_multi_auth.login_required
