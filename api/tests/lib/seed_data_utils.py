@@ -10,7 +10,13 @@ from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition, Form
 from src.db.models.entity_models import Organization
-from src.db.models.user_models import AgencyUserRole, OrganizationUserRole, Role, User
+from src.db.models.user_models import (
+    AgencyUserRole,
+    InternalUserRole,
+    OrganizationUserRole,
+    Role,
+    User,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -134,14 +140,20 @@ class UserBuilder:
 
         return self
 
-    def with_internal_role(self, role_name: str, privileges: list[Privilege]) -> Self:
-        """Assign an internal role with specific privileges to the user"""
-        role = factories.RoleFactory.create(
-            role_name=role_name, is_core=True, privileges=privileges
-        )
-        factories.LinkRoleRoleTypeFactory.create(role=role, role_type=RoleType.INTERNAL)
+    def with_internal_role(self, role: Role) -> Self:
+        """Assign an internal role to the user."""
 
-        factories.InternalUserRoleFactory.create(user=self.user, role=role)
+        # Only give them the role if they don't already have it from a prior run
+        has_role_already = False
+        for internal_role in self.user.internal_user_roles:
+            if internal_role.role_id == role.role_id:
+                has_role_already = True
+                break
+
+        if not has_role_already:
+            self.user.internal_user_roles.append(
+                InternalUserRole(user=self.user, role_id=role.role_id)
+            )
 
         return self
 
