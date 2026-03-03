@@ -143,7 +143,7 @@ describe("validateFormData", () => {
         errors.some((error) => {
           const instancePath =
             typeof error.instancePath === "string" ? error.instancePath : "";
-            // only allows fields
+          // only allows fields
           return instancePath.startsWith("/0/children/0");
         });
 
