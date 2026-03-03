@@ -6,7 +6,6 @@ from typing import Self
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.auth.api_jwt_auth import ApiJwtConfig, create_jwt_for_user
-from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition, Form
 from src.db.models.entity_models import Organization

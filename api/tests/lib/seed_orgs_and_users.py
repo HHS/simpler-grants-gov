@@ -11,8 +11,6 @@ from src.constants.lookup_constants import (
     ApplicationStatus,
     LegacyUserStatus,
     OpportunityStatus,
-    Privilege,
-    RoleType,
 )
 from src.constants.static_role_values import (
     INTERNAL_WORKFLOW_USER_ROLE,
