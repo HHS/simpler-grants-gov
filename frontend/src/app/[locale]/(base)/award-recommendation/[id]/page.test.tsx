@@ -71,7 +71,7 @@ jest.mock("src/components/award-recommendation/AwardRecommendationHero", () => {
 });
 
 const mockOpportunityDetail = {
-  opportunity_id: "123",
+  opportunity_id: "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
   legacy_opportunity_id: 1,
   opportunity_status: "posted" as const,
   opportunity_title: "Test Funding Opportunity",
@@ -168,29 +168,18 @@ describe("AwardRecommendationPage", () => {
       expect(await screen.findByText("pageTitle")).toBeVisible();
     });
 
-    it("does not fetch opportunity when no id search param provided", async () => {
-      const component = await AwardRecommendationPage({
-        params: awardRecommendationParams,
-        searchParams: Promise.resolve({}),
-      });
-      render(component);
-
-      expect(opportunityFetcher.getOpportunityDetails).not.toHaveBeenCalled();
-      expect(await screen.findByText("pageTitle")).toBeVisible();
-    });
-
-    it("calls getOpportunityDetails when id search param is provided", async () => {
+    it("calls getOpportunityDetails after award recommendation call happens", async () => {
       jest
         .spyOn(opportunityFetcher, "getOpportunityDetails")
         .mockResolvedValue(mockOpportunityData);
 
       await AwardRecommendationPage({
         params: awardRecommendationParams,
-        searchParams: Promise.resolve({ opportunityId: "123" }),
+        searchParams: Promise.resolve({}),
       });
 
       expect(opportunityFetcher.getOpportunityDetails).toHaveBeenCalledWith(
-        "123",
+        "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
       );
     });
 

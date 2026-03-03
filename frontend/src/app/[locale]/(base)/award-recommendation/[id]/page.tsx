@@ -36,7 +36,7 @@ export const dynamic = "force-dynamic";
 export type AwardRecommendationPageProps = {
   params: Promise<{ locale: string; id?: string }>;
 } & WithFeatureFlagProps & {
-    searchParams?: Promise<{ opportunityId?: string }>;
+    searchParams?: Promise<{}>;
   };
 
 interface OpportunitySectionProps {
@@ -129,9 +129,7 @@ async function AwardRecommendationPageContent({
     locale,
     namespace: "AwardRecommendation",
   });
-  const resolvedSearchParams = (await (searchParams ||
-    Promise.resolve({}))) as { opportunityId?: string };
-  const opportunityId = resolvedSearchParams.opportunityId;
+  const opportunityId = "6a483cd8-9169-418a-8dfb-60fa6e6f51e5";
 
   let opportunityData: OpportunityDetail | null = null;
   if (opportunityId) {
