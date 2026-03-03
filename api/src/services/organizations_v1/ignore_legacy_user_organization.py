@@ -5,11 +5,10 @@ from sqlalchemy import select
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
+from src.constants.lookup_constants import Privilege
 from src.db.models.entity_models import IgnoredLegacyOrganizationUser
 from src.db.models.user_models import User
-from src.services.organizations_v1.list_organization_invitations import (
-    get_organization_and_verify_access,
-)
+from src.services.organizations_v1.get_organization import get_organization_and_verify_access
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +17,9 @@ def ignore_legacy_user_organization(
     db_session: db.Session, user: User, organization_id: UUID, json_data: dict
 ) -> None:
     # Get organization and verify access
-    get_organization_and_verify_access(db_session, user, organization_id)
+    get_organization_and_verify_access(
+        db_session, user, organization_id, privileges={Privilege.MANAGE_ORG_MEMBERS}
+    )
 
     # Normalize email
     email = json_data["email"].strip().lower()
