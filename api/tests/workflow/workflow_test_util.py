@@ -15,7 +15,6 @@ from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.workflow_event import (
     ProcessWorkflowEventContext,
     StartWorkflowEventContext,
-    WorkflowEntity,
     WorkflowEvent,
 )
 from src.workflow.handler.event_handler import EventHandler
@@ -27,17 +26,14 @@ from tests.src.db.models.factories import WorkflowEventHistoryFactory
 def build_workflow_config(
     workflow_type: WorkflowType = WorkflowType.INITIAL_PROTOTYPE,
     persistence_model_cls: type[BaseStatePersistenceModel] = BaseStatePersistenceModel,
-    entity_types: list[WorkflowEntityType] | None = None,
+    entity_type: WorkflowEntityType = WorkflowEntityType.OPPORTUNITY,
 ) -> WorkflowConfig:
     """Build a workflow config"""
-
-    if entity_types is None:
-        entity_types = []
 
     config = WorkflowConfig(
         workflow_type=workflow_type,
         persistence_model_cls=persistence_model_cls,
-        entity_types=entity_types,
+        entity_type=entity_type,
         approval_mapping={},
     )
     return config
@@ -46,26 +42,26 @@ def build_workflow_config(
 def build_start_workflow_event(
     workflow_type: WorkflowType,
     user: User | None,
-    entities: list,
+    entity,
     exclude_start_workflow_context: bool = False,
 ) -> tuple[WorkflowEvent, WorkflowEventHistory]:
     user_id = user.user_id if user else uuid.uuid4()
 
-    entity_list = []
-    for entity in entities:
-        if isinstance(entity, Opportunity):
-            entity_list.append(
-                WorkflowEntity(
-                    entity_type=WorkflowEntityType.OPPORTUNITY, entity_id=entity.opportunity_id
-                )
-            )
+    if isinstance(entity, Opportunity):
+        entity_type = WorkflowEntityType.OPPORTUNITY
+        entity_id = entity.opportunity_id
+    else:
+        raise NotImplementedError(
+            f"Haven't yet configured this function for entity type {type(entity)}"
+        )
 
     if exclude_start_workflow_context:
         start_workflow_context = None
     else:
         start_workflow_context = StartWorkflowEventContext(
             workflow_type=workflow_type,
-            entities=entity_list,
+            entity_type=entity_type,
+            entity_id=entity_id,
         )
 
     event = WorkflowEvent(

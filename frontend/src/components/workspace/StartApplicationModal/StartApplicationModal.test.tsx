@@ -1,7 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { fakeUserOrganization } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { createRef } from "react";
 
@@ -14,10 +13,6 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockRouterPush,
   }),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/hooks/useClientFetch", () => ({
@@ -322,7 +317,7 @@ describe("StartApplicationModal", () => {
         />,
       );
 
-      expect(screen.queryByText("notListed")).toBeInTheDocument();
+      expect(screen.getByText("notListed")).toBeInTheDocument();
     });
 
     it("shows 'I don't see my org listed' option for mixed competitions", () => {
@@ -409,7 +404,7 @@ describe("StartApplicationModal", () => {
       );
 
       const button = screen.getByTestId("application-start-save");
-      expect(button).not.toBeDisabled();
+      expect(button).toBeEnabled();
     });
 
     it("button is enabled when organizationsError is undefined", () => {
@@ -426,7 +421,7 @@ describe("StartApplicationModal", () => {
       );
 
       const button = screen.getByTestId("application-start-save");
-      expect(button).not.toBeDisabled();
+      expect(button).toBeEnabled();
     });
 
     it("shows main modal with error banner when organizationsError is true with empty organizations", () => {

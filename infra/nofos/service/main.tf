@@ -135,9 +135,8 @@ module "service" {
 
   image_tag = local.image_tag
 
-  vpc_id             = data.aws_vpc.network.id
-  public_subnet_ids  = data.aws_subnets.public.ids
-  private_subnet_ids = data.aws_subnets.private.ids
+  network_name = local.environment_config.network_name
+  project_name = module.project_config.project_name
 
   domain_name     = local.service_config.domain_name
   hosted_zone_id  = null

@@ -1,7 +1,7 @@
 import { identity } from "lodash";
 import { Response } from "node-fetch";
 import { subscribeEmailAction } from "src/app/[locale]/(base)/newsletter/actions";
-import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
+import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 const original = console.error;
 console.error = jest.fn();
@@ -13,12 +13,6 @@ afterEach(() => {
 jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
   setRequestLocale: identity,
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-  useMessages: () => mockMessages,
-  getTranslations: () => identity,
 }));
 
 describe("subscribeEmailAction", () => {

@@ -62,4 +62,6 @@ module "dev_config" {
   # enable_command_execution = true
 
   enable_identity_provider = local.enable_identity_provider
+
+  enable_workflow_service = true
 }

@@ -263,6 +263,16 @@ export const messages = {
     },
     genericErrorCta: "Please try refreshing the page.",
   },
+  ShareOpportunityToOrganization: {
+    modal: {
+      description: "Select organizations to share this opportunity with.",
+      opportunity: "Opportunity:",
+      error: "Could not load your organizations. Please try again later.",
+      loadingOrganizations: "Loading organizations...",
+      fallbackError: "You are not a member of any organizations.",
+      close: "Close",
+    },
+  },
   Application: {
     title: "Application",
     submissionValidationError: {
@@ -849,6 +859,7 @@ export const messages = {
     },
     callToAction: {
       title: "Search funding opportunities",
+      shareWithOrganization: "Share with organizations",
     },
     opportunitySaved: "Saved",
     resultsHeader: {
@@ -1819,12 +1830,35 @@ export const messages = {
     pageTitle: "Organizations",
   },
   AwardRecommendation: {
+    awardRecs: "Award Recs",
     errorMessage:
       "We have encountered an error loading your award recommendations, please try again later.",
     metaDescription: "View your award recommendations",
     pageHeading: "Award Recommendations",
-    pageTitle: "Award Recommendations",
+    heroTitle: "Award Rec #",
+    datePrepared: "Date prepared",
+    status: "Status",
+    statusTag: {
+      draft: "Draft",
+      inProgress: "In progress",
+      pendingReview: "Pending review",
+    },
+    heroButtons: {
+      save: "Save and finish later",
+      create: "Create",
+    },
+    pageTitle: "Review your Recommendation",
     description: "Award Recommendation flow coming soon.",
+    opportunitySummary: "Opportunity summary",
+    selectionMethod: "Selection method",
+    viewFullDetails: "View Full Details",
+    opportunityStatus: "Status",
+    agency: "Agency",
+    closeDate: "Closing Date",
+    readMore: "Read more",
+    showLess: "Show less",
+    opportunity: "Opportunity",
+    editOpportunityDetails: "Edit opportunity details",
   },
   InviteLegacyUsers: {
     dataLoadingError:

@@ -1,7 +1,5 @@
+import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { render, screen } from "tests/react-utils";
-
-import React from "react";
 
 import SearchResultsHeader from "src/components/search/SearchResultsHeader";
 
@@ -25,7 +23,7 @@ describe("SearchResultsHeader", () => {
   it("renders correctly and displays the number of opportunities", () => {
     render(<SearchResultsHeader sortby="" totalFetchedResults={"100"} />);
 
-    expect(screen.getByText("100 Opportunities")).toBeInTheDocument();
+    expect(screen.getByText("resultsHeader.message 100")).toBeInTheDocument();
     expect(screen.getByText("Mock SearchSortBy")).toBeInTheDocument();
   });
 });

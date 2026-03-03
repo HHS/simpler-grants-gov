@@ -15,11 +15,14 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def workflow_user(enable_factory_create, monkeypatch) -> User:
     """Get the workflow user, setting them up with expected params
 
     Also sets the workflow user ID env var to the user created here.
+
+    This fixture has autouse=True so it's automatically available for all
+    workflow tests without needing to explicitly request it.
     """
     user = UserFactory.create()
     UserProfileFactory.create(user=user, first_name="System", last_name="User")
@@ -47,8 +50,22 @@ def budget_officer(agency) -> User:
 
 
 @pytest.fixture
+def other_agency_budget_officer(enable_factory_create) -> User:
+    # A budget officer in a random agency
+    user, _ = create_user_in_agency(privileges=[Privilege.BUDGET_OFFICER_APPROVAL])
+    return user
+
+
+@pytest.fixture
 def program_officer(agency) -> User:
     user, _ = create_user_in_agency(agency=agency, privileges=[Privilege.PROGRAM_OFFICER_APPROVAL])
+    return user
+
+
+@pytest.fixture
+def other_agency_program_officer(enable_factory_create) -> User:
+    # A program officer in a random agency
+    user, _ = create_user_in_agency(privileges=[Privilege.PROGRAM_OFFICER_APPROVAL])
     return user
 
 

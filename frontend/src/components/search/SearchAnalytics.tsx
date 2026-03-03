@@ -38,7 +38,6 @@ function SearchAnalytics({
   // set new relic query param based custom attributes
   useEffect(() => {
     if (!newRelicEnabled || !newRelicInitialized) {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       return () => {};
     }
     if (params) {

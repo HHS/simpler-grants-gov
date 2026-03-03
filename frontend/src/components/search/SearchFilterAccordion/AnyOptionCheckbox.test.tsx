@@ -1,9 +1,8 @@
 import "@testing-library/jest-dom";
 
-import { waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { render, screen } from "tests/react-utils";
 
 import React from "react";
 
@@ -84,7 +83,7 @@ describe("AnyOptionCheckbox", () => {
         queryParamKey={"any"}
       />,
     );
-    const label = screen.getByText("Any For the title");
+    const label = screen.getByText("any For the title");
     expect(label).toBeInTheDocument();
   });
 });

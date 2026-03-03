@@ -60,6 +60,21 @@ locals {
   notifications_config                           = local.environment_config.notifications_config
 
   network_config = module.project_config.network_configs[local.environment_config.network_name]
+
+  container_secrets = concat(
+    [for secret_name in keys(local.service_config.secrets) : {
+      name      = secret_name
+      valueFrom = module.secrets[secret_name].secret_arn
+    }],
+    module.app_config.enable_identity_provider ? [{
+
+    }] : [],
+    # OpenSearch endpoint
+    local.search_config != null ? [{
+      name      = "SEARCH_ENDPOINT"
+      valueFrom = data.aws_ssm_parameter.search_endpoint_arn[0].arn
+    }] : []
+  )
 }
 
 terraform {
@@ -139,6 +154,9 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
   name  = local.incident_management_service_integration_config.integration_url_param_name
 }
 
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
 data "aws_security_groups" "aws_services" {
   filter {
     name   = "group-name"
@@ -161,9 +179,8 @@ module "service" {
 
   image_tag = local.image_tag
 
-  vpc_id             = data.aws_vpc.network.id
-  public_subnet_ids  = data.aws_subnets.public.ids
-  private_subnet_ids = data.aws_subnets.private.ids
+  network_name = local.environment_config.network_name
+  project_name = module.project_config.project_name
 
   certificate_arn        = local.service_config.enable_https == true ? data.aws_acm_certificate.cert[0].arn : null
   domain_name            = local.service_config.domain_name
@@ -227,21 +244,7 @@ module "service" {
     local.service_config.extra_environment_variables,
   )
 
-  secrets = concat(
-    [for secret_name in keys(local.service_config.secrets) : {
-      name      = secret_name
-      valueFrom = module.secrets[secret_name].secret_arn
-    }],
-    module.app_config.enable_identity_provider ? [{
-      # name      = "COGNITO_CLIENT_SECRET"
-      # valueFrom = module.identity_provider_client[0].client_secret_arn
-    }] : [],
-    # OpenSearch endpoint
-    local.search_config != null ? [{
-      name      = "SEARCH_ENDPOINT"
-      valueFrom = data.aws_ssm_parameter.search_endpoint_arn[0].arn
-    }] : []
-  )
+  secrets = local.container_secrets
 
   extra_policies = merge(
     {
