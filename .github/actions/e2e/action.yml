@@ -21,6 +21,12 @@ inputs:
   current_shard:
     description: "total number of test shards in parent run"
     default: "1"
+  needs_node_setup:
+    description: "does this action need to set up node and install deps"
+    default: "true"
+  api_logs:
+    description: "print api logs on failure?"
+    default: "false"
   node_version:
     description: "node version"
     default: "24"
@@ -53,8 +59,10 @@ runs:
       uses: actions/checkout@v6
       with:
         ref: ${{ inputs.version }}
+        clean: false
 
     - name: Set up Node
+      if: ${{ inputs.needs_node_setup == 'true' }}
       uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.NODE_VERSION }}
@@ -62,6 +70,7 @@ runs:
         cache-dependency-path: ${{ inputs.LOCKFILE_PATH }}
 
     - name: Install Node dependencies & Playwright
+      if: ${{ inputs.needs_node_setup == 'true' }}
       shell: bash
       working-directory: ./frontend
       run: |
@@ -84,7 +93,7 @@ runs:
       shell: bash
 
     - name: Debug logging on failure
-      if: failure()
+      if:  ${{ failure() && inputs.api_logs == 'true' }}
       working-directory: ./frontend
       run: |
         cd ../api
