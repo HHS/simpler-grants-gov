@@ -11,6 +11,7 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.adapters.db import flask_db
+from src.constants.lookup_constants import AgencySubmissionNotificationSetting
 from src.constants.static_role_values import OPPORTUNITY_PUBLISHER
 from src.db.models.agency_models import Agency
 from src.db.models.user_models import AgencyUser, AgencyUserRole, Role, User
@@ -98,7 +99,7 @@ class SetupLowerEnvAgenciesTask(Task):
             agency_code=unique_code,
             agency_name="Agency for " + unique_code,
             assistance_listing_number="00.000",
-            agency_submission_notification_setting=3,
+            agency_submission_notification_setting=AgencySubmissionNotificationSetting.ALWAYS,
             is_test_agency=False,
         )
         self.db_session.add(agency)
