@@ -353,10 +353,34 @@ test.describe("Search page - state persistence after refresh", () => {
         await expect(checkbox).not.toBeChecked({ timeout: 10000 });
       }
 
-      // Scroll via JS (handles inner scroll containers) then dispatch click event.
+      // Scroll via JS (handles inner scroll containers of filter drawer).
+      // First, scroll the element into view, then ensure the parent drawer container is scrolled.
       await page.evaluate((id) => {
         const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ block: "center", inline: "nearest" });
+        if (el) {
+          // Scroll the element into view
+          el.scrollIntoView({ block: "center", inline: "nearest" });
+
+          // Also scroll parent drawer container if it exists
+          const drawerContent =
+            el.closest("[class*='drawer']") ||
+            el.closest("[class*='modal']") ||
+            el.closest("[role='region']");
+          if (
+            drawerContent &&
+            drawerContent.scrollHeight > drawerContent.clientHeight
+          ) {
+            const rect = el.getBoundingClientRect();
+            const containerRect = drawerContent.getBoundingClientRect();
+
+            if (rect.top < containerRect.top) {
+              drawerContent.scrollTop -= containerRect.top - rect.top + 50;
+            } else if (rect.bottom > containerRect.bottom) {
+              drawerContent.scrollTop +=
+                rect.bottom - containerRect.bottom + 50;
+            }
+          }
+        }
       }, subAgency.id);
       await page.waitForTimeout(300);
 
