@@ -162,17 +162,7 @@ export const UiJsonSchema: RJSFSchema = {
         children: {
           type: "array",
           items: {
-            anyOf: [
-              {
-                $ref: "#/$defs/field",
-              },
-              {
-                $ref: "#/$defs/fieldList",
-              },
-              {
-                $ref: "#/$defs/section",
-              },
-            ],
+            $ref: "#/$defs/field",
           },
         },
       },

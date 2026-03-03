@@ -115,5 +115,27 @@ describe("validateFormData", () => {
 
       expect(hasTypeEnumError).toBe(true);
     });
+
+    it("should invalidate fieldList with section children", () => {
+      const invalidUiSchema = [
+        {
+          type: "fieldList",
+          label: "Test",
+          name: "test",
+          defaultSize: 1,
+          children: [
+            {
+              type: "section",
+              label: "Bad",
+              name: "bad",
+              children: [],
+            },
+          ],
+        },
+      ];
+
+      const errors = validateUiSchema(invalidUiSchema);
+      expect(Array.isArray(errors)).toBe(true);
+    });
   });
 });
