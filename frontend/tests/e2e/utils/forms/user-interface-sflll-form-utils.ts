@@ -1,6 +1,9 @@
-import { expect, Page, TestInfo } from "@playwright/test";
+import { Page, TestInfo } from "@playwright/test";
 
-import { UIFieldDefinition, verifyUIField } from "../test-verify-ui-utils";
+import {
+  UIFieldDefinition,
+  verifyUIField,
+} from "tests/e2e/utils/test-verify-ui-utils";
 
 // Test data for filling the form - modify as needed for different test scenarios
 export const ENTITY_DATA = {
@@ -399,8 +402,6 @@ export async function userInterfaceSflllFormUtils(
   testInfo: TestInfo,
   page: Page,
 ): Promise<void> {
-  const startTime = new Date();
-
   // Wrap the entire process in a try-catch to capture any unexpected errors
   try {
     // Extract ApplicationURL and attach to test report
