@@ -66,21 +66,6 @@ jest.mock("next-intl", () => ({
   useTranslations: () => identity,
 }));
 
-jest.mock("src/components/opportunity/OpportunityDescription", () => {
-  // prettier-ignore
-  const actual = jest.requireActual<typeof import("src/components/opportunity/OpportunityDescription")>("src/components/opportunity/OpportunityDescription");
-  return {
-    ...actual,
-    SummaryDescriptionDisplay: ({
-      summaryDescription,
-    }: {
-      summaryDescription: string;
-    }) => (
-      <div data-testid="summary-description-mock">{summaryDescription}</div>
-    ),
-  };
-});
-
 jest.mock("src/components/award-recommendation/AwardRecommendationHero", () => {
   const React = jest.requireActual<typeof import("react")>("react");
   return {
