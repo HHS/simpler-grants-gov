@@ -1670,6 +1670,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         assert record
         assert record.submission_titles == "['This is my submission']"
 
+    # Shows you can create an application with the new ApplicationStatus RECEIVED_BY_AGENCY and filter on it correctly
     def test_get_submission_list_expanded_response_correctly_handles_received_by_agency_application_status(
         self, db_session, enable_factory_create
     ):
@@ -1677,6 +1678,10 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         submission = setup_application_submission(
             agency,
             application_status=ApplicationStatus.RECEIVED_BY_AGENCY,
+        )
+        setup_application_submission(
+            agency,
+            application_status=ApplicationStatus.ACCEPTED,
         )
         _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml = (
@@ -1712,20 +1717,25 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         submission_info = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")[
             "Envelope"
         ]["Body"]["ns2:GetSubmissionListExpandedResponse"]["ns2:SubmissionInfo"]
+        assert len(submission_info) == 1
         assert (
             f"GRANT{submission.legacy_tracking_number}"
             == submission_info[0]["GrantsGovTrackingNumber"]
         )
-        # Application with ApplicationStatus of "received_by_agency" returns as "Received by Agency"
         assert "Received by Agency" == submission_info[0]["GrantsGovApplicationStatus"]
 
-    def test_get_submission_list_expanded_response_correctly_handles_agency_tracking_number_assigned_agency_application_status(
+    # Shows you can create an application with the new ApplicationStatus AGENCY_TRACKIN_NUMBER_ASSIGNED and filter on it correctly
+    def test_get_submission_list_expanded_response_correctly_handles_agency_tracking_number_assigned_application_status(
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
         submission = setup_application_submission(
             agency,
             application_status=ApplicationStatus.AGENCY_TRACKING_NUMBER_ASSIGNED,
+        )
+        setup_application_submission(
+            agency,
+            application_status=ApplicationStatus.ACCEPTED,
         )
         _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml = (
@@ -1761,9 +1771,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         submission_info = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")[
             "Envelope"
         ]["Body"]["ns2:GetSubmissionListExpandedResponse"]["ns2:SubmissionInfo"]
+        assert len(submission_info) == 1
         assert (
             f"GRANT{submission.legacy_tracking_number}"
             == submission_info[0]["GrantsGovTrackingNumber"]
         )
-        # Application with ApplicationStatus of "agency_tracking_number_assigned" returns as "Agency Tracking Number Assigned"
         assert "Agency Tracking Number Assigned" == submission_info[0]["GrantsGovApplicationStatus"]
