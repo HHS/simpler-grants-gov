@@ -2,7 +2,6 @@ from src.legacy_soap_api.grantors.schemas.update_application_info_schemas import
     UpdateApplicationInfoRequest,
     UpdateApplicationInfoResponse,
 )
-from src.legacy_soap_api.legacy_soap_api_client import SimplerGrantorsS2SClient
 from src.legacy_soap_api.soap_payload_handler import SOAPPayload, get_envelope_dict
 from tests.src.legacy_soap_api.soap_request_templates.grantors.update_application_info_payloads import (
     get_mock_update_application_info_request_xml,
