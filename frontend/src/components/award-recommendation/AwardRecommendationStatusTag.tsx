@@ -43,6 +43,16 @@ const AwardRecommendationStatusTag = ({ status }: Props) => {
             {t("pendingReview")}
           </div>
         );
+      case "approved":
+        return (
+          <div
+            className="usa-tag bg-info-dark text-white radius-2 font-sans-sm text-no-uppercase display-flex flex-align-center"
+            data-testid="award-recommendation-status-approved"
+          >
+            <USWDSIcon name="check" className="margin-right-05" />
+            {t("approved")}
+          </div>
+        );
       default:
         return null;
     }
