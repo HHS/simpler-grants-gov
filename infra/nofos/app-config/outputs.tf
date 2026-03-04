@@ -45,4 +45,3 @@ output "enable_notifications" {
 output "shared_network_name" {
   value = local.shared_network_name
 }
-
