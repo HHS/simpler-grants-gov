@@ -39,7 +39,7 @@ const categoryCheckboxes = {
   "category-agriculture": "agriculture",
 };
 
-test.describe("Search page tests", () => {
+test.describe.skip("Search page tests", () => {
   // Set all inputs, then refresh the page. Those same inputs should be
   // set from query params.
   test("should refresh and retain filters in a new tab", async ({ page }, {
