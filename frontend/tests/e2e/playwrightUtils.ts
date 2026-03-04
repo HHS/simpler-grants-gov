@@ -33,6 +33,19 @@ export async function waitForURLChange(
   throw new Error(`URL did not update as expected within ${timeout}ms`);
 }
 
+/* ---- Single Value Query Param Utils ---- */
+
+export const expectURLQueryParamValue = (
+  page: Page,
+  queryParamName: string,
+  queryParamValue: string,
+): void => {
+  const url = new URL(page.url());
+  const params = new URLSearchParams(url.search);
+  const actualValue = params.get(queryParamName);
+  expect(actualValue).toBe(queryParamValue);
+};
+
 export async function waitForURLContainsQueryParamValue(
   page: Page,
   queryParamName: string,
@@ -58,21 +71,23 @@ export async function waitForURLContainsQueryParamValue(
   }
 
   // Verify using URLSearchParams to handle URL encoding correctly
-  const url = new URL(page.url());
-  const params = new URLSearchParams(url.search);
-  const actualValue = params.get(queryParamName);
-  return expect(actualValue).toBe(queryParamValue);
+  expectURLQueryParamValue(page, queryParamName, queryParamValue);
 }
 
-export const expectURLQueryParamValue = (
+/* ---- Multiple Value Query Param Utils ---- */
+
+export const expectURLQueryParamValues = (
   page: Page,
   queryParamName: string,
-  queryParamValue: string,
+  queryParamValues: string[],
 ): void => {
   const url = new URL(page.url());
   const params = new URLSearchParams(url.search);
-  const actualValue = params.get(queryParamName);
-  expect(actualValue).toBe(queryParamValue);
+  const actualValue = params.get(queryParamName) || "";
+
+  const actualSorted = actualValue.split(",").filter(Boolean).sort();
+  const expectedSorted = [...queryParamValues].sort();
+  expect(actualSorted).toEqual(expectedSorted);
 };
 
 export async function waitForURLContainsQueryParamValues(
@@ -105,26 +120,10 @@ export async function waitForURLContainsQueryParamValues(
     );
   }
 
-  const url = new URL(page.url());
-  const params = new URLSearchParams(url.search);
-  const actualValue = params.get(queryParamName) || "";
-  const actualSorted = actualValue.split(",").filter(Boolean).sort();
-  return expect(actualSorted).toEqual(expectedSorted);
+  expectURLQueryParamValues(page, queryParamName, queryParamValues);
 }
 
-export const expectURLQueryParamValues = (
-  page: Page,
-  queryParamName: string,
-  queryParamValues: string[],
-): void => {
-  const url = new URL(page.url());
-  const params = new URLSearchParams(url.search);
-  const actualValue = params.get(queryParamName) || "";
-
-  const actualSorted = actualValue.split(",").filter(Boolean).sort();
-  const expectedSorted = [...queryParamValues].sort();
-  expect(actualSorted).toEqual(expectedSorted);
-};
+/* ---- URL Helpers ---- */
 
 export async function waitForUrl(
   page: Page,
@@ -163,6 +162,8 @@ export async function waitForAnyURLChange(
   await waitForURLChange(page, changeCheck, timeout);
 }
 
+/* ---- Random String Generator ---- */
+
 const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 // adapted from https://stackoverflow.com/a/1349426
@@ -182,6 +183,8 @@ export const generateRandomString = (desiredPattern: number[]) => {
     return randomString;
   }, "");
 };
+
+/* ---- Auth /Sign In ---- */
 
 // signs in using mock 0auth server
 // note that this does not currently work in CI, but does work locally
@@ -221,6 +224,8 @@ export const performSignIn = async (page: Page, project: FullProject) => {
   }
 };
 
+/* ---- Mobile Navigation ---- */
+
 export const openMobileNav = async (page: Page) => {
   const menuOpener = page.locator(`button[data-testid="navMenuButton"]`);
   await menuOpener.click();
@@ -238,6 +243,8 @@ export const openMobileNav = async (page: Page) => {
   await expect(overlay).toBeVisible({ timeout });
   return menuOpener;
 };
+
+/* ---- Page Refresh ---- */
 
 export async function refreshPageWithCurrentURL(page: Page) {
   const currentURL = page.url();
