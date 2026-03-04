@@ -110,6 +110,15 @@ class FundingInstrument(StrEnum):
     OTHER = "other"  # O
 
 
+class AwardSelectionMethod(StrEnum):
+    MERIT_REVIEW_RANKING_ONLY = "merit_review_ranking_only"
+    MERIT_REVIEW_RANKING_WITH_OTHER_FACTORS = "merit_review_ranking_with_other_factors"
+    FORMULA = "formula"
+    SINGLE_SOURCE = "single_source"
+    SOLE_SOURCE = "sole_source"
+    OTHER = "other"
+
+
 class AgencyDownloadFileType(StrEnum):
     XML = "xml"
     PDF = "pdf"
@@ -222,6 +231,55 @@ class ApplicationStatus(StrEnum):
 class ApplicationFormStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     COMPLETE = "complete"
+
+
+class AwardRecommendationAttachmentType(StrEnum):
+    STANDARD_TERMS = "standard_terms"
+    STANDARD_CONDITIONS = "standard_conditions"
+    PROGRAM_TERMS = "program_terms"
+    PROGRAM_CONDITIONS = "program_conditions"
+    OTHER = "other"
+
+
+class AwardRecommendationStatus(StrEnum):
+    DRAFT = "draft"
+    IN_REVIEW = "in_review"
+    APPROVED = "approved"
+
+
+class AwardRecommendationType(StrEnum):
+    RECOMMENDED_FOR_FUNDING = "recommended_for_funding"
+    RECOMMENDED_WITHOUT_FUNDING = "recommended_without_funding"
+    NOT_RECOMMENDED = "not_recommended"
+
+
+class AwardRecommendationReviewType(StrEnum):
+    MERIT_REVIEW = "merit_review"
+    APPLICATION_BUDGET_REVIEW = "application_budget_review"
+    PROGRAMMATIC_REVIEW = "programmatic_review"
+    BUSINESS_AND_RISK_REVIEW = "business_and_risk_review"
+
+
+class AwardRecommendationRiskType(StrEnum):
+    ADDITIONAL_MONITORING = "additional_monitoring"
+
+
+class AwardRecommendationAuditEvent(StrEnum):
+    AWARD_RECOMMENDATION_CREATED = "award_recommendation_created"
+    AWARD_RECOMMENDATION_UPDATED = "award_recommendation_updated"
+    ATTACHMENT_CREATED = "attachment_created"
+    ATTACHMENT_UPDATED = "attachment_updated"
+    ATTACHMENT_DELETED = "attachment_deleted"
+    EXCEPTION_CREATED = "exception_created"
+    EXCEPTION_UPDATED = "exception_updated"
+    EXCEPTION_DELETED = "exception_deleted"
+    RISK_CREATED = "risk_created"
+    RISK_UPDATED = "risk_updated"
+    RISK_DELETED = "risk_deleted"
+    APPLICATION_SUBMISSION_UPDATED = "application_submission_updated"
+    REVIEW_CREATED = "review_created"
+    REVIEW_UPDATED = "review_updated"
+    REVIEW_DELETED = "review_deleted"
 
 
 class Privilege(StrEnum):
