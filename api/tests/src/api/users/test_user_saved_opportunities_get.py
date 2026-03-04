@@ -161,16 +161,20 @@ def test_get_saved_opportunities_unauthorized_user(client, enable_factory_create
 
 
 def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_saves(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client, enable_factory_create, db_session
 ):
     """Test that when organization_ids is empty, only user saved opportunities should be returned"""
 
-    # User save
+    # Org saved opp
+    user, org, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+    OrganizationSavedOpportunityFactory.create(organization=org)
+
+    # User saved opp
     user_saved_opp = UserSavedOpportunityFactory.create(user=user)
 
     response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         json={
             "filters": {"organization_ids": {"one_of": []}},
             "pagination": {
@@ -182,9 +186,12 @@ def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_sa
 
     assert response.status_code == 200
     data = response.json["data"]
+    import pdb
 
+    pdb.set_trace()
     assert len(data) == 1
     assert data[0]["opportunity_id"] == str(user_saved_opp.opportunity_id)
+    assert "saved_to_organizations" not in data[0]
 
 
 @pytest.mark.parametrize(
@@ -492,6 +499,9 @@ def test_user_get_saved_opportunities_org_only(client, enable_factory_create, db
     assert [opp["opportunity_id"] for opp in data] == [
         str(opp) for opp in [org_saved_opp3.opportunity_id, org_saved_opp2.opportunity_id]
     ]
+    import pdb
+
+    pdb.set_trace()
 
 
 def test_user_get_saved_opportunities_org_only_403(
@@ -566,7 +576,8 @@ def test_user_get_saved_opportunities_user_and_org(client, enable_factory_create
 
     # User-only saved opportunity: no saved_to_organizations
     user_only_item = opp_map[str(user_only_opp.opportunity_id)]
-    assert "saved_to_organizations" not in user_only_item
+    assert "saved_to_organizations" in user_only_item
+    assert user_only_item["saved_to_organizations"] == []
 
     # Opportunity saved by one org (org_saved_oppb)
     opp_b_item = opp_map[str(org_saved_oppb.opportunity_id)]

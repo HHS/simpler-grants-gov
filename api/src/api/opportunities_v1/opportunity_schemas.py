@@ -595,7 +595,7 @@ class SavedOpportunityResponseV1Schema(Schema):
 
     summary = fields.Nested(SavedOpportunitySummaryV1Schema())
     saved_to_organizations = fields.Nested(
-        SavedOpportunityOrganizationSchema, many=True, allow_none=True, missing=missing
+        SavedOpportunityOrganizationSchema, many=True, allow_none=True
     )
 
 
