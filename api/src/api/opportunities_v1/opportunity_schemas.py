@@ -1,5 +1,7 @@
 from enum import StrEnum
 
+from marshmallow import ValidationError, validates_schema
+
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import (
@@ -11,7 +13,9 @@ from src.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     DateSearchSchemaBuilder,
     IntegerSearchSchemaBuilder,
+    MarshmallowErrorContainer,
     StrSearchSchemaBuilder,
+    ValidationErrorType,
 )
 from src.api.schemas.shared_schema import OpportunityAssistanceListingV1Schema
 from src.constants.lookup_constants import (
@@ -23,12 +27,7 @@ from src.constants.lookup_constants import (
 )
 from src.pagination.pagination_schema import generate_pagination_schema
 from src.services.opportunities_v1.experimental_constant import ScoringRule
-from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema
-from src.constants.lookup_constants import ApplicantType, FundingCategory, FundingInstrument
-from marshmallow import ValidationError
-from src.api.schemas.search_schema import MarshmallowErrorContainer, ValidationErrorType
-from marshmallow import ValidationError, validates_schema
+
 
 class SearchResponseFormat(StrEnum):
     JSON = "json"
@@ -603,45 +602,43 @@ class OpportunityVersionSchema(OpportunityV1Schema):
         metadata={"description": "List of attachments associated with the opportunity"},
     )
 
+
 class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
     # Override legacy_opportunity_id to make it required
     legacy_opportunity_id = fields.Integer(
-        required=True,
-        metadata={"description": "The legacy opportunity ID", "example": 12345}
+        required=True, metadata={"description": "The legacy opportunity ID", "example": 12345}
     )
-    
+
     # Override is_forecast to make it required
     is_forecast = fields.Boolean(
         required=True,
-        metadata={
-            "description": "Whether the opportunity is forecasted",
-            "example": False
-        }
+        metadata={"description": "Whether the opportunity is forecasted", "example": False},
     )
-    
+
     @validates_schema
-    def validate_award_values(self, data, **kwargs):
+    def validate_award_values(self, data: dict, **kwargs: dict) -> None:
         if data.get("award_floor") is not None and data.get("award_ceiling") is not None:
             if data["award_floor"] > data["award_ceiling"]:
                 raise ValidationError(
                     [
                         MarshmallowErrorContainer(
-                            ValidationErrorType.INVALID, 
-                            "Award floor must be less than or equal to award ceiling"
+                            ValidationErrorType.INVALID,
+                            "Award floor must be less than or equal to award ceiling",
                         )
                     ]
                 )
-        
+
         if data.get("post_date") is not None and data.get("close_date") is not None:
             if data["post_date"] > data["close_date"]:
                 raise ValidationError(
                     [
                         MarshmallowErrorContainer(
                             ValidationErrorType.INVALID,
-                            "Post date must be less than or equal to close date"
+                            "Post date must be less than or equal to close date",
                         )
                     ]
                 )
+
 
 class OpportunitySummaryCreateResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunitySummaryV1Schema())

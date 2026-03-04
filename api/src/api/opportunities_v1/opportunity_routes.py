@@ -23,10 +23,10 @@ from src.services.opportunities_v1.get_opportunity import (
     get_opportunity,
     get_opportunity_by_legacy_id,
 )
+from src.services.opportunities_v1.opportunity_summaries import create_opportunity_summary
 from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_csv
 from src.services.opportunities_v1.search_opportunities import search_opportunities
 from src.util.dict_util import flatten_dict
-from src.services.opportunities_v1.opportunity_summaries import create_opportunity_summary
 
 logger = logging.getLogger(__name__)
 
@@ -277,11 +277,18 @@ def opportunity_get(db_session: db.Session, opportunity_id: UUID) -> response.Ap
     responses=[200, 403, 404, 422, 500], security=jwt_or_api_user_key_security_schemes
 )
 @flask_db.with_db_session()
-def opportunity_summary_create(db_session: db.Session, opportunity_id: UUID, json_data: dict) -> response.ApiResponse:
+def opportunity_summary_create(
+    db_session: db.Session, opportunity_id: UUID, json_data: dict
+) -> response.ApiResponse:
     """Create a new opportunity summary"""
     add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
     logger.info("POST /v1/opportunities/:opportunity_id/summary")
 
     with db_session.begin():
-        opportunity_summary = create_opportunity_summary(db_session, opportunity_id, json_data)
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        opportunity_summary = create_opportunity_summary(
+            db_session, opportunity_id, json_data, user
+        )
     return response.ApiResponse(message="Success", data=opportunity_summary)
