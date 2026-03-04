@@ -654,7 +654,7 @@ class LkAwardRecommendationAttachmentType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkAwardRecommendationAttachmentType":
+    def from_lookup(cls, lookup: Lookup) -> LkAwardRecommendationAttachmentType:
         return LkAwardRecommendationAttachmentType(
             award_recommendation_attachment_type_id=lookup.lookup_val,
             description=lookup.get_description(),
@@ -669,7 +669,7 @@ class LkAwardRecommendationStatus(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkAwardRecommendationStatus":
+    def from_lookup(cls, lookup: Lookup) -> LkAwardRecommendationStatus:
         return LkAwardRecommendationStatus(
             award_recommendation_status_id=lookup.lookup_val,
             description=lookup.get_description(),
@@ -684,7 +684,7 @@ class LkAwardRecommendationType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkAwardRecommendationType":
+    def from_lookup(cls, lookup: Lookup) -> LkAwardRecommendationType:
         return LkAwardRecommendationType(
             award_recommendation_type_id=lookup.lookup_val,
             description=lookup.get_description(),
@@ -699,7 +699,7 @@ class LkAwardRecommendationReviewType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkAwardRecommendationReviewType":
+    def from_lookup(cls, lookup: Lookup) -> LkAwardRecommendationReviewType:
         return LkAwardRecommendationReviewType(
             award_recommendation_review_type_id=lookup.lookup_val,
             description=lookup.get_description(),
@@ -714,7 +714,7 @@ class LkAwardRecommendationRiskType(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkAwardRecommendationRiskType":
+    def from_lookup(cls, lookup: Lookup) -> LkAwardRecommendationRiskType:
         return LkAwardRecommendationRiskType(
             award_recommendation_risk_type_id=lookup.lookup_val,
             description=lookup.get_description(),
@@ -729,7 +729,7 @@ class LkAwardRecommendationAuditEvent(LookupTable, TimestampMixin):
     description: Mapped[str]
 
     @classmethod
-    def from_lookup(cls, lookup: Lookup) -> "LkAwardRecommendationAuditEvent":
+    def from_lookup(cls, lookup: Lookup) -> LkAwardRecommendationAuditEvent:
         return LkAwardRecommendationAuditEvent(
             award_recommendation_audit_event_id=lookup.lookup_val,
             description=lookup.get_description(),
