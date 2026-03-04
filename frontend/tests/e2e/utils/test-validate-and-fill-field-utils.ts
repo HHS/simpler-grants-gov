@@ -4,8 +4,8 @@
 // fills the field with test data, and ensures no validation errors remain.
 // It captures detailed test information and attaches it to the test report.
 // File: frontend/tests/e2e/utils/test-validate-and-fill-field-utils.ts
-// ============================================================================//
-//Usage:
+// ============================================================================
+// Usage:
 // import { validateAndFillField } from "../utils/test-validate-and-fill-field-utils";
 // await validateAndFillField(testInfo, page, fieldDefinition);
 //
@@ -26,8 +26,6 @@ export async function validateAndFillField(
   page: Page,
   field: FieldDefinition,
 ): Promise<void> {
-  const startTime = new Date();
-
   try {
     // Click save to trigger validation
     await page.getByTestId("apply-form-save").click();
