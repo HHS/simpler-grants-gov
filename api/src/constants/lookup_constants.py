@@ -413,3 +413,12 @@ class WorkflowEntityType(StrEnum):
 class WorkflowEventType(StrEnum):
     START_WORKFLOW = "start_workflow"
     PROCESS_WORKFLOW = "process_workflow"
+
+
+class WorkflowEventProcessingResult(StrEnum):
+    """Enum representing the result of processing an SQS event."""
+
+    SUCCESS = "success"
+    NON_RETRYABLE_ERROR = "non_retryable_error"
+    RETRYABLE_ERROR = "retryable_error"
+    GENERAL_ERROR = "general_error"
