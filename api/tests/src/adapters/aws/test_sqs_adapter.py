@@ -42,13 +42,17 @@ class TestGetBotoSQSClient:
         mock_get_session.return_value = mock_session
         get_boto_sqs_client()
         mock_get_session.assert_called_once()
-        mock_session.client.assert_called_once_with("sqs", region_name=SQSConfig().aws_region, endpoint_url=SQSConfig().s3_endpoint_url)
+        mock_session.client.assert_called_once_with(
+            "sqs", region_name=SQSConfig().aws_region, endpoint_url=SQSConfig().s3_endpoint_url
+        )
 
     def test_uses_provided_session(self):
         """Verify that the factory function uses a specifically provided AWS session."""
         mock_session = Mock()
         get_boto_sqs_client(session=mock_session)
-        mock_session.client.assert_called_once_with("sqs", region_name=SQSConfig().aws_region, endpoint_url=SQSConfig().s3_endpoint_url)
+        mock_session.client.assert_called_once_with(
+            "sqs", region_name=SQSConfig().aws_region, endpoint_url=SQSConfig().s3_endpoint_url
+        )
 
 
 class TestSQSClient:
