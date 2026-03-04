@@ -1,16 +1,17 @@
-name: Deploy NOFOs
-run-name: Deploy ${{ inputs.version || 'main' }} to NOFOs ${{ inputs.environment }}
+name: Deploy nofos
+# Need to set a default value for when the workflow is triggered from a git push
+# which bypasses the default configuration for inputs
+run-name: Deploy ${{ inputs.version || 'main' }} to nofos ${{ inputs.environment || 'dev' }}
 
 on:
-  push:
-    branches:
-      - "main"
-    paths:
-      - ".github/workflows/*-nofos.yml"
-      - "infra/nofos/**"
-      - "infra/modules/**"
-  # Release deployments are handled by cd-release.yml to enforce deployment order
-  # (API -> Frontend -> NOFOs -> Analytics)
+  # !! Uncomment the following lines once you've set up the dev environment and ready to turn on continuous deployment
+  # push:
+  #   branches:
+  #     - "main"
+  #   paths:
+  #     - "nofos/**"
+  #     - "bin/**"
+  #     - "infra/**"
   workflow_dispatch:
     inputs:
       environment:
@@ -20,43 +21,18 @@ on:
         type: choice
         options:
           - dev
-          - training
-          - grantee1
+          - staging
           - prod
       version:
-        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
         required: true
         default: "main"
-        type: string
+        description: Tag or branch or SHA to deploy
 
 jobs:
-  checks:
-    name: Checks
-    uses: ./.github/workflows/ci-nofos.yml
-    with:
-      version: ${{ inputs.version || 'main' }}
-
-  vulnerability-scans:
-    name: Vulnerability Scans
-    needs: [checks]
-    uses: ./.github/workflows/vulnerability-scans-nofos.yml
-
   deploy:
     name: Deploy
-    if: github.event_name != 'push' || inputs.environment != null
-    needs: [checks, vulnerability-scans]
-    uses: ./.github/workflows/deploy-nofos.yml
-    strategy:
-      max-parallel: 1
-      fail-fast: false
-      matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || '["dev"]')  }}
+    uses: ./.github/workflows/deploy.yml
     with:
-      environment: ${{ matrix.envs }}
-      version: ${{ inputs.version || github.ref || 'main' }}
-
-  send-slack-notification:
-    if: failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
-    needs: [checks, deploy, vulnerability-scans]
-    uses: ./.github/workflows/send-slack-notification.yml
-    secrets: inherit
+      app_name: nofos
+      environment: ${{ inputs.environment || 'dev' }}
+      version: ${{ inputs.version || 'main' }}
