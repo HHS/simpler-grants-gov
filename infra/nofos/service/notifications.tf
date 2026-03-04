@@ -6,7 +6,8 @@ locals {
     module.existing_notifications_email_domain[0].domain_identity_arn
   ) : null
   notifications_environment_variables = local.notifications_config != null ? {
-    AWS_PINPOINT_APP_ID = module.notifications[0].app_id
+    AWS_PINPOINT_APP_ID       = module.notifications[0].app_id,
+    AWS_PINPOINT_SENDER_EMAIL = local.notifications_config.sender_email
   } : {}
   notifications_app_name = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
 }

@@ -37,4 +37,11 @@ describe("AwardRecommendationStatusTag", () => {
     );
     expect(tag).toBeInTheDocument();
   });
+
+  it("renders approved status tag", () => {
+    render(<AwardRecommendationStatusTag status="approved" />);
+
+    const tag = screen.getByTestId("award-recommendation-status-approved");
+    expect(tag).toBeInTheDocument();
+  });
 });
