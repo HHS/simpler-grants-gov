@@ -1,3 +1,5 @@
+import boto3
+
 from src.adapters.aws.sqs_adapter import SQSClient, SQSConfig
 from src.workflow.event.workflow_event import WorkflowEvent
 
