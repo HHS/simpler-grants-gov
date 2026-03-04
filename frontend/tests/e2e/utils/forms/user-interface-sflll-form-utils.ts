@@ -1,5 +1,4 @@
 import { Page, TestInfo } from "@playwright/test";
-
 import {
   UIFieldDefinition,
   verifyUIField,
