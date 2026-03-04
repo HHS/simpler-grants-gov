@@ -10,18 +10,22 @@ from tests.src.db.models.factories import UserFactory
 
 def test_setup_lower_env_agencies(enable_factory_create, db_session):
 
-    # Create a few users & run the task
-    UserFactory.create_batch(size=5)
+    # Create a few users
+    users = UserFactory.create_batch(size=5)
+    user_ids = [user.user_id for user in users]
+
+    # Run the task
     task = SetupLowerEnvAgenciesTask(db_session)
     task.run()
 
-    # Get the user records (use expire_all to "commit" the data)
+    # Get the user records (use expire_all to force load from the DB)
     db_session.expire_all()
     users = (
         db_session.execute(
             select(User)
             .options(selectinload(User.agency_users).selectinload(AgencyUser.agency))
             .where(User.user_type == UserType.STANDARD)
+            .where(User.user_id.in_(user_ids))
         )
         .scalars()
         .all()
@@ -48,7 +52,7 @@ def test_setup_lower_env_agencies(enable_factory_create, db_session):
         # For this user, if no fake agency or user role was found
         if not agency_and_role_found:
             errors.append(
-                "User does not have a fake agency and/or a role; user_id = " + user.user_id
+                "User does not have a fake agency and/or a role; user_id = " + str(user.user_id)
             )
 
     # Assert that all users were checked successfully
@@ -65,6 +69,7 @@ def test_setup_lower_env_agencies(enable_factory_create, db_session):
             select(User)
             .options(selectinload(User.agency_users).selectinload(AgencyUser.agency))
             .where(User.user_type == UserType.STANDARD)
+            .where(User.user_id.in_(user_ids))
         )
         .scalars()
         .all()
@@ -72,7 +77,6 @@ def test_setup_lower_env_agencies(enable_factory_create, db_session):
     assert len(users) >= 5
 
     errors2 = []
-    test2_success = True
     for user in users:
         agency_count = 0
         for agency_user in user.agency_users:
@@ -81,12 +85,10 @@ def test_setup_lower_env_agencies(enable_factory_create, db_session):
                 agency_count += 1
 
         if agency_count != 1:
-            test2_success = False
-            errors2.append("User has more than 1 fake agency; user_id = " + user.user_id)
+            errors2.append("User has more than 1 fake agency; user_id = " + str(user.user_id))
 
     # Assert that all users have no more than 1 fake agency
-    assert len(errors) == 0, ". ".join(errors)
-    assert test2_success
+    assert len(errors2) == 0, ". ".join(errors2)
 
 
 def test_does_not_work_in_prod(db_session, monkeypatch):

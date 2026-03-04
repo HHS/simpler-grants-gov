@@ -4,7 +4,6 @@ import secrets
 import string
 from collections.abc import Sequence
 from datetime import date
-from enum import StrEnum
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -27,11 +26,6 @@ class SetupLowerEnvAgenciesTask(Task):
     """Task that creates fake Agencies, one for each user,
     and assigns them the opportunity_publisher role.
     """
-
-    class Metrics(StrEnum):
-        USER_COUNT = "user_count"
-        HAS_EXISTING_AGENCY_COUNT = "has_existing_agency_count"
-        NEW_AGENCY_COUNT = "new_agency_count"
 
     def __init__(self, db_session: db.Session, current_date: date | None = None) -> None:
         super().__init__(db_session)
@@ -57,7 +51,6 @@ class SetupLowerEnvAgenciesTask(Task):
             # opportunity_publisher role. If a user already has a fake
             # agency, skip it.
             for user in users:
-                self.increment(self.Metrics.USER_COUNT)
                 if not self.has_agency(user):
                     agency = self.create_fake_agency()
                     self.assign_agency_user(user, agency, OPPORTUNITY_PUBLISHER)
@@ -80,7 +73,6 @@ class SetupLowerEnvAgenciesTask(Task):
         for agency_user in user.agency_users:
             agency = agency_user.agency
             if agency.agency_code.startswith("AUTO"):
-                self.increment(self.Metrics.HAS_EXISTING_AGENCY_COUNT)
                 logger.info(
                     "User has an existing fake agency",
                     extra={"agency_code": agency.agency_code, "user_id": user.user_id},
@@ -137,7 +129,6 @@ class SetupLowerEnvAgenciesTask(Task):
             ).scalar_one_or_none()
 
             if existing_record is None:
-                self.increment(self.Metrics.NEW_AGENCY_COUNT)
                 return new_code
 
         raise Exception("Could not generate a unique agency_code after 5 attempts")
