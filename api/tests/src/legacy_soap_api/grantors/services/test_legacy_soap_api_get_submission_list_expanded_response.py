@@ -1716,6 +1716,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             f"GRANT{submission.legacy_tracking_number}"
             == submission_info[0]["GrantsGovTrackingNumber"]
         )
+        # Application with ApplicationStatus of "received_by_agency" returns as "Received by Agency"
         assert "Received by Agency" == submission_info[0]["GrantsGovApplicationStatus"]
 
     def test_get_submission_list_expanded_response_correctly_handles_agency_tracking_number_assigned_agency_application_status(
@@ -1764,4 +1765,5 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             f"GRANT{submission.legacy_tracking_number}"
             == submission_info[0]["GrantsGovTrackingNumber"]
         )
+        # Application with ApplicationStatus of "agency_tracking_number_assigned" returns as "Agency Tracking Number Assigned"
         assert "Agency Tracking Number Assigned" == submission_info[0]["GrantsGovApplicationStatus"]
