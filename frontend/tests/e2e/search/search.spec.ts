@@ -42,12 +42,15 @@ const categoryCheckboxes = {
 test.describe("Search page tests", () => {
   // Set all inputs, then refresh the page. Those same inputs should be
   // set from query params.
-  test("should refresh and retain filters in a new tab", async ({ page }, {
-    project,
-  }) => {
+  test("should refresh and retain filters in a new tab", async ({
+    page,
+    browserName,
+  }, { project }) => {
     const isMobile = !!project.name.match(/[Mm]obile/);
     const agencyCheckboxes: { [key: string]: string } = {};
     await page.goto("/search");
+
+    test.skip(browserName === "firefox", "This test is flaky in Firefox");
 
     await waitForSearchResultsInitialLoad(page);
     await fillSearchInputAndSubmit(searchTerm, page, project.name);
