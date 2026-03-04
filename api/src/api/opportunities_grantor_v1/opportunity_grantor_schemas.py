@@ -60,6 +60,7 @@ class OpportunityCreateRequestSchema(Schema):
         },
     )
     category_explanation = fields.String(
+        allow_none=True,
         validate=validators.Length(max=255),
         metadata={
             "description": "Explanation of the category (required when category is 'other')",
@@ -105,6 +106,40 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
         fields.Nested(CompetitionAlphaSchema),
         metadata={"description": "List of competitions associated with the opportunity"},
     )
+
+
+class OpportunityUpdateRequestSchema(Schema):
+    """Schema for PUT /v1/grantors/opportunities/<opportunity_id> request"""
+
+    opportunity_title = fields.String(
+        required=True,
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "The title of the opportunity",
+            "example": "Updated Research Grant for Climate Innovation",
+        },
+    )
+    category = fields.Enum(
+        OpportunityCategory,
+        required=True,
+        metadata={
+            "description": "The opportunity category",
+        },
+    )
+    category_explanation = fields.String(
+        allow_none=True,
+        load_default=None,
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "Explanation of the category (required when category is 'other')",
+        },
+    )
+
+
+class OpportunityUpdateResponseSchema(AbstractResponseSchema):
+    """Schema for PUT /v1/grantors/opportunities/<opportunity_id> response"""
+
+    data = fields.Nested(OpportunityGrantorSchema())
 
 
 class OpportunityCreateResponseSchema(AbstractResponseSchema):
