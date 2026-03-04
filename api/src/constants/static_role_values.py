@@ -204,6 +204,21 @@ SYSTEM_WORKFLOW_USER_ROLE = Role(
     ],
 )
 
+# Role for us to give our own users for testing workflows
+# Allowed to send any event to the event API
+INTERNAL_WORKFLOW_USER_ROLE_ID = uuid.UUID("df17eaaf-701b-4b9f-9a88-0406beabc68e")
+INTERNAL_WORKFLOW_USER_ROLE = Role(
+    role_id=INTERNAL_WORKFLOW_USER_ROLE_ID,
+    role_name="Internal Workflow User",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        INTERNAL_WORKFLOW_USER_ROLE_ID, [Privilege.INTERNAL_WORKFLOW_EVENT_SEND]
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=INTERNAL_WORKFLOW_USER_ROLE_ID, role_type=RoleType.INTERNAL),
+    ],
+)
+
 CORE_ROLES = [
     ORG_ADMIN,
     ORG_MEMBER,
@@ -215,4 +230,5 @@ CORE_ROLES = [
     OPPORTUNITY_PUBLISHER,
     NAVA_INTERNAL_ROLE,
     SYSTEM_WORKFLOW_USER_ROLE,
+    INTERNAL_WORKFLOW_USER_ROLE,
 ]
