@@ -1842,6 +1842,7 @@ export const messages = {
       draft: "Draft",
       inProgress: "In progress",
       pendingReview: "Pending review",
+      approved: "Approved",
     },
     heroButtons: {
       save: "Save and finish later",
