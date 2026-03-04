@@ -3,30 +3,38 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.constants.static_role_values import OPPORTUNITY_PUBLISHER
-from src.db.models.user_models import AgencyUser, User
+from src.db.models.user_models import AgencyUser, User, UserType
 from src.task.agencies.setup_lower_env_agencies import SetupLowerEnvAgenciesTask
+from tests.src.db.models.factories import UserFactory
 
 
 def test_setup_lower_env_agencies(enable_factory_create, db_session):
+
+    # Create a few users & run the task
+    UserFactory.create_batch(size=5)
     task = SetupLowerEnvAgenciesTask(db_session)
     task.run()
 
-    # Get all users
+    # Get the user records (use expire_all to "commit" the data)
+    db_session.expire_all()
     users = (
         db_session.execute(
-            select(User).options(selectinload(User.agency_users).selectinload(AgencyUser.agency))
+            select(User)
+            .options(selectinload(User.agency_users).selectinload(AgencyUser.agency))
+            .where(User.user_type == UserType.STANDARD)
         )
         .scalars()
         .all()
     )
+    assert len(users) >= 5
 
-    # Check each user for a fake agency with the opportunity_publisher role
-    test_success = True
-
+    # --- Test1: Check each user for a fake agency with the opportunity_publisher role ---
+    errors = []
     for user in users:
-        agency_and_role_found = False
+        assert len(user.agency_users) >= 1
 
         # For each agency that this user belongs to, check for the AUTO prefix
+        agency_and_role_found = False
         for agency_user in user.agency_users:
             agency = agency_user.agency
             if agency.agency_code.startswith("AUTO"):
@@ -37,13 +45,48 @@ def test_setup_lower_env_agencies(enable_factory_create, db_session):
                         agency_and_role_found = True
                         break
 
-        # For this user, if no fake agency or user role found then stop and fail the test
+        # For this user, if no fake agency or user role was found
         if not agency_and_role_found:
-            test_success = False
-            break
+            errors.append(
+                "User does not have a fake agency and/or a role; user_id = " + user.user_id
+            )
 
-    # If all users were checked successfully, this will assert True
-    assert test_success
+    # Assert that all users were checked successfully
+    assert len(errors) == 0, ". ".join(errors)
+
+    # --- Test 2: Rerun the task and verify it doesn't give the users a second agency ---
+    task = SetupLowerEnvAgenciesTask(db_session)
+    task.run()
+
+    # Again, expire_all and get the user records
+    db_session.expire_all()
+    users = (
+        db_session.execute(
+            select(User)
+            .options(selectinload(User.agency_users).selectinload(AgencyUser.agency))
+            .where(User.user_type == UserType.STANDARD)
+        )
+        .scalars()
+        .all()
+    )
+    assert len(users) >= 5
+
+    errors2 = []
+    test2_success = True
+    for user in users:
+        agency_count = 0
+        for agency_user in user.agency_users:
+            agency = agency_user.agency
+            if agency.agency_code.startswith("AUTO"):
+                agency_count += 1
+
+        if agency_count != 1:
+            test2_success = False
+            errors2.append("User has more than 1 fake agency; user_id = " + user.user_id)
+
+    # Assert that all users have no more than 1 fake agency
+    assert len(errors) == 0, ". ".join(errors)
+    assert test2_success
 
 
 def test_does_not_work_in_prod(db_session, monkeypatch):
