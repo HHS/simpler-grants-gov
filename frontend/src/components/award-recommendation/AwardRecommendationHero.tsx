@@ -20,7 +20,7 @@ export default async function AwardRecommendationHero({
   return (
     <div
       data-testid="award-recommendation-hero"
-      className="text-dark bg-base-lightest padding-y-4 tablet:padding-y-6"
+      className="text-dark bg-base-lightest padding-bottom-4 tablet:padding-y-6"
     >
       <GridContainer>
         <Grid>
@@ -40,7 +40,7 @@ export default async function AwardRecommendationHero({
               },
             ]}
           />
-          <Grid className="padding-y-4 tablet:padding-y-3">
+          <Grid className="padding-bottom-4 padding-bottom-4 tablet:padding-y-3">
             <h1 className="font-sans-xl tablet:font-sans-2xl">
               {t("heroTitle", { defaultValue: "Award Rec #" })}: {recordNumber}
             </h1>
