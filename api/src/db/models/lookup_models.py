@@ -235,16 +235,16 @@ APPLICATION_STATUS_CONFIG: LookupConfig[ApplicationStatus] = LookupConfig(
     ]
 )
 
-AWARD_RECOMMENDATION_ATTACHMENT_TYPE_CONFIG: LookupConfig[
-    AwardRecommendationAttachmentType
-] = LookupConfig(
-    [
-        LookupStr(AwardRecommendationAttachmentType.STANDARD_TERMS, 1),
-        LookupStr(AwardRecommendationAttachmentType.STANDARD_CONDITIONS, 2),
-        LookupStr(AwardRecommendationAttachmentType.PROGRAM_TERMS, 3),
-        LookupStr(AwardRecommendationAttachmentType.PROGRAM_CONDITIONS, 4),
-        LookupStr(AwardRecommendationAttachmentType.OTHER, 5),
-    ]
+AWARD_RECOMMENDATION_ATTACHMENT_TYPE_CONFIG: LookupConfig[AwardRecommendationAttachmentType] = (
+    LookupConfig(
+        [
+            LookupStr(AwardRecommendationAttachmentType.STANDARD_TERMS, 1),
+            LookupStr(AwardRecommendationAttachmentType.STANDARD_CONDITIONS, 2),
+            LookupStr(AwardRecommendationAttachmentType.PROGRAM_TERMS, 3),
+            LookupStr(AwardRecommendationAttachmentType.PROGRAM_CONDITIONS, 4),
+            LookupStr(AwardRecommendationAttachmentType.OTHER, 5),
+        ]
+    )
 )
 
 AWARD_RECOMMENDATION_STATUS_CONFIG: LookupConfig[AwardRecommendationStatus] = LookupConfig(
@@ -263,9 +263,7 @@ AWARD_RECOMMENDATION_TYPE_CONFIG: LookupConfig[AwardRecommendationType] = Lookup
     ]
 )
 
-AWARD_RECOMMENDATION_REVIEW_TYPE_CONFIG: LookupConfig[
-    AwardRecommendationReviewType
-] = LookupConfig(
+AWARD_RECOMMENDATION_REVIEW_TYPE_CONFIG: LookupConfig[AwardRecommendationReviewType] = LookupConfig(
     [
         LookupStr(AwardRecommendationReviewType.MERIT_REVIEW, 1),
         LookupStr(AwardRecommendationReviewType.APPLICATION_BUDGET_REVIEW, 2),
@@ -274,17 +272,13 @@ AWARD_RECOMMENDATION_REVIEW_TYPE_CONFIG: LookupConfig[
     ]
 )
 
-AWARD_RECOMMENDATION_RISK_TYPE_CONFIG: LookupConfig[
-    AwardRecommendationRiskType
-] = LookupConfig(
+AWARD_RECOMMENDATION_RISK_TYPE_CONFIG: LookupConfig[AwardRecommendationRiskType] = LookupConfig(
     [
         LookupStr(AwardRecommendationRiskType.ADDITIONAL_MONITORING, 1),
     ]
 )
 
-AWARD_RECOMMENDATION_AUDIT_EVENT_CONFIG: LookupConfig[
-    AwardRecommendationAuditEvent
-] = LookupConfig(
+AWARD_RECOMMENDATION_AUDIT_EVENT_CONFIG: LookupConfig[AwardRecommendationAuditEvent] = LookupConfig(
     [
         LookupStr(AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_CREATED, 1),
         LookupStr(AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_UPDATED, 2),
