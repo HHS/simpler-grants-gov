@@ -1,19 +1,18 @@
-import DOMPurify from "isomorphic-dompurify";
 import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
-import { splitMarkup } from "src/utils/generalUtils";
 
+import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
-import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 
 export async function generateMetadata({
   params,
@@ -37,83 +36,23 @@ export const dynamic = "force-dynamic";
 
 export type AwardRecommendationPageProps = {
   params: Promise<{ locale: string; id?: string }>;
-} & WithFeatureFlagProps & {
-    searchParams?: Promise<{ id?: string }>;
-  };
-
-const SummaryDescriptionDisplay = ({
-  summaryDescription = "",
-  showCallToAction,
-  hideCallToAction,
-}: {
-  summaryDescription: string;
-  showCallToAction: string;
-  hideCallToAction: string;
-}) => {
-  if (summaryDescription?.length < 750) {
-    return (
-      <div
-        dangerouslySetInnerHTML={{
-          __html: summaryDescription
-            ? DOMPurify.sanitize(summaryDescription)
-            : "--",
-        }}
-      />
-    );
-  }
-
-  const purifiedSummary = DOMPurify.sanitize(summaryDescription);
-  const { preSplit, postSplit } = splitMarkup(purifiedSummary, 600);
-
-  if (!postSplit) {
-    return (
-      <div
-        dangerouslySetInnerHTML={{
-          __html: summaryDescription
-            ? DOMPurify.sanitize(summaryDescription)
-            : "--",
-        }}
-      />
-    );
-  }
-
-  return (
-    <>
-      <div
-        dangerouslySetInnerHTML={{
-          __html: preSplit + "...",
-        }}
-      />
-      <ContentDisplayToggle
-        showCallToAction={showCallToAction}
-        hideCallToAction={hideCallToAction}
-        positionButtonBelowContent={false}
-      >
-        <div
-          dangerouslySetInnerHTML={{
-            __html: postSplit,
-          }}
-        />
-      </ContentDisplayToggle>
-    </>
-  );
-};
+} & WithFeatureFlagProps;
 
 interface OpportunitySectionProps {
   opportunityData: OpportunityDetail;
   locale: string;
 }
 
-const OpportunitySectionComponent = async ({
+const OpportunitySectionComponent = ({
   opportunityData,
-  locale,
+  locale: _locale,
 }: OpportunitySectionProps) => {
-  const t = await getTranslations({ locale, namespace: "AwardRecommendation" });
+  const t = useTranslations("AwardRecommendation");
   const fundingOppName =
     opportunityData.opportunity_title || "Funding Opportunity";
   const fundingOppNumber = opportunityData.opportunity_number || "--";
-  const summary =
-    opportunityData.summary.summary_description || "No summary available";
+  const summaryDescription = opportunityData.summary?.summary_description || "";
+  const hasSummary = !!summaryDescription;
 
   return (
     <div>
@@ -152,28 +91,25 @@ const OpportunitySectionComponent = async ({
                   <p className="text-bold margin-bottom-1 font-sans-sm">
                     Funding opp #
                   </p>
-                  <p>{fundingOppNumber}</p>
+                  {fundingOppNumber}
                 </div>
               </div>
-
               <p className="text-bold margin-bottom-2">
                 {t("opportunitySummary")}
               </p>
               <div className="margin-bottom-3">
-                <SummaryDescriptionDisplay
-                  summaryDescription={summary}
-                  showCallToAction={t("readMore", {
-                    defaultValue: "Read more",
-                  })}
-                  hideCallToAction={t("showLess", {
-                    defaultValue: "Show less",
-                  })}
-                />
+                {hasSummary ? (
+                  <SummaryDescriptionDisplay
+                    summaryDescription={summaryDescription || ""}
+                  />
+                ) : (
+                  <div>No summary available</div>
+                )}
               </div>
               <p className="text-bold margin-bottom-2">
                 {t("selectionMethod")}
               </p>
-              <p>Merit Review</p>
+              Merit Review
             </div>
           </div>
         </Grid>
@@ -184,7 +120,6 @@ const OpportunitySectionComponent = async ({
 
 async function AwardRecommendationPageContent({
   params,
-  searchParams,
 }: AwardRecommendationPageProps) {
   const { locale, id: awardRecommendationId } = await params;
 
@@ -192,9 +127,7 @@ async function AwardRecommendationPageContent({
     locale,
     namespace: "AwardRecommendation",
   });
-  const resolvedSearchParams = (await (searchParams ||
-    Promise.resolve({}))) as { id?: string };
-  const opportunityId = resolvedSearchParams.id;
+  const opportunityId = "6a483cd8-9169-418a-8dfb-60fa6e6f51e5";
 
   let opportunityData: OpportunityDetail | null = null;
   if (opportunityId) {
@@ -206,6 +139,16 @@ async function AwardRecommendationPageContent({
       if (parseErrorStatus(error as ApiRequestError) === 404) {
         opportunityData = null;
       }
+      return (
+        <Alert
+          heading={t("errorHeadingOppurtunity")}
+          headingLevel="h2"
+          type="warning"
+          validation
+        >
+          {t("oppurtunityFetchError")}
+        </Alert>
+      );
     }
   }
 
