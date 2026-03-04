@@ -3,10 +3,11 @@ from collections.abc import Iterator
 from unittest.mock import patch
 
 import pytest
-from pydantic import ValidationError
+from pydantic import Field, ValidationError
 
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import (
+    BaseSOAPSchema,
     FaultMessage,
     SOAPInvalidRequestOperationName,
     SOAPOperationNotSupported,
@@ -324,3 +325,28 @@ def test_soap_request_streamer_reconstructs_head_with_the_rest_of_the_stream():
     soap_request_streamer = SoapRequestStreamer(stream=fake_stream)
     assert len(soap_request_streamer.head()) == 10000
     assert b"".join(soap_request_streamer) == data
+
+
+class SOAPExample(BaseSOAPSchema):
+    bool_value: bool = Field(alias="BoolValue")
+
+
+@pytest.mark.parametrize(
+    ("val", "expected"),
+    [
+        ("YES", True),
+        ("no", False),
+        ("tRue", True),
+        ("falSe", False),
+        ("1", True),
+        ("0", False),
+        (1, True),
+        (0, False),
+    ],
+)
+def test_bool_values_parse_as_expected(val: str | int, expected: bool) -> None:
+    assert SOAPExample(**{"bool_value": val}).bool_value is expected
+
+
+def test_base_schema_field_name_alias() -> None:
+    assert SOAPExample(**{"BoolValue": True}).bool_value is True

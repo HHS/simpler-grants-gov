@@ -12,6 +12,10 @@ from src.legacy_soap_api.grantors.schemas.get_submission_list_expanded_schemas i
     GetSubmissionListExpandedResponse,
     SubmissionInfo,
 )
+from src.legacy_soap_api.grantors.schemas.update_application_info_schemas import (
+    UpdateApplicationInfoRequest,
+    UpdateApplicationInfoResponse,
+)
 
 __all__ = [
     "GetApplicationZipResponseSOAPEnvelope",
@@ -24,4 +28,6 @@ __all__ = [
     "GetSubmissionListExpandedResponse",
     "ExpandedApplicationFilter",
     "SubmissionInfo",
+    "UpdateApplicationInfoResponse",
+    "UpdateApplicationInfoRequest",
 ]
