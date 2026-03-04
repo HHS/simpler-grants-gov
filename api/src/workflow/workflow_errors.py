@@ -81,3 +81,7 @@ class UserAccessError(NonRetryableWorkflowError):
 
 class DuplicateApprovalError(NonRetryableWorkflowError):
     pass
+
+
+class OpportunityWithoutAgencyError(NonRetryableWorkflowError):
+    pass

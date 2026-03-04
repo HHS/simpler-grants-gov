@@ -1,4 +1,4 @@
-import { render, screen } from "tests/react-utils";
+import { render, screen } from "@testing-library/react";
 
 import RoadmapTimeline from "src/components/roadmap/sections/RoadmapTimeline";
 
@@ -7,7 +7,7 @@ describe("RoadmapTimeline Content", () => {
     render(<RoadmapTimeline />);
     const RoadmapTimelineH2 = screen.getByRole("heading", {
       level: 2,
-      name: /Key milestones?/i,
+      name: "title",
     });
 
     expect(RoadmapTimelineH2).toBeInTheDocument();

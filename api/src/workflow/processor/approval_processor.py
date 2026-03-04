@@ -1,7 +1,6 @@
 import logging
 
 from src.adapters import db
-from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import ApprovalResponseType, ApprovalType
 from src.db.models.agency_models import Agency
 from src.db.models.user_models import User
@@ -10,11 +9,7 @@ from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.service.approval_service import get_approvals_for_workflow
 from src.workflow.workflow_config import ApprovalConfig
 from src.workflow.workflow_constants import WorkflowConstants
-from src.workflow.workflow_errors import (
-    DuplicateApprovalError,
-    ImplementationMissingError,
-    UserAccessError,
-)
+from src.workflow.workflow_errors import DuplicateApprovalError, ImplementationMissingError
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +59,6 @@ class ApprovalProcessor:
 
         Handles:
         * Checking against the approval config for the current workflow state
-        * Validating that the user can do this approval event
         * Validating that the user doesn't already have an active approval
         * Creating a record in the workflow approval table
         """
@@ -74,12 +68,6 @@ class ApprovalProcessor:
         user = self.state_machine_event.acting_user
 
         approval_config = self._get_approval_config()
-
-        if not can_access(user, set(approval_config.required_privileges), agency):
-            logger.warning(
-                "User does not have access to approve workflow for given state.", extra=log_extra
-            )
-            raise UserAccessError("User does not have access to approve workflow for given state.")
 
         if self._has_already_approved(user, approval_config.approval_type):
             logger.info(
@@ -133,7 +121,7 @@ class ApprovalProcessor:
     def _get_approval_config(self) -> ApprovalConfig:
         """Fetch the approval configuration based on the current state of the workflow."""
         approval_config = self.state_machine_event.config.approval_mapping.get(
-            self.state_machine_event.workflow.current_workflow_state
+            self.state_machine_event.event_to_send
         )
         if approval_config is None:
             logger.error(

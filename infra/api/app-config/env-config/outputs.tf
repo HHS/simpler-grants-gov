@@ -85,3 +85,12 @@ output "incident_management_service_integration" {
 output "sqs_config" {
   value = local.sqs_config
 }
+
+output "workflow_service_config" {
+  value = {
+    enable        = var.enable_workflow_service
+    cpu           = var.workflow_service_cpu
+    memory        = var.workflow_service_memory
+    desired_count = var.workflow_service_desired_count
+  }
+}

@@ -1,4 +1,4 @@
-import { render, screen } from "tests/react-utils";
+import { render, screen } from "@testing-library/react";
 
 import RoadmapProcess from "src/components/roadmap/sections/RoadmapProcess";
 
@@ -7,7 +7,7 @@ describe("RoadmapProcess Content", () => {
     render(<RoadmapProcess />);
     const RoadmapProcessH2 = screen.getByRole("heading", {
       level: 2,
-      name: /How we work?/i,
+      name: "title",
     });
 
     expect(RoadmapProcessH2).toBeInTheDocument();

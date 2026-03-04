@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import GrantsLogo from "public/img/grants-logo.svg";
-import { LOGIN_URL } from "src/constants/auth";
+import { applicationTestUserId, LOGIN_URL } from "src/constants/auth";
 import { ExternalRoutes } from "src/constants/routes";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
@@ -28,7 +28,7 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 import NavDropdown from "./NavDropdown";
 import { RouteChangeWatcher } from "./RouteChangeWatcher";
 import { TestUserSelect } from "./TestUserSelect";
-import { SignOutNavLink } from "./user/UserControl";
+import { SignOutNavLink, TestApplicationLink } from "./user/UserControl";
 
 type PrimaryLink = {
   text?: string;
@@ -77,9 +77,11 @@ const NavLink = ({
 const NavLinks = ({
   mobileExpanded,
   onToggleMobileNav,
+  localDev = false,
 }: {
   mobileExpanded: boolean;
   onToggleMobileNav: () => void;
+  localDev: boolean;
 }) => {
   const t = useTranslations("Header.navLinks");
   const path = usePathname();
@@ -244,6 +246,7 @@ const NavLinks = ({
       );
     });
 
+    // add user account nav  depending on login status
     if (!user?.token) {
       items.push(
         <NavLink
@@ -260,10 +263,10 @@ const NavLinks = ({
           })}
         />,
       );
-    }
-
-    if (user?.token) {
+    } else {
       const accountIndex = navLinkList.length;
+      const isApplicationTestUser =
+        localDev && user?.user_id === applicationTestUserId;
       items.push(
         <NavDropdown
           key="account"
@@ -278,6 +281,7 @@ const NavLinks = ({
               onClick={closeDropdownAndMobileNav}
               text={t("settings")}
             />,
+            isApplicationTestUser && <TestApplicationLink />,
             <SignOutNavLink key="logout" onClick={closeDropdownAndMobileNav} />,
           ]}
           setActiveNavDropdownIndex={setActiveNavDropdownIndex}
@@ -400,6 +404,7 @@ const Header = ({
           <NavLinks
             mobileExpanded={isMobileNavExpanded}
             onToggleMobileNav={handleMobileNavToggle}
+            localDev={localDev}
           />
         </div>
       </USWDSHeader>

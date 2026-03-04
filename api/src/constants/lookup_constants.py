@@ -250,6 +250,8 @@ class Privilege(StrEnum):
     VIEW_ORG_SAVED_OPPORTUNITIES = "view_org_saved_opportunities"
     MODIFY_ORG_SAVED_OPPORTUNITIES = "modify_org_saved_opportunities"
 
+    INTERNAL_WORKFLOW_EVENT_SEND = "internal_workflow_event_send"
+
     # These privileges are associated with workflow approvals
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"

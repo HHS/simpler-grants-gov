@@ -72,6 +72,7 @@ describe("LabeledSelect", () => {
     renderLabeledSelect();
 
     const labelElement = screen.getByText("Who is applying?");
+    // eslint-disable-next-line testing-library/no-node-access
     expect(labelElement.closest("label")).toHaveAttribute("for", "test-select");
     expect(screen.getByLabelText("Who is applying?")).toBeInTheDocument();
   });

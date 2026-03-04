@@ -47,7 +47,7 @@ export type FormValidationWarning = {
   field: string;
   message: string;
   type: string;
-  value: string;
+  value: string | null;
 };
 
 export type FormattedFormValidationWarning = FormValidationWarning & {
@@ -74,9 +74,9 @@ export type WidgetTypes =
   | "Budget424aSectionE"
   | "Budget424aSectionF";
 
-export type DefinitionPath =
-  | `/properties/${string}`
-  | [`/properties/${string}`];
+type PropertyPath = `/properties/${string}`;
+
+export type DefinitionPath = PropertyPath | PropertyPath[];
 
 export type UiSchemaField = {
   type: "field" | "multiField" | "null";

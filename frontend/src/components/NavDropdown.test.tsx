@@ -1,6 +1,6 @@
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { IndexType } from "src/types/generalTypes";
-import { render, screen, waitFor } from "tests/react-utils";
 
 import { useState } from "react";
 
@@ -15,6 +15,7 @@ function ControlledNavDropdown() {
       isCurrent={false}
       linkText="Menu"
       menuItems={[
+        // eslint-disable-next-line @next/next/no-html-link-for-pages
         <a href="/a" key="a">
           Link A
         </a>,

@@ -40,6 +40,15 @@ class BaseStateMachine(StateMachine):
         # iterable for some reason.
         return {e.id for e in cls.events}  # type: ignore[attr-defined]
 
+    @classmethod
+    def get_valid_events_for_state(cls, state: str) -> list[str]:
+
+        s = cls.states_map.get(state, None)
+        if s is None:
+            return []
+
+        return [event.id for event in s.transitions.unique_events]
+
     #############################
     # Event Handlers
     #############################

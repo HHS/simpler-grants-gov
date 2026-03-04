@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { SubscriptionSubmitButton } from "src/components/newsletter/SubscriptionSubmitButton";
 
@@ -13,11 +12,6 @@ jest.mock("react-dom", () => {
     useFormStatus: jest.fn(() => ({ pending: false })),
   };
 });
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-  useMessages: () => mockMessages,
-}));
 
 describe("SubscriptionSubmitButton", () => {
   it("renders", () => {
