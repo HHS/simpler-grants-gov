@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Any
+from typing import Any, cast
 
 import src.workflow.state_machine  # noqa: F401  # Import to register all state machines
 from src.adapters import db
@@ -11,7 +11,11 @@ from src.db.models.user_models import User
 from src.db.models.workflow_models import Workflow
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.workflows.send_workflow_event import send_workflow_event_to_queue
-from src.workflow.event.workflow_event import WorkflowEvent
+from src.workflow.event.workflow_event import (
+    ProcessWorkflowEventContext,
+    StartWorkflowEventContext,
+    WorkflowEvent,
+)
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.approval_service import can_user_do_agency_approval
 from src.workflow.service.workflow_service import (
@@ -117,7 +121,7 @@ def _validate_start_workflow_event(
 ) -> None:
     """Validate a start_workflow event."""
     # Note: start_workflow_context is guaranteed to be present due to schema validation
-    start_context = workflow_event.start_workflow_context
+    start_context = cast(StartWorkflowEventContext, workflow_event.start_workflow_context)
 
     # Get the workflow config and state machine class - validates that the workflow type is real and configured
     config, _ = WorkflowRegistry.get_state_machine_for_workflow_type(start_context.workflow_type)
@@ -144,7 +148,7 @@ def _validate_process_workflow_event(
 ) -> None:
     """Validate a process_workflow event."""
     # Note: process_context_data is guaranteed to be present due to schema validation
-    process_context = workflow_event.process_workflow_context
+    process_context = cast(ProcessWorkflowEventContext, workflow_event.process_workflow_context)
 
     # Validate workflow exists and is active
     workflow = get_and_validate_workflow(db_session, process_context.workflow_id)
