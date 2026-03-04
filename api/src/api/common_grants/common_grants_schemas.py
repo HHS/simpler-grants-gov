@@ -32,7 +32,7 @@ class Money(Schema):
     )
     currency = fields.String(
         required=True,
-        metadata={"description": "The ISO 4217 currency code", "example": "USD, EUR"},
+        metadata={"description": "The ISO 4217 currency code", "example": "USD"},
     )
 
 
