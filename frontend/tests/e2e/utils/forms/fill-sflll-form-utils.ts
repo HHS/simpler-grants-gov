@@ -441,8 +441,6 @@ export async function fillSflllFormUtils(
   testInfo: TestInfo,
   page: Page,
 ): Promise<void> {
-  const startTime = new Date();
-
   // Wrap the entire process in a try-catch to capture any unexpected errors
   try {
     // Extract ApplicationURL and attach to test report
