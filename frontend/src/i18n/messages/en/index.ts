@@ -1860,6 +1860,9 @@ export const messages = {
     showLess: "Show less",
     opportunity: "Opportunity",
     editOpportunityDetails: "Edit opportunity details",
+    errorHeadingOppurtunity: "Error fetching opportunity details",
+    oppurtunityFetchError:
+      "Error fetching opportunity data. Please try refreshing the page.",
   },
   InviteLegacyUsers: {
     dataLoadingError:
