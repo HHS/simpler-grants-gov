@@ -67,9 +67,9 @@ jest.mock("next-intl", () => ({
 }));
 
 jest.mock("src/components/opportunity/OpportunityDescription", () => {
-  const actual = jest.requireActual(
-    "src/components/opportunity/OpportunityDescription",
-  );
+  const actual = jest.requireActual;
+  typeof import("src/components/opportunity/OpportunityDescription") >
+    "src/components/opportunity/OpportunityDescription";
   return {
     ...actual,
     SummaryDescriptionDisplay: ({
