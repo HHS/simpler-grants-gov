@@ -1,12 +1,11 @@
-
 import { test } from "@playwright/test";
-import playwrightEnv from "tests/e2e/playwright-env";
 import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
-import { ensurePageClosedAfterEach } from "tests/e2e/utils/test-lifecycle-helpers";
+import playwrightEnv from "tests/e2e/playwright-env";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import { userInterfaceSflllFormUtils } from "tests/e2e/utils/forms/user-interface-sflll-form-utils";
 import { fillSflllFormUtils } from "tests/e2e/utils/forms/fill-sflll-form-utils";
+import { userInterfaceSflllFormUtils } from "tests/e2e/utils/forms/user-interface-sflll-form-utils";
 import { validationSflllFormUtils } from "tests/e2e/utils/forms/validation-sflll-form-utils";
+import { ensurePageClosedAfterEach } from "tests/e2e/utils/test-lifecycle-helpers";
 
 const { baseUrl, testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab";
@@ -32,7 +31,7 @@ test.describe("Test Suite - SFLLL Form", () => {
     await fillSflllFormUtils(testInfo, page);
   });
 
-// Ensure the page is closed after each test to prevent resource leaks
+  // Ensure the page is closed after each test to prevent resource leaks
   ensurePageClosedAfterEach(test);
 
   test("UI - SFLLL Form", async ({ page }, testInfo) => {
@@ -45,7 +44,7 @@ test.describe("Test Suite - SFLLL Form", () => {
     await userInterfaceSflllFormUtils(testInfo, page);
   });
 
-// Ensure the page is closed after each test to prevent resource leaks
+  // Ensure the page is closed after each test to prevent resource leaks
   ensurePageClosedAfterEach(test);
 
   test("Validation - SFLLL Form", async ({ page }, testInfo) => {
@@ -72,7 +71,7 @@ test.describe("Test Suite - SFLLL Form", () => {
     await fillSflllFormUtils(testInfo, page);
   });
 
- // Ensure the page is closed after each test to prevent resource leaks
+  // Ensure the page is closed after each test to prevent resource leaks
   ensurePageClosedAfterEach(test);
 
   test("Regression test - SFLLL Form", async ({ page }, testInfo) => {
@@ -86,5 +85,4 @@ test.describe("Test Suite - SFLLL Form", () => {
     await validationSflllFormUtils(testInfo, page);
     await fillSflllFormUtils(testInfo, page);
   });
-
 });
