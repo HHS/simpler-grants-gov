@@ -132,11 +132,20 @@ const OpportunitiesTable = ({
 
   return (
     <div>
-      <span className="font-sans-lg text-bold">
-        {isSingleAgency
-          ? t("showingOpportunitiesFor", { agencyName })
-          : t("numOpportunities", { num: userOpportunities.length })}
-      </span>
+      {isSingleAgency ? (
+        <div className="margin-bottom-2">
+          <div className="font-sans-lg text-bold margin-bottom-2">
+            {t("numOpportunities", { num: userOpportunities.length })}
+          </div>
+          <div className="font-sans-lg text-bold">
+            {t("showingOpportunitiesFor", { agencyName })}
+          </div>
+        </div>
+      ) : (
+        <span className="font-sans-lg text-bold">
+          {t("numOpportunities", { num: userOpportunities.length })}
+        </span>
+      )}
 
       <TableWithResponsiveHeader
         headerContent={headerTitles}

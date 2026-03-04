@@ -205,7 +205,7 @@ describe("Opportunities", () => {
       expect(await screen.findByText("Test Opportunity")).toBeVisible();
     });
 
-    it("renders agency name label instead of opportunity count", async () => {
+    it("renders both opportunity count and agency label", async () => {
       mockSearchForOpportunities.mockResolvedValue({
         data: [basicOpportunity],
       });
@@ -215,6 +215,7 @@ describe("Opportunities", () => {
       });
       render(component);
 
+      expect(await screen.findByText("numOpportunities")).toBeVisible();
       expect(await screen.findByText("showingOpportunitiesFor")).toBeVisible();
     });
 
