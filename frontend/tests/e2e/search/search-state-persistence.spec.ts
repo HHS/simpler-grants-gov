@@ -66,9 +66,11 @@ const goToSearch = async (page: Page) => {
 
 const getFirstSubAgencySelection = async (page: Page) => {
   // Sub-agencies are rendered in nested lists: ul.margin-left-4 > li
+  // Use test id for robust E2E selection: [data-testid="sub-agency-item"]
   // The result count is in a dedicated span.text-base-dark, e.g. "[5]"
   const subAgencyItems = page.locator(
-    "#opportunity-filter-agency ul.margin-left-4 > li",
+    // "#opportunity-filter-agency ul.margin-left-4 > li",
+    '[data-testid="sub-agency-item"]',
   );
 
   const count = await subAgencyItems.count();
