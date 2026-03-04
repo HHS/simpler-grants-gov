@@ -88,7 +88,7 @@ def program_officer_jwt(db_session, agency) -> str:
 
 
 def test_put_workflow_event_start_workflow_internal_user_200(
-    client, internal_send_user_jwt, enable_factory_create
+    client, internal_send_user_jwt, enable_factory_create, workflow_sqs_queue
 ):
     """Test successful start_workflow event via HTTP endpoint (integration test)."""
     opportunity = OpportunityFactory.create()
