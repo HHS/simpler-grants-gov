@@ -3,9 +3,9 @@ import { Page, TestInfo } from "@playwright/test";
 import {
   validateAndFillField,
   type FieldDefinition,
-} from "../test-validate-and-fill-field-utils";
+} from "tests/e2e/utils/test-validate-and-fill-field-utils";
 
-//Test data for filling the form - modify as needed for different test scenarios
+// Test data for filling the form - modify as needed for different test scenarios
 export const ENTITY_DATA = {
   form: {
     name: "Disclosure of Lobbying Activities (SF-LLL)",
@@ -190,8 +190,6 @@ export async function validationSflllFormUtils(
   testInfo: TestInfo,
   page: Page,
 ): Promise<void> {
-  const startTime = new Date();
-
   // Wrap the entire process in a try-catch to capture any unexpected errors
   try {
     // Extract ApplicationURL and attach to test report
