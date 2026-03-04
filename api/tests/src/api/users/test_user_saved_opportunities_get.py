@@ -1,4 +1,6 @@
+import logging
 from datetime import date
+from unittest.mock import patch
 
 import pytest
 
@@ -425,3 +427,27 @@ def test_user_get_saved_opportunities_no_filter_returns_all(
 
     assert response.status_code == 200
     assert len(response.json["data"]) == 2
+
+
+def test_user_get_saved_opportunities_logging(
+    client, enable_factory_create, db_session, user, user_auth_token, caplog
+):
+    opportunity = OpportunityFactory.create(opportunity_title="Test Opportunity")
+    UserSavedOpportunityFactory.create(user=user, opportunity=opportunity)
+
+    with patch(
+        "src.api.users.user_routes.add_extra_data_to_current_request_logs"
+    ) as mock_extra_data:
+        caplog.set_level(logging.INFO)
+        response = client.post(
+            f"/v1/users/{user.user_id}/saved-opportunities/list",
+            headers={"X-SGG-Token": user_auth_token},
+            json={"pagination": {"page_offset": 1, "page_size": 25}},
+        )
+
+    assert response.status_code == 200
+    # Verify pagination info was logged (1 record, 1 page with page_size=25)
+    mock_extra_data.assert_any_call(
+        {"response.pagination.total_pages": 1, "response.pagination.total_records": 1}
+    )
+    assert any("Successfully fetched saved opportunities" in r.message for r in caplog.records)

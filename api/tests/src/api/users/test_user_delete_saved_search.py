@@ -1,4 +1,6 @@
+import logging
 import uuid
+from unittest.mock import patch
 
 import pytest
 
@@ -102,3 +104,20 @@ def test_user_delete_saved_search(
     )
     assert len(saved_searches) == 1
     assert saved_searches[0].is_deleted
+
+
+def test_user_delete_saved_search_logging(
+    client, db_session, user, user_auth_token, enable_factory_create, saved_search, caplog
+):
+    with patch(
+        "src.api.users.user_routes.add_extra_data_to_current_request_logs"
+    ) as mock_extra_data:
+        caplog.set_level(logging.INFO)
+        response = client.delete(
+            f"/v1/users/{user.user_id}/saved-searches/{saved_search.saved_search_id}",
+            headers={"X-SGG-Token": user_auth_token},
+        )
+
+    assert response.status_code == 200
+    mock_extra_data.assert_any_call({"saved_search_id": saved_search.saved_search_id})
+    assert any("Deleted saved search" in r.message for r in caplog.records)

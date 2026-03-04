@@ -1,5 +1,7 @@
+import logging
 import uuid
 from datetime import date
+from unittest.mock import patch
 
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import (
@@ -221,3 +223,52 @@ def test_user_save_search_post(
     assert len(saved_opp) == 2
     assert saved_opp[1].saved_search_id != saved_search.saved_search_id
     assert not saved_opp[0].is_deleted
+
+
+def test_user_save_search_post_logging(
+    client,
+    opportunity_index,
+    search_client,
+    user,
+    user_auth_token,
+    enable_factory_create,
+    db_session,
+    monkeypatch,
+    opportunity_index_alias,
+    caplog,
+):
+    search_name = "My Logging Test Search"
+    search_query = get_search_request(
+        funding_instrument_one_of=[FundingInstrument.GRANT],
+        agency_one_of=["USAID"],
+    )
+
+    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
+    search_client.create_index(index_name)
+    schema = OpportunityV1Schema()
+    json_records = [schema.dump(opp) for opp in [SPORTS]]
+    search_client.bulk_upsert(index_name, json_records, "opportunity_id")
+    search_client.swap_alias_index(index_name, opportunity_index_alias)
+
+    with patch(
+        "src.api.users.user_routes.add_extra_data_to_current_request_logs"
+    ) as mock_extra_data:
+        caplog.set_level(logging.INFO)
+        response = client.post(
+            f"/v1/users/{user.user_id}/saved-searches",
+            headers={"X-SGG-Token": user_auth_token},
+            json={"name": search_name, "search_query": search_query},
+        )
+
+    assert response.status_code == 200
+
+    # Verify the search query name was logged in the initial call
+    all_calls_combined = {k: v for c in mock_extra_data.call_args_list for k, v in c[0][0].items()}
+    assert "search_query.name" in all_calls_combined
+    assert all_calls_combined["search_query.name"] == search_name
+    assert "search_query.filters.funding_instrument.one_of" in all_calls_combined
+
+    # Verify matched_opportunity_count was logged after the search
+    mock_extra_data.assert_any_call({"response.matched_opportunity_count": 1})
+
+    assert any("Saved search for user" in r.message for r in caplog.records)

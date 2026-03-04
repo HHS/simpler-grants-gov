@@ -1,5 +1,7 @@
+import logging
 import uuid
 from datetime import datetime, timezone
+from unittest.mock import patch
 
 import pytest
 
@@ -190,3 +192,24 @@ def test_user_get_saved_searches_deleted(
 
     data = response.json["data"]
     assert len(data) == 0
+
+
+def test_user_get_saved_searches_logging(
+    client, user, user_auth_token, enable_factory_create, db_session, saved_searches, caplog
+):
+    with patch(
+        "src.api.users.user_routes.add_extra_data_to_current_request_logs"
+    ) as mock_extra_data:
+        caplog.set_level(logging.INFO)
+        response = client.post(
+            f"/v1/users/{user.user_id}/saved-searches/list",
+            headers={"X-SGG-Token": user_auth_token},
+            json={"pagination": {"page_offset": 1, "page_size": 25}},
+        )
+
+    assert response.status_code == 200
+    # saved_searches fixture creates 3 records, all fit in 1 page of 25
+    mock_extra_data.assert_any_call(
+        {"response.pagination.total_pages": 1, "response.pagination.total_records": 3}
+    )
+    assert any("Successfully fetched saved searches" in r.message for r in caplog.records)
