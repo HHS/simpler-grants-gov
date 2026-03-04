@@ -11,7 +11,7 @@ from src.db.models.user_models import User
 from src.db.models.workflow_models import Workflow
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.workflows.send_workflow_event import send_workflow_event_to_queue
-from src.workflow.event.workflow_event import ProcessWorkflowEventContext, StartWorkflowEventContext, WorkflowEvent
+from src.workflow.event.workflow_event import WorkflowEvent
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.approval_service import can_user_do_agency_approval
 from src.workflow.service.workflow_service import (
@@ -77,13 +77,11 @@ def ingest_workflow_event(
     """
 
     # Construct the
-    workflow_event = WorkflowEvent(
-        event_id=uuid.uuid4(),
-        acting_user_id=user.user_id,
-        **json_data
-    )
+    workflow_event = WorkflowEvent(event_id=uuid.uuid4(), acting_user_id=user.user_id, **json_data)
 
-    add_extra_data_to_current_request_logs({"event_id": workflow_event.event_id, "event_type": workflow_event.event_type})
+    add_extra_data_to_current_request_logs(
+        {"event_id": workflow_event.event_id, "event_type": workflow_event.event_type}
+    )
     logger.info("Ingesting workflow event")
 
     try:
@@ -109,8 +107,6 @@ def ingest_workflow_event(
         raise_flask_error(422, "This workflow is not currently active")
 
     logger.info("Successfully validated workflow event")
-
-    # TODO
     send_workflow_event_to_queue(workflow_event)
 
     return workflow_event.event_id

@@ -9,12 +9,7 @@ See https://docs.python.org/3/library/logging.html#formatter-objects
 
 import json
 import logging
-from collections.abc import Callable
-from datetime import date, datetime
-from decimal import Decimal
-from enum import Enum
-from typing import Any
-from uuid import UUID
+from datetime import datetime
 
 import src.logging.decodelog as decodelog
 from src.util.json_util import json_encoder

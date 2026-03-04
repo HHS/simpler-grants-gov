@@ -72,6 +72,7 @@ class SQSClient:
     ) -> list[SQSMessage]:
         """Fetch messages from SQS using long polling and return as SQSMessage objects."""
         try:
+            logger.info("Fetching messages from SQS", extra={"queue_url": self.queue_url})
             response = self.client.receive_message(
                 QueueUrl=self.queue_url,
                 MaxNumberOfMessages=max_messages,
@@ -106,6 +107,10 @@ class SQSClient:
             entries.append({"Id": id_str, "ReceiptHandle": handle})
 
         try:
+            logger.info(
+                "Deleting messages from SQS",
+                extra={"queue_url": self.queue_url, "receipt_handles": ",".join(receipt_handles)},
+            )
             response = self.client.delete_message_batch(QueueUrl=self.queue_url, Entries=entries)
 
             batch_results = SQSDeleteBatchResponse()
@@ -128,6 +133,7 @@ class SQSClient:
         """
         try:
             logger.info("Sending message to SQS", extra={"queue_url": self.queue_url})
+            # To handle converting common types like uuids, we use our json_encoder
             message_body_str = json.dumps(message_body, default=json_encoder)
 
             response = self.client.send_message(

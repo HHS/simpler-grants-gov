@@ -1,8 +1,10 @@
-from datetime import datetime, date
-from typing import Any, Callable
+from collections.abc import Callable
+from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
+from typing import Any
 from uuid import UUID
+
 
 # identity returns an unmodified object
 def identity[T](obj: T) -> T:

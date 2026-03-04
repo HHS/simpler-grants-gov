@@ -2,6 +2,7 @@ import uuid
 
 import pytest
 
+from src.adapters.aws.sqs_adapter import SQSClient
 from src.constants.lookup_constants import (
     Privilege,
     WorkflowEntityType,
@@ -9,6 +10,8 @@ from src.constants.lookup_constants import (
     WorkflowType,
 )
 from src.db.models.opportunity_models import Opportunity
+from src.db.models.user_models import User
+from src.workflow.event.workflow_event import WorkflowEvent
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt
 from tests.lib.internal_user_test_utils import create_internal_user_with_jwt_and_api_key
 from tests.src.db.models.factories import AgencyFactory, OpportunityFactory, WorkflowFactory
@@ -67,19 +70,19 @@ def internal_send_user_api_key(internal_workflow_send_user_values):
 
 
 @pytest.fixture
-def budget_officer_jwt(db_session, agency) -> str:
-    _, _, token = create_user_in_agency_with_jwt(
+def budget_officer_user_jwt(db_session, agency) -> tuple[User, str]:
+    user, _, token = create_user_in_agency_with_jwt(
         db_session, agency=agency, privileges=[Privilege.BUDGET_OFFICER_APPROVAL]
     )
-    return token
+    return user, token
 
 
 @pytest.fixture
-def program_officer_jwt(db_session, agency) -> str:
-    _, _, token = create_user_in_agency_with_jwt(
+def program_officer_user_jwt(db_session, agency) -> tuple[User, str]:
+    user, _, token = create_user_in_agency_with_jwt(
         db_session, agency=agency, privileges=[Privilege.PROGRAM_OFFICER_APPROVAL]
     )
-    return token
+    return user, token
 
 
 ####################################
@@ -88,7 +91,7 @@ def program_officer_jwt(db_session, agency) -> str:
 
 
 def test_put_workflow_event_start_workflow_internal_user_200(
-    client, internal_send_user_jwt, enable_factory_create, workflow_sqs_queue
+    client, internal_send_user, internal_send_user_jwt, enable_factory_create, workflow_sqs_queue
 ):
     """Test successful start_workflow event via HTTP endpoint (integration test)."""
     opportunity = OpportunityFactory.create()
@@ -110,9 +113,20 @@ def test_put_workflow_event_start_workflow_internal_user_200(
     assert "event_id" in response.json["data"]
     assert response.json["message"] == "Event received"
 
+    # Verify the message that we sent
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 1
+    message = WorkflowEvent.model_validate_json(messages[0].body)
+    assert str(message.event_id) == response.json["data"]["event_id"]
+    assert message.acting_user_id == internal_send_user.user_id
+    assert message.event_type == WorkflowEventType.START_WORKFLOW
+    assert message.start_workflow_context.workflow_type == WorkflowType.BASIC_TEST_WORKFLOW
+    assert message.start_workflow_context.entity_type == WorkflowEntityType.OPPORTUNITY
+    assert message.start_workflow_context.entity_id == opportunity.opportunity_id
+
 
 def test_put_workflow_event_process_workflow_internal_user_200(
-    client, internal_send_user_jwt, enable_factory_create
+    client, internal_send_user, internal_send_user_jwt, enable_factory_create, workflow_sqs_queue
 ):
     """Test successful process_workflow event via HTTP endpoint (integration test)."""
     workflow = WorkflowFactory.create(
@@ -137,9 +151,22 @@ def test_put_workflow_event_process_workflow_internal_user_200(
     assert "event_id" in response.json["data"]
     assert response.json["message"] == "Event received"
 
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 1
+    message = WorkflowEvent.model_validate_json(messages[0].body)
+    assert str(message.event_id) == response.json["data"]["event_id"]
+    assert message.acting_user_id == internal_send_user.user_id
+    assert message.event_type == WorkflowEventType.PROCESS_WORKFLOW
+    assert message.process_workflow_context.workflow_id == workflow.workflow_id
+    assert message.process_workflow_context.event_to_send == "start_workflow"
+
 
 def test_put_workflow_event_process_workflow_internal_user_api_key_200(
-    client, internal_send_user_api_key, enable_factory_create
+    client,
+    internal_send_user,
+    internal_send_user_api_key,
+    enable_factory_create,
+    workflow_sqs_queue,
 ):
     """Same as above. but verifies API key works as well"""
     workflow = WorkflowFactory.create(
@@ -162,9 +189,18 @@ def test_put_workflow_event_process_workflow_internal_user_api_key_200(
     assert "event_id" in response.json["data"]
     assert response.json["message"] == "Event received"
 
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 1
+    message = WorkflowEvent.model_validate_json(messages[0].body)
+    assert str(message.event_id) == response.json["data"]["event_id"]
+    assert message.acting_user_id == internal_send_user.user_id
+    assert message.event_type == WorkflowEventType.PROCESS_WORKFLOW
+    assert message.process_workflow_context.workflow_id == workflow.workflow_id
+    assert message.process_workflow_context.event_to_send == "start_workflow"
+
 
 def test_put_workflow_event_process_workflow_program_officer_200(
-    client, program_officer_jwt, enable_factory_create, opportunity
+    client, program_officer_user_jwt, enable_factory_create, opportunity, workflow_sqs_queue
 ):
     """Test successful process_workflow event via HTTP endpoint (integration test)."""
     workflow = WorkflowFactory.create(
@@ -180,16 +216,25 @@ def test_put_workflow_event_process_workflow_program_officer_200(
     }
 
     response = client.put(
-        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": program_officer_jwt}
+        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": program_officer_user_jwt[1]}
     )
 
     assert response.status_code == 200
     assert "event_id" in response.json["data"]
     assert response.json["message"] == "Event received"
 
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 1
+    message = WorkflowEvent.model_validate_json(messages[0].body)
+    assert str(message.event_id) == response.json["data"]["event_id"]
+    assert message.acting_user_id == program_officer_user_jwt[0].user_id
+    assert message.event_type == WorkflowEventType.PROCESS_WORKFLOW
+    assert message.process_workflow_context.workflow_id == workflow.workflow_id
+    assert message.process_workflow_context.event_to_send == "receive_program_officer_approval"
+
 
 def test_put_workflow_event_process_workflow_budget_officer_200(
-    client, budget_officer_jwt, enable_factory_create, opportunity
+    client, budget_officer_user_jwt, enable_factory_create, opportunity, workflow_sqs_queue
 ):
     """Test successful process_workflow event via HTTP endpoint (integration test)."""
     workflow = WorkflowFactory.create(
@@ -205,12 +250,21 @@ def test_put_workflow_event_process_workflow_budget_officer_200(
     }
 
     response = client.put(
-        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": budget_officer_jwt}
+        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": budget_officer_user_jwt[1]}
     )
 
     assert response.status_code == 200
     assert "event_id" in response.json["data"]
     assert response.json["message"] == "Event received"
+
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 1
+    message = WorkflowEvent.model_validate_json(messages[0].body)
+    assert str(message.event_id) == response.json["data"]["event_id"]
+    assert message.acting_user_id == budget_officer_user_jwt[0].user_id
+    assert message.event_type == WorkflowEventType.PROCESS_WORKFLOW
+    assert message.process_workflow_context.workflow_id == workflow.workflow_id
+    assert message.process_workflow_context.event_to_send == "receive_budget_officer_approval"
 
 
 ####################################
@@ -218,7 +272,7 @@ def test_put_workflow_event_process_workflow_budget_officer_200(
 ####################################
 
 
-def test_put_workflow_event_missing_token_401(client):
+def test_put_workflow_event_missing_token_401(client, workflow_sqs_queue):
     """Test that requests without auth token are rejected."""
     payload = {
         "event_type": WorkflowEventType.START_WORKFLOW,
@@ -232,8 +286,12 @@ def test_put_workflow_event_missing_token_401(client):
     assert response.status_code == 401
     assert response.get_json()["message"] == "Unable to process token"
 
+    # Verify no message sent
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 0
 
-def test_put_workflow_event_unauthorized_jwt_401(client):
+
+def test_put_workflow_event_unauthorized_jwt_401(client, workflow_sqs_queue):
     """Test that requests without auth token are rejected."""
     payload = {
         "event_type": WorkflowEventType.START_WORKFLOW,
@@ -249,8 +307,12 @@ def test_put_workflow_event_unauthorized_jwt_401(client):
     assert response.status_code == 401
     assert response.get_json()["message"] == "Unable to process token"
 
+    # Verify no message sent
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 0
 
-def test_put_workflow_event_unauthorized_api_key_401(client):
+
+def test_put_workflow_event_unauthorized_api_key_401(client, workflow_sqs_queue):
     """Test that requests without auth token are rejected."""
     payload = {
         "event_type": WorkflowEventType.START_WORKFLOW,
@@ -266,9 +328,13 @@ def test_put_workflow_event_unauthorized_api_key_401(client):
     assert response.status_code == 401
     assert response.get_json()["message"] == "Invalid API key"
 
+    # Verify no message sent
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 0
+
 
 def test_put_workflow_event_start_workflow_non_internal_user_403(
-    client, budget_officer_jwt, agency, opportunity
+    client, budget_officer_user_jwt, agency, opportunity, workflow_sqs_queue
 ):
     """Test that start workflow events can't be called by other users"""
     payload = {
@@ -281,15 +347,19 @@ def test_put_workflow_event_start_workflow_non_internal_user_403(
     }
 
     response = client.put(
-        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": budget_officer_jwt}
+        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": budget_officer_user_jwt[1]}
     )
 
     assert response.status_code == 403
     assert response.json["message"] == "Forbidden"
 
+    # Verify no message sent
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 0
+
 
 def test_put_workflow_event_process_workflow_program_officer_403(
-    client, program_officer_jwt, enable_factory_create, opportunity
+    client, program_officer_user_jwt, enable_factory_create, opportunity, workflow_sqs_queue
 ):
     """Test that a program officer can't do a budget officer approval"""
     workflow = WorkflowFactory.create(
@@ -305,15 +375,19 @@ def test_put_workflow_event_process_workflow_program_officer_403(
     }
 
     response = client.put(
-        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": program_officer_jwt}
+        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": program_officer_user_jwt[1]}
     )
 
     assert response.status_code == 403
     assert response.json["message"] == "Forbidden"
 
+    # Verify no message sent
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 0
+
 
 def test_put_workflow_event_process_workflow_budget_officer_403(
-    client, budget_officer_jwt, enable_factory_create, opportunity
+    client, budget_officer_user_jwt, enable_factory_create, opportunity, workflow_sqs_queue
 ):
     """Test that a budget officer can't do a program officer approval"""
     workflow = WorkflowFactory.create(
@@ -329,11 +403,15 @@ def test_put_workflow_event_process_workflow_budget_officer_403(
     }
 
     response = client.put(
-        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": budget_officer_jwt}
+        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": budget_officer_user_jwt[1]}
     )
 
     assert response.status_code == 403
     assert response.json["message"] == "Forbidden"
+
+    # Verify no message sent
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 0
 
 
 ####################################
@@ -366,7 +444,9 @@ def test_put_workflow_event_process_workflow_budget_officer_403(
         ),
     ],
 )
-def test_put_workflow_request_validation_422(client, internal_send_user_jwt, payload, expected_msg):
+def test_put_workflow_request_validation_422(
+    client, internal_send_user_jwt, payload, expected_msg, workflow_sqs_queue
+):
     """Test that schema validation errors are returned for invalid payloads."""
     response = client.put(
         "/v1/workflows/events", json=payload, headers={"X-SGG-Token": internal_send_user_jwt}
@@ -378,3 +458,7 @@ def test_put_workflow_request_validation_422(client, internal_send_user_jwt, pay
     error_messages = [err.get("message", "") for err in errors]
 
     assert any(expected_msg in msg for msg in error_messages)
+
+    # Verify no message sent
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 0
