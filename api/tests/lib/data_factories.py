@@ -133,7 +133,7 @@ def setup_application_for_form_validation(
     return application_form
 
 
-def setup_cert_user(agency: Agency, privileges: list) -> tuple[User, Role, SOAPClientCertificate]:
+def setup_cert_user(agency: Agency, privileges: set) -> tuple[User, Role, SOAPClientCertificate]:
     legacy_certificate = LegacyAgencyCertificateFactory.create(agency=agency)
     agency_user = AgencyUserFactory.create(agency=agency, user=legacy_certificate.user)
     role = RoleFactory.create(privileges=privileges, is_agency_role=True)

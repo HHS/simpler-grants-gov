@@ -1669,3 +1669,99 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         )
         assert record
         assert record.submission_titles == "['This is my submission']"
+
+    def test_get_submission_list_expanded_response_correctly_handles_received_by_agency_application_status(
+        self, db_session, enable_factory_create
+    ):
+        agency = AgencyFactory.create()
+        submission = setup_application_submission(
+            agency,
+            application_status=ApplicationStatus.RECEIVED_BY_AGENCY,
+        )
+        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        request_xml = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>Status</gran:FilterType>"
+            "<gran:FilterValue>Received by Agency</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        )
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml.encode("utf-8"))),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetSubmissionListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
+            **value
+        )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        result = get_submission_list_expanded_response(
+            db_session, get_submission_list_expanded_request_schema, soap_request, proxy_response
+        )
+        submission_info = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")[
+            "Envelope"
+        ]["Body"]["ns2:GetSubmissionListExpandedResponse"]["ns2:SubmissionInfo"]
+        assert (
+            f"GRANT{submission.legacy_tracking_number}"
+            == submission_info[0]["GrantsGovTrackingNumber"]
+        )
+        assert "Received by Agency" == submission_info[0]["GrantsGovApplicationStatus"]
+
+    def test_get_submission_list_expanded_response_correctly_handles_agency_tracking_number_assigned_agency_application_status(
+        self, db_session, enable_factory_create
+    ):
+        agency = AgencyFactory.create()
+        submission = setup_application_submission(
+            agency,
+            application_status=ApplicationStatus.AGENCY_TRACKING_NUMBER_ASSIGNED,
+        )
+        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        request_xml = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>Status</gran:FilterType>"
+            "<gran:FilterValue>Agency Tracking Number Assigned</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        )
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml.encode("utf-8"))),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetSubmissionListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
+            **value
+        )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        result = get_submission_list_expanded_response(
+            db_session, get_submission_list_expanded_request_schema, soap_request, proxy_response
+        )
+        submission_info = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")[
+            "Envelope"
+        ]["Body"]["ns2:GetSubmissionListExpandedResponse"]["ns2:SubmissionInfo"]
+        assert (
+            f"GRANT{submission.legacy_tracking_number}"
+            == submission_info[0]["GrantsGovTrackingNumber"]
+        )
+        assert "Agency Tracking Number Assigned" == submission_info[0]["GrantsGovApplicationStatus"]
