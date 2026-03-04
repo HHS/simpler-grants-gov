@@ -11,7 +11,7 @@ import { FunctionComponent, ReactNode } from "react";
 type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: () => Promise.resolve(identity),
+  getTranslations: () => identity,
 }));
 
 jest.mock("react", () => ({
@@ -66,25 +66,21 @@ jest.mock("next-intl", () => ({
   useTranslations: () => identity,
 }));
 
-jest.mock("next/link", () => ({
-  __esModule: true,
-  default: ({
-    children,
-    href,
-  }: {
-    children: React.ReactNode;
-    href: string;
-  }) => <a href={href}>{children}</a>,
-}));
-
-jest.mock("src/components/opportunity/OpportunityDescription", () => ({
-  __esModule: true,
-  SummaryDescriptionDisplay: ({
-    summaryDescription,
-  }: {
-    summaryDescription: string;
-  }) => <div data-testid="summary-description-mock">{summaryDescription}</div>,
-}));
+jest.mock("src/components/opportunity/OpportunityDescription", () => {
+  const actual = jest.requireActual(
+    "src/components/opportunity/OpportunityDescription",
+  );
+  return {
+    ...actual,
+    SummaryDescriptionDisplay: ({
+      summaryDescription,
+    }: {
+      summaryDescription: string;
+    }) => (
+      <div data-testid="summary-description-mock">{summaryDescription}</div>
+    ),
+  };
+});
 
 jest.mock("src/components/award-recommendation/AwardRecommendationHero", () => {
   const React = jest.requireActual<typeof import("react")>("react");
@@ -196,7 +192,43 @@ describe("AwardRecommendationPage", () => {
       expect(await screen.findByText("pageTitle")).toBeVisible();
     });
 
-    it("calls getOpportunityDetails after award recommendation call happens", async () => {
+    it("renders opportunity details on the page", async () => {
+      const component = await AwardRecommendationPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText(mockOpportunityDetail.opportunity_title),
+      ).toBeVisible();
+      expect(
+        await screen.findByText(mockOpportunityDetail.opportunity_number),
+      ).toBeVisible();
+    });
+
+    it("renders 'No summary available' when opportunity has no summary description", async () => {
+      jest
+        .spyOn(opportunityFetcher, "getOpportunityDetails")
+        .mockResolvedValue({
+          ...mockOpportunityData,
+          data: {
+            ...mockOpportunityDetail,
+            summary: {
+              ...mockOpportunityDetail.summary,
+              summary_description: null,
+            },
+          },
+        });
+
+      const component = await AwardRecommendationPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(await screen.findByText("No summary available")).toBeVisible();
+    });
+
+    it("calls getOpportunityDetails with expected id", async () => {
       jest
         .spyOn(opportunityFetcher, "getOpportunityDetails")
         .mockResolvedValue(mockOpportunityData);
