@@ -20,7 +20,7 @@ export default async function AwardRecommendationHero({
   return (
     <div
       data-testid="award-recommendation-hero"
-      className="text-dark bg-base-lightest padding-bottom-4 tablet:padding-y-6"
+      className="text-dark bg-base-lightest padding-bottom-4 mobile-lg:padding-y-4 tablet:padding-y-6"
     >
       <GridContainer>
         <Grid>
@@ -40,7 +40,7 @@ export default async function AwardRecommendationHero({
               },
             ]}
           />
-          <Grid className="padding-bottom-4 padding-bottom-4 tablet:padding-y-3">
+          <Grid className="padding-bottom-4 mobile-lg:padding-y-4 tablet:padding-y-3">
             <h1 className="font-sans-xl tablet:font-sans-2xl">
               {t("heroTitle", { defaultValue: "Award Rec #" })}: {recordNumber}
             </h1>
@@ -64,11 +64,11 @@ export default async function AwardRecommendationHero({
             </Grid>
             <Grid className="flex-align-self-end margin-top-4 tablet:margin-top-2 display-flex flex-justify-start">
               {/* TODO: add save functionality when endpoint is available */}
-              <Button type="button" outline style={{ width: "auto" }}>
+              <Button type="button" outline className="width-auto">
                 {t("heroButtons.save")}
               </Button>
               {/* TODO: add create functionality when endpoint is available */}
-              <Button type="button" style={{ width: "auto" }}>
+              <Button type="button" className="width-auto">
                 {t("heroButtons.create")}
               </Button>
             </Grid>
