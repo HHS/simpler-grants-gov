@@ -27,6 +27,18 @@ function toStringArray(selectedValue: unknown): string[] {
   return [selectedValue as string];
 }
 
+/** ComboBox widget changes the id which breaks handling of idFor and anchor links
+ * This component denotes selected items in the DOM by creating hidden inputs whose names correspond to the id passed into the component,
+ * along with an index for each selected item. Ex: "applicant_type_code": "C: City or Township Government"
+ * Note that the Trussworks ComboBox creates a select component that will take a name based on the "name" prop passed in.
+ * Based on the component's internal state management logic, it will maintain a value for the select on its own. For some reason,
+ * it will select the first entry in the option list on close, and store that as its value.
+ * In order to prevent his value to be picked up on save along with the hidden inputs mentioned above, we set the "name" for the ComboBox to an empty string.
+ * @param {string} id - name of the fieldName
+ * @type {string} idFor
+ * @type {string} label
+ */
+
 export default function MultiSelect<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
@@ -131,7 +143,6 @@ export default function MultiSelect<
   const getLabelForValue = (value: string) =>
     allOptions.find((option) => String(option.value) === value)?.label ?? value;
 
-  // ComboBox widget changes the id which breaks handling of idFor and anchor links
   const idFor = `${id}__combobox`;
 
   return (
@@ -160,7 +171,7 @@ export default function MultiSelect<
       <ComboBox
         ref={comboRef}
         id={`${id}__combobox`}
-        name={`${id}__combobox_input`}
+        name={""}
         options={availableOptions}
         disabled={disabled || readOnly || atMaxSelection}
         onChange={(val?: string) => {
