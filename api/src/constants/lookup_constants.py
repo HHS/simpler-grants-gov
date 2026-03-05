@@ -312,6 +312,7 @@ class Privilege(StrEnum):
     CREATE_AWARD_RECOMMENDATION = "create_award_recommendation"
     UPDATE_AWARD_RECOMMENDATION = "update_award_recommendation"
     SUBMIT_AWARD_RECOMMENDATION = "submit_award_recommendation"
+
     # These privileges are associated with workflow approvals
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
