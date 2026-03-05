@@ -429,10 +429,7 @@ def user_save_search(
     search_client: search.SearchClient, db_session: db.Session, user_id: UUID, json_data: dict
 ) -> response.ApiResponse:
     add_extra_data_to_current_request_logs(
-        {
-            **flatten_dict(json_data.get("search_query", {}), prefix="search_query"),
-            "search_query.name": json_data.get("name"),
-        }
+        flatten_dict(json_data.get("search_query", {}), prefix="search_query")
     )
     logger.info("POST /v1/users/:user_id/saved-searches")
 
@@ -447,7 +444,7 @@ def user_save_search(
 
     add_extra_data_to_current_request_logs(
         {
-            "response.matched_opportunity_count": len(saved_search.searched_opportunity_ids or []),
+            "response.matched_opportunity_count": len(saved_search.searched_opportunity_ids),
         }
     )
     logger.info(
@@ -534,9 +531,7 @@ def user_get_saved_searches(
 def user_update_saved_search(
     db_session: db.Session, user_id: UUID, saved_search_id: UUID, json_data: dict
 ) -> response.ApiResponse:
-    add_extra_data_to_current_request_logs(
-        {"saved_search_id": saved_search_id, **flatten_dict(json_data, prefix="update")}
-    )
+    add_extra_data_to_current_request_logs({"saved_search_id": saved_search_id})
     logger.info("PUT /v1/users/:user_id/saved-searches/:saved_search_id")
 
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()

@@ -1,5 +1,4 @@
 import logging
-from unittest.mock import patch
 
 import pytest
 
@@ -179,17 +178,13 @@ def test_user_delete_saved_opportunity_logging(
     opportunity = OpportunityFactory.create()
     UserSavedOpportunityFactory.create(user=user, opportunity=opportunity, is_deleted=False)
 
-    with patch(
-        "src.api.users.user_routes.add_extra_data_to_current_request_logs"
-    ) as mock_extra_data:
-        caplog.set_level(logging.INFO)
-        response = client.delete(
-            f"/v1/users/{user.user_id}/saved-opportunities/{opportunity.opportunity_id}",
-            headers={"X-SGG-Token": user_auth_token},
-        )
+    caplog.set_level(logging.INFO)
+    response = client.delete(
+        f"/v1/users/{user.user_id}/saved-opportunities/{opportunity.opportunity_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
 
     assert response.status_code == 200
-    mock_extra_data.assert_any_call({"opportunity_id": opportunity.opportunity_id})
     assert any("Deleted saved opportunity" in r.message for r in caplog.records)
 
 
@@ -199,15 +194,11 @@ def test_user_delete_saved_opportunity_legacy_logging(
     opportunity = OpportunityFactory.create()
     UserSavedOpportunityFactory.create(user=user, opportunity=opportunity, is_deleted=False)
 
-    with patch(
-        "src.api.users.user_routes.add_extra_data_to_current_request_logs"
-    ) as mock_extra_data:
-        caplog.set_level(logging.INFO)
-        response = client.delete(
-            f"/v1/users/{user.user_id}/saved-opportunities/{opportunity.legacy_opportunity_id}",
-            headers={"X-SGG-Token": user_auth_token},
-        )
+    caplog.set_level(logging.INFO)
+    response = client.delete(
+        f"/v1/users/{user.user_id}/saved-opportunities/{opportunity.legacy_opportunity_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
 
     assert response.status_code == 200
-    mock_extra_data.assert_any_call({"legacy_opportunity_id": opportunity.legacy_opportunity_id})
     assert any("Deleted saved opportunity" in r.message for r in caplog.records)

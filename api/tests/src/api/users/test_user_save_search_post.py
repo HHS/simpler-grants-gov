@@ -262,10 +262,8 @@ def test_user_save_search_post_logging(
 
     assert response.status_code == 200
 
-    # Verify the search query name was logged in the initial call
+    # Verify the flattened search query params were logged
     all_calls_combined = {k: v for c in mock_extra_data.call_args_list for k, v in c[0][0].items()}
-    assert "search_query.name" in all_calls_combined
-    assert all_calls_combined["search_query.name"] == search_name
     assert "search_query.filters.funding_instrument.one_of" in all_calls_combined
 
     # Verify matched_opportunity_count was logged after the search

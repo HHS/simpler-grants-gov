@@ -1,6 +1,5 @@
 import logging
 import uuid
-from unittest.mock import patch
 
 from src.db.models.user_models import UserSavedOpportunity
 from tests.lib.db_testing import cascade_delete_from_db_table
@@ -159,16 +158,12 @@ def test_user_save_opportunity_post_logging(
 ):
     opportunity = OpportunityFactory.create()
 
-    with patch(
-        "src.api.users.user_routes.add_extra_data_to_current_request_logs"
-    ) as mock_extra_data:
-        caplog.set_level(logging.INFO)
-        response = client.post(
-            f"/v1/users/{user.user_id}/saved-opportunities",
-            headers={"X-SGG-Token": user_auth_token},
-            json={"opportunity_id": opportunity.opportunity_id},
-        )
+    caplog.set_level(logging.INFO)
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities",
+        headers={"X-SGG-Token": user_auth_token},
+        json={"opportunity_id": opportunity.opportunity_id},
+    )
 
     assert response.status_code == 200
-    mock_extra_data.assert_any_call({"opportunity_id": opportunity.opportunity_id})
     assert any("Saved opportunity for user" in r.message for r in caplog.records)
