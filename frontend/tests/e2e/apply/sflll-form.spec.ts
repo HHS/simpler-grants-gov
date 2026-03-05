@@ -24,7 +24,7 @@ test.describe("Test Suite - SFLLL Form", () => {
   // Set a timeout of 120 seconds for the test
   test.setTimeout(120000);
 
-  test("Fill - SFLLL Form", async ({ page }, testInfo) => {
+  test("Should fill all required form fields with valid test data - SFLLL Form", async ({ page }, testInfo) => {
     await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
       waitUntil: "load",
       timeout: 30000,
@@ -34,7 +34,7 @@ test.describe("Test Suite - SFLLL Form", () => {
     await fillSflllForm(testInfo, page);
   });
 
-  test("UI - SFLLL Form", async ({ page }, testInfo) => {
+  test("Form fields contain expected labels and descriptions - SFLLL Form", async ({ page }, testInfo) => {
     await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
       waitUntil: "load",
       timeout: 30000,
@@ -44,7 +44,7 @@ test.describe("Test Suite - SFLLL Form", () => {
     await validateSflllUI(testInfo, page);
   });
 
-  test("Validation - SFLLL Form", async ({ page }, testInfo) => {
+  test("Required form fields validate and show error messages - SFLLL Form", async ({ page }, testInfo) => {
     await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
       waitUntil: "load",
       timeout: 30000,
@@ -54,7 +54,7 @@ test.describe("Test Suite - SFLLL Form", () => {
     await validateSflllFormRequiredFields(testInfo, page);
   });
 
-  test("Smoke test - SFLLL Form", async ({ page }, testInfo) => {
+  test("Smoke test: Form UI, fill, and navigation complete successfully - SFLLL Form", async ({ page }, testInfo) => {
     await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
       waitUntil: "load",
       timeout: 30000,
@@ -65,7 +65,7 @@ test.describe("Test Suite - SFLLL Form", () => {
     await fillSflllForm(testInfo, page);
   });
 
-  test("Regression test - SFLLL Form", async ({ page }, testInfo) => {
+  test("Regression test: Form UI, validation, and fill complete successfully - SFLLL Form", async ({ page }, testInfo) => {
     await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
       waitUntil: "load",
       timeout: 30000,
