@@ -5,21 +5,24 @@ import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { fillSflllFormUtils } from "tests/e2e/utils/forms/fill-sflll-form-utils";
 import { userInterfaceSflllFormUtils } from "tests/e2e/utils/forms/user-interface-sflll-form-utils";
 import { validationSflllFormUtils } from "tests/e2e/utils/forms/validation-sflll-form-utils";
-import { ensurePageClosedAfterEach } from "tests/e2e/utils/test-lifecycle-helpers";
+import { ensurePageClosed } from "tests/e2e/utils/test-lifecycle-helpers";
 
 const { baseUrl, testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab";
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 test.describe("Test Suite - SFLLL Form", () => {
+
+  // Ensure the page is closed after each test
+  test.afterEach(async ({ page }) => {
+    await ensurePageClosed(page);
+  });
+
   test.beforeEach(async ({ context }) => {
     await createSpoofedSessionCookie(context);
   });
   // Set a timeout of 120 seconds for the test
   test.setTimeout(120000);
-
-  // Ensure the page is closed after each test to prevent resource leaks
-  ensurePageClosedAfterEach(test);
 
   test("Fill - SFLLL Form", async ({ page }, testInfo) => {
     await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
@@ -31,9 +34,6 @@ test.describe("Test Suite - SFLLL Form", () => {
     await fillSflllFormUtils(testInfo, page);
   });
 
-  // Ensure the page is closed after each test to prevent resource leaks
-  ensurePageClosedAfterEach(test);
-
   test("UI - SFLLL Form", async ({ page }, testInfo) => {
     await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
       waitUntil: "load",
@@ -43,9 +43,6 @@ test.describe("Test Suite - SFLLL Form", () => {
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     await userInterfaceSflllFormUtils(testInfo, page);
   });
-
-  // Ensure the page is closed after each test to prevent resource leaks
-  ensurePageClosedAfterEach(test);
 
   test("Validation - SFLLL Form", async ({ page }, testInfo) => {
     await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
@@ -57,9 +54,6 @@ test.describe("Test Suite - SFLLL Form", () => {
     await validationSflllFormUtils(testInfo, page);
   });
 
-  // Ensure the page is closed after each test to prevent resource leaks
-  ensurePageClosedAfterEach(test);
-
   test("Smoke test - SFLLL Form", async ({ page }, testInfo) => {
     await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
       waitUntil: "load",
@@ -70,9 +64,6 @@ test.describe("Test Suite - SFLLL Form", () => {
     await userInterfaceSflllFormUtils(testInfo, page);
     await fillSflllFormUtils(testInfo, page);
   });
-
-  // Ensure the page is closed after each test to prevent resource leaks
-  ensurePageClosedAfterEach(test);
 
   test("Regression test - SFLLL Form", async ({ page }, testInfo) => {
     await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
