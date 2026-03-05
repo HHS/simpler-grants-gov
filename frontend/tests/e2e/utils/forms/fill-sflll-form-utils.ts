@@ -437,7 +437,7 @@ const FILL_FIELDS: FillFieldDefinition[] = [
 // Main Function to Fill Form
 // ============================================================================
 
-export async function fillSflllFormUtils(
+export async function fillSflllForm(
   testInfo: TestInfo,
   page: Page,
 ): Promise<void> {
@@ -445,7 +445,7 @@ export async function fillSflllFormUtils(
   try {
     // Extract ApplicationURL and attach to test report
     const applicationURL = page.url();
-    await testInfo.attach("validationSflllFormUtils-applicationURL", {
+    await testInfo.attach("fillSflllForm-applicationURL", {
       body: `Application URL: ${applicationURL}`,
       contentType: "text/plain",
     });
@@ -480,7 +480,7 @@ export async function fillSflllFormUtils(
     await page.goto(applicationURL);
   } catch (error) {
     // Attach error to test report instead of console
-    await testInfo.attach("fillSflllFormUtils-error", {
+    await testInfo.attach("fillSflllForm-error", {
       body: error instanceof Error ? error.message : String(error),
       contentType: "text/plain",
     });
