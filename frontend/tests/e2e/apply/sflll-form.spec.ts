@@ -2,9 +2,9 @@ import { test } from "@playwright/test";
 import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import { fillSflllFormUtils } from "tests/e2e/utils/forms/fill-sflll-form-utils";
-import { userInterfaceSflllFormUtils } from "tests/e2e/utils/forms/user-interface-sflll-form-utils";
-import { validationSflllFormUtils } from "tests/e2e/utils/forms/validation-sflll-form-utils";
+import { fillSflllForm } from "tests/e2e/utils/forms/fill-sflll-form-utils";
+import { validateSflllUI} from "tests/e2e/utils/forms/user-interface-sflll-form-utils";
+import { validateSflllFormRequiredFields } from "tests/e2e/utils/forms/validation-sflll-form-utils";
 import { ensurePageClosed } from "tests/e2e/utils/test-lifecycle-helpers";
 
 const { baseUrl, testOrgLabel } = playwrightEnv;
@@ -31,7 +31,7 @@ test.describe("Test Suite - SFLLL Form", () => {
     });
 
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-    await fillSflllFormUtils(testInfo, page);
+    await fillSflllForm(testInfo, page);
   });
 
   test("UI - SFLLL Form", async ({ page }, testInfo) => {
@@ -41,7 +41,7 @@ test.describe("Test Suite - SFLLL Form", () => {
     });
 
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-    await userInterfaceSflllFormUtils(testInfo, page);
+    await validateSflllUI(testInfo, page);
   });
 
   test("Validation - SFLLL Form", async ({ page }, testInfo) => {
@@ -51,7 +51,7 @@ test.describe("Test Suite - SFLLL Form", () => {
     });
 
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-    await validationSflllFormUtils(testInfo, page);
+    await validateSflllFormRequiredFields(testInfo, page);
   });
 
   test("Smoke test - SFLLL Form", async ({ page }, testInfo) => {
@@ -61,8 +61,8 @@ test.describe("Test Suite - SFLLL Form", () => {
     });
 
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-    await userInterfaceSflllFormUtils(testInfo, page);
-    await fillSflllFormUtils(testInfo, page);
+    await validateSflllUI(testInfo, page);
+    await fillSflllForm(testInfo, page);
   });
 
   test("Regression test - SFLLL Form", async ({ page }, testInfo) => {
@@ -72,8 +72,8 @@ test.describe("Test Suite - SFLLL Form", () => {
     });
 
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-    await userInterfaceSflllFormUtils(testInfo, page);
-    await validationSflllFormUtils(testInfo, page);
-    await fillSflllFormUtils(testInfo, page);
+    await validateSflllUI(testInfo, page);
+    await validateSflllFormRequiredFields(testInfo, page);
+    await fillSflllForm(testInfo, page);
   });
 });
