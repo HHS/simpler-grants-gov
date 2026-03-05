@@ -185,7 +185,7 @@ const VALIDATION_FIELDS: FieldDefinition[] = [
 // Main Function to Validate and Fill SF-LLL Form
 // ============================================================================
 
-export async function validationSflllFormUtils(
+export async function validateSflllFormRequiredFields(
   testInfo: TestInfo,
   page: Page,
 ): Promise<void> {
@@ -193,7 +193,7 @@ export async function validationSflllFormUtils(
   try {
     // Extract ApplicationURL and attach to test report
     const applicationURL = page.url();
-    await testInfo.attach("validationSflllFormUtils-applicationURL", {
+    await testInfo.attach("validateSflllFormRequiredFields-applicationURL", {
       body: `Application URL: ${applicationURL}`,
       contentType: "text/plain",
     });
@@ -219,13 +219,13 @@ export async function validationSflllFormUtils(
     await page.goto(applicationURL);
 
     // Attach final success info to test report
-    await testInfo.attach("validationSflllFormUtils-success", {
+    await testInfo.attach("validateSflllFormRequiredFields-success", {
       body: "Successfully validated and filled all required fields on the SF-LLL form with no remaining validation errors.",
       contentType: "text/plain",
     });
   } catch (error) {
     // Attach unexpected error info to test report
-    await testInfo.attach("validationSflllFormUtils-error", {
+    await testInfo.attach("validateSflllFormRequiredFields-error", {
       body: error instanceof Error ? error.message : String(error),
       contentType: "text/plain",
     });
