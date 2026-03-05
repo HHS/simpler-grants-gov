@@ -162,6 +162,26 @@ OPPORTUNITY_PUBLISHER = Role(
 )
 
 ############################
+# Core Award Recommendation Roles
+############################
+AWARD_RECOMMENDATION_USER_ID = uuid.UUID("a5a5881e-2b55-4044-bf4d-eec45503cc56")
+AWARD_RECOMMENDATION_USER = Role(
+    role_id=AWARD_RECOMMENDATION_USER_ID,
+    role_name="Award Recommendation User",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        AWARD_RECOMMENDATION_USER_ID,
+        [
+            Privilege.VIEW_AWARD_RECOMMENDATION,
+            Privilege.CREATE_AWARD_RECOMMENDATION,
+            Privilege.UPDATE_AWARD_RECOMMENDATION,
+            Privilege.SUBMIT_AWARD_RECOMMENDATION,
+        ],
+    ),
+    link_role_types=[LinkRoleRoleType(role_id=AWARD_RECOMMENDATION_USER_ID, role_type=RoleType.AGENCY)],
+)
+
+############################
 # Core Internal Roles
 ############################
 
@@ -231,4 +251,5 @@ CORE_ROLES = [
     NAVA_INTERNAL_ROLE,
     SYSTEM_WORKFLOW_USER_ROLE,
     INTERNAL_WORKFLOW_USER_ROLE,
+    AWARD_RECOMMENDATION_USER,
 ]
