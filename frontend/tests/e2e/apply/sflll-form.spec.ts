@@ -5,7 +5,7 @@ import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { fillSflllForm } from "tests/e2e/utils/forms/fill-sflll-form-utils";
 import { validateSflllUI} from "tests/e2e/utils/forms/user-interface-sflll-form-utils";
 import { validateSflllFormRequiredFields } from "tests/e2e/utils/forms/validation-sflll-form-utils";
-import { ensurePageClosed } from "tests/e2e/utils/test-lifecycle-helpers";
+import { ensurePageClosed } from "tests/e2e/utils/lifecycle-helpers";
 
 const { baseUrl, testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab";
