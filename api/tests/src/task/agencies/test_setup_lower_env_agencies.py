@@ -52,7 +52,7 @@ def test_setup_lower_env_agencies(enable_factory_create, db_session):
         # For this user, if no fake agency or user role was found
         if not agency_and_role_found:
             errors.append(
-                "User does not have a fake agency and/or a role; user_id = " + str(user.user_id)
+                f"User does not have a fake agency and/or a role; user_id = {user.user_id}"
             )
 
     # Assert that all users were checked successfully
@@ -85,7 +85,7 @@ def test_setup_lower_env_agencies(enable_factory_create, db_session):
                 agency_count += 1
 
         if agency_count != 1:
-            errors2.append("User has more than 1 fake agency; user_id = " + str(user.user_id))
+            errors2.append(f"User has more than 1 fake agency; user_id = {user.user_id}")
 
     # Assert that all users have no more than 1 fake agency
     assert len(errors2) == 0, ". ".join(errors2)
