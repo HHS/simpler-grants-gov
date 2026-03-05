@@ -10,7 +10,7 @@
 // await verifyUIField(testInfo, page, field);
 //
 
-import { Page, TestInfo } from "@playwright/test";
+import { expect, Page, TestInfo } from "@playwright/test";
 
 // ============================================================================
 // Interface Definitions
