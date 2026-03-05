@@ -178,7 +178,9 @@ AWARD_RECOMMENDATION_USER = Role(
             Privilege.SUBMIT_AWARD_RECOMMENDATION,
         ],
     ),
-    link_role_types=[LinkRoleRoleType(role_id=AWARD_RECOMMENDATION_USER_ID, role_type=RoleType.AGENCY)],
+    link_role_types=[
+        LinkRoleRoleType(role_id=AWARD_RECOMMENDATION_USER_ID, role_type=RoleType.AGENCY)
+    ],
 )
 
 ############################
