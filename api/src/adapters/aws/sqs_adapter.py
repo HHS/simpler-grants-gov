@@ -7,13 +7,15 @@ from pydantic import BaseModel, Field
 
 from src.adapters.aws import get_boto_session
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.json_util import json_encoder
 
 logger = logging.getLogger(__name__)
 
 
 class SQSConfig(PydanticBaseEnvConfig):
     workflow_queue_url: str = Field(alias="WORKFLOW_QUEUE_URL")
-    s3_endpoint_url: str = Field(alias="S3_ENDPOINT_URL")
+    s3_endpoint_url: str | None = Field(alias="S3_ENDPOINT_URL", default=None)
+    aws_region: str = Field(alias="AWS_REGION", default="us-east-1")
 
 
 class SQSMessage(BaseModel):
@@ -57,7 +59,7 @@ def get_boto_sqs_client(
     if session is None:
         session = get_boto_session()
 
-    return session.client("sqs", **params)
+    return session.client("sqs", region_name=sqs_config.aws_region, **params)
 
 
 class SQSClient:
@@ -70,6 +72,7 @@ class SQSClient:
     ) -> list[SQSMessage]:
         """Fetch messages from SQS using long polling and return as SQSMessage objects."""
         try:
+            logger.info("Fetching messages from SQS", extra={"queue_url": self.queue_url})
             response = self.client.receive_message(
                 QueueUrl=self.queue_url,
                 MaxNumberOfMessages=max_messages,
@@ -104,6 +107,10 @@ class SQSClient:
             entries.append({"Id": id_str, "ReceiptHandle": handle})
 
         try:
+            logger.info(
+                "Deleting messages from SQS",
+                extra={"queue_url": self.queue_url, "receipt_handles": ",".join(receipt_handles)},
+            )
             response = self.client.delete_message_batch(QueueUrl=self.queue_url, Entries=entries)
 
             batch_results = SQSDeleteBatchResponse()
@@ -125,7 +132,9 @@ class SQSClient:
         Sends a message to the SQS queue and returns the response.
         """
         try:
-            message_body_str = json.dumps(message_body)
+            logger.info("Sending message to SQS", extra={"queue_url": self.queue_url})
+            # To handle converting common types like uuids, we use our json_encoder
+            message_body_str = json.dumps(message_body, default=json_encoder)
 
             response = self.client.send_message(
                 QueueUrl=self.queue_url, MessageBody=message_body_str

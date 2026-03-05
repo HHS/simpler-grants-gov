@@ -39,10 +39,11 @@ const categoryCheckboxes = {
   "category-agriculture": "agriculture",
 };
 
-test.describe.skip("Search page tests", () => {
+test.describe("Search page tests", () => {
   // Set all inputs, then refresh the page. Those same inputs should be
   // set from query params.
-  test("should refresh and retain filters in a new tab", async ({ page }, {
+  // skip this test - should refresh and retain filters in a new tab
+  test.skip("should refresh and retain filters in a new tab", async ({ page }, {
     project,
   }) => {
     const isMobile = !!project.name.match(/[Mm]obile/);

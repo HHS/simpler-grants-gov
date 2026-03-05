@@ -491,10 +491,12 @@ def mock_sqs(reset_aws_env_vars):
 
 
 @pytest.fixture
-def workflow_sqs_queue(mock_sqs):
+def workflow_sqs_queue(mock_sqs, monkeypatch):
     sqs = boto3.client("sqs", region_name="us-east-1")
     # Create a default queue for tests
     queue = sqs.create_queue(QueueName="test-workflow-queue")
+    # Set the env var of this queue so the SQSConfig picks it up
+    monkeypatch.setenv("WORKFLOW_QUEUE_URL", queue["QueueUrl"])
     return queue["QueueUrl"]
 
 

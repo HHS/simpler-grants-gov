@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Any
+from typing import Any, cast
 
 import src.workflow.state_machine  # noqa: F401  # Import to register all state machines
 from src.adapters import db
@@ -10,7 +10,12 @@ from src.constants.lookup_constants import Privilege, WorkflowEventType
 from src.db.models.user_models import User
 from src.db.models.workflow_models import Workflow
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
-from src.workflow.event.workflow_event import ProcessWorkflowEventContext, StartWorkflowEventContext
+from src.services.workflows.send_workflow_event import send_workflow_event_to_queue
+from src.workflow.event.workflow_event import (
+    ProcessWorkflowEventContext,
+    StartWorkflowEventContext,
+    WorkflowEvent,
+)
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.approval_service import can_user_do_agency_approval
 from src.workflow.service.workflow_service import (
@@ -74,17 +79,21 @@ def ingest_workflow_event(
       - Workflow exists and is active (404 if missing, 422 if inactive)
       - Event is valid for the workflow (422 if not)
     """
-    event_id = uuid.uuid4()
-    event_type = json_data.get("event_type")
 
-    add_extra_data_to_current_request_logs({"event_id": event_id, "event_type": event_type})
+    # Construct the workflow event from the request
+    # but add the event ID + calling user.
+    workflow_event = WorkflowEvent(event_id=uuid.uuid4(), acting_user_id=user.user_id, **json_data)
+
+    add_extra_data_to_current_request_logs(
+        {"event_id": workflow_event.event_id, "event_type": workflow_event.event_type}
+    )
     logger.info("Ingesting workflow event")
 
     try:
-        if event_type == WorkflowEventType.START_WORKFLOW:
-            _validate_start_workflow_event(db_session, json_data, user)
-        elif event_type == WorkflowEventType.PROCESS_WORKFLOW:
-            _validate_process_workflow_event(db_session, json_data, user)
+        if workflow_event.event_type == WorkflowEventType.START_WORKFLOW:
+            _validate_start_workflow_event(db_session, workflow_event, user)
+        elif workflow_event.event_type == WorkflowEventType.PROCESS_WORKFLOW:
+            _validate_process_workflow_event(db_session, workflow_event, user)
 
     except EntityNotFound as e:
         logger.info("Entity not found for workflow event", extra={"error": str(e)})
@@ -103,17 +112,17 @@ def ingest_workflow_event(
         raise_flask_error(422, "This workflow is not currently active")
 
     logger.info("Successfully validated workflow event")
+    send_workflow_event_to_queue(workflow_event)
 
-    return event_id
+    return workflow_event.event_id
 
 
 def _validate_start_workflow_event(
-    db_session: db.Session, json_data: dict[str, Any], user: User
+    db_session: db.Session, workflow_event: WorkflowEvent, user: User
 ) -> None:
     """Validate a start_workflow event."""
     # Note: start_workflow_context is guaranteed to be present due to schema validation
-    start_context_data = json_data.get("start_workflow_context", {})
-    start_context = StartWorkflowEventContext(**start_context_data)
+    start_context = cast(StartWorkflowEventContext, workflow_event.start_workflow_context)
 
     # Get the workflow config and state machine class - validates that the workflow type is real and configured
     config, _ = WorkflowRegistry.get_state_machine_for_workflow_type(start_context.workflow_type)
@@ -136,12 +145,11 @@ def _validate_start_workflow_event(
 
 
 def _validate_process_workflow_event(
-    db_session: db.Session, json_data: dict[str, Any], user: User
+    db_session: db.Session, workflow_event: WorkflowEvent, user: User
 ) -> None:
     """Validate a process_workflow event."""
     # Note: process_context_data is guaranteed to be present due to schema validation
-    process_context_data = json_data.get("process_workflow_context", {})
-    process_context = ProcessWorkflowEventContext(**process_context_data)
+    process_context = cast(ProcessWorkflowEventContext, workflow_event.process_workflow_context)
 
     # Validate workflow exists and is active
     workflow = get_and_validate_workflow(db_session, process_context.workflow_id)

@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from src.db.models.user_models import UserSavedOpportunity
@@ -150,3 +151,19 @@ def test_user_save_opportunity_post_not_found(
     )
 
     assert response.status_code == 404
+
+
+def test_user_save_opportunity_post_logging(
+    client, user, user_auth_token, enable_factory_create, db_session, caplog
+):
+    opportunity = OpportunityFactory.create()
+
+    caplog.set_level(logging.INFO)
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities",
+        headers={"X-SGG-Token": user_auth_token},
+        json={"opportunity_id": opportunity.opportunity_id},
+    )
+
+    assert response.status_code == 200
+    assert any("Saved opportunity for user" in r.message for r in caplog.records)
