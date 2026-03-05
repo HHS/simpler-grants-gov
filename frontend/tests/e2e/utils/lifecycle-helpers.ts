@@ -1,10 +1,10 @@
-import { Page, TestType } from "@playwright/test";
+import { Page } from "@playwright/test";
 
 // ============================================================================
 // TEST LIFECYCLE HELPERS
 // ============================================================================
 
-//Ensure the page is closed after each test to prevent resource leaks
+// Ensure the page is closed after each test to prevent resource leaks
 // Usage: Call this function at the end of each test file, passing in the test object
 // Example:
 //   test("My Test", async ({ page }) => {
