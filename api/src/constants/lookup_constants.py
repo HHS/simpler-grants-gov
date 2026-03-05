@@ -309,6 +309,11 @@ class Privilege(StrEnum):
     MODIFY_ORG_SAVED_OPPORTUNITIES = "modify_org_saved_opportunities"
 
     INTERNAL_WORKFLOW_EVENT_SEND = "internal_workflow_event_send"
+    VIEW_AWARD_RECOMMENDATION = "view_award_recommendation"
+    CREATE_AWARD_RECOMMENDATION = "create_award_recommendation"
+    UPDATE_AWARD_RECOMMENDATION = "update_award_recommendation"
+    SUBMIT_AWARD_RECOMMENDATION = "submit_award_recommendation"
+    
 
     # These privileges are associated with workflow approvals
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
