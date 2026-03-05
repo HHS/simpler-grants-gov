@@ -175,44 +175,40 @@ def _enrich_with_saved_organizations(
     org_ids_to_use: list[uuid.UUID] | None,
 ) -> list[dict]:
     """
-    Enrich opportunities with saved_to_organizations based on request mode.
+    Convert a list of Opportunity objects into dicts for API response.
 
-    org_ids_to_use:
-        None  -> user-saved-only request (omit field)
-        []    -> include field, always empty
-        [ids] -> include field, filtered by ids
+    Include `saved_to_organizations` only if:
+    - The request filtered by specific organizations, or
+    - The opportunity is saved by at least one organization in org_ids_to_use.
+
+    If the opportunity is only user-saved (no orgs) and the request is for all saved opportunities,
+    the `saved_to_organizations` key is omitted.
     """
 
     response: list = []
 
     for opp in opportunities:
-        base: dict = {
-            "opportunity_id": opp.opportunity_id,
+        saved_to_orgs = [
+            {
+                "organization_id": str(save.organization_id),
+                "organization_name": (
+                    save.organization.organization_name if save.organization else None
+                ),
+            }
+            for save in opp.saved_opportunities_by_organizations
+            if org_ids_to_use and save.organization_id in org_ids_to_use
+        ]
+        base = {
+            "opportunity_id": str(opp.opportunity_id),
             "opportunity_title": opp.opportunity_title,
             "opportunity_status": opp.opportunity_status,
             "summary": opp.summary,
         }
 
-        # USER-SAVED-ONLY MODE
-        if org_ids_to_use is None:
-            response.append(base)
-            continue
+        # Only include key if request is org-specific or if there are saved orgs
+        if (org_ids_to_use is not None) or saved_to_orgs:
+            base["saved_to_organizations"] = saved_to_orgs
 
-        # ORG MODE (all or specific)
-        saved_to_orgs = []
-
-        for save in opp.saved_opportunities_by_organizations:
-            if save.organization_id in org_ids_to_use:
-                saved_to_orgs.append(
-                    {
-                        "organization_id": save.organization_id,
-                        "organization_name": (
-                            save.organization.organization_name if save.organization else None
-                        ),
-                    }
-                )
-
-        base["saved_to_organizations"] = saved_to_orgs
         response.append(base)
 
     return response
