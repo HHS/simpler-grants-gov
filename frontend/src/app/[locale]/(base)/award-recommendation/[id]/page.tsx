@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
@@ -155,9 +156,15 @@ async function AwardRecommendationPageContent({
   return (
     <>
       {awardRecommendationId && (
-        <AwardRecommendationHero
-          awardRecommendationId={awardRecommendationId}
-        />
+        <Suspense
+          fallback={
+            <span data-testid="award-recommendation-hero-fallback"></span>
+          }
+        >
+          <AwardRecommendationHero
+            awardRecommendationId={awardRecommendationId}
+          />
+        </Suspense>
       )}
       <GridContainer>
         <h1 className="margin-top-9 margin-bottom-7">
