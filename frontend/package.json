@@ -42,6 +42,7 @@
     "cookies-next": "^6.0.0",
     "dayjs": "^1.11.13",
     "focus-trap-react": "^11",
+    "immutable": "^5.1.5",
     "isomorphic-dompurify": "^2.15.0",
     "jose": "^5.9.6",
     "js-cookie": "^3.0.5",
