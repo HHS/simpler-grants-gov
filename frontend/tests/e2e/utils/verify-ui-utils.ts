@@ -25,7 +25,6 @@ export interface UIFieldDefinition {
 // ============================================================================
 // Helper Function to Verify a Single UI Field
 // ============================================================================
-
 /**
  * Verifies that a UI element contains the expected text content.
  * Normalizes whitespace to handle formatting variations in the DOM.
@@ -42,21 +41,9 @@ export async function verifyUIField(
 ): Promise<void> {
   try {
     const element = page.locator(field.locator);
-    const elementText = await element.textContent();
 
-    // Normalize whitespace in both expected and actual text for comparison
-    // This handles cases where DOM has multiple spaces or line breaks
-    const normalizeWhitespace = (text: string) =>
-      text.replace(/\s+/g, " ").trim();
-
-    const normalizedActual = normalizeWhitespace(elementText || "");
-    const normalizedExpected = normalizeWhitespace(field.expectedText);
-
-    if (!normalizedActual.includes(normalizedExpected)) {
-      throw new Error(
-        `Expected text "${field.expectedText}" not found in element with locator "${field.locator}". Actual text: "${elementText}"`,
-      );
-    }
+    // Playwright automatically normalizes whitespace and retries
+    await expect(element).toContainText(field.expectedText);
 
     await testInfo.attach(`verifyUIField-${field.section}-success`, {
       body: `Successfully verified ${field.section}: "${field.expectedText}"`,
@@ -69,10 +56,6 @@ export async function verifyUIField(
       }`,
       contentType: "text/plain",
     });
-    throw new Error(
-      `Failed to verify ${field.section}: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
+    throw error;
   }
 }
