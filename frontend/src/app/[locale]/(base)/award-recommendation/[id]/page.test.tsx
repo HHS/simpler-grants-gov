@@ -62,6 +62,10 @@ jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
   }),
 }));
 
+jest.mock("next-intl", () => ({
+  useTranslations: () => identity,
+}));
+
 jest.mock("src/components/award-recommendation/AwardRecommendationHero", () => {
   const React = jest.requireActual<typeof import("react")>("react");
   return {
@@ -71,7 +75,7 @@ jest.mock("src/components/award-recommendation/AwardRecommendationHero", () => {
 });
 
 const mockOpportunityDetail = {
-  opportunity_id: "123",
+  opportunity_id: "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
   legacy_opportunity_id: 1,
   opportunity_status: "posted" as const,
   opportunity_title: "Test Funding Opportunity",
@@ -87,7 +91,7 @@ const mockOpportunityDetail = {
   attachments: [],
   competitions: null,
   summary: {
-    summary_description: "<p>This is a test opportunity summary.</p>",
+    summary_description: "",
     close_date: null,
     is_forecast: false,
     post_date: "2024-01-01",
@@ -148,6 +152,10 @@ describe("AwardRecommendationPage", () => {
           (props: { params: Promise<{ locale: string }> }) =>
             WrappedComponent(props) as unknown,
       );
+
+      jest
+        .spyOn(opportunityFetcher, "getOpportunityDetails")
+        .mockResolvedValue(mockOpportunityData);
     });
 
     it("includes the AwardRecommendationHero component in the page", async () => {
@@ -168,29 +176,54 @@ describe("AwardRecommendationPage", () => {
       expect(await screen.findByText("pageTitle")).toBeVisible();
     });
 
-    it("does not fetch opportunity when no id search param provided", async () => {
+    it("renders opportunity details on the page", async () => {
       const component = await AwardRecommendationPage({
         params: awardRecommendationParams,
-        searchParams: Promise.resolve({}),
       });
       render(component);
 
-      expect(opportunityFetcher.getOpportunityDetails).not.toHaveBeenCalled();
-      expect(await screen.findByText("pageTitle")).toBeVisible();
+      expect(
+        await screen.findByText(mockOpportunityDetail.opportunity_title),
+      ).toBeVisible();
+      expect(
+        await screen.findByText(mockOpportunityDetail.opportunity_number),
+      ).toBeVisible();
     });
 
-    it("calls getOpportunityDetails when id search param is provided", async () => {
+    it("renders 'No summary available' when opportunity has no summary description", async () => {
+      jest
+        .spyOn(opportunityFetcher, "getOpportunityDetails")
+        .mockResolvedValue({
+          ...mockOpportunityData,
+          data: {
+            ...mockOpportunityDetail,
+            summary: {
+              ...mockOpportunityDetail.summary,
+              summary_description: null,
+            },
+          },
+        });
+
+      const component = await AwardRecommendationPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(await screen.findByText("No summary available")).toBeVisible();
+    });
+
+    it("calls getOpportunityDetails with expected id", async () => {
       jest
         .spyOn(opportunityFetcher, "getOpportunityDetails")
         .mockResolvedValue(mockOpportunityData);
 
       await AwardRecommendationPage({
         params: awardRecommendationParams,
-        searchParams: Promise.resolve({ id: "123" }),
+        searchParams: Promise.resolve({}),
       });
 
       expect(opportunityFetcher.getOpportunityDetails).toHaveBeenCalledWith(
-        "123",
+        "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
       );
     });
 
@@ -204,13 +237,11 @@ describe("AwardRecommendationPage", () => {
 
       const component = await AwardRecommendationPage({
         params: awardRecommendationParams,
-        searchParams: Promise.resolve({ id: "non-existent" }),
+        searchParams: Promise.resolve({ opportunityId: "non-existent" }),
       });
       render(component);
 
       expect(consoleSpy).toHaveBeenCalled();
-      expect(await screen.findByText("pageTitle")).toBeVisible();
-
       consoleSpy.mockRestore();
     });
 
@@ -222,7 +253,7 @@ describe("AwardRecommendationPage", () => {
 
       const component = await AwardRecommendationPage({
         params: awardRecommendationParams,
-        searchParams: Promise.resolve({ id: "123" }),
+        searchParams: Promise.resolve({ opportunityId: "123" }),
       });
 
       render(component);
@@ -255,6 +286,7 @@ describe("AwardRecommendationPage", () => {
           params: awardRecommendationParams,
         });
       });
+
       expect(mockRedirect).toHaveBeenCalledWith("/maintenance");
     });
   });

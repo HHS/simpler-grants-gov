@@ -371,22 +371,26 @@ def user_delete_saved_opportunity_legacy(
 @user_blueprint.post("/<uuid:user_id>/saved-opportunities/list")
 @user_blueprint.input(UserSavedOpportunitiesRequestSchema, location="json")
 @user_blueprint.output(UserSavedOpportunitiesResponseSchema)
-@user_blueprint.doc(responses=[200, 403])
+@user_blueprint.doc(responses=[200, 403, 404])
 @user_blueprint.auth_required(api_jwt_auth)
 @flask_db.with_db_session()
 def user_get_saved_opportunities(
     db_session: db.Session, user_id: UUID, json_data: dict
 ) -> response.ApiResponse:
     logger.info("POST /v1/users/:user_id/saved-opportunities/list")
-
     user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
-
     # Verify the authenticated user matches the requested user_id
     if user_token_session.user_id != user_id:
         raise_flask_error(403, "Forbidden")
 
-    # Get all saved opportunities for the user with their related opportunity data
-    saved_opportunities, pagination_info = get_saved_opportunities(db_session, user_id, json_data)
+    with db_session.begin():
+        # Add the user from the token session to our current session
+        db_session.add(user_token_session)
+
+        # Get all saved opportunities for the user with their related opportunity data
+        saved_opportunities, pagination_info = get_saved_opportunities(
+            db_session, user_token_session.user, json_data
+        )
 
     return response.ApiResponse(
         message="Success",
