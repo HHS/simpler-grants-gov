@@ -1,6 +1,5 @@
 from src.legacy_soap_api.grantors.schemas.confirm_application_delivery_schemas import (
     ConfirmApplicationDeliveryRequest,
-    ConfirmApplicationDeliveryResponseSOAPBody,
     ConfirmApplicationDeliveryResponseSOAPEnvelope,
 )
 from src.legacy_soap_api.grantors.schemas.get_application_zip_schemas import (
@@ -31,5 +30,4 @@ __all__ = [
     "SubmissionInfo",
     "ConfirmApplicationDeliveryResponseSOAPEnvelope",
     "ConfirmApplicationDeliveryRequest",
-    "ConfirmApplicationDeliveryResponseSOAPBody",
 ]

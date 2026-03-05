@@ -14,7 +14,7 @@ RESPONSE_MESSAGE = "Success"
 
 
 class TestLegacySoapGrantorConfirmApplicationRequestSchema:
-    def test_can_convert_confirm_application_delivery_request_soap_payload_dict(self, db_session):
+    def test_can_convert_confirm_application_delivery_request_soap_payload_dict(self):
         request_xml = (
             "<soapenv:Envelope "
             'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
@@ -44,7 +44,7 @@ class TestLegacySoapGrantorConfirmApplicationRequestSchema:
         }
         assert soap_payload_dict == expected
 
-    def test_can_convert_confirm_application_delivery_request_xml_bytes_to_dict(self, db_session):
+    def test_can_convert_confirm_application_delivery_request_xml_bytes_to_dict(self):
         request_xml = (
             "<soapenv:Envelope "
             'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
@@ -68,7 +68,7 @@ class TestLegacySoapGrantorConfirmApplicationRequestSchema:
         }
 
     def test_confirm_application_delivery_request_validates_there_is_a_grants_gov_tracking_number_exists(
-        self, db_session
+        self,
     ):
         request_xml = (
             "<soapenv:Envelope "
@@ -88,10 +88,10 @@ class TestLegacySoapGrantorConfirmApplicationRequestSchema:
         )
         with pytest.raises(SOAPFaultException) as e:
             grantors_schemas.ConfirmApplicationDeliveryRequest(**soap_operation_dict)
-        assert e.value.message == "No grants_gov_tracking_number provided."
+        assert e.value.message == "Invalid grants_gov_tracking_number provided."
 
     def test_confirm_application_delivery_request_validates_there_is_a_grants_gov_tracking_number_is_in_correct_format(
-        self, db_session
+        self,
     ):
         BAD_NUMBER = "123456"
         request_xml = (
@@ -116,7 +116,7 @@ class TestLegacySoapGrantorConfirmApplicationRequestSchema:
 
 
 class TestLegacySoapGrantorConfirmApplicationResponseSchema:
-    def test_can_convert_confirm_application_delivery_response_xml_bytes_to_dict(self, db_session):
+    def test_can_convert_confirm_application_delivery_response_xml_bytes_to_dict(self):
         response_xml_bytes = (
             f"--uuid:{BOUNDARY_UUID}"
             'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"'
@@ -143,17 +143,16 @@ class TestLegacySoapGrantorConfirmApplicationResponseSchema:
             "</soap:Body>"
             "</soap:Envelope>"
         ).encode("utf-8")
-        soap_payload_dict = SOAPPayload(soap_payload=response_xml_bytes.decode()).to_dict()
-        schema = grantors_schemas.ConfirmApplicationDeliveryResponseSOAPEnvelope(
-            body=soap_payload_dict.get("Envelope", {}).get("Body")
-        )
-        assert (
-            schema.body.confirm_application_delivery_response.grants_gov_tracking_number
-            == GRANTS_GOV_TRACKING_NUMBER
-        )
-        assert (
-            schema.body.confirm_application_delivery_response.response_message == RESPONSE_MESSAGE
-        )
+        soap_payload_dict = SOAPPayload(soap_payload=response_xml_bytes.decode()).to_dict()[
+            "Envelope"
+        ]["Body"]["ConfirmApplicationDeliveryResponse"]
+        schema_data = {
+            "grants_gov_tracking_number": soap_payload_dict["GrantsGovTrackingNumber"],
+            "response_message": soap_payload_dict["ResponseMessage"],
+        }
+        schema = grantors_schemas.ConfirmApplicationDeliveryResponseSOAPEnvelope(**schema_data)
+        assert schema.grants_gov_tracking_number == GRANTS_GOV_TRACKING_NUMBER
+        assert schema.response_message == RESPONSE_MESSAGE
         result = schema.to_soap_envelope_dict(operation_name="ConfirmApplicationDeliveryResponse")
         expected = {
             "Envelope": {
@@ -167,7 +166,7 @@ class TestLegacySoapGrantorConfirmApplicationResponseSchema:
         }
         assert result == expected
 
-    def test_can_convert_confirm_application_delivery_response_to_dict(self, db_session):
+    def test_can_convert_confirm_application_delivery_response_to_dict(self):
         response_xml_bytes = (
             f"--uuid:{BOUNDARY_UUID}"
             'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"'
@@ -220,9 +219,7 @@ class TestLegacySoapGrantorConfirmApplicationResponseSchema:
         }
         assert soap_xml_dict == expected
 
-    def test_can_convert_confirm_application_delivery_response_dict_to_mtom_message(
-        self, db_session
-    ):
+    def test_can_convert_confirm_application_delivery_response_dict_to_mtom_message(self):
         response_xml_bytes = (
             f"--uuid:{BOUNDARY_UUID}"
             'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"'
@@ -249,9 +246,15 @@ class TestLegacySoapGrantorConfirmApplicationResponseSchema:
             "</soap:Body>"
             "</soap:Envelope>"
         ).encode("utf-8")
-        soap_payload_dict = SOAPPayload(soap_payload=response_xml_bytes.decode()).to_dict()
+        soap_payload_dict = SOAPPayload(soap_payload=response_xml_bytes.decode()).to_dict()[
+            "Envelope"
+        ]["Body"]["ConfirmApplicationDeliveryResponse"]
+        schema_data = {
+            "grants_gov_tracking_number": soap_payload_dict["GrantsGovTrackingNumber"],
+            "response_message": soap_payload_dict["ResponseMessage"],
+        }
         result = grantors_schemas.ConfirmApplicationDeliveryResponseSOAPEnvelope(
-            Body=soap_payload_dict.get("Envelope", {}).get("Body")
+            **schema_data
         ).to_soap_envelope_dict(operation_name="ConfirmApplicationDeliveryResponse")
         ns = {
             "ns12": "http://schemas.xmlsoap.org/wsdl/soap/",
