@@ -186,9 +186,7 @@ def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_sa
 
     assert response.status_code == 200
     data = response.json["data"]
-    import pdb
 
-    pdb.set_trace()
     assert len(data) == 1
     assert data[0]["opportunity_id"] == str(user_saved_opp.opportunity_id)
     assert "saved_to_organizations" not in data[0]
