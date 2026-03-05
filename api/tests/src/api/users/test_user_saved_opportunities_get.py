@@ -499,10 +499,6 @@ def test_user_get_saved_opportunities_org_only(client, enable_factory_create, db
     assert [opp["opportunity_id"] for opp in data] == [
         str(opp) for opp in [org_saved_opp3.opportunity_id, org_saved_opp2.opportunity_id]
     ]
-    import pdb
-
-    pdb.set_trace()
-
 
 def test_user_get_saved_opportunities_org_only_403(
     client,
