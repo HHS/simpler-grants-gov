@@ -2,7 +2,7 @@ import { Page, TestInfo } from "@playwright/test";
 import {
   fillField,
   FillFieldDefinition,
-} from "tests/e2e/utils/test-form-fill-utils";
+} from "tests/e2e/utils/form-fill-utils";
 
 // Test data for filling the form - modify as needed for different test scenarios
 export const ENTITY_DATA = {
