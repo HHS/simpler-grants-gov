@@ -91,7 +91,8 @@ jobs:
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build -- --no-lint
 
-      - uses: ./.github/actions/e2e
+      - name: Run E2E tests
+        uses: ./.github/actions/e2e
         with:
           version: ${{ github.ref }}
           target: "local"
