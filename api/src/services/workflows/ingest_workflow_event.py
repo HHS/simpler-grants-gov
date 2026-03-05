@@ -80,7 +80,8 @@ def ingest_workflow_event(
       - Event is valid for the workflow (422 if not)
     """
 
-    # Construct the
+    # Construct the workflow event from the request
+    # but add the event ID + calling user.
     workflow_event = WorkflowEvent(event_id=uuid.uuid4(), acting_user_id=user.user_id, **json_data)
 
     add_extra_data_to_current_request_logs(
