@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 
 class SQSConfig(PydanticBaseEnvConfig):
     workflow_queue_url: str = Field(alias="WORKFLOW_QUEUE_URL")
-    s3_endpoint_url: str = Field(alias="S3_ENDPOINT_URL")
+    s3_endpoint_url: str | None = Field(alias="S3_ENDPOINT_URL", default=None)
+    aws_region: str = Field(alias="AWS_REGION", default="us-east-1")
 
 
 class SQSMessage(BaseModel):
@@ -57,7 +58,7 @@ def get_boto_sqs_client(
     if session is None:
         session = get_boto_session()
 
-    return session.client("sqs", **params)
+    return session.client("sqs", region_name=sqs_config.aws_region, **params)
 
 
 class SQSClient:
