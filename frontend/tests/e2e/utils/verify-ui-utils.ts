@@ -49,7 +49,7 @@ export async function verifyUIField(
       body: `Successfully verified ${field.section}: "${field.expectedText}"`,
       contentType: "text/plain",
     });
-  } catch (error) {
+  } catch (error: unknown) {
     await testInfo.attach(`verifyUIField-${field.section}-error`, {
       body: `Failed to verify ${field.section}: ${
         error instanceof Error ? error.message : String(error)
