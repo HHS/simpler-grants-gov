@@ -2,7 +2,7 @@ import { Page, TestInfo } from "@playwright/test";
 import {
   UIFieldDefinition,
   verifyUIField,
-} from "tests/e2e/utils/test-verify-ui-utils";
+} from "tests/e2e/utils/verify-ui-utils";
 
 // Test data for filling the form - modify as needed for different test scenarios
 export const ENTITY_DATA = {
