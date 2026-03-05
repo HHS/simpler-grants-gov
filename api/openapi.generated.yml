@@ -698,6 +698,7 @@ paths:
           type:
           - integer
           - 'null'
+          example: 1
         required: false
       - in: query
         name: pageSize
@@ -706,6 +707,7 @@ paths:
           type:
           - integer
           - 'null'
+          example: 10
         required: false
       responses:
         '200':
@@ -5539,6 +5541,7 @@ components:
           - string
           - 'null'
           description: The status value, from a predefined set of options
+          example: active, forecasted, closed
         customValue:
           type:
           - string
@@ -5555,9 +5558,11 @@ components:
         amount:
           type: string
           description: The amount of money
+          example: '1000000.0'
         currency:
           type: string
-          description: The ISO 4217 currency code (e.g., 'USD', 'EUR')
+          description: The ISO 4217 currency code
+          example: USD
       required:
       - amount
       - currency
@@ -5570,6 +5575,7 @@ components:
           - 'null'
           description: Details about the funding available for this opportunity that
             don't fit other fields
+          example: Awards are subject to the availability of appropriated funds.
         totalAmountAvailable:
           description: Total amount of funding available for this opportunity
           type:
@@ -5599,16 +5605,19 @@ components:
           - integer
           - 'null'
           description: Minimum number of awards granted
+          example: 1
         maxAwardCount:
           type:
           - integer
           - 'null'
           description: Maximum number of awards granted
+          example: 10
         estimatedAwardCount:
           type:
           - integer
           - 'null'
           description: Estimated number of awards that will be granted
+          example: 5
     SingleDateEvent:
       type: object
       properties:
@@ -5617,27 +5626,32 @@ components:
           - string
           - 'null'
           description: Human-readable name of the event
+          example: Application period begins
         eventType:
           type:
           - string
           - 'null'
           description: Type of event
+          example: singleDate
         description:
           type:
           - string
           - 'null'
           description: Description of what this event represents
+          example: Application period begins
         date:
           type:
           - string
           - 'null'
           format: date
           description: 'Date of the event in ISO 8601 format: YYYY-MM-DD'
+          example: '2026-02-27'
         time:
           type:
           - string
           - 'null'
           description: 'Time of the event in ISO 8601 format: HH:MM:SS'
+          example: '11:15:00'
     OppTimeline:
       type: object
       properties:
@@ -5665,6 +5679,7 @@ components:
       properties:
         name:
           type: string
+          example: eligible_applicants
         fieldType:
           type: string
           enum:
@@ -5680,11 +5695,14 @@ components:
           - string
           - 'null'
           format: url
-        value: {}
+          example: https://example.com/schema
+        value:
+          example: nonprofits, state governments
         description:
           type:
           - string
           - 'null'
+          example: The types of organizations eligible to apply
       required:
       - fieldType
       - name
@@ -5694,8 +5712,10 @@ components:
       properties:
         createdAt:
           description: The timestamp (in UTC) at which the record was created.
+          example: '2026-01-01T00:00:00Z'
         lastModifiedAt:
           description: The timestamp (in UTC) at which the record was last modified.
+          example: '2026-02-01T00:00:00Z'
         id:
           type:
           - string
@@ -5708,6 +5728,7 @@ components:
           - string
           - 'null'
           description: Title or name of the funding opportunity
+          example: Community Health Initiative Grant
         status:
           description: Status of the opportunity
           type:
@@ -5721,6 +5742,8 @@ components:
           - string
           - 'null'
           description: Description of the opportunity's purpose and scope
+          example: Funding to support community health initiatives in underserved
+            areas.
         funding:
           description: Details about the funding available
           type:
@@ -5740,6 +5763,7 @@ components:
           - type: 'null'
         source:
           description: URL for the original source of the opportunity
+          example: https://grants.gov/web/grants/view-opportunity.html?oppId=12345
         customFields:
           type:
           - object
@@ -5757,17 +5781,21 @@ components:
           - integer
           - 'null'
           description: The page number to retrieve
+          example: 1
         pageSize:
           type:
           - integer
           - 'null'
           description: The number of items per page
+          example: 10
         totalItems:
           type: integer
           description: The total number of items
+          example: 100
         totalPages:
           type: integer
           description: The total number of pages
+          example: 10
       required:
       - totalItems
       - totalPages
@@ -6148,40 +6176,44 @@ components:
       type: object
       properties:
         operator:
-          type:
-          - string
-          - 'null'
+          type: string
           description: The operator to apply to the filter value
+          example: in
         value:
-          type:
-          - array
-          - 'null'
+          type: array
           description: The array of string values
+          example:
+          - open
+          - forecasted
           items:
             type: string
+      required:
+      - operator
+      - value
     DateRange1:
       type: object
       properties:
         min:
           description: The minimum date in the range
+          example: '2021-01-01'
         max:
           description: The maximum date in the range
+          example: '2021-01-02'
     DateRangeFilter:
       type: object
       properties:
         operator:
-          type:
-          - string
-          - 'null'
+          type: string
           description: The operator to apply to the filter value
+          example: between
         value:
           description: The date range value
           type:
           - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/DateRange1'
-          - type: 'null'
+          $ref: '#/components/schemas/DateRange1'
+      required:
+      - operator
+      - value
     MoneyRange:
       type: object
       properties:
@@ -6205,18 +6237,17 @@ components:
       type: object
       properties:
         operator:
-          type:
-          - string
-          - 'null'
+          type: string
           description: The operator to apply to the filter value
+          example: between
         value:
           description: The money range value
           type:
           - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/MoneyRange'
-          - type: 'null'
+          $ref: '#/components/schemas/MoneyRange'
+      required:
+      - operator
+      - value
     OppFilters:
       type: object
       properties:
@@ -6261,7 +6292,12 @@ components:
           - $ref: '#/components/schemas/MoneyRangeFilter'
           - type: 'null'
         customFilters:
+          type:
+          - object
+          - 'null'
           description: Additional custom filters to apply to the search
+          example: {}
+          additionalProperties: {}
     OppSorting:
       type: object
       properties:
@@ -6284,11 +6320,13 @@ components:
           - string
           - 'null'
           description: The sort order (asc or desc)
+          example: desc
         customSortBy:
           type:
           - string
           - 'null'
           description: The custom field to sort by when sortBy is 'custom'
+          example: custom_field_1
       required:
       - sortBy
     PaginatedBodyParams:
@@ -6299,11 +6337,13 @@ components:
           - integer
           - 'null'
           description: The page number to retrieve
+          example: 1
         pageSize:
           type:
           - integer
           - 'null'
           description: The number of items per page
+          example: 10
     OpportunitySearchRequest:
       type: object
       properties:
@@ -6312,43 +6352,38 @@ components:
           - string
           - 'null'
           description: Search query string
+          example: community health
         filters:
           description: Filters to apply to the opportunity search
           type:
           - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/OppFilters'
-          - type: 'null'
+          $ref: '#/components/schemas/OppFilters'
         sorting:
           description: Sorting parameters for opportunities
           type:
           - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/OppSorting'
-          - type: 'null'
+          $ref: '#/components/schemas/OppSorting'
         pagination:
           type:
           - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/PaginatedBodyParams'
-          - type: 'null'
+          $ref: '#/components/schemas/PaginatedBodyParams'
     SortedResultsInfo:
       type: object
       properties:
         sortBy:
           type: string
           description: The field to sort by
+          example: lastModifiedAt
         customSortBy:
           type:
           - string
           - 'null'
           description: Implementation-defined sort key
+          example: custom_field_1
         sortOrder:
           type: string
           description: The order in which the results are sorted
+          example: desc
         errors:
           type: array
           default: []
