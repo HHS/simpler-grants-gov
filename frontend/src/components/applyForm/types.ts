@@ -77,6 +77,33 @@ export type WidgetTypes =
 
 type PropertyPath = `/properties/${string}`;
 
+export type FieldListWidgetProps = {
+  id: string;
+  key: string;
+
+  // Needed because WidgetRenderers expects UswdsWidgetProps-ish props,
+  // and UswdsWidgetProps requires schema.
+  schema: RJSFSchema & {
+    description?: string;
+    title?: string;
+  };
+
+  label: string;
+  description?: string;
+  defaultSize: number;
+  groupDefinition: FieldListGroupItem[];
+  rawErrors?: FormattedFormValidationWarning[] | string[];
+  requiredFields?: string[];
+};
+
+export type FieldListChildWidgetTypes = Exclude<WidgetTypes, "FieldList">;
+
+export type FieldListGroupItem = {
+  widget: FieldListChildWidgetTypes;
+  generalProps: Omit<UswdsWidgetProps, "id" | "value" | "key">;
+  baseId: string;
+};
+
 export type DefinitionPath = PropertyPath | PropertyPath[];
 
 export type UiSchemaField = {
@@ -109,7 +136,7 @@ export interface UiSchemaFieldList {
   name: string;
   description?: string;
   defaultSize: number;
-  children: UiSchema;
+  children: UiSchemaField[];
 }
 
 export type UiSchemaNode = UiSchemaField | UiSchemaSection | UiSchemaFieldList;

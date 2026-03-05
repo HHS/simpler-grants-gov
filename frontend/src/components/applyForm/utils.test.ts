@@ -1045,44 +1045,4 @@ describe("addPrintWidgetToFields", () => {
       },
     ]);
   });
-
-  it("handles nested fieldList nodes", () => {
-    const uiSchema: UiSchema = [
-      {
-        type: "fieldList" as const,
-        name: "outer",
-        label: "Outer",
-        defaultSize: 1,
-        children: [
-          {
-            type: "fieldList" as const,
-            name: "inner",
-            label: "Inner",
-            defaultSize: 1,
-            children: [
-              {
-                type: "field" as const,
-                definition: "/properties/name" as const,
-                schema: { title: "Name", type: "string" },
-              },
-            ],
-          },
-        ],
-      },
-    ];
-
-    const result = addPrintWidgetToFields(uiSchema);
-
-    const outer = result[0];
-    if (outer.type !== "fieldList") throw new Error("expected fieldList");
-
-    const inner = outer.children[0];
-    if (inner.type !== "fieldList")
-      throw new Error("expected nested fieldList");
-
-    const innerField = inner.children[0];
-    if (innerField.type !== "field") throw new Error("expected field");
-
-    expect(innerField.widget).toBe("Print");
-  });
 });

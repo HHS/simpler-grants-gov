@@ -12,6 +12,7 @@ import {
   FormValidationWarning,
   SchemaField,
   UiSchema,
+  UiSchemaField,
   UiSchemaNode,
 } from "./types";
 
@@ -147,8 +148,8 @@ const findValidationError = (
 };
 
 export const buildWarningTree = (
-  uiSchema: UiSchema | UiSchemaNode,
-  parent: UiSchema | UiSchemaNode | null,
+  uiSchema: UiSchema | UiSchemaField[] | UiSchemaNode,
+  parent: UiSchema | UiSchemaField[] | UiSchemaNode | null,
   formValidationWarnings: FormValidationWarning[],
   formSchema: RJSFSchema,
 ): FormattedFormValidationWarning[] => {
@@ -167,8 +168,10 @@ export const buildWarningTree = (
     const childErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
       (errors, node) => {
         if ("children" in node) {
+          const children =
+            node.type === "fieldList" ? node.children : node.children;
           const nodeError = buildWarningTree(
-            node.children,
+            children,
             uiSchema,
             formValidationWarnings,
             formSchema,
@@ -581,7 +584,21 @@ export function addPrintWidgetToFields(uiSchema: UiSchema): UiSchema {
     } else if (item.type === "fieldList") {
       return {
         ...item,
-        children: addPrintWidgetToFields(item.children),
+        children: item.children.map((child) => {
+          if (child.type !== "field") {
+            return child;
+          }
+
+          if (
+            child.widget &&
+            (child.widget === "AttachmentArray" ||
+              child.widget === "Attachment")
+          ) {
+            return { ...child, widget: "PrintAttachment" };
+          }
+
+          return { ...child, widget: "Print" };
+        }),
       };
     }
     return item;

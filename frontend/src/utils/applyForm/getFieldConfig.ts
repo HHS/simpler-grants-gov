@@ -5,6 +5,8 @@ import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 
 import {
   BroadlyDefinedWidgetValue,
+  FieldListGroupItem,
+  FieldListWidgetProps,
   FormattedFormValidationWarning,
   SchemaField,
   UiSchemaField,
@@ -29,24 +31,36 @@ type FieldInfo<V extends BroadlyDefinedWidgetValue> = {
   htmlFieldName: string;
 };
 
-type FieldConfig = {
-  type: WidgetTypes;
-  props: {
-    id: string;
-    key: string;
-    disabled?: boolean;
-    required?: boolean;
-    minLength?: number;
-    maxLength?: number;
-    schema: RJSFSchema;
-    rawErrors?: string[] | FormattedFormValidationWarning[] | undefined;
-    value?: BroadlyDefinedWidgetValue;
-    options?: WidgetOptions;
-    label?: string;
-    description?: string;
-    defaultSize?: number;
-  };
+const FIELD_LIST_INDEX_PLACEHOLDER = "~~index~~" as const;
+
+function buildFieldListBaseId({
+  fieldListName,
+  childId,
+}: {
+  fieldListName: string;
+  childId: string;
+}): string {
+  const token = `--${fieldListName}--`;
+  if (childId.includes(token)) {
+    return childId.replace(
+      token,
+      `--${fieldListName}[${FIELD_LIST_INDEX_PLACEHOLDER}]--`,
+    );
+  }
+  return `${fieldListName}[${FIELD_LIST_INDEX_PLACEHOLDER}]--${childId}`;
+}
+
+type FieldWidgetConfig = {
+  type: Exclude<WidgetTypes, "FieldList">;
+  props: UswdsWidgetProps;
 };
+
+type FieldListConfig = {
+  type: "FieldList";
+  props: FieldListWidgetProps;
+};
+
+type FieldConfig = FieldWidgetConfig | FieldListConfig;
 
 // json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
@@ -376,6 +390,43 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
   requiredField: boolean;
 }): FieldConfig => {
   if (uiFieldObject.type === "fieldList") {
+    const groupDefinition: FieldListGroupItem[] = uiFieldObject.children.map(
+      (childNode) => {
+        if (childNode.type !== "field" && childNode.type !== "multiField") {
+          throw new Error("fieldList children must be field nodes");
+        }
+
+        const childWidgetConfig = getFieldConfig({
+          errors,
+          formSchema,
+          formData,
+          uiFieldObject: childNode,
+          requiredField: false,
+        });
+
+        if (childWidgetConfig.type === "FieldList") {
+          throw new Error("nested fieldList is not supported");
+        }
+
+        const {
+          id: childId,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          value: _value,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          key: _key,
+          ...rest
+        } = childWidgetConfig.props;
+
+        return {
+          widget: childWidgetConfig.type,
+          baseId: buildFieldListBaseId({
+            fieldListName: uiFieldObject.name,
+            childId,
+          }),
+          generalProps: rest,
+        };
+      },
+    );
     return {
       type: "FieldList",
       props: {
@@ -389,6 +440,9 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
         label: uiFieldObject.label,
         description: uiFieldObject.description,
         defaultSize: uiFieldObject.defaultSize,
+        groupDefinition,
+        rawErrors: [],
+        requiredFields: [],
       },
     };
   }
@@ -432,7 +486,7 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
       : {};
 
   return {
-    type: widgetType,
+    type: widgetType as Exclude<WidgetTypes, "FieldList">,
     props: {
       id: htmlFieldName,
       key: htmlFieldName,

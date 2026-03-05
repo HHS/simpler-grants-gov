@@ -117,7 +117,7 @@ describe("validateFormData", () => {
     });
 
     it("should invalidate fieldList with section children", () => {
-      const invalidUiSchema: UiSchema = [
+      const invalidUiSchema = [
         {
           type: "fieldList",
           label: "Test",
@@ -132,7 +132,7 @@ describe("validateFormData", () => {
             },
           ],
         },
-      ];
+      ] as unknown as UiSchema;
 
       const errors = validateUiSchema(invalidUiSchema);
 
@@ -143,7 +143,6 @@ describe("validateFormData", () => {
         errors.some((error) => {
           const instancePath =
             typeof error.instancePath === "string" ? error.instancePath : "";
-          // only allows fields
           return instancePath.startsWith("/0/children/0");
         });
 
