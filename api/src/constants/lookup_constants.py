@@ -307,7 +307,6 @@ class Privilege(StrEnum):
     INTERNAL_WORKFLOW_ACCESS = "internal_workflow_access"
     VIEW_ORG_SAVED_OPPORTUNITIES = "view_org_saved_opportunities"
     MODIFY_ORG_SAVED_OPPORTUNITIES = "modify_org_saved_opportunities"
-
     INTERNAL_WORKFLOW_EVENT_SEND = "internal_workflow_event_send"
     VIEW_AWARD_RECOMMENDATION = "view_award_recommendation"
     CREATE_AWARD_RECOMMENDATION = "create_award_recommendation"

@@ -16,6 +16,7 @@ const hydrateAttachmentReferences = (
   const values = Array.isArray(attachmentIds)
     ? (attachmentIds as string[])
     : ([attachmentIds] as string[]);
+
   let hydrated: { id: string; name: string }[] = [];
 
   if (values.length > 0) {
