@@ -1,6 +1,7 @@
 import logging
 import uuid
 from collections.abc import Sequence
+from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy import asc, desc, func, nulls_last, select
@@ -198,7 +199,7 @@ def _enrich_with_saved_organizations(
             for save in opp.saved_opportunities_by_organizations
             if org_ids_to_use and save.organization_id in org_ids_to_use
         ]
-        base = {
+        base: dict[str, Any] = {
             "opportunity_id": str(opp.opportunity_id),
             "opportunity_title": opp.opportunity_title,
             "opportunity_status": opp.opportunity_status,
