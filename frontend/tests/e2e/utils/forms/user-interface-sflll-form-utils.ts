@@ -397,7 +397,7 @@ const UI_VERIFICATION_FIELDS: UIFieldDefinition[] = [
 // Main Function to Verify UI Elements on SF-LLL Form
 // ============================================================================
 
-export async function userInterfaceSflllFormUtils(
+export async function validateSflllUI(
   testInfo: TestInfo,
   page: Page,
 ): Promise<void> {
@@ -405,7 +405,7 @@ export async function userInterfaceSflllFormUtils(
   try {
     // Extract ApplicationURL and attach to test report
     const applicationURL = page.url();
-    await testInfo.attach("validationSflllFormUtils-applicationURL", {
+    await testInfo.attach("validateSflllUI-applicationURL", {
       body: `Application URL: ${applicationURL}`,
       contentType: "text/plain",
     });
@@ -426,7 +426,7 @@ export async function userInterfaceSflllFormUtils(
     await page.goto(applicationURL);
 
     // Attach final success info to test report
-    await testInfo.attach("userInterfaceSflllFormUtils-success", {
+    await testInfo.attach("validateSflllUI-success", {
       body: "Successfully verified all UI elements on the SF-LLL form.",
       contentType: "text/plain",
     });
@@ -437,7 +437,7 @@ export async function userInterfaceSflllFormUtils(
       type: "test-error",
       description: errorMsg,
     });
-    await testInfo.attach("userInterfaceSflllFormUtils-error", {
+    await testInfo.attach("validateSflllUI-error", {
       body: error instanceof Error ? error.message : String(error),
       contentType: "text/plain",
     });
