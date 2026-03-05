@@ -68,17 +68,11 @@ def _build_opportunity_url(opportunity_id: str, base_url: str) -> str:
 def opportunities_to_csv(
     opportunities: Sequence[dict],
     output: io.StringIO,
-    has_full_fields: bool,
 ) -> None:
-    output_fields = (
-        CSV_FIELDS
-        if has_full_fields
-        else [field for field in CSV_FIELDS if field != "summary_description"]
-    )
-    writer = csv.DictWriter(output, fieldnames=output_fields, quoting=csv.QUOTE_ALL)
+    writer = csv.DictWriter(output, fieldnames=CSV_FIELDS, quoting=csv.QUOTE_ALL)
     writer.writeheader()
 
-    csv_fields_set = set(output_fields)
+    csv_fields_set = set(CSV_FIELDS)
     base_url = os.getenv("FRONTEND_BASE_URL")
     for opportunity in opportunities:
         opp = flatten_dict(opportunity)
