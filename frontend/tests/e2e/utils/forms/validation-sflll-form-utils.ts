@@ -2,7 +2,7 @@ import { Page, TestInfo } from "@playwright/test";
 import {
   validateAndFillField,
   type FieldDefinition,
-} from "tests/e2e/utils/test-validate-and-fill-field-utils";
+} from "tests/e2e/utils/validate-and-fill-field-utils";
 
 // Test data for filling the form - modify as needed for different test scenarios
 export const ENTITY_DATA = {
