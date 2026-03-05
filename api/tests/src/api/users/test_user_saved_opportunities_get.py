@@ -500,6 +500,7 @@ def test_user_get_saved_opportunities_org_only(client, enable_factory_create, db
         str(opp) for opp in [org_saved_opp3.opportunity_id, org_saved_opp2.opportunity_id]
     ]
 
+
 def test_user_get_saved_opportunities_org_only_403(
     client,
     enable_factory_create,
