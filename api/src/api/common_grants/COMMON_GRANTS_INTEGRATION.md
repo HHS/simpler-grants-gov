@@ -288,3 +288,33 @@ make lint-ruff
 # Type checking
 make lint-mypy
 ```
+
+
+## Adding Custom Fields
+
+To add custom fields to the openAPI sample documentation follow these steps:
+1. Add any new custom fields to the marshmallow schemas in `common_grants_custom_fields.py` this file is the container for all existing custom fields
+2. Inside of `common_grants_schemas.py` update the `CustomFields` class to have an additional field named after the field that has been added and set it's value equal to the newly imported custom field.  Like so
+```python
+class CustomFields(Schema):
+    legacyId = fields.Nested(LegacyId, allow_none=True)
+    federalOpportunityNumber = fields.Nested(FederalOpportunityNumber, allow_none=True)
+    assistanceListing = fields.Nested(AssistanceListing, allow_none=True)
+    agency = fields.Nested(Agency, allow_none=True)
+    attachments = fields.Nested(Attachments, allow_none=True)
+    category = fields.Nested(Category, allow_none=True)
+    fiscalYear = fields.Nested(FiscalYear, allow_none=True)
+    costSharing = fields.Nested(CostSharing, allow_none=True)
+    additionalInfo = fields.Nested(AdditionalInfo, allow_none=True)
+    AgencyContact = fields.Nested(AgencyContact, allow_none=True)
+    yourNewestField = fields.Nexted(YourNewestField, allow_none=True)
+
+```
+
+
+3. To verify the changes run `make openapi-spec-common-grants` at the first `/api` directory in the repository and then run `make init 
+make db-seed-local && make populate-search-opportunities
+make run-logs` to stand up the openApi endpoints
+
+4. After the Docker containers have started go to `localhost:8080/docs` and enter the user key for the `common grants` endpoints. 
+5. Run the endpoints to validate responses. 

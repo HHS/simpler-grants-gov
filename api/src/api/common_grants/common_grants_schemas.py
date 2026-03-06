@@ -3,20 +3,13 @@
 This file contains all Marshmallow schemas that correspond to Pydantic models,
 organized by category for better maintainability.
 
-NOTICE: This file is COPIED directly from
-simpler-grants-protocol/lib/python-sdk/common_grants_sdk/schemas/marshmallow/
-and then MODIFIED to change imports as described below.
-
-    ORIGINAL:
-        from marshmallow import Schema, fields, validate
-    MODIFIED
-        from src.api.schemas.extension import Schema, fields, validators as validate
 """
 
 from typing import Any
 
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.extension import validators as validate
+from src.api.common_grants.common_grants_custom_fields import AdditionalInfo, Agency, AgencyContact, AssistanceListing, Attachments, Category, CostSharing, CustomField, CustomFieldType, FederalOpportunityNumber, FiscalYear, LegacyId
 
 # =============================================================================
 # BASIC FIELD TYPES
@@ -215,32 +208,6 @@ class SystemMetadata(Schema):
     )
 
 
-class CustomFieldType(fields.String):
-    """Enum field for custom field types."""
-
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(
-            validate=validate.OneOf(["string", "number", "integer", "boolean", "object", "array"]),
-            metadata={
-                "description": "The JSON schema type to use when de-serializing the value field"
-            },
-            **kwargs
-        )
-
-
-class CustomField(Schema):
-    """Schema for defining custom fields on a record."""
-
-    name = fields.String(required=True, metadata={"example": "eligible_applicants"})
-    fieldType = CustomFieldType(required=True)
-    schema = fields.URL(allow_none=True, metadata={"example": "https://example.com/schema"})
-    value = fields.Raw(required=True, metadata={"example": "nonprofits, state governments"})
-    description = fields.String(
-        allow_none=True,
-        metadata={"example": "The types of organizations eligible to apply"},
-    )
-
-
 # =============================================================================
 # FILTER INFO MODELS
 # =============================================================================
@@ -356,6 +323,24 @@ class OppTimeline(Schema):
     )
 
 
+class CustomFields(Schema):
+    """
+    This class serves as the collection point for all custom fields on the OpportunityBase schema.
+    It is passed to (camelCase) customFields on OpportunityBase with the fields.nested property
+    """
+
+    legacyId = fields.Nested(LegacyId, allow_none=True)
+    federalOpportunityNumber = fields.Nested(FederalOpportunityNumber, allow_none=True)
+    assistanceListing = fields.Nested(AssistanceListing, allow_none=True)
+    agency = fields.Nested(Agency, allow_none=True)
+    attachments = fields.Nested(Attachments, allow_none=True)
+    category = fields.Nested(Category, allow_none=True)
+    fiscalYear = fields.Nested(FiscalYear, allow_none=True)
+    costSharing = fields.Nested(CostSharing, allow_none=True)
+    additionalInfo = fields.Nested(AdditionalInfo, allow_none=True)
+    agencyContact = fields.Nested(AgencyContact, allow_none=True)
+
+
 class OpportunityBase(Schema):
     """Base opportunity model."""
 
@@ -415,12 +400,11 @@ class OpportunityBase(Schema):
             "example": "https://grants.gov/web/grants/view-opportunity.html?oppId=12345",
         },
     )
-    customFields = fields.Dict(
-        keys=fields.String(),
-        values=fields.Nested(CustomField),
-        allow_none=True,
-        metadata={"description": "Additional custom fields specific to this opportunity"},
-    )
+    customFields = fields.Nested(
+          CustomFields,
+          allow_none=True,
+          metadata={"description": "Additional custom fields specific to this opportunity"},
+      )
 
 
 # =============================================================================
