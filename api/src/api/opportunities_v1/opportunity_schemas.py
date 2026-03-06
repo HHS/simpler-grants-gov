@@ -1,5 +1,7 @@
 from enum import StrEnum
 
+from marshmallow import ValidationError, validates_schema
+
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import (
@@ -11,7 +13,9 @@ from src.api.schemas.search_schema import (
     BoolSearchSchemaBuilder,
     DateSearchSchemaBuilder,
     IntegerSearchSchemaBuilder,
+    MarshmallowErrorContainer,
     StrSearchSchemaBuilder,
+    ValidationErrorType,
 )
 from src.api.schemas.shared_schema import OpportunityAssistanceListingV1Schema
 from src.constants.lookup_constants import (
@@ -597,3 +601,48 @@ class OpportunityVersionSchema(OpportunityV1Schema):
         fields.Nested(OpportunityVersionAttachmentSchema),
         metadata={"description": "List of attachments associated with the opportunity"},
     )
+
+
+class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
+    legacy_opportunity_id = fields.Integer(
+        required=True,
+        allow_none=True,
+        metadata={"description": "The legacy opportunity ID"},
+    )
+
+    is_forecast = fields.Boolean(
+        required=True,
+        metadata={"description": "Whether the opportunity is forecasted", "example": False},
+    )
+
+    @validates_schema
+    def validate_award_values(self, data: dict, **kwargs: dict) -> None:
+        """Validate that award floor is less than or equal to award ceiling"""
+        if data.get("award_floor") is not None and data.get("award_ceiling") is not None:
+            if data["award_floor"] > data["award_ceiling"]:
+                raise ValidationError(
+                    [
+                        MarshmallowErrorContainer(
+                            ValidationErrorType.INVALID,
+                            "Award floor must be less than or equal to award ceiling",
+                        )
+                    ]
+                )
+
+    @validates_schema
+    def validate_dates(self, data: dict, **kwargs: dict) -> None:
+        """Validate that post date is less than or equal to close date"""
+        if data.get("post_date") is not None and data.get("close_date") is not None:
+            if data["post_date"] > data["close_date"]:
+                raise ValidationError(
+                    [
+                        MarshmallowErrorContainer(
+                            ValidationErrorType.INVALID,
+                            "Post date must be less than or equal to close date",
+                        )
+                    ]
+                )
+
+
+class OpportunitySummaryCreateResponseV1Schema(AbstractResponseSchema):
+    data = fields.Nested(OpportunitySummaryV1Schema())
