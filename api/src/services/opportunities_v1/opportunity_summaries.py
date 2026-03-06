@@ -1,8 +1,8 @@
 import logging
-from datetime import date
+from datetime import date, timedelta
 from uuid import UUID
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
@@ -50,20 +50,6 @@ class OpportunitySummaryCreateRequest(BaseModel):
     forecasted_project_start_date: date | None = None
     fiscal_year: int | None = None
 
-    @validator("award_ceiling")
-    def validate_award_ceiling(cls, v: int | None, values: dict) -> int | None:
-        if "award_floor" in values and values["award_floor"] is not None and v is not None:
-            if values["award_floor"] > v:
-                raise ValueError("Award floor must be less than or equal to award ceiling")
-        return v
-
-    @validator("close_date")
-    def validate_close_date(cls, v: date | None, values: dict) -> date | None:
-        if "post_date" in values and values["post_date"] is not None and v is not None:
-            if values["post_date"] > v:
-                raise ValueError("Post date must be less than or equal to close date")
-        return v
-
 
 def _check_existing_summary(opportunity: OpportunitySummary, is_forecast: bool) -> None:
     """Check if a summary of the same type already exists for the opportunity"""
@@ -82,6 +68,11 @@ def _create_opportunity_summary_object(
     opportunity: OpportunitySummary, request: OpportunitySummaryCreateRequest
 ) -> OpportunitySummary:
     """Create a new OpportunitySummary object from the request data"""
+    # Calculate archive_date as close_date + 30 days
+    archive_date = request.archive_date
+    if archive_date is None and request.close_date is not None:
+        archive_date = request.close_date + timedelta(days=30)
+
     return OpportunitySummary(
         opportunity=opportunity,
         legacy_opportunity_id=request.legacy_opportunity_id,
@@ -91,7 +82,7 @@ def _create_opportunity_summary_object(
         post_date=request.post_date,
         close_date=request.close_date,
         close_date_description=request.close_date_description,
-        archive_date=request.archive_date,
+        archive_date=archive_date,
         expected_number_of_awards=request.expected_number_of_awards,
         estimated_total_program_funding=request.estimated_total_program_funding,
         award_floor=request.award_floor,

@@ -617,6 +617,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     @validates_schema
     def validate_award_values(self, data: dict, **kwargs: dict) -> None:
+        """Validate that award floor is less than or equal to award ceiling"""
         if data.get("award_floor") is not None and data.get("award_ceiling") is not None:
             if data["award_floor"] > data["award_ceiling"]:
                 raise ValidationError(
@@ -628,6 +629,9 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
                     ]
                 )
 
+    @validates_schema
+    def validate_dates(self, data: dict, **kwargs: dict) -> None:
+        """Validate that post date is less than or equal to close date"""
         if data.get("post_date") is not None and data.get("close_date") is not None:
             if data["post_date"] > data["close_date"]:
                 raise ValidationError(

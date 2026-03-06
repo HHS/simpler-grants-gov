@@ -1,7 +1,7 @@
 """Test utilities for opportunity-related tests."""
 
 import uuid
-from datetime import date, timedelta
+from datetime import date
 
 from src.constants.lookup_constants import OpportunityCategory
 
@@ -112,12 +112,7 @@ def create_opportunity_summary_request(
         post_date = post_date.isoformat()
 
     if close_date is None:
-        # Default to 30 days after post date
-        if isinstance(post_date, str):
-            post_date_obj = date.fromisoformat(post_date)
-        else:
-            post_date_obj = post_date
-        close_date = (post_date_obj + timedelta(days=30)).isoformat()
+        close_date = date.today().isoformat()
     elif isinstance(close_date, date):
         close_date = close_date.isoformat()
 
