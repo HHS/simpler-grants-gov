@@ -1,0 +1,7 @@
+# Maintainers who should be notified of external (fork-based) pull requests.
+# These users will be requested as reviewers and assigned to external PRs.
+# Update this list as team responsibilities change.
+external_pr_reviewers:
+  - btabaska
+  - mdragon
+  - KevinJBoyer
