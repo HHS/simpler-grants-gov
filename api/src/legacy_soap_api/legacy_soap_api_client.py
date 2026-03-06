@@ -270,8 +270,6 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         yield b"\n" + boundary.encode("utf-8") + b"--"
 
     def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
-        if self.operation_config.is_mtom is False:
-            return proxy_response
         # MTOM message is assembled here
         # 1. --uuid: {boundary_uuid}\n
         # 2. headers:
