@@ -23,7 +23,7 @@ interface Props {
   attachmentIdsToDelete: Set<string>;
   deleteAttachmentModalRef: RefObject<ModalRef | null>;
   handleCancelUpload: (uploadId: string) => void;
-  isDeleting: boolean;
+  //isDeleting: boolean;
   markAttachmentForDeletion: (
     application_attachment_id: string,
     attachmentToDeleteName: string,
