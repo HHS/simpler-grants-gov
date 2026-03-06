@@ -12,12 +12,8 @@ from src.api.workflows.workflow_schemas import (
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
-from src.services.workflows.get_workflow import (
-    build_workflow_approval_config,
-    get_workflow_for_user,
-)
+from src.services.workflows.get_workflow import get_workflow_and_verify_access
 from src.services.workflows.ingest_workflow_event import ingest_workflow_event
-from src.workflow.service.approval_service import _get_agency_for_workflow
 
 logger = logging.getLogger(__name__)
 
@@ -65,25 +61,6 @@ def workflow_get(db_session: db.Session, workflow_id: uuid.UUID) -> response.Api
         user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
-        workflow = get_workflow_for_user(db_session, user, workflow_id)
+        workflow = get_workflow_and_verify_access(db_session, user, workflow_id)
 
-        agency = _get_agency_for_workflow(workflow)
-
-        approval_config = build_workflow_approval_config(db_session, workflow, agency)
-
-        data = {
-            "workflow_id": workflow.workflow_id,
-            "workflow_type": workflow.workflow_type,
-            "current_workflow_state": workflow.current_workflow_state,
-            "is_active": workflow.is_active,
-            "created_at": workflow.created_at,
-            "updated_at": workflow.updated_at,
-            "workflow_audit_events": workflow.workflow_audits,
-            "workflow_approvals": workflow.workflow_approvals,
-            "workflow_approval_config": approval_config,
-            "opportunity_id": workflow.opportunity_id,
-            "application_id": workflow.application_id,
-            "application_submission_id": workflow.application_submission_id,
-        }
-
-    return response.ApiResponse(message="Success", data=data)
+    return response.ApiResponse(message="Success", data=workflow)

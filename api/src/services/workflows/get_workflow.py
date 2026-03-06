@@ -14,7 +14,8 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
 from src.db.models.workflow_models import Workflow, WorkflowApproval, WorkflowAudit
 from src.workflow.registry.workflow_registry import WorkflowRegistry
-from src.workflow.workflow_errors import ImplementationMissingError, OpportunityWithoutAgencyError
+from src.workflow.service.approval_service import get_agency_for_workflow
+from src.workflow.workflow_errors import OpportunityWithoutAgencyError
 
 logger = logging.getLogger(__name__)
 
@@ -63,42 +64,17 @@ def _get_workflow(db_session: db.Session, workflow_id: uuid.UUID) -> Workflow | 
     )
 
     workflow = db_session.execute(stmt).scalar_one_or_none()
+
+    if workflow is not None:
+        workflow.workflow_audits.sort(key=lambda a: a.created_at)
+        workflow.workflow_approvals.sort(key=lambda a: a.created_at)
+
     return workflow
 
 
-def _get_agency_for_workflow(workflow: Workflow) -> Agency:
-    """
-    Extract agency from workflow entity.
-
-    Args:
-        workflow: Workflow object with entity relationships loaded
-
-    Returns:
-        Agency object associated with the workflow's entity
-
-    Raises:
-        ImplementationMissingError: If no entity is found on the workflow
-        OpportunityWithoutAgencyError: If the opportunity has no agency record
-    """
-    # From the workflow entity, find the opportunity which we'll use to get the agency
-    opportunity: Opportunity | None = None
-    if workflow.opportunity is not None:
-        opportunity = workflow.opportunity
-    elif workflow.application is not None:
-        opportunity = workflow.application.competition.opportunity
-    elif workflow.application_submission is not None:
-        opportunity = workflow.application_submission.application.competition.opportunity
-
-    if opportunity is None:
-        raise ImplementationMissingError("No approach implemented to find agency for workflow")
-
-    if opportunity.agency_record is None:
-        raise OpportunityWithoutAgencyError("Opportunity does not have an agency record")
-
-    return opportunity.agency_record
-
-
-def get_workflow_for_user(db_session: db.Session, user: User, workflow_id: uuid.UUID) -> Workflow:
+def get_workflow_and_verify_access(
+    db_session: db.Session, user: User, workflow_id: uuid.UUID
+) -> Workflow:
     """
     Public function to fetch a workflow with authorization checks.
 
@@ -124,12 +100,9 @@ def get_workflow_for_user(db_session: db.Session, user: User, workflow_id: uuid.
         raise_flask_error(404, message=f"Could not find Workflow with ID {workflow_id}")
 
     try:
-        agency = _get_agency_for_workflow(workflow)
+        agency = get_agency_for_workflow(workflow)
     except OpportunityWithoutAgencyError:
         logger.warning("Opportunity associated with workflow has no agency", extra=log_extra)
-        raise_flask_error(403, message="Forbidden")
-    except ImplementationMissingError:
-        logger.warning("No way to determine agency for workflow", extra=log_extra)
         raise_flask_error(403, message="Forbidden")
 
     log_extra["agency_id"] = str(agency.agency_id)
@@ -159,6 +132,10 @@ def get_workflow_for_user(db_session: db.Session, user: User, workflow_id: uuid.
     verify_access(user, {required_privilege}, agency)
 
     logger.info("User has access to workflow", extra=log_extra)
+
+    approval_config = build_workflow_approval_config(db_session, workflow, agency)
+    workflow.workflow_approval_config = approval_config  # type: ignore[attr-defined]
+
     return workflow
 
 
@@ -183,9 +160,7 @@ def build_workflow_approval_config(
             }
         }
     """
-    log_extra: dict[str, str | int] = workflow.get_log_extra() | {
-        "agency_id": str(agency.agency_id)
-    }
+    log_extra: dict = workflow.get_log_extra() | {"agency_id": agency.agency_id}
     logger.info("Building workflow approval config", extra=log_extra)
 
     config, _ = WorkflowRegistry.get_state_machine_for_workflow_type(workflow.workflow_type)

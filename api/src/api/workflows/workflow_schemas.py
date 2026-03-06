@@ -1,6 +1,6 @@
 from typing import Any
 
-from marshmallow import ValidationError, pre_dump, validates_schema
+from marshmallow import ValidationError, validates_schema
 
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
@@ -13,7 +13,6 @@ from src.constants.lookup_constants import (
     WorkflowEventType,
     WorkflowType,
 )
-from src.db.models.user_models import User
 from src.validation.validation_constants import ValidationErrorType
 
 
@@ -152,16 +151,6 @@ class WorkflowUserSchema(Schema):
         allow_none=True, metadata={"description": "The user's last name", "example": "Smith"}
     )
 
-    @pre_dump
-    def extract_user_fields(self, user: User, **kwargs: Any) -> dict:
-        """Extract user fields from User model using properties."""
-        return {
-            "user_id": user.user_id,
-            "email": user.email,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-        }
-
 
 class WorkflowAuditEventSchema(Schema):
     """Audit event details for workflow state transitions."""
@@ -284,6 +273,7 @@ class WorkflowGetResponseDataSchema(Schema):
     updated_at = fields.DateTime(metadata={"description": "When the workflow was last updated"})
     workflow_audit_events = fields.List(
         fields.Nested(WorkflowAuditEventSchema),
+        attribute="workflow_audits",
         metadata={"description": "Ordered list of audit events (sorted by created_at)"},
     )
     workflow_approvals = fields.List(
@@ -316,23 +306,6 @@ class WorkflowGetResponseDataSchema(Schema):
         allow_none=True,
         metadata={"description": "The application submission ID if this is a submission workflow"},
     )
-
-    @pre_dump
-    def prepare_workflow_data(self, data: dict, **kwargs: Any) -> dict:
-        """Sort audit events and approvals by created_at timestamp."""
-        # Sort audit events by created_at
-        if data.get("workflow_audit_events"):
-            data["workflow_audit_events"] = sorted(
-                data["workflow_audit_events"], key=lambda x: x.created_at
-            )
-
-        # Sort approvals by created_at
-        if data.get("workflow_approvals"):
-            data["workflow_approvals"] = sorted(
-                data["workflow_approvals"], key=lambda x: x.created_at
-            )
-
-        return data
 
 
 class WorkflowGetResponseSchema(AbstractResponseSchema):
