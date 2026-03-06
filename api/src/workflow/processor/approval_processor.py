@@ -39,7 +39,9 @@ class ApprovalProcessor:
 
     def handle_agency_approval_requires_modification(self) -> WorkflowApproval:
         """Handle receiving a Requires Modification event - also marks all prior events as invalid"""
-        curr_approval = self._handle_agency_approval_event(ApprovalResponseType.REQUIRES_MODIFICATION)
+        curr_approval = self._handle_agency_approval_event(
+            ApprovalResponseType.REQUIRES_MODIFICATION
+        )
 
         # if we receive a requires-modification event, set all approvals to no longer be valid.
         # This likely needs a bit more nuance to use a config to say which
@@ -49,7 +51,9 @@ class ApprovalProcessor:
 
         return curr_approval
 
-    def _handle_agency_approval_event(self, approval_response_type: ApprovalResponseType) -> WorkflowApproval:
+    def _handle_agency_approval_event(
+        self, approval_response_type: ApprovalResponseType
+    ) -> WorkflowApproval:
         """Handle an agency approval event.
 
         Handles:
