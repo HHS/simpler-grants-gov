@@ -1,12 +1,6 @@
 import { JSX } from "react";
 
-import { UswdsWidgetProps } from "src/components/applyForm/types";
-
-type FieldListWidgetProps = UswdsWidgetProps & {
-  label?: string;
-  description?: string;
-  defaultSize?: number;
-};
+import { FieldListWidgetProps } from "src/components/applyForm/types";
 
 function FieldListWidget(widgetProps: FieldListWidgetProps): JSX.Element {
   const { id, label, description, defaultSize } = widgetProps;

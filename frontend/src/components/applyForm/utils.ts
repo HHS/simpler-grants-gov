@@ -168,8 +168,7 @@ export const buildWarningTree = (
     const childErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
       (errors, node) => {
         if ("children" in node) {
-          const children =
-            node.type === "fieldList" ? node.children : node.children;
+          const children = node.children;
           const nodeError = buildWarningTree(
             children,
             uiSchema,
@@ -585,6 +584,9 @@ export function addPrintWidgetToFields(uiSchema: UiSchema): UiSchema {
       return {
         ...item,
         children: item.children.map((child) => {
+          // fieldList children should only be `field` nodes (validated by validateUiSchema).
+          // This guard prevents us from applying print widget logic to unexpected node
+          // types if an invalid schema slips through.
           if (child.type !== "field") {
             return child;
           }

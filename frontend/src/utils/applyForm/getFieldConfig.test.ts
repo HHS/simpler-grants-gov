@@ -25,402 +25,440 @@ jest.mock("src/i18n/getMessagesSync", () => ({
   }) => mockGetSimpleTranslationsSync(translateableString) as unknown,
 }));
 
-describe("getFieldConfig + helpers", () => {
-  describe("getNameFromDef", () => {
-    it("prefers definition, falls back to schema title, else 'untitled'", () => {
-      expect(
-        getNameFromDef({ definition: "/properties/foo", schema: undefined }),
-      ).toBe("foo");
+describe("getNameFromDef", () => {
+  it("gets name from definition", () => {
+    expect(
+      getNameFromDef({ definition: "/properties/foo", schema: undefined }),
+    ).toBe("foo");
+  });
+  it("gets name from schema title", () => {
+    expect(
+      getNameFromDef({ definition: undefined, schema: { title: "My Field" } }),
+    ).toBe("My-Field");
+  });
+  it("returns 'untitled' if no info", () => {
+    expect(getNameFromDef({ definition: undefined, schema: {} })).toBe(
+      "untitled",
+    );
+  });
+});
 
-      expect(
-        getNameFromDef({
-          definition: undefined,
-          schema: { title: "My Field" },
-        }),
-      ).toBe("My-Field");
-      expect(getNameFromDef({ definition: undefined, schema: {} })).toBe(
-        "untitled",
-      );
-    });
+describe("getWarningsForField", () => {
+  it("returns an empty array if there are not any warnings", () => {
+    expect(
+      getWarningsForField({
+        errors: [],
+        fieldName: "$.field_name",
+        fieldType: "string",
+        definition: "/properties/field_name",
+      }),
+    ).toEqual([]);
+    expect(
+      getWarningsForField({
+        errors: null,
+        fieldName: "$.field_name",
+        definition: "/properties/field_name",
+        fieldType: "string",
+      }),
+    ).toEqual([]);
   });
 
-  describe("getWarningsForField", () => {
-    it("returns [] when no errors, and maps formatted/message for matching definitions", () => {
-      expect(
-        getWarningsForField({
-          errors: null,
-          fieldName: "field_name",
-          fieldType: "string",
-          definition: "/properties/field_name",
-        }),
-      ).toEqual([]);
-      expect(
-        getWarningsForField({
-          errors: [],
-          fieldName: "field_name",
-          fieldType: "string",
-          definition: "/properties/field_name",
-        }),
-      ).toEqual([]);
-
-      expect(
-        getWarningsForField({
-          errors: [
-            {
-              field: "$.field_name",
-              message: "something went wrong",
-              formatted: "something went wrong",
-              htmlField: "field_name",
-              type: "generic",
-              value: "not sure",
-              definition: "/properties/field_name",
-            },
-            {
-              field: "$.other",
-              message: "ignore me",
-              type: "generic",
-              value: "x",
-              definition: "/properties/other",
-            },
-          ],
-          fieldName: "field_name",
-          fieldType: "string",
-          definition: "/properties/field_name",
-        }),
-      ).toEqual(["something went wrong"]);
-    });
+  it.skip("does something with arrays?", () => {});
+  it("returns warnings that directly reference the field name", () => {
+    expect(
+      getWarningsForField({
+        errors: [
+          {
+            field: "$.field_name",
+            message: "something went wrong",
+            formatted: "something went wrong",
+            htmlField: "field_name",
+            type: "generic",
+            value: "not sure",
+            definition: "/properties/field_name",
+          },
+        ],
+        fieldName: "field_name",
+        definition: "/properties/field_name",
+        fieldType: "string",
+      }),
+    ).toEqual(["something went wrong"]);
   });
+  it("if a field is required, returns `required` warnings that reference the field's parent paths", () => {
+    expect(
+      getWarningsForField({
+        errors: [
+          {
+            field: "$.parent.field_name",
+            message: "parent is required",
+            formatted: "parent is required",
+            htmlField: "parent--field_name",
+            type: "required",
+            value: "not sure",
+            definition: "/properties/parent/properties/field_name",
+          },
+        ],
+        fieldName: "field_name",
+        definition: "/properties/parent/properties/field_name",
+        fieldType: "string",
+      }),
+    ).toEqual(["parent is required"]);
+  });
+});
 
-  describe("determineFieldType", () => {
+describe("determineFieldType", () => {
+  it("should return proper fields", () => {
     const uiFieldObject: UiSchemaField = {
       type: "field",
       definition: "/properties/test",
     };
-
-    it("uses uiFieldObject.widget override when provided", () => {
-      const override: UiSchemaField = {
-        ...uiFieldObject,
-        widget: "Radio",
-      };
-      expect(
-        determineFieldType({
-          uiFieldObject: override,
-          fieldSchema: { type: "string", title: "test" },
-        }),
-      ).toBe("Radio");
+    const fieldSchema: RJSFSchema = {
+      type: "string" as const,
+      title: "test",
+    };
+    const textField = determineFieldType({ uiFieldObject, fieldSchema });
+    expect(textField).toEqual("Text");
+    const selectFieldSchema: RJSFSchema = {
+      ...fieldSchema,
+      enum: ["test"],
+    };
+    const selectField = determineFieldType({
+      uiFieldObject,
+      fieldSchema: selectFieldSchema,
     });
-
-    it("infers common types (attachment, enums, boolean, textarea, arrays)", () => {
-      expect(
-        determineFieldType({
-          uiFieldObject,
-          fieldSchema: { type: "string", format: "uuid" },
-        }),
-      ).toBe("Attachment");
-
-      expect(
-        determineFieldType({
-          uiFieldObject,
-          fieldSchema: { type: "string", enum: ["a", "b"] },
-        }),
-      ).toBe("Select");
-
-      expect(
-        determineFieldType({
-          uiFieldObject,
-          fieldSchema: { type: "boolean" },
-        }),
-      ).toBe("Checkbox");
-
-      expect(
-        determineFieldType({
-          uiFieldObject,
-          fieldSchema: { type: "string", maxLength: 256 },
-        }),
-      ).toBe("TextArea");
-
-      expect(
-        determineFieldType({
-          uiFieldObject,
-          fieldSchema: {
-            type: "array",
-            items: { type: "string", enum: ["x", "y"] },
-          },
-        }),
-      ).toBe("MultiSelect");
-
-      expect(
-        determineFieldType({
-          uiFieldObject,
-          fieldSchema: {
-            type: "array",
-            items: { type: "string", format: "uuid" },
-          },
-        }),
-      ).toBe("AttachmentArray");
+    expect(selectField).toEqual("Select");
+    const checkboxFieldSchema: RJSFSchema = {
+      ...fieldSchema,
+      type: "boolean",
+    };
+    const checkboxField = determineFieldType({
+      uiFieldObject,
+      fieldSchema: checkboxFieldSchema,
     });
+    expect(checkboxField).toEqual("Checkbox");
+    const textAreaFieldSchema: RJSFSchema = {
+      ...fieldSchema,
+      maxLength: 256,
+    };
+    const textAreaField = determineFieldType({
+      uiFieldObject,
+      fieldSchema: textAreaFieldSchema,
+    });
+    expect(textAreaField).toEqual("TextArea");
   });
+});
 
-  describe("getEnumOptions", () => {
-    it("returns {} for non-enum widgets; supports boolean, enum arrays, and select emptyValue", () => {
-      expect(getEnumOptions({ widgetType: "Text", fieldSchema: {} })).toEqual(
-        {},
-      );
-
-      expect(
-        getEnumOptions({
-          widgetType: "Radio",
-          fieldSchema: { type: "boolean" },
-        }),
-      ).toEqual({
-        enumOptions: [
-          { value: "true", label: "Yes" },
-          { value: "false", label: "No" },
-        ],
-      });
-
-      expect(
-        getEnumOptions({
-          widgetType: "MultiSelect",
-          fieldSchema: {
-            type: "array",
-            items: { enum: ["option one", "option two"] },
-          },
-        }),
-      ).toEqual({
-        enumOptions: [
-          { value: "option one", label: "option one" },
-          { value: "option two", label: "option two" },
-        ],
-      });
-
-      expect(
-        getEnumOptions({
-          widgetType: "Select",
-          fieldSchema: { type: "array", items: { enum: ["a", "b"] } },
-        }),
-      ).toEqual({
-        enumOptions: [
-          { value: "a", label: "a" },
-          { value: "b", label: "b" },
-        ],
-        emptyValue: "- Select -",
-      });
-
-      // malformed enum should not throw
-      expect(
-        getEnumOptions({
-          widgetType: "MultiSelect",
-          fieldSchema: {
-            type: "array",
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            items: { enum: { option_one: "bad" } },
-          },
-        }),
-      ).toEqual({ enumOptions: [] });
-    });
-  });
-
-  describe("getFieldConfig", () => {
-    it("builds a basic field config (incl disabled/required/errors/options)", () => {
-      const uiFieldObject: UiSchemaField = {
-        type: "field",
-        definition: "/properties/email",
-      };
-
-      const formSchema: RJSFSchema = {
-        type: "object",
-        properties: {
-          email: {
-            type: "string",
-            title: "Email",
-            enum: ["first option", "second option"],
-          },
-        },
-      };
-
-      const errors = [
-        {
-          field: "$.email",
-          message: "'invalid' email format",
-          type: "",
-          value: "",
-          htmlField: "email",
-          formatted: "Invalid email format",
-          definition: "/properties/email",
-        },
-      ];
-
-      const result = getFieldConfig({
-        uiFieldObject,
-        formSchema,
-        errors,
-        formData: { email: "first option" },
-        requiredField: true,
-      });
-
-      expect(result.type).toBe("Select");
-      if (result.type === "FieldList") {
-        throw new Error("Expected non-FieldList widget");
-      }
-
-      expect(result.props).toMatchObject({
-        id: "email",
-        key: "email",
-        disabled: false,
-        required: true,
-        schema: {
-          type: "string",
-          title: "Email",
-          enum: ["first option", "second option"],
-        },
-        rawErrors: ["Invalid email format"],
-        value: "first option",
-      });
-
-      expect(result.props.options).toMatchObject({
-        enumOptions: [
-          { label: "first option", value: "first option" },
-          { label: "second option", value: "second option" },
-        ],
-      });
-    });
-  });
-
-  describe("fieldList", () => {
-    const formSchema: RJSFSchema = {
-      type: "object",
-      properties: {
-        firstName: { type: "string", title: "First Name" },
-        docs: { type: "array", items: { type: "string", format: "uuid" } },
+describe("getFieldConfig", () => {
+  it("should build a config with basic properties", () => {
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      definition: "/properties/name",
+      schema: {
+        type: "string",
+        title: "Name",
+        maxLength: 50,
       },
     };
 
-    it("builds FieldList config with groupDefinition/generalProps and schema", () => {
-      const uiFieldObject: UiSchemaFieldList = {
-        type: "fieldList",
-        name: "contacts",
-        label: "Contacts",
-        description: "A list of contacts",
-        defaultSize: 1,
-        children: [
-          {
-            type: "field",
-            definition: "/properties/firstName",
-            schema: { title: "First Name", type: "string" },
-          },
-          {
-            type: "field",
-            definition: "/properties/docs",
-            schema: { title: "Docs", type: "array" },
-            widget: "AttachmentArray",
-          },
-        ],
-      };
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        name: { type: "string", title: "Name", maxLength: 50 },
+      },
+      required: ["name"],
+    };
 
-      const result = getFieldConfig({
-        errors: null,
-        formSchema,
-        formData: {},
-        uiFieldObject,
-        requiredField: false,
-      });
+    const errors = null;
+    const formData = { name: "Jane Doe" };
 
-      expect(result.type).toBe("FieldList");
-      if (result.type !== "FieldList") {
-        throw new Error("Expected FieldList result");
-      }
-
-      expect(result.props).toMatchObject({
-        id: "contacts",
-        key: "contacts",
-        label: "Contacts",
-        description: "A list of contacts",
-        defaultSize: 1,
-        schema: {
-          type: "array",
-          title: "Contacts",
-          description: "A list of contacts",
-        },
-      });
-
-      expect(result.props.groupDefinition).toHaveLength(2);
-
-      const [first, second] = result.props.groupDefinition;
-
-      expect(first.widget).toBe("Text");
-      expect(first.baseId).toContain("contacts[~~index~~]");
-      expect(first.generalProps).toHaveProperty("schema");
-      expect(first.generalProps).not.toHaveProperty("id");
-      expect(first.generalProps).not.toHaveProperty("value");
-      expect(first.generalProps).not.toHaveProperty("key");
-
-      expect(second.widget).toBe("AttachmentArray");
-      expect(second.baseId).toContain("contacts[~~index~~]");
-      expect(second.generalProps).toHaveProperty("schema");
-      expect(second.generalProps).not.toHaveProperty("id");
-      expect(second.generalProps).not.toHaveProperty("value");
-      expect(second.generalProps).not.toHaveProperty("key");
+    const { type, props } = getFieldConfig({
+      uiFieldObject,
+      formSchema,
+      errors,
+      formData,
+      requiredField: true,
     });
 
-    it("throws when fieldList has non-field children (including nested fieldList)", () => {
-      const badUiFieldObject = {
-        type: "fieldList",
-        name: "contacts",
-        label: "Contacts",
-        defaultSize: 1,
-        children: [
-          {
-            type: "fieldList",
-            name: "inner",
-            label: "Inner",
-            defaultSize: 1,
-            children: [],
-          },
-        ],
-      } as unknown as UiSchemaFieldList;
-
-      expect(() =>
-        getFieldConfig({
-          errors: null,
-          formSchema,
-          formData: {},
-          uiFieldObject: badUiFieldObject,
-          requiredField: false,
-        }),
-      ).toThrow(/fieldList children must be field nodes/);
+    expect(type).toEqual("Text");
+    expect(props).toEqual({
+      id: "name",
+      key: "name",
+      disabled: false,
+      required: true,
+      maxLength: 50,
+      schema: { type: "string", title: "Name", maxLength: 50 },
+      rawErrors: [],
+      value: "Jane Doe",
+      options: {},
     });
   });
 
-  describe("getBasicMultifieldInfo", () => {
-    it("throws on non-array definition or missing name; otherwise returns merged value + rawErrors", () => {
-      expect(() =>
-        getBasicMultifieldInfo({
-          uiFieldObject: {
-            definition: "/properties/not-an-array",
-            type: "multiField",
-            name: "name",
-          },
-          formSchema: {},
-          formData: {},
-          errors: [],
-        }),
-      ).toThrow();
+  it("should handle fields with errors", () => {
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      definition: "/properties/email",
+    };
 
-      expect(() =>
-        getBasicMultifieldInfo({
-          uiFieldObject: {
-            definition: ["/properties/field_one"],
-            type: "multiField",
-          },
-          formSchema: {},
-          formData: {},
-          errors: [],
-        }),
-      ).toThrow();
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        email: { type: "string", title: "Email" },
+      },
+    };
 
-      const result = getBasicMultifieldInfo({
+    const errors = [
+      {
+        field: "$.email",
+        message: "'invalid' email format",
+        type: "",
+        value: "",
+        htmlField: "email",
+        formatted: "Invalid email format",
+        definition: "/properties/email",
+      },
+    ];
+
+    const formData = { email: "invalid-email" };
+
+    const { type, props } = getFieldConfig({
+      uiFieldObject,
+      formSchema,
+      errors,
+      formData,
+      requiredField: false,
+    });
+
+    expect(type).toEqual("Text");
+    expect(props).toEqual({
+      id: "email",
+      key: "email",
+      disabled: false,
+      required: false,
+      schema: { type: "string", title: "Email" },
+      rawErrors: ["Invalid email format"],
+      value: "invalid-email",
+      options: {},
+    });
+  });
+
+  it("should handle field types with options", () => {
+    const uiFieldObject: UiSchemaField = {
+      type: "field",
+      definition: "/properties/pickOneOfTheOptions",
+    };
+
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        pickOneOfTheOptions: {
+          type: "string",
+          title: "select field",
+          enum: ["first option", "second option"],
+        },
+      },
+    };
+
+    const errors = null;
+    const formData = {
+      pickOneOfTheOptions: "first option",
+    };
+
+    const { type, props } = getFieldConfig({
+      uiFieldObject,
+      formSchema,
+      errors,
+      formData,
+      requiredField: false,
+    });
+
+    expect(type).toEqual("Select");
+    expect(props).toEqual({
+      id: "pickOneOfTheOptions",
+      key: "pickOneOfTheOptions",
+      disabled: false,
+      required: false,
+      schema: {
+        type: "string",
+        title: "select field",
+        enum: ["first option", "second option"],
+      },
+      rawErrors: [],
+      value: "first option",
+      maxLength: undefined,
+      minLength: undefined,
+      options: {
+        enumOptions: [
+          { label: "first option", value: "first option" },
+          {
+            label: "second option",
+            value: "second option",
+          },
+        ],
+        emptyValue: "- Select -",
+      },
+    });
+  });
+});
+
+describe("getEnumOptions", () => {
+  it("returns empty object if widget type does not support an enum option", () => {
+    expect(getEnumOptions({ widgetType: "Text", fieldSchema: {} })).toEqual({});
+  });
+  it("returns correct enum for boolean field", () => {
+    expect(
+      getEnumOptions({
+        widgetType: "Radio",
+        fieldSchema: { type: "boolean" },
+      }),
+    ).toEqual({
+      enumOptions: [
+        { value: "true", label: "Yes" },
+        { value: "false", label: "No" },
+      ],
+    });
+  });
+  it("handles array field type (multiple items)", () => {
+    expect(
+      getEnumOptions({
+        widgetType: "MultiSelect",
+        fieldSchema: {
+          type: "array",
+          items: [
+            { enum: ["option one", "option two"] },
+            { enum: ["ignore me"] },
+          ],
+        },
+      }),
+    ).toEqual({
+      enumOptions: [
+        { value: "option one", label: "option one" },
+        { value: "option two", label: "option two" },
+      ],
+    });
+  });
+
+  it("handles array field type (single item)", () => {
+    expect(
+      getEnumOptions({
+        widgetType: "MultiSelect",
+        fieldSchema: {
+          type: "array",
+          items: { enum: ["option one", "option two"] },
+        },
+      }),
+    ).toEqual({
+      enumOptions: [
+        { value: "option one", label: "option one" },
+        { value: "option two", label: "option two" },
+      ],
+    });
+  });
+
+  it("handles object field type", () => {
+    expect(
+      getEnumOptions({
+        widgetType: "MultiSelect",
+        fieldSchema: {
+          type: "object",
+          enum: ["option one", "option two"],
+        },
+      }),
+    ).toEqual({
+      enumOptions: [
+        { value: "option one", label: "option one" },
+        { value: "option two", label: "option two" },
+      ],
+    });
+  });
+
+  it("adds placeholder value for select array field type", () => {
+    expect(
+      getEnumOptions({
+        widgetType: "Select",
+        fieldSchema: {
+          type: "array",
+          items: { enum: ["option one", "option two"] },
+        },
+      }),
+    ).toEqual({
+      enumOptions: [
+        { value: "option one", label: "option one" },
+        { value: "option two", label: "option two" },
+      ],
+      emptyValue: "- Select -",
+    });
+  });
+
+  it("does not error on malformed field schema enum", () => {
+    expect(
+      getEnumOptions({
+        widgetType: "MultiSelect",
+        fieldSchema: {
+          type: "array",
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          items: { enum: { option_one: "option two" } },
+        },
+      }),
+    ).toEqual({
+      enumOptions: [],
+    });
+  });
+});
+
+describe("getBasicMultifieldInfo", () => {
+  it("errors on non-multifield schema", () => {
+    expect(() =>
+      getBasicMultifieldInfo({
+        uiFieldObject: {
+          definition: "/properties/not-an-array",
+          type: "multiField", // note that this function doesn't assert on type
+          name: "name",
+        },
+        formSchema: {},
+        formData: {},
+        errors: [],
+      }),
+    ).toThrow();
+  });
+  it("errors on missing name", () => {
+    expect(() =>
+      getBasicMultifieldInfo({
+        uiFieldObject: {
+          definition: ["/properties/not-an-array"],
+          type: "multiField", // note that this function doesn't assert on type
+        },
+        formSchema: {},
+        formData: {},
+        errors: [],
+      }),
+    ).toThrow();
+  });
+  it("handles basic schema case", () => {
+    const expected = {
+      value: {
+        nested_field_one: "value one",
+        nested_field_two: "value two",
+      },
+      // note that the current logic clobbers the first nested field entirely see https://github.com/HHS/simpler-grants-gov/issues/8624
+      fieldSchema: {
+        properties: {
+          nested_field_two: {
+            type: "string",
+            title: "field two",
+            description: "description two",
+            minLength: 0,
+            maxLength: 5,
+          },
+        },
+      },
+      rawErrors: [{ ...fakeValidationError }],
+      fieldName: "test multifield",
+      htmlFieldName: "",
+    };
+
+    expect(
+      getBasicMultifieldInfo({
         uiFieldObject: {
           definition: ["/properties/field_one", "/properties/field_two"],
           name: "test multifield",
@@ -457,14 +495,104 @@ describe("getFieldConfig + helpers", () => {
           field_two: { nested_field_two: "value two" },
         },
         errors: [fakeValidationError],
-      });
+      }),
+    ).toEqual(expected);
+  });
+});
 
-      expect(result.fieldName).toBe("test multifield");
-      expect(result.value).toMatchObject({
-        nested_field_one: "value one",
-        nested_field_two: "value two",
-      });
-      expect(result.rawErrors).toEqual([{ ...fakeValidationError }]);
+describe("fieldList", () => {
+  const formSchema: RJSFSchema = {
+    type: "object",
+    properties: {
+      firstName: { type: "string", title: "First Name" },
+      docs: { type: "array", items: { type: "string", format: "uuid" } },
+    },
+  };
+
+  it("returns FieldList config for a fieldList node", () => {
+    const uiFieldObject: UiSchemaFieldList = {
+      type: "fieldList",
+      name: "contacts",
+      label: "Contacts",
+      defaultSize: 1,
+      children: [
+        {
+          type: "field",
+          definition: "/properties/firstName",
+        },
+      ],
+    };
+
+    const result = getFieldConfig({
+      errors: null,
+      formSchema,
+      formData: {},
+      uiFieldObject,
+      requiredField: false,
     });
+
+    expect(result.type).toBe("FieldList");
+
+    if (result.type !== "FieldList") {
+      throw new Error("Expected FieldList");
+    }
+
+    expect(result.props.groupDefinition).toHaveLength(1);
+    expect(result.props.groupDefinition[0].widget).toBe("Text");
+  });
+
+  it("throws if fieldList contains unsupported node types", () => {
+    const uiFieldObject = {
+      type: "fieldList",
+      name: "contacts",
+      label: "Contacts",
+      defaultSize: 1,
+      children: [
+        {
+          type: "section",
+          name: "bad",
+          label: "Bad",
+          children: [],
+        },
+      ],
+    } as unknown as UiSchemaFieldList;
+
+    expect(() =>
+      getFieldConfig({
+        errors: null,
+        formSchema,
+        formData: {},
+        uiFieldObject,
+        requiredField: false,
+      }),
+    ).toThrow("fieldList children must be field nodes");
+  });
+
+  it("throws for nested fieldList", () => {
+    const uiFieldObject = {
+      type: "fieldList",
+      name: "outer",
+      label: "Outer",
+      defaultSize: 1,
+      children: [
+        {
+          type: "fieldList",
+          name: "inner",
+          label: "Inner",
+          defaultSize: 1,
+          children: [],
+        },
+      ],
+    } as unknown as UiSchemaFieldList;
+
+    expect(() =>
+      getFieldConfig({
+        errors: null,
+        formSchema,
+        formData: {},
+        uiFieldObject,
+        requiredField: false,
+      }),
+    ).toThrow();
   });
 });

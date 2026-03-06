@@ -5,6 +5,7 @@ import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 
 import {
   BroadlyDefinedWidgetValue,
+  FieldListChildWidgetTypes,
   FieldListGroupItem,
   FieldListWidgetProps,
   FormattedFormValidationWarning,
@@ -31,7 +32,34 @@ type FieldInfo<V extends BroadlyDefinedWidgetValue> = {
   htmlFieldName: string;
 };
 
-const FIELD_LIST_INDEX_PLACEHOLDER = "~~index~~" as const;
+const FIELD_LIST_INDEX_TOKEN = "~~index~~" as const;
+
+/**
+ * Builds the "baseId" used by FieldList widgets for each child field.
+ *
+ * FieldList entries represent a repeatable array of grouped fields.
+ * Instead of generating a concrete id for a specific row (e.g. `[0]`),
+ * we generate a template id containing a placeholder:
+ *
+ *   contacts[~~index~~]--firstName
+ *
+ * The FieldList widget later replaces `~~index~~` with the actual
+ * array index when rendering each entry.
+ *
+ * This function adapts the id produced by existing field logic and
+ * injects the `[~~index~~]` placeholder at the correct position.
+ *
+ * Example transformations:
+ *
+ *   childId: "contacts--firstName"
+ *   > "contacts[~~index~~]--firstName"
+ *
+ *   childId: "top_field--contacts--firstName"
+ *   > "top_field--contacts[~~index~~]--firstName"
+ *
+ * We check for an existing `--fieldListName--` segment so we only modify
+ * the correct portion of the id while preserving any parent structure.
+ */
 
 function buildFieldListBaseId({
   fieldListName,
@@ -44,14 +72,14 @@ function buildFieldListBaseId({
   if (childId.includes(token)) {
     return childId.replace(
       token,
-      `--${fieldListName}[${FIELD_LIST_INDEX_PLACEHOLDER}]--`,
+      `--${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--`,
     );
   }
-  return `${fieldListName}[${FIELD_LIST_INDEX_PLACEHOLDER}]--${childId}`;
+  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${childId}`;
 }
 
 type FieldWidgetConfig = {
-  type: Exclude<WidgetTypes, "FieldList">;
+  type: FieldListChildWidgetTypes;
   props: UswdsWidgetProps;
 };
 
@@ -486,7 +514,7 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
       : {};
 
   return {
-    type: widgetType as Exclude<WidgetTypes, "FieldList">,
+    type: widgetType as FieldListChildWidgetTypes,
     props: {
       id: htmlFieldName,
       key: htmlFieldName,
