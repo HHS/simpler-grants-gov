@@ -27,8 +27,9 @@ GRANTS_APPLICATION_STATUSES = {
     ApplicationStatus.IN_PROGRESS: None,
     ApplicationStatus.SUBMITTED: "Received",
     ApplicationStatus.ACCEPTED: "Validated",
+    ApplicationStatus.RECEIVED_BY_AGENCY: "Received by Agency",
+    ApplicationStatus.AGENCY_TRACKING_NUMBER_ASSIGNED: "Agency Tracking Number Assigned",
 }
-# TODO - this will require new statuses, we will need to adjust this later (2025-12-18)
 STATUS_TRANSFORM = {
     "Receiving": None,
     "Received": None,
@@ -36,8 +37,8 @@ STATUS_TRANSFORM = {
     "Validated": ApplicationStatus.ACCEPTED,
     "Rejected with Errors": None,
     "Download Preparation": None,
-    "Received by Agency": ApplicationStatus.ACCEPTED,
-    "Agency Tracking Number Assigned": ApplicationStatus.ACCEPTED,
+    "Received by Agency": ApplicationStatus.RECEIVED_BY_AGENCY,
+    "Agency Tracking Number Assigned": ApplicationStatus.AGENCY_TRACKING_NUMBER_ASSIGNED,
 }
 
 

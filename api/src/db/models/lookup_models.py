@@ -232,6 +232,8 @@ APPLICATION_STATUS_CONFIG: LookupConfig[ApplicationStatus] = LookupConfig(
         LookupStr(ApplicationStatus.IN_PROGRESS, 1),
         LookupStr(ApplicationStatus.SUBMITTED, 2),
         LookupStr(ApplicationStatus.ACCEPTED, 3),
+        LookupStr(ApplicationStatus.RECEIVED_BY_AGENCY, 4),
+        LookupStr(ApplicationStatus.AGENCY_TRACKING_NUMBER_ASSIGNED, 5),
     ]
 )
 

@@ -226,6 +226,8 @@ class ApplicationStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     SUBMITTED = "submitted"
     ACCEPTED = "accepted"
+    RECEIVED_BY_AGENCY = "received_by_agency"
+    AGENCY_TRACKING_NUMBER_ASSIGNED = "agency_tracking_number_assigned"
 
 
 class ApplicationFormStatus(StrEnum):
