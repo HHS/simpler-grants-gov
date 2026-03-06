@@ -111,7 +111,7 @@ export const AttachmentsCardTable = ({
             </tr>
           ))
         ) : (
-          <AttachmentsCardTableRowEmpty />
+          null
         )}
       </tbody>
     </Table>
