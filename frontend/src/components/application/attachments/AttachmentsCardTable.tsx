@@ -13,8 +13,8 @@ import { Link, ModalRef, Table } from "@trussworks/react-uswds";
 
 import { PopoverMenu } from "src/components/PopoverMenu";
 import { AttachmentsCardTableHeaders } from "./AttachmentsCardTableHeaders";
-import { AttachmentsCardTableRowDeleting } from "./AttachmentsCardTableRowDeleting";
-import { AttachmentsCardTableRowEmpty } from "./AttachmentsCardTableRowEmpty";
+// import { AttachmentsCardTableRowDeleting } from "./AttachmentsCardTableRowDeleting";
+// import { AttachmentsCardTableRowEmpty } from "./AttachmentsCardTableRowEmpty";
 import { AttachmentsCardTableRowUploading } from "./AttachmentsCardTableRowUploading";
 import { DeleteAttachmentButton } from "./DeleteAttachmentButton";
 
