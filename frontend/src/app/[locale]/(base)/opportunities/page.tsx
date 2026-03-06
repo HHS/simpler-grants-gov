@@ -101,7 +101,7 @@ const OpportunitiesTable = ({
           {t("numOpportunities", { num: userOpportunities.length })}
         </span>
         <Link
-          href="https://www.google.com"
+          href={`/opportunities/create/${userOpportunities[0].agency_code}`}
           className="usa-button margin-left-auto"
         >
           {t("createOpportunityButton")}

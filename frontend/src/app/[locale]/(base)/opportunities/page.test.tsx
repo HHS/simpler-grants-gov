@@ -193,7 +193,7 @@ describe("Opportunities", () => {
       expect(createOpportunityLink).toBeVisible();
       expect(createOpportunityLink).toHaveAttribute(
         "href",
-        "https://www.google.com",
+        "/opportunities/create/HHS-ACF-FYSB",
       );
     });
 
