@@ -26,6 +26,7 @@ const ApiKeyNameDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
 };
 
 const ApiKeySecretDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
+  const t = useTranslations("ApiDashboard.modal");
   return (
     <div>
       <div className="font-sans-s text-base-dark grid-row">
@@ -35,6 +36,7 @@ const ApiKeySecretDisplay = ({ apiKey }: { apiKey: ApiKey }) => {
         <CopyIcon
           content={apiKey.key_id}
           className="usa-icon--size-2 grid-col-6"
+          aria-label={t("copyApiKey")}
         />
       </div>
     </div>

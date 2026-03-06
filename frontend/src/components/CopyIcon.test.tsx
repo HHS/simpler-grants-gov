@@ -1,5 +1,4 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 
 import CopyIcon from "src/components/CopyIcon";
 
@@ -30,21 +29,26 @@ describe("CopyIcon", () => {
     );
   });
 
-  it("copies content to clipboard on click", () => {
+  it("copies content to clipboard on click", async () => {
     render(<CopyIcon content="my-secret-key" />);
 
     const button = screen.getByRole("button");
-    fireEvent.click(button);
+    await act(async () => {
+      fireEvent.click(button);
+      await Promise.resolve();
+    });
 
     expect(mockWriteText).toHaveBeenCalledWith("my-secret-key");
   });
 
   it("shows check icon after clicking, then reverts after 2 seconds", async () => {
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const { container } = render(<CopyIcon content="test-content" />);
 
     const button = screen.getByRole("button");
-    await user.click(button);
+    await act(async () => {
+      fireEvent.click(button);
+      await Promise.resolve();
+    });
 
     const checkIcon = container.querySelector("svg use");
     expect(checkIcon).toHaveAttribute("href", expect.stringContaining("check"));
@@ -72,5 +76,30 @@ describe("CopyIcon", () => {
 
     const button = screen.getByRole("button");
     expect(button).toHaveAttribute("type", "button");
+  });
+
+  it("does not show check icon when clipboard write fails", async () => {
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+    mockWriteText.mockRejectedValueOnce(new Error("Permission denied"));
+
+    const { container } = render(<CopyIcon content="test-content" />);
+
+    const button = screen.getByRole("button");
+    await act(async () => {
+      fireEvent.click(button);
+      await Promise.resolve();
+    });
+
+    const icon = container.querySelector("svg use");
+    expect(icon).toHaveAttribute(
+      "href",
+      expect.stringContaining("content_copy"),
+    );
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "Error copying to clipboard",
+      expect.any(Error),
+    );
+
+    consoleSpy.mockRestore();
   });
 });

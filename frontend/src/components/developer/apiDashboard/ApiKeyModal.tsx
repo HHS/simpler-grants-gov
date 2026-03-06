@@ -169,7 +169,11 @@ function SuccessContent({
         <div className="grid-row">
           <div className="font-sans-s text-bold">
             <span className="margin-right-3">{apiKeyId}</span>
-            <CopyIcon content={apiKeyId} className="usa-icon--size-2" />
+            <CopyIcon
+              content={apiKeyId}
+              className="usa-icon--size-2"
+              aria-label={t("copyApiKey")}
+            />
           </div>
         </div>
       )}

@@ -119,6 +119,7 @@ const messages = {
       deleting: "Deleting...",
       saveChanges: "Save Changes",
       cancel: "Cancel",
+      copyApiKey: "Copy API key",
     },
   },
 };
@@ -221,12 +222,10 @@ describe("ApiKeyTableClient", () => {
     it("renders copy icons for each API key", () => {
       renderTable();
 
-      const copyButtons = screen.getAllByRole("button", { name: "" });
-      const copyIconButtons = copyButtons.filter((btn) => {
-        const svg = btn.querySelector("svg use");
-        return svg?.getAttribute("href")?.includes("content_copy");
+      const copyButtons = screen.getAllByRole("button", {
+        name: "Copy API key",
       });
-      expect(copyIconButtons.length).toBeGreaterThanOrEqual(2);
+      expect(copyButtons.length).toBeGreaterThanOrEqual(2);
     });
   });
 

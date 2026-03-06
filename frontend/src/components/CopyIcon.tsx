@@ -6,20 +6,32 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 interface CopyIconProps {
   content: string;
   className?: string;
+  "aria-label"?: string;
 }
-const CopyIcon = ({ content, className }: CopyIconProps) => {
+const CopyIcon = ({
+  content,
+  className,
+  "aria-label": ariaLabel,
+}: CopyIconProps) => {
   const [copied, setCopied] = useState(false);
   return (
     <Button
       className={className}
       unstyled
       type="button"
+      aria-label={ariaLabel}
       onClick={() => {
-        navigator.clipboard.writeText(content).catch(console.error);
-        setCopied(true);
-        setTimeout(() => {
-          setCopied(false);
-        }, 2000);
+        navigator.clipboard
+          .writeText(content)
+          .then(() => {
+            setCopied(true);
+            setTimeout(() => {
+              setCopied(false);
+            }, 2000);
+          })
+          .catch((e) => {
+            console.error("Error copying to clipboard", e);
+          });
       }}
     >
       {copied ? (

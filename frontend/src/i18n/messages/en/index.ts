@@ -689,6 +689,7 @@ export const messages = {
         "There was an error deleting your API key. Please try again.",
       deleteButtonText: "Delete Key",
       deleting: "Deleting...",
+      copyApiKey: "Copy API key",
     },
   },
   Header: {
