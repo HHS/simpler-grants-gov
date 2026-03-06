@@ -15,13 +15,13 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.opportunity_models import OpportunitySummary
 from src.db.models.user_models import User
-from src.services.opportunities_v1.get_opportunity import get_opportunity
+from src.services.opportunities_v1.get_opportunity import get_opportunity_including_drafts
 
 logger = logging.getLogger(__name__)
 
 
 class OpportunitySummaryCreateRequest(BaseModel):
-    legacy_opportunity_id: int
+    legacy_opportunity_id: int | None = None
     is_forecast: bool
     summary_description: str | None = None
     is_cost_sharing: bool | None = None
@@ -65,24 +65,11 @@ class OpportunitySummaryCreateRequest(BaseModel):
         return v
 
 
-def create_opportunity_summary(
-    db_session: db.Session, opportunity_id: UUID, summary_data: dict, user: User
-) -> OpportunitySummary:
-    request = OpportunitySummaryCreateRequest(**summary_data)
-
-    # Fetch the opportunity
-    opportunity = get_opportunity(db_session, opportunity_id)
-
-    # Verify the user has permission to edit this opportunity
-    agency = opportunity.agency_record
-    verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, agency)
-
-    # Check if a summary of the same type already exists
-    is_forecast = request.is_forecast
-    if is_forecast:
-        existing_summary = opportunity.forecast_summary
-    else:
-        existing_summary = opportunity.non_forecast_summary
+def _check_existing_summary(opportunity: OpportunitySummary, is_forecast: bool) -> None:
+    """Check if a summary of the same type already exists for the opportunity"""
+    existing_summary = (
+        opportunity.forecast_summary if is_forecast else opportunity.non_forecast_summary
+    )
 
     if existing_summary:
         raise_flask_error(
@@ -90,8 +77,12 @@ def create_opportunity_summary(
             f"An opportunity summary of type {'forecast' if is_forecast else 'non-forecast'} already exists",
         )
 
-    # Create the new opportunity summary
-    opportunity_summary = OpportunitySummary(
+
+def _create_opportunity_summary_object(
+    opportunity: OpportunitySummary, request: OpportunitySummaryCreateRequest
+) -> OpportunitySummary:
+    """Create a new OpportunitySummary object from the request data"""
+    return OpportunitySummary(
         opportunity=opportunity,
         legacy_opportunity_id=request.legacy_opportunity_id,
         is_forecast=request.is_forecast,
@@ -120,10 +111,42 @@ def create_opportunity_summary(
         fiscal_year=request.fiscal_year,
     )
 
+
+def create_opportunity_summary(
+    db_session: db.Session, opportunity_id: UUID, summary_data: dict, user: User
+) -> OpportunitySummary:
+    """Create a new opportunity summary"""
+    # Parse and validate the request data
+    request = OpportunitySummaryCreateRequest(**summary_data)
+
+    opportunity = get_opportunity_including_drafts(db_session, opportunity_id)
+
+    # Check if user has permission to view/edit opportunities for this agency
+    agency = opportunity.agency_record
+    verify_access(user, {Privilege.VIEW_OPPORTUNITY}, agency)
+    verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, agency)
+
+    _check_existing_summary(opportunity, request.is_forecast)
+
+    opportunity_summary = _create_opportunity_summary_object(opportunity, request)
+
     db_session.add(opportunity_summary)
 
+    # Handle relationships for loading
+    if request.funding_instruments:
+        for instrument in request.funding_instruments:
+            opportunity_summary.funding_instruments.append(instrument)
+
+    if request.funding_categories:
+        for category in request.funding_categories:
+            opportunity_summary.funding_categories.append(category)
+
+    if request.applicant_types:
+        for applicant_type in request.applicant_types:
+            opportunity_summary.applicant_types.append(applicant_type)
+
     logger.info(
-        f"Created {'forecast' if is_forecast else 'non-forecast'} opportunity summary",
+        f"Created {'forecast' if request.is_forecast else 'non-forecast'} opportunity summary",
         extra={
             "opportunity_id": str(opportunity_id),
             "opportunity_summary_id": str(opportunity_summary.opportunity_summary_id),

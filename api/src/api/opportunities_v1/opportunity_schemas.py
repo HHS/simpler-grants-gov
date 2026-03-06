@@ -604,12 +604,12 @@ class OpportunityVersionSchema(OpportunityV1Schema):
 
 
 class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
-    # Override legacy_opportunity_id to make it required
     legacy_opportunity_id = fields.Integer(
-        required=True, metadata={"description": "The legacy opportunity ID", "example": 12345}
+        required=True,
+        allow_none=True,
+        metadata={"description": "The legacy opportunity ID"},
     )
 
-    # Override is_forecast to make it required
     is_forecast = fields.Boolean(
         required=True,
         metadata={"description": "Whether the opportunity is forecasted", "example": False},
