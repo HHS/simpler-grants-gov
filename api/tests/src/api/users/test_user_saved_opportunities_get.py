@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import date
 
@@ -463,6 +464,23 @@ def test_user_get_saved_opportunities_no_filter_returns_all(
 
     assert response.status_code == 200
     assert len(response.json["data"]) == 2
+
+
+def test_user_get_saved_opportunities_logging(
+    client, enable_factory_create, db_session, user, user_auth_token, caplog
+):
+    opportunity = OpportunityFactory.create(opportunity_title="Test Opportunity")
+    UserSavedOpportunityFactory.create(user=user, opportunity=opportunity)
+
+    caplog.set_level(logging.INFO)
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": user_auth_token},
+        json={"pagination": {"page_offset": 1, "page_size": 25}},
+    )
+
+    assert response.status_code == 200
+    assert any("Successfully fetched saved opportunities" in r.message for r in caplog.records)
 
 
 def test_user_get_saved_opportunities_org_only(client, enable_factory_create, db_session):
