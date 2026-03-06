@@ -86,6 +86,21 @@ Pull requests should follow the conventions in [DEVELOPMENT.md](./DEVELOPMENT.md
 1. Pull requests should be titled with `[Issue N] Description`. However if there is no issue, use `[External] Description` format.
 1. External contributors can't merge their own PRs, so an internal team member will pull in after changes are satisfactory.
 
+### Review Assignment
+
+This repository uses a hybrid review assignment model powered by a GitHub Action rather than the traditional CODEOWNERS file.
+
+**For external contributors (community/fork PRs):**
+When you open a pull request from a fork, our automated workflow will detect it as an external contribution and automatically notify the designated maintainers for review. A welcome comment will be posted on your PR with a checklist and the assigned reviewers. You do not need to manually request reviewers.
+
+If you're unsure who to ask or need additional help, you can tag any of the following maintainers directly:
+- @btabaska
+- @mdragon
+- @KevinJBoyer
+
+**For internal team members:**
+Internal PRs (opened from repo branches, or from forks by [allowlisted contributors](/.github/internal-contributors.yml)) are not auto-assigned. The PR author is responsible for manually requesting reviews from the appropriate colleagues. If no reviewer is assigned within one hour, a reminder will be posted on the PR.
+
 ## Policies
 
 ### Open Source Policy
