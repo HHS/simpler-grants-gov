@@ -26,7 +26,7 @@ describe("wrapSection", () => {
     const props = {
       label: "label",
       fieldName: "fieldName",
-      tree: <span>hi</span>,
+      sectionFields: <span>hi</span>,
       description: "description",
     };
     render(wrapSection(props));
@@ -34,7 +34,7 @@ describe("wrapSection", () => {
       label: props.label,
       fieldName: props.fieldName,
       description: props.description,
-      children: props.tree,
+      children: props.sectionFields,
     });
   });
 });

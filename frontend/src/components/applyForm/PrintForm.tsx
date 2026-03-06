@@ -29,6 +29,7 @@ export default function PrintForm({
         formData={savedFormData}
         schema={formSchema}
         uiSchema={uiSchema}
+        formContext={{ rootFormData: savedFormData, rootSchema: formSchema }}
       />
     </AttachmentsProvider>
   );

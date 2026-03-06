@@ -38,7 +38,7 @@ export const updateAppFilingNameAction = async (
       throw new Error(`Failed to update application: ${res.status_code}`);
     }
 
-    revalidateTag(`application-${applicationId}`);
+    revalidateTag(`application-${applicationId}`, "max");
 
     return { success: true, error: null };
   } catch (error) {

@@ -80,9 +80,8 @@ export const StartApplicationOrganizationInput = ({
           </option>
         ) : null}
 
-        {/* Not listed option - only if both individual and organization applicant types allowed */}
-        {applicantTypes.includes("organization") &&
-        applicantTypes.includes("individual") ? (
+        {/* Not listed option - only if organization applicant types allowed */}
+        {applicantTypes.includes("organization") ? (
           <option key="not-listed" value={SPECIAL_VALUES.NOT_LISTED}>
             {t("notListed")}
           </option>

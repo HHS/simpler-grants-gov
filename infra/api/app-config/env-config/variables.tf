@@ -215,3 +215,27 @@ variable "sqs_max_receive_count" {
   type        = number
   default     = 3
 }
+
+variable "enable_workflow_service" {
+  description = "Enable workflow manager"
+  type        = bool
+  default     = false
+}
+
+variable "workflow_service_cpu" {
+  description = "CPU units for the workflow ECS task"
+  type        = number
+  default     = 1024
+}
+
+variable "workflow_service_memory" {
+  description = "Memory in MiB for the workflow ECS task"
+  type        = number
+  default     = 2048
+}
+
+variable "workflow_service_desired_count" {
+  description = "Workflow services counter count"
+  type        = number
+  default     = 1
+}

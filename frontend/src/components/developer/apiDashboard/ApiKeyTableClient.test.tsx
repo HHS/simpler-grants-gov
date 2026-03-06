@@ -10,8 +10,6 @@ import {
   usedApiKey,
 } from "src/utils/testing/fixtures";
 
-import { NextIntlClientProvider } from "next-intl";
-
 import ApiKeyTableClient from "src/components/developer/apiDashboard/ApiKeyTableClient";
 
 const mockClientFetch = jest.fn();
@@ -57,73 +55,6 @@ const mockUser = {
   token: "test-token",
 };
 
-const messages = {
-  ApiDashboard: {
-    table: {
-      headers: {
-        apiKey: "Name",
-        status: "Status",
-        secret: "Secret",
-        created: "Created",
-        lastUsed: "Last used",
-        modify: "Modify",
-      },
-      statuses: {
-        active: "Active",
-        inactive: "Inactive",
-      },
-      dateLabels: {
-        created: "Created:",
-        lastUsed: "Last used:",
-        never: "Never",
-      },
-    },
-    modal: {
-      apiKeyNameLabel: "Name <required>(required)</required>",
-      placeholder: "e.g., Production API Key",
-      createTitle: "Create New API Key",
-      editTitle: "Rename API Key: {keyName}",
-      deleteTitle: "Delete API Key",
-      createDescription:
-        "Create a new key for use with the Simpler.Grants.gov API",
-      editDescription: "Change the name of your Simpler.Grants.gov API key",
-      deleteDescription:
-        'To confirm deletion, type "delete" in the field below:',
-      deleteConfirmationLabel:
-        'Type "delete" to confirm <required>(required)</required>',
-      deleteConfirmationPlaceholder: "delete",
-      deleteConfirmationError: 'Please type "delete" to confirm deletion',
-      createSuccessHeading: "API Key Created Successfully",
-      editSuccessHeading: "API Key Renamed Successfully",
-      deleteSuccessHeading: "API Key Deleted Successfully",
-      createSuccessMessage:
-        'Your API key "{keyName}" has been created successfully.',
-      editSuccessMessage:
-        'Your API key has been renamed from "{originalName}" to "{keyName}".',
-      deleteSuccessMessage:
-        'Your API key "{keyName}" has been deleted successfully.',
-      close: "Close",
-      createErrorMessage:
-        "There was an error creating your API key. Please try again.",
-      editErrorMessage:
-        "There was an error renaming your API key. Please try again.",
-      deleteErrorMessage:
-        "There was an error deleting your API key. Please try again.",
-      nameRequiredError: "API key name is required",
-      nameChangedError: "Please enter a different name",
-      createButtonText: "Create API Key",
-      editNameButtonText: "Edit Name",
-      deleteButtonText: "Delete Key",
-      creating: "Creating...",
-      saving: "Saving...",
-      deleting: "Deleting...",
-      saveChanges: "Save Changes",
-      cancel: "Cancel",
-      copyApiKey: "Copy API key",
-    },
-  },
-};
-
 const mockApiKeys: ApiKey[] = [
   createMockApiKey({
     api_key_id: "key-1",
@@ -144,11 +75,7 @@ const mockApiKeys: ApiKey[] = [
 ];
 
 const renderTable = (apiKeys: ApiKey[] = mockApiKeys) => {
-  return render(
-    <NextIntlClientProvider locale="en" messages={messages}>
-      <ApiKeyTableClient apiKeys={apiKeys} />
-    </NextIntlClientProvider>,
-  );
+  return render(<ApiKeyTableClient apiKeys={apiKeys} />);
 };
 
 describe("ApiKeyTableClient", () => {
@@ -179,12 +106,12 @@ describe("ApiKeyTableClient", () => {
 
       const headers = screen.getAllByRole("columnheader");
       expect(headers).toHaveLength(6);
-      expect(headers[0]).toHaveTextContent("Name");
-      expect(headers[1]).toHaveTextContent("Status");
-      expect(headers[2]).toHaveTextContent("Secret");
-      expect(headers[3]).toHaveTextContent("Created");
-      expect(headers[4]).toHaveTextContent("Last used");
-      expect(headers[5]).toHaveTextContent("Modify");
+      expect(headers[0]).toHaveTextContent("headers.apiKey");
+      expect(headers[1]).toHaveTextContent("headers.status");
+      expect(headers[2]).toHaveTextContent("headers.secret");
+      expect(headers[3]).toHaveTextContent("headers.created");
+      expect(headers[4]).toHaveTextContent("headers.lastUsed");
+      expect(headers[5]).toHaveTextContent("headers.modify");
     });
   });
 
@@ -198,16 +125,16 @@ describe("ApiKeyTableClient", () => {
   });
 
   describe("Status Column", () => {
-    it("shows Active for active keys", () => {
+    it("shows active status for active keys", () => {
       renderTable([baseApiKey]);
 
-      expect(screen.getByText("Active")).toBeInTheDocument();
+      expect(screen.getByText("active")).toBeInTheDocument();
     });
 
-    it("shows Inactive for inactive keys", () => {
+    it("shows inactive status for inactive keys", () => {
       renderTable([inactiveApiKey]);
 
-      expect(screen.getByText("Inactive")).toBeInTheDocument();
+      expect(screen.getByText("inactive")).toBeInTheDocument();
     });
   });
 
@@ -223,7 +150,7 @@ describe("ApiKeyTableClient", () => {
       renderTable();
 
       const copyButtons = screen.getAllByRole("button", {
-        name: "Copy API key",
+        name: "copyApiKey",
       });
       expect(copyButtons.length).toBeGreaterThanOrEqual(2);
     });
@@ -243,10 +170,10 @@ describe("ApiKeyTableClient", () => {
       expect(screen.getByText("Jun 1, 2023")).toBeInTheDocument();
     });
 
-    it('shows "Never" when last_used is null', () => {
+    it('shows "never" when last_used is null', () => {
       renderTable([baseApiKey]);
 
-      expect(screen.getByText("Never")).toBeInTheDocument();
+      expect(screen.getByText("never")).toBeInTheDocument();
     });
   });
 

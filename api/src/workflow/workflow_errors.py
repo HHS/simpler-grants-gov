@@ -51,6 +51,10 @@ class InvalidWorkflowTypeError(NonRetryableWorkflowError):
     pass
 
 
+class InvalidWorkflowResponseTypeError(NonRetryableWorkflowError):
+    pass
+
+
 class WorkflowDoesNotExistError(NonRetryableWorkflowError):
     pass
 
@@ -68,4 +72,16 @@ class UserDoesNotExist(NonRetryableWorkflowError):
 
 
 class InactiveWorkflowError(NonRetryableWorkflowError):
+    pass
+
+
+class UserAccessError(NonRetryableWorkflowError):
+    pass
+
+
+class DuplicateApprovalError(NonRetryableWorkflowError):
+    pass
+
+
+class OpportunityWithoutAgencyError(NonRetryableWorkflowError):
     pass

@@ -9,13 +9,16 @@ import {
 import { Competition } from "src/types/competitionsResponseTypes";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
   Grid,
   GridContainer,
   Link,
   ModalRef,
+  SummaryBox,
+  SummaryBoxContent,
+  SummaryBoxHeading,
 } from "@trussworks/react-uswds";
 
 import { EditAppFilingName } from "src/components/application/editAppFilingName/EditAppFilingName";
@@ -53,6 +56,19 @@ const OrganizationDetailsDisplay = ({
         </div>
       </Grid>
     </>
+  );
+};
+
+type InlineActionLinkProps = {
+  onClick: () => void;
+  children: ReactNode;
+};
+
+const InlineActionLink = ({ onClick, children }: InlineActionLinkProps) => {
+  return (
+    <Button type="button" onClick={onClick} className="text-underline" unstyled>
+      {children}
+    </Button>
   );
 };
 
@@ -110,10 +126,17 @@ export const InformationCard = ({
   const transferModalId = "transfer-ownership-modal";
   const organizationEligible =
     applicationDetails.competition.open_to_applicants.includes("organization");
+  const individualEligible =
+    applicationDetails.competition.open_to_applicants.includes("individual");
   const isEditable =
     applicationDetails.application_status === ApplicationStatus.IN_PROGRESS;
   const canTransferOwnership =
     !hasOrganization && organizationEligible && isEditable;
+  const isOrganizationOnlyCompetition =
+    organizationEligible && !individualEligible;
+  const isIndividualOwnedApplication = !hasOrganization;
+  const shouldBlockSubmitForTransferOwnership =
+    isIndividualOwnedApplication && isOrganizationOnlyCompetition;
   const [isTransferModalOpen, setIsTransferModalOpen] =
     useState<boolean>(false);
 
@@ -229,6 +252,29 @@ export const InformationCard = ({
     }
   };
 
+  const NeedsTransferOwnershipCta = () => {
+    return (
+      <SummaryBox className="simpler-summary-box-yellow">
+        <SummaryBoxHeading headingLevel="h5" className="font-sans-md">
+          {t("unassociatedApplicationAlert.title")}
+        </SummaryBoxHeading>
+        <SummaryBoxContent>
+          {t.rich("unassociatedApplicationAlert.body", {
+            link: (content) => (
+              <InlineActionLink
+                onClick={() => {
+                  setIsTransferModalOpen(true);
+                }}
+              >
+                {content}
+              </InlineActionLink>
+            ),
+          })}
+        </SummaryBoxContent>
+      </SummaryBox>
+    );
+  };
+
   const InformationCardDetails = ({
     applicationSubmitHandler,
   }: {
@@ -318,6 +364,7 @@ export const InformationCard = ({
               buttonText={t("submit")}
               submitHandler={applicationSubmitHandler}
               loading={submissionLoading}
+              disabled={shouldBlockSubmitForTransferOwnership}
             />
           )}
           <ApplicationSubmissionDownload />
@@ -327,16 +374,21 @@ export const InformationCard = ({
   };
 
   return (
-    <GridContainer
-      data-testid="information-card"
-      className="border radius-md border-base-lighter padding-x-2 margin-y-4"
-    >
-      <Grid row gap>
-        <InformationCardDetails
-          applicationSubmitHandler={applicationSubmitHandler}
-        />
-      </Grid>
-    </GridContainer>
+    <>
+      {shouldBlockSubmitForTransferOwnership ? (
+        <NeedsTransferOwnershipCta />
+      ) : null}
+      <GridContainer
+        data-testid="information-card"
+        className="border radius-md border-base-lighter padding-x-2 margin-y-4"
+      >
+        <Grid row gap>
+          <InformationCardDetails
+            applicationSubmitHandler={applicationSubmitHandler}
+          />
+        </Grid>
+      </GridContainer>
+    </>
   );
 };
 
@@ -344,13 +396,19 @@ export const SubmitApplicationButton = ({
   buttonText,
   loading,
   submitHandler,
+  disabled,
 }: {
   buttonText: string;
   loading: boolean;
   submitHandler: () => void;
+  disabled?: boolean;
 }) => {
   return (
-    <Button type="button" disabled={!!loading} onClick={submitHandler}>
+    <Button
+      type="button"
+      disabled={Boolean(loading) || Boolean(disabled)}
+      onClick={submitHandler}
+    >
       <USWDSIcon name="upload_file" />
       {loading ? "Loading...  " : buttonText}
     </Button>

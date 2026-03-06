@@ -122,8 +122,9 @@ FORM_XML_TRANSFORM_RULES = {
         "namespaces": {
             "default": "http://apply.grants.gov/forms/GG_LobbyingForm-V1.1",
             "GG_LobbyingForm": "http://apply.grants.gov/forms/GG_LobbyingForm-V1.1",
-            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
             "glob": "http://apply.grants.gov/system/Global-V1.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
         },
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/GG_LobbyingForm-V1.1.xsd",
         "xml_structure": {

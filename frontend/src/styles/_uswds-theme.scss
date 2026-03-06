@@ -13,8 +13,8 @@ in the form $setting: value,
   $theme-show-compile-warnings: false,
   // Specify USWDS font and image paths.
   // Same paths are successfully used for both Next.js and Storybook.
-  $theme-font-path: add-base-path("/uswds/fonts"),
-  $theme-image-path: add-base-path("/uswds/img"),
+  $theme-font-path: "/uswds/fonts",
+  $theme-image-path: "/uswds/img",
   // Ensure utility classes always override other styles
   $utilities-use-important: true,
 
@@ -173,7 +173,7 @@ in the form $setting: value,
   // $theme-color-error-lighter: "red-warm-10",
   // $theme-color-error-light: "red-warm-30v",
   // $theme-color-error: "red-warm-50v",
-  // $theme-color-error-dark: "red-60v",
+  $theme-color-error-dark: "red-warm-60v",
   // $theme-color-error-darker: "red-70",
   // Warning colors
   $theme-color-warning-family: "yellow",
@@ -194,7 +194,7 @@ in the form $setting: value,
   // $theme-color-info-lighter: "cyan-5",
   // $theme-color-info-light: "cyan-20",
   // $theme-color-info: "cyan-30v",
-  // $theme-color-info-dark: "cyan-40v",
+  $theme-color-info-dark: "cyan-40v",
   // $theme-color-info-darker: "blue-cool-60",
   // Disabled colors
   // $theme-color-disabled-family: "gray",

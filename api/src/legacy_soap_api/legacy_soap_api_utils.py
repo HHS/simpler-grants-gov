@@ -322,7 +322,7 @@ def get_gov_grants_tracking_number(xml_bytes: bytes) -> str | None:
 
 
 def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | None:
-    xml_bytes = extract_soap_xml(soap_request.data)
+    xml_bytes = extract_soap_xml(soap_request.data.head())
     if not xml_bytes:
         return None
     if soap_request.operation_name in AlternateSoapOperation:

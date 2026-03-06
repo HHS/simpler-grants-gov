@@ -6,8 +6,6 @@ import { useUser } from "src/services/auth/useUser";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { baseApiKey } from "src/utils/testing/fixtures";
 
-import { NextIntlClientProvider } from "next-intl";
-
 import ApiKeyModal from "src/components/developer/apiDashboard/ApiKeyModal";
 
 // Mock dependencies
@@ -49,65 +47,16 @@ const mockApiKey: ApiKey = {
   api_key_id: "test-api-key-id",
 };
 
-const messages = {
-  ApiDashboard: {
-    modal: {
-      apiKeyNameLabel: "Name <required>(required)</required>",
-      placeholder: "e.g., Production API Key",
-      createTitle: "Create New API Key",
-      editTitle: "Rename API Key",
-      deleteTitle: "Delete API Key",
-      createDescription:
-        "Create a new key for use with the Simpler.Grants.gov API",
-      editDescription: "Change the name of your Simpler.Grants.gov API key",
-      deleteDescription:
-        'To confirm deletion, type "delete" in the field below:',
-      deleteConfirmationLabel:
-        'Type "delete" to confirm <required>(required)</required>',
-      deleteConfirmationPlaceholder: "delete",
-      deleteConfirmationError: 'Please type "delete" to confirm deletion',
-      createSuccessHeading: "API Key Created Successfully",
-      editSuccessHeading: "API Key Renamed Successfully",
-      deleteSuccessHeading: "API Key Deleted Successfully",
-      createSuccessMessage:
-        'Your API key "{keyName}" has been created successfully.',
-      editSuccessMessage:
-        'Your API key has been renamed from "{originalName}" to "{keyName}".',
-      deleteSuccessMessage:
-        'Your API key "{keyName}" has been deleted successfully.',
-      close: "Close",
-      createErrorMessage:
-        "There was an error creating your API key. Please try again.",
-      editErrorMessage:
-        "There was an error renaming your API key. Please try again.",
-      deleteErrorMessage:
-        "There was an error deleting your API key. Please try again.",
-      nameRequiredError: "API key name is required",
-      nameChangedError: "Please enter a different name",
-      createButtonText: "Create API Key",
-      editNameButtonText: "Edit Name",
-      deleteButtonText: "Delete Key",
-      creating: "Creating...",
-      saving: "Saving...",
-      deleting: "Deleting...",
-      saveChanges: "Save Changes",
-      cancel: "Cancel",
-    },
-  },
-};
-
 const renderModal = (mode: "create" | "edit" | "delete", apiKey?: ApiKey) => {
   const onApiKeyUpdated = jest.fn();
 
   return {
     ...render(
-      <NextIntlClientProvider locale="en" messages={messages}>
-        <ApiKeyModal
-          mode={mode}
-          apiKey={apiKey}
-          onApiKeyUpdated={onApiKeyUpdated}
-        />
-      </NextIntlClientProvider>,
+      <ApiKeyModal
+        mode={mode}
+        apiKey={apiKey}
+        onApiKeyUpdated={onApiKeyUpdated}
+      />,
     ),
     onApiKeyUpdated,
   };
@@ -143,13 +92,11 @@ describe("ApiKeyModal", () => {
       expect(
         screen.getByTestId("open-delete-api-key-modal-button-test-api-key-id"),
       ).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          'To confirm deletion, type "delete" in the field below:',
-        ),
-      ).toBeInTheDocument();
+      expect(screen.getByText("deleteDescription")).toBeInTheDocument();
       expect(screen.getByText('"Test API Key"')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText("delete")).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText("deleteConfirmationPlaceholder"),
+      ).toBeInTheDocument();
     });
 
     it("shows validation error when delete confirmation is empty", async () => {
@@ -165,9 +112,7 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("delete-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText('Please type "delete" to confirm deletion'),
-        ).toBeInTheDocument();
+        expect(screen.getByText("deleteConfirmationError")).toBeInTheDocument();
       });
     });
 
@@ -181,16 +126,16 @@ describe("ApiKeyModal", () => {
       );
 
       // Type incorrect confirmation
-      const confirmationInput = screen.getByPlaceholderText("delete");
+      const confirmationInput = screen.getByPlaceholderText(
+        "deleteConfirmationPlaceholder",
+      );
       await user.type(confirmationInput, "wrong");
 
       // Try to submit
       await user.click(screen.getByTestId("delete-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText('Please type "delete" to confirm deletion'),
-        ).toBeInTheDocument();
+        expect(screen.getByText("deleteConfirmationError")).toBeInTheDocument();
       });
     });
 
@@ -206,7 +151,9 @@ describe("ApiKeyModal", () => {
       );
 
       // Type correct confirmation
-      const confirmationInput = screen.getByPlaceholderText("delete");
+      const confirmationInput = screen.getByPlaceholderText(
+        "deleteConfirmationPlaceholder",
+      );
       await user.type(confirmationInput, "delete");
 
       // Submit
@@ -241,21 +188,17 @@ describe("ApiKeyModal", () => {
       );
 
       // Type correct confirmation and submit
-      const confirmationInput = screen.getByPlaceholderText("delete");
+      const confirmationInput = screen.getByPlaceholderText(
+        "deleteConfirmationPlaceholder",
+      );
       await user.type(confirmationInput, "delete");
       await user.click(screen.getByTestId("delete-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText("API Key Deleted Successfully"),
-        ).toBeInTheDocument();
+        expect(screen.getByText("deleteSuccessHeading")).toBeInTheDocument();
       });
 
-      expect(
-        screen.getByText(
-          'Your API key "Test API Key" has been deleted successfully.',
-        ),
-      ).toBeInTheDocument();
+      expect(screen.getByText("deleteSuccessMessage")).toBeInTheDocument();
     });
 
     it("shows error message when deletion fails", async () => {
@@ -270,16 +213,14 @@ describe("ApiKeyModal", () => {
       );
 
       // Type correct confirmation and submit
-      const confirmationInput = screen.getByPlaceholderText("delete");
+      const confirmationInput = screen.getByPlaceholderText(
+        "deleteConfirmationPlaceholder",
+      );
       await user.type(confirmationInput, "delete");
       await user.click(screen.getByTestId("delete-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText(
-            "There was an error deleting your API key. Please try again.",
-          ),
-        ).toBeInTheDocument();
+        expect(screen.getByText("deleteErrorMessage")).toBeInTheDocument();
       });
     });
 
@@ -301,12 +242,14 @@ describe("ApiKeyModal", () => {
       );
 
       // Type correct confirmation and submit
-      const confirmationInput = screen.getByPlaceholderText("delete");
+      const confirmationInput = screen.getByPlaceholderText(
+        "deleteConfirmationPlaceholder",
+      );
       await user.type(confirmationInput, "delete");
       await user.click(screen.getByTestId("delete-api-key-submit-button"));
 
       // Check loading state
-      expect(screen.getByText("Deleting...")).toBeInTheDocument();
+      expect(screen.getByText("deleting")).toBeInTheDocument();
 
       // Resolve the promise
       resolveDelete({ message: "Success" });
@@ -334,7 +277,9 @@ describe("ApiKeyModal", () => {
       );
 
       // Type some text
-      const confirmationInput = screen.getByPlaceholderText("delete");
+      const confirmationInput = screen.getByPlaceholderText(
+        "deleteConfirmationPlaceholder",
+      );
       await user.type(confirmationInput, "partial");
 
       // Verify the input has the text we typed
@@ -344,12 +289,10 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("delete-api-key-submit-button"));
 
       // Should show validation error
-      expect(
-        screen.getByText('Please type "delete" to confirm deletion'),
-      ).toBeInTheDocument();
+      expect(screen.getByText("deleteConfirmationError")).toBeInTheDocument();
 
       // Close modal
-      await user.click(screen.getByText("Cancel"));
+      await user.click(screen.getByText("cancel"));
 
       // Wait for modal to be hidden (it stays in DOM but gets hidden class)
       await waitFor(() => {
@@ -372,7 +315,7 @@ describe("ApiKeyModal", () => {
 
       // The validation error should be cleared when modal reopens
       expect(
-        screen.queryByText('Please type "delete" to confirm deletion'),
+        screen.queryByText("deleteConfirmationError"),
       ).not.toBeInTheDocument();
 
       // Note: The input field itself doesn't reset because it's uncontrolled,
@@ -387,14 +330,8 @@ describe("ApiKeyModal", () => {
       expect(
         screen.getByTestId("open-create-api-key-modal-button"),
       ).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          "Create a new key for use with the Simpler.Grants.gov API",
-        ),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByPlaceholderText("e.g., Production API Key"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("createDescription")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("placeholder")).toBeInTheDocument();
     });
 
     it("validates required name field", async () => {
@@ -408,9 +345,7 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText("API key name is required"),
-        ).toBeInTheDocument();
+        expect(screen.getByText("nameRequiredError")).toBeInTheDocument();
       });
     });
 
@@ -425,7 +360,7 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
       // Type name
-      const nameInput = screen.getByPlaceholderText("e.g., Production API Key");
+      const nameInput = screen.getByPlaceholderText("placeholder");
       await user.type(nameInput, "New API Key");
 
       // Submit
@@ -456,9 +391,7 @@ describe("ApiKeyModal", () => {
       expect(
         screen.getByTestId("open-edit-api-key-modal-button-test-api-key-id"),
       ).toBeInTheDocument();
-      expect(
-        screen.getByText("Change the name of your Simpler.Grants.gov API key"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("editDescription")).toBeInTheDocument();
       expect(screen.getByDisplayValue("Test API Key")).toBeInTheDocument();
     });
 
@@ -475,9 +408,7 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("edit-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Please enter a different name"),
-        ).toBeInTheDocument();
+        expect(screen.getByText("nameChangedError")).toBeInTheDocument();
       });
     });
 
@@ -545,16 +476,12 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
       // Type name and submit
-      const nameInput = screen.getByPlaceholderText("e.g., Production API Key");
+      const nameInput = screen.getByPlaceholderText("placeholder");
       await user.type(nameInput, "Test Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText(
-            "There was an error creating your API key. Please try again.",
-          ),
-        ).toBeInTheDocument();
+        expect(screen.getByText("createErrorMessage")).toBeInTheDocument();
       });
     });
 
@@ -580,16 +507,12 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
       // Type name and submit
-      const nameInput = screen.getByPlaceholderText("e.g., Production API Key");
+      const nameInput = screen.getByPlaceholderText("placeholder");
       await user.type(nameInput, "Test Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText(
-            "There was an error creating your API key. Please try again.",
-          ),
-        ).toBeInTheDocument();
+        expect(screen.getByText("createErrorMessage")).toBeInTheDocument();
       });
     });
 
@@ -612,7 +535,9 @@ describe("ApiKeyModal", () => {
       await user.keyboard("{Enter}");
 
       // Should focus on confirmation input
-      const confirmationInput = screen.getByPlaceholderText("delete");
+      const confirmationInput = screen.getByPlaceholderText(
+        "deleteConfirmationPlaceholder",
+      );
       await user.type(confirmationInput, "delete");
 
       // Submit with mouse click for now (Enter key handling is complex to test)
@@ -639,13 +564,13 @@ describe("ApiKeyModal", () => {
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
-      const nameInput = screen.getByPlaceholderText("e.g., Production API Key");
+      const nameInput = screen.getByPlaceholderText("placeholder");
       await user.type(nameInput, "New API Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
       await waitFor(() => {
         expect(
-          screen.getByText("API Key Created Successfully"),
+          screen.getByText("createSuccessHeading"),
         ).toBeInTheDocument();
       });
 
@@ -665,7 +590,7 @@ describe("ApiKeyModal", () => {
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
-      const nameInput = screen.getByPlaceholderText("e.g., Production API Key");
+      const nameInput = screen.getByPlaceholderText("placeholder");
       await user.type(nameInput, "New API Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
@@ -700,7 +625,7 @@ describe("ApiKeyModal", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText("API Key Renamed Successfully"),
+          screen.getByText("editSuccessHeading"),
         ).toBeInTheDocument();
       });
 
@@ -720,7 +645,7 @@ describe("ApiKeyModal", () => {
 
       await user.click(screen.getByTestId("open-create-api-key-modal-button"));
 
-      const nameInput = screen.getByPlaceholderText("e.g., Production API Key");
+      const nameInput = screen.getByPlaceholderText("placeholder");
       await user.type(nameInput, "New Key");
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 

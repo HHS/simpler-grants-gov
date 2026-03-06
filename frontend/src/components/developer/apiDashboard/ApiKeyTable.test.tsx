@@ -10,8 +10,6 @@ import {
   specialCharApiKey,
 } from "src/utils/testing/fixtures";
 
-import { NextIntlClientProvider } from "next-intl";
-
 import ApiKeyTable from "src/components/developer/apiDashboard/ApiKeyTable";
 
 // Mock dependencies
@@ -70,80 +68,8 @@ const mockApiKeys: ApiKey[] = [
   }),
 ];
 
-const messages = {
-  ApiDashboard: {
-    table: {
-      headers: {
-        apiKey: "Name",
-        status: "Status",
-        secret: "Secret",
-        created: "Created",
-        lastUsed: "Last used",
-        modify: "Modify",
-      },
-      statuses: {
-        active: "Active",
-        inactive: "Inactive",
-      },
-      dateLabels: {
-        created: "Created:",
-        lastUsed: "Last used:",
-        never: "Never",
-      },
-      emptyState:
-        "You don't have any API keys yet. Create your first API key to get started.",
-    },
-    modal: {
-      apiKeyNameLabel: "Name <required>(required)</required>",
-      placeholder: "e.g., Production API Key",
-      createTitle: "Create New API Key",
-      editTitle: "Rename API Key: {keyName}",
-      deleteTitle: "Delete API Key",
-      createDescription:
-        "Create a new key for use with the Simpler.Grants.gov API",
-      editDescription: "Change the name of your Simpler.Grants.gov API key",
-      deleteDescription:
-        'To confirm deletion, type "delete" in the field below:',
-      deleteConfirmationLabel:
-        'Type "delete" to confirm <required>(required)</required>',
-      deleteConfirmationPlaceholder: "delete",
-      deleteConfirmationError: 'Please type "delete" to confirm deletion',
-      createSuccessHeading: "API Key Created Successfully",
-      editSuccessHeading: "API Key Renamed Successfully",
-      deleteSuccessHeading: "API Key Deleted Successfully",
-      createSuccessMessage:
-        'Your API key "{keyName}" has been created successfully.',
-      editSuccessMessage:
-        'Your API key has been renamed from "{originalName}" to "{keyName}".',
-      deleteSuccessMessage:
-        'Your API key "{keyName}" has been deleted successfully.',
-      close: "Close",
-      createErrorMessage:
-        "There was an error creating your API key. Please try again.",
-      editErrorMessage:
-        "There was an error renaming your API key. Please try again.",
-      deleteErrorMessage:
-        "There was an error deleting your API key. Please try again.",
-      nameRequiredError: "API key name is required",
-      nameChangedError: "Please enter a different name",
-      createButtonText: "Create API Key",
-      editNameButtonText: "Edit Name",
-      deleteButtonText: "Delete Key",
-      creating: "Creating...",
-      saving: "Saving...",
-      deleting: "Deleting...",
-      saveChanges: "Save Changes",
-      cancel: "Cancel",
-    },
-  },
-};
-
 const renderTable = (apiKeys: ApiKey[] = mockApiKeys) => {
-  return render(
-    <NextIntlClientProvider locale="en" messages={messages}>
-      <ApiKeyTable apiKeys={apiKeys} />
-    </NextIntlClientProvider>,
-  );
+  return render(<ApiKeyTable apiKeys={apiKeys} />);
 };
 
 describe("ApiKeyTable", () => {
@@ -175,12 +101,12 @@ describe("ApiKeyTable", () => {
 
       const headers = screen.getAllByRole("columnheader");
       expect(headers).toHaveLength(6);
-      expect(headers[0]).toHaveTextContent("Name");
-      expect(headers[1]).toHaveTextContent("Status");
-      expect(headers[2]).toHaveTextContent("Secret");
-      expect(headers[3]).toHaveTextContent("Created");
-      expect(headers[4]).toHaveTextContent("Last used");
-      expect(headers[5]).toHaveTextContent("Modify");
+      expect(headers[0]).toHaveTextContent("headers.apiKey");
+      expect(headers[1]).toHaveTextContent("headers.status");
+      expect(headers[2]).toHaveTextContent("headers.secret");
+      expect(headers[3]).toHaveTextContent("headers.created");
+      expect(headers[4]).toHaveTextContent("headers.lastUsed");
+      expect(headers[5]).toHaveTextContent("headers.modify");
 
       expect(screen.getByText("Production API Key")).toBeInTheDocument();
       expect(screen.getByText("Development API Key")).toBeInTheDocument();
@@ -194,17 +120,13 @@ describe("ApiKeyTable", () => {
 
       expect(screen.getByText("Development API Key")).toBeInTheDocument();
       expect(screen.getByText("xyz...012")).toBeInTheDocument();
-      expect(screen.getByText("Never")).toBeInTheDocument();
+      expect(screen.getByText("never")).toBeInTheDocument();
     });
 
     it("renders empty state when no API keys", () => {
       renderTable([]);
 
-      expect(
-        screen.getByText(
-          "You don't have any API keys yet. Create your first API key to get started.",
-        ),
-      ).toBeInTheDocument();
+      expect(screen.getByText("emptyState")).toBeInTheDocument();
       expect(screen.queryByRole("table")).not.toBeInTheDocument();
     });
   });
@@ -230,16 +152,12 @@ describe("ApiKeyTable", () => {
 
       const deleteHeadings = screen.getAllByRole("heading", {
         level: 2,
-        name: /Delete API Key/i,
+        name: /deleteTitle/i,
       });
       expect(deleteHeadings.length).toBeGreaterThan(0);
 
       expect(screen.getByText('"Production API Key"')).toBeInTheDocument();
-      expect(
-        screen.getAllByText(
-          'To confirm deletion, type "delete" in the field below:',
-        )[0],
-      ).toBeInTheDocument();
+      expect(screen.getAllByText("deleteDescription")[0]).toBeInTheDocument();
     });
 
     it("shows correct API key name in delete modal", async () => {
@@ -265,7 +183,9 @@ describe("ApiKeyTable", () => {
       );
       await user.click(deleteButton);
 
-      const confirmationInputs = screen.getAllByPlaceholderText("delete");
+      const confirmationInputs = screen.getAllByPlaceholderText(
+        "deleteConfirmationPlaceholder",
+      );
       await user.type(confirmationInputs[0], "delete");
 
       const submitButtons = screen.getAllByTestId(
@@ -302,9 +222,7 @@ describe("ApiKeyTable", () => {
       );
       await user.click(submitButtons[0]);
 
-      expect(
-        screen.getByText('Please type "delete" to confirm deletion'),
-      ).toBeInTheDocument();
+      expect(screen.getByText("deleteConfirmationError")).toBeInTheDocument();
     });
 
     it("rejects incorrect confirmation text", async () => {
@@ -316,7 +234,9 @@ describe("ApiKeyTable", () => {
       );
       await user.click(deleteButton);
 
-      const confirmationInputs = screen.getAllByPlaceholderText("delete");
+      const confirmationInputs = screen.getAllByPlaceholderText(
+        "deleteConfirmationPlaceholder",
+      );
       await user.type(confirmationInputs[0], "wrong");
 
       const submitButtons = screen.getAllByTestId(
@@ -324,9 +244,7 @@ describe("ApiKeyTable", () => {
       );
       await user.click(submitButtons[0]);
 
-      expect(
-        screen.getByText('Please type "delete" to confirm deletion'),
-      ).toBeInTheDocument();
+      expect(screen.getByText("deleteConfirmationError")).toBeInTheDocument();
     });
 
     it("handles delete API errors", async () => {
@@ -340,7 +258,9 @@ describe("ApiKeyTable", () => {
       );
       await user.click(deleteButton);
 
-      const confirmationInputs = screen.getAllByPlaceholderText("delete");
+      const confirmationInputs = screen.getAllByPlaceholderText(
+        "deleteConfirmationPlaceholder",
+      );
       await user.type(confirmationInputs[0], "delete");
 
       const submitButtons = screen.getAllByTestId(
@@ -350,11 +270,7 @@ describe("ApiKeyTable", () => {
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      expect(
-        screen.getByText(
-          "There was an error deleting your API key. Please try again.",
-        ),
-      ).toBeInTheDocument();
+      expect(screen.getByText("deleteErrorMessage")).toBeInTheDocument();
     });
   });
 
@@ -379,7 +295,7 @@ describe("ApiKeyTable", () => {
 
       const editHeadings = screen.getAllByRole("heading", {
         level: 2,
-        name: /Rename API Key/i,
+        name: /editTitle/i,
       });
       expect(editHeadings.length).toBeGreaterThan(0);
 
@@ -440,12 +356,12 @@ describe("ApiKeyTable", () => {
 
       const headers = screen.getAllByRole("columnheader");
       expect(headers).toHaveLength(6);
-      expect(headers[0]).toHaveTextContent("Name");
-      expect(headers[1]).toHaveTextContent("Status");
-      expect(headers[2]).toHaveTextContent("Secret");
-      expect(headers[3]).toHaveTextContent("Created");
-      expect(headers[4]).toHaveTextContent("Last used");
-      expect(headers[5]).toHaveTextContent("Modify");
+      expect(headers[0]).toHaveTextContent("headers.apiKey");
+      expect(headers[1]).toHaveTextContent("headers.status");
+      expect(headers[2]).toHaveTextContent("headers.secret");
+      expect(headers[3]).toHaveTextContent("headers.created");
+      expect(headers[4]).toHaveTextContent("headers.lastUsed");
+      expect(headers[5]).toHaveTextContent("headers.modify");
     });
 
     it("displays API key data in correct order", () => {
@@ -480,7 +396,7 @@ describe("ApiKeyTable", () => {
         /open-delete-api-key-modal-button-/,
       );
       deleteButtons.forEach((button) => {
-        expect(button).toHaveAttribute("title", "Delete API Key");
+        expect(button).toHaveAttribute("title", "deleteTitle");
       });
     });
 
@@ -517,7 +433,7 @@ describe("ApiKeyTable", () => {
 
       renderTable([nullLastUsedApiKey]);
 
-      expect(screen.getByText("Never")).toBeInTheDocument();
+      expect(screen.getByText("never")).toBeInTheDocument();
     });
 
     it("handles single API key", () => {

@@ -263,6 +263,16 @@ export const messages = {
     },
     genericErrorCta: "Please try refreshing the page.",
   },
+  ShareOpportunityToOrganization: {
+    modal: {
+      description: "Select organizations to share this opportunity with.",
+      opportunity: "Opportunity:",
+      error: "Could not load your organizations. Please try again later.",
+      loadingOrganizations: "Loading organizations...",
+      fallbackError: "You are not a member of any organizations.",
+      close: "Close",
+    },
+  },
   Application: {
     title: "Application",
     submissionValidationError: {
@@ -309,8 +319,8 @@ export const messages = {
       submit: "Submit application",
       transferApplicaitonOwnership: "Transfer application ownership",
       unassociatedApplicationAlert: {
-        title: "This application isn't associated with a valid organization.",
-        body: "You can continue working and your progress will be saved, but to submit on behalf of an organization, you must <link>select that organization and transfer ownership</link>.",
+        title: "This application isn't associated with an organization.",
+        body: "You can continue working and your progress will be saved, but to submit on behalf of an organization you must select that organization and transfer ownership. <link>Click here to transfer application ownership.</link>",
       },
       editApplicationFilingNameModal: {
         buttonText: "Edit filing name",
@@ -856,6 +866,7 @@ export const messages = {
     },
     callToAction: {
       title: "Search funding opportunities",
+      shareWithOrganization: "Share with organizations",
     },
     opportunitySaved: "Saved",
     resultsHeader: {
@@ -1826,12 +1837,39 @@ export const messages = {
     pageTitle: "Organizations",
   },
   AwardRecommendation: {
+    awardRecs: "Award Recs",
     errorMessage:
       "We have encountered an error loading your award recommendations, please try again later.",
     metaDescription: "View your award recommendations",
     pageHeading: "Award Recommendations",
-    pageTitle: "Award Recommendations",
+    heroTitle: "Award Rec #",
+    datePrepared: "Date prepared",
+    status: "Status",
+    statusTag: {
+      draft: "Draft",
+      inProgress: "In progress",
+      pendingReview: "Pending review",
+      approved: "Approved",
+    },
+    heroButtons: {
+      save: "Save and finish later",
+      create: "Create",
+    },
+    pageTitle: "Review your Recommendation",
     description: "Award Recommendation flow coming soon.",
+    opportunitySummary: "Opportunity summary",
+    selectionMethod: "Selection method",
+    viewFullDetails: "View Full Details",
+    opportunityStatus: "Status",
+    agency: "Agency",
+    closeDate: "Closing Date",
+    readMore: "Read more",
+    showLess: "Show less",
+    opportunity: "Opportunity",
+    editOpportunityDetails: "Edit opportunity details",
+    errorHeadingOppurtunity: "Error fetching opportunity details",
+    oppurtunityFetchError:
+      "Error fetching opportunity data. Please try refreshing the page.",
   },
   InviteLegacyUsers: {
     dataLoadingError:

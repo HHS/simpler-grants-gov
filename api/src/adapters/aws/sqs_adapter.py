@@ -1,3 +1,4 @@
+import json
 import logging
 
 import boto3
@@ -6,13 +7,15 @@ from pydantic import BaseModel, Field
 
 from src.adapters.aws import get_boto_session
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.json_util import json_encoder
 
 logger = logging.getLogger(__name__)
 
 
 class SQSConfig(PydanticBaseEnvConfig):
     workflow_queue_url: str = Field(alias="WORKFLOW_QUEUE_URL")
-    s3_endpoint_url: str = Field(alias="S3_ENDPOINT_URL")
+    s3_endpoint_url: str | None = Field(alias="S3_ENDPOINT_URL", default=None)
+    aws_region: str = Field(alias="AWS_REGION", default="us-east-1")
 
 
 class SQSMessage(BaseModel):
@@ -31,6 +34,18 @@ class SQSDeleteBatchResponse(BaseModel):
     failed_deletes: set[str] = Field(default_factory=set)
 
 
+class SQSSendMessageResponse(BaseModel):
+    """Represents the response from sending a message to SQS."""
+
+    message_id: str = Field(alias="MessageId")
+    md5_of_message_body: str = Field(alias="MD5OfMessageBody")
+    md5_of_message_attributes: str | None = Field(alias="MD5OfMessageAttributes", default=None)
+    sequence_number: str | None = Field(alias="SequenceNumber", default=None)
+    md5_of_message_system_attributes: str | None = Field(
+        alias="MD5OfMessageSystemAttributes", default=None
+    )
+
+
 def get_boto_sqs_client(
     sqs_config: SQSConfig | None = None, session: boto3.Session | None = None
 ) -> botocore.client.BaseClient:
@@ -44,7 +59,7 @@ def get_boto_sqs_client(
     if session is None:
         session = get_boto_session()
 
-    return session.client("sqs", **params)
+    return session.client("sqs", region_name=sqs_config.aws_region, **params)
 
 
 class SQSClient:
@@ -57,6 +72,7 @@ class SQSClient:
     ) -> list[SQSMessage]:
         """Fetch messages from SQS using long polling and return as SQSMessage objects."""
         try:
+            logger.info("Fetching messages from SQS", extra={"queue_url": self.queue_url})
             response = self.client.receive_message(
                 QueueUrl=self.queue_url,
                 MaxNumberOfMessages=max_messages,
@@ -91,6 +107,10 @@ class SQSClient:
             entries.append({"Id": id_str, "ReceiptHandle": handle})
 
         try:
+            logger.info(
+                "Deleting messages from SQS",
+                extra={"queue_url": self.queue_url, "receipt_handles": ",".join(receipt_handles)},
+            )
             response = self.client.delete_message_batch(QueueUrl=self.queue_url, Entries=entries)
 
             batch_results = SQSDeleteBatchResponse()
@@ -105,4 +125,28 @@ class SQSClient:
 
         except Exception:
             logger.exception("Failed to delete message batch", extra={"queue_url": self.queue_url})
+            raise
+
+    def send_message(self, message_body: dict) -> SQSSendMessageResponse:
+        """
+        Sends a message to the SQS queue and returns the response.
+        """
+        try:
+            logger.info("Sending message to SQS", extra={"queue_url": self.queue_url})
+            # To handle converting common types like uuids, we use our json_encoder
+            message_body_str = json.dumps(message_body, default=json_encoder)
+
+            response = self.client.send_message(
+                QueueUrl=self.queue_url, MessageBody=message_body_str
+            )
+
+            logger.info(
+                "Successfully sent message to SQS",
+                extra={"queue_url": self.queue_url, "message_id": response.get("MessageId")},
+            )
+
+            return SQSSendMessageResponse.model_validate(response)
+
+        except Exception:
+            logger.exception("Failed to send message to SQS", extra={"queue_url": self.queue_url})
             raise

@@ -1,12 +1,17 @@
 import dataclasses
 import math
 from enum import StrEnum
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
 from pydantic import BaseModel, Field
 
-from src.adapters.search.opensearch_response import SearchResponse
 from src.pagination.paginator import Paginator
+
+# In some scripts that don't start at our app, importing
+# anything that leads to this file hits a circular dependency issue
+# as SearchResponse is defined in a file that chains to import this file
+if TYPE_CHECKING:
+    from src.adapters.search.opensearch_response import SearchResponse
 
 
 class SortDirection(StrEnum):

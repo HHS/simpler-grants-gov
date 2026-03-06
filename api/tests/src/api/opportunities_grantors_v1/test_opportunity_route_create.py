@@ -1,10 +1,8 @@
 import pytest
 
 from src.constants.lookup_constants import Privilege
-from tests.lib.opportunity_test_utils import (
-    create_opportunity_request,
-    create_user_in_agency_with_jwt_and_api_key,
-)
+from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
+from tests.lib.opportunity_test_utils import create_opportunity_request
 from tests.src.db.models.factories import AgencyFactory
 
 
@@ -33,7 +31,7 @@ def test_opportunity_create_successful_creation(client, grantor_auth_data, oppor
 
     # Create an opportunity
     response = client.post(
-        "/v1/grantors/opportunities/", json=opportunity_request, headers={"X-SGG-Token": token}
+        "/v1/grantors/opportunities", json=opportunity_request, headers={"X-SGG-Token": token}
     )
 
     # Success check
@@ -60,7 +58,7 @@ def test_opportunity_create_successful_creation(client, grantor_auth_data, oppor
 def test_opportunity_create_with_invalid_jwt_token(client, grantor_auth_data, opportunity_request):
     """Test opportunity creation endpoint with invalid JWT token"""
     response = client.post(
-        "/v1/grantors/opportunities/",
+        "/v1/grantors/opportunities",
         json=opportunity_request,
         headers={"X-SGG-Token": "invalid_token_value"},
     )
@@ -73,12 +71,12 @@ def test_opportunity_create_duplicate_number(client, grantor_auth_data, opportun
 
     # First create an opportunity
     response = client.post(
-        "/v1/grantors/opportunities/", json=opportunity_request, headers={"X-SGG-Token": token}
+        "/v1/grantors/opportunities", json=opportunity_request, headers={"X-SGG-Token": token}
     )
 
     # Try to create another with the same opportunity number
     response = client.post(
-        "/v1/grantors/opportunities/", json=opportunity_request, headers={"X-SGG-Token": token}
+        "/v1/grantors/opportunities", json=opportunity_request, headers={"X-SGG-Token": token}
     )
 
     response_json = response.get_json()
@@ -92,7 +90,7 @@ def test_opportunity_create_invalid_data(client, grantor_auth_data):
 
     # Missing required fields
     response = client.post(
-        "/v1/grantors/opportunities/",
+        "/v1/grantors/opportunities",
         json={
             "opportunity_title": "Test Opportunity"
             # Missing other required fields
@@ -120,7 +118,7 @@ def test_opportunity_create_no_permissions(client, db_session, enable_factory_cr
     opportunity_request = create_opportunity_request(agency_id=str(agency.agency_id))
 
     response = client.post(
-        "/v1/grantors/opportunities/", json=opportunity_request, headers={"X-SGG-Token": token}
+        "/v1/grantors/opportunities", json=opportunity_request, headers={"X-SGG-Token": token}
     )
 
     assert response.status_code == 403

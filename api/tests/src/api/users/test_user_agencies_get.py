@@ -1,9 +1,9 @@
 import uuid
 
 from src.auth.api_jwt_auth import create_jwt_for_user
-from tests.lib.opportunity_test_utils import (
+from tests.lib.agency_test_utils import (
+    create_user_in_agency_with_api_key,
     create_user_in_agency_with_jwt,
-    create_user_in_agency_with_jwt_and_api_key,
 )
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -89,7 +89,7 @@ class TestUserAgenciesGet:
         self, enable_factory_create, client, db_session
     ):
         """Test getting user agencies works with API key auth"""
-        user, agency, _, api_key_id = create_user_in_agency_with_jwt_and_api_key(db_session)
+        user, agency, api_key_id = create_user_in_agency_with_api_key()
 
         resp = client.post(f"/v1/users/{user.user_id}/agencies", headers={"X-API-Key": api_key_id})
 
@@ -103,7 +103,7 @@ class TestUserAgenciesGet:
         self, enable_factory_create, client, db_session
     ):
         """Test that API key auth returns 403 when user_id doesn't match authenticated user"""
-        _, _, _, api_key_id = create_user_in_agency_with_jwt_and_api_key(db_session)
+        _, _, api_key_id = create_user_in_agency_with_api_key()
         other_user, _, _ = create_user_in_agency_with_jwt(db_session)
 
         resp = client.post(
