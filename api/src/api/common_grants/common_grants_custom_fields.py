@@ -10,7 +10,6 @@ it should be as simple as importing the already existing field into the file tha
 as a new property.
 """
 
-
 from typing import Any
 
 from src.api.schemas.extension import Schema, fields
@@ -50,96 +49,101 @@ class CustomField(Schema):
 # Custom Field Implementations
 # ===========================================================================================
 
+
 class LegacyId(CustomField):
     """Storing legacy id for compatibility iwth legacy systems"""
 
-    name = fields.String(required=True,
-                         metadata={
-                             "example": "legacyId"
-                        })
+    name = fields.String(required=True, metadata={"example": "legacyId"})
     fieldType = fields.String(required=True, metadata={"example": "integer"})
-    value = fields.Integer(required=True,
-                           metadata={"example": "12345"})
-    description = fields.String(allow_none=True,
-                                metadata={"example": "An integer ID for the opportunity, needed for compatibility with legacy systems"})
+    value = fields.Integer(required=True, metadata={"example": "12345"})
+    description = fields.String(
+        allow_none=True,
+        metadata={
+            "example": "An integer ID for the opportunity, needed for compatibility with legacy systems"
+        },
+    )
 
 
 class FederalOpportunityNumber(CustomField):
     """Federal Opportunity Number assigned to this grant opportunity"""
 
-    name = fields.String(required=True,
-                         metadata={
-                            "example": "federalOpportunityNumber"
-                         })
+    name = fields.String(required=True, metadata={"example": "federalOpportunityNumber"})
     fieldType = fields.String(required=True, metadata={"example": "string"})
-    value = fields.String(required=True,
-                          metadata={
-                            "example": "ABC-123-XYZ-001"
-                        })
-    description = fields.String(allow_none=True,
-                                metadata={"example": "The federal opportunity number assigned to this grant opportunity"})
+    value = fields.String(required=True, metadata={"example": "ABC-123-XYZ-001"})
+    description = fields.String(
+        allow_none=True,
+        metadata={"example": "The federal opportunity number assigned to this grant opportunity"},
+    )
 
 
 class AssistanceListingValue(Schema):
     """Schema for populating the AssistanceListing value field"""
+
     assistanceListingNumber = fields.String(required=True, metadata={"example": "43.012"})
     programTitle = fields.String(required=True, metadata={"example": "Space Technology"})
 
 
 class AssistanceListing(CustomField):
     """The assistance listing number and program title for this opportunity"""
-    name = fields.String(required=True,
-                         metadata={
-                             "example": "assistanceListing"
-                         })
+
+    name = fields.String(required=True, metadata={"example": "assistanceListing"})
     fieldType = fields.String(required=True, metadata={"example": "object"})
     value = fields.Nested(AssistanceListingValue, required=True)
     description = fields.String(
         allow_none=True,
-        metadata={"example": "The assistance listing number and program title for this opportunity"}
+        metadata={
+            "example": "The assistance listing number and program title for this opportunity"
+        },
     )
 
 
 class AgencyValue(Schema):
     """Schema for populating the Agency value field"""
+
     agencyCode = fields.String(required=True, metadata={"example": "US-ABC"})
     agencyName = fields.String(required=True, metadata={"example": "Department of Examples"})
-    topLevelAgencyName = fields.String(required=True, metadata={"example": "Department of Examples"})
+    topLevelAgencyName = fields.String(
+        required=True, metadata={"example": "Department of Examples"}
+    )
 
 
 class Agency(CustomField):
     """Information about the agency offering this opportunity"""
-    name = fields.String(required=True,
-                         metadata={"example": "agency"})
+
+    name = fields.String(required=True, metadata={"example": "agency"})
     fieldType = fields.String(required=True, metadata={"example": "object"})
     value = fields.Nested(AgencyValue, required=True)
     description = fields.String(
         allow_none=True,
-        metadata={"example": "Information about the agency offering this opportunity"}
+        metadata={"example": "Information about the agency offering this opportunity"},
     )
 
 
 class AttachmentValue(Schema):
     downloadUrl = fields.URL(required=True, metadata={"example": "https://example.com/file.pdf"})
     name = fields.String(required=True, metadata={"example": "example.pdf"})
-    description = fields.String(allow_none=True, metadata={"example": "A PDF file with instructions"})
+    description = fields.String(
+        allow_none=True, metadata={"example": "A PDF file with instructions"}
+    )
     sizeInBytes = fields.Integer(required=True, metadata={"example": 1000})
     mimeType = fields.String(required=True, metadata={"example": "application/pdf"})
     createdAt = fields.DateTime(required=True, metadata={"example": "2025-01-01T17:01:01.000Z"})
-    lastModifiedAt = fields.DateTime(required=True, metadata={"example": "2025-01-02T17:30:00.000Z"})
+    lastModifiedAt = fields.DateTime(
+        required=True, metadata={"example": "2025-01-02T17:30:00.000Z"}
+    )
 
 
 class Attachments(CustomField):
     """Attachments such as NOFOs or other supplemental documents"""
-    name = fields.String(required=True,
-                         metadata={
-                             "example": "attachments"
-                         })
+
+    name = fields.String(required=True, metadata={"example": "attachments"})
     fieldType = fields.String(required=True, metadata={"example": "array"})
     value = fields.List(fields.Nested(AttachmentValue), required=True)
     description = fields.String(
         allow_none=True,
-        metadata={"example": "Attachments such as NOFOs and supplemental documents for the opportunity"},
+        metadata={
+            "example": "Attachments such as NOFOs and supplemental documents for the opportunity"
+        },
     )
 
 
@@ -158,9 +162,14 @@ class Category(CustomField):
 class AgencyContactValue(Schema):
     """Schema for populating the AgencyContact value field"""
 
-    description = fields.String(required=True, metadata={"example": "For more information, reach out to Jane Smith at agency US-ABC"})
+    description = fields.String(
+        required=True,
+        metadata={"example": "For more information, reach out to Jane Smith at agency US-ABC"},
+    )
     emailAddress = fields.String(required=True, metadata={"example": "fake_email@grants.gov"})
-    emailDescription = fields.String(required=True, metadata={"example": "Click me to email the agency"})
+    emailDescription = fields.String(
+        required=True, metadata={"example": "Click me to email the agency"}
+    )
 
 
 class AgencyContact(CustomField):
@@ -190,7 +199,9 @@ class AdditionalInfo(CustomField):
     value = fields.Nested(AdditionalInfoValue, required=True)
     description = fields.String(
         allow_none=True,
-        metadata={"example": "URL and description for additional information about the opportunity"},
+        metadata={
+            "example": "URL and description for additional information about the opportunity"
+        },
     )
 
 
@@ -202,7 +213,9 @@ class CostSharing(CustomField):
     value = fields.Boolean(required=True, metadata={"example": True})
     description = fields.String(
         allow_none=True,
-        metadata={"example": "Whether cost sharing or matching funds are required for this opportunity"},
+        metadata={
+            "example": "Whether cost sharing or matching funds are required for this opportunity"
+        },
     )
 
 
