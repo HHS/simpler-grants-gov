@@ -312,9 +312,7 @@ class CustomFields(Schema):
 ```
 
 
-3. To verify the changes run `make openapi-spec-common-grants` at the first `/api` directory in the repository and then run `make init 
-make db-seed-local && make populate-search-opportunities
-make run-logs` to stand up the openApi endpoints
+3. To verify the changes run `make openapi-spec-common-grants` at the first `/api` directory in the repository and then run `make init make db-seed-local && make populate-search-opportunities make run-logs` to stand up the openApi endpoints
 
 4. After the Docker containers have started go to `localhost:8080/docs` and enter the user key for the `common grants` endpoints. 
 5. Run the endpoints to validate responses. 

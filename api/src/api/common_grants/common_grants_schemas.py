@@ -7,9 +7,20 @@ organized by category for better maintainability.
 
 from typing import Any
 
+from src.api.common_grants.common_grants_custom_fields import (
+    AdditionalInfo,
+    Agency,
+    AgencyContact,
+    AssistanceListing,
+    Attachments,
+    Category,
+    CostSharing,
+    FederalOpportunityNumber,
+    FiscalYear,
+    LegacyId,
+)
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.extension import validators as validate
-from src.api.common_grants.common_grants_custom_fields import AdditionalInfo, Agency, AgencyContact, AssistanceListing, Attachments, Category, CostSharing, CustomField, CustomFieldType, FederalOpportunityNumber, FiscalYear, LegacyId
 
 # =============================================================================
 # BASIC FIELD TYPES
@@ -401,10 +412,10 @@ class OpportunityBase(Schema):
         },
     )
     customFields = fields.Nested(
-          CustomFields,
-          allow_none=True,
-          metadata={"description": "Additional custom fields specific to this opportunity"},
-      )
+        CustomFields,
+        allow_none=True,
+        metadata={"description": "Additional custom fields specific to this opportunity"},
+    )
 
 
 # =============================================================================

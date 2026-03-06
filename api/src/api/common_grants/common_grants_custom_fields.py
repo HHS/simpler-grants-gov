@@ -7,7 +7,7 @@ At this time there is only one such file and that is common_grants_schemas.py wh
 
 This pattern allows for simple re-use of custom fields across different base objects since if the fields already exist
 it should be as simple as importing the already existing field into the file that requires it and adding it to the CustomFields class
-as a new property. 
+as a new property.
 """
 
 
@@ -32,6 +32,9 @@ class CustomFieldType(fields.String):
 
 class CustomField(Schema):
     """Schema for defining custom fields on a record."""
+
+    fieldType: fields.String
+    value: fields.MixinField
 
     name = fields.String(required=True, metadata={"example": "eligible_applicants"})
     fieldType = CustomFieldType(required=True)
