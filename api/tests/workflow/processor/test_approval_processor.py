@@ -363,7 +363,9 @@ def test_agency_approval_approve_then_decline(db_session, agency, program_office
     )
 
 
-def test_agency_approval_invalid_response_type(db_session, agency, budget_officer, opportunity):
+def test_agency_approval_invalid_response_type(
+    db_session, agency, budget_officer, opportunity, app
+):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
