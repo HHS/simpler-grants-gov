@@ -39,6 +39,6 @@ test.describe("fill SF-LLL Form", () => {
       saveButtonTestId: SFLLL_FORM_CONFIG.saveButtonTestId,
       noErrorsText: SFLLL_FORM_CONFIG.noErrorsText,
     });
-    ensurePageClosed(page);
+    await ensurePageClosed(page);
   });
 });
