@@ -6,10 +6,18 @@ import { PropsWithChildren } from "react";
 export function LoginLink({
   children,
   className,
-}: { className?: string } & PropsWithChildren) {
+  queryParameters,
+}: {
+  className?: string;
+  queryParameters?: Record<string, string>;
+} & PropsWithChildren) {
+  let linkUrl = LOGIN_URL;
+  if (queryParameters) {
+    linkUrl += `?${new URLSearchParams(queryParameters).toString()}`;
+  }
   return (
     <a
-      href={LOGIN_URL}
+      href={linkUrl}
       key="login-link"
       className={className}
       onClick={() => {

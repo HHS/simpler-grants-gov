@@ -10,6 +10,12 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 
 export default function Login() {
   const router = useRouter();
+  if (typeof window !== "undefined") {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("piverror") === "true") {
+      SessionStorage.setItem("showPivError", "true");
+    }
+  }
 
   useEffect(() => {
     if (typeof window !== "undefined") {
