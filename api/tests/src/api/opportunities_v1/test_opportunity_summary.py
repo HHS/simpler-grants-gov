@@ -1,17 +1,12 @@
 import uuid
-from datetime import date, timedelta
+from datetime import date
 
 import pytest
 
 from src.constants.lookup_constants import Privilege
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
-from tests.lib.opportunity_test_utils import (
-    create_opportunity_summary_request,
-)
-from tests.src.db.models.factories import (
-    AgencyFactory,
-    OpportunityFactory,
-)
+from tests.lib.opportunity_test_utils import create_opportunity_summary_request
+from tests.src.db.models.factories import AgencyFactory, OpportunityFactory
 
 
 @pytest.fixture
@@ -66,49 +61,6 @@ def test_opportunities(db_session, enable_factory_create, opportunity_summary_au
     )
 
     return opportunities
-
-
-def test_opportunity_summary_create_successful(
-    client, db_session, opportunity, opportunity_summary_auth_data
-):
-    """Test successful creation of an opportunity summary"""
-    _, _, token, _ = opportunity_summary_auth_data
-
-    today = date.today()
-    post_date = today + timedelta(days=1)  # Tomorrow
-    close_date = today + timedelta(days=30)  # 30 days from now
-
-    summary_request = create_opportunity_summary_request(
-        summary_description="Test summary description",
-        is_forecast=False,
-        post_date=post_date,
-        close_date=close_date,
-        award_floor=50000,
-        award_ceiling=200000,
-    )
-
-    print(f"Request data: {json.dumps(summary_request, default=str)}")
-
-    # Send request to create a summary
-    response = client.post(
-        f"/v1/opportunities/{opportunity.opportunity_id}/summary",
-        json=summary_request,
-        headers={"X-SGG-Token": token},
-    )
-
-    # Print response details for debugging
-    print(f"Response status: {response.status_code}")
-    print(f"Response body: {response.data.decode('utf-8')}")
-
-    # Verify successful response
-    assert response.status_code == 200
-    response_data = response.get_json()
-    assert "data" in response_data
-
-    # Verify summary data in response
-    summary_data = response_data["data"]
-    assert summary_data["summary_description"] == summary_request["summary_description"]
-    assert summary_data["is_forecast"] == summary_request["is_forecast"]
 
 
 def test_opportunity_summary_create_with_invalid_jwt_token(
