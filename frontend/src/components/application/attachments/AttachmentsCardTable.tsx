@@ -76,7 +76,6 @@ export const AttachmentsCardTable = ({
         sortDirection={sortDirection}
       />
       <tbody>
-        {isDeleting ? <AttachmentsCardTableRowDeleting /> : null}
         {uploads.map((upload) =>
           upload.status === "uploading" ? (
             <AttachmentsCardTableRowUploading
