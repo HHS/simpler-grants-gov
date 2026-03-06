@@ -1,6 +1,10 @@
 import { JSX } from "react";
 
-import { UswdsWidgetProps, WidgetTypes } from "src/components/applyForm/types";
+import {
+  FieldListWidgetProps,
+  UswdsWidgetProps,
+  WidgetTypes,
+} from "src/components/applyForm/types";
 import AttachmentWidget from "./AttachmentUploadWidget";
 import Budget424aSectionA from "./budget/Budget424aSectionA";
 import Budget424aSectionB from "./budget/Budget424aSectionB";
@@ -47,5 +51,6 @@ export const widgetComponents: Record<
   Budget424aSectionF: (widgetProps: UswdsWidgetProps) =>
     Budget424aSectionF(widgetProps),
   MultiSelect: (widgetProps: UswdsWidgetProps) => MultiSelect(widgetProps),
-  FieldList: (widgetProps: UswdsWidgetProps) => FieldListWidget(widgetProps),
+  FieldList: (widgetProps: UswdsWidgetProps) =>
+    FieldListWidget(widgetProps as unknown as FieldListWidgetProps),
 };

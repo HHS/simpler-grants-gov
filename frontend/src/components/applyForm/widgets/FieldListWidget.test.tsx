@@ -7,14 +7,18 @@ describe("FieldListWidget (stub)", () => {
     render(
       <FieldListWidget
         id="contacts"
+        key="contacts"
         schema={{}}
         label="Contacts"
         description="Add contacts"
-        defaultSize={2}
+        defaultSize={1}
+        groupDefinition={[]}
+        rawErrors={[]}
+        requiredFields={[]}
       />,
     );
 
     expect(screen.getByText("Contacts")).toBeInTheDocument();
-    expect(screen.getByText(/defaultSize: 2/i)).toBeInTheDocument();
+    expect(screen.getByText(/defaultSize: 1/i)).toBeInTheDocument();
   });
 });
