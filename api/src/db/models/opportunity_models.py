@@ -217,7 +217,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
-    legacy_opportunity_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    legacy_opportunity_id: Mapped[int | None] = mapped_column(BigInteger, index=True)
 
     summary_description: Mapped[str | None]
 

@@ -1,6 +1,5 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { identity, noop } from "lodash";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { SaveSearchModal } from "src/components/search/SaveSearchModal";
 
@@ -22,10 +21,6 @@ jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
     clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
   }),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/utils/search/searchFormatUtils", () => ({
