@@ -26,7 +26,7 @@ In current practice, the service is triggered daily via an AWS Step Function orc
 - [Terraform config file](../infra/analytics/app-config/env-config/scheduled_jobs.tf)
 - [AWS Step Function console](https://us-east-1.console.aws.amazon.com/states/home?region=us-east-1#/statemachines)
 
-# Docker Base Image
+## Docker Base Image
 We build a common Docker Base Image for our Python Services and the [steps to update that base image to pick up software patches](../api/package-dependency-management.md#docker-base-image-updates) is documented in the API section to avoid duplicating information.
 
 <!-- Key technologies -->
