@@ -203,7 +203,7 @@ export const AttachmentsCard = ({
             deleteAttachmentModalRef={deleteModalRef}
             handleCancelUpload={handleCancelUpload}
             markAttachmentForDeletion={markAttachmentForDeletion}
-            isDeleting={deletePending}
+            //isDeleting={deletePending}
             uploads={uploads}
           />
         </Grid>
