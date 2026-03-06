@@ -54,25 +54,14 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
 
 jest.mock("src/services/fetch/fetchers/opportunityFetcher");
 
-jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
-  getAwardRecommendationDetails: jest.fn().mockResolvedValue({
-    recordNumber: "AR-26-0001",
-    datePrepared: "01/01/2026",
-    status: "in_progress" as const,
-  }),
+jest.mock("react", () => ({
+  ...jest.requireActual<typeof import("react")>("react"),
+  Suspense: ({ fallback }: { fallback: React.Component }) => fallback,
 }));
 
 jest.mock("next-intl", () => ({
   useTranslations: () => identity,
 }));
-
-jest.mock("src/components/award-recommendation/AwardRecommendationHero", () => {
-  const React = jest.requireActual<typeof import("react")>("react");
-  return {
-    __esModule: true,
-    default: () => <div data-testid="award-recommendation-hero-mock" />,
-  };
-});
 
 const mockOpportunityDetail = {
   opportunity_id: "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
@@ -164,7 +153,7 @@ describe("AwardRecommendationPage", () => {
       });
       render(component);
       expect(
-        screen.getByTestId("award-recommendation-hero-mock"),
+        screen.getByTestId("award-recommendation-hero-fallback"),
       ).toBeInTheDocument();
     });
 
