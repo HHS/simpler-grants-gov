@@ -1,4 +1,10 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 
 import CopyIcon from "src/components/CopyIcon";
 
@@ -20,48 +26,37 @@ describe("CopyIcon", () => {
   });
 
   it("renders the copy icon by default", () => {
-    const { container } = render(<CopyIcon content="test-content" />);
+    render(<CopyIcon content="test-content" />);
 
-    const svg = container.querySelector("svg use");
-    expect(svg).toHaveAttribute(
-      "href",
-      expect.stringContaining("content_copy"),
-    );
+    expect(screen.getByRole("button", { name: "Copy" })).toBeInTheDocument();
   });
 
   it("copies content to clipboard on click", async () => {
     render(<CopyIcon content="my-secret-key" />);
 
-    const button = screen.getByRole("button");
-    await act(async () => {
-      fireEvent.click(button);
-      await Promise.resolve();
-    });
+    fireEvent.click(screen.getByRole("button", { name: "Copy" }));
 
-    expect(mockWriteText).toHaveBeenCalledWith("my-secret-key");
+    await waitFor(() => {
+      expect(mockWriteText).toHaveBeenCalledWith("my-secret-key");
+    });
   });
 
   it("shows check icon after clicking, then reverts after 2 seconds", async () => {
-    const { container } = render(<CopyIcon content="test-content" />);
+    render(<CopyIcon content="test-content" />);
 
-    const button = screen.getByRole("button");
-    await act(async () => {
-      fireEvent.click(button);
-      await Promise.resolve();
+    fireEvent.click(screen.getByRole("button", { name: "Copy" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Copied" }),
+      ).toBeInTheDocument();
     });
-
-    const checkIcon = container.querySelector("svg use");
-    expect(checkIcon).toHaveAttribute("href", expect.stringContaining("check"));
 
     act(() => {
       jest.advanceTimersByTime(2000);
     });
 
-    const copyIcon = container.querySelector("svg use");
-    expect(copyIcon).toHaveAttribute(
-      "href",
-      expect.stringContaining("content_copy"),
-    );
+    expect(screen.getByRole("button", { name: "Copy" })).toBeInTheDocument();
   });
 
   it("applies custom className to the button", () => {
@@ -82,23 +77,18 @@ describe("CopyIcon", () => {
     const consoleSpy = jest.spyOn(console, "error").mockImplementation();
     mockWriteText.mockRejectedValueOnce(new Error("Permission denied"));
 
-    const { container } = render(<CopyIcon content="test-content" />);
+    render(<CopyIcon content="test-content" />);
 
-    const button = screen.getByRole("button");
-    await act(async () => {
-      fireEvent.click(button);
-      await Promise.resolve();
+    fireEvent.click(screen.getByRole("button", { name: "Copy" }));
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Error copying to clipboard",
+        expect.any(Error),
+      );
     });
 
-    const icon = container.querySelector("svg use");
-    expect(icon).toHaveAttribute(
-      "href",
-      expect.stringContaining("content_copy"),
-    );
-    expect(consoleSpy).toHaveBeenCalledWith(
-      "Error copying to clipboard",
-      expect.any(Error),
-    );
+    expect(screen.getByRole("button", { name: "Copy" })).toBeInTheDocument();
 
     consoleSpy.mockRestore();
   });

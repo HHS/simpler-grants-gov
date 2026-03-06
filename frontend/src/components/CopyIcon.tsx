@@ -11,7 +11,7 @@ interface CopyIconProps {
 const CopyIcon = ({
   content,
   className,
-  "aria-label": ariaLabel,
+  "aria-label": ariaLabel = "Copy",
 }: CopyIconProps) => {
   const [copied, setCopied] = useState(false);
   return (
@@ -19,7 +19,7 @@ const CopyIcon = ({
       className={className}
       unstyled
       type="button"
-      aria-label={ariaLabel}
+      aria-label={copied ? "Copied" : ariaLabel}
       onClick={() => {
         navigator.clipboard
           .writeText(content)

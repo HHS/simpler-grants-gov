@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { useClientFetch } from "src/hooks/useClientFetch";
@@ -569,9 +569,7 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("create-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText("createSuccessHeading"),
-        ).toBeInTheDocument();
+        expect(screen.getByText("createSuccessHeading")).toBeInTheDocument();
       });
 
       expect(screen.getByText("new-secret-key-123")).toBeInTheDocument();
@@ -599,8 +597,9 @@ describe("ApiKeyModal", () => {
       });
 
       const modal = screen.getByRole("dialog");
-      const copyIcon = modal.querySelector("svg use[href*='content_copy']");
-      expect(copyIcon).toBeInTheDocument();
+      expect(
+        within(modal).getByRole("button", { name: "copyApiKey" }),
+      ).toBeInTheDocument();
     });
 
     it("does not display the API key ID after successful edit", async () => {
@@ -624,9 +623,7 @@ describe("ApiKeyModal", () => {
       await user.click(screen.getByTestId("edit-api-key-submit-button"));
 
       await waitFor(() => {
-        expect(
-          screen.getByText("editSuccessHeading"),
-        ).toBeInTheDocument();
+        expect(screen.getByText("editSuccessHeading")).toBeInTheDocument();
       });
 
       expect(screen.queryByText("edit-key-456")).not.toBeInTheDocument();
