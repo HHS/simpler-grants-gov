@@ -9,18 +9,10 @@ module "project_config" {
   source = "../../project-config"
 }
 
-data "external" "whoami" {
-  program = ["sh", "-c", "whoami | xargs -I {} echo '{\"value\": \"{}\"}'"]
-}
-
 # TODO: https://github.com/HHS/simpler-grants-gov/issues/3177
 # data "external" "deploy_github_ref" {
 #   program = ["sh", "-c", "git branch --show-current | xargs -I {} echo '{\"value\": \"{}\"}'"]
 # }
-
-data "external" "deploy_github_sha" {
-  program = ["sh", "-c", "git rev-parse HEAD | xargs -I {} echo '{\"value\": \"{}\"}'"]
-}
 
 data "aws_ssm_parameter" "fluent_bit_commit" {
   name = "/fluent-bit-commit"
@@ -45,10 +37,8 @@ locals {
     { name : "AWS_REGION", value : data.aws_region.current.name },
     { name : "GENERAL_S3_BUCKET_URL", value : aws_s3_bucket.general_purpose.bucket_regional_domain_name },
     { name : "ENVIRONMENT", value : var.environment_name },
-    { name : "DEPLOY_GITHUB_SHA", value : data.external.deploy_github_sha.result.value },
     # TODO: https://github.com/HHS/simpler-grants-gov/issues/3177
     # { name : "DEPLOY_GITHUB_REF", value : data.external.deploy_github_ref.result.value },
-    { name : "DEPLOY_WHOAMI", value : data.external.whoami.result.value },
     { name : "IMAGE_TAG", value : var.image_tag },
   ], local.hostname)
 
