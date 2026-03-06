@@ -223,10 +223,10 @@ locals {
     }
     setup-lower-env-agencies = {
       task_command = ["poetry", "run", "flask", "task", "setup-lower-env-agencies"]
-      # Every day at 8:15am Eastern Time during DST. 9:15am during non-DST.
-      # Runs just before the search load job that runs 30 minutes after the hour.
-      schedule_expression = "cron(15 13 * * ? *)"
-      # Only enable in dev/staging/training, do not run in prod
+      # Every day at 7:45am Eastern Time during DST. 8:45am during non-DST.
+      # Runs just before the agency search load job that runs at the top of the hour.
+      schedule_expression = "cron(45 12 * * ? *)"
+      # Only enable in dev/staging, do not run in training/prod
       state            = local.setup-lower-env-agencies-state[var.environment]
       cpu              = try(local.scheduled_jobs_config[var.environment].cpu, null)
       mem              = try(local.scheduled_jobs_config[var.environment].mem, null)
