@@ -1,4 +1,3 @@
-
 import { AttachmentCardItem } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";

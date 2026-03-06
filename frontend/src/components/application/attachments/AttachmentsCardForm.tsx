@@ -1,4 +1,3 @@
-
 import { RefObject } from "react";
 import { FileInput, FileInputRef } from "@trussworks/react-uswds";
 
