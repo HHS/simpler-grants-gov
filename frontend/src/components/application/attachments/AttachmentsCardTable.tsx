@@ -36,7 +36,7 @@ export const AttachmentsCardTable = ({
   attachmentIdsToDelete,
   deleteAttachmentModalRef,
   handleCancelUpload,
-  isDeleting,
+  //isDeleting,
   markAttachmentForDeletion,
   uploads,
 }: Props) => {
