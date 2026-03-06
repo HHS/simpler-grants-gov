@@ -90,7 +90,6 @@ def test_legacy_soap_api_request_raises_error_if_soap_config_privileges_are_none
                 "GetApplicationZipResponse": "ns2",
             },
             privileges=None,
-            is_mtom=True,
         )
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '

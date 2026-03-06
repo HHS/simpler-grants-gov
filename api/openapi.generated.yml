@@ -5995,6 +5995,10 @@ components:
             - view_org_saved_opportunities
             - modify_org_saved_opportunities
             - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
             type:
@@ -6155,6 +6159,10 @@ components:
             - view_org_saved_opportunities
             - modify_org_saved_opportunities
             - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
             type:
@@ -7033,6 +7041,10 @@ components:
             - view_org_saved_opportunities
             - modify_org_saved_opportunities
             - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
             type:
@@ -7596,6 +7608,10 @@ components:
             - view_org_saved_opportunities
             - modify_org_saved_opportunities
             - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
             type:
