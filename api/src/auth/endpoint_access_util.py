@@ -1,13 +1,16 @@
 import logging
 from typing import Any
 
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
-from src.db.models.user_models import Role, User
+from src.db.models.user_models import AgencyUser, AgencyUserRole, LinkRolePrivilege, Role, User
 from src.services.users.get_roles_and_privileges import get_roles_and_privileges
 
 logger = logging.getLogger(__name__)
@@ -115,6 +118,43 @@ def get_log_info_for_resource(resource: Organization | Application | Agency | No
         log_info["agency_code"] = resource.agency_code
 
     return log_info
+
+
+def get_users_with_privileges_for_agency(
+    db_session: db.Session,
+    agency: Agency,
+    required_privileges: list[Privilege],
+) -> list[User]:
+    """
+    Get all users in an agency who have ANY of the required privileges.
+
+    Args:
+        db_session: Database session
+        agency: Agency to search within
+        required_privileges: List of privileges, user must have at least one
+
+    Returns:
+        List of User objects with profile and external user info loaded
+    """
+    stmt = (
+        select(User)
+        .distinct()
+        .join(AgencyUser, AgencyUser.user_id == User.user_id)
+        .join(AgencyUserRole, AgencyUserRole.agency_user_id == AgencyUser.agency_user_id)
+        .join(Role, Role.role_id == AgencyUserRole.role_id)
+        .join(LinkRolePrivilege, LinkRolePrivilege.role_id == Role.role_id)
+        .where(
+            AgencyUser.agency_id == agency.agency_id,
+            LinkRolePrivilege.privilege.in_(required_privileges),
+        )
+        .options(
+            selectinload(User.linked_login_gov_external_user),
+            selectinload(User.profile),
+        )
+    )
+
+    users = db_session.execute(stmt).scalars().unique().all()
+    return list(users)
 
 
 def check_user_access(
