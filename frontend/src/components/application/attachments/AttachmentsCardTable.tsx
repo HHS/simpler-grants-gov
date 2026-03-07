@@ -70,17 +70,8 @@ export const AttachmentsCardTable = ({
 
   return (
     <Table className="application-attachments-table width-full overflow-wrap">
-      <AttachmentsCardTableHeaders
-        handleAttachmentSort={handleAttachmentSort}
-        sortBy={sortBy}
-        sortDirection={sortDirection}
-      />
       <tbody>
-        {uploads.map((upload) =>
-          upload.status === "uploading" ? (
-            null
-          ) : null,
-        )}
+        {uploads.map((upload) => (upload.status === "uploading" ? null : null))}
 
         {sortedAttachments.length
           ? sortedAttachments.map((file) => (
