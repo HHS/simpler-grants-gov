@@ -15,7 +15,7 @@ import { PopoverMenu } from "src/components/PopoverMenu";
 import { AttachmentsCardTableHeaders } from "./AttachmentsCardTableHeaders";
 // import { AttachmentsCardTableRowDeleting } from "./AttachmentsCardTableRowDeleting";
 // import { AttachmentsCardTableRowEmpty } from "./AttachmentsCardTableRowEmpty";
-import { AttachmentsCardTableRowUploading } from "./AttachmentsCardTableRowUploading";
+// import { AttachmentsCardTableRowUploading } from "./AttachmentsCardTableRowUploading";
 import { DeleteAttachmentButton } from "./DeleteAttachmentButton";
 
 interface Props {
@@ -78,11 +78,7 @@ export const AttachmentsCardTable = ({
       <tbody>
         {uploads.map((upload) =>
           upload.status === "uploading" ? (
-            <AttachmentsCardTableRowUploading
-              key={upload.id}
-              attachment={upload}
-              onCancel={handleCancelUpload}
-            />
+            null
           ) : null,
         )}
 
