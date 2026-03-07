@@ -86,33 +86,31 @@ export const AttachmentsCardTable = ({
           ) : null,
         )}
 
-        {sortedAttachments.length ? (
-          sortedAttachments.map((file) => (
-            <tr key={file.application_attachment_id}>
-              <td suppressHydrationWarning>{file.file_name}</td>
-              <td>
-                <PopoverMenu>
-                  {file.download_path && (
-                    <Link download href={file.download_path}>
-                      {t("download")}
-                    </Link>
-                  )}
+        {sortedAttachments.length
+          ? sortedAttachments.map((file) => (
+              <tr key={file.application_attachment_id}>
+                <td suppressHydrationWarning>{file.file_name}</td>
+                <td>
+                  <PopoverMenu>
+                    {file.download_path && (
+                      <Link download href={file.download_path}>
+                        {t("download")}
+                      </Link>
+                    )}
 
-                  <DeleteAttachmentButton
-                    file={file}
-                    buttonText={t("delete")}
-                    markAttachmentForDeletion={markAttachmentForDeletion}
-                    modalRef={deleteAttachmentModalRef}
-                  />
-                </PopoverMenu>
-              </td>
-              <td>{formatFileSize(file.file_size_bytes)}</td>
-              <td>{formatDateTime(file.updated_at)}</td>
-            </tr>
-          ))
-        ) : (
-          null
-        )}
+                    <DeleteAttachmentButton
+                      file={file}
+                      buttonText={t("delete")}
+                      markAttachmentForDeletion={markAttachmentForDeletion}
+                      modalRef={deleteAttachmentModalRef}
+                    />
+                  </PopoverMenu>
+                </td>
+                <td>{formatFileSize(file.file_size_bytes)}</td>
+                <td>{formatDateTime(file.updated_at)}</td>
+              </tr>
+            ))
+          : null}
       </tbody>
     </Table>
   );
