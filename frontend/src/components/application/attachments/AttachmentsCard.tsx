@@ -93,7 +93,7 @@ export const AttachmentsCard = ({
 
   //  const target = uploads.find((u) => u.id === uploadId);
   //  target?.abortController?.abort();
-  //};
+  // };
 
   const handleDeleteAttachment = () => {
     const applicationAttachmentId = lastDeletedIdRef.current as string;
