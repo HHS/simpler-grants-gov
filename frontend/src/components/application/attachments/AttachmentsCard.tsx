@@ -84,16 +84,16 @@ export const AttachmentsCard = ({
    * Helpers
    */
 
-  const handleCancelUpload = (uploadId: string) => {
-    setUploads((prev) =>
-      prev.map((upload) =>
-        upload.id === uploadId ? { ...upload, status: "cancelled" } : upload,
-      ),
-    );
+  // const handleCancelUpload = (uploadId: string) => {
+  //  setUploads((prev) =>
+  //    prev.map((upload) =>
+  //      upload.id === uploadId ? { ...upload, status: "cancelled" } : upload,
+  //    ),
+  //  );
 
-    const target = uploads.find((u) => u.id === uploadId);
-    target?.abortController?.abort();
-  };
+  //  const target = uploads.find((u) => u.id === uploadId);
+  //  target?.abortController?.abort();
+  // };
 
   const handleDeleteAttachment = () => {
     const applicationAttachmentId = lastDeletedIdRef.current as string;
@@ -201,9 +201,9 @@ export const AttachmentsCard = ({
             attachments={attachments}
             attachmentIdsToDelete={attachmentIdsToDelete}
             deleteAttachmentModalRef={deleteModalRef}
-            handleCancelUpload={handleCancelUpload}
+            // handleCancelUpload={handleCancelUpload}
             markAttachmentForDeletion={markAttachmentForDeletion}
-            isDeleting={deletePending}
+            // isDeleting={deletePending}
             uploads={uploads}
           />
         </Grid>

@@ -13,17 +13,17 @@ import { Link, ModalRef, Table } from "@trussworks/react-uswds";
 
 import { PopoverMenu } from "src/components/PopoverMenu";
 import { AttachmentsCardTableHeaders } from "./AttachmentsCardTableHeaders";
-import { AttachmentsCardTableRowDeleting } from "./AttachmentsCardTableRowDeleting";
-import { AttachmentsCardTableRowEmpty } from "./AttachmentsCardTableRowEmpty";
-import { AttachmentsCardTableRowUploading } from "./AttachmentsCardTableRowUploading";
+// import { AttachmentsCardTableRowDeleting } from "./AttachmentsCardTableRowDeleting";
+// import { AttachmentsCardTableRowEmpty } from "./AttachmentsCardTableRowEmpty";
+// import { AttachmentsCardTableRowUploading } from "./AttachmentsCardTableRowUploading";
 import { DeleteAttachmentButton } from "./DeleteAttachmentButton";
 
 interface Props {
   attachments: Attachment[];
   attachmentIdsToDelete: Set<string>;
   deleteAttachmentModalRef: RefObject<ModalRef | null>;
-  handleCancelUpload: (uploadId: string) => void;
-  isDeleting: boolean;
+  // handleCancelUpload: (uploadId: string) => void;
+  // isDeleting: boolean;
   markAttachmentForDeletion: (
     application_attachment_id: string,
     attachmentToDeleteName: string,
@@ -35,8 +35,8 @@ export const AttachmentsCardTable = ({
   attachments,
   attachmentIdsToDelete,
   deleteAttachmentModalRef,
-  handleCancelUpload,
-  isDeleting,
+  // handleCancelUpload,
+  // isDeleting,
   markAttachmentForDeletion,
   uploads,
 }: Props) => {
@@ -70,50 +70,34 @@ export const AttachmentsCardTable = ({
 
   return (
     <Table className="application-attachments-table width-full overflow-wrap">
-      <AttachmentsCardTableHeaders
-        handleAttachmentSort={handleAttachmentSort}
-        sortBy={sortBy}
-        sortDirection={sortDirection}
-      />
       <tbody>
-        {isDeleting ? <AttachmentsCardTableRowDeleting /> : null}
-        {uploads.map((upload) =>
-          upload.status === "uploading" ? (
-            <AttachmentsCardTableRowUploading
-              key={upload.id}
-              attachment={upload}
-              onCancel={handleCancelUpload}
-            />
-          ) : null,
-        )}
+        {uploads.map((upload) => (upload.status === "uploading" ? null : null))}
 
-        {sortedAttachments.length ? (
-          sortedAttachments.map((file) => (
-            <tr key={file.application_attachment_id}>
-              <td suppressHydrationWarning>{file.file_name}</td>
-              <td>
-                <PopoverMenu>
-                  {file.download_path && (
-                    <Link download href={file.download_path}>
-                      {t("download")}
-                    </Link>
-                  )}
+        {sortedAttachments.length
+          ? sortedAttachments.map((file) => (
+              <tr key={file.application_attachment_id}>
+                <td suppressHydrationWarning>{file.file_name}</td>
+                <td>
+                  <PopoverMenu>
+                    {file.download_path && (
+                      <Link download href={file.download_path}>
+                        {t("download")}
+                      </Link>
+                    )}
 
-                  <DeleteAttachmentButton
-                    file={file}
-                    buttonText={t("delete")}
-                    markAttachmentForDeletion={markAttachmentForDeletion}
-                    modalRef={deleteAttachmentModalRef}
-                  />
-                </PopoverMenu>
-              </td>
-              <td>{formatFileSize(file.file_size_bytes)}</td>
-              <td>{formatDateTime(file.updated_at)}</td>
-            </tr>
-          ))
-        ) : (
-          <AttachmentsCardTableRowEmpty />
-        )}
+                    <DeleteAttachmentButton
+                      file={file}
+                      buttonText={t("delete")}
+                      markAttachmentForDeletion={markAttachmentForDeletion}
+                      modalRef={deleteAttachmentModalRef}
+                    />
+                  </PopoverMenu>
+                </td>
+                <td>{formatFileSize(file.file_size_bytes)}</td>
+                <td>{formatDateTime(file.updated_at)}</td>
+              </tr>
+            ))
+          : null}
       </tbody>
     </Table>
   );
