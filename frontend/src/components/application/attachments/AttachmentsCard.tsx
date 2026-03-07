@@ -84,12 +84,12 @@ export const AttachmentsCard = ({
    * Helpers
    */
 
-  const handleCancelUpload = (uploadId: string) => {
-    setUploads((prev) =>
-      prev.map((upload) =>
-        upload.id === uploadId ? { ...upload, status: "cancelled" } : upload,
-      ),
-    );
+  // const handleCancelUpload = (uploadId: string) => {
+  //  setUploads((prev) =>
+  //    prev.map((upload) =>
+  //      upload.id === uploadId ? { ...upload, status: "cancelled" } : upload,
+  //    ),
+  //  );
 
     const target = uploads.find((u) => u.id === uploadId);
     target?.abortController?.abort();
