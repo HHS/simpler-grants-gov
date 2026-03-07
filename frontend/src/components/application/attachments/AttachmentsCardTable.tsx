@@ -22,7 +22,7 @@ interface Props {
   attachments: Attachment[];
   attachmentIdsToDelete: Set<string>;
   deleteAttachmentModalRef: RefObject<ModalRef | null>;
-  handleCancelUpload: (uploadId: string) => void;
+  // handleCancelUpload: (uploadId: string) => void;
   // isDeleting: boolean;
   markAttachmentForDeletion: (
     application_attachment_id: string,
@@ -35,7 +35,7 @@ export const AttachmentsCardTable = ({
   attachments,
   attachmentIdsToDelete,
   deleteAttachmentModalRef,
-  handleCancelUpload,
+  // handleCancelUpload,
   // isDeleting,
   markAttachmentForDeletion,
   uploads,
