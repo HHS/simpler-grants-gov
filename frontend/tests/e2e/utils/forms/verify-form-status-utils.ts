@@ -1,19 +1,20 @@
-import { expect, Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
+import {
+  type FieldError,
+  verifyAlertErrors,
+  verifyInlineErrors,
+} from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 export type FormStatus = "complete" | "incomplete";
 
 /**
- * Navigate to the application page and verify the status message for a specific form row in the table.
- * Scrolls down to locate the form row.
+ * Navigates to the application landing page.
+ * Uses goto if applicationUrl is provided, otherwise falls back to goBack.
  * @param page Playwright Page object
- * @param status Expected status: "complete" (No issues detected) or "incomplete" (Some issues found)
- * @param formName The form name to verify status for (e.g., "SF-424B", "SF-LLL")
  * @param applicationUrl The application URL to navigate to
  */
-export async function verifyFormStatusOnPage(
+async function navigateToApplicationPage(
   page: Page,
-  status: FormStatus,
-  formName: string,
   applicationUrl: string,
 ): Promise<void> {
   if (applicationUrl) {
@@ -23,7 +24,20 @@ export async function verifyFormStatusOnPage(
     await page.waitForLoadState("domcontentloaded");
   }
   await page.waitForTimeout(10000);
+}
 
+/**
+ * Verifies the form row status in the table on the application landing page.
+ * Assumes navigation to the application page has already occurred.
+ * @param page Playwright Page object
+ * @param status Expected status: "complete" (No issues detected) or "incomplete" (Some issues found)
+ * @param formName The form name to verify status for (e.g., "SF-424B", "SF-LLL")
+ */
+export async function assertFormRowStatus(
+  page: Page,
+  status: FormStatus,
+  formName: string,
+): Promise<void> {
   // Scroll down to find form row in the table
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.waitForTimeout(5000);
@@ -49,30 +63,68 @@ export async function verifyFormStatusOnPage(
 }
 
 /**
- * Navigate to the application page and verify the top-level alert status for a specific form.
- * Scrolls up to locate the alert/banner message.
+ * Navigates to the application landing page and verifies the form row status.
  * @param page Playwright Page object
  * @param status Expected status: "complete" (No issues detected) or "incomplete" (Some issues found)
  * @param formName The form name to verify status for (e.g., "SF-424B", "SF-LLL")
  * @param applicationUrl The application URL to navigate to
+ */
+export async function verifyFormStatusOnPage(
+  page: Page,
+  status: FormStatus,
+  formName: string,
+  applicationUrl: string,
+): Promise<void> {
+  await navigateToApplicationPage(page, applicationUrl);
+  await assertFormRowStatus(page, status, formName);
+}
+
+/**
+ * Verifies the post-save state on the form page, then navigates to the application
+ * landing page and verifies the form row status.
+ *
+ * For "complete": checks success alert on form page, then verifies "no issues detected" in form row.
+ * For "incomplete": checks error alert and inline errors on form page, then verifies "some issues found" in form row.
+ *
+ * @param page Playwright Page object
+ * @param status Expected status: "complete" or "incomplete"
+ * @param formName The form name to verify status for (e.g., "SF-424B", "SF-LLL")
+ * @param applicationUrl The application URL to navigate to
+ * @param expectedErrors Required when status is "incomplete" — list of field errors to verify
  */
 export async function verifyFormStatusAfterSave(
   page: Page,
   status: FormStatus,
   formName: string,
   applicationUrl: string,
+  expectedErrors?: FieldError[],
 ): Promise<void> {
-  if (applicationUrl) {
-    await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
-  } else {
-    await page.goBack();
-    await page.waitForLoadState("domcontentloaded");
+  if (status === "complete") {
+    // On form page — check success alert
+    const alert = page.getByTestId("alert");
+    await expect(alert.locator(".usa-alert__heading")).toContainText(
+      "Form was saved",
+    );
+    await expect(alert.locator(".usa-alert__text")).toContainText(
+      "No errors were detected.",
+    );
+  } else if (status === "incomplete") {
+    // On form page — check error alert list
+    if (!expectedErrors?.length) {
+      throw new Error(
+        "expectedErrors must be provided when status is 'incomplete'",
+      );
+    }
+    // On form page — check error alert list at top
+    await verifyAlertErrors(page, expectedErrors);
+
+    // On form page — scroll down and check inline field errors
+    await verifyInlineErrors(page, expectedErrors);
   }
-  await page.waitForTimeout(10000);
 
-  // Scroll up to find the alert/banner message at the top
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.waitForTimeout(5000);
-
-  await verifyFormStatusOnPage(page, status, formName, applicationUrl);
+  // Navigate to application landing page
+  await navigateToApplicationPage(page, applicationUrl);
+  
+  // On application page — verify form row status
+  await assertFormRowStatus(page, status, formName);
 }

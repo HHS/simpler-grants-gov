@@ -36,6 +36,8 @@ test("Application submission happy path - application with required SF424B and u
   if (targetEnv === "local") {
     // Use test-user spoofing
     await createSpoofedSessionCookie(context);
+    // Give cookie time to be set before navigating
+    await page.waitForTimeout(1000);
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
   } else if (targetEnv === "staging") {
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });

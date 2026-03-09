@@ -14,11 +14,7 @@ import {
   verifySf424bFormVisible,
 } from "tests/e2e/utils/forms/fill-sf424b-form-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
-import {
-  verifyAlertErrors,
-  verifyInlineErrors,
-} from "tests/e2e/utils/forms/verify-form-errors-utils";
-import { verifyFormStatusOnPage } from "tests/e2e/utils/forms/verify-form-status-utils";
+import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
 
 const { baseUrl, targetEnv, testOrgLabel } = playwrightEnv;
@@ -33,7 +29,7 @@ const sf424bErrors = [
   },
 ];
 
-test("SF-424B error validation - required fields and inline errors", async ({
+test.only("SF-424B error validation - required fields and inline errors", async ({
   page,
   context,
 }: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
@@ -82,13 +78,10 @@ test("SF-424B error validation - required fields and inline errors", async ({
     // Do not enter anything and click save
     await saveForm(page); // expect validation errors
 
-    // Error alert appears at top next to save button
-    await verifyAlertErrors(page, sf424bErrors);
-
-    // Scroll down to check for inline errors
-    await verifyInlineErrors(page, sf424bErrors);
-
-    // Go to application landing page and verify error status for SF-424B
-    await verifyFormStatusOnPage(page, "incomplete", "SF-424B", applicationUrl);
+    // Checks error alert list at top of form page
+    // Scrolls down and checks inline field errors on form page
+    // Navigates to application landing page
+    // Scrolls down and checks "Some issues found" in form row
+    await verifyFormStatusAfterSave(page, "incomplete", "SF-424B", applicationUrl, sf424bErrors);
   }
 });

@@ -32,8 +32,8 @@ export const initializePlaywrightSessionSecrets = () => {
   clientJwtKey = encodeText(playwrightEnv.clientSessionSecret);
 };
 
-// 60 minute expiration, could probably do less but needs to be more than 10 mins so that it doesn't trigger a token refresh
-export const newExpirationDate = () => new Date(Date.now() + 60 * 60 * 1000);
+// 12 hour expiration for test tokens to avoid expiration issues
+export const newExpirationDate = () => new Date(Date.now() + 12 * 60 * 60 * 1000);
 
 /*
   encrypts an API token passed as an env var into a fake client token
