@@ -27,7 +27,7 @@ import {
   UploadAttachmentActionState,
 } from "./actions";
 import { AttachmentsCardForm } from "./AttachmentsCardForm";
-import { AttachmentsCardTable } from "./AttachmentsCardTable";
+// import { AttachmentsCardTable } from "./AttachmentsCardTable";
 import { DeleteAttachmentModal } from "./DeleteAttachmentModal";
 
 interface AttachmentsCardProps {
@@ -197,15 +197,7 @@ export const AttachmentsCard = ({
           </Grid>
         </Grid>
         <Grid row>
-          <AttachmentsCardTable
-            attachments={attachments}
-            attachmentIdsToDelete={attachmentIdsToDelete}
-            deleteAttachmentModalRef={deleteModalRef}
-            // handleCancelUpload={handleCancelUpload}
-            markAttachmentForDeletion={markAttachmentForDeletion}
-            // isDeleting={deletePending}
-            uploads={uploads}
-          />
+          null
         </Grid>
       </GridContainer>
       <DeleteAttachmentModal
