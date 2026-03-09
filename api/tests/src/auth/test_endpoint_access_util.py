@@ -406,9 +406,29 @@ def test_get_users_with_privileges_for_agency_deduplicates_user_with_same_privil
     AgencyUserRoleFactory.create(agency_user=agency_user, role=role_a)
     AgencyUserRoleFactory.create(agency_user=agency_user, role=role_b)
 
+    # Another user with the same privilege (should be included)
+    user_with_privilege = UserFactory.create()
+    agency_user_with_privilege = AgencyUserFactory.create(agency=agency, user=user_with_privilege)
+    AgencyUserRoleFactory.create(agency_user=agency_user_with_privilege, role=role_a)
+
+    # Another user in the agency without that privilege (should not be included)
+    user_without_privilege = UserFactory.create()
+    agency_user_without_privilege = AgencyUserFactory.create(
+        agency=agency, user=user_without_privilege
+    )
+    role_without_target_privilege = RoleFactory.create(
+        privileges=[Privilege.MANAGE_AGENCY_MEMBERS], is_agency_role=True
+    )
+    AgencyUserRoleFactory.create(
+        agency_user=agency_user_without_privilege, role=role_without_target_privilege
+    )
+
     results = get_users_with_privileges_for_agency(
         db_session, agency, [Privilege.PROGRAM_OFFICER_APPROVAL]
     )
 
-    assert len(results) == 1
-    assert results[0].user_id == user.user_id
+    assert len(results) == 2
+    result_user_ids = {result.user_id for result in results}
+    assert user.user_id in result_user_ids
+    assert user_with_privilege.user_id in result_user_ids
+    assert user_without_privilege.user_id not in result_user_ids

@@ -151,6 +151,7 @@ def get_users_with_privileges_for_agency(
             selectinload(User.linked_login_gov_external_user),
             selectinload(User.profile),
         )
+        .order_by(User.created_at.asc())
     )
 
     users = db_session.execute(stmt).scalars().unique().all()

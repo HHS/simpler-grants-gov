@@ -90,7 +90,7 @@ def get_workflow_and_verify_access(
         404: If workflow doesn't exist
         403: If user doesn't have required privilege or entity type not supported
     """
-    log_extra: dict[str, str] = {"user_id": str(user.user_id), "workflow_id": str(workflow_id)}
+    log_extra: dict = {"user_id": user.user_id, "workflow_id": workflow_id}
     logger.info("Fetching workflow for user", extra=log_extra)
 
     workflow = _get_workflow(db_session, workflow_id)
@@ -169,16 +169,20 @@ def build_workflow_approval_config(
 
     # Build config for each approval event
     for event_name, approval_config in config.approval_mapping.items():
-        log_extra["event_name"] = event_name
-        log_extra["approval_type"] = approval_config.approval_type.value
-        logger.debug("Processing approval config for event", extra=log_extra)
+        event_log_extra = {
+            "event_name": event_name,
+            "approval_type": approval_config.approval_type.value,
+        }
+        logger.debug("Processing approval config for event", extra=log_extra | event_log_extra)
 
         possible_users = get_users_with_privileges_for_agency(
             db_session, agency, approval_config.required_privileges
         )
 
-        log_extra["possible_users_count"] = len(possible_users)
-        logger.debug("Found possible users for approval", extra=log_extra)
+        logger.debug(
+            "Found possible users for approval",
+            extra=log_extra | event_log_extra | {"possible_users_count": len(possible_users)},
+        )
 
         approval_config_dict[event_name] = {
             "approval_type": approval_config.approval_type,
