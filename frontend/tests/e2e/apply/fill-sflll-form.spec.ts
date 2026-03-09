@@ -1,5 +1,5 @@
 import { test } from "@playwright/test";
-import { FORMS_TEST_DATA } from "tests/e2e/apply/fixtures/test-data-for-forms.fixture";
+import { FORMS_TEST_DATA } from "tests/e2e/apply/fixtures/test-data-for-sflll-forms.fixture";
 import {
   getSflllFillFields,
   SFLLL_FORM_CONFIG,
