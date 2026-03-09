@@ -202,7 +202,7 @@ def test_process_workflow_event_invalid_event_for_current_state(db_session, enab
     event, history_event = build_process_workflow_event(
         workflow.workflow_id, user=user, event_to_send="start_workflow"
     )
-    with pytest.raises(InvalidEventError, match="Event is not valid for current state of workflow"):
+    with pytest.raises(InvalidEventError, match="Event is not valid for workflow"):
         EventHandler(db_session, event, history_event).process()
 
 
