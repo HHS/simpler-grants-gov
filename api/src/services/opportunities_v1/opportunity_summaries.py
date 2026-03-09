@@ -21,7 +21,7 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.db.models.user_models import User
-from src.services.opportunities_v1.get_opportunity import get_opportunity_including_drafts
+from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ def create_opportunity_summary(
     # Parse and validate the request data
     request = OpportunitySummaryCreateRequest(**summary_data)
 
-    opportunity = get_opportunity_including_drafts(db_session, opportunity_id)
+    opportunity = get_opportunity_for_grantors(db_session, user, opportunity_id)
 
     # Check if user has permission to view/edit opportunities for this agency
     agency = opportunity.agency_record
