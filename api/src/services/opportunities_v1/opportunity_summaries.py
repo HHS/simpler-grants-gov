@@ -17,6 +17,7 @@ from src.db.models.opportunity_models import (
     LinkOpportunitySummaryApplicantType,
     LinkOpportunitySummaryFundingCategory,
     LinkOpportunitySummaryFundingInstrument,
+    Opportunity,
     OpportunitySummary,
 )
 from src.db.models.user_models import User
@@ -56,7 +57,7 @@ class OpportunitySummaryCreateRequest(BaseModel):
     fiscal_year: int | None = None
 
 
-def _check_existing_summary(opportunity: "Opportunity", is_forecast: bool) -> None:
+def _check_existing_summary(opportunity: Opportunity, is_forecast: bool) -> None:
     """Check if a summary of the same type already exists for the opportunity"""
     existing_summary = (
         opportunity.forecast_summary if is_forecast else opportunity.non_forecast_summary
@@ -70,7 +71,7 @@ def _check_existing_summary(opportunity: "Opportunity", is_forecast: bool) -> No
 
 
 def _create_opportunity_summary_object(
-    opportunity: "Opportunity", request: OpportunitySummaryCreateRequest
+    opportunity: Opportunity, request: OpportunitySummaryCreateRequest
 ) -> OpportunitySummary:
     """Create a new OpportunitySummary object from the request data"""
     # Calculate archive_date as close_date + 30 days

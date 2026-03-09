@@ -3,7 +3,12 @@ from datetime import date
 
 import pytest
 
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import (
+    ApplicantType,
+    FundingCategory,
+    FundingInstrument,
+    Privilege,
+)
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.lib.opportunity_test_utils import create_opportunity_summary_request
 from tests.src.db.models.factories import AgencyFactory, OpportunityFactory
@@ -165,3 +170,83 @@ def test_opportunity_summary_create_invalid_award_amount(
         "award floor" in str(response_json).lower()
         and "award ceiling" in str(response_json).lower()
     )
+
+
+def test_opportunity_summary_create_successful(
+    client, opportunity, opportunity_summary_auth_data, opportunity_summary_request
+):
+    """Test successful creation of an opportunity summary"""
+    _, _, token, _ = opportunity_summary_auth_data
+
+    opportunity_summary_request["is_forecast"] = True
+
+    response = client.post(
+        f"/v1/opportunities/{opportunity.opportunity_id}/summary",
+        json=opportunity_summary_request,
+        headers={"X-SGG-Token": token},
+    )
+
+    # Success check
+    assert response.status_code == 200
+
+    # Check response data
+    response_json = response.get_json()
+    assert "data" in response_json
+    assert "message" in response_json
+    assert response_json["message"] == "Success"
+
+    # Verify the opportunity summary data
+    summary_data = response_json["data"]
+    assert summary_data["summary_description"] == opportunity_summary_request["summary_description"]
+    assert summary_data["is_forecast"] == opportunity_summary_request["is_forecast"]
+    assert summary_data["is_cost_sharing"] == opportunity_summary_request["is_cost_sharing"]
+    assert (
+        summary_data["expected_number_of_awards"]
+        == opportunity_summary_request["expected_number_of_awards"]
+    )
+    assert (
+        summary_data["estimated_total_program_funding"]
+        == opportunity_summary_request["estimated_total_program_funding"]
+    )
+    assert summary_data["award_floor"] == opportunity_summary_request["award_floor"]
+    assert summary_data["award_ceiling"] == opportunity_summary_request["award_ceiling"]
+
+    # Verify the funding instruments, categories, and applicant types
+    assert len(summary_data["funding_instruments"]) == 2
+    assert FundingInstrument.GRANT in summary_data["funding_instruments"]
+    assert FundingInstrument.COOPERATIVE_AGREEMENT in summary_data["funding_instruments"]
+
+    assert len(summary_data["funding_categories"]) == 1
+    assert FundingCategory.AGRICULTURE in summary_data["funding_categories"]
+
+    assert len(summary_data["applicant_types"]) == 1
+    assert ApplicantType.CITY_OR_TOWNSHIP_GOVERNMENTS in summary_data["applicant_types"]
+
+
+def test_opportunity_summary_create_duplicate_summary(
+    client, db_session, opportunity, opportunity_summary_auth_data, opportunity_summary_request
+):
+    """Test that creating a duplicate opportunity summary of the same type returns a 422 error"""
+    _, _, token, _ = opportunity_summary_auth_data
+
+    # First create a summary of forecast type
+    opportunity_summary_request["is_forecast"] = True
+
+    first_response = client.post(
+        f"/v1/opportunities/{opportunity.opportunity_id}/summary",
+        json=opportunity_summary_request,
+        headers={"X-SGG-Token": token},
+    )
+    assert first_response.status_code == 200
+
+    # Second request with the same forecast type should fail with 422
+    second_response = client.post(
+        f"/v1/opportunities/{opportunity.opportunity_id}/summary",
+        json=opportunity_summary_request,
+        headers={"X-SGG-Token": token},
+    )
+
+    # Verify the error response
+    assert second_response.status_code == 422
+    response_json = second_response.get_json()
+    assert "forecast already exists" in str(response_json).lower()

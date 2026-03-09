@@ -3,7 +3,12 @@
 import uuid
 from datetime import date
 
-from src.constants.lookup_constants import OpportunityCategory
+from src.constants.lookup_constants import (
+    ApplicantType,
+    FundingCategory,
+    FundingInstrument,
+    OpportunityCategory,
+)
 
 
 def create_opportunity_request(
@@ -85,6 +90,9 @@ def create_opportunity_summary_request(
     estimated_total_program_funding=1000000,
     award_floor=50000,
     award_ceiling=200000,
+    funding_instruments=None,
+    funding_categories=None,
+    applicant_types=None,
 ):
     """Create a valid opportunity summary creation request.
 
@@ -116,6 +124,16 @@ def create_opportunity_summary_request(
     elif isinstance(close_date, date):
         close_date = close_date.isoformat()
 
+    # Set default values for the collections if not provided
+    if funding_instruments is None:
+        funding_instruments = [FundingInstrument.GRANT, FundingInstrument.COOPERATIVE_AGREEMENT]
+
+    if funding_categories is None:
+        funding_categories = [FundingCategory.AGRICULTURE]
+
+    if applicant_types is None:
+        applicant_types = [ApplicantType.CITY_OR_TOWNSHIP_GOVERNMENTS]
+
     request = {
         "legacy_opportunity_id": legacy_opportunity_id,
         "is_forecast": is_forecast,
@@ -128,6 +146,9 @@ def create_opportunity_summary_request(
         "estimated_total_program_funding": estimated_total_program_funding,
         "award_floor": award_floor,
         "award_ceiling": award_ceiling,
+        "funding_instruments": funding_instruments,
+        "funding_categories": funding_categories,
+        "applicant_types": applicant_types,
     }
 
     return request
