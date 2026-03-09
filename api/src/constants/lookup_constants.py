@@ -391,6 +391,9 @@ class WorkflowType(StrEnum):
     # reserved for testing.
     BASIC_TEST_WORKFLOW = "basic_test_workflow"
 
+    def get_human_friendly_text(self) -> str:
+        return self.value.replace("_", " ").title()
+
 
 class ApprovalType(StrEnum):
     INITIAL_PROTOTYPE_APPROVAL = "initial_prototype_approval"
