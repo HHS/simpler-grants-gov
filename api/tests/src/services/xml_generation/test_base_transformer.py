@@ -1,7 +1,9 @@
 """Tests for recursive XML transformer."""
 
-from src.services.xml_generation.transformers.base_transformer import RecursiveXMLTransformer
 from pytest import approx
+
+from src.services.xml_generation.transformers.base_transformer import RecursiveXMLTransformer
+
 
 class TestRecursiveXMLTransformer:
     """Test cases for RecursiveXMLTransformer."""
