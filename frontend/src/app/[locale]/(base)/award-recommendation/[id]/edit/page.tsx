@@ -10,7 +10,14 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
+import {
+  Alert,
+  CharacterCount,
+  Grid,
+  GridContainer,
+  Label,
+  Textarea,
+} from "@trussworks/react-uswds";
 
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
@@ -23,11 +30,11 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("AwardRecommendation.pageTitle", {
-      defaultValue: "Review your recommendation",
+    title: t("AwardRecommendation.pageTitleEdit", {
+      defaultValue: "Edit your recommendation",
     }),
-    description: t("AwardRecommendation.metaDescription", {
-      defaultValue: "View your award recommendations",
+    description: t("AwardRecommendation.metaDescriptionEdit", {
+      defaultValue: "Edit your award recommendations",
     }),
   };
   return meta;
@@ -99,10 +106,23 @@ const OpportunitySectionComponent = ({
                   <div>No summary available</div>
                 )}
               </div>
-              <p className="text-bold margin-bottom-2">
-                {t("selectionMethod")}
-              </p>
-              Merit Review
+              <div className="margin-bottom-3">
+                <Label htmlFor="other-opportunity-info">
+                  {t("otherOpportunityInfo.label")}
+                </Label>
+                <p className="text-base margin-top-1 margin-bottom-2">
+                  {t("otherOpportunityInfo.description")}
+                </p>
+                <CharacterCount
+                  id="other-opportunity-info"
+                  name="other-opportunity-info"
+                  maxLength={1000}
+                  isTextArea
+                  defaultValue=""
+                  rows={6}
+                  className="maxw-full"
+                />
+              </div>
             </div>
           </div>
         </Grid>
@@ -111,7 +131,7 @@ const OpportunitySectionComponent = ({
   );
 };
 
-async function AwardRecommendationPageContent({
+async function AwardRecommendationEditPageContent({
   params,
 }: AwardRecommendationPageProps) {
   const { locale, id: awardRecommendationId } = await params;
@@ -160,7 +180,7 @@ async function AwardRecommendationPageContent({
       )}
       <GridContainer>
         <h1 className="margin-top-9 margin-bottom-7">
-          {t("pageTitle", { defaultValue: "Review your recommendation" })}
+          {t("pageTitleEdit", { defaultValue: "Edit your recommendation" })}
         </h1>
 
         {opportunityData && (
@@ -175,7 +195,7 @@ async function AwardRecommendationPageContent({
 }
 
 export default withFeatureFlag<AwardRecommendationPageProps, never>(
-  AwardRecommendationPageContent,
+  AwardRecommendationEditPageContent,
   "awardRecommendationOff",
   () => redirect("/maintenance"),
 );

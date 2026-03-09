@@ -1834,6 +1834,7 @@ export const messages = {
     errorMessage:
       "We have encountered an error loading your award recommendations, please try again later.",
     metaDescription: "View your award recommendations",
+    metaDescriptionEdit: "Edit your award recommendations",
     pageHeading: "Award Recommendations",
     heroTitle: "Award Rec #",
     datePrepared: "Date prepared",
@@ -1849,9 +1850,16 @@ export const messages = {
       create: "Create",
     },
     pageTitle: "Review your Recommendation",
+    pageTitleEdit: "Edit your recommendation",
     description: "Award Recommendation flow coming soon.",
     opportunitySummary: "Opportunity summary",
     selectionMethod: "Selection method",
+    otherOpportunityInfo: {
+      label: "Other opportunity information",
+      description:
+        "Any any additional context or information specific to the opportunity that the decision maker may need to know, or leave blank.",
+      characterLimit: "1000 characters allowed",
+    },
     viewFullDetails: "View Full Details",
     opportunityStatus: "Status",
     agency: "Agency",

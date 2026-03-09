@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
-import AwardRecommendationPage from "src/app/[locale]/(base)/award-recommendation/[id]/page";
+import AwardRecommendationEditPage from "src/app/[locale]/(base)/award-recommendation/[id]/edit/page";
 import * as opportunityFetcher from "src/services/fetch/fetchers/opportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
@@ -75,7 +75,7 @@ const awardRecommendationParams = Promise.resolve({
   id: "AR-26-0001",
 });
 
-describe("AwardRecommendationPage", () => {
+describe("AwardRecommendationEditPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -98,7 +98,7 @@ describe("AwardRecommendationPage", () => {
     });
 
     it("includes the AwardRecommendationHero component in the page", async () => {
-      const component = await AwardRecommendationPage({
+      const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
       });
       render(component);
@@ -107,16 +107,16 @@ describe("AwardRecommendationPage", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders page title", async () => {
-      const component = await AwardRecommendationPage({
+    it("renders page title for edit page", async () => {
+      const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
       });
       render(component);
-      expect(await screen.findByText("pageTitle")).toBeVisible();
+      expect(await screen.findByText("pageTitleEdit")).toBeVisible();
     });
 
     it("renders opportunity details on the page", async () => {
-      const component = await AwardRecommendationPage({
+      const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
       });
       render(component);
@@ -127,6 +127,33 @@ describe("AwardRecommendationPage", () => {
       expect(
         await screen.findByText(mockOpportunityDetail.opportunity_number),
       ).toBeVisible();
+    });
+
+    it("renders other opportunity information textarea field", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByLabelText("otherOpportunityInfo.label"),
+      ).toBeInTheDocument();
+      expect(
+        await screen.findByText("otherOpportunityInfo.description"),
+      ).toBeVisible();
+    });
+
+    it("renders textarea with correct attributes", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      const textarea = await screen.findByLabelText(
+        "otherOpportunityInfo.label",
+      );
+      expect(textarea).toHaveAttribute("id", "other-opportunity-info");
+      expect(textarea).toHaveAttribute("name", "other-opportunity-info");
     });
 
     it("renders 'No summary available' when opportunity has no summary description", async () => {
@@ -143,7 +170,7 @@ describe("AwardRecommendationPage", () => {
           },
         });
 
-      const component = await AwardRecommendationPage({
+      const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
       });
       render(component);
@@ -156,7 +183,7 @@ describe("AwardRecommendationPage", () => {
         .spyOn(opportunityFetcher, "getOpportunityDetails")
         .mockResolvedValue(mockOpportunityData);
 
-      await AwardRecommendationPage({
+      await AwardRecommendationEditPage({
         params: awardRecommendationParams,
         searchParams: Promise.resolve({}),
       });
@@ -174,7 +201,7 @@ describe("AwardRecommendationPage", () => {
           response: { status: 404 },
         });
 
-      const component = await AwardRecommendationPage({
+      const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
         searchParams: Promise.resolve({ opportunityId: "non-existent" }),
       });
@@ -190,7 +217,7 @@ describe("AwardRecommendationPage", () => {
         .spyOn(opportunityFetcher, "getOpportunityDetails")
         .mockRejectedValue(new Error("Network error"));
 
-      const component = await AwardRecommendationPage({
+      const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
         searchParams: Promise.resolve({ opportunityId: "123" }),
       });
@@ -203,6 +230,16 @@ describe("AwardRecommendationPage", () => {
       );
 
       consoleSpy.mockRestore();
+    });
+
+    it("does not render selection method field on edit page", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(screen.queryByText("selectionMethod")).not.toBeInTheDocument();
+      expect(screen.queryByText("Merit Review")).not.toBeInTheDocument();
     });
   });
 
@@ -221,7 +258,7 @@ describe("AwardRecommendationPage", () => {
 
     it("redirects to /maintenance", async () => {
       await wrapForExpectedError(() => {
-        return AwardRecommendationPage({
+        return AwardRecommendationEditPage({
           params: awardRecommendationParams,
         });
       });
