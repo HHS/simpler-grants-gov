@@ -13,9 +13,8 @@ import {
   ensurePageClosed,
 } from "tests/e2e/utils/lifecycle-helpers";
 
-const { baseUrl, testOrgLabel } = playwrightEnv;
-const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab";
-const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
+const { baseUrl, testOrgLabel, opportunityId } = playwrightEnv;
+const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
 
 test.describe("fill SF-LLL Form", () => {
   test.beforeEach(async ({ context }) => {
@@ -39,13 +38,12 @@ test.describe("fill SF-LLL Form", () => {
         formName: SFLLL_FORM_CONFIG.formName,
         fields: getSflllFillFields(sflllData),
         saveButtonTestId: SFLLL_FORM_CONFIG.saveButtonTestId,
+        returnToApplication: false,
       });
 
-      // Wait for save to complete before asserting
-      await page.waitForLoadState("networkidle");
-      await expect(
-        page.getByText(SFLLL_FORM_CONFIG.noErrorsText),
-      ).toBeVisible();
+      await expect(page.getByText(SFLLL_FORM_CONFIG.noErrorsText)).toBeVisible({
+        timeout: 15000,
+      });
     } finally {
       await clearPageState(context);
       await ensurePageClosed(page);
