@@ -1,4 +1,4 @@
-import type { SflllEntityData } from "tests/e2e/apply/fixtures/test-data-for-forms.fixture";
+import type { SflllEntityData } from "tests/e2e/apply/fixtures/test-data-for-sflll-forms.fixture";
 import { FillFieldDefinition } from "tests/e2e/utils/forms/general-forms-filling";
 
 export const SFLLL_FORM_CONFIG = {
