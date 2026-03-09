@@ -5,7 +5,9 @@ from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, get_soap_config
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
+
+# , get_soap_config
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPInvalidEnvelope,
@@ -28,7 +30,8 @@ def get_simpler_soap_response(
         else SimplerGrantorsS2SClient
     )
 
-    use_simpler = get_soap_config().use_simpler
+    # use_simpler = get_soap_config().use_simpler
+    use_simpler = True
 
     try:
         simpler_soap_client = simpler_soap_client_type(
