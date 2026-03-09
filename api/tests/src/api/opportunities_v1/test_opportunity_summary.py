@@ -133,7 +133,7 @@ def test_opportunity_summary_create_invalid_date_validation(
 
     # Use Invalid Dates
     invalid_dates_request = create_opportunity_summary_request(
-        post_date=date(2030, 12, 31), close_date=date.today()
+        post_date=date(3000, 12, 31), close_date=date.today()
     )
 
     response = client.post(
@@ -144,7 +144,8 @@ def test_opportunity_summary_create_invalid_date_validation(
 
     assert response.status_code == 422
     response_json = response.get_json()
-    assert "post date" in str(response_json).lower() and "close date" in str(response_json).lower()
+    assert "errors" in response_json
+    assert response_json["errors"][0]["message"] == "Post date must be less than or equal to close date"
 
 
 def test_opportunity_summary_create_invalid_award_amount(
