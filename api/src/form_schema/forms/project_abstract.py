@@ -76,7 +76,8 @@ FORM_XML_TRANSFORM_RULES = {
         "attachment_fields": {
             "attachment": {
                 "xml_element": "ProjectAbstractAddAttachment",
-                "type": "single",
+                "type": "single_with_wrapper",
+                "file_element": "AttachedFile",
             },
         },
     },
