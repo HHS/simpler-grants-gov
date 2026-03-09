@@ -8,7 +8,10 @@ import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { fillAnyForm } from "tests/e2e/utils/forms/general-forms-filling";
-import { clearPageState, ensurePageClosed } from "tests/e2e/utils/lifecycle-helpers";
+import {
+  clearPageState,
+  ensurePageClosed,
+} from "tests/e2e/utils/lifecycle-helpers";
 
 const { baseUrl, testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab";
