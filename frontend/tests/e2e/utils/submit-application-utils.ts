@@ -2,6 +2,17 @@ import { expect, Page } from "@playwright/test";
 import { UUID_REGEX } from "tests/e2e/utils/regex-utils";
 
 /**
+ * Verifies that the application status is 'Submitted' using a dynamic locator.
+ * @param page Playwright Page object
+ */
+export async function verifyApplicationStatusSubmitted(page: Page) {
+  const statusLocator = page.locator(
+    '[data-testid*="information-card" i], div[class*="information-card" i], section[class*="information-card" i]'
+  ).filter({ hasText: /status\s*:\s*submitted/i });
+  await expect(statusLocator).toBeVisible();
+}
+
+/**
  * Submit the application and verify success message with application ID.
  * @param page Playwright Page object
  * @returns The application ID that was submitted

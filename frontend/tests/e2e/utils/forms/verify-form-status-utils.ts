@@ -1,53 +1,65 @@
+
 import { expect, Page } from "@playwright/test";
 
+export type FormStatus = "complete" | "incomplete";
+
 /**
- * Verify "No issues detected" status for a specific form row on the application page.
+ * Navigate to the application page and verify the status message for a specific form row in the table.
+ * Scrolls down to locate the form row.
  * @param page Playwright Page object
+ * @param status Expected status: "complete" (No issues detected) or "incomplete" (Some issues found)
  * @param formName The form name to verify status for (e.g., "SF-424B", "SF-LLL")
+ * @param applicationUrl The application URL to navigate to
  */
 export async function verifyFormStatusOnPage(
   page: Page,
+  status: FormStatus,
   formName: string,
+  applicationUrl: string,
 ): Promise<void> {
-  // Find the row containing the form name and verify it has "No issues detected"
-  // Look for the row that contains both the form name AND a link to the form
+  await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(10000);
+
+  // Scroll down to find form row in the table
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(5000);
+
   const escapedFormName = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const flexiblePattern = escapedFormName.replace(/\s+/g, "\\s*");
   const formRow = page
-    .locator("tr", {
-      hasText: new RegExp(flexiblePattern, "i"),
-    })
-    .filter({
-      has: page.locator('a[href*="/form/"]'),
-    });
+    .locator("tr", { hasText: new RegExp(flexiblePattern, "i") })
+    .filter({ has: page.locator('a[href*="/form/"]') });
 
   await expect(formRow).toBeVisible({ timeout: 10000 });
-  await expect(formRow.getByText(/no issues detected/i)).toBeVisible({
+
+  const statusPattern =
+    status === "complete" ? /no issues detected/i : /some issues found/i;
+
+  await expect(formRow.getByText(statusPattern)).toBeVisible({
     timeout: 10000,
   });
 }
 
 /**
- * Navigate back to application page and verify "No issues detected" status for a form.
+ * Navigate to the application page and verify the top-level alert status for a specific form.
+ * Scrolls up to locate the alert/banner message.
  * @param page Playwright Page object
+ * @param status Expected status: "complete" (No issues detected) or "incomplete" (Some issues found)
  * @param formName The form name to verify status for (e.g., "SF-424B", "SF-LLL")
+ * @param applicationUrl The application URL to navigate to
  */
 export async function verifyFormStatusAfterSave(
   page: Page,
+  status: FormStatus,
   formName: string,
-  applicationUrl?: string,
+  applicationUrl: string,
 ): Promise<void> {
-  if (applicationUrl) {
-    await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
-  } else {
-    await page.goBack();
-    await page.waitForLoadState("domcontentloaded");
-  }
+  await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(10000);
 
-  // Scroll to top to find status message
+  // Scroll up to find the alert/banner message at the top
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(5000);
 
-  await verifyFormStatusOnPage(page, formName);
+  await verifyFormStatusOnPage(page, status, formName, applicationUrl);
 }

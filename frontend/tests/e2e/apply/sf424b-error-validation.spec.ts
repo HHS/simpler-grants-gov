@@ -10,15 +10,12 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { openMobileNav } from "tests/e2e/playwrightUtils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import {
-  fillSf424bForm,
   getSf424bFormLink,
   verifySf424bFormVisible,
 } from "tests/e2e/utils/forms/fill-sf424b-form-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
-import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
-import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
+import { verifyFormStatusOnPage } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
-import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
 
 const { baseUrl, targetEnv, testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
@@ -85,12 +82,7 @@ test("SF-424B error validation - required fields and inline errors", async ({
     await expect(page.locator('#error-for-applicant_organization')).toBeVisible();
     await expect(page.locator('#error-for-applicant_organization')).toContainText('Applicant Organization is required');
 
-    // Go to application landing page
-    await page.getByRole('link', { name: 'TEST-BR-APP-' }).click();
-
-    // Check if the specific form is displaying the error message
-    await page.getByRole('cell', { name: 'Assurances for Non-Construction Programs (SF-424B) Some issues found. Check' }).click();
-    await expect(page.locator('#main-content')).toContainText('Assurances for Non-Construction Programs (SF-424B)Some issues found. Check your entries.');
-    await expect(page.locator('#main-content')).toContainText('Some issues found. Check your entries.');
+    // Go to application landing page and verify error status for SF-424B
+    await verifyFormStatusOnPage(page, "incomplete", "SF-424B", applicationUrl);
   }
 });
