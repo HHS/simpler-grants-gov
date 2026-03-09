@@ -147,10 +147,11 @@ def create_opportunity_summary(
             opportunity_summary.link_applicant_types.append(link_applicant_type)
 
     logger.info(
-        f"Created {'forecast' if request.is_forecast else 'non-forecast'} opportunity summary",
+        "Created opportunity summary",
         extra={
-            "opportunity_id": str(opportunity_id),
-            "opportunity_summary_id": str(opportunity_summary.opportunity_summary_id),
+            "opportunity_id": opportunity_id,
+            "opportunity_summary_id": opportunity_summary.opportunity_summary_id,
+            "is_forecast": request.is_forecast
         },
     )
 
