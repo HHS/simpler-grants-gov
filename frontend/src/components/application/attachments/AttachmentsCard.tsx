@@ -38,7 +38,7 @@ interface AttachmentsCardProps {
 
 export const AttachmentsCard = ({
   applicationId,
-  attachments,
+  // attachments,
   competitionInstructionsDownloadPath,
 }: AttachmentsCardProps) => {
   /**
@@ -55,13 +55,13 @@ export const AttachmentsCard = ({
    * Local state
    */
 
-  const [uploads, setUploads] = useState<AttachmentCardItem[]>([]);
+  // const [uploads, setUploads] = useState<AttachmentCardItem[]>([]);
   const [attachmentIdsToDelete, setAttachmentIdsToDelete] = useState<
     Set<string>
   >(new Set());
-  const [attachmentToDeleteName, setAttachmentToDeleteName] = useState<
-    string | undefined
-  >(undefined);
+  // const [attachmentToDeleteName, setAttachmentToDeleteName] = useState<
+  //   string | undefined
+  // >(undefined);
   const [fileInputErrorText, setFileInputErrorText] = useState<
     string | undefined
   >(undefined);
@@ -131,14 +131,14 @@ export const AttachmentsCard = ({
     });
   };
 
-  const markAttachmentForDeletion = (
-    applicationAttachmentId: string,
-    attachmentToDeleteName: string,
-  ) => {
-    lastDeletedIdRef.current = applicationAttachmentId;
+  // const markAttachmentForDeletion = (
+  //   applicationAttachmentId: string,
+  //   attachmentToDeleteName: string,
+  // ) => {
+  //   lastDeletedIdRef.current = applicationAttachmentId;
 
-    setAttachmentToDeleteName(attachmentToDeleteName);
-  };
+  //   setAttachmentToDeleteName(attachmentToDeleteName);
+  // };
 
   /**
    * UseEffects
