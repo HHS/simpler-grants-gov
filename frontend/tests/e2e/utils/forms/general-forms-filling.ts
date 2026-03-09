@@ -1,4 +1,4 @@
-import { expect, Page, TestInfo } from "@playwright/test";
+import { Page, TestInfo } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
 
 export interface FillFieldDefinition {
@@ -7,17 +7,13 @@ export interface FillFieldDefinition {
   value: string;
   type: "text" | "dropdown";
   section: string;
-  field?: string; // <- add this
+  field?: string;
 }
 
-export interface FillFormOptions {
+export interface FillFormConfig {
   formName: string;
   fields: FillFieldDefinition[];
-  saveButtonTestId?: string;
-  noErrorsText?: string;
-  formLoadTimeoutMs?: number;
-  noErrorsTimeoutMs?: number;
-  skipErrorValidation?: boolean;
+  saveButtonTestId: string;
 }
 
 export async function fillField(
@@ -56,23 +52,16 @@ export async function fillField(
 
 /**
  * Fills a form from the application page and saves it.
+ * Does NOT perform assertions - those should be done in the test.
  * Assumes the current page is already an application page
  * where the form link (`formName`) is visible and clickable.
  */
-export async function fillAnyForm(
+export async function fillForm(
   testInfo: TestInfo,
   page: Page,
-  options: FillFormOptions,
+  config: FillFormConfig,
 ): Promise<void> {
-  const {
-    formName,
-    fields,
-    saveButtonTestId = "apply-form-save",
-    noErrorsText = "No errors were detected",
-    formLoadTimeoutMs = 35000,
-    noErrorsTimeoutMs = 10000,
-    skipErrorValidation = false,
-  } = options;
+  const { formName, fields, saveButtonTestId } = config;
 
   const applicationURL = page.url();
 
@@ -87,7 +76,7 @@ export async function fillAnyForm(
     await page
       .getByText(formName)
       .first()
-      .waitFor({ state: "visible", timeout: formLoadTimeoutMs });
+      .waitFor({ state: "visible", timeout: 35000 });
 
     for (const field of fields) {
       await fillField(testInfo, page, field);
@@ -95,12 +84,6 @@ export async function fillAnyForm(
 
     await page.waitForTimeout(500);
     await page.getByTestId(saveButtonTestId).click();
-
-    if (!skipErrorValidation) {
-      await expect(page.getByText(noErrorsText)).toBeVisible({
-        timeout: noErrorsTimeoutMs,
-      });
-    }
 
     await page.goto(applicationURL);
   } catch (error) {
