@@ -93,6 +93,9 @@ def create_opportunity_summary_request(
     funding_instruments=None,
     funding_categories=None,
     applicant_types=None,
+    agency_contact_description="Contact Jane Doe at agency X.",
+    agency_email_address="contact@agency.gov",
+    agency_email_address_description="Email the agency",
 ):
     """Create a valid opportunity summary creation request.
 
@@ -149,6 +152,9 @@ def create_opportunity_summary_request(
         "funding_instruments": funding_instruments,
         "funding_categories": funding_categories,
         "applicant_types": applicant_types,
+        "agency_contact_description": agency_contact_description,
+        "agency_email_address": agency_email_address,
+        "agency_email_address_description": agency_email_address_description,
     }
 
     return request

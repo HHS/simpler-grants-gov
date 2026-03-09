@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from marshmallow import ValidationError, validates_schema
+from marshmallow import ValidationError, validate, validates_schema
 
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields, validators
@@ -607,6 +607,89 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
     is_forecast = fields.Boolean(
         required=True,
         metadata={"description": "Whether the opportunity is forecasted", "example": False},
+    )
+
+    summary_description = fields.String(
+        required=True,
+        validate=validators.Length(max=18000),
+        metadata={"description": "Opportunity summary", "example": "This opportunity..."},
+    )
+
+    is_cost_sharing = fields.Boolean(required=True)
+
+    post_date = fields.Date(required=True)
+
+    expected_number_of_awards = fields.Integer(
+        required=False,
+        validate=validators.Range(min=0, max=999_999_999_999_999),
+    )
+
+    estimated_total_program_funding = fields.Integer(
+        required=False,
+        validate=validators.Range(min=0, max=999_999_999_999_999),
+    )
+
+    award_floor = fields.Integer(
+        required=True,
+        validate=validators.Range(min=0, max=999_999_999_999_999),
+    )
+
+    award_ceiling = fields.Integer(
+        required=True,
+        validate=validators.Range(min=0, max=999_999_999_999_999),
+    )
+
+    additional_info_url = fields.String(
+        required=False,
+        validate=validators.Length(max=250),
+    )
+
+    additional_info_url_description = fields.String(
+        required=False,
+        validate=validators.Length(max=250),
+    )
+
+    funding_categories = fields.List(
+        fields.Enum(FundingCategory),
+        required=True,
+        validate=validators.Length(min=1),
+    )
+
+    funding_category_description = fields.String(
+        required=False,
+        validate=validators.Length(max=2500),
+    )
+
+    funding_instruments = fields.List(
+        fields.Enum(FundingInstrument),
+        required=True,
+        validate=validators.Length(min=1),
+    )
+
+    applicant_types = fields.List(
+        fields.Enum(ApplicantType),
+        required=True,
+        validate=validators.Length(min=1),
+    )
+
+    applicant_eligibility_description = fields.String(
+        required=False,
+        validate=validators.Length(max=4000),
+    )
+
+    agency_contact_description = fields.String(
+        required=True,
+        validate=validators.Length(max=1000),
+    )
+
+    agency_email_address = fields.String(
+        required=True,
+        validate=validators.Length(max=130),
+    )
+
+    agency_email_address_description = fields.String(
+        required=True,
+        validate=validators.Length(max=108),
     )
 
     @validates_schema

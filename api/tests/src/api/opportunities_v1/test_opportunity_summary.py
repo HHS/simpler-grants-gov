@@ -145,7 +145,10 @@ def test_opportunity_summary_create_invalid_date_validation(
     assert response.status_code == 422
     response_json = response.get_json()
     assert "errors" in response_json
-    assert response_json["errors"][0]["message"] == "Post date must be less than or equal to close date"
+    assert (
+        response_json["errors"][0]["message"]
+        == "Post date must be less than or equal to close date"
+    )
 
 
 def test_opportunity_summary_create_invalid_award_amount(
@@ -168,7 +171,10 @@ def test_opportunity_summary_create_invalid_award_amount(
     assert response.status_code == 422
     response_json = response.get_json()
     assert "errors" in response_json
-    assert response_json["errors"][0]["message"] == "Award floor must be less than or equal to award ceiling"
+    assert (
+        response_json["errors"][0]["message"]
+        == "Award floor must be less than or equal to award ceiling"
+    )
 
 
 def test_opportunity_summary_create_successful(

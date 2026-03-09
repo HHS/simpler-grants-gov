@@ -13,10 +13,7 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     Privilege,
 )
-from src.db.models.opportunity_models import (
-    Opportunity,
-    OpportunitySummary,
-)
+from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 
