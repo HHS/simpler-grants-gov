@@ -19,6 +19,7 @@ import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inc
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
+import { selectLocalTestUser } from "tests/e2e/utils/select-local-test-user-utils";
 
 const { baseUrl, targetEnv, testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
@@ -39,6 +40,12 @@ test("Application submission happy path - application with required SF424B and u
     // Give cookie time to be set before navigating
     await page.waitForTimeout(1000);
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+    // Fallback: If sign-in modal appears, select local test user
+    const signInModal = page.locator('[role="dialog"], #sign-in-modal');
+    if (await signInModal.isVisible()) {
+      await selectLocalTestUser(page, "Sally's Soup Emporium");
+      await page.waitForTimeout(2000);
+    }
   } else if (targetEnv === "staging") {
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     const signOutButton = await performStagingLogin(page, !!isMobile);
