@@ -68,7 +68,7 @@ def get_opportunity_by_legacy_id(db_session: db.Session, legacy_opportunity_id: 
 
 def _get_opportunity_including_drafts(
     db_session: db.Session, where_clause: ColumnExpressionArgument[bool]
-) -> Opportunity:
+) -> Opportunity | None:
     stmt = (
         select(Opportunity)
         .where(where_clause)

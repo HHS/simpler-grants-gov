@@ -13,7 +13,12 @@ from src.constants.lookup_constants import (
     FundingInstrument,
     Privilege,
 )
-from src.db.models.opportunity_models import OpportunitySummary
+from src.db.models.opportunity_models import (
+    LinkOpportunitySummaryApplicantType,
+    LinkOpportunitySummaryFundingCategory,
+    LinkOpportunitySummaryFundingInstrument,
+    OpportunitySummary,
+)
 from src.db.models.user_models import User
 from src.services.opportunities_v1.get_opportunity import get_opportunity_including_drafts
 
@@ -51,7 +56,7 @@ class OpportunitySummaryCreateRequest(BaseModel):
     fiscal_year: int | None = None
 
 
-def _check_existing_summary(opportunity: OpportunitySummary, is_forecast: bool) -> None:
+def _check_existing_summary(opportunity: "Opportunity", is_forecast: bool) -> None:
     """Check if a summary of the same type already exists for the opportunity"""
     existing_summary = (
         opportunity.forecast_summary if is_forecast else opportunity.non_forecast_summary
@@ -65,7 +70,7 @@ def _check_existing_summary(opportunity: OpportunitySummary, is_forecast: bool) 
 
 
 def _create_opportunity_summary_object(
-    opportunity: OpportunitySummary, request: OpportunitySummaryCreateRequest
+    opportunity: "Opportunity", request: OpportunitySummaryCreateRequest
 ) -> OpportunitySummary:
     """Create a new OpportunitySummary object from the request data"""
     # Calculate archive_date as close_date + 30 days
@@ -126,15 +131,18 @@ def create_opportunity_summary(
     # Handle relationships for loading
     if request.funding_instruments:
         for instrument in request.funding_instruments:
-            opportunity_summary.funding_instruments.append(instrument)
+            link = LinkOpportunitySummaryFundingInstrument(funding_instrument=instrument)
+            opportunity_summary.link_funding_instruments.append(link)
 
     if request.funding_categories:
         for category in request.funding_categories:
-            opportunity_summary.funding_categories.append(category)
+            link = LinkOpportunitySummaryFundingCategory(funding_category=category)
+            opportunity_summary.link_funding_categories.append(link)
 
     if request.applicant_types:
         for applicant_type in request.applicant_types:
-            opportunity_summary.applicant_types.append(applicant_type)
+            link = LinkOpportunitySummaryApplicantType(applicant_type=applicant_type)
+            opportunity_summary.link_applicant_types.append(link)
 
     logger.info(
         f"Created {'forecast' if request.is_forecast else 'non-forecast'} opportunity summary",
