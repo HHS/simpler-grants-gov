@@ -167,10 +167,8 @@ def test_opportunity_summary_create_invalid_award_amount(
 
     assert response.status_code == 422
     response_json = response.get_json()
-    assert (
-        "award floor" in str(response_json).lower()
-        and "award ceiling" in str(response_json).lower()
-    )
+    assert "errors" in response_json
+    assert response_json["errors"][0]["message"] == "Award floor must be less than or equal to award ceiling"
 
 
 def test_opportunity_summary_create_successful(
