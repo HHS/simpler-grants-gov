@@ -15,6 +15,7 @@ from src.constants.lookup_constants import WorkflowEventProcessingResult
 from src.db.models.workflow_models import WorkflowEventHistory
 from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.json_util import json_encoder
 from src.workflow.event.workflow_event import WorkflowEvent
 from src.workflow.handler.event_handler import EventHandler
 from src.workflow.workflow_background_task import workflow_transaction
@@ -93,20 +94,19 @@ class WorkflowManager:
         logger.info("Received keyboard interrupt, exiting immediately.")
         sys.exit(0)
 
-    def fetch_event(self, message: SQSMessage) -> WorkflowEvent:
+    def parse_event(self, message: SQSMessage) -> WorkflowEvent:
         try:
             message_body = json.loads(message.body)
             return WorkflowEvent.model_validate(message_body)
         except json.JSONDecodeError as e:
-            logger.error(
-                "Failed to parse SQS message body as JSON",
-                extra={"message_id": message.message_id, "error": str(e)},
+            logger.exception(
+                "Failed to parse SQS message body as JSON", extra={"message_id": message.message_id}
             )
             raise ValueError(f"Invalid JSON in SQS message body: {e}") from e
-        except ValidationError as e:
-            logger.error(
+        except ValidationError:
+            logger.exception(
                 "Failed to validate SQS message as WorkflowEvent",
-                extra={"message_id": message.message_id, "error": str(e)},
+                extra={"message_id": message.message_id},
             )
             raise
 
@@ -166,7 +166,7 @@ class WorkflowManager:
         # Note that the initial approach won't be multi-threaded
         # We'll follow-up on that later
         for message in messages:
-            workflow_event = self.fetch_event(message)
+            workflow_event = self.parse_event(message)
             events.append(workflow_event)
             event_result = handle_event(workflow_event)
             if event_result in [
@@ -175,14 +175,22 @@ class WorkflowManager:
             ]:
                 messages_to_delete.append(message.receipt_handle)
 
+            logger.info(
+                "Processed workflow event",
+                extra=workflow_event.get_log_extra() | {"event_result": event_result},
+            )
+
         # Delete messages that were successfully processed or had non-retryable errors
         if messages_to_delete:
-            logger.info(f"Deleting {len(messages_to_delete)} messages from SQS queue")
+            logger.info(
+                "Deleting messages from current batch",
+                extra={"message_count": len(messages_to_delete)},
+            )
             delete_result = self.sqs_client.delete_message_batch(messages_to_delete)
 
             if delete_result.failed_deletes:
-                logger.error(
-                    f"Failed to delete {len(delete_result.failed_deletes)} messages from SQS queue",
+                logger.exception(
+                    "Failed to delete messages from SQS queue",
                     extra={"failed_deletes": list(delete_result.failed_deletes)},
                 )
 
@@ -193,43 +201,46 @@ class WorkflowManager:
 
 @flask_db.with_db_session()
 def handle_event(db_session: db.Session, event: WorkflowEvent) -> WorkflowEventProcessingResult:
-    with workflow_transaction(event.event_type):
+    with workflow_transaction(f"process-{event.event_type}"):
         logger.info(
             "Processing event",
             extra={"event_type": event.event_type},
         )
-        with db_session.begin():
-            try:
-                with workflow_transaction(f"process-{event.event_id}"):
-                    history_event = WorkflowEventHistory(
-                        event_data=None,  # will update with actual data after processing
-                        sent_at=datetime_util.utcnow(),
-                        is_successfully_processed=False,
-                        event_id=event.event_id,
-                    )
 
-                    event_handler = EventHandler(db_session, event, history_event)
-                    event_handler.process()
-                    db_session.commit()
-                    return WorkflowEventProcessingResult.SUCCESS
+        history_event = WorkflowEventHistory(
+            event_data=json.dumps(event.__dict__, default=json_encoder),
+            sent_at=datetime_util.utcnow(),
+            is_successfully_processed=True,
+            event_id=event.event_id,
+        )
 
-            except NonRetryableWorkflowError:
-                logger.warning("Encountered non-retryable workflow error", exc_info=True)
-                # Rollback any partial changes
+        try:
+            with db_session.begin():
+                db_session.add(history_event)
+                event_handler = EventHandler(db_session, event, history_event)
+                event_handler.process()
+            logger.info("Successfully processed workflow event")
+            return WorkflowEventProcessingResult.SUCCESS
+
+        except NonRetryableWorkflowError:
+            if db_session.is_active:
                 db_session.rollback()
-                return WorkflowEventProcessingResult.NON_RETRYABLE_ERROR
 
-            except RetryableWorkflowError:
-                logger.warning("Encountered retryable workflow error", exc_info=True)
-                # Rollback any partial changes
-                db_session.rollback()
-                return WorkflowEventProcessingResult.RETRYABLE_ERROR
+            with db_session.begin():
+                history_event.is_successfully_processed = False
+                db_session.add(history_event)
+            logger.warning(
+                "Encountered non-retryable workflow error while processing event", exc_info=True
+            )
+            return WorkflowEventProcessingResult.NON_RETRYABLE_ERROR
 
-            except Exception as e:
-                # log specific error for any other exception
-                logger.error(
-                    f"EVENT_PROCESSING_RESULT: Unexpected error processing workflow event: {str(e)}"
-                )
-                # Rollback any partial changes
-                db_session.rollback()
-                return WorkflowEventProcessingResult.GENERAL_ERROR
+        except RetryableWorkflowError:
+            logger.warning(
+                "Encountered retryable workflow error while processing event", exc_info=True
+            )
+            return WorkflowEventProcessingResult.RETRYABLE_ERROR
+
+        except Exception:
+            # log specific error for any other exception
+            logger.exception("Unexpected error processing workflow event")
+            return WorkflowEventProcessingResult.GENERAL_ERROR
