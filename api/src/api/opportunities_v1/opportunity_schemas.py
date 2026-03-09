@@ -604,12 +604,6 @@ class OpportunityVersionSchema(OpportunityV1Schema):
 
 
 class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
-    legacy_opportunity_id = fields.Integer(
-        required=True,
-        allow_none=True,
-        metadata={"description": "The legacy opportunity ID"},
-    )
-
     is_forecast = fields.Boolean(
         required=True,
         metadata={"description": "Whether the opportunity is forecasted", "example": False},
