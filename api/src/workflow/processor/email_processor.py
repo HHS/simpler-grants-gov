@@ -12,15 +12,14 @@ from src.task.notifications.config import get_email_config
 
 logger = logging.getLogger(__name__)
 
-APPROVAL_EMAIL_SUBJECT_TEMPLATE = "Approval required for workflow of '{workflow_type}'"
+APPROVAL_EMAIL_SUBJECT_TEMPLATE = "Approval required for '{workflow_type}'"
 
-APPROVAL_EMAIL_TEMPLATE = """An approval is required for a Simpler Grants.gov workflow.
+APPROVAL_EMAIL_TEMPLATE = """An approval is required for a {workflow_type} that is currently in state '{current_workflow_state}' from a user with the following privilege(s): {privileges}.
 
-The workflow is currently in {current_workflow_state} waiting for an approval
-from a user with privilege(s) {privileges}.
-
-Workflow ID: {workflow_id} [{workflow_type}]
+ID: {workflow_id}
 Agency: {agency_code}: {agency_name}
+
+Please visit {url} to make this update.
 """
 
 
@@ -65,6 +64,8 @@ def send_approval_email_for_grantor(workflow: Workflow, privileges: list[Privile
         agency_code=agency.agency_code,
         agency_name=agency.agency_name,
         privileges=",".join(privileges),
+        # TODO - something here
+        url=get_email_config().frontend_base_url
     )
 
     for user in users:
