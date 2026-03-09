@@ -1,8 +1,8 @@
 name: E2E Tests (Deployed Target)
 on:
-  push:
-    branches:
-      - "dschrashun/7973-e2e-ci-staging-refactor"
+  schedule:
+    # Run every day at (6/7am Eastern) before the start of the workday
+    - cron: "0 11 * * *"
   workflow_dispatch:
     inputs:
       version:
