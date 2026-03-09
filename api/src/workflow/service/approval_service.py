@@ -70,7 +70,7 @@ def get_approval_response_type(state_machine_event: StateMachineEvent) -> Approv
         raise InvalidWorkflowResponseTypeError("Approval response type is not a valid value") from e
 
 
-def _get_agency_for_workflow(workflow: Workflow) -> Agency:
+def get_agency_for_workflow(workflow: Workflow) -> Agency:
     # From the workflow entity, find the opportunity
     # which we'll in turn use to get the agency
     opportunity: Opportunity | None = None
@@ -106,7 +106,7 @@ def can_user_do_agency_approval(
     # As a safety precaution, if we ever see this, disallow access
     # regardless of the other agencies that might be present.
     try:
-        agency = _get_agency_for_workflow(workflow)
+        agency = get_agency_for_workflow(workflow)
     except OpportunityWithoutAgencyError:
         logger.warning("Opportunity associated with workflow has no agency", extra=log_extra)
         return False
