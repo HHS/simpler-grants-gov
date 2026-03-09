@@ -1,7 +1,7 @@
 """Tests for recursive XML transformer."""
 
 from src.services.xml_generation.transformers.base_transformer import RecursiveXMLTransformer
-
+from pytest import approx
 
 class TestRecursiveXMLTransformer:
     """Test cases for RecursiveXMLTransformer."""
@@ -120,7 +120,7 @@ class TestRecursiveXMLTransformer:
         # Should preserve data types
         assert result["StringField"] == "test string"
         assert result["IntField"] == 42
-        assert result["FloatField"] == 3.14
+        assert result["FloatField"] == approx(3.14)
         assert result["BoolField"] is True
         assert result["ListField"] == ["item1", "item2"]
 
