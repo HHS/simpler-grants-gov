@@ -120,7 +120,6 @@ def create_opportunity_summary(
 
     # Check if user has permission to view/edit opportunities for this agency
     agency = opportunity.agency_record
-    verify_access(user, {Privilege.VIEW_OPPORTUNITY}, agency)
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, agency)
 
     _check_existing_summary(opportunity, request.is_forecast)
