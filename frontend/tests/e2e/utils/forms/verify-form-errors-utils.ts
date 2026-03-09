@@ -7,7 +7,7 @@ interface FieldError {
 
 export async function verifyAlertErrors(
   page: Page,
-  expectedErrors: FieldError[]
+  expectedErrors: FieldError[],
 ): Promise<void> {
   const alertList = page.getByTestId("alert").getByRole("list");
   for (const { message } of expectedErrors) {
@@ -17,7 +17,7 @@ export async function verifyAlertErrors(
 
 export async function verifyInlineErrors(
   page: Page,
-  expectedErrors: FieldError[]
+  expectedErrors: FieldError[],
 ): Promise<void> {
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   for (const { fieldId, message } of expectedErrors) {

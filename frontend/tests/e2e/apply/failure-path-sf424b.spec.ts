@@ -14,12 +14,12 @@ import {
   verifySf424bFormVisible,
 } from "tests/e2e/utils/forms/fill-sf424b-form-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
-import { verifyFormStatusOnPage } from "tests/e2e/utils/forms/verify-form-status-utils";
-import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
 import {
   verifyAlertErrors,
   verifyInlineErrors,
 } from "tests/e2e/utils/forms/verify-form-errors-utils";
+import { verifyFormStatusOnPage } from "tests/e2e/utils/forms/verify-form-status-utils";
+import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
 
 const { baseUrl, targetEnv, testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
@@ -27,7 +27,10 @@ const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 const sf424bErrors = [
   { fieldId: "title", message: "Title is required" },
-  { fieldId: "applicant_organization", message: "Applicant Organization is required" },
+  {
+    fieldId: "applicant_organization",
+    message: "Applicant Organization is required",
+  },
 ];
 
 test("SF-424B error validation - required fields and inline errors", async ({
