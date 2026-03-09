@@ -14,6 +14,7 @@ export interface FillFormConfig {
   formName: string;
   fields: FillFieldDefinition[];
   saveButtonTestId: string;
+  returnToApplication?: boolean;
 }
 
 export async function fillField(
@@ -61,7 +62,12 @@ export async function fillForm(
   page: Page,
   config: FillFormConfig,
 ): Promise<void> {
-  const { formName, fields, saveButtonTestId } = config;
+  const {
+    formName,
+    fields,
+    saveButtonTestId,
+    returnToApplication = true,
+  } = config;
 
   const applicationURL = page.url();
 
@@ -85,7 +91,9 @@ export async function fillForm(
     await page.waitForTimeout(500);
     await page.getByTestId(saveButtonTestId).click();
 
-    await page.goto(applicationURL);
+    if (returnToApplication) {
+      await page.goto(applicationURL);
+    }
   } catch (error) {
     await testInfo.attach("fillForm-error", {
       body: error instanceof Error ? error.message : String(error),
