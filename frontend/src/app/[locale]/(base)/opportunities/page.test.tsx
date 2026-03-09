@@ -148,10 +148,10 @@ describe("Opportunities", () => {
 
   describe("no agency param in URL", () => {
     beforeEach(() => {
-      mockFetchUserAgencies.mockResolvedValue([agency1]);
+      mockFetchUserAgencies.mockResolvedValue([agency2, agency1]);
     });
 
-    it("redirects to first agency", async () => {
+    it("redirects to deterministic default agency", async () => {
       await OpportunitiesListPage({ params: localeParams });
 
       expect(redirectMock).toHaveBeenCalledWith(`?agency=${agency1.agency_id}`);
@@ -203,6 +203,22 @@ describe("Opportunities", () => {
       render(component);
 
       expect(await screen.findByText("Test Opportunity")).toBeVisible();
+    });
+
+    it("normalizes array agency search param by using first value", async () => {
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+      });
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({
+          agency: [agency1.agency_id, agency2.agency_id],
+        }) as unknown as Promise<Record<string, string | undefined>>,
+      });
+      render(component);
+
+      expect(await screen.findByText("Test Opportunity")).toBeVisible();
+      expect(mockSearchForOpportunities).toHaveBeenCalled();
     });
 
     it("renders both opportunity count and agency label", async () => {

@@ -158,7 +158,10 @@ const OpportunitiesTable = ({
 async function OpportunitiesListPage(props: OpportunitiesListProps) {
   const { searchParams } = props;
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const selectedAgencyId = resolvedSearchParams.agency;
+  const selectedAgencyParam = resolvedSearchParams.agency;
+  const selectedAgencyId = Array.isArray(selectedAgencyParam)
+    ? selectedAgencyParam[0]
+    : selectedAgencyParam;
 
   let userAgencies: UserAgency[];
   try {
@@ -174,11 +177,15 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
     return <NoAgenciesPage />;
   }
 
+  const sortedUserAgencies = [...userAgencies].sort((a, b) =>
+    a.agency_name.localeCompare(b.agency_name),
+  );
+
   if (!selectedAgencyId) {
-    redirect(`?agency=${userAgencies[0].agency_id}`);
+    redirect(`?agency=${sortedUserAgencies[0].agency_id}`);
   }
 
-  const selectedAgency = userAgencies.find(
+  const selectedAgency = sortedUserAgencies.find(
     (a) => a.agency_id === selectedAgencyId,
   );
 
@@ -203,9 +210,9 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
 
   return (
     <OpportunitiesPageWrapper>
-      {userAgencies.length > 1 && (
+      {sortedUserAgencies.length > 1 && (
         <AgencySelector
-          agencies={userAgencies}
+          agencies={sortedUserAgencies}
           currentAgencyId={selectedAgencyId}
         />
       )}
@@ -213,7 +220,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
         <OpportunitiesTable
           userOpportunities={userOpportunities}
           agencyName={selectedAgency.agency_name}
-          isSingleAgency={userAgencies.length === 1}
+          isSingleAgency={sortedUserAgencies.length === 1}
         />
       ) : (
         <NoStartedOpportunities />

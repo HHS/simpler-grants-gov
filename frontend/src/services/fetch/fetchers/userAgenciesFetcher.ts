@@ -20,6 +20,15 @@ export const getUserAgencies = async (
     additionalHeaders: { "X-SGG-Token": token },
     body: {},
   });
+
+  if (!resp.ok) {
+    if (resp.status === 401) {
+      throw new UnauthorizedError("Unauthorized");
+    }
+
+    throw new Error(`Failed to fetch user agencies: ${resp.status}`);
+  }
+
   const json = (await resp.json()) as { data: UserAgency[] };
   return json.data;
 };
