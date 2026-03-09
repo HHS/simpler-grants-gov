@@ -16,7 +16,12 @@ export async function verifyFormStatusOnPage(
   formName: string,
   applicationUrl: string,
 ): Promise<void> {
-  await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
+  if (applicationUrl) {
+    await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
+  } else {
+    await page.goBack();
+    await page.waitForLoadState("domcontentloaded");
+  }
   await page.waitForTimeout(10000);
 
   // Scroll down to find form row in the table
@@ -26,8 +31,12 @@ export async function verifyFormStatusOnPage(
   const escapedFormName = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const flexiblePattern = escapedFormName.replace(/\s+/g, "\\s*");
   const formRow = page
-    .locator("tr", { hasText: new RegExp(flexiblePattern, "i") })
-    .filter({ has: page.locator('a[href*="/form/"]') });
+    .locator("tr", {
+      hasText: new RegExp(flexiblePattern, "i"),
+    })
+    .filter({
+      has: page.locator('a[href*="/form/"]'),
+    });
 
   await expect(formRow).toBeVisible({ timeout: 10000 });
 
@@ -53,7 +62,12 @@ export async function verifyFormStatusAfterSave(
   formName: string,
   applicationUrl: string,
 ): Promise<void> {
-  await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
+  if (applicationUrl) {
+    await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
+  } else {
+    await page.goBack();
+    await page.waitForLoadState("domcontentloaded");
+  }
   await page.waitForTimeout(10000);
 
   // Scroll up to find the alert/banner message at the top
