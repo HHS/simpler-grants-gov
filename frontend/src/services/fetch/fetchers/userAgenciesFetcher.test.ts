@@ -1,4 +1,3 @@
-import { UnauthorizedError } from "src/errors";
 import {
   fetchUserAgencies,
   getUserAgencies,

@@ -157,9 +157,13 @@ const OpportunitiesTable = ({
 
 async function OpportunitiesListPage(props: OpportunitiesListProps) {
   const { searchParams } = props;
-  const resolvedSearchParams = searchParams ? await searchParams : {};
-  const selectedAgencyParam = resolvedSearchParams.agency;
-  const selectedAgencyId = Array.isArray(selectedAgencyParam)
+  const resolvedSearchParams: Record<string, string | string[] | undefined> =
+    searchParams ? await searchParams : {};
+  const selectedAgencyParam: string | string[] | undefined =
+    resolvedSearchParams.agency;
+  const selectedAgencyId: string | undefined = Array.isArray(
+    selectedAgencyParam,
+  )
     ? selectedAgencyParam[0]
     : selectedAgencyParam;
 
