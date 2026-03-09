@@ -5,7 +5,7 @@
 // It includes functions to ensure pages are closed and to clear page state to prevent caching issues.
 // These utilities help maintain a clean testing environment across different browsers, especially WebKit.
 
-import { Page, BrowserContext } from "@playwright/test";
+import { BrowserContext, Page } from "@playwright/test";
 
 export async function ensurePageClosed(page: Page): Promise<void> {
   if (page && !page.isClosed()) {
