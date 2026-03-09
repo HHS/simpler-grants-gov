@@ -276,7 +276,7 @@ function Budget424aSectionB<
                   );
                 })}
 
-                <td className="sf424a__equals-cell border-bottom-0 border-top-0 verticle-align-bottom">
+                <td className="sf424a__equal-sign-wrapper-cell border-bottom-0 border-top-0 verticle-align-bottom">
                   <div className="display-flex flex-column">=</div>
                 </td>
 

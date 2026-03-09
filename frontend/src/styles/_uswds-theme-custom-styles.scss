@@ -748,16 +748,16 @@ dl {
 
 // Print Styles
 // SF424-A
-.sf424a-print-only {
+.sf424a-print-only-view {
   display: none;
 }
 
 @media print {
-  .sf424a-screen-only {
+  .sf424a-application-view-only {
     display: none !important;
   }
 
-  .sf424a-print-only {
+  .sf424a-print-only-view {
     display: block !important;
   }
 
@@ -854,13 +854,13 @@ dl {
     box-sizing: border-box;
   }
 
-  .sf424a__equals-cell {
+  .sf424a__equal-sign-wrapper-cell {
     width: 16px !important;
     padding: 0 2px !important;
     vertical-align: middle !important;
   }
 
-  .sf424a__equals {
+  .sf424a__equal-sign-wrapper {
     display: block !important;
     text-align: center !important;
     line-height: 1 !important;

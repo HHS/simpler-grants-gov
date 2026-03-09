@@ -320,7 +320,7 @@ function Budget424aSectionC<
 
               {/* Visual equals column */}
               <td
-                className="sf424a__equals-cell border-bottom-0 border-top-0 verticle-align-bottom"
+                className="sf424a__equal-sign-wrapper-cell border-bottom-0 border-top-0 verticle-align-bottom"
                 aria-hidden="true"
               >
                 =

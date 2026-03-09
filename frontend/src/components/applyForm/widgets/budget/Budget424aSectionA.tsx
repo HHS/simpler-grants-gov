@@ -245,7 +245,7 @@ function Budget424aSectionA<
                     {row + 1}.
                   </span>
                   <div className="margin-top-05 padding-top-0">
-                    <div className="sf424a-screen-only">
+                    <div className="sf424a-application-view-only">
                       <TextWidget
                         schema={activityTitleSchema}
                         id={`activity_line_items[${row}]--activity_title`}
@@ -266,7 +266,7 @@ function Budget424aSectionA<
                     due to the unpredictability of what the activity names may be, 
                     it might get cut off and impossible to read.
                     */}
-                    <div className="sf424a-print-only sf424a-section-a__activity-print-value">
+                    <div className="sf424a-print-only-view sf424a-section-a__activity-print-value">
                       {getItemVal(row, "activity_title") || "—"}
                     </div>
                   </div>
@@ -277,7 +277,7 @@ function Budget424aSectionA<
               <DataCell className="sf424a-section-a__assistance-cell">
                 <div className="display-flex flex-align-end">
                   <div className="margin-top-05 padding-top-0">
-                    <div className="sf424a-screen-only">
+                    <div className="sf424a-application-view-only">
                       <TextWidget
                         schema={assistanceListingNumberSchema}
                         id={`activity_line_items[${row}]--assistance_listing_number`}
@@ -292,8 +292,12 @@ function Budget424aSectionA<
                       />
                     </div>
 
-                    {/* Print only value - see comment above */}
-                    <div className="sf424a-print-only sf424a-section-a__activity-print-value">
+                    {/* 
+                    Print only value - we hide the input only for print and show the value here- 
+                    due to the unpredictability of what the activity names may be, 
+                    it might get cut off and impossible to read.
+                    */}
+                    <div className="sf424a-print-only-view sf424a-section-a__activity-print-value">
                       {getItemVal(row, "assistance_listing_number") || "—"}
                     </div>
                   </div>

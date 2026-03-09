@@ -209,7 +209,7 @@ export function ActivityTitlesRow({
         return (
           <td
             key={`occ-title-${columnIndex}`}
-            className="sf424a__equals-cell padding-05 border-bottom-0 border-top-0 verticle-align-bottom"
+            className="sf424a__equal-sign-wrapper-cell padding-05 border-bottom-0 border-top-0 verticle-align-bottom"
           >
             <div className="minw-15 font-sans-sm text-italic text-center">
               {displayText}
