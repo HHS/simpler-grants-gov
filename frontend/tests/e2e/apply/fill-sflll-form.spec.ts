@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { FORMS_TEST_DATA } from "tests/e2e/apply/fixtures/test-data-for-sflll-forms.fixture";
 import {
   getSflllFillFields,
@@ -7,7 +7,7 @@ import {
 import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import { fillAnyForm } from "tests/e2e/utils/forms/general-forms-filling";
+import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   clearPageState,
   ensurePageClosed,
@@ -35,12 +35,17 @@ test.describe("fill SF-LLL Form", () => {
 
       const sflllData = FORMS_TEST_DATA.sflll;
 
-      await fillAnyForm(testInfo, page, {
+      await fillForm(testInfo, page, {
         formName: SFLLL_FORM_CONFIG.formName,
         fields: getSflllFillFields(sflllData),
         saveButtonTestId: SFLLL_FORM_CONFIG.saveButtonTestId,
-        noErrorsText: SFLLL_FORM_CONFIG.noErrorsText,
       });
+
+      // Wait for save to complete before asserting
+      await page.waitForLoadState("networkidle");
+      await expect(
+        page.getByText(SFLLL_FORM_CONFIG.noErrorsText),
+      ).toBeVisible();
     } finally {
       await clearPageState(context);
       await ensurePageClosed(page);
