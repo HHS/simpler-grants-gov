@@ -222,7 +222,7 @@ function Budget424aSectionD<
                   {/* "=" for row 1 & 2, empty for row 3 (totals) */}
                   {quarterIndex === 3 && (
                     <td
-                      className="border-bottom-0 border-top-0 verticle-align-bottom text-center text-bold"
+                      className="sf424a__equals-cell border-bottom-0 border-top-0 verticle-align-bottom text-center text-bold"
                       aria-hidden="true"
                     >
                       {rowIndex < 2 ? "=" : ""}
