@@ -6,8 +6,6 @@ from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerGrantorsS2SClient,
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
-
-# , get_soap_config
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPInvalidEnvelope,
