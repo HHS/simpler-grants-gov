@@ -16,7 +16,6 @@ import {
   Grid,
   GridContainer,
   Label,
-  Textarea,
 } from "@trussworks/react-uswds";
 
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
