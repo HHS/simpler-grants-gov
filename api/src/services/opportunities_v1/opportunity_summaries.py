@@ -132,18 +132,20 @@ def create_opportunity_summary(
     # Handle relationships for loading
     if request.funding_instruments:
         for instrument in request.funding_instruments:
-            link = LinkOpportunitySummaryFundingInstrument(funding_instrument=instrument)
-            opportunity_summary.link_funding_instruments.append(link)
+            link_funding_instrument = LinkOpportunitySummaryFundingInstrument(
+                funding_instrument=instrument
+            )
+            opportunity_summary.link_funding_instruments.append(link_funding_instrument)
 
     if request.funding_categories:
         for category in request.funding_categories:
-            link = LinkOpportunitySummaryFundingCategory(funding_category=category)
-            opportunity_summary.link_funding_categories.append(link)
+            link_funding_category = LinkOpportunitySummaryFundingCategory(funding_category=category)
+            opportunity_summary.link_funding_categories.append(link_funding_category)
 
     if request.applicant_types:
         for applicant_type in request.applicant_types:
-            link = LinkOpportunitySummaryApplicantType(applicant_type=applicant_type)
-            opportunity_summary.link_applicant_types.append(link)
+            link_applicant_type = LinkOpportunitySummaryApplicantType(applicant_type=applicant_type)
+            opportunity_summary.link_applicant_types.append(link_applicant_type)
 
     logger.info(
         f"Created {'forecast' if request.is_forecast else 'non-forecast'} opportunity summary",
