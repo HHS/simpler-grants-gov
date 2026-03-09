@@ -12,7 +12,7 @@ import { RefObject, useMemo, useState } from "react";
 import { Link, ModalRef, Table } from "@trussworks/react-uswds";
 
 import { PopoverMenu } from "src/components/PopoverMenu";
-import { AttachmentsCardTableHeaders } from "./AttachmentsCardTableHeaders";
+// import { AttachmentsCardTableHeaders } from "./AttachmentsCardTableHeaders";
 // import { AttachmentsCardTableRowDeleting } from "./AttachmentsCardTableRowDeleting";
 // import { AttachmentsCardTableRowEmpty } from "./AttachmentsCardTableRowEmpty";
 // import { AttachmentsCardTableRowUploading } from "./AttachmentsCardTableRowUploading";
