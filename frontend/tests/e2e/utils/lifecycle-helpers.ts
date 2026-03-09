@@ -14,13 +14,26 @@ export async function ensurePageClosed(page: Page): Promise<void> {
 }
 
 export async function clearPageState(context: BrowserContext): Promise<void> {
-  // Clear all storage to prevent WebKit caching issues
-  await context.clearCookies();
-  const pages = context.pages();
-  for (const page of pages) {
-    await page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-    });
+  try {
+    // Clear all storage to prevent WebKit caching issues
+    await context.clearCookies();
+    const pages = context.pages();
+    for (const page of pages) {
+      // Check if page is still valid before evaluating
+      if (!page.isClosed()) {
+        try {
+          await page.evaluate(() => {
+            localStorage.clear();
+            sessionStorage.clear();
+          });
+        } catch (error) {
+          // Ignore errors from closed/destroyed pages
+          console.warn("Could not clear page storage:", error);
+        }
+      }
+    }
+  } catch (error) {
+    // Context already closed - ignore
+    console.warn("Could not clear context state:", error);
   }
 }
