@@ -7,6 +7,7 @@ export interface FillFieldDefinition {
   value: string;
   type: "text" | "dropdown";
   section: string;
+  field?: string; // <- add this
 }
 
 export interface FillFormOptions {
@@ -16,6 +17,7 @@ export interface FillFormOptions {
   noErrorsText?: string;
   formLoadTimeoutMs?: number;
   noErrorsTimeoutMs?: number;
+  skipErrorValidation?: boolean;
 }
 
 export async function fillField(
@@ -52,6 +54,11 @@ export async function fillField(
   }
 }
 
+/**
+ * Fills a form from the application page and saves it.
+ * Assumes the current page is already an application page
+ * where the form link (`formName`) is visible and clickable.
+ */
 export async function fillAnyForm(
   testInfo: TestInfo,
   page: Page,
@@ -64,6 +71,7 @@ export async function fillAnyForm(
     noErrorsText = "No errors were detected",
     formLoadTimeoutMs = 35000,
     noErrorsTimeoutMs = 10000,
+    skipErrorValidation = false,
   } = options;
 
   const applicationURL = page.url();
@@ -88,9 +96,11 @@ export async function fillAnyForm(
     await page.waitForTimeout(500);
     await page.getByTestId(saveButtonTestId).click();
 
-    await expect(page.getByText(noErrorsText)).toBeVisible({
-      timeout: noErrorsTimeoutMs,
-    });
+    if (!skipErrorValidation) {
+      await expect(page.getByText(noErrorsText)).toBeVisible({
+        timeout: noErrorsTimeoutMs,
+      });
+    }
 
     await page.goto(applicationURL);
   } catch (error) {
