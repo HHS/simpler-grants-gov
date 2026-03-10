@@ -79,11 +79,11 @@ function Search({ searchParams, params }: SearchPageProps) {
       <div className="bg-primary-lightest line-height-body-2 font-body-3xs padding-y-1">
         <div className="grid-container">
           {t.rich("goToGG", {
-            "search-link": (chunks) => (
-              <a href="/search">{chunks}</a>
-            ),
+            "search-link": (chunks) => <a href="/search">{chunks}</a>,
             "gg-link": (chunks) => (
-              <a href="https://grants.gov/" target="_blank">{chunks}</a>
+              <a href="https://grants.gov/" target="_blank">
+                {chunks}
+              </a>
             ),
           })}
         </div>
