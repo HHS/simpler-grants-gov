@@ -48,9 +48,9 @@ const Footer = () => {
                 />
               </div>
             </Grid>
-            <Grid 
-              className="usa-footer__nav border-0" 
-              tablet={{ col: "auto" }} 
+            <Grid
+              className="usa-footer__nav border-0"
+              tablet={{ col: "auto" }}
               desktop={{ col: 2 }}
             >
               <h3 className="desktop:padding-top-4">{t("explore")}</h3>
@@ -99,7 +99,9 @@ const Footer = () => {
               tabletLg={{ col: 5 }}
               desktop={{ col: 3 }}
             >
-              <h3 className="desktop:padding-top-4">{t("agencyContactCenter")}</h3>
+              <h3 className="desktop:padding-top-4">
+                {t("agencyContactCenter")}
+              </h3>
               <div>
                 {t.rich("grantorSupport", {
                   poc: (chunk) => (
