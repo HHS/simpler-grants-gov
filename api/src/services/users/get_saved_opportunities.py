@@ -173,8 +173,7 @@ def _build_saved_union_subquery(
 def _enrich_with_saved_organizations_sql(
     db_session: db.Session,
     opportunities: Sequence[Opportunity],
-    org_ids_to_use: list[uuid.UUID] | None,
-) -> Sequence[Opportunity]:
+) -> None:
     """
     Enrich paginated Opportunity objects with `saved_to_organizations`.
 
@@ -182,12 +181,9 @@ def _enrich_with_saved_organizations_sql(
     -  If the request is for **user-saved opportunities only**, the `saved_to_organizations` field is omitted.
     - If the request involves organizations the `saved_to_organizations` field is always included.
     """
-    if not org_ids_to_use:
-        return opportunities
-
     opp_ids = [opp.opportunity_id for opp in opportunities]
 
-    rows = db_session.execute(
+    result = db_session.execute(
         select(OrganizationSavedOpportunity.opportunity_id, Organization)
         .join(
             Organization,
@@ -198,13 +194,12 @@ def _enrich_with_saved_organizations_sql(
 
     # Build a mapping: opportunity_id to list of Organization objects
     saved_orgs_map: dict[uuid.UUID, list[Organization]] = {}
-    for opp_id, org in rows:
+    for opp_id, org in result:
         saved_orgs_map.setdefault(opp_id, []).append(org)
 
     # Assign attribute to each organization saved opportunity
     for opp in opportunities:
-        setattr(opp, "saved_to_organizations", saved_orgs_map.get(opp.opportunity_id, []))  # noqa: B010
-    return opportunities
+        opp.saved_to_organizations = saved_orgs_map.get(opp.opportunity_id, [])  # type: ignore[attr-defined]
 
 
 def get_saved_opportunities(
@@ -274,12 +269,9 @@ def get_saved_opportunities(
     pagination_info = PaginationInfo.from_pagination_params(
         opportunity_params.pagination, paginator
     )
-    if paginated_search:
+
+    if paginated_search and org_ids_to_use:
         # Enrich paginated opportunities with saved_to_organizations
-        paginated_search = _enrich_with_saved_organizations_sql(
-            db_session,
-            paginated_search,
-            org_ids_to_use,
-        )
+        _enrich_with_saved_organizations_sql(db_session, paginated_search)
 
     return paginated_search, pagination_info
