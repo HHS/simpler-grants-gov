@@ -237,12 +237,14 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     summary_description = fields.String(
         required=True,
+        allow_none=True,
         validate=validators.Length(max=18000),
         metadata={"description": "Opportunity summary", "example": "This opportunity..."},
     )
 
     is_cost_sharing = fields.Boolean(
         required=True,
+        allow_none=True,
         metadata={
             "description": "Whether or not the opportunity has a cost sharing/matching requirement",
         },
@@ -250,6 +252,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     post_date = fields.Date(
         required=True,
+        allow_none=True,
         metadata={
             "description": "The date the opportunity was posted",
         },
@@ -257,6 +260,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     expected_number_of_awards = fields.Integer(
         required=False,
+        allow_none=True,
         validate=validators.Range(min=0, max=999_999_999_999_999),
         metadata={
             "description": "The number of awards the opportunity is expected to award",
@@ -266,6 +270,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     estimated_total_program_funding = fields.Integer(
         required=False,
+        allow_none=True,
         validate=validators.Range(min=0, max=999_999_999_999_999),
         metadata={
             "description": "The total program funding of the opportunity in US Dollars",
@@ -275,6 +280,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     award_floor = fields.Integer(
         required=True,
+        allow_none=True,
         validate=validators.Range(min=0, max=999_999_999_999_999),
         metadata={
             "description": "The minimum amount an opportunity would award",
@@ -284,6 +290,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     award_ceiling = fields.Integer(
         required=True,
+        allow_none=True,
         validate=validators.Range(min=0, max=999_999_999_999_999),
         metadata={
             "description": "The maximum amount an opportunity would award",
@@ -293,6 +300,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     additional_info_url = fields.String(
         required=False,
+        allow_none=True,
         validate=validators.Length(max=250),
         metadata={
             "description": "A URL to a website that can provide additional information about the opportunity",
@@ -302,6 +310,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     additional_info_url_description = fields.String(
         required=False,
+        allow_none=True,
         validate=validators.Length(max=250),
         metadata={
             "description": "The text to display for the additional_info_url link",
@@ -321,6 +330,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     funding_category_description = fields.String(
         required=False,
+        allow_none=True,
         validate=validators.Length(max=2500),
         metadata={
             "description": "Additional information about the funding category",
@@ -350,6 +360,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     applicant_eligibility_description = fields.String(
         required=False,
+        allow_none=True,
         validate=validators.Length(max=4000),
         metadata={
             "description": "Additional information about the types of applicants that are eligible",
@@ -359,6 +370,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     agency_contact_description = fields.String(
         required=True,
+        allow_none=True,
         validate=validators.Length(max=1000),
         metadata={
             "description": "Information regarding contacting the agency who owns the opportunity",
@@ -368,6 +380,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     agency_email_address = fields.String(
         required=True,
+        allow_none=True,
         validate=validators.Length(max=130),
         metadata={
             "description": "The contact email of the agency who owns the opportunity",
@@ -377,6 +390,7 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     agency_email_address_description = fields.String(
         required=True,
+        allow_none=True,
         validate=validators.Length(max=108),
         metadata={
             "description": "The text for the link to the agency email address",
