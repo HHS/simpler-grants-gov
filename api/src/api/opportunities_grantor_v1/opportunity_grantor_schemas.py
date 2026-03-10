@@ -8,10 +8,7 @@ from src.api.opportunities_v1.opportunity_schemas import (
 )
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from src.api.schemas.response_schema import (
-    AbstractResponseSchema,
-    PaginationMixinSchema,
-)
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
