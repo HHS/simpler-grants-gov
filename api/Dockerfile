@@ -35,8 +35,7 @@ COPY newrelic.ini /api/newrelic.ini
 
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
-RUN PY_MM=$(cat /tmp/py_version.txt) && \
-    /usr/local/bin/python"${PY_MM}" -m virtualenv /api/.venv && \
+RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
     /usr/local/bin/python"${PY_MM}" -m poetry build --format wheel && \
     /api/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
     /api/.venv/bin/python -m pip install --no-cache-dir "virtualenv>=20.35.3" && \
@@ -49,7 +48,7 @@ RUN PY_MM=$(cat /tmp/py_version.txt) && \
       echo "ERROR: newrelic.ini missing at ${SITE_BASE}/src/newrelic.ini" >&2; \
       ls -la "${SITE_BASE}/src" || true; \
       exit 1; \
-    fi; \
+    fi && \
     (find /tmp -mindepth 1 ! -name 'py_version.txt' -delete 2>/dev/null || true) && \
     (rm -rf /root/.cache "/home/${RUN_USER}/.cache" /var/tmp/* /api/dist /api/src || true)
 
