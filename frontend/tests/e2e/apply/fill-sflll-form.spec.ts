@@ -1,18 +1,17 @@
-import { expect, test} from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { FORMS_TEST_DATA } from "tests/e2e/apply/fixtures/test-data-for-sflll-forms.fixture";
 import {
   getSflllFillFields,
   SFLLL_FORM_CONFIG,
 } from "tests/e2e/apply/page-objects/sflll-form.page";
-import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
+import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   clearPageState,
   ensurePageClosed,
 } from "tests/e2e/utils/lifecycle-helpers";
-import { authenticateE2eUser } from "../utils/authenticate-e2e-user-utils";
 
 const { baseUrl, testOrgLabel, opportunityId } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
