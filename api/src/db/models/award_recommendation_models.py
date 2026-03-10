@@ -31,19 +31,18 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
         UUID, primary_key=True, default=uuid.uuid4
     )
     opportunity_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Opportunity.opportunity_id), nullable=False, index=True
+        UUID, ForeignKey(Opportunity.opportunity_id), index=True
     )
     opportunity: Mapped[Opportunity] = relationship(
         Opportunity, back_populates="award_recommendations"
     )
     # TODO - add a relationship to the funding strategy
-    funding_strategy_id: Mapped[uuid.UUID | None] = mapped_column(UUID, nullable=True)
-    award_recommendation_number: Mapped[str] = mapped_column(nullable=False, index=True)
+    funding_strategy_id: Mapped[uuid.UUID | None] = mapped_column(UUID)
+    award_recommendation_number: Mapped[str] = mapped_column(index=True)
     award_recommendation_status: Mapped[AwardRecommendationStatus] = mapped_column(
         "award_recommendation_status_id",
         LookupColumn(LkAwardRecommendationStatus),
         ForeignKey(LkAwardRecommendationStatus.award_recommendation_status_id),
-        nullable=False,
         default=AwardRecommendationStatus.DRAFT,
     )
     additional_info: Mapped[str | None]
@@ -51,7 +50,6 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
         "award_selection_method_id",
         LookupColumn(LkAwardSelectionMethod),
         ForeignKey(LkAwardSelectionMethod.award_selection_method_id),
-        nullable=True,
     )
     selection_method_detail: Mapped[str | None]
     funding_strategy: Mapped[str | None]
@@ -75,7 +73,6 @@ class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
     award_recommendation_id: Mapped[uuid.UUID] = mapped_column(
         UUID,
         ForeignKey(AwardRecommendation.award_recommendation_id),
-        nullable=False,
         index=True,
     )
     award_recommendation: Mapped[AwardRecommendation] = relationship(
@@ -84,7 +81,6 @@ class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
     application_submission_id: Mapped[uuid.UUID] = mapped_column(
         UUID,
         ForeignKey("api.application_submission.application_submission_id"),
-        nullable=False,
     )
     application_submission: Mapped[ApplicationSubmission] = relationship("ApplicationSubmission")
     award_recommendation_submission_detail_id: Mapped[uuid.UUID] = mapped_column(
@@ -92,7 +88,6 @@ class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
         ForeignKey(
             "api.award_recommendation_submission_detail.award_recommendation_submission_detail_id"
         ),
-        nullable=False,
     )
     award_recommendation_submission_detail: Mapped[AwardRecommendationSubmissionDetail] = (
         relationship("AwardRecommendationSubmissionDetail")
@@ -112,7 +107,6 @@ class AwardRecommendationSubmissionDetail(ApiSchemaTable, TimestampMixin):
         "award_recommendation_type_id",
         LookupColumn(LkAwardRecommendationType),
         ForeignKey(LkAwardRecommendationType.award_recommendation_type_id),
-        nullable=True,
     )
     has_exception: Mapped[bool] = mapped_column(default=False)
     exception_detail: Mapped[str | None]
