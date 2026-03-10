@@ -958,7 +958,7 @@ class AwardRecommendationFactory(BaseFactory):
         lambda s: f"{s.opportunity.agency_code or 'AGC'}_{fake.bothify('??????').upper()}"
     )
 
-    award_recommendation_status = AwardRecommendationStatus.IN_PROGRESS
+    award_recommendation_status = AwardRecommendationStatus.DRAFT
     additional_info = sometimes_none(factory.Faker("paragraph"))
     award_selection_method = sometimes_none(factory.fuzzy.FuzzyChoice(AwardSelectionMethod))
     selection_method_detail = sometimes_none(factory.Faker("paragraph"))

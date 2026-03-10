@@ -252,7 +252,6 @@ AWARD_RECOMMENDATION_STATUS_CONFIG: LookupConfig[AwardRecommendationStatus] = Lo
         LookupStr(AwardRecommendationStatus.DRAFT, 1),
         LookupStr(AwardRecommendationStatus.IN_REVIEW, 2),
         LookupStr(AwardRecommendationStatus.APPROVED, 3),
-        LookupStr(AwardRecommendationStatus.IN_PROGRESS, 4),
     ]
 )
 

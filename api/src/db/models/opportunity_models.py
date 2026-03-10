@@ -539,7 +539,7 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
         LookupColumn(LkAwardRecommendationStatus),
         ForeignKey(LkAwardRecommendationStatus.award_recommendation_status_id),
         nullable=False,
-        default=AwardRecommendationStatus.IN_PROGRESS,
+        default=AwardRecommendationStatus.DRAFT,
     )
     additional_info: Mapped[str | None]
     award_selection_method: Mapped[AwardSelectionMethod | None] = mapped_column(
