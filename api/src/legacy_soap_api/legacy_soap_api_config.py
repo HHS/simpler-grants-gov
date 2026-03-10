@@ -77,7 +77,6 @@ class SOAPOperationConfig:
     request_operation_name: str
     response_operation_name: str
     compare_endpoints: bool = False
-    is_mtom: bool = False
     always_call_simpler: bool = False
 
     # These are the privileges needed for these endpoints:
@@ -142,13 +141,16 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
         "GetApplicationZipRequest": SOAPOperationConfig(
             request_operation_name="GetApplicationZipRequest",
             response_operation_name="GetApplicationZipResponse",
-            is_mtom=True,
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
         ),
         "GetSubmissionListExpandedRequest": SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
-            is_mtom=True,
+            privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
+        ),
+        "ConfirmApplicationDeliveryRequest": SOAPOperationConfig(
+            request_operation_name="ConfirmApplicationDeliveryRequest",
+            response_operation_name="ConfirmApplicationDeliveryResponse",
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
         ),
     },

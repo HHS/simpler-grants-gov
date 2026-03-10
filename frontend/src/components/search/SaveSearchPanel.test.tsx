@@ -80,7 +80,6 @@ describe("SaveSearchPanel", () => {
 
   // not able to reliably test this due to dynamic imports
   // was able to get things to work locally using jest-next-dynamic, but this did not work in CI
-  // eslint-disable-next-line jest/no-disabled-tests
   it.skip("displays a tooltip next to copy button when not authenticated", async () => {
     mockUseUser.mockImplementation(() => ({
       user: {
@@ -95,7 +94,6 @@ describe("SaveSearchPanel", () => {
       "copySearch.copy.unauthenticated",
     );
   });
-  // eslint-disable-next-line jest/no-disabled-tests
   it.skip("displays a tooltip next to description text when authenticated", () => {
     mockUseUser.mockImplementation(() => ({
       user: {

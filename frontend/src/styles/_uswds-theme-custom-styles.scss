@@ -395,16 +395,6 @@ h6 {
 // we are implementing the uswds nav drop down at mobile widths, which is not ordinarily supported
 // these styles are taken from the desktop imlementation of the dropdown and applied at all breakpoints
 .usa-nav__primary {
-  // Match the exact USWDS selector .usa-nav__primary button:hover
-  // Use the same color as .usa-nav__primary a:not(.usa-button):not(.usa-current) (#76766a)
-  @include at-media-max($theme-header-min-width) {
-    button:hover,
-    button:focus:hover,
-    button:active:hover {
-      color: #76766a;
-      background-color: transparent;
-    }
-  }
   .mobile-nav-dropdown-uncollapsed-override {
     button[aria-expanded="true"]:hover {
       background-color: color("mint-40");
@@ -482,6 +472,16 @@ h6 {
     .usa-nav__primary-item > .usa-nav__link {
       padding-top: 0.75rem;
       padding-bottom: 0.75rem;
+    }
+  }
+  // Match the exact USWDS selector .usa-nav__primary button:hover
+  // Use the same color as .usa-nav__primary a:not(.usa-button):not(.usa-current) (#76766a)
+  @include at-media-max($theme-header-min-width) {
+    button:hover,
+    button:focus:hover,
+    button:active:hover {
+      color: #76766a;
+      background-color: transparent;
     }
   }
 }
@@ -743,6 +743,181 @@ dl {
         padding-bottom: 0.5rem;
       }
     }
+  }
+}
+
+// Print Styles
+// SF424-A
+.sf424a-print-only-view {
+  display: none;
+}
+
+@media print {
+  .sf424a-application-view-only {
+    display: none !important;
+  }
+
+  .sf424a-print-only-view {
+    display: block !important;
+  }
+
+  .sf424__table {
+    width: 100% !important;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+
+  .sf424__table th,
+  .sf424__table td {
+    padding: 4px !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    vertical-align: top;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .sf424__table tr,
+  .sf424a__row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .sf424a__cell--row-headers {
+    width: 12% !important;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+
+  .sf424__table .font-sans-2xs,
+  .sf424__table .font-sans-3xs,
+  .sf424__table .text-italic {
+    font-size: 9px !important;
+    line-height: 1.15 !important;
+  }
+
+  .sf424__table .usa-input-group,
+  .sf424__table .currency-input,
+  .sf424__table [class*="currency"] {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    width: 100% !important;
+    white-space: nowrap !important;
+  }
+
+  .sf424__table .usa-input-prefix,
+  .sf424__table [class*="prefix"] {
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    padding: 0 4px !important;
+    line-height: 1 !important;
+  }
+
+  .sf424__table input,
+  .sf424__table .usa-input {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+    padding: 2px 4px !important;
+    white-space: nowrap !important;
+    box-sizing: border-box;
+  }
+
+  .sf424__table .simpler-currency-input-wrapper {
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .sf424__table .simpler-currency-input-wrapper::after {
+    bottom: auto !important;
+    top: 50% !important;
+    left: 8px !important;
+    transform: translateY(-50%) !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  .sf424__table .simpler-currency-input-wrapper .usa-input {
+    padding-left: 18px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    line-height: 1.1 !important;
+    box-sizing: border-box;
+  }
+
+  .sf424a__equal-sign-wrapper-cell {
+    width: 16px !important;
+    padding: 0 2px !important;
+    vertical-align: middle !important;
+  }
+
+  .sf424a__equal-sign-wrapper {
+    display: block !important;
+    text-align: center !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .sf424__table .display-flex.flex-column {
+    display: block !important;
+  }
+
+  .sf424__table .margin-top-auto {
+    margin-top: 0 !important;
+  }
+
+  .sf424__table .padding-top-05 {
+    padding-top: 0 !important;
+  }
+
+  // SECTION A
+
+  .sf424a-section-a__activity-cell,
+  .sf424a-section-a__assistance-cell {
+    overflow: visible !important;
+    vertical-align: top !important;
+  }
+
+  .sf424a-section-a__activity-cell .usa-form-group,
+  .sf424a-section-a__assistance-cell .usa-form-group {
+    margin: 0 !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+  }
+
+  .sf424a-section-a__activity-input,
+  .sf424a-section-a__assistance-input {
+    min-width: 0 !important;
+    width: 100% !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+    height: auto !important;
+    min-height: 0 !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
+  }
+
+  .sf424__table .minw-10 {
+    min-width: 0 !important;
+  }
+
+  .sf424a-section-a__activity-print-value {
+    margin-left: 0.5rem;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    line-height: 1.2 !important;
   }
 }
 

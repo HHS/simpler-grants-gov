@@ -49,7 +49,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 ENV NEXT_BUILD true
 
 # Skip lint because it should have happened in the CI already
-RUN npm run build -- --no-lint
+RUN npm run build
 
 # Run the Next.js server
 # =====================================
