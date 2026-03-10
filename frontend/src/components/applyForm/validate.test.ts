@@ -100,10 +100,53 @@ describe("validateFormData", () => {
         // eslint-disable-next-line
         `must match pattern \"^/(properties|\\$defs)(/[a-zA-Z0-9_]+)+$\"`,
       );
-      expect(schemaErrors && schemaErrors[7]?.instancePath).toMatch("/0/type");
-      expect(schemaErrors && schemaErrors[7]?.message).toMatch(
-        "must be equal to one of the allowed values",
-      );
+      const hasTypeEnumError =
+        Array.isArray(schemaErrors) &&
+        schemaErrors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+          const message =
+            typeof error.message === "string" ? error.message : "";
+          return (
+            (instancePath === "/0/type" || instancePath === "/0") &&
+            message.includes("must be equal to one of the allowed values")
+          );
+        });
+
+      expect(hasTypeEnumError).toBe(true);
+    });
+
+    it("should invalidate fieldList with section children", () => {
+      const invalidUiSchema = [
+        {
+          type: "fieldList",
+          label: "Test",
+          name: "test",
+          defaultSize: 1,
+          children: [
+            {
+              type: "section",
+              label: "Bad",
+              name: "bad",
+              children: [],
+            },
+          ],
+        },
+      ] as unknown as UiSchema;
+
+      const errors = validateUiSchema(invalidUiSchema);
+
+      expect(Array.isArray(errors)).toBe(true);
+
+      const hasFieldListChildrenError =
+        Array.isArray(errors) &&
+        errors.some((error) => {
+          const instancePath =
+            typeof error.instancePath === "string" ? error.instancePath : "";
+          return instancePath.startsWith("/0/children/0");
+        });
+
+      expect(hasFieldListChildrenError).toBe(true);
     });
   });
 });

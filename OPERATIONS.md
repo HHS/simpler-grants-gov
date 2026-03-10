@@ -234,7 +234,7 @@ Certificates were last rotated:
 * Dev - December 2025
 * Staging - December 2025
 * Training - August 2025
-* Prod - March 2025
+* Prod - February 2026
 
 We need to manage a public certificate with login.gov for [private_jwt_auth](https://developers.login.gov/oidc/token/#client_assertion) in each of our environments.
 

@@ -239,45 +239,67 @@ function Budget424aSectionA<
           {ACTIVITY_ITEMS.map((row) => (
             <tr key={row}>
               {/* Column A: activity title */}
-              <DataCell>
+              <DataCell className="sf424a-section-a__activity-cell">
                 <div className="display-flex flex-align-end">
                   <span className="text-bold text-no-wrap margin-right-2">
                     {row + 1}.
                   </span>
                   <div className="margin-top-05 padding-top-0">
-                    <TextWidget
-                      schema={activityTitleSchema}
-                      id={`activity_line_items[${row}]--activity_title`}
-                      rawErrors={getErrorsA({
-                        errors,
-                        id: `activity_line_items[${row}]--activity_title`,
-                      })}
-                      formClassName="margin-left-2"
-                      inputClassName="minw-10"
-                      value={getItemVal(row, "activity_title")}
-                      disabled={disabled}
-                      readOnly={readOnly}
-                    />
+                    <div className="sf424a-application-view-only">
+                      <TextWidget
+                        schema={activityTitleSchema}
+                        id={`activity_line_items[${row}]--activity_title`}
+                        rawErrors={getErrorsA({
+                          errors,
+                          id: `activity_line_items[${row}]--activity_title`,
+                        })}
+                        formClassName="margin-left-2"
+                        inputClassName="minw-10 sf424a-section-a__activity-input"
+                        value={getItemVal(row, "activity_title")}
+                        disabled={disabled}
+                        readOnly={readOnly}
+                      />
+                    </div>
+
+                    {/* 
+                    Print only value - we hide the input only for print and show the value here- 
+                    due to the unpredictability of what the activity names may be, 
+                    it might get cut off and impossible to read.
+                    */}
+                    <div className="sf424a-print-only-view sf424a-section-a__activity-print-value">
+                      {getItemVal(row, "activity_title") || "—"}
+                    </div>
                   </div>
                 </div>
               </DataCell>
 
               {/* Column B: assistance listing */}
-              <DataCell>
+              <DataCell className="sf424a-section-a__assistance-cell">
                 <div className="display-flex flex-align-end">
                   <div className="margin-top-05 padding-top-0">
-                    <TextWidget
-                      schema={assistanceListingNumberSchema}
-                      id={`activity_line_items[${row}]--assistance_listing_number`}
-                      rawErrors={getErrorsA({
-                        errors,
-                        id: `activity_line_items[${row}]--assistance_listing_number`,
-                      })}
-                      inputClassName="minw-10"
-                      value={getItemVal(row, "assistance_listing_number")}
-                      disabled={disabled}
-                      readOnly={readOnly}
-                    />
+                    <div className="sf424a-application-view-only">
+                      <TextWidget
+                        schema={assistanceListingNumberSchema}
+                        id={`activity_line_items[${row}]--assistance_listing_number`}
+                        rawErrors={getErrorsA({
+                          errors,
+                          id: `activity_line_items[${row}]--assistance_listing_number`,
+                        })}
+                        inputClassName="minw-10 sf424a-section-a__assistance-input"
+                        value={getItemVal(row, "assistance_listing_number")}
+                        disabled={disabled}
+                        readOnly={readOnly}
+                      />
+                    </div>
+
+                    {/* 
+                    Print only value - we hide the input only for print and show the value here- 
+                    due to the unpredictability of what the activity names may be, 
+                    it might get cut off and impossible to read.
+                    */}
+                    <div className="sf424a-print-only-view sf424a-section-a__activity-print-value">
+                      {getItemVal(row, "assistance_listing_number") || "—"}
+                    </div>
                   </div>
                 </div>
               </DataCell>
