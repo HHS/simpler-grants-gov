@@ -121,6 +121,7 @@ const OpportunitySection = ({
                   defaultValue=""
                   rows={6}
                   className="maxw-full"
+                  data-testid="additional-info-textarea"
                 />
               </div>
             </div>

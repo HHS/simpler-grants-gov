@@ -147,10 +147,9 @@ describe("AwardRecommendationEditPage", () => {
       const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
       });
-      const { container } = render(component);
+      render(component);
 
-      const textarea = container.querySelector("#additional_info");
-      expect(textarea).toBeInTheDocument();
+      const textarea = await screen.findByTestId("additional-info-textarea");
       expect(textarea).toHaveAttribute("id", "additional_info");
       expect(textarea).toHaveAttribute("name", "additional_info");
     });
