@@ -327,6 +327,10 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.VIEW_ORG_SAVED_OPPORTUNITIES, 25),
         LookupStr(Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES, 26),
         LookupStr(Privilege.INTERNAL_WORKFLOW_EVENT_SEND, 27),
+        LookupStr(Privilege.VIEW_AWARD_RECOMMENDATION, 28),
+        LookupStr(Privilege.CREATE_AWARD_RECOMMENDATION, 29),
+        LookupStr(Privilege.UPDATE_AWARD_RECOMMENDATION, 30),
+        LookupStr(Privilege.SUBMIT_AWARD_RECOMMENDATION, 31),
     ]
 )
 

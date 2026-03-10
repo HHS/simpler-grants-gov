@@ -5,9 +5,13 @@ import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
 
 import {
   BroadlyDefinedWidgetValue,
+  FieldListChildWidgetTypes,
+  FieldListGroupItem,
+  FieldListWidgetProps,
   FormattedFormValidationWarning,
   SchemaField,
   UiSchemaField,
+  UiSchemaFieldList,
   UswdsWidgetProps,
   WidgetTypes,
 } from "src/components/applyForm/types";
@@ -27,6 +31,64 @@ type FieldInfo<V extends BroadlyDefinedWidgetValue> = {
   fieldName: string;
   htmlFieldName: string;
 };
+
+const FIELD_LIST_INDEX_TOKEN = "~~index~~" as const;
+
+/**
+ * Builds the "baseId" used by FieldList widgets for each child field.
+ *
+ * FieldList entries represent a repeatable array of grouped fields.
+ * Instead of generating a concrete id for a specific row (e.g. `[0]`),
+ * we generate a template id containing a placeholder:
+ *
+ *   contacts[~~index~~]--firstName
+ *
+ * The FieldList widget later replaces `~~index~~` with the actual
+ * array index when rendering each entry.
+ *
+ * This function adapts the id produced by existing field logic and
+ * injects the `[~~index~~]` placeholder at the correct position.
+ *
+ * Example transformations:
+ *
+ *   childId: "contacts--firstName"
+ *   > "contacts[~~index~~]--firstName"
+ *
+ *   childId: "top_field--contacts--firstName"
+ *   > "top_field--contacts[~~index~~]--firstName"
+ *
+ * We check for an existing `--fieldListName--` segment so we only modify
+ * the correct portion of the id while preserving any parent structure.
+ */
+
+export function buildFieldListBaseId({
+  fieldListName,
+  childId,
+}: {
+  fieldListName: string;
+  childId: string;
+}): string {
+  const token = `--${fieldListName}--`;
+  if (childId.includes(token)) {
+    return childId.replace(
+      token,
+      `--${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--`,
+    );
+  }
+  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${childId}`;
+}
+
+type FieldWidgetConfig = {
+  type: FieldListChildWidgetTypes;
+  props: UswdsWidgetProps;
+};
+
+type FieldListConfig = {
+  type: "FieldList";
+  props: FieldListWidgetProps;
+};
+
+type FieldConfig = FieldWidgetConfig | FieldListConfig;
 
 // json schema doesn't describe UI so types are infered if widget not supplied
 export const determineFieldType = ({
@@ -352,10 +414,68 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
   errors: FormattedFormValidationWarning[] | null;
   formSchema: RJSFSchema;
   formData: object;
-  uiFieldObject: UiSchemaField;
+  uiFieldObject: UiSchemaField | UiSchemaFieldList;
   requiredField: boolean;
-}) => {
-  const { definition, type: uiSchemaFieldType } = uiFieldObject;
+}): FieldConfig => {
+  if (uiFieldObject.type === "fieldList") {
+    const groupDefinition: FieldListGroupItem[] = uiFieldObject.children.map(
+      (childNode) => {
+        if (childNode.type !== "field" && childNode.type !== "multiField") {
+          throw new Error("fieldList children must be field nodes");
+        }
+
+        const childWidgetConfig = getFieldConfig({
+          errors,
+          formSchema,
+          formData,
+          uiFieldObject: childNode,
+          requiredField: false,
+        });
+
+        if (childWidgetConfig.type === "FieldList") {
+          throw new Error("nested fieldList is not supported");
+        }
+
+        const {
+          id: childId,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          value: _value,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          key: _key,
+          ...rest
+        } = childWidgetConfig.props;
+
+        return {
+          widget: childWidgetConfig.type,
+          baseId: buildFieldListBaseId({
+            fieldListName: uiFieldObject.name,
+            childId,
+          }),
+          generalProps: rest,
+        };
+      },
+    );
+    return {
+      type: "FieldList",
+      props: {
+        id: uiFieldObject.name,
+        key: uiFieldObject.name,
+        schema: {
+          type: "array",
+          title: uiFieldObject.label,
+          description: uiFieldObject.description,
+        },
+        label: uiFieldObject.label,
+        description: uiFieldObject.description,
+        defaultSize: uiFieldObject.defaultSize,
+        groupDefinition,
+        rawErrors: [],
+        requiredFields: [],
+      },
+    };
+  }
+
+  const { definition } = uiFieldObject;
 
   const { value, fieldSchema, fieldName, rawErrors, htmlFieldName } =
     getFieldInfo({
@@ -377,7 +497,10 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
   }
 
   // should filter and match warnings to field earlier in the process
-  const widgetType = determineFieldType({ uiFieldObject, fieldSchema });
+  const widgetType = determineFieldType({
+    uiFieldObject,
+    fieldSchema,
+  });
 
   // if the widget type requires an option list, generate it here
   const options =
@@ -391,11 +514,11 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
       : {};
 
   return {
-    type: widgetType,
+    type: widgetType as FieldListChildWidgetTypes,
     props: {
       id: htmlFieldName,
       key: htmlFieldName,
-      disabled: uiSchemaFieldType === "null",
+      disabled: uiFieldObject.type === "null",
       required: requiredField,
       minLength: fieldSchema?.minLength,
       maxLength: fieldSchema?.maxLength,

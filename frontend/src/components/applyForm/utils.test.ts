@@ -585,6 +585,92 @@ describe("buildWarningTree", () => {
     );
     expect(result).toEqual([]);
   });
+
+  it("handles nested fieldList nodes", () => {
+    const uiSchema: UiSchema = [
+      {
+        type: "fieldList" as const,
+        name: "contacts",
+        label: "Contacts",
+        defaultSize: 1,
+        children: [
+          {
+            type: "field" as const,
+            definition: "/properties/name" as const,
+            schema: { title: "Name", type: "string" },
+          },
+        ],
+      },
+    ];
+
+    const warnings = [
+      {
+        field: "$.name",
+        message: "name is required",
+        formatted: "name is required",
+        htmlField: "name",
+        type: "required",
+        value: "",
+        definition: "/properties/name",
+      },
+    ];
+
+    const formSchema = {
+      type: "object" as const,
+      properties: {
+        name: { type: "string" as const, title: "Name" },
+      },
+    };
+
+    const errors = buildWarningTree(uiSchema, null, warnings, formSchema);
+
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0].message).toBe("name is required");
+  });
+
+  it("handles fieldList nested under section", () => {
+    const uiSchema: UiSchema = [
+      {
+        type: "section" as const,
+        name: "root",
+        label: "Root",
+        children: [
+          {
+            type: "fieldList" as const,
+            name: "contacts",
+            label: "Contacts",
+            defaultSize: 1,
+            children: [
+              {
+                type: "field" as const,
+                definition: "/properties/email" as const,
+                schema: { title: "Email", type: "string" },
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const warnings = [
+      {
+        field: "$.email",
+        message: "email is required",
+        type: "required",
+        value: "",
+      },
+    ];
+
+    const formSchema = {
+      type: "object" as const,
+      properties: {
+        email: { type: "string" as const, title: "Email" },
+      },
+    };
+
+    const errors = buildWarningTree(uiSchema, null, warnings, formSchema);
+    expect(errors.length).toBeGreaterThan(0);
+  });
 });
 
 it("pushes direct warnings for uiSchema fields", () => {
@@ -907,6 +993,55 @@ describe("addPrintWidgetToFields", () => {
         schema: { title: "Custom Field", type: "string", maxLength: 100 },
         widget: "Print",
         name: "customFieldName",
+      },
+    ]);
+  });
+
+  it("handles fieldList with nested fields", () => {
+    const uiSchema: UiSchema = [
+      {
+        type: "fieldList" as const,
+        name: "contacts",
+        label: "Contacts",
+        defaultSize: 1,
+        children: [
+          {
+            type: "field" as const,
+            definition: "/properties/firstName" as const,
+            schema: { title: "First Name", type: "string" },
+          },
+          {
+            type: "field" as const,
+            definition: "/properties/docs" as const,
+            schema: { title: "Docs", type: "array" },
+            widget: "AttachmentArray",
+          },
+        ],
+      },
+    ];
+
+    const result = addPrintWidgetToFields(uiSchema);
+
+    expect(result).toEqual([
+      {
+        type: "fieldList",
+        name: "contacts",
+        label: "Contacts",
+        defaultSize: 1,
+        children: [
+          {
+            type: "field",
+            definition: "/properties/firstName",
+            schema: { title: "First Name", type: "string" },
+            widget: "Print",
+          },
+          {
+            type: "field",
+            definition: "/properties/docs",
+            schema: { title: "Docs", type: "array" },
+            widget: "PrintAttachment",
+          },
+        ],
       },
     ]);
   });

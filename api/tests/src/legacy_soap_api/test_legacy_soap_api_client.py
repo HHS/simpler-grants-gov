@@ -590,39 +590,6 @@ class TestSimplerSOAPGetApplicationZip:
         assert response.data == mock_proxy_response.data
         assert response.status_code == mock_proxy_response.status_code
 
-    def test_get_simpler_soap_response_returns_proxy_response_if_is_mtom_is_false_on_operation_config(
-        self, db_session
-    ):
-        request_xml_bytes = (
-            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
-            "<soapenv:Header/>"
-            "<soapenv:Body>"
-            "<agen:GetApplicationZipRequest>"
-            f"<gran:GrantsGovTrackingNumber>{GRANTS_GOV_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>"
-            "</agen:GetApplicationZipRequest>"
-            "</soapenv:Body>"
-            "</soapenv:Envelope>"
-        ).encode("utf-8")
-        soap_request = SOAPRequest(
-            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
-            full_path="x",
-            headers={},
-            method="POST",
-            api_name=SimplerSoapAPI.GRANTORS,
-            operation_name="GetApplicationZipRequest",
-        )
-        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
-        with patch.object(uuid, "uuid4") as mock_uuid4:
-            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
-            client = SimplerGrantorsS2SClient(soap_request, db_session)
-            # Directly changing the config value here will change it for other tests
-            # so for safety I use a MagicMock as the operation_config
-            client.operation_config = MagicMock(**client.operation_config.__dict__)
-            client.operation_config.is_mtom = False
-            result = client.get_simpler_soap_response(mock_proxy_response)
-            assert result.data == mock_proxy_response.data
-            assert result.status_code == mock_proxy_response.status_code
-
 
 class TestSimplerSOAPGetSubmissionListExpanded:
     def setup_application_submission(

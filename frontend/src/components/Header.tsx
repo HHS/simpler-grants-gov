@@ -298,6 +298,8 @@ const NavLinks = ({
     setActiveNavDropdownIndex,
     t,
     user?.token,
+    user?.user_id,
+    localDev,
   ]);
 
   return (

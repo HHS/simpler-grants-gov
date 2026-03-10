@@ -37,7 +37,7 @@ def create_workflow_diagrams() -> None:
 
         logger.info(f"Creating workflow diagram for {state_machine_cls.__name__} at {path}")
 
-        DotGraphMachine(state_machine_cls)().write_png(path)  # type: ignore[arg-type]
+        DotGraphMachine(state_machine_cls)().write_png(path)
 
 
 def main() -> None:

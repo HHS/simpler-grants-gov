@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get } from "lodash";
 
@@ -320,7 +319,7 @@ function Budget424aSectionC<
 
               {/* Visual equals column */}
               <td
-                className="border-bottom-0 border-top-0 verticle-align-bottom"
+                className="sf424a__equal-sign-wrapper-cell border-bottom-0 border-top-0 verticle-align-bottom"
                 aria-hidden="true"
               >
                 =

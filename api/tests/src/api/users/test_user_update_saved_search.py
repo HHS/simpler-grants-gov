@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 import pytest
@@ -103,3 +104,19 @@ def test_user_update_saved_search_no_auth(
     # Verify search was not updated
     saved_searches = db_session.query(UserSavedSearch).first()
     assert saved_searches.name == saved_search.name
+
+
+def test_user_update_saved_search_logging(client, db_session, user, user_auth_token, caplog):
+    saved_search = UserSavedSearchFactory.create(
+        user=user, name="Old Name", search_query={"keywords": "python"}
+    )
+
+    caplog.set_level(logging.INFO)
+    response = client.put(
+        f"/v1/users/{user.user_id}/saved-searches/{saved_search.saved_search_id}",
+        headers={"X-SGG-Token": user_auth_token},
+        json={"name": "New Name"},
+    )
+
+    assert response.status_code == 200
+    assert any("Updated saved search for user" in r.message for r in caplog.records)
