@@ -12,7 +12,7 @@ from src.legacy_soap_api.grantors.schemas.update_application_info_schemas import
 class TestUpdateApplicationInfoRequestSchema(unittest.TestCase):
     def setUp(self) -> None:
         self.update_application_info_request_dict = {
-            "grants_gov_tracking_number": "GRANTS80193",
+            "grants_gov_tracking_number": "GRANT12345678",
         }
 
     def test_minimal_valid_schema(self) -> None:
@@ -45,8 +45,8 @@ class TestUpdateApplicationInfoRequestSchema(unittest.TestCase):
 class TestUpdateApplicationInfoResponseSchema(unittest.TestCase):
     def setUp(self) -> None:
         self.update_application_info_response_dict = {
-            "grants_gov_tracking_number": "GRANTS80193",
-            "success": True,
+            "grants_gov_tracking_number": "GRANT12345678",
+            "success": "true",
         }
 
     def test_minimal_valid_schema(self) -> None:
@@ -59,10 +59,10 @@ class TestUpdateApplicationInfoResponseSchema(unittest.TestCase):
         schema_dict = {
             **self.update_application_info_response_dict,
             "assign_agency_tracking_number_result": {
-                "success": True,
+                "success": "true",
             },
             "save_agency_notes_result": {
-                "success": True,
+                "success": "true",
             },
         }
         assert isinstance(
@@ -71,4 +71,4 @@ class TestUpdateApplicationInfoResponseSchema(unittest.TestCase):
 
     def test_missing_success_fields(self) -> None:
         with pytest.raises(ValidationError):
-            UpdateApplicationInfoResponse(**{"grants_gov_tracking_number": "GRANTS80193"})
+            UpdateApplicationInfoResponse(**{"grants_gov_tracking_number": "GRANT12345678"})

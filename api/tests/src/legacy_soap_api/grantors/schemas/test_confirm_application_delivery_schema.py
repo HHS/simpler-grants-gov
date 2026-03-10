@@ -1,6 +1,10 @@
 import pytest
 
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
+from src.legacy_soap_api.grantors.schemas.grants_gov_tracking_number_schema import (
+    INVALID_TRACKING_NUMBER_ERR,
+    MISSING_TRACKING_NUMBER_ERR,
+)
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 from src.legacy_soap_api.soap_payload_handler import (
     SOAPPayload,
@@ -88,7 +92,7 @@ class TestLegacySoapGrantorConfirmApplicationRequestSchema:
         )
         with pytest.raises(SOAPFaultException) as e:
             grantors_schemas.ConfirmApplicationDeliveryRequest(**soap_operation_dict)
-        assert e.value.message == "Invalid grants_gov_tracking_number provided."
+        assert e.value.message == MISSING_TRACKING_NUMBER_ERR
 
     def test_confirm_application_delivery_request_validates_there_is_a_grants_gov_tracking_number_is_in_correct_format(
         self,
@@ -112,7 +116,7 @@ class TestLegacySoapGrantorConfirmApplicationRequestSchema:
         )
         with pytest.raises(SOAPFaultException) as e:
             grantors_schemas.ConfirmApplicationDeliveryRequest(**soap_operation_dict)
-        assert e.value.message == "Invalid grants_gov_tracking_number provided."
+        assert e.value.message == INVALID_TRACKING_NUMBER_ERR
 
 
 class TestLegacySoapGrantorConfirmApplicationResponseSchema:

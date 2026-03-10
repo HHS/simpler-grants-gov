@@ -8,11 +8,13 @@ Production: https://apply07.grants.gov/apply/system/schemas/AgencyUpdateApplicat
 
 from pydantic import Field
 
+from src.legacy_soap_api.grantors.schemas.grants_gov_tracking_number_schema import (
+    GrantsGovTrackingNumberRequiredSchema,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema
 
 
-class UpdateApplicationInfoRequest(BaseSOAPSchema):
-    grants_gov_tracking_number: str = Field(alias="GrantsGovTrackingNumber")
+class UpdateApplicationInfoRequest(GrantsGovTrackingNumberRequiredSchema):
     assign_agency_tracking_number: str | None = Field(
         default=None, alias="AssignAgencyTrackingNumber"
     )
@@ -20,18 +22,17 @@ class UpdateApplicationInfoRequest(BaseSOAPSchema):
 
 
 class SaveAgencyNotesResult(BaseSOAPSchema):
-    success: bool = Field(alias="Success")
+    success: str = Field(alias="Success")
     error_message: str | None = Field(default=None, alias="ErrorMessage")
 
 
 class AssignAgencyTrackingNumberResult(BaseSOAPSchema):
-    success: bool = Field(alias="Success")
+    success: str = Field(alias="Success")
     error_message: str | None = Field(default=None, alias="ErrorMessage")
 
 
-class UpdateApplicationInfoResponse(BaseSOAPSchema):
-    grants_gov_tracking_number: str = Field(alias="GrantsGovTrackingNumber")
-    success: bool = Field(alias="Success")
+class UpdateApplicationInfoResponse(GrantsGovTrackingNumberRequiredSchema):
+    success: str = Field(alias="Success")
     assign_agency_tracking_number_result: AssignAgencyTrackingNumberResult | None = Field(
         default=None, alias="AssignAgencyTrackingNumberResult"
     )

@@ -11,7 +11,7 @@ from tests.src.legacy_soap_api.soap_request_templates.grantors.update_applicatio
 
 def test_update_application_info_request_xml_parsing() -> None:
     # Set up the mock data values
-    grants_gov_tracking_number = "123"
+    grants_gov_tracking_number = "GRANT12345678"
     assign_agency_tracking_number = "456"
     save_agency_notes = "notes"
 
@@ -53,7 +53,7 @@ def test_update_application_info_request_xml_parsing() -> None:
 
 
 def test_update_application_info_response_xml_parsing() -> None:
-    grants_gov_tracking_number = "123"
+    grants_gov_tracking_number = "GRANT12345678"
     response_xml = get_mock_update_application_info_response_xml(grants_gov_tracking_number)
     response_xml_dict = SOAPPayload(
         response_xml, operation_name="UpdateApplicationInfoResponse"
