@@ -72,9 +72,37 @@ export type WidgetTypes =
   | "Budget424aSectionC"
   | "Budget424aSectionD"
   | "Budget424aSectionE"
-  | "Budget424aSectionF";
+  | "Budget424aSectionF"
+  | "FieldList";
 
 type PropertyPath = `/properties/${string}`;
+
+export type FieldListWidgetProps = {
+  id: string;
+  key: string;
+
+  // Needed because WidgetRenderers expects UswdsWidgetProps-ish props,
+  // and UswdsWidgetProps requires schema.
+  schema: RJSFSchema & {
+    description?: string;
+    title?: string;
+  };
+
+  label: string;
+  description?: string;
+  defaultSize: number;
+  groupDefinition: FieldListGroupItem[];
+  rawErrors?: FormattedFormValidationWarning[] | string[];
+  requiredFields?: string[];
+};
+
+export type FieldListChildWidgetTypes = Exclude<WidgetTypes, "FieldList">;
+
+export type FieldListGroupItem = {
+  widget: FieldListChildWidgetTypes;
+  generalProps: Omit<UswdsWidgetProps, "id" | "value" | "key">;
+  baseId: string;
+};
 
 export type DefinitionPath = PropertyPath | PropertyPath[];
 
@@ -98,11 +126,21 @@ export interface UiSchemaSection {
   type: "section";
   label: string;
   name: string;
-  children: Array<UiSchemaField | UiSchemaSection>;
+  children: UiSchema;
   description?: string;
 }
 
-export type UiSchema = Array<UiSchemaSection | UiSchemaField>;
+export interface UiSchemaFieldList {
+  type: "fieldList";
+  label: string;
+  name: string;
+  description?: string;
+  defaultSize: number;
+  children: UiSchemaField[];
+}
+
+export type UiSchemaNode = UiSchemaField | UiSchemaSection | UiSchemaFieldList;
+export type UiSchema = UiSchemaNode[];
 
 export type TextTypes =
   | "text"
