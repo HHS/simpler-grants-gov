@@ -348,11 +348,11 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
     """
     Helper function to assemble custom fields from the data and pass them back as part of the response.
 
-        Args:
-            opp_data: Opportunity data from the SGG database
+    Args:
+        opp_data: Opportunity data from the SGG database
 
-        Returns:
-            custom_fields: A dict with the values recovered from the input and stored in the appropriate field
+    Returns:
+        custom_fields: A dict with the values recovered from the input and stored in the appropriate field
     """
 
     custom_fields: dict[str, CustomField] = {}
@@ -428,7 +428,7 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
             name="agency",
             fieldType=CustomFieldType.OBJECT,
             value={
-                "agencyCode": opp_data.get("agency_code"),
+                "agencyCode": agency,
                 "agencyName": opp_data.get("agency_name"),
                 "topLevelAgencyName": opp_data.get("top_level_agency_name"),
             },
@@ -484,7 +484,7 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
                 description="Whether cost sharing or matching funds are required for this opportunity",
             )
 
-    if len(custom_fields) > 0:
+    if custom_fields:
         return custom_fields
     else:
         return None
