@@ -15,7 +15,6 @@ import {
   CharacterCount,
   Grid,
   GridContainer,
-  Label,
 } from "@trussworks/react-uswds";
 
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
