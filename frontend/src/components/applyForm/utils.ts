@@ -13,7 +13,7 @@ import {
   SchemaField,
   UiSchema,
   UiSchemaField,
-  UiSchemaSection,
+  UiSchemaNode,
 } from "./types";
 
 const nestedWarningForField = ({
@@ -148,15 +148,8 @@ const findValidationError = (
 };
 
 export const buildWarningTree = (
-  uiSchema:
-    | Array<UiSchemaSection | UiSchemaField>
-    | UiSchemaSection
-    | UiSchemaField,
-  parent:
-    | Array<UiSchemaSection | UiSchemaField>
-    | UiSchemaSection
-    | UiSchemaField
-    | null,
+  uiSchema: UiSchema | UiSchemaField[] | UiSchemaNode,
+  parent: UiSchema | UiSchemaField[] | UiSchemaNode | null,
   formValidationWarnings: FormValidationWarning[],
   formSchema: RJSFSchema,
 ): FormattedFormValidationWarning[] => {
@@ -175,8 +168,9 @@ export const buildWarningTree = (
     const childErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
       (errors, node) => {
         if ("children" in node) {
+          const children = node.children;
           const nodeError = buildWarningTree(
-            node.children,
+            children,
             uiSchema,
             formValidationWarnings,
             formSchema,
@@ -585,6 +579,28 @@ export function addPrintWidgetToFields(uiSchema: UiSchema): UiSchema {
       return {
         ...item,
         children: addPrintWidgetToFields(item.children),
+      };
+    } else if (item.type === "fieldList") {
+      return {
+        ...item,
+        children: item.children.map((child) => {
+          // fieldList children should only be `field` nodes (validated by validateUiSchema).
+          // This guard prevents us from applying print widget logic to unexpected node
+          // types if an invalid schema slips through.
+          if (child.type !== "field") {
+            return child;
+          }
+
+          if (
+            child.widget &&
+            (child.widget === "AttachmentArray" ||
+              child.widget === "Attachment")
+          ) {
+            return { ...child, widget: "PrintAttachment" };
+          }
+
+          return { ...child, widget: "Print" };
+        }),
       };
     }
     return item;

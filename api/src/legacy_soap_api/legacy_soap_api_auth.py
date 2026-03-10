@@ -10,7 +10,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
 from pydantic import BaseModel, ConfigDict
 from requests.adapters import HTTPAdapter
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 import src.adapters.db as db
 from src.db.models.user_models import LegacyCertificate
@@ -109,15 +109,29 @@ def get_soap_auth(mtls_cert: str | None, db_session: db.Session) -> SOAPAuth | N
     return auth
 
 
+def get_legacy_certificate_by_serial_number(
+    db_session: db.Session, serial_number: str
+) -> LegacyCertificate | None:
+    # Since we lower the input serial_number we wrap the column
+    # value in func.lower() to make the match case insensitive. In hexadecimal
+    # there is no distinction between upper and lower case. The serial number
+    # can be either upper or lower cased in the DB.
+    return db_session.execute(
+        select(LegacyCertificate).where(
+            func.lower(LegacyCertificate.serial_number) == serial_number.lower()
+        )
+    ).scalar_one_or_none()
+
+
 def get_soap_client_certificate(
     urlencoded_cert: str, db_session: db.Session
 ) -> SOAPClientCertificate:
     cert_str = unquote(urlencoded_cert)
     cert = load_pem_x509_certificate(cert_str.encode(), default_backend())
+    # We convert the integer representation of the serial number to lower case hexadecimal here
+    # Note: the 'x' in '032x' returns it lower cased
     serial_number_hex = format(int(cert.serial_number), "032x")
-    legacy_certificate = db_session.execute(
-        select(LegacyCertificate).where(LegacyCertificate.serial_number == str(serial_number_hex))
-    ).scalar_one_or_none()
+    legacy_certificate = get_legacy_certificate_by_serial_number(db_session, serial_number_hex)
     if legacy_certificate:
         add_extra_data_to_current_request_logs(
             {

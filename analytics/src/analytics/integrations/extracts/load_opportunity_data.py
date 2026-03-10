@@ -77,7 +77,7 @@ def _fetch_insert_opportunity_data(conn: Connection) -> None:
             )
             copy = stack.enter_context(cursor.copy(query))
 
-            while data := file.read():
-                copy.write(data)
+            for line in file:
+                copy.write(line)
 
         logger.info("Successfully loaded data for table: %s", table)
