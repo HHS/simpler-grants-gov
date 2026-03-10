@@ -36,8 +36,8 @@ const Footer = () => {
       }
       primary={
         <GridContainer>
-          <Grid row gap>
-            <Grid tablet={{ col: 3 }}>
+          <Grid row gap="lg">
+            <Grid desktop={{ col: 4 }}>
               <div className="footer-logo-container position-relative">
                 <Image
                   className="height-auto position-relative"
@@ -48,8 +48,12 @@ const Footer = () => {
                 />
               </div>
             </Grid>
-            <Grid className="usa-footer__nav border-0" tablet={{ col: 3 }}>
-              <h3>{t("explore")}</h3>
+            <Grid 
+              className="usa-footer__nav border-0" 
+              tablet={{ col: "auto" }} 
+              desktop={{ col: 2 }}
+            >
+              <h3 className="desktop:padding-top-4">{t("explore")}</h3>
               <ul className="margin-top-3">
                 <li className="usa-footer__secondary-link margin-left-0">
                   <Link href="/">{t("links.home")}</Link>
@@ -63,9 +67,11 @@ const Footer = () => {
             </Grid>
             <Grid
               className="margin-top-3 tablet:margin-top-0"
-              tablet={{ col: 3 }}
+              tablet={{ col: "fill" }}
+              tabletLg={{ col: 5 }}
+              desktop={{ col: 3 }}
             >
-              <h3>{t("simpler")}</h3>
+              <h3 className="desktop:padding-top-4">{t("simpler")}</h3>
               <div>
                 {t.rich("feedback", {
                   email: (chunk) => (
@@ -75,7 +81,7 @@ const Footer = () => {
                   ),
                 })}
               </div>
-              <h3>{t("supportCenter")}</h3>
+              <h3 className="desktop:padding-top-2">{t("supportCenter")}</h3>
               <div>
                 {t.rich("techSupport", {
                   email: (chunk) => (
@@ -89,9 +95,11 @@ const Footer = () => {
             </Grid>
             <Grid
               className="margin-top-3 tablet:margin-top-0"
-              tablet={{ col: 3 }}
+              tablet={{ col: "fill" }}
+              tabletLg={{ col: 5 }}
+              desktop={{ col: 3 }}
             >
-              <h3 className="">{t("agencyContactCenter")}</h3>
+              <h3 className="desktop:padding-top-4">{t("agencyContactCenter")}</h3>
               <div>
                 {t.rich("grantorSupport", {
                   poc: (chunk) => (
