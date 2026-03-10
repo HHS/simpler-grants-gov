@@ -138,7 +138,9 @@ RUN dnf install -y \
       binutils-2.41-50.amzn2023.0.5 \
       glib2-2.82.2-767.amzn2023 \
       curl-minimal-8.11.1-4.amzn2023.0.3 \
-      libcurl-minimal-8.11.1-4.amzn2023.0.3 \
+      libcurl-minimal-8.11.1-4.amzn2023.0.3 && \
+    # CVE-2026-1757: libxml2 memory leak in xmllint (ALAS2023-2026-1446)
+    dnf update -y --releasever=2023.10.20260302 \
       libxml2-2.10.4-1.amzn2023.0.18 \
       libxml2-devel-2.10.4-1.amzn2023.0.18 && \
     dnf clean all && \
