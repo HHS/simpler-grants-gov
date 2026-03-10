@@ -41,6 +41,8 @@ from src.constants.lookup_constants import (
     ApplicationStatus,
     ApprovalResponseType,
     ApprovalType,
+    AwardRecommendationStatus,
+    AwardSelectionMethod,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -938,6 +940,29 @@ class OpportunityChangeAuditFactory(BaseFactory):
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
     is_loaded_to_search = False
     is_loaded_to_version_table = False
+
+
+class AwardRecommendationFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.AwardRecommendation
+
+    award_recommendation_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+    funding_strategy_id = None
+
+    award_recommendation_number = factory.LazyAttribute(
+        lambda s: f"{s.opportunity.agency_code or 'AGC'}_{fake.bothify('??????').upper()}"
+    )
+
+    award_recommendation_status = AwardRecommendationStatus.IN_PROGRESS
+    additional_info = sometimes_none(factory.Faker("paragraph"))
+    award_selection_method = sometimes_none(factory.fuzzy.FuzzyChoice(AwardSelectionMethod))
+    selection_method_detail = sometimes_none(factory.Faker("paragraph"))
+    funding_strategy = sometimes_none(factory.Faker("paragraph"))
+    other_key_information = sometimes_none(factory.Faker("paragraph"))
 
 
 ###################

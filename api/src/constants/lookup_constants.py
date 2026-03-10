@@ -245,6 +245,7 @@ class AwardRecommendationStatus(StrEnum):
     DRAFT = "draft"
     IN_REVIEW = "in_review"
     APPROVED = "approved"
+    IN_PROGRESS = "in_progress"
 
 
 class AwardRecommendationType(StrEnum):

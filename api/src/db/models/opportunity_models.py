@@ -10,6 +10,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import (
     ApplicantType,
+    AwardRecommendationStatus,
+    AwardSelectionMethod,
     FundingCategory,
     FundingInstrument,
     OpportunityCategory,
@@ -19,6 +21,8 @@ from src.db.models.agency_models import Agency
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import (
     LkApplicantType,
+    LkAwardRecommendationStatus,
+    LkAwardSelectionMethod,
     LkFundingCategory,
     LkFundingInstrument,
     LkOpportunityCategory,
@@ -107,6 +111,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     competitions: Mapped[list[Competition]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
+    )
+
+    award_recommendations: Mapped[list[AwardRecommendation]] = relationship(
+        "AwardRecommendation",
+        back_populates="opportunity",
+        uselist=True,
+        cascade="all, delete-orphan",
     )
 
     versions: Mapped[list[OpportunityVersion]] = relationship(
@@ -503,6 +514,40 @@ class OpportunityChangeAudit(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
     is_loaded_to_search: Mapped[bool | None]
     is_loaded_to_version_table: Mapped[bool | None] = mapped_column(index=True)
+
+
+class AwardRecommendation(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "award_recommendation"
+
+    award_recommendation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    opportunity_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(Opportunity.opportunity_id), nullable=False, index=True
+    )
+    opportunity: Mapped[Opportunity] = relationship(
+        Opportunity, back_populates="award_recommendations"
+    )
+    # TODO - add a relationship to the funding strategy
+    funding_strategy_id: Mapped[uuid.UUID | None] = mapped_column(UUID, nullable=True)
+    award_recommendation_number: Mapped[str] = mapped_column(nullable=False, index=True)
+    award_recommendation_status: Mapped[AwardRecommendationStatus] = mapped_column(
+        "award_recommendation_status_id",
+        LookupColumn(LkAwardRecommendationStatus),
+        ForeignKey(LkAwardRecommendationStatus.award_recommendation_status_id),
+        nullable=False,
+        default=AwardRecommendationStatus.IN_PROGRESS,
+    )
+    additional_info: Mapped[str | None]
+    award_selection_method: Mapped[AwardSelectionMethod | None] = mapped_column(
+        "award_selection_method_id",
+        LookupColumn(LkAwardSelectionMethod),
+        ForeignKey(LkAwardSelectionMethod.award_selection_method_id),
+        nullable=True,
+    )
+    selection_method_detail: Mapped[str | None]
+    funding_strategy: Mapped[str | None]
+    other_key_information: Mapped[str | None]
 
 
 class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):
