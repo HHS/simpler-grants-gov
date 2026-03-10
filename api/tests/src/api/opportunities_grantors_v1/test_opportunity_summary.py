@@ -255,3 +255,71 @@ def test_opportunity_summary_create_duplicate_summary(
     assert second_response.status_code == 422
     response_json = second_response.get_json()
     assert "forecast already exists" in str(response_json).lower()
+
+
+def test_opportunity_summary_create_schema_validation(
+    client, db_session, opportunity, opportunity_summary_auth_data
+):
+    """Test schema validation for opportunity summary creation"""
+    _, _, token, _ = opportunity_summary_auth_data
+
+    # Create request with invalid field values
+    invalid_request = {
+        "is_forecast": True,
+        "summary_description": "a" * 20000,  # Exceeds max length of 18000
+        "is_cost_sharing": True,
+        "post_date": "2026-03-10",
+        "close_date": "2027-03-10",
+        "estimated_total_program_funding": -1000000,  # Negative value
+        "award_floor": -1000000,  # Negative value
+        "award_ceiling": -500000,  # Negative value
+        "expected_number_of_awards": -5,  # Negative value
+        "additional_info_url": "https://example.com" * 250,  # Exceeds max length of 250
+        "additional_info_url_description": "https://example.com" * 250,  # Exceeds max length of 250
+        "funding_category_description": "a" * 2501,  # Exceeds max length of 2500
+        "applicant_eligibility_description": "a" * 4001,  # Exceeds max length of 4000
+        "agency_contact_description": "a" * 1500,  # Exceeds max length of 1000
+        "agency_email_address": "contact@agency.gov" * 100,  # Exceeds max length of 130
+        "agency_email_address_description": "Email the agency" * 100,  # Exceeds max length of 108
+        "funding_instruments": [],  # Empty list
+        "funding_categories": [],  # Empty list
+        "applicant_types": [],  # Empty list
+    }
+
+    response = client.post(
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        json=invalid_request,
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 422
+    response_json = response.get_json()
+    assert "errors" in response_json
+
+    # Expected fields with validation errors
+    expected_error_fields = [
+        "summary_description",
+        "estimated_total_program_funding",
+        "award_floor",
+        "award_ceiling",
+        "expected_number_of_awards",
+        "additional_info_url",
+        "additional_info_url_description",
+        "funding_category_description",
+        "applicant_eligibility_description",
+        "agency_contact_description",
+        "agency_email_address",
+        "agency_email_address_description",
+        "funding_instruments",
+        "funding_categories",
+        "applicant_types",
+    ]
+
+    # Collect fields with errors
+    erroring_fields = []
+    for err in response_json["errors"]:
+        field = err["field"]
+        erroring_fields.append(field)
+        assert field in expected_error_fields
+
+    assert len(erroring_fields) == len(expected_error_fields)
