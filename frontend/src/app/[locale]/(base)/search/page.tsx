@@ -11,6 +11,7 @@ import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import Link from "next/link";
 import { Suspense, use } from "react";
 
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
@@ -79,7 +80,7 @@ function Search({ searchParams, params }: SearchPageProps) {
       <div className="bg-primary-lightest line-height-body-2 font-body-3xs padding-y-1">
         <div className="grid-container">
           {t.rich("goToGG", {
-            "search-link": (chunks) => <a href="/search">{chunks}</a>,
+            "search-link": (chunks) => <Link href="/search">{chunks}</Link>,
             "gg-link": (chunks) => (
               <a href="https://grants.gov/" target="_blank">
                 {chunks}
