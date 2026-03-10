@@ -1006,7 +1006,7 @@ class AwardRecommendationSubmissionDetailFactory(BaseFactory):
     recommended_amount = sometimes_none(
         factory.Faker("pydecimal", left_digits=7, right_digits=2, positive=True)
     )
-    scoring_comment = sometimes_none(factory.Faker("paragraph"))
+    scoring_comment = sometimes_none(factory.LazyFunction(lambda: str(random.randint(1, 100))))
     general_comment = sometimes_none(factory.Faker("paragraph"))
     award_recommendation_type = sometimes_none(factory.fuzzy.FuzzyChoice(AwardRecommendationType))
     has_exception = False
