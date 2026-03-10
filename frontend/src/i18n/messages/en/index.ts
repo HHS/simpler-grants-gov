@@ -799,6 +799,7 @@ export const messages = {
     metaDescription:
       "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
+    goToGG: "Simpler.Grants.gov is the new way to <search-link>search</search-link>. To access classic search, you must sign in to <gg-link>www.grants.gov</gg-link>.",
     filters: {
       searchNoResults: {
         title: "Your search didn't return any results.",

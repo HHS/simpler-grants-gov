@@ -76,7 +76,19 @@ function Search({ searchParams, params }: SearchPageProps) {
         params={resolvedSearchParams}
         newRelicEnabled={environment.NEW_RELIC_ENABLED === "true"}
       />
-      <div className="bg-base-lightest padding-top-5">
+      <div className="bg-primary-lightest line-height-body-2 font-body-3xs padding-y-1">
+        <div className="grid-container">
+          {t.rich("goToGG", {
+            "search-link": (chunks) => (
+              <a href="/search">{chunks}</a>
+            ),
+            "gg-link": (chunks) => (
+              <a href="https://grants.gov/" target="_blank">{chunks}</a>
+            ),
+          })}
+        </div>
+      </div>
+      <div className="bg-base-lightest padding-top-4">
         <div className="grid-container">
           <h1 className="margin-top-0">{t("header")}</h1>
           <div className="tablet:display-flex tablet:margin-bottom-2 margin-top-0">

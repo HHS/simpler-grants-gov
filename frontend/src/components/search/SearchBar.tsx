@@ -63,7 +63,7 @@ export default function SearchBar({
 
   return (
     <div
-      className={clsx("margin-top-5", {
+      className={clsx("margin-top-3", {
         "margin-bottom-2": !tableView,
         "usa-form-group--error": !!validationError,
       })}
