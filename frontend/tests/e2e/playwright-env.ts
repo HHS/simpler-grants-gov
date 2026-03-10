@@ -23,7 +23,13 @@ const OPPORTUNITY_IDS: Record<string, string> = {
 // Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
 const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "staging";
 
-const baseUrl = BASE_URLS[targetEnv] || BASE_URLS.local;
+if (!Object.prototype.hasOwnProperty.call(BASE_URLS, targetEnv)) {
+  throw new Error(
+    `Unsupported PLAYWRIGHT_TARGET_ENV: ${targetEnv}. Allowed values: ${Object.keys(BASE_URLS).join(", ")}`,
+  );
+}
+
+const baseUrl = BASE_URLS[targetEnv];
 
 // Test organization labels for each environment
 const TEST_ORG_LABELS: Record<string, string> = {
@@ -41,23 +47,12 @@ const webServerEnv: Record<string, string> = Object.fromEntries(
   }).filter(([, value]) => typeof value === "string"),
 );
 
-// Determine opportunity ID based on environment
-const getOpportunityId = (): string => {
-  // Allow explicit override
-  if (process.env.OPPORTUNITY_ID) {
-    return process.env.OPPORTUNITY_ID;
-  }
-
-  // Use environment-specific opportunity ID
-  return OPPORTUNITY_IDS[targetEnv] || OPPORTUNITY_IDS.local;
-};
-
 const playwrightEnv = {
   webServerEnv,
   baseUrl,
   targetEnv,
   testOrgLabel,
-  opportunityId: getOpportunityId(),
+  opportunityId: process.env.OPPORTUNITY_ID || OPPORTUNITY_IDS[targetEnv] || OPPORTUNITY_IDS.local,
   isCi: process.env.CI,
   totalShards: process.env.TOTAL_SHARDS,
   currentShard: process.env.CURRENT_SHARD,
