@@ -16,7 +16,7 @@ const BASE_URLS: Record<string, string> = {
 
 // Opportunity IDs for each environment
 const OPPORTUNITY_IDS: Record<string, string> = {
-  local: "924022f2-d89c-4af2-a7e5-f1cbdee4d385",
+  local: "f7a1c2b3-4d5e-6789-8abc-1234567890ab",
   staging: "f7a1c2b3-4d5e-6789-8abc-1234567890ab",
 };
 
