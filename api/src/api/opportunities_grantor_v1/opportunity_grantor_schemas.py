@@ -427,5 +427,14 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
                 )
 
 
+class OpportunitySummaryDetailSchema(OpportunitySummaryV1Schema):
+    opportunity_summary_id = fields.UUID(
+        required=True,
+        metadata={
+            "description": "Unique identifier for the opportunity summary",
+        },
+    )
+
+
 class OpportunitySummaryCreateResponseV1Schema(AbstractResponseSchema):
-    data = fields.Nested(OpportunitySummaryV1Schema())
+    data = fields.Nested(OpportunitySummaryDetailSchema())
