@@ -1,13 +1,10 @@
 import logging
 from uuid import UUID
 
-
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
-from src.constants.lookup_constants import (
-    Privilege,
-)
+from src.constants.lookup_constants import Privilege
 from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors

@@ -241,81 +241,147 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
         metadata={"description": "Opportunity summary", "example": "This opportunity..."},
     )
 
-    is_cost_sharing = fields.Boolean(required=True)
+    is_cost_sharing = fields.Boolean(
+        required=True,
+        metadata={
+            "description": "Whether or not the opportunity has a cost sharing/matching requirement",
+        },
+    )
 
-    post_date = fields.Date(required=True)
+    post_date = fields.Date(
+        required=True,
+        metadata={
+            "description": "The date the opportunity was posted",
+        },
+    )
 
     expected_number_of_awards = fields.Integer(
         required=False,
         validate=validators.Range(min=0, max=999_999_999_999_999),
+        metadata={
+            "description": "The number of awards the opportunity is expected to award",
+            "example": 10,
+        },
     )
 
     estimated_total_program_funding = fields.Integer(
         required=False,
         validate=validators.Range(min=0, max=999_999_999_999_999),
+        metadata={
+            "description": "The total program funding of the opportunity in US Dollars",
+            "example": 10_000_000,
+        },
     )
 
     award_floor = fields.Integer(
         required=True,
         validate=validators.Range(min=0, max=999_999_999_999_999),
+        metadata={
+            "description": "The minimum amount an opportunity would award",
+            "example": 10_000,
+        },
     )
 
     award_ceiling = fields.Integer(
         required=True,
         validate=validators.Range(min=0, max=999_999_999_999_999),
+        metadata={
+            "description": "The maximum amount an opportunity would award",
+            "example": 100_000,
+        },
     )
 
     additional_info_url = fields.String(
         required=False,
         validate=validators.Length(max=250),
+        metadata={
+            "description": "A URL to a website that can provide additional information about the opportunity",
+            "example": "grants.gov",
+        },
     )
 
     additional_info_url_description = fields.String(
         required=False,
         validate=validators.Length(max=250),
+        metadata={
+            "description": "The text to display for the additional_info_url link",
+            "example": "Click me for more info",
+        },
     )
 
     funding_categories = fields.List(
         fields.Enum(FundingCategory),
         required=True,
         validate=validators.Length(min=1),
+        metadata={
+            "description": "Categories of funding for this opportunity",
+            "example": ["education", "health"],
+        },
     )
 
     funding_category_description = fields.String(
         required=False,
         validate=validators.Length(max=2500),
+        metadata={
+            "description": "Additional information about the funding category",
+            "example": "Economic Support",
+        },
     )
 
     funding_instruments = fields.List(
         fields.Enum(FundingInstrument),
         required=True,
         validate=validators.Length(min=1),
+        metadata={
+            "description": "Types of funding instruments used for this opportunity",
+            "example": ["cooperative_agreement", "grant"],
+        },
     )
 
     applicant_types = fields.List(
         fields.Enum(ApplicantType),
         required=True,
         validate=validators.Length(min=1),
+        metadata={
+            "description": "Types of applicants eligible for this opportunity",
+            "example": ["state_governments", "county_governments"],
+        },
     )
 
     applicant_eligibility_description = fields.String(
         required=False,
         validate=validators.Length(max=4000),
+        metadata={
+            "description": "Additional information about the types of applicants that are eligible",
+            "example": "All types of domestic applicants are eligible to apply",
+        },
     )
 
     agency_contact_description = fields.String(
         required=True,
         validate=validators.Length(max=1000),
+        metadata={
+            "description": "Information regarding contacting the agency who owns the opportunity",
+            "example": "For more information, reach out to Jane Smith at agency US-ABC",
+        },
     )
 
     agency_email_address = fields.String(
         required=True,
         validate=validators.Length(max=130),
+        metadata={
+            "description": "The contact email of the agency who owns the opportunity",
+            "example": "fake_email@grants.gov",
+        },
     )
 
     agency_email_address_description = fields.String(
         required=True,
         validate=validators.Length(max=108),
+        metadata={
+            "description": "The text for the link to the agency email address",
+            "example": "Click me to email the agency",
+        },
     )
 
     @validates_schema
