@@ -20,6 +20,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
+import src.db.models.award_recommendation_models as award_recommendation_models
 import src.db.models.competition_models as competition_models
 import src.db.models.entity_models as entity_models
 import src.db.models.extract_models as extract_models
@@ -945,7 +946,7 @@ class OpportunityChangeAuditFactory(BaseFactory):
 
 class AwardRecommendationFactory(BaseFactory):
     class Meta:
-        model = opportunity_models.AwardRecommendation
+        model = award_recommendation_models.AwardRecommendation
 
     award_recommendation_id = Generators.UuidObj
 
@@ -968,7 +969,7 @@ class AwardRecommendationFactory(BaseFactory):
 
 class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
     class Meta:
-        model = opportunity_models.AwardRecommendationApplicationSubmission
+        model = award_recommendation_models.AwardRecommendationApplicationSubmission
 
     award_recommendation_application_submission_id = Generators.UuidObj
 
@@ -994,7 +995,7 @@ class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
 
 class AwardRecommendationSubmissionDetailFactory(BaseFactory):
     class Meta:
-        model = opportunity_models.AwardRecommendationSubmissionDetail
+        model = award_recommendation_models.AwardRecommendationSubmissionDetail
 
     award_recommendation_submission_detail_id = Generators.UuidObj
 
