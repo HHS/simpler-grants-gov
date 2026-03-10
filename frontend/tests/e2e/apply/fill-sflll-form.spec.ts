@@ -5,8 +5,8 @@ import {
   SFLLL_FORM_CONFIG,
 } from "tests/e2e/apply/page-objects/sflll-form.page";
 import playwrightEnv from "tests/e2e/playwright-env";
-import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
+import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   clearPageState,
@@ -18,10 +18,9 @@ const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
 
 test.describe("fill SF-LLL Form", () => {
   test.beforeEach(async ({ page, context }, testInfo) => {
-
-      const isMobile = testInfo.project.name.match(/[Mm]obile/);
-      await authenticateE2eUser(page, context, !!isMobile);
-    });
+    const isMobile = testInfo.project.name.match(/[Mm]obile/);
+    await authenticateE2eUser(page, context, !!isMobile);
+  });
 
   test.setTimeout(120000);
 
