@@ -7,21 +7,24 @@ import {
 import playwrightEnv from "tests/e2e/playwright-env";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import {
-  fillSf424bForm,
-  SF424B_FORM_MATCHER,
-} from "tests/e2e/utils/forms/fill-sf424b-form-utils";
+import { SF424B_FORM_MATCHER } from "tests/e2e/utils/forms/fill-sf424b-form-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
-import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
-import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
 
 const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
-test("Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL", async ({
+const sf424bErrors = [
+  { fieldId: "title", message: "Title is required" },
+  {
+    fieldId: "applicant_organization",
+    message: "Applicant Organization is required",
+  },
+];
+
+test("SF-424B error validation - required fields and inline errors", async ({
   page,
   context,
 }: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
@@ -31,37 +34,23 @@ test("Application submission happy path - application with required SF424B and u
 
   await authenticateE2eUser(page, context, !!isMobile);
 
-  // Call reusable create application function from utils
   await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
   const applicationUrl = page.url();
 
   if (await openForm(page, SF424B_FORM_MATCHER)) {
-    // Fill SF-424B form fields using helper
-    await fillSf424bForm(page, "TESTER", testOrgLabel);
+    // Do not enter anything and click save
+    await saveForm(page, true); // expect validation errors
 
-    // Save the form using helper
-    await saveForm(page);
-
-    // Verify form status after save
+    // Checks error alert list at top of form page
+    // Scrolls down and checks inline field errors on form page
+    // Navigates to application landing page
+    // Scrolls down and checks "Some issues found" in form row
     await verifyFormStatusAfterSave(
       page,
-      "complete",
+      "incomplete",
       "SF-424B",
       applicationUrl,
+      sf424bErrors,
     );
-
-    // Extra wait for page to fully render forms table after navigation
-    await page.waitForTimeout(10000);
-
-    // Select 'No' for including SF-LLL form in submission
-    await selectFormInclusionOption(
-      page,
-      "Disclosure of Lobbying Activities (SF-LLL)",
-      "No",
-    );
-
-    // Submit the application and verify success
-    await submitApplicationAndVerify(page);
-    // Application ID is now available in appId variable for further use if needed
   }
 });
