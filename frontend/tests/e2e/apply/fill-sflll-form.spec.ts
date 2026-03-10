@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test} from "@playwright/test";
 import { FORMS_TEST_DATA } from "tests/e2e/apply/fixtures/test-data-for-sflll-forms.fixture";
 import {
   getSflllFillFields,
@@ -12,14 +12,17 @@ import {
   clearPageState,
   ensurePageClosed,
 } from "tests/e2e/utils/lifecycle-helpers";
+import { authenticateE2eUser } from "../utils/authenticate-e2e-user-utils";
 
 const { baseUrl, testOrgLabel, opportunityId } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
 
 test.describe("fill SF-LLL Form", () => {
-  test.beforeEach(async ({ context }) => {
-    await createSpoofedSessionCookie(context);
-  });
+  test.beforeEach(async ({ page, context }, testInfo) => {
+
+      const isMobile = testInfo.project.name.match(/[Mm]obile/);
+      await authenticateE2eUser(page, context, !!isMobile);
+    });
 
   test.setTimeout(120000);
 
