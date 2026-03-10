@@ -578,10 +578,10 @@ class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
     )
     application_submission_id: Mapped[uuid.UUID] = mapped_column(
         UUID,
-        ForeignKey(ApplicationSubmission.application_submission_id),
+        ForeignKey("api.application_submission.application_submission_id"),
         nullable=False,
     )
-    application_submission: Mapped[ApplicationSubmission] = relationship(ApplicationSubmission)
+    application_submission: Mapped[ApplicationSubmission] = relationship("ApplicationSubmission")
     award_recommendation_submission_detail_id: Mapped[uuid.UUID] = mapped_column(
         UUID,
         ForeignKey(
