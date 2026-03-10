@@ -17,7 +17,10 @@ from src.workflow.event.workflow_event import (
     WorkflowEvent,
 )
 from src.workflow.registry.workflow_registry import WorkflowRegistry
-from src.workflow.service.approval_service import can_user_do_agency_approval
+from src.workflow.service.approval_service import (
+    can_user_do_agency_approval,
+    get_approval_response_type_from_metadata,
+)
 from src.workflow.service.workflow_service import (
     get_and_validate_workflow,
     get_workflow_entity,
@@ -29,6 +32,7 @@ from src.workflow.workflow_errors import (
     EntityNotFound,
     InactiveWorkflowError,
     InvalidEntityForWorkflow,
+    InvalidWorkflowResponseTypeError,
     InvalidWorkflowTypeError,
     WorkflowDoesNotExistError,
 )
@@ -110,6 +114,9 @@ def ingest_workflow_event(
     except InactiveWorkflowError as e:
         logger.info("Workflow is not active", extra={"error": str(e)})
         raise_flask_error(422, "This workflow is not currently active")
+    except InvalidWorkflowResponseTypeError as e:
+        logger.info("Invalid or missing approval response type", extra={"error": str(e)})
+        raise_flask_error(422, str(e))
 
     logger.info("Successfully validated workflow event")
     send_workflow_event_to_queue(workflow_event)
@@ -172,3 +179,8 @@ def _validate_process_workflow_event(
             },
         )
         raise_flask_error(422, "The specified event is not valid for this workflow")
+
+    # If this is an approval event, validate required metadata
+    approval_config = config.approval_mapping.get(process_context.event_to_send)
+    if approval_config is not None:
+        get_approval_response_type_from_metadata(workflow_event.metadata)
