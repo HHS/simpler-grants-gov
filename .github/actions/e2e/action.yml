@@ -89,8 +89,7 @@ runs:
         STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
       run: |
         echo $STAGING_TEST_USER_EMAIL
-        # npm run test:e2e
-        npx playwright test --config ./tests/playwright.config.ts tests/e2e/apply/failure-path-sf424b.spec.ts tests/e2e/apply/happy-path-application-submission.spec.ts
+        npm run test:e2e
       shell: bash
 
     - name: Debug logging on failure
