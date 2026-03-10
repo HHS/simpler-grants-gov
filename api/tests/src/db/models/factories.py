@@ -966,6 +966,10 @@ class AwardRecommendationFactory(BaseFactory):
     funding_strategy = sometimes_none(factory.Faker("paragraph"))
     other_key_information = sometimes_none(factory.Faker("paragraph"))
 
+    is_deleted = False
+    review_workflow = factory.SubFactory("tests.src.db.models.factories.WorkflowFactory")
+    review_workflow_id = factory.LazyAttribute(lambda s: s.review_workflow.workflow_id)
+
 
 class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
     class Meta:

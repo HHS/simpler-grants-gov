@@ -22,6 +22,7 @@ from src.db.models.lookup_models import (
 if TYPE_CHECKING:
     from src.db.models.competition_models import ApplicationSubmission
     from src.db.models.opportunity_models import Opportunity
+    from src.db.models.workflow_models import Workflow
 
 
 class AwardRecommendation(ApiSchemaTable, TimestampMixin):
@@ -36,8 +37,6 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(
         Opportunity, back_populates="award_recommendations"
     )
-    # TODO - add a relationship to the funding strategy
-    funding_strategy_id: Mapped[uuid.UUID | None] = mapped_column(UUID)
     award_recommendation_number: Mapped[str] = mapped_column(index=True)
     award_recommendation_status: Mapped[AwardRecommendationStatus] = mapped_column(
         "award_recommendation_status_id",
@@ -51,9 +50,14 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
         LookupColumn(LkAwardSelectionMethod),
         ForeignKey(LkAwardSelectionMethod.award_selection_method_id),
     )
-    selection_method_detail: Mapped[str | None]
-    funding_strategy: Mapped[str | None]
     other_key_information: Mapped[str | None]
+
+    is_deleted: Mapped[bool] = mapped_column(default=False)
+
+    review_workflow_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey("api.workflow.workflow_id")
+    )
+    review_workflow: Mapped[Workflow | None] = relationship("Workflow")
 
     award_recommendation_application_submissions: Mapped[
         list[AwardRecommendationApplicationSubmission]
