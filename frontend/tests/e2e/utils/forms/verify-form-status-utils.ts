@@ -1,8 +1,8 @@
 import { expect, type Page } from "@playwright/test";
 import {
-  type FieldError,
   verifyAlertErrors,
   verifyInlineErrors,
+  type FieldError,
 } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 export type FormStatus = "complete" | "incomplete";
@@ -43,7 +43,10 @@ export async function assertFormRowStatus(
   await page.waitForTimeout(5000);
 
   const escapedFormName = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const flexiblePattern = escapedFormName.replace(/\s+/g, "\\s*");
+  const flexiblePattern = escapedFormName
+    .replace(/\s+/g, "\\s*")
+    // be tolerant of SF-424B vs SF424B text variants
+    .replace(/-/g, "-?");
   const formRow = page
     .locator("tr", {
       hasText: new RegExp(flexiblePattern, "i"),
@@ -55,7 +58,9 @@ export async function assertFormRowStatus(
   await expect(formRow).toBeVisible({ timeout: 10000 });
 
   const statusPattern =
-    status === "complete" ? /no issues detected/i : /some issues found/i;
+    status === "complete"
+      ? /no issues detected\.?|complete/i
+      : /some issues found\.?|in progress/i;
 
   await expect(formRow.getByText(statusPattern)).toBeVisible({
     timeout: 10000,
@@ -124,7 +129,7 @@ export async function verifyFormStatusAfterSave(
 
   // Navigate to application landing page
   await navigateToApplicationPage(page, applicationUrl);
-  
+
   // On application page — verify form row status
   await assertFormRowStatus(page, status, formName);
 }

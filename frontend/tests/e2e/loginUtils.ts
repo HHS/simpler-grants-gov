@@ -33,7 +33,8 @@ export const initializePlaywrightSessionSecrets = () => {
 };
 
 // 12 hour expiration for test tokens to avoid expiration issues
-export const newExpirationDate = () => new Date(Date.now() + 12 * 60 * 60 * 1000);
+export const newExpirationDate = () =>
+  new Date(Date.now() + 12 * 60 * 60 * 1000);
 
 /*
   encrypts an API token passed as an env var into a fake client token

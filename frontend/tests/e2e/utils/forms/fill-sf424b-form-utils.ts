@@ -20,6 +20,30 @@ export async function verifySf424bFormVisible(page: Page) {
 }
 
 /**
+ * Opens SF-424B form from the application forms table.
+ * @param page Playwright Page object
+ * @returns true when a link was found and opened, false otherwise
+ */
+export async function openSf424bForm(page: Page): Promise<boolean> {
+  await verifySf424bFormVisible(page);
+  const sf424bLink = getSf424bFormLink(page);
+  const linkCount = await sf424bLink.count();
+
+  if (linkCount === 0) return false;
+
+  await sf424bLink.first().waitFor({ state: "visible", timeout: 60000 });
+  await Promise.all([
+    page.waitForURL(/\/applications\/[a-f0-9-]+\/form\/[a-f0-9-]+/, {
+      timeout: 30000,
+    }),
+    sf424bLink.first().click(),
+  ]);
+  await page.waitForLoadState("domcontentloaded");
+  await page.waitForTimeout(2000);
+  return true;
+}
+
+/**
  * Fills the SF-424B form fields.
  * @param page Playwright Page object
  * @param title Title value to fill
