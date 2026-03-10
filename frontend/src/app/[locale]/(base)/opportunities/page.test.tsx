@@ -182,6 +182,21 @@ describe("Opportunities", () => {
       ).toBeVisible();
     });
 
+    it("renders create opportunity button with placeholder URL", async () => {
+      mockSearchForOpportunities.mockResolvedValue(basicOpportunity);
+      const component = await OpportunitiesListPage({ params: localeParams });
+      render(component);
+
+      const createOpportunityLink = screen.getByRole("link", {
+        name: "createOpportunityButton",
+      });
+      expect(createOpportunityLink).toBeVisible();
+      expect(createOpportunityLink).toHaveAttribute(
+        "href",
+        "/opportunities/create/HHS-ACF-FYSB",
+      );
+    });
+
     describe("renders status", () => {
       it("if in draft", async () => {
         mockSearchForOpportunities.mockResolvedValue(basicOpportunity);

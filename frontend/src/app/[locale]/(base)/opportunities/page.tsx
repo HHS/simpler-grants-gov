@@ -7,6 +7,7 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
@@ -95,9 +96,17 @@ const OpportunitiesTable = ({
 
   return (
     <div>
-      <span className="font-sans-lg text-bold">
-        {t("numOpportunities", { num: userOpportunities.length })}
-      </span>
+      <div className="display-flex flex-align-center margin-bottom-2 width-full">
+        <span className="font-sans-lg text-bold">
+          {t("numOpportunities", { num: userOpportunities.length })}
+        </span>
+        <Link
+          href={`/opportunities/create/${userOpportunities[0].agency_code}`}
+          className="usa-button margin-left-auto"
+        >
+          {t("createOpportunityButton")}
+        </Link>
+      </div>
 
       <TableWithResponsiveHeader
         headerContent={headerTitles}
