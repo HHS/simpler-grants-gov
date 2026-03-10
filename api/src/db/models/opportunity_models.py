@@ -1,8 +1,9 @@
 import uuid
 from datetime import date
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy import BigInteger, ForeignKey, Numeric, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -11,6 +12,7 @@ from src.adapters.db.type_decorators.postgres_type_decorators import LookupColum
 from src.constants.lookup_constants import (
     ApplicantType,
     AwardRecommendationStatus,
+    AwardRecommendationType,
     AwardSelectionMethod,
     FundingCategory,
     FundingInstrument,
@@ -22,6 +24,7 @@ from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import (
     LkApplicantType,
     LkAwardRecommendationStatus,
+    LkAwardRecommendationType,
     LkAwardSelectionMethod,
     LkFundingCategory,
     LkFundingInstrument,
@@ -31,7 +34,7 @@ from src.db.models.lookup_models import (
 from src.util.file_util import presign_or_s3_cdnify_url
 
 if TYPE_CHECKING:
-    from src.db.models.competition_models import Competition
+    from src.db.models.competition_models import ApplicationSubmission, Competition
     from src.db.models.entity_models import OrganizationSavedOpportunity
     from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
     from src.db.models.workflow_models import Workflow
@@ -548,6 +551,66 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
     selection_method_detail: Mapped[str | None]
     funding_strategy: Mapped[str | None]
     other_key_information: Mapped[str | None]
+
+    award_recommendation_application_submissions: Mapped[
+        list[AwardRecommendationApplicationSubmission]
+    ] = relationship(
+        back_populates="award_recommendation",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
+
+class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "award_recommendation_application_submission"
+
+    award_recommendation_application_submission_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    award_recommendation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
+        ForeignKey(AwardRecommendation.award_recommendation_id),
+        nullable=False,
+        index=True,
+    )
+    award_recommendation: Mapped[AwardRecommendation] = relationship(
+        AwardRecommendation, back_populates="award_recommendation_application_submissions"
+    )
+    application_submission_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
+        ForeignKey(ApplicationSubmission.application_submission_id),
+        nullable=False,
+    )
+    application_submission: Mapped[ApplicationSubmission] = relationship(ApplicationSubmission)
+    award_recommendation_submission_detail_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
+        ForeignKey(
+            "api.award_recommendation_submission_detail.award_recommendation_submission_detail_id"
+        ),
+        nullable=False,
+    )
+    award_recommendation_submission_detail: Mapped[AwardRecommendationSubmissionDetail] = (
+        relationship("AwardRecommendationSubmissionDetail")
+    )
+
+
+class AwardRecommendationSubmissionDetail(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "award_recommendation_submission_detail"
+
+    award_recommendation_submission_detail_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    recommended_amount: Mapped[Decimal | None] = mapped_column(Numeric)
+    scoring_comment: Mapped[str | None]
+    general_comment: Mapped[str | None]
+    award_recommendation_type: Mapped[AwardRecommendationType | None] = mapped_column(
+        "award_recommendation_type_id",
+        LookupColumn(LkAwardRecommendationType),
+        ForeignKey(LkAwardRecommendationType.award_recommendation_type_id),
+        nullable=True,
+    )
+    has_exception: Mapped[bool] = mapped_column(default=False)
+    exception_detail: Mapped[str | None]
 
 
 class ReferencedOpportunity(ApiSchemaTable, TimestampMixin):

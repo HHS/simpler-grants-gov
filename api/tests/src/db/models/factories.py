@@ -42,6 +42,7 @@ from src.constants.lookup_constants import (
     ApprovalResponseType,
     ApprovalType,
     AwardRecommendationStatus,
+    AwardRecommendationType,
     AwardSelectionMethod,
     CompetitionOpenToApplicant,
     ExternalUserType,
@@ -963,6 +964,48 @@ class AwardRecommendationFactory(BaseFactory):
     selection_method_detail = sometimes_none(factory.Faker("paragraph"))
     funding_strategy = sometimes_none(factory.Faker("paragraph"))
     other_key_information = sometimes_none(factory.Faker("paragraph"))
+
+
+class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.AwardRecommendationApplicationSubmission
+
+    award_recommendation_application_submission_id = Generators.UuidObj
+
+    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
+    award_recommendation_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation.award_recommendation_id
+    )
+
+    application_submission = factory.SubFactory(
+        "tests.src.db.models.factories.ApplicationSubmissionFactory"
+    )
+    application_submission_id = factory.LazyAttribute(
+        lambda s: s.application_submission.application_submission_id
+    )
+
+    award_recommendation_submission_detail = factory.SubFactory(
+        "tests.src.db.models.factories.AwardRecommendationSubmissionDetailFactory"
+    )
+    award_recommendation_submission_detail_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation_submission_detail.award_recommendation_submission_detail_id
+    )
+
+
+class AwardRecommendationSubmissionDetailFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.AwardRecommendationSubmissionDetail
+
+    award_recommendation_submission_detail_id = Generators.UuidObj
+
+    recommended_amount = sometimes_none(
+        factory.Faker("pydecimal", left_digits=7, right_digits=2, positive=True)
+    )
+    scoring_comment = sometimes_none(factory.Faker("paragraph"))
+    general_comment = sometimes_none(factory.Faker("paragraph"))
+    award_recommendation_type = sometimes_none(factory.fuzzy.FuzzyChoice(AwardRecommendationType))
+    has_exception = False
+    exception_detail = sometimes_none(factory.Faker("paragraph"))
 
 
 ###################
