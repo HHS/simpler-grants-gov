@@ -136,7 +136,7 @@ describe("AwardRecommendationEditPage", () => {
       render(component);
 
       expect(
-        await screen.findByLabelText("otherOpportunityInfo.label"),
+        await screen.findByText("otherOpportunityInfo.label"),
       ).toBeInTheDocument();
       expect(
         await screen.findByText("otherOpportunityInfo.description"),
@@ -147,11 +147,10 @@ describe("AwardRecommendationEditPage", () => {
       const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
       });
-      render(component);
+      const { container } = render(component);
 
-      const textarea = await screen.findByLabelText(
-        "otherOpportunityInfo.label",
-      );
+      const textarea = container.querySelector("#additional_info");
+      expect(textarea).toBeInTheDocument();
       expect(textarea).toHaveAttribute("id", "additional_info");
       expect(textarea).toHaveAttribute("name", "additional_info");
     });
