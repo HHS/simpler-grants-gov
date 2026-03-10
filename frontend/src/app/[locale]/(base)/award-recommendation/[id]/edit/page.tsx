@@ -50,14 +50,15 @@ interface OpportunitySectionProps {
   locale: string;
 }
 
-const OpportunitySectionComponent = ({
+const OpportunitySection = ({
   opportunityData,
   locale: _locale,
 }: OpportunitySectionProps) => {
   const t = useTranslations("AwardRecommendation");
   const fundingOppName =
-    opportunityData.opportunity_title || "Funding Opportunity";
-  const fundingOppNumber = opportunityData.opportunity_number || "--";
+    opportunityData.opportunity_title || t("fundingOpportunityFallback");
+  const fundingOppNumber =
+    opportunityData.opportunity_number || t("noDataFallback");
   const summaryDescription = opportunityData.summary?.summary_description || "";
   const hasSummary = !!summaryDescription;
 
@@ -75,7 +76,7 @@ const OpportunitySectionComponent = ({
               <div className="margin-bottom-4 display-flex gap-3">
                 <div className="flex-1">
                   <p className="text-bold margin-bottom-1 font-sans-sm">
-                    Funding opp name
+                    {t("fundingOppName")}
                   </p>
                   <Link
                     href={`/opportunity/${opportunityData.opportunity_id}`}
@@ -88,7 +89,7 @@ const OpportunitySectionComponent = ({
                 </div>
                 <div className="flex-0">
                   <p className="text-bold margin-bottom-1 font-sans-sm">
-                    Funding opp #
+                    {t("fundingOppNumber")}
                   </p>
                   {fundingOppNumber}
                 </div>
@@ -102,19 +103,20 @@ const OpportunitySectionComponent = ({
                     summaryDescription={summaryDescription || ""}
                   />
                 ) : (
-                  <div>No summary available</div>
+                  <div>{t("noSummaryAvailable")}</div>
                 )}
               </div>
+              <div className="border-top border-base-lighter margin-top-2 margin-bottom-2" />
               <div className="margin-bottom-3">
-                <Label htmlFor="other-opportunity-info">
+                <p className="text-bold margin-bottom-1 font-sans-sm">
                   {t("otherOpportunityInfo.label")}
-                </Label>
+                </p>
                 <p className="text-base margin-top-1 margin-bottom-2">
                   {t("otherOpportunityInfo.description")}
                 </p>
                 <CharacterCount
-                  id="other-opportunity-info"
-                  name="other-opportunity-info"
+                  id="additional_info"
+                  name="additional_info"
                   maxLength={1000}
                   isTextArea
                   defaultValue=""
@@ -135,11 +137,8 @@ async function AwardRecommendationEditPageContent({
 }: AwardRecommendationPageProps) {
   const { locale, id: awardRecommendationId } = await params;
 
-  const t = await getTranslations({
-    locale,
-    namespace: "AwardRecommendation",
-  });
-  const opportunityId = "6a483cd8-9169-418a-8dfb-60fa6e6f51e5";
+  const t = await getTranslations("AwardRecommendation");
+  const opportunityId = "036855fc-ec61-43e8-a702-2db7ec005999";
 
   let opportunityData: OpportunityDetail | null = null;
   if (opportunityId) {
@@ -178,12 +177,8 @@ async function AwardRecommendationEditPageContent({
         </Suspense>
       )}
       <GridContainer>
-        <h1 className="margin-top-9 margin-bottom-7">
-          {t("pageTitleEdit", { defaultValue: "Edit your recommendation" })}
-        </h1>
-
         {opportunityData && (
-          <OpportunitySectionComponent
+          <OpportunitySection
             opportunityData={opportunityData}
             locale={locale}
           />

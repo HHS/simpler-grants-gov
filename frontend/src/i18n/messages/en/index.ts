@@ -1861,6 +1861,12 @@ export const messages = {
     description: "Award Recommendation flow coming soon.",
     opportunitySummary: "Opportunity summary",
     selectionMethod: "Selection method",
+    meritReview: "Merit Review",
+    fundingOpportunityFallback: "Funding Opportunity",
+    noDataFallback: "--",
+    fundingOppName: "Funding opportunity name",
+    fundingOppNumber: "Funding opportunity number",
+    noSummaryAvailable: "No summary available",
     otherOpportunityInfo: {
       label: "Other opportunity information",
       description:

@@ -33,8 +33,6 @@ export async function generateMetadata({
   return meta;
 }
 
-export const dynamic = "force-dynamic";
-
 export type AwardRecommendationPageProps = {
   params: Promise<{ locale: string; id?: string }>;
 } & WithFeatureFlagProps;
@@ -44,14 +42,15 @@ interface OpportunitySectionProps {
   locale: string;
 }
 
-const OpportunitySectionComponent = ({
+const OpportunitySection = ({
   opportunityData,
   locale: _locale,
 }: OpportunitySectionProps) => {
   const t = useTranslations("AwardRecommendation");
   const fundingOppName =
-    opportunityData.opportunity_title || "Funding Opportunity";
-  const fundingOppNumber = opportunityData.opportunity_number || "--";
+    opportunityData.opportunity_title || t("fundingOpportunityFallback");
+  const fundingOppNumber =
+    opportunityData.opportunity_number || t("noDataFallback");
   const summaryDescription = opportunityData.summary?.summary_description || "";
   const hasSummary = !!summaryDescription;
 
@@ -69,7 +68,7 @@ const OpportunitySectionComponent = ({
               <div className="margin-bottom-4 display-flex gap-3">
                 <div className="flex-1">
                   <p className="text-bold margin-bottom-1 font-sans-sm">
-                    Funding opp name
+                    {t("fundingOppName")}
                   </p>
                   <Link
                     href={`/opportunity/${opportunityData.opportunity_id}`}
@@ -82,7 +81,7 @@ const OpportunitySectionComponent = ({
                 </div>
                 <div className="flex-0">
                   <p className="text-bold margin-bottom-1 font-sans-sm">
-                    Funding opp #
+                    {t("fundingOppNumber")}
                   </p>
                   {fundingOppNumber}
                 </div>
@@ -96,13 +95,13 @@ const OpportunitySectionComponent = ({
                     summaryDescription={summaryDescription || ""}
                   />
                 ) : (
-                  <div>No summary available</div>
+                  <div>{t("noSummaryAvailable")}</div>
                 )}
               </div>
               <p className="text-bold margin-bottom-2">
                 {t("selectionMethod")}
               </p>
-              Merit Review
+              {t("meritReview")}
             </div>
           </div>
         </Grid>
@@ -116,11 +115,8 @@ async function AwardRecommendationPageContent({
 }: AwardRecommendationPageProps) {
   const { locale, id: awardRecommendationId } = await params;
 
-  const t = await getTranslations({
-    locale,
-    namespace: "AwardRecommendation",
-  });
-  const opportunityId = "6a483cd8-9169-418a-8dfb-60fa6e6f51e5";
+  const t = await getTranslations("AwardRecommendation");
+  const opportunityId = "036855fc-ec61-43e8-a702-2db7ec005999";
 
   let opportunityData: OpportunityDetail | null = null;
   if (opportunityId) {
@@ -159,12 +155,8 @@ async function AwardRecommendationPageContent({
         </Suspense>
       )}
       <GridContainer>
-        <h1 className="margin-top-9 margin-bottom-7">
-          {t("pageTitle", { defaultValue: "Review your recommendation" })}
-        </h1>
-
         {opportunityData && (
-          <OpportunitySectionComponent
+          <OpportunitySection
             opportunityData={opportunityData}
             locale={locale}
           />

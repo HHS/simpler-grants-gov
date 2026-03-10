@@ -107,12 +107,12 @@ describe("AwardRecommendationEditPage", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders page title for edit page", async () => {
+    it("renders page for edit Award Recommendation", async () => {
       const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
       });
       render(component);
-      expect(await screen.findByText("pageTitleEdit")).toBeVisible();
+      expect(await screen.findByText("opportunity")).toBeVisible();
     });
 
     it("renders opportunity details on the page", async () => {
@@ -152,8 +152,8 @@ describe("AwardRecommendationEditPage", () => {
       const textarea = await screen.findByLabelText(
         "otherOpportunityInfo.label",
       );
-      expect(textarea).toHaveAttribute("id", "other-opportunity-info");
-      expect(textarea).toHaveAttribute("name", "other-opportunity-info");
+      expect(textarea).toHaveAttribute("id", "additional_info");
+      expect(textarea).toHaveAttribute("name", "additional_info");
     });
 
     it("renders 'No summary available' when opportunity has no summary description", async () => {
@@ -175,7 +175,7 @@ describe("AwardRecommendationEditPage", () => {
       });
       render(component);
 
-      expect(await screen.findByText("No summary available")).toBeVisible();
+      expect(await screen.findByText("noSummaryAvailable")).toBeVisible();
     });
 
     it("calls getOpportunityDetails with expected id", async () => {

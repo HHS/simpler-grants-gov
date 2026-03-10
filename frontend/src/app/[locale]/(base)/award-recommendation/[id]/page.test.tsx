@@ -107,12 +107,12 @@ describe("AwardRecommendationPage", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders page title", async () => {
+    it("renders page for Award Recommendation", async () => {
       const component = await AwardRecommendationPage({
         params: awardRecommendationParams,
       });
       render(component);
-      expect(await screen.findByText("pageTitle")).toBeVisible();
+      expect(await screen.findByText("opportunity")).toBeVisible();
     });
 
     it("renders opportunity details on the page", async () => {
@@ -148,7 +148,7 @@ describe("AwardRecommendationPage", () => {
       });
       render(component);
 
-      expect(await screen.findByText("No summary available")).toBeVisible();
+      expect(await screen.findByText("noSummaryAvailable")).toBeVisible();
     });
 
     it("calls getOpportunityDetails with expected id", async () => {
