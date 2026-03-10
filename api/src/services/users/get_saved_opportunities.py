@@ -1,7 +1,6 @@
 import logging
 import uuid
 from collections.abc import Sequence
-from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy import asc, desc, func, nulls_last, select
@@ -171,53 +170,47 @@ def _build_saved_union_subquery(
     return saved_union
 
 
-def _enrich_with_saved_organizations(
+def _enrich_with_saved_organizations_sql(
+    db_session: db.Session,
     opportunities: Sequence[Opportunity],
     org_ids_to_use: list[uuid.UUID] | None,
-) -> list[dict]:
+) -> Sequence[Opportunity]:
     """
-    Convert a list of Opportunity objects into dicts for API response.
+    Enrich paginated Opportunity objects with `saved_to_organizations`.
 
-    Include `saved_to_organizations` only if:
-    - The request filtered by specific organizations, or
-    - The opportunity is saved by at least one organization in org_ids_to_use.
-
-    If the opportunity is only user-saved (no orgs) and the request is for all saved opportunities,
-    the `saved_to_organizations` key is omitted.
+    Behavior:
+    -  If the request is for **user-saved opportunities only**, the `saved_to_organizations` field is omitted.
+    - If the request involves organizations the `saved_to_organizations` field is always included.
     """
+    if not org_ids_to_use:
+        return opportunities
 
-    response: list = []
+    opp_ids = [opp.opportunity_id for opp in opportunities]
 
-    for opp in opportunities:
-        saved_to_orgs = [
-            {
-                "organization_id": str(save.organization_id),
-                "organization_name": (
-                    save.organization.organization_name if save.organization else None
-                ),
-            }
-            for save in opp.saved_opportunities_by_organizations
-            if org_ids_to_use and save.organization_id in org_ids_to_use
-        ]
-        base: dict[str, Any] = {
-            "opportunity_id": str(opp.opportunity_id),
-            "opportunity_title": opp.opportunity_title,
-            "opportunity_status": opp.opportunity_status,
-            "summary": opp.summary,
-        }
+    rows = db_session.execute(
+        select(OrganizationSavedOpportunity.opportunity_id, Organization)
+        .join(
+            Organization,
+            Organization.organization_id == OrganizationSavedOpportunity.organization_id,
+        )
+        .where(OrganizationSavedOpportunity.opportunity_id.in_(opp_ids))
+    ).all()
 
-        # Only include key if request is org-specific or if there are saved orgs
-        if (org_ids_to_use is not None) or saved_to_orgs:
-            base["saved_to_organizations"] = saved_to_orgs
+    # Build a mapping: opportunity_id to list of Organization objects
+    saved_orgs_map: dict[uuid.UUID, list[Organization]] = {}
+    for opp_id, org in rows:
+        saved_orgs_map.setdefault(opp_id, []).append(org)
 
-        response.append(base)
-
-    return response
+    # Assign attribute to each organization saved opportunity
+    if org_ids_to_use:
+        for opp in opportunities:
+            opp.saved_to_organizations = saved_orgs_map.get(opp.opportunity_id, [])  # type: ignore[attr-defined]
+    return opportunities
 
 
 def get_saved_opportunities(
     db_session: db.Session, user: User, raw_opportunity_params: dict
-) -> tuple[list[dict], PaginationInfo]:
+) -> tuple[Sequence[Opportunity], PaginationInfo]:
     """
     Returns paginated saved opportunities for a user, enriched with
     saved_to_organizations when relevant.
@@ -282,11 +275,12 @@ def get_saved_opportunities(
     pagination_info = PaginationInfo.from_pagination_params(
         opportunity_params.pagination, paginator
     )
+    if paginated_search:
+        # Enrich paginated opportunities with saved_to_organizations
+        paginated_search = _enrich_with_saved_organizations_sql(
+            db_session,
+            paginated_search,
+            org_ids_to_use,
+        )
 
-    # Enrich paginated opportunities with saved_to_organizations
-    enriched_response = _enrich_with_saved_organizations(
-        paginated_search,
-        org_ids_to_use,
-    )
-
-    return enriched_response, pagination_info
+    return paginated_search, pagination_info

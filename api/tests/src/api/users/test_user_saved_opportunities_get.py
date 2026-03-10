@@ -104,10 +104,11 @@ def test_user_get_saved_opportunities(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": user_auth_token},
         json={
+            "filters": {"organization_ids": {"one_of": []}},
             "pagination": {
                 "page_offset": 1,
                 "page_size": 25,
-            }
+            },
         },
     )
 
@@ -556,7 +557,6 @@ def test_user_get_saved_opportunities_user_and_org(client, enable_factory_create
     data = response.json["data"]
     assert len(data) == 3
     # Both user and org opps are returned with no duplicate
-
     assert [opp["opportunity_id"] for opp in data] == [
         str(opp)
         for opp in [
