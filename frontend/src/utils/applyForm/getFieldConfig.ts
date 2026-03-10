@@ -61,7 +61,7 @@ const FIELD_LIST_INDEX_TOKEN = "~~index~~" as const;
  * the correct portion of the id while preserving any parent structure.
  */
 
-function buildFieldListBaseId({
+export function buildFieldListBaseId({
   fieldListName,
   childId,
 }: {
