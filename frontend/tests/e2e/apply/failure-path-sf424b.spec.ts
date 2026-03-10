@@ -23,7 +23,7 @@ const sf424bErrors = [
   },
 ];
 
-test.only("SF-424B error validation - required fields and inline errors", async ({
+test("SF-424B error validation - required fields and inline errors", async ({
   page,
   context,
 }: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
