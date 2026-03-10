@@ -21,7 +21,7 @@ const OPPORTUNITY_IDS: Record<string, string> = {
 };
 
 // Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
-const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "staging";
+const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
 if (!Object.prototype.hasOwnProperty.call(BASE_URLS, targetEnv)) {
   throw new Error(
