@@ -1,6 +1,9 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
-import { getFormLink } from "./form-link-utils";
+import { getFormLink, openForm } from "./form-navigation-utils";
+
+export const SF424B_FORM_MATCHER =
+  "SF-424B|Assurances for Non-Construction Programs";
 
 /**
  * Gets the SF-424B form link element.
@@ -8,7 +11,7 @@ import { getFormLink } from "./form-link-utils";
  * @returns Locator for the SF-424B form link
  */
 export function getSf424bFormLink(page: Page): Locator {
-  return getFormLink(page, "SF-424B|Assurances for Non-Construction Programs");
+  return getFormLink(page, SF424B_FORM_MATCHER);
 }
 
 /**
@@ -25,22 +28,7 @@ export async function verifySf424bFormVisible(page: Page) {
  * @returns true when a link was found and opened, false otherwise
  */
 export async function openSf424bForm(page: Page): Promise<boolean> {
-  await verifySf424bFormVisible(page);
-  const sf424bLink = getSf424bFormLink(page);
-  const linkCount = await sf424bLink.count();
-
-  if (linkCount === 0) return false;
-
-  await sf424bLink.first().waitFor({ state: "visible", timeout: 60000 });
-  await Promise.all([
-    page.waitForURL(/\/applications\/[a-f0-9-]+\/form\/[a-f0-9-]+/, {
-      timeout: 30000,
-    }),
-    sf424bLink.first().click(),
-  ]);
-  await page.waitForLoadState("domcontentloaded");
-  await page.waitForTimeout(2000);
-  return true;
+  return openForm(page, SF424B_FORM_MATCHER);
 }
 
 /**

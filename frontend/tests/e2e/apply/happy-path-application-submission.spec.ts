@@ -9,8 +9,9 @@ import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import {
   fillSf424bForm,
-  openSf424bForm,
+  SF424B_FORM_MATCHER,
 } from "tests/e2e/utils/forms/fill-sf424b-form-utils";
+import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
 import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
@@ -34,7 +35,7 @@ test("Application submission happy path - application with required SF424B and u
   await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
   const applicationUrl = page.url();
 
-  if (await openSf424bForm(page)) {
+  if (await openForm(page, SF424B_FORM_MATCHER)) {
     // Fill SF-424B form fields using helper
     await fillSf424bForm(page, "TESTER", testOrgLabel);
 

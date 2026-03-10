@@ -7,7 +7,8 @@ import {
 import playwrightEnv from "tests/e2e/playwright-env";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import { openSf424bForm } from "tests/e2e/utils/forms/fill-sf424b-form-utils";
+import { SF424B_FORM_MATCHER } from "tests/e2e/utils/forms/fill-sf424b-form-utils";
+import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
@@ -36,7 +37,7 @@ test("SF-424B error validation - required fields and inline errors", async ({
   await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
   const applicationUrl = page.url();
 
-  if (await openSf424bForm(page)) {
+  if (await openForm(page, SF424B_FORM_MATCHER)) {
     // Do not enter anything and click save
     await saveForm(page, true); // expect validation errors
 

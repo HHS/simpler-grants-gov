@@ -127,9 +127,6 @@ export async function verifyFormStatusAfterSave(
     await verifyInlineErrors(page, expectedErrors);
   }
 
-  // Navigate to application landing page
-  await navigateToApplicationPage(page, applicationUrl);
-
-  // On application page — verify form row status
-  await assertFormRowStatus(page, status, formName);
+  // On application page — verify form row status/messages
+  await verifyFormStatusOnPage(page, status, formName, applicationUrl);
 }
