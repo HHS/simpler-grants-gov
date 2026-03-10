@@ -795,6 +795,7 @@ export const messages = {
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
+    header: "Search funding opportunities",
     metaDescription:
       "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
@@ -865,7 +866,6 @@ export const messages = {
       toggleButton: "Filters",
     },
     callToAction: {
-      title: "Search funding opportunities",
       shareWithOrganization: "Share with organizations",
     },
     opportunitySaved: "Saved",
@@ -1584,9 +1584,6 @@ export const messages = {
     "YEM: YEMEN": "Yemen",
     "ZMB: ZAMBIA": "Zambia",
     "ZWE: ZIMBABWE": "Zimbabwe",
-  },
-  returnToGrants: {
-    message: "Return to Grants.gov",
   },
   Settings: {
     pageTitle: "Settings | Simpler.Grants.gov",

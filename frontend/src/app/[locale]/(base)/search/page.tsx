@@ -20,7 +20,6 @@ import { PillListSkeleton } from "src/components/search/PillList";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
 import { SearchBarWithLabel } from "src/components/search/SearchBarWithLabel";
-import SearchCallToAction from "src/components/search/SearchCallToAction";
 import { SearchDrawerFilters } from "src/components/search/SearchDrawerFilters";
 import { SearchDrawerHeading } from "src/components/search/SearchDrawerHeading";
 import SearchResults from "src/components/search/SearchResults";
@@ -79,7 +78,7 @@ function Search({ searchParams, params }: SearchPageProps) {
       />
       <div className="bg-base-lightest padding-top-5">
         <div className="grid-container">
-          <SearchCallToAction />
+          <h1 className="margin-top-0">{t("header")}</h1>
           <div className="tablet:display-flex tablet:margin-bottom-2 margin-top-0">
             <div className="flex-6 flex-align-self-end">
               <SearchBarWithLabel

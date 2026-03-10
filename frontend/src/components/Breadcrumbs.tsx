@@ -8,8 +8,6 @@ import {
   BreadcrumbLink,
 } from "@trussworks/react-uswds";
 
-import { ReturnToGrantsNotification } from "./ReturnToGrantsNotification";
-
 export type Breadcrumb = {
   title: string;
   path: string;
@@ -34,10 +32,8 @@ const microdata = {
 
 const Breadcrumbs = ({
   breadcrumbList,
-  className,
 }: {
   breadcrumbList: Breadcrumb[];
-  className?: string;
 }) => {
   const breadcrumArray = breadcrumbList.map((breadcrumbInfo, i) => {
     return (
@@ -64,18 +60,12 @@ const Breadcrumbs = ({
   });
 
   return (
-    <div className="display-flex flex-column tablet:flex-row">
-      <BreadcrumbBar
-        listProps={{ ...microdata.ol }}
-        data-testid="breadcrumb"
-        className={clsx("flex-1", className)}
-      >
-        {breadcrumArray}
-      </BreadcrumbBar>
-      <Suspense>
-        <ReturnToGrantsNotification legacyLink={environment.LEGACY_HOST} />
-      </Suspense>
-    </div>
+    <BreadcrumbBar
+      listProps={{ ...microdata.ol }}
+      data-testid="breadcrumb"
+    >
+      {breadcrumArray}
+    </BreadcrumbBar>
   );
 };
 
