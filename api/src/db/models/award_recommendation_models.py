@@ -32,10 +32,12 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
         UUID, primary_key=True, default=uuid.uuid4
     )
     opportunity_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(Opportunity.opportunity_id), index=True
+        UUID,
+        ForeignKey("api.opportunity.opportunity_id"),
+        index=True,
     )
     opportunity: Mapped[Opportunity] = relationship(
-        Opportunity, back_populates="award_recommendations"
+        "Opportunity", back_populates="award_recommendations"
     )
     award_recommendation_number: Mapped[str] = mapped_column(index=True)
     award_recommendation_status: Mapped[AwardRecommendationStatus] = mapped_column(

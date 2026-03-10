@@ -1,8 +1,8 @@
 """add core award recommendation tables
 
-Revision ID: caec4a3aa8d1
+Revision ID: dc49bb9e25ab
 Revises: 21761f4206c4
-Create Date: 2026-03-10 16:54:52.190638
+Create Date: 2026-03-10 20:24:20.040032
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "caec4a3aa8d1"
+revision = "dc49bb9e25ab"
 down_revision = "21761f4206c4"
 branch_labels = None
 depends_on = None
@@ -56,14 +56,13 @@ def upgrade():
         "award_recommendation",
         sa.Column("award_recommendation_id", sa.UUID(), nullable=False),
         sa.Column("opportunity_id", sa.UUID(), nullable=False),
-        sa.Column("funding_strategy_id", sa.UUID(), nullable=True),
         sa.Column("award_recommendation_number", sa.Text(), nullable=False),
         sa.Column("award_recommendation_status_id", sa.Integer(), nullable=False),
         sa.Column("additional_info", sa.Text(), nullable=True),
         sa.Column("award_selection_method_id", sa.Integer(), nullable=True),
-        sa.Column("selection_method_detail", sa.Text(), nullable=True),
-        sa.Column("funding_strategy", sa.Text(), nullable=True),
         sa.Column("other_key_information", sa.Text(), nullable=True),
+        sa.Column("is_deleted", sa.Boolean(), nullable=False),
+        sa.Column("review_workflow_id", sa.UUID(), nullable=True),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
@@ -94,6 +93,11 @@ def upgrade():
             ["opportunity_id"],
             ["api.opportunity.opportunity_id"],
             name=op.f("award_recommendation_opportunity_id_opportunity_fkey"),
+        ),
+        sa.ForeignKeyConstraint(
+            ["review_workflow_id"],
+            ["api.workflow.workflow_id"],
+            name=op.f("award_recommendation_review_workflow_id_workflow_fkey"),
         ),
         sa.PrimaryKeyConstraint("award_recommendation_id", name=op.f("award_recommendation_pkey")),
         schema="api",
