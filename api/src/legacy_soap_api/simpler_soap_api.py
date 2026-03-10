@@ -1,6 +1,7 @@
 import logging
 
 import src.adapters.db as db
+from src.legacy_soap_api.legacy_soap_api_auth import USE_SIMPLER_OVERRIDE_KEY
 from src.legacy_soap_api.legacy_soap_api_client import (
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
@@ -29,6 +30,8 @@ def get_simpler_soap_response(
     )
 
     use_simpler = get_soap_config().use_simpler
+    if soap_request.headers.get(USE_SIMPLER_OVERRIDE_KEY, None) == "true":
+        use_simpler = True
 
     try:
         simpler_soap_client = simpler_soap_client_type(
