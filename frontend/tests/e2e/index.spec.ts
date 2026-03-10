@@ -10,23 +10,24 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded", timeout });
 });
 
-test("has title", async ({ page }) => {
+test("has title", { tag: "@smoke" }, async ({ page }) => {
   await expect(page).toHaveTitle(/Simpler.Grants.gov/);
 });
 
-test("clicking 'follow on GitHub' link opens a new tab pointed at Github repository", async ({
-  page,
-  context,
-}) => {
-  const pagePromise = context.waitForEvent("page");
-  // Click the Follow on GitHub link
-  await page.getByRole("link", { name: "Follow on GitHub" }).click();
-  const newPage = await pagePromise;
-  await newPage.waitForLoadState();
-  await expect(newPage).toHaveURL(
-    /https:\/\/github.com\/HHS\/simpler-grants-gov/,
-  );
-});
+test(
+  "clicking 'follow on GitHub' link opens a new tab pointed at Github repository",
+  { tag: "@full-regression" },
+  async ({ page, context }) => {
+    const pagePromise = context.waitForEvent("page");
+    // Click the Follow on GitHub link
+    await page.getByRole("link", { name: "Follow on GitHub" }).click();
+    const newPage = await pagePromise;
+    await newPage.waitForLoadState();
+    await expect(newPage).toHaveURL(
+      /https:\/\/github.com\/HHS\/simpler-grants-gov/,
+    );
+  },
+);
 
 test("skips to main content when navigating via keyboard", async ({
   page,

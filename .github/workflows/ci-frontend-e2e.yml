@@ -14,6 +14,14 @@ on:
     inputs:
       api_logs:
         description: "print api logs on failure?"
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      playwright_tags:
+        description: "pipe separated list of @tags denoting groups of tests to run"
+        required: false
         type: string
   workflow_call:
   pull_request:
@@ -100,6 +108,7 @@ jobs:
           total_shards: ${{ matrix.total_shards }}
           current_shard: ${{ matrix.shard }}
           api_logs: ${{ inputs.api_logs }}
+          playwright_tags: ${{ inputs.playwright_tags }}
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
