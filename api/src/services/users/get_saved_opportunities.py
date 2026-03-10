@@ -203,7 +203,7 @@ def _enrich_with_saved_organizations_sql(
 
     # Assign attribute to each organization saved opportunity
     for opp in opportunities:
-        setattr(opp, "saved_to_organizations", saved_orgs_map.get(opp.opportunity_id, [])) # type: ignore[attr-defined]
+        setattr(opp, "saved_to_organizations", saved_orgs_map.get(opp.opportunity_id, []))  # type: ignore[attr-defined]
     return opportunities
 
 
