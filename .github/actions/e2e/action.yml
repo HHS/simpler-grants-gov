@@ -39,6 +39,12 @@ inputs:
   node_options:
     description: "options to pass to node"
     default: "--dns-result-order=ipv4first"
+  test_command:
+    description: "command used to run e2e tests"
+    default: "npm run test:e2e"
+  report_name_prefix:
+    description: "prefix for blob report artifact name"
+    default: "blob-report"
 outputs:
   artifact-id:
     description: "artifact ids for uploaded test reports"
@@ -89,7 +95,7 @@ runs:
         STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
       run: |
         echo $STAGING_TEST_USER_EMAIL
-        npm run test:e2e
+        ${{ inputs.test_command }}
       shell: bash
 
     - name: Debug logging on failure
@@ -123,6 +129,6 @@ runs:
       if: always()
       uses: actions/upload-artifact@v6
       with:
-        name: blob-report-shard-${{ inputs.current_shard }}
+        name: ${{ inputs.report_name_prefix }}-shard-${{ inputs.current_shard }}
         path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
         retention-days: 1

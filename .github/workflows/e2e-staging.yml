@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  e2e-tests-deployed:
+  e2e-tests-no-auth-sharded:
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
@@ -46,11 +46,46 @@ jobs:
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
+          report_name_prefix: blob-report-no-auth
+          test_command: >-
+            npx playwright test --config ./tests/playwright.config.ts --project=Chrome
+            $(find tests/e2e -name "*.spec.ts"
+            ! -path "tests/e2e/apply/failure-path-sf424b.spec.ts"
+            ! -path "tests/e2e/apply/happy-path-application-submission.spec.ts"
+            ! -path "tests/e2e/saved-opportunities.spec.ts"
+            ! -path "tests/e2e/login/login_with_login_gov.spec.ts")
+
+  e2e-tests-auth-single-worker:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set target
+        run: if [[ -z "${{ inputs.target }}" ]]; then echo "defaulted_target=staging" >> "$GITHUB_ENV"; else echo 'defaulted_target="${{ inputs.target }}"' >> "$GITHUB_ENV"; fi
+
+      - uses: ./.github/actions/e2e
+        with:
+          version: ${{ inputs.version || github.ref }}
+          target: ${{ env.defaulted_target }}
+          total_shards: 1
+          current_shard: 1
+          staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
+          staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
+          staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
+          report_name_prefix: blob-report-auth
+          test_command: >-
+            npx playwright test --config ./tests/playwright.config.ts --project=Chrome --workers=1
+            tests/e2e/apply/failure-path-sf424b.spec.ts
+            tests/e2e/apply/happy-path-application-submission.spec.ts
+            tests/e2e/saved-opportunities.spec.ts
+            tests/e2e/login/login_with_login_gov.spec.ts
 
   create-report:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
-    needs: e2e-tests-deployed
+    needs: [e2e-tests-no-auth-sharded, e2e-tests-auth-single-worker]
     uses: ./.github/workflows/e2e-create-report.yml
     secrets: inherit
     with:

@@ -45,7 +45,7 @@ jobs:
           path: frontend/all-blob-reports
           # artifact-ids: ${{ inputs.artifact-ids }}
           run-id: ${{ inputs.run_id }}
-          pattern: blob-report-shard-*
+          pattern: blob-report*-shard-*
           merge-multiple: true
 
       - name: Verify Downloaded Artifacts
