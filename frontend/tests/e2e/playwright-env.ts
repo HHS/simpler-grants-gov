@@ -16,12 +16,12 @@ const BASE_URLS: Record<string, string> = {
 
 // Opportunity IDs for each environment
 const OPPORTUNITY_IDS: Record<string, string> = {
-  local: "f7a1c2b3-4d5e-6789-8abc-1234567890ab",
+  local: "924022f2-d89c-4af2-a7e5-f1cbdee4d385",
   staging: "f7a1c2b3-4d5e-6789-8abc-1234567890ab",
 };
 
 // Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
-const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "staging";
+const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
 if (!Object.prototype.hasOwnProperty.call(BASE_URLS, targetEnv)) {
   throw new Error(
@@ -52,7 +52,10 @@ const playwrightEnv = {
   baseUrl,
   targetEnv,
   testOrgLabel,
-  opportunityId: process.env.OPPORTUNITY_ID || OPPORTUNITY_IDS[targetEnv] || OPPORTUNITY_IDS.local,
+  opportunityId:
+    process.env.OPPORTUNITY_ID ||
+    OPPORTUNITY_IDS[targetEnv] ||
+    OPPORTUNITY_IDS.local,
   isCi: process.env.CI,
   totalShards: process.env.TOTAL_SHARDS,
   currentShard: process.env.CURRENT_SHARD,
