@@ -87,8 +87,8 @@ class AssistanceListing(CustomField):
     """The assistance listing number and program title for this opportunity"""
 
     name = fields.String(required=True, metadata={"example": "assistanceListing"})
-    fieldType = fields.String(required=True, metadata={"example": "object"})
-    value = fields.Nested(AssistanceListingValue, required=True)
+    fieldType = fields.String(required=True, metadata={"example": "array"})
+    value = fields.List(fields.Nested(AssistanceListingValue), required=True)
     description = fields.String(
         allow_none=True,
         metadata={
@@ -101,9 +101,9 @@ class AgencyValue(Schema):
     """Schema for populating the Agency value field"""
 
     agencyCode = fields.String(required=True, metadata={"example": "US-ABC"})
-    agencyName = fields.String(required=True, metadata={"example": "Department of Examples"})
+    agencyName = fields.String(allow_none=True, metadata={"example": "Department of Examples"})
     topLevelAgencyName = fields.String(
-        required=True, metadata={"example": "Department of Examples"}
+        allow_none=True, metadata={"example": "Department of Examples"}
     )
 
 
@@ -120,7 +120,7 @@ class Agency(CustomField):
 
 
 class AttachmentValue(Schema):
-    downloadUrl = fields.URL(required=True, metadata={"example": "https://example.com/file.pdf"})
+    downloadUrl = fields.URL(allow_none=True, metadata={"example": "https://example.com/file.pdf"})
     name = fields.String(required=True, metadata={"example": "example.pdf"})
     description = fields.String(
         allow_none=True, metadata={"example": "A PDF file with instructions"}
@@ -163,12 +163,12 @@ class AgencyContactValue(Schema):
     """Schema for populating the AgencyContact value field"""
 
     description = fields.String(
-        required=True,
+        allow_none=True,
         metadata={"example": "For more information, reach out to Jane Smith at agency US-ABC"},
     )
-    emailAddress = fields.String(required=True, metadata={"example": "fake_email@grants.gov"})
+    emailAddress = fields.String(allow_none=True, metadata={"example": "fake_email@grants.gov"})
     emailDescription = fields.String(
-        required=True, metadata={"example": "Click me to email the agency"}
+        allow_none=True, metadata={"example": "Click me to email the agency"}
     )
 
 
@@ -187,8 +187,8 @@ class AgencyContact(CustomField):
 class AdditionalInfoValue(Schema):
     """Schema for populating the AdditionalInfo value field"""
 
-    url = fields.String(required=True, metadata={"example": "grants.gov"})
-    description = fields.String(required=True, metadata={"example": "Click me for more info"})
+    url = fields.String(allow_none=True, metadata={"example": "grants.gov"})
+    description = fields.String(allow_none=True, metadata={"example": "Click me for more info"})
 
 
 class AdditionalInfo(CustomField):

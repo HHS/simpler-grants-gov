@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from common_grants_sdk.schemas.pydantic import (
     ArrayOperator,
+    CustomFieldType,
     Money,
     MoneyRange,
     MoneyRangeFilter,
@@ -23,6 +24,7 @@ from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.services.common_grants.transformation import (
     build_filter_info,
     build_money_range_filter,
+    populate_custom_fields,
     transform_opportunity_to_cg,
     transform_search_request_from_cg,
     transform_search_result_to_cg,
@@ -71,6 +73,22 @@ class TestTransformation:
                 self.opportunity_status = OpportunityStatus.POSTED
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
                 self.updated_at = datetime(2024, 1, 2, 12, 0, 0)  # Changed from date to datetime
+                self.legacy_opportunity_id = uuid4()
+                self.opportunity_number = 9876
+                self.category = "Federal"
+                self.agency_code = "A1235"
+                self.agency_name = "Test Agency"
+                self.top_level_agency_name = "Dept of Test"
+                self.opportunity_assistance_listings = [
+                    type(
+                        "MockAssistanceListing",
+                        (),
+                        {
+                            "assistance_listing_number": 1234,
+                            "program_title": "Title of Program",
+                        },
+                    )()
+                ]
                 self.current_opportunity_summary = type(
                     "MockSummary",
                     (),
@@ -86,6 +104,12 @@ class TestTransformation:
                                 "award_ceiling": 500000,
                                 "award_floor": 10000,
                                 "additional_info_url": "https://example.com/opportunity",
+                                "additional_info_url_description": "Additional opportunity information",
+                                "agency_contact_description": "Contact the grants office for questions",
+                                "agency_email_address": "grants@test-agency.gov",
+                                "agency_email_address_description": "Grants Office Email",
+                                "fiscal_year": 2024,
+                                "is_cost_sharing": False,
                                 "created_at": datetime(2024, 1, 3, 12, 0, 0),
                                 "updated_at": datetime(2024, 1, 4, 12, 0, 0),
                             },
@@ -93,6 +117,21 @@ class TestTransformation:
                     },
                 )()
                 self.summary = self.current_opportunity_summary.opportunity_summary
+                self.opportunity_attachments = [
+                    type(
+                        "MockAttachment",
+                        (),
+                        {
+                            "download_path": "https://example.com/opportunity",
+                            "file_name": "nofo.pdf",
+                            "file_description": "Notice of Funding Opportunity",
+                            "file_size_bytes": 204800,
+                            "mime_type": "application/pdf",
+                            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+                        },
+                    )()
+                ]
 
         opportunity = MockOpportunity()
 
@@ -125,6 +164,66 @@ class TestTransformation:
 
         # Check source URL
         assert str(result.source) == "https://example.com/opportunity"
+
+        # Check custom fields
+        assert result.custom_fields is not None
+
+        assert "legacyId" in result.custom_fields
+        assert result.custom_fields["legacyId"].value == opportunity.legacy_opportunity_id
+
+        assert "federalOpportunityNumber" in result.custom_fields
+        assert result.custom_fields["federalOpportunityNumber"].value == 9876
+
+        assert "category" in result.custom_fields
+        assert result.custom_fields["category"].value == "Federal"
+
+        assert "agency" in result.custom_fields
+        assert result.custom_fields["agency"].value["agencyCode"] == "A1235"
+        assert result.custom_fields["agency"].value["agencyName"] == "Test Agency"
+        assert result.custom_fields["agency"].value["topLevelAgencyName"] == "Dept of Test"
+
+        assert "assistanceListing" in result.custom_fields
+        assert len(result.custom_fields["assistanceListing"].value) == 1
+        assert result.custom_fields["assistanceListing"].value[0]["assistanceListingNumber"] == 1234
+        assert (
+            result.custom_fields["assistanceListing"].value[0]["programTitle"] == "Title of Program"
+        )
+
+        assert "agencyContact" in result.custom_fields
+        assert (
+            result.custom_fields["agencyContact"].value["description"]
+            == "Contact the grants office for questions"
+        )
+        assert (
+            result.custom_fields["agencyContact"].value["emailAddress"] == "grants@test-agency.gov"
+        )
+        assert (
+            result.custom_fields["agencyContact"].value["emailDescription"] == "Grants Office Email"
+        )
+
+        assert "additionalInfo" in result.custom_fields
+        assert (
+            result.custom_fields["additionalInfo"].value["url"] == "https://example.com/opportunity"
+        )
+        assert (
+            result.custom_fields["additionalInfo"].value["description"]
+            == "Additional opportunity information"
+        )
+
+        assert "fiscalYear" in result.custom_fields
+        assert result.custom_fields["fiscalYear"].value == 2024
+
+        assert "costSharing" in result.custom_fields
+        assert result.custom_fields["costSharing"].value is False
+
+        assert "attachments" in result.custom_fields
+        assert len(result.custom_fields["attachments"].value) == 1
+        attachment = result.custom_fields["attachments"].value[0]
+        assert attachment["downloadUrl"] == "https://example.com/opportunity"
+        assert attachment["name"] == "nofo.pdf"
+        assert attachment["description"] == "Notice of Funding Opportunity"
+        assert attachment["sizeInBytes"] == 204800
+        assert attachment["mimeType"] == "application/pdf"
 
     def test_url_validation_and_fixing(self):
         """Test that URLs are properly validated and fixed."""
@@ -166,6 +265,37 @@ class TestTransformation:
                     self.updated_at = datetime(
                         2024, 1, 1, 12, 0, 0
                     )  # Changed from date to datetime
+                    self.legacy_opportunity_id = 12345
+                    self.opportunity_number = "TEST-2024-001"
+                    self.category = "Discretionary"
+                    self.agency_code = "A2345"
+                    self.agency_name = "Testing Dept"
+                    self.top_level_agency_name = "Testing Top Level Agency"
+                    self.opportunity_assistance_listings = [
+                        type(
+                            "MockAssistanceListing",
+                            (),
+                            {
+                                "assistance_listing_number": "93.045",
+                                "program_title": "Test Program",
+                            },
+                        )()
+                    ]
+                    self.opportunity_attachments = [
+                        type(
+                            "MockAttachment",
+                            (),
+                            {
+                                "download_path": "https://example.com/opportunity",
+                                "file_name": "nofo.pdf",
+                                "file_description": "Notice of Funding Opportunity",
+                                "file_size_bytes": 102400,
+                                "mime_type": "application/pdf",
+                                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                                "updated_at": datetime(2024, 1, 1, 12, 0, 0),
+                            },
+                        )()
+                    ]
                     self.current_opportunity_summary = type(
                         "MockSummary",
                         (),
@@ -174,13 +304,19 @@ class TestTransformation:
                                 "MockOppSummary",
                                 (),
                                 {
-                                    "summary_description": "Test",
-                                    "post_date": None,
-                                    "close_date": None,
-                                    "estimated_total_program_funding": None,
-                                    "award_ceiling": None,
-                                    "award_floor": None,
-                                    "additional_info_url": None,
+                                    "summary_description": "Test summary description",
+                                    "post_date": date(2024, 1, 1),
+                                    "close_date": date(2024, 12, 31),
+                                    "estimated_total_program_funding": 500000,
+                                    "award_ceiling": 100000,
+                                    "award_floor": 5000,
+                                    "additional_info_url": "https://example.com/opportunity",
+                                    "additional_info_url_description": "Grant program details",
+                                    "agency_contact_description": "Contact the program office",
+                                    "agency_email_address": "example@test.gov",
+                                    "agency_email_address_description": "Program Office Email",
+                                    "fiscal_year": 2024,
+                                    "is_cost_sharing": False,
                                     "created_at": datetime(2024, 1, 1, 12, 0, 0),
                                     "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                                 },
@@ -208,6 +344,37 @@ class TestTransformation:
                 self.updated_at = datetime(
                     2024, 1, 1, 12, 0, 0
                 )  # Provide a default datetime instead of None
+                self.legacy_opportunity_id = 67890
+                self.opportunity_number = "2024-010"
+                self.category = "Mandatory"
+                self.agency_code = "A2345"
+                self.agency_name = "Testing Agency"
+                self.top_level_agency_name = "Testing top level agency"
+                self.opportunity_assistance_listings = [
+                    type(
+                        "MockAssistanceListing",
+                        (),
+                        {
+                            "assistance_listing_number": "10.557",
+                            "program_title": "Special Supplemental Nutrition Program",
+                        },
+                    )()
+                ]
+                self.opportunity_attachments = [
+                    type(
+                        "MockAttachment",
+                        (),
+                        {
+                            "download_path": "https://example.com/opportunity",
+                            "file_name": "synopsis.pdf",
+                            "file_description": "Opportunity Synopsis",
+                            "file_size_bytes": 51200,
+                            "mime_type": "application/pdf",
+                            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                            "updated_at": datetime(2024, 1, 1, 12, 0, 0),
+                        },
+                    )()
+                ]
                 self.current_opportunity_summary = None
                 self.summary = None
 
@@ -242,6 +409,37 @@ class TestTransformation:
                 self.opportunity_status = type("MockStatus", (), {"value": "posted"})()
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
                 self.updated_at = datetime(2024, 1, 2, 12, 0, 0)  # Changed from date to datetime
+                self.legacy_opportunity_id = 11111
+                self.opportunity_number = "2024-050"
+                self.category = "Discretionary"
+                self.agency_code = "A1234"
+                self.agency_name = "Testing Agency"
+                self.top_level_agency_name = "Testing Top Level Agency"
+                self.opportunity_assistance_listings = [
+                    type(
+                        "MockAssistanceListing",
+                        (),
+                        {
+                            "assistance_listing_number": "47.049",
+                            "program_title": "Mathematical and Physical Sciences",
+                        },
+                    )()
+                ]
+                self.opportunity_attachments = [
+                    type(
+                        "MockAttachment",
+                        (),
+                        {
+                            "download_path": "https://example.com/opportunity",
+                            "file_name": "solicitation.pdf",
+                            "file_description": "Grant Solicitation",
+                            "file_size_bytes": 307200,
+                            "mime_type": "application/pdf",
+                            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+                        },
+                    )()
+                ]
                 self.current_opportunity_summary = type(
                     "MockSummary",
                     (),
@@ -257,6 +455,12 @@ class TestTransformation:
                                 "award_ceiling": None,
                                 "award_floor": 10000,
                                 "additional_info_url": None,
+                                "additional_info_url_description": None,
+                                "agency_contact_description": "Contact the NSF program office",
+                                "agency_email_address": "example@test.gov",
+                                "agency_email_address_description": "NSF Program Office",
+                                "fiscal_year": 2024,
+                                "is_cost_sharing": True,
                                 "created_at": datetime(2024, 1, 3, 12, 0, 0),
                                 "updated_at": datetime(2024, 1, 4, 12, 0, 0),
                             },
@@ -285,6 +489,37 @@ class TestTransformation:
                 self.opportunity_status = type("MockStatus", (), {"value": "unknown_status"})()
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
                 self.updated_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
+                self.legacy_opportunity_id = 22222
+                self.opportunity_number = "2024-007"
+                self.category = "Discretionary"
+                self.agency_code = "A123"
+                self.agency_name = "Dept of Testing"
+                self.top_level_agency_name = "Top Level Testing Dept"
+                self.opportunity_assistance_listings = [
+                    type(
+                        "MockAssistanceListing",
+                        (),
+                        {
+                            "assistance_listing_number": "14.218",
+                            "program_title": "Community Development Block Grants",
+                        },
+                    )()
+                ]
+                self.opportunity_attachments = [
+                    type(
+                        "MockAttachment",
+                        (),
+                        {
+                            "download_path": "https://example.com/opportunity",
+                            "file_name": "announcement.pdf",
+                            "file_description": "Grant Announcement",
+                            "file_size_bytes": 153600,
+                            "mime_type": "application/pdf",
+                            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                            "updated_at": datetime(2024, 1, 1, 12, 0, 0),
+                        },
+                    )()
+                ]
                 self.current_opportunity_summary = type(
                     "MockSummary",
                     (),
@@ -293,13 +528,19 @@ class TestTransformation:
                             "MockOppSummary",
                             (),
                             {
-                                "summary_description": "Test",
-                                "post_date": None,
-                                "close_date": None,
-                                "estimated_total_program_funding": None,
-                                "award_ceiling": None,
-                                "award_floor": None,
-                                "additional_info_url": None,
+                                "summary_description": "Test summary for unknown status",
+                                "post_date": date(2024, 3, 1),
+                                "close_date": date(2024, 9, 30),
+                                "estimated_total_program_funding": 750000,
+                                "award_ceiling": 250000,
+                                "award_floor": 25000,
+                                "additional_info_url": "https://example.com/opportunity",
+                                "additional_info_url_description": "Example",
+                                "agency_contact_description": "Example Program Office",
+                                "agency_email_address": "test@example.gov",
+                                "agency_email_address_description": "Example Test Email",
+                                "fiscal_year": 2024,
+                                "is_cost_sharing": False,
                                 "created_at": datetime(2024, 1, 1, 12, 0, 0),
                                 "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                             },
@@ -323,6 +564,37 @@ class TestTransformation:
                 self.opportunity_status = type("MockStatus", (), {"value": "posted"})()
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)
                 self.updated_at = datetime(2024, 1, 2, 12, 0, 0)
+                self.legacy_opportunity_id = 33333
+                self.opportunity_number = "2024-NNH24ZDA"
+                self.category = "Discretionary"
+                self.agency_code = "TST"
+                self.agency_name = "Testing Agency"
+                self.top_level_agency_name = "Top Level Testing Agency"
+                self.opportunity_assistance_listings = [
+                    type(
+                        "MockAssistanceListing",
+                        (),
+                        {
+                            "assistance_listing_number": "43.001",
+                            "program_title": "Science",
+                        },
+                    )()
+                ]
+                self.opportunity_attachments = [
+                    type(
+                        "MockAttachment",
+                        (),
+                        {
+                            "download_path": "https://example.com/opportunity",
+                            "file_name": "solicitation.pdf",
+                            "file_description": "Testing Research Solicitation",
+                            "file_size_bytes": 409600,
+                            "mime_type": "application/pdf",
+                            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+                        },
+                    )()
+                ]
                 self.current_opportunity_summary = type(
                     "MockSummary",
                     (),
@@ -338,6 +610,12 @@ class TestTransformation:
                                 "award_ceiling": 500000,
                                 "award_floor": 10000,
                                 "additional_info_url": "sam.gov",  # URL without protocol
+                                "additional_info_url_description": "SAM.gov Listing",
+                                "agency_contact_description": "Testing contact description",
+                                "agency_email_address": "example@test.gov",
+                                "agency_email_address_description": "Test Example Email",
+                                "fiscal_year": 2024,
+                                "is_cost_sharing": False,
                                 "created_at": datetime(2024, 1, 1, 12, 0, 0),
                                 "updated_at": datetime(2024, 1, 1, 12, 0, 0),
                             },
@@ -791,3 +1069,90 @@ class TestTransformation:
             and invalid_url in record.message
             for record in caplog.records
         )
+
+    def test_populate_custom_fields(self):
+        """Test that populate_custom_fields correctly maps all fields from opp_data."""
+        opp_data = {
+            "legacy_opportunity_id": 99001,
+            "opportunity_number": "HHS-2024-001",
+            "category": "Discretionary",
+            "agency_code": "HHS",
+            "agency_name": "Dept of Health and Human Services",
+            "top_level_agency_name": "HHS",
+            "opportunity_assistance_listings": [
+                {"assistance_listing_number": "93.001", "program_title": "Health Research"},
+            ],
+            "opportunity_attachments": [
+                {
+                    "download_path": "https://example.com/nofo.pdf",
+                    "file_name": "nofo.pdf",
+                    "file_description": "Notice of Funding Opportunity",
+                    "file_size_bytes": 102400,
+                    "mime_type": "application/pdf",
+                    "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                    "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+                }
+            ],
+            "summary": {
+                "agency_contact_description": "Contact the grants office",
+                "agency_email_address": "grants@hhs.gov",
+                "agency_email_address_description": "Grants Office Email",
+                "additional_info_url": "https://hhs.gov/grants",
+                "additional_info_url_description": "More info",
+                "fiscal_year": 2024,
+                "is_cost_sharing": False,
+            },
+        }
+
+        result = populate_custom_fields(opp_data)
+
+        assert result is not None
+
+        assert result["legacyId"].field_type == CustomFieldType.INTEGER
+        assert result["legacyId"].value == 99001
+
+        assert result["federalOpportunityNumber"].field_type == CustomFieldType.STRING
+        assert result["federalOpportunityNumber"].value == "HHS-2024-001"
+
+        assert result["category"].field_type == CustomFieldType.STRING
+        assert result["category"].value == "Discretionary"
+
+        assert result["agency"].field_type == CustomFieldType.OBJECT
+        assert result["agency"].value == {
+            "agencyCode": "HHS",
+            "agencyName": "Dept of Health and Human Services",
+            "topLevelAgencyName": "HHS",
+        }
+
+        assert result["assistanceListing"].field_type == CustomFieldType.ARRAY
+        assert result["assistanceListing"].value == [
+            {"assistanceListingNumber": "93.001", "programTitle": "Health Research"}
+        ]
+
+        assert result["agencyContact"].field_type == CustomFieldType.OBJECT
+        assert result["agencyContact"].value == {
+            "description": "Contact the grants office",
+            "emailAddress": "grants@hhs.gov",
+            "emailDescription": "Grants Office Email",
+        }
+
+        assert result["additionalInfo"].field_type == CustomFieldType.OBJECT
+        assert result["additionalInfo"].value == {
+            "url": "https://hhs.gov/grants",
+            "description": "More info",
+        }
+
+        assert result["fiscalYear"].field_type == CustomFieldType.NUMBER
+        assert result["fiscalYear"].value == 2024
+
+        assert result["costSharing"].field_type == CustomFieldType.BOOLEAN
+        assert result["costSharing"].value is False
+
+        assert result["attachments"].field_type == CustomFieldType.ARRAY
+        assert len(result["attachments"].value) == 1
+        attachment = result["attachments"].value[0]
+        assert attachment["downloadUrl"] == "https://example.com/nofo.pdf"
+        assert attachment["name"] == "nofo.pdf"
+        assert attachment["description"] == "Notice of Funding Opportunity"
+        assert attachment["sizeInBytes"] == 102400
+        assert attachment["mimeType"] == "application/pdf"

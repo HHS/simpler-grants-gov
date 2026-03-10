@@ -4,6 +4,8 @@ import logging
 from datetime import date, datetime
 
 from common_grants_sdk.schemas.pydantic import (
+    CustomField,
+    CustomFieldType,
     FilterInfo,
     Money,
     MoneyRangeFilter,
@@ -194,6 +196,19 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
         "opportunity_id": v1_opportunity.opportunity_id,
         "opportunity_title": v1_opportunity.opportunity_title or "Untitled Opportunity",
         "opportunity_status": v1_opportunity.opportunity_status,
+        "legacy_opportunity_id": v1_opportunity.legacy_opportunity_id,
+        "opportunity_number": v1_opportunity.opportunity_number,
+        "category": v1_opportunity.category,
+        "agency_code": v1_opportunity.agency_code,
+        "agency_name": v1_opportunity.agency_name,
+        "top_level_agency_name": v1_opportunity.top_level_agency_name,
+        "opportunity_assistance_listings": [
+            {
+                "assistance_listing_number": listing.assistance_listing_number,
+                "program_title": listing.program_title,
+            }
+            for listing in v1_opportunity.opportunity_assistance_listings
+        ],
         "created_at": v1_opportunity.created_at,
         "updated_at": v1_opportunity.updated_at,
         "summmary": {},
@@ -209,9 +224,28 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
             "award_ceiling": v1_opportunity.summary.award_ceiling,
             "award_floor": v1_opportunity.summary.award_floor,
             "additional_info_url": v1_opportunity.summary.additional_info_url,
+            "additional_info_url_description": v1_opportunity.summary.additional_info_url_description,
+            "agency_contact_description": v1_opportunity.summary.agency_contact_description,
+            "agency_email_address": v1_opportunity.summary.agency_email_address,
+            "agency_email_address_description": v1_opportunity.summary.agency_email_address_description,
+            "fiscal_year": v1_opportunity.summary.fiscal_year,
+            "is_cost_sharing": v1_opportunity.summary.is_cost_sharing,
             "created_at": v1_opportunity.summary.created_at,
             "updated_at": v1_opportunity.summary.updated_at,
         }
+
+    opp_data["opportunity_attachments"] = [
+        {
+            "download_path": attachment.download_path,
+            "file_name": attachment.file_name,
+            "file_description": attachment.file_description,
+            "file_size_bytes": attachment.file_size_bytes,
+            "mime_type": attachment.mime_type,
+            "created_at": attachment.created_at,
+            "updated_at": attachment.updated_at,
+        }
+        for attachment in v1_opportunity.opportunity_attachments
+    ]
 
     return transform_search_result_to_cg(opp_data)
 
@@ -295,7 +329,7 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
                 minAwardAmount=min_award_money,
             ),
             source=validate_url(summary.get("additional_info_url")),
-            custom_fields={},
+            customFields=populate_custom_fields(opp_data),
             createdAt=summary.get("created_at") or datetime_util.utcnow(),
             lastModifiedAt=summary.get("updated_at") or datetime_util.utcnow(),
         )
@@ -307,6 +341,152 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
                 "opportunity_id": opportunity_id,
             },
         )
+        return None
+
+
+def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
+    """
+    Helper function to assemble custom fields from the data and pass them back as part of the response.
+
+        Args:
+            opp_data: Opportunity data from the SGG database
+
+        Returns:
+            custom_fields: A dict with the values recovered from the input and stored in the appropriate field
+    """
+
+    custom_fields: dict[str, CustomField] = {}
+    summary = opp_data.get("summary")
+
+    attachments = opp_data.get("opportunity_attachments")
+    if attachments:
+        attachment_values = [
+            {
+                "downloadUrl": attachment.get("download_path"),
+                "name": attachment.get("file_name"),
+                "description": attachment.get("file_description"),
+                "sizeInBytes": attachment.get("file_size_bytes"),
+                "mimeType": attachment.get("mime_type"),
+                "createdAt": attachment.get("created_at"),
+                "lastModifiedAt": attachment.get("updated_at"),
+            }
+            for attachment in attachments
+        ]
+        custom_fields["attachments"] = CustomField(
+            name="attachments",
+            fieldType=CustomFieldType.ARRAY,
+            value=attachment_values,
+            description="Attachments such as NOFOs and supplemental documents for the opportunity",
+        )
+
+    legacy_opportunity_id = opp_data.get("legacy_opportunity_id")
+    if legacy_opportunity_id is not None:
+        custom_fields["legacyId"] = CustomField(
+            name="legacyId",
+            fieldType=CustomFieldType.INTEGER,
+            value=legacy_opportunity_id,
+            description="An integer ID for the opportunity, needed for compatibility with legacy systems",
+        )
+
+    federal_opportunity_number = opp_data.get("opportunity_number")
+    if federal_opportunity_number is not None:
+        custom_fields["federalOpportunityNumber"] = CustomField(
+            name="federalOpportunityNumber",
+            fieldType=CustomFieldType.STRING,
+            value=federal_opportunity_number,
+            description="The federal opportunity number assigned to this grant opportunity",
+        )
+
+    listings = opp_data.get("opportunity_assistance_listings")
+    if listings:
+        listing_values = [
+            {
+                "assistanceListingNumber": listing.get("assistance_listing_number"),
+                "programTitle": listing.get("program_title"),
+            }
+            for listing in listings
+        ]
+        custom_fields["assistanceListing"] = CustomField(
+            name="assistanceListing",
+            fieldType=CustomFieldType.ARRAY,
+            value=listing_values,
+            description="The assistance listing number and program title for this opportunity",
+        )
+
+    category = opp_data.get("category")
+    if category is not None:
+        custom_fields["category"] = CustomField(
+            name="category",
+            fieldType=CustomFieldType.STRING,
+            value=str(category),
+            description="The category type of the grant opportunity",
+        )
+
+    agency = opp_data.get("agency_code")
+    if agency is not None:
+        custom_fields["agency"] = CustomField(
+            name="agency",
+            fieldType=CustomFieldType.OBJECT,
+            value={
+                "agencyCode": opp_data.get("agency_code"),
+                "agencyName": opp_data.get("agency_name"),
+                "topLevelAgencyName": opp_data.get("top_level_agency_name"),
+            },
+            description="Information about the agency offering this opportunity",
+        )
+
+    if summary:
+        agency_contact_description = summary.get("agency_contact_description")
+        agency_email_address = summary.get("agency_email_address")
+        agency_email_address_description = summary.get("agency_email_address_description")
+        if any(
+            [agency_contact_description, agency_email_address, agency_email_address_description]
+        ):
+            custom_fields["agencyContact"] = CustomField(
+                name="agencyContact",
+                fieldType=CustomFieldType.OBJECT,
+                value={
+                    "description": agency_contact_description,
+                    "emailAddress": agency_email_address,
+                    "emailDescription": agency_email_address_description,
+                },
+                description="Contact information for the agency managing this opportunity",
+            )
+
+        additional_info_url = summary.get("additional_info_url")
+        additional_info_url_description = summary.get("additional_info_url_description")
+        if additional_info_url is not None:
+            custom_fields["additionalInfo"] = CustomField(
+                name="additionalInfo",
+                fieldType=CustomFieldType.OBJECT,
+                value={
+                    "url": additional_info_url,
+                    "description": additional_info_url_description,
+                },
+                description="URL and description for additional information about the opportunity",
+            )
+
+        fiscal_year = summary.get("fiscal_year")
+        if fiscal_year is not None:
+            custom_fields["fiscalYear"] = CustomField(
+                name="fiscalYear",
+                fieldType=CustomFieldType.NUMBER,
+                value=fiscal_year,
+                description="The fiscal year associated with this opportunity",
+            )
+
+        is_cost_sharing = summary.get("is_cost_sharing")
+        if is_cost_sharing is not None:
+            custom_fields["costSharing"] = CustomField(
+                name="costSharing",
+                fieldType=CustomFieldType.BOOLEAN,
+                value=is_cost_sharing,
+                description="Whether cost sharing or matching funds are required for this opportunity",
+            )
+
+    if len(custom_fields) > 0:
+        return custom_fields
+    else:
         return None
 
 
