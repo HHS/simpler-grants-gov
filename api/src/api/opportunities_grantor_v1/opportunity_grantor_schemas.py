@@ -1,3 +1,5 @@
+from marshmallow import ValidationError, validates_schema
+
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.opportunities_v1.opportunity_schemas import (
     OpportunityAttachmentV1Schema,
@@ -5,9 +7,19 @@ from src.api.opportunities_v1.opportunity_schemas import (
     OpportunityV1Schema,
 )
 from src.api.schemas.extension import Schema, fields, validators
-from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.constants.lookup_constants import OpportunityCategory
+from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
+from src.api.schemas.response_schema import (
+    AbstractResponseSchema,
+    PaginationMixinSchema,
+)
+from src.constants.lookup_constants import (
+    ApplicantType,
+    FundingCategory,
+    FundingInstrument,
+    OpportunityCategory,
+)
 from src.pagination.pagination_schema import generate_pagination_schema
+from src.validation.validation_constants import ValidationErrorType
 
 
 class OpportunityCreateRequestSchema(Schema):
@@ -218,3 +230,125 @@ class OpportunityListResponseSchema(AbstractResponseSchema, PaginationMixinSchem
         fields.Nested(OpportunityGrantorSchema),
         metadata={"description": "List of opportunities"},
     )
+
+
+class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
+    is_forecast = fields.Boolean(
+        required=True,
+        metadata={"description": "Whether the opportunity is forecasted", "example": False},
+    )
+
+    summary_description = fields.String(
+        required=True,
+        validate=validators.Length(max=18000),
+        metadata={"description": "Opportunity summary", "example": "This opportunity..."},
+    )
+
+    is_cost_sharing = fields.Boolean(required=True)
+
+    post_date = fields.Date(required=True)
+
+    expected_number_of_awards = fields.Integer(
+        required=False,
+        validate=validators.Range(min=0, max=999_999_999_999_999),
+    )
+
+    estimated_total_program_funding = fields.Integer(
+        required=False,
+        validate=validators.Range(min=0, max=999_999_999_999_999),
+    )
+
+    award_floor = fields.Integer(
+        required=True,
+        validate=validators.Range(min=0, max=999_999_999_999_999),
+    )
+
+    award_ceiling = fields.Integer(
+        required=True,
+        validate=validators.Range(min=0, max=999_999_999_999_999),
+    )
+
+    additional_info_url = fields.String(
+        required=False,
+        validate=validators.Length(max=250),
+    )
+
+    additional_info_url_description = fields.String(
+        required=False,
+        validate=validators.Length(max=250),
+    )
+
+    funding_categories = fields.List(
+        fields.Enum(FundingCategory),
+        required=True,
+        validate=validators.Length(min=1),
+    )
+
+    funding_category_description = fields.String(
+        required=False,
+        validate=validators.Length(max=2500),
+    )
+
+    funding_instruments = fields.List(
+        fields.Enum(FundingInstrument),
+        required=True,
+        validate=validators.Length(min=1),
+    )
+
+    applicant_types = fields.List(
+        fields.Enum(ApplicantType),
+        required=True,
+        validate=validators.Length(min=1),
+    )
+
+    applicant_eligibility_description = fields.String(
+        required=False,
+        validate=validators.Length(max=4000),
+    )
+
+    agency_contact_description = fields.String(
+        required=True,
+        validate=validators.Length(max=1000),
+    )
+
+    agency_email_address = fields.String(
+        required=True,
+        validate=validators.Length(max=130),
+    )
+
+    agency_email_address_description = fields.String(
+        required=True,
+        validate=validators.Length(max=108),
+    )
+
+    @validates_schema
+    def validate_award_values(self, data: dict, **kwargs: dict) -> None:
+        """Validate that award floor is less than or equal to award ceiling"""
+        if data.get("award_floor") is not None and data.get("award_ceiling") is not None:
+            if data["award_floor"] > data["award_ceiling"]:
+                raise ValidationError(
+                    [
+                        MarshmallowErrorContainer(
+                            ValidationErrorType.INVALID,
+                            "Award floor must be less than or equal to award ceiling",
+                        )
+                    ]
+                )
+
+    @validates_schema
+    def validate_dates(self, data: dict, **kwargs: dict) -> None:
+        """Validate that post date is less than or equal to close date"""
+        if data.get("post_date") is not None and data.get("close_date") is not None:
+            if data["post_date"] > data["close_date"]:
+                raise ValidationError(
+                    [
+                        MarshmallowErrorContainer(
+                            ValidationErrorType.INVALID,
+                            "Post date must be less than or equal to close date",
+                        )
+                    ]
+                )
+
+
+class OpportunitySummaryCreateResponseV1Schema(AbstractResponseSchema):
+    data = fields.Nested(OpportunitySummaryV1Schema())
