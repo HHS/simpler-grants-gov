@@ -1,7 +1,3 @@
-import clsx from "clsx";
-import { environment } from "src/constants/environments";
-
-import { Suspense } from "react";
 import {
   Breadcrumb,
   BreadcrumbBar,
@@ -32,8 +28,10 @@ const microdata = {
 
 const Breadcrumbs = ({
   breadcrumbList,
+  className,
 }: {
   breadcrumbList: Breadcrumb[];
+  className?: string;
 }) => {
   const breadcrumArray = breadcrumbList.map((breadcrumbInfo, i) => {
     return (
@@ -63,6 +61,7 @@ const Breadcrumbs = ({
     <BreadcrumbBar
       listProps={{ ...microdata.ol }}
       data-testid="breadcrumb"
+      className={className}
     >
       {breadcrumArray}
     </BreadcrumbBar>
