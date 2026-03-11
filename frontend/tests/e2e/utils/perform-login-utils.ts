@@ -32,9 +32,9 @@ async function waitForFreshTotpWindow(page: Page): Promise<void> {
   const secondsRemaining =
     TOTP_WINDOW_SECONDS - (Math.floor(Date.now() / 1000) % TOTP_WINDOW_SECONDS);
   if (secondsRemaining <= TOTP_SAFE_THRESHOLD_SECONDS) {
-    console.log(
-      `waitForFreshTotpWindow: ${secondsRemaining}s left in TOTP window — waiting ${secondsRemaining + 1}s for next window`,
-    );
+    // console.log(
+    //   `waitForFreshTotpWindow: ${secondsRemaining}s left in TOTP window — waiting ${secondsRemaining + 1}s for next window`,
+    // );
     await page.waitForTimeout((secondsRemaining + 1) * 1000);
   }
 }
@@ -164,13 +164,13 @@ export const performStagingLogin = async (
     'button:has-text("Sign out"), a:has-text("Sign out")',
   );
   if (await existingSignOut.isVisible({ timeout: 3000 }).catch(() => false)) {
-    // console.warn("performStagingLogin: already logged in, skipping login flow");
+    // console.log("performStagingLogin: already logged in, skipping login flow");
     return existingSignOut;
   }
 
   const signInReady = await clickSignIn(page);
   if (!signInReady) {
-    // console.error("unable to access login gov sign in");
+    console.error("unable to access login gov sign in");
     throw new Error("unable to access login gov sign in");
   }
   await fillSignInForm(page);

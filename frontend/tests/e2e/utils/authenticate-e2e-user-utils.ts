@@ -4,9 +4,10 @@
  * - Local: spoofs a session using loginUtils.ts with a fake JWT cookie.
  * - Staging (standalone run): performs a real login with credentials and MFA
  *   using perform-login-utils.ts.
- * - Staging (full suite run): if a storageState session was injected via
- *   playwright.config.ts (setup project), the user is already authenticated
- *   and the full login flow is skipped automatically.
+ * - Staging (full suite / CI run): if the user is already logged in (session
+ *   persisted from the previous test because --workers=1 reuses the browser,
+ *   or storageState was injected via playwright.config.ts), the full MFA login
+ *   flow is skipped automatically.
  *
  * This means tests can be run individually or as part of the full suite
  * without any changes — authentication is handled correctly in both cases.
@@ -39,33 +40,36 @@ export async function authenticateE2eUser(
   } else if (targetEnv === "staging") {
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
 
-    // If storageState was injected by the setup project in playwright.config.ts,
-    // the session cookie is already present and the user is logged in.
-    // Skip the full MFA login flow in that case.
-    const signOutButton = page.locator(
+    // Check whether the user is already logged in before attempting MFA login.
+    // This covers two cases:
+    //   1. CI / full suite run with --workers=1: the browser is reused across
+    //      tests so the session from the previous test is still active.
+    //   2. storageState injected via the setup project in playwright.config.ts.
+    //
+    // Use a generous timeout — CI page hydration is slower than local, and the
+    // nav Sign Out button may take several seconds to appear after domcontentloaded.
+    const signOutLocator = page.locator(
       'button:has-text("Sign out"), a:has-text("Sign out")',
     );
-    const isAlreadyLoggedIn = await signOutButton
-      .isVisible({ timeout: 5000 })
+    const isAlreadyLoggedIn = await signOutLocator
+      .isVisible({ timeout: 15000 })
       .catch(() => false);
 
     if (isAlreadyLoggedIn) {
-      // Session was injected via storageState — nothing more to do
-      // console.warn(
-      //   "authenticateE2eUser: session already active, skipping login",
-      // );
+      //  console.log(
+      //    "authenticateE2eUser: session already active, skipping MFA login",
+      //  );
     } else {
-      // Standalone run or session expired — perform full MFA login.
-      // Do NOT clear cookies here: login.gov tracks session state across
-      // the redirect flow and clearing cookies mid-suite can cause
-      // rate-limiting or broken OAuth state.
-      const signOutButton = await performStagingLogin(page, isMobile);
-      if (!signOutButton) {
+      // No active session — perform full MFA login.
+      // Do NOT clear cookies: login.gov tracks OAuth state across the redirect
+      // flow and clearing cookies mid-suite can break the handshake.
+      const freshSignOutButton = await performStagingLogin(page, isMobile);
+      if (!freshSignOutButton) {
         throw new Error(
           "signOutButton was not found after performStagingLogin",
         );
       }
-      await expect(signOutButton).toHaveCount(1, { timeout: 120_000 });
+      await expect(freshSignOutButton).toHaveCount(1, { timeout: 120_000 });
     }
   } else {
     throw new Error(`Unsupported env ${targetEnv}`);

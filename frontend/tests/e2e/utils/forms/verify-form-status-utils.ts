@@ -24,14 +24,16 @@ async function navigateToApplicationPage(
   applicationUrl: string,
 ): Promise<void> {
   if (applicationUrl) {
-    let lastError: Error | undefined;
+    let lastError: Error = new Error(
+      `navigateToApplicationPage: all ${NAVIGATION_RETRIES} attempts failed for ${applicationUrl}`,
+    );
     for (let attempt = 1; attempt <= NAVIGATION_RETRIES; attempt++) {
       try {
         await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
         await page.waitForTimeout(10000);
         return; // success — exit retry loop
       } catch (e) {
-        lastError = e as Error;
+        lastError = e instanceof Error ? e : new Error(String(e));
         console.warn(
           `navigateToApplicationPage: attempt ${attempt}/${NAVIGATION_RETRIES} failed — ${lastError.message}`,
         );
