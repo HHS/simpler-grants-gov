@@ -16,12 +16,17 @@ on:
         type: choice
         options:
           - staging
+  pull_request:
+    paths:
+      - frontend/**
+      - .github/workflows/e2e-staging.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # Runs E2E Staging non auth test by Tag-based exclusion -@auth is excluded
   e2e-tests-no-auth-sharded:
     runs-on: ubuntu-22.04
     strategy:
@@ -49,12 +54,10 @@ jobs:
           report_name_prefix: blob-report-no-auth
           test_command: >-
             npx playwright test --config ./tests/playwright.config.ts --project=Chrome
-            $(find tests/e2e -name "*.spec.ts"
-            ! -path "tests/e2e/apply/failure-path-sf424b.spec.ts"
-            ! -path "tests/e2e/apply/happy-path-application-submission.spec.ts"
-            ! -path "tests/e2e/saved-opportunities.spec.ts"
-            ! -path "tests/e2e/login/login_with_login_gov.spec.ts")
-
+            --grep-invert @auth
+            tests/e2e
+  
+  # Runs E2E Staging auth test by Tag-based inclusion -only @auth is included
   e2e-tests-auth-single-worker:
     runs-on: ubuntu-22.04
 
@@ -77,10 +80,8 @@ jobs:
           report_name_prefix: blob-report-auth
           test_command: >-
             npx playwright test --config ./tests/playwright.config.ts --project=Chrome --workers=1
-            tests/e2e/apply/failure-path-sf424b.spec.ts
-            tests/e2e/apply/happy-path-application-submission.spec.ts
-            tests/e2e/saved-opportunities.spec.ts
-            tests/e2e/login/login_with_login_gov.spec.ts
+            --grep @auth
+            tests/e2e
 
   create-report:
     name: Create Merged Test Report

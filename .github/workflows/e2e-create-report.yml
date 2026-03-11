@@ -45,6 +45,7 @@ jobs:
           path: frontend/all-blob-reports
           # artifact-ids: ${{ inputs.artifact-ids }}
           run-id: ${{ inputs.run_id }}
+          # Merges both auth and no-auth test artifacts
           pattern: blob-report*-shard-*
           merge-multiple: true
 

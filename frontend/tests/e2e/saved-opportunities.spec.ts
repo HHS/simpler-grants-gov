@@ -20,7 +20,8 @@ test("Saved opportunities page shows unauthenticated state if not logged in", as
 });
 
 // will fail when run against staging until after https://github.com/HHS/simpler-grants-gov/issues/7769
-test("Working saved opportunities page link appears in nav when logged in", async ({
+//Added @auth tag to login-dependent tests so workflows can select them automatically.
+test("Working saved opportunities page link appears in nav when logged in @auth", async ({
   page,
   context,
 }, { project }) => {
