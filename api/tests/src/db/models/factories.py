@@ -1662,6 +1662,14 @@ class ApplicationSubmissionFactory(BaseFactory):
         lambda s: f"s3://local-mock-public-bucket/applications/{s.application_id}/submissions/{fake.uuid4()}/submission.zip"
     )
 
+    application_submission_number = factory.LazyAttribute(
+        lambda f: f"{f.application.competition.opportunity.opportunity_number}-{fake.unique.pystr_format(string_format="##???").upper()}"
+    )
+    project_title = factory.Faker("sentence")
+    total_requested_amount = sometimes_none(
+        factory.Faker("pydecimal", left_digits=7, right_digits=2, positive=True)
+    )
+
     @classmethod
     def _build(cls, model_class, *args, **kwargs):
         kwargs.pop("file_contents", None)  # Don't file for build strategy

@@ -1,5 +1,6 @@
 import uuid
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint, and_
@@ -434,6 +435,10 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
         legacy_tracking_number_seq,
         server_default=legacy_tracking_number_seq.next_value(),
     )
+
+    application_submission_number: Mapped[str | None]
+    project_title: Mapped[str | None]
+    total_requested_amount: Mapped[Decimal | None]
 
     # We mostly add this so if we delete a submission, any corresponding
     # workflows are deleted as well.
