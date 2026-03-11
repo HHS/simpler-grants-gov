@@ -252,7 +252,6 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
 
     post_date = fields.Date(
         required=True,
-        allow_none=True,
         metadata={
             "description": "The date the opportunity was posted",
         },
