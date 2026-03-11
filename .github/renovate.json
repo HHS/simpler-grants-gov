@@ -14,7 +14,6 @@
     "dependencies"
   ],
   "branchPrefix": "renovate/",
-  "reviewersFromCodeOwners": true,
   "rangeStrategy": "update-lockfile",
   "timezone": "America/New_York",
   "vulnerabilityAlerts": {
@@ -29,35 +28,73 @@
       "matchFileNames": [
         "api/**"
       ],
-      "groupName": "Api"
+      "groupName": "Api",
+      "reviewers": [
+        "chouinar",
+        "mdragon",
+        "joshtonava",
+        "jakobpederson",
+        "chay-REIsys",
+        "hao10282025-sudo",
+        "kkrug",
+        "dghazvini"
+      ]
     },
     {
       "description": "Group all dependencies from the frontend directory",
       "matchFileNames": [
         "frontend/**"
       ],
-      "groupName": "Frontend"
+      "groupName": "Frontend",
+      "reviewers": [
+        "andycochran",
+        "btabaska",
+        "doug-s-nava",
+        "myduong-navapbc",
+        "ErinPattisonNava",
+        "chay-REIsys",
+        "glenblosser-nava",
+        "nathan-stricker",
+        "dghazvini"
+      ]
     },
     {
       "description": "Group all dependencies from the infra directory",
       "matchFileNames": [
         "infra/**"
       ],
-      "groupName": "Infra"
+      "groupName": "Infra",
+      "reviewers": [
+        "mdragon",
+        "joshtonava",
+        "chouinar",
+        "prasnava",
+        "sean-navapbc"
+      ]
     },
     {
       "description": "Group all dependencies from the analytics directory",
       "matchFileNames": [
         "analytics/**"
       ],
-      "groupName": "Analytics"
+      "groupName": "Analytics",
+      "reviewers": [
+        "widal001"
+      ]
     },
     {
       "description": "Group all dependencies from the .github directory",
       "matchFileNames": [
         ".github/**"
       ],
-      "groupName": "CI/CD"
+      "groupName": "CI/CD",
+      "reviewers": [
+        "mdragon",
+        "joshtonava",
+        "chouinar",
+        "prasnava",
+        "sean-navapbc"
+      ]
     },
     {
       "description": "Group React packages together",
@@ -67,26 +104,70 @@
         "react-dom",
         "@types/react-dom"
       ],
-      "groupName": "React"
+      "groupName": "React",
+      "reviewers": [
+        "andycochran",
+        "btabaska",
+        "doug-s-nava",
+        "myduong-navapbc",
+        "ErinPattisonNava",
+        "chay-REIsys",
+        "glenblosser-nava",
+        "nathan-stricker",
+        "dghazvini"
+      ]
     },
     {
       "description": "Group Storybook packages together",
       "matchPackagePatterns": [
         "storybook"
       ],
-      "groupName": "Storybook"
+      "groupName": "Storybook",
+      "reviewers": [
+        "andycochran",
+        "btabaska",
+        "doug-s-nava",
+        "myduong-navapbc",
+        "ErinPattisonNava",
+        "chay-REIsys",
+        "glenblosser-nava",
+        "nathan-stricker",
+        "dghazvini"
+      ]
     },
     {
       "description": "Group Next.js packages together",
       "matchPackagePatterns": ["next"],
-      "groupName": "Next.js"
+      "groupName": "Next.js",
+      "reviewers": [
+        "andycochran",
+        "btabaska",
+        "doug-s-nava",
+        "myduong-navapbc",
+        "ErinPattisonNava",
+        "chay-REIsys",
+        "glenblosser-nava",
+        "nathan-stricker",
+        "dghazvini"
+      ]
     },
     {
       "description": "Group I18next packages together",
       "matchPackagePatterns": [
         "i18next"
       ],
-      "groupName": "I18next"
+      "groupName": "I18next",
+      "reviewers": [
+        "andycochran",
+        "btabaska",
+        "doug-s-nava",
+        "myduong-navapbc",
+        "ErinPattisonNava",
+        "chay-REIsys",
+        "glenblosser-nava",
+        "nathan-stricker",
+        "dghazvini"
+      ]
     },
     {
       "description": "Group test packages together",
