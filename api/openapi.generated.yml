@@ -8227,6 +8227,20 @@ components:
           type: boolean
           description: Whether the opportunity is forecasted
           example: false
+    SavedOpportunityOrganization:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+          description: The ID of the organization
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the organization
+          example: Department of Health
     SavedOpportunityResponseV1:
       type: object
       properties:
@@ -8256,6 +8270,15 @@ components:
           type:
           - object
           $ref: '#/components/schemas/SavedOpportunitySummaryV1'
+        saved_to_organizations:
+          type: array
+          items:
+            type:
+            - object
+            - 'null'
+            anyOf:
+            - $ref: '#/components/schemas/SavedOpportunityOrganization'
+            - type: 'null'
     UserSavedOpportunitiesResponse:
       type: object
       properties:
