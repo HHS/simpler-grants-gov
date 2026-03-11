@@ -23,7 +23,7 @@ match exactly what you do, it's one way of getting the tools, some have multiple
 
 * Install [xcode-select](https://developer.apple.com/documentation/xcode/installing-the-command-line-tools/) - these are the developer tools needed for most command line tools.
 * Install [Homebrew](https://brew.sh/) - for installing several packages
-* Install [postgres](https://www.postgresql.org/download/macosx/) - Can use brew, make sure to specify the version in our docker-compose (eg. `brew install postgresql@17`)
+* Install [postgres](https://www.postgresql.org/download/macosx/) - Can use brew, make sure to specify the version in our [docker-compose](../../api/docker-compose.yml) (eg. `brew install postgresql@17`)
 * Install [libpq](https://formulae.brew.sh/formula/libpq) - Postgres utils, including one used by a script to verify the DB is ready
 * Install [docker](https://docs.docker.com/engine/install/)
 * Install [poetry](https://python-poetry.org/docs/) - For managing packages
