@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from marshmallow import ValidationError, validates_schema
 
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
@@ -229,7 +231,9 @@ class OpportunityListResponseSchema(AbstractResponseSchema, PaginationMixinSchem
     )
 
 
-class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
+class OpportunitySummaryCreateRequestV1Schema(Schema):
+    """Schema for creating an opportunity summary"""
+
     is_forecast = fields.Boolean(
         required=True,
         metadata={"description": "Whether the opportunity is forecasted", "example": False},
@@ -254,6 +258,32 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
         required=True,
         metadata={
             "description": "The date the opportunity was posted",
+        },
+    )
+
+    close_date = fields.Date(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "The date the opportunity closes",
+        },
+    )
+
+    close_date_description = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Optional details regarding the close date",
+            "example": "Proposals are due earlier than usual.",
+        },
+    )
+
+    archive_date = fields.Date(
+        required=False,
+        allow_none=True,
+        load_default=lambda: date.today() + timedelta(days=30),
+        metadata={
+            "description": "When the opportunity will be archived",
+            "example": (date.today() + timedelta(days=30)).isoformat(),  # 30 days from today
         },
     )
 
@@ -314,6 +344,58 @@ class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryV1Schema):
         metadata={
             "description": "The text to display for the additional_info_url link",
             "example": "Click me for more info",
+        },
+    )
+
+    forecasted_post_date = fields.Date(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Forecasted opportunity only. The date the opportunity is expected to be posted, and transition out of being a forecast"
+        },
+    )
+
+    forecasted_close_date = fields.Date(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Forecasted opportunity only. The date the opportunity is expected to be close once posted."
+        },
+    )
+
+    forecasted_close_date_description = fields.String(
+        required=False,
+        allow_none=True,
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "Forecasted opportunity only. Optional details regarding the forecasted closed date.",
+            "example": "Proposals will probably be due on this date",
+        },
+    )
+
+    forecasted_award_date = fields.Date(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Forecasted opportunity only. The date the grantor plans to award the opportunity."
+        },
+    )
+
+    forecasted_project_start_date = fields.Date(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Forecasted opportunity only. The date the grantor expects the award recipient should start their project"
+        },
+    )
+
+    fiscal_year = fields.Integer(
+        required=False,
+        allow_none=True,
+        validate=validators.Range(min=1900, max=2100),
+        metadata={
+            "description": "Forecasted opportunity only. The fiscal year the project is expected to be funded and launched",
+            "example": 2026,
         },
     )
 

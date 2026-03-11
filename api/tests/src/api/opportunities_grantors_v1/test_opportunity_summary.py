@@ -276,6 +276,9 @@ def test_opportunity_summary_create_schema_validation(
         "expected_number_of_awards": -5,  # Negative value
         "additional_info_url": "https://example.com" * 250,  # Exceeds max length of 250
         "additional_info_url_description": "https://example.com" * 250,  # Exceeds max length of 250
+        "forecasted_close_date_description": "Optional details regarding the forecasted closed date."
+        * 250,  # Exceeds max length of 250
+        "fiscal_year": 2101,  # Outside the range of 1900 - 2100
         "funding_category_description": "a" * 2501,  # Exceeds max length of 2500
         "applicant_eligibility_description": "a" * 4001,  # Exceeds max length of 4000
         "agency_contact_description": "a" * 1500,  # Exceeds max length of 1000
@@ -305,7 +308,9 @@ def test_opportunity_summary_create_schema_validation(
         "expected_number_of_awards",
         "additional_info_url",
         "additional_info_url_description",
+        "forecasted_close_date_description",
         "funding_category_description",
+        "fiscal_year",
         "applicant_eligibility_description",
         "agency_contact_description",
         "agency_email_address",
