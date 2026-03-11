@@ -5,6 +5,11 @@ import playwrightEnv from "tests/e2e/playwright-env";
 
 const { baseUrl } = playwrightEnv;
 
+// Retry constants for transient network errors (e.g. net::ERR_NETWORK_CHANGED)
+// which are common in Codespaces when navigating to staging URLs.
+const NAVIGATION_RETRIES = 3;
+const NAVIGATION_RETRY_DELAY_MS = 3000;
+
 async function selectOptionByLabelSubstring(
   selectLocator: Locator,
   labelSubstring: string,
@@ -54,6 +59,29 @@ async function selectOptionByLabelSubstring(
 }
 
 /**
+ * Navigates to the given URL with retry logic to handle transient network
+ * errors (e.g. net::ERR_NETWORK_CHANGED) common in Codespaces/staging tunnels.
+ */
+async function gotoWithRetry(page: Page, url: string): Promise<void> {
+  let lastError: Error | undefined;
+  for (let attempt = 1; attempt <= NAVIGATION_RETRIES; attempt++) {
+    try {
+      await page.goto(url, { waitUntil: "domcontentloaded" });
+      return; // success
+    } catch (e) {
+      lastError = e as Error;
+      console.warn(
+        `gotoWithRetry: attempt ${attempt}/${NAVIGATION_RETRIES} failed for ${url} — ${lastError.message}`,
+      );
+      if (attempt < NAVIGATION_RETRIES) {
+        await page.waitForTimeout(NAVIGATION_RETRY_DELAY_MS);
+      }
+    }
+  }
+  throw lastError;
+}
+
+/**
  * Creates a new application for the given opportunity.
  * @param page Playwright Page object
  * @param opportunityUrl Opportunity URL (e.g. "/opportunity/abc123")
@@ -64,9 +92,7 @@ export async function createApplication(
   opportunityUrl: string,
   orgLabel: string,
 ) {
-  await page.goto(`${baseUrl}${opportunityUrl}`, {
-    waitUntil: "domcontentloaded",
-  });
+  await gotoWithRetry(page, `${baseUrl}${opportunityUrl}`);
   await page.waitForTimeout(3000);
   const startAppButton = page.getByRole("button", {
     name: /start.*application/i,

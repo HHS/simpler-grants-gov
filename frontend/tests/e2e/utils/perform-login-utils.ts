@@ -17,6 +17,28 @@ if (
 const TIMEOUT_HOME = playwrightEnv.targetEnv === "staging" ? 180000 : 60000;
 const TIMEOUT_MFA = 120000;
 
+// TOTP codes are valid for 30s windows. If we're within this many seconds
+// of a window boundary, wait for the next window before generating a code.
+// This prevents submitting a code that expires before login.gov processes it.
+const TOTP_WINDOW_SECONDS = 30;
+const TOTP_SAFE_THRESHOLD_SECONDS = 5;
+
+/**
+ * Waits until we are safely within a fresh TOTP time window (not within
+ * the last TOTP_SAFE_THRESHOLD_SECONDS seconds of a window expiring).
+ * This avoids submitting a code that login.gov will reject as expired.
+ */
+async function waitForFreshTotpWindow(page: Page): Promise<void> {
+  const secondsRemaining =
+    TOTP_WINDOW_SECONDS - (Math.floor(Date.now() / 1000) % TOTP_WINDOW_SECONDS);
+  if (secondsRemaining <= TOTP_SAFE_THRESHOLD_SECONDS) {
+    console.log(
+      `waitForFreshTotpWindow: ${secondsRemaining}s left in TOTP window — waiting ${secondsRemaining + 1}s for next window`,
+    );
+    await page.waitForTimeout((secondsRemaining + 1) * 1000);
+  }
+}
+
 export const findSignOutButton = async (
   page: Page,
   isMobileProject: boolean,
@@ -44,6 +66,10 @@ export const findSignOutButton = async (
 };
 
 export const generateMfaAndSubmit = async (page: Page, mfaInput: Locator) => {
+  // Wait for a safe TOTP window before generating the code so it doesn't
+  // expire before login.gov processes it.
+  await waitForFreshTotpWindow(page);
+
   const oneTimeCode: string = authenticator.generate(
     playwrightEnv.testUserAuthKey,
   );
@@ -130,12 +156,25 @@ export const performStagingLogin = async (
   if (isMobileProject) {
     await openMobileNav(page);
   }
+
+  // If already logged in, return the sign-out button immediately.
+  // This handles the case where authenticateE2eUser is called on a page
+  // where a session is already active (e.g. storageState was injected).
+  const existingSignOut = page.locator(
+    'button:has-text("Sign out"), a:has-text("Sign out")',
+  );
+  if (await existingSignOut.isVisible({ timeout: 3000 }).catch(() => false)) {
+    // console.warn("performStagingLogin: already logged in, skipping login flow");
+    return existingSignOut;
+  }
+
   const signInReady = await clickSignIn(page);
   if (!signInReady) {
-    console.error("unable to access login gov sign in");
+    // console.error("unable to access login gov sign in");
     throw new Error("unable to access login gov sign in");
   }
   await fillSignInForm(page);
+
   let mfaInput: Locator | undefined;
   for (let attempt = 1; attempt <= 3 && !mfaInput; attempt++) {
     try {
@@ -153,13 +192,31 @@ export const performStagingLogin = async (
   for (let attempt = 1; attempt <= 3 && !signOutButton; attempt++) {
     try {
       await generateMfaAndSubmit(page, mfaInput);
-      signOutButton = await findSignOutButton(page, isMobileProject);
-      if (!signOutButton) {
-        await page.waitForTimeout(TIMEOUT_MFA);
+
+      // Check if login.gov rejected the code (shown as an error on the MFA page)
+      await page.waitForTimeout(2000);
+      const invalidCodeError = page.locator(
+        "text=/invalid|incorrect|try again|new code/i",
+      );
+      const codeWasRejected = await invalidCodeError
+        .isVisible({ timeout: 3000 })
+        .catch(() => false);
+
+      if (codeWasRejected) {
+        console.warn(
+          `performStagingLogin: MFA code rejected on attempt ${attempt} — waiting for next TOTP window`,
+        );
+        // Wait for the next full TOTP window so the next code is guaranteed fresh
+        await page.waitForTimeout(TOTP_WINDOW_SECONDS * 1000);
+        // Re-locate the MFA input (page may have reset it)
+        mfaInput = await locateMfaInput(page);
+        continue; // retry with a new code
       }
+
+      signOutButton = await findSignOutButton(page, isMobileProject);
     } catch (e) {
       if (page.isClosed()) throw e;
-      await page.waitForTimeout(TIMEOUT_MFA);
+      await page.waitForTimeout(3000);
       if (attempt === 3) throw e;
     }
   }

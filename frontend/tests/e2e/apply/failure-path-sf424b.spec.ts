@@ -24,33 +24,37 @@ const sf424bErrors = [
   },
 ];
 
-test("SF-424B error validation - required fields and inline errors @auth", async ({
-  page,
-  context,
-}: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
-  test.setTimeout(300_000); // 5 min timeout
+test(
+  "SF-424B error validation - required fields and inline errors",
+  { tag: "@auth" },
+  async (
+    { page, context }: { page: Page; context: BrowserContext },
+    testInfo: TestInfo,
+  ) => {
+    test.setTimeout(300_000); // 5 min timeout
 
-  const isMobile = testInfo.project.name.match(/[Mm]obile/);
+    const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
-  await authenticateE2eUser(page, context, !!isMobile);
+    await authenticateE2eUser(page, context, !!isMobile);
 
-  await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-  const applicationUrl = page.url();
+    await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
+    const applicationUrl = page.url();
 
-  if (await openForm(page, SF424B_FORM_MATCHER)) {
-    // Do not enter anything and click save
-    await saveForm(page, true); // expect validation errors
+    if (await openForm(page, SF424B_FORM_MATCHER)) {
+      // Do not enter anything and click save
+      await saveForm(page, true); // expect validation errors
 
-    // Checks error alert list at top of form page
-    // Scrolls down and checks inline field errors on form page
-    // Navigates to application landing page
-    // Scrolls down and checks "Some issues found" in form row
-    await verifyFormStatusAfterSave(
-      page,
-      "incomplete",
-      "SF-424B",
-      applicationUrl,
-      sf424bErrors,
-    );
-  }
-});
+      // Checks error alert list at top of form page
+      // Scrolls down and checks inline field errors on form page
+      // Navigates to application landing page
+      // Scrolls down and checks "Some issues found" in form row
+      await verifyFormStatusAfterSave(
+        page,
+        "incomplete",
+        "SF-424B",
+        applicationUrl,
+        sf424bErrors,
+      );
+    }
+  },
+);
