@@ -100,7 +100,7 @@ release-build:
 unit-test:
 	@echo "=> Running unit tests"
 	@echo "============================="
-	$(POETRY) pytest --cov=src
+	$(POETRY) pytest --cov=src ${args}
 
 e2e-test:
 	@echo "=> Running end-to-end tests"
@@ -185,4 +185,3 @@ mb-backup:
 	@echo "====================================================="
 	$(POETRY) analytics metabase backup
 	@echo "====================================================="
-
