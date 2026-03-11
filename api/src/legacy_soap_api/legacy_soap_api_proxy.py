@@ -43,6 +43,10 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     use_soap_jwt = soap_request.headers.get(USE_SOAP_JWT_HEADER_KEY) == "1"
     should_log_response = soap_request.headers.get(LOG_LOCAL_RESPONSE_HEADER_KEY) == "1"
     if use_soap_jwt and soap_auth and soap_auth.certificate.legacy_certificate:
+        logger.info(
+            "soap_client_certificate: sending certificate with jwt",
+            extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_JWT},
+        )
         proxy_headers = {
             S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY: get_soap_jwt_auth_jwt(
                 config, soap_auth.certificate.legacy_certificate
