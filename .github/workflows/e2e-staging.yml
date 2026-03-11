@@ -79,7 +79,7 @@ jobs:
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
           report_name_prefix: blob-report-auth
           test_command: >-
-            npx playwright test --config ./tests/playwright.config.ts --project=Chrome --workers=1
+            npx playwright test --config ./tests/playwright.config.ts --project=Chrome --workers=1 --reporter=list
             --grep @auth
             tests/e2e
 

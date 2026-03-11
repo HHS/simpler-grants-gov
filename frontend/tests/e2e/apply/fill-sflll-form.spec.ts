@@ -24,7 +24,7 @@ test.describe("fill SF-LLL Form", () => {
 
   test.setTimeout(120000);
 
-  test("should fill SFLLL form", async ({ page, context }, testInfo) => {
+  test("should fill SFLLL form", { tag: "@auth" }, async ({ page, context }, testInfo) => {
     try {
       await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
         waitUntil: "load",
