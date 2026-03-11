@@ -95,7 +95,7 @@ function emptySummary() {
 
 async function OpportunityListing({ params }: OpportunityListingProps) {
   const { id } = await params;
-  
+
   let opportunityData = {} as OpportunityDetail;
   let opportunitySaved = false;
   try {
@@ -139,7 +139,6 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
       <ContentLayout
         title={opportunityData.opportunity_title}
         data-testid="opportunity-intro-content"
-        paddingTop={false}
       >
         <div className="display-flex desktop:padding-y-1 padding-y-3">
           <OpportunitySaveUserControl
