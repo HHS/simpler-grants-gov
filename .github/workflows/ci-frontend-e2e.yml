@@ -16,10 +16,10 @@ on:
         description: "print api logs on failure?"
         type: string
   workflow_call:
-  pull_request:
-    paths:
-      - frontend/**
-      - .github/workflows/ci-frontend-e2e.yml
+#  pull_request:
+#    paths:
+#      - frontend/**
+#      - .github/workflows/ci-frontend-e2e.yml
 
 defaults:
   run:
