@@ -124,10 +124,14 @@ export async function createApplication(
   await page.waitForTimeout(3000);
   await page.waitForURL(/\/applications\/[a-f0-9-]+/, { timeout: 60000 });
   await page.waitForLoadState("domcontentloaded");
-  await page.waitForLoadState("networkidle");
+  // Avoid strict networkidle waits on pages with background polling.
+  await page.waitForLoadState("load").catch(() => undefined);
   await page.waitForTimeout(2000);
   const mainContent = page.locator("main");
   await expect(mainContent).toBeVisible();
+  await expect(
+    page.locator(".simpler-application-forms-table").first(),
+  ).toBeVisible({ timeout: 30000 });
   const requiredFormsHeading = page.locator(
     "text=/Required Forms/i, text=/forms required/i",
   );

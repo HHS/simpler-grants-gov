@@ -29,8 +29,8 @@ test.describe("Login.gov based authentication tests", () => {
     !testUserAuthKey;
   test.skip(envMissing, "Login E2E env not configured; skipping spec");
 
-  // --- Test ---
-  test("Login.gov authentication with MFA", async ({
+  // Added @auth tag to login-dependent tests so workflows can select them automatically.
+  test("Login.gov authentication with MFA @auth", async ({
     page,
     context,
   }: {
