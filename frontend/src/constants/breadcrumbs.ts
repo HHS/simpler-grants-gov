@@ -36,7 +36,6 @@ export const SUBSCRIBE_CONFIRMATION_CRUMBS: Breadcrumb[] = [
 ];
 export const UNSUBSCRIBE_CRUMBS: Breadcrumb[] = [HOME, SUBSCRIBE, UNSUBSCRIBE];
 export const SEARCH_CRUMBS: Breadcrumb[] = [HOME, SEARCH];
-export const OPPORTUNITY_CRUMBS: Breadcrumb[] = [HOME, SEARCH];
 export const SAVED_OPPORTUNITIES_CRUMBS: Breadcrumb[] = [
   HOME,
   SAVED_OPPORTUNITIES,
