@@ -147,6 +147,14 @@ class AttachmentTransformer:
             </AttachmentForm_1_2:ATT1File>
         </AttachmentForm_1_2:ATT1>
 
+        When 'file_element' is set in field_config, that name is used instead of '{element_name}File':
+        <Project_Abstract_1_2:ProjectAbstractAddAttachment>
+            <Project_Abstract_1_2:AttachedFile>
+                <att:FileName>...</att:FileName>
+                ...
+            </Project_Abstract_1_2:AttachedFile>
+        </Project_Abstract_1_2:ProjectAbstractAddAttachment>
+
         Example structure without wrapper (type='single'):
         <att:FileName>...</att:FileName>
         <att:MimeType>...</att:MimeType>
@@ -157,28 +165,30 @@ class AttachmentTransformer:
             element_name: Name of the attachment element (e.g., "ATT1")
             attachment_data: Attachment data dictionary
             nsmap: Namespace map
-            field_config: Field configuration containing type information
+            field_config: Field configuration containing type and optional file_element
         """
         # Check if this field requires wrapper elements based on configuration
         uses_wrapper = field_config and field_config.get("type") == "single_with_wrapper"
 
         if uses_wrapper:
-            # Get the default namespace from nsmap
-            default_ns = None
-            for _, uri in nsmap.items():
-                # Look for any namespace in the nsmap (first one is typically the default)
-                if not default_ns:
-                    default_ns = uri
+            # Determine inner element name: config override or default to '{element_name}File'
+            file_element_name = (
+                field_config.get("file_element", f"{element_name}File")
+                if field_config
+                else f"{element_name}File"
+            )
+
+            default_ns = next(iter(nsmap.values()), None) if nsmap else None
 
             # Create the wrapper element (e.g., <ATT1>) in the default namespace
             if default_ns:
                 attachment_elem = lxml_etree.SubElement(parent, f"{{{default_ns}}}{element_name}")
                 file_elem = lxml_etree.SubElement(
-                    attachment_elem, f"{{{default_ns}}}{element_name}File"
+                    attachment_elem, f"{{{default_ns}}}{file_element_name}"
                 )
             else:
                 attachment_elem = lxml_etree.SubElement(parent, element_name)
-                file_elem = lxml_etree.SubElement(attachment_elem, f"{element_name}File")
+                file_elem = lxml_etree.SubElement(attachment_elem, file_element_name)
 
             # Populate the File element with attachment content
             self._populate_attachment_content(file_elem, attachment_data, nsmap)

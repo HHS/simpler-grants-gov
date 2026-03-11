@@ -1772,6 +1772,29 @@ EPA_KEY_CONTACTS_TEST_CASES = [
 ]
 
 
+# Sample test cases for Project Abstract v1.2 validation
+PROJECT_ABSTRACT_TEST_CASES = [
+    {
+        "name": "project_abstract_with_attachment",
+        "json_input": {
+            "attachment": "11111111-1111-1111-1111-111111111111",
+        },
+        "form_name": "Project_Abstract",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/Project_Abstract_1_2-V1.2.xsd",
+        "pretty_print": True,
+        "attachment_mapping": {
+            "11111111-1111-1111-1111-111111111111": {
+                "FileName": "project_abstract.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "project_abstract.pdf",
+                "HashValue": "aeB1+6gdFwih51ijIRn3b8QYn24=",
+                "HashAlgorithm": "SHA-1",
+            }
+        },
+    },
+]
+
+
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
 
@@ -1786,6 +1809,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         + CD511_TEST_CASES
         + GG_LOBBYING_FORM_TEST_CASES
         + PROJECT_ABSTRACT_SUMMARY_TEST_CASES
+        + PROJECT_ABSTRACT_TEST_CASES
         + EPA4700_4_TEST_CASES
         + EPA_KEY_CONTACTS_TEST_CASES
         + ATTACHMENTFORM_TEST_CASES
