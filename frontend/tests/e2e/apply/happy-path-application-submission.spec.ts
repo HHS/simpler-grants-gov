@@ -34,54 +34,71 @@ test.beforeEach(({ page: _ }, testInfo) => {
   }
 });
 
-test("Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL", async ({
-  page,
-  context,
-}: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
-  test.setTimeout(300_000); // 5 min timeout
+test(
+  "Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL",
+  { tag: ["@smoke", "@grantee", "@apply"] },
+  async (
+    { page, context }: { page: Page; context: BrowserContext },
+    testInfo: TestInfo,
+  ) => {
+    test.setTimeout(300_000); // 5 min timeout
 
-  const isMobile = testInfo.project.name.match(/[Mm]obile/);
+    const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
-  await authenticateE2eUser(page, context, !!isMobile);
+    await authenticateE2eUser(page, context, !!isMobile);
 
-  // Call reusable create application function from utils
-  await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-  const applicationUrl = page.url();
+    // Call reusable create application function from utils
+    await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
+    const applicationUrl = page.url();
 
-  if (!(await openForm(page, SF424B_FORM_MATCHER))) {
-    throw new Error(
-      "Could not find or open SF-424B form link on the application forms page",
+    if (!(await openForm(page, SF424B_FORM_MATCHER))) {
+      throw new Error(
+        "Could not find or open SF-424B form link on the application forms page",
+      );
+    }
+
+    // Fill SF-424B form fields using helper
+    await fillSf424bForm(page, "TESTER", testOrgLabel);
+
+    // Save the form using helper
+    await saveForm(page);
+
+    // Verify form status after save
+    await verifyFormStatusAfterSave(page, "complete");
+
+    // Extra wait for page to fully render forms table after navigation
+    await page.waitForTimeout(10000);
+
+    // Select 'No' for including SF-LLL form in submission
+    await selectFormInclusionOption(
+      page,
+      "Disclosure of Lobbying Activities (SF-LLL)",
+      "No",
     );
-  }
 
-  // Fill SF-424B form fields using helper
-  await fillSf424bForm(page, "TESTER", testOrgLabel);
+    // Verify form status after save
+    await verifyFormStatusAfterSave(page, "complete");
 
-  // Save the form using helper
-  await saveForm(page);
+    // On application page — verify form row status/messages
+    await verifyFormStatusOnApplication(
+      page,
+      "complete",
+      "SF-424B",
+      applicationUrl,
+    );
 
-  // Verify form status after save
-  await verifyFormStatusAfterSave(page, "complete");
+    // Extra wait for page to fully render forms table after navigation
+    await page.waitForTimeout(10000);
 
-  // On application page — verify form row status/messages
-  await verifyFormStatusOnApplication(
-    page,
-    "complete",
-    "SF-424B",
-    applicationUrl,
-  );
+    // Select 'No' for including SF-LLL form in submission
+    await selectFormInclusionOption(
+      page,
+      "Disclosure of Lobbying Activities (SF-LLL)",
+      "No",
+    );
 
-  // Extra wait for page to fully render forms table after navigation
-  await page.waitForTimeout(10000);
-
-  // Select 'No' for including SF-LLL form in submission
-  await selectFormInclusionOption(
-    page,
-    "Disclosure of Lobbying Activities (SF-LLL)",
-    "No",
-  );
-
-  // Submit the application and verify success
-  await submitApplicationAndVerify(page);
-  // Application ID is now available in appId variable for further use if needed
-});
+    // Submit the application and verify success
+    await submitApplicationAndVerify(page);
+    // Application ID is now available in appId variable for further use if needed
+  },
+);
