@@ -48,7 +48,7 @@ export function SimplerModal({
   children,
   onKeyDown,
   onClose,
-  isInitiallyOpen,
+  isInitiallyOpen = false,
 }: {
   modalRef: RefObject<ModalRef | null>;
   titleText?: string;

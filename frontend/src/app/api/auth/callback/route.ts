@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     if (
       errorMessage === "Agency users must authenticate using a PIV/CAC card"
     ) {
-      return redirect("/login?piverror=true");
+      return redirect("/login?pivError=true");
     }
     return redirect("/unauthenticated");
   }
