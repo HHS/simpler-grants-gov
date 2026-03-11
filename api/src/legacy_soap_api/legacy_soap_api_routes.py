@@ -76,6 +76,10 @@ def simpler_soap_api_route(
             auth=get_soap_auth(request.headers.get(MTLS_CERT_HEADER_KEY), db_session=db_session),
             operation_name=operation_name,
         )
+        logger.info(
+            "soap_client_certificate: header check",
+            extra={"soap_request_headers": soap_request.headers},
+        )
         if alternate_proxy_response := get_alternate_proxy_response(soap_request):
             soap_proxy_response = alternate_proxy_response
         else:
