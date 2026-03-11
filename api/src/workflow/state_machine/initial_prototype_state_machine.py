@@ -31,11 +31,13 @@ initial_prototype_state_machine_config = WorkflowConfig(
         # Program Officer Approvals
         "receive_program_officer_approval": ApprovalConfig(
             approval_type=ApprovalType.PROGRAM_OFFICER_APPROVAL,
+            approval_state=InitialPrototypeState.PENDING_PROGRAM_OFFICER_APPROVAL,
             required_privileges=[Privilege.PROGRAM_OFFICER_APPROVAL],
         ),
         # Budget Officer Approvals
         "receive_budget_officer_approval": ApprovalConfig(
             approval_type=ApprovalType.BUDGET_OFFICER_APPROVAL,
+            approval_state=InitialPrototypeState.PENDING_BUDGET_OFFICER_APPROVAL,
             required_privileges=[Privilege.BUDGET_OFFICER_APPROVAL],
         ),
     },
