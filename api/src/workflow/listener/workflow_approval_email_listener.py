@@ -26,7 +26,9 @@ Please visit {url} to make this update.
 
 class WorkflowApprovalEmailListener:
     """
-    TODO - docs
+    Listener for state machine transitions that automatically
+    sends emails to approval users whenever a workflow
+    enters into a state that requires approval.
     """
 
     def __init__(self, db_session: db.Session):
