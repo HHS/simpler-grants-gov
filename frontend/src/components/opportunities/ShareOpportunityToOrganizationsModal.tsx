@@ -1,5 +1,7 @@
 "use client";
 
+import { addSavedOpportunityForOrganizationHandler } from "src/app/api/opportunities/[opportunityid]/save-opportunity/handler";
+import { deleteSavedOpportunityForOrganizationHandler } from "src/app/api/opportunities/[opportunityid]/delete-opportunity/handler";
 import { Organization } from "src/types/applicationResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -15,7 +17,30 @@ import {
 
 import { SimplerModal } from "src/components/SimplerModal";
 
+//useclientfetcher to call handler code not the fetcher code addSavedOpportunityForOrganization/deleteSavedOpportunityForOrganization
+//const [isChecked, setIsChecked] = useState(false);
+const makeApiCall = async (checkedStatus) => {
+  console.log("Checkbox is now:", checkedStatus);
+  if (checkedStatus) {
+    console.log("Checkbox is checked, making a call...");
+    addSavedOpportunityForOrganizationHandler();
+  } else {
+    console.log("Checkbox is unchecked, making a call...");
+    deleteSavedOpportunityForOrganizationHandler();
+  }
+};
+
+const handleCheckboxChange = (event) => {
+  const newCheckedState = event.target.checked;
+  //setIsChecked(newCheckedState);
+  makeApiCall(newCheckedState);
+};
+
 const MODAL_ID = "share-opportunity-to-organizations";
+
+//const handleOnChange = () => {
+//  setIsChecked(addSavedOpportunityForOrganization);
+//};
 
 export interface ShareOpportunityToOrganizationsModalProps {
   modalRef: RefObject<ModalRef | null>;
@@ -82,7 +107,7 @@ export function ShareOpportunityToOrganizationsModal({
                     organization.organization_id,
                   )}
                   disabled={isDisabled}
-                  onChange={() => undefined}
+                  onChange={handleCheckboxChange}
                 />
               </li>
             );

@@ -1,0 +1,96 @@
+"server-only";
+
+// import { getSession } from "src/services/auth/session";
+import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
+// import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+
+export const handleSavedOpportunity = async (
+  type: "DELETE" | "POST",
+  token: string,
+  userId: string,
+  opportunityId: string,
+) => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+  const subPath =
+    type === "POST"
+      ? `/organizations/${organizationId}/saved-opportunities`
+      : `/organizations/${organizationId}/saved-opportunities/${opportunityId}`;
+
+  const body =
+    type === "POST"
+      ? {
+          opportunity_id: String(opportunityId),
+        }
+      : {};
+  return fetchUserWithMethod(type)({
+    subPath,
+    additionalHeaders: ssgToken,
+    body,
+  });
+};
+
+export const addSavedOpportunityForOrganization = async ({
+  organizationId,
+}: {
+  organizationId: string;
+}): Promise<ApplicationAddOrganizationApiResponse> => {
+  // const session = await getSession();
+
+  // if (!session || !session.token) {
+  //  throw new UnauthorizedError("No active session");
+  // }
+
+  const additionalHeaders: Record<string, string> = {
+    "X-SGG-Token": session.token,
+  };
+
+  const response = await fetchOrganizationBySavedOpportunities("PUT")({
+    subPath: `/organizations/${organizationId}/saved-opportunities`,
+    additionalHeaders,
+  });
+
+  if (!response.ok) {
+    throw new ApiRequestError(
+      "Error adding organization to saved opportunity",
+      "APIRequestError",
+      response.status,
+    );
+  }
+
+  return (await response.json()) as ApplicationAddOrganizationApiResponse;
+};
+
+export const deleteSavedOpportunityForOrganization = async ({
+  opportunityId,
+  organizationId,
+}: {
+  opportunityId: string;
+  organizationId: string;
+}): Promise<ApplicationAddOrganizationApiResponse> => {
+  // const session = await getSession();
+
+  // if (!session || !session.token) {
+  //   throw new UnauthorizedError("No active session");
+  // }
+
+  const additionalHeaders: Record<string, string> = {
+    "X-SGG-Token": session.token,
+  };
+
+  const response = await fetchOrganizationBySavedOpportunities("DELETE")({
+    subPath: `/organizations/${organizationId}/saved-opportunities/${opportunityId}`,
+    additionalHeaders,
+  });
+
+  if (!response.ok) {
+    throw new ApiRequestError(
+      "Error deleting organization from saved opportunity",
+      "APIRequestError",
+      response.status,
+    );
+  }
+
+  return (await response.json()) as ApplicationAddOrganizationApiResponse;
+};
