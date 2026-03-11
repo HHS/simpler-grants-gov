@@ -30,24 +30,12 @@ test.describe("Login.gov based authentication tests", () => {
   test.skip(envMissing, "Login E2E env not configured; skipping spec");
 
   // Added @auth tag to login-dependent tests so workflows can select them automatically.
-<<<<<<< HEAD
   test(
     "Login.gov authentication with MFA",
     { tag: "@auth" },
     async ({ page, context }: { page: Page; context: BrowserContext }) => {
       const isChrome = !!test.info().project.name.match(/^Chrome/);
       const isMobileProject = !!test.info().project.name.match(/[Mm]obile/);
-=======
-  test("Login.gov authentication with MFA @auth", async ({
-    page,
-    context,
-  }: {
-    page: Page;
-    context: BrowserContext;
-  }) => {
-    const isChrome = !!test.info().project.name.match(/^Chrome/);
-    const isMobileProject = !!test.info().project.name.match(/[Mm]obile/);
->>>>>>> 4eb16fe34 (E2E: tag-based auth split, robust form nav, artifact/report improvements)
 
       // for now MFA is failing if we run this test too frequently, so limiting to one browser until we can figure that out
       if (!isChrome) {
