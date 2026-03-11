@@ -51,6 +51,7 @@ const Footer = () => {
             <Grid
               className="usa-footer__nav border-0"
               tablet={{ col: "auto" }}
+              tabletLg={{ col: 2 }}
               desktop={{ col: 2 }}
             >
               <h3 className="desktop:padding-top-4">{t("explore")}</h3>
