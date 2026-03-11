@@ -78,7 +78,7 @@ def simpler_soap_api_route(
         )
         logger.info(
             "soap_client_certificate: header check",
-            extra={"soap_request_headers": soap_request.headers},
+            extra={"soap_request_headers": soap_request.headers.keys()},
         )
         if alternate_proxy_response := get_alternate_proxy_response(soap_request):
             soap_proxy_response = alternate_proxy_response
