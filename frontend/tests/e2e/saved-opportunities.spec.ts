@@ -19,12 +19,21 @@ test("Saved opportunities page shows unauthenticated state if not logged in", as
 });
 
 // will fail when run against staging until after https://github.com/HHS/simpler-grants-gov/issues/7769
+<<<<<<< HEAD
 // Added @auth tag to login-dependent tests so workflows can select them automatically.
 test(
   "Working saved opportunities page link appears in nav when logged in",
   { tag: "@auth" },
   async ({ page, context }, { project }) => {
     const isMobile = project.name.match(/[Mm]obile/);
+=======
+//Added @auth tag to login-dependent tests so workflows can select them automatically.
+test("Working saved opportunities page link appears in nav when logged in @auth", async ({
+  page,
+  context,
+}, { project }) => {
+  const isMobile = project.name.match(/[Mm]obile/);
+>>>>>>> 4eb16fe34 (E2E: tag-based auth split, robust form nav, artifact/report improvements)
 
     await authenticateE2eUser(page, context, !!isMobile);
 
