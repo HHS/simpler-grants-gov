@@ -2,6 +2,7 @@ import logging
 
 from . import (
     agency_models,
+    award_recommendation_models,
     base,
     competition_models,
     entity_models,
@@ -23,6 +24,7 @@ metadata = base.metadata
 __all__ = [
     "metadata",
     "opportunity_models",
+    "award_recommendation_models",
     "lookup_models",
     "agency_models",
     "user_models",
