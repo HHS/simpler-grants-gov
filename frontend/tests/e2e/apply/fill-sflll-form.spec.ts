@@ -24,30 +24,36 @@ test.describe("fill SF-LLL Form", () => {
 
   test.setTimeout(120000);
 
-  test("should fill SFLLL form", { tag: "@auth" }, async ({ page, context }, testInfo) => {
-    try {
-      await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
-        waitUntil: "load",
-        timeout: 30000,
-      });
+  test(
+    "should fill SFLLL form",
+    { tag: "@auth" },
+    async ({ page, context }, testInfo) => {
+      try {
+        await page.goto(`${baseUrl}${OPPORTUNITY_URL}`, {
+          waitUntil: "load",
+          timeout: 30000,
+        });
 
-      await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
+        await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
-      const sflllData = FORMS_TEST_DATA.sflll;
+        const sflllData = FORMS_TEST_DATA.sflll;
 
-      await fillForm(testInfo, page, {
-        formName: SFLLL_FORM_CONFIG.formName,
-        fields: getSflllFillFields(sflllData),
-        saveButtonTestId: SFLLL_FORM_CONFIG.saveButtonTestId,
-        returnToApplication: false,
-      });
+        await fillForm(testInfo, page, {
+          formName: SFLLL_FORM_CONFIG.formName,
+          fields: getSflllFillFields(sflllData),
+          saveButtonTestId: SFLLL_FORM_CONFIG.saveButtonTestId,
+          returnToApplication: false,
+        });
 
-      await expect(page.getByText(SFLLL_FORM_CONFIG.noErrorsText)).toBeVisible({
-        timeout: 15000,
-      });
-    } finally {
-      await clearPageState(context);
-      await ensurePageClosed(page);
-    }
-  });
+        await expect(
+          page.getByText(SFLLL_FORM_CONFIG.noErrorsText),
+        ).toBeVisible({
+          timeout: 15000,
+        });
+      } finally {
+        await clearPageState(context);
+        await ensurePageClosed(page);
+      }
+    },
+  );
 });
