@@ -1908,4 +1908,23 @@ export const messages = {
       "If you opt in to using what we learn, your feedback will be anonymized and included in our research findings as part of trends we see across many participants.",
     ],
   },
+  CreateOpportunity: {
+    pageTitle: "Create an opportunity",
+    errorMessage: "We have encountered an error loading this page, please try again later.",
+    keyInfo: "Key information",
+    basicInstructions: "Fill out the basic details below to begin. Once you save this information, a draft will be created, allowing you to return at any time to add more details, upload documents, and finalize your opportunity.",
+    CreateOpportunityPage1: {
+      opportunityNumber: "Opportunity number",
+      opportunityNumberDesc: "Enter the unique ID assigned to this funding opportunity.",
+      opportunityTitle: "Opportunity title",
+      opportunityTitleDesc: "Provide a concise, descriptive name that helps applicants identify the grant's purpose.",
+      agency: "Agency",
+      category: "Grant selection method",
+      categoryDesc: "Choose the evaluation process used to award these funds.",
+      categoryExplanation: "Grant selection method explanation",
+      categoryExplanationDesc: "If \"Other\" was selected, please describe the specific process used to evaluate and award these funds.",
+      charactersAllowed40: "40 characters allowed",
+      charactersAllowed255: "255 characters allowed",
+    }
+  }
 };
