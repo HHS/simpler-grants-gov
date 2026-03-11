@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import timedelta
 
 from marshmallow import ValidationError, validates_schema
 
@@ -280,10 +280,8 @@ class OpportunitySummaryCreateRequestV1Schema(Schema):
     archive_date = fields.Date(
         required=False,
         allow_none=True,
-        load_default=lambda: date.today() + timedelta(days=30),
         metadata={
-            "description": "When the opportunity will be archived",
-            "example": (date.today() + timedelta(days=30)).isoformat(),  # 30 days from today
+            "description": "When the opportunity will be archived (defaults to 30 days after the close date)",
         },
     )
 
@@ -506,6 +504,14 @@ class OpportunitySummaryCreateRequestV1Schema(Schema):
                         )
                     ]
                 )
+
+    @validates_schema
+    def set_archive_date(self, data: dict, **kwargs: dict) -> None:
+        """Set archive_date to 30 days after close_date if not provided"""
+        if data.get("close_date") is not None and (
+            "archive_date" not in data or data["archive_date"] is None
+        ):
+            data["archive_date"] = data["close_date"] + timedelta(days=30)
 
 
 class OpportunitySummaryDetailSchema(OpportunitySummaryV1Schema):
