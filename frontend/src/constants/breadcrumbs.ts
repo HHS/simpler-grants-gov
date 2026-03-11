@@ -42,7 +42,3 @@ export const SAVED_OPPORTUNITIES_CRUMBS: Breadcrumb[] = [
   SAVED_OPPORTUNITIES,
 ];
 export const SAVED_SEARCHES_CRUMBS: Breadcrumb[] = [HOME, SAVED_SEARCHES];
-export const ACTIVITY_DASHBOARD_CRUMBS: Breadcrumb[] = [
-  HOME,
-  ACTIVITY_DASHBOARD,
-];
