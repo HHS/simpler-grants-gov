@@ -32,6 +32,10 @@ def get_simpler_soap_response(
     use_simpler = get_soap_config().use_simpler
     if soap_request.headers.get(USE_SIMPLER_OVERRIDE_KEY, None) == "true":
         use_simpler = True
+        logger.info(
+            "soap_client_certificate: Use-Simpler-Override flag is enabled",
+            extra={"soap_api_event": LegacySoapApiEvent.USE_SIMPLER_OVERRIDE},
+        )
 
     try:
         simpler_soap_client = simpler_soap_client_type(
@@ -66,6 +70,9 @@ def get_simpler_soap_response(
         return soap_proxy_response
 
     if use_simpler or simpler_soap_client.operation_config.always_call_simpler:
+        logger.info(
+            "simpler_soap_api: getting simpler soap response",
+        )
         simpler_soap_response = simpler_soap_client.get_simpler_soap_response(soap_proxy_response)
 
     if use_simpler and simpler_soap_response is not None:
