@@ -726,7 +726,7 @@ export const messages = {
       vision: "Our vision",
       wiki: "Public wiki",
       workspace: "Workspace",
-      workspaceDashboard: "Workspace Dashboard",
+      workspaceDashboard: "Workspace dashboard",
       settings: "Settings",
       testApplication: "Test application",
     },
