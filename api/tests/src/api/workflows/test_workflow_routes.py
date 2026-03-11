@@ -211,10 +211,10 @@ def test_put_workflow_event_process_workflow_internal_user_api_key_200(
     assert message.process_workflow_context.event_to_send == "start_workflow"
 
 
-def test_put_workflow_event_process_workflow_program_officer_200(
-    client, program_officer_user_jwt, enable_factory_create, opportunity, workflow_sqs_queue
+def test_put_workflow_event_process_workflow_budget_officer_missing_response_type_422(
+    client, budget_officer_user_jwt, enable_factory_create, opportunity, workflow_sqs_queue
 ):
-    """Test successful process_workflow event via HTTP endpoint (integration test)."""
+    """Test process_workflow event fails if approval_response_type is missing in metadata."""
     workflow = WorkflowFactory.create(
         is_active=True, workflow_type=WorkflowType.BASIC_TEST_WORKFLOW, opportunity=opportunity
     )
@@ -223,26 +223,46 @@ def test_put_workflow_event_process_workflow_program_officer_200(
         "event_type": WorkflowEventType.PROCESS_WORKFLOW,
         "process_workflow_context": {
             "workflow_id": str(workflow.workflow_id),
-            "event_to_send": "receive_program_officer_approval",
+            "event_to_send": "receive_budget_officer_approval",
         },
+        # metadata is missing
     }
 
     response = client.put(
-        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": program_officer_user_jwt[1]}
+        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": budget_officer_user_jwt[1]}
     )
 
-    assert response.status_code == 200
-    assert "event_id" in response.json["data"]
-    assert response.json["message"] == "Event received"
-
+    assert response.status_code == 422
+    assert "approval response type not found" in response.json["message"].lower()
     messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
-    assert len(messages) == 1
-    message = WorkflowEvent.model_validate_json(messages[0].body)
-    assert str(message.event_id) == response.json["data"]["event_id"]
-    assert message.acting_user_id == program_officer_user_jwt[0].user_id
-    assert message.event_type == WorkflowEventType.PROCESS_WORKFLOW
-    assert message.process_workflow_context.workflow_id == workflow.workflow_id
-    assert message.process_workflow_context.event_to_send == "receive_program_officer_approval"
+    assert len(messages) == 0
+
+
+def test_put_workflow_event_process_workflow_budget_officer_invalid_response_type_422(
+    client, budget_officer_user_jwt, enable_factory_create, opportunity, workflow_sqs_queue
+):
+    """Test process_workflow event fails if approval_response_type is invalid in metadata."""
+    workflow = WorkflowFactory.create(
+        is_active=True, workflow_type=WorkflowType.BASIC_TEST_WORKFLOW, opportunity=opportunity
+    )
+
+    payload = {
+        "event_type": WorkflowEventType.PROCESS_WORKFLOW,
+        "process_workflow_context": {
+            "workflow_id": str(workflow.workflow_id),
+            "event_to_send": "receive_budget_officer_approval",
+        },
+        "metadata": {"approval_response_type": "not_a_valid_type"},
+    }
+
+    response = client.put(
+        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": budget_officer_user_jwt[1]}
+    )
+
+    assert response.status_code == 422
+    assert "not a valid value" in response.json["message"].lower()
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 0
 
 
 def test_put_workflow_event_process_workflow_budget_officer_200(
@@ -259,6 +279,7 @@ def test_put_workflow_event_process_workflow_budget_officer_200(
             "workflow_id": str(workflow.workflow_id),
             "event_to_send": "receive_budget_officer_approval",
         },
+        "metadata": {"approval_response_type": ApprovalResponseType.APPROVED},
     }
 
     response = client.put(
@@ -277,6 +298,41 @@ def test_put_workflow_event_process_workflow_budget_officer_200(
     assert message.event_type == WorkflowEventType.PROCESS_WORKFLOW
     assert message.process_workflow_context.workflow_id == workflow.workflow_id
     assert message.process_workflow_context.event_to_send == "receive_budget_officer_approval"
+
+
+def test_put_workflow_event_process_workflow_program_officer_200(
+    client, program_officer_user_jwt, enable_factory_create, opportunity, workflow_sqs_queue
+):
+    """Test successful process_workflow event via HTTP endpoint (integration test)."""
+    workflow = WorkflowFactory.create(
+        is_active=True, workflow_type=WorkflowType.BASIC_TEST_WORKFLOW, opportunity=opportunity
+    )
+
+    payload = {
+        "event_type": WorkflowEventType.PROCESS_WORKFLOW,
+        "process_workflow_context": {
+            "workflow_id": str(workflow.workflow_id),
+            "event_to_send": "receive_program_officer_approval",
+        },
+        "metadata": {"approval_response_type": ApprovalResponseType.APPROVED},
+    }
+
+    response = client.put(
+        "/v1/workflows/events", json=payload, headers={"X-SGG-Token": program_officer_user_jwt[1]}
+    )
+
+    assert response.status_code == 200
+    assert "event_id" in response.json["data"]
+    assert response.json["message"] == "Event received"
+
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 1
+    message = WorkflowEvent.model_validate_json(messages[0].body)
+    assert str(message.event_id) == response.json["data"]["event_id"]
+    assert message.acting_user_id == program_officer_user_jwt[0].user_id
+    assert message.event_type == WorkflowEventType.PROCESS_WORKFLOW
+    assert message.process_workflow_context.workflow_id == workflow.workflow_id
+    assert message.process_workflow_context.event_to_send == "receive_program_officer_approval"
 
 
 ####################################
