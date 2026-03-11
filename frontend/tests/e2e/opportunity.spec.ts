@@ -34,9 +34,13 @@ test.beforeEach(async ({ page, testOpportunityId }) => {
   await page.goto(`/opportunity/${testOpportunityId}`);
 });
 
-test("has title", async ({ page }) => {
-  await expect(page).toHaveTitle(/^Opportunity Listing - */);
-});
+test(
+  "has title",
+  { tag: ["@smoke", "@grantee", "@opportunity-search"] },
+  async ({ page }) => {
+    await expect(page).toHaveTitle(/^Opportunity Listing - */);
+  },
+);
 
 test("has page attributes", async ({ page }) => {
   await expect(page.getByText("Application process")).toBeVisible();
