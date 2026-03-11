@@ -23,10 +23,6 @@ const SAVED_SEARCHES: Breadcrumb = {
   title: "Saved search queries",
   path: "/saved-search-queries/",
 };
-const ACTIVITY_DASHBOARD: Breadcrumb = {
-  title: "Activity Dashboard",
-  path: "/dashboard",
-};
 
 // page breadcrumbs
 export const SUBSCRIBE_CONFIRMATION_CRUMBS: Breadcrumb[] = [
