@@ -46,13 +46,40 @@ describe("AwardRecommendationHero", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders buttons", async () => {
+  it("renders buttons when buttons prop is provided", async () => {
+    const mockButtons = [
+      {
+        type: "navigation" as const,
+        label: "Edit",
+        href: "/award-recommendation/AR-26-0001/edit",
+        outline: true,
+      },
+      {
+        type: "action" as const,
+        label: "Submit",
+        formAction: jest.fn(),
+      },
+    ];
+
     const component = await AwardRecommendationHero({
       awardRecommendationId: "AR-26-0001",
+      buttons: mockButtons,
     });
     render(component);
 
     const buttons = screen.getAllByRole("button");
     expect(buttons.length).toEqual(2);
+    expect(screen.getByText("Edit")).toBeInTheDocument();
+    expect(screen.getByText("Submit")).toBeInTheDocument();
+  });
+
+  it("does not render buttons when buttons prop is not provided", async () => {
+    const component = await AwardRecommendationHero({
+      awardRecommendationId: "AR-26-0001",
+    });
+    render(component);
+
+    const buttons = screen.queryAllByRole("button");
+    expect(buttons.length).toEqual(0);
   });
 });
