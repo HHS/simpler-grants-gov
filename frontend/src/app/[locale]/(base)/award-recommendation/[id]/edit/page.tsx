@@ -17,8 +17,14 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
-import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
+import AwardRecommendationHero, {
+  HeroButtonConfig,
+} from "src/components/award-recommendation/AwardRecommendationHero";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
+import {
+  saveAwardRecommendation,
+  submitAwardRecommendationForReview,
+} from "./../actions";
 
 export async function generateMetadata({
   params,
@@ -140,6 +146,27 @@ async function AwardRecommendationEditPageContent({
   const t = await getTranslations("AwardRecommendation");
   const opportunityId = "6a483cd8-9169-418a-8dfb-60fa6e6f51e5";
 
+  // Define button configuration for edit page
+  const heroButtons: HeroButtonConfig[] = [
+    {
+      type: "action",
+      label: t("heroButtons.save"),
+      formAction: saveAwardRecommendation,
+      outline: true,
+    },
+    {
+      type: "navigation",
+      label: t("heroButtons.preview"),
+      href: `/award-recommendation/${awardRecommendationId}`,
+      outline: true,
+    },
+    {
+      type: "action",
+      label: t("heroButtons.submitForReview"),
+      formAction: submitAwardRecommendationForReview,
+    },
+  ];
+
   let opportunityData: OpportunityDetail | null = null;
   if (opportunityId) {
     try {
@@ -173,6 +200,7 @@ async function AwardRecommendationEditPageContent({
         >
           <AwardRecommendationHero
             awardRecommendationId={awardRecommendationId}
+            buttons={heroButtons}
           />
         </Suspense>
       )}

@@ -1,17 +1,39 @@
 import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
 
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import AwardRecommendationStatusTag from "./AwardRecommendationStatusTag";
 
+// Action button - performs an action via form action (save, submit, etc.)
+export type ActionButtonConfig = {
+  type: "action";
+  label: string;
+  formAction: (formData: FormData) => Promise<any>;
+  outline?: boolean;
+  disabled?: boolean;
+};
+
+// Navigation button - redirects to another page (edit, preview)
+export type NavigationButtonConfig = {
+  type: "navigation";
+  label: string;
+  href: string;
+  outline?: boolean;
+};
+
+export type HeroButtonConfig = ActionButtonConfig | NavigationButtonConfig;
+
 interface AwardRecommendationHeroProps {
   awardRecommendationId: string;
+  buttons?: HeroButtonConfig[];
 }
 
 export default async function AwardRecommendationHero({
   awardRecommendationId,
+  buttons,
 }: AwardRecommendationHeroProps) {
   const t = await getTranslations("AwardRecommendation");
   const { recordNumber, datePrepared, status } =
@@ -62,16 +84,38 @@ export default async function AwardRecommendationHero({
                 </span>
               </Grid>
             </Grid>
-            <Grid className="flex-align-self-end margin-top-4 tablet:margin-top-2 display-flex flex-justify-start">
-              {/* TODO: add save functionality when endpoint is available */}
-              <Button type="button" outline className="width-auto">
-                {t("heroButtons.save")}
-              </Button>
-              {/* TODO: add create functionality when endpoint is available */}
-              <Button type="button" className="width-auto">
-                {t("heroButtons.create")}
-              </Button>
-            </Grid>
+            {buttons && buttons.length > 0 && (
+              <Grid className="flex-align-self-end margin-top-4 tablet:margin-top-2 display-flex flex-justify-start gap-1">
+                {buttons.map((button, index) => {
+                  if (button.type === "navigation") {
+                    return (
+                      <Link key={index} href={button.href}>
+                        <Button
+                          type="button"
+                          outline={button.outline}
+                          className="width-auto"
+                        >
+                          {button.label}
+                        </Button>
+                      </Link>
+                    );
+                  } else {
+                    return (
+                      <form key={index} action={button.formAction}>
+                        <Button
+                          type="submit"
+                          outline={button.outline}
+                          disabled={button.disabled}
+                          className="width-auto"
+                        >
+                          {button.label}
+                        </Button>
+                      </form>
+                    );
+                  }
+                })}
+              </Grid>
+            )}
           </Grid>
         </Grid>
       </GridContainer>

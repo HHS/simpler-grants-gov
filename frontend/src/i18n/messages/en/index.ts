@@ -1855,6 +1855,9 @@ export const messages = {
     heroButtons: {
       save: "Save and finish later",
       create: "Create",
+      edit: "Edit",
+      preview: "Preview",
+      submitForReview: "Submit for review",
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",

@@ -12,8 +12,11 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
-import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
+import AwardRecommendationHero, {
+  HeroButtonConfig,
+} from "src/components/award-recommendation/AwardRecommendationHero";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
+import { submitAwardRecommendationForReview } from "./actions";
 
 export async function generateMetadata({
   params,
@@ -118,6 +121,21 @@ async function AwardRecommendationPageContent({
   const t = await getTranslations("AwardRecommendation");
   const opportunityId = "6a483cd8-9169-418a-8dfb-60fa6e6f51e5";
 
+  // Define button configuration for preview page
+  const heroButtons: HeroButtonConfig[] = [
+    {
+      type: "navigation",
+      label: t("heroButtons.edit"),
+      href: `/${locale}/award-recommendation/${awardRecommendationId}/edit`,
+      outline: true,
+    },
+    {
+      type: "action",
+      label: t("heroButtons.submitForReview"),
+      formAction: submitAwardRecommendationForReview,
+    },
+  ];
+
   let opportunityData: OpportunityDetail | null = null;
   if (opportunityId) {
     try {
@@ -151,6 +169,7 @@ async function AwardRecommendationPageContent({
         >
           <AwardRecommendationHero
             awardRecommendationId={awardRecommendationId}
+            buttons={heroButtons}
           />
         </Suspense>
       )}
