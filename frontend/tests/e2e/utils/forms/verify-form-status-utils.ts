@@ -98,7 +98,7 @@ export async function assertFormRowStatus(
  * @param formName The form name to verify status for (e.g., "SF-424B", "SF-LLL")
  * @param applicationUrl The application URL to navigate to
  */
-export async function verifyFormStatusOnPage(
+export async function verifyFormStatusOnApplication(
   page: Page,
   status: FormStatus,
   formName: string,
@@ -150,7 +150,4 @@ export async function verifyFormStatusAfterSave(
     // On form page — scroll down and check inline field errors
     await verifyInlineErrors(page, expectedErrors);
   }
-
-  // On application page — verify form row status/messages
-  await verifyFormStatusOnPage(page, status, formName, applicationUrl);
 }

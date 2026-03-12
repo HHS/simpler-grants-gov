@@ -14,7 +14,10 @@ import {
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
 import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
-import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
+import {
+  verifyFormStatusAfterSave,
+  verifyFormStatusOnApplication,
+} from "tests/e2e/utils/forms/verify-form-status-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
