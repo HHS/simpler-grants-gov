@@ -156,7 +156,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
         "UpdateApplicationInfoRequest": SOAPOperationConfig(
             request_operation_name="UpdateApplicationInfoRequest",
             response_operation_name="UpdateApplicationInfoResponse",
-            privileges=set(),
+            privileges={Privilege.LEGACY_AGENCY_ASSIGNER},
         ),
     },
 }
