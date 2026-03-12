@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { UNSUBSCRIBE_CRUMBS } from "src/constants/breadcrumbs";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { useTranslations } from "next-intl";
@@ -8,7 +7,6 @@ import Link from "next/link";
 import { use } from "react";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
 import SendyDisclaimer from "src/components/newsletter/SendyDisclaimer";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
@@ -28,10 +26,9 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
   const t = useTranslations("UnsubscriptionConfirmation");
 
   return (
-    <>
+    <div className="padding-top-2 tablet:padding-y-6">
       <GridContainer>
-        <Breadcrumbs breadcrumbList={UNSUBSCRIBE_CRUMBS} />
-        <h1 className="margin-top-0">{t("title")}</h1>
+        <h1>{t("title")}</h1>
         <p>{t("paragraph")}</p>
         <p>
           {t("cta") + " "}
@@ -39,6 +36,6 @@ export default function Unsubscribe({ params }: LocalizedPageProps) {
         </p>
       </GridContainer>
       <SendyDisclaimer />
-    </>
+    </div>
   );
 }

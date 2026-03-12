@@ -2,22 +2,22 @@ import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { ActivityDashboardLinksSection } from "src/components/workspace/ActivityDashboardLinksSection";
+import { WorkspaceDashboardLinksSection } from "src/components/workspace/WorkspaceDashboardLinksSection";
 
 jest.mock("next-intl/server", () => ({
   // eslint-disable-next-line react-hooks/rules-of-hooks
   getTranslations: () => useTranslationsMock(),
 }));
 
-describe("ActivityDashboardLinksSection", () => {
+describe("WorkspaceDashboardLinksSection", () => {
   it("should not have accessibility violations", async () => {
-    const { container } = render(await ActivityDashboardLinksSection());
+    const { container } = render(await WorkspaceDashboardLinksSection());
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
 
   it("renders section heading and link cards with correct targets", async () => {
-    render(await ActivityDashboardLinksSection());
+    render(await WorkspaceDashboardLinksSection());
 
     // top-level heading (h2) should exist
     const topHeading = screen.getByRole("heading", { level: 2 });
