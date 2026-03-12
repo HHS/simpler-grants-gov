@@ -1,5 +1,6 @@
 import logging
 
+from apiflask.exceptions import HTTPError
 from flask import request
 
 import src.adapters.db as db
@@ -98,6 +99,15 @@ def simpler_soap_api_route(
         return get_simpler_soap_response(
             soap_request, soap_proxy_response, db_session
         ).to_flask_response()
+    except HTTPError:
+        msg = "soap_client_certificate: User did not have permission to access this application"
+        logger.info(
+            msg=msg,
+            extra={
+                "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
+            },
+        )
+        return soap_proxy_response.to_flask_response()
     except Exception:
         msg = "Unable to process Simpler SOAP proxy response"
         logger.exception(

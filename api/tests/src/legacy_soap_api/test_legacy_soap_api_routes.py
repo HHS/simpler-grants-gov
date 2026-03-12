@@ -1,9 +1,23 @@
+import logging
 from unittest import mock
 
 from lxml import etree
 
-from src.legacy_soap_api.legacy_soap_api_auth import USE_SOAP_JWT_HEADER_KEY
+from src.constants.lookup_constants import Privilege
+from src.legacy_soap_api.legacy_soap_api_auth import (
+    USE_SOAP_JWT_HEADER_KEY,
+    SOAPAuth,
+    SOAPClientCertificate,
+)
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
+from tests.lib.data_factories import setup_cert_user
+from tests.src.db.models.factories import (
+    AgencyFactory,
+    ApplicationFactory,
+    ApplicationSubmissionFactory,
+    CompetitionFactory,
+    OpportunityFactory,
+)
 
 NSMAP = {
     "envelope": "http://schemas.xmlsoap.org/soap/envelope/",
@@ -15,6 +29,9 @@ SIMPLER_TRACKING_NUMBER = "GRANT80000008"
 LEGACY_TRACKING_NUMBER = "GRANT00000008"
 GET_APPLICATION_PATH = f"{{{NSMAP['envelope']}}}Body/{{{NSMAP['application_request']}}}GetApplicationRequest/{{{NSMAP['tracking_number']}}}GrantsGovTrackingNumber"
 GET_APPLICATION_ZIP_PATH = f"{{{NSMAP['envelope']}}}Body/{{{NSMAP['application_request']}}}GetApplicationZipRequest/{{{NSMAP['tracking_number']}}}GrantsGovTrackingNumber"
+MOCK_FINGERPRINT = "123"
+MOCK_CERT = "456"
+MOCK_CERT_STR = "certstr"
 
 
 def test_successful_request(client, fixture_from_file, caplog) -> None:
@@ -244,3 +261,42 @@ def test_simpler_getapplicationzip_operation_returns_not_found_response_includes
     assert (
         response.headers["Set-Cookie"] == "JSESSIONID=xyz; Path=/grantsws-agency; Secure; HttpOnly"
     )
+
+
+def test_simpler_getapplicationzip_operation_raising_httperror_due_to_privileges_logs_info(
+    client, fixture_from_file, enable_factory_create, caplog
+) -> None:
+    caplog.set_level(logging.INFO)
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    WRONG_PRIVILEGES = {Privilege.READ_TEST_USER_TOKEN}
+    user, role, soap_client_certificate = setup_cert_user(agency, WRONG_PRIVILEGES)
+    application = ApplicationFactory.create(competition=competition)
+    submission = ApplicationSubmissionFactory.create(application=application)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    fixture_path = "/legacy_soap_api/grantors/get_application_zip_request.xml"
+    mock_data = fixture_from_file(fixture_path)
+    envelope = etree.fromstring(mock_data)
+    tracking_number = envelope.find(GET_APPLICATION_ZIP_PATH)
+    tracking_number.text = f"GRANT{submission.legacy_tracking_number}"
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+    )
+    with mock.patch("src.legacy_soap_api.legacy_soap_api_routes.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        response = client.post(
+            full_path, data=etree.tostring(envelope), headers={"Use-Simpler-Override": "true"}
+        )
+    assert response.status_code == 500
+    post_message = next(
+        record
+        for record in caplog.records
+        if record.message == "User did not have permission to access this application"
+    )
+    assert post_message.message == "User did not have permission to access this application"
