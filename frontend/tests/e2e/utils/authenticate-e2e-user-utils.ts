@@ -56,9 +56,9 @@ export async function authenticateE2eUser(
       .catch(() => false);
 
     if (isAlreadyLoggedIn) {
-      //  console.log(
-      //    "authenticateE2eUser: session already active, skipping MFA login",
-      //  );
+      console.log(
+        "authenticateE2eUser: session already active, skipping MFA login",
+      );
     } else {
       // No active session — perform full MFA login.
       // Do NOT clear cookies: login.gov tracks OAuth state across the redirect
@@ -69,6 +69,22 @@ export async function authenticateE2eUser(
           "signOutButton was not found after performStagingLogin",
         );
       }
+
+      // After OAuth callback (/api/auth/callback), the app must redirect back
+      // to the home page and re-render the nav before Sign Out appears.
+      // Wait for the URL to leave the callback path before asserting Sign Out.
+      await page
+        .waitForURL((url) => !url.pathname.includes("/api/auth/callback"), {
+          timeout: 30000,
+        })
+        .catch(() => {
+          // If still on callback URL after 30s, proceed anyway and let the
+          // Sign Out assertion below give the definitive failure with context.
+          console.warn(
+            "authenticateE2eUser: still on /api/auth/callback after 30s — proceeding",
+          );
+        });
+
       await expect(freshSignOutButton).toHaveCount(1, { timeout: 120_000 });
     }
   } else {
