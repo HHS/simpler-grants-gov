@@ -55,33 +55,37 @@ test("skips to main content when navigating via keyboard", async ({
   await expect(banner).not.toBeInViewport({ ratio: 1 });
 });
 
-test("displays mobile nav at mobile width", async ({ page }, { project }) => {
-  if (project.name.match(/[Mm]obile/)) {
-    // confirm that nav items are not visible by default with menu closed
-    const primaryNavItems = page.locator(
-      ".usa-accordion > .usa-nav__primary-item",
-    );
-    await expect(primaryNavItems).toHaveCount(5);
-    const allNavItems = await page
-      .locator(".usa-accordion > .usa-nav__primary-item")
-      .all();
-    await Promise.all(
-      allNavItems.map((item) => {
-        return expect(item).not.toBeVisible();
-      }),
-    );
+test(
+  "displays mobile nav at mobile width",
+  { tag: ["@smoke", "@static"] },
+  async ({ page }, { project }) => {
+    if (project.name.match(/[Mm]obile/)) {
+      // confirm that nav items are not visible by default with menu closed
+      const primaryNavItems = page.locator(
+        ".usa-accordion > .usa-nav__primary-item",
+      );
+      await expect(primaryNavItems).toHaveCount(5);
+      const allNavItems = await page
+        .locator(".usa-accordion > .usa-nav__primary-item")
+        .all();
+      await Promise.all(
+        allNavItems.map((item) => {
+          return expect(item).not.toBeVisible();
+        }),
+      );
 
-    await openMobileNav(page);
-    const nav = page.locator(".usa-nav");
-    await expect(nav).toHaveClass(/is-visible/);
+      await openMobileNav(page);
+      const nav = page.locator(".usa-nav");
+      await expect(nav).toHaveClass(/is-visible/);
 
-    await Promise.all(
-      allNavItems.map((item) => {
-        return expect(item).toBeVisible();
-      }),
-    );
-  }
-});
+      await Promise.all(
+        allNavItems.map((item) => {
+          return expect(item).toBeVisible();
+        }),
+      );
+    }
+  },
+);
 
 test("hides mobile nav at expected times", async ({ page }, { project }) => {
   if (project.name.match(/[Mm]obile/)) {
