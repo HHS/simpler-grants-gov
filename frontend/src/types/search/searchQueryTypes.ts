@@ -27,8 +27,8 @@ export const validSearchQueryParamKeys = [
 // an allow list for any paramaters we expect and would like to keep track of in New Relic or elsewhere
 export const expectedQueryParamKeys = [
   ...validSearchQueryParamKeys,
-  "savedSearch",
   "utm_source",
+  "savedSearch",
 ];
 
 // Only a few defined keys possible
