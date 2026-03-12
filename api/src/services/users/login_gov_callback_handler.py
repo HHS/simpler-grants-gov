@@ -176,12 +176,16 @@ def handle_login_gov_token(
             if tries == limit:
                 raise_flask_error(500, response.error_description)
             else:
-                logger.info("Retrying call to Login.gov after receiving error", extra={"tries": tries, "limit": limit})
+                logger.info(
+                    "Retrying call to Login.gov after receiving error",
+                    extra={"tries": tries, "limit": limit},
+                )
                 continue
 
     # Process the token response from login.gov
     # which will create/update a user in the DB
     return _process_token(db_session, response.id_token, login_gov_data.nonce)
+
 
 def _process_token(db_session: db.Session, token: str, nonce: str) -> LoginGovCallbackResponse:
     """Process the token from login.gov and generate our own token for auth"""
