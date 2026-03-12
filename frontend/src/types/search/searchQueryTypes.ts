@@ -28,6 +28,7 @@ export const validSearchQueryParamKeys = [
 export const expectedQueryParamKeys = [
   ...validSearchQueryParamKeys,
   "savedSearch",
+  "utm_source",
 ];
 
 // Only a few defined keys possible
