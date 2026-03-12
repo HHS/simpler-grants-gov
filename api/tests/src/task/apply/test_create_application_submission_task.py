@@ -158,26 +158,16 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             == application_without_attachments.submitted_by
         )
 
-        # Validate the submission with attachments
+        # Validate the submission with attachments.
+        # All attachments are orphaned (not referenced in any form response via attachment_fields),
+        # so none should appear in the zip.
         assert application_with_attachments.application_status == ApplicationStatus.ACCEPTED
         assert len(application_with_attachments.application_submissions) == 1
         attachment_submission = application_with_attachments.application_submissions[0]
 
         validate_files_in_zip(
             attachment_submission.file_location,
-            {
-                "file_a.txt": "contents of file A",
-                "file_b.txt": "contents of file B",
-                "dupe_filename.txt": "contents of first dupe_filename.txt",
-                "1-dupe_filename.txt": "contents of second dupe_filename.txt",
-                "manifest.txt": [
-                    "file_a.txt",
-                    "file_b.txt",
-                    "dupe_filename.txt",
-                    "1-dupe_filename.txt",
-                ]
-                + app_with_attachments_form_file_names,
-            }
+            {"manifest.txt": app_with_attachments_form_file_names}
             | {f: None for f in app_with_attachments_form_file_names},
         )
         # No user attached, no audit event added
@@ -189,12 +179,66 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
 
         metrics = create_submission_task.metrics
         assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 2
-        assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 4
+        assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 0
         apps_processed = [application_with_attachments, application_without_attachments]
         assert (
             metrics[create_submission_task.Metrics.APPLICATION_FORM_COUNT]
             == sum([len(app.application_forms) for app in apps_processed]) - 1
         )  # Not counting the one app form that we skip
+
+    def test_run_task_excludes_orphaned_attachments(self, db_session, create_submission_task):
+        """Referenced attachments are included in the zip; orphaned ones are excluded."""
+        application = ApplicationFactory.create(
+            application_status=ApplicationStatus.SUBMITTED,
+        )
+
+        referenced_attachment = ApplicationAttachmentFactory.create(
+            application=application,
+            file_name="referenced.txt",
+            file_contents="referenced file contents",
+        )
+        ApplicationAttachmentFactory.create(
+            application=application,
+            file_name="orphaned.txt",
+            file_contents="orphaned file contents",
+        )
+
+        app_form = ApplicationFormFactory.create(
+            application=application,
+            competition_form__competition=application.competition,
+            application_response={
+                "attachment_field": str(referenced_attachment.application_attachment_id),
+            },
+        )
+        # Configure the form to treat attachment_field as an attachment reference field
+        app_form.form.json_to_xml_schema = {
+            "_xml_config": {"attachment_fields": {"attachment_field": {}}}
+        }
+        db_session.flush()
+
+        create_submission_task.run()
+
+        db_session.refresh(application)
+        assert application.application_status == ApplicationStatus.ACCEPTED
+        assert len(application.application_submissions) == 1
+        submission = application.application_submissions[0]
+
+        form_file_names = [f"{app_form.form.short_form_name}.pdf"]
+
+        # Only the referenced attachment should be in the zip; orphaned is excluded.
+        # GrantApplication.xml is also generated because the form has json_to_xml_schema configured.
+        validate_files_in_zip(
+            submission.file_location,
+            {
+                "referenced.txt": "referenced file contents",
+                "GrantApplication.xml": None,
+                "manifest.txt": ["referenced.txt"] + form_file_names,
+            }
+            | {f: None for f in form_file_names},
+        )
+
+        metrics = create_submission_task.metrics
+        assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 1
 
     def test_run_task_with_erroring_application(
         self, db_session, create_submission_task, monkeypatch
