@@ -11,7 +11,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("has title", { tag: "@smoke" }, async ({ page }) => {
-  await expect(page).toHaveTitle(/Simpler.Grants.gov/);
+  await expect(page).toHaveTitle(/Simpler\.Grants\.gov/);
 });
 
 test(
@@ -24,7 +24,7 @@ test(
     const newPage = await pagePromise;
     await newPage.waitForLoadState();
     await expect(newPage).toHaveURL(
-      /https:\/\/github.com\/HHS\/simpler-grants-gov/,
+      /^https:\/\/github\.com\/HHS\/simpler-grants-gov/,
     );
   },
 );

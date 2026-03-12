@@ -79,7 +79,7 @@ runs:
         npm install @playwright/test
         npx playwright install --with-deps
 
-    - name: Run all e2e tests (Shard ${{ inputs.shard }}/${{ inputs.total_shards }})
+    - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
       if: ${{ inputs.playwright_tags == '' }}
       working-directory: ./frontend
       env:
@@ -95,7 +95,7 @@ runs:
       shell: bash
 
 
-    - name: Run e2e tests for ${{ inputs.playwright_tags }} (Shard ${{ inputs.shard }}/${{ inputs.total_shards }})
+    - name: Run e2e tests for ${{ inputs.playwright_tags }} (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
       if: ${{ inputs.playwright_tags != '' }}
       working-directory: ./frontend
       env:
