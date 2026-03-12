@@ -1,4 +1,5 @@
 import zipfile
+from decimal import Decimal
 from io import BytesIO
 
 import pytest
@@ -6,6 +7,7 @@ from sqlalchemy import update
 
 from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
 from src.db.models.competition_models import Application
+from src.form_schema.forms import SF424_v4_0
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.task.apply.create_application_submission_task import (
     ApplicationSubmissionConfig,
@@ -21,6 +23,7 @@ from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
     ApplicationSubmissionFactory,
+    CompetitionFormFactory,
 )
 
 
@@ -146,6 +149,9 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             | {f: None for f in app_without_attachments_form_file_names},
         )
         assert no_attachment_submission.file_size_bytes > 0
+        assert no_attachment_submission.application_submission_number.startswith(
+            application_without_attachments.competition.opportunity.opportunity_number
+        )
 
         # Verify audit event added
         assert len(application_without_attachments.application_audits) == 1
@@ -182,6 +188,10 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
         )
         # No user attached, no audit event added
         assert len(application_with_attachments.application_audits) == 0
+
+        assert no_attachment_submission.application_submission_number.startswith(
+            application_without_attachments.competition.opportunity.opportunity_number
+        )
 
         # These weren't picked up
         assert len(not_picked_up_app1.application_submissions) == 0
@@ -259,6 +269,47 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
                 assert "GrantApplication.xml" not in file_names
                 # Should only have PDF and manifest
                 assert "manifest.txt" in file_names
+
+    def test_project_title_and_requested_amount_set(
+        self,
+        db_session,
+        enable_factory_create,
+        s3_config,
+        load_active_forms,
+        create_submission_task,
+    ):
+        """Test that project title and requested amount are set from values in application forms."""
+        application = ApplicationFactory.create(
+            application_status=ApplicationStatus.SUBMITTED,
+            # Add some other forms that we won't use for this
+            with_forms=True,
+        )
+
+        sf424 = db_session.merge(SF424_v4_0, load=True)
+        competition_form = CompetitionFormFactory.create(
+            competition=application.competition, form=sf424, is_required=True
+        )
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={
+                "project_title": "my fun title",
+                "federal_estimated_funding": "456.78",
+            },
+            is_included_in_submission=True,
+        )
+
+        create_submission_task.run()
+
+        assert application.application_status == ApplicationStatus.ACCEPTED
+        assert len(application.application_submissions) == 1
+        submission = application.application_submissions[0]
+
+        assert submission.application_submission_number.startswith(
+            application.competition.opportunity.opportunity_number
+        )
+        assert submission.project_title == "my fun title"
+        assert submission.total_requested_amount == Decimal("456.78")
 
 
 def test_get_file_name_in_zip():

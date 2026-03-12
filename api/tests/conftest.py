@@ -1,3 +1,4 @@
+import copy
 import logging
 import uuid
 from os import path
@@ -10,7 +11,7 @@ import pytest
 from apiflask import APIFlask
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from sqlalchemy import text
+from sqlalchemy import select, text
 
 import src.adapters.db as db
 import src.app as app_entry
@@ -24,11 +25,14 @@ from src.constants.schema import Schemas
 from src.constants.static_role_values import NAVA_INTERNAL_ROLE
 from src.db import models
 from src.db.models.agency_models import Agency
+from src.db.models.competition_models import FormInstruction
 from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import AgencyUser, UserApiKey
+from src.form_schema.forms import get_active_forms
+from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.util.local import load_local_env_vars
 from tests.lib import db_testing
 from tests.lib.auth_test_utils import mock_oauth_endpoint
@@ -609,3 +613,52 @@ def fixture_file_path():
         return path.join(FILE_FIXTURE_DIR, fixture_path_relative_to_fixture_dir.lstrip("/"))
 
     return _get_fixture_file_path
+
+
+########################
+# Forms
+########################
+
+
+@pytest.fixture
+def load_active_forms(db_session, enable_factory_create) -> None:
+    """
+    Load the active forms into the DB.
+
+    This will make it so a test can explicitly use one of our defined forms
+    without needing to define a new form like it.
+
+    To use this do the following with whatever form you want to use
+
+    def test_example(db_session, load_active_forms):
+        sf424 = db_session.merge(SF424_v4_0, load=True)
+
+        # use the form object returned from the merge function
+        # it'll actually work with our DB / factories
+        CompetitionFormFactory.create(form=sf424)
+
+    Note that because these are all in the same DB, don't
+    modify these forms otherwise you might break other tests that use them.
+    """
+
+    existing_form_instruction_ids = set(
+        db_session.execute(select(FormInstruction.form_instruction_id)).scalars()
+    )
+
+    for form in get_active_forms():
+
+        form_instruction_id = form.form_instruction_id
+        if (
+            form_instruction_id is not None
+            and form_instruction_id not in existing_form_instruction_ids
+        ):
+            # Note that we make these text files as generating valid PDFs is surprisingly complex.
+            factories.FormInstructionFactory.create(
+                form_instruction_id=form.form_instruction_id,
+                file_name=f"{form.short_form_name}.txt",
+            )
+
+        # do a copy so we aren't modifying a global form object
+        copied_form = copy.deepcopy(form)
+        copied_form.form_json_schema = resolve_jsonschema(form.form_json_schema)
+        db_session.merge(copied_form, load=True)
