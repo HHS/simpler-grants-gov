@@ -48,26 +48,32 @@ def get_approvals_for_workflow(
     return list(approvals)
 
 
-def get_approval_response_type(state_machine_event: StateMachineEvent) -> ApprovalResponseType:
-    """Get the approval response type from the state machine event."""
-    raw_value = state_machine_event.get_metadata_value(WorkflowConstants.APPROVAL_RESPONSE_TYPE)
+def get_approval_response_type_from_metadata(
+    metadata: dict | None, log_extra: dict | None = None
+) -> ApprovalResponseType:
+    """Get the approval response type from a metadata dict."""
+    if log_extra is None:
+        log_extra = {}
+    raw_value = None
+    if metadata is not None:
+        raw_value = metadata.get(WorkflowConstants.APPROVAL_RESPONSE_TYPE)
 
     if raw_value is None:
-        logger.warning(
-            "Approval response type not found for state machine event",
-            extra=state_machine_event.get_log_extra(),
-        )
-        raise InvalidWorkflowResponseTypeError(
-            "Approval response type not found for state machine event"
-        )
+        logger.warning("Approval response type not found in metadata", extra=log_extra)
+        raise InvalidWorkflowResponseTypeError("Approval response type not found in metadata")
 
     try:
         return ApprovalResponseType(raw_value)
     except ValueError as e:
-        logger.warning(
-            "Approval response type is not a valid value", extra=state_machine_event.get_log_extra()
-        )
+        logger.warning("Approval response type is not a valid value")
         raise InvalidWorkflowResponseTypeError("Approval response type is not a valid value") from e
+
+
+def get_approval_response_type(state_machine_event: StateMachineEvent) -> ApprovalResponseType:
+    """Get the approval response type from the state machine event (for state machine usage)."""
+    return get_approval_response_type_from_metadata(
+        state_machine_event.metadata, state_machine_event.get_log_extra()
+    )
 
 
 def get_agency_for_workflow(workflow: Workflow) -> Agency:

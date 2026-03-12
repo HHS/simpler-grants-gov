@@ -396,7 +396,7 @@ def test_agency_approval_null_response_type(db_session, agency, budget_officer, 
 
     with pytest.raises(
         InvalidWorkflowResponseTypeError,
-        match="Approval response type not found for state machine event",
+        match="Approval response type not found in metadata",
     ):
         send_process_event(
             db_session=db_session,

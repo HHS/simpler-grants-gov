@@ -13,8 +13,8 @@
     "debug": "NODE_OPTIONS='--inspect' next dev",
     "format": "prettier --write '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
     "format-check": "prettier --check '**/*.{js,json,md,ts,tsx,scss,yaml,yml}'",
-    "lint": "eslint",
-    "lint-fix": "npm run lint -- --fix",
+    "lint": "next typegen && eslint",
+    "lint-fix": "next typegen && npm run lint -- --fix",
     "postinstall": "node ./scripts/postinstall.js",
     "start:nr": "NEW_RELIC_ENABLED=true NODE_OPTIONS='-r newrelic' next start -p ${PORT:-3000}",
     "start": "next start -p ${PORT:-3000}",
@@ -26,7 +26,7 @@
     "test-watch": "jest --watch",
     "test:e2e": "npx playwright test --config ./tests/playwright.config.ts",
     "test:e2e:ui": "npx playwright test --config ./tests/playwright.config.ts --ui",
-    "ts:check": "tsc --noEmit"
+    "ts:check": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@newrelic/next": "^0.10.0",

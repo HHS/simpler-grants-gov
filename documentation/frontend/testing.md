@@ -24,6 +24,41 @@ Using this function, tests should work automatically in CI, but they will requir
 - We use data fixtures when relevant (see https://github.com/HHS/simpler-grants-gov/blob/main/frontend/src/utils/testing/fixtures.ts)
 - We strive to include axe tests on all components
 
+### Debugging
+
+If you're using VSCode you have a couple of options for debugging tests using the built in debugger.
+
+1. Setting a configuration in your launch.json
+
+Create or edit a launch.json file in frontend/.vscode to include a configuration with this definition
+
+```
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Jest debug current file",
+      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+      "args": [
+        "--verbose",
+        "-i",
+        "--no-cache",
+        "--testPathPattern",
+        "${file}",
+        "--testTimeout=100000000"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+```
+
+With this in place you can navigate to the "Run and Debug" section on the left nav, and select "Jest debug current file" from the drop down. The debugger will honor any debuggers you have set while running tests in the file that you have open and active.
+
+The caveat here is that this does not work for files that sit in directories or files with special characters in their names. The second option below does not have that problem.
+
+2. Using the `Jest / Vitest Runner`
+
+Install the `Jest / Vitest Runner` extension. When you open the quick menu with Command + P and type debug jest, you should see a task with that name. Running this does the same thing as option one, without the problem of special characters in the path.
+
 ### Helpful common patterns
 
 Before writing tests, familiarize yourself with the [testing utilities](https://github.com/HHS/simpler-grants-gov/tree/main/frontend/src/utils/testing) that we have written to deal with common or complex testing scenarios

@@ -10,7 +10,12 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
+import {
+  Alert,
+  CharacterCount,
+  Grid,
+  GridContainer,
+} from "@trussworks/react-uswds";
 
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
@@ -23,15 +28,17 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("AwardRecommendation.pageTitle", {
-      defaultValue: "Review your recommendation",
+    title: t("AwardRecommendation.pageTitleEdit", {
+      defaultValue: "Edit your recommendation",
     }),
-    description: t("AwardRecommendation.metaDescription", {
-      defaultValue: "View your award recommendations",
+    description: t("AwardRecommendation.metaDescriptionEdit", {
+      defaultValue: "Edit your award recommendations",
     }),
   };
   return meta;
 }
+
+export const dynamic = "force-dynamic";
 
 export type AwardRecommendationPageProps = {
   params: Promise<{ locale: string; id?: string }>;
@@ -98,10 +105,25 @@ const OpportunitySection = ({
                   <div>{t("noSummaryAvailable")}</div>
                 )}
               </div>
-              <p className="text-bold margin-bottom-2">
-                {t("selectionMethod")}
-              </p>
-              {t("meritReview")}
+              <div className="border-top border-base-lighter margin-top-2 margin-bottom-2" />
+              <div className="margin-bottom-3">
+                <p className="text-bold margin-bottom-1 font-sans-sm">
+                  {t("otherOpportunityInfo.label")}
+                </p>
+                <p className="text-base margin-top-1 margin-bottom-2">
+                  {t("otherOpportunityInfo.description")}
+                </p>
+                <CharacterCount
+                  id="additional_info"
+                  name="additional_info"
+                  maxLength={1000}
+                  isTextArea
+                  defaultValue=""
+                  rows={6}
+                  className="maxw-full"
+                  data-testid="additional-info-textarea"
+                />
+              </div>
             </div>
           </div>
         </Grid>
@@ -110,7 +132,7 @@ const OpportunitySection = ({
   );
 };
 
-async function AwardRecommendationPageContent({
+async function AwardRecommendationEditPageContent({
   params,
 }: AwardRecommendationPageProps) {
   const { locale, id: awardRecommendationId } = await params;
@@ -167,7 +189,7 @@ async function AwardRecommendationPageContent({
 }
 
 export default withFeatureFlag<AwardRecommendationPageProps, never>(
-  AwardRecommendationPageContent,
+  AwardRecommendationEditPageContent,
   "awardRecommendationOff",
   () => redirect("/maintenance"),
 );
