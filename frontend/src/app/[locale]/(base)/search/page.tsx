@@ -82,7 +82,12 @@ function Search({ searchParams, params }: SearchPageProps) {
           {t.rich("goToGG", {
             "search-link": (chunks) => <Link href="/search">{chunks}</Link>,
             "gg-link": (chunks) => (
-              <a href="https://grants.gov/" target="_blank">
+              <a
+                href="https://grants.gov/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="usa-link--external"
+              >
                 {chunks}
               </a>
             ),
