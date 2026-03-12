@@ -40,8 +40,6 @@ from tests.src.db.models.factories import (
     AgencyFactory,
     ApplicationFactory,
     ApplicationSubmissionFactory,
-    ApplicationUserFactory,
-    ApplicationUserRoleFactory,
     CompetitionFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
@@ -425,11 +423,12 @@ class TestSimplerSOAPGetApplicationZip:
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
-        submission = ApplicationSubmissionFactory.create()
-        application_user = ApplicationUserFactory.create(
-            application=submission.application, user=user
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory(
+            opportunity=opportunity,
         )
-        ApplicationUserRoleFactory.create(application_user=application_user, role=role)
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
         response = requests.get(submission.download_path, timeout=10)
         submission_text = response.content.decode()
         request_xml_bytes = (
@@ -476,10 +475,19 @@ class TestSimplerSOAPGetApplicationZip:
                 "MIME-Version": "1.0",
             }
 
-    def test_get_simpler_soap_response_returns_error_if_certificate_user_does_not_have_permissions(
+    def test_get_simpler_soap_response_can_access_endpoint_if_certificate_user_has_privileges(
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
-        submission = ApplicationSubmissionFactory.create()
+        agency = AgencyFactory.create()
+        user, role, soap_client_certificate = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+        )
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory(
+            opportunity=opportunity,
+        )
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
             'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
@@ -492,9 +500,47 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Body>"
             "</soapenv:Envelope>"
         ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        client = SimplerGrantorsS2SClient(soap_request, db_session)
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            assert result.status_code == 200
+
+    def test_get_simpler_soap_response_cannot_access_endpoint_if_certificate_user_does_not_have_privileges(
+        self, db_session, enable_factory_create, mock_s3_bucket
+    ):
         agency = AgencyFactory.create()
-        wrong_privileges = {Privilege.LEGACY_AGENCY_VIEWER}
-        user, _, soap_client_certificate = setup_cert_user(agency, wrong_privileges)
+        wrong_privileges = {Privilege.START_APPLICATION}
+        user, role, soap_client_certificate = setup_cert_user(agency, wrong_privileges)
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory(
+            opportunity=opportunity,
+        )
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+            'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationZipRequest>"
+            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            "</agen:GetApplicationZipRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
@@ -513,15 +559,16 @@ class TestSimplerSOAPGetApplicationZip:
         self, db_session, enable_factory_create, caplog
     ):
         caplog.set_level(logging.INFO)
-        submission = ApplicationSubmissionFactory.create()
-        agency = AgencyFactory()
+        agency = AgencyFactory.create()
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
-        application_user = ApplicationUserFactory.create(
-            application=submission.application, user=user
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory(
+            opportunity=opportunity,
         )
-        ApplicationUserRoleFactory.create(application_user=application_user, role=role)
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
             'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
