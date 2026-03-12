@@ -15,6 +15,7 @@ from src.services.opportunities_grantor_v1.get_opportunity_list import (
     get_opportunity_list_for_grantors,
 )
 from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
+from src.services.opportunities_grantor_v1.opportunity_summaries import create_opportunity_summary
 from src.services.opportunities_grantor_v1.opportunity_update import update_opportunity
 
 logger = logging.getLogger(__name__)
@@ -119,3 +120,32 @@ def opportunity_update(
         opportunity = update_opportunity(db_session, user, opportunity_id, json_data)
 
     return response.ApiResponse(message="Success", data=opportunity)
+
+
+@opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/summary")
+@opportunity_grantor_blueprint.input(
+    opportunity_grantor_schemas.OpportunitySummaryCreateRequestV1Schema(), location="json"
+)
+@opportunity_grantor_blueprint.output(
+    opportunity_grantor_schemas.OpportunitySummaryCreateResponseV1Schema()
+)
+@jwt_or_api_user_key_multi_auth.login_required
+@opportunity_grantor_blueprint.doc(
+    responses=[200, 403, 404, 422, 500], security=jwt_or_api_user_key_security_schemes
+)
+@flask_db.with_db_session()
+def opportunity_summary_create(
+    db_session: db.Session, opportunity_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Create a new opportunity summary"""
+    add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
+    logger.info("POST /v1/opportunities/:opportunity_id/summary")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        opportunity_summary = create_opportunity_summary(
+            db_session, opportunity_id, json_data, user
+        )
+    return response.ApiResponse(message="Success", data=opportunity_summary)
