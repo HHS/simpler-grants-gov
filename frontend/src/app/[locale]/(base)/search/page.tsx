@@ -11,11 +11,11 @@ import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import Link from "next/link";
 import { Suspense, use } from "react";
 
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { AndOrPanel } from "src/components/search/AndOrPanel";
+import ClassicSearchBanner from "src/components/search/ClassicSearchBanner";
 import { FilterPillPanel } from "src/components/search/FilterPillPanel";
 import { PillListSkeleton } from "src/components/search/PillList";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
@@ -77,23 +77,7 @@ function Search({ searchParams, params }: SearchPageProps) {
         params={resolvedSearchParams}
         newRelicEnabled={environment.NEW_RELIC_ENABLED === "true"}
       />
-      <div className="bg-primary-lightest line-height-body-2 font-body-3xs padding-y-1">
-        <div className="grid-container">
-          {t.rich("goToGG", {
-            "search-link": (chunks) => <Link href="/search">{chunks}</Link>,
-            "gg-link": (chunks) => (
-              <a
-                href="https://grants.gov/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="usa-link--external"
-              >
-                {chunks}
-              </a>
-            ),
-          })}
-        </div>
-      </div>
+      <ClassicSearchBanner />
       <div className="bg-base-lightest padding-top-4">
         <div className="grid-container">
           <h1 className="margin-top-0">{t("header")}</h1>
