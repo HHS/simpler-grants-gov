@@ -1,8 +1,8 @@
 """create application_submission_retrieved table
 
-Revision ID: a2a8f9f15489
-Revises: dc49bb9e25ab
-Create Date: 2026-03-11 19:09:13.949910
+Revision ID: f8eaafc955ec
+Revises: 3bbb6f5e037e
+Create Date: 2026-03-12 14:17:02.346821
 
 """
 
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "a2a8f9f15489"
-down_revision = "dc49bb9e25ab"
+revision = "f8eaafc955ec"
+down_revision = "3bbb6f5e037e"
 branch_labels = None
 depends_on = None
 

@@ -20,7 +20,6 @@ from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
-import src.db.models.application_submission_retrieved_models as application_submission_retrieved_models
 import src.db.models.award_recommendation_models as award_recommendation_models
 import src.db.models.competition_models as competition_models
 import src.db.models.entity_models as entity_models
@@ -3329,7 +3328,7 @@ class WorkflowApprovalFactory(BaseFactory):
 
 class ApplicationSubmissionRetrievedFactory(BaseFactory):
     class Meta:
-        model = application_submission_retrieved_models.ApplicationSubmissionRetrieved
+        model = competition_models.ApplicationSubmissionRetrieved
 
     application_submission_retrieved_id = Generators.UuidObj
 

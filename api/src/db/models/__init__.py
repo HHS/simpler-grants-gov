@@ -2,7 +2,6 @@ import logging
 
 from . import (
     agency_models,
-    application_submission_retrieved_models,
     award_recommendation_models,
     base,
     competition_models,
@@ -35,5 +34,4 @@ __all__ = [
     "sam_extract_models",
     "entity_models",
     "workflow_models",
-    "application_submission_retrieved_models",
 ]
