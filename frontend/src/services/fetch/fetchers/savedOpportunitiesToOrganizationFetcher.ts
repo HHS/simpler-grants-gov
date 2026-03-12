@@ -1,8 +1,17 @@
 "server-only";
 
-// import { getSession } from "src/services/auth/session";
+import { getSession } from "src/services/auth/session";
+import { UnauthorizedError } from "src/errors";
 import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
-// import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+// import { NextRequest, NextResponse } from "next/server";
+// import { OpportunityId } from "src/types/opportunity/opportunityResponseTypes";
+
+type ApplicationAddOrganizationApiResponse = {
+  message: string;
+  data: {
+    application_id: string;
+  };
+};
 
 export const handleSavedOpportunity = async (
   type: "DELETE" | "POST",
@@ -36,11 +45,11 @@ export const addSavedOpportunityForOrganization = async ({
 }: {
   organizationId: string;
 }): Promise<ApplicationAddOrganizationApiResponse> => {
-  // const session = await getSession();
+  const session = await getSession();
 
-  // if (!session || !session.token) {
-  //  throw new UnauthorizedError("No active session");
-  // }
+  if (!session || !session.token) {
+   throw new UnauthorizedError("No active session");
+  }
 
   const additionalHeaders: Record<string, string> = {
     "X-SGG-Token": session.token,
@@ -69,11 +78,11 @@ export const deleteSavedOpportunityForOrganization = async ({
   opportunityId: string;
   organizationId: string;
 }): Promise<ApplicationAddOrganizationApiResponse> => {
-  // const session = await getSession();
+  const session = await getSession();
 
-  // if (!session || !session.token) {
-  //   throw new UnauthorizedError("No active session");
-  // }
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
 
   const additionalHeaders: Record<string, string> = {
     "X-SGG-Token": session.token,
