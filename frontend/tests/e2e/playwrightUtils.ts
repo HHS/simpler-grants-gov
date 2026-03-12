@@ -249,7 +249,6 @@ export const openMobileNav = async (page: Page) => {
 export async function refreshPageWithCurrentURL(page: Page) {
   const currentURL = page.url();
   // Use "domcontentloaded" instead of "networkidle" to avoid timeouts on staging,
-  // where third-party scripts (analytics, monitoring) keep the network perpetually busy.
   // All callers follow this with waitForSearchResultsInitialLoad() which handles
   // waiting for meaningful app state.
   await page.goto(currentURL, {
