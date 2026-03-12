@@ -31,5 +31,5 @@ class MockLoginGovOauthClient(BaseOauthClient):
 
         # if we did turn on retries on the mock, do retry stuff
         return OauthTokenResponse(
-                    error="error", error_description="mock oauth token error description"
-                )
+            error="error", error_description="mock oauth token error description"
+        )

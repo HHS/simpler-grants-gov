@@ -691,6 +691,7 @@ def test_agency_user_without_piv_succeeds_when_not_required(
     assert resp_json["message"] == "success"
     assert resp_json["token"] is not None
 
+
 def test_user_callback_retries_success(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
 ):
@@ -744,6 +745,7 @@ def test_user_callback_retries_success(
         .one_or_none()
     )
     assert db_state is None
+
 
 def test_user_callback_retries_failure(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
