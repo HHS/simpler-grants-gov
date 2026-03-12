@@ -56,7 +56,7 @@ export async function authenticateE2eUser(
       .catch(() => false);
 
     if (isAlreadyLoggedIn) {
-      console.log(
+      console.warn(
         "authenticateE2eUser: session already active, skipping MFA login",
       );
     } else {
