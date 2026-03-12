@@ -225,11 +225,13 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
 
         form_file_names = [f"{app_form.form.short_form_name}.pdf"]
 
-        # Only the referenced attachment should be in the zip; orphaned is excluded
+        # Only the referenced attachment should be in the zip; orphaned is excluded.
+        # GrantApplication.xml is also generated because the form has json_to_xml_schema configured.
         validate_files_in_zip(
             submission.file_location,
             {
                 "referenced.txt": "referenced file contents",
+                "GrantApplication.xml": None,
                 "manifest.txt": ["referenced.txt"] + form_file_names,
             }
             | {f: None for f in form_file_names},
