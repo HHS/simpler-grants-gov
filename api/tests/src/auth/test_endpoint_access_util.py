@@ -8,6 +8,7 @@ from src.auth.endpoint_access_util import (
     get_roles_for_app,
     get_roles_for_org,
     get_roles_for_resource,
+    get_users_with_privileges_for_agency,
 )
 from src.constants.lookup_constants import Privilege
 from src.services.users.get_roles_and_privileges import get_roles_and_privileges
@@ -24,6 +25,7 @@ from tests.src.db.models.factories import (
     OrganizationUserFactory,
     OrganizationUserRoleFactory,
     RoleFactory,
+    UserFactory,
 )
 
 ORG_PRIVILEGES = [
@@ -384,3 +386,49 @@ def test_check_user_access(db_session, user):
 
     # Assert no additional queries made
     assert len(queries) == 0
+
+
+def test_get_users_with_privileges_for_agency_deduplicates_user_with_same_privilege_via_multi_roles(
+    db_session, enable_factory_create
+):
+    """User assigned the same privilege via two different roles should appear only once."""
+    agency = AgencyFactory.create()
+    user = UserFactory.create()
+    agency_user = AgencyUserFactory.create(agency=agency, user=user)
+
+    # Two separate roles that both grant PROGRAM_OFFICER_APPROVAL
+    role_a = RoleFactory.create(
+        privileges=[Privilege.PROGRAM_OFFICER_APPROVAL], is_agency_role=True
+    )
+    role_b = RoleFactory.create(
+        privileges=[Privilege.PROGRAM_OFFICER_APPROVAL], is_agency_role=True
+    )
+    AgencyUserRoleFactory.create(agency_user=agency_user, role=role_a)
+    AgencyUserRoleFactory.create(agency_user=agency_user, role=role_b)
+
+    # Another user with the same privilege (should be included)
+    user_with_privilege = UserFactory.create()
+    agency_user_with_privilege = AgencyUserFactory.create(agency=agency, user=user_with_privilege)
+    AgencyUserRoleFactory.create(agency_user=agency_user_with_privilege, role=role_a)
+
+    # Another user in the agency without that privilege (should not be included)
+    user_without_privilege = UserFactory.create()
+    agency_user_without_privilege = AgencyUserFactory.create(
+        agency=agency, user=user_without_privilege
+    )
+    role_without_target_privilege = RoleFactory.create(
+        privileges=[Privilege.MANAGE_AGENCY_MEMBERS], is_agency_role=True
+    )
+    AgencyUserRoleFactory.create(
+        agency_user=agency_user_without_privilege, role=role_without_target_privilege
+    )
+
+    results = get_users_with_privileges_for_agency(
+        db_session, agency, [Privilege.PROGRAM_OFFICER_APPROVAL]
+    )
+
+    assert len(results) == 2
+    result_user_ids = {result.user_id for result in results}
+    assert user.user_id in result_user_ids
+    assert user_with_privilege.user_id in result_user_ids
+    assert user_without_privilege.user_id not in result_user_ids

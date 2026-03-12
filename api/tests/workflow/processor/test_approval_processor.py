@@ -363,7 +363,9 @@ def test_agency_approval_approve_then_decline(db_session, agency, program_office
     )
 
 
-def test_agency_approval_invalid_response_type(db_session, agency, budget_officer, opportunity):
+def test_agency_approval_invalid_response_type(
+    db_session, agency, budget_officer, opportunity, app
+):
     workflow = WorkflowFactory.create(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         current_workflow_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
@@ -394,7 +396,7 @@ def test_agency_approval_null_response_type(db_session, agency, budget_officer, 
 
     with pytest.raises(
         InvalidWorkflowResponseTypeError,
-        match="Approval response type not found for state machine event",
+        match="Approval response type not found in metadata",
     ):
         send_process_event(
             db_session=db_session,
