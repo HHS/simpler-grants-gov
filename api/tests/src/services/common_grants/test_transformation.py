@@ -20,6 +20,7 @@ from common_grants_sdk.schemas.pydantic import (
 )
 from freezegun import freeze_time
 
+from src.api.common_grants.common_grants_schemas import OpportunityCustomFields
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.services.common_grants.transformation import (
     build_filter_info,
@@ -59,6 +60,26 @@ def _legacy_validate_url(value: str | None) -> str | None:
     return None
 
 
+DEFAULT_MOCK_OPP_FIELDS = {
+    "legacy_opportunity_id": 67890,
+    "opportunity_number": "2024-010",
+    "category": "Mandatory",
+    "agency_code": "A2345",
+    "agency_name": "Testing Agency",
+    "top_level_agency_name": "Testing top level agency",
+    "opportunity_assistance_listings": [
+        type(
+            "MockAssistanceListing",
+            (),
+            {
+                "assistance_listing_number": "10.557",
+                "program_title": "Special Supplemental Nutrition Program",
+            },
+        )()
+    ],
+}
+
+
 class TestTransformation:
     """Test the transformation functions."""
 
@@ -73,22 +94,7 @@ class TestTransformation:
                 self.opportunity_status = OpportunityStatus.POSTED
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
                 self.updated_at = datetime(2024, 1, 2, 12, 0, 0)  # Changed from date to datetime
-                self.legacy_opportunity_id = uuid4()
-                self.opportunity_number = 9876
-                self.category = "Federal"
-                self.agency_code = "A1235"
-                self.agency_name = "Test Agency"
-                self.top_level_agency_name = "Dept of Test"
-                self.opportunity_assistance_listings = [
-                    type(
-                        "MockAssistanceListing",
-                        (),
-                        {
-                            "assistance_listing_number": 1234,
-                            "program_title": "Title of Program",
-                        },
-                    )()
-                ]
+                vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
                 self.current_opportunity_summary = type(
                     "MockSummary",
                     (),
@@ -137,6 +143,7 @@ class TestTransformation:
 
         result = transform_opportunity_to_cg(opportunity)
 
+        assert result is not None
         assert result.id == opportunity.opportunity_id
         assert result.title == "Test Opportunity"
         assert result.description == "Test description"
@@ -168,37 +175,41 @@ class TestTransformation:
         # Check custom fields
         assert result.custom_fields is not None
 
-        assert "legacyId" in result.custom_fields
-        assert result.custom_fields["legacyId"].value == opportunity.legacy_opportunity_id
+        assert "legacySerialId" in result.custom_fields
+        assert result.custom_fields["legacySerialId"].value == opportunity.legacy_opportunity_id
 
         assert "federalOpportunityNumber" in result.custom_fields
-        assert result.custom_fields["federalOpportunityNumber"].value == 9876
+        assert result.custom_fields["federalOpportunityNumber"].value == "2024-010"
 
-        assert "category" in result.custom_fields
-        assert result.custom_fields["category"].value == "Federal"
+        assert "federalFundingSource" in result.custom_fields
+        assert result.custom_fields["federalFundingSource"].value == "Mandatory"
 
         assert "agency" in result.custom_fields
-        assert result.custom_fields["agency"].value["agencyCode"] == "A1235"
-        assert result.custom_fields["agency"].value["agencyName"] == "Test Agency"
-        assert result.custom_fields["agency"].value["topLevelAgencyName"] == "Dept of Test"
-
-        assert "assistanceListing" in result.custom_fields
-        assert len(result.custom_fields["assistanceListing"].value) == 1
-        assert result.custom_fields["assistanceListing"].value[0]["assistanceListingNumber"] == 1234
+        assert result.custom_fields["agency"].value["agencyCode"] == "A2345"
+        assert result.custom_fields["agency"].value["agencyName"] == "Testing Agency"
         assert (
-            result.custom_fields["assistanceListing"].value[0]["programTitle"] == "Title of Program"
+            result.custom_fields["agency"].value["topLevelAgencyName"] == "Testing top level agency"
         )
 
-        assert "agencyContact" in result.custom_fields
+        assert "assistanceListings" in result.custom_fields
+        assert len(result.custom_fields["assistanceListings"].value) == 1
         assert (
-            result.custom_fields["agencyContact"].value["description"]
+            result.custom_fields["assistanceListings"].value[0]["assistanceListingNumber"]
+            == "10.557"
+        )
+        assert (
+            result.custom_fields["assistanceListings"].value[0]["programTitle"]
+            == "Special Supplemental Nutrition Program"
+        )
+
+        assert "contactInfo" in result.custom_fields
+        assert (
+            result.custom_fields["contactInfo"].value["description"]
             == "Contact the grants office for questions"
         )
+        assert result.custom_fields["contactInfo"].value["emailAddress"] == "grants@test-agency.gov"
         assert (
-            result.custom_fields["agencyContact"].value["emailAddress"] == "grants@test-agency.gov"
-        )
-        assert (
-            result.custom_fields["agencyContact"].value["emailDescription"] == "Grants Office Email"
+            result.custom_fields["contactInfo"].value["emailDescription"] == "Grants Office Email"
         )
 
         assert "additionalInfo" in result.custom_fields
@@ -265,22 +276,7 @@ class TestTransformation:
                     self.updated_at = datetime(
                         2024, 1, 1, 12, 0, 0
                     )  # Changed from date to datetime
-                    self.legacy_opportunity_id = 12345
-                    self.opportunity_number = "TEST-2024-001"
-                    self.category = "Discretionary"
-                    self.agency_code = "A2345"
-                    self.agency_name = "Testing Dept"
-                    self.top_level_agency_name = "Testing Top Level Agency"
-                    self.opportunity_assistance_listings = [
-                        type(
-                            "MockAssistanceListing",
-                            (),
-                            {
-                                "assistance_listing_number": "93.045",
-                                "program_title": "Test Program",
-                            },
-                        )()
-                    ]
+                    vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
                     self.opportunity_attachments = [
                         type(
                             "MockAttachment",
@@ -327,6 +323,7 @@ class TestTransformation:
 
             opportunity = MockOpportunity(db_status)
             result = transform_opportunity_to_cg(opportunity)
+            assert result is not None
             assert result.status.value == expected_status
 
     @freeze_time("2024-01-03 12:00:00")
@@ -344,22 +341,7 @@ class TestTransformation:
                 self.updated_at = datetime(
                     2024, 1, 1, 12, 0, 0
                 )  # Provide a default datetime instead of None
-                self.legacy_opportunity_id = 67890
-                self.opportunity_number = "2024-010"
-                self.category = "Mandatory"
-                self.agency_code = "A2345"
-                self.agency_name = "Testing Agency"
-                self.top_level_agency_name = "Testing top level agency"
-                self.opportunity_assistance_listings = [
-                    type(
-                        "MockAssistanceListing",
-                        (),
-                        {
-                            "assistance_listing_number": "10.557",
-                            "program_title": "Special Supplemental Nutrition Program",
-                        },
-                    )()
-                ]
+                vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
                 self.opportunity_attachments = [
                     type(
                         "MockAttachment",
@@ -382,6 +364,7 @@ class TestTransformation:
         result = transform_opportunity_to_cg(opportunity)
 
         # The transformation should now succeed even with None summary
+        assert result is not None
         assert result.id == opportunity.opportunity_id
         assert result.title == "Untitled Opportunity"
         assert result.description == "No description available"
@@ -409,22 +392,7 @@ class TestTransformation:
                 self.opportunity_status = type("MockStatus", (), {"value": "posted"})()
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
                 self.updated_at = datetime(2024, 1, 2, 12, 0, 0)  # Changed from date to datetime
-                self.legacy_opportunity_id = 11111
-                self.opportunity_number = "2024-050"
-                self.category = "Discretionary"
-                self.agency_code = "A1234"
-                self.agency_name = "Testing Agency"
-                self.top_level_agency_name = "Testing Top Level Agency"
-                self.opportunity_assistance_listings = [
-                    type(
-                        "MockAssistanceListing",
-                        (),
-                        {
-                            "assistance_listing_number": "47.049",
-                            "program_title": "Mathematical and Physical Sciences",
-                        },
-                    )()
-                ]
+                vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
                 self.opportunity_attachments = [
                     type(
                         "MockAttachment",
@@ -472,6 +440,7 @@ class TestTransformation:
         opportunity = MockOpportunity()
         result = transform_opportunity_to_cg(opportunity)
 
+        assert result is not None
         assert result.description == "No description available"
         assert result.key_dates is not None
         assert result.key_dates.close_date is not None
@@ -489,22 +458,7 @@ class TestTransformation:
                 self.opportunity_status = type("MockStatus", (), {"value": "unknown_status"})()
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
                 self.updated_at = datetime(2024, 1, 1, 12, 0, 0)  # Changed from date to datetime
-                self.legacy_opportunity_id = 22222
-                self.opportunity_number = "2024-007"
-                self.category = "Discretionary"
-                self.agency_code = "A123"
-                self.agency_name = "Dept of Testing"
-                self.top_level_agency_name = "Top Level Testing Dept"
-                self.opportunity_assistance_listings = [
-                    type(
-                        "MockAssistanceListing",
-                        (),
-                        {
-                            "assistance_listing_number": "14.218",
-                            "program_title": "Community Development Block Grants",
-                        },
-                    )()
-                ]
+                vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
                 self.opportunity_attachments = [
                     type(
                         "MockAttachment",
@@ -552,6 +506,7 @@ class TestTransformation:
         opportunity = MockOpportunity()
         result = transform_opportunity_to_cg(opportunity)
 
+        assert result is not None
         assert result.status.value == OppStatusOptions.FORECASTED
 
     def test_transformation_with_url_fixing(self):
@@ -564,22 +519,7 @@ class TestTransformation:
                 self.opportunity_status = type("MockStatus", (), {"value": "posted"})()
                 self.created_at = datetime(2024, 1, 1, 12, 0, 0)
                 self.updated_at = datetime(2024, 1, 2, 12, 0, 0)
-                self.legacy_opportunity_id = 33333
-                self.opportunity_number = "2024-NNH24ZDA"
-                self.category = "Discretionary"
-                self.agency_code = "TST"
-                self.agency_name = "Testing Agency"
-                self.top_level_agency_name = "Top Level Testing Agency"
-                self.opportunity_assistance_listings = [
-                    type(
-                        "MockAssistanceListing",
-                        (),
-                        {
-                            "assistance_listing_number": "43.001",
-                            "program_title": "Science",
-                        },
-                    )()
-                ]
+                vars(self).update(DEFAULT_MOCK_OPP_FIELDS)
                 self.opportunity_attachments = [
                     type(
                         "MockAttachment",
@@ -628,6 +568,7 @@ class TestTransformation:
         result = transform_opportunity_to_cg(opportunity)
 
         # Check that the URL was not fixed (current implementation returns None for invalid URLs)
+        assert result is not None
         assert result.source is None
 
     def test_transform_status_to_cg(self):
@@ -914,6 +855,7 @@ class TestTransformation:
 
         result = transform_search_request_from_cg(filters, sorting, pagination, search_query)
 
+        assert result is not None
         # Check pagination
         assert result["pagination"]["page_offset"] == 1
         assert result["pagination"]["page_size"] == 20
@@ -942,6 +884,7 @@ class TestTransformation:
 
         result = transform_search_request_from_cg(filters, sorting, pagination, None)
 
+        assert result is not None
         # Check pagination
         assert result["pagination"]["page_offset"] == 1
         assert result["pagination"]["page_size"] == 10
@@ -1070,52 +1013,56 @@ class TestTransformation:
             for record in caplog.records
         )
 
-    def test_populate_custom_fields(self):
-        """Test that populate_custom_fields correctly maps all fields from opp_data."""
-        opp_data = {
-            "legacy_opportunity_id": 99001,
-            "opportunity_number": "HHS-2024-001",
-            "category": "Discretionary",
-            "agency_code": "HHS",
-            "agency_name": "Dept of Health and Human Services",
-            "top_level_agency_name": "HHS",
-            "opportunity_assistance_listings": [
-                {"assistance_listing_number": "93.001", "program_title": "Health Research"},
-            ],
-            "opportunity_attachments": [
-                {
-                    "download_path": "https://example.com/nofo.pdf",
-                    "file_name": "nofo.pdf",
-                    "file_description": "Notice of Funding Opportunity",
-                    "file_size_bytes": 102400,
-                    "mime_type": "application/pdf",
-                    "created_at": datetime(2024, 1, 1, 12, 0, 0),
-                    "updated_at": datetime(2024, 1, 2, 12, 0, 0),
-                }
-            ],
-            "summary": {
-                "agency_contact_description": "Contact the grants office",
-                "agency_email_address": "grants@hhs.gov",
-                "agency_email_address_description": "Grants Office Email",
-                "additional_info_url": "https://hhs.gov/grants",
-                "additional_info_url_description": "More info",
-                "fiscal_year": 2024,
-                "is_cost_sharing": False,
-            },
-        }
 
-        result = populate_custom_fields(opp_data)
+class TestPopulateCustomFields:
+    """Tests for the populate_custom_fields function."""
+
+    BASE_OPP_DATA = {
+        "legacy_opportunity_id": 99001,
+        "opportunity_number": "HHS-2024-001",
+        "category": "Discretionary",
+        "agency_code": "HHS",
+        "agency_name": "Dept of Health and Human Services",
+        "top_level_agency_name": "HHS",
+        "opportunity_assistance_listings": [
+            {"assistance_listing_number": "93.001", "program_title": "Health Research"},
+        ],
+        "opportunity_attachments": [
+            {
+                "download_path": "https://example.com/nofo.pdf",
+                "file_name": "nofo.pdf",
+                "file_description": "Notice of Funding Opportunity",
+                "file_size_bytes": 102400,
+                "mime_type": "application/pdf",
+                "created_at": "2024-01-01T12:00:00",
+                "updated_at": "2024-01-02T12:00:00",
+            }
+        ],
+        "summary": {
+            "agency_contact_description": "Contact the grants office",
+            "agency_email_address": "grants@hhs.gov",
+            "agency_email_address_description": "Grants Office Email",
+            "additional_info_url": "https://hhs.gov/grants",
+            "additional_info_url_description": "More info",
+            "fiscal_year": 2024,
+            "is_cost_sharing": False,
+        },
+    }
+
+    def test_all_fields_populated(self):
+        """Test that populate_custom_fields correctly maps all fields when fully populated."""
+        result = populate_custom_fields(self.BASE_OPP_DATA)
 
         assert result is not None
 
-        assert result["legacyId"].field_type == CustomFieldType.INTEGER
-        assert result["legacyId"].value == 99001
+        assert result["legacySerialId"].field_type == CustomFieldType.INTEGER
+        assert result["legacySerialId"].value == 99001
 
         assert result["federalOpportunityNumber"].field_type == CustomFieldType.STRING
         assert result["federalOpportunityNumber"].value == "HHS-2024-001"
 
-        assert result["category"].field_type == CustomFieldType.STRING
-        assert result["category"].value == "Discretionary"
+        assert result["federalFundingSource"].field_type == CustomFieldType.STRING
+        assert result["federalFundingSource"].value == "Discretionary"
 
         assert result["agency"].field_type == CustomFieldType.OBJECT
         assert result["agency"].value == {
@@ -1124,13 +1071,13 @@ class TestTransformation:
             "topLevelAgencyName": "HHS",
         }
 
-        assert result["assistanceListing"].field_type == CustomFieldType.ARRAY
-        assert result["assistanceListing"].value == [
+        assert result["assistanceListings"].field_type == CustomFieldType.ARRAY
+        assert result["assistanceListings"].value == [
             {"assistanceListingNumber": "93.001", "programTitle": "Health Research"}
         ]
 
-        assert result["agencyContact"].field_type == CustomFieldType.OBJECT
-        assert result["agencyContact"].value == {
+        assert result["contactInfo"].field_type == CustomFieldType.OBJECT
+        assert result["contactInfo"].value == {
             "description": "Contact the grants office",
             "emailAddress": "grants@hhs.gov",
             "emailDescription": "Grants Office Email",
@@ -1156,3 +1103,51 @@ class TestTransformation:
         assert attachment["description"] == "Notice of Funding Opportunity"
         assert attachment["sizeInBytes"] == 102400
         assert attachment["mimeType"] == "application/pdf"
+
+    def test_missing_optional_fields(self):
+        """Test that None and missing values are handled gracefully and produce valid schema output."""
+        opp_data = {
+            "legacy_opportunity_id": None,
+            "opportunity_number": None,
+            "category": None,
+            "agency_code": None,
+            "opportunity_assistance_listings": [],
+            "opportunity_attachments": [],
+            "summary": None,
+        }
+
+        result = populate_custom_fields(opp_data)
+
+        # All fields are absent/None so populate_custom_fields should return None
+        assert result is None
+
+        # An empty custom fields dict should pass Marshmallow schema validation without errors
+        schema = OpportunityCustomFields()
+        errors = schema.validate({})
+        assert errors == {}
+
+    def test_malformed_data_types(self):
+        """Test that Marshmallow schema catches malformed data types before they reach API consumers."""
+        opp_data = {
+            **self.BASE_OPP_DATA,
+            "legacy_opportunity_id": "not-an-integer",
+            "summary": {
+                **self.BASE_OPP_DATA["summary"],
+                "fiscal_year": "not-a-year",
+            },
+        }
+
+        # populate_custom_fields passes values through without type validation
+        result = populate_custom_fields(opp_data)
+        assert result is not None
+
+        # Serialize to the format the Marshmallow schema expects and validate
+        serialized = {k: v.model_dump(by_alias=True) for k, v in result.items()}
+        schema = OpportunityCustomFields()
+        errors = schema.validate(serialized)
+
+        # Marshmallow should catch the malformed integer fields
+        assert "legacySerialId" in errors
+        assert "value" in errors["legacySerialId"]
+        assert "fiscalYear" in errors
+        assert "value" in errors["fiscalYear"]

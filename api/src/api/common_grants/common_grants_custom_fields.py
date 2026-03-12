@@ -50,10 +50,10 @@ class CustomField(Schema):
 # ===========================================================================================
 
 
-class LegacyId(CustomField):
+class legacySerialId(CustomField):
     """Storing legacy id for compatibility iwth legacy systems"""
 
-    name = fields.String(required=True, metadata={"example": "legacyId"})
+    name = fields.String(required=True, metadata={"example": "legacySerialId"})
     fieldType = fields.String(required=True, metadata={"example": "integer"})
     value = fields.Integer(required=True, metadata={"example": "12345"})
     description = fields.String(
@@ -64,7 +64,7 @@ class LegacyId(CustomField):
     )
 
 
-class FederalOpportunityNumber(CustomField):
+class federalOpportunityNumber(CustomField):
     """Federal Opportunity Number assigned to this grant opportunity"""
 
     name = fields.String(required=True, metadata={"example": "federalOpportunityNumber"})
@@ -83,10 +83,10 @@ class AssistanceListingValue(Schema):
     programTitle = fields.String(required=True, metadata={"example": "Space Technology"})
 
 
-class AssistanceListing(CustomField):
+class assistanceListings(CustomField):
     """The assistance listing number and program title for this opportunity"""
 
-    name = fields.String(required=True, metadata={"example": "assistanceListing"})
+    name = fields.String(required=True, metadata={"example": "assistanceListings"})
     fieldType = fields.String(required=True, metadata={"example": "array"})
     value = fields.List(fields.Nested(AssistanceListingValue), required=True)
     description = fields.String(
@@ -107,7 +107,7 @@ class AgencyValue(Schema):
     )
 
 
-class Agency(CustomField):
+class agency(CustomField):
     """Information about the agency offering this opportunity"""
 
     name = fields.String(required=True, metadata={"example": "agency"})
@@ -133,7 +133,7 @@ class AttachmentValue(Schema):
     )
 
 
-class Attachments(CustomField):
+class attachments(CustomField):
     """Attachments such as NOFOs or other supplemental documents"""
 
     name = fields.String(required=True, metadata={"example": "attachments"})
@@ -147,10 +147,10 @@ class Attachments(CustomField):
     )
 
 
-class Category(CustomField):
+class federalFundingSource(CustomField):
     """The category type of the grant opportunity"""
 
-    name = fields.String(required=True, metadata={"example": "category"})
+    name = fields.String(required=True, metadata={"example": "federalFundingSource"})
     fieldType = fields.String(required=True, metadata={"example": "string"})
     value = fields.String(required=True, metadata={"example": "discretionary"})
     description = fields.String(
@@ -172,10 +172,10 @@ class AgencyContactValue(Schema):
     )
 
 
-class AgencyContact(CustomField):
+class contactInfo(CustomField):
     """Contact information for the agency managing this opportunity"""
 
-    name = fields.String(required=True, metadata={"example": "agencyContact"})
+    name = fields.String(required=True, metadata={"example": "contactInfo"})
     fieldType = fields.String(required=True, metadata={"example": "object"})
     value = fields.Nested(AgencyContactValue, required=True)
     description = fields.String(
@@ -191,7 +191,7 @@ class AdditionalInfoValue(Schema):
     description = fields.String(allow_none=True, metadata={"example": "Click me for more info"})
 
 
-class AdditionalInfo(CustomField):
+class additionalInfo(CustomField):
     """URL and description for additional information about the opportunity"""
 
     name = fields.String(required=True, metadata={"example": "additionalInfo"})
@@ -205,7 +205,7 @@ class AdditionalInfo(CustomField):
     )
 
 
-class CostSharing(CustomField):
+class costSharing(CustomField):
     """Whether cost sharing or matching funds are required for this opportunity"""
 
     name = fields.String(required=True, metadata={"example": "costSharing"})
@@ -219,7 +219,7 @@ class CostSharing(CustomField):
     )
 
 
-class FiscalYear(CustomField):
+class fiscalYear(CustomField):
     """The fiscal year associated with this opportunity"""
 
     name = fields.String(required=True, metadata={"example": "fiscalYear"})

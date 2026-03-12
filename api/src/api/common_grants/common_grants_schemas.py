@@ -8,16 +8,16 @@ organized by category for better maintainability.
 from typing import Any
 
 from src.api.common_grants.common_grants_custom_fields import (
-    AdditionalInfo,
-    Agency,
-    AgencyContact,
-    AssistanceListing,
-    Attachments,
-    Category,
-    CostSharing,
-    FederalOpportunityNumber,
-    FiscalYear,
-    LegacyId,
+    additionalInfo,
+    agency,
+    assistanceListings,
+    attachments,
+    contactInfo,
+    costSharing,
+    federalFundingSource,
+    federalOpportunityNumber,
+    fiscalYear,
+    legacySerialId,
 )
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.extension import validators as validate
@@ -334,22 +334,22 @@ class OppTimeline(Schema):
     )
 
 
-class CustomFields(Schema):
+class OpportunityCustomFields(Schema):
     """
     This class serves as the collection point for all custom fields on the OpportunityBase schema.
     It is passed to (camelCase) customFields on OpportunityBase with the fields.nested property
     """
 
-    legacyId = fields.Nested(LegacyId, allow_none=True)
-    federalOpportunityNumber = fields.Nested(FederalOpportunityNumber, allow_none=True)
-    assistanceListing = fields.Nested(AssistanceListing, allow_none=True)
-    agency = fields.Nested(Agency, allow_none=True)
-    attachments = fields.Nested(Attachments, allow_none=True)
-    category = fields.Nested(Category, allow_none=True)
-    fiscalYear = fields.Nested(FiscalYear, allow_none=True)
-    costSharing = fields.Nested(CostSharing, allow_none=True)
-    additionalInfo = fields.Nested(AdditionalInfo, allow_none=True)
-    agencyContact = fields.Nested(AgencyContact, allow_none=True)
+    legacySerialId = fields.Nested(legacySerialId, allow_none=True)
+    federalOpportunityNumber = fields.Nested(federalOpportunityNumber, allow_none=True)
+    assistanceListings = fields.Nested(assistanceListings, allow_none=True)
+    agency = fields.Nested(agency, allow_none=True)
+    attachments = fields.Nested(attachments, allow_none=True)
+    federalFundingSource = fields.Nested(federalFundingSource, allow_none=True)
+    fiscalYear = fields.Nested(fiscalYear, allow_none=True)
+    costSharing = fields.Nested(costSharing, allow_none=True)
+    additionalInfo = fields.Nested(additionalInfo, allow_none=True)
+    contactInfo = fields.Nested(contactInfo, allow_none=True)
 
 
 class OpportunityBase(Schema):
@@ -412,7 +412,7 @@ class OpportunityBase(Schema):
         },
     )
     customFields = fields.Nested(
-        CustomFields,
+        OpportunityCustomFields,
         allow_none=True,
         metadata={"description": "Additional custom fields specific to this opportunity"},
     )

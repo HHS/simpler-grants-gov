@@ -381,8 +381,8 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
 
     legacy_opportunity_id = opp_data.get("legacy_opportunity_id")
     if legacy_opportunity_id is not None:
-        custom_fields["legacyId"] = CustomField(
-            name="legacyId",
+        custom_fields["legacySerialId"] = CustomField(
+            name="legacySerialId",
             fieldType=CustomFieldType.INTEGER,
             value=legacy_opportunity_id,
             description="An integer ID for the opportunity, needed for compatibility with legacy systems",
@@ -406,8 +406,8 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
             }
             for listing in listings
         ]
-        custom_fields["assistanceListing"] = CustomField(
-            name="assistanceListing",
+        custom_fields["assistanceListings"] = CustomField(
+            name="assistanceListings",
             fieldType=CustomFieldType.ARRAY,
             value=listing_values,
             description="The assistance listing number and program title for this opportunity",
@@ -415,8 +415,8 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
 
     category = opp_data.get("category")
     if category is not None:
-        custom_fields["category"] = CustomField(
-            name="category",
+        custom_fields["federalFundingSource"] = CustomField(
+            name="federalFundingSource",
             fieldType=CustomFieldType.STRING,
             value=str(category),
             description="The category type of the grant opportunity",
@@ -442,8 +442,8 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
         if any(
             [agency_contact_description, agency_email_address, agency_email_address_description]
         ):
-            custom_fields["agencyContact"] = CustomField(
-                name="agencyContact",
+            custom_fields["contactInfo"] = CustomField(
+                name="contactInfo",
                 fieldType=CustomFieldType.OBJECT,
                 value={
                     "description": agency_contact_description,
