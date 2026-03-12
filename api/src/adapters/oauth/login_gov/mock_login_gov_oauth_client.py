@@ -8,7 +8,7 @@ class MockLoginGovOauthClient(BaseOauthClient):
         self.responses: dict[str, OauthTokenResponse] = {}
 
         # Used to control testing of retry behavior for Login.gov token lookup calls
-        self.retries: dict[str, OauthTokenResponse] = {}
+        self.retries: dict[str, int] = {}
 
     def add_token_response(self, code: str, response: OauthTokenResponse) -> None:
         self.responses[code] = response
