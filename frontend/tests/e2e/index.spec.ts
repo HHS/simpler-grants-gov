@@ -24,7 +24,7 @@ test(
     const newPage = await pagePromise;
     await newPage.waitForLoadState();
     await expect(newPage).toHaveURL(
-      /^https:\/\/github\.com\/HHS\/simpler-grants-gov/,
+      "https://github.com/HHS/simpler-grants-gov",
     );
   },
 );
