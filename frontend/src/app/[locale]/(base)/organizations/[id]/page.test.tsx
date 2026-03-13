@@ -102,27 +102,25 @@ describe("Organizations page feature flag wiring", () => {
     );
   });
 
-  // it("the happy path page should have a table and heading", async () => {
-  //   // FAILING
-  //   const component = await OrganizationsPage({
-  //     params: Promise.resolve({ locale: "en" }),
-  //   });
-  //   render(component);
+  it("the happy path page should have a table and heading", async () => {
+    const component = await OrganizationsPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+    render(component);
 
-  //   expect(await screen.findByText("pageTitle")).toBeVisible();
-  //   expect(await screen.findByTestId("user-org-list")).toBeVisible();
-  // });
+    expect(await screen.findByText("pageTitle")).toBeVisible();
+    expect(await screen.findByTestId("user-org-list")).toBeVisible();
+  });
 
-  // it("errors fetching data show an error message", async () => {
-  //   // FAILING
-  //   organizations.mockRejectedValue(new Error("failure"));
-  //   const component = await OrganizationsPage({
-  //     params: Promise.resolve({ locale: "en" }),
-  //   });
-  //   render(component);
-  //   expect(await screen.findByTestId("alert")).toBeVisible();
-  //   expect(await screen.findByText("errorMessage")).toBeVisible();
-  // });
+  it("errors fetching data show an error message", async () => {
+    organizations.mockRejectedValue(new Error("failure"));
+    const component = await OrganizationsPage({
+      params: Promise.resolve({ locale: "en" }),
+    });
+    render(component);
+    expect(await screen.findByTestId("alert")).toBeVisible();
+    expect(await screen.findByText("errorMessage")).toBeVisible();
+  });
 
   it("unauthenticated users throw an error", async () => {
     authentication.mockResolvedValue({
