@@ -185,7 +185,6 @@ export interface UiSchemaFieldList {
   type: "fieldList";
   label: string;
   name: string;
-  definition: DefinitionPath;
   description?: string;
   defaultSize: number;
   children: UiSchemaField[];
