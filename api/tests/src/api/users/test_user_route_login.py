@@ -690,3 +690,98 @@ def test_agency_user_without_piv_succeeds_when_not_required(
     resp_json = resp.get_json()
     assert resp_json["message"] == "success"
     assert resp_json["token"] is not None
+
+
+def test_user_callback_retries_success(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
+):
+    # Create state so the callback gets past the check
+    login_gov_state = LoginGovStateFactory.create()
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id="bob-xyz",
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+    mock_oauth_client.retries[code] = 3
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["is_user_new"] == "0"
+    assert resp_json["message"] == "success"
+    assert resp_json["token"] is not None
+
+    user_token_session = parse_jwt_for_user(resp_json["token"], db_session)
+    assert user_token_session.expires_at > datetime_util.utcnow()
+    assert user_token_session.is_valid is True
+
+    # Make sure the external user record is created with expected IDs
+    external_user = (
+        db_session.query(LinkExternalUser)
+        .filter(
+            LinkExternalUser.user_id == user_token_session.user_id,
+            LinkExternalUser.external_user_id == "bob-xyz",
+        )
+        .one_or_none()
+    )
+    assert external_user is not None
+
+    # Make sure the login gov state was deleted
+    db_state = (
+        db_session.query(LoginGovState)
+        .filter(LoginGovState.login_gov_state_id == login_gov_state.login_gov_state_id)
+        .one_or_none()
+    )
+    assert db_state is None
+
+
+def test_user_callback_retries_failure(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
+):
+    # Create state so the callback gets past the check
+    login_gov_state = LoginGovStateFactory.create()
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id="bob-xyz",
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+    mock_oauth_client.retries[code] = 4
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "internal error"
+
+    # History contains each redirect, we redirected just once
+    assert len(resp.history) == 1
+    redirect = resp.history[0]
+
+    assert redirect.status_code == 302
+    redirect_url = urllib.parse.urlparse(redirect.headers["Location"])
+    assert redirect_url.path == "/v1/users/login/result"

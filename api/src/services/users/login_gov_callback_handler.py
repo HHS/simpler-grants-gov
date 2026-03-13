@@ -161,15 +161,26 @@ def handle_login_gov_token(
     # call the token endpoint (make a client)
     # https://developers.login.gov/oidc/token/
     client = get_login_gov_client()
-    response = client.get_token(
-        OauthTokenRequest(
-            code=login_gov_data.code, client_assertion=get_login_gov_client_assertion()
+    limit = 3
+    tries = 0
+    while tries < limit:
+        tries += 1
+        response = client.get_token(
+            OauthTokenRequest(
+                code=login_gov_data.code, client_assertion=get_login_gov_client_assertion()
+            )
         )
-    )
 
-    # If this request failed, we'll assume we're the issue and 500
-    if response.is_error_response():
-        raise_flask_error(500, response.error_description)
+        # If this request failed, we'll assume we're the issue and 500
+        if response.is_error_response():
+            if tries == limit:
+                raise_flask_error(500, response.error_description)
+            else:
+                logger.info(
+                    "Retrying call to Login.gov after receiving error",
+                    extra={"tries": tries, "limit": limit},
+                )
+                continue
 
     # Process the token response from login.gov
     # which will create/update a user in the DB
