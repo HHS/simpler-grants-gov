@@ -36,23 +36,61 @@ class SetupCertUserTaskStatus(StrEnum):
     TCERTIFICATE_IS_EXPIRED = "Tcertificate is expired"
     TCERTIFICATE_NOT_FOUND = "Tcertificate not found"
     TCERTIFICATE_IS_MISSING_SERIAL_NUMBER = "Tcertificate is missing serial number"
+    MISSING_REQUIRED_INPUT_VALUES = "Missing required input values"
 
 
 @task_blueprint.cli.command("setup-cert-user", help="Setup the LegacyCertificate and User")
-@click.option("--tcertificates-id", "-t", help="tcertificates_id on Staging Tcertificate")
-@click.option("--role-ids", "-t", help="role_id of role that needs to be added", multiple=True)
+@click.option(
+    "--tcertificates-id",
+    help="tcertificates_id on Staging Tcertificate, if set to none then check for manual settings",
+)
+@click.option("--role-ids", help="role_id of role that needs to be added", multiple=True)
+@click.option("--serial-number", default=None, help="manually set the serial number of certificate")
+@click.option("--agency-code", default=None, help="manually set the agency_code of the certificate")
+@click.option("--cert-id", default=None, help="manually set the cert_id of the certificate")
 @flask_db.with_db_session()
 @ecs_background_task(task_name="setup-cert-user")
-def setup_cert_user(db_session: db.Session, tcertificates_id: str, role_ids: list[str]) -> None:
-    SetupCertUserTask(db_session, tcertificates_id, role_ids).run_task()
+def setup_cert_user(
+    db_session: db.Session,
+    tcertificates_id: str | None,
+    role_ids: list[str],
+    serial_number: str | None,
+    agency_code: str | None,
+    cert_id: str | None,
+) -> None:
+    SetupCertUserTask(
+        db_session, tcertificates_id, role_ids, serial_number, agency_code, cert_id
+    ).run_task()
 
 
 class SetupCertUserTask(Task):
 
-    def __init__(self, db_session: db.Session, tcertificates_id: str, role_ids: list[str]):
+    def __init__(
+        self,
+        db_session: db.Session,
+        tcertificates_id: str | None,
+        role_ids: list[str],
+        serial_number: str | None = None,
+        agency_code: str | None = None,
+        cert_id: str | None = None,
+    ):
+        """
+        To run command in environment <env>
+            bin/run-command api <env> '["poetry", "run", "flask", "task", "setup-cert-user", "--tcertificates-id", "<tcertificates id>", "--role-ids", "<role id>"]'
+        """
         super().__init__(db_session)
         self.tcertificates_id = tcertificates_id
         self.role_ids = role_ids
+
+        """
+        In order to manually create a test certificate these values are required and enter no value for tcertificates-id
+
+        To generate a test cert locally run:
+            make cmd args="task setup-cert-user --role-ids 446bafb9-41ee-46ac-8584-889aedcd5142 --agency-code <agency code> --serial-number <serial number> --cert-id <cert id>"
+        """
+        self.serial_number = serial_number
+        self.agency_code = agency_code
+        self.cert_id = cert_id
 
     def run_task(self) -> None:
         with self.db_session.begin():
@@ -64,52 +102,74 @@ class SetupCertUserTask(Task):
         if roles is None:
             return SetupCertUserTaskStatus.INVALID_ROLE_IDS
 
+        if self.tcertificates_id is None:
+            logger.info("setting up test cert user")
+            if self.serial_number and self.agency_code and self.cert_id:
+                agency = self.db_session.scalar(
+                    select(Agency).where(Agency.agency_code == self.agency_code)
+                )
+                if agency:
+                    self.process_legacy_certificate(
+                        self.cert_id, self.serial_number, agency, [], roles, None
+                    )
+                    return SetupCertUserTaskStatus.SUCCESS
+                else:
+                    logger.info("Agency not found")
+                    return SetupCertUserTaskStatus.AGENCY_NOT_FOUND
+            else:
+                logger.info("Missing required inputs")
+                return SetupCertUserTaskStatus.MISSING_REQUIRED_INPUT_VALUES
+
         tcertificate = self.get_tcertificate()
-        if tcertificate is None:
+        if tcertificate is not None:
+            if not tcertificate.serial_num:
+                logger.warning("Tcertificate is missing serial number")
+                return SetupCertUserTaskStatus.TCERTIFICATE_IS_MISSING_SERIAL_NUMBER
+            valid_expiration_date = tcertificate.expirationdate or FUTURE_DATE
+            if valid_expiration_date <= datetime_util.get_now_us_eastern_date():
+                logger.warning("Cert is expired")
+                return SetupCertUserTaskStatus.TCERTIFICATE_IS_EXPIRED
+            if self.is_existing_certificate(tcertificate):
+                logger.warning("LegacyCertificate already exists")
+                return SetupCertUserTaskStatus.LEGACY_CERTIFICATE_ALREADY_EXISTS
+            agency, related_agencies = self.get_agencies(tcertificate)
+        else:
             logger.warning("Tcertificate not found")
             return SetupCertUserTaskStatus.TCERTIFICATE_NOT_FOUND
-        if not tcertificate.serial_num:
-            logger.warning("Tcertificate is missing serial number")
-            return SetupCertUserTaskStatus.TCERTIFICATE_IS_MISSING_SERIAL_NUMBER
-        valid_expiration_date = tcertificate.expirationdate or FUTURE_DATE
-        if valid_expiration_date <= datetime_util.get_now_us_eastern_date():
-            logger.warning("Cert is expired")
-            return SetupCertUserTaskStatus.TCERTIFICATE_IS_EXPIRED
-        if self.is_existing_certificate(tcertificate):
-            logger.warning("LegacyCertificate already exists")
-            return SetupCertUserTaskStatus.LEGACY_CERTIFICATE_ALREADY_EXISTS
-
-        agency, related_agencies = self.get_agencies(tcertificate)
         if agency is None:
             return SetupCertUserTaskStatus.AGENCY_NOT_FOUND
-
         else:
-            self.process_cert_user(
-                roles, tcertificate, agency, related_agencies, valid_expiration_date
+            self.process_legacy_certificate(
+                tcertificate.currentcertid,
+                tcertificate.serial_num,
+                agency,
+                related_agencies,
+                roles,
+                valid_expiration_date,
             )
         logger.info("setup cert user complete")
         return SetupCertUserTaskStatus.SUCCESS
 
-    def process_cert_user(
+    def process_legacy_certificate(
         self,
-        roles: list[Role],
-        tcertificate: staging.certificates.Tcertificates,
+        cert_id: str,
+        serial_number: str | None,
         agency: Agency,
         related_agencies: list[Agency],
-        valid_expiration_date: date,
+        roles: list[Role],
+        valid_expiration_date: date | None,
     ) -> None:
         all_agencies = related_agencies + [agency]
         user = self.create_user_with_agency_roles(all_agencies, roles)
         legacy_certificate = LegacyCertificate(
             legacy_certificate_id=uuid.uuid4(),
             agency=agency,
-            cert_id=tcertificate.currentcertid,
-            expiration_date=valid_expiration_date,
-            serial_number=tcertificate.serial_num,
+            cert_id=cert_id,
+            expiration_date=valid_expiration_date or FUTURE_DATE,
+            serial_number=serial_number,
             user=user,
         )
         self.db_session.add(legacy_certificate)
-
         logger.info(
             "Created legacy certificate",
             extra={

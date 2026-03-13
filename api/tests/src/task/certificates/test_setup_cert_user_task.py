@@ -1,4 +1,5 @@
 import logging
+import random
 import uuid
 from datetime import date
 
@@ -42,11 +43,86 @@ class TestSetupCertUserTask(BaseTestClass):
         self, enable_factory_create, db_session, caplog
     ):
         role = RoleFactory.create(is_agency_role=True)
-        tcert_id = str(uuid.uuid4())
-        result = SetupCertUserTask(db_session, tcert_id, [str(role.role_id)]).setup_cert()
-        assert result == SetupCertUserTaskStatus.TCERTIFICATE_NOT_FOUND
-        warning_messages = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
-        assert "Tcertificate not found" in warning_messages
+        result = SetupCertUserTask(db_session, None, [str(role.role_id)]).setup_cert()
+        assert result == SetupCertUserTaskStatus.MISSING_REQUIRED_INPUT_VALUES
+
+    def test_setup_cert_user_fails_to_create_test_cert_if_missing_required_agency(
+        self, enable_factory_create, db_session, caplog
+    ):
+        role = RoleFactory.create(is_agency_role=True)
+        CERT_ID = f"{random.randint(1000, 9999)}"
+        result = SetupCertUserTask(
+            db_session, None, [str(role.role_id)], None, "garbage-agency-code", CERT_ID
+        ).setup_cert()
+        assert result == SetupCertUserTaskStatus.MISSING_REQUIRED_INPUT_VALUES
+        legacy_certificate = (
+            db_session.query(LegacyCertificate).filter(LegacyCertificate.cert_id == CERT_ID).first()
+        )
+        assert legacy_certificate is None
+
+    def test_setup_cert_user_fails_to_create_test_cert_if_missing_required_serial_number(
+        self, enable_factory_create, db_session, caplog
+    ):
+        role = RoleFactory.create(is_agency_role=True)
+        agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
+        CERT_ID = f"{random.randint(1000, 9999)}"
+        result = SetupCertUserTask(
+            db_session, None, [str(role.role_id)], None, f"{agency.agency_code}", CERT_ID
+        ).setup_cert()
+        assert result == SetupCertUserTaskStatus.MISSING_REQUIRED_INPUT_VALUES
+        legacy_certificate = (
+            db_session.query(LegacyCertificate).filter(LegacyCertificate.cert_id == CERT_ID).first()
+        )
+        assert legacy_certificate is None
+
+    def test_setup_cert_user_fails_to_create_test_cert_if_missing_required_cert_id(
+        self, enable_factory_create, db_session, caplog
+    ):
+        role = RoleFactory.create(is_agency_role=True)
+        agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
+        result = SetupCertUserTask(
+            db_session, None, [str(role.role_id)], None, f"{agency.agency_code}", None
+        ).setup_cert()
+        assert result == SetupCertUserTaskStatus.MISSING_REQUIRED_INPUT_VALUES
+        legacy_certificate = (
+            db_session.query(LegacyCertificate)
+            .filter(LegacyCertificate.agency_id == agency.agency_id)
+            .first()
+        )
+        assert legacy_certificate is None
+
+    def test_setup_cert_user_fails_to_create_test_cert_if_missing_required_agency_code(
+        self, enable_factory_create, db_session, caplog
+    ):
+        role = RoleFactory.create(is_agency_role=True)
+        CERT_ID = f"{random.randint(1000, 9999)}"
+        SERIAL_NUMBER = f"{random.randint(1000, 9999)}"
+        result = SetupCertUserTask(
+            db_session, None, [str(role.role_id)], SERIAL_NUMBER, None, CERT_ID
+        ).setup_cert()
+        assert result == SetupCertUserTaskStatus.MISSING_REQUIRED_INPUT_VALUES
+        legacy_certificate = (
+            db_session.query(LegacyCertificate).filter(LegacyCertificate.cert_id == CERT_ID).first()
+        )
+        assert legacy_certificate is None
+
+    def test_setup_cert_user_creates_test_cert(self, enable_factory_create, db_session, caplog):
+        role = RoleFactory.create(is_agency_role=True)
+        agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
+        CERT_ID = f"{random.randint(1000, 9999)}"
+        SERIAL_NUMBER = f"{random.randint(1000, 9999)}"
+        result = SetupCertUserTask(
+            db_session, None, [str(role.role_id)], SERIAL_NUMBER, agency.agency_code, CERT_ID
+        ).setup_cert()
+        assert result == SetupCertUserTaskStatus.SUCCESS
+        legacy_certificate = (
+            db_session.query(LegacyCertificate)
+            .filter(LegacyCertificate.cert_id == CERT_ID)
+            .filter(LegacyCertificate.serial_number == SERIAL_NUMBER)
+            .filter(LegacyCertificate.agency_id == agency.agency_id)
+            .first()
+        )
+        assert legacy_certificate
 
     def test_setup_cert_user_if_cert_is_expired(self, enable_factory_create, db_session, caplog):
         role = RoleFactory.create(is_agency_role=True)
