@@ -13,6 +13,8 @@ export const PivRequiredModal = () => {
   const [showPivError, setShowPivError] = useState<string | null>("false");
   const t = useTranslations("PivRequiredModal");
   const pivModalRef = useRef<ModalRef | null>(null);
+  // We expect this modal will only display or not when the application is first mounted
+  // There shouldn't be any cases where the modal needs to open in response to activity on the application
   useEffect(() => {
     setShowPivError(SessionStorage.getItem("showPivError"));
   }, []);
