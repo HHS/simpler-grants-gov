@@ -15,7 +15,10 @@ from src.services.opportunities_grantor_v1.get_opportunity_list import (
     get_opportunity_list_for_grantors,
 )
 from src.services.opportunities_grantor_v1.opportunity_creation import create_opportunity
-from src.services.opportunities_grantor_v1.opportunity_summaries import create_opportunity_summary
+from src.services.opportunities_grantor_v1.opportunity_summaries import (
+    create_opportunity_summary,
+    update_opportunity_summary,
+)
 from src.services.opportunities_grantor_v1.opportunity_update import update_opportunity
 
 logger = logging.getLogger(__name__)
@@ -148,4 +151,38 @@ def opportunity_summary_create(
         opportunity_summary = create_opportunity_summary(
             db_session, opportunity_id, json_data, user
         )
+    return response.ApiResponse(message="Success", data=opportunity_summary)
+
+
+@opportunity_grantor_blueprint.put(
+    "/opportunities/<uuid:opportunity_id>/summary/<uuid:opportunity_summary_id>"
+)
+@opportunity_grantor_blueprint.input(
+    opportunity_grantor_schemas.OpportunitySummaryUpdateRequestV1Schema(), location="json"
+)
+@opportunity_grantor_blueprint.output(
+    opportunity_grantor_schemas.OpportunitySummaryUpdateResponseV1Schema()
+)
+@jwt_or_api_user_key_multi_auth.login_required
+@opportunity_grantor_blueprint.doc(
+    responses=[200, 403, 404, 422, 500], security=jwt_or_api_user_key_security_schemes
+)
+@flask_db.with_db_session()
+def opportunity_summary_update(
+    db_session: db.Session, opportunity_id: UUID, opportunity_summary_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    """Update an existing opportunity summary"""
+    add_extra_data_to_current_request_logs(
+        {"opportunity_id": opportunity_id, "opportunity_summary_id": opportunity_summary_id}
+    )
+    logger.info("PUT /v1/grantors/opportunities/:opportunity_id/summary/:opportunity_summary_id")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        opportunity_summary = update_opportunity_summary(
+            db_session, opportunity_id, opportunity_summary_id, json_data, user
+        )
+
     return response.ApiResponse(message="Success", data=opportunity_summary)
