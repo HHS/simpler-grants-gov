@@ -25,7 +25,7 @@ jobs:
   e2e-tests-deployed:
     runs-on: ubuntu-22.04
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         shard: [1, 2, 3, 4]
         total_shards: [4]
@@ -55,3 +55,11 @@ jobs:
     secrets: inherit
     with:
       run_id: ${{ github.run_id }}
+
+  send-slack-notification:
+    if: failure()
+    needs: [create-report]
+    uses: ./.github/workflows/send-slack-notification.yml
+    with:
+      "channel_id": "alerts-e2e"
+    secrets: inherit
