@@ -427,7 +427,7 @@ FORM_UI_SCHEMA = [
     },
 ]
 
-FORM_RULE_SCHEMA = {}
+FORM_RULE_SCHEMA: dict[str, dict] = {}
 
 FORM_XML_TRANSFORM_RULES = {
     "_xml_config": {
