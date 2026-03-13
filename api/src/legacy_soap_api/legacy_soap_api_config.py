@@ -153,6 +153,11 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             response_operation_name="ConfirmApplicationDeliveryResponse",
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
         ),
+        "UpdateApplicationInfoRequest": SOAPOperationConfig(
+            request_operation_name="UpdateApplicationInfoRequest",
+            response_operation_name="UpdateApplicationInfoResponse",
+            privileges={Privilege.LEGACY_AGENCY_ASSIGNER},
+        ),
     },
 }
 
