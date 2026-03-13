@@ -2,7 +2,6 @@ import logging
 from typing import Any, cast
 
 from statemachine import StateChart
-from statemachine.event_data import EventData
 
 from src.constants.lookup_constants import ApprovalResponseType
 from src.db.models.workflow_models import Workflow
@@ -115,6 +114,3 @@ class BaseStateMachine(StateChart):
             get_approval_response_type(state_machine_event)
             == ApprovalResponseType.REQUIRES_MODIFICATION
         )
-
-    def on_enter(self, state_machine_event: StateMachineEvent, event_data: EventData) -> None:
-        print(event_data)

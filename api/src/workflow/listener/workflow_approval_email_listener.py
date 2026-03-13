@@ -54,7 +54,7 @@ class WorkflowApprovalEmailListener:
             )
             return
 
-        # If the state machine's state is changing as part of this
+        # If the state machine's state is NOT changing as part of this
         # then we don't want to do anything. We only want to send
         # emails when first entering the state.
         if event_data.source == target_state:

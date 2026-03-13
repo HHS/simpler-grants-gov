@@ -35,4 +35,9 @@ class WorkflowConfig:
         self.state_approval_mapping = {}
 
         for approval_config in self.approval_mapping.values():
+            if approval_config.approval_state in self.state_approval_mapping:
+                raise Exception(
+                    f"Approval state {approval_config.approval_state} is configured on two separate approvals - must be unique"
+                )
+
             self.state_approval_mapping[approval_config.approval_state] = approval_config
