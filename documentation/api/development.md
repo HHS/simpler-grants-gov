@@ -144,8 +144,9 @@ Running in the native/local approach may require additional packages to be insta
 
 4. This still requires Docker as the database and services all still run within Docker.
 5. Certain environment variables require different paths when running outside of Docker.
-   You can handle this by setting these environment variables yourself via a means other
-   than our .env files. One approach is to have an `.envrc` in the api directory that works with [direnv](https://direnv.net/)
+   You can handle this by setting these environment variables yourself via you `.bashrc`
+   or `.zshrc` file. Another approach is to have an `.envrc` in the api directory and
+   use [direnv](https://direnv.net/) to have a directory-based shell file.
 
 ```shell
 #!/bin/bash
