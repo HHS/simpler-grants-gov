@@ -7,14 +7,14 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
-from src.constants.lookup_constants import (
-    ApplicationStatus,
-    LegacyUserStatus,
-    OpportunityStatus,
-    Privilege,
-    RoleType,
+from src.constants.lookup_constants import ApplicationStatus, LegacyUserStatus, OpportunityStatus
+from src.constants.static_role_values import (
+    INTERNAL_WORKFLOW_USER_ROLE,
+    NAVA_INTERNAL_ROLE,
+    ORG_ADMIN,
+    ORG_MEMBER,
+    SYSTEM_WORKFLOW_USER_ROLE,
 )
-from src.constants.static_role_values import ORG_ADMIN, ORG_MEMBER
 from src.db.models.competition_models import Application, Competition
 from src.db.models.entity_models import Organization
 from src.db.models.opportunity_models import (
@@ -68,32 +68,74 @@ def setup_org(
     return organization
 
 
-def seed_internal_admin(db_session: db.Session) -> None:
+def create_internal_users(db_session: db.Session) -> None:
     """
-    Seeds a local admin user with the 'manage_internal_roles' privilege
-    and a static API key.
+    Create internal users of varying kinds
     """
-    logger.info("Creating internal admin user")
+    user_scenarios = []
+    ###############################
+    # Internal Nava user
+    ###############################
+    # a local admin user with the 'manage_internal_roles' privilege and a static API key.
 
-    admin_role = factories.RoleFactory.create(
-        role_name="Internal Admin", is_core=True, privileges=[Privilege.MANAGE_INTERNAL_ROLES]
-    )
-
-    factories.LinkRoleRoleTypeFactory.create(role=admin_role, role_type=RoleType.INTERNAL)
-
-    admin_user = (
+    (
         UserBuilder(
             uuid.UUID("7c3e5d1e-8a2f-4e5a-8b1c-9d2e3f4a5b6c"), db_session, "internal admin user"
         )
         .with_oauth_login("admin_user")
         .with_api_key("admin_key")
         .with_jwt_auth()
+        .with_internal_role(NAVA_INTERNAL_ROLE)
         .build()
     )
 
-    factories.InternalUserRoleFactory.create(user=admin_user, role=admin_role)
-
+    user_scenarios.append("admin_user - Internal NAVA admin user")
     logger.info("Internal admin user created. Key: 'admin_key'")
+
+    ###############################
+    # Workflow management user
+    ###############################
+    (
+        UserBuilder(
+            uuid.UUID("aed2ad32-8427-41bd-aee7-199310292941"),
+            db_session,
+            "Workflow Management System User",
+        )
+        .with_api_key("local-workflow-user-api-key")
+        .with_profile(first_name="System", last_name="User")
+        .with_internal_role(SYSTEM_WORKFLOW_USER_ROLE)
+        .build()
+    )
+
+    user_scenarios.append("Workflow management user - Needed for certain workflow related tasks")
+
+    ###############################
+    # Internal workflow user that can send events
+    ###############################
+    (
+        UserBuilder(
+            uuid.UUID("13f0e322-66b9-4e28-80de-9429fc1c0449"),
+            db_session,
+            "Internal workflow user that can send events",
+        )
+        .with_api_key("internal_workflow_user_key")
+        .with_internal_role(INTERNAL_WORKFLOW_USER_ROLE)
+        .build()
+    )
+
+    user_scenarios.append(
+        "Internal workflow user that can send events - capable of sending events at the workflow API"
+    )
+
+    ##############################################################
+    # Log output
+    ##############################################################
+
+    # Log summary of all created user scenarios
+    logger.info("=== INTERNAL USER SCENARIOS SUMMARY ===")
+    logger.info(f"Created {len(user_scenarios)} internal user scenarios with role-based access:")
+    for scenario in user_scenarios:
+        logger.info(f"• {scenario}")
 
 
 #############################################################
@@ -355,25 +397,6 @@ def _build_organizations_and_users(
     )
 
     user_scenarios.append("api_user - API-only user (no OAuth, API key only)")
-
-    ###############################
-    # Workflow management user
-    ###############################
-    (
-        UserBuilder(
-            uuid.UUID("aed2ad32-8427-41bd-aee7-199310292941"),
-            db_session,
-            "Workflow Management System User",
-        )
-        .with_api_key("local-workflow-user-api-key")
-        .with_profile(first_name="System", last_name="User")
-        .with_internal_role(
-            "Workflow internal role", privileges=[Privilege.INTERNAL_WORKFLOW_ACCESS]
-        )
-        .build()
-    )
-
-    user_scenarios.append("Workflow management user - Needed for certain workflow related tasks")
 
     ##############################################################
     # Log output

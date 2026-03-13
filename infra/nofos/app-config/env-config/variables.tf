@@ -2,13 +2,6 @@ variable "app_name" {
   type = string
 }
 
-variable "enable_notifications" {
-  type        = bool
-  description = "Enable notifications for the application"
-  default     = false
-
-}
-
 variable "certificate_arn" {
   type        = string
   description = "The ARN of the certificate to use for the application"
@@ -18,11 +11,6 @@ variable "certificate_arn" {
 variable "default_region" {
   description = "default region for the project"
   type        = string
-}
-
-variable "has_search" {
-  type    = bool
-  default = false
 }
 
 variable "domain_name" {
@@ -43,14 +31,43 @@ variable "enable_https" {
   default     = false
 }
 
+variable "enable_identity_provider" {
+  type        = bool
+  description = "Enables identity provider"
+  default     = false
+}
+
+variable "enable_notifications" {
+  type        = bool
+  description = "Enables notifications"
+  default     = false
+}
+
 variable "environment" {
   description = "name of the application environment (e.g. dev, staging, prod)"
   type        = string
 }
 
+variable "extra_identity_provider_callback_urls" {
+  type        = list(string)
+  description = "List of additional URLs that the identity provider will redirect the user to after a successful sign-in. Used for local development."
+  default     = []
+}
+
+variable "extra_identity_provider_logout_urls" {
+  type        = list(string)
+  description = "List of additional URLs that the identity provider will redirect the user to after signing out. Used for local development."
+  default     = []
+}
+
 variable "has_database" {
   type    = bool
   default = true
+}
+
+variable "has_incident_management_service" {
+  type    = bool
+  default = false
 }
 
 variable "network_name" {
@@ -64,57 +81,17 @@ variable "project_name" {
 
 variable "service_cpu" {
   type    = number
-  default = 3
+  default = 1024
 }
 
-variable "database_instance_count" {
-  description = "Number of database instances. Should be 2+ for production environments."
-  type        = number
-  default     = 1
+variable "service_desired_instance_count" {
+  type    = number
+  default = 1
 }
 
-variable "database_enable_http_endpoint" {
-  description = "Enable HTTP endpoint (data API). Enables the Query Editor in the AWS Console."
-  type        = bool
-  default     = false
-}
-
-variable "database_max_capacity" {
-  description = "Maximum capacity of the Aurora Serverless v2 cluster"
-  type        = number
-}
-
-variable "database_min_capacity" {
-  description = "Minimum capacity of the Aurora Serverless v2 cluster"
-  type        = number
-}
-
-variable "instance_cpu" {
-  description = "CPU units for the ECS container instances"
-  type        = number
-  default     = 1024
-}
-
-variable "instance_memory" {
-  description = "Memory in MiB for the ECS container instances"
-  type        = number
-  default     = 4096
-}
-
-variable "instance_desired_instance_count" {
-  description = "Number of desired ECS container instances for the service"
-  type        = number
-  default     = 1
-}
-
-variable "instance_scaling_max_capacity" {
-  description = "Maximum number of ECS container instances for the service"
-  type        = number
-}
-
-variable "instance_scaling_min_capacity" {
-  description = "Minimum number of ECS container instances for the service"
-  type        = number
+variable "service_memory" {
+  type    = number
+  default = 4096
 }
 
 variable "service_override_extra_environment_variables" {
@@ -124,6 +101,26 @@ variable "service_override_extra_environment_variables" {
     Map from environment variable name to environment variable value
   EOT
   default     = {}
+}
+
+# Database variables
+
+variable "database_instance_count" {
+  description = "Number of database instances. Should be 2+ for production environments."
+  type        = number
+  default     = 1
+}
+
+variable "database_max_capacity" {
+  description = "Maximum capacity of the Aurora Serverless v2 cluster"
+  type        = number
+  default     = 1
+}
+
+variable "database_min_capacity" {
+  description = "Minimum capacity of the Aurora Serverless v2 cluster"
+  type        = number
+  default     = 1
 }
 
 variable "database_engine_version" {

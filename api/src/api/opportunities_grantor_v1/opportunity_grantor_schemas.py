@@ -1,3 +1,7 @@
+from datetime import timedelta
+
+from marshmallow import ValidationError, validates_schema
+
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.opportunities_v1.opportunity_schemas import (
     OpportunityAttachmentV1Schema,
@@ -5,9 +9,16 @@ from src.api.opportunities_v1.opportunity_schemas import (
     OpportunityV1Schema,
 )
 from src.api.schemas.extension import Schema, fields, validators
+from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.constants.lookup_constants import OpportunityCategory
+from src.constants.lookup_constants import (
+    ApplicantType,
+    FundingCategory,
+    FundingInstrument,
+    OpportunityCategory,
+)
 from src.pagination.pagination_schema import generate_pagination_schema
+from src.validation.validation_constants import ValidationErrorType
 
 
 class OpportunityCreateRequestSchema(Schema):
@@ -60,6 +71,7 @@ class OpportunityCreateRequestSchema(Schema):
         },
     )
     category_explanation = fields.String(
+        allow_none=True,
         validate=validators.Length(max=255),
         metadata={
             "description": "Explanation of the category (required when category is 'other')",
@@ -105,6 +117,40 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
         fields.Nested(CompetitionAlphaSchema),
         metadata={"description": "List of competitions associated with the opportunity"},
     )
+
+
+class OpportunityUpdateRequestSchema(Schema):
+    """Schema for PUT /v1/grantors/opportunities/<opportunity_id> request"""
+
+    opportunity_title = fields.String(
+        required=True,
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "The title of the opportunity",
+            "example": "Updated Research Grant for Climate Innovation",
+        },
+    )
+    category = fields.Enum(
+        OpportunityCategory,
+        required=True,
+        metadata={
+            "description": "The opportunity category",
+        },
+    )
+    category_explanation = fields.String(
+        allow_none=True,
+        load_default=None,
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "Explanation of the category (required when category is 'other')",
+        },
+    )
+
+
+class OpportunityUpdateResponseSchema(AbstractResponseSchema):
+    """Schema for PUT /v1/grantors/opportunities/<opportunity_id> response"""
+
+    data = fields.Nested(OpportunityGrantorSchema())
 
 
 class OpportunityCreateResponseSchema(AbstractResponseSchema):
@@ -183,3 +229,299 @@ class OpportunityListResponseSchema(AbstractResponseSchema, PaginationMixinSchem
         fields.Nested(OpportunityGrantorSchema),
         metadata={"description": "List of opportunities"},
     )
+
+
+class OpportunitySummaryCreateRequestV1Schema(Schema):
+    """Schema for creating an opportunity summary"""
+
+    is_forecast = fields.Boolean(
+        required=True,
+        metadata={"description": "Whether the opportunity is forecasted", "example": False},
+    )
+
+    summary_description = fields.String(
+        required=True,
+        allow_none=True,
+        validate=validators.Length(max=18000),
+        metadata={"description": "Opportunity summary", "example": "This opportunity..."},
+    )
+
+    is_cost_sharing = fields.Boolean(
+        required=True,
+        allow_none=True,
+        metadata={
+            "description": "Whether or not the opportunity has a cost sharing/matching requirement",
+        },
+    )
+
+    post_date = fields.Date(
+        required=True,
+        metadata={
+            "description": "The date the opportunity was posted",
+        },
+    )
+
+    close_date = fields.Date(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "The date the opportunity closes",
+        },
+    )
+
+    close_date_description = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Optional details regarding the close date",
+            "example": "Proposals are due earlier than usual.",
+        },
+    )
+
+    archive_date = fields.Date(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "When the opportunity will be archived (defaults to 30 days after the close date)",
+        },
+    )
+
+    expected_number_of_awards = fields.Integer(
+        required=False,
+        allow_none=True,
+        validate=validators.Range(min=0, max=999_999_999_999_999),
+        metadata={
+            "description": "The number of awards the opportunity is expected to award",
+            "example": 10,
+        },
+    )
+
+    estimated_total_program_funding = fields.Integer(
+        required=False,
+        allow_none=True,
+        validate=validators.Range(min=0, max=999_999_999_999_999),
+        metadata={
+            "description": "The total program funding of the opportunity in US Dollars",
+            "example": 10_000_000,
+        },
+    )
+
+    award_floor = fields.Integer(
+        required=True,
+        allow_none=True,
+        validate=validators.Range(min=0, max=999_999_999_999_999),
+        metadata={
+            "description": "The minimum amount an opportunity would award",
+            "example": 10_000,
+        },
+    )
+
+    award_ceiling = fields.Integer(
+        required=True,
+        allow_none=True,
+        validate=validators.Range(min=0, max=999_999_999_999_999),
+        metadata={
+            "description": "The maximum amount an opportunity would award",
+            "example": 100_000,
+        },
+    )
+
+    additional_info_url = fields.String(
+        required=False,
+        allow_none=True,
+        validate=validators.Length(max=250),
+        metadata={
+            "description": "A URL to a website that can provide additional information about the opportunity",
+            "example": "grants.gov",
+        },
+    )
+
+    additional_info_url_description = fields.String(
+        required=False,
+        allow_none=True,
+        validate=validators.Length(max=250),
+        metadata={
+            "description": "The text to display for the additional_info_url link",
+            "example": "Click me for more info",
+        },
+    )
+
+    forecasted_post_date = fields.Date(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Forecasted opportunity only. The date the opportunity is expected to be posted, and transition out of being a forecast"
+        },
+    )
+
+    forecasted_close_date = fields.Date(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Forecasted opportunity only. The date the opportunity is expected to be close once posted."
+        },
+    )
+
+    forecasted_close_date_description = fields.String(
+        required=False,
+        allow_none=True,
+        validate=validators.Length(max=255),
+        metadata={
+            "description": "Forecasted opportunity only. Optional details regarding the forecasted closed date.",
+            "example": "Proposals will probably be due on this date",
+        },
+    )
+
+    forecasted_award_date = fields.Date(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Forecasted opportunity only. The date the grantor plans to award the opportunity."
+        },
+    )
+
+    forecasted_project_start_date = fields.Date(
+        required=False,
+        allow_none=True,
+        metadata={
+            "description": "Forecasted opportunity only. The date the grantor expects the award recipient should start their project"
+        },
+    )
+
+    fiscal_year = fields.Integer(
+        required=False,
+        allow_none=True,
+        validate=validators.Range(min=1900, max=2100),
+        metadata={
+            "description": "Forecasted opportunity only. The fiscal year the project is expected to be funded and launched",
+            "example": 2026,
+        },
+    )
+
+    funding_categories = fields.List(
+        fields.Enum(FundingCategory),
+        required=True,
+        validate=validators.Length(min=1),
+        metadata={
+            "description": "Categories of funding for this opportunity",
+            "example": ["education", "health"],
+        },
+    )
+
+    funding_category_description = fields.String(
+        required=False,
+        allow_none=True,
+        validate=validators.Length(max=2500),
+        metadata={
+            "description": "Additional information about the funding category",
+            "example": "Economic Support",
+        },
+    )
+
+    funding_instruments = fields.List(
+        fields.Enum(FundingInstrument),
+        required=True,
+        validate=validators.Length(min=1),
+        metadata={
+            "description": "Types of funding instruments used for this opportunity",
+            "example": ["cooperative_agreement", "grant"],
+        },
+    )
+
+    applicant_types = fields.List(
+        fields.Enum(ApplicantType),
+        required=True,
+        validate=validators.Length(min=1),
+        metadata={
+            "description": "Types of applicants eligible for this opportunity",
+            "example": ["state_governments", "county_governments"],
+        },
+    )
+
+    applicant_eligibility_description = fields.String(
+        required=False,
+        allow_none=True,
+        validate=validators.Length(max=4000),
+        metadata={
+            "description": "Additional information about the types of applicants that are eligible",
+            "example": "All types of domestic applicants are eligible to apply",
+        },
+    )
+
+    agency_contact_description = fields.String(
+        required=True,
+        allow_none=True,
+        validate=validators.Length(max=1000),
+        metadata={
+            "description": "Information regarding contacting the agency who owns the opportunity",
+            "example": "For more information, reach out to Jane Smith at agency US-ABC",
+        },
+    )
+
+    agency_email_address = fields.String(
+        required=True,
+        allow_none=True,
+        validate=validators.Length(max=130),
+        metadata={
+            "description": "The contact email of the agency who owns the opportunity",
+            "example": "fake_email@grants.gov",
+        },
+    )
+
+    agency_email_address_description = fields.String(
+        required=True,
+        allow_none=True,
+        validate=validators.Length(max=108),
+        metadata={
+            "description": "The text for the link to the agency email address",
+            "example": "Click me to email the agency",
+        },
+    )
+
+    @validates_schema
+    def validate_award_values(self, data: dict, **kwargs: dict) -> None:
+        """Validate that award floor is less than or equal to award ceiling"""
+        if data.get("award_floor") is not None and data.get("award_ceiling") is not None:
+            if data["award_floor"] > data["award_ceiling"]:
+                raise ValidationError(
+                    [
+                        MarshmallowErrorContainer(
+                            ValidationErrorType.INVALID,
+                            "Award floor must be less than or equal to award ceiling",
+                        )
+                    ]
+                )
+
+    @validates_schema
+    def validate_dates(self, data: dict, **kwargs: dict) -> None:
+        """Validate that post date is less than or equal to close date"""
+        if data.get("post_date") is not None and data.get("close_date") is not None:
+            if data["post_date"] > data["close_date"]:
+                raise ValidationError(
+                    [
+                        MarshmallowErrorContainer(
+                            ValidationErrorType.INVALID,
+                            "Post date must be less than or equal to close date",
+                        )
+                    ]
+                )
+
+    @validates_schema
+    def set_archive_date(self, data: dict, **kwargs: dict) -> None:
+        """Set archive_date to 30 days after close_date if not provided"""
+        if data.get("close_date") is not None and (
+            "archive_date" not in data or data["archive_date"] is None
+        ):
+            data["archive_date"] = data["close_date"] + timedelta(days=30)
+
+
+class OpportunitySummaryDetailSchema(OpportunitySummaryV1Schema):
+    opportunity_summary_id = fields.UUID(
+        required=True,
+        metadata={
+            "description": "Unique identifier for the opportunity summary",
+        },
+    )
+
+
+class OpportunitySummaryCreateResponseV1Schema(AbstractResponseSchema):
+    data = fields.Nested(OpportunitySummaryDetailSchema())

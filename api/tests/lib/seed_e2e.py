@@ -3,7 +3,7 @@ import os
 import uuid
 
 import src.adapters.db as db
-from src.constants.lookup_constants import Privilege
+from src.constants.static_role_values import E2E_TEST_USER_ROLE
 from src.util.file_util import write_to_file
 from tests.lib.seed_data_utils import UserBuilder
 
@@ -28,7 +28,7 @@ def _build_users_and_tokens(db_session: db.Session) -> None:
         UserBuilder(uuid.UUID("7edb5704-9d3b-4099-9e10-fbb9f2729aff"), db_session, "user for e2e")
         .with_jwt_auth()
         .with_api_key("e2e-test-key")
-        .with_internal_role(role_name="E2E Test Role", privileges=[Privilege.READ_TEST_USER_TOKEN])
+        .with_internal_role(E2E_TEST_USER_ROLE)
     )
 
     builder.build()

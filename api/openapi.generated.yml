@@ -698,6 +698,7 @@ paths:
           type:
           - integer
           - 'null'
+          example: 1
         required: false
       - in: query
         name: pageSize
@@ -706,6 +707,7 @@ paths:
           type:
           - integer
           - 'null'
+          example: 10
         required: false
       responses:
         '200':
@@ -782,6 +784,48 @@ paths:
               $ref: '#/components/schemas/UserUpdateProfileRequest'
       security:
       - ApiJwtAuth: []
+  /v1/workflows/{workflow_id}:
+    get:
+      parameters:
+      - in: path
+        name: workflow_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Workflow
+      summary: Get Workflow Details
+      description: Retrieve detailed information about a specific workflow including
+        audit history, approvals, and approval configuration. Access is controlled
+        by entity-based privileges (VIEW_OPPORTUNITY or VIEW_APPLICATION).
+      security:
+      - ApiJwtAuth: []
+      - ApiUserKeyAuth: []
   /v1/users/{user_id}/agencies:
     post:
       parameters:
@@ -1787,9 +1831,56 @@ paths:
       tags:
       - Opportunity v1 - for Grantors
       summary: Get an editable opportunity for grantors
-      security:
+      security: &id001
       - ApiJwtAuth: []
       - ApiUserKeyAuth: []
+    put:
+      parameters:
+      - in: path
+        name: opportunity_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityUpdateResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Opportunity v1 - for Grantors
+      summary: Update an existing opportunity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunityUpdateRequest'
+      security: *id001
   /alpha/applications/{application_id}/submit:
     post:
       parameters:
@@ -3457,7 +3548,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: &id001
+          type: &id002
           - object
           $ref: '#/components/schemas/PaginationInfo'
         message:
@@ -3723,7 +3814,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -4580,7 +4671,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: &id002
+          enum: &id003
           - discretionary
           - mandatory
           - continuation
@@ -4599,23 +4690,23 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: &id003
+            type: &id004
             - object
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: &id004
+          type: &id005
           - object
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: &id005
+          enum: &id006
           - forecasted
           - posted
           - closed
           - archived
-          type: &id006
+          type: &id007
           - string
         top_level_agency_code:
           type:
@@ -4699,7 +4790,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -4859,7 +4950,9 @@ components:
           type:
           - string
         category_explanation:
-          type: string
+          type:
+          - string
+          - 'null'
           maxLength: 255
           description: Explanation of the category (required when category is 'other')
           example: Competitive research grant
@@ -5225,7 +5318,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id002
+          enum: *id003
           type:
           - string
           - 'null'
@@ -5239,17 +5332,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id003
+            type: *id004
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: *id004
+          type: *id005
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id005
-          type: *id006
+          enum: *id006
+          type: *id007
         top_level_agency_code:
           type:
           - string
@@ -5332,7 +5425,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: &id007
+            type: &id008
             - object
             $ref: '#/components/schemas/ValidationIssue'
     FormUpdateRequest:
@@ -5490,6 +5583,7 @@ components:
           - string
           - 'null'
           description: The status value, from a predefined set of options
+          example: active, forecasted, closed
         customValue:
           type:
           - string
@@ -5506,9 +5600,11 @@ components:
         amount:
           type: string
           description: The amount of money
+          example: '1000000.0'
         currency:
           type: string
-          description: The ISO 4217 currency code (e.g., 'USD', 'EUR')
+          description: The ISO 4217 currency code
+          example: USD
       required:
       - amount
       - currency
@@ -5521,6 +5617,7 @@ components:
           - 'null'
           description: Details about the funding available for this opportunity that
             don't fit other fields
+          example: Awards are subject to the availability of appropriated funds.
         totalAmountAvailable:
           description: Total amount of funding available for this opportunity
           type:
@@ -5550,16 +5647,19 @@ components:
           - integer
           - 'null'
           description: Minimum number of awards granted
+          example: 1
         maxAwardCount:
           type:
           - integer
           - 'null'
           description: Maximum number of awards granted
+          example: 10
         estimatedAwardCount:
           type:
           - integer
           - 'null'
           description: Estimated number of awards that will be granted
+          example: 5
     SingleDateEvent:
       type: object
       properties:
@@ -5568,27 +5668,32 @@ components:
           - string
           - 'null'
           description: Human-readable name of the event
+          example: Application period begins
         eventType:
           type:
           - string
           - 'null'
           description: Type of event
+          example: singleDate
         description:
           type:
           - string
           - 'null'
           description: Description of what this event represents
+          example: Application period begins
         date:
           type:
           - string
           - 'null'
           format: date
           description: 'Date of the event in ISO 8601 format: YYYY-MM-DD'
+          example: '2026-02-27'
         time:
           type:
           - string
           - 'null'
           description: 'Time of the event in ISO 8601 format: HH:MM:SS'
+          example: '11:15:00'
     OppTimeline:
       type: object
       properties:
@@ -5616,6 +5721,7 @@ components:
       properties:
         name:
           type: string
+          example: eligible_applicants
         fieldType:
           type: string
           enum:
@@ -5631,11 +5737,14 @@ components:
           - string
           - 'null'
           format: url
-        value: {}
+          example: https://example.com/schema
+        value:
+          example: nonprofits, state governments
         description:
           type:
           - string
           - 'null'
+          example: The types of organizations eligible to apply
       required:
       - fieldType
       - name
@@ -5645,8 +5754,10 @@ components:
       properties:
         createdAt:
           description: The timestamp (in UTC) at which the record was created.
+          example: '2026-01-01T00:00:00Z'
         lastModifiedAt:
           description: The timestamp (in UTC) at which the record was last modified.
+          example: '2026-02-01T00:00:00Z'
         id:
           type:
           - string
@@ -5659,6 +5770,7 @@ components:
           - string
           - 'null'
           description: Title or name of the funding opportunity
+          example: Community Health Initiative Grant
         status:
           description: Status of the opportunity
           type:
@@ -5672,6 +5784,8 @@ components:
           - string
           - 'null'
           description: Description of the opportunity's purpose and scope
+          example: Funding to support community health initiatives in underserved
+            areas.
         funding:
           description: Details about the funding available
           type:
@@ -5691,6 +5805,7 @@ components:
           - type: 'null'
         source:
           description: URL for the original source of the opportunity
+          example: https://grants.gov/web/grants/view-opportunity.html?oppId=12345
         customFields:
           type:
           - object
@@ -5708,17 +5823,21 @@ components:
           - integer
           - 'null'
           description: The page number to retrieve
+          example: 1
         pageSize:
           type:
           - integer
           - 'null'
           description: The number of items per page
+          example: 10
         totalItems:
           type: integer
           description: The total number of items
+          example: 100
         totalPages:
           type: integer
           description: The total number of pages
+          example: 10
       required:
       - totalItems
       - totalPages
@@ -5777,6 +5896,289 @@ components:
           type:
           - object
           $ref: '#/components/schemas/UserProfile'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    WorkflowUser:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: The user's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type:
+          - string
+          - 'null'
+          description: The user's email address
+          example: user@example.com
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: The user's first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: The user's last name
+          example: Smith
+    WorkflowAuditEvent:
+      type: object
+      properties:
+        workflow_audit_id:
+          type: string
+          format: uuid
+          description: The audit event's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        acting_user:
+          description: The user who triggered the transition
+          type:
+          - object
+          $ref: '#/components/schemas/WorkflowUser'
+        transition_event:
+          type: string
+          description: The event that triggered the state transition
+          example: approve
+        source_state:
+          type: string
+          description: The state before the transition
+          example: pending_review
+        target_state:
+          type: string
+          description: The state after the transition
+          example: approved
+        event_id:
+          type: string
+          format: uuid
+          description: The workflow event that triggered this audit
+          example: 123e4567-e89b-12d3-a456-426614174000
+        audit_metadata:
+          type:
+          - object
+          - 'null'
+          description: Additional metadata about the audit event
+          example:
+            comment: Looks good
+          additionalProperties: {}
+        created_at:
+          type: string
+          format: date-time
+          description: When the audit event was created
+    WorkflowApproval:
+      type: object
+      properties:
+        workflow_approval_id:
+          type: string
+          format: uuid
+          description: The workflow approval's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        approving_user:
+          description: The user who provided the approval
+          type:
+          - object
+          $ref: '#/components/schemas/WorkflowUser'
+        event_id:
+          type: string
+          format: uuid
+          description: The workflow event that created this approval
+          example: 123e4567-e89b-12d3-a456-426614174000
+        is_still_valid:
+          type: boolean
+          description: Whether this approval is still valid or has been invalidated
+          example: true
+        comment:
+          type:
+          - string
+          - 'null'
+          description: Optional comment from the approver
+          example: Approved with conditions
+        approval_type:
+          description: The type of approval
+          example: !!python/object/apply:src.constants.lookup_constants.ApprovalType
+          - program_officer_approval
+          enum:
+          - initial_prototype_approval
+          - program_officer_approval
+          - budget_officer_approval
+          type:
+          - string
+        approval_response_type:
+          description: The response type of the approval
+          example: !!python/object/apply:src.constants.lookup_constants.ApprovalResponseType
+          - approved
+          enum:
+          - approved
+          - declined
+          - requires_modification
+          type:
+          - string
+        created_at:
+          type: string
+          format: date-time
+          description: When the approval was created
+    WorkflowApprovalConfigItem:
+      type: object
+      properties:
+        approval_type:
+          description: The type of approval required
+          example: !!python/object/apply:src.constants.lookup_constants.ApprovalType
+          - program_officer_approval
+          enum:
+          - initial_prototype_approval
+          - program_officer_approval
+          - budget_officer_approval
+          type:
+          - string
+        required_privileges:
+          type: array
+          description: List of privileges required to provide this approval
+          example:
+          - !!python/object/apply:src.constants.lookup_constants.Privilege
+            - program_officer_approval
+          items:
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            - legacy_agency_viewer
+            - legacy_agency_grant_retriever
+            - legacy_agency_assigner
+            - manage_internal_roles
+            - manage_competition
+            - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - update_opportunity
+            - publish_opportunity
+            - internal_workflow_access
+            - view_org_saved_opportunities
+            - modify_org_saved_opportunities
+            - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
+            - program_officer_approval
+            - budget_officer_approval
+            type:
+            - string
+        possible_users:
+          type: array
+          description: List of users in the workflow's agency who have the required
+            privileges
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/WorkflowUser'
+    WorkflowGetResponseData:
+      type: object
+      properties:
+        workflow_id:
+          type: string
+          format: uuid
+          description: The workflow's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        workflow_type:
+          description: The type of workflow
+          example: !!python/object/apply:src.constants.lookup_constants.WorkflowType
+          - opportunity_publish
+          enum:
+          - opportunity_publish
+          - application_submission
+          - initial_prototype
+          - basic_test_workflow
+          type:
+          - string
+        current_workflow_state:
+          type: string
+          description: The current state in the workflow
+          example: draft
+        is_active:
+          type: boolean
+          description: Whether the workflow is active (false when workflow reaches
+            end state)
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          description: When the workflow was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the workflow was last updated
+        workflow_audit_events:
+          type: array
+          description: Ordered list of audit events (sorted by created_at)
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/WorkflowAuditEvent'
+        workflow_approvals:
+          type: array
+          description: Ordered list of approvals (sorted by created_at)
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/WorkflowApproval'
+        workflow_approval_config:
+          type: object
+          description: Configuration mapping event names to approval requirements
+            and possible users
+          example:
+            receive_program_officer_approval:
+              approval_type: PROGRAM_OFFICER_APPROVAL
+              required_privileges:
+              - PROGRAM_OFFICER_APPROVAL
+              possible_users: []
+          additionalProperties:
+            type:
+            - object
+            $ref: '#/components/schemas/WorkflowApprovalConfigItem'
+        opportunity_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: The opportunity ID if this is an opportunity workflow
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: The application ID if this is an application workflow
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_submission_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: The application submission ID if this is a submission workflow
+          example: 123e4567-e89b-12d3-a456-426614174000
+    WorkflowGetResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The workflow details with audit history and approval configuration
+          type:
+          - object
+          $ref: '#/components/schemas/WorkflowGetResponseData'
         status_code:
           type: integer
           description: The HTTP status code
@@ -5917,6 +6319,11 @@ components:
             - internal_workflow_access
             - view_org_saved_opportunities
             - modify_org_saved_opportunities
+            - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
             type:
@@ -6076,6 +6483,11 @@ components:
             - internal_workflow_access
             - view_org_saved_opportunities
             - modify_org_saved_opportunities
+            - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
             type:
@@ -6097,40 +6509,44 @@ components:
       type: object
       properties:
         operator:
-          type:
-          - string
-          - 'null'
+          type: string
           description: The operator to apply to the filter value
+          example: in
         value:
-          type:
-          - array
-          - 'null'
+          type: array
           description: The array of string values
+          example:
+          - open
+          - forecasted
           items:
             type: string
+      required:
+      - operator
+      - value
     DateRange1:
       type: object
       properties:
         min:
           description: The minimum date in the range
+          example: '2021-01-01'
         max:
           description: The maximum date in the range
+          example: '2021-01-02'
     DateRangeFilter:
       type: object
       properties:
         operator:
-          type:
-          - string
-          - 'null'
+          type: string
           description: The operator to apply to the filter value
+          example: between
         value:
           description: The date range value
           type:
           - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/DateRange1'
-          - type: 'null'
+          $ref: '#/components/schemas/DateRange1'
+      required:
+      - operator
+      - value
     MoneyRange:
       type: object
       properties:
@@ -6154,18 +6570,17 @@ components:
       type: object
       properties:
         operator:
-          type:
-          - string
-          - 'null'
+          type: string
           description: The operator to apply to the filter value
+          example: between
         value:
           description: The money range value
           type:
           - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/MoneyRange'
-          - type: 'null'
+          $ref: '#/components/schemas/MoneyRange'
+      required:
+      - operator
+      - value
     OppFilters:
       type: object
       properties:
@@ -6210,7 +6625,12 @@ components:
           - $ref: '#/components/schemas/MoneyRangeFilter'
           - type: 'null'
         customFilters:
+          type:
+          - object
+          - 'null'
           description: Additional custom filters to apply to the search
+          example: {}
+          additionalProperties: {}
     OppSorting:
       type: object
       properties:
@@ -6233,11 +6653,13 @@ components:
           - string
           - 'null'
           description: The sort order (asc or desc)
+          example: desc
         customSortBy:
           type:
           - string
           - 'null'
           description: The custom field to sort by when sortBy is 'custom'
+          example: custom_field_1
       required:
       - sortBy
     PaginatedBodyParams:
@@ -6248,11 +6670,13 @@ components:
           - integer
           - 'null'
           description: The page number to retrieve
+          example: 1
         pageSize:
           type:
           - integer
           - 'null'
           description: The number of items per page
+          example: 10
     OpportunitySearchRequest:
       type: object
       properties:
@@ -6261,43 +6685,38 @@ components:
           - string
           - 'null'
           description: Search query string
+          example: community health
         filters:
           description: Filters to apply to the opportunity search
           type:
           - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/OppFilters'
-          - type: 'null'
+          $ref: '#/components/schemas/OppFilters'
         sorting:
           description: Sorting parameters for opportunities
           type:
           - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/OppSorting'
-          - type: 'null'
+          $ref: '#/components/schemas/OppSorting'
         pagination:
           type:
           - object
-          - 'null'
-          anyOf:
-          - $ref: '#/components/schemas/PaginatedBodyParams'
-          - type: 'null'
+          $ref: '#/components/schemas/PaginatedBodyParams'
     SortedResultsInfo:
       type: object
       properties:
         sortBy:
           type: string
           description: The field to sort by
+          example: lastModifiedAt
         customSortBy:
           type:
           - string
           - 'null'
           description: Implementation-defined sort key
+          example: custom_field_1
         sortOrder:
           type: string
           description: The order in which the results are sorted
+          example: desc
         errors:
           type: array
           default: []
@@ -6712,7 +7131,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id002
+          enum: *id003
           type:
           - string
           - 'null'
@@ -6726,17 +7145,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id003
+            type: *id004
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: *id004
+          type: *id005
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id005
-          type: *id006
+          enum: *id006
+          type: *id007
         top_level_agency_code:
           type:
           - string
@@ -6946,6 +7365,11 @@ components:
             - internal_workflow_access
             - view_org_saved_opportunities
             - modify_org_saved_opportunities
+            - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
             type:
@@ -7219,7 +7643,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id007
+            type: *id008
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -7508,6 +7932,11 @@ components:
             - internal_workflow_access
             - view_org_saved_opportunities
             - modify_org_saved_opportunities
+            - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
             type:
@@ -7555,7 +7984,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -7622,6 +8051,49 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    OpportunityUpdateRequest:
+      type: object
+      properties:
+        opportunity_title:
+          type: string
+          maxLength: 255
+          description: The title of the opportunity
+          example: Updated Research Grant for Climate Innovation
+        category:
+          description: The opportunity category
+          enum:
+          - discretionary
+          - mandatory
+          - continuation
+          - earmark
+          - other
+          type:
+          - string
+        category_explanation:
+          type:
+          - string
+          - 'null'
+          default: null
+          maxLength: 255
+          description: Explanation of the category (required when category is 'other')
+      required:
+      - category
+      - opportunity_title
+    OpportunityUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityGrantor'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     AbstractResponse:
       type: object
       properties:
@@ -7651,6 +8123,17 @@ components:
             - archived
             type:
             - string
+    UserSavedOpportunitiesOrganizationIDSFilter:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426614174000
     UserSavedOpportunitiesFilter:
       type: object
       properties:
@@ -7658,6 +8141,10 @@ components:
           type:
           - object
           $ref: '#/components/schemas/SavedOpportunityStatusFieldFilter'
+        organization_ids:
+          type:
+          - object
+          $ref: '#/components/schemas/UserSavedOpportunitiesOrganizationIDSFilter'
     SortOrderUserGetSavedOpportunityPaginationV1:
       type: object
       properties:
@@ -7665,7 +8152,6 @@ components:
           type: string
           enum:
           - created_at
-          - updated_at
           - opportunity_title
           - close_date
           description: The field to sort the response by
@@ -7911,7 +8397,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -8132,7 +8618,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -8262,7 +8748,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -8488,7 +8974,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -8712,7 +9198,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id001
+          type: *id002
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -8875,7 +9361,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id007
+            type: *id008
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -9040,7 +9526,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id007
+            type: *id008
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string

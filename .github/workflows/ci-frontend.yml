@@ -81,7 +81,7 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
       - run: npm ci
-      - run: npm run build -- --no-lint
+      - run: npm run build
 
   # Confirms Storybook still builds successfully
   check-storybook-builds:

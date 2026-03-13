@@ -162,6 +162,28 @@ OPPORTUNITY_PUBLISHER = Role(
 )
 
 ############################
+# Core Award Recommendation Roles
+############################
+AWARD_RECOMMENDATION_USER_ID = uuid.UUID("a5a5881e-2b55-4044-bf4d-eec45503cc56")
+AWARD_RECOMMENDATION_USER = Role(
+    role_id=AWARD_RECOMMENDATION_USER_ID,
+    role_name="Award Recommendation User",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        AWARD_RECOMMENDATION_USER_ID,
+        [
+            Privilege.VIEW_AWARD_RECOMMENDATION,
+            Privilege.CREATE_AWARD_RECOMMENDATION,
+            Privilege.UPDATE_AWARD_RECOMMENDATION,
+            Privilege.SUBMIT_AWARD_RECOMMENDATION,
+        ],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=AWARD_RECOMMENDATION_USER_ID, role_type=RoleType.AGENCY)
+    ],
+)
+
+############################
 # Core Internal Roles
 ############################
 
@@ -204,6 +226,21 @@ SYSTEM_WORKFLOW_USER_ROLE = Role(
     ],
 )
 
+# Role for us to give our own users for testing workflows
+# Allowed to send any event to the event API
+INTERNAL_WORKFLOW_USER_ROLE_ID = uuid.UUID("df17eaaf-701b-4b9f-9a88-0406beabc68e")
+INTERNAL_WORKFLOW_USER_ROLE = Role(
+    role_id=INTERNAL_WORKFLOW_USER_ROLE_ID,
+    role_name="Internal Workflow User",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        INTERNAL_WORKFLOW_USER_ROLE_ID, [Privilege.INTERNAL_WORKFLOW_EVENT_SEND]
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=INTERNAL_WORKFLOW_USER_ROLE_ID, role_type=RoleType.INTERNAL),
+    ],
+)
+
 CORE_ROLES = [
     ORG_ADMIN,
     ORG_MEMBER,
@@ -215,4 +252,6 @@ CORE_ROLES = [
     OPPORTUNITY_PUBLISHER,
     NAVA_INTERNAL_ROLE,
     SYSTEM_WORKFLOW_USER_ROLE,
+    INTERNAL_WORKFLOW_USER_ROLE,
+    AWARD_RECOMMENDATION_USER,
 ]

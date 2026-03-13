@@ -12,7 +12,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     // Prevent .js source files. We only want to use TypeScript to
     // support comprehensive type checking.
     "allowJs": false,
@@ -23,7 +23,8 @@
     "paths": {
       "@next/third-parties/google": [
         "./node_modules/@next/third-parties/dist/google"
-      ]
+      ],
+      "react": ["./node_modules/@types/react"]
     },
     "plugins": [
       {

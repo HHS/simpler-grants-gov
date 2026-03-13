@@ -1,11 +1,35 @@
 name: E2E Tests (Local Github Target)
 on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "api/**"
+      - "frontend/**"
+      - "infra/api/**"
+      - "infra/frontend/**"
+      - "infra/modules/**"
+      - ".github/workflows/ci-frontend-e2e.yml"
   workflow_dispatch:
     inputs:
       api_logs:
         description: "print api logs on failure?"
+        default: false
+        type: boolean
+      playwright_tags:
+        description: "pipe separated list of @tags denoting groups of tests to run"
+        required: false
         type: string
   workflow_call:
+    inputs:
+      api_logs:
+        description: "print api logs on failure?"
+        default: false
+        type: boolean
+      playwright_tags:
+        description: "pipe separated list of @tags denoting groups of tests to run"
+        required: false
+        type: string
   pull_request:
     paths:
       - frontend/**
@@ -79,16 +103,18 @@ jobs:
           } >> .env.local
           # Use the 127.0.0.1 url for tests (IPv4 only)
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
-          npm run build -- --no-lint
+          npm run build
 
-      - uses: ./.github/actions/e2e
+      - name: Run E2E tests
+        uses: ./.github/actions/e2e
         with:
           version: ${{ github.ref }}
           target: "local"
           needs_node_setup: "false"
           total_shards: ${{ matrix.total_shards }}
           current_shard: ${{ matrix.shard }}
-          api_logs: ${{ inputs.api_logs }}
+          api_logs: ${{ inputs.api_logs && 'true' || 'false' }}
+          playwright_tags: ${{ inputs.playwright_tags }}
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}

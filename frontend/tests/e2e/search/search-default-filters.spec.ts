@@ -9,7 +9,7 @@ interface PageProps {
   contextOptions?: BrowserContextOptions;
 }
 
-test("should navigate from index to search page", async ({
+test("should load search page with forecasted and open filters checked by default", async ({
   page,
 }: PageProps) => {
   await page.goto("/search");
@@ -20,6 +20,6 @@ test("should navigate from index to search page", async ({
   );
 
   // Verify that the 'forecasted' and 'posted' are checked
-  await expectCheckboxIDIsChecked(page, "#status-forecasted");
-  await expectCheckboxIDIsChecked(page, "#status-open");
+  await expectCheckboxIDIsChecked(page, "status-forecasted");
+  await expectCheckboxIDIsChecked(page, "status-open");
 });

@@ -78,7 +78,11 @@ class TestAttachmentTransformer:
         assert custom_transformer.attachment_namespace == "http://custom.namespace"
 
     def test_add_single_attachment_element(self):
-        """Test adding a single attachment element."""
+        """Test adding a single attachment element.
+
+        type='single' adds content directly to the parent — no wrapper element is created.
+        All attachment fields use the att: and glob: namespace prefixes.
+        """
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
 
         attachment_data = {
@@ -95,15 +99,19 @@ class TestAttachmentTransformer:
             root, "AreasAffected", attachment_data, self.nsmap
         )
 
-        # Verify XML structure
-        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+        att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
+        glob_ns = "http://apply.grants.gov/system/Global-V1.0"
 
-        assert "<AreasAffected>" in xml_string
-        assert "<FileName>test_document.pdf</FileName>" in xml_string
-        assert "<MimeType>application/pdf</MimeType>" in xml_string
-        assert 'href="./attachments/test_document.pdf"' in xml_string
-        assert 'hashAlgorithm="SHA-1"' in xml_string
-        assert "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q=" in xml_string
+        # type='single' adds content directly to root — no <AreasAffected> wrapper
+        assert root.find(f"{{{att_ns}}}FileName").text == "test_document.pdf"
+        assert root.find(f"{{{att_ns}}}MimeType").text == "application/pdf"
+        assert (
+            root.find(f"{{{att_ns}}}FileLocation").get(f"{{{att_ns}}}href")
+            == "./attachments/test_document.pdf"
+        )
+        hash_val = root.find(f"{{{glob_ns}}}HashValue")
+        assert hash_val.get(f"{{{glob_ns}}}hashAlgorithm") == "SHA-1"
+        assert hash_val.text == "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q="
 
     def test_add_multiple_attachment_element(self):
         """Test adding a multiple attachment element."""
@@ -130,14 +138,15 @@ class TestAttachmentTransformer:
             root, "AdditionalProjectTitle", attachment_data, self.nsmap
         )
 
-        # Verify XML structure
-        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+        att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
 
-        assert "<AdditionalProjectTitle>" in xml_string
-        assert xml_string.count("<AttachedFile>") == 2
-        assert "<FileName>document1.pdf</FileName>" in xml_string
-        assert "<FileName>document2.xlsx</FileName>" in xml_string
-        assert "spreadsheetml.sheet" in xml_string
+        group = root.find("AdditionalProjectTitle")
+        assert group is not None
+        attached_files = group.findall("AttachedFile")
+        assert len(attached_files) == 2
+        assert attached_files[0].find(f"{{{att_ns}}}FileName").text == "document1.pdf"
+        assert attached_files[1].find(f"{{{att_ns}}}FileName").text == "document2.xlsx"
+        assert "spreadsheetml.sheet" in attached_files[1].find(f"{{{att_ns}}}MimeType").text
 
     def test_add_multiple_attachment_element_single_file(self):
         """Test adding multiple attachment element with single file."""
@@ -156,11 +165,13 @@ class TestAttachmentTransformer:
             root, "AdditionalProjectTitle", attachment_data, self.nsmap
         )
 
-        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+        att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
 
-        assert "<AdditionalProjectTitle>" in xml_string
-        assert xml_string.count("<AttachedFile>") == 1
-        assert "<FileName>single_document.pdf</FileName>" in xml_string
+        group = root.find("AdditionalProjectTitle")
+        assert group is not None
+        attached_files = group.findall("AttachedFile")
+        assert len(attached_files) == 1
+        assert attached_files[0].find(f"{{{att_ns}}}FileName").text == "single_document.pdf"
 
     def test_add_multiple_attachment_element_direct_list(self):
         """Test adding multiple attachment element with direct list."""
@@ -185,11 +196,13 @@ class TestAttachmentTransformer:
             root, "AdditionalProjectTitle", attachment_data, self.nsmap
         )
 
-        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+        att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
 
-        assert xml_string.count("<AttachedFile>") == 2
-        assert "<FileName>list_document1.pdf</FileName>" in xml_string
-        assert "<FileName>list_document2.docx</FileName>" in xml_string
+        group = root.find("AdditionalProjectTitle")
+        attached_files = group.findall("AttachedFile")
+        assert len(attached_files) == 2
+        assert attached_files[0].find(f"{{{att_ns}}}FileName").text == "list_document1.pdf"
+        assert attached_files[1].find(f"{{{att_ns}}}FileName").text == "list_document2.docx"
 
     def test_populate_attachment_content_complete(self):
         """Test populating complete attachment content."""
@@ -204,16 +217,18 @@ class TestAttachmentTransformer:
 
         self.transformer._populate_attachment_content(root, attachment_data, self.nsmap)
 
-        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+        att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
+        glob_ns = "http://apply.grants.gov/system/Global-V1.0"
 
-        # Verify all elements are present
-        assert "<FileName>complete_test.pdf</FileName>" in xml_string
-        assert "<MimeType>application/pdf</MimeType>" in xml_string
+        assert root.find(f"{{{att_ns}}}FileName").text == "complete_test.pdf"
+        assert root.find(f"{{{att_ns}}}MimeType").text == "application/pdf"
         assert (
-            "<FileLocation" in xml_string and 'href="./attachments/complete_test.pdf"' in xml_string
+            root.find(f"{{{att_ns}}}FileLocation").get(f"{{{att_ns}}}href")
+            == "./attachments/complete_test.pdf"
         )
-        assert "<HashValue" in xml_string and 'hashAlgorithm="SHA-1"' in xml_string
-        assert "Y29tcGxldGV0ZXN0aGFzaA==" in xml_string
+        hash_val = root.find(f"{{{glob_ns}}}HashValue")
+        assert hash_val.get(f"{{{glob_ns}}}hashAlgorithm") == "SHA-1"
+        assert hash_val.text == "Y29tcGxldGV0ZXN0aGFzaA=="
 
     def test_populate_attachment_content_string_file_location(self):
         """Test populating attachment content with string file location."""
@@ -247,13 +262,16 @@ class TestAttachmentTransformer:
 
         self.transformer._populate_attachment_content(root, attachment_data, self.nsmap)
 
-        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+        att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
+        glob_ns = "http://apply.grants.gov/system/Global-V1.0"
 
-        # Should only contain provided fields
-        assert "<FileName>partial_test.pdf</FileName>" in xml_string
-        assert "<MimeType>" not in xml_string
-        assert 'href="./attachments/partial_test.pdf"' in xml_string
-        assert "<HashValue>" not in xml_string
+        assert root.find(f"{{{att_ns}}}FileName").text == "partial_test.pdf"
+        assert root.find(f"{{{att_ns}}}MimeType") is None
+        assert (
+            root.find(f"{{{att_ns}}}FileLocation").get(f"{{{att_ns}}}href")
+            == "./attachments/partial_test.pdf"
+        )
+        assert root.find(f"{{{glob_ns}}}HashValue") is None
 
     def test_populate_attachment_content_invalid_data(self):
         """Test populating attachment content with invalid data."""
@@ -280,14 +298,19 @@ class TestAttachmentTransformer:
 
         self.transformer.add_attachment_elements(root, data, self.nsmap)
 
-        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+        att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
+        glob_ns = "http://apply.grants.gov/system/Global-V1.0"
 
-        assert "<AreasAffected>" in xml_string
-        assert "<FileName>test_document.pdf</FileName>" in xml_string
-        assert "<MimeType>application/pdf</MimeType>" in xml_string
-        assert 'href="./attachments/test_document.pdf"' in xml_string
-        assert 'hashAlgorithm="SHA-1"' in xml_string
-        assert "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q=" in xml_string
+        # type='single' adds content directly to root — no <AreasAffected> wrapper
+        assert root.find(f"{{{att_ns}}}FileName").text == "test_document.pdf"
+        assert root.find(f"{{{att_ns}}}MimeType").text == "application/pdf"
+        assert (
+            root.find(f"{{{att_ns}}}FileLocation").get(f"{{{att_ns}}}href")
+            == "./attachments/test_document.pdf"
+        )
+        hash_val = root.find(f"{{{glob_ns}}}HashValue")
+        assert hash_val.get(f"{{{glob_ns}}}hashAlgorithm") == "SHA-1"
+        assert hash_val.text == "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q="
 
     def test_uuid_based_multiple_attachments(self):
         """Test adding multiple attachments using UUIDs."""
@@ -298,13 +321,15 @@ class TestAttachmentTransformer:
 
         self.transformer.add_attachment_elements(root, data, self.nsmap)
 
-        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+        att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
 
-        assert "<AdditionalProjectTitle>" in xml_string
-        assert xml_string.count("<AttachedFile>") == 2
-        assert "<FileName>document1.pdf</FileName>" in xml_string
-        assert "<FileName>document2.xlsx</FileName>" in xml_string
-        assert "spreadsheetml.sheet" in xml_string
+        group = root.find("AdditionalProjectTitle")
+        assert group is not None
+        attached_files = group.findall("AttachedFile")
+        assert len(attached_files) == 2
+        assert attached_files[0].find(f"{{{att_ns}}}FileName").text == "document1.pdf"
+        assert attached_files[1].find(f"{{{att_ns}}}FileName").text == "document2.xlsx"
+        assert "spreadsheetml.sheet" in attached_files[1].find(f"{{{att_ns}}}MimeType").text
 
     def test_uuid_not_found_error(self):
         """Test error when UUID not found in mapping."""
@@ -345,17 +370,19 @@ class TestAttachmentTransformer:
 
         self.transformer.add_attachment_elements(root, data, self.nsmap)
 
-        xml_string = lxml_etree.tostring(root, encoding="unicode", pretty_print=True)
+        att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
 
-        # Check single attachment
-        assert "<DebtExplanation>" in xml_string
-        assert "<FileName>test_document.pdf</FileName>" in xml_string
+        # type='single': content added directly to root, no <DebtExplanation> wrapper
+        filenames = root.findall(f"{{{att_ns}}}FileName")
+        assert any(f.text == "test_document.pdf" for f in filenames)
 
-        # Check multiple attachments
-        assert "<AdditionalProjectTitle>" in xml_string
-        assert xml_string.count("<AttachedFile>") == 2
-        assert "<FileName>document1.pdf</FileName>" in xml_string
-        assert "<FileName>document2.xlsx</FileName>" in xml_string
+        # type='multiple': wrapped in <AdditionalProjectTitle>
+        group = root.find("AdditionalProjectTitle")
+        assert group is not None
+        attached_files = group.findall("AttachedFile")
+        assert len(attached_files) == 2
+        assert attached_files[0].find(f"{{{att_ns}}}FileName").text == "document1.pdf"
+        assert attached_files[1].find(f"{{{att_ns}}}FileName").text == "document2.xlsx"
 
     def test_no_attachments_in_data(self):
         """Test handling when no attachments are in the data."""
@@ -371,3 +398,69 @@ class TestAttachmentTransformer:
         assert "AreasAffected" not in xml_string
         assert "DebtExplanation" not in xml_string
         assert "AdditionalProjectTitle" not in xml_string
+
+    def test_single_with_wrapper_custom_file_element(self):
+        """single_with_wrapper with file_element override uses the given inner element name."""
+        form_ns = "http://apply.grants.gov/forms/Project_Abstract_1_2-V1.2"
+        nsmap = {
+            "Project_Abstract_1_2": form_ns,
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+        }
+        root = lxml_etree.Element(f"{{{form_ns}}}Project_Abstract_1_2", nsmap=nsmap)
+
+        attachment_data = {
+            "FileName": "abstract.pdf",
+            "MimeType": "application/pdf",
+            "FileLocation": {"@href": "abstract.pdf"},
+            "HashValue": {"@hashAlgorithm": "SHA-1", "#text": "aeB1+6gdFwih51ijIRn3b8QYn24="},
+        }
+        field_config = {"type": "single_with_wrapper", "file_element": "AttachedFile"}
+
+        transformer = AttachmentTransformer()
+        transformer._add_single_attachment_element(
+            root, "ProjectAbstractAddAttachment", attachment_data, nsmap, field_config
+        )
+
+        # Both wrapper elements must be in the form's namespace
+        outer = root.find(f"{{{form_ns}}}ProjectAbstractAddAttachment")
+        assert outer is not None, "ProjectAbstractAddAttachment missing"
+
+        inner = outer.find(f"{{{form_ns}}}AttachedFile")
+        assert inner is not None, "AttachedFile missing"
+
+        att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
+        assert inner.find(f"{{{att_ns}}}FileName").text == "abstract.pdf"
+        assert inner.find(f"{{{att_ns}}}MimeType").text == "application/pdf"
+        assert inner.find(f"{{{att_ns}}}FileLocation").get(f"{{{att_ns}}}href") == "abstract.pdf"
+
+    def test_single_with_wrapper_file_element_via_add_attachment_elements(self):
+        """add_attachment_elements uses file_element override when present in field config."""
+        form_ns = "http://apply.grants.gov/forms/Project_Abstract_1_2-V1.2"
+        att_uuid = str(self.uuid1)
+        field_config = {
+            "attachment": {
+                "xml_element": "ProjectAbstractAddAttachment",
+                "type": "single_with_wrapper",
+                "file_element": "AttachedFile",
+            }
+        }
+        nsmap = {
+            "Project_Abstract_1_2": form_ns,
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
+            "glob": "http://apply.grants.gov/system/Global-V1.0",
+        }
+        root = lxml_etree.Element(f"{{{form_ns}}}Project_Abstract_1_2", nsmap=nsmap)
+        transformer = AttachmentTransformer(
+            attachment_mapping=self.attachment_mapping,
+            attachment_field_config=field_config,
+        )
+
+        transformer.add_attachment_elements(root, {"attachment": att_uuid}, nsmap)
+
+        outer = root.find(f"{{{form_ns}}}ProjectAbstractAddAttachment")
+        assert outer is not None
+        inner = outer.find(f"{{{form_ns}}}AttachedFile")
+        assert inner is not None
+        att_ns = "http://apply.grants.gov/system/Attachments-V1.0"
+        assert inner.find(f"{{{att_ns}}}FileName").text == "test_document.pdf"

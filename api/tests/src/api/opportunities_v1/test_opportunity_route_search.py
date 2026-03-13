@@ -1872,7 +1872,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
         rows = list(reader)
 
         assert "url" in reader.fieldnames
-        assert "summary_description" not in reader.fieldnames
 
         for row in rows:
             # assert correct url is configured

@@ -9,12 +9,12 @@
 
 from types import ModuleType
 
-import rich
-import rich.panel
+import rich  # noqa: F401 isort:skip
+import rich.panel  # noqa: F401 isort:skip
 import rich.pretty
 
 import src.adapters.db as db
-import src.db
+import src.db  # noqa: F401 isort:skip
 import src.db.models
 import src.logging
 import src.util

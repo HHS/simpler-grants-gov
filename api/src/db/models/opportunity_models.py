@@ -27,6 +27,7 @@ from src.db.models.lookup_models import (
 from src.util.file_util import presign_or_s3_cdnify_url
 
 if TYPE_CHECKING:
+    from src.db.models.award_recommendation_models import AwardRecommendation
     from src.db.models.competition_models import Competition
     from src.db.models.entity_models import OrganizationSavedOpportunity
     from src.db.models.user_models import UserOpportunityNotificationLog, UserSavedOpportunity
@@ -107,6 +108,13 @@ class Opportunity(ApiSchemaTable, TimestampMixin):
 
     competitions: Mapped[list[Competition]] = relationship(
         back_populates="opportunity", uselist=True, cascade="all, delete-orphan"
+    )
+
+    award_recommendations: Mapped[list[AwardRecommendation]] = relationship(
+        "AwardRecommendation",
+        back_populates="opportunity",
+        uselist=True,
+        cascade="all, delete-orphan",
     )
 
     versions: Mapped[list[OpportunityVersion]] = relationship(
@@ -217,7 +225,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
     )
     opportunity: Mapped[Opportunity] = relationship(Opportunity)
 
-    legacy_opportunity_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    legacy_opportunity_id: Mapped[int | None] = mapped_column(BigInteger, index=True)
 
     summary_description: Mapped[str | None]
 

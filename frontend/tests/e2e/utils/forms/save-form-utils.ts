@@ -10,14 +10,17 @@ export async function saveForm(page: Page, expectErrors = false) {
   if (await saveButton.isVisible()) {
     await saveButton.click();
     await page.waitForTimeout(2000);
+
+    // Always check for form saved message, which appears for both validation and successful saves. Then check for either validation error message or success details based on expectErrors flag.
+    await expect(page.getByText(/form was saved/i)).toBeVisible({
+      timeout: 10000,
+    });
     if (expectErrors) {
-      await expect(page.getByText(/errors were detected/i)).toBeVisible({
-        timeout: 10000,
-      });
+      // a validation message, not a generic "errors were detected" string.
+      await expect(
+        page.getByText(/correct the following errors before submitting/i),
+      ).toBeVisible({ timeout: 10000 });
     } else {
-      await expect(page.getByText(/form was saved/i)).toBeVisible({
-        timeout: 10000,
-      });
       await expect(page.getByText(/no errors were detected/i)).toBeVisible({
         timeout: 10000,
       });

@@ -219,4 +219,45 @@ describe("buildFormTreeRecursive", () => {
     expect(screen.getByTestId("section--field1")).toBeInTheDocument();
     expect(screen.getByTestId("section--field2")).toBeInTheDocument();
   });
+
+  describe("FormFields formContext forwarding", () => {
+    it("forwards formContext to rendered widgets", () => {
+      const schema: RJSFSchema = {
+        type: "object",
+        properties: {
+          example: { type: "string", title: "Example" },
+        },
+      };
+
+      const uiSchema: UiSchema = [
+        {
+          type: "field",
+          definition: "/properties/example",
+        },
+      ];
+
+      const formContext = {
+        rootFormData: { activity_line_items: [{ activity_title: "Test" }] },
+        rootSchema: schema,
+      };
+
+      render(
+        <FormFields
+          errors={null}
+          formData={{ example: "hello" }}
+          schema={schema}
+          uiSchema={uiSchema}
+          formContext={formContext}
+        />,
+      );
+
+      // grab the rendered input
+      const input = screen.getByTestId("example");
+
+      expect(input).toBeInTheDocument();
+
+      // verify that rendering still works with formContext
+      expect(input).toHaveValue("hello");
+    });
+  });
 });

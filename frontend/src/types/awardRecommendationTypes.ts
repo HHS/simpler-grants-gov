@@ -1,7 +1,8 @@
 export type AwardRecommendationStatus =
   | "draft"
   | "inProgress"
-  | "pendingReview";
+  | "pendingReview"
+  | "approved";
 
 export type AwardRecommendationDetails = {
   recordNumber: string;

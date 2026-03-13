@@ -1,0 +1,5 @@
+# Changes here will be overwritten by Copier
+_commit: platform-cli-migration/v0.14.3
+_src_path: https://github.com/navapbc/template-infra
+app_name: nofos
+template: app
