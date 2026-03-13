@@ -31,7 +31,7 @@ jobs:
           curl -X POST -H "Authorization: Bearer ${{ secrets.ALERTS_SLACK_BOT_TOKEN }}" \
           -H "Content-Type: application/json; charset=utf-8" \
           --data '{
-            "channel": "${{ inputs.channel_id }}",
+            "channel": "${{ inputs.channel_id || secrets.SLACK_ALERTS_CHANNEL_ID }}",
             "text": ":x: *GitHub Actions Failure Alert*",
             "attachments": [
             {
