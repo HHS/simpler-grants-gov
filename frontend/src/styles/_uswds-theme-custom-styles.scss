@@ -752,7 +752,28 @@ dl {
   display: none;
 }
 
+.field-list-widget__row {
+  border: 1px solid #dfe1e2;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.field-list-widget__controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.apply-form-print-preview .field-list-widget__controls {
+  display: none !important;
+}
+
 @media print {
+  .field-list-widget__controls {
+    display: none !important;
+  }
+
   .sf424a-application-view-only {
     display: none !important;
   }

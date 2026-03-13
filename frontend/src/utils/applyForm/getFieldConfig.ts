@@ -9,6 +9,7 @@ import {
   FieldListGroupItem,
   FieldListWidgetProps,
   FormattedFormValidationWarning,
+  GeneralRecord,
   SchemaField,
   UiSchemaField,
   UiSchemaFieldList,
@@ -37,28 +38,30 @@ const FIELD_LIST_INDEX_TOKEN = "~~index~~" as const;
 /**
  * Builds the "baseId" used by FieldList widgets for each child field.
  *
- * FieldList entries represent a repeatable array of grouped fields.
- * Instead of generating a concrete id for a specific row (e.g. `[0]`),
- * we generate a template id containing a placeholder:
+ * FieldList rows represent an array of grouped field values, where each row
+ * is stored as an object and each child field maps to a single property
+ * within that object.
  *
- *   contacts[~~index~~]--firstName
+ * Instead of generating a concrete id for a specific row (for example `[0]`),
+ * we generate a template id containing an index placeholder:
  *
- * The FieldList widget later replaces `~~index~~` with the actual
- * array index when rendering each entry.
+ *   contact_people_test[~~index~~]--first_name
  *
- * This function adapts the id produced by existing field logic and
- * injects the `[~~index~~]` placeholder at the correct position.
+ * The FieldList widget later replaces `~~index~~` with the actual row index
+ * when rendering each row.
  *
- * Example transformations:
+ * This helper extracts the final field key (the last `--` segment) from the
+ * child field id and builds the FieldList id using that key.
  *
- *   childId: "contacts--firstName"
- *   > "contacts[~~index~~]--firstName"
+ * Example:
  *
- *   childId: "top_field--contacts--firstName"
- *   > "top_field--contacts[~~index~~]--firstName"
+ *   childId: "contact_people_test--items--first_name"
+ *   final field key: "first_name"
+ *   result: "contact_people_test[~~index~~]--first_name"
  *
- * We check for an existing `--fieldListName--` segment so we only modify
- * the correct portion of the id while preserving any parent structure.
+ * Using only the final field key keeps the generated id aligned with the
+ * structure used to store FieldList row values, which are serialized as
+ * objects keyed by the individual field names.
  */
 
 export function buildFieldListBaseId({
@@ -68,14 +71,10 @@ export function buildFieldListBaseId({
   fieldListName: string;
   childId: string;
 }): string {
-  const token = `--${fieldListName}--`;
-  if (childId.includes(token)) {
-    return childId.replace(
-      token,
-      `--${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--`,
-    );
-  }
-  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${childId}`;
+  const childIdParts = childId.split("--");
+  const finalFieldKey = childIdParts[childIdParts.length - 1];
+
+  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
 }
 
 type FieldWidgetConfig = {
@@ -455,6 +454,11 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
         };
       },
     );
+    const fieldListValue =
+      formData && typeof formData === "object" && !Array.isArray(formData)
+        ? (formData as Record<string, unknown>)[uiFieldObject.name]
+        : undefined;
+
     return {
       type: "FieldList",
       props: {
@@ -471,6 +475,7 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
         groupDefinition,
         rawErrors: [],
         requiredFields: [],
+        value: fieldListValue as GeneralRecord[] | undefined,
       },
     };
   }
