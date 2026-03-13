@@ -19,7 +19,7 @@ inputs:
     description: "total number of test shards in parent run"
     default: "1"
   current_shard:
-    description: "total number of test shards in parent run"
+    description: "current shard number in parent run"
     default: "1"
   needs_node_setup:
     description: "does this action need to set up node and install deps"

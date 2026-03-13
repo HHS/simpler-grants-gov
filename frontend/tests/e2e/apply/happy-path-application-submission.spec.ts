@@ -70,7 +70,7 @@ test(
     );
 
     // Submit the application and verify success
-    await submitApplicationAndVerify(page);
+    await submitApplicationAndVerify(page, "success");
     // Application ID is now available in appId variable for further use if needed
   },
 );
