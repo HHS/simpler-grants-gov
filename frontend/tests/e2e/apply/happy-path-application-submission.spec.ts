@@ -21,7 +21,6 @@ const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
-// Added @auth tag to login-dependent tests so workflows can select them automatically.
 test("Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL", async ({
   page,
   context,

@@ -8,7 +8,7 @@ const { targetEnv } = playwrightEnv;
 
 // Note: do NOT close context in afterEach — Playwright manages context lifecycle
 // automatically per test. Explicitly closing it here causes session loss when
-// multiple @auth tests run sequentially in the same suite.
+// multiple auth tests run sequentially in the same suite.
 
 test("Saved opportunities page shows unauthenticated state if not logged in", async ({
   page,
@@ -19,7 +19,7 @@ test("Saved opportunities page shows unauthenticated state if not logged in", as
 });
 
 // will fail when run against staging until after https://github.com/HHS/simpler-grants-gov/issues/7769
-// Added @auth tag to login-dependent tests so workflows can select them automatically.
+
 test("Working saved opportunities page link appears in nav when logged in", async ({
   page,
   context,
