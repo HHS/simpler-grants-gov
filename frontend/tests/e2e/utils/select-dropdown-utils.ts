@@ -32,7 +32,8 @@ export async function selectDropdownByValueOrLabel(
   try {
     // Try selecting by option value first
     await dropdown.selectOption(option);
-  } catch {
+  } catch (e) {
+    console.error("option may not exist for select", option, selector);
     // Fall back to selecting by visible label text
     await dropdown.selectOption({ label: option });
   }
