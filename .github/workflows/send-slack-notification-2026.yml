@@ -10,7 +10,7 @@ on:
         description: "List of Slack handles to tag in the message"
         required: false
         type: string
-        default: "@Matt Dragon"
+        default: ""
 
 jobs:
   send-slack-notification:
@@ -22,7 +22,7 @@ jobs:
           curl -X POST \
           -H "Content-Type: application/json; charset=utf-8" \
           --data '{
-            "text": ":x: *GitHub Actions Failure Alert* ${{ inputs.slack_tag}}",
+            "text": ":x: *GitHub Actions Failure Alert* ${{ '@Matt Dragon' }}",
             "attachments": [
             {
               "color": "#ff0000",
