@@ -85,8 +85,8 @@ export async function assertFormRowStatus(
     status === "complete"
       ? /no issues detected\.?|complete/i
       : /some issues found\.?|in progress/i;
-
-  await expect(formRow.getByText(statusPattern)).toBeVisible({
+  const text = formRow.getByText(statusPattern);
+  await expect(text).toBeVisible({
     timeout: 10000,
   });
 }
