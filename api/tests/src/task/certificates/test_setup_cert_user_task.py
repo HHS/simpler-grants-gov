@@ -58,10 +58,11 @@ class TestSetupCertUserTask(BaseTestClass):
     ):
         role = RoleFactory.create(is_agency_role=True)
         CERT_ID = f"{uuid.uuid4()}"
+        SERIAL_NUMBER = f"{random.randint(1000, 9999)}"
         result = SetupCertUserTask(
-            db_session, None, [str(role.role_id)], None, "garbage-agency-code", CERT_ID
+            db_session, None, [str(role.role_id)], SERIAL_NUMBER, "garbage-agency-code", CERT_ID
         ).setup_cert()
-        assert result == SetupCertUserTaskStatus.MISSING_REQUIRED_INPUT_VALUES
+        assert result == SetupCertUserTaskStatus.AGENCY_NOT_FOUND
         legacy_certificate = (
             db_session.query(LegacyCertificate).filter(LegacyCertificate.cert_id == CERT_ID).first()
         )
