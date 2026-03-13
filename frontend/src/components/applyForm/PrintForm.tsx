@@ -24,13 +24,15 @@ export default function PrintForm({
     <AttachmentsProvider
       value={{ attachments: attachments ?? [], setAttachmentsChanged }}
     >
-      <FormFields
-        errors={null}
-        formData={savedFormData}
-        schema={formSchema}
-        uiSchema={uiSchema}
-        formContext={{ rootFormData: savedFormData, rootSchema: formSchema }}
-      />
+      <div className="apply-form-print-preview">
+        <FormFields
+          errors={null}
+          formData={savedFormData}
+          schema={formSchema}
+          uiSchema={uiSchema}
+          formContext={{ rootFormData: savedFormData, rootSchema: formSchema }}
+        />
+      </div>
     </AttachmentsProvider>
   );
 }
