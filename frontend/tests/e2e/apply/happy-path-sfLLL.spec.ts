@@ -1,13 +1,15 @@
 import { test } from "@playwright/test";
-import { SFLLL_TEST_DATA } from "tests/e2e/apply/fixtures/test-data-for-sflll-forms.fixture";
-import { SFLLL_FORM_CONFIG } from "tests/e2e/apply/page-objects/sflll-form.page";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-const { baseUrl, testOrgLabel, opportunityId, targetEnv } = playwrightEnv;
+import { SFLLL_TEST_DATA } from "./fixtures/sfLLL-field-definitions";
+import { SFLLL_FORM_CONFIG } from "./fixtures/sfLLL-fill-data";
+
+const { testOrgLabel, opportunityId, targetEnv, baseUrl } = playwrightEnv;
+
 const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
 
 test.describe("Application form completion happy path - SFLLL", () => {
