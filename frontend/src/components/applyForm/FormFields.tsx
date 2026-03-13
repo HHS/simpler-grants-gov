@@ -53,7 +53,6 @@ type RootBudgetFormContext = {
  * - `field` nodes contain either `definition` or `schema`
  * - `section` nodes contain `children` instead and are excluded
  */
-
 const isRenderableFieldNode = (
   node: UiSchema[number],
 ): node is UiSchemaField | UiSchemaFieldList => {
@@ -83,8 +82,8 @@ export const FormFields = ({
 
   try {
     requiredFieldPaths = getRequiredProperties(schema);
-  } catch (e) {
-    console.error(e);
+  } catch (error: unknown) {
+    console.error(error);
     return (
       <Alert data-testid="alert" type="error" heading="Error" headingLevel="h4">
         Error rendering form
@@ -99,14 +98,17 @@ export const FormFields = ({
     if (!Array.isArray(uiSchema)) {
       throw new Error("top level UI Schema element must be an array");
     }
+
     // generate fields for all schema elements that are not children of a section
     uiSchema.forEach((node) => {
-      /*  Only `section` nodes should recurse into `children` here.
-          `fieldList` nodes also have `children`, but they are renderable widgets,
-          not structural containers, so they must continue through the field-rendering path. */
+      /*
+        Only `section` nodes should recurse into `children` here.
+        `fieldList` nodes also have `children`, but they are renderable widgets,
+        not structural containers, so they must continue through the field-rendering path.
+      */
       if (node.type === "section") {
         // treat as section and recursively build child fields
-        buildFormTree(node.children as UiSchema, {
+        buildFormTree(node.children, {
           label: node.label,
           name: node.name,
           description: node.description,
@@ -114,11 +116,16 @@ export const FormFields = ({
       } else if (!isRenderableFieldNode(node)) {
         throw new Error("child field missing definition and schema");
       } else if (!parent) {
-        // treat as valid non-child field
-        const requiredField = isFieldRequired(
-          (node.definition || node.schema?.title || "") as string,
-          requiredFieldPaths,
-        );
+        // FieldList is a renderable composite widget and does not have its own
+        // field definition path in the same way a standard field node does.
+        const requiredField =
+          node.type === "fieldList"
+            ? false
+            : isFieldRequired(
+                (node.definition || node.schema?.title || "") as string,
+                requiredFieldPaths,
+              );
+
         const widgetConfig = getFieldConfig({
           uiFieldObject: node,
           formSchema: schema,
@@ -130,18 +137,22 @@ export const FormFields = ({
         const field = renderWidget({
           type: widgetConfig.type,
           props: { ...widgetConfig.props, formContext, isFormLocked },
-          definition: node.definition,
+          definition: "definition" in node ? node.definition : undefined,
         });
 
         if (field) {
+          const nodeKey =
+            node.name ??
+            ("definition" in node ? node.definition?.toString() : undefined);
+
           renderedFields = [
             ...renderedFields,
-            /* Not every renderable UiSchema node has a `name`.
-            Prefer `name` when available, otherwise fall back to the field definition
-            so React still receives a stable key for this rendered node. */
-            <React.Fragment key={node.name ?? node.definition?.toString()}>
-              {field}
-            </React.Fragment>,
+            /*
+    Not every renderable UiSchema node has a `name`.
+    Prefer `name` when available, otherwise fall back to the field definition
+    so React still receives a stable key for this rendered node.
+  */
+            <React.Fragment key={nodeKey}>{field}</React.Fragment>,
           ];
         }
       }
@@ -160,10 +171,17 @@ export const FormFields = ({
         // Some renderable UiSchema nodes are definition-based and do not include an
         // inline `schema` object. Use optional chaining here so required-field checks
         // can safely fall back to the schema title only when it exists.
-        const requiredField = isFieldRequired(
-          (node.definition || node.schema?.title || "") as string,
-          requiredFieldPaths,
-        );
+        //
+        // FieldList is a renderable composite widget and does not have its own
+        // field definition path in the same way a standard field node does.
+        const requiredField =
+          node.type === "fieldList"
+            ? false
+            : isFieldRequired(
+                (node.definition || node.schema?.title || "") as string,
+                requiredFieldPaths,
+              );
+
         const widgetConfig = getFieldConfig({
           uiFieldObject: node,
           formSchema: schema,
@@ -175,7 +193,7 @@ export const FormFields = ({
         return renderWidget({
           type: widgetConfig.type,
           props: { ...widgetConfig.props, formContext, isFormLocked },
-          definition: node.definition,
+          definition: "definition" in node ? node.definition : undefined,
         });
       });
 
@@ -194,8 +212,8 @@ export const FormFields = ({
   try {
     buildFormTree(uiSchema, null);
     return renderedFields;
-  } catch (e) {
-    console.error(e);
+  } catch (error: unknown) {
+    console.error(error);
     return (
       <Alert data-testid="alert" type="error" heading="Error" headingLevel="h4">
         Error rendering form

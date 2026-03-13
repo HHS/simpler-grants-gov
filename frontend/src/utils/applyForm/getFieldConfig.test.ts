@@ -307,14 +307,14 @@ describe("getFieldConfig", () => {
           fieldListName: "contacts",
           childId: "topField--contacts--firstName",
         }),
-      ).toBe("topField--contacts[~~index~~]--firstName");
+      ).toBe("contacts[~~index~~]--firstName");
     });
 
     it("falls back to prefixing the fieldList name when the token is not present", () => {
       expect(
         buildFieldListBaseId({
           fieldListName: "contacts",
-          childId: "firstName",
+          childId: "topField--contacts--firstName",
         }),
       ).toBe("contacts[~~index~~]--firstName");
     });
