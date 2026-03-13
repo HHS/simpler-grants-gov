@@ -1,8 +1,10 @@
 "server only";
 
+import { getSession } from "src/services/auth/session";
+import { UnauthorizedError } from "src/errors";
 import { ApiRequestError } from "src/errors";
 import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
-import { searchAgencies } from "src/services/fetch/fetchers/fetchers";
+import { searchAgencies, fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { flattenAgencies } from "src/utils/search/filterUtils";
 import { getStatusValueForAgencySearch } from "src/utils/search/searchUtils";
@@ -73,4 +75,34 @@ export const searchAndFlattenAgencies = async (
     console.error("Error flattening agency search results");
     throw e;
   }
+};
+
+//------------------------------------------------------
+// Fetch user's agencies
+//------------------------------------------------------
+export const getUserAgencies = async (
+  token: string,
+  userId: string,
+): Promise<RelevantAgencyRecord[]> => {
+  const ssgToken = {
+    "X-SGG-Token": token,
+  };
+
+  const subPath = `${userId}/agencies`;
+  const resp = await fetchUserWithMethod("POST")({
+    subPath,
+    additionalHeaders: ssgToken,
+  });
+  const json = (await resp.json()) as { data: [] };
+  return json.data;
+};
+
+export const fetchUserAgencies = async (): Promise<RelevantAgencyRecord[]> => {
+  const session = await getSession();
+  if (!session || !session.token) {
+    // we shouldn't get there because the page should be checking authentication
+    throw new UnauthorizedError("No active session");
+  }
+  const agencies = await getUserAgencies(session.token, session.user_id);
+  return agencies;
 };
