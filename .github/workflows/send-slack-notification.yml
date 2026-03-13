@@ -1,11 +1,11 @@
 name: Slack Notification
 
 on:
-  push:
-    branches: mdragon/9032-e2e-staging-notifications
   workflow_call:
     secrets:
       ALERTS_SLACK_BOT_TOKEN:
+        required: true
+      SLACK_ALERTS_CHANNEL_ID:
         required: true
     inputs:
       channel_id:
