@@ -1,4 +1,4 @@
-name: Slack Notification
+name: Slack Notification (2026)
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       slack_tag:
-        description: "List of Slack handles to tag in the message"
+        description: "S"
         required: false
         type: string
         default: ""
@@ -22,7 +22,8 @@ jobs:
           curl -X POST \
           -H "Content-Type: application/json; charset=utf-8" \
           --data '{
-            "text": ":x: *GitHub Actions Failure Alert* ${{ '@Matt Dragon' }}",
+            "text": ":x: *GitHub Actions Failure Alert* ${{ '<@Matt Dragon>' }}",
+            "link_names": 1,
             "attachments": [
             {
               "color": "#ff0000",

@@ -1,8 +1,25 @@
-name: Slack Notification (Legacy)
+name: Slack Notification
 
 on:
+  push:
+    branches: mdragon/9032-e2e-staging-notifications
   workflow_call:
+    secrets:
+      ALERTS_SLACK_BOT_TOKEN:
+        required: true
+    inputs:
+      channel_id:
+        description: "Slack channel to message (bot account must have permissions applied in Slack)"
+        required: false
+        type: string
+        default: "#alerts-infra"
   workflow_dispatch:
+    inputs:
+      channel_id:
+        description: "Slack channel to message (bot account must have permissions applied in Slack)"
+        required: false
+        type: string
+        default: "#alerts-infra"
 
 jobs:
   send-slack-notification:
@@ -14,7 +31,7 @@ jobs:
           curl -X POST -H "Authorization: Bearer ${{ secrets.ALERTS_SLACK_BOT_TOKEN }}" \
           -H "Content-Type: application/json; charset=utf-8" \
           --data '{
-            "channel": "${{ secrets.SLACK_ALERTS_CHANNEL_ID }}",
+            "channel": "${{ inputs.channel_id }}",
             "text": ":x: *GitHub Actions Failure Alert*",
             "attachments": [
             {

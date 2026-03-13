@@ -60,4 +60,7 @@ jobs:
     if: failure()
     needs: [create-report]
     uses: ./.github/workflows/send-slack-notification.yml
-    secrets: inherit
+    with:
+      "channel_id": "alerts-e2e"
+    secrets:
+      "ALERTS_SLACK_BOT_TOKEN": ${{ secrets.ALERTS_SLACK_BOT_TOKEN_2026 }}
