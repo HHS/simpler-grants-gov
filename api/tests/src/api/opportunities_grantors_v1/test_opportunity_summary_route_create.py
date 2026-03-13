@@ -48,6 +48,8 @@ def opportunity(
         agency_code=agency.agency_code,
         opportunity_number=opportunity_number,
         opportunity_title=opportunity_title,
+        is_draft=True,
+        is_simpler_grants_opportunity=True,
     )
 
     opportunity.agency_record = agency
@@ -63,6 +65,7 @@ def test_opportunities(db_session, enable_factory_create, opportunity_summary_au
         size=3,
         agency_id=agency.agency_id,
         agency_code=agency.agency_code,
+        is_draft=True,
     )
 
     return opportunities
