@@ -2404,6 +2404,62 @@ paths:
               $ref: '#/components/schemas/ApplicationAuditRequest'
       security:
       - ApiJwtAuth: []
+  /v1/grantors/opportunities/{opportunity_id}/summary:
+    post:
+      parameters:
+      - in: path
+        name: opportunity_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunitySummaryCreateResponseV1'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal Server Error
+      tags:
+      - Opportunity v1 - for Grantors
+      summary: Create a new opportunity summary
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunitySummaryCreateRequestV1'
+      security:
+      - ApiJwtAuth: []
+      - ApiUserKeyAuth: []
   /v1/organizations/{organization_id}/invitations/list:
     post:
       parameters:
@@ -4548,17 +4604,17 @@ components:
         funding_instruments:
           type: array
           items:
-            enum:
+            enum: &id009
             - cooperative_agreement
             - grant
             - procurement_contract
             - other
-            type:
+            type: &id010
             - string
         funding_categories:
           type: array
           items:
-            enum:
+            enum: &id011
             - recovery_act
             - agriculture
             - arts
@@ -4586,12 +4642,12 @@ components:
             - affordable_care_act
             - other
             - energy_infrastructure_and_critical_mineral_and_materials
-            type:
+            type: &id012
             - string
         applicant_types:
           type: array
           items:
-            enum:
+            enum: &id013
             - state_governments
             - county_governments
             - city_or_township_governments
@@ -4609,7 +4665,7 @@ components:
             - small_businesses
             - other
             - unrestricted
-            type:
+            type: &id014
             - string
         created_at:
           type: string
@@ -8227,6 +8283,20 @@ components:
           type: boolean
           description: Whether the opportunity is forecasted
           example: false
+    SavedOpportunityOrganization:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+          description: The ID of the organization
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization_name:
+          type:
+          - string
+          - 'null'
+          description: The name of the organization
+          example: Department of Health
     SavedOpportunityResponseV1:
       type: object
       properties:
@@ -8256,6 +8326,15 @@ components:
           type:
           - object
           $ref: '#/components/schemas/SavedOpportunitySummaryV1'
+        saved_to_organizations:
+          type: array
+          items:
+            type:
+            - object
+            - 'null'
+            anyOf:
+            - $ref: '#/components/schemas/SavedOpportunityOrganization'
+            - type: 'null'
     UserSavedOpportunitiesResponse:
       type: object
       properties:
@@ -8986,6 +9065,475 @@ components:
             type:
             - object
             $ref: '#/components/schemas/ApplicationAuditData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OpportunitySummaryCreateRequestV1:
+      type: object
+      properties:
+        is_forecast:
+          type: boolean
+          description: Whether the opportunity is forecasted
+          example: false
+        summary_description:
+          type:
+          - string
+          - 'null'
+          maxLength: 18000
+          description: Opportunity summary
+          example: This opportunity...
+        is_cost_sharing:
+          type:
+          - boolean
+          - 'null'
+          description: Whether or not the opportunity has a cost sharing/matching
+            requirement
+        post_date:
+          type: string
+          format: date
+          description: The date the opportunity was posted
+        close_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: The date the opportunity closes
+        close_date_description:
+          type:
+          - string
+          - 'null'
+          description: Optional details regarding the close date
+          example: Proposals are due earlier than usual.
+        archive_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: When the opportunity will be archived (defaults to 30 days
+            after the close date)
+        expected_number_of_awards:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          maximum: 999999999999999
+          description: The number of awards the opportunity is expected to award
+          example: 10
+        estimated_total_program_funding:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          maximum: 999999999999999
+          description: The total program funding of the opportunity in US Dollars
+          example: 10000000
+        award_floor:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          maximum: 999999999999999
+          description: The minimum amount an opportunity would award
+          example: 10000
+        award_ceiling:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          maximum: 999999999999999
+          description: The maximum amount an opportunity would award
+          example: 100000
+        additional_info_url:
+          type:
+          - string
+          - 'null'
+          maxLength: 250
+          description: A URL to a website that can provide additional information
+            about the opportunity
+          example: grants.gov
+        additional_info_url_description:
+          type:
+          - string
+          - 'null'
+          maxLength: 250
+          description: The text to display for the additional_info_url link
+          example: Click me for more info
+        forecasted_post_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the opportunity is expected
+            to be posted, and transition out of being a forecast
+        forecasted_close_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the opportunity is expected
+            to be close once posted.
+        forecasted_close_date_description:
+          type:
+          - string
+          - 'null'
+          maxLength: 255
+          description: Forecasted opportunity only. Optional details regarding the
+            forecasted closed date.
+          example: Proposals will probably be due on this date
+        forecasted_award_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the grantor plans to
+            award the opportunity.
+        forecasted_project_start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the grantor expects the
+            award recipient should start their project
+        fiscal_year:
+          type:
+          - integer
+          - 'null'
+          minimum: 1900
+          maximum: 2100
+          description: Forecasted opportunity only. The fiscal year the project is
+            expected to be funded and launched
+          example: 2026
+        funding_categories:
+          type: array
+          minItems: 1
+          description: Categories of funding for this opportunity
+          example:
+          - education
+          - health
+          items:
+            enum:
+            - recovery_act
+            - agriculture
+            - arts
+            - business_and_commerce
+            - community_development
+            - consumer_protection
+            - disaster_prevention_and_relief
+            - education
+            - employment_labor_and_training
+            - energy
+            - environment
+            - food_and_nutrition
+            - health
+            - housing
+            - humanities
+            - infrastructure_investment_and_jobs_act
+            - information_and_statistics
+            - income_security_and_social_services
+            - law_justice_and_legal_services
+            - natural_resources
+            - opportunity_zone_benefits
+            - regional_development
+            - science_technology_and_other_research_and_development
+            - transportation
+            - affordable_care_act
+            - other
+            - energy_infrastructure_and_critical_mineral_and_materials
+            type:
+            - string
+        funding_category_description:
+          type:
+          - string
+          - 'null'
+          maxLength: 2500
+          description: Additional information about the funding category
+          example: Economic Support
+        funding_instruments:
+          type: array
+          minItems: 1
+          description: Types of funding instruments used for this opportunity
+          example:
+          - cooperative_agreement
+          - grant
+          items:
+            enum:
+            - cooperative_agreement
+            - grant
+            - procurement_contract
+            - other
+            type:
+            - string
+        applicant_types:
+          type: array
+          minItems: 1
+          description: Types of applicants eligible for this opportunity
+          example:
+          - state_governments
+          - county_governments
+          items:
+            enum:
+            - state_governments
+            - county_governments
+            - city_or_township_governments
+            - special_district_governments
+            - independent_school_districts
+            - public_and_state_institutions_of_higher_education
+            - private_institutions_of_higher_education
+            - federally_recognized_native_american_tribal_governments
+            - other_native_american_tribal_organizations
+            - public_and_indian_housing_authorities
+            - nonprofits_non_higher_education_with_501c3
+            - nonprofits_non_higher_education_without_501c3
+            - individuals
+            - for_profit_organizations_other_than_small_businesses
+            - small_businesses
+            - other
+            - unrestricted
+            type:
+            - string
+        applicant_eligibility_description:
+          type:
+          - string
+          - 'null'
+          maxLength: 4000
+          description: Additional information about the types of applicants that are
+            eligible
+          example: All types of domestic applicants are eligible to apply
+        agency_contact_description:
+          type:
+          - string
+          - 'null'
+          maxLength: 1000
+          description: Information regarding contacting the agency who owns the opportunity
+          example: For more information, reach out to Jane Smith at agency US-ABC
+        agency_email_address:
+          type:
+          - string
+          - 'null'
+          maxLength: 130
+          description: The contact email of the agency who owns the opportunity
+          example: fake_email@grants.gov
+        agency_email_address_description:
+          type:
+          - string
+          - 'null'
+          maxLength: 108
+          description: The text for the link to the agency email address
+          example: Click me to email the agency
+      required:
+      - agency_contact_description
+      - agency_email_address
+      - agency_email_address_description
+      - applicant_types
+      - award_ceiling
+      - award_floor
+      - funding_categories
+      - funding_instruments
+      - is_cost_sharing
+      - is_forecast
+      - post_date
+      - summary_description
+    OpportunitySummaryDetail:
+      type: object
+      properties:
+        summary_description:
+          type:
+          - string
+          - 'null'
+          description: The summary of the opportunity
+          example: This opportunity aims to unravel the mysteries of the universe.
+        is_cost_sharing:
+          type:
+          - boolean
+          - 'null'
+          description: Whether or not the opportunity has a cost sharing/matching
+            requirement
+        is_forecast:
+          type: boolean
+          description: Whether the opportunity is forecasted, that is, the information
+            is only an estimate and not yet official
+          example: false
+        close_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: The date that the opportunity will close - only set if is_forecast=False
+        close_date_description:
+          type:
+          - string
+          - 'null'
+          description: Optional details regarding the close date
+          example: Proposals are due earlier than usual.
+        post_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: The date the opportunity was posted
+        archive_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: When the opportunity will be archived
+        expected_number_of_awards:
+          type:
+          - integer
+          - 'null'
+          description: The number of awards the opportunity is expected to award
+          example: 10
+        estimated_total_program_funding:
+          type:
+          - integer
+          - 'null'
+          description: The total program funding of the opportunity in US Dollars
+          example: 10000000
+        award_floor:
+          type:
+          - integer
+          - 'null'
+          description: The minimum amount an opportunity would award
+          example: 10000
+        award_ceiling:
+          type:
+          - integer
+          - 'null'
+          description: The maximum amount an opportunity would award
+          example: 100000
+        additional_info_url:
+          type:
+          - string
+          - 'null'
+          description: A URL to a website that can provide additional information
+            about the opportunity
+          example: grants.gov
+        additional_info_url_description:
+          type:
+          - string
+          - 'null'
+          description: The text to display for the additional_info_url link
+          example: Click me for more info
+        forecasted_post_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the opportunity is expected
+            to be posted, and transition out of being a forecast
+        forecasted_close_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the opportunity is expected
+            to be close once posted.
+        forecasted_close_date_description:
+          type:
+          - string
+          - 'null'
+          description: Forecasted opportunity only. Optional details regarding the
+            forecasted closed date.
+          example: Proposals will probably be due on this date
+        forecasted_award_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the grantor plans to
+            award the opportunity.
+        forecasted_project_start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the grantor expects the
+            award recipient should start their project
+        fiscal_year:
+          type:
+          - integer
+          - 'null'
+          description: Forecasted opportunity only. The fiscal year the project is
+            expected to be funded and launched
+        funding_category_description:
+          type:
+          - string
+          - 'null'
+          description: Additional information about the funding category
+          example: Economic Support
+        applicant_eligibility_description:
+          type:
+          - string
+          - 'null'
+          description: Additional information about the types of applicants that are
+            eligible
+          example: All types of domestic applicants are eligible to apply
+        agency_contact_description:
+          type:
+          - string
+          - 'null'
+          description: Information regarding contacting the agency who owns the opportunity
+          example: For more information, reach out to Jane Smith at agency US-ABC
+        agency_email_address:
+          type:
+          - string
+          - 'null'
+          description: The contact email of the agency who owns the opportunity
+          example: fake_email@grants.gov
+        agency_email_address_description:
+          type:
+          - string
+          - 'null'
+          description: The text for the link to the agency email address
+          example: Click me to email the agency
+        version_number:
+          type:
+          - integer
+          - 'null'
+          description: The version number of the opportunity summary
+          example: 1
+        funding_instruments:
+          type: array
+          items:
+            enum: *id009
+            type: *id010
+        funding_categories:
+          type: array
+          items:
+            enum: *id011
+            type: *id012
+        applicant_types:
+          type: array
+          items:
+            enum: *id013
+            type: *id014
+        created_at:
+          type: string
+          format: date-time
+          description: When the opportunity summary was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the opportunity summary was last updated
+        opportunity_summary_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the opportunity summary
+          example: 123e4567-e89b-12d3-a456-426614174000
+      required:
+      - opportunity_summary_id
+    OpportunitySummaryCreateResponseV1:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunitySummaryDetail'
         status_code:
           type: integer
           description: The HTTP status code
