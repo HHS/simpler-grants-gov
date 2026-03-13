@@ -11,7 +11,7 @@ import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
 import { SF424B_FORM_CONFIG } from "./fixtures/sf424b-field-definitions";
-import { sf424BHappyPathTestData } from "./page-objects/sf424b-fill-data";
+import { sf424BHappyPathTestData } from "./fixtures/sf424b-fill-data";
 
 const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01

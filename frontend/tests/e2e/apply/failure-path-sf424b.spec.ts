@@ -10,7 +10,10 @@ import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { SF424B_FORM_MATCHER } from "tests/e2e/utils/forms/fill-sf424b-form-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
-import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
+import {
+  verifyFormStatusAfterSave,
+  verifyFormStatusOnApplication,
+} from "tests/e2e/utils/forms/verify-form-status-utils";
 
 const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
@@ -45,12 +48,13 @@ test("SF-424B error validation - required fields and inline errors", async ({
     // Scrolls down and checks inline field errors on form page
     // Navigates to application landing page
     // Scrolls down and checks "Some issues found" in form row
-    await verifyFormStatusAfterSave(
+    await verifyFormStatusAfterSave(page, "incomplete", sf424bErrors);
+    // On application page — verify form row status/messages
+    await verifyFormStatusOnApplication(
       page,
-      "incomplete",
+      "complete",
       "SF-424B",
       applicationUrl,
-      sf424bErrors,
     );
   }
 });

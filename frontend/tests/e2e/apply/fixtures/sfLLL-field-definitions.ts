@@ -1,7 +1,4 @@
 export const SFLLL_TEST_DATA = {
-  // form: {
-  //   name: "Disclosure of Lobbying Activities (SF-LLL)",
-  // },
   federalAction_type: "Grant",
   federalAction_status: "BidOffer",
   federalAction_reportType: "MaterialChange",
