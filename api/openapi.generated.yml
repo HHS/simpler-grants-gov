@@ -784,6 +784,48 @@ paths:
               $ref: '#/components/schemas/UserUpdateProfileRequest'
       security:
       - ApiJwtAuth: []
+  /v1/workflows/{workflow_id}:
+    get:
+      parameters:
+      - in: path
+        name: workflow_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Workflow
+      summary: Get Workflow Details
+      description: Retrieve detailed information about a specific workflow including
+        audit history, approvals, and approval configuration. Access is controlled
+        by entity-based privileges (VIEW_OPPORTUNITY or VIEW_APPLICATION).
+      security:
+      - ApiJwtAuth: []
+      - ApiUserKeyAuth: []
   /v1/users/{user_id}/agencies:
     post:
       parameters:
@@ -5858,6 +5900,289 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    WorkflowUser:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: The user's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type:
+          - string
+          - 'null'
+          description: The user's email address
+          example: user@example.com
+        first_name:
+          type:
+          - string
+          - 'null'
+          description: The user's first name
+          example: John
+        last_name:
+          type:
+          - string
+          - 'null'
+          description: The user's last name
+          example: Smith
+    WorkflowAuditEvent:
+      type: object
+      properties:
+        workflow_audit_id:
+          type: string
+          format: uuid
+          description: The audit event's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        acting_user:
+          description: The user who triggered the transition
+          type:
+          - object
+          $ref: '#/components/schemas/WorkflowUser'
+        transition_event:
+          type: string
+          description: The event that triggered the state transition
+          example: approve
+        source_state:
+          type: string
+          description: The state before the transition
+          example: pending_review
+        target_state:
+          type: string
+          description: The state after the transition
+          example: approved
+        event_id:
+          type: string
+          format: uuid
+          description: The workflow event that triggered this audit
+          example: 123e4567-e89b-12d3-a456-426614174000
+        audit_metadata:
+          type:
+          - object
+          - 'null'
+          description: Additional metadata about the audit event
+          example:
+            comment: Looks good
+          additionalProperties: {}
+        created_at:
+          type: string
+          format: date-time
+          description: When the audit event was created
+    WorkflowApproval:
+      type: object
+      properties:
+        workflow_approval_id:
+          type: string
+          format: uuid
+          description: The workflow approval's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        approving_user:
+          description: The user who provided the approval
+          type:
+          - object
+          $ref: '#/components/schemas/WorkflowUser'
+        event_id:
+          type: string
+          format: uuid
+          description: The workflow event that created this approval
+          example: 123e4567-e89b-12d3-a456-426614174000
+        is_still_valid:
+          type: boolean
+          description: Whether this approval is still valid or has been invalidated
+          example: true
+        comment:
+          type:
+          - string
+          - 'null'
+          description: Optional comment from the approver
+          example: Approved with conditions
+        approval_type:
+          description: The type of approval
+          example: !!python/object/apply:src.constants.lookup_constants.ApprovalType
+          - program_officer_approval
+          enum:
+          - initial_prototype_approval
+          - program_officer_approval
+          - budget_officer_approval
+          type:
+          - string
+        approval_response_type:
+          description: The response type of the approval
+          example: !!python/object/apply:src.constants.lookup_constants.ApprovalResponseType
+          - approved
+          enum:
+          - approved
+          - declined
+          - requires_modification
+          type:
+          - string
+        created_at:
+          type: string
+          format: date-time
+          description: When the approval was created
+    WorkflowApprovalConfigItem:
+      type: object
+      properties:
+        approval_type:
+          description: The type of approval required
+          example: !!python/object/apply:src.constants.lookup_constants.ApprovalType
+          - program_officer_approval
+          enum:
+          - initial_prototype_approval
+          - program_officer_approval
+          - budget_officer_approval
+          type:
+          - string
+        required_privileges:
+          type: array
+          description: List of privileges required to provide this approval
+          example:
+          - !!python/object/apply:src.constants.lookup_constants.Privilege
+            - program_officer_approval
+          items:
+            enum:
+            - manage_org_members
+            - manage_org_admin_members
+            - view_org_membership
+            - start_application
+            - list_application
+            - view_application
+            - modify_application
+            - submit_application
+            - update_form
+            - manage_agency_members
+            - get_submitted_applications
+            - legacy_agency_viewer
+            - legacy_agency_grant_retriever
+            - legacy_agency_assigner
+            - manage_internal_roles
+            - manage_competition
+            - read_test_user_token
+            - view_opportunity
+            - create_opportunity
+            - update_opportunity
+            - publish_opportunity
+            - internal_workflow_access
+            - view_org_saved_opportunities
+            - modify_org_saved_opportunities
+            - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
+            - program_officer_approval
+            - budget_officer_approval
+            type:
+            - string
+        possible_users:
+          type: array
+          description: List of users in the workflow's agency who have the required
+            privileges
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/WorkflowUser'
+    WorkflowGetResponseData:
+      type: object
+      properties:
+        workflow_id:
+          type: string
+          format: uuid
+          description: The workflow's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        workflow_type:
+          description: The type of workflow
+          example: !!python/object/apply:src.constants.lookup_constants.WorkflowType
+          - opportunity_publish
+          enum:
+          - opportunity_publish
+          - application_submission
+          - initial_prototype
+          - basic_test_workflow
+          type:
+          - string
+        current_workflow_state:
+          type: string
+          description: The current state in the workflow
+          example: draft
+        is_active:
+          type: boolean
+          description: Whether the workflow is active (false when workflow reaches
+            end state)
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          description: When the workflow was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the workflow was last updated
+        workflow_audit_events:
+          type: array
+          description: Ordered list of audit events (sorted by created_at)
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/WorkflowAuditEvent'
+        workflow_approvals:
+          type: array
+          description: Ordered list of approvals (sorted by created_at)
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/WorkflowApproval'
+        workflow_approval_config:
+          type: object
+          description: Configuration mapping event names to approval requirements
+            and possible users
+          example:
+            receive_program_officer_approval:
+              approval_type: PROGRAM_OFFICER_APPROVAL
+              required_privileges:
+              - PROGRAM_OFFICER_APPROVAL
+              possible_users: []
+          additionalProperties:
+            type:
+            - object
+            $ref: '#/components/schemas/WorkflowApprovalConfigItem'
+        opportunity_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: The opportunity ID if this is an opportunity workflow
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: The application ID if this is an application workflow
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_submission_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: The application submission ID if this is a submission workflow
+          example: 123e4567-e89b-12d3-a456-426614174000
+    WorkflowGetResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The workflow details with audit history and approval configuration
+          type:
+          - object
+          $ref: '#/components/schemas/WorkflowGetResponseData'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
     UserAgency:
       type: object
       properties:
@@ -5995,6 +6320,10 @@ components:
             - view_org_saved_opportunities
             - modify_org_saved_opportunities
             - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
             type:
@@ -6155,6 +6484,10 @@ components:
             - view_org_saved_opportunities
             - modify_org_saved_opportunities
             - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
             type:
@@ -7033,6 +7366,10 @@ components:
             - view_org_saved_opportunities
             - modify_org_saved_opportunities
             - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
             type:
@@ -7596,6 +7933,10 @@ components:
             - view_org_saved_opportunities
             - modify_org_saved_opportunities
             - internal_workflow_event_send
+            - view_award_recommendation
+            - create_award_recommendation
+            - update_award_recommendation
+            - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
             type:

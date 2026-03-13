@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import date
 
@@ -16,6 +17,7 @@ from tests.src.db.models.factories import (
     OpportunityFactory,
     OrganizationSavedOpportunityFactory,
     OrganizationUserFactory,
+    OrganizationUserRoleFactory,
     RoleFactory,
     UserFactory,
     UserSavedOpportunityFactory,
@@ -103,10 +105,11 @@ def test_user_get_saved_opportunities(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
         headers={"X-SGG-Token": user_auth_token},
         json={
+            "filters": {"organization_ids": {"one_of": []}},
             "pagination": {
                 "page_offset": 1,
                 "page_size": 25,
-            }
+            },
         },
     )
 
@@ -160,16 +163,20 @@ def test_get_saved_opportunities_unauthorized_user(client, enable_factory_create
 
 
 def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_saves(
-    client, enable_factory_create, db_session, user, user_auth_token
+    client, enable_factory_create, db_session
 ):
     """Test that when organization_ids is empty, only user saved opportunities should be returned"""
 
-    # User save
+    # Org saved opp
+    user, org, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+    OrganizationSavedOpportunityFactory.create(organization=org)
+
+    # User saved opp
     user_saved_opp = UserSavedOpportunityFactory.create(user=user)
 
     response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         json={
             "filters": {"organization_ids": {"one_of": []}},
             "pagination": {
@@ -184,6 +191,7 @@ def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_sa
 
     assert len(data) == 1
     assert data[0]["opportunity_id"] == str(user_saved_opp.opportunity_id)
+    assert "saved_to_organizations" not in data[0]
 
 
 @pytest.mark.parametrize(
@@ -465,6 +473,23 @@ def test_user_get_saved_opportunities_no_filter_returns_all(
     assert len(response.json["data"]) == 2
 
 
+def test_user_get_saved_opportunities_logging(
+    client, enable_factory_create, db_session, user, user_auth_token, caplog
+):
+    opportunity = OpportunityFactory.create(opportunity_title="Test Opportunity")
+    UserSavedOpportunityFactory.create(user=user, opportunity=opportunity)
+
+    caplog.set_level(logging.INFO)
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": user_auth_token},
+        json={"pagination": {"page_offset": 1, "page_size": 25}},
+    )
+
+    assert response.status_code == 200
+    assert any("Successfully fetched saved opportunities" in r.message for r in caplog.records)
+
+
 def test_user_get_saved_opportunities_org_only(client, enable_factory_create, db_session):
     """Test user can get organization saved opportunities with no duplicates"""
     user, orga, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
@@ -520,14 +545,26 @@ def test_user_get_saved_opportunities_org_only_403(
 def test_user_get_saved_opportunities_user_and_org(client, enable_factory_create, db_session):
     """Test with user and org saved opportunities"""
     user, org, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
-
+    # Opportunity saved by org_a
     org_saved_oppa = OrganizationSavedOpportunityFactory.create(organization=org)
+    # Another opportunity saved by org_a only
     org_saved_oppb = OrganizationSavedOpportunityFactory.create(organization=org)
-
+    # Same opp as org_saved_oppa, but also saved by org_b
+    org_saved_oppc = OrganizationSavedOpportunityFactory.create(
+        opportunity=org_saved_oppa.opportunity
+    )
+    OrganizationUserRoleFactory.create(
+        organization_user=OrganizationUserFactory(
+            user=user, organization=org_saved_oppc.organization
+        ),
+        role=RoleFactory(is_org_role=True),
+    )
+    # User also saved the same opportunity as org_a (org_saved_oppa)
     UserSavedOpportunityFactory.create(
         user=user, opportunity=org_saved_oppa.opportunity
     )  # same opp as org
-    uso2 = UserSavedOpportunityFactory.create(user=user)
+    # User-only saved opportunity (no org save)
+    user_only_opp = UserSavedOpportunityFactory.create(user=user)
 
     response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities/list",
@@ -541,11 +578,33 @@ def test_user_get_saved_opportunities_user_and_org(client, enable_factory_create
     assert [opp["opportunity_id"] for opp in data] == [
         str(opp)
         for opp in [
-            uso2.opportunity_id,
+            user_only_opp.opportunity_id,
             org_saved_oppa.opportunity_id,
             org_saved_oppb.opportunity_id,
         ]
     ]
+    # Check that saved_to_organizations is included correctly
+    # Build a mapping from opportunity_id to data dict for easy lookup
+    opp_map = {item["opportunity_id"]: item for item in data}
+
+    # User-only saved opportunity: no saved_to_organizations
+    user_only_item = opp_map[str(user_only_opp.opportunity_id)]
+    assert "saved_to_organizations" in user_only_item
+    assert user_only_item["saved_to_organizations"] == []
+
+    # Opportunity saved by one org (org_saved_oppb)
+    opp_b_item = opp_map[str(org_saved_oppb.opportunity_id)]
+    assert "saved_to_organizations" in opp_b_item
+    org_ids_b = {org["organization_id"] for org in opp_b_item["saved_to_organizations"]}
+    assert str(org.organization_id) in org_ids_b
+    assert len(org_ids_b) == 1  # only one org
+
+    # Opportunity saved by multiple orgs (org_saved_oppa + org_saved_oppc)
+    opp_a_item = opp_map[str(org_saved_oppa.opportunity_id)]
+    assert "saved_to_organizations" in opp_a_item
+    org_ids_a = {org["organization_id"] for org in opp_a_item["saved_to_organizations"]}
+    expected_orgs = {str(org.organization_id), str(org_saved_oppc.organization_id)}
+    assert org_ids_a == expected_orgs
 
 
 def test_user_get_saved_opportunities_specific_org(client, enable_factory_create, db_session):

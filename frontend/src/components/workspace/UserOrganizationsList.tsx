@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { OrganizationItem } from "./UserOrganizationItem";
 
 const NoOrganizations = () => {
-  const t = useTranslations("ActivityDashboard.noOrganizations");
+  const t = useTranslations("WorkspaceDashboard.noOrganizations");
   return (
     <li className="border-base-lighter border-1px padding-2 margin-top-2">
       <h3>{t("title")}</h3>

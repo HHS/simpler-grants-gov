@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 import pytest
@@ -102,3 +103,16 @@ def test_user_delete_saved_search(
     )
     assert len(saved_searches) == 1
     assert saved_searches[0].is_deleted
+
+
+def test_user_delete_saved_search_logging(
+    client, db_session, user, user_auth_token, enable_factory_create, saved_search, caplog
+):
+    caplog.set_level(logging.INFO)
+    response = client.delete(
+        f"/v1/users/{user.user_id}/saved-searches/{saved_search.saved_search_id}",
+        headers={"X-SGG-Token": user_auth_token},
+    )
+
+    assert response.status_code == 200
+    assert any("Deleted saved search" in r.message for r in caplog.records)

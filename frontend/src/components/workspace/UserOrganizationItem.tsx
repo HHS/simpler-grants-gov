@@ -15,7 +15,7 @@ const ManageUsersButton = ({
 }: {
   organization: Organization;
 }) => {
-  const t = useTranslations("ActivityDashboard");
+  const t = useTranslations("WorkspaceDashboard");
   return (
     <Link href={`/organizations/${organization.organization_id}/manage-users`}>
       <Button type="button">
@@ -30,7 +30,7 @@ const ViewDetailsButton = ({
 }: {
   organization: Organization;
 }) => {
-  const t = useTranslations("ActivityDashboard");
+  const t = useTranslations("WorkspaceDashboard");
   return (
     <Link href={`/organizations/${organization.organization_id}`}>
       <Button type="button">

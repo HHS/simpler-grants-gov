@@ -13,8 +13,8 @@ in the form $setting: value,
   $theme-show-compile-warnings: false,
   // Specify USWDS font and image paths.
   // Same paths are successfully used for both Next.js and Storybook.
-  $theme-font-path: add-base-path("/uswds/fonts"),
-  $theme-image-path: add-base-path("/uswds/img"),
+  $theme-font-path: "/uswds/fonts",
+  $theme-image-path: "/uswds/img",
   // Ensure utility classes always override other styles
   $utilities-use-important: true,
 

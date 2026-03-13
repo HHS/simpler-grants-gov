@@ -55,7 +55,7 @@ def get_application_zip_response(
                 verify_access(
                     certificate.user,
                     soap_config.privileges,
-                    application_submission.application,
+                    application_submission.application.competition.opportunity.agency_record,
                 )
             except HTTPError as e:
                 logger.info(

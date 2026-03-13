@@ -263,7 +263,8 @@ export async function waitForSearchResultsInitialLoad(
     timeout = timeoutOverride;
   }
 
-  await page.waitForSelector('h3:has-text("Opportunities")', {
+  // Using Playwright's text= selector for robust cross-browser support (especially Webkit).
+  await page.waitForSelector("text=Opportunities", {
     state: "visible",
     timeout,
   });

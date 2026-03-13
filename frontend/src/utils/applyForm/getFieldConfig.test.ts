@@ -1,6 +1,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { identity } from "lodash";
 import {
+  buildFieldListBaseId,
   determineFieldType,
   getBasicMultifieldInfo,
   getEnumOptions,
@@ -10,7 +11,10 @@ import {
 } from "src/utils/applyForm/getFieldConfig";
 import { fakeValidationError } from "src/utils/testing/fixtures";
 
-import { UiSchemaField } from "src/components/applyForm/types";
+import {
+  UiSchemaField,
+  UiSchemaFieldList,
+} from "src/components/applyForm/types";
 
 const mockGetSimpleTranslationsSync = jest.fn().mockImplementation(identity);
 
@@ -293,6 +297,126 @@ describe("getFieldConfig", () => {
         ],
         emptyValue: "- Select -",
       },
+    });
+  });
+
+  describe("buildFieldListBaseId", () => {
+    it("inserts the index placeholder when the fieldList token exists in the child id", () => {
+      expect(
+        buildFieldListBaseId({
+          fieldListName: "contacts",
+          childId: "topField--contacts--firstName",
+        }),
+      ).toBe("topField--contacts[~~index~~]--firstName");
+    });
+
+    it("falls back to prefixing the fieldList name when the token is not present", () => {
+      expect(
+        buildFieldListBaseId({
+          fieldListName: "contacts",
+          childId: "firstName",
+        }),
+      ).toBe("contacts[~~index~~]--firstName");
+    });
+  });
+
+  describe("fieldList", () => {
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        firstName: { type: "string", title: "First Name" },
+        docs: { type: "array", items: { type: "string", format: "uuid" } },
+      },
+    };
+
+    it("returns FieldList config for a fieldList node", () => {
+      const uiFieldObject: UiSchemaFieldList = {
+        type: "fieldList",
+        name: "contacts",
+        label: "Contacts",
+        defaultSize: 1,
+        children: [
+          {
+            type: "field",
+            definition: "/properties/firstName",
+          },
+        ],
+      };
+
+      const result = getFieldConfig({
+        errors: null,
+        formSchema,
+        formData: {},
+        uiFieldObject,
+        requiredField: false,
+      });
+
+      expect(result.type).toBe("FieldList");
+
+      if (result.type !== "FieldList") {
+        throw new Error("Expected FieldList");
+      }
+
+      expect(result.props.groupDefinition).toHaveLength(1);
+      expect(result.props.groupDefinition[0].widget).toBe("Text");
+      expect(result.props.groupDefinition[0].baseId).toBe(
+        "contacts[~~index~~]--firstName",
+      );
+    });
+
+    it("throws if fieldList contains unsupported node types", () => {
+      const uiFieldObject = {
+        type: "fieldList",
+        name: "contacts",
+        label: "Contacts",
+        defaultSize: 1,
+        children: [
+          {
+            type: "section",
+            name: "bad",
+            label: "Bad",
+            children: [],
+          },
+        ],
+      } as unknown as UiSchemaFieldList;
+
+      expect(() =>
+        getFieldConfig({
+          errors: null,
+          formSchema,
+          formData: {},
+          uiFieldObject,
+          requiredField: false,
+        }),
+      ).toThrow("fieldList children must be field nodes");
+    });
+
+    it("throws for nested fieldList", () => {
+      const uiFieldObject = {
+        type: "fieldList",
+        name: "outer",
+        label: "Outer",
+        defaultSize: 1,
+        children: [
+          {
+            type: "fieldList",
+            name: "inner",
+            label: "Inner",
+            defaultSize: 1,
+            children: [],
+          },
+        ],
+      } as unknown as UiSchemaFieldList;
+
+      expect(() =>
+        getFieldConfig({
+          errors: null,
+          formSchema,
+          formData: {},
+          uiFieldObject,
+          requiredField: false,
+        }),
+      ).toThrow();
     });
   });
 });

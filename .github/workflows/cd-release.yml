@@ -2,12 +2,12 @@ name: Release Deploy
 run-name: Release Deploy to ${{ github.event_name == 'release' && 'prod + training' || inputs.environment }}
 
 # This workflow orchestrates deployments across all services in a specific order:
-# API first
-# FE and Analytics next after API
-# Skip NOFOs (at least for now)
+# API first, then FE and Analytics after API.
+# Skip NOFOs (at least for now).
 #
-# This ensures backwards compatibility by deploying API first, allowing other
-# services to safely depend on API changes being available.
+# For releases (prod + training), all prod services deploy first, then all
+# training services. This ensures prod is fully deployed and verified before
+# training begins.
 #
 # All CI checks and vulnerability scans run in parallel for speed.
 # Only the deployment phase is serialized.
@@ -84,8 +84,11 @@ jobs:
       app_name: analytics
 
   # =====================================================
-  # PHASE 2: Sequential Deploys (API -> FE -> NOFO -> Analytics)
-  # Each deployment waits for its own checks AND the previous service
+  # PHASE 2: Deploy to prod (or selected environment)
+  #
+  # For releases: deploys all services to prod
+  # For workflow_dispatch: deploys all services to the selected environment
+  # Order: API first, then Frontend + Analytics in parallel
   # =====================================================
 
   # 1. Deploy API first - all other services depend on this
@@ -93,14 +96,9 @@ jobs:
     name: Deploy API
     needs: [api-checks, api-vulnerability-scans]
     uses: ./.github/workflows/deploy.yml
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || '["prod", "training"]') }}
     with:
       app_name: "api"
-      environment: ${{ matrix.envs }}
+      environment: ${{ inputs.environment || 'prod' }}
       version: ${{ github.ref }}
 
   # 2. Deploy Frontend after API completes successfully
@@ -108,45 +106,71 @@ jobs:
     name: Deploy Frontend
     needs: [frontend-checks, frontend-vulnerability-scans, deploy-api]
     uses: ./.github/workflows/deploy.yml
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || '["prod", "training"]') }}
     with:
       app_name: "frontend"
-      environment: ${{ matrix.envs }}
+      environment: ${{ inputs.environment || 'prod' }}
       version: ${{ github.ref }}
 
-  # 3. Deploy NOFOs after Frontend completes successfully
+  # 3. Deploy Analytics after API completes successfully
+  deploy-analytics:
+    name: Deploy Analytics
+    needs: [analytics-checks, analytics-vulnerability-scans, deploy-api]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app_name: "analytics"
+      environment: ${{ inputs.environment || 'prod' }}
+      version: ${{ github.ref }}
+
+  # 3b. Deploy NOFOs (skipped - they deploy manually)
   deploy-nofos:
     # skip NOFOS as they deploy manually
     if: ${{ inputs.environment == 'skip' }}
     name: Deploy NOFOs
     needs: [nofos-checks, nofos-vulnerability-scans, deploy-api]
     uses: ./.github/workflows/deploy-nofos.yml
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || '["prod", "training"]') }}
     with:
-      environment: ${{ matrix.envs }}
+      environment: ${{ inputs.environment || 'prod' }}
       version: ${{ github.ref }}
 
-  # 4. Deploy Analytics last, after NOFOs completes successfully
-  deploy-analytics:
-    name: Deploy Analytics
-    needs: [analytics-checks, analytics-vulnerability-scans, deploy-api]
+  # =====================================================
+  # PHASE 3: Deploy to training (release only)
+  #
+  # Only runs for release events. Waits for ALL prod deploys to complete
+  # before starting. Same order: API first, then Frontend + Analytics.
+  # If any prod deploy fails, training deploys are skipped.
+  # =====================================================
+
+  # 4. Deploy API to training after all prod deploys complete
+  deploy-api-training:
+    if: ${{ github.event_name == 'release' }}
+    name: Deploy API (training)
+    needs: [api-checks, api-vulnerability-scans, deploy-api, deploy-frontend, deploy-analytics]
     uses: ./.github/workflows/deploy.yml
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        envs: ${{ fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || '["prod", "training"]') }}
+    with:
+      app_name: "api"
+      environment: "training"
+      version: ${{ github.ref }}
+
+  # 5. Deploy Frontend to training after training API completes
+  deploy-frontend-training:
+    if: ${{ github.event_name == 'release' }}
+    name: Deploy Frontend (training)
+    needs: [frontend-checks, frontend-vulnerability-scans, deploy-api-training]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app_name: "frontend"
+      environment: "training"
+      version: ${{ github.ref }}
+
+  # 6. Deploy Analytics to training after training API completes
+  deploy-analytics-training:
+    if: ${{ github.event_name == 'release' }}
+    name: Deploy Analytics (training)
+    needs: [analytics-checks, analytics-vulnerability-scans, deploy-api-training]
+    uses: ./.github/workflows/deploy.yml
     with:
       app_name: "analytics"
-      environment: ${{ matrix.envs }}
+      environment: "training"
       version: ${{ github.ref }}
 
   # =====================================================
@@ -154,6 +178,6 @@ jobs:
   # =====================================================
   send-slack-notification:
     if: failure()
-    needs: [deploy-api, deploy-frontend, deploy-nofos, deploy-analytics]
+    needs: [deploy-api, deploy-frontend, deploy-analytics, deploy-nofos, deploy-api-training, deploy-frontend-training, deploy-analytics-training]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit

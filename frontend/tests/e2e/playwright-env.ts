@@ -14,6 +14,12 @@ const BASE_URLS: Record<string, string> = {
   staging: process.env.STAGING_BASE_URL || "https://staging.simpler.grants.gov",
 };
 
+// Opportunity IDs for each environment
+const OPPORTUNITY_IDS: Record<string, string> = {
+  local: "f7a1c2b3-4d5e-6789-8abc-1234567890ab",
+  staging: "f7a1c2b3-4d5e-6789-8abc-1234567890ab",
+};
+
 // Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
 const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
@@ -46,6 +52,10 @@ const playwrightEnv = {
   baseUrl,
   targetEnv,
   testOrgLabel,
+  opportunityId:
+    process.env.OPPORTUNITY_ID ||
+    OPPORTUNITY_IDS[targetEnv] ||
+    OPPORTUNITY_IDS.local,
   isCi: process.env.CI,
   totalShards: process.env.TOTAL_SHARDS,
   currentShard: process.env.CURRENT_SHARD,

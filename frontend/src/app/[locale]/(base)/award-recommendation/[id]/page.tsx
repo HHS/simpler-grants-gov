@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
 import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
@@ -32,8 +33,6 @@ export async function generateMetadata({
   return meta;
 }
 
-export const dynamic = "force-dynamic";
-
 export type AwardRecommendationPageProps = {
   params: Promise<{ locale: string; id?: string }>;
 } & WithFeatureFlagProps;
@@ -43,40 +42,33 @@ interface OpportunitySectionProps {
   locale: string;
 }
 
-const OpportunitySectionComponent = ({
+const OpportunitySection = ({
   opportunityData,
   locale: _locale,
 }: OpportunitySectionProps) => {
   const t = useTranslations("AwardRecommendation");
   const fundingOppName =
-    opportunityData.opportunity_title || "Funding Opportunity";
-  const fundingOppNumber = opportunityData.opportunity_number || "--";
+    opportunityData.opportunity_title || t("fundingOpportunityFallback");
+  const fundingOppNumber =
+    opportunityData.opportunity_number || t("noDataFallback");
   const summaryDescription = opportunityData.summary?.summary_description || "";
   const hasSummary = !!summaryDescription;
 
   return (
     <div>
       <Grid row className="grid-gap">
-        <Grid col={12} tablet={{ col: 9 }}>
+        <Grid col={9} tablet={{ col: 9 }}>
           <div className="margin-top-5 margin-bottom-5">
-            <div className="display-flex flex-align-center margin-bottom-3">
-              <h2 className="flex-1 margin-top-0 margin-bottom-0">
+            <div className="margin-bottom-3">
+              <h2 className="margin-top-0 margin-bottom-0">
                 {t("opportunity", { defaultValue: "Opportunity" })}
               </h2>
-              <Link
-                href=""
-                className="text-primary-darker hover:text-primary text-decoration-none"
-              >
-                {t("editOpportunityDetails", {
-                  defaultValue: "Edit opportunity details",
-                })}
-              </Link>
             </div>
             <div className="border radius-md border-base-lighter padding-3 bg-white">
               <div className="margin-bottom-4 display-flex gap-3">
                 <div className="flex-1">
                   <p className="text-bold margin-bottom-1 font-sans-sm">
-                    Funding opp name
+                    {t("fundingOppName")}
                   </p>
                   <Link
                     href={`/opportunity/${opportunityData.opportunity_id}`}
@@ -89,7 +81,7 @@ const OpportunitySectionComponent = ({
                 </div>
                 <div className="flex-0">
                   <p className="text-bold margin-bottom-1 font-sans-sm">
-                    Funding opp #
+                    {t("fundingOppNumber")}
                   </p>
                   {fundingOppNumber}
                 </div>
@@ -103,13 +95,13 @@ const OpportunitySectionComponent = ({
                     summaryDescription={summaryDescription || ""}
                   />
                 ) : (
-                  <div>No summary available</div>
+                  <div>{t("noSummaryAvailable")}</div>
                 )}
               </div>
               <p className="text-bold margin-bottom-2">
                 {t("selectionMethod")}
               </p>
-              Merit Review
+              {t("meritReview")}
             </div>
           </div>
         </Grid>
@@ -123,10 +115,7 @@ async function AwardRecommendationPageContent({
 }: AwardRecommendationPageProps) {
   const { locale, id: awardRecommendationId } = await params;
 
-  const t = await getTranslations({
-    locale,
-    namespace: "AwardRecommendation",
-  });
+  const t = await getTranslations("AwardRecommendation");
   const opportunityId = "6a483cd8-9169-418a-8dfb-60fa6e6f51e5";
 
   let opportunityData: OpportunityDetail | null = null;
@@ -155,17 +144,19 @@ async function AwardRecommendationPageContent({
   return (
     <>
       {awardRecommendationId && (
-        <AwardRecommendationHero
-          awardRecommendationId={awardRecommendationId}
-        />
+        <Suspense
+          fallback={
+            <span data-testid="award-recommendation-hero-fallback"></span>
+          }
+        >
+          <AwardRecommendationHero
+            awardRecommendationId={awardRecommendationId}
+          />
+        </Suspense>
       )}
       <GridContainer>
-        <h1 className="margin-top-9 margin-bottom-7">
-          {t("pageTitle", { defaultValue: "Review your recommendation" })}
-        </h1>
-
         {opportunityData && (
-          <OpportunitySectionComponent
+          <OpportunitySection
             opportunityData={opportunityData}
             locale={locale}
           />

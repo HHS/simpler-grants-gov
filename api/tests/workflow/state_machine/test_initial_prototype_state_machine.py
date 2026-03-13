@@ -220,10 +220,10 @@ def test_initial_prototype_state_machine_invalid_events(
         opportunity=opportunity,
     )
 
-    with pytest.raises(InvalidEventError, match="Event is not valid for current state of workflow"):
+    with pytest.raises(InvalidEventError, match="Event is not valid for workflow"):
         send_process_event(
             db_session=db_session,
-            event_to_send="receive_budget_officer_approval",
+            event_to_send=event_to_send,
             workflow_id=workflow.workflow_id,
             user=user,
             expected_state=InitialPrototypeState.START,
