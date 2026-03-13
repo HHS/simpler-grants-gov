@@ -166,7 +166,7 @@ describe("createAndReturnSession", () => {
   });
 
   it("calls decrypt with the correct arguments and returns successfully", async () => {
-    decryptMock.mockReturnValueOnce({
+    decryptMock.mockReturnValue({
       arbitrary: "stuff",
     });
     const session = await createAndReturnSession("nothingSpecial", new Date(1));
@@ -217,7 +217,7 @@ describe("refreshSession", () => {
   });
 
   it("calls decrypt with the correct arguments and returns successfully", async () => {
-    decryptMock.mockReturnValueOnce({
+    decryptMock.mockReturnValue({
       arbitrary: "stuff",
     });
     const session = await createAndReturnSession("nothingSpecial", new Date(1));
