@@ -22,8 +22,9 @@ export default function Login() {
         redirectURL.substring(0, 1) !== "/"
       ) {
         router.push("/");
+      } else {
+        router.push(redirectURL);
       }
-      router.push(redirectURL || "/");
       return () => {
         return SessionStorage.removeItem("login-redirect");
       };
