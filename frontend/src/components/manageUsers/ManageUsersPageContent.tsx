@@ -45,9 +45,17 @@ export async function ManageUsersPageContent({
   const name = userOrganizations?.sam_gov_entity?.legal_business_name;
 
   return (
-    <GridContainer className="padding-top-1">
+    <GridContainer>
       <Breadcrumbs
         breadcrumbList={[
+          {
+            title: `${t("breadcrumbWorkspace")}`,
+            path: `/dashboard`,
+          },
+          {
+            title: `${t("breadcrumbOrganizations")}`,
+            path: `/organizations`,
+          },
           {
             title: name ?? "Organization",
             path: `/organizations/${organizationId}`,
