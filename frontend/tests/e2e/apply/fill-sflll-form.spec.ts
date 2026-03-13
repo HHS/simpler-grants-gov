@@ -11,7 +11,7 @@ import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   clearPageState,
   ensurePageClosed,
-} from "tests/e2e/utils/lifecycle-helpers";
+} from "tests/e2e/utils/lifecycle-utils";
 
 const { baseUrl, testOrgLabel, opportunityId } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;

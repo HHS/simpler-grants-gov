@@ -35,33 +35,32 @@ test("Application submission happy path - application with required SF424B and u
   await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
   const applicationUrl = page.url();
 
-  if (await openForm(page, SF424B_FORM_MATCHER)) {
-    // Fill SF-424B form fields using helper
-    await fillSf424bForm(page, "TESTER", testOrgLabel);
-
-    // Save the form using helper
-    await saveForm(page);
-
-    // Verify form status after save
-    await verifyFormStatusAfterSave(
-      page,
-      "complete",
-      "SF-424B",
-      applicationUrl,
+  if (!(await openForm(page, SF424B_FORM_MATCHER))) {
+    throw new Error(
+      "Could not find or open SF-424B form link on the application forms page",
     );
-
-    // Extra wait for page to fully render forms table after navigation
-    await page.waitForTimeout(10000);
-
-    // Select 'No' for including SF-LLL form in submission
-    await selectFormInclusionOption(
-      page,
-      "Disclosure of Lobbying Activities (SF-LLL)",
-      "No",
-    );
-
-    // Submit the application and verify success
-    await submitApplicationAndVerify(page);
-    // Application ID is now available in appId variable for further use if needed
   }
+
+  // Fill SF-424B form fields using helper
+  await fillSf424bForm(page, "TESTER", testOrgLabel);
+
+  // Save the form using helper
+  await saveForm(page);
+
+  // Verify form status after save
+  await verifyFormStatusAfterSave(page, "complete", "SF-424B", applicationUrl);
+
+  // Extra wait for page to fully render forms table after navigation
+  await page.waitForTimeout(10000);
+
+  // Select 'No' for including SF-LLL form in submission
+  await selectFormInclusionOption(
+    page,
+    "Disclosure of Lobbying Activities (SF-LLL)",
+    "No",
+  );
+
+  // Submit the application and verify success
+  await submitApplicationAndVerify(page);
+  // Application ID is now available in appId variable for further use if needed
 });

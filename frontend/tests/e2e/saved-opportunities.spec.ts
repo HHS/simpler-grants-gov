@@ -1,15 +1,14 @@
-import { expect, Locator, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-import { createSpoofedSessionCookie } from "./loginUtils";
 import playwrightEnv from "./playwright-env";
-import { openMobileNav, waitForURLChange } from "./playwrightUtils";
-import { performStagingLogin } from "./utils/perform-login-utils";
+import { waitForURLChange } from "./playwrightUtils";
+import { authenticateE2eUser } from "./utils/authenticate-e2e-user-utils";
 
 const { targetEnv } = playwrightEnv;
 
-test.afterEach(async ({ context }) => {
-  await context.close();
-});
+// Note: do NOT close context in afterEach — Playwright manages context lifecycle
+// automatically per test. Explicitly closing it here causes session loss when
+// multiple auth tests run sequentially in the same suite.
 
 test("Saved opportunities page shows unauthenticated state if not logged in", async ({
   page,
@@ -20,34 +19,14 @@ test("Saved opportunities page shows unauthenticated state if not logged in", as
 });
 
 // will fail when run against staging until after https://github.com/HHS/simpler-grants-gov/issues/7769
+
 test("Working saved opportunities page link appears in nav when logged in", async ({
   page,
   context,
 }, { project }) => {
   const isMobile = project.name.match(/[Mm]obile/);
 
-  // get a test user logged in
-  if (playwrightEnv.targetEnv === "local") {
-    await createSpoofedSessionCookie(context);
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-  } else if (playwrightEnv.targetEnv === "staging") {
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    const signOutButton = (await performStagingLogin(
-      page,
-      !!isMobile,
-    )) as Locator;
-    await expect(signOutButton).toHaveCount(1, {
-      timeout: 120000,
-    });
-  } else {
-    throw new Error(
-      `unsupported env ${playwrightEnv.targetEnv} - only able to run tests against local or staging`,
-    );
-  }
-
-  if (isMobile) {
-    await openMobileNav(page);
-  }
+  await authenticateE2eUser(page, context, !!isMobile);
 
   // find the Workspace nav dropdown item and open it
   const dropDownButton = page.locator("#nav-dropdown-button-4");
