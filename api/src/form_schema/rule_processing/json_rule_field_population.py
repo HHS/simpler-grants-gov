@@ -1,16 +1,15 @@
 import logging
 from collections.abc import Callable
-from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from src.form_schema.rule_processing.json_rule_context import JsonRule, JsonRuleContext
 from src.form_schema.rule_processing.json_rule_util import get_field_values, populate_nested_value
 from src.util.datetime_util import get_now_us_eastern_date
+from src.util.decimal_util import ZERO_DECIMAL, convert_monetary_field, quantize_decimal
 
 logger = logging.getLogger(__name__)
 
 INDIVIDUAL_UEI = "00000000INDV"
-ZERO_DECIMAL = Decimal("0.00")  # For formatting and defining 0 for decimal/monetary
 EXCLUDE_VALUE = "exclude_value"
 UNKNOWN_VALUE = "unknown"
 
@@ -143,21 +142,6 @@ def get_signature(context: JsonRuleContext, json_rule: JsonRule) -> str | None:
     return UNKNOWN_VALUE
 
 
-def _convert_monetary_field(value: Any) -> Decimal:
-    # We store monetary amounts as strings, for the purposes
-    # of doing math, we want to convert those to Decimals
-    if value is None:
-        return ZERO_DECIMAL
-
-    if not isinstance(value, str):
-        raise ValueError("Cannot convert value to monetary field, is not a string")
-
-    try:
-        return Decimal(value)
-    except InvalidOperation as e:
-        raise ValueError("Invalid decimal format, cannot process") from e
-
-
 def sum_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
     """Sum monetary amounts based on configuration
 
@@ -185,7 +169,7 @@ def sum_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
         # we'd still want to produce "6.00" from this function as that seems
         # the most intuitive to a user.
         try:
-            monetary_value = _convert_monetary_field(value)
+            monetary_value = convert_monetary_field(value)
         except ValueError:
             logger.info("Cannot convert monetary amount entered", extra=json_rule.get_log_context())
             continue
@@ -195,7 +179,7 @@ def sum_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
     # Because our validation of monetary fields limits them to 2 decimals
     # this only matters when a user enters something that would be flagged
     # for a validation issue anyways, but at least this maintains consistency.
-    return str(result.quantize(ZERO_DECIMAL))
+    return str(quantize_decimal(result))
 
 
 population_func = Callable[[JsonRuleContext, JsonRule], Any]
