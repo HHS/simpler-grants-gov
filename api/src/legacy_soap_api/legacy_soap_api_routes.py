@@ -7,6 +7,7 @@ import src.adapters.db.flask_db as flask_db
 from src.legacy_soap_api.legacy_soap_api_auth import (
     MTLS_CERT_HEADER_KEY,
     USE_SOAP_JWT_HEADER_KEY,
+    SOAPClientUserDoesNotHavePermission,
     get_soap_auth,
 )
 from src.legacy_soap_api.legacy_soap_api_blueprint import legacy_soap_api_blueprint
@@ -98,6 +99,15 @@ def simpler_soap_api_route(
         return get_simpler_soap_response(
             soap_request, soap_proxy_response, db_session
         ).to_flask_response()
+    except SOAPClientUserDoesNotHavePermission:
+        msg = "soap_client_certificate: User did not have permission to access this application"
+        logger.info(
+            msg=msg,
+            extra={
+                "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
+            },
+        )
+        return soap_proxy_response.to_flask_response()
     except Exception:
         msg = "Unable to process Simpler SOAP proxy response"
         logger.exception(
