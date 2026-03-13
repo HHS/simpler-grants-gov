@@ -266,7 +266,6 @@ def test_simpler_getapplicationzip_operation_returns_not_found_response_includes
 def test_simpler_getapplicationzip_operation_raising_httperror_due_to_privileges_logs_info(
     client, fixture_from_file, enable_factory_create, caplog
 ) -> None:
-    caplog.set_level(logging.INFO)
     agency = AgencyFactory.create()
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
     competition = CompetitionFactory(
@@ -294,9 +293,12 @@ def test_simpler_getapplicationzip_operation_raising_httperror_due_to_privileges
             full_path, data=etree.tostring(envelope), headers={"Use-Simpler-Override": "true"}
         )
     assert response.status_code == 500
-    post_message = next(
+    info_messages = [
         record
         for record in caplog.records
-        if record.message == "User did not have permission to access this application"
-    )
-    assert post_message.message == "User did not have permission to access this application"
+        if record.message
+        == "soap_client_certificate: User did not have permission to access this application"
+    ]
+    assert len(info_messages) == 1
+    error_records = [record for record in caplog.records if record.levelno >= logging.ERROR]
+    assert len(error_records) == 0
