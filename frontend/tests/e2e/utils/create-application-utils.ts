@@ -124,7 +124,6 @@ export async function createApplication(
   await page.waitForTimeout(3000);
   await page.waitForURL(/\/applications\/[a-f0-9-]+/, { timeout: 60000 });
   await page.waitForLoadState("domcontentloaded");
-  await page.waitForLoadState("networkidle");
   await page.waitForTimeout(2000);
   const mainContent = page.locator("main");
   await expect(mainContent).toBeVisible();
