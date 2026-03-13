@@ -157,58 +157,80 @@ class WorkflowManager:
 
         logger.info("Finished processing workflow events")
 
-    def process_batch(self) -> None:
+    def process_batch(self) -> list[str]:
         """Fetch and process a batch of events from SQS."""
-        messages = self.sqs_client.receive_messages(wait_time=self.config.workflow_cycle_duration)
+        message_event_dict = self.fetch_messages()
         messages_to_delete: list[str] = []
-        events = []
 
         # Note that the initial approach won't be multi-threaded
         # We'll follow-up on that later
-        for message in messages:
-            workflow_event = self.parse_event(message)
-            events.append(workflow_event)
-            event_result = handle_event(workflow_event)
-            if event_result in [
-                WorkflowEventProcessingResult.SUCCESS,
-                WorkflowEventProcessingResult.NON_RETRYABLE_ERROR,
-            ]:
-                messages_to_delete.append(message.receipt_handle)
 
-            logger.info(
-                "Processed workflow event",
-                extra=workflow_event.get_log_extra() | {"event_result": event_result},
-            )
+        if message_event_dict:
+            for receipt_handle, event in message_event_dict.items():
+                event_result = handle_event(event)
+                if event_result in [
+                    WorkflowEventProcessingResult.SUCCESS,
+                    WorkflowEventProcessingResult.NON_RETRYABLE_ERROR,
+                ]:
+                    messages_to_delete.append(receipt_handle)
 
-        # Delete messages that were successfully processed or had non-retryable errors
+                logger.info(
+                    "Processed workflow event",
+                    extra=event.get_log_extra() | {"event_result": event_result},
+                )
+
         if messages_to_delete:
-            logger.info(
-                "Deleting messages from current batch",
-                extra={"message_count": len(messages_to_delete)},
-            )
-            delete_result = self.sqs_client.delete_message_batch(messages_to_delete)
+            self.delete_messages(messages_to_delete)
 
+        # Very simple metrics for test purposes
+        self.metrics["batches_processed"] += 1
+        self.metrics["events_processed"] += len(message_event_dict)
+
+        # return messages to delete receipt handles for testing purposes
+        return messages_to_delete
+
+    def fetch_messages(self) -> dict[str, WorkflowEvent]:
+        event_dict = {}
+        try:
+            messages = self.sqs_client.receive_messages(
+                wait_time=self.config.workflow_cycle_duration
+            )
+        except Exception:
+            logger.exception("Failed to fetch messages from SQS")
+
+        for message in messages:
+            try:
+                event = self.parse_event(message)
+                event_dict[message.receipt_handle] = event
+            except Exception:
+                logger.exception("Failed to convert SQS message")
+                continue
+
+        return event_dict
+
+    def delete_messages(self, receipt_handles: list[str]) -> None:
+        # Delete messages that were successfully processed or had non-retryable errors
+        try:
+            delete_result = self.sqs_client.delete_message_batch(receipt_handles)
             if delete_result.failed_deletes:
                 logger.exception(
                     "Failed to delete messages from SQS queue",
                     extra={"failed_deletes": list(delete_result.failed_deletes)},
                 )
-
-        # Very simple metrics for test purposes
-        self.metrics["batches_processed"] += 1
-        self.metrics["events_processed"] += len(events)
+        except Exception:
+            logger.exception("Failed to delete messages from SQS queue")
 
 
 @flask_db.with_db_session()
 def handle_event(db_session: db.Session, event: WorkflowEvent) -> WorkflowEventProcessingResult:
-    with workflow_transaction(f"process-{event.event_type}"):
+    with workflow_transaction(event.event_type):
         logger.info(
             "Processing event",
-            extra={"event_type": event.event_type},
+            extra=event.get_log_extra(),
         )
 
         history_event = WorkflowEventHistory(
-            event_data=json.dumps(event.__dict__, default=json_encoder),
+            event_data=json.dumps(event.model_dump(), default=json_encoder),
             sent_at=datetime_util.utcnow(),
             is_successfully_processed=True,
             event_id=event.event_id,
