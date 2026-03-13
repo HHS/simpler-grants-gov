@@ -15,6 +15,10 @@ inputs:
     description: "password for staging test user"
   staging_test_user_mfa_key:
     description: "mfa key for staging test user"
+  playwright_tags:
+    description: "pipe separated list of tags denoting groups of tests to run"
+  playwright_tags_invert:
+    description: "pipe separated list of tags to exclude from test run"
   total_shards:
     description: "total number of test shards in parent run"
     default: "1"
@@ -39,9 +43,6 @@ inputs:
   node_options:
     description: "options to pass to node"
     default: "--dns-result-order=ipv4first"
-  test_command:
-    description: "command used to run e2e tests"
-    default: "npm run test:e2e"
   report_name_prefix:
     description: "prefix for blob report artifact name"
     default: "blob-report"
@@ -71,9 +72,9 @@ runs:
       if: ${{ inputs.needs_node_setup == 'true' }}
       uses: actions/setup-node@v6
       with:
-        node-version: ${{ inputs.NODE_VERSION }}
-        cache: ${{ inputs.PACKAGE_MANAGER }}
-        cache-dependency-path: ${{ inputs.LOCKFILE_PATH }}
+        node-version: ${{ inputs.node_version }}
+        cache: ${{ inputs.package_manager }}
+        cache-dependency-path: ${{ inputs.lockfile_path }}
 
     - name: Install Node dependencies & Playwright
       if: ${{ inputs.needs_node_setup == 'true' }}
@@ -83,7 +84,8 @@ runs:
         npm install @playwright/test
         npx playwright install --with-deps
 
-    - name: Run e2e tests (Shard ${{ inputs.shard }}/${{ inputs.total_shards }})
+    - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
+      if: ${{ inputs.playwright_tags == '' && inputs.playwright_tags_invert == '' }}
       working-directory: ./frontend
       env:
         CI: true
@@ -94,12 +96,41 @@ runs:
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
         STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
       run: |
-        echo $STAGING_TEST_USER_EMAIL
-        ${{ inputs.test_command }}
+        npm run test:e2e
+      shell: bash
+
+    - name: Run e2e tests for ${{ inputs.playwright_tags }} (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
+      if: ${{ inputs.playwright_tags != '' }}
+      working-directory: ./frontend
+      env:
+        CI: true
+        TOTAL_SHARDS: ${{ inputs.total_shards }}
+        CURRENT_SHARD: ${{ inputs.current_shard }}
+        PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
+        STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
+        STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
+      run: |
+        npm run test:e2e -- --grep "${{ inputs.playwright_tags }}"
+      shell: bash
+
+    - name: Run e2e tests excluding ${{ inputs.playwright_tags_invert }} (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
+      if: ${{ inputs.playwright_tags_invert != '' }}
+      working-directory: ./frontend
+      env:
+        CI: true
+        TOTAL_SHARDS: ${{ inputs.total_shards }}
+        CURRENT_SHARD: ${{ inputs.current_shard }}
+        PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
+        STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
+        STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
+      run: |
+        npm run test:e2e -- --grep-invert "${{ inputs.playwright_tags_invert }}"
       shell: bash
 
     - name: Debug logging on failure
-      if:  ${{ failure() && inputs.api_logs == 'true' }}
+      if: ${{ failure() && inputs.api_logs == 'true' }}
       working-directory: ./frontend
       run: |
         cd ../api
