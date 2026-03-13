@@ -46,12 +46,8 @@ test("Application submission happy path - application with required SF424B and u
     await saveForm(page);
 
     // Verify form status after save
-    await verifyFormStatusAfterSave(
-      page,
-      "complete",
-      "SF-424B",
-      applicationUrl,
-    );
+    await verifyFormStatusAfterSave(page, "complete");
+
     await verifyFormStatusOnApplication(
       page,
       "complete",
