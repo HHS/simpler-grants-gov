@@ -10,7 +10,7 @@ on:
         description: "List of Slack handles to tag in the message"
         required: false
         type: string
-        default: ""
+        default: "@Matt Dragon"
 
 jobs:
   send-slack-notification:
