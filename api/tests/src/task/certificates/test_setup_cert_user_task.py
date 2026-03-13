@@ -46,11 +46,18 @@ class TestSetupCertUserTask(BaseTestClass):
         result = SetupCertUserTask(db_session, None, [str(role.role_id)]).setup_cert()
         assert result == SetupCertUserTaskStatus.MISSING_REQUIRED_INPUT_VALUES
 
+    def test_setup_cert_user_raises_error_if_no_tcertificate_found(
+        self, enable_factory_create, db_session, caplog
+    ):
+        role = RoleFactory.create(is_agency_role=True)
+        result = SetupCertUserTask(db_session, f"{uuid.uuid4()}", [str(role.role_id)]).setup_cert()
+        assert result == SetupCertUserTaskStatus.TCERTIFICATE_NOT_FOUND
+
     def test_setup_cert_user_fails_to_create_test_cert_if_missing_required_agency(
         self, enable_factory_create, db_session, caplog
     ):
         role = RoleFactory.create(is_agency_role=True)
-        CERT_ID = f"{random.randint(1000, 9999)}"
+        CERT_ID = f"{uuid.uuid4()}"
         result = SetupCertUserTask(
             db_session, None, [str(role.role_id)], None, "garbage-agency-code", CERT_ID
         ).setup_cert()
@@ -65,7 +72,7 @@ class TestSetupCertUserTask(BaseTestClass):
     ):
         role = RoleFactory.create(is_agency_role=True)
         agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
-        CERT_ID = f"{random.randint(1000, 9999)}"
+        CERT_ID = f"{uuid.uuid4()}"
         result = SetupCertUserTask(
             db_session, None, [str(role.role_id)], None, f"{agency.agency_code}", CERT_ID
         ).setup_cert()
@@ -95,7 +102,7 @@ class TestSetupCertUserTask(BaseTestClass):
         self, enable_factory_create, db_session, caplog
     ):
         role = RoleFactory.create(is_agency_role=True)
-        CERT_ID = f"{random.randint(1000, 9999)}"
+        CERT_ID = f"{uuid.uuid4()}"
         SERIAL_NUMBER = f"{random.randint(1000, 9999)}"
         result = SetupCertUserTask(
             db_session, None, [str(role.role_id)], SERIAL_NUMBER, None, CERT_ID
@@ -109,7 +116,7 @@ class TestSetupCertUserTask(BaseTestClass):
     def test_setup_cert_user_creates_test_cert(self, enable_factory_create, db_session, caplog):
         role = RoleFactory.create(is_agency_role=True)
         agency = AgencyFactory(agency_code=f"XYZ-{uuid.uuid4()}", is_multilevel_agency=False)
-        CERT_ID = f"{random.randint(1000, 9999)}"
+        CERT_ID = f"{uuid.uuid4()}"
         SERIAL_NUMBER = f"{random.randint(1000, 9999)}"
         result = SetupCertUserTask(
             db_session, None, [str(role.role_id)], SERIAL_NUMBER, agency.agency_code, CERT_ID

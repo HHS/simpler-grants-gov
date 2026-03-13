@@ -63,6 +63,10 @@ def setup_cert_user(
     ).run_task()
 
 
+# To run command in environment <env>:
+#     bin/run-command api <env> '["poetry", "run", "flask", "task", "setup-cert-user", "--tcertificates-id", "<tcertificates id>", "--role-ids", "<role id>"]'
+# To run command locally:
+#     make cmd args="task setup-cert-user --role-ids 446bafb9-41ee-46ac-8584-889aedcd5142 --agency-code <agency code> --serial-number <serial number> --cert-id <cert id>"
 class SetupCertUserTask(Task):
 
     def __init__(
@@ -74,20 +78,11 @@ class SetupCertUserTask(Task):
         agency_code: str | None = None,
         cert_id: str | None = None,
     ):
-        """
-        To run command in environment <env>
-            bin/run-command api <env> '["poetry", "run", "flask", "task", "setup-cert-user", "--tcertificates-id", "<tcertificates id>", "--role-ids", "<role id>"]'
-        """
         super().__init__(db_session)
         self.tcertificates_id = tcertificates_id
         self.role_ids = role_ids
 
-        """
-        In order to manually create a test certificate these values are required and enter no value for tcertificates-id
-
-        To generate a test cert locally run:
-            make cmd args="task setup-cert-user --role-ids 446bafb9-41ee-46ac-8584-889aedcd5142 --agency-code <agency code> --serial-number <serial number> --cert-id <cert id>"
-        """
+        # In order to set up a test certificate leave tcertificates_id blank and add these values
         self.serial_number = serial_number
         self.agency_code = agency_code
         self.cert_id = cert_id
