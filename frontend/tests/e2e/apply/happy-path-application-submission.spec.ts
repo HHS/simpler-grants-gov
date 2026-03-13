@@ -48,6 +48,7 @@ test("Application submission happy path - application with required SF424B and u
     // Verify form status after save
     await verifyFormStatusAfterSave(page, "complete");
 
+    // On application page — verify form row status/messages
     await verifyFormStatusOnApplication(
       page,
       "complete",
@@ -68,6 +69,5 @@ test("Application submission happy path - application with required SF424B and u
     // Submit the application and verify success
     await submitApplicationAndVerify(page);
     // Application ID is now available in appId variable for further use if needed
-    // On application page — verify form row status/messages
   }
 });

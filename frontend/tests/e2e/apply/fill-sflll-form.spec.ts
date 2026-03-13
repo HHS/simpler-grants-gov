@@ -24,6 +24,8 @@ test("Application form completion happy path - SFLLL", async ({
 
   await fillForm(testInfo, page, SFLLL_FORM_CONFIG, SFLLL_TEST_DATA, false);
 
+  await page.waitForTimeout(5000);
+
   // Verify form status after save
   await verifyFormStatusAfterSave(page, "complete");
 });
