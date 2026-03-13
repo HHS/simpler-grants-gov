@@ -7,7 +7,7 @@ export const PageHeader = ({
 }) => {
   const t = useTranslations("ManageUsers");
   return (
-    <h1 className="margin-bottom-6 margin-top-4 font-sans-2xl">
+    <h1 className="margin-bottom-6 margin-top-0 font-sans-2xl">
       {organizationName && (
         <span className="margin-bottom-2 margin-top-0 font-sans-lg display-block">
           {organizationName}

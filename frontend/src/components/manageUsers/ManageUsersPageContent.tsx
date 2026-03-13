@@ -49,6 +49,14 @@ export async function ManageUsersPageContent({
       <Breadcrumbs
         breadcrumbList={[
           {
+            title: `${t("breadcrumbWorkspace")}`,
+            path: `/dashboard`,
+          },
+          {
+            title: `${t("breadcrumbOrganizations")}`,
+            path: `/organizations`,
+          },
+          {
             title: name ?? "Organization",
             path: `/organizations/${organizationId}`,
           },
