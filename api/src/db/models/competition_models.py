@@ -449,12 +449,37 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
+    application_submission_retrievals: Mapped[list[ApplicationSubmissionRetrieved]] = relationship(
+        "ApplicationSubmissionRetrieved",
+        back_populates="application_submission",
+        uselist=True,
+    )
+
     @property
     def download_path(self) -> str:
         """Get the presigned s3 url path for downloading the submission file"""
         # NOTE: These submission files will only ever be in a non-public
         # bucket so we only can presign their URL, we can't use the CDN path.
         return pre_sign_file_location(self.file_location)
+
+
+class ApplicationSubmissionRetrieved(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_submission_retrieved"
+
+    application_submission_retrieved_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    application_submission_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(ApplicationSubmission.application_submission_id)
+    )
+    created_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+    modified_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+
+    application_submission: Mapped[ApplicationSubmission] = relationship(
+        ApplicationSubmission, back_populates="application_submission_retrievals"
+    )
+    created_by_user: Mapped[User] = relationship("User", foreign_keys=[created_by_user_id])
+    modified_by_user: Mapped[User] = relationship("User", foreign_keys=[modified_by_user_id])
 
 
 class ShortLivedInternalToken(ApiSchemaTable, TimestampMixin):

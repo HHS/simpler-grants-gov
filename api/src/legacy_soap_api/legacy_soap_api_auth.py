@@ -36,6 +36,10 @@ class SOAPClientCertificateLookupError(Exception):
     pass
 
 
+class SOAPClientUserDoesNotHavePermission(Exception):
+    pass
+
+
 class SOAPClientCertificate(BaseModel):
     cert: str
     serial_number: str
