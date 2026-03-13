@@ -52,7 +52,7 @@ test("SF-424B error validation - required fields and inline errors", async ({
     // On application page — verify form row status/messages
     await verifyFormStatusOnApplication(
       page,
-      "complete",
+      "incomplete",
       "SF-424B",
       applicationUrl,
     );
