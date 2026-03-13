@@ -1,9 +1,6 @@
 "use client";
 
-import { addSavedOpportunityForOrganizationHandler } from "src/app/api/opportunities/[opportunityid]/save-opportunity/handler";
-import { deleteSavedOpportunityForOrganizationHandler } from "src/app/api/opportunities/[opportunityid]/delete-opportunity/handler";
 import { Organization } from "src/types/applicationResponseTypes";
-
 import { useTranslations } from "next-intl";
 import { RefObject } from "react";
 import {
@@ -16,25 +13,8 @@ import {
 } from "@trussworks/react-uswds";
 
 import { SimplerModal } from "src/components/SimplerModal";
-
-// useclientfetcher to call handler code not the fetcher code addSavedOpportunityForOrganization/deleteSavedOpportunityForOrganization
-// const [isChecked, setIsChecked] = useState(false);
-const makeApiCall = async (checkedStatus) => {
-  // console.log("Checkbox is now:", checkedStatus);
-  if (checkedStatus) {
-    // console.log("Checkbox is checked, making a call...");
-    await addSavedOpportunityForOrganizationHandler();
-  } else {
-    // console.log("Checkbox is unchecked, making a call...");
-    await deleteSavedOpportunityForOrganizationHandler();
-  }
-};
-
-const handleCheckboxChange = (event) => {
-  const newCheckedState = event.target.checked;
-  // setIsChecked(newCheckedState);
-  await makeApiCall(newCheckedState);
-};
+import { NextResponse } from "next/server";
+import { useClientFetch } from "src/hooks/useClientFetch";
 
 const MODAL_ID = "share-opportunity-to-organizations";
 
@@ -59,6 +39,29 @@ export function ShareOpportunityToOrganizationsModal({
   hasOrganizationsError,
   opportunityTitle,
 }: ShareOpportunityToOrganizationsModalProps) {
+  const { clientFetch: addOrganizationAction } = useClientFetch<
+        NextResponse
+      >("Error fetching addSavedOpportunityForOrganizationHandler");
+  const { clientFetch: deleteOrganizationAction } = useClientFetch<
+        NextResponse
+      >("Error fetching deleteSavedOpportunityForOrganizationHandler");
+  const makeApiCall = async (checkedStatus: any) => {
+    organizations.map(async (organization) => {   
+      console.log("Organization id: " + organization.organization_id);
+      console.log("CheckedStatus: " + checkedStatus); 
+      if (checkedStatus) {
+        await addOrganizationAction(organization.organization_id);
+      } else {
+        await deleteOrganizationAction(organization.organization_id);
+      }
+    })
+  };
+  const handleCheckboxChange = (event: { target: { checked: any; }; }) => {
+    const newCheckedState = event.target.checked;
+    // setIsChecked(newCheckedState);
+    console.log("MakeApiCall check: " + newCheckedState);
+    makeApiCall(newCheckedState);
+  };
   const t = useTranslations("ShareOpportunityToOrganization");
   const modalContent = () => {
     if (hasOrganizationsError) {
@@ -84,7 +87,7 @@ export function ShareOpportunityToOrganizationsModal({
       >
         <ul className="padding-0 margin-0">
           {organizations.map((organization) => {
-            const isDisabled = true;
+            const isDisabled = false;
 
             return (
               <li

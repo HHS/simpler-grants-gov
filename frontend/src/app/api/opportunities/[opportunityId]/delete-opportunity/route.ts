@@ -1,7 +1,5 @@
 import { respondWithTraceAndLogs } from "src/utils/apiUtils";
 
-import { deleteSavedOpportunityForOrganization } from "./handler";
+import { deleteSavedOpportunityForOrganizationHandler } from "./handler";
 
-export const DELETE = respondWithTraceAndLogs<{ opportunityId: string, organizationId: string }>(
-  deleteSavedOpportunityForOrganization,
-);
+export const DELETE = respondWithTraceAndLogs(deleteSavedOpportunityForOrganizationHandler);

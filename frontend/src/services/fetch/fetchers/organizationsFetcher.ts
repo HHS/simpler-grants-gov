@@ -11,8 +11,14 @@ import {
   UserRole,
 } from "src/types/userTypes";
 import { throwOnApiError } from "src/utils/apiUtils";
+import { fetchOrganizationWithMethod, fetchOrganizationBySavedOpportunities, fetchUserWithMethod } from "./fetchers";
 
-import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
+type ApplicationAddOrganizationApiResponse = {
+  message: string;
+  data: {
+    application_id: string;
+  };
+};
 
 export const getOrganizationDetails = async (
   organizationId: string,
@@ -216,6 +222,59 @@ export const removeOrganizationUser = async (
   }
 
   const json = (await resp.json()) as { data: UserDetail };
+  return json.data;
+};
+
+export const deleteOrganization = async (
+  opportunityId: string,
+  organizationId: string,
+
+): Promise<ApplicationAddOrganizationApiResponse> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
+  const resp = await fetchOrganizationBySavedOpportunities("DELETE")({
+    subPath: `/organizations/${organizationId}/saved-opportunities/${opportunityId}`,
+    additionalHeaders: { "X-SGG-TOKEN": session.token },
+  });
+
+  if (!resp.ok) {
+    await throwOnApiError(resp, {
+      operationName: "deleteOrganization",   //"removeOrganizationUser",
+      unauthorizedMessage: "No active session for deleting organizations.",
+    });
+  }
+
+  const json = (await resp.json()) as { data: ApplicationAddOrganizationApiResponse };
+  return json.data;
+};
+
+export const addOrganization = async (
+  organizationId: string,
+
+): Promise<ApplicationAddOrganizationApiResponse> => {
+  const session = await getSession();
+
+  if (!session || !session.token) {
+    throw new UnauthorizedError("No active session");
+  }
+
+  const resp = await fetchOrganizationBySavedOpportunities("PUT")({
+    subPath: `/organizations/${organizationId}/saved-opportunities`,
+    additionalHeaders: { "X-SGG-TOKEN": session.token },
+  });
+
+  if (!resp.ok) {
+    await throwOnApiError(resp, {
+      operationName: "deleteOrganization",
+      unauthorizedMessage: "No active session for deleting organizations.",
+    });
+  }
+
+  const json = (await resp.json()) as { data: ApplicationAddOrganizationApiResponse };
   return json.data;
 };
 

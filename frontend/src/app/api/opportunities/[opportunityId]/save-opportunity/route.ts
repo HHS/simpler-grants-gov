@@ -1,7 +1,5 @@
 import { respondWithTraceAndLogs } from "src/utils/apiUtils";
 
-import { addSavedOpportunityForOrganization } from "./handler";
+import { addSavedOpportunityForOrganizationHandler } from "./handler";
 
-export const PUT = respondWithTraceAndLogs<{ organizationId: string }>(
-  addSavedOpportunityForOrganization,
-);
+export const PUT = respondWithTraceAndLogs(addSavedOpportunityForOrganizationHandler);

@@ -1,10 +1,9 @@
 "server-only";
 
 import { getSession } from "src/services/auth/session";
-import { UnauthorizedError } from "src/errors";
-import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
+import { ApiRequestError, UnauthorizedError } from "src/errors";
+import { fetchOrganizationBySavedOpportunities, fetchUserWithMethod } from "./fetchers";
 // import { NextRequest, NextResponse } from "next/server";
-// import { OpportunityId } from "src/types/opportunity/opportunityResponseTypes";
 
 type ApplicationAddOrganizationApiResponse = {
   message: string;
@@ -16,8 +15,8 @@ type ApplicationAddOrganizationApiResponse = {
 export const handleSavedOpportunity = async (
   type: "DELETE" | "POST",
   token: string,
-  userId: string,
   opportunityId: string,
+  organizationId: string,
 ) => {
   const ssgToken = {
     "X-SGG-Token": token,
@@ -40,11 +39,9 @@ export const handleSavedOpportunity = async (
   });
 };
 
-export const addSavedOpportunityForOrganization = async ({
-  organizationId,
-}: {
-  organizationId: string;
-}): Promise<ApplicationAddOrganizationApiResponse> => {
+export const addSavedOpportunityForOrganization = async (
+  organizationId: string,
+): Promise<ApplicationAddOrganizationApiResponse> => {
   const session = await getSession();
 
   if (!session || !session.token) {
@@ -71,13 +68,10 @@ export const addSavedOpportunityForOrganization = async ({
   return (await response.json()) as ApplicationAddOrganizationApiResponse;
 };
 
-export const deleteSavedOpportunityForOrganization = async ({
-  opportunityId,
-  organizationId,
-}: {
-  opportunityId: string;
-  organizationId: string;
-}): Promise<ApplicationAddOrganizationApiResponse> => {
+export const deleteSavedOpportunityForOrganization = async (
+  opportunityId: string,
+  organizationId: string,
+): Promise<ApplicationAddOrganizationApiResponse> => {
   const session = await getSession();
 
   if (!session || !session.token) {
