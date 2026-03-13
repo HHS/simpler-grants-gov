@@ -39,11 +39,7 @@ jobs:
           path: frontend/all-blob-reports
           # artifact-ids: ${{ inputs.artifact-ids }}
           run-id: ${{ inputs.run_id }}
-          # Matches report_name_prefix values set by callers:
-          # - blob-report-no-auth (e2e-staging.yml sharded job)
-          # - blob-report-auth (e2e-staging.yml auth job)
-          # - blob-report (ci-frontend-e2e.yml default)
-          pattern: blob-report*-shard-*
+          pattern: blob-report-shard-*
           merge-multiple: true
       - name: Verify Downloaded Artifacts
         run: |

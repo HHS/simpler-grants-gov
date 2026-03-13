@@ -17,8 +17,6 @@ inputs:
     description: "mfa key for staging test user"
   playwright_tags:
     description: "pipe separated list of tags denoting groups of tests to run"
-  playwright_tags_invert:
-    description: "pipe separated list of tags to exclude from test run"
   total_shards:
     description: "total number of test shards in parent run"
     default: "1"
@@ -43,9 +41,9 @@ inputs:
   node_options:
     description: "options to pass to node"
     default: "--dns-result-order=ipv4first"
-  report_name_prefix:
-    description: "prefix for blob report artifact name"
-    default: "blob-report"
+  workers:
+    description: "number of workers to use for test run"
+    default: ""
 outputs:
   artifact-id:
     description: "artifact ids for uploaded test reports"
@@ -85,13 +83,14 @@ runs:
         npx playwright install --with-deps
 
     - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
-      if: ${{ inputs.playwright_tags == '' && inputs.playwright_tags_invert == '' }}
+      if: ${{ inputs.playwright_tags == '' }}
       working-directory: ./frontend
       env:
         CI: true
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        PLAYWRIGHT_WORKERS: ${{ inputs.workers }}
         STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
         STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
@@ -107,26 +106,12 @@ runs:
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        PLAYWRIGHT_WORKERS: ${{ inputs.workers }}
         STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
         STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
       run: |
         npm run test:e2e -- --grep "${{ inputs.playwright_tags }}"
-      shell: bash
-
-    - name: Run e2e tests excluding ${{ inputs.playwright_tags_invert }} (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
-      if: ${{ inputs.playwright_tags_invert != '' }}
-      working-directory: ./frontend
-      env:
-        CI: true
-        TOTAL_SHARDS: ${{ inputs.total_shards }}
-        CURRENT_SHARD: ${{ inputs.current_shard }}
-        PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
-        STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
-        STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
-        STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
-      run: |
-        npm run test:e2e -- --grep-invert "${{ inputs.playwright_tags_invert }}"
       shell: bash
 
     - name: Debug logging on failure
@@ -160,6 +145,6 @@ runs:
       if: always()
       uses: actions/upload-artifact@v6
       with:
-        name: ${{ inputs.report_name_prefix }}-shard-${{ inputs.current_shard }}
+        name: blob-report-shard-${{ inputs.current_shard }}
         path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
         retention-days: 1
