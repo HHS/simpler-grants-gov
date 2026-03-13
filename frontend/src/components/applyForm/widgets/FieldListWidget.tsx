@@ -5,6 +5,7 @@ import {
   FieldListGroupItem,
   FieldListWidgetProps,
   GeneralRecord,
+  UiSchema,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
 import { renderWidget } from "./WidgetRenderers";
@@ -284,7 +285,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps): JSX.Element {
                */
               const childWidgetProps: UswdsWidgetProps = {
                 ...groupItem.generalProps,
-                schema: groupItem.generalProps.schema,
+                schema: groupItem.generalProps.schema as UiSchema,
                 id: generatedId,
                 value: currentValue,
                 onChange: handleChildChange,
