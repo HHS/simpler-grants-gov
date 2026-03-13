@@ -5,7 +5,7 @@ export interface FillFieldDefinition {
   testId?: string;
   selector?: string;
   type: "text" | "dropdown";
-  section: string;
+  section?: string;
   field: string;
 }
 
@@ -31,6 +31,9 @@ export async function fillField(
   field: FillFieldDefinition,
   data: string,
 ): Promise<void> {
+  const fieldIdentifier = field.section
+    ? `${field.section}-${field.field}`
+    : field.field;
   try {
     if (field.type === "dropdown" && field.selector) {
       await selectDropdownByValueOrLabel(page, field.selector, data);
@@ -42,20 +45,20 @@ export async function fillField(
       console.error("unsupported field type or selector type", field);
     }
 
-    await testInfo.attach(`fillField-${field.section}-success`, {
-      body: `Successfully filled ${field.section}: "${data}"`,
+    await testInfo.attach(`fillField-${fieldIdentifier}-success`, {
+      body: `Successfully filled ${fieldIdentifier}: "${data}"`,
       contentType: "text/plain",
     });
   } catch (error) {
-    await testInfo.attach(`fillField-${field.section}-error`, {
-      body: `Failed to fill ${field.section}: ${
+    await testInfo.attach(`fillField-${fieldIdentifier}-error`, {
+      body: `Failed to fill ${fieldIdentifier}: ${
         error instanceof Error ? error.message : String(error)
       }`,
       contentType: "text/plain",
     });
 
     throw new Error(
-      `Failed to fill ${field.section}: ${
+      `Failed to fill ${field.field}: ${
         error instanceof Error ? error.message : String(error)
       }`,
     );

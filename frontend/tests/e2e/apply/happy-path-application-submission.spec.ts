@@ -61,7 +61,15 @@ test("Application submission happy path - application with required SF424B and u
   await saveForm(page);
 
   // Verify form status after save
-  await verifyFormStatusAfterSave(page, "complete", "SF-424B", applicationUrl);
+  await verifyFormStatusAfterSave(page, "complete");
+
+  // On application page — verify form row status/messages
+  await verifyFormStatusOnApplication(
+    page,
+    "complete",
+    "SF-424B",
+    applicationUrl,
+  );
 
   // Extra wait for page to fully render forms table after navigation
   await page.waitForTimeout(10000);

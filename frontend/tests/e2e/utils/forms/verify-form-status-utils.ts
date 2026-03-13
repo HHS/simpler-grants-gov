@@ -124,8 +124,6 @@ export async function verifyFormStatusOnApplication(
 export async function verifyFormStatusAfterSave(
   page: Page,
   status: FormStatus,
-  formName: string,
-  applicationUrl: string,
   expectedErrors?: FieldError[],
 ): Promise<void> {
   if (status === "complete") {

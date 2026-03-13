@@ -1,10 +1,11 @@
-import { expect, test } from "@playwright/test";
+import { test } from "@playwright/test";
 import { SFLLL_TEST_DATA } from "tests/e2e/apply/fixtures/test-data-for-sflll-forms.fixture";
 import { SFLLL_FORM_CONFIG } from "tests/e2e/apply/page-objects/sflll-form.page";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
+import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
 const { baseUrl, testOrgLabel, opportunityId, targetEnv } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
@@ -37,8 +38,6 @@ test.describe("Application form completion happy path - SFLLL", () => {
 
     await fillForm(testInfo, page, SFLLL_FORM_CONFIG, SFLLL_TEST_DATA, false);
 
-    await expect(page.getByText(SFLLL_FORM_CONFIG.noErrorsText)).toBeVisible({
-      timeout: 15000,
-    });
+    await verifyFormStatusAfterSave(page, "complete");
   });
 });
