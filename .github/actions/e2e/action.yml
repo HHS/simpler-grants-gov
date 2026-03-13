@@ -67,9 +67,9 @@ runs:
       if: ${{ inputs.needs_node_setup == 'true' }}
       uses: actions/setup-node@v6
       with:
-        node-version: ${{ inputs.NODE_VERSION }}
-        cache: ${{ inputs.PACKAGE_MANAGER }}
-        cache-dependency-path: ${{ inputs.LOCKFILE_PATH }}
+        node-version: ${{ inputs.node_version }}
+        cache: ${{ inputs.package_manager }}
+        cache-dependency-path: ${{ inputs.lockfile_path }}
 
     - name: Install Node dependencies & Playwright
       if: ${{ inputs.needs_node_setup == 'true' }}
