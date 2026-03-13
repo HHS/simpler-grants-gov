@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Button, Grid } from "@trussworks/react-uswds";
 
-const ActivityDashboardLinkCard = ({
+const WorkspaceDashboardLinkCard = ({
   heading,
   description,
   linkText,
@@ -26,15 +26,15 @@ const ActivityDashboardLinkCard = ({
   );
 };
 
-export const ActivityDashboardLinksSection = async () => {
-  const t = await getTranslations("ActivityDashboard.linksSection");
+export const WorkspaceDashboardLinksSection = async () => {
+  const t = await getTranslations("WorkspaceDashboard.linksSection");
   return (
     <div className="margin-top-4">
       <h2>{t("heading")}</h2>
       <Grid row gap>
         {
           <Grid tablet={{ col: 4 }}>
-            <ActivityDashboardLinkCard
+            <WorkspaceDashboardLinkCard
               heading={t("applications.heading")}
               description={t("applications.description")}
               linkText={t("applications.linkText")}
@@ -43,7 +43,7 @@ export const ActivityDashboardLinksSection = async () => {
           </Grid>
         }
         <Grid tablet={{ col: 4 }}>
-          <ActivityDashboardLinkCard
+          <WorkspaceDashboardLinkCard
             heading={t("savedQueries.heading")}
             description={t("savedQueries.description")}
             linkText={t("savedQueries.linkText")}
@@ -51,7 +51,7 @@ export const ActivityDashboardLinksSection = async () => {
           />
         </Grid>
         <Grid tablet={{ col: 4 }}>
-          <ActivityDashboardLinkCard
+          <WorkspaceDashboardLinkCard
             heading={t("savedOpportunities.heading")}
             description={t("savedOpportunities.description")}
             linkText={t("savedOpportunities.linkText")}

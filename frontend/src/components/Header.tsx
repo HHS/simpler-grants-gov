@@ -125,7 +125,7 @@ const NavLinks = ({
     const workspaceSubNavs = [];
 
     workspaceSubNavs.push({
-      text: t("activityDashboard"),
+      text: t("workspaceDashboard"),
       href: "/dashboard",
     });
 
