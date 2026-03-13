@@ -1,8 +1,10 @@
+import inspect
 from datetime import datetime
 
 import pytest
 
 import src.adapters.db as db
+import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.opportunity_models import Opportunity
 from tests.src.db.models.factories import OpportunityFactory
@@ -82,3 +84,54 @@ def test_opportunity_factory_create(enable_factory_create, db_session: db.Sessio
     null_params = {"agency_code": None}
     opportunity = OpportunityFactory.create(**null_params)
     validate_opportunity_record(opportunity, null_params)
+
+
+factories_to_skip = [
+    # Using this factory directly hits some circular
+    # issues that don't happen when using the opportunity
+    # or opportunity summary factories that in turn call this.
+    factories.CurrentOpportunitySummaryFactory,
+    # These end up a bit flaky because if you use them
+    # it creates an opportunity summary, which also adds
+    # rows of their kind and can lead to uniqueness problems
+    # We'll just rely on the OpportunitySummary factory to validate
+    # that these are working.
+    factories.LinkOpportunitySummaryFundingCategoryFactory,
+    factories.LinkOpportunitySummaryApplicantTypeFactory,
+    factories.LinkOpportunitySummaryFundingInstrumentFactory,
+]
+
+
+def test_factory_create(db_session, enable_factory_create):
+    """Iterate over all factories and verify that they are setup
+    to work correctly by default. This doesn't guarantee that every
+    use case for a given factory works, but is a nice sanity test
+    for when we build factories prior to using them.
+    """
+    # Iterates over everything defined in the factories module
+    # and filters to:
+    # * Classes
+    # * Derived from the BaseFactory
+    # * That aren't defined as Abstract
+    for obj in factories.__dict__.values():
+        if (
+            inspect.isclass(obj)
+            and issubclass(obj, factories.BaseFactory)
+            # Note that the "class Meta" added to factories
+            # gets renamed to _meta by the internals of the factories
+            and getattr(getattr(obj, "_meta", {}), "abstract", False) is False
+        ):
+
+            if obj in factories_to_skip:
+                continue
+
+            try:
+                instance = obj.create()
+                # Some tests rely on specific data when pulling from a whole table
+                # Avoid breaking those by cleaning up what we just made. Also
+                # tests that deletes work properly for all our models/foreign keys.
+                db_session.delete(instance)
+            except Exception:
+                # catch the error to add the factory name to the stack trace
+                # so it's a bit clearer which factory failed.
+                pytest.fail(f"Failed to run create for factory {obj.__name__}")
