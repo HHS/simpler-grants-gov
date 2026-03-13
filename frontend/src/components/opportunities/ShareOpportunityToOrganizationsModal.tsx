@@ -41,10 +41,10 @@ export function ShareOpportunityToOrganizationsModal({
 }: ShareOpportunityToOrganizationsModalProps) {
   const { clientFetch: addOrganizationAction } = useClientFetch<
         NextResponse
-      >("Error fetching addSavedOpportunityForOrganizationHandler");
+      >("Error fetching addOrganizationAction");
   const { clientFetch: deleteOrganizationAction } = useClientFetch<
         NextResponse
-      >("Error fetching deleteSavedOpportunityForOrganizationHandler");
+      >("Error fetching deleteOrganizationAction");
   const makeApiCall = async (checkedStatus: any) => {
     organizations.map(async (organization) => {   
       console.log("Organization id: " + organization.organization_id);
