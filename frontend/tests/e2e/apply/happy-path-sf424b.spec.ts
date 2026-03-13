@@ -38,6 +38,8 @@ test("Application form completion happy path - SF424B", async ({
     false,
   );
 
+  await page.waitForTimeout(2000);
+
   // Verify form status after save
   await verifyFormStatusAfterSave(page, "complete");
 });

@@ -3,20 +3,19 @@ import { FormFillFieldDefinitions } from "tests/e2e/utils/forms/general-forms-fi
 
 export const fieldDefinitionsSF424B: FormFillFieldDefinitions = {
   title: {
-    selector:
-      'input[name*="title" i], input[placeholder*="title" i], textarea[name*="title" i], textarea[placeholder*="title" i]',
+    testId: "title",
     type: "text",
     field: "Title",
   },
   organization: {
-    selector: 'input[name*="applicant" i], input[name*="organization" i]',
+    testId: "applicant_organization",
     type: "text",
-    field: "Organization",
+    field: "Applicant Organization",
   },
 };
 
 export const SF424B_FORM_CONFIG = {
   ...FORM_DEFAULTS,
-  formName: "SF-424B|Assurances for Non-Construction Programs",
+  formName: "Assurances for Non-Construction Programs (SF-424B)",
   fields: fieldDefinitionsSF424B,
 } as const;
