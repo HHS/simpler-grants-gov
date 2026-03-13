@@ -48,7 +48,7 @@ jobs:
           pattern: blob-report-shard-*
           merge-multiple: true
 
-      - name: Verify Downloaded Artifacts
+      - name: Verify Downloaded Blob Report
         run: |
           echo "Contents of all-blob-reports after download:"
           ls -R all-blob-reports*
@@ -56,7 +56,7 @@ jobs:
       - name: Merge Blob Reports into HTML
         run: npx playwright merge-reports --reporter html ./all-blob-reports
 
-      - name: Verify Downloaded Artifacts
+      - name: Verify Merged HTML Report
         run: |
           echo "Contents of all-blob-reports after download:"
           ls -R playwright*
