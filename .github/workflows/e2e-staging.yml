@@ -55,3 +55,9 @@ jobs:
     secrets: inherit
     with:
       run_id: ${{ github.run_id }}
+
+  send-slack-notification:
+    if: failure()
+    needs: [create-report]
+    uses: ./.github/workflows/send-slack-notification.yml
+    secrets: inherit
