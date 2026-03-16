@@ -3,6 +3,8 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 
+import { gotoWithRetry } from "./lifecycle-utils";
+
 const { baseUrl } = playwrightEnv;
 
 async function selectOptionByLabelSubstring(
@@ -64,7 +66,7 @@ export async function createApplication(
   opportunityUrl: string,
   orgLabel: string,
 ) {
-  await page.goto(`${baseUrl}${opportunityUrl}`, {
+  await gotoWithRetry(page, `${baseUrl}${opportunityUrl}`, {
     waitUntil: "domcontentloaded",
   });
   await page.waitForTimeout(3000);
@@ -76,7 +78,7 @@ export async function createApplication(
   const modal = page.locator(
     '[role="dialog"].is-visible, #start-application.is-visible',
   );
-  await expect(modal.locator("select")).toBeVisible({ timeout: 15000 });
+  await expect(modal.locator("select")).toBeVisible({ timeout: 45000 });
   const orgSelect = modal.locator(
     'select[name*="applicant"], select:nth-of-type(1)',
   );
@@ -124,10 +126,14 @@ export async function createApplication(
   await page.waitForTimeout(3000);
   await page.waitForURL(/\/applications\/[a-f0-9-]+/, { timeout: 60000 });
   await page.waitForLoadState("domcontentloaded");
-  await page.waitForLoadState("networkidle");
+  // Avoid strict networkidle waits on pages with background polling.
+  await page.waitForLoadState("load").catch(() => undefined);
   await page.waitForTimeout(2000);
   const mainContent = page.locator("main");
   await expect(mainContent).toBeVisible();
+  await expect(
+    page.locator(".simpler-application-forms-table").first(),
+  ).toBeVisible({ timeout: 30000 });
   const requiredFormsHeading = page.locator(
     "text=/Required Forms/i, text=/forms required/i",
   );

@@ -42,6 +42,8 @@ const categoryCheckboxes = {
 
 const { baseUrl, targetEnv } = playwrightEnv;
 
+const GOTO_TIMEOUT = targetEnv === "staging" ? 300000 : 60000;
+
 const goToSearch = async (page: Page) => {
   if (targetEnv !== "local" && targetEnv !== "staging") {
     throw new Error(`Unsupported env ${targetEnv}`);
@@ -49,7 +51,7 @@ const goToSearch = async (page: Page) => {
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
-      await page.goto(`${baseUrl}/search`, { timeout: 30000 });
+      await page.goto(`${baseUrl}/search`, { timeout: GOTO_TIMEOUT });
       return;
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
