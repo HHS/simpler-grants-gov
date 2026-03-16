@@ -316,6 +316,10 @@ const FormLink = ({
       {formName && (
         <Link
           className="text-bold"
+          // Added stable test attributes for reliable E2E targeting of form links.
+          // Enables Playwright to select the correct link regardless of text or layout changes.
+          data-testid="application-form-link"
+          data-form-id={formId}
           href={`/applications/${applicationId}/form/${appFormId}`}
         >
           {formName}

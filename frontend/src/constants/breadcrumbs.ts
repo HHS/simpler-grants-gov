@@ -10,10 +10,6 @@ const SAVED_OPPORTUNITIES: Breadcrumb = {
   title: "Saved opportunities",
   path: "/saved-opportunities/",
 };
-const SAVED_SEARCHES: Breadcrumb = {
-  title: "Saved search queries",
-  path: "/saved-search-queries/",
-};
 
 // page breadcrumbs
 export const SEARCH_CRUMBS: Breadcrumb[] = [HOME, SEARCH];
@@ -21,4 +17,3 @@ export const SAVED_OPPORTUNITIES_CRUMBS: Breadcrumb[] = [
   HOME,
   SAVED_OPPORTUNITIES,
 ];
-export const SAVED_SEARCHES_CRUMBS: Breadcrumb[] = [HOME, SAVED_SEARCHES];
