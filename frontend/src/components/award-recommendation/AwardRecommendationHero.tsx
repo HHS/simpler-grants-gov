@@ -11,6 +11,7 @@ import AwardRecommendationStatusTag from "./AwardRecommendationStatusTag";
 export type ActionButtonConfig = {
   type: "action";
   label: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formAction: (formData: FormData) => Promise<any>;
   outline?: boolean;
   disabled?: boolean;

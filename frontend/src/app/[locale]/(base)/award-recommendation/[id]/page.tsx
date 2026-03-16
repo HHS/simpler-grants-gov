@@ -113,6 +113,63 @@ const OpportunitySection = ({
   );
 };
 
+interface RecommendationSectionProps {
+  locale: string;
+}
+
+const RecommendationSection = ({
+  locale: _locale,
+}: RecommendationSectionProps) => {
+  const t = useTranslations("AwardRecommendation");
+
+  // TODO: Replace with actual data from API
+  const recommendationMethod = "Merit review ranking with other factors";
+  const recommendationMethodDetails =
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+  const otherKeyInformation =
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute ....";
+
+  return (
+    <div>
+      <Grid row className="grid-gap">
+        <Grid col={9} tablet={{ col: 9 }}>
+          <div className="margin-top-5 margin-bottom-5">
+            <div className="border radius-md border-base-lighter padding-3 bg-white">
+              <div className="margin-bottom-3">
+                <p className="text-bold margin-bottom-2">
+                  {t("recommendationMethod.label", {
+                    defaultValue: "Recommendation method",
+                  })}
+                </p>
+                {recommendationMethod}
+              </div>
+              <div className="margin-bottom-3">
+                <p className="text-bold margin-bottom-2">
+                  {t("recommendationMethodDetails.label", {
+                    defaultValue: "Recommendation method details",
+                  })}
+                </p>
+                {recommendationMethodDetails}
+              </div>
+              <div className="border-top border-base-lighter margin-top-2 margin-bottom-2" />
+              <div className="margin-bottom-3">
+                <p className="text-bold margin-bottom-2">
+                  {t("otherKeyInformation.label", {
+                    defaultValue: "Other key information",
+                  })}
+                </p>
+                <SummaryDescriptionDisplay
+                  summaryDescription={otherKeyInformation || ""}
+                />
+              </div>
+            </div>
+          </div>
+        </Grid>
+      </Grid>
+    </div>
+  );
+};
+
 async function AwardRecommendationPageContent({
   params,
 }: AwardRecommendationPageProps) {
@@ -180,6 +237,7 @@ async function AwardRecommendationPageContent({
             locale={locale}
           />
         )}
+        <RecommendationSection locale={locale} />
       </GridContainer>
     </>
   );

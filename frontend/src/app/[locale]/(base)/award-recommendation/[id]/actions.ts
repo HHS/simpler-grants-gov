@@ -1,7 +1,5 @@
 "use server";
 
-import { getTranslations } from "next-intl/server";
-
 export type AwardRecommendationActionResponse = {
   success?: boolean;
   errorMessage?: string;
@@ -11,18 +9,17 @@ export type AwardRecommendationActionResponse = {
 export async function saveAwardRecommendation(
   formData: FormData,
 ): Promise<AwardRecommendationActionResponse> {
-  const t = await getTranslations("AwardRecommendation");
-
   // Extract form data
   const rawFormData = {
-    otherOpportunityInfo: formData.get("other-opportunity-info") as string,
-    otherKeyInformation: formData.get("other-key-information") as string,
+    additionalInfo: formData.get("additional_info") as string,
+    awardSelectionMethod: formData.get("award_selection_method") as string,
+    awardSelectionDetails: formData.get("award_selection_details") as string,
+    otherKeyInformation: formData.get("other_key_information") as string,
   };
 
   try {
     // TODO: Implement save functionality when endpoint is available
     // const response = await saveAwardRecommendationAPI(rawFormData);
-    console.log("Save clicked - Form data:", rawFormData);
 
     return {
       success: true,
@@ -41,18 +38,17 @@ export async function saveAwardRecommendation(
 export async function submitAwardRecommendationForReview(
   formData: FormData,
 ): Promise<AwardRecommendationActionResponse> {
-  const t = await getTranslations("AwardRecommendation");
-
   // Extract form data
   const rawFormData = {
-    otherOpportunityInfo: formData.get("other-opportunity-info") as string,
-    otherKeyInformation: formData.get("other-key-information") as string,
+    additionalInfo: formData.get("additional_info") as string,
+    awardSelectionMethod: formData.get("award_selection_method") as string,
+    awardSelectionDetails: formData.get("award_selection_details") as string,
+    otherKeyInformation: formData.get("other_key_information") as string,
   };
 
   try {
     // TODO: Implement submit for review functionality when endpoint is available
     // const response = await submitAwardRecommendationAPI(rawFormData);
-    console.log("Submit for review clicked - Form data:", rawFormData);
 
     return {
       success: true,
