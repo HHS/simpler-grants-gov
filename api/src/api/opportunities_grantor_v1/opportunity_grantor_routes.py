@@ -125,7 +125,7 @@ def opportunity_update(
     return response.ApiResponse(message="Success", data=opportunity)
 
 
-@opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/summary")
+@opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/summaries")
 @opportunity_grantor_blueprint.input(
     opportunity_grantor_schemas.OpportunitySummaryCreateRequestV1Schema(), location="json"
 )
@@ -142,7 +142,7 @@ def opportunity_summary_create(
 ) -> response.ApiResponse:
     """Create a new opportunity summary"""
     add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
-    logger.info("POST /v1/opportunities/:opportunity_id/summary")
+    logger.info("POST /v1/opportunities/:opportunity_id/summaries")
 
     with db_session.begin():
         user = jwt_or_api_user_key_multi_auth.get_user()
@@ -155,7 +155,7 @@ def opportunity_summary_create(
 
 
 @opportunity_grantor_blueprint.put(
-    "/opportunities/<uuid:opportunity_id>/summary/<uuid:opportunity_summary_id>"
+    "/opportunities/<uuid:opportunity_id>/summaries/<uuid:opportunity_summary_id>"
 )
 @opportunity_grantor_blueprint.input(
     opportunity_grantor_schemas.OpportunitySummaryUpdateRequestV1Schema(), location="json"
@@ -175,7 +175,7 @@ def opportunity_summary_update(
     add_extra_data_to_current_request_logs(
         {"opportunity_id": opportunity_id, "opportunity_summary_id": opportunity_summary_id}
     )
-    logger.info("PUT /v1/grantors/opportunities/:opportunity_id/summary/:opportunity_summary_id")
+    logger.info("PUT /v1/grantors/opportunities/:opportunity_id/summaries/:opportunity_summary_id")
 
     with db_session.begin():
         user = jwt_or_api_user_key_multi_auth.get_user()

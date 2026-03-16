@@ -64,7 +64,7 @@ def test_opportunity_summary_update_with_invalid_jwt_token(
     opportunity, summary = opportunity_with_summary
 
     response = client.put(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary/{summary.opportunity_summary_id}",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{summary.opportunity_summary_id}",
         json=opportunity_summary_update_request,
         headers={"X-SGG-Token": "invalid_token_value"},
     )
@@ -99,7 +99,7 @@ def test_opportunity_summary_update_missing_permissions(
     )
 
     response = client.put(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary/{summary.opportunity_summary_id}",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{summary.opportunity_summary_id}",
         json=opportunity_summary_update_request,
         headers={"X-SGG-Token": token},
     )
@@ -119,7 +119,7 @@ def test_opportunity_summary_update_opportunity_not_found(
     non_existent_summary_id = uuid.uuid4()
 
     response = client.put(
-        f"/v1/grantors/opportunities/{non_existent_opportunity_id}/summary/{non_existent_summary_id}",
+        f"/v1/grantors/opportunities/{non_existent_opportunity_id}/summaries/{non_existent_summary_id}",
         json=opportunity_summary_update_request,
         headers={"X-SGG-Token": token},
     )
@@ -157,7 +157,7 @@ def test_opportunity_summary_update_summary_not_found(
     non_existent_summary_id = uuid.uuid4()
 
     response = client.put(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary/{non_existent_summary_id}",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{non_existent_summary_id}",
         json=opportunity_summary_update_request,
         headers={"X-SGG-Token": token},
     )
@@ -183,7 +183,7 @@ def test_opportunity_summary_update_invalid_date_validation(
     )
 
     response = client.put(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary/{summary.opportunity_summary_id}",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{summary.opportunity_summary_id}",
         json=invalid_dates_request,
         headers={"X-SGG-Token": token},
     )
@@ -210,7 +210,7 @@ def test_opportunity_summary_update_invalid_award_amount(
     )
 
     response = client.put(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary/{summary.opportunity_summary_id}",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{summary.opportunity_summary_id}",
         json=invalid_award_request,
         headers={"X-SGG-Token": token},
     )
@@ -242,7 +242,7 @@ def test_opportunity_summary_update_successful(
     opportunity_summary_update_request["award_ceiling"] = 180000
 
     response = client.put(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary/{summary.opportunity_summary_id}",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{summary.opportunity_summary_id}",
         json=opportunity_summary_update_request,
         headers={"X-SGG-Token": token},
     )
@@ -326,7 +326,7 @@ def test_opportunity_summary_update_schema_validation(
     }
 
     response = client.put(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary/{summary.opportunity_summary_id}",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{summary.opportunity_summary_id}",
         json=invalid_request,
         headers={"X-SGG-Token": token},
     )

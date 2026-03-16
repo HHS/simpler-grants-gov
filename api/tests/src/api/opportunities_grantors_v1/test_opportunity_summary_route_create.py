@@ -74,7 +74,7 @@ def test_opportunity_summary_create_with_invalid_jwt_token(
 ):
     """Test opportunity summary creation endpoint with invalid JWT token"""
     response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=opportunity_summary_request,
         headers={"X-SGG-Token": "invalid_token_value"},
     )
@@ -97,7 +97,7 @@ def test_opportunity_summary_create_missing_permissions(
     opportunity = OpportunityFactory.create(agency_record=agency)
 
     response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=opportunity_summary_request,
         headers={"X-SGG-Token": token},
     )
@@ -116,7 +116,7 @@ def test_opportunity_summary_create_opportunity_not_found(
     non_existent_id = uuid.uuid4()
 
     response = client.post(
-        f"/v1/grantors/opportunities/{non_existent_id}/summary",
+        f"/v1/grantors/opportunities/{non_existent_id}/summaries",
         json=opportunity_summary_request,
         headers={"X-SGG-Token": token},
     )
@@ -138,7 +138,7 @@ def test_opportunity_summary_create_invalid_date_validation(
     )
 
     response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=invalid_dates_request,
         headers={"X-SGG-Token": token},
     )
@@ -164,7 +164,7 @@ def test_opportunity_summary_create_invalid_award_amount(
     )
 
     response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=invalid_award_request,
         headers={"X-SGG-Token": token},
     )
@@ -187,7 +187,7 @@ def test_opportunity_summary_create_successful(
     opportunity_summary_request["is_forecast"] = True
 
     response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=opportunity_summary_request,
         headers={"X-SGG-Token": token},
     )
@@ -239,7 +239,7 @@ def test_opportunity_summary_create_duplicate_summary(
     opportunity_summary_request["is_forecast"] = True
 
     first_response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=opportunity_summary_request,
         headers={"X-SGG-Token": token},
     )
@@ -247,7 +247,7 @@ def test_opportunity_summary_create_duplicate_summary(
 
     # Second request with the same forecast type should fail with 422
     second_response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=opportunity_summary_request,
         headers={"X-SGG-Token": token},
     )
@@ -291,7 +291,7 @@ def test_opportunity_summary_create_schema_validation(
     }
 
     response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=invalid_request,
         headers={"X-SGG-Token": token},
     )
