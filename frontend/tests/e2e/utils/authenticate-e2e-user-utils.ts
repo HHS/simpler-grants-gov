@@ -38,12 +38,6 @@ export async function authenticateE2eUser(
       await page.waitForTimeout(2000);
     }
   } else if (targetEnv === "staging") {
-    const isChrome = !!test.info().project.name.match(/^Chrome/);
-    // for now MFA is failing if we run this test too frequently, so limiting to one browser until we can figure that out
-    if (!isChrome) {
-      return;
-    }
-
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
 
     // Check whether the user is already logged in before attempting MFA login.

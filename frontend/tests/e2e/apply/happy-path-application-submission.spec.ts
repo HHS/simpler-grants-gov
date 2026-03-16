@@ -17,9 +17,19 @@ import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inc
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
 
-const { testOrgLabel } = playwrightEnv;
+const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
+
+// Skip non-Chrome browsers in staging
+test.beforeEach(({}, testInfo) => {
+  if (targetEnv === "staging") {
+    test.skip(
+      testInfo.project.name !== "Chrome",
+      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
+    );
+  }
+});
 
 test("Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL", async ({
   page,

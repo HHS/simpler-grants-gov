@@ -18,6 +18,16 @@ test("Saved opportunities page shows unauthenticated state if not logged in", as
   await expect(h4).toHaveText("Not signed in");
 });
 
+// Skip non-Chrome browsers in staging
+test.beforeEach(({}, testInfo) => {
+  if (targetEnv === "staging") {
+    test.skip(
+      testInfo.project.name !== "Chrome",
+      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
+    );
+  }
+});
+
 // will fail when run against staging until after https://github.com/HHS/simpler-grants-gov/issues/7769
 
 test("Working saved opportunities page link appears in nav when logged in", async ({
