@@ -30,6 +30,7 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import AgencyUser, UserApiKey
 from src.util.local import load_local_env_vars
+from src.workflow.workflow_background_task import _init_newrelic_app
 from tests.lib import db_testing
 from tests.lib.auth_test_utils import mock_oauth_endpoint
 from tests.lib.db_testing import cascade_delete_from_db_table
@@ -116,6 +117,14 @@ def set_env_var_defaults(monkeypatch_session):
 
     # We will set this to false so we skip logs during unit tests and keep enabled during dev.
     monkeypatch_session.setenv("SOAP_ENABLE_VERBOSE_LOGGING", "0")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def init_new_relic_app():
+    """Setup the new relic app to be initialized so the transaction logic
+    won't error when running tests. This won't actually connect to New Relic.
+    """
+    _init_newrelic_app()
 
 
 @pytest.fixture

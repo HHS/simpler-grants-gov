@@ -2,8 +2,9 @@ import { expect, type Locator, type Page } from "@playwright/test";
 
 import { getFormLink, openForm } from "./form-navigation-utils";
 
+// Uses regex matcher tolerant of hyphen/dash variants for SF-424B, to be compatible with both local and staging.
 export const SF424B_FORM_MATCHER =
-  "SF-424B|Assurances for Non-Construction Programs";
+  "SF\\s*[-‑–—]?\\s*424B|Assurances\\s+for\\s+Non\\s*[-‑–—]?\\s*Construction\\s+Programs";
 
 /**
  * Gets the SF-424B form link element.
