@@ -18,7 +18,7 @@ const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
 
 test.describe("fill SF-LLL Form", () => {
   // Skip non-Chrome browsers in staging
-  test.beforeEach(({}, testInfo) => {
+  test.beforeEach((_, testInfo) => {
     if (targetEnv === "staging") {
       test.skip(
         testInfo.project.name !== "Chrome",

@@ -13,7 +13,7 @@
  * without any changes — authentication is handled correctly in both cases.
  */
 
-import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import { expect, type BrowserContext, type Page } from "@playwright/test";
 import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { openMobileNav } from "tests/e2e/playwrightUtils";
