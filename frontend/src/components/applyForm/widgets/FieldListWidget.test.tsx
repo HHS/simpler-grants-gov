@@ -50,7 +50,7 @@ describe("FieldListWidget", () => {
 
     expect(screen.getByText("Contacts")).toBeInTheDocument();
     expect(screen.getByText("Add contacts")).toBeInTheDocument();
-    expect(screen.getByText("Row 1")).toBeInTheDocument();
+    expect(screen.getByText(/entry\s+1/i)).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
 
@@ -80,9 +80,9 @@ describe("FieldListWidget", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /\+ add row/i }));
+    await user.click(screen.getByRole("button", { name: /\+\s*add/i }));
 
-    expect(screen.getByText("Row 2")).toBeInTheDocument();
+    expect(screen.getByText(/entry\s+2/i)).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(2);
   });
 
@@ -115,7 +115,7 @@ describe("FieldListWidget", () => {
     const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
     await user.click(deleteButtons[0]);
 
-    expect(screen.queryByText("Row 2")).not.toBeInTheDocument();
+    expect(screen.queryByText(/entry\s+2/i)).not.toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
 });

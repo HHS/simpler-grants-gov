@@ -1,15 +1,15 @@
-import React, { JSX, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { Button } from "@trussworks/react-uswds";
 
 import {
   BroadlyDefinedWidgetValue,
   FieldListGroupItem,
   FieldListWidgetProps,
   GeneralRecord,
-  UiSchema,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
 import { renderWidget } from "./WidgetRenderers";
-import { Button } from "@trussworks/react-uswds";
 
 const FIELD_LIST_INDEX_TOKEN = "~~index~~";
 
@@ -31,7 +31,7 @@ const normalizeFieldListRows = ({
   value,
   defaultSize,
 }: {
-  value: unknown;
+  value: GeneralRecord[] | undefined;
   defaultSize: number;
 }): GeneralRecord[] => {
   const startingRows = Array.isArray(value)
@@ -149,7 +149,7 @@ const toBroadlyDefinedWidgetValue = (
   return undefined;
 };
 
-function FieldListWidget(widgetProps: FieldListWidgetProps): JSX.Element {
+function FieldListWidget(widgetProps: FieldListWidgetProps) {
   const {
     id,
     label,
@@ -163,18 +163,14 @@ function FieldListWidget(widgetProps: FieldListWidgetProps): JSX.Element {
     isFormLocked,
     formContext,
   } = widgetProps;
+  const t = useTranslations("Application.applyForm.fieldListWidget");
 
   /**
-   * FieldList manages row add/delete behavior locally so the UI responds
+   * FieldList manages entry add/remove behavior locally so the UI updates
    * immediately during editing.
    *
-   * The rows are still rehydrated from saved form data via `value`, so the
-   * widget stays aligned with persisted state after save / reload.
-   *
-   * extra context:
-   * Local row state used for interactive editing (add/delete row operations).
-   * The value is rehydrated from the incoming `value` prop so that saved form
-   * data is reflected correctly when the form reloads.
+   * The entries are rehydrated from the incoming `value` prop so the widget
+   * stays aligned with saved form data after save / reload.
    */
   const [rows, setRows] = useState<GeneralRecord[]>(
     normalizeFieldListRows({
@@ -239,14 +235,15 @@ function FieldListWidget(widgetProps: FieldListWidgetProps): JSX.Element {
             className="field-list-widget__row"
           >
             <div className="field-list-widget__controls">
-              <strong>Row {rowIndex + 1}</strong>
+              <strong>
+                {t("entry")} {rowIndex + 1}
+              </strong>
               <Button
-
                 type="button"
                 onClick={() => handleDeleteRow(rowIndex)}
                 disabled={isInteractionDisabled}
               >
-                Delete
+                {t("delete")}
               </Button>
             </div>
 
@@ -287,22 +284,19 @@ function FieldListWidget(widgetProps: FieldListWidgetProps): JSX.Element {
                */
               const childWidgetProps: UswdsWidgetProps = {
                 ...groupItem.generalProps,
-                schema: groupItem.generalProps.schema as UiSchema,
+                schema: groupItem.generalProps.schema,
                 id: generatedId,
+                key: generatedId,
                 value: currentValue,
                 onChange: handleChildChange,
                 isFormLocked,
                 formContext,
               };
 
-              return (
-                <React.Fragment key={generatedId}>
-                  {renderWidget({
-                    type: groupItem.widget,
-                    props: childWidgetProps,
-                  })}
-                </React.Fragment>
-              );
+              return renderWidget({
+                type: groupItem.widget,
+                props: childWidgetProps,
+              });
             })}
           </div>
         );
@@ -314,7 +308,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps): JSX.Element {
           onClick={handleAddRow}
           disabled={isInteractionDisabled}
         >
-          + Add row
+          + {t("add")}
         </Button>
       </div>
     </div>
