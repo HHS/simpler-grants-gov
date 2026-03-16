@@ -157,27 +157,38 @@ class WorkflowManager:
 
         logger.info("Finished processing workflow events")
 
-    def process_batch(self) -> list[str]:
+    def process_batch(self) -> tuple[list[str], list[str]]:
         """Fetch and process a batch of events from SQS."""
         message_event_dict = self.fetch_messages()
         messages_to_delete: list[str] = []
+        messages_to_keep: list[str] = []
 
         # Note that the initial approach won't be multi-threaded
         # We'll follow-up on that later
 
-        if message_event_dict:
-            for receipt_handle, event in message_event_dict.items():
-                event_result = handle_event(event)
-                if event_result in [
-                    WorkflowEventProcessingResult.SUCCESS,
-                    WorkflowEventProcessingResult.NON_RETRYABLE_ERROR,
-                ]:
-                    messages_to_delete.append(receipt_handle)
+        for receipt_handle, event in message_event_dict.items():
+            messages_to_keep.append(receipt_handle)
 
-                logger.info(
-                    "Processed workflow event",
-                    extra=event.get_log_extra() | {"event_result": event_result},
+            try:
+                event_result = handle_event(event)
+            except Exception:
+                logger.exception(
+                    "Fail to handle current event",
+                    extra={"receipt handle:": receipt_handle, "event id": event.event_id},
                 )
+                continue
+
+            if event_result in [
+                WorkflowEventProcessingResult.SUCCESS,
+                WorkflowEventProcessingResult.NON_RETRYABLE_ERROR,
+            ]:
+                messages_to_delete.append(receipt_handle)
+                messages_to_keep.remove(receipt_handle)
+
+            logger.info(
+                "Processed workflow event",
+                extra=event.get_log_extra() | {"event_result": event_result},
+            )
 
         if messages_to_delete:
             self.delete_messages(messages_to_delete)
@@ -186,17 +197,19 @@ class WorkflowManager:
         self.metrics["batches_processed"] += 1
         self.metrics["events_processed"] += len(message_event_dict)
 
-        # return messages to delete receipt handles for testing purposes
-        return messages_to_delete
+        # return messages to delete and messages to keep handles for testing purposes
+        return messages_to_delete, messages_to_keep
 
     def fetch_messages(self) -> dict[str, WorkflowEvent]:
-        event_dict = {}
+        event_dict: dict[str, WorkflowEvent] = {}
+        messages = []
         try:
             messages = self.sqs_client.receive_messages(
                 wait_time=self.config.workflow_cycle_duration
             )
         except Exception:
             logger.exception("Failed to fetch messages from SQS")
+            return event_dict
 
         for message in messages:
             try:
@@ -213,7 +226,7 @@ class WorkflowManager:
         try:
             delete_result = self.sqs_client.delete_message_batch(receipt_handles)
             if delete_result.failed_deletes:
-                logger.exception(
+                logger.error(
                     "Failed to delete messages from SQS queue",
                     extra={"failed_deletes": list(delete_result.failed_deletes)},
                 )
