@@ -82,7 +82,10 @@ def test_opportunity_create_duplicate_number(client, grantor_auth_data, opportun
     response_json = response.get_json()
 
     assert response.status_code == 422
-    assert "already exists" in str(response_json).lower()
+    assert (
+        response_json["message"]
+        == f"Opportunity with number '{opportunity_request['opportunity_number']}' already exists"
+    )
 
 
 def test_opportunity_create_invalid_data(client, grantor_auth_data):
@@ -123,4 +126,4 @@ def test_opportunity_create_no_permissions(client, db_session, enable_factory_cr
 
     assert response.status_code == 403
     response_json = response.get_json()
-    assert "forbidden" in str(response_json).lower()
+    assert response_json["message"] == "Forbidden"

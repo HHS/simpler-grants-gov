@@ -106,7 +106,7 @@ def test_opportunity_summary_create_missing_permissions(
 
     assert response.status_code == 403
     response_json = response.get_json()
-    assert "forbidden" in str(response_json).lower()
+    assert response_json["message"] == "Forbidden"
 
 
 def test_opportunity_summary_create_opportunity_not_found(
@@ -125,7 +125,7 @@ def test_opportunity_summary_create_opportunity_not_found(
 
     assert response.status_code == 404
     response_json = response.get_json()
-    assert "could not find opportunity" in str(response_json).lower()
+    assert response_json["message"] == f"Could not find Opportunity with ID {non_existent_id}"
 
 
 def test_opportunity_summary_create_invalid_date_validation(
@@ -257,7 +257,7 @@ def test_opportunity_summary_create_duplicate_summary(
     # Verify the error response
     assert second_response.status_code == 422
     response_json = second_response.get_json()
-    assert "forecast already exists" in str(response_json).lower()
+    assert response_json["message"] == "An opportunity summary of type forecast already exists"
 
 
 def test_opportunity_summary_create_schema_validation(

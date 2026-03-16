@@ -108,7 +108,7 @@ def test_opportunity_summary_update_missing_permissions(
 
     assert response.status_code == 403
     response_json = response.get_json()
-    assert "forbidden" in str(response_json).lower()
+    assert response_json["message"] == "Forbidden"
 
 
 def test_opportunity_summary_update_opportunity_not_found(
@@ -128,7 +128,10 @@ def test_opportunity_summary_update_opportunity_not_found(
 
     assert response.status_code == 404
     response_json = response.get_json()
-    assert "could not find opportunity" in str(response_json).lower()
+    assert (
+        response_json["message"]
+        == f"Could not find Opportunity with ID {non_existent_opportunity_id}"
+    )
 
 
 def test_opportunity_summary_update_summary_not_found(
@@ -163,7 +166,10 @@ def test_opportunity_summary_update_summary_not_found(
 
     assert response.status_code == 404
     response_json = response.get_json()
-    assert "could not find opportunity summary" in str(response_json).lower()
+    assert (
+        response_json["message"]
+        == f"Could not find Opportunity Summary with ID {non_existent_summary_id}"
+    )
 
 
 def test_opportunity_summary_update_invalid_date_validation(
