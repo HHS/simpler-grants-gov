@@ -45,22 +45,22 @@ export function ShareOpportunityToOrganizationsModal({
   const { clientFetch: deleteOrganizationAction } = useClientFetch<
         NextResponse
       >("Error fetching deleteOrganizationAction");
-  const makeApiCall = async (checkedStatus: any) => {
+  const makeApiCall = async (checkedStatus: any, organization_id: string) => {
     organizations.map(async (organization) => {   
-      console.log("Organization id: " + organization.organization_id);
-      console.log("CheckedStatus: " + checkedStatus); 
-      if (checkedStatus) {
-        await addOrganizationAction(`/v1/api/organizations/${organization.organization_id}/saved-opportunities`);
-      } else {
-        await deleteOrganizationAction(`/v1/api/organizations/${organization.organization_id}/saved-opportunities`);
+      if (checkedStatus && organization.organization_id == organization_id) {
+        console.log("Organization id passed in: " + organization_id);
+        console.log("Organization id: " + organization.organization_id);
+        console.log("CheckedStatus: " + checkedStatus); 
+        await addOrganizationAction(`/v1/organizations/${organization.organization_id}/saved-opportunities`);
+      } else if(!checkedStatus && organization.organization_id == organization_id) {
+        console.log("In deleteOrganziationAction section for organization Id: " + organization.organization_id);
+        await deleteOrganizationAction(`/v1/organizations/${organization.organization_id}/saved-opportunities`);
       }
     })
   };
-  const handleCheckboxChange = (event: { target: { checked: any; }; }) => {
+  const handleCheckboxChange = (event: { target: { checked: any; }; }, organization_id: string) => {
     const newCheckedState = event.target.checked;
-    // setIsChecked(newCheckedState);
-    console.log("MakeApiCall check: " + newCheckedState);
-    makeApiCall(newCheckedState);
+    makeApiCall(newCheckedState, organization_id);
   };
   const t = useTranslations("ShareOpportunityToOrganization");
   const modalContent = () => {
@@ -110,7 +110,7 @@ export function ShareOpportunityToOrganizationsModal({
                     organization.organization_id,
                   )}
                   disabled={isDisabled}
-                  onChange={handleCheckboxChange}
+                  onChange={(e) => {handleCheckboxChange(e, organization.organization_id)}}
                 />
               </li>
             );
