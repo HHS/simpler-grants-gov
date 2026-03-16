@@ -15,7 +15,7 @@ class MockLoginGovOauthClient(BaseOauthClient):
         self.retries[code] = retries
 
     def get_token(self, request: OauthTokenRequest) -> OauthTokenResponse:
-        retries: int = self.retries.get(request.code, 0)
+        retries = self.retries.get(request.code, 0)
         # if we don't have retries enabled on the mock, behave as usual
 
         self.retries[request.code] = retries - 1
