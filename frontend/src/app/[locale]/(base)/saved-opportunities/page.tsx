@@ -74,11 +74,11 @@ export default async function SavedOpportunities({
         <Breadcrumbs
           breadcrumbList={[
             {
-              title: `${t("SavedOpportunities.breadcrumbWorkspace")}`,
+              title: t("SavedOpportunities.breadcrumbWorkspace"),
               path: `/dashboard`,
             },
             {
-              title: `${t("SavedOpportunities.breadcrumbSavedOpportunities")}`,
+              title: t("SavedOpportunities.breadcrumbSavedOpportunities"),
               path: `/saved-opportunities`,
             },
           ]}
