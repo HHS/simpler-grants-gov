@@ -50,20 +50,21 @@ const FIELD_LIST_INDEX_TOKEN = "~~index~~" as const;
  * The FieldList widget later replaces `~~index~~` with the actual row index
  * when rendering each row.
  *
- * This helper extracts the final field key (the last `--` segment) from the
- * child field id and builds the FieldList id using that key.
+ * This helper preserves the original schema path from the child field id
+ * while inserting the `[~~index~~]` placeholder at the FieldList segment.
  *
  * Example:
  *
  *   childId: "contact_people_test--items--first_name"
- *   final field key: "first_name"
- *   result: "contact_people_test[~~index~~]--first_name"
  *
- * Using only the final field key keeps the generated id aligned with the
- * structure used to store FieldList row values, which are serialized as
- * objects keyed by the individual field names.
+ * becomes:
+ *
+ *   "contact_people_test--items[~~index~~]--first_name"
+ *
+ * Preserving the full path keeps the generated id aligned with the UI schema
+ * structure while still allowing the FieldList widget to scope each rendered
+ * field instance to its corresponding row.
  */
-
 export function buildFieldListBaseId({
   fieldListName,
   childId,
@@ -73,8 +74,15 @@ export function buildFieldListBaseId({
 }): string {
   const childIdParts = childId.split("--");
   const finalFieldKey = childIdParts[childIdParts.length - 1];
+  const originalPathPrefix = childId.split("--").slice(0, -1).join("--");
 
-  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
+  if (!originalPathPrefix) {
+    return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
+  }
+
+  // Preserve the full schema path in the generated id so that the UI schema
+  // and serialized form data paths remain clearly aligned.
+  return `${originalPathPrefix}--${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
 }
 
 type FieldWidgetConfig = {
@@ -402,6 +410,79 @@ const getFieldInfo = ({
   );
 };
 
+const getFieldListConfig = ({
+  errors,
+  formSchema,
+  formData,
+  uiFieldObject,
+}: {
+  errors: FormattedFormValidationWarning[] | null;
+  formSchema: RJSFSchema;
+  formData: object;
+  uiFieldObject: UiSchemaFieldList;
+}): FieldListConfig => {
+  const groupDefinition: FieldListGroupItem[] = uiFieldObject.children.map(
+    (childNode) => {
+      if (childNode.type !== "field" && childNode.type !== "multiField") {
+        throw new Error("fieldList children must be field nodes");
+      }
+
+      const childWidgetConfig = getFieldConfig({
+        errors,
+        formSchema,
+        formData,
+        uiFieldObject: childNode,
+        requiredField: false,
+      });
+
+      if (childWidgetConfig.type === "FieldList") {
+        throw new Error("nested fieldList is not supported");
+      }
+
+      const {
+        id: childId,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        value: _value,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        key: _key,
+        ...rest
+      } = childWidgetConfig.props;
+
+      return {
+        widget: childWidgetConfig.type,
+        baseId: buildFieldListBaseId({
+          fieldListName: uiFieldObject.name,
+          childId,
+        }),
+        generalProps: rest,
+      };
+    },
+  );
+  const fieldListValue =
+    formData && typeof formData === "object" && !Array.isArray(formData)
+      ? (formData as Record<string, unknown>)[uiFieldObject.name]
+      : undefined;
+
+  return {
+    type: "FieldList",
+    props: {
+      id: uiFieldObject.name,
+      key: uiFieldObject.name,
+      schema: {
+        type: "array",
+        title: uiFieldObject.label,
+        description: uiFieldObject.description,
+      },
+      label: uiFieldObject.label,
+      description: uiFieldObject.description,
+      defaultSize: uiFieldObject.defaultSize,
+      groupDefinition,
+      rawErrors: [],
+      requiredFields: [],
+      value: fieldListValue as GeneralRecord[] | undefined,
+    },
+  };
+};
 // returns widget type and props for rendering data for a given JSON schema field
 export const getFieldConfig = <V extends string | Record<string, unknown>>({
   errors,
@@ -417,67 +498,12 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
   requiredField: boolean;
 }): FieldConfig => {
   if (uiFieldObject.type === "fieldList") {
-    const groupDefinition: FieldListGroupItem[] = uiFieldObject.children.map(
-      (childNode) => {
-        if (childNode.type !== "field" && childNode.type !== "multiField") {
-          throw new Error("fieldList children must be field nodes");
-        }
-
-        const childWidgetConfig = getFieldConfig({
-          errors,
-          formSchema,
-          formData,
-          uiFieldObject: childNode,
-          requiredField: false,
-        });
-
-        if (childWidgetConfig.type === "FieldList") {
-          throw new Error("nested fieldList is not supported");
-        }
-
-        const {
-          id: childId,
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          value: _value,
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          key: _key,
-          ...rest
-        } = childWidgetConfig.props;
-
-        return {
-          widget: childWidgetConfig.type,
-          baseId: buildFieldListBaseId({
-            fieldListName: uiFieldObject.name,
-            childId,
-          }),
-          generalProps: rest,
-        };
-      },
-    );
-    const fieldListValue =
-      formData && typeof formData === "object" && !Array.isArray(formData)
-        ? (formData as Record<string, unknown>)[uiFieldObject.name]
-        : undefined;
-
-    return {
-      type: "FieldList",
-      props: {
-        id: uiFieldObject.name,
-        key: uiFieldObject.name,
-        schema: {
-          type: "array",
-          title: uiFieldObject.label,
-          description: uiFieldObject.description,
-        },
-        label: uiFieldObject.label,
-        description: uiFieldObject.description,
-        defaultSize: uiFieldObject.defaultSize,
-        groupDefinition,
-        rawErrors: [],
-        requiredFields: [],
-        value: fieldListValue as GeneralRecord[] | undefined,
-      },
-    };
+    return getFieldListConfig({
+      errors,
+      formSchema,
+      formData,
+      uiFieldObject,
+    });
   }
 
   const { definition } = uiFieldObject;

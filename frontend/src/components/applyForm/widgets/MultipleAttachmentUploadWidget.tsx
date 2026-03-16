@@ -76,6 +76,11 @@ const MultipleAttachmentUploadWidget = ({
       initialValue.every((item) => typeof item === "string")
     ) {
       parsedValue = initialValue;
+    } else if (Array.isArray(initialValue)) {
+      console.warn(
+        "MultipleAttachmentUploadWidget received a non-string array value:",
+        initialValue,
+      );
     } else if (typeof initialValue === "string") {
       try {
         // casting doesn’t fully satisfy the linter because it treats schema as possibly any underneath

@@ -82,8 +82,8 @@ export const FormFields = ({
 
   try {
     requiredFieldPaths = getRequiredProperties(schema);
-  } catch (error: unknown) {
-    console.error(error);
+  } catch (e: unknown) {
+    console.error(e);
     return (
       <Alert data-testid="alert" type="error" heading="Error" headingLevel="h4">
         Error rendering form
@@ -148,10 +148,10 @@ export const FormFields = ({
           renderedFields = [
             ...renderedFields,
             /*
-    Not every renderable UiSchema node has a `name`.
-    Prefer `name` when available, otherwise fall back to the field definition
-    so React still receives a stable key for this rendered node.
-  */
+              Not every renderable UiSchema node has a `name`.
+              Prefer `name` when available, otherwise fall back to the field definition
+              so React still receives a stable key for this rendered node.
+            */
             <React.Fragment key={nodeKey}>{field}</React.Fragment>,
           ];
         }

@@ -439,6 +439,11 @@ export const messages = {
       navTitle: "Sections in this form",
       unsavedChangesWarning:
         "You have unsaved changes or attachments that will be lost if you select OK.",
+      fieldListWidget: {
+        entry: "Entry",
+        delete: "Delete",
+        add: "Add entry",
+      },
     },
     transferOwnershipModal: {
       title: "Transfer application ownership",
