@@ -41,11 +41,11 @@ export const OrganizationDetail = ({
       <Breadcrumbs
         breadcrumbList={[
           {
-            title: `${t("breadcrumbWorkspace")}`,
+            title: t("breadcrumbWorkspace"),
             path: `/dashboard`,
           },
           {
-            title: `${t("breadcrumbOrganizations")}`,
+            title: t("breadcrumbOrganizations"),
             path: `/organizations`,
           },
           {

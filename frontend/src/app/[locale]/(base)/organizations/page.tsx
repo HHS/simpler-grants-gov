@@ -22,11 +22,11 @@ const OrganizationsPageWrapper = ({ children }: PropsWithChildren) => {
       <Breadcrumbs
         breadcrumbList={[
           {
-            title: `${t("breadcrumbWorkspace")}`,
+            title: "breadcrumbWorkspace",
             path: `/dashboard`,
           },
           {
-            title: `${t("breadcrumbOrganizations")}`,
+            title: t("breadcrumbOrganizations"),
             path: `/organizations`,
           },
         ]}

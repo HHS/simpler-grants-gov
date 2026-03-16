@@ -19,11 +19,11 @@ const PageBreadcrumbs = ({
     <Breadcrumbs
       breadcrumbList={[
         {
-          title: `${t("OrganizationDetail.breadcrumbWorkspace")}`,
+          title: t("OrganizationDetail.breadcrumbWorkspace"),
           path: `/dashboard`,
         },
         {
-          title: `${t("OrganizationDetail.breadcrumbOrganizations")}`,
+          title: t("OrganizationDetail.breadcrumbOrganizations"),
           path: `/organizations`,
         },
         {
