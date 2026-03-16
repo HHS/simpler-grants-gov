@@ -14,7 +14,10 @@ import {
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
 import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
-import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
+import {
+  verifyFormStatusAfterSave,
+  verifyFormStatusOnApplication,
+} from "tests/e2e/utils/forms/verify-form-status-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
@@ -58,7 +61,15 @@ test("Application submission happy path - application with required SF424B and u
   await saveForm(page);
 
   // Verify form status after save
-  await verifyFormStatusAfterSave(page, "complete", "SF-424B", applicationUrl);
+  await verifyFormStatusAfterSave(page, "complete");
+
+  // On application page — verify form row status/messages
+  await verifyFormStatusOnApplication(
+    page,
+    "complete",
+    "SF-424B",
+    applicationUrl,
+  );
 
   // Extra wait for page to fully render forms table after navigation
   await page.waitForTimeout(10000);
