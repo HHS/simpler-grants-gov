@@ -275,6 +275,8 @@ export const messages = {
   },
   Application: {
     title: "Application",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbApplications: "Applications",
     submissionValidationError: {
       title: "Your application could not be submitted",
       description:
@@ -961,6 +963,8 @@ export const messages = {
   },
   SavedSearches: {
     heading: "Saved search queries",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedQueries: "Saved search queries",
     noSavedCTAParagraphOne: "You don't have any saved queries yet.",
     noSavedCTAParagraphTwo:
       "As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
@@ -1011,6 +1015,8 @@ export const messages = {
   SavedOpportunities: {
     metaDescription: "View your saved funding opportunities.",
     heading: "Saved opportunities",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedOpportunities: "Saved opportunities",
     noSavedCTAParagraphOne:
       "To add an opportunity to your list, use the Save button next to its title on the listing's page.",
     noSavedCTAParagraphTwo:
@@ -1794,6 +1800,8 @@ export const messages = {
     },
     pageHeading: "Applications",
     pageTitle: "Applications",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbApplications: "Applications",
     tableContents: {
       agency: "Agency: ",
       draft: "Draft",
@@ -1819,6 +1827,11 @@ export const messages = {
       secondary:
         "Opportunities you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
     },
+    showingOpportunitiesFor: "Showing opportunities for {agencyName}",
+    agencySelector: "Select agency",
+    agencyNotAuthorized:
+      "You do not have access to this agency's opportunities.",
+    noAgencies: "You are not associated with any agencies.",
     pageHeading: "Opportunities",
     pageTitle: "Opportunities",
     tableContents: {
