@@ -44,10 +44,6 @@ def _get_opportunity_summary(
             404, f"Could not find Opportunity Summary with ID {opportunity_summary_id}"
         )
 
-    # Ensure we're not trying to update is_forecast
-    if "is_forecast" in summary_data:
-        raise_flask_error(422, "Cannot update is_forecast field")
-
     return summary
 
 

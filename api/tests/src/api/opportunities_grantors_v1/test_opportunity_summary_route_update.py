@@ -362,3 +362,38 @@ def test_opportunity_summary_update_schema_validation(
         field = err["field"]
         erroring_fields.append(field)
         assert field in expected_error_fields
+
+
+def test_opportunity_summary_update_cannot_change_forecast_status(
+    client,
+    opportunity_with_summary,
+    opportunity_summary_auth_data,
+    opportunity_summary_update_request,
+):
+    """Test that is_forecast cannot be updated if included in the request"""
+    opportunity, summary = opportunity_with_summary
+    _, _, token, _ = opportunity_summary_auth_data
+
+    # Store original is_forecast value
+    original_is_forecast = summary.is_forecast
+
+    # Create an update request and try to add is_forecast
+    update_data = opportunity_summary_update_request.copy()
+    update_data["is_forecast"] = not original_is_forecast  # Flip value
+
+    response = client.put(
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{summary.opportunity_summary_id}",
+        json=update_data,
+        headers={"X-SGG-Token": token},
+    )
+
+    # Success check
+    assert response.status_code == 200
+
+    # Check response data
+    response_json = response.get_json()
+    assert response_json["message"] == "Success"
+
+    # Verify that is_forecast was NOT changed in the response
+    summary_data = response_json["data"]
+    assert summary_data["is_forecast"] == original_is_forecast
