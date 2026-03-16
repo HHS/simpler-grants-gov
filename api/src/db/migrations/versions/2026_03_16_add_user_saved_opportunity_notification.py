@@ -1,8 +1,8 @@
 """add user_saved_opportunity_notification table
 
-Revision ID: b4c9d2e8f1a3
-Revises: 3bbb6f5e037e
-Create Date: 2026-03-13 00:00:00.000000
+Revision ID: a3f7e2c9d1b8
+Revises: f8eaafc955ec
+Create Date: 2026-03-16 00:00:00.000000
 
 """
 
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "b4c9d2e8f1a3"
-down_revision = "3bbb6f5e037e"
+revision = "a3f7e2c9d1b8"
+down_revision = "f8eaafc955ec"
 branch_labels = None
 depends_on = None
 
@@ -49,7 +49,7 @@ def upgrade():
         sa.UniqueConstraint(
             "user_id",
             "organization_id",
-            name=op.f("user_saved_opportunity_notification_user_id_organization_id_key"),
+            name=op.f("user_saved_opportunity_notification_user_id_uniq"),
             postgresql_nulls_not_distinct=True,
         ),
         sa.PrimaryKeyConstraint(
