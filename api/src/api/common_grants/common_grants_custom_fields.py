@@ -88,7 +88,7 @@ class assistanceListings(CustomField):
 
     name = fields.String(required=True, metadata={"example": "assistanceListings"})
     fieldType = fields.String(required=True, metadata={"example": "array"})
-    value = fields.List(fields.Nested(AssistanceListingValue), required=True)
+    value = fields.List(fields.Raw(), required=True)
     description = fields.String(
         allow_none=True,
         metadata={
