@@ -34,7 +34,6 @@ werkzeug = "^3.1.6"
 marshmallow = "^4.1.2"
 filelock = "^3.20.3"
 authlib = "^1.6.6"
-poetry = "^2.2.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0.0"
