@@ -114,11 +114,11 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
         <Breadcrumbs
           breadcrumbList={[
             {
-              title: `${t("breadcrumbWorkspace")}`,
+              title: t("breadcrumbWorkspace"),
               path: `/dashboard`,
             },
             {
-              title: `${t("breadcrumbApplications")}`,
+              title: t("breadcrumbApplications"),
               path: `/applications`,
             },
             {
