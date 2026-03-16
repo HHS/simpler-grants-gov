@@ -10,6 +10,7 @@ from src.db.models.workflow_models import Workflow, WorkflowEventHistory
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_event import WorkflowEvent
+from src.workflow.listener.workflow_approval_email_listener import WorkflowApprovalEmailListener
 from src.workflow.listener.workflow_audit_listener import WorkflowAuditListener
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.workflow_service import get_and_validate_workflow, get_workflow_entity
@@ -74,9 +75,6 @@ class EventHandler:
 
         log_extra = self.event.get_log_extra() | {"current_workflow_state": persistence_model.state}
 
-        # Create the audit listener to track all state transitions
-        audit_listener = WorkflowAuditListener(db_session=self.db_session)
-
         if (
             state_machine_event.workflow.current_workflow_state
             not in state_machine_event.state_machine_cls.get_valid_states()
@@ -85,7 +83,7 @@ class EventHandler:
             raise UnexpectedStateError("Workflow record has an unexpected state")
 
         state_machine = state_machine_event.state_machine_cls(
-            persistence_model, listeners=[audit_listener]
+            persistence_model, listeners=self.get_listeners()
         )
 
         if (
@@ -233,3 +231,11 @@ class EventHandler:
             )
             raise UserDoesNotExist("User does not exist, cannot process event.")
         return user
+
+    def get_listeners(self) -> list:
+        # Create the audit listener to track all state transitions
+        audit_listener = WorkflowAuditListener(db_session=self.db_session)
+        # Create a listener that sends emails whenever a workflow enters an approval state
+        approval_email_listener = WorkflowApprovalEmailListener(db_session=self.db_session)
+
+        return [audit_listener, approval_email_listener]
