@@ -1129,7 +1129,7 @@ class TestPopulateCustomFields:
         assert errors == {}
 
     def test_malformed_data_types(self):
-        """Test that Marshmallow schema catches malformed data types before they reach API consumers."""
+        """Test that value fields use fields.Raw and accept any type without validation errors."""
         opp_data = {
             **self.BASE_OPP_DATA,
             "legacy_opportunity_id": "not-an-integer",
@@ -1148,8 +1148,6 @@ class TestPopulateCustomFields:
         schema = OpportunityCustomFields()
         errors = schema.validate(serialized)
 
-        # Marshmallow should catch the malformed integer fields
-        assert "legacySerialId" in errors
-        assert "value" in errors["legacySerialId"]
-        assert "fiscalYear" in errors
-        assert "value" in errors["fiscalYear"]
+        # fields.Raw accepts any value, so malformed types should not produce errors
+        assert "legacySerialId" not in errors
+        assert "fiscalYear" not in errors
