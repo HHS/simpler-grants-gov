@@ -171,7 +171,7 @@ def handle_login_gov_token(
             )
         )
 
-        # If this request failed, we'll assume we're the issue and 500
+        # If this request failed, we'll check our retry policy and either retry or return the 500 if we're out of retries
         if response.is_error_response():
             if tries == limit:
                 raise_flask_error(500, response.error_description)
