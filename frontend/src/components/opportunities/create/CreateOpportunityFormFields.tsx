@@ -14,7 +14,7 @@ import {
 } from "@trussworks/react-uswds";
 
 
-export const GenericText = ({
+export const CommonText = ({
   textContent,
 }: {
   textContent: string;
@@ -29,9 +29,9 @@ export const GenericText = ({
 }
 
 // ----------------------------------------------------------
-// Generic Label with ErrorMessage
+// Common Label with ErrorMessage
 // ----------------------------------------------------------
-export const GenericLabel = ({
+export const CommonLabel = ({
   labelId,
   labelText,
   description,  // or instructions
@@ -67,9 +67,9 @@ export const GenericLabel = ({
 
 
 // ----------------------------------------------------------
-// Generic TextInput with error block
+// Common TextInput with error block
 // ----------------------------------------------------------
-export const GenericTextInput = ({
+export const CommonTextInput = ({
   labelId,
   labelText,
   description,  // or instructions
@@ -77,6 +77,7 @@ export const GenericTextInput = ({
   isRequired,
   fieldMaxLength,
   onTextChange,
+  defaultValue="",
   validationError="",
 }: {
   labelId: string;
@@ -86,12 +87,13 @@ export const GenericTextInput = ({
   isRequired: boolean;
   fieldMaxLength: number;
   onTextChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  defaultValue?: string;
   validationError?: string;
 }) => {
   return (
     <>
       <FormGroup error={Boolean(validationError)} className="margin-top-1">
-        <GenericLabel
+        <CommonLabel
             labelId={labelId}
             labelText={labelText}
             description={description}
@@ -106,6 +108,7 @@ export const GenericTextInput = ({
             onChange={onTextChange}
             maxLength={fieldMaxLength}
             style={{ maxWidth: "550px" }}
+            defaultValue={defaultValue}
         />
       </FormGroup>
     </>
@@ -114,9 +117,9 @@ export const GenericTextInput = ({
 
 
 // ----------------------------------------------------------
-// Generic Textarea with error block
+// Common Textarea with error block
 // ----------------------------------------------------------
-export const GenericTextArea = ({
+export const CommonTextArea = ({
   labelId,
   labelText,
   description,  // or instructions
@@ -124,6 +127,7 @@ export const GenericTextArea = ({
   isRequired,
   fieldMaxLength,
   onTextChange,
+  defaultValue="",
   validationError="",
 }: {
   labelId: string;
@@ -133,12 +137,13 @@ export const GenericTextArea = ({
   isRequired: boolean;
   fieldMaxLength: number;
   onTextChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  defaultValue?: string;
   validationError?: string;
 }) => {
   return (
     <>
       <FormGroup error={Boolean(validationError)} className="margin-top-1">
-        <GenericLabel
+        <CommonLabel
             labelId={labelId}
             labelText={labelText}
             description={description}
@@ -153,6 +158,7 @@ export const GenericTextArea = ({
             onChange={onTextChange}
             maxLength={fieldMaxLength}
             style={{ maxWidth: "550px" }}
+            defaultValue={defaultValue}
         />
       </FormGroup>
     </>
@@ -161,13 +167,13 @@ export const GenericTextArea = ({
 
 
 // ----------------------------------------------------------
-// Generic Select input with error block
+// Common Select input with error block
 // ----------------------------------------------------------
 export interface KeyValuePair {
     key: string;
     value: string;
 }
-export const GenericSelectInput = ({
+export const CommonSelectInput = ({
   labelId,
   labelText,
   description,  // or instructions
@@ -187,20 +193,22 @@ export const GenericSelectInput = ({
   listKeyValuePairs: KeyValuePair[];
   defaultSelection?: string;    // optional: default selection key
   pleaseSelectText?: string;    // optional: e.g. --Please Select-- 
-  onSelectionChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onSelectionChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   validationError?: string;
 }) => {
   
   const [selectedValue, setSelectedValue] = useState<string>(defaultSelection || "");
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedValue(event.target.value);
-    onSelectionChange(event);
+    if (onSelectionChange) {
+        onSelectionChange(event);
+    }
   };
 
   return (
     <>
       <FormGroup error={Boolean(validationError)} className="margin-top-1">
-        <GenericLabel
+        <CommonLabel
             labelId={labelId}
             labelText={labelText}
             description={description}

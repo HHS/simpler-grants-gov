@@ -13,6 +13,7 @@ import {
   toDynamicApplicationsEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
+  toDynamicGrantorsEndpoint,
   userLogoutEndpoint,
   userRefreshEndpoint,
 } from "src/services/fetch/endpointConfigs";
@@ -148,3 +149,6 @@ export const fetchOrganizationWithMethod = (
 ) => requesterForEndpoint(toDynamicOrganizationsEndpoint(type));
 
 export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);
+
+export const fetchGrantorWithMethod = (type: "POST" | "DELETE" | "PUT" | "GET") =>
+  requesterForEndpoint(toDynamicGrantorsEndpoint(type));

@@ -1925,6 +1925,14 @@ export const messages = {
       categoryExplanationDesc: "If \"Other\" was selected, please describe the specific process used to evaluate and award these funds.",
       charactersAllowed40: "40 characters allowed",
       charactersAllowed255: "255 characters allowed",
+      successMessage: "Opportunity saved. Continuing in 5 seconds..",
     }
-  }
+  },
+  CommonLabels: {
+    cancel: "Cancel",
+    saveAndContinue: "Save and continue",
+    pending: "Pending..",
+    errorHeading: "Error",
+    successHeading: "Success",
+  },
 };

@@ -5,11 +5,12 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { fetchUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
-import { CreateOpportunityPage1 } from "src/components/opportunities/create/CreateOpportunityPage1";
+import { CreateOpportunityForm } from "src/components/opportunities/create/CreateOpportunityForm";
+import { KeyValuePair } from "src/components/opportunities/create/CreateOpportunityFormFields";
 
 import { useTranslations } from "next-intl";
 import { redirect } from "next/navigation";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import { Alert, GridContainer} from "@trussworks/react-uswds";
 
 
@@ -39,9 +40,6 @@ const PageErrorMessage = () => {
 // Page Header component
 const PageHeader = () => {
   const t = useTranslations("CreateOpportunity");
-  const pageTitle = t("pageTitle");
-  const infoTitle = t("keyInfo");
-  const infoText = t("basicInstructions");
   return (
     <>
       <Breadcrumbs
@@ -58,11 +56,11 @@ const PageHeader = () => {
         ]}
       />
 
-      <h1>{pageTitle}</h1>
-      <h2>{infoTitle}</h2>
+      <h1>{t("pageTitle")}</h1>
+      <h2>{ t("keyInfo")}</h2>
       <div className="display-flex flex-justify">
         <div>
-          {infoText}
+          {t("basicInstructions")}
         </div>
       </div>
     </>
@@ -70,7 +68,7 @@ const PageHeader = () => {
 };
 
 
-// Main Page 
+// --- Main Page ---
 interface formPageProps {
   params: Promise<{ agencyId: string; locale: string }>;
 }
@@ -83,7 +81,8 @@ async function FormPage({ params }: formPageProps) {
     return <TopLevelError />;
   }
 
-  // Get the user's agencies
+  // Get agencies
+  let defaultAgencyId = "";
   let userAgencies: RelevantAgencyRecord[];
   try {
     userAgencies = await fetchUserAgencies();
@@ -93,14 +92,32 @@ async function FormPage({ params }: formPageProps) {
     }
     return <PageErrorMessage />;
   }
+  // Agencies: sort alphabetically, convert to key-value pairs, set the default
+  const sortedAgencies = [...userAgencies].sort((a, b) =>
+    a.agency_name.localeCompare(b.agency_name)
+  );
+  const mapAgencyToKeyValuePair = (agency: RelevantAgencyRecord): KeyValuePair => ({
+    key: agency.agency_id.toString(), // Example mapping
+    value: agency.agency_name,
+  });
+  const keyValueList: KeyValuePair[] = sortedAgencies.map(mapAgencyToKeyValuePair);
+  // const keyValueList: KeyValuePair[] = sortedAgencies.map(agency => ({
+  //   key: agency.agency_id,
+  //   value: agency.agency_name,
+  // }));
+  keyValueList.forEach((item) => {
+    if (item.key === agencyId) {
+      defaultAgencyId = agencyId;
+    }
+  })
 
   return (
     <>
       <GridContainer>
         <PageHeader/>
-        <CreateOpportunityPage1
-          agencyId={agencyId}
-          userAgencies={userAgencies}
+        <CreateOpportunityForm
+          defaultAgencyId={defaultAgencyId}
+          userAgencies={keyValueList}
         />
       </GridContainer>
     </>
@@ -111,6 +128,6 @@ async function FormPage({ params }: formPageProps) {
 
 export default withFeatureFlag<formPageProps, never>(
   FormPage,
-  "createOpportunityOff",
+  "opportunitiesListOff",
   () => redirect("/maintenance"),
 );
