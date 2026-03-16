@@ -1,7 +1,7 @@
 """create application_submission_retrieved table
 
 Revision ID: f8eaafc955ec
-Revises: f8eaafc955ec
+Revises: b4c9d2e8f1a3
 Create Date: 2026-03-12 14:17:02.346821
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "f8eaafc955ec"
-down_revision = "f8eaafc955ec"
+down_revision = "b4c9d2e8f1a3"
 branch_labels = None
 depends_on = None
 
