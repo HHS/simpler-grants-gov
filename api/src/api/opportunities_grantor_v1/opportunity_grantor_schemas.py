@@ -530,10 +530,6 @@ class OpportunitySummaryCreateResponseV1Schema(AbstractResponseSchema):
 class OpportunitySummaryUpdateRequestV1Schema(Schema):
     """Schema for PUT /v1/grantors/opportunities/<opportunity_id>/summary/<opportunity_summary_id> request"""
 
-    legacy_opportunity_id = fields.Integer(
-        required=False, allow_none=True, metadata={"description": "Legacy opportunity ID"}
-    )
-
     summary_description = fields.String(
         required=True,
         allow_none=True,
