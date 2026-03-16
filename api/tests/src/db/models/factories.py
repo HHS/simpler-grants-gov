@@ -1122,7 +1122,7 @@ class UserSavedOpportunityNotificationFactory(BaseFactory):
         lambda o: o.organization.organization_id if o.organization is not None else None
     )
 
-    email_enabled = True
+    email_enabled = factory.LazyAttribute(lambda o: o.organization is None)
 
 
 class UserSavedSearchFactory(BaseFactory):
