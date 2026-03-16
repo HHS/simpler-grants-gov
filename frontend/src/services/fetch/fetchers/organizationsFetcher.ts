@@ -237,7 +237,7 @@ export const deleteOrganization = async (
   }
 
   const resp = await fetchOrganizationBySavedOpportunities("DELETE")({
-    subPath: `/organizations/${organizationId}/saved-opportunities/${opportunityId}`,
+    subPath: `/v1/organizations/${organizationId}/saved-opportunities/${opportunityId}`,
     additionalHeaders: { "X-SGG-TOKEN": session.token },
   });
 
@@ -263,8 +263,8 @@ export const addOrganization = async (
     throw new UnauthorizedError("No active session");
   }
 
-  const resp = await fetchOrganizationBySavedOpportunities("PUT")({
-    subPath: `/organizations/${organizationId}/saved-opportunities`,
+  const resp = await fetchOrganizationBySavedOpportunities("POST")({
+    subPath: `/v1/organizations/${organizationId}/saved-opportunities`,
     additionalHeaders: { "X-SGG-TOKEN": session.token },
   });
   console.log("in addOrganization resp.json: " + resp.json());

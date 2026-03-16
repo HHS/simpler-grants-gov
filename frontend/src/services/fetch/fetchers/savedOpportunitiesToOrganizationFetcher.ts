@@ -23,8 +23,8 @@ export const handleSavedOpportunity = async (
   };
   const subPath =
     type === "POST"
-      ? `/organizations/${organizationId}/saved-opportunities`
-      : `/organizations/${organizationId}/saved-opportunities/${opportunityId}`;
+      ? `/v1/organizations/${organizationId}/saved-opportunities`
+      : `/v1/organizations/${organizationId}/saved-opportunities/${opportunityId}`;
 
   const body =
     type === "POST"
@@ -51,12 +51,12 @@ export const addSavedOpportunityForOrganization = async (
   const additionalHeaders: Record<string, string> = {
     "X-SGG-Token": session.token,
   };
-
-  const response = await fetchOrganizationBySavedOpportunities("PUT")({
-    subPath: `/organizations/${organizationId}/saved-opportunities`,
+  console.log("in addSavedOpportunityForOrganization");
+  const response = await fetchOrganizationBySavedOpportunities("POST")({
+    subPath: `/v1/organizations/${organizationId}/saved-opportunities`,
     additionalHeaders,
   });
-
+  console.log("in addSavedOpportunityForOrganization response: " + response.status);
   if (!response.ok) {
     throw new ApiRequestError(
       "Error adding organization to saved opportunity",
@@ -83,7 +83,7 @@ export const deleteSavedOpportunityForOrganization = async (
   };
 
   const response = await fetchOrganizationBySavedOpportunities("DELETE")({
-    subPath: `/organizations/${organizationId}/saved-opportunities/${opportunityId}`,
+    subPath: `/v1/organizations/${organizationId}/saved-opportunities/${opportunityId}`,
     additionalHeaders,
   });
 

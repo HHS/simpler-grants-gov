@@ -22,13 +22,16 @@ export const useClientFetch = <T>(
     url: string,
     options: RequestInit = {},
   ): Promise<Response> => {
+    console.log("in fetchwithauthcheck");
     const expired = await refreshIfExpired();
     if (expired && authGatedRequest) {
       router.refresh();
       throw new Error("local token expired, logging out");
     }
     await refreshIfExpiring();
+    console.log("calling fetch with url: " + url);
     const response = await fetch(url, options);
+    console.log("after fetch with response: " + response.status);
     if (response.status === 401) {
       await refreshUser();
       if (authGatedRequest) {
@@ -36,6 +39,7 @@ export const useClientFetch = <T>(
       }
       return response;
     }
+    console.log("returning with response: " + response.status);
     return response;
   };
 

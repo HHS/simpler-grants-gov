@@ -35,27 +35,29 @@ export const addOrganizationAction = async (
   _prevState: AddOrganizationActionState | undefined,
   { organizationId }: AddOrganizationAction,
 ): Promise<AddOrganizationActionState> => {
+    console.log("in addOrganizationAction organizationId: " + organizationId);  
   const session = await getSession();
-
+  
   if (!session || !session.token) {
     return {
       success: false,
       error: "Session has expired",
     };
   }
-
+  console.log("calling addOrganization organizationId: " + organizationId);
   try {
     const res = await addOrganization(
       organizationId,
     );
 
     revalidateTag(`organization-${organizationId}`, "max");
-
+    console.log("returning repsonse of sucess");
     return { success: true, error: undefined};
   } catch (_e) {
+    console.log("retuning success = false");
     return {
       success: false,
-      error: "Failed to upload attachment.",
+      error: "Failed to add organization.",
     };
   }
 };

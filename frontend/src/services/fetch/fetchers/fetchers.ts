@@ -148,7 +148,7 @@ export const fetchOrganizationWithMethod = (
 ) => requesterForEndpoint(toDynamicOrganizationsEndpoint(type));
 
 export const fetchOrganizationBySavedOpportunities = (
-  type: "DELETE" | "PUT",
+  type: "DELETE" | "POST",
 ) => requesterForEndpoint(toDynamicOrganizationsEndpoint(type));
 
 export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);

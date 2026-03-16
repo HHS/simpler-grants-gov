@@ -15,6 +15,8 @@ import {
 import { SimplerModal } from "src/components/SimplerModal";
 import { NextResponse } from "next/server";
 import { useClientFetch } from "src/hooks/useClientFetch";
+//import { addOrganizationAction, deleteOrganizationAction } from "./actions";
+//import { addOrganizationAction } from "src/services/fetch/fetchers/organizationsFetcher";
 
 const MODAL_ID = "share-opportunity-to-organizations";
 
@@ -29,6 +31,7 @@ export interface ShareOpportunityToOrganizationsModalProps {
   isLoadingOrganizations: boolean;
   hasOrganizationsError: boolean;
   opportunityTitle?: string | null;
+  opportunityId?: string | null;
 }
 
 export function ShareOpportunityToOrganizationsModal({
@@ -38,6 +41,7 @@ export function ShareOpportunityToOrganizationsModal({
   isLoadingOrganizations,
   hasOrganizationsError,
   opportunityTitle,
+  opportunityId,
 }: ShareOpportunityToOrganizationsModalProps) {
   const { clientFetch: addOrganizationAction } = useClientFetch<
         NextResponse
@@ -52,9 +56,10 @@ export function ShareOpportunityToOrganizationsModal({
         console.log("Organization id: " + organization.organization_id);
         console.log("CheckedStatus: " + checkedStatus); 
         await addOrganizationAction(`/v1/organizations/${organization.organization_id}/saved-opportunities`);
+        //await addOrganizationAction('/api/user/organizations');
       } else if(!checkedStatus && organization.organization_id == organization_id) {
         console.log("In deleteOrganziationAction section for organization Id: " + organization.organization_id);
-        await deleteOrganizationAction(`/v1/organizations/${organization.organization_id}/saved-opportunities`);
+        await deleteOrganizationAction(`/v1/organizations/${organization.organization_id}/saved-opportunities/${opportunityId}`);
       }
     })
   };
