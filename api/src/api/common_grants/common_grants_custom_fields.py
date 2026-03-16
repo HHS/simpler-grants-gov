@@ -88,7 +88,7 @@ class assistanceListings(CustomField):
 
     name = fields.String(required=True, metadata={"example": "assistanceListings"})
     fieldType = fields.String(required=True, metadata={"example": "array"})
-    value = fields.List(fields.Raw(), required=True)
+    value = fields.Raw()
     description = fields.String(
         allow_none=True,
         metadata={
@@ -139,7 +139,7 @@ class attachments(CustomField):
 
     name = fields.String(required=True, metadata={"example": "attachments"})
     fieldType = fields.String(required=True, metadata={"example": "array"})
-    value = fields.List(fields.Raw(), required=True)
+    value = fields.Raw()
     description = fields.String(
         allow_none=True,
         metadata={
