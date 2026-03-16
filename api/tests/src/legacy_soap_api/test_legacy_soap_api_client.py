@@ -8,7 +8,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 import pytz
 import requests
-from apiflask import HTTPError
 from botocore.exceptions import ClientError
 from sqlalchemy import update
 
@@ -21,7 +20,7 @@ from src.legacy_soap_api.applicants.schemas import (
     GetOpportunityListResponse,
     OpportunityDetails,
 )
-from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
+from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientUserDoesNotHavePermission
 from src.legacy_soap_api.legacy_soap_api_client import (
     BaseSOAPClient,
     SimplerApplicantsS2SClient,
@@ -552,7 +551,7 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
-        with pytest.raises(HTTPError):
+        with pytest.raises(SOAPClientUserDoesNotHavePermission):
             client.get_simpler_soap_response(mock_proxy_response)
 
     def test_get_simpler_soap_response_logging_if_downloading_the_file_from_s3_fails(
