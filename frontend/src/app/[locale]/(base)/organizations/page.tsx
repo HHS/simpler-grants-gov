@@ -22,7 +22,7 @@ const OrganizationsPageWrapper = ({ children }: PropsWithChildren) => {
       <Breadcrumbs
         breadcrumbList={[
           {
-            title: "breadcrumbWorkspace",
+            title: t("breadcrumbWorkspace"),
             path: `/dashboard`,
           },
           {
