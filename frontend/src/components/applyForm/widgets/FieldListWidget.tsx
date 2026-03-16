@@ -1,3 +1,5 @@
+import { RJSFSchema } from "@rjsf/utils/lib/types";
+
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
@@ -284,7 +286,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
                */
               const childWidgetProps: UswdsWidgetProps = {
                 ...groupItem.generalProps,
-                schema: groupItem.generalProps.schema,
+                schema: groupItem.generalProps.schema as RJSFSchema,
                 id: generatedId,
                 key: generatedId,
                 value: currentValue,
