@@ -19,7 +19,7 @@ test("Saved opportunities page shows unauthenticated state if not logged in", as
 });
 
 // Skip non-Chrome browsers in staging
-test.beforeEach((_, testInfo) => {
+test.beforeEach(({ page: _ }, testInfo) => {
   if (targetEnv === "staging") {
     test.skip(
       testInfo.project.name !== "Chrome",
