@@ -10,16 +10,17 @@ class MockLoginGovOauthClient(BaseOauthClient):
         # Used to control testing of retry behavior for Login.gov token lookup calls
         self.retries: dict[str, int] = {}
 
-    def add_token_response(self, code: str, response: OauthTokenResponse) -> None:
+    def add_token_response(self, code: str, response: OauthTokenResponse, retries: int = 0) -> None:
         self.responses[code] = response
+        self.retries[code] = retries
 
     def get_token(self, request: OauthTokenRequest) -> OauthTokenResponse:
-        retries = self.retries.get(request.code)
+        retries: int = self.retries.get(request.code, 0)
         # if we don't have retries enabled on the mock, behave as usual
-        if retries is not None:
-            self.retries[request.code] = retries - 1
+
+        self.retries[request.code] = retries - 1
         # retries would be one the last time through, as we've reduced it to zero but retries accounts for the data before that
-        if retries is None or retries == 1:
+        if retries <= 1:
             response = self.responses.get(request.code, None)
 
             if response is None:
