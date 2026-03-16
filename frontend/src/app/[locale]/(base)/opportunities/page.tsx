@@ -1,6 +1,10 @@
 import { UnauthorizedError } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
+import {
+  fetchUserAgencies,
+  UserAgency,
+} from "src/services/fetch/fetchers/userAgenciesFetcher";
 import { LocalizedPageProps, TFn } from "src/types/intl";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
@@ -16,6 +20,7 @@ import {
   TableCellData,
   TableWithResponsiveHeader,
 } from "src/components/TableWithResponsiveHeader";
+import { AgencySelector } from "src/components/workspace/AgencySelector";
 
 type OpportunitiesListProps = LocalizedPageProps & WithFeatureFlagProps;
 
@@ -56,6 +61,34 @@ const OpportunitiesErrorPage = () => {
   );
 };
 
+const AgencyNotAuthorizedPage = () => {
+  const t = useTranslations("Opportunities");
+
+  return (
+    <OpportunitiesPageWrapper>
+      <div className="margin-bottom-15">
+        <Alert slim={true} headingLevel="h6" noIcon={true} type="error">
+          {t("agencyNotAuthorized")}
+        </Alert>
+      </div>
+    </OpportunitiesPageWrapper>
+  );
+};
+
+const NoAgenciesPage = () => {
+  const t = useTranslations("Opportunities");
+
+  return (
+    <OpportunitiesPageWrapper>
+      <div className="margin-bottom-15">
+        <Alert slim={true} headingLevel="h6" noIcon={true} type="error">
+          {t("noAgencies")}
+        </Alert>
+      </div>
+    </OpportunitiesPageWrapper>
+  );
+};
+
 const transformTableRowData = (
   userOpportunities: BaseOpportunity[],
   _t: TFn,
@@ -80,6 +113,53 @@ const transformTableRowData = (
   });
 };
 
+const OpportunitiesHeader = ({
+  userOpportunitiesCount,
+  agencyName,
+  agencyCode,
+  agencies,
+  currentAgencyId,
+  isSingleAgency,
+}: {
+  userOpportunitiesCount: number;
+  agencyName: string;
+  agencyCode: string;
+  agencies: UserAgency[];
+  currentAgencyId: string;
+  isSingleAgency: boolean;
+}) => {
+  const t = useTranslations("Opportunities");
+
+  return (
+    <div className="display-flex flex-column gap-3 margin-bottom-4">
+      <div className="font-sans-lg text-bold">
+        {t("numOpportunities", { num: userOpportunitiesCount })}
+      </div>
+      <div className="display-flex flex-justify flex-align-end">
+        <div className="maxw-mobile-lg width-full">
+          {isSingleAgency ? (
+            <div className="font-sans-md text-bold line-height-sans-3">
+              {t("showingOpportunitiesFor", { agencyName })}
+            </div>
+          ) : (
+            <AgencySelector
+              agencies={agencies}
+              currentAgencyId={currentAgencyId}
+              className="usa-form-group margin-bottom-0"
+            />
+          )}
+        </div>
+        <Link
+          href={`/opportunities/create/${agencyCode}`}
+          className="usa-button margin-left-auto"
+        >
+          {t("createOpportunityButton")}
+        </Link>
+      </div>
+    </div>
+  );
+};
+
 const OpportunitiesTable = ({
   userOpportunities,
 }: {
@@ -95,35 +175,63 @@ const OpportunitiesTable = ({
   ];
 
   return (
-    <div>
-      <div className="display-flex flex-align-center margin-bottom-2 width-full">
-        <span className="font-sans-lg text-bold">
-          {t("numOpportunities", { num: userOpportunities.length })}
-        </span>
-        <Link
-          href={`/opportunities/create/${userOpportunities[0].agency_code}`}
-          className="usa-button margin-left-auto"
-        >
-          {t("createOpportunityButton")}
-        </Link>
-      </div>
-
-      <TableWithResponsiveHeader
-        headerContent={headerTitles}
-        tableRowData={transformTableRowData(userOpportunities, t)}
-      />
-    </div>
+    <TableWithResponsiveHeader
+      headerContent={headerTitles}
+      tableRowData={transformTableRowData(userOpportunities, t)}
+    />
   );
 };
 
-async function OpportunitiesListPage(_props: OpportunitiesListProps) {
-  const searchParams = convertSearchParamsToProperTypes({});
+async function OpportunitiesListPage(props: OpportunitiesListProps) {
+  const { searchParams } = props;
+  const resolvedSearchParams: Record<string, string | string[] | undefined> =
+    searchParams ? await searchParams : {};
+  const selectedAgencyParam: string | string[] | undefined =
+    resolvedSearchParams.agency;
+  const selectedAgencyId: string | undefined = Array.isArray(
+    selectedAgencyParam,
+  )
+    ? selectedAgencyParam[0]
+    : selectedAgencyParam;
+
+  let userAgencies: UserAgency[];
+  try {
+    userAgencies = await fetchUserAgencies();
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      throw error;
+    }
+    return <OpportunitiesErrorPage />;
+  }
+
+  if (!userAgencies.length) {
+    return <NoAgenciesPage />;
+  }
+
+  const sortedUserAgencies = [...userAgencies].sort((a, b) =>
+    a.agency_name.localeCompare(b.agency_name),
+  );
+
+  if (!selectedAgencyId) {
+    redirect(`?agency=${sortedUserAgencies[0].agency_id}`);
+  }
+
+  const selectedAgency = sortedUserAgencies.find(
+    (a) => a.agency_id === selectedAgencyId,
+  );
+
+  if (!selectedAgency) {
+    return <AgencyNotAuthorizedPage />;
+  }
+
+  const opportunitySearchParams = convertSearchParamsToProperTypes({
+    agency: selectedAgency.agency_code,
+  });
 
   let userOpportunities: BaseOpportunity[];
   try {
-    userOpportunities = (await searchForOpportunities(searchParams)).data
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 5);
+    userOpportunities = (await searchForOpportunities(opportunitySearchParams))
+      .data;
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       throw error;
@@ -133,7 +241,15 @@ async function OpportunitiesListPage(_props: OpportunitiesListProps) {
 
   return (
     <OpportunitiesPageWrapper>
-      {userOpportunities?.length ? (
+      <OpportunitiesHeader
+        userOpportunitiesCount={userOpportunities.length}
+        agencyName={selectedAgency.agency_name}
+        agencyCode={selectedAgency.agency_code}
+        agencies={sortedUserAgencies}
+        currentAgencyId={selectedAgencyId}
+        isSingleAgency={sortedUserAgencies.length === 1}
+      />
+      {userOpportunities.length ? (
         <OpportunitiesTable userOpportunities={userOpportunities} />
       ) : (
         <NoStartedOpportunities />

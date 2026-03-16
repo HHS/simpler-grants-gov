@@ -1,8 +1,8 @@
 name: E2E Tests (Deployed Target)
 on:
-  push:
-    branches:
-      - "dschrashun/7973-e2e-ci-staging-refactor"
+  schedule:
+    # Run every day at (6/7am Eastern) before the start of the workday
+    - cron: "0 11 * * *"
   workflow_dispatch:
     inputs:
       version:
@@ -16,37 +16,33 @@ on:
         type: choice
         options:
           - staging
-
+      playwright_tags:
+        description: "pipe separated list of @tags denoting groups of tests to run"
+        required: false
+        type: string
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   e2e-tests-deployed:
     runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: true
-      matrix:
-        shard: [1, 2, 3, 4]
-        total_shards: [4]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-
       - name: Set target
-        run: if [[ -z "${{ inputs.target }}" ]]; then echo "defaulted_target=staging" >> "$GITHUB_ENV"; else echo 'defaulted_target="${{ inputs.target }}"' >> "$GITHUB_ENV"; fi
-
-      - uses: ./.github/actions/e2e
+        run: if [[ -z "${{ inputs.target }}" ]]; then echo "defaulted_target=staging" >> "$GITHUB_ENV"; else echo "defaulted_target=${{ inputs.target }}" >> "$GITHUB_ENV"; fi
+      - name: Run E2E tests
+        uses: ./.github/actions/e2e
         with:
           version: ${{ inputs.version || github.ref }}
           target: ${{ env.defaulted_target }}
-          total_shards: ${{ matrix.total_shards }}
-          current_shard: ${{ matrix.shard }}
+          total_shards: 1
+          current_shard: 1
+          workers: 1
+          playwright_tags: ${{ inputs.playwright_tags }}
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
-
   create-report:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
@@ -55,3 +51,10 @@ jobs:
     secrets: inherit
     with:
       run_id: ${{ github.run_id }}
+  send-slack-notification:
+    if: failure()
+    needs: [create-report]
+    uses: ./.github/workflows/send-slack-notification.yml
+    with:
+      "channel_id": "alerts-e2e"
+    secrets: inherit

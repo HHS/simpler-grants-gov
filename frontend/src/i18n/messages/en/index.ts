@@ -637,10 +637,16 @@ export const messages = {
     errorLoadingKeys: "Failed to load API keys",
     table: {
       headers: {
-        apiKey: "API Key",
-        dates: "Dates",
-        editName: "Edit Name",
-        deleteKey: "Delete Key",
+        apiKey: "Name",
+        status: "Status",
+        secret: "Secret",
+        created: "Created",
+        lastUsed: "Last used",
+        modify: "Modify",
+      },
+      statuses: {
+        active: "Active",
+        inactive: "Inactive",
       },
       dateLabels: {
         created: "Created:",
@@ -659,10 +665,10 @@ export const messages = {
       createDescription:
         "Create a new key for use with the Simpler.Grants.gov API",
       editDescription: "Change the name of your Simpler.Grants.gov API key",
-      createSuccessHeading: "API Key Created Successfully",
+      createSuccessHeading: "Save your key",
       editSuccessHeading: "API Key Renamed Successfully",
       createSuccessMessage:
-        'Your API key "{keyName}" has been created successfully.',
+        'Your API key "{keyName}" has been created successfully. Please save your secret key in a safe place. Keep it secure, as anyone with your API key can make requests on your behalf.',
       editSuccessMessage:
         'Your API key has been renamed from "{originalName}" to "{keyName}".',
       close: "Close",
@@ -693,13 +699,13 @@ export const messages = {
         "There was an error deleting your API key. Please try again.",
       deleteButtonText: "Delete Key",
       deleting: "Deleting...",
+      copyApiKey: "Copy API key",
     },
   },
   Header: {
     navLinks: {
       about: "About",
       account: "Account",
-      activityDashboard: "Activity Dashboard",
       applications: "Applications",
       community: "Community",
       developer: "Developer Portal",
@@ -720,6 +726,7 @@ export const messages = {
       vision: "Our vision",
       wiki: "Public wiki",
       workspace: "Workspace",
+      workspaceDashboard: "Workspace dashboard",
       settings: "Settings",
       testApplication: "Test application",
     },
@@ -948,6 +955,8 @@ export const messages = {
   },
   SavedSearches: {
     heading: "Saved search queries",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedQueries: "Saved search queries",
     noSavedCTAParagraphOne: "You don't have any saved queries yet.",
     noSavedCTAParagraphTwo:
       "As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
@@ -998,6 +1007,8 @@ export const messages = {
   SavedOpportunities: {
     metaDescription: "View your saved funding opportunities.",
     heading: "Saved opportunities",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedOpportunities: "Saved opportunities",
     noSavedCTAParagraphOne:
       "To add an opportunity to your list, use the Save button next to its title on the listing's page.",
     noSavedCTAParagraphTwo:
@@ -1075,9 +1086,9 @@ export const messages = {
               "<p>Grants.gov user roles and permissions can be cumbersome and may not align with how organizations work. We co-designed a new experience with applicants and grantors to simplify onboarding, improve visibility into organizational access, and make collaboration easier and more intuitive.</p>",
           },
           {
-            title: "Launched new changes to the Activity Dashboard",
+            title: "Launched new changes to the Workspace Dashboard",
             content:
-              "<p>The Simpler.Grants.gov team has created a hub that allows users to quickly access saved searches and applications. To solve for the key pain point of finding active grants and managing work, this Activity Dashboard centralizes where users can manage their work and track their progress.</p>",
+              "<p>The Simpler.Grants.gov team has created a hub that allows users to quickly access saved searches and applications. To solve for the key pain point of finding active grants and managing work, this Workspace Dashboard centralizes where users can manage their work and track their progress.</p>",
           },
         ],
         archivedRoadmapSections: [
@@ -1609,9 +1620,9 @@ export const messages = {
     lastNameRequired: "Last name is required",
     requiredForProfile: "Required to complete your profile.",
   },
-  ActivityDashboard: {
-    pageTitle: "Activity Dashboard | Simpler.Grants.gov",
-    title: "Welcome to your activity dashboard.",
+  WorkspaceDashboard: {
+    pageTitle: "Workspace Dashboard | Simpler.Grants.gov",
+    title: "Welcome to your workspace dashboard.",
     fetchError: "Error fetching user data. Please try refreshing the page.",
     organizations: "Your organizations",
     noOrganizations: {
@@ -1807,6 +1818,11 @@ export const messages = {
       secondary:
         "Opportunities you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
     },
+    showingOpportunitiesFor: "Showing opportunities for {agencyName}",
+    agencySelector: "Select agency",
+    agencyNotAuthorized:
+      "You do not have access to this agency's opportunities.",
+    noAgencies: "You are not associated with any agencies.",
     pageHeading: "Opportunities",
     pageTitle: "Opportunities",
     tableContents: {
@@ -1835,6 +1851,7 @@ export const messages = {
     errorMessage:
       "We have encountered an error loading your award recommendations, please try again later.",
     metaDescription: "View your award recommendations",
+    metaDescriptionEdit: "Edit your award recommendations",
     pageHeading: "Award Recommendations",
     heroTitle: "Award Rec #",
     datePrepared: "Date prepared",
@@ -1850,9 +1867,22 @@ export const messages = {
       create: "Create",
     },
     pageTitle: "Review your Recommendation",
+    pageTitleEdit: "Edit your recommendation",
     description: "Award Recommendation flow coming soon.",
     opportunitySummary: "Opportunity summary",
     selectionMethod: "Selection method",
+    meritReview: "Merit Review",
+    fundingOpportunityFallback: "Funding Opportunity",
+    noDataFallback: "--",
+    fundingOppName: "Funding opportunity name",
+    fundingOppNumber: "Funding opportunity number",
+    noSummaryAvailable: "No summary available",
+    otherOpportunityInfo: {
+      label: "Other opportunity information",
+      description:
+        "Any any additional context or information specific to the opportunity that the decision maker may need to know, or leave blank.",
+      characterLimit: "1000 characters allowed",
+    },
     viewFullDetails: "View Full Details",
     opportunityStatus: "Status",
     agency: "Agency",

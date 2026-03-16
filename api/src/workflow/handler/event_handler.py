@@ -2,7 +2,6 @@ import logging
 import uuid
 
 from sqlalchemy import select
-from statemachine.exceptions import InvalidStateValue, TransitionNotAllowed
 
 from src.adapters import db
 from src.constants.lookup_constants import WorkflowEventType, WorkflowType
@@ -11,13 +10,10 @@ from src.db.models.workflow_models import Workflow, WorkflowEventHistory
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_event import WorkflowEvent
+from src.workflow.listener.workflow_approval_email_listener import WorkflowApprovalEmailListener
 from src.workflow.listener.workflow_audit_listener import WorkflowAuditListener
 from src.workflow.registry.workflow_registry import WorkflowRegistry
-from src.workflow.service.workflow_service import (
-    get_and_validate_workflow,
-    get_workflow_entity,
-    is_event_valid_for_workflow,
-)
+from src.workflow.service.workflow_service import get_and_validate_workflow, get_workflow_entity
 from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_constants import WorkflowConstants
 from src.workflow.workflow_errors import (
@@ -77,34 +73,32 @@ class EventHandler:
             db_session=self.db_session, workflow=state_machine_event.workflow
         )
 
-        # Create the audit listener to track all state transitions
-        audit_listener = WorkflowAuditListener(db_session=self.db_session)
-
-        state_machine = state_machine_event.state_machine_cls(
-            persistence_model, listeners=[audit_listener]
-        )
         log_extra = self.event.get_log_extra() | {"current_workflow_state": persistence_model.state}
 
-        if not is_event_valid_for_workflow(state_machine_event.event_to_send, state_machine):
+        if (
+            state_machine_event.workflow.current_workflow_state
+            not in state_machine_event.state_machine_cls.get_valid_states()
+        ):
+            logger.error("Workflow record has an unexpected state", extra=log_extra)
+            raise UnexpectedStateError("Workflow record has an unexpected state")
+
+        state_machine = state_machine_event.state_machine_cls(
+            persistence_model, listeners=self.get_listeners()
+        )
+
+        if (
+            state_machine_event.event_to_send
+            not in state_machine.get_valid_events_for_current_state()
+        ):
             logger.warning(
                 "Event is not valid for workflow",
                 extra=log_extra | {"erroring_event": state_machine_event.event_to_send},
             )
             raise InvalidEventError("Event is not valid for workflow")
 
-        try:
-            state_machine.send(
-                event=state_machine_event.event_to_send, state_machine_event=state_machine_event
-            )
-        except TransitionNotAllowed as e:
-            logger.warning(
-                "Event is not valid for current state of workflow",
-                extra=log_extra | {"erroring_event": state_machine_event.event_to_send},
-            )
-            raise InvalidEventError("Event is not valid for current state of workflow") from e
-        except InvalidStateValue as e:
-            logger.error("Workflow record has an unexpected state", extra=log_extra)
-            raise UnexpectedStateError("Workflow record has an unexpected state") from e
+        state_machine.send(
+            event=state_machine_event.event_to_send, state_machine_event=state_machine_event
+        )
 
         return state_machine
 
@@ -237,3 +231,11 @@ class EventHandler:
             )
             raise UserDoesNotExist("User does not exist, cannot process event.")
         return user
+
+    def get_listeners(self) -> list:
+        # Create the audit listener to track all state transitions
+        audit_listener = WorkflowAuditListener(db_session=self.db_session)
+        # Create a listener that sends emails whenever a workflow enters an approval state
+        approval_email_listener = WorkflowApprovalEmailListener(db_session=self.db_session)
+
+        return [audit_listener, approval_email_listener]

@@ -391,6 +391,9 @@ class WorkflowType(StrEnum):
     # reserved for testing.
     BASIC_TEST_WORKFLOW = "basic_test_workflow"
 
+    def get_human_friendly_text(self) -> str:
+        return self.value.replace("_", " ").title()
+
 
 class ApprovalType(StrEnum):
     INITIAL_PROTOTYPE_APPROVAL = "initial_prototype_approval"
@@ -413,3 +416,12 @@ class WorkflowEntityType(StrEnum):
 class WorkflowEventType(StrEnum):
     START_WORKFLOW = "start_workflow"
     PROCESS_WORKFLOW = "process_workflow"
+
+
+class WorkflowEventProcessingResult(StrEnum):
+    """Enum representing the result of processing an SQS event."""
+
+    SUCCESS = "success"
+    NON_RETRYABLE_ERROR = "non_retryable_error"
+    RETRYABLE_ERROR = "retryable_error"
+    GENERAL_ERROR = "general_error"

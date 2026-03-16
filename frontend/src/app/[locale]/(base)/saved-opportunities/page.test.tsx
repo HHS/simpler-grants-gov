@@ -25,6 +25,7 @@ const savedOpportunities = jest.fn().mockResolvedValue([]);
 const opportunity = jest.fn().mockResolvedValue({ data: [] });
 const mockUseSearchParams = jest.fn().mockReturnValue(new URLSearchParams());
 const clientFetchMock = jest.fn().mockResolvedValue([]);
+const mockBreadcrumbs = jest.fn();
 
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({
@@ -56,6 +57,14 @@ jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
     savedOpportunities(statusFilter) as Promise<MinimalOpportunity[]>,
 }));
 
+jest.mock("src/components/Breadcrumbs", () => ({
+  __esModule: true,
+  default: (props: { breadcrumbList: { title: string; path: string }[] }) => {
+    mockBreadcrumbs(props);
+    return <nav data-testid="mock-breadcrumbs" />;
+  },
+}));
+
 const defaultSearchParams = Promise.resolve({});
 
 describe("Saved Opportunities page", () => {
@@ -74,6 +83,29 @@ describe("Saved Opportunities page", () => {
     const content = await screen.findByText("noSavedCTAParagraphOne");
 
     await waitFor(() => expect(content).toBeInTheDocument());
+  });
+
+  it("passes the correct breadcrumbs", async () => {
+    const component = await SavedOpportunities({
+      params: localeParams,
+      searchParams: defaultSearchParams,
+    });
+    render(component);
+
+    expect(screen.getByTestId("mock-breadcrumbs")).toBeInTheDocument();
+
+    expect(mockBreadcrumbs).toHaveBeenCalledWith({
+      breadcrumbList: [
+        {
+          title: "SavedOpportunities.breadcrumbWorkspace",
+          path: "/dashboard",
+        },
+        {
+          title: "SavedOpportunities.breadcrumbSavedOpportunities",
+          path: "/saved-opportunities",
+        },
+      ],
+    });
   });
 
   it("does not render status filter when there are no saved opportunities", async () => {

@@ -1,3 +1,7 @@
+from src.legacy_soap_api.grantors.schemas.confirm_application_delivery_schemas import (
+    ConfirmApplicationDeliveryRequest,
+    ConfirmApplicationDeliveryResponseSOAPEnvelope,
+)
 from src.legacy_soap_api.grantors.schemas.get_application_zip_schemas import (
     FileDataHandler,
     GetApplicationZipRequest,
@@ -12,6 +16,10 @@ from src.legacy_soap_api.grantors.schemas.get_submission_list_expanded_schemas i
     GetSubmissionListExpandedResponse,
     SubmissionInfo,
 )
+from src.legacy_soap_api.grantors.schemas.update_application_info_schemas import (
+    UpdateApplicationInfoRequest,
+    UpdateApplicationInfoResponse,
+)
 
 __all__ = [
     "GetApplicationZipResponseSOAPEnvelope",
@@ -24,4 +32,8 @@ __all__ = [
     "GetSubmissionListExpandedResponse",
     "ExpandedApplicationFilter",
     "SubmissionInfo",
+    "UpdateApplicationInfoResponse",
+    "UpdateApplicationInfoRequest",
+    "ConfirmApplicationDeliveryResponseSOAPEnvelope",
+    "ConfirmApplicationDeliveryRequest",
 ]

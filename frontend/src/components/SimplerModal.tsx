@@ -126,12 +126,13 @@ export function SimplerModal({
           return;
         }
 
-        const clickTarget = clickEvent.target as HTMLElement;
+        const clickTarget = clickEvent.target as Element;
 
         // The Truss Modal renders a close button with the `usa-modal__close`
         // class. When that is clicked, treat it as a close event and call
-        // `onClose`.
-        if (clickTarget.className.includes("usa-modal__close")) {
+        // `onClose`. We use `closest()` because the click target may be a
+        // child element (e.g. the SVG icon inside the button).
+        if (clickTarget.closest(".usa-modal__close")) {
           onClose();
         }
       }}

@@ -1,5 +1,6 @@
 import uuid
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, ForeignKey, Sequence, UniqueConstraint, and_
@@ -435,6 +436,10 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
         server_default=legacy_tracking_number_seq.next_value(),
     )
 
+    application_submission_number: Mapped[str | None]
+    project_title: Mapped[str | None]
+    total_requested_amount: Mapped[Decimal | None]
+
     # We mostly add this so if we delete a submission, any corresponding
     # workflows are deleted as well.
     workflows: Mapped[list[Workflow]] = relationship(
@@ -444,12 +449,51 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
+    application_submission_notes: Mapped[list[ApplicationSubmissionNote]] = relationship(
+        back_populates="application_submission",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
+    application_submission_tracking_numbers: Mapped[list[ApplicationSubmissionTrackingNumber]] = (
+        relationship(
+            back_populates="application_submission",
+            uselist=True,
+            cascade="all, delete-orphan",
+        )
+    )
+
+    application_submission_retrievals: Mapped[list[ApplicationSubmissionRetrieved]] = relationship(
+        "ApplicationSubmissionRetrieved",
+        back_populates="application_submission",
+        uselist=True,
+    )
+
     @property
     def download_path(self) -> str:
         """Get the presigned s3 url path for downloading the submission file"""
         # NOTE: These submission files will only ever be in a non-public
         # bucket so we only can presign their URL, we can't use the CDN path.
         return pre_sign_file_location(self.file_location)
+
+
+class ApplicationSubmissionRetrieved(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_submission_retrieved"
+
+    application_submission_retrieved_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    application_submission_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(ApplicationSubmission.application_submission_id)
+    )
+    created_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+    modified_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+
+    application_submission: Mapped[ApplicationSubmission] = relationship(
+        ApplicationSubmission, back_populates="application_submission_retrievals"
+    )
+    created_by_user: Mapped[User] = relationship("User", foreign_keys=[created_by_user_id])
+    modified_by_user: Mapped[User] = relationship("User", foreign_keys=[modified_by_user_id])
 
 
 class ShortLivedInternalToken(ApiSchemaTable, TimestampMixin):
@@ -476,6 +520,54 @@ class LinkCompetitionOpenToApplicant(ApiSchemaTable, TimestampMixin):
         ForeignKey(LkCompetitionOpenToApplicant.competition_open_to_applicant_id),
         primary_key=True,
     )
+
+
+class ApplicationSubmissionNote(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_submission_note"
+
+    application_submission_note_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    application_submission_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(ApplicationSubmission.application_submission_id)
+    )
+
+    application_submission: Mapped[ApplicationSubmission] = relationship(
+        ApplicationSubmission, back_populates="application_submission_notes"
+    )
+
+    note: Mapped[str]
+
+    created_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+    modified_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+
+    created_by_user: Mapped[User] = relationship("User", foreign_keys=[created_by_user_id])
+    modified_by_user: Mapped[User] = relationship("User", foreign_keys=[modified_by_user_id])
+
+
+class ApplicationSubmissionTrackingNumber(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "application_submission_tracking_number"
+
+    application_submission_tracking_number_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    application_submission_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(ApplicationSubmission.application_submission_id)
+    )
+
+    application_submission: Mapped[ApplicationSubmission] = relationship(
+        ApplicationSubmission, back_populates="application_submission_tracking_numbers"
+    )
+
+    tracking_number: Mapped[str]
+
+    created_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+    modified_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
+
+    created_by_user: Mapped[User] = relationship("User", foreign_keys=[created_by_user_id])
+    modified_by_user: Mapped[User] = relationship("User", foreign_keys=[modified_by_user_id])
 
 
 class ApplicationAudit(ApiSchemaTable, TimestampMixin):

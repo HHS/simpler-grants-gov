@@ -20,6 +20,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
+import src.db.models.award_recommendation_models as award_recommendation_models
 import src.db.models.competition_models as competition_models
 import src.db.models.entity_models as entity_models
 import src.db.models.extract_models as extract_models
@@ -41,6 +42,9 @@ from src.constants.lookup_constants import (
     ApplicationStatus,
     ApprovalResponseType,
     ApprovalType,
+    AwardRecommendationStatus,
+    AwardRecommendationType,
+    AwardSelectionMethod,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -940,6 +944,75 @@ class OpportunityChangeAuditFactory(BaseFactory):
     is_loaded_to_version_table = False
 
 
+class AwardRecommendationFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendation
+
+    award_recommendation_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+    funding_strategy_id = None
+
+    award_recommendation_number = factory.LazyAttribute(
+        lambda s: f"{s.opportunity.agency_code or 'AGC'}_{fake.bothify('??????').upper()}"
+    )
+
+    award_recommendation_status = AwardRecommendationStatus.DRAFT
+    additional_info = sometimes_none(factory.Faker("paragraph"))
+    award_selection_method = sometimes_none(factory.fuzzy.FuzzyChoice(AwardSelectionMethod))
+    selection_method_detail = sometimes_none(factory.Faker("paragraph"))
+    funding_strategy = sometimes_none(factory.Faker("paragraph"))
+    other_key_information = sometimes_none(factory.Faker("paragraph"))
+
+    is_deleted = False
+    review_workflow = factory.SubFactory("tests.src.db.models.factories.WorkflowFactory")
+    review_workflow_id = factory.LazyAttribute(lambda s: s.review_workflow.workflow_id)
+
+
+class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationApplicationSubmission
+
+    award_recommendation_application_submission_id = Generators.UuidObj
+
+    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
+    award_recommendation_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation.award_recommendation_id
+    )
+
+    application_submission = factory.SubFactory(
+        "tests.src.db.models.factories.ApplicationSubmissionFactory"
+    )
+    application_submission_id = factory.LazyAttribute(
+        lambda s: s.application_submission.application_submission_id
+    )
+
+    award_recommendation_submission_detail = factory.SubFactory(
+        "tests.src.db.models.factories.AwardRecommendationSubmissionDetailFactory"
+    )
+    award_recommendation_submission_detail_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation_submission_detail.award_recommendation_submission_detail_id
+    )
+
+
+class AwardRecommendationSubmissionDetailFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationSubmissionDetail
+
+    award_recommendation_submission_detail_id = Generators.UuidObj
+
+    recommended_amount = sometimes_none(
+        factory.Faker("pydecimal", left_digits=7, right_digits=2, positive=True)
+    )
+    scoring_comment = sometimes_none(factory.LazyFunction(lambda: str(random.randint(1, 100))))
+    general_comment = sometimes_none(factory.Faker("paragraph"))
+    award_recommendation_type = sometimes_none(factory.fuzzy.FuzzyChoice(AwardRecommendationType))
+    has_exception = False
+    exception_detail = sometimes_none(factory.Faker("paragraph"))
+
+
 ###################
 # User & Auth Factories
 ###################
@@ -1589,6 +1662,14 @@ class ApplicationSubmissionFactory(BaseFactory):
         lambda s: f"s3://local-mock-public-bucket/applications/{s.application_id}/submissions/{fake.uuid4()}/submission.zip"
     )
 
+    application_submission_number = factory.LazyAttribute(
+        lambda f: f"{f.application.competition.opportunity.opportunity_number}-{fake.unique.pystr_format(string_format="##???").upper()}"
+    )
+    project_title = factory.Faker("sentence")
+    total_requested_amount = sometimes_none(
+        factory.Faker("pydecimal", left_digits=7, right_digits=2, positive=True)
+    )
+
     @classmethod
     def _build(cls, model_class, *args, **kwargs):
         kwargs.pop("file_contents", None)  # Don't file for build strategy
@@ -1733,6 +1814,46 @@ class ApplicationAuditFactory(BaseFactory):
                 ApplicationFormFactory, application=factory.SelfAttribute("..application")
             ),
         )
+
+
+class ApplicationSubmissionNoteFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationSubmissionNote
+
+    application_submission_note_id = Generators.UuidObj
+
+    application_submission = factory.SubFactory(ApplicationSubmissionFactory)
+    application_submission_id = factory.LazyAttribute(
+        lambda s: s.application_submission.application_submission_id
+    )
+
+    note = factory.Faker("test note for application submission")
+
+    created_by_user = factory.SubFactory(UserFactory)
+    created_by_user_id = factory.LazyAttribute(lambda o: o.created_by_user.user_id)
+
+    modified_by_user = factory.SubFactory(UserFactory)
+    modified_by_user_id = factory.LazyAttribute(lambda o: o.modified_by_user.user_id)
+
+
+class ApplicationSubmissionTrackingNumberFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationSubmissionTrackingNumber
+
+    application_submission_tracking_number_id = Generators.UuidObj
+
+    application_submission = factory.SubFactory(ApplicationSubmissionFactory)
+    application_submission_id = factory.LazyAttribute(
+        lambda s: s.application_submission.application_submission_id
+    )
+
+    tracking_number = factory.Faker("bothify", text="GRANT########")
+
+    created_by_user = factory.SubFactory(UserFactory)
+    created_by_user_id = factory.LazyAttribute(lambda o: o.created_by_user.user_id)
+
+    modified_by_user = factory.SubFactory(UserFactory)
+    modified_by_user_id = factory.LazyAttribute(lambda o: o.modified_by_user.user_id)
 
 
 ###################
@@ -3243,3 +3364,21 @@ class WorkflowApprovalFactory(BaseFactory):
 
     event = factory.SubFactory(WorkflowEventHistoryFactory)
     event_id = factory.LazyAttribute(lambda a: a.event.event_id)
+
+
+class ApplicationSubmissionRetrievedFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationSubmissionRetrieved
+
+    application_submission_retrieved_id = Generators.UuidObj
+
+    application_submission = factory.SubFactory(ApplicationSubmissionFactory)
+    application_submission_id = factory.LazyAttribute(
+        lambda o: o.application_submission.application_submission_id
+    )
+
+    created_by_user = factory.SubFactory(UserFactory)
+    created_by_user_id = factory.LazyAttribute(lambda o: o.created_by_user.user_id)
+
+    modified_by_user = factory.SubFactory(UserFactory)
+    modified_by_user_id = factory.LazyAttribute(lambda o: o.modified_by_user.user_id)

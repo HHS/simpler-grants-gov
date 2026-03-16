@@ -2,7 +2,6 @@ import logging
 
 from src.adapters import db
 from src.constants.lookup_constants import ApprovalResponseType, ApprovalType
-from src.db.models.agency_models import Agency
 from src.db.models.user_models import User
 from src.db.models.workflow_models import WorkflowApproval
 from src.workflow.event.state_machine_event import StateMachineEvent
@@ -30,18 +29,18 @@ class ApprovalProcessor:
         self.db_session = db_session
         self.state_machine_event = state_machine_event
 
-    def handle_agency_approval_accepted(self, agency: Agency) -> WorkflowApproval:
+    def handle_agency_approval_accepted(self) -> WorkflowApproval:
         """Handle receiving an Approved event"""
-        return self._handle_agency_approval_event(agency, ApprovalResponseType.APPROVED)
+        return self._handle_agency_approval_event(ApprovalResponseType.APPROVED)
 
-    def handle_agency_approval_declined(self, agency: Agency) -> WorkflowApproval:
+    def handle_agency_approval_declined(self) -> WorkflowApproval:
         """Handle receiving a Declined event"""
-        return self._handle_agency_approval_event(agency, ApprovalResponseType.DECLINED)
+        return self._handle_agency_approval_event(ApprovalResponseType.DECLINED)
 
-    def handle_agency_approval_requires_modification(self, agency: Agency) -> WorkflowApproval:
+    def handle_agency_approval_requires_modification(self) -> WorkflowApproval:
         """Handle receiving a Requires Modification event - also marks all prior events as invalid"""
         curr_approval = self._handle_agency_approval_event(
-            agency, ApprovalResponseType.REQUIRES_MODIFICATION
+            ApprovalResponseType.REQUIRES_MODIFICATION
         )
 
         # if we receive a requires-modification event, set all approvals to no longer be valid.
@@ -53,7 +52,7 @@ class ApprovalProcessor:
         return curr_approval
 
     def _handle_agency_approval_event(
-        self, agency: Agency, approval_response_type: ApprovalResponseType
+        self, approval_response_type: ApprovalResponseType
     ) -> WorkflowApproval:
         """Handle an agency approval event.
 

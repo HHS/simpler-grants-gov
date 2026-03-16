@@ -8,6 +8,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientCertificate,
     SOAPClientCertificateLookupError,
     SOAPClientCertificateNotConfigured,
+    get_legacy_certificate_by_serial_number,
     get_soap_auth,
     get_soap_client_certificate,
     validate_certificate,
@@ -84,6 +85,18 @@ def test_get_soap_client_certificate_legacy_certificate_gets_hex_serial_number_h
         mock_load_pem_x509.return_value.fingerprint.return_value.hex.return_value = "5677"
         soap_client_certificate = get_soap_client_certificate(MOCK_CERT_STR, db_session)
         assert soap_client_certificate.legacy_certificate == legacy_certificate
+
+
+def test_get_soap_client_certificate_legacy_certificate_search_ignores_case_in_serial_number(
+    db_session, enable_factory_create
+):
+    SERIAL_NUMBER = "000000000000ABBBBBCCCCCCCCC12210"
+    legacy_certificate = LegacyAgencyCertificateFactory.create(serial_number=SERIAL_NUMBER.upper())
+    result = get_legacy_certificate_by_serial_number(
+        db_session, serial_number=SERIAL_NUMBER.lower()
+    )
+    assert result is not None
+    assert result.legacy_certificate_id == legacy_certificate.legacy_certificate_id
 
 
 def test_client_auth(db_session, enable_factory_create):
