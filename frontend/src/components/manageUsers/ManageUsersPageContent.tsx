@@ -53,7 +53,7 @@ export async function ManageUsersPageContent({
             path: `/organizations/${organizationId}`,
           },
           {
-            title: `${t("pageHeading")}`,
+            title: t("pageHeading"),
             path: `/organizations/${organizationId}/manage-users`,
           },
         ]}

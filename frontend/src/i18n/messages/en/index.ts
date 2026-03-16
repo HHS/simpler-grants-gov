@@ -955,6 +955,8 @@ export const messages = {
   },
   SavedSearches: {
     heading: "Saved search queries",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedQueries: "Saved search queries",
     noSavedCTAParagraphOne: "You don't have any saved queries yet.",
     noSavedCTAParagraphTwo:
       "As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
@@ -1005,6 +1007,8 @@ export const messages = {
   SavedOpportunities: {
     metaDescription: "View your saved funding opportunities.",
     heading: "Saved opportunities",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedOpportunities: "Saved opportunities",
     noSavedCTAParagraphOne:
       "To add an opportunity to your list, use the Save button next to its title on the listing's page.",
     noSavedCTAParagraphTwo:

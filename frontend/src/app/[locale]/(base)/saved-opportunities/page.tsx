@@ -1,4 +1,3 @@
-import { SAVED_OPPORTUNITIES_CRUMBS } from "src/constants/breadcrumbs";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
@@ -72,7 +71,18 @@ export default async function SavedOpportunities({
   return (
     <>
       <GridContainer>
-        <Breadcrumbs breadcrumbList={SAVED_OPPORTUNITIES_CRUMBS} />
+        <Breadcrumbs
+          breadcrumbList={[
+            {
+              title: t("SavedOpportunities.breadcrumbWorkspace"),
+              path: `/dashboard`,
+            },
+            {
+              title: t("SavedOpportunities.breadcrumbSavedOpportunities"),
+              path: `/saved-opportunities`,
+            },
+          ]}
+        />
         <h1 className="margin-top-0">{t("SavedOpportunities.heading")}</h1>
       </GridContainer>
       <div className="grid-container padding-y-5">
