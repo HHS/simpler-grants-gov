@@ -11,12 +11,22 @@ import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import {
   clearPageState,
   ensurePageClosed,
-} from "tests/e2e/utils/lifecycle-helpers";
+} from "tests/e2e/utils/lifecycle-utils";
 
-const { baseUrl, testOrgLabel, opportunityId } = playwrightEnv;
+const { baseUrl, testOrgLabel, opportunityId, targetEnv } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
 
 test.describe("fill SF-LLL Form", () => {
+  // Skip non-Chrome browsers in staging
+  test.beforeEach(({ page: _ }, testInfo) => {
+    if (targetEnv === "staging") {
+      test.skip(
+        testInfo.project.name !== "Chrome",
+        "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
+      );
+    }
+  });
+
   test.beforeEach(async ({ page, context }, testInfo) => {
     const isMobile = testInfo.project.name.match(/[Mm]obile/);
     await authenticateE2eUser(page, context, !!isMobile);
