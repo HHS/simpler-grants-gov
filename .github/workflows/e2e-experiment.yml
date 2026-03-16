@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - "dschrashun/8184-test-job-tag-groups"
+      - "dschrashun/8586-idea-of-smoke-tests"
   workflow_dispatch:
     inputs:
       version:
