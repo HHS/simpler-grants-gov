@@ -103,8 +103,7 @@ def update_opportunity_summary(
 
     # Update all fields from the request body
     for field, value in summary_data.items():
-        if hasattr(summary, field):
-            setattr(summary, field, value)
+        setattr(summary, field, value)
 
     logger.info(
         "Updated opportunity summary",
