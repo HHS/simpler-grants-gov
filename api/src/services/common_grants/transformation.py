@@ -202,6 +202,7 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
         "agency_code": v1_opportunity.agency_code,
         "agency_name": v1_opportunity.agency_name,
         "top_level_agency_name": v1_opportunity.top_level_agency_name,
+        "top_level_agency_code": v1_opportunity.top_level_agency_code,
         "opportunity_assistance_listings": [
             {
                 "assistance_listing_number": listing.assistance_listing_number,
@@ -428,9 +429,10 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
             name="agency",
             fieldType=CustomFieldType.OBJECT,
             value={
-                "agencyCode": agency,
-                "agencyName": opp_data.get("agency_name"),
-                "topLevelAgencyName": opp_data.get("top_level_agency_name"),
+                "code": agency,
+                "name": opp_data.get("agency_name"),
+                "parentName": opp_data.get("top_level_agency_name"),
+                "parentCode": opp_data.get("top_level_agency_code"),
             },
             description="Information about the agency offering this opportunity",
         )

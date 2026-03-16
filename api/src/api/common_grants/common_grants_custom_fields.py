@@ -100,11 +100,10 @@ class assistanceListings(CustomField):
 class AgencyValue(Schema):
     """Schema for populating the Agency value field"""
 
-    agencyCode = fields.String(required=True, metadata={"example": "US-ABC"})
-    agencyName = fields.String(allow_none=True, metadata={"example": "Department of Examples"})
-    topLevelAgencyName = fields.String(
-        allow_none=True, metadata={"example": "Department of Examples"}
-    )
+    code = fields.String(required=True, metadata={"example": "US-ABC"})
+    name = fields.String(allow_none=True, metadata={"example": "Department of Examples"})
+    parentName = fields.String(allow_none=True, metadata={"example": "Department of Examples"})
+    parentCode = fields.String(allow_none=True, metadata={"example": "HHS"})
 
 
 class agency(CustomField):

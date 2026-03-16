@@ -67,6 +67,7 @@ DEFAULT_MOCK_OPP_FIELDS = {
     "agency_code": "A2345",
     "agency_name": "Testing Agency",
     "top_level_agency_name": "Testing top level agency",
+    "top_level_agency_code": "A",
     "opportunity_assistance_listings": [
         type(
             "MockAssistanceListing",
@@ -185,11 +186,10 @@ class TestTransformation:
         assert result.custom_fields["federalFundingSource"].value == "Mandatory"
 
         assert "agency" in result.custom_fields
-        assert result.custom_fields["agency"].value["agencyCode"] == "A2345"
-        assert result.custom_fields["agency"].value["agencyName"] == "Testing Agency"
-        assert (
-            result.custom_fields["agency"].value["topLevelAgencyName"] == "Testing top level agency"
-        )
+        assert result.custom_fields["agency"].value["code"] == "A2345"
+        assert result.custom_fields["agency"].value["name"] == "Testing Agency"
+        assert result.custom_fields["agency"].value["parentName"] == "Testing top level agency"
+        assert result.custom_fields["agency"].value["parentCode"] == "A"
 
         assert "assistanceListings" in result.custom_fields
         assert len(result.custom_fields["assistanceListings"].value) == 1
@@ -1023,7 +1023,8 @@ class TestPopulateCustomFields:
         "category": "Discretionary",
         "agency_code": "HHS",
         "agency_name": "Dept of Health and Human Services",
-        "top_level_agency_name": "HHS",
+        "top_level_agency_name": "Health and Human Services",
+        "top_level_agency_code": "HHS",
         "opportunity_assistance_listings": [
             {"assistance_listing_number": "93.001", "program_title": "Health Research"},
         ],
@@ -1066,9 +1067,10 @@ class TestPopulateCustomFields:
 
         assert result["agency"].field_type == CustomFieldType.OBJECT
         assert result["agency"].value == {
-            "agencyCode": "HHS",
-            "agencyName": "Dept of Health and Human Services",
-            "topLevelAgencyName": "HHS",
+            "code": "HHS",
+            "name": "Dept of Health and Human Services",
+            "parentName": "Health and Human Services",
+            "parentCode": "HHS",
         }
 
         assert result["assistanceListings"].field_type == CustomFieldType.ARRAY
