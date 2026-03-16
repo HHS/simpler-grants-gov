@@ -10,7 +10,12 @@ from src.legacy_soap_api.grantors import schemas
 from src.legacy_soap_api.grantors.services.get_submission_list_expanded_response import (
     get_submission_list_expanded_response,
 )
-from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientUserDoesNotHavePermission
+from src.legacy_soap_api.legacy_soap_api_auth import (
+    SOAPAuth,
+    SOAPClientCertificate,
+    SOAPClientCertificateLookupError,
+    SOAPClientUserDoesNotHavePermission,
+)
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPInvalidEnvelope,
@@ -25,6 +30,7 @@ from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationSubmissionFactory,
     CompetitionFactory,
+    LegacyOrganizationCertificateFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
     OrganizationFactory,
@@ -204,6 +210,123 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
                 proxy_response,
                 soap_config,
             )
+
+    def test_get_submission_list_expanded_response_fails_if_privileges_are_not_set_on_config(
+        self, db_session, enable_factory_create, caplog
+    ):
+        caplog.set_level(logging.INFO)
+        agency = AgencyFactory.create()
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
+        )
+        submission = setup_application_submission(agency, sam_gov_entity=sam_gov_entity)
+        application = submission.application
+        db_session.commit()
+        db_session.refresh(application.competition)
+        soap_config = SOAPOperationConfig(
+            request_operation_name="GetSubmissionListExpandedRequest",
+            response_operation_name="GetSubmissionListExpandedResponse",
+        )
+        WRONG_PRIVLEGES = {Privilege.GET_SUBMITTED_APPLICATIONS}
+        _, _, soap_client_certificate = setup_cert_user(agency, WRONG_PRIVLEGES)
+        request_xml = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
+            f"<gran:FilterValue>GRANT{submission.legacy_tracking_number}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        )
+        value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml.encode("utf-8"))),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetSubmissionListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
+            **value
+        )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        with pytest.raises(SOAPClientUserDoesNotHavePermission):
+            get_submission_list_expanded_response(
+                db_session,
+                get_submission_list_expanded_request_schema,
+                soap_request,
+                proxy_response,
+                soap_config,
+            )
+        records = [r for r in caplog.records if "Soap Config privileges not set" in r.message]
+        assert len(records) == 1
+
+    def test_get_submission_list_expanded_response_fails_if_there_is_no_agency(
+        self, db_session, enable_factory_create, caplog
+    ):
+        caplog.set_level(logging.INFO)
+        agency = AgencyFactory.create()
+        sam_gov_entity = SamGovEntityFactory.create(
+            has_debt_subject_to_offset=True, has_exclusion_status=True
+        )
+        submission = setup_application_submission(agency, sam_gov_entity=sam_gov_entity)
+        application = submission.application
+        db_session.commit()
+        db_session.refresh(application.competition)
+        soap_config = SOAPOperationConfig(
+            request_operation_name="GetSubmissionListExpandedRequest",
+            response_operation_name="GetSubmissionListExpandedResponse",
+        )
+        legacy_certificate = LegacyOrganizationCertificateFactory.create(agency=None)
+        soap_client_certificate = SOAPClientCertificate(
+            serial_number=legacy_certificate.serial_number,
+            cert="123",
+            fingerprint="456",
+            legacy_certificate=legacy_certificate,
+        )
+        request_xml = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetSubmissionListExpandedRequest>"
+            "<gran:ExpandedApplicationFilter>"
+            "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
+            f"<gran:FilterValue>GRANT{submission.legacy_tracking_number}</gran:FilterValue>"
+            "</gran:ExpandedApplicationFilter>"
+            "</agen:GetSubmissionListExpandedRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        )
+        value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml.encode("utf-8"))),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetSubmissionListExpandedRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
+            **value
+        )
+        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        with pytest.raises(SOAPClientCertificateLookupError):
+            get_submission_list_expanded_response(
+                db_session,
+                get_submission_list_expanded_request_schema,
+                soap_request,
+                proxy_response,
+                soap_config,
+            )
+        records = [r for r in caplog.records if "certificate does not have agency" in r.message]
+        assert len(records) == 1
 
     def test_get_submission_list_expanded_response_no_filter(
         self, db_session, enable_factory_create

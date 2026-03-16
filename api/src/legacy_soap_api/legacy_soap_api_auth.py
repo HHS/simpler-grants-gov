@@ -5,7 +5,6 @@ from typing import Any
 from urllib.parse import unquote
 
 import jwt
-from apiflask.exceptions import HTTPError
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
@@ -14,7 +13,7 @@ from requests.adapters import HTTPAdapter
 from sqlalchemy import func, select
 
 import src.adapters.db as db
-from src.auth.endpoint_access_util import verify_access
+from src.auth.endpoint_access_util import can_access
 from src.db.models.agency_models import Agency
 from src.db.models.user_models import LegacyCertificate
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
@@ -215,22 +214,32 @@ def generate_soap_jwt(
 def verify_certificate_access(
     certificate: LegacyCertificate, soap_config: SOAPOperationConfig, agency: Agency | None
 ) -> None:
-    if soap_config.privileges is not None:
-        try:
-            verify_access(
-                certificate.user,
-                soap_config.privileges,
-                agency,
-            )
-        except HTTPError as e:
-            logger.info(
-                "User did not have permission to access this application",
-                extra={
-                    "user_id": certificate.user.user_id,
-                    "agency_id": agency.agency_id if agency else None,
-                    "privileges": soap_config.privileges,
-                },
-            )
-            raise SOAPClientUserDoesNotHavePermission(
-                "User did not have permission to access this application"
-            ) from e
+    if soap_config.privileges is None:
+        logger.info(
+            "Soap Config privileges not set",
+            extra={
+                "user_id": certificate.user.user_id,
+                "soap_config_request_operation_name": soap_config.request_operation_name,
+            },
+        )
+        raise SOAPClientUserDoesNotHavePermission("Soap Config privileges not set")
+    if agency is None:
+        logger.info(
+            "Agency cannot be None",
+            extra={
+                "user_id": certificate.user.user_id,
+            },
+        )
+        raise SOAPClientUserDoesNotHavePermission("Agency cannot be None")
+    if not can_access(certificate.user, soap_config.privileges, agency):
+        logger.info(
+            "User did not have permission to access this application",
+            extra={
+                "user_id": certificate.user.user_id,
+                "agency_id": agency.agency_id if agency else None,
+                "privileges": soap_config.privileges,
+            },
+        )
+        raise SOAPClientUserDoesNotHavePermission(
+            "User did not have permission to access this application"
+        )
