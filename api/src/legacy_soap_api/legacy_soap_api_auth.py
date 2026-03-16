@@ -5,6 +5,7 @@ from typing import Any
 from urllib.parse import unquote
 
 import jwt
+from apiflask.exceptions import HTTPError
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
@@ -13,8 +14,10 @@ from requests.adapters import HTTPAdapter
 from sqlalchemy import func, select
 
 import src.adapters.db as db
+from src.auth.endpoint_access_util import verify_access
+from src.db.models.agency_models import Agency
 from src.db.models.user_models import LegacyCertificate
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.util.datetime_util import get_now_us_eastern_date
@@ -207,3 +210,27 @@ def generate_soap_jwt(
         "certId": cert_id,
     }
     return jwt.encode(payload=payload, key=soap_partner_gateway_auth_key, algorithm="HS256")
+
+
+def verify_certificate_access(
+    certificate: LegacyCertificate, soap_config: SOAPOperationConfig, agency: Agency | None
+) -> None:
+    if soap_config.privileges is not None:
+        try:
+            verify_access(
+                certificate.user,
+                soap_config.privileges,
+                agency,
+            )
+        except HTTPError as e:
+            logger.info(
+                "User did not have permission to access this application",
+                extra={
+                    "user_id": certificate.user.user_id,
+                    "agency_id": agency.agency_id if agency else None,
+                    "privileges": soap_config.privileges,
+                },
+            )
+            raise SOAPClientUserDoesNotHavePermission(
+                "User did not have permission to access this application"
+            ) from e
