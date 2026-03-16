@@ -1,7 +1,7 @@
 """Test utilities for opportunity-related tests."""
 
 import uuid
-from datetime import date
+from datetime import date, timedelta
 
 from src.constants.lookup_constants import (
     ApplicantType,
@@ -160,7 +160,7 @@ def create_opportunity_summary_request(
     return request
 
 
-def create_opportunity_summary_update_request(
+def update_opportunity_summary_request(
     summary_description="This is an updated opportunity summary description",
     is_cost_sharing=True,
     post_date=None,
@@ -195,7 +195,7 @@ def create_opportunity_summary_update_request(
         post_date = date.today()
 
     if close_date is None:
-        close_date = date.today().replace(year=date.today().year + 1)
+        close_date = date.today() + timedelta(days=365)
 
     if funding_categories is None:
         funding_categories = [FundingCategory.EDUCATION]

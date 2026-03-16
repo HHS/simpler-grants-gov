@@ -5,7 +5,7 @@ import pytest
 
 from src.constants.lookup_constants import Privilege
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
-from tests.lib.opportunity_test_utils import create_opportunity_summary_update_request
+from tests.lib.opportunity_test_utils import update_opportunity_summary_request
 from tests.src.db.models.factories import (
     AgencyFactory,
     OpportunityFactory,
@@ -16,7 +16,7 @@ from tests.src.db.models.factories import (
 @pytest.fixture
 def opportunity_summary_update_request():
     """Return a valid opportunity summary update request"""
-    return create_opportunity_summary_update_request()
+    return update_opportunity_summary_request()
 
 
 @pytest.fixture
@@ -178,7 +178,7 @@ def test_opportunity_summary_update_invalid_date_validation(
     _, _, token, _ = opportunity_summary_auth_data
 
     # Use Invalid Dates
-    invalid_dates_request = create_opportunity_summary_update_request(
+    invalid_dates_request = update_opportunity_summary_request(
         post_date=date(3000, 12, 31), close_date=date.today()
     )
 
@@ -205,7 +205,7 @@ def test_opportunity_summary_update_invalid_award_amount(
     _, _, token, _ = opportunity_summary_auth_data
 
     # Create a request with invalid award amounts (floor > ceiling)
-    invalid_award_request = create_opportunity_summary_update_request(
+    invalid_award_request = update_opportunity_summary_request(
         award_floor=100000, award_ceiling=50000
     )
 
