@@ -1853,7 +1853,7 @@ export const messages = {
       approved: "Approved",
     },
     heroButtons: {
-      save: "Save and finish later",
+      save: "Save",
       create: "Create",
       edit: "Edit",
       preview: "Preview",
