@@ -9,6 +9,7 @@ import {
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
 import { renderWidget } from "./WidgetRenderers";
+import { Button } from "@trussworks/react-uswds";
 
 const FIELD_LIST_INDEX_TOKEN = "~~index~~";
 
@@ -239,13 +240,14 @@ function FieldListWidget(widgetProps: FieldListWidgetProps): JSX.Element {
           >
             <div className="field-list-widget__controls">
               <strong>Row {rowIndex + 1}</strong>
-              <button
+              <Button
+
                 type="button"
                 onClick={() => handleDeleteRow(rowIndex)}
                 disabled={isInteractionDisabled}
               >
                 Delete
-              </button>
+              </Button>
             </div>
 
             {groupDefinition.map((groupItem: FieldListGroupItem) => {
@@ -307,13 +309,13 @@ function FieldListWidget(widgetProps: FieldListWidgetProps): JSX.Element {
       })}
 
       <div className="field-list-widget__controls">
-        <button
+        <Button
           type="button"
           onClick={handleAddRow}
           disabled={isInteractionDisabled}
         >
           + Add row
-        </button>
+        </Button>
       </div>
     </div>
   );
