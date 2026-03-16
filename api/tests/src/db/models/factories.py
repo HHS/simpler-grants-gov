@@ -3342,3 +3342,21 @@ class WorkflowApprovalFactory(BaseFactory):
 
     event = factory.SubFactory(WorkflowEventHistoryFactory)
     event_id = factory.LazyAttribute(lambda a: a.event.event_id)
+
+
+class ApplicationSubmissionRetrievedFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationSubmissionRetrieved
+
+    application_submission_retrieved_id = Generators.UuidObj
+
+    application_submission = factory.SubFactory(ApplicationSubmissionFactory)
+    application_submission_id = factory.LazyAttribute(
+        lambda o: o.application_submission.application_submission_id
+    )
+
+    created_by_user = factory.SubFactory(UserFactory)
+    created_by_user_id = factory.LazyAttribute(lambda o: o.created_by_user.user_id)
+
+    modified_by_user = factory.SubFactory(UserFactory)
+    modified_by_user_id = factory.LazyAttribute(lambda o: o.modified_by_user.user_id)

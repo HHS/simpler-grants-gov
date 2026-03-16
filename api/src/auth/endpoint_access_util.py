@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import exists, select
 from sqlalchemy.orm import selectinload
 
 from src.adapters import db
@@ -10,7 +10,15 @@ from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
-from src.db.models.user_models import AgencyUser, AgencyUserRole, LinkRolePrivilege, Role, User
+from src.db.models.user_models import (
+    AgencyUser,
+    AgencyUserRole,
+    LinkExternalUser,
+    LinkRolePrivilege,
+    Role,
+    SuppressedEmail,
+    User,
+)
 from src.services.users.get_roles_and_privileges import get_roles_and_privileges
 
 logger = logging.getLogger(__name__)
@@ -124,6 +132,7 @@ def get_users_with_privileges_for_agency(
     db_session: db.Session,
     agency: Agency,
     required_privileges: list[Privilege],
+    filter_out_suppressed_emails: bool = False,
 ) -> list[User]:
     """
     Get all users in an agency who have ANY of the required privileges.
@@ -132,6 +141,7 @@ def get_users_with_privileges_for_agency(
         db_session: Database session
         agency: Agency to search within
         required_privileges: List of privileges, user must have at least one
+        filter_out_suppressed_emails: Whether to filter out users with suppressed emails
 
     Returns:
         List of User objects with profile and external user info loaded
@@ -139,6 +149,9 @@ def get_users_with_privileges_for_agency(
     stmt = (
         select(User)
         .distinct()
+        # Join to link external user, this'll implicitly filter
+        # out system users without an OAuth login.
+        .join(LinkExternalUser)
         .join(AgencyUser, AgencyUser.user_id == User.user_id)
         .join(AgencyUserRole, AgencyUserRole.agency_user_id == AgencyUser.agency_user_id)
         .join(Role, Role.role_id == AgencyUserRole.role_id)
@@ -153,6 +166,12 @@ def get_users_with_privileges_for_agency(
         )
         .order_by(User.created_at.asc())
     )
+
+    if filter_out_suppressed_emails:
+        """
+        WHERE NOT EXISTS (select email from suppressed_email where email = link_external_user.email)
+        """
+        stmt = stmt.where(~exists().where(SuppressedEmail.email == LinkExternalUser.email))
 
     users = db_session.execute(stmt).scalars().unique().all()
     return list(users)
