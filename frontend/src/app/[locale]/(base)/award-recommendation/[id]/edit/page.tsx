@@ -197,7 +197,7 @@ const RecommendationSection = ({
                 <CharacterCount
                   id="award_selection_details"
                   name="award_selection_details"
-                  maxLength={1000}
+                  maxLength={500}
                   isTextArea
                   defaultValue=""
                   rows={6}
@@ -221,7 +221,7 @@ const RecommendationSection = ({
                 <CharacterCount
                   id="other_key_information"
                   name="other_key_information"
-                  maxLength={1000}
+                  maxLength={500}
                   isTextArea
                   defaultValue=""
                   rows={6}

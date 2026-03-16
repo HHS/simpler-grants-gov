@@ -6,10 +6,12 @@ export type AwardRecommendationActionResponse = {
   validationErrors?: Record<string, string[]>;
 };
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function saveAwardRecommendation(
   formData: FormData,
 ): Promise<AwardRecommendationActionResponse> {
   // Extract form data
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const rawFormData = {
     additionalInfo: formData.get("additional_info") as string,
     awardSelectionMethod: formData.get("award_selection_method") as string,
@@ -35,10 +37,12 @@ export async function saveAwardRecommendation(
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function submitAwardRecommendationForReview(
   formData: FormData,
 ): Promise<AwardRecommendationActionResponse> {
   // Extract form data
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const rawFormData = {
     additionalInfo: formData.get("additional_info") as string,
     awardSelectionMethod: formData.get("award_selection_method") as string,
