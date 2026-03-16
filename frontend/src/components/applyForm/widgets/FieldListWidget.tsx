@@ -273,9 +273,9 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
         return (
           <div
             key={`${id}--row-${rowIndex}`}
-            className="field-list-widget__row"
+            className="field-list-widget__row border radius-md border-base-lighter padding-2 margin-2"
           >
-            <div className="field-list-widget__controls">
+            <div className="field-list-widget__controls display-flex flex-align-center flex-justify margin-bottom-2">
               <strong>
                 {t("entry")} {rowIndex + 1}
               </strong>
@@ -332,7 +332,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
         );
       })}
 
-      <div className="field-list-widget__controls">
+      <div className="field-list-widget__controls display-flex flex-align-center flex-justify-between margin-bottom-2">
         <Button
           type="button"
           onClick={handleAddRow}
