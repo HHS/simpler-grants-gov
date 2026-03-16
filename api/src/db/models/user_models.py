@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import ForeignKey, UniqueConstraint, and_
+from sqlalchemy import ForeignKey, Index, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -25,6 +25,13 @@ class User(ApiSchemaTable, TimestampMixin):
 
     saved_opportunities: Mapped[list[UserSavedOpportunity]] = relationship(
         "UserSavedOpportunity",
+        back_populates="user",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
+    saved_opportunity_notifications: Mapped[list[UserSavedOpportunityNotification]] = relationship(
+        "UserSavedOpportunityNotification",
         back_populates="user",
         uselist=True,
         cascade="all, delete-orphan",
@@ -160,6 +167,58 @@ class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
         "Opportunity", back_populates="saved_opportunities_by_users"
     )
     is_deleted: Mapped[bool | None]
+
+
+class UserSavedOpportunityNotification(ApiSchemaTable, TimestampMixin):
+    """Notification settings for a user's saved opportunities.
+
+    A row with organization_id=None represents the user's own default settings.
+    A row with an organization_id represents settings scoped to that organization.
+
+    Business logic defaults:
+    - No row for user's own settings -> email_enabled=True
+    - No row for an org -> email_enabled=False
+    """
+
+    __tablename__ = "user_saved_opportunity_notification"
+
+    __table_args__ = (
+        # When organization_id IS NULL, only one row per user is allowed.
+        Index(
+            "user_saved_opportunity_notification_user_id_null_org_idx",
+            "user_id",
+            unique=True,
+            postgresql_where="organization_id IS NULL",
+        ),
+        # When organization_id IS NOT NULL, one row per (user, org) pair.
+        Index(
+            "user_saved_opportunity_notification_user_id_org_id_idx",
+            "user_id",
+            "organization_id",
+            unique=True,
+            postgresql_where="organization_id IS NOT NULL",
+        ),
+        ApiSchemaTable.__table_args__,
+    )
+
+    user_saved_opportunity_notification_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, ForeignKey(User.user_id, ondelete="CASCADE"), index=True
+    )
+    user: Mapped[User] = relationship(User, back_populates="saved_opportunity_notifications")
+
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID,
+        ForeignKey(Organization.organization_id, ondelete="CASCADE"),
+        index=True,
+        nullable=True,
+    )
+    organization: Mapped[Organization | None] = relationship(Organization)
+
+    email_enabled: Mapped[bool] = mapped_column(default=True)
 
 
 class UserSavedSearch(ApiSchemaTable, TimestampMixin):
