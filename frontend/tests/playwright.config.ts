@@ -17,7 +17,11 @@ export default defineConfig({
   forbidOnly: !!isCi,
   /* Retry on CI only */
   retries: isCi ? 3 : 0,
-  workers: 10,
+  /* ci-frontend-e2e.yml — no workers passed → defaults to 10, sharding works as normal
+     e2e-staging.yml — passes workers: 1 → PLAYWRIGHT_WORKERS=1, all tests run sequentially */
+  workers: process.env.PLAYWRIGHT_WORKERS
+    ? parseInt(process.env.PLAYWRIGHT_WORKERS)
+    : 10,
   // Use 'blob' for CI to allow merging of reports. See https://playwright.dev/docs/test-reporters
   reporter: isCi ? "blob" : "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
