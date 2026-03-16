@@ -22,8 +22,6 @@ def opportunity_summary_update_request():
 @pytest.fixture
 def opportunity_summary_auth_data(db_session, enable_factory_create):
     """Create a user with VIEW_OPPORTUNITY and UPDATE_OPPORTUNITY permissions and return auth data"""
-    agency = AgencyFactory.create()
-
     user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,
         privileges=[Privilege.VIEW_OPPORTUNITY, Privilege.UPDATE_OPPORTUNITY],
