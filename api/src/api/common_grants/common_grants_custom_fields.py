@@ -106,12 +106,13 @@ class AgencyValue(Schema):
     parentCode = fields.String(allow_none=True, metadata={"example": "HHS"})
 
 
+# TODO: Update the value field when flask moves to v3
 class agency(CustomField):
     """Information about the agency offering this opportunity"""
 
     name = fields.String(required=True, metadata={"example": "agency"})
     fieldType = fields.String(required=True, metadata={"example": "object"})
-    value = fields.Nested(AgencyValue, required=True)
+    value = fields.Raw(required=True)
     description = fields.String(
         allow_none=True,
         metadata={"example": "Information about the agency offering this opportunity"},
@@ -132,12 +133,13 @@ class AttachmentValue(Schema):
     )
 
 
+# TODO: Update the value field when flask moves to v3
 class attachments(CustomField):
     """Attachments such as NOFOs or other supplemental documents"""
 
     name = fields.String(required=True, metadata={"example": "attachments"})
     fieldType = fields.String(required=True, metadata={"example": "array"})
-    value = fields.List(fields.Nested(AttachmentValue), required=True)
+    value = fields.List(fields.Raw(), required=True)
     description = fields.String(
         allow_none=True,
         metadata={
@@ -171,12 +173,13 @@ class AgencyContactValue(Schema):
     )
 
 
+# TODO: Update the value field when flask moves to v3
 class contactInfo(CustomField):
     """Contact information for the agency managing this opportunity"""
 
     name = fields.String(required=True, metadata={"example": "contactInfo"})
     fieldType = fields.String(required=True, metadata={"example": "object"})
-    value = fields.Nested(AgencyContactValue, required=True)
+    value = fields.Raw(required=True)
     description = fields.String(
         allow_none=True,
         metadata={"example": "Contact information for the agency managing this opportunity"},
@@ -190,12 +193,13 @@ class AdditionalInfoValue(Schema):
     description = fields.String(allow_none=True, metadata={"example": "Click me for more info"})
 
 
+# TODO: Update the value field when flask moves to v3
 class additionalInfo(CustomField):
     """URL and description for additional information about the opportunity"""
 
     name = fields.String(required=True, metadata={"example": "additionalInfo"})
     fieldType = fields.String(required=True, metadata={"example": "object"})
-    value = fields.Nested(AdditionalInfoValue, required=True)
+    value = fields.Raw(required=True)
     description = fields.String(
         allow_none=True,
         metadata={
