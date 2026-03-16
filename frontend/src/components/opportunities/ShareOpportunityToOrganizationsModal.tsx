@@ -50,9 +50,9 @@ export function ShareOpportunityToOrganizationsModal({
       console.log("Organization id: " + organization.organization_id);
       console.log("CheckedStatus: " + checkedStatus); 
       if (checkedStatus) {
-        await addOrganizationAction(organization.organization_id);
+        await addOrganizationAction(`/v1/api/organizations/${organization.organization_id}/saved-opportunities`);
       } else {
-        await deleteOrganizationAction(organization.organization_id);
+        await deleteOrganizationAction(`/v1/api/organizations/${organization.organization_id}/saved-opportunities`);
       }
     })
   };

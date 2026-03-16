@@ -256,6 +256,7 @@ export const addOrganization = async (
   organizationId: string,
 
 ): Promise<ApplicationAddOrganizationApiResponse> => {
+  console.log("in addOrganization organizationId: " + organizationId);
   const session = await getSession();
 
   if (!session || !session.token) {
@@ -266,15 +267,16 @@ export const addOrganization = async (
     subPath: `/organizations/${organizationId}/saved-opportunities`,
     additionalHeaders: { "X-SGG-TOKEN": session.token },
   });
-
+  console.log("in addOrganization resp.json: " + resp.json());
   if (!resp.ok) {
     await throwOnApiError(resp, {
-      operationName: "deleteOrganization",
-      unauthorizedMessage: "No active session for deleting organizations.",
+      operationName: "addOrganization",
+      unauthorizedMessage: "No active session for adding organizations.",
     });
   }
 
   const json = (await resp.json()) as { data: ApplicationAddOrganizationApiResponse };
+  console.log("in addOrganization json.data: " + json.data);
   return json.data;
 };
 
