@@ -9,7 +9,10 @@ import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.db.models.competition_models import ApplicationSubmission
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
-from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate
+from src.legacy_soap_api.legacy_soap_api_auth import (
+    SOAPClientUserDoesNotHavePermission,
+    validate_certificate,
+)
 from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
@@ -66,7 +69,9 @@ def get_application_zip_response(
                         "privileges": soap_config.privileges,
                     },
                 )
-                raise e
+                raise SOAPClientUserDoesNotHavePermission(
+                    "User did not have permission to access this application"
+                ) from e
 
         try:
             filestream = file_util.open_stream(application_submission.download_path, mode="rb")
