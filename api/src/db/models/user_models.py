@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import ForeignKey, Index, UniqueConstraint, and_
+from sqlalchemy import ForeignKey, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -183,20 +183,12 @@ class UserSavedOpportunityNotification(ApiSchemaTable, TimestampMixin):
     __tablename__ = "user_saved_opportunity_notification"
 
     __table_args__ = (
-        # When organization_id IS NULL, only one row per user is allowed.
-        Index(
-            "user_saved_opportunity_notification_user_id_null_org_idx",
-            "user_id",
-            unique=True,
-            postgresql_where="organization_id IS NULL",
-        ),
-        # When organization_id IS NOT NULL, one row per (user, org) pair.
-        Index(
-            "user_saved_opportunity_notification_user_id_org_id_idx",
+        # NULLS_NOT_DISTINCT treats NULL organization_id as equal, enforcing one row per
+        # (user, org) pair and one row per user where organization_id IS NULL.
+        UniqueConstraint(
             "user_id",
             "organization_id",
-            unique=True,
-            postgresql_where="organization_id IS NOT NULL",
+            postgresql_nulls_not_distinct=True,
         ),
         ApiSchemaTable.__table_args__,
     )
@@ -205,20 +197,18 @@ class UserSavedOpportunityNotification(ApiSchemaTable, TimestampMixin):
         UUID, primary_key=True, default=uuid.uuid4
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(User.user_id, ondelete="CASCADE"), index=True
-    )
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship(User, back_populates="saved_opportunity_notifications")
 
     organization_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID,
-        ForeignKey(Organization.organization_id, ondelete="CASCADE"),
-        index=True,
-        nullable=True,
+        UUID, ForeignKey(Organization.organization_id), index=True
     )
     organization: Mapped[Organization | None] = relationship(Organization)
 
-    email_enabled: Mapped[bool] = mapped_column(default=True)
+    # Defaults to True for user's own settings (organization_id IS NULL), False for org-scoped rows.
+    email_enabled: Mapped[bool] = mapped_column(
+        default=lambda ctx: ctx.get_current_parameters().get("organization_id") is None
+    )
 
 
 class UserSavedSearch(ApiSchemaTable, TimestampMixin):
