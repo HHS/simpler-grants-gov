@@ -14,12 +14,6 @@ from tests.src.db.models.factories import (
 
 
 @pytest.fixture
-def opportunity_summary_update_request():
-    """Return a valid opportunity summary update request"""
-    return update_opportunity_summary_request()
-
-
-@pytest.fixture
 def opportunity_summary_auth_data(db_session, enable_factory_create):
     """Create a user with VIEW_OPPORTUNITY and UPDATE_OPPORTUNITY permissions and return auth data"""
     user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
@@ -57,24 +51,22 @@ def opportunity_with_summary(
     return opportunity, non_forecast_summary
 
 
-def test_opportunity_summary_update_with_invalid_jwt_token(
-    client, opportunity_with_summary, opportunity_summary_update_request
-):
+def test_opportunity_summary_update_with_invalid_jwt_token(client, opportunity_with_summary):
     """Test opportunity summary update endpoint with invalid JWT token"""
     opportunity, summary = opportunity_with_summary
 
+    update_request = update_opportunity_summary_request()
+
     response = client.put(
         f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{summary.opportunity_summary_id}",
-        json=opportunity_summary_update_request,
+        json=update_request,
         headers={"X-SGG-Token": "invalid_token_value"},
     )
 
     assert response.status_code == 401
 
 
-def test_opportunity_summary_update_missing_permissions(
-    client, db_session, enable_factory_create, opportunity_summary_update_request
-):
+def test_opportunity_summary_update_missing_permissions(client, db_session, enable_factory_create):
     """Test opportunity summary update with a user that has VIEW_OPPORTUNITY but not UPDATE_OPPORTUNITY privilege"""
     # Create a user with VIEW_OPPORTUNITY but without UPDATE_OPPORTUNITY privilege
     agency = AgencyFactory.create()
@@ -98,9 +90,11 @@ def test_opportunity_summary_update_missing_permissions(
         is_forecast=False,
     )
 
+    update_request = update_opportunity_summary_request()
+
     response = client.put(
         f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{summary.opportunity_summary_id}",
-        json=opportunity_summary_update_request,
+        json=update_request,
         headers={"X-SGG-Token": token},
     )
 
@@ -109,18 +103,18 @@ def test_opportunity_summary_update_missing_permissions(
     assert response_json["message"] == "Forbidden"
 
 
-def test_opportunity_summary_update_opportunity_not_found(
-    client, opportunity_summary_auth_data, opportunity_summary_update_request
-):
+def test_opportunity_summary_update_opportunity_not_found(client, opportunity_summary_auth_data):
     """Test updating a summary for a non-existent opportunity"""
     _, _, token, _ = opportunity_summary_auth_data
 
     non_existent_opportunity_id = uuid.uuid4()
     non_existent_summary_id = uuid.uuid4()
 
+    update_request = update_opportunity_summary_request()
+
     response = client.put(
         f"/v1/grantors/opportunities/{non_existent_opportunity_id}/summaries/{non_existent_summary_id}",
-        json=opportunity_summary_update_request,
+        json=update_request,
         headers={"X-SGG-Token": token},
     )
 
@@ -137,7 +131,6 @@ def test_opportunity_summary_update_summary_not_found(
     db_session,
     enable_factory_create,
     opportunity_summary_auth_data,
-    opportunity_summary_update_request,
 ):
     """Test updating a non-existent summary for an existing opportunity"""
     user, agency, token, _ = opportunity_summary_auth_data
@@ -156,9 +149,11 @@ def test_opportunity_summary_update_summary_not_found(
     # Generate a non-existent summary ID
     non_existent_summary_id = uuid.uuid4()
 
+    update_request = update_opportunity_summary_request()
+
     response = client.put(
         f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{non_existent_summary_id}",
-        json=opportunity_summary_update_request,
+        json=update_request,
         headers={"X-SGG-Token": token},
     )
 
@@ -228,22 +223,21 @@ def test_opportunity_summary_update_successful(
     client,
     opportunity_with_summary,
     opportunity_summary_auth_data,
-    opportunity_summary_update_request,
 ):
     """Test successful update of an opportunity summary"""
     opportunity, summary = opportunity_with_summary
     _, _, token, _ = opportunity_summary_auth_data
 
     # Modify the request to have clearly different values
-    opportunity_summary_update_request["summary_description"] = (
-        "UPDATED: This is a modified description"
+    update_request = update_opportunity_summary_request(
+        summary_description="UPDATED: This is a modified description",
+        award_floor=30000,
+        award_ceiling=180000,
     )
-    opportunity_summary_update_request["award_floor"] = 30000
-    opportunity_summary_update_request["award_ceiling"] = 180000
 
     response = client.put(
         f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries/{summary.opportunity_summary_id}",
-        json=opportunity_summary_update_request,
+        json=update_request,
         headers={"X-SGG-Token": token},
     )
 
@@ -258,39 +252,27 @@ def test_opportunity_summary_update_successful(
 
     # Verify the opportunity summary data was updated
     summary_data = response_json["data"]
-    assert (
-        summary_data["summary_description"]
-        == opportunity_summary_update_request["summary_description"]
-    )
-    assert summary_data["is_cost_sharing"] == opportunity_summary_update_request["is_cost_sharing"]
-    assert (
-        summary_data["expected_number_of_awards"]
-        == opportunity_summary_update_request["expected_number_of_awards"]
-    )
+    assert summary_data["summary_description"] == update_request["summary_description"]
+    assert summary_data["is_cost_sharing"] == update_request["is_cost_sharing"]
+    assert summary_data["expected_number_of_awards"] == update_request["expected_number_of_awards"]
     assert (
         summary_data["estimated_total_program_funding"]
-        == opportunity_summary_update_request["estimated_total_program_funding"]
+        == update_request["estimated_total_program_funding"]
     )
-    assert summary_data["award_floor"] == opportunity_summary_update_request["award_floor"]
-    assert summary_data["award_ceiling"] == opportunity_summary_update_request["award_ceiling"]
+    assert summary_data["award_floor"] == update_request["award_floor"]
+    assert summary_data["award_ceiling"] == update_request["award_ceiling"]
 
     # Verify the funding instruments, categories, and applicant types
-    assert len(summary_data["funding_instruments"]) == len(
-        opportunity_summary_update_request["funding_instruments"]
-    )
-    for instrument in opportunity_summary_update_request["funding_instruments"]:
+    assert len(summary_data["funding_instruments"]) == len(update_request["funding_instruments"])
+    for instrument in update_request["funding_instruments"]:
         assert instrument in summary_data["funding_instruments"]
 
-    assert len(summary_data["funding_categories"]) == len(
-        opportunity_summary_update_request["funding_categories"]
-    )
-    for category in opportunity_summary_update_request["funding_categories"]:
+    assert len(summary_data["funding_categories"]) == len(update_request["funding_categories"])
+    for category in update_request["funding_categories"]:
         assert category in summary_data["funding_categories"]
 
-    assert len(summary_data["applicant_types"]) == len(
-        opportunity_summary_update_request["applicant_types"]
-    )
-    for applicant_type in opportunity_summary_update_request["applicant_types"]:
+    assert len(summary_data["applicant_types"]) == len(update_request["applicant_types"])
+    for applicant_type in update_request["applicant_types"]:
         assert applicant_type in summary_data["applicant_types"]
 
 
@@ -368,7 +350,6 @@ def test_opportunity_summary_update_cannot_change_forecast_status(
     client,
     opportunity_with_summary,
     opportunity_summary_auth_data,
-    opportunity_summary_update_request,
 ):
     """Test that is_forecast cannot be updated if included in the request"""
     opportunity, summary = opportunity_with_summary
@@ -378,7 +359,7 @@ def test_opportunity_summary_update_cannot_change_forecast_status(
     original_is_forecast = summary.is_forecast
 
     # Create an update request and try to add is_forecast
-    update_data = opportunity_summary_update_request.copy()
+    update_data = update_opportunity_summary_request()
     update_data["is_forecast"] = not original_is_forecast  # Flip value
 
     response = client.put(
