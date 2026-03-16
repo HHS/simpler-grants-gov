@@ -1,4 +1,3 @@
-import { SAVED_SEARCHES_CRUMBS } from "src/constants/breadcrumbs";
 import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
 import { fetchSavedSearches } from "src/services/fetch/fetchers/savedSearchFetcher";
 import { LocalizedPageProps } from "src/types/intl";
@@ -89,7 +88,18 @@ export default async function SavedSearchQueries({
   return (
     <>
       <GridContainer>
-        <Breadcrumbs breadcrumbList={SAVED_SEARCHES_CRUMBS} />
+        <Breadcrumbs
+          breadcrumbList={[
+            {
+              title: t("breadcrumbWorkspace"),
+              path: `/dashboard`,
+            },
+            {
+              title: t("breadcrumbSavedQueries"),
+              path: `/saved-search-queries`,
+            },
+          ]}
+        />
         <h1 className="margin-top-0">{t("heading")}</h1>
       </GridContainer>
       <div className="padding-y-5">
