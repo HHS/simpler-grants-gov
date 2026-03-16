@@ -1,7 +1,7 @@
 import { RJSFSchema } from "@rjsf/utils/lib/types";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
 import {
@@ -182,31 +182,70 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   );
 
   /**
-   * Updates the local row state and optionally forwards the new value through
+   * Updates local entry state and optionally forwards the new value through
    * the widget-style `onChange` prop for compatibility with the broader form
    * rendering system.
    */
-  const handleRowsChange = (nextRows: GeneralRecord[]): void => {
-    setRows(nextRows);
-    onChange?.(nextRows);
-  };
+  const handleRowsChange = useCallback(
+    (getNextRows: (previousRows: GeneralRecord[]) => GeneralRecord[]): void => {
+      setRows((previousRows) => {
+        const nextRows = getNextRows(previousRows);
+        onChange?.(nextRows);
+        return nextRows;
+      });
+    },
+    [onChange],
+  );
 
-  const handleAddRow = (): void => {
-    handleRowsChange(
+  const handleAddRow = useCallback((): void => {
+    handleRowsChange((previousRows) =>
       addFieldListRow({
-        rows,
+        rows: previousRows,
       }),
     );
-  };
+  }, [handleRowsChange]);
 
-  const handleDeleteRow = (rowIndex: number): void => {
-    handleRowsChange(
-      removeFieldListRow({
-        rows,
-        rowIndex,
-      }),
-    );
-  };
+  const handleDeleteRow = useCallback(
+    (rowIndex: number): void => {
+      handleRowsChange((previousRows) =>
+        removeFieldListRow({
+          rows: previousRows,
+          rowIndex,
+        }),
+      );
+    },
+    [handleRowsChange],
+  );
+
+  /**
+   * Updates a single field within the current entry while preserving
+   * the rest of the entry and all sibling entries.
+   */
+  const handleChildValueChange = useCallback(
+    ({
+      rowIndex,
+      storageKey,
+      nextValue,
+    }: {
+      rowIndex: number;
+      storageKey: string;
+      nextValue: unknown;
+    }): void => {
+      handleRowsChange((previousRows) => {
+        const nextRows = [...previousRows];
+
+        const updatedRow = {
+          ...nextRows[rowIndex],
+          [storageKey]: nextValue,
+        };
+
+        nextRows[rowIndex] = updatedRow;
+
+        return nextRows;
+      });
+    },
+    [handleRowsChange],
+  );
 
   const isInteractionDisabled = Boolean(disabled || readOnly || isFormLocked);
 
@@ -264,23 +303,6 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
               );
 
               /**
-               * Updates a single field within the current row while preserving
-               * the rest of the row and all sibling rows.
-               */
-              const handleChildChange = (nextValue: unknown): void => {
-                const nextRows = [...rows];
-
-                const updatedRow = {
-                  ...nextRows[rowIndex],
-                  [storageKey]: nextValue,
-                };
-
-                nextRows[rowIndex] = updatedRow;
-
-                handleRowsChange(nextRows);
-              };
-
-              /**
                * Build a standard widget prop object for the child field so it
                * can be rendered through the existing WidgetRenderers pipeline.
                */
@@ -290,7 +312,13 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
                 id: generatedId,
                 key: generatedId,
                 value: currentValue,
-                onChange: handleChildChange,
+                onChange: (nextValue: unknown): void => {
+                  handleChildValueChange({
+                    rowIndex,
+                    storageKey,
+                    nextValue,
+                  });
+                },
                 isFormLocked,
                 formContext,
               };
