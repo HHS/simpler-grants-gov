@@ -91,11 +91,11 @@ export default async function SavedSearchQueries({
         <Breadcrumbs
           breadcrumbList={[
             {
-              title: `${t("breadcrumbWorkspace")}`,
+              title: t("breadcrumbWorkspace"),
               path: `/dashboard`,
             },
             {
-              title: `${t("breadcrumbSavedQueries")}`,
+              title: t("breadcrumbSavedQueries"),
               path: `/saved-search-queries`,
             },
           ]}
