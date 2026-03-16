@@ -448,17 +448,19 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
         uselist=True,
         cascade="all, delete-orphan",
     )
-    
+
     application_submission_notes: Mapped[list[ApplicationSubmissionNote]] = relationship(
         back_populates="application_submission",
         uselist=True,
         cascade="all, delete-orphan",
     )
-    
-    application_submission_tracking_numbers: Mapped[list[ApplicationSubmissionTrackingNumber]] = relationship(
-        back_populates="application_submission",
-        uselist=True,
-        cascade="all, delete-orphan",
+
+    application_submission_tracking_numbers: Mapped[list[ApplicationSubmissionTrackingNumber]] = (
+        relationship(
+            back_populates="application_submission",
+            uselist=True,
+            cascade="all, delete-orphan",
+        )
     )
 
     application_submission_retrievals: Mapped[list[ApplicationSubmissionRetrieved]] = relationship(

@@ -1,7 +1,11 @@
 import uuid
 
 import src.util.file_util as file_util
-from tests.src.db.models.factories import ApplicationSubmissionFactory, ApplicationSubmissionNoteFactory, ApplicationSubmissionTrackingNumberFactory
+from tests.src.db.models.factories import (
+    ApplicationSubmissionFactory,
+    ApplicationSubmissionNoteFactory,
+    ApplicationSubmissionTrackingNumberFactory,
+)
 
 
 def test_application_submission_factory_creation(enable_factory_create, db_session):
@@ -67,7 +71,9 @@ def test_application_submission_note_creation(enable_factory_create, db_session)
     """Test that we can create an ApplicationSubmission with a note"""
 
     submission = ApplicationSubmissionFactory.create()
-    note = ApplicationSubmissionNoteFactory.create(application_submission=submission, note="This is a test note")
+    note = ApplicationSubmissionNoteFactory.create(
+        application_submission=submission, note="This is a test note"
+    )
 
     assert note.application_submission_id == submission.application_submission_id
     assert note.note == "This is a test note"
