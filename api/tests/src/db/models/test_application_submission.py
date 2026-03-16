@@ -1,7 +1,7 @@
 import uuid
 
 import src.util.file_util as file_util
-from tests.src.db.models.factories import ApplicationSubmissionFactory
+from tests.src.db.models.factories import ApplicationSubmissionFactory, ApplicationSubmissionNoteFactory, ApplicationSubmissionTrackingNumberFactory
 
 
 def test_application_submission_factory_creation(enable_factory_create, db_session):
@@ -61,3 +61,25 @@ def test_application_submission_file_creation(enable_factory_create, db_session,
 
     # Check that the file exists
     assert file_util.file_exists(submission.file_location) is True
+
+
+def test_application_submission_note_creation(enable_factory_create, db_session):
+    """Test that we can create an ApplicationSubmission with a note"""
+
+    submission = ApplicationSubmissionFactory.create()
+    note = ApplicationSubmissionNoteFactory.create(application_submission=submission, note="This is a test note")
+
+    assert note.application_submission_id == submission.application_submission_id
+    assert note.note == "This is a test note"
+
+
+def test_application_submission_tracking_number_creation(enable_factory_create, db_session):
+    """Test that we can create an ApplicationSubmission with a tracking number"""
+
+    submission = ApplicationSubmissionFactory.create()
+    tracking_number = ApplicationSubmissionTrackingNumberFactory.create(
+        application_submission=submission, tracking_number="GRANT12345678"
+    )
+
+    assert tracking_number.application_submission_id == submission.application_submission_id
+    assert tracking_number.tracking_number == "GRANT12345678"
