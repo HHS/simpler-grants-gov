@@ -210,9 +210,14 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
                 "attachment_field": str(referenced_attachment.application_attachment_id),
             },
         )
-        # Configure the form to treat attachment_field as an attachment reference field
+        # Configure the form for XML generation and attachment field identification.
+        # json_to_xml_schema drives GrantApplication.xml output;
+        # form_rule_schema is what _collect_referenced_attachment_ids now uses.
         app_form.form.json_to_xml_schema = {
             "_xml_config": {"attachment_fields": {"attachment_field": {}}}
+        }
+        app_form.form.form_rule_schema = {
+            "attachment_field": {"gg_validation": {"rule": "attachment"}}
         }
         db_session.flush()
 
