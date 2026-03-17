@@ -18,7 +18,7 @@ Feature: Saved Opportunities Page
     When the user clicks the "Workspace" dropdown button
     And the user clicks the "Saved opportunities" item in the Workspace dropdown
     Then the URL should contain "/saved-opportunities"
-    And the page title should be "Saved Opportunities | Simpler.Grants.gov" within <timeout> ms
+    And the page title should be "Saved Opportunities | Simpler.Grants.gov"
 
     Examples:
       | viewport |
