@@ -1,7 +1,5 @@
 """Tests for json_rule_validator, focusing on attachment ID collection."""
 
-import pytest
-
 from src.form_schema.rule_processing.json_rule_processor import process_rule_schema_for_context
 from tests.src.form_schema.rule_processing.conftest import setup_context
 
