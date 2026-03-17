@@ -492,7 +492,6 @@ class BuildAutomaticOpportunitiesTask(Task):
             OpportunityContainer(
                 opportunity_title="TEST-ALN-ALPHANUM-OT02",
                 opportunity_number="TEST-ALN-ALPHANUM-ON02",
-                opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000006"),
                 assistance_listing_number="93.AA1",
                 program_title="Alphanumeric ALN Test Program 2",
             ),
