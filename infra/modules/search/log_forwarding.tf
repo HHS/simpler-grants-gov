@@ -42,10 +42,10 @@ resource "aws_lambda_function" "nr_log_forwarder" {
 
   environment {
     variables = {
-      NR_LICENSE_KEY          = data.aws_ssm_parameter.newrelic_license_key.value
-      NR_LOGS_ENDPOINT        = "https://log-api.newrelic.com/log/v1"
-      AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
-      OPENSEARCH_DOMAIN_NAME  = aws_opensearch_domain.opensearch.domain_name
+      NR_LICENSE_KEY         = data.aws_ssm_parameter.newrelic_license_key.value
+      NR_LOGS_ENDPOINT       = "https://log-api.newrelic.com/log/v1"
+      AWS_ACCOUNT_ID         = data.aws_caller_identity.current.account_id
+      OPENSEARCH_DOMAIN_NAME = aws_opensearch_domain.opensearch.domain_name
     }
   }
 
