@@ -22,16 +22,13 @@ export const useClientFetch = <T>(
     url: string,
     options: RequestInit = {},
   ): Promise<Response> => {
-    console.log("in fetchwithauthcheck");
     const expired = await refreshIfExpired();
     if (expired && authGatedRequest) {
       router.refresh();
       throw new Error("local token expired, logging out");
     }
     await refreshIfExpiring();
-    console.log("calling fetch with url: " + url);
     const response = await fetch(url, options);
-    console.log("after fetch with response: " + response.status);
     if (response.status === 401) {
       await refreshUser();
       if (authGatedRequest) {
@@ -39,7 +36,6 @@ export const useClientFetch = <T>(
       }
       return response;
     }
-    console.log("returning with response: " + response.status);
     return response;
   };
 
@@ -50,9 +46,6 @@ export const useClientFetch = <T>(
   const clientFetch = useCallback(
     async (url: string, options: RequestInit = {}): Promise<T> => {
       const response = await fetchWithAuthCheck(url, options);
-      console.log("clientFetch url: " + url);
-      console.log("clientFetch options: " + options);
-      console.log("clientFetch response.status: " + response.status);
       if (response.ok && response.status === 200) {
         if (jsonResponse) {
           const data = (await response.json()) as T;

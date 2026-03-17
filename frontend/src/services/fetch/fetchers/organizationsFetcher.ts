@@ -11,14 +11,8 @@ import {
   UserRole,
 } from "src/types/userTypes";
 import { throwOnApiError } from "src/utils/apiUtils";
-import { fetchOrganizationWithMethod, fetchOrganizationBySavedOpportunities, fetchUserWithMethod } from "./fetchers";
 
-type ApplicationAddOrganizationApiResponse = {
-  message: string;
-  data: {
-    application_id: string;
-  };
-};
+import { fetchOrganizationWithMethod, fetchUserWithMethod } from "./fetchers";
 
 export const getOrganizationDetails = async (
   organizationId: string,
@@ -184,7 +178,7 @@ export const updateOrganizationUserRoles = async (
 
   const resp = await fetchOrganizationWithMethod("PUT")({
     subPath: `${organizationId}/users/${userId}`,
-    additionalHeaders: { "X-SGG-TOKEN": session.token },
+    additionalHeaders: { "X-SGG-Token": session.token },
     body: { role_ids: roleIds },
   });
 
@@ -211,7 +205,7 @@ export const removeOrganizationUser = async (
 
   const resp = await fetchOrganizationWithMethod("DELETE")({
     subPath: `${organizationId}/users/${userId}`,
-    additionalHeaders: { "X-SGG-TOKEN": session.token },
+    additionalHeaders: { "X-SGG-Token": session.token },
   });
 
   if (!resp.ok) {
@@ -222,61 +216,6 @@ export const removeOrganizationUser = async (
   }
 
   const json = (await resp.json()) as { data: UserDetail };
-  return json.data;
-};
-
-export const deleteOrganization = async (
-  opportunityId: string,
-  organizationId: string,
-
-): Promise<ApplicationAddOrganizationApiResponse> => {
-  const session = await getSession();
-
-  if (!session || !session.token) {
-    throw new UnauthorizedError("No active session");
-  }
-
-  const resp = await fetchOrganizationBySavedOpportunities("DELETE")({
-    subPath: `/v1/organizations/${organizationId}/saved-opportunities/${opportunityId}`,
-    additionalHeaders: { "X-SGG-TOKEN": session.token },
-  });
-
-  if (!resp.ok) {
-    await throwOnApiError(resp, {
-      operationName: "deleteOrganization",   //"removeOrganizationUser",
-      unauthorizedMessage: "No active session for deleting organizations.",
-    });
-  }
-
-  const json = (await resp.json()) as { data: ApplicationAddOrganizationApiResponse };
-  return json.data;
-};
-
-export const addOrganization = async (
-  organizationId: string,
-
-): Promise<ApplicationAddOrganizationApiResponse> => {
-  console.log("in addOrganization organizationId: " + organizationId);
-  const session = await getSession();
-
-  if (!session || !session.token) {
-    throw new UnauthorizedError("No active session");
-  }
-
-  const resp = await fetchOrganizationBySavedOpportunities("POST")({
-    subPath: `/v1/organizations/${organizationId}/saved-opportunities`,
-    additionalHeaders: { "X-SGG-TOKEN": session.token },
-  });
-  console.log("in addOrganization resp.json: " + resp.json());
-  if (!resp.ok) {
-    await throwOnApiError(resp, {
-      operationName: "addOrganization",
-      unauthorizedMessage: "No active session for adding organizations.",
-    });
-  }
-
-  const json = (await resp.json()) as { data: ApplicationAddOrganizationApiResponse };
-  console.log("in addOrganization json.data: " + json.data);
   return json.data;
 };
 
