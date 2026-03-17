@@ -6,12 +6,12 @@ from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models.competition_models import ApplicationSubmissionRetrieved
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
 from src.legacy_soap_api.grantors.services.confirm_application_delivery_response import (
-    CONFIRM_DELIVERY_FAULT_STRING,
     confirm_application_delivery_response,
 )
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientUserDoesNotHavePermission
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SoapRequestStreamer
+from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -117,14 +117,13 @@ class TestConfirmApplicationDeliveryResponse:
             GrantsGovTrackingNumber=tracking_number,
         )
 
-        result = confirm_application_delivery_response(
-            db_session=db_session,
-            soap_request=soap_request,
-            confirm_application_delivery_request=request_schema,
-            soap_config=_make_operation_config(),
-        )
-
-        assert result.response_message == CONFIRM_DELIVERY_FAULT_STRING
+        with pytest.raises(SOAPFaultException):
+            confirm_application_delivery_response(
+                db_session=db_session,
+                soap_request=soap_request,
+                confirm_application_delivery_request=request_schema,
+                soap_config=_make_operation_config(),
+            )
 
     def test_already_retrieved_by_same_user_returns_fault(self, db_session, enable_factory_create):
         """The same user calling ConfirmApplicationDelivery twice should fail."""
@@ -149,14 +148,13 @@ class TestConfirmApplicationDeliveryResponse:
             GrantsGovTrackingNumber=tracking_number,
         )
 
-        result = confirm_application_delivery_response(
-            db_session=db_session,
-            soap_request=soap_request,
-            confirm_application_delivery_request=request_schema,
-            soap_config=_make_operation_config(),
-        )
-
-        assert result.response_message == CONFIRM_DELIVERY_FAULT_STRING
+        with pytest.raises(SOAPFaultException):
+            confirm_application_delivery_response(
+                db_session=db_session,
+                soap_request=soap_request,
+                confirm_application_delivery_request=request_schema,
+                soap_config=_make_operation_config(),
+            )
 
         # Verify no additional retrieval record was inserted
         retrievals = (
@@ -226,14 +224,13 @@ class TestConfirmApplicationDeliveryResponse:
             GrantsGovTrackingNumber=tracking_number,
         )
 
-        result = confirm_application_delivery_response(
-            db_session=db_session,
-            soap_request=soap_request,
-            confirm_application_delivery_request=request_schema,
-            soap_config=_make_operation_config(),
-        )
-
-        assert result.response_message == CONFIRM_DELIVERY_FAULT_STRING
+        with pytest.raises(SOAPFaultException):
+            confirm_application_delivery_response(
+                db_session=db_session,
+                soap_request=soap_request,
+                confirm_application_delivery_request=request_schema,
+                soap_config=_make_operation_config(),
+            )
 
         # Verify NO retrieval record was inserted
         retrievals = (
@@ -243,7 +240,7 @@ class TestConfirmApplicationDeliveryResponse:
         )
         assert len(retrievals) == 0
 
-    def test_submission_not_found_returns_no_message(self, db_session, enable_factory_create):
+    def test_submission_not_found_raises_fault(self, db_session, enable_factory_create):
         agency = AgencyFactory.create()
         tracking_number = "GRANT99999999"
 
@@ -256,15 +253,13 @@ class TestConfirmApplicationDeliveryResponse:
             GrantsGovTrackingNumber=tracking_number,
         )
 
-        result = confirm_application_delivery_response(
-            db_session=db_session,
-            soap_request=soap_request,
-            confirm_application_delivery_request=request_schema,
-            soap_config=_make_operation_config(),
-        )
-
-        assert result.response_message is None
-        assert result.grants_gov_tracking_number == tracking_number
+        with pytest.raises(SOAPFaultException):
+            confirm_application_delivery_response(
+                db_session=db_session,
+                soap_request=soap_request,
+                confirm_application_delivery_request=request_schema,
+                soap_config=_make_operation_config(),
+            )
 
     def test_user_without_privileges_raises_permission_error(
         self, db_session, enable_factory_create
