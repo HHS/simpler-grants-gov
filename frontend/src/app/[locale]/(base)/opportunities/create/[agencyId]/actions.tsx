@@ -1,17 +1,14 @@
 "use server";
 
 import { getSession } from "src/services/auth/session";
-import { CreateOpportunityResponse } from "src/types/grantor/createOpportunityTypes";
 import { handleCreateOpportunity } from "src/services/fetch/fetchers/createOpportunityFetcher";
-import { getTranslations } from "next-intl/server";
+import { CreateOpportunityResponse } from "src/types/grantor/createOpportunityTypes";
 import { z } from "zod";
 
 const validateFormFields = async (formData: FormData) => {
-  const t = await getTranslations("Settings.validationErrors");
-  
   const schema = z.object({
     // This is a placeholder.
-    // Future: apply any frontend field validations that 
+    // Future: apply any frontend field validations that
     // have not been taken care of client-side.
     // Backend validations will be displayed in the main error field.
   });
@@ -36,7 +33,7 @@ export const createOpportunityAction = async (
 ): Promise<CreateOpportunityResponse> => {
   const session = await getSession();
 
-//   console.log("DEBUG: entering createOpportunityAction");
+  //   console.log("DEBUG: entering createOpportunityAction");
   if (!session || !session.token || !session.user_id) {
     return {
       errorMessage: "Session timed out. Please login again.",
@@ -80,5 +77,4 @@ export const createOpportunityAction = async (
       data: rawFormData,
     };
   }
-  
-}
+};

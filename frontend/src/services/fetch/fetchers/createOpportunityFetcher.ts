@@ -4,7 +4,7 @@ import { fetchGrantorWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { CreateOpportunityRecord } from "src/types/grantor/createOpportunityTypes";
 
 export const handleCreateOpportunity = async (
-  type: "POST",     // "POST" | "PUT" | "DELETE"
+  type: "POST", // "POST" | "PUT" | "DELETE"
   token: string,
   createOppSchema: CreateOpportunityRecord,
   opportunityId?: string,
@@ -12,14 +12,10 @@ export const handleCreateOpportunity = async (
   const ssgToken = {
     "X-SGG-Token": token,
   };
-  const subPath = 
-    type === "POST"
-      ? `opportunities`
-      : `opportunities/${opportunityId}`   // for select, update and delete
-      
-  const body =
-    type === "POST" || type === "PUT" ? createOppSchema 
-    : {};       // for select and delete
+  const subPath =
+    type === "POST" ? `opportunities` : `opportunities/${opportunityId}`; // for select, update and delete
+
+  const body = type === "POST" || type === "PUT" ? createOppSchema : {}; // for select and delete
 
   const response = await fetchGrantorWithMethod(type)({
     subPath,
@@ -28,5 +24,4 @@ export const handleCreateOpportunity = async (
   });
   const json = (await response.json()) as { data: CreateOpportunityRecord };
   return json.data;
-
 };

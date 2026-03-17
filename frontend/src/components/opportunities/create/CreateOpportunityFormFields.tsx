@@ -2,31 +2,25 @@
 // Use this in combo with FormGroup. For examples, see page opportunities/create/[agencyId]
 // Feel free to add attributes as needed, but don't delete any because others could be using them.
 
-import React, { useState } from 'react';
-
+import React, { useState } from "react";
 import {
   ErrorMessage,
   FormGroup,
   Label,
   Select,
-  TextInput,
   Textarea,
+  TextInput,
 } from "@trussworks/react-uswds";
 
-
-export const CommonText = ({
-  textContent,
-}: {
-  textContent: string;
-}) => {
+export const CommonText = ({ textContent }: { textContent: string }) => {
   return (
     <>
       <div className="font-sans-2xs" style={{ maxWidth: "550px" }}>
         {textContent}
       </div>
     </>
-  )
-}
+  );
+};
 
 // ----------------------------------------------------------
 // Common Label with ErrorMessage
@@ -34,7 +28,7 @@ export const CommonText = ({
 export const CommonLabel = ({
   labelId,
   labelText,
-  description,  // or instructions
+  description, // or instructions
   fieldId,
   isRequired,
   validationError = "",
@@ -65,20 +59,19 @@ export const CommonLabel = ({
   );
 };
 
-
 // ----------------------------------------------------------
 // Common TextInput with error block
 // ----------------------------------------------------------
 export const CommonTextInput = ({
   labelId,
   labelText,
-  description,  // or instructions
+  description, // or instructions
   fieldId,
   isRequired,
   fieldMaxLength,
   onTextChange,
-  defaultValue="",
-  validationError="",
+  defaultValue = "",
+  validationError = "",
 }: {
   labelId: string;
   labelText: string;
@@ -94,27 +87,26 @@ export const CommonTextInput = ({
     <>
       <FormGroup error={Boolean(validationError)} className="margin-top-1">
         <CommonLabel
-            labelId={labelId}
-            labelText={labelText}
-            description={description}
-            fieldId={fieldId}
-            isRequired={isRequired}
-            validationError={validationError}
+          labelId={labelId}
+          labelText={labelText}
+          description={description}
+          fieldId={fieldId}
+          isRequired={isRequired}
+          validationError={validationError}
         />
         <TextInput
-            type="text"
-            name={fieldId}
-            id={fieldId}
-            onChange={onTextChange}
-            maxLength={fieldMaxLength}
-            style={{ maxWidth: "550px" }}
-            defaultValue={defaultValue}
+          type="text"
+          name={fieldId}
+          id={fieldId}
+          onChange={onTextChange}
+          maxLength={fieldMaxLength}
+          style={{ maxWidth: "550px" }}
+          defaultValue={defaultValue}
         />
       </FormGroup>
     </>
   );
 };
-
 
 // ----------------------------------------------------------
 // Common Textarea with error block
@@ -122,13 +114,13 @@ export const CommonTextInput = ({
 export const CommonTextArea = ({
   labelId,
   labelText,
-  description,  // or instructions
+  description, // or instructions
   fieldId,
   isRequired,
   fieldMaxLength,
   onTextChange,
-  defaultValue="",
-  validationError="",
+  defaultValue = "",
+  validationError = "",
 }: {
   labelId: string;
   labelText: string;
@@ -144,39 +136,38 @@ export const CommonTextArea = ({
     <>
       <FormGroup error={Boolean(validationError)} className="margin-top-1">
         <CommonLabel
-            labelId={labelId}
-            labelText={labelText}
-            description={description}
-            fieldId={fieldId}
-            isRequired={isRequired}
-            validationError={validationError}
+          labelId={labelId}
+          labelText={labelText}
+          description={description}
+          fieldId={fieldId}
+          isRequired={isRequired}
+          validationError={validationError}
         />
         <Textarea
-            type="text"
-            name={fieldId}
-            id={fieldId}
-            onChange={onTextChange}
-            maxLength={fieldMaxLength}
-            style={{ maxWidth: "550px" }}
-            defaultValue={defaultValue}
+          type="text"
+          name={fieldId}
+          id={fieldId}
+          onChange={onTextChange}
+          maxLength={fieldMaxLength}
+          style={{ maxWidth: "550px" }}
+          defaultValue={defaultValue}
         />
       </FormGroup>
     </>
   );
 };
 
-
 // ----------------------------------------------------------
 // Common Select input with error block
 // ----------------------------------------------------------
 export interface KeyValuePair {
-    key: string;
-    value: string;
+  key: string;
+  value: string;
 }
 export const CommonSelectInput = ({
   labelId,
   labelText,
-  description,  // or instructions
+  description, // or instructions
   fieldId,
   isRequired,
   listKeyValuePairs,
@@ -191,17 +182,18 @@ export const CommonSelectInput = ({
   fieldId: string;
   isRequired: boolean;
   listKeyValuePairs: KeyValuePair[];
-  defaultSelection?: string;    // optional: default selection key
-  pleaseSelectText?: string;    // optional: e.g. --Please Select-- 
+  defaultSelection?: string; // optional: default selection key
+  pleaseSelectText?: string; // optional: e.g. --Please Select--
   onSelectionChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   validationError?: string;
 }) => {
-  
-  const [selectedValue, setSelectedValue] = useState<string>(defaultSelection || "");
+  const [selectedValue, setSelectedValue] = useState<string>(
+    defaultSelection || "",
+  );
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedValue(event.target.value);
     if (onSelectionChange) {
-        onSelectionChange(event);
+      onSelectionChange(event);
     }
   };
 
@@ -209,34 +201,31 @@ export const CommonSelectInput = ({
     <>
       <FormGroup error={Boolean(validationError)} className="margin-top-1">
         <CommonLabel
-            labelId={labelId}
-            labelText={labelText}
-            description={description}
-            fieldId={fieldId}
-            isRequired={isRequired}
-            validationError={validationError}
+          labelId={labelId}
+          labelText={labelText}
+          description={description}
+          fieldId={fieldId}
+          isRequired={isRequired}
+          validationError={validationError}
         />
         <Select
-            id={fieldId}
-            name={fieldId}
-            onChange={handleChange}
-            value={selectedValue}
-            style={{ maxWidth: "550px" }}
+          id={fieldId}
+          name={fieldId}
+          onChange={handleChange}
+          value={selectedValue}
+          style={{ maxWidth: "550px" }}
         >
-            {/* Default option */}
-            <option key={""} value={""} disabled>
+          {/* Default option */}
+          <option key={""} value={""} disabled>
             {pleaseSelectText}
-            </option>
+          </option>
 
-            {/* List of options */}
-            {listKeyValuePairs.map((item) => (
-            <option
-                key={item.key}
-                value={item.key}
-            >
-                {item.value}
+          {/* List of options */}
+          {listKeyValuePairs.map((item) => (
+            <option key={item.key} value={item.key}>
+              {item.value}
             </option>
-            ))}
+          ))}
         </Select>
       </FormGroup>
     </>

@@ -1,56 +1,65 @@
 "use client";
 
-import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { createOpportunityAction } from "src/app/[locale]/(base)/opportunities/create/[agencyId]/actions";
-import { CommonTextInput, CommonTextArea, CommonText, 
-  KeyValuePair, CommonSelectInput } from "./CreateOpportunityFormFields";
 
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useState } from "react";
 import { Alert, Button, Link } from "@trussworks/react-uswds";
-import { useActionState, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+
+import {
+  CommonSelectInput,
+  CommonText,
+  CommonTextArea,
+  CommonTextInput,
+  KeyValuePair,
+} from "./CreateOpportunityFormFields";
 
 // Category options
 const categoryList: KeyValuePair[] = [
-  { key: 'discretionary', value: 'Discretionary' },
-  { key: 'mandatory', value: 'Mandatory' },
-  { key: 'continuation', value: 'Continuation' },
-  { key: 'earmark', value: 'Earmark' },
-  { key: 'other', value: 'Other' },
+  { key: "discretionary", value: "Discretionary" },
+  { key: "mandatory", value: "Mandatory" },
+  { key: "continuation", value: "Continuation" },
+  { key: "earmark", value: "Earmark" },
+  { key: "other", value: "Other" },
 ];
 
-// Field level error messages
-let oppNbrVldtnError = "";
-let oppTitleVldtnError = "";
-let agencyVldtnError = "";
-let categoryVldtnError = "";
-let explanationVldtnError = "";
-
 // ----- Main Form -----
-export function CreateOpportunityForm ({
+export function CreateOpportunityForm({
   defaultAgencyId,
   userAgencies,
 }: {
   defaultAgencyId: string;
   userAgencies: KeyValuePair[];
 }) {
-  const t = useTranslations("CreateOpportunity.CreateOpportunityPage1");
+  const t = useTranslations("CreateOpportunity.CreateOpportunityForm");
   const tg = useTranslations("CommonLabels");
+  const th = useTranslations("CreateOpportunity");
+  const [disableSave, setDisableSave] = useState<boolean>(true);
 
-  const [response, formAction, isPending] = useActionState(createOpportunityAction, {
-    validationErrors: {},
-  });
+  const [response, formAction, isPending] = useActionState(
+    createOpportunityAction,
+    {
+      validationErrors: {},
+    },
+  );
 
   // Use useEffect to detect success and redirect
   const router = useRouter();
   useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth", // Smooth scrolling animation
+    });
     if (response?.success) {
-      router.push('/opportunities'); 
+      router.push("/opportunities");
+    } else {
+      setDisableSave(true); // on text change does not seem to reset this?
     }
   }, [response, router]);
 
-  // Variables to store the form field values. Needed in order to check 
-  // required fields (on individual field value change) to enable the Save button. 
+  // Variables to store the form field values. Needed in order to check
+  // required fields (on individual field value change) to enable the Save button.
   let opportunityNumber = "";
   let opportunityTitle = "";
   let selectedAgencyId = defaultAgencyId;
@@ -64,14 +73,14 @@ export function CreateOpportunityForm ({
   // const [opportunityTitle, setOppTitle] = useState<string>("");
   // const [selectedCategoryId, setCategory] = useState<string>("");
   // const [category_explanation, setExplain] = useState<string>("");
- 
-  //Category: if Other then show the Explanation field
+
+  // Category: if Other then show the Explanation field
   const [showExplain, setShowExplain] = useState<boolean>(false);
   const onCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log("DEBUG: e.target.value is ", e.target.value);
-    //setCategory(e.target.value);
+    // console.log("DEBUG: e.target.value is ", e.target.value);
+    // setCategory(e.target.value);
     selectedCategoryId = e.target.value;
-    console.log("DEBUG: category is ", selectedCategoryId);   // is still old value w/ useState()
+    // console.log("DEBUG: category is ", selectedCategoryId);   // is still old value w/ useState()
     checkRequiredFields();
     if (selectedCategoryId === "other") {
       setShowExplain(true);
@@ -80,49 +89,48 @@ export function CreateOpportunityForm ({
     }
   };
 
-  const [disableSave, setDisableSave] = useState<boolean>(true);
-  // If there was a validation error, disable the Save button until the user fixes/changes the input
-  // if (response?.errorMessage) {
-  //   setDisableSave(true);
-  // }  -- EXCEPTION: Too many re-renders...
-
   // Check required fields to enable the Save button
+  // const [disableSave, setDisableSave] = useState<boolean>(true);
   const checkRequiredFields = () => {
-    if (opportunityNumber.trim().length == 0
-      || opportunityTitle.trim().length == 0
-      || selectedCategoryId === ""
-      || selectedAgencyId === "") {
-        setDisableSave(true);
-        return;
-      }
+    if (
+      opportunityNumber.trim().length === 0 ||
+      opportunityTitle.trim().length === 0 ||
+      selectedCategoryId === "" ||
+      selectedAgencyId === ""
+    ) {
+      setDisableSave(true);
+      return;
+    }
     // if Category is 'Other' then an Explanation is required
-    if (selectedCategoryId === "other"
-      && categoryExplanation.trim().length == 0) {
-        setDisableSave(true);
-        return;
-    }    
-    console.log('checkRequiredFields: All requirements met');
+    if (
+      selectedCategoryId === "other" &&
+      categoryExplanation.trim().length === 0
+    ) {
+      setDisableSave(true);
+      return;
+    }
+    // console.log('checkRequiredFields: All requirements met');
     setDisableSave(false);
-  }
+  };
 
   // Save values as the user inputs the fields & check for required fields
   const onOppNbrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //setOppNbr(e.target.value);
+    // setOppNbr(e.target.value);
     opportunityNumber = e.target.value;
     checkRequiredFields();
   };
   const onOppTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //setOppTitle(e.target.value);
+    // setOppTitle(e.target.value);
     opportunityTitle = e.target.value;
     checkRequiredFields();
   };
   const onAgencySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    //setAgencyId(e.target.value);
+    // setAgencyId(e.target.value);
     selectedAgencyId = e.target.value;
     checkRequiredFields();
   };
   const onExplanationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //setExplain(e.target.value);
+    // setExplain(e.target.value);
     categoryExplanation = e.target.value;
     checkRequiredFields();
   };
@@ -130,9 +138,32 @@ export function CreateOpportunityForm ({
   // Display the form
   return (
     <>
-      <form action={formAction} className="flex-1 margin-top-2 simpler-apply-form">
-        <div data-testid="formGroup" className="width-full">
+      {response?.errorMessage && (
+        <Alert
+          heading={tg("errorHeading")}
+          headingLevel="h2"
+          type="error"
+          validation
+        >
+          {response?.errorMessage}
+        </Alert>
+      )}
+      {response?.success && (
+        <Alert heading={tg("successHeading")} headingLevel="h2" type="success">
+          {t("successMessage")}
+        </Alert>
+      )}
 
+      <h2>{th("keyInfo")}</h2>
+      <div className="display-flex flex-justify">
+        <div>{th("basicInstructions")}</div>
+      </div>
+
+      <form
+        action={formAction}
+        className="flex-1 margin-top-2 simpler-apply-form"
+      >
+        <div data-testid="formGroup" className="width-full">
           {/* Opportunity Number */}
           <CommonTextInput
             labelId="label-for-opportunityNumber"
@@ -141,13 +172,10 @@ export function CreateOpportunityForm ({
             fieldId="opportunityNumber"
             fieldMaxLength={40}
             isRequired={true}
-            validationError={oppNbrVldtnError}
             onTextChange={onOppNbrChange}
             defaultValue={response?.data?.opportunity_number || ""}
           />
-          <CommonText
-            textContent={t("charactersAllowed40")}
-          />
+          <CommonText textContent={t("charactersAllowed40")} />
 
           {/* Opportunity Title */}
           <CommonTextArea
@@ -157,13 +185,10 @@ export function CreateOpportunityForm ({
             fieldId="opportunityTitle"
             fieldMaxLength={255}
             isRequired={true}
-            validationError={oppTitleVldtnError}
             onTextChange={onOppTitleChange}
             defaultValue={response?.data?.opportunity_title || ""}
           />
-          <CommonText
-            textContent={t("charactersAllowed255")}
-          />
+          <CommonText textContent={t("charactersAllowed255")} />
 
           {/* Agency */}
           <CommonSelectInput
@@ -173,8 +198,7 @@ export function CreateOpportunityForm ({
             fieldId="agencyId"
             isRequired={true}
             listKeyValuePairs={userAgencies}
-            defaultSelection={ response?.data?.agency_id || selectedAgencyId }
-            validationError={agencyVldtnError}
+            defaultSelection={response?.data?.agency_id || selectedAgencyId}
             onSelectionChange={onAgencySelection}
           />
 
@@ -186,68 +210,47 @@ export function CreateOpportunityForm ({
             fieldId="category"
             isRequired={true}
             listKeyValuePairs={categoryList}
-            defaultSelection={ response?.data?.category || "" }
-            validationError={categoryVldtnError}
+            defaultSelection={response?.data?.category || ""}
             onSelectionChange={onCategorySelection}
           />
 
           {/* Category-Other Explanation */}
-          { showExplain && <CommonTextArea
-            labelId="label-for-categoryExplanation"
-            labelText={t("categoryExplanation")}
-            description={t("categoryExplanationDesc")}
-            fieldId="categoryExplanation"
-            fieldMaxLength={2000}
-            isRequired={true}
-            validationError={explanationVldtnError}
-            onTextChange={onExplanationChange}
-            defaultValue={response?.data?.category_explanation || ""}
-
-          /> }
-          { showExplain && <CommonText
-            textContent={t("charactersAllowed255")}
-          /> }
-
+          {showExplain && (
+            <CommonTextArea
+              labelId="label-for-categoryExplanation"
+              labelText={t("categoryExplanation")}
+              description={t("categoryExplanationDesc")}
+              fieldId="categoryExplanation"
+              fieldMaxLength={2000}
+              isRequired={true}
+              onTextChange={onExplanationChange}
+              defaultValue={response?.data?.category_explanation || ""}
+            />
+          )}
+          {showExplain && (
+            <CommonText textContent={t("charactersAllowed255")} />
+          )}
         </div>
 
         <div className="display-flex flex-left margin-top-5">
           <Link href="/opportunities">
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               name="cancel_button"
-              className="usa-button--outline">
-                {tg("cancel")}
+              className="usa-button--outline"
+            >
+              {tg("cancel")}
             </Button>
           </Link>
-          <Button 
-            disabled={disableSave || isPending }
-            type="submit" 
-            name="save_button">
-              { tg(isPending ? "pending" : "saveAndContinue")}
+          <Button
+            disabled={disableSave || isPending}
+            type="submit"
+            name="save_button"
+          >
+            {tg(isPending ? "pending" : "saveAndContinue")}
           </Button>
         </div>
-
       </form>
-
-      {response?.errorMessage && (
-        <Alert
-          heading={tg("errorHeading")}
-          headingLevel="h2"
-          type="error"
-          validation>
-            {response?.errorMessage}
-        </Alert>
-      )}
-      {response?.success && (
-        <Alert 
-          heading={tg("successHeading")} 
-          headingLevel="h2" 
-          type="success">
-            {t("successMessage")}  
-        </Alert>
-      )}
-      
-    </>    
-  )
+    </>
+  );
 }
-

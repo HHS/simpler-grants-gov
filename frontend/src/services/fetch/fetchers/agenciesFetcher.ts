@@ -1,8 +1,7 @@
 "server only";
 
+import { ApiRequestError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import { UnauthorizedError } from "src/errors";
-import { ApiRequestError } from "src/errors";
 import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import { searchAgencies, fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
@@ -77,9 +76,9 @@ export const searchAndFlattenAgencies = async (
   }
 };
 
-//------------------------------------------------------
+// ------------------------------------------------------
 // Fetch user's agencies
-//------------------------------------------------------
+// ------------------------------------------------------
 export const getUserAgencies = async (
   token: string,
   userId: string,
