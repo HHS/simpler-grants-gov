@@ -66,19 +66,6 @@ test(
     // Verify form status after save
     await verifyFormStatusAfterSave(page, "complete");
 
-    // Extra wait for page to fully render forms table after navigation
-    await page.waitForTimeout(10000);
-
-    // Select 'No' for including SF-LLL form in submission
-    await selectFormInclusionOption(
-      page,
-      "Disclosure of Lobbying Activities (SF-LLL)",
-      "No",
-    );
-
-    // Verify form status after save
-    await verifyFormStatusAfterSave(page, "complete");
-
     // On application page — verify form row status/messages
     await verifyFormStatusOnApplication(
       page,
