@@ -166,7 +166,7 @@ const RecommendationSection = ({
                   })}
                 </p>
                 <Radio
-                  id="merit-review-only"
+                  id="merit_review_only"
                   name="award_selection_method"
                   label={t("recommendationMethod.meritReviewOnly", {
                     defaultValue: "Merit review ranking only",
@@ -174,7 +174,7 @@ const RecommendationSection = ({
                   value="merit-review-only"
                 />
                 <Radio
-                  id="merit-review-other"
+                  id="merit_review_other"
                   name="award_selection_method"
                   label={t("recommendationMethod.meritReviewOther", {
                     defaultValue: "Merit review ranking with other factors",

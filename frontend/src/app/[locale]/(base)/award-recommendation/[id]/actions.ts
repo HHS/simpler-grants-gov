@@ -6,6 +6,30 @@ export type AwardRecommendationActionResponse = {
   validationErrors?: Record<string, string[]>;
 };
 
+/**
+ * Safely extracts a value from FormData with explicit null/File handling
+ * @param formData - The FormData object
+ * @param key - The key to extract
+ * @returns The value as string, or empty string if null/undefined/File
+ */
+function getFormDataValue(formData: FormData, key: string): string {
+  const value = formData.get(key);
+
+  // Handle null or undefined
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  // Handle File type - reject it
+  if (value instanceof File) {
+    console.warn(`Unexpected File type for form field "${key}"`);
+    return "";
+  }
+
+  // Return the string value
+  return value;
+}
+
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function saveAwardRecommendation(
   formData: FormData,
@@ -13,10 +37,13 @@ export async function saveAwardRecommendation(
   // Extract form data
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const rawFormData = {
-    additionalInfo: formData.get("additional_info") as string,
-    awardSelectionMethod: formData.get("award_selection_method") as string,
-    awardSelectionDetails: formData.get("award_selection_details") as string,
-    otherKeyInformation: formData.get("other_key_information") as string,
+    additionalInfo: getFormDataValue(formData, "additional_info"),
+    awardSelectionMethod: getFormDataValue(formData, "award_selection_method"),
+    awardSelectionDetails: getFormDataValue(
+      formData,
+      "award_selection_details",
+    ),
+    otherKeyInformation: getFormDataValue(formData, "other_key_information"),
   };
 
   try {
@@ -44,10 +71,13 @@ export async function submitAwardRecommendationForReview(
   // Extract form data
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const rawFormData = {
-    additionalInfo: formData.get("additional_info") as string,
-    awardSelectionMethod: formData.get("award_selection_method") as string,
-    awardSelectionDetails: formData.get("award_selection_details") as string,
-    otherKeyInformation: formData.get("other_key_information") as string,
+    additionalInfo: getFormDataValue(formData, "additional_info"),
+    awardSelectionMethod: getFormDataValue(formData, "award_selection_method"),
+    awardSelectionDetails: getFormDataValue(
+      formData,
+      "award_selection_details",
+    ),
+    otherKeyInformation: getFormDataValue(formData, "other_key_information"),
   };
 
   try {

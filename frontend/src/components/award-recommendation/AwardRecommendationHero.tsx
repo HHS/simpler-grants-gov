@@ -90,14 +90,12 @@ export default async function AwardRecommendationHero({
                 {buttons.map((button, index) => {
                   if (button.type === "navigation") {
                     return (
-                      <Link key={index} href={button.href}>
-                        <Button
-                          type="button"
-                          outline={button.outline}
-                          className="width-auto"
-                        >
-                          {button.label}
-                        </Button>
+                      <Link
+                        key={index}
+                        href={button.href}
+                        className={`usa-button ${button.outline ? "usa-button--outline" : ""} width-auto`}
+                      >
+                        {button.label}
                       </Link>
                     );
                   } else {

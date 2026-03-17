@@ -68,7 +68,7 @@ describe("AwardRecommendationHero", () => {
     render(component);
 
     const buttons = screen.getAllByRole("button");
-    expect(buttons.length).toEqual(2);
+    expect(buttons.length).toEqual(1);
     expect(screen.getByText("Edit")).toBeInTheDocument();
     expect(screen.getByText("Submit")).toBeInTheDocument();
   });
