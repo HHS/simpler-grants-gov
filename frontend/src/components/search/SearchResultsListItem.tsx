@@ -15,7 +15,7 @@ interface SearchResultsListItemProps {
   saved?: boolean;
   index: number;
   page?: number;
-  // onShareClick?: () => void;
+  onShareClick?: (buttonElement: HTMLButtonElement) => void;
 }
 
 const metadataBorderClasses = `
@@ -42,7 +42,7 @@ export default function SearchResultsListItem({
   saved = false,
   index,
   page = 1,
-  // onShareClick,
+  onShareClick,
 }: SearchResultsListItemProps) {
   const t = useTranslations("Search");
 
@@ -109,7 +109,6 @@ export default function SearchResultsListItem({
         </div>
         <div className="desktop:grid-col-auto">
           <div className="overflow-hidden font-sans-xs">
-            {/* TODO: Better way to format as a dollar amounts */}
             <span className="desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0">
               <strong>{t("resultsListItem.awardCeiling")}</strong>
               <span className="desktop:display-block desktop:font-sans-lg text-ls-neg-3 text-right">
@@ -121,17 +120,18 @@ export default function SearchResultsListItem({
               {opportunity?.summary?.award_floor?.toLocaleString() || "--"}
             </span>
           </div>
-          {/* {saved && onShareClick ? (
+          {saved && onShareClick ? (
             <div className="margin-top-1 text-right">
               <button
+                id={`share-opportunity-button-${opportunity.opportunity_id}`}
                 type="button"
                 className="usa-button usa-button--unstyled font-sans-2xs"
-                onClick={onShareClick}
+                onClick={(event) => onShareClick?.(event.currentTarget)}
               >
                 {t("callToAction.shareWithOrganization")}
               </button>
             </div>
-          ) : null} */}
+          ) : null}
         </div>
       </div>
     </div>

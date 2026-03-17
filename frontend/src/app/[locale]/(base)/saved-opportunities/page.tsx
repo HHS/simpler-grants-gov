@@ -48,7 +48,6 @@ export default async function SavedOpportunities({
   const { status } = await searchParams;
   const t = await getTranslations({ locale });
 
-  // Fetch saved opportunities (filtered if status is provided)
   const savedOpportunities = await fetchSavedOpportunities(status);
 
   let hasSavedOpportunities = savedOpportunities.length > 0;
@@ -57,15 +56,17 @@ export default async function SavedOpportunities({
     hasSavedOpportunities = allSavedOpportunities.length > 0;
   }
 
-  // Get full opportunity details for each saved opportunity
-  const opportunityPromises = savedOpportunities.map(
-    async (savedOpportunity) => {
-      const { data: opportunityData } = await getOpportunityDetails(
-        String(savedOpportunity.opportunity_id),
-      );
-      return opportunityData;
-    },
-  );
+  const opportunityPromises = savedOpportunities.map(async (savedOpportunity) => {
+    const { data: opportunityData } = await getOpportunityDetails(
+      savedOpportunity.opportunity_id,
+    );
+
+    return {
+      ...opportunityData,
+      saved_to_organizations: savedOpportunity.saved_to_organizations ?? [],
+    };
+  });
+
   const resolvedOpportunities = await Promise.all(opportunityPromises);
 
   return (
