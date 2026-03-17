@@ -50,20 +50,27 @@ const FIELD_LIST_INDEX_TOKEN = "~~index~~" as const;
  * The FieldList widget later replaces `~~index~~` with the actual row index
  * when rendering each row.
  *
- * This helper preserves the original schema path from the child field id
- * while inserting the `[~~index~~]` placeholder at the FieldList segment.
+ * If the child field id already contains the FieldList segment, this helper
+ * replaces that segment with the indexed version.
  *
  * Example:
  *
- *   childId: "contact_people_test--items--first_name"
+ *   childId: "topField--contacts--firstName"
  *
  * becomes:
  *
- *   "contact_people_test--items[~~index~~]--first_name"
+ *   "topField--contacts[~~index~~]--firstName"
  *
- * Preserving the full path keeps the generated id aligned with the UI schema
- * structure while still allowing the FieldList widget to scope each rendered
- * field instance to its corresponding row.
+ * If the FieldList segment is not present in the child id, the helper falls
+ * back to building the id from the FieldList name and the final field key.
+ *
+ * Example fallback:
+ *
+ *   childId: "topField--firstName"
+ *
+ * becomes:
+ *
+ *   "contacts[~~index~~]--firstName"
  */
 export function buildFieldListBaseId({
   fieldListName,
@@ -72,17 +79,19 @@ export function buildFieldListBaseId({
   fieldListName: string;
   childId: string;
 }): string {
-  const childIdParts = childId.split("--");
-  const finalFieldKey = childIdParts[childIdParts.length - 1];
-  const originalPathPrefix = childId.split("--").slice(0, -1).join("--");
+  const token = `--${fieldListName}--`;
 
-  if (!originalPathPrefix) {
-    return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
+  if (childId.includes(token)) {
+    return childId.replace(
+      token,
+      `--${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--`,
+    );
   }
 
-  // Preserve the full schema path in the generated id so that the UI schema
-  // and serialized form data paths remain clearly aligned.
-  return `${originalPathPrefix}--${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
+  const childIdParts = childId.split("--");
+  const finalFieldKey = childIdParts[childIdParts.length - 1];
+
+  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
 }
 
 type FieldWidgetConfig = {

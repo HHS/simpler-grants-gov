@@ -310,6 +310,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
                 ...groupItem.generalProps,
                 schema: groupItem.generalProps.schema as RJSFSchema,
                 id: generatedId,
+                name: generatedId,
                 key: generatedId,
                 value: currentValue,
                 onChange: (nextValue: unknown): void => {
