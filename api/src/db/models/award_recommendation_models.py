@@ -52,6 +52,7 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
         LookupColumn(LkAwardSelectionMethod),
         ForeignKey(LkAwardSelectionMethod.award_selection_method_id),
     )
+    selection_method_detail: Mapped[str | None]
     other_key_information: Mapped[str | None]
 
     is_deleted: Mapped[bool] = mapped_column(default=False)
