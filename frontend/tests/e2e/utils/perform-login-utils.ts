@@ -164,7 +164,6 @@ export const performStagingLogin = async (
     'button:has-text("Sign out"), a:has-text("Sign out")',
   );
   if (await existingSignOut.isVisible({ timeout: 3000 }).catch(() => false)) {
-    // console.log("performStagingLogin: already logged in, skipping login flow");
     return existingSignOut;
   }
 

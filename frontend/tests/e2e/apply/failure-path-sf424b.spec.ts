@@ -10,9 +10,12 @@ import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { SF424B_FORM_MATCHER } from "tests/e2e/utils/forms/fill-sf424b-form-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
-import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
+import {
+  verifyFormStatusAfterSave,
+  verifyFormStatusOnApplication,
+} from "tests/e2e/utils/forms/verify-form-status-utils";
 
-const { testOrgLabel } = playwrightEnv;
+const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
@@ -24,37 +27,44 @@ const sf424bErrors = [
   },
 ];
 
-test(
-  "SF-424B error validation - required fields and inline errors",
-  { tag: "@auth" },
-  async (
-    { page, context }: { page: Page; context: BrowserContext },
-    testInfo: TestInfo,
-  ) => {
-    test.setTimeout(300_000); // 5 min timeout
+// Skip non-Chrome browsers in staging
+test.beforeEach(({ page: _ }, testInfo) => {
+  if (targetEnv === "staging") {
+    test.skip(
+      testInfo.project.name !== "Chrome",
+      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
+    );
+  }
+});
 
-    const isMobile = testInfo.project.name.match(/[Mm]obile/);
+test("SF-424B error validation - required fields and inline errors", async ({
+  page,
+  context,
+}: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
+  test.setTimeout(300_000); // 5 min timeout
 
-    await authenticateE2eUser(page, context, !!isMobile);
+  const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
-    await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-    const applicationUrl = page.url();
+  await authenticateE2eUser(page, context, !!isMobile);
 
-    if (await openForm(page, SF424B_FORM_MATCHER)) {
-      // Do not enter anything and click save
-      await saveForm(page, true); // expect validation errors
+  await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
+  const applicationUrl = page.url();
 
-      // Checks error alert list at top of form page
-      // Scrolls down and checks inline field errors on form page
-      // Navigates to application landing page
-      // Scrolls down and checks "Some issues found" in form row
-      await verifyFormStatusAfterSave(
-        page,
-        "incomplete",
-        "SF-424B",
-        applicationUrl,
-        sf424bErrors,
-      );
-    }
-  },
-);
+  if (await openForm(page, SF424B_FORM_MATCHER)) {
+    // Do not enter anything and click save
+    await saveForm(page, true); // expect validation errors
+
+    // Checks error alert list at top of form page
+    // Scrolls down and checks inline field errors on form page
+    // Navigates to application landing page
+    // Scrolls down and checks "Some issues found" in form row
+    await verifyFormStatusAfterSave(page, "incomplete", sf424bErrors);
+    // On application page — verify form row status/messages
+    await verifyFormStatusOnApplication(
+      page,
+      "incomplete",
+      "SF-424B",
+      applicationUrl,
+    );
+  }
+});

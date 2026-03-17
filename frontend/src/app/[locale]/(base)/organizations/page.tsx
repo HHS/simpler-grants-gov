@@ -11,6 +11,7 @@ import { setRequestLocale } from "next-intl/server";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
 import { AuthenticationGate } from "src/components/user/AuthenticationGate";
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
 
@@ -18,7 +19,19 @@ const OrganizationsPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Organizations");
   return (
     <GridContainer>
-      <h1 className="margin-top-9 margin-bottom-5">{t("pageTitle")}</h1>
+      <Breadcrumbs
+        breadcrumbList={[
+          {
+            title: t("breadcrumbWorkspace"),
+            path: `/dashboard`,
+          },
+          {
+            title: t("breadcrumbOrganizations"),
+            path: `/organizations`,
+          },
+        ]}
+      />
+      <h1 className="margin-top-0 margin-bottom-5">{t("pageTitle")}</h1>
       {children}
     </GridContainer>
   );

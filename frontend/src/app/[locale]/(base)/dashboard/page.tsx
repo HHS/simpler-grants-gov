@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { ACTIVITY_DASHBOARD_CRUMBS } from "src/constants/breadcrumbs";
 import { getSession } from "src/services/auth/session";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 import {
@@ -12,10 +11,9 @@ import { OrganizationInvitation } from "src/types/userTypes";
 import { getTranslations } from "next-intl/server";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
-import { ActivityDashboardLinksSection } from "src/components/workspace/ActivityDashboardLinksSection";
 import { OrganizationInvitationReplies } from "src/components/workspace/OrganizationInvitationReplies";
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
+import { WorkspaceDashboardLinksSection } from "src/components/workspace/WorkspaceDashboardLinksSection";
 
 export async function generateMetadata({
   params,
@@ -23,14 +21,14 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("ActivityDashboard.pageTitle"),
+    title: t("WorkspaceDashboard.pageTitle"),
     description: t("Index.metaDescription"),
   };
   return meta;
 }
 
-async function ActivityDashboard() {
-  const t = await getTranslations("ActivityDashboard");
+async function WorkspaceDashboard() {
+  const t = await getTranslations("WorkspaceDashboard");
 
   const session = await getSession();
   if (!session?.email) {
@@ -62,8 +60,7 @@ async function ActivityDashboard() {
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
-      <Breadcrumbs breadcrumbList={ACTIVITY_DASHBOARD_CRUMBS} />
-      <h1 className="margin-top-2">
+      <h1>
         {t.rich("title", {
           color: (chunks) => (
             <span className="text-primary-dark">{chunks}</span>
@@ -75,7 +72,7 @@ async function ActivityDashboard() {
       ) : (
         <></>
       )}
-      <ActivityDashboardLinksSection />
+      <WorkspaceDashboardLinksSection />
       {userRoles && userOrganizations ? (
         <div className="margin-top-4">
           <h2>{t("organizations")}</h2>
@@ -91,4 +88,4 @@ async function ActivityDashboard() {
   );
 }
 
-export default ActivityDashboard;
+export default WorkspaceDashboard;

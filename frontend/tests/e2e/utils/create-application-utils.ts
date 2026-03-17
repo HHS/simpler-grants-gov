@@ -3,6 +3,8 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 
+import { gotoWithRetry } from "./lifecycle-utils";
+
 const { baseUrl } = playwrightEnv;
 
 // Retry config for transient network errors (e.g. net::ERR_NETWORK_CHANGED)

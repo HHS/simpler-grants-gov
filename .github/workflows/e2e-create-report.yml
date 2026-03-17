@@ -8,17 +8,14 @@ on:
       artifact-ids:
         description: "comma separated string of test report artifact ids to download"
         type: string
-
 env:
   NODE_VERSION: 24
   LOCKFILE_PATH: ./frontend/package-lock.json
   PACKAGE_MANAGER: npm
   NODE_OPTIONS: --dns-result-order=ipv4first
-
 defaults:
   run:
     working-directory: ./frontend
-
 jobs:
   e2e-create-report:
     continue-on-error: true
@@ -26,19 +23,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
-
       - name: Install Playwright Dependencies
         run: |
           npm ci
           npx playwright install --with-deps
-
       - name: Download All Blob Reports
         uses: actions/download-artifact@v7
         with:
@@ -48,20 +42,16 @@ jobs:
           # Merges both auth and no-auth test artifacts
           pattern: blob-report*-shard-*
           merge-multiple: true
-
       - name: Verify Downloaded Artifacts
         run: |
           echo "Contents of all-blob-reports after download:"
           ls -R all-blob-reports*
-
       - name: Merge Blob Reports into HTML
         run: npx playwright merge-reports --reporter html ./all-blob-reports
-
       - name: Verify Downloaded Artifacts
         run: |
           echo "Contents of all-blob-reports after download:"
           ls -R playwright*
-
       - name: Upload Merged HTML Report
         uses: actions/upload-artifact@v6
         with:

@@ -251,6 +251,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             soap_request=self.soap_request,
             request=grantors_schemas.GetSubmissionListExpandedRequest(**soap_request_dict),
             proxy_response=proxy_response,
+            soap_config=self.operation_config,
         )
 
     def _gen_response_data(

@@ -1107,6 +1107,24 @@ class UserSavedOpportunityFactory(BaseFactory):
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
 
+class UserSavedOpportunityNotificationFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserSavedOpportunityNotification
+
+    user_saved_opportunity_notification_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+    # None means user's own settings; set organization to an OrganizationFactory instance for org-scoped settings
+    organization = None
+    organization_id = factory.LazyAttribute(
+        lambda o: o.organization.organization_id if o.organization is not None else None
+    )
+
+    email_enabled = factory.LazyAttribute(lambda o: o.organization is None)
+
+
 class UserSavedSearchFactory(BaseFactory):
     class Meta:
         model = user_models.UserSavedSearch
@@ -1662,6 +1680,14 @@ class ApplicationSubmissionFactory(BaseFactory):
         lambda s: f"s3://local-mock-public-bucket/applications/{s.application_id}/submissions/{fake.uuid4()}/submission.zip"
     )
 
+    application_submission_number = factory.LazyAttribute(
+        lambda f: f"{f.application.competition.opportunity.opportunity_number}-{fake.unique.pystr_format(string_format="##???").upper()}"
+    )
+    project_title = factory.Faker("sentence")
+    total_requested_amount = sometimes_none(
+        factory.Faker("pydecimal", left_digits=7, right_digits=2, positive=True)
+    )
+
     @classmethod
     def _build(cls, model_class, *args, **kwargs):
         kwargs.pop("file_contents", None)  # Don't file for build strategy
@@ -1806,6 +1832,46 @@ class ApplicationAuditFactory(BaseFactory):
                 ApplicationFormFactory, application=factory.SelfAttribute("..application")
             ),
         )
+
+
+class ApplicationSubmissionNoteFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationSubmissionNote
+
+    application_submission_note_id = Generators.UuidObj
+
+    application_submission = factory.SubFactory(ApplicationSubmissionFactory)
+    application_submission_id = factory.LazyAttribute(
+        lambda s: s.application_submission.application_submission_id
+    )
+
+    note = factory.Faker("test note for application submission")
+
+    created_by_user = factory.SubFactory(UserFactory)
+    created_by_user_id = factory.LazyAttribute(lambda o: o.created_by_user.user_id)
+
+    modified_by_user = factory.SubFactory(UserFactory)
+    modified_by_user_id = factory.LazyAttribute(lambda o: o.modified_by_user.user_id)
+
+
+class ApplicationSubmissionTrackingNumberFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationSubmissionTrackingNumber
+
+    application_submission_tracking_number_id = Generators.UuidObj
+
+    application_submission = factory.SubFactory(ApplicationSubmissionFactory)
+    application_submission_id = factory.LazyAttribute(
+        lambda s: s.application_submission.application_submission_id
+    )
+
+    tracking_number = factory.Faker("bothify", text="GRANT########")
+
+    created_by_user = factory.SubFactory(UserFactory)
+    created_by_user_id = factory.LazyAttribute(lambda o: o.created_by_user.user_id)
+
+    modified_by_user = factory.SubFactory(UserFactory)
+    modified_by_user_id = factory.LazyAttribute(lambda o: o.modified_by_user.user_id)
 
 
 ###################
@@ -3316,3 +3382,21 @@ class WorkflowApprovalFactory(BaseFactory):
 
     event = factory.SubFactory(WorkflowEventHistoryFactory)
     event_id = factory.LazyAttribute(lambda a: a.event.event_id)
+
+
+class ApplicationSubmissionRetrievedFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationSubmissionRetrieved
+
+    application_submission_retrieved_id = Generators.UuidObj
+
+    application_submission = factory.SubFactory(ApplicationSubmissionFactory)
+    application_submission_id = factory.LazyAttribute(
+        lambda o: o.application_submission.application_submission_id
+    )
+
+    created_by_user = factory.SubFactory(UserFactory)
+    created_by_user_id = factory.LazyAttribute(lambda o: o.created_by_user.user_id)
+
+    modified_by_user = factory.SubFactory(UserFactory)
+    modified_by_user_id = factory.LazyAttribute(lambda o: o.modified_by_user.user_id)

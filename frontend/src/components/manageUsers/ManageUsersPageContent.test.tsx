@@ -106,8 +106,8 @@ describe("ManageUsersPageContent", () => {
 
     expect(BreadcrumbsMock).toHaveBeenCalledTimes(1);
     const breadcrumbsProps = BreadcrumbsMock.mock.calls[0][0];
-    expect(breadcrumbsProps.breadcrumbList).toHaveLength(2);
-    expect(breadcrumbsProps.breadcrumbList[0]).toEqual({
+    expect(breadcrumbsProps.breadcrumbList).toHaveLength(4);
+    expect(breadcrumbsProps.breadcrumbList[2]).toEqual({
       title: "Cool Org Inc",
       path: `/organizations/${organizationId}`,
     });
@@ -134,7 +134,7 @@ describe("ManageUsersPageContent", () => {
 
     expect(BreadcrumbsMock).toHaveBeenCalledTimes(1);
     const breadcrumbsProps = BreadcrumbsMock.mock.calls[0][0];
-    expect(breadcrumbsProps.breadcrumbList[0]).toEqual({
+    expect(breadcrumbsProps.breadcrumbList[2]).toEqual({
       title: "Organization",
       path: `/organizations/${organizationId}`,
     });
