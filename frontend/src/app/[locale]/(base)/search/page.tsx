@@ -15,7 +15,7 @@ import { Suspense, use } from "react";
 
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { AndOrPanel } from "src/components/search/AndOrPanel";
-import ClassicSearchBanner from "src/components/search/ClassicSearchBanner";
+import { ClassicSearchBanner } from "src/components/search/ClassicSearchBanner";
 import { FilterPillPanel } from "src/components/search/FilterPillPanel";
 import { PillListSkeleton } from "src/components/search/PillList";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";

@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { GridContainer } from "@trussworks/react-uswds";
 
-const ClassicSearchBanner = () => {
+export function ClassicSearchBanner() {
   const t = useTranslations("Search");
 
   return (
@@ -26,6 +26,4 @@ const ClassicSearchBanner = () => {
       </GridContainer>
     </div>
   );
-};
-
-export default ClassicSearchBanner;
+}

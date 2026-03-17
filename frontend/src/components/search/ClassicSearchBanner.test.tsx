@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
 
-import ClassicSearchBanner from "src/components/search/ClassicSearchBanner";
+import { ClassicSearchBanner } from "src/components/search/ClassicSearchBanner";
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
