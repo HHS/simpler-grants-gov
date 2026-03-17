@@ -63,7 +63,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
 
     # Grab the opportunities created from the task itself
     opportunities = task.opportunities
-    assert len(opportunities) == 18
+    assert len(opportunities) == 20
 
     # Figure out the forms we added to each opportunity
     opp_form_ids_for_opps = set()
@@ -80,7 +80,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     # There should also be one opportunity with every form
     assert all_form_ids in opp_form_ids_for_opps
 
-    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 18
+    assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 20
     assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 0
 
     # If we rerun the task, all opportunities should be skipped (including ALL-forms)
@@ -90,7 +90,7 @@ def test_build_automatic_opportunities(enable_factory_create, db_session, forms)
     assert len(task.opportunities) == 0
 
     assert task.metrics[task.Metrics.OPPORTUNITY_CREATED_COUNT] == 0
-    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 18
+    assert task.metrics[task.Metrics.OPPORTUNITY_ALREADY_EXIST_COUNT] == 20
 
 
 def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_session, forms):
@@ -133,6 +133,8 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "SGG-indv-only-test": uuid.UUID("10000000-0000-0000-0000-000000000002"),
         "MOCK-R25AS00293-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000003"),
         "MOCK-O-OVW-2025-172425-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000004"),
+        "TEST-ALN-ALPHANUM-ON01": uuid.UUID("10000000-0000-0000-0000-000000000005"),
+        "TEST-ALN-ALPHANUM-ON02": uuid.UUID("10000000-0000-0000-0000-000000000006"),
     }
 
     for opp_number, expected_id in expected_ids.items():

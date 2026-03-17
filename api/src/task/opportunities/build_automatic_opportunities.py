@@ -466,6 +466,46 @@ class BuildAutomaticOpportunitiesTask(Task):
             ],
         )
 
+        # Seed opportunities for alphanumeric ALN testing in lower environments.
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-ALN-ALPHANUM-OT01",
+                opportunity_number="TEST-ALN-ALPHANUM-ON01",
+                opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000005"),
+                assistance_listing_number="93.KT1",
+                program_title="Alphanumeric ALN Test Program 1",
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-ALN-ALPHANUM-CT01",
+                    required_form_ids=[SF424b_v1_1.form_id],
+                    optional_form_ids=[SFLLL_v2_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                    ],
+                )
+            ],
+        )
+
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-ALN-ALPHANUM-OT02",
+                opportunity_number="TEST-ALN-ALPHANUM-ON02",
+                opportunity_id=uuid.UUID("10000000-0000-0000-0000-000000000006"),
+                assistance_listing_number="93.AA1",
+                program_title="Alphanumeric ALN Test Program 2",
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-ALN-ALPHANUM-CT02",
+                    required_form_ids=[SF424b_v1_1.form_id],
+                    optional_form_ids=[SFLLL_v2_0.form_id],
+                    open_to_applicants=[CompetitionOpenToApplicant.ORGANIZATION],
+                )
+            ],
+        )
+
     def create_opportunity(
         self,
         data: OpportunityContainer,
