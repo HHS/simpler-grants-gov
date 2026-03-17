@@ -1,18 +1,13 @@
 import logging
 import uuid
 
-from apiflask.exceptions import HTTPError
 from botocore.exceptions import ClientError
 from sqlalchemy import select
 
 import src.adapters.db as db
-from src.auth.endpoint_access_util import verify_access
 from src.db.models.competition_models import ApplicationSubmission
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
-from src.legacy_soap_api.legacy_soap_api_auth import (
-    SOAPClientUserDoesNotHavePermission,
-    validate_certificate,
-)
+from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate, verify_certificate_access
 from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
@@ -53,26 +48,11 @@ def get_application_zip_response(
         certificate = validate_certificate(
             db_session, soap_auth=soap_request.auth, api_name=soap_request.api_name
         )
-        if soap_config.privileges is not None:
-            try:
-                verify_access(
-                    certificate.user,
-                    soap_config.privileges,
-                    application_submission.application.competition.opportunity.agency_record,
-                )
-            except HTTPError as e:
-                logger.info(
-                    "User did not have permission to access this application",
-                    extra={
-                        "user_id": certificate.user.user_id,
-                        "application_submission_id": application_submission.application_submission_id,
-                        "privileges": soap_config.privileges,
-                    },
-                )
-                raise SOAPClientUserDoesNotHavePermission(
-                    "User did not have permission to access this application"
-                ) from e
-
+        verify_certificate_access(
+            certificate,
+            soap_config,
+            application_submission.application.competition.opportunity.agency_record,
+        )
         try:
             filestream = file_util.open_stream(application_submission.download_path, mode="rb")
             schema._mtom_file_stream = filestream

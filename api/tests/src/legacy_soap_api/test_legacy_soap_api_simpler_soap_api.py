@@ -66,7 +66,7 @@ class TestSimplerSoapApi:
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
-            headers={USE_SIMPLER_OVERRIDE_KEY: "true"},
+            headers={USE_SIMPLER_OVERRIDE_KEY: "1"},
             method="POST",
             api_name=SimplerSoapAPI.APPLICANTS,
             operation_name="GetOpportunityListRequest",

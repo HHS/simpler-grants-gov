@@ -803,9 +803,12 @@ export const messages = {
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
+    header: "Search funding opportunities",
     metaDescription:
       "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
+    goToGG:
+      "Simpler.Grants.gov is the new way to <search-link>search</search-link>. To access classic search, you must sign in to <gg-link>www.grants.gov</gg-link>.",
     filters: {
       searchNoResults: {
         title: "Your search didn't return any results.",
@@ -873,7 +876,6 @@ export const messages = {
       toggleButton: "Filters",
     },
     callToAction: {
-      title: "Search funding opportunities",
       shareWithOrganization: "Share with organizations",
     },
     opportunitySaved: "Saved",
@@ -1597,9 +1599,6 @@ export const messages = {
     "ZMB: ZAMBIA": "Zambia",
     "ZWE: ZIMBABWE": "Zimbabwe",
   },
-  returnToGrants: {
-    message: "Return to Grants.gov",
-  },
   Settings: {
     pageTitle: "Settings | Simpler.Grants.gov",
     title: "Settings",
@@ -1690,6 +1689,8 @@ export const messages = {
   },
   OrganizationDetail: {
     pageTitle: "Organization",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
     fetchError: "Unable to fetch organization details",
     organizationDetailsHeader: "Organization details",
     ebizPoc: "eBiz POC",
@@ -1713,6 +1714,8 @@ export const messages = {
   },
   ManageUsers: {
     pageTitle: "Manage users | Simpler.Grants.gov",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
     pageHeading: "Manage users",
     activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
@@ -1854,6 +1857,8 @@ export const messages = {
     metaDescription: "View your organizations",
     pageHeading: "Organizations",
     pageTitle: "Organizations",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
     awardRecs: "Award Recs",
