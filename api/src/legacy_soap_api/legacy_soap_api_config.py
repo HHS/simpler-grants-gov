@@ -146,7 +146,7 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
         "GetSubmissionListExpandedRequest": SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
-            privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
+            privileges={Privilege.LEGACY_AGENCY_VIEWER},
         ),
         "ConfirmApplicationDeliveryRequest": SOAPOperationConfig(
             request_operation_name="ConfirmApplicationDeliveryRequest",

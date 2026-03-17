@@ -4,47 +4,61 @@ import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-ut
 export interface FillFieldDefinition {
   testId?: string;
   selector?: string;
-  value: string;
   type: "text" | "dropdown";
-  section: string;
-  field?: string;
+  section?: string;
+  field: string;
 }
+
+export type FormFillFieldDefinitions = {
+  [fieldIdentifier: string]: FillFieldDefinition;
+};
 
 export interface FillFormConfig {
   formName: string;
-  fields: FillFieldDefinition[];
+  fields: FormFillFieldDefinitions;
   saveButtonTestId: string;
-  returnToApplication?: boolean;
+  noErrorsText?: string;
+}
+
+export interface FormsFixtureData {
+  formName: string;
+  fields: FillFieldDefinition[];
 }
 
 export async function fillField(
   testInfo: TestInfo,
   page: Page,
   field: FillFieldDefinition,
+  data: string,
 ): Promise<void> {
+  const fieldIdentifier = field.section
+    ? `${field.section}-${field.field}`
+    : field.field;
   try {
     if (field.type === "dropdown" && field.selector) {
-      await selectDropdownByValueOrLabel(page, field.selector, field.value);
+      await selectDropdownByValueOrLabel(page, field.selector, data);
     } else if (field.type === "text" && field.testId) {
       const locator = page.getByTestId(field.testId);
       await locator.waitFor({ state: "attached", timeout: 5000 });
-      await locator.fill(field.value);
+      await locator.fill(data);
+    } else {
+      console.error("unsupported field type or selector type", field);
     }
 
-    await testInfo.attach(`fillField-${field.section}-success`, {
-      body: `Successfully filled ${field.section}: "${field.value}"`,
+    await testInfo.attach(`fillField-${fieldIdentifier}-success`, {
+      body: `Successfully filled ${fieldIdentifier}: "${data}"`,
       contentType: "text/plain",
     });
   } catch (error) {
-    await testInfo.attach(`fillField-${field.section}-error`, {
-      body: `Failed to fill ${field.section}: ${
+    await testInfo.attach(`fillField-${fieldIdentifier}-error`, {
+      body: `Failed to fill ${fieldIdentifier}: ${
         error instanceof Error ? error.message : String(error)
       }`,
       contentType: "text/plain",
     });
 
     throw new Error(
-      `Failed to fill ${field.section}: ${
+      `Failed to fill ${field.field}: ${
         error instanceof Error ? error.message : String(error)
       }`,
     );
@@ -61,13 +75,10 @@ export async function fillForm(
   testInfo: TestInfo,
   page: Page,
   config: FillFormConfig,
+  data: { [key: string]: string },
+  returnToApplication = true,
 ): Promise<void> {
-  const {
-    formName,
-    fields,
-    saveButtonTestId,
-    returnToApplication = true,
-  } = config;
+  const { formName, fields, saveButtonTestId } = config;
 
   const applicationURL = page.url();
 
@@ -84,8 +95,10 @@ export async function fillForm(
       .first()
       .waitFor({ state: "visible", timeout: 35000 });
 
-    for (const field of fields) {
-      await fillField(testInfo, page, field);
+    for (const fieldDefinition of Object.entries(fields)) {
+      const [fieldIdentifier, fieldConfig] = fieldDefinition;
+      const dataForField = data[fieldIdentifier];
+      await fillField(testInfo, page, fieldConfig, dataForField);
     }
 
     await page.waitForTimeout(500);

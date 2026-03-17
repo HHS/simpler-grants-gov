@@ -15,7 +15,8 @@ from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.legacy_soap_api.grantors import schemas
-from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate
+from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate, verify_certificate_access
+from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import convert_bool_to_yes_no
 from src.util.datetime_util import adjust_timezone
@@ -82,6 +83,7 @@ def get_submissions(
     db_session: db.Session,
     request: schemas.GetSubmissionListExpandedRequest,
     soap_request: SOAPRequest,
+    soap_config: SOAPOperationConfig,
 ) -> list[ApplicationSubmission]:
     stmt = (
         select(ApplicationSubmission)
@@ -160,6 +162,7 @@ def get_submissions(
             logger.info("GetSubmissionListExpanded Filter: SubmissionTitles", extra=extra)
 
     certificate = validate_certificate(db_session, soap_request.auth, soap_request.api_name)
+    verify_certificate_access(certificate, soap_config, certificate.agency)
     stmt = _apply_agency_filter(stmt, certificate.agency)
 
     return list(db_session.execute(stmt).scalars().all())
@@ -185,8 +188,9 @@ def get_submission_list_expanded_response(
     request: schemas.GetSubmissionListExpandedRequest,
     soap_request: SOAPRequest,
     proxy_response: SOAPResponse,
+    soap_config: SOAPOperationConfig,
 ) -> schemas.GetSubmissionListExpandedResponse:
-    submissions = get_submissions(db_session, request, soap_request)
+    submissions = get_submissions(db_session, request, soap_request, soap_config)
     info = []
     proxy_submissions = []
     try:

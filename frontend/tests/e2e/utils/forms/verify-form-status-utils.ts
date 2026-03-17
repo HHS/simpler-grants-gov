@@ -85,8 +85,8 @@ export async function assertFormRowStatus(
     status === "complete"
       ? /no issues detected\.?|complete/i
       : /some issues found\.?|in progress/i;
-
-  await expect(formRow.getByText(statusPattern)).toBeVisible({
+  const text = formRow.getByText(statusPattern);
+  await expect(text).toBeVisible({
     timeout: 10000,
   });
 }
@@ -98,7 +98,7 @@ export async function assertFormRowStatus(
  * @param formName The form name to verify status for (e.g., "SF-424B", "SF-LLL")
  * @param applicationUrl The application URL to navigate to
  */
-export async function verifyFormStatusOnPage(
+export async function verifyFormStatusOnApplication(
   page: Page,
   status: FormStatus,
   formName: string,
@@ -124,8 +124,6 @@ export async function verifyFormStatusOnPage(
 export async function verifyFormStatusAfterSave(
   page: Page,
   status: FormStatus,
-  formName: string,
-  applicationUrl: string,
   expectedErrors?: FieldError[],
 ): Promise<void> {
   if (status === "complete") {
@@ -150,7 +148,4 @@ export async function verifyFormStatusAfterSave(
     // On form page — scroll down and check inline field errors
     await verifyInlineErrors(page, expectedErrors);
   }
-
-  // On application page — verify form row status/messages
-  await verifyFormStatusOnPage(page, status, formName, applicationUrl);
 }
