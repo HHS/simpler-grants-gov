@@ -12,6 +12,7 @@ import { setRequestLocale } from "next-intl/server";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
 import {
   TableCellData,
   TableWithResponsiveHeader,
@@ -21,7 +22,19 @@ const ApplicationsPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Applications");
   return (
     <GridContainer>
-      <h1 className="margin-top-9 margin-bottom-7">{t("pageTitle")}</h1>
+      <Breadcrumbs
+        breadcrumbList={[
+          {
+            title: t("breadcrumbWorkspace"),
+            path: `/dashboard`,
+          },
+          {
+            title: t("breadcrumbApplications"),
+            path: `/applications`,
+          },
+        ]}
+      />
+      <h1 className="margin-top-0 margin-bottom-7">{t("pageTitle")}</h1>
       {children}
     </GridContainer>
   );

@@ -275,6 +275,8 @@ export const messages = {
   },
   Application: {
     title: "Application",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbApplications: "Applications",
     submissionValidationError: {
       title: "Your application could not be submitted",
       description:
@@ -1007,6 +1009,8 @@ export const messages = {
   SavedOpportunities: {
     metaDescription: "View your saved funding opportunities.",
     heading: "Saved opportunities",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedOpportunities: "Saved opportunities",
     noSavedCTAParagraphOne:
       "To add an opportunity to your list, use the Save button next to its title on the listing's page.",
     noSavedCTAParagraphTwo:
@@ -1680,6 +1684,8 @@ export const messages = {
   },
   OrganizationDetail: {
     pageTitle: "Organization",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
     fetchError: "Unable to fetch organization details",
     organizationDetailsHeader: "Organization details",
     ebizPoc: "eBiz POC",
@@ -1703,6 +1709,8 @@ export const messages = {
   },
   ManageUsers: {
     pageTitle: "Manage users | Simpler.Grants.gov",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
     pageHeading: "Manage users",
     activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
@@ -1790,6 +1798,8 @@ export const messages = {
     },
     pageHeading: "Applications",
     pageTitle: "Applications",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbApplications: "Applications",
     tableContents: {
       agency: "Agency: ",
       draft: "Draft",
@@ -1815,6 +1825,11 @@ export const messages = {
       secondary:
         "Opportunities you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
     },
+    showingOpportunitiesFor: "Showing opportunities for {agencyName}",
+    agencySelector: "Select agency",
+    agencyNotAuthorized:
+      "You do not have access to this agency's opportunities.",
+    noAgencies: "You are not associated with any agencies.",
     pageHeading: "Opportunities",
     pageTitle: "Opportunities",
     tableContents: {
@@ -1837,6 +1852,8 @@ export const messages = {
     metaDescription: "View your organizations",
     pageHeading: "Organizations",
     pageTitle: "Organizations",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
     awardRecs: "Award Recs",
