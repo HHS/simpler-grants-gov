@@ -199,7 +199,7 @@ GRANTOR_PROGRAM_OFFICER = Role(
 
 GRANTOR_BUDGET_OFFICER_ID = uuid.UUID("4d00cb3c-0cc5-4876-8e09-7067ae0530a2")
 GRANTOR_BUDGET_OFFICER = Role(
-    role_id=GRANTOR_PROGRAM_OFFICER_ID,
+    role_id=GRANTOR_BUDGET_OFFICER_ID,
     role_name="Grantor Budget Officer",
     is_core=True,
     link_privileges=get_link_privileges(
