@@ -32,7 +32,6 @@ logger = logging.getLogger(__name__)
 # Descriptions in OpenAPI support markdown https://swagger.io/specification/
 SHARED_ALPHA_DESCRIPTION = """
 This API is in active development as we build out new functionalities for Simpler.Grants.gov.
-    
 It is currently stable for everyday use, and will be versioned with advance notice for any breaking changes.
 
 See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
