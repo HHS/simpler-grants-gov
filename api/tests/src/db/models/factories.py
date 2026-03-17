@@ -1107,6 +1107,24 @@ class UserSavedOpportunityFactory(BaseFactory):
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
 
+class UserSavedOpportunityNotificationFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserSavedOpportunityNotification
+
+    user_saved_opportunity_notification_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+    # None means user's own settings; set organization to an OrganizationFactory instance for org-scoped settings
+    organization = None
+    organization_id = factory.LazyAttribute(
+        lambda o: o.organization.organization_id if o.organization is not None else None
+    )
+
+    email_enabled = factory.LazyAttribute(lambda o: o.organization is None)
+
+
 class UserSavedSearchFactory(BaseFactory):
     class Meta:
         model = user_models.UserSavedSearch

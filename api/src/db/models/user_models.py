@@ -30,6 +30,13 @@ class User(ApiSchemaTable, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
+    saved_opportunity_notifications: Mapped[list[UserSavedOpportunityNotification]] = relationship(
+        "UserSavedOpportunityNotification",
+        back_populates="user",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
     saved_searches: Mapped[list[UserSavedSearch]] = relationship(
         "UserSavedSearch", back_populates="user", uselist=True, cascade="all, delete-orphan"
     )
@@ -160,6 +167,48 @@ class UserSavedOpportunity(ApiSchemaTable, TimestampMixin):
         "Opportunity", back_populates="saved_opportunities_by_users"
     )
     is_deleted: Mapped[bool | None]
+
+
+class UserSavedOpportunityNotification(ApiSchemaTable, TimestampMixin):
+    """Notification settings for a user's saved opportunities.
+
+    A row with organization_id=None represents the user's own default settings.
+    A row with an organization_id represents settings scoped to that organization.
+
+    Business logic defaults:
+    - No row for user's own settings -> email_enabled=True
+    - No row for an org -> email_enabled=False
+    """
+
+    __tablename__ = "user_saved_opportunity_notification"
+
+    __table_args__ = (
+        # NULLS_NOT_DISTINCT treats NULL organization_id as equal, enforcing one row per
+        # (user, org) pair and one row per user where organization_id IS NULL.
+        UniqueConstraint(
+            "user_id",
+            "organization_id",
+            postgresql_nulls_not_distinct=True,
+        ),
+        ApiSchemaTable.__table_args__,
+    )
+
+    user_saved_opportunity_notification_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
+    user: Mapped[User] = relationship(User, back_populates="saved_opportunity_notifications")
+
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(Organization.organization_id), index=True
+    )
+    organization: Mapped[Organization | None] = relationship(Organization)
+
+    # Defaults to True for user's own settings (organization_id IS NULL), False for org-scoped rows.
+    email_enabled: Mapped[bool] = mapped_column(
+        default=lambda ctx: ctx.get_current_parameters().get("organization_id") is None
+    )
 
 
 class UserSavedSearch(ApiSchemaTable, TimestampMixin):
