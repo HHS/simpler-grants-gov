@@ -20,7 +20,10 @@ import {
   waitForFilterOptions,
   waitForSearchResultsInitialLoad,
 } from "tests/e2e/search/searchSpecUtil";
+import { VALID_TAGS } from "tests/e2e/tags";
 
+const { GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION, CORE_REGRESSION } =
+  VALID_TAGS;
 const searchTerm = "education";
 const statusCheckboxes = {
   "status-closed": "closed",
@@ -40,9 +43,7 @@ const categoryCheckboxes = {
 };
 
 test.describe("Search page tests", () => {
-  // Set all inputs, then refresh the page. Those same inputs should be
-  // set from query params.
-  // skip this test - should refresh and retain filters in a new tab
+  // This test has been split out into multiple individual tests in the search-state-persistence file
   test.skip("should refresh and retain filters in a new tab", async ({ page }, {
     project,
   }) => {
@@ -143,108 +144,118 @@ test.describe("Search page tests", () => {
     }
   });
 
-  test("resets page back to 1 when choosing a filter", async ({ page }) => {
-    await page.goto("/search?status=none");
-    await clickPaginationPageNumber(page, 2);
+  test(
+    "resets page back to 1 when choosing a filter",
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    async ({ page }) => {
+      await page.goto("/search?status=none");
+      await clickPaginationPageNumber(page, 2);
 
-    // Verify that page 1 is highlighted
-    let currentPageButton = page
-      .locator(".usa-pagination__button.usa-current")
-      .first();
-    await expect(currentPageButton).toHaveAttribute("aria-label", "Page 2");
+      // Verify that page 1 is highlighted
+      let currentPageButton = page
+        .locator(".usa-pagination__button.usa-current")
+        .first();
+      await expect(currentPageButton).toHaveAttribute("aria-label", "Page 2");
 
-    // Select the 'Closed' checkbox under 'Opportunity status'
-    const statusCheckboxes = {
-      "status-closed": "closed",
-    };
+      // Select the 'Closed' checkbox under 'Opportunity status'
+      const statusCheckboxes = {
+        "status-closed": "closed",
+      };
 
-    await toggleFilterDrawer(page);
-
-    await clickAccordionWithTitle(page, "Opportunity status");
-    await toggleCheckboxes(page, statusCheckboxes, "status");
-
-    // Wait for the page to reload
-    await Promise.all([
-      waitForSearchResultsInitialLoad(page),
-      waitForFilterOptions(page, "agency"),
-    ]);
-
-    // Verify that page 1 is highlighted
-    currentPageButton = page
-      .locator(".usa-pagination__button.usa-current")
-      .first();
-    await expect(currentPageButton).toHaveAttribute("aria-label", "Page 1");
-
-    // It should not have a page query param set
-    await page.waitForURL("search?status=closed");
-  });
-
-  test("last result becomes first result when flipping sort order", async ({
-    page,
-  }, { project }) => {
-    const isMobile = !!project.name.match(/[Mm]obile/);
-    await page.goto("/search");
-
-    await waitForSearchResultsInitialLoad(page);
-
-    if (isMobile) {
       await toggleFilterDrawer(page);
-    }
-    await selectSortBy(page, "opportunityTitleAsc", isMobile);
 
-    if (isMobile) {
+      await clickAccordionWithTitle(page, "Opportunity status");
+      await toggleCheckboxes(page, statusCheckboxes, "status");
+
+      // Wait for the page to reload
+      await Promise.all([
+        waitForSearchResultsInitialLoad(page),
+        waitForFilterOptions(page, "agency"),
+      ]);
+
+      // Verify that page 1 is highlighted
+      currentPageButton = page
+        .locator(".usa-pagination__button.usa-current")
+        .first();
+      await expect(currentPageButton).toHaveAttribute("aria-label", "Page 1");
+
+      // It should not have a page query param set
+      await page.waitForURL("search?status=closed");
+    },
+  );
+
+  test(
+    "last result becomes first result when flipping sort order",
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION },
+    async ({ page }, { project }) => {
+      const isMobile = !!project.name.match(/[Mm]obile/);
+      await page.goto("/search");
+
+      await waitForSearchResultsInitialLoad(page);
+
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+      await selectSortBy(page, "opportunityTitleAsc", isMobile);
+
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+      const firstSearchResultTitle = await getFirstSearchResultTitle(page);
+
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+      await selectSortBy(page, "opportunityTitleDesc", isMobile);
+
+      if (isMobile) {
+        await toggleFilterDrawer(page);
+      }
+
+      await clickLastPaginationPage(page);
+
+      const lastSearchResultTitle = await getLastSearchResultTitle(page);
+
+      expect(firstSearchResultTitle).toBe(lastSearchResultTitle);
+    },
+  );
+
+  test(
+    "number of results is the same with none or all opportunity status checked",
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION },
+    async ({ page }) => {
+      await page.goto("/search?status=none");
+      const initialSearchResultsCount =
+        await getNumberOfOpportunitySearchResults(page);
+
+      // check all 4 boxes
+      const statusCheckboxes = {
+        "status-forecasted": "forecasted",
+        "status-open": "posted",
+        "status-closed": "closed",
+        "status-archived": "archived",
+      };
+
       await toggleFilterDrawer(page);
-    }
-    const firstSearchResultTitle = await getFirstSearchResultTitle(page);
+      await clickAccordionWithTitle(page, "Opportunity status");
+      await toggleCheckboxes(page, statusCheckboxes, "status");
 
-    if (isMobile) {
-      await toggleFilterDrawer(page);
-    }
-    await selectSortBy(page, "opportunityTitleDesc", isMobile);
+      const updatedSearchResultsCount =
+        await getNumberOfOpportunitySearchResults(page);
 
-    if (isMobile) {
-      await toggleFilterDrawer(page);
-    }
+      expect(initialSearchResultsCount).toBe(updatedSearchResultsCount);
+    },
+  );
 
-    await clickLastPaginationPage(page);
+  test(
+    "should redirect to the last page of results when page param is too high",
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION },
+    async ({ page }) => {
+      await page.goto("/search?page=1000000");
 
-    const lastSearchResultTitle = await getLastSearchResultTitle(page);
+      await waitForAnyURLChange(page, "/search?page=1000000");
 
-    expect(firstSearchResultTitle).toBe(lastSearchResultTitle);
-  });
-
-  test("number of results is the same with none or all opportunity status checked", async ({
-    page,
-  }) => {
-    await page.goto("/search?status=none");
-    const initialSearchResultsCount =
-      await getNumberOfOpportunitySearchResults(page);
-
-    // check all 4 boxes
-    const statusCheckboxes = {
-      "status-forecasted": "forecasted",
-      "status-open": "posted",
-      "status-closed": "closed",
-      "status-archived": "archived",
-    };
-
-    await toggleFilterDrawer(page);
-    await clickAccordionWithTitle(page, "Opportunity status");
-    await toggleCheckboxes(page, statusCheckboxes, "status");
-
-    const updatedSearchResultsCount =
-      await getNumberOfOpportunitySearchResults(page);
-
-    expect(initialSearchResultsCount).toBe(updatedSearchResultsCount);
-  });
-
-  test("should redirect to the last page of results when page param is too high", async ({
-    page,
-  }) => {
-    await page.goto("/search?page=1000000");
-
-    await waitForAnyURLChange(page, "/search?page=1000000");
-
-    expect(page.url()).toMatch(/search\?page=\d{1,3}/);
-  });
+      expect(page.url()).toMatch(/search\?page=\d{1,3}/);
+    },
+  );
 });

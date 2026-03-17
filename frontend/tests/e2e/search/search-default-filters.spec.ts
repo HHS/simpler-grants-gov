@@ -1,18 +1,14 @@
-import { expect, Page, test } from "@playwright/test";
-import { BrowserContextOptions } from "playwright-core";
+import { expect, test } from "@playwright/test";
+import { VALID_TAGS } from "tests/e2e/tags";
 
 import { expectCheckboxIDIsChecked } from "./searchSpecUtil";
 
-interface PageProps {
-  page: Page;
-  browserName?: string;
-  contextOptions?: BrowserContextOptions;
-}
+const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE } = VALID_TAGS;
 
 test(
   "should load search page with forecasted and open filters checked by default",
-  { tag: ["@smoke", "@grantee", "@opportunity-search"] },
-  async ({ page }: PageProps) => {
+  { tag: [GRANTEE, OPPORTUNITY_SEARCH, SMOKE] },
+  async ({ page }) => {
     await page.goto("/search");
 
     // Verify the presence of "Search" content on the page
