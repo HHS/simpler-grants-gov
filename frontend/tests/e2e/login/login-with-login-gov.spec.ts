@@ -43,13 +43,7 @@ test.describe("Login.gov based authentication tests", () => {
     "Login.gov authentication with MFA",
     { tag: ["@smoke", "@auth"] },
     async ({ page, context }: { page: Page; context: BrowserContext }) => {
-      const isChrome = !!test.info().project.name.match(/^Chrome/);
       const isMobileProject = !!test.info().project.name.match(/[Mm]obile/);
-
-      // for now MFA is failing if we run this test too frequently, so limiting to one browser until we can figure that out
-      if (!isChrome) {
-        return;
-      }
 
       // Only start tracing manually on the first attempt. On retries, Playwright's
       // config (trace: "on-first-retry") has already started tracing, and calling
