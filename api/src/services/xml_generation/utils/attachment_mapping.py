@@ -6,6 +6,7 @@ from typing import Any
 from src.db.models.competition_models import Application, ApplicationAttachment
 from src.form_schema.rule_processing.json_rule_context import JsonRuleConfig, JsonRuleContext
 from src.form_schema.rule_processing.json_rule_processor import process_rule_schema_for_context
+from src.services.applications.application_validation import is_form_required
 from src.services.xml_generation.models.attachment import HASH_ALGORITHM, AttachmentFile
 
 logger = logging.getLogger(__name__)
@@ -63,8 +64,7 @@ def _collect_referenced_attachment_ids(application: Application) -> set[str]:
     """
     referenced: set[str] = set()
     for app_form in application.application_forms:
-        is_required = app_form.competition_form.is_required
-        if not is_required and app_form.is_included_in_submission is not True:
+        if not is_form_required(app_form) and app_form.is_included_in_submission is not True:
             continue
 
         context = JsonRuleContext(app_form, config=_ATTACHMENT_COLLECTION_CONFIG)
