@@ -19,6 +19,14 @@ const PageBreadcrumbs = ({
     <Breadcrumbs
       breadcrumbList={[
         {
+          title: t("OrganizationDetail.breadcrumbWorkspace"),
+          path: `/dashboard`,
+        },
+        {
+          title: t("OrganizationDetail.breadcrumbOrganizations"),
+          path: `/organizations`,
+        },
+        {
           title: organizationName || t("OrganizationDetail.pageTitle"),
           path: `/organizations/${organizationId}`,
         },
@@ -70,7 +78,7 @@ export const InviteLegacyUsersPageContent = ({
         organizationId={organizationId}
         organizationName={organizationName}
       />
-      <h1 className="margin-top-4">
+      <h1 className="margin-top-0">
         {organizationName && (
           <span className="margin-bottom-2 margin-top-0 font-sans-lg display-block">
             {organizationName}

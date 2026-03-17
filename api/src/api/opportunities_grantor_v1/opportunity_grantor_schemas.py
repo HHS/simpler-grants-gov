@@ -231,13 +231,8 @@ class OpportunityListResponseSchema(AbstractResponseSchema, PaginationMixinSchem
     )
 
 
-class OpportunitySummaryCreateRequestV1Schema(Schema):
-    """Schema for creating an opportunity summary"""
-
-    is_forecast = fields.Boolean(
-        required=True,
-        metadata={"description": "Whether the opportunity is forecasted", "example": False},
-    )
+class OpportunitySummaryBaseRequestSchema(Schema):
+    """Base schema containing common fields for both create and update operations on opportunity summaries"""
 
     summary_description = fields.String(
         required=True,
@@ -514,6 +509,15 @@ class OpportunitySummaryCreateRequestV1Schema(Schema):
             data["archive_date"] = data["close_date"] + timedelta(days=30)
 
 
+class OpportunitySummaryCreateRequestV1Schema(OpportunitySummaryBaseRequestSchema):
+    """Schema for creating an opportunity summary"""
+
+    is_forecast = fields.Boolean(
+        required=True,
+        metadata={"description": "Whether the opportunity is forecasted", "example": False},
+    )
+
+
 class OpportunitySummaryDetailSchema(OpportunitySummaryV1Schema):
     opportunity_summary_id = fields.UUID(
         required=True,
@@ -524,4 +528,13 @@ class OpportunitySummaryDetailSchema(OpportunitySummaryV1Schema):
 
 
 class OpportunitySummaryCreateResponseV1Schema(AbstractResponseSchema):
+    data = fields.Nested(OpportunitySummaryDetailSchema())
+
+
+class OpportunitySummaryUpdateRequestV1Schema(OpportunitySummaryBaseRequestSchema):
+    """Schema for updating an opportunity summary. Inherits all fields from base schema
+    except 'is_forecast' which cannot be changed after creation."""
+
+
+class OpportunitySummaryUpdateResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunitySummaryDetailSchema())

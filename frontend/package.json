@@ -118,6 +118,7 @@
     "next-navigation-guard": {
       "next": "^16.0.0"
     },
+    "flatted": "^3.4.0",
     "devEngines": {
       "packageManager": {
         "name": "npm"

@@ -19,6 +19,7 @@ import { GridContainer } from "@trussworks/react-uswds";
 import ApplicationContainer from "src/components/application/ApplicationContainer";
 import { ApplicationHistoryCardProps } from "src/components/application/ApplicationHistoryTable";
 import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
+import Breadcrumbs from "src/components/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
 
@@ -110,7 +111,23 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   return (
     <>
       <GridContainer>
-        <h1 className="margin-top-9 margin-bottom-7">{t("title")}</h1>
+        <Breadcrumbs
+          breadcrumbList={[
+            {
+              title: t("breadcrumbWorkspace"),
+              path: `/dashboard`,
+            },
+            {
+              title: t("breadcrumbApplications"),
+              path: `/applications`,
+            },
+            {
+              title: details.application_name,
+              path: `/applications`, // not used, can be whatever
+            },
+          ]}
+        />
+        <h1 className="margin-top-0 margin-bottom-7">{t("title")}</h1>
         <ApplicationContainer
           applicationDetails={details}
           opportunity={opportunity}

@@ -44,12 +44,14 @@ basic_test_workflow_config = WorkflowConfig(
         # Program Officer Approvals
         "receive_program_officer_approval": ApprovalConfig(
             approval_type=ApprovalType.PROGRAM_OFFICER_APPROVAL,
+            approval_state=BasicState.PENDING_PROGRAM_OFFICER_APPROVAL,
             required_privileges=[Privilege.PROGRAM_OFFICER_APPROVAL],
             minimum_approvals_required=3,  # require 3 approvals
         ),
         # Budget Officer Approvals
         "receive_budget_officer_approval": ApprovalConfig(
             approval_type=ApprovalType.BUDGET_OFFICER_APPROVAL,
+            approval_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
             required_privileges=[Privilege.BUDGET_OFFICER_APPROVAL],
         ),
     },
@@ -75,8 +77,7 @@ class BasicTestStateMachine(BaseStateMachine):
         states.MIDDLE.to(states.END),
     )
 
-    # These need to exist even if we don't use them
-    # as StateMachine doesn't like states to be unreachable from the start state.
+    # These exist so we can test logic on entering approval states
     middle_to_program_officer_approval = Event(
         states.MIDDLE.to(states.PENDING_PROGRAM_OFFICER_APPROVAL),
     )

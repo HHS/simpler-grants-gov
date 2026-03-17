@@ -275,6 +275,8 @@ export const messages = {
   },
   Application: {
     title: "Application",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbApplications: "Applications",
     submissionValidationError: {
       title: "Your application could not be submitted",
       description:
@@ -706,7 +708,6 @@ export const messages = {
     navLinks: {
       about: "About",
       account: "Account",
-      activityDashboard: "Activity Dashboard",
       applications: "Applications",
       community: "Community",
       developer: "Developer Portal",
@@ -727,6 +728,7 @@ export const messages = {
       vision: "Our vision",
       wiki: "Public wiki",
       workspace: "Workspace",
+      workspaceDashboard: "Workspace dashboard",
       settings: "Settings",
       testApplication: "Test application",
     },
@@ -955,6 +957,8 @@ export const messages = {
   },
   SavedSearches: {
     heading: "Saved search queries",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedQueries: "Saved search queries",
     noSavedCTAParagraphOne: "You don't have any saved queries yet.",
     noSavedCTAParagraphTwo:
       "As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
@@ -1005,6 +1009,8 @@ export const messages = {
   SavedOpportunities: {
     metaDescription: "View your saved funding opportunities.",
     heading: "Saved opportunities",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedOpportunities: "Saved opportunities",
     noSavedCTAParagraphOne:
       "To add an opportunity to your list, use the Save button next to its title on the listing's page.",
     noSavedCTAParagraphTwo:
@@ -1082,9 +1088,9 @@ export const messages = {
               "<p>Grants.gov user roles and permissions can be cumbersome and may not align with how organizations work. We co-designed a new experience with applicants and grantors to simplify onboarding, improve visibility into organizational access, and make collaboration easier and more intuitive.</p>",
           },
           {
-            title: "Launched new changes to the Activity Dashboard",
+            title: "Launched new changes to the Workspace Dashboard",
             content:
-              "<p>The Simpler.Grants.gov team has created a hub that allows users to quickly access saved searches and applications. To solve for the key pain point of finding active grants and managing work, this Activity Dashboard centralizes where users can manage their work and track their progress.</p>",
+              "<p>The Simpler.Grants.gov team has created a hub that allows users to quickly access saved searches and applications. To solve for the key pain point of finding active grants and managing work, this Workspace Dashboard centralizes where users can manage their work and track their progress.</p>",
           },
         ],
         archivedRoadmapSections: [
@@ -1616,9 +1622,9 @@ export const messages = {
     lastNameRequired: "Last name is required",
     requiredForProfile: "Required to complete your profile.",
   },
-  ActivityDashboard: {
-    pageTitle: "Activity Dashboard | Simpler.Grants.gov",
-    title: "Welcome to your activity dashboard.",
+  WorkspaceDashboard: {
+    pageTitle: "Workspace Dashboard | Simpler.Grants.gov",
+    title: "Welcome to your workspace dashboard.",
     fetchError: "Error fetching user data. Please try refreshing the page.",
     organizations: "Your organizations",
     noOrganizations: {
@@ -1678,6 +1684,8 @@ export const messages = {
   },
   OrganizationDetail: {
     pageTitle: "Organization",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
     fetchError: "Unable to fetch organization details",
     organizationDetailsHeader: "Organization details",
     ebizPoc: "eBiz POC",
@@ -1701,6 +1709,8 @@ export const messages = {
   },
   ManageUsers: {
     pageTitle: "Manage users | Simpler.Grants.gov",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
     pageHeading: "Manage users",
     activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
@@ -1788,6 +1798,8 @@ export const messages = {
     },
     pageHeading: "Applications",
     pageTitle: "Applications",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbApplications: "Applications",
     tableContents: {
       agency: "Agency: ",
       draft: "Draft",
@@ -1813,6 +1825,11 @@ export const messages = {
       secondary:
         "Opportunities you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
     },
+    showingOpportunitiesFor: "Showing opportunities for {agencyName}",
+    agencySelector: "Select agency",
+    agencyNotAuthorized:
+      "You do not have access to this agency's opportunities.",
+    noAgencies: "You are not associated with any agencies.",
     pageHeading: "Opportunities",
     pageTitle: "Opportunities",
     tableContents: {
@@ -1835,6 +1852,8 @@ export const messages = {
     metaDescription: "View your organizations",
     pageHeading: "Organizations",
     pageTitle: "Organizations",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
     awardRecs: "Award Recs",
