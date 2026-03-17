@@ -17,7 +17,7 @@ jest.mock("next-intl/server", () => ({
 }));
 
 describe("ClassicSearchBanner", () => {
-  it("renders header title text", () => {
+  it("renders banner text", () => {
     render(<ClassicSearchBanner />);
     const content = screen.getByText("goToGG");
     expect(content).toBeInTheDocument();
