@@ -1,7 +1,7 @@
 """add user_saved_opportunity_notification table
 
 Revision ID: a3f7e2c9d1b8
-Revises: f8eaafc955ec
+Revises: 89d3134e7de8
 Create Date: 2026-03-16 00:00:00.000000
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "a3f7e2c9d1b8"
-down_revision = "f8eaafc955ec"
+down_revision = "89d3134e7de8"
 branch_labels = None
 depends_on = None
 
