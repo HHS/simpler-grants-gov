@@ -708,7 +708,8 @@ def test_user_callback_retries_success(
         code,
         OauthTokenResponse(
             id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
-        ), 3
+        ),
+        3,
     )
 
     resp = client.get(
@@ -763,9 +764,8 @@ def test_user_callback_retries_failure(
         OauthTokenResponse(
             id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
         ),
-        4
+        4,
     )
-
 
     resp = client.get(
         f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
