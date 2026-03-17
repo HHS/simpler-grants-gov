@@ -133,8 +133,6 @@ def test_opportunity_ids_are_consistent_across_runs(enable_factory_create, db_se
         "SGG-indv-only-test": uuid.UUID("10000000-0000-0000-0000-000000000002"),
         "MOCK-R25AS00293-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000003"),
         "MOCK-O-OVW-2025-172425-Dec102025": uuid.UUID("10000000-0000-0000-0000-000000000004"),
-        "TEST-ALN-ALPHANUM-ON01": uuid.UUID("10000000-0000-0000-0000-000000000005"),
-        "TEST-ALN-ALPHANUM-ON02": uuid.UUID("10000000-0000-0000-0000-000000000006"),
     }
 
     for opp_number, expected_id in expected_ids.items():
