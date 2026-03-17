@@ -183,6 +183,34 @@ AWARD_RECOMMENDATION_USER = Role(
     ],
 )
 
+GRANTOR_PROGRAM_OFFICER_ID = uuid.UUID("66b4238b-8f22-4996-b6ba-712958fd5631")
+GRANTOR_PROGRAM_OFFICER = Role(
+    role_id=GRANTOR_PROGRAM_OFFICER_ID,
+    role_name="Grantor Program Officer",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        GRANTOR_PROGRAM_OFFICER_ID,
+        [Privilege.PROGRAM_OFFICER_APPROVAL],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=GRANTOR_PROGRAM_OFFICER_ID, role_type=RoleType.AGENCY)
+    ],
+)
+
+GRANTOR_BUDGET_OFFICER_ID = uuid.UUID("66b4238b-8f22-4996-b6ba-712958fd5631")
+GRANTOR_BUDGET_OFFICER = Role(
+    role_id=GRANTOR_PROGRAM_OFFICER_ID,
+    role_name="Grantor Budget Officer",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        GRANTOR_BUDGET_OFFICER_ID,
+        [Privilege.BUDGET_OFFICER_APPROVAL],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=GRANTOR_BUDGET_OFFICER_ID, role_type=RoleType.AGENCY)
+    ],
+)
+
 ############################
 # Core Internal Roles
 ############################
@@ -254,4 +282,6 @@ CORE_ROLES = [
     SYSTEM_WORKFLOW_USER_ROLE,
     INTERNAL_WORKFLOW_USER_ROLE,
     AWARD_RECOMMENDATION_USER,
+    GRANTOR_PROGRAM_OFFICER,
+    GRANTOR_BUDGET_OFFICER,
 ]
