@@ -111,6 +111,7 @@ class WorkflowManager:
             raise
 
     def parse_sent_timestamp(self, message: SQSMessage) -> datetime:
+        """Parse the SQS messages timestamp - defaulting to now on errors"""
         sent_timestamp = message.attributes.get("SentTimestamp", None)
         if sent_timestamp is None:
             logger.warning(
