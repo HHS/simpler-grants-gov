@@ -1683,6 +1683,8 @@ export const messages = {
   },
   OrganizationDetail: {
     pageTitle: "Organization",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
     fetchError: "Unable to fetch organization details",
     organizationDetailsHeader: "Organization details",
     ebizPoc: "eBiz POC",
@@ -1706,6 +1708,8 @@ export const messages = {
   },
   ManageUsers: {
     pageTitle: "Manage users | Simpler.Grants.gov",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
     pageHeading: "Manage users",
     activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
@@ -1847,6 +1851,8 @@ export const messages = {
     metaDescription: "View your organizations",
     pageHeading: "Organizations",
     pageTitle: "Organizations",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
     awardRecs: "Award Recs",

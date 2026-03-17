@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 import { ErrorMessage, GridContainer } from "@trussworks/react-uswds";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
 import { OrganizationInfo } from "src/components/organization/OrganizationInfo";
 import {
   OrganizationRoster,
@@ -36,8 +37,24 @@ export const OrganizationDetail = ({
   }
   const { sam_gov_entity } = data as Organization;
   return (
-    <GridContainer className="padding-top-2 tablet:padding-y-6">
-      <h1>{sam_gov_entity.legal_business_name}</h1>
+    <GridContainer>
+      <Breadcrumbs
+        breadcrumbList={[
+          {
+            title: t("breadcrumbWorkspace"),
+            path: `/dashboard`,
+          },
+          {
+            title: t("breadcrumbOrganizations"),
+            path: `/organizations`,
+          },
+          {
+            title: sam_gov_entity.legal_business_name,
+            path: `/organizations`, // not used, can be whatever
+          },
+        ]}
+      />
+      <h1 className="margin-top-0">{sam_gov_entity.legal_business_name}</h1>
       <OrganizationInfo organizationDetails={sam_gov_entity} />
       <Suspense
         fallback={
