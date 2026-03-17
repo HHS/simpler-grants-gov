@@ -406,6 +406,7 @@ def test_process_sqs_event_non_retryable_error(app, db_session):
         workflow_id=workflow.workflow_id,
         user=None,
         event_to_send="middle_to_end",
+        event_id=test_event_id,
         put_history_event_in_session=False,
     )
 
