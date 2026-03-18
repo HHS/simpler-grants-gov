@@ -51,13 +51,17 @@ test.describe("Login Page Redirect", () => {
     await expect(page).toHaveURL("/");
   });
 
-  test("should redirect to stored URL after login", async ({ page }) => {
-    await page.evaluate(() => {
-      sessionStorage.setItem("login-redirect", "/opportunities");
-    });
-    await page.goto("/login");
-    await expect(page).toHaveURL(`/opportunities`);
-  });
+  test(
+    "should redirect to stored URL after login",
+    { tag: ["@smoke", "@auth"] },
+    async ({ page }) => {
+      await page.evaluate(() => {
+        sessionStorage.setItem("login-redirect", "/opportunities");
+      });
+      await page.goto("/login");
+      await expect(page).toHaveURL(`/opportunities`);
+    },
+  );
 
   test("should redirect to home page when stored URL is empty", async ({
     page,
