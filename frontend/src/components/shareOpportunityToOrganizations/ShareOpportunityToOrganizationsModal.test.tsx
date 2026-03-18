@@ -8,7 +8,7 @@ import { ModalRef } from "@trussworks/react-uswds";
 import { ShareOpportunityToOrganizationsModal } from "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal";
 
 jest.mock("next-intl", () => ({
-   useTranslations: () => useTranslationsMock(),
+  useTranslations: () => useTranslationsMock(),
 }));
 
 const modalRef: RefObject<ModalRef | null> = { current: null };
