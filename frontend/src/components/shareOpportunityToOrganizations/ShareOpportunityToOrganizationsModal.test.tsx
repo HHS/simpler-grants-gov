@@ -2,8 +2,8 @@
 import { Organization } from "src/types/applicationResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import type { RefObject } from "react";
-import { ModalRef } from "@trussworks/react-uswds";
+// import type { RefObject } from "react";
+// import { ModalRef } from "@trussworks/react-uswds";
 
 // import { ShareOpportunityToOrganizationsModal } from "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal";
 
@@ -13,7 +13,7 @@ jest.mock("next-intl", () => ({
 
 // const modalRef: RefObject<ModalRef | null> = { current: null };
 // const orgIds = new Set(["test1", "test2"]);
-const organizations: Organization[] = [
+/* const organizations: Organization[] = [
   {
     organization_id: "org-1",
     sam_gov_entity: {
@@ -26,7 +26,7 @@ const organizations: Organization[] = [
     },
   },
 ];
-
+*/
 describe("ShareOpportunityToOrganizationsModal", () => {
   it("renders error state when organizations fail to load", () => {
     /*
