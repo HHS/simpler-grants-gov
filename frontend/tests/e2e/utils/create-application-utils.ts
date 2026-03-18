@@ -14,12 +14,19 @@ async function selectOptionByLabelSubstring(
   const select = selectLocator.first();
   await select.waitFor({ state: "visible", timeout: 5000 });
   await expect(select).toBeEnabled({ timeout: 10000 });
+
+  // Wait for org options to load — on WebKit the dropdown may initially only
+  // show default options before the org list is fetched from the API.
   await expect
-    .poll(async () =>
-      select.evaluate((el) => {
-        if (!(el instanceof HTMLSelectElement)) return false;
-        return Array.from(el.options).some((opt) => !opt.disabled);
-      }),
+    .poll(
+      async () => {
+        const options = await select.locator("option").allTextContents();
+        return options.some((opt) => opt.includes(labelSubstring));
+      },
+      {
+        message: `Waiting for option matching "${labelSubstring}" to appear in dropdown`,
+        timeout: 30000,
+      },
     )
     .toBe(true);
 
@@ -87,6 +94,7 @@ export async function createApplication(
   const modal = page.locator(
     '[role="dialog"].is-visible, #start-application.is-visible',
   );
+  await expect(modal).toBeVisible({ timeout: 45000 });
   await expect(modal.locator("select")).toBeVisible({ timeout: 45000 });
   const orgSelect = modal.locator(
     'select[name*="applicant"], select:nth-of-type(1)',
