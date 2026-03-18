@@ -3,14 +3,10 @@ import pytest
 from src.constants.lookup_constants import Privilege
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.lib.opportunity_test_utils import create_opportunity_request
-from tests.src.db.models.factories import AgencyFactory
 
 
 @pytest.fixture
 def grantor_auth_data(db_session, enable_factory_create):
-
-    agency = AgencyFactory.create()
-
     """Create a user with CREATE_OPPORTUNITY permission and return auth data"""
     user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,
@@ -82,7 +78,10 @@ def test_opportunity_create_duplicate_number(client, grantor_auth_data, opportun
     response_json = response.get_json()
 
     assert response.status_code == 422
-    assert "already exists" in str(response_json).lower()
+    assert (
+        response_json["message"]
+        == f"Opportunity with number '{opportunity_request['opportunity_number']}' already exists"
+    )
 
 
 def test_opportunity_create_invalid_data(client, grantor_auth_data):
@@ -123,4 +122,4 @@ def test_opportunity_create_no_permissions(client, db_session, enable_factory_cr
 
     assert response.status_code == 403
     response_json = response.get_json()
-    assert "forbidden" in str(response_json).lower()
+    assert response_json["message"] == "Forbidden"

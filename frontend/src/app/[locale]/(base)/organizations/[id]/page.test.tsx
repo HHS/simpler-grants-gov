@@ -12,6 +12,8 @@ type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
 const redirectMock = jest.fn();
 
+const mockUseSearchParams = jest.fn();
+
 const authentication = jest.fn().mockResolvedValue({
   token: "fake-token",
   user_id: "user-1",
@@ -41,6 +43,7 @@ jest.mock("src/components/workspace/UserOrganizationsList", () => ({
 
 jest.mock("next/navigation", () => ({
   redirect: (location: string) => redirectMock(location) as unknown,
+  useSearchParams: () => mockUseSearchParams() as unknown,
 }));
 
 jest.mock("src/components/user/AuthenticationGate", () => ({
@@ -100,6 +103,7 @@ describe("Organizations page feature flag wiring", () => {
         (props: { params: Promise<{ locale: string }> }) =>
           WrappedComponent(props) as unknown,
     );
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
   });
 
   it("the happy path page should have a table and heading", async () => {

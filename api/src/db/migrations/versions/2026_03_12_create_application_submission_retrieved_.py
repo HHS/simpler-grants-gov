@@ -1,7 +1,7 @@
 """create application_submission_retrieved table
 
 Revision ID: f8eaafc955ec
-Revises: 3bbb6f5e037e
+Revises: b4c9d2e8f1a3
 Create Date: 2026-03-12 14:17:02.346821
 
 """
