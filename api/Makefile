@@ -307,6 +307,9 @@ seed-local-legacy-tables:
 generate-internal-token:
 	$(FLASK_CMD) task generate-internal-token $(args)
 
+seed-local-soap-certificate:
+	$(PY_RUN_CMD) python3 -m tests.lib.seed_local_soap_certificate
+
 
 ##################################################
 # Tasks/Jobs
