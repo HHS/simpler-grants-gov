@@ -151,6 +151,75 @@ const toBroadlyDefinedWidgetValue = (
   return undefined;
 };
 
+function FieldListEntry({
+  id,
+  rowIndex,
+  rowValue,
+  isInteractionDisabled,
+  handleDeleteRow,
+  groupDefinition,
+}: {
+  id: string;
+  rowIndex: number;
+  rowValue: GeneralRecord;
+  isInteractionDisabled: boolean;
+  handleDeleteRow: (rowIndex: number) => void;
+  groupDefinition: FieldListGroupItem[];
+}) {
+  const t = useTranslations("Application.applyForm.fieldListWidget");
+
+  return (
+    <div
+      key={`${id}--row-${rowIndex}`}
+      className="field-list-widget__row border radius-md border-base-lighter padding-2 margin-2"
+    >
+      <div className="field-list-widget__controls display-flex flex-align-center flex-justify margin-bottom-2">
+        <strong>
+          {t("entry")} {rowIndex + 1}
+        </strong>
+        <Button
+          type="button"
+          onClick={() => handleDeleteRow(rowIndex)}
+          disabled={isInteractionDisabled}
+        >
+          {t("delete")}
+        </Button>
+      </div>
+
+      {groupDefinition.map((groupItem: FieldListGroupItem) => {
+        const generatedId = replaceFieldListIndexPlaceholder({
+          baseId: groupItem.baseId,
+          rowIndex,
+        });
+
+        const storageKey = getFieldListStorageKey({
+          baseId: groupItem.baseId,
+        });
+
+        const currentValue = toBroadlyDefinedWidgetValue(rowValue[storageKey]);
+
+        /**
+         * Build a standard widget prop object for the child field so it
+         * can be rendered through the existing WidgetRenderers pipeline.
+         */
+        const childWidgetProps: UswdsWidgetProps = {
+          ...groupItem.generalProps,
+          schema: groupItem.generalProps.schema as RJSFSchema,
+          id: generatedId,
+          name: generatedId,
+          key: generatedId,
+          value: currentValue,
+        };
+
+        return renderWidget({
+          type: groupItem.widget,
+          props: childWidgetProps,
+        });
+      })}
+    </div>
+  );
+}
+
 function FieldListWidget(widgetProps: FieldListWidgetProps) {
   const {
     id,
@@ -163,7 +232,6 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
     disabled,
     readOnly,
     isFormLocked,
-    formContext,
   } = widgetProps;
   const t = useTranslations("Application.applyForm.fieldListWidget");
 
@@ -217,36 +285,6 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
     [handleRowsChange],
   );
 
-  /**
-   * Updates a single field within the current entry while preserving
-   * the rest of the entry and all sibling entries.
-   */
-  const handleChildValueChange = useCallback(
-    ({
-      rowIndex,
-      storageKey,
-      nextValue,
-    }: {
-      rowIndex: number;
-      storageKey: string;
-      nextValue: unknown;
-    }): void => {
-      handleRowsChange((previousRows) => {
-        const nextRows = [...previousRows];
-
-        const updatedRow = {
-          ...nextRows[rowIndex],
-          [storageKey]: nextValue,
-        };
-
-        nextRows[rowIndex] = updatedRow;
-
-        return nextRows;
-      });
-    },
-    [handleRowsChange],
-  );
-
   const isInteractionDisabled = Boolean(disabled || readOnly || isFormLocked);
 
   /**
@@ -271,65 +309,15 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
 
       {rows.map((rowValue, rowIndex) => {
         return (
-          <div
-            key={`${id}--row-${rowIndex}`}
-            className="field-list-widget__row border radius-md border-base-lighter padding-2 margin-2"
-          >
-            <div className="field-list-widget__controls display-flex flex-align-center flex-justify margin-bottom-2">
-              <strong>
-                {t("entry")} {rowIndex + 1}
-              </strong>
-              <Button
-                type="button"
-                onClick={() => handleDeleteRow(rowIndex)}
-                disabled={isInteractionDisabled}
-              >
-                {t("delete")}
-              </Button>
-            </div>
-
-            {groupDefinition.map((groupItem: FieldListGroupItem) => {
-              const generatedId = replaceFieldListIndexPlaceholder({
-                baseId: groupItem.baseId,
-                rowIndex,
-              });
-
-              const storageKey = getFieldListStorageKey({
-                baseId: groupItem.baseId,
-              });
-
-              const currentValue = toBroadlyDefinedWidgetValue(
-                rowValue[storageKey],
-              );
-
-              /**
-               * Build a standard widget prop object for the child field so it
-               * can be rendered through the existing WidgetRenderers pipeline.
-               */
-              const childWidgetProps: UswdsWidgetProps = {
-                ...groupItem.generalProps,
-                schema: groupItem.generalProps.schema as RJSFSchema,
-                id: generatedId,
-                name: generatedId,
-                key: generatedId,
-                value: currentValue,
-                onChange: (nextValue: unknown): void => {
-                  handleChildValueChange({
-                    rowIndex,
-                    storageKey,
-                    nextValue,
-                  });
-                },
-                isFormLocked,
-                formContext,
-              };
-
-              return renderWidget({
-                type: groupItem.widget,
-                props: childWidgetProps,
-              });
-            })}
-          </div>
+          <FieldListEntry
+            key={`${id}-${rowIndex}`}
+            id={id}
+            rowIndex={rowIndex}
+            rowValue={rowValue}
+            isInteractionDisabled={isInteractionDisabled}
+            handleDeleteRow={handleDeleteRow}
+            groupDefinition={groupDefinition}
+          />
         );
       })}
 
