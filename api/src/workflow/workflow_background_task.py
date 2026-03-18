@@ -108,3 +108,7 @@ def workflow_transaction(event_type: str) -> Generator[None]:
     # "WorkflowMain/{event_type}" in apm in New Relic.
     with newrelic.agent.BackgroundTask(_newrelic_app(), name=event_type, group="WorkflowMain"):
         yield
+
+
+def record_event(event_type: str, params: dict) -> None:
+    newrelic.agent.record_custom_event(event_type, params, application=_newrelic_app())
