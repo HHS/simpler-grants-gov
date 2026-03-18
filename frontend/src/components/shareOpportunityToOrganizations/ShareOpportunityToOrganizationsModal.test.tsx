@@ -1,19 +1,25 @@
-// import { render, screen } from "@testing-library/react";
-// import { Organization } from "src/types/applicationResponseTypes";
+import { render, screen } from "@testing-library/react";
+import { Organization } from "src/types/applicationResponseTypes";
+import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-// import type { RefObject } from "react";
-// import { ModalRef } from "@trussworks/react-uswds";
+import type { RefObject } from "react";
+import { ModalRef } from "@trussworks/react-uswds";
 
-// import { ShareOpportunityToOrganizationsModal } from "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal";
+import { ShareOpportunityToOrganizationsModal } from "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal";
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
-// const modalRef: RefObject<ModalRef | null> = { current: null };
-// const orgIds = new Set(["test1", "test2"]);
-/* const organizations: Organization[] = [
+jest.mock("src/components/shareOpportunityToOrganizations/actions", () => ({
+  saveOpportunityForOrganizationAction: jest.fn(),
+  deleteSavedOpportunityForOrganizationAction: jest.fn(),
+}));
+
+const modalRef: RefObject<ModalRef | null> = { current: null };
+const orgIds = new Set(["test1", "test2"]);
+const organizations: Organization[] = [
   {
     organization_id: "org-1",
     sam_gov_entity: {
@@ -26,10 +32,8 @@ jest.mock("next-intl", () => ({
     },
   },
 ];
-*/
 describe("ShareOpportunityToOrganizationsModal", () => {
   it("renders error state when organizations fail to load", () => {
-    /*
     render(
       <ShareOpportunityToOrganizationsModal
         modalRef={modalRef}
@@ -45,9 +49,7 @@ describe("ShareOpportunityToOrganizationsModal", () => {
     );
 
     expect(screen.getByText("modal.error")).toBeInTheDocument();
-    */
   });
-  /*
   it("renders loading state", () => {
     render(
       <ShareOpportunityToOrganizationsModal
@@ -85,24 +87,25 @@ describe("ShareOpportunityToOrganizationsModal", () => {
   });
 
   it("renders the selected opportunity title when provided", () => {
+    const selectedOpportunity = {
+      opportunity_id: "opportunity-1",
+      opportunity_title: "A Great Opportunity",
+      saved_to_organizations: [],
+    } as unknown as BaseOpportunity;
+
     render(
       <ShareOpportunityToOrganizationsModal
         modalRef={modalRef}
-        organizations={[]}
+        organizations={organizations}
         savedToOrganizationIds={new Set<string>()}
         isLoadingOrganizations={false}
         hasOrganizationsError={false}
-        selectedOpportunity={null}
-        onSavedOrganizationsChange={() => {
-          console.warn(orgIds);
-        }}
+        selectedOpportunity={selectedOpportunity}
+        onSavedOrganizationsChange={jest.fn()}
       />,
     );
 
-    expect(
-      screen.getByText((content) => content.includes("A Great Opportunity")),
-    ).toBeInTheDocument();
-    expect(screen.getByTestId("checkbox")).toBeInTheDocument();
+    expect(screen.getByText(/A Great Opportunity/)).toBeInTheDocument();
+    expect(screen.getByLabelText("First Organization")).toBeInTheDocument();
   });
-  */
 });
