@@ -99,11 +99,11 @@ def get_or_create_agency(db_session):
         ).scalar()
 
 
-def create_opportunity(db_session, agency):
+def create_opportunity(db_session, agency, status):
     # Due to issues with agency being overridden an Opportunity is created without a factory
     opportunity = Opportunity(
         opportunity_number=f"{uuid.uuid4()}",
-        opportunity_title="TEST SOAP OPPORTUNITY",
+        opportunity_title=f"Test-Opportunity-{status}",
         agency_code=agency.agency_code,
         is_draft=False,
     )
@@ -139,6 +139,24 @@ def get_or_create_legacy_certificate(db_session, agency, serial_number):
         logger.info("Test legacy_certificate already exists")
 
 
+def create_application_submission(
+    db_session, agency, serial_number, status=ApplicationStatus.ACCEPTED
+):
+    opportunity = create_opportunity(db_session, agency, status)
+    db_session.add(opportunity)
+    competition = factories.CompetitionFactory(
+        opportunity=opportunity,
+    )
+    application = factories.ApplicationFactory.create(
+        competition=competition, with_forms=True, application_status=status
+    )
+    submission = factories.ApplicationSubmissionFactory.create(application=application)
+    print(
+        f"\nTest submission GRANT{submission.legacy_tracking_number} created with status {application.application_status.upper()}"
+    )
+    get_or_create_legacy_certificate(db_session, agency, serial_number)
+
+
 # This method creates a cert and key if it cannot find them in the cache
 # it then gets or creates an agency with an agency_code of 'SOAP'
 # then it creates an opportunity -> competition -> application -> application_submission
@@ -155,17 +173,9 @@ def _build_legacy_certificate_and_submission(db_session: db.Session) -> None:
     serial_number = hex(cert.serial_number).lower().lstrip("0x")
 
     agency = get_or_create_agency(db_session)
-    opportunity = create_opportunity(db_session, agency)
-    db_session.add(opportunity)
-    competition = factories.CompetitionFactory(
-        opportunity=opportunity,
-    )
-    application = factories.ApplicationFactory.create(
-        competition=competition, with_forms=True, application_status=ApplicationStatus.ACCEPTED
-    )
-    submission = factories.ApplicationSubmissionFactory.create(application=application)
-    print(f"\nTest submission GRANT{submission.legacy_tracking_number} created")
-    get_or_create_legacy_certificate(db_session, agency, serial_number)
+    for status in ApplicationStatus:
+        create_application_submission(db_session, agency, serial_number, status=status)
+
     db_session.commit()
 
     with open(f"{TARGET_DIR}/local.crt") as f:
@@ -173,7 +183,7 @@ def _build_legacy_certificate_and_submission(db_session: db.Session) -> None:
 
     encoded = quote(cert_text, safe="")
     print(
-        "For local testing use this url in Postman: 'http://localhost:8080/grantsws-agency/services/v2/AgencyWebServicesSoapPort'"
+        "\nFor local testing use this url in Postman: 'http://localhost:8080/grantsws-agency/services/v2/AgencyWebServicesSoapPort'"
     )
     print("\nCOPY AND PASTE THIS STRING INTO THE POSTMAN HEADER AS 'X-Amzn-Mtls-Clientcert'")
     print(encoded)
