@@ -27,7 +27,6 @@ const organizations: Organization[] = [
   },
 ];
 
-
 describe("ShareOpportunityToOrganizationsModal", () => {
   it("renders error state when organizations fail to load", () => {
     /*
@@ -48,7 +47,7 @@ describe("ShareOpportunityToOrganizationsModal", () => {
     expect(screen.getByText("modal.error")).toBeInTheDocument();
     */
   });
-/*
+  /*
   it("renders loading state", () => {
     render(
       <ShareOpportunityToOrganizationsModal
