@@ -23,8 +23,6 @@ def opportunity_summary_request():
 @pytest.fixture
 def opportunity_summary_auth_data(db_session, enable_factory_create):
     """Create a user with VIEW_OPPORTUNITY and UPDATE_OPPORTUNITY permissions and return auth data"""
-    agency = AgencyFactory.create()
-
     user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,
         privileges=[Privilege.VIEW_OPPORTUNITY, Privilege.UPDATE_OPPORTUNITY],
@@ -48,6 +46,8 @@ def opportunity(
         agency_code=agency.agency_code,
         opportunity_number=opportunity_number,
         opportunity_title=opportunity_title,
+        is_draft=True,
+        is_simpler_grants_opportunity=True,
     )
 
     opportunity.agency_record = agency
@@ -63,6 +63,7 @@ def test_opportunities(db_session, enable_factory_create, opportunity_summary_au
         size=3,
         agency_id=agency.agency_id,
         agency_code=agency.agency_code,
+        is_draft=True,
     )
 
     return opportunities
@@ -73,7 +74,7 @@ def test_opportunity_summary_create_with_invalid_jwt_token(
 ):
     """Test opportunity summary creation endpoint with invalid JWT token"""
     response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=opportunity_summary_request,
         headers={"X-SGG-Token": "invalid_token_value"},
     )
@@ -96,14 +97,14 @@ def test_opportunity_summary_create_missing_permissions(
     opportunity = OpportunityFactory.create(agency_record=agency)
 
     response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=opportunity_summary_request,
         headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 403
     response_json = response.get_json()
-    assert "forbidden" in str(response_json).lower()
+    assert response_json["message"] == "Forbidden"
 
 
 def test_opportunity_summary_create_opportunity_not_found(
@@ -115,14 +116,14 @@ def test_opportunity_summary_create_opportunity_not_found(
     non_existent_id = uuid.uuid4()
 
     response = client.post(
-        f"/v1/grantors/opportunities/{non_existent_id}/summary",
+        f"/v1/grantors/opportunities/{non_existent_id}/summaries",
         json=opportunity_summary_request,
         headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 404
     response_json = response.get_json()
-    assert "could not find opportunity" in str(response_json).lower()
+    assert response_json["message"] == f"Could not find Opportunity with ID {non_existent_id}"
 
 
 def test_opportunity_summary_create_invalid_date_validation(
@@ -137,7 +138,7 @@ def test_opportunity_summary_create_invalid_date_validation(
     )
 
     response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=invalid_dates_request,
         headers={"X-SGG-Token": token},
     )
@@ -163,7 +164,7 @@ def test_opportunity_summary_create_invalid_award_amount(
     )
 
     response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=invalid_award_request,
         headers={"X-SGG-Token": token},
     )
@@ -186,7 +187,7 @@ def test_opportunity_summary_create_successful(
     opportunity_summary_request["is_forecast"] = True
 
     response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=opportunity_summary_request,
         headers={"X-SGG-Token": token},
     )
@@ -238,7 +239,7 @@ def test_opportunity_summary_create_duplicate_summary(
     opportunity_summary_request["is_forecast"] = True
 
     first_response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=opportunity_summary_request,
         headers={"X-SGG-Token": token},
     )
@@ -246,7 +247,7 @@ def test_opportunity_summary_create_duplicate_summary(
 
     # Second request with the same forecast type should fail with 422
     second_response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=opportunity_summary_request,
         headers={"X-SGG-Token": token},
     )
@@ -254,7 +255,7 @@ def test_opportunity_summary_create_duplicate_summary(
     # Verify the error response
     assert second_response.status_code == 422
     response_json = second_response.get_json()
-    assert "forecast already exists" in str(response_json).lower()
+    assert response_json["message"] == "An opportunity summary of type forecast already exists"
 
 
 def test_opportunity_summary_create_schema_validation(
@@ -290,7 +291,7 @@ def test_opportunity_summary_create_schema_validation(
     }
 
     response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summary",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/summaries",
         json=invalid_request,
         headers={"X-SGG-Token": token},
     )

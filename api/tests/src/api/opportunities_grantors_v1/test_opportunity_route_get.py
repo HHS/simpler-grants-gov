@@ -10,9 +10,6 @@ from tests.src.db.models.factories import AgencyFactory, OpportunityFactory
 
 @pytest.fixture
 def grantor_auth_data(db_session, enable_factory_create):
-
-    agency = AgencyFactory.create()
-
     """Create a user with VIEW_OPPORTUNITY permission and return auth data"""
     user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,

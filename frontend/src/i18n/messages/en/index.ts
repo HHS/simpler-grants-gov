@@ -275,6 +275,8 @@ export const messages = {
   },
   Application: {
     title: "Application",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbApplications: "Applications",
     submissionValidationError: {
       title: "Your application could not be submitted",
       description:
@@ -795,9 +797,12 @@ export const messages = {
   },
   Search: {
     title: "Search Funding Opportunities | Simpler.Grants.gov",
+    header: "Search funding opportunities",
     metaDescription:
       "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
+    goToGG:
+      "Simpler.Grants.gov is the new way to <search-link>search</search-link>. To access classic search, you must sign in to <gg-link>www.grants.gov</gg-link>.",
     filters: {
       searchNoResults: {
         title: "Your search didn't return any results.",
@@ -865,7 +870,6 @@ export const messages = {
       toggleButton: "Filters",
     },
     callToAction: {
-      title: "Search funding opportunities",
       shareWithOrganization: "Share with organizations",
     },
     opportunitySaved: "Saved",
@@ -955,6 +959,8 @@ export const messages = {
   },
   SavedSearches: {
     heading: "Saved search queries",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedQueries: "Saved search queries",
     noSavedCTAParagraphOne: "You don't have any saved queries yet.",
     noSavedCTAParagraphTwo:
       "As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
@@ -1005,6 +1011,8 @@ export const messages = {
   SavedOpportunities: {
     metaDescription: "View your saved funding opportunities.",
     heading: "Saved opportunities",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedOpportunities: "Saved opportunities",
     noSavedCTAParagraphOne:
       "To add an opportunity to your list, use the Save button next to its title on the listing's page.",
     noSavedCTAParagraphTwo:
@@ -1585,9 +1593,6 @@ export const messages = {
     "ZMB: ZAMBIA": "Zambia",
     "ZWE: ZIMBABWE": "Zimbabwe",
   },
-  returnToGrants: {
-    message: "Return to Grants.gov",
-  },
   Settings: {
     pageTitle: "Settings | Simpler.Grants.gov",
     title: "Settings",
@@ -1678,6 +1683,8 @@ export const messages = {
   },
   OrganizationDetail: {
     pageTitle: "Organization",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
     fetchError: "Unable to fetch organization details",
     organizationDetailsHeader: "Organization details",
     ebizPoc: "eBiz POC",
@@ -1701,6 +1708,8 @@ export const messages = {
   },
   ManageUsers: {
     pageTitle: "Manage users | Simpler.Grants.gov",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
     pageHeading: "Manage users",
     activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
@@ -1788,6 +1797,8 @@ export const messages = {
     },
     pageHeading: "Applications",
     pageTitle: "Applications",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbApplications: "Applications",
     tableContents: {
       agency: "Agency: ",
       draft: "Draft",
@@ -1813,6 +1824,11 @@ export const messages = {
       secondary:
         "Opportunities you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
     },
+    showingOpportunitiesFor: "Showing opportunities for {agencyName}",
+    agencySelector: "Select agency",
+    agencyNotAuthorized:
+      "You do not have access to this agency's opportunities.",
+    noAgencies: "You are not associated with any agencies.",
     pageHeading: "Opportunities",
     pageTitle: "Opportunities",
     tableContents: {
@@ -1835,6 +1851,8 @@ export const messages = {
     metaDescription: "View your organizations",
     pageHeading: "Organizations",
     pageTitle: "Organizations",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
     awardRecs: "Award Recs",

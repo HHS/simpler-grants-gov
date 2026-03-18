@@ -7,9 +7,15 @@ import {
 
 export type FormStatus = "complete" | "incomplete";
 
+// Max attempts and delay for transient network errors (e.g. net::ERR_NETWORK_CHANGED)
+// which are common in Codespaces when navigating to staging URLs mid-test.
+const NAVIGATION_RETRIES = 3;
+const NAVIGATION_RETRY_DELAY_MS = 3000;
+
 /**
  * Navigates to the application landing page.
  * Uses goto if applicationUrl is provided, otherwise falls back to goBack.
+ * Retries up to NAVIGATION_RETRIES times to handle transient network errors.
  * @param page Playwright Page object
  * @param applicationUrl The application URL to navigate to
  */
@@ -18,12 +24,30 @@ async function navigateToApplicationPage(
   applicationUrl: string,
 ): Promise<void> {
   if (applicationUrl) {
-    await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
+    let lastError: Error = new Error(
+      `navigateToApplicationPage: all ${NAVIGATION_RETRIES} attempts failed for ${applicationUrl}`,
+    );
+    for (let attempt = 1; attempt <= NAVIGATION_RETRIES; attempt++) {
+      try {
+        await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
+        await page.waitForTimeout(10000);
+        return; // success — exit retry loop
+      } catch (e) {
+        lastError = e instanceof Error ? e : new Error(String(e));
+        console.warn(
+          `navigateToApplicationPage: attempt ${attempt}/${NAVIGATION_RETRIES} failed — ${lastError.message}`,
+        );
+        if (attempt < NAVIGATION_RETRIES) {
+          await page.waitForTimeout(NAVIGATION_RETRY_DELAY_MS);
+        }
+      }
+    }
+    throw lastError;
   } else {
     await page.goBack();
     await page.waitForLoadState("domcontentloaded");
+    await page.waitForTimeout(10000);
   }
-  await page.waitForTimeout(10000);
 }
 
 /**
@@ -61,8 +85,8 @@ export async function assertFormRowStatus(
     status === "complete"
       ? /no issues detected\.?|complete/i
       : /some issues found\.?|in progress/i;
-
-  await expect(formRow.getByText(statusPattern)).toBeVisible({
+  const text = formRow.getByText(statusPattern);
+  await expect(text).toBeVisible({
     timeout: 10000,
   });
 }
@@ -74,7 +98,7 @@ export async function assertFormRowStatus(
  * @param formName The form name to verify status for (e.g., "SF-424B", "SF-LLL")
  * @param applicationUrl The application URL to navigate to
  */
-export async function verifyFormStatusOnPage(
+export async function verifyFormStatusOnApplication(
   page: Page,
   status: FormStatus,
   formName: string,
@@ -100,8 +124,6 @@ export async function verifyFormStatusOnPage(
 export async function verifyFormStatusAfterSave(
   page: Page,
   status: FormStatus,
-  formName: string,
-  applicationUrl: string,
   expectedErrors?: FieldError[],
 ): Promise<void> {
   if (status === "complete") {
@@ -126,7 +148,4 @@ export async function verifyFormStatusAfterSave(
     // On form page — scroll down and check inline field errors
     await verifyInlineErrors(page, expectedErrors);
   }
-
-  // On application page — verify form row status/messages
-  await verifyFormStatusOnPage(page, status, formName, applicationUrl);
 }
