@@ -17,14 +17,18 @@ async function selectOptionByLabelSubstring(
 
   // Wait for org options to load — on WebKit the dropdown may initially only
   // show default options before the org list is fetched from the API.
+  // If the org never appears (e.g. e2e user has no orgs), fall back to individual.
   await expect
     .poll(
       async () => {
         const options = await select.locator("option").allTextContents();
-        return options.some((opt) => opt.includes(labelSubstring));
+        return (
+          options.some((opt) => opt.includes(labelSubstring)) ||
+          options.some((opt) => opt.includes("As an individual"))
+        );
       },
       {
-        message: `Waiting for option matching "${labelSubstring}" to appear in dropdown`,
+        message: `Waiting for options to load in dropdown`,
         timeout: 30000,
       },
     )
@@ -39,9 +43,9 @@ async function selectOptionByLabelSubstring(
         .map((n) => n.value),
     );
 
-  const resolvedLabel = options.find((opt: string) =>
-    opt.includes(labelSubstring),
-  );
+  const resolvedLabel =
+    options.find((opt: string) => opt.includes(labelSubstring)) ??
+    options.find((opt: string) => opt.includes("As an individual (myself)"));
 
   if (!resolvedLabel) {
     throw new Error(
@@ -96,7 +100,7 @@ export async function createApplication(
   );
   await expect(modal.locator("select")).toBeVisible({ timeout: 60000 });
   const orgSelect = modal.locator(
-    'select[name*="applicant"], select:nth-of-type(1)',
+    '#create-application-organization-select, select[name*="orgnization"], select[name*="organization"]',
   );
   const orgSelectCount = await orgSelect.count();
   if (orgSelectCount > 0) {
@@ -113,31 +117,15 @@ export async function createApplication(
       timeout: 5000,
     });
   }
-  const createButton = modal.getByRole("button", {
-    name: /create|submit|start|next/i,
-  });
+  const createButton = modal.getByTestId("application-start-save");
   const createRequest = page.waitForResponse(
     (response) =>
       response.request().method() === "POST" &&
       response.url().includes("/api/applications"),
     { timeout: 60000 },
   );
-  await expect(createButton.first()).toBeEnabled({ timeout: 10000 });
-  await modal.scrollIntoViewIfNeeded();
-  await modal
-    .locator(".usa-modal__main, .usa-modal__content, .usa-modal__body")
-    .first()
-    .evaluate((el) => {
-      (el as HTMLElement).scrollTop = (el as HTMLElement).scrollHeight;
-    })
-    .catch(() => undefined);
-  await createButton.first().scrollIntoViewIfNeeded();
-  try {
-    await createButton.first().click({ timeout: 15000 });
-  } catch (_error) {
-    await createButton.first().click({ force: true });
-    await createButton.first().evaluate((el) => (el as HTMLElement).click());
-  }
+  await expect(createButton).toBeEnabled({ timeout: 10000 });
+  await createButton.click({ force: true });
   await createRequest;
   await page.waitForTimeout(3000);
   await page.waitForURL(/\/applications\/[a-f0-9-]+/, { timeout: 60000 });

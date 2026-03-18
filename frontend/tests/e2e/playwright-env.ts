@@ -31,12 +31,21 @@ if (!Object.prototype.hasOwnProperty.call(BASE_URLS, targetEnv)) {
 
 const baseUrl = BASE_URLS[targetEnv];
 
-// Test organization labels for each environment
+// Label used to select the test user from the local dev quick-login dropdown.
+// Must match the OAuth login name defined in seed_orgs_and_users.py.
+const TEST_USER_LABELS: Record<string, string> = {
+  local: "one_org_user",
+  staging: "Automatic staging Organization for UEI AUTOHQDCCHBY",
+};
+
+// Organization label shown in the "Start new application" modal dropdown.
+// Must match the legal_business_name in seed_orgs_and_users.py.
 const TEST_ORG_LABELS: Record<string, string> = {
   local: "Sally's Soup Emporium",
   staging: "Automatic staging Organization for UEI AUTOHQDCCHBY",
 };
 
+const testUserLabel = TEST_USER_LABELS[targetEnv];
 const testOrgLabel = TEST_ORG_LABELS[targetEnv];
 
 // Environment for web server
@@ -51,6 +60,7 @@ const playwrightEnv = {
   webServerEnv,
   baseUrl,
   targetEnv,
+  testUserLabel,
   testOrgLabel,
   opportunityId:
     process.env.OPPORTUNITY_ID ||

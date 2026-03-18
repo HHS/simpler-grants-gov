@@ -8,14 +8,18 @@ async function clickInclusionOption(
   await label.scrollIntoViewIfNeeded();
   await expect(label).toBeVisible({ timeout: visibleTimeout });
 
-  const includeFormResponsePromise = page.waitForResponse((response) => {
-    const url = response.url();
-    return (
-      response.request().method() === "PUT" &&
-      url.includes("/api/applications/") &&
-      url.includes("/forms/")
-    );
-  });
+  // Set up response listener BEFORE clicking to avoid missing a fast response.
+  const includeFormResponsePromise = page.waitForResponse(
+    (response) => {
+      const url = response.url();
+      return (
+        response.request().method() === "PUT" &&
+        url.includes("/api/applications/") &&
+        url.includes("/forms/")
+      );
+    },
+    { timeout: 30000 },
+  );
 
   await label.click();
   const includeFormResponse = await includeFormResponsePromise;
@@ -38,19 +42,14 @@ export async function selectFormInclusionOption(
   formName: string,
   option: "Yes" | "No" = "Yes",
 ): Promise<void> {
-  // Look for the form row by its text content (works across all tables)
-  // Note: The text content may not have spaces, so use a flexible regex
-  // Escape special regex characters and allow optional spaces
   const escapedFormName = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const flexiblePattern = escapedFormName.replace(/\s+/g, "\\s*");
   const formRow = page.locator("tr", {
     hasText: new RegExp(flexiblePattern, "i"),
   });
 
-  // Wait for row to be visible with extended timeout
   await expect(formRow).toBeVisible({ timeout: 12000 });
 
-  // Find the label with the specified option (Yes or No)
   const optionLabel = formRow.locator("label.usa-radio__label", {
     hasText: new RegExp(`^${option}$`, "i"),
   });
