@@ -3,10 +3,10 @@ name: Lint - Sprint rollover
 on:
   workflow_dispatch: # for manual runs
   schedule:
-    # Runs "at 09:00 UTC, every week on Wednesday" (see https://crontab.guru)
+    # Runs "at 06:00 UTC, every week on Wednesday" (see https://crontab.guru)
     # Sprints are 2 weeks long, but crons don't easily support biweekly schedules
     # and this GitHub action won't move tickets out of the current sprint
-    - cron: "0 9 * * 3"
+    - cron: "0 6 * * 3"
 
 jobs:
   sprint-rollover:
@@ -23,3 +23,14 @@ jobs:
           iteration: last
           new-iteration: current
           excluded-statuses: "Done"
+
+  # =====================================================
+  # Notification on failure
+  # =====================================================
+  send-slack-notification:
+    if: failure()
+    needs: [sprint-rollover]
+    uses: ./.github/workflows/send-slack-notification.yml
+    with:
+      "channel_id": "alerts-infra-lower-envs"
+    secrets: inherit
