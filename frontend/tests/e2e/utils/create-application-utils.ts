@@ -32,26 +32,35 @@ async function selectOptionByLabelSubstring(
         .map((n) => n.value),
     );
 
-  const resolvedLabel =
-    options.find((opt: string) => opt.includes(labelSubstring)) || options[0];
+  const resolvedLabel = options.find((opt: string) =>
+    opt.includes(labelSubstring),
+  );
 
-  if (resolvedLabel) {
-    const value = await select
-      .locator("option")
-      .filter({ hasText: resolvedLabel })
-      .first()
-      .getAttribute("value");
+  if (!resolvedLabel) {
+    throw new Error(
+      `Could not find option matching "${labelSubstring}" in dropdown. Available options: ${options.join(", ")}`,
+    );
+  }
 
-    if (value && enabledOptionValues.includes(value)) {
-      await select.selectOption({ value });
-    } else if (enabledOptionValues.length > 0) {
-      await select.selectOption({ value: enabledOptionValues[0] });
-    }
+  const value = await select
+    .locator("option")
+    .filter({ hasText: resolvedLabel })
+    .first()
+    .getAttribute("value");
+
+  if (value && enabledOptionValues.includes(value)) {
+    await select.selectOption({ value });
+  } else {
+    throw new Error(
+      `Option "${resolvedLabel}" is disabled or has no value. Enabled options: ${enabledOptionValues.join(", ")}`,
+    );
   }
 
   const selectedValue = await select.inputValue();
-  if (!selectedValue && enabledOptionValues.length > 0) {
-    await select.selectOption({ value: enabledOptionValues[0] });
+  if (!selectedValue) {
+    throw new Error(
+      `Failed to select option "${resolvedLabel}" — no value was set after selection.`,
+    );
   }
 }
 

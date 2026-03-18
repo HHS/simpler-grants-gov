@@ -32,47 +32,53 @@ test.beforeEach(({ page: _ }, testInfo) => {
   }
 });
 
-test("Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL", async ({
-  page,
-  context,
-}: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
-  test.setTimeout(300_000); // 5 min timeout
+test(
+  "Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL",
+  { tag: ["@smoke", "@grantee", "@apply"] },
+  async (
+    { page, context }: { page: Page; context: BrowserContext },
+    testInfo: TestInfo,
+  ) => {
+    test.setTimeout(300_000); // 5 min timeout
 
-  const isMobile = testInfo.project.name.match(/[Mm]obile/);
+    const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
-  await authenticateE2eUser(page, context, !!isMobile);
+    await authenticateE2eUser(page, context, !!isMobile);
 
-  await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-  const applicationUrl = page.url();
+    await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
+    const applicationUrl = page.url();
 
-  // Fill, save, and return to application page
-  await fillForm(
-    testInfo,
-    page,
-    SF424B_FORM_CONFIG,
-    sf424BHappyPathTestData(testOrgLabel),
-    true,
-  );
+    // Fill and save, stay on form page to verify save success
+    await fillForm(
+      testInfo,
+      page,
+      SF424B_FORM_CONFIG,
+      sf424BHappyPathTestData(testOrgLabel),
+      false,
+    );
 
-  // Verify save success alert on form page (fillForm with returnToApplication=true
-  // navigates back, so we check status on the application page directly)
-  await verifyFormStatusOnApplication(
-    page,
-    "complete",
-    "SF-424B",
-    applicationUrl,
-  );
+    // Verify save success alert on form page
+    await verifyFormStatusAfterSave(page, "complete");
 
-  // Extra wait for page to fully render forms table after navigation
-  await page.waitForTimeout(10000);
+    // On application page — verify form row shows "No issues detected"
+    await verifyFormStatusOnApplication(
+      page,
+      "complete",
+      "SF-424B",
+      applicationUrl,
+    );
 
-  // Select 'No' for including SF-LLL form in submission
-  await selectFormInclusionOption(
-    page,
-    "Disclosure of Lobbying Activities (SF-LLL)",
-    "No",
-  );
+    // Extra wait for page to fully render forms table after navigation
+    await page.waitForTimeout(10000);
 
-  // Submit the application and verify success
-  await submitApplicationAndVerify(page, "success");
-});
+    // Select 'No' for including SF-LLL form in submission
+    await selectFormInclusionOption(
+      page,
+      "Disclosure of Lobbying Activities (SF-LLL)",
+      "No",
+    );
+
+    // Submit the application and verify success
+    await submitApplicationAndVerify(page, "success");
+  },
+);

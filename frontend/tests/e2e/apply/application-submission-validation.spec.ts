@@ -123,14 +123,17 @@ test(
       applicationUrl,
     );
 
-    // Fill, save, and return to application page
+    // Fill and save, stay on form page to verify save success
     await fillForm(
       testInfo,
       page,
       SF424B_FORM_CONFIG,
       sf424BHappyPathTestData(testOrgLabel),
-      true,
+      false,
     );
+
+    // Verify save success alert on form page
+    await verifyFormStatusAfterSave(page, "complete");
 
     // On application page — verify form row shows "No issues detected"
     await verifyFormStatusOnApplication(
