@@ -11,8 +11,8 @@ jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
 
-const modalRef: RefObject<ModalRef | null> = { current: null };
-const orgIds = new Set(["test1", "test2"]);
+// const modalRef: RefObject<ModalRef | null> = { current: null };
+// const orgIds = new Set(["test1", "test2"]);
 const organizations: Organization[] = [
   {
     organization_id: "org-1",
