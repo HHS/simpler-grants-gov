@@ -1,11 +1,11 @@
-import { render, screen } from "@testing-library/react";
+// import { render, screen } from "@testing-library/react";
 import { Organization } from "src/types/applicationResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import type { RefObject } from "react";
 import { ModalRef } from "@trussworks/react-uswds";
 
-import { ShareOpportunityToOrganizationsModal } from "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal";
+// import { ShareOpportunityToOrganizationsModal } from "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal";
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
