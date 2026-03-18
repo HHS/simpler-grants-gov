@@ -21,13 +21,13 @@ def test_initial_prototype_state_machine_happy_path(
     db_session, agency, program_officer, budget_officer, opportunity
 ):
     """Happy path, verifies it can move through the states."""
-    workflow_event, history_event = build_start_workflow_event(
+    sqs_container = build_start_workflow_event(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         user=program_officer,
         entity=opportunity,
     )
 
-    state_machine = EventHandler(db_session, workflow_event, history_event).process()
+    state_machine = EventHandler(db_session, sqs_container).process()
 
     send_process_event(
         db_session=db_session,
