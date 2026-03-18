@@ -62,7 +62,9 @@ class ApprovalProcessor:
         * Validating that the user doesn't already have an active approval
         * Creating a record in the workflow approval table
         """
-        log_extra = self.state_machine_event.get_log_extra()
+        log_extra = self.state_machine_event.get_log_extra() | {
+            "approval_response_type": approval_response_type
+        }
         logger.info("Handling approval event for workflow", extra=log_extra)
 
         user = self.state_machine_event.acting_user
