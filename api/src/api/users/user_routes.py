@@ -34,6 +34,8 @@ from src.api.users.user_schemas import (
     UserResponseOrgInvitationResponseSchema,
     UserSavedOpportunitiesRequestSchema,
     UserSavedOpportunitiesResponseSchema,
+    UserSavedOpportunityNotificationRequestSchema,
+    UserSavedOpportunityNotificationResponseSchema,
     UserSavedSearchesRequestSchema,
     UserSavedSearchesResponseSchema,
     UserSaveOpportunityRequestSchema,
@@ -74,6 +76,9 @@ from src.services.users.login_gov_callback_handler import (
 )
 from src.services.users.org_invitation_response import org_invitation_response
 from src.services.users.rename_api_key import rename_api_key
+from src.services.users.set_saved_opportunity_notification_settings import (
+    set_saved_opportunity_notification_settings,
+)
 from src.services.users.update_saved_searches import update_saved_search
 from src.services.users.update_user_profile import update_user_profile
 from src.services.users.user_can_access import check_user_can_access
@@ -89,6 +94,32 @@ Do not try to use the execute option below as OpenAPI will not redirect your bro
 
 The token you receive can then be set to the X-SGG-Token header for authenticating with endpoints.
 """
+
+examples = {
+    "example1": {
+        "summary": "Set self notification to enabled",
+        "value": {"email_enabled": True},
+    },
+    "example2": {
+        "summary": "Set self notification to disabled",
+        "value": {"email_enabled": False},
+    },
+    "example3": {
+        "summary": "Set notification for a specific organization to enabled",
+        "value": {"organization_id": "11111111-1111-1111-1111-111111111111", "email_enabled": True},
+    },
+    "example4": {
+        "summary": "Set notification for a specific organization to disabled",
+        "value": {
+            "organization_id": "22222222-2222-2222-2222-222222222222",
+            "email_enabled": False,
+        },
+    },
+    "example5": {
+        "summary": "Self notification with explicit null organization_id",
+        "value": {"organization_id": None, "email_enabled": True},
+    },
+}
 
 
 @user_blueprint.get("/login")
@@ -818,3 +849,32 @@ def user_response_org_invitation(
         )
 
     return response.ApiResponse(message="Success", data=invitation_response)
+
+
+@user_blueprint.post("/<uuid:user_id>/saved-opportunities/notifications")
+@user_blueprint.input(UserSavedOpportunityNotificationRequestSchema)
+@user_blueprint.output(UserSavedOpportunityNotificationResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403, 404])
+@user_blueprint.auth_required(api_jwt_auth)
+@flask_db.with_db_session()
+def user_saved_opportunities_notifications(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {
+            "user_id": user_id,
+        }
+    )
+    logger.info("POST /v1/users/:user_id/saved-opportunities/notifications")
+
+    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+
+    # Verify the authenticated user matches the requested user_id
+    if user_token_session.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        db_session.add(user_token_session)
+        set_saved_opportunity_notification_settings(db_session, user_token_session.user, json_data)
+
+    return response.ApiResponse(message="Success")

@@ -805,3 +805,19 @@ class OrganizationInvitationSchema(Schema):
 
 class UserResponseOrgInvitationResponseSchema(AbstractResponseSchema):
     data = fields.Nested(OrganizationInvitationSchema)
+
+
+class UserSavedOpportunityNotificationRequestSchema(Schema):
+    organization_id = fields.UUID(
+        required=False,
+        metadata={
+            "description": "The ID of the organization for which to set notification.If not provided, the setting applies to the user's own saved opportunities."
+        },
+    )
+    email_enabled = fields.Boolean(
+        metadata={"description": "Whether the email notifications is enabled"}
+    )
+
+
+class UserSavedOpportunityNotificationResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
