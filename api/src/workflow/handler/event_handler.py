@@ -63,7 +63,6 @@ class EventHandler:
 
     def process(self) -> BaseStateMachine:
         """Process an event."""
-        logger.info("Processing event", extra=self.event.get_log_extra())
         state_machine_event = self._pre_process_event()
         return self._process_event(state_machine_event)
 

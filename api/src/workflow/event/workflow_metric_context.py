@@ -21,7 +21,7 @@ class WorkflowMetricContext:
     metrics: dict[str, Any]
 
     def __init__(self) -> None:
-        self.metrics = {metric: 0 for metric in self.Metrics}
+        self.metrics: dict[str, Any] = {metric: 0 for metric in self.Metrics}
         self.log_extra: dict[str, Any] = {}
         self.start_time = time.perf_counter()
 
