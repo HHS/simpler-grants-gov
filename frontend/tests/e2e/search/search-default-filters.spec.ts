@@ -9,17 +9,19 @@ interface PageProps {
   contextOptions?: BrowserContextOptions;
 }
 
-test("should load search page with forecasted and open filters checked by default", async ({
-  page,
-}: PageProps) => {
-  await page.goto("/search");
+test(
+  "should load search page with forecasted and open filters checked by default",
+  { tag: ["@smoke", "@grantee", "@opportunity-search"] },
+  async ({ page }: PageProps) => {
+    await page.goto("/search");
 
-  // Verify the presence of "Search" content on the page
-  await expect(page.locator("h1")).toContainText(
-    "Search funding opportunities",
-  );
+    // Verify the presence of "Search" content on the page
+    await expect(page.locator("h1")).toContainText(
+      "Search funding opportunities",
+    );
 
-  // Verify that the 'forecasted' and 'posted' are checked
-  await expectCheckboxIDIsChecked(page, "status-forecasted");
-  await expectCheckboxIDIsChecked(page, "status-open");
-});
+    // Verify that the 'forecasted' and 'posted' are checked
+    await expectCheckboxIDIsChecked(page, "status-forecasted");
+    await expectCheckboxIDIsChecked(page, "status-open");
+  },
+);
