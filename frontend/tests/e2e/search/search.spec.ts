@@ -186,7 +186,7 @@ test.describe("Search page tests", () => {
 
   test(
     "last result becomes first result when flipping sort order",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION },
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
       await page.goto("/search");
@@ -222,7 +222,7 @@ test.describe("Search page tests", () => {
 
   test(
     "number of results is the same with none or all opportunity status checked",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION },
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }) => {
       await page.goto("/search?status=none");
       const initialSearchResultsCount =
@@ -249,7 +249,7 @@ test.describe("Search page tests", () => {
 
   test(
     "should redirect to the last page of results when page param is too high",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION },
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }) => {
       await page.goto("/search?page=1000000");
 
