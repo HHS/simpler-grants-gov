@@ -1,4 +1,6 @@
 name: Lint - Sprint rollover
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
   workflow_dispatch: # for manual runs
