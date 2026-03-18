@@ -33,6 +33,9 @@ def _validate_attachment_value(
         )
         return
 
+    # Collect the attachment ID regardless of whether it passes validation
+    context.attachment_ids.add(value)
+
     # If the value isn't in the attachment ID list
     # then add a validation error.
     if value not in application_attachment_ids:

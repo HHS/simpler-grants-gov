@@ -46,6 +46,8 @@ class JsonRuleContext:
 
         self.validation_issues: list[ValidationErrorDetail] = []
 
+        self.attachment_ids: set[str] = set()
+
         self.rules: list[JsonRule] = []
 
     @property
