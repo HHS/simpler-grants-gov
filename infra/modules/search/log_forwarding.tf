@@ -23,6 +23,7 @@ data "archive_file" "nr_log_forwarder" {
 resource "aws_lambda_function" "nr_log_forwarder" {
   # checkov:skip=CKV_AWS_116:DLQ not needed for log forwarding Lambda
   # checkov:skip=CKV_AWS_117:VPC access not required for log forwarding
+  # checkov:skip=CKV_AWS_173:Env vars contain no secrets — license key is fetched from SSM at runtime
   # checkov:skip=CKV_AWS_272:Code signing not required for infrastructure Lambda
   # checkov:skip=CKV_AWS_115:Reserved concurrency not needed for log forwarding Lambda
   # checkov:skip=CKV_AWS_50:X-Ray tracing not required for log forwarding Lambda
@@ -55,7 +56,7 @@ resource "aws_lambda_function" "nr_log_forwarder" {
 
 resource "aws_cloudwatch_log_group" "nr_log_forwarder" {
   name              = "/aws/lambda/${local.nr_log_forwarder_name}"
-  retention_in_days = 90
+  retention_in_days = 365
   kms_key_id        = aws_kms_key.opensearch.arn
 }
 
