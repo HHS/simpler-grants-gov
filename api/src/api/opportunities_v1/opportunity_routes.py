@@ -34,6 +34,7 @@ SHARED_ALPHA_DESCRIPTION = """
 This API is in active development as we build out new functionalities for Simpler.Grants.gov.
 It is currently stable for everyday use, and will be versioned with advance notice for any breaking changes.
 
+Learn more in our [API documentation](https://wiki.simpler.grants.gov/product/api).
 See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
 """
 
