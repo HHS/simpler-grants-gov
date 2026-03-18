@@ -8,13 +8,16 @@ import uuid
 
 from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
 from src.db.models.user_models import User
-from src.db.models.workflow_models import Workflow
 from src.task.notifications.config import get_email_config
+from src.workflow.event.state_machine_event import StateMachineEvent
+from src.workflow.event.workflow_metric_context import WorkflowMetricContext
 
 logger = logging.getLogger(__name__)
 
 
-def send_workflow_email(workflow: Workflow, user: User, subject: str, message: str) -> None:
+def send_workflow_email(
+    state_machine_event: StateMachineEvent, user: User, subject: str, message: str
+) -> None:
     """
 
     Send an email for the workflow.
@@ -24,7 +27,10 @@ def send_workflow_email(workflow: Workflow, user: User, subject: str, message: s
     """
 
     trace_id = str(uuid.uuid4())
-    log_extra = workflow.get_log_extra() | {"trace_id": trace_id, "user_id": user.user_id}
+    log_extra = state_machine_event.get_log_extra() | {
+        "trace_id": trace_id,
+        "user_id": user.user_id,
+    }
 
     # Not every user in our system is guaranteed to have an email
     # Before calling this function, probably should make sure this
@@ -49,3 +55,6 @@ def send_workflow_email(workflow: Workflow, user: User, subject: str, message: s
 
     except Exception:
         logger.exception("Failed to send email for workflow", extra=log_extra)
+
+    # Increment the emails-sent metric
+    state_machine_event.increment(WorkflowMetricContext.Metrics.EMAIL_SENT_COUNT)

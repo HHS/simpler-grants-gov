@@ -1,8 +1,7 @@
 import { expect, test } from "@playwright/test";
-
-import playwrightEnv from "./playwright-env";
-import { waitForURLChange } from "./playwrightUtils";
-import { authenticateE2eUser } from "./utils/authenticate-e2e-user-utils";
+import playwrightEnv from "tests/e2e/playwright-env";
+import { waitForURLChange } from "tests/e2e/playwrightUtils";
+import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 
 const { targetEnv } = playwrightEnv;
 
