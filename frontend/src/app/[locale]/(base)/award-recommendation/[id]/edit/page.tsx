@@ -19,12 +19,12 @@ import {
   CharacterCount,
   Grid,
   GridContainer,
-  Radio,
 } from "@trussworks/react-uswds";
 
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
+import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 
 export async function generateMetadata({
@@ -72,7 +72,7 @@ const OpportunitySection = ({
     <div>
       <Grid row className="grid-gap">
         <Grid col={9} tablet={{ col: 9 }}>
-          <div className="margin-top-5 margin-bottom-5">
+          <div className="margin-top-3 margin-bottom-3">
             <div className="margin-bottom-3">
               <h2 className="margin-top-0 margin-bottom-0">
                 {t("opportunity", { defaultValue: "Opportunity" })}
@@ -129,104 +129,6 @@ const OpportunitySection = ({
                   rows={6}
                   className="maxw-full"
                   data-testid="additional-info-textarea"
-                />
-              </div>
-            </div>
-          </div>
-        </Grid>
-      </Grid>
-    </div>
-  );
-};
-
-interface RecommendationSectionProps {
-  locale: string;
-}
-
-const RecommendationSection = ({
-  locale: _locale,
-}: RecommendationSectionProps) => {
-  const t = useTranslations("AwardRecommendation");
-
-  return (
-    <div>
-      <Grid row className="grid-gap">
-        <Grid col={9} tablet={{ col: 9 }}>
-          <div className="margin-top-5 margin-bottom-5">
-            <div>
-              <div className="margin-bottom-3">
-                <p className="text-bold margin-bottom-2">
-                  {t("recommendationMethod.label", {
-                    defaultValue: "Recommendation method",
-                  })}
-                </p>
-                <p className="text-base margin-top-1 margin-bottom-2">
-                  {t("recommendationMethod.description", {
-                    defaultValue: "Choose the method you'll use to rate",
-                  })}
-                </p>
-                <Radio
-                  id="merit_review_only"
-                  name="award_selection_method"
-                  label={t("recommendationMethod.meritReviewOnly", {
-                    defaultValue: "Merit review ranking only",
-                  })}
-                  value="merit-review-only"
-                />
-                <Radio
-                  id="merit_review_other"
-                  name="award_selection_method"
-                  label={t("recommendationMethod.meritReviewOther", {
-                    defaultValue: "Merit review ranking with other factors",
-                  })}
-                  value="merit-review-other"
-                />
-              </div>
-              <div className="margin-bottom-3">
-                <p className="text-bold margin-bottom-2">
-                  {t("recommendationMethodDetails.label", {
-                    defaultValue: "Recommendation method details",
-                  })}
-                </p>
-                <p className="text-base margin-top-1 margin-bottom-2">
-                  {t("recommendationMethodDetails.description", {
-                    defaultValue:
-                      "Add any additional information - including the selection factors used in the NOFO",
-                  })}
-                </p>
-                <CharacterCount
-                  id="award_selection_details"
-                  name="award_selection_details"
-                  maxLength={500}
-                  isTextArea
-                  defaultValue=""
-                  rows={6}
-                  className="maxw-full"
-                  data-testid="award-selection-details-textarea"
-                />
-              </div>
-              <div className="border-top border-base-lighter margin-top-4 margin-bottom-4" />
-              <div className="margin-bottom-3">
-                <p className="text-bold margin-bottom-1 font-sans-sm">
-                  {t("otherKeyInformation.label", {
-                    defaultValue: "Other key information",
-                  })}
-                </p>
-                <p className="text-base margin-top-1 margin-bottom-2">
-                  {t("otherKeyInformation.description", {
-                    defaultValue:
-                      "Add any relevant information related to this reviewer and decision-maker for this opportunity",
-                  })}
-                </p>
-                <CharacterCount
-                  id="other_key_information"
-                  name="other_key_information"
-                  maxLength={500}
-                  isTextArea
-                  defaultValue=""
-                  rows={6}
-                  className="maxw-full"
-                  data-testid="other-key-information-textarea"
                 />
               </div>
             </div>
@@ -310,7 +212,7 @@ async function AwardRecommendationEditPageContent({
             locale={locale}
           />
         )}
-        <RecommendationSection locale={locale} />
+        <RecommendationSection mode="edit" />
       </GridContainer>
     </>
   );
