@@ -13,9 +13,19 @@ import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-sta
 import { SF424B_FORM_CONFIG } from "./fixtures/sf424b-field-definitions";
 import { sf424BHappyPathTestData } from "./fixtures/sf424b-fill-data";
 
-const { testOrgLabel } = playwrightEnv;
+const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
+
+// Skip non-Chrome browsers in staging
+test.beforeEach(({ page: _ }, testInfo) => {
+  if (targetEnv === "staging") {
+    test.skip(
+      testInfo.project.name !== "Chrome",
+      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
+    );
+  }
+});
 
 test("Application form completion happy path - SF424B", async ({
   page,
@@ -34,7 +44,7 @@ test("Application form completion happy path - SF424B", async ({
     testInfo,
     page,
     SF424B_FORM_CONFIG,
-    sf424BHappyPathTestData,
+    sf424BHappyPathTestData(testOrgLabel),
     false,
   );
 

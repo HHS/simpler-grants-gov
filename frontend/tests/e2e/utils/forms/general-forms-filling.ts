@@ -75,7 +75,7 @@ export async function fillForm(
   testInfo: TestInfo,
   page: Page,
   config: FillFormConfig,
-  data: { [key: string]: string },
+  data: Record<string, string>,
   returnToApplication = true,
 ): Promise<void> {
   const { formName, fields, saveButtonTestId } = config;
