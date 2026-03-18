@@ -77,6 +77,10 @@ class WorkflowApprovalEmailListener:
             approval_config.required_privileges,
             filter_out_suppressed_emails=True,
         )
+        logger.info(
+            "Fetched users that could potentially do approval",
+            extra=log_extra | {"user_count": len(users), "target_state": target_state},
+        )
 
         if len(users) == 0:
             logger.warning("No users can do approval - cannot send email", extra=log_extra)
