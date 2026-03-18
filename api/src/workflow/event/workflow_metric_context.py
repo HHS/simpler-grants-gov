@@ -18,8 +18,6 @@ class WorkflowMetricContext:
         WORKFLOW_TRANSITION_COUNT = "workflow_transition_count"
         WORKFLOW_EVENT_COUNT = "workflow_event_count"
 
-    metrics: dict[str, Any]
-
     def __init__(self) -> None:
         self.metrics: dict[str, Any] = {metric: 0 for metric in self.Metrics}
         self.log_extra: dict[str, Any] = {}
