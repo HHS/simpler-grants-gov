@@ -78,6 +78,13 @@ test(
       "No",
     );
 
+    // Select 'No' for including SF-LLL form in submission
+    await selectFormInclusionOption(
+      page,
+      "Disclosure of Lobbying Activities (SF-LLL)",
+      "No",
+    );
+
     // Submit the application and verify success
     await submitApplicationAndVerify(page, "success");
   },
