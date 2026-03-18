@@ -97,6 +97,7 @@ class SQSClient:
         Deletes a batch of messages and returns an SQSDeleteBatchResponse.
         """
         if not receipt_handles:
+            logger.info("No SQS messages to delete", extra={"queue_url": self.queue_url})
             return SQSDeleteBatchResponse()
 
         receipt_mapping = {}
