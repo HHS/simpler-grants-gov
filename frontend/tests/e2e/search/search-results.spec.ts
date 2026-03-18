@@ -24,14 +24,16 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("Search page results tests", () => {
-  test("should return at least 1 result when searching with valid term", async ({
-    page,
-  }) => {
-    const resultsHeading = page.locator("h3", {
-      hasText: /^[1-9]\d*\s+Opportunities$/i,
-    });
-    await expect(resultsHeading).toBeAttached();
-  });
+  test(
+    "should return at least 1 result when searching with valid term",
+    { tag: ["@smoke", "@grantee", "@opportunity-search"] },
+    async ({ page }) => {
+      const resultsHeading = page.locator("h3", {
+        hasText: /^[1-9]\d*\s+Opportunities$/i,
+      });
+      await expect(resultsHeading).toBeAttached();
+    },
+  );
 
   test("search list should have at least 1 item", async ({ page }) => {
     const searchList = page.locator("ul.usa-list--unstyled");
