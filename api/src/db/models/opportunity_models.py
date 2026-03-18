@@ -17,7 +17,6 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.agency_models import Agency
 from src.db.models.base import ApiSchemaTable, TimestampMixin
-from src.db.models.entity_models import OrganizationSavedOpportunity
 from src.db.models.lookup_models import (
     LkApplicantType,
     LkFundingCategory,

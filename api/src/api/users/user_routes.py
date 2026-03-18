@@ -95,32 +95,6 @@ Do not try to use the execute option below as OpenAPI will not redirect your bro
 The token you receive can then be set to the X-SGG-Token header for authenticating with endpoints.
 """
 
-examples = {
-    "example1": {
-        "summary": "Set self notification to enabled",
-        "value": {"email_enabled": True},
-    },
-    "example2": {
-        "summary": "Set self notification to disabled",
-        "value": {"email_enabled": False},
-    },
-    "example3": {
-        "summary": "Set notification for a specific organization to enabled",
-        "value": {"organization_id": "11111111-1111-1111-1111-111111111111", "email_enabled": True},
-    },
-    "example4": {
-        "summary": "Set notification for a specific organization to disabled",
-        "value": {
-            "organization_id": "22222222-2222-2222-2222-222222222222",
-            "email_enabled": False,
-        },
-    },
-    "example5": {
-        "summary": "Self notification with explicit null organization_id",
-        "value": {"organization_id": None, "email_enabled": True},
-    },
-}
-
 
 @user_blueprint.get("/login")
 @user_blueprint.doc(responses=[302], description=LOGIN_DESCRIPTION)
