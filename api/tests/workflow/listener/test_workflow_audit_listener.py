@@ -16,13 +16,13 @@ def test_workflow_audit_created_on_start_workflow(db_session, enable_factory_cre
     user = UserFactory.create()
     opportunity = OpportunityFactory.create()
 
-    event, history_event = build_start_workflow_event(
+    sqs_container = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=user,
         entity=opportunity,
     )
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     state_machine = event_handler.process()
 
     # Query for the audit records
@@ -44,7 +44,7 @@ def test_workflow_audit_created_on_start_workflow(db_session, enable_factory_cre
     assert audit_record.transition_event == "Start workflow"
     assert audit_record.source_state == BasicState.START
     assert audit_record.target_state == BasicState.MIDDLE
-    assert audit_record.event_id == history_event.event_id
+    assert audit_record.event_id == sqs_container.history_event.event_id
 
 
 def test_workflow_audit_created_on_process_workflow(db_session, enable_factory_create):
@@ -57,11 +57,11 @@ def test_workflow_audit_created_on_process_workflow(db_session, enable_factory_c
         has_opportunity=True,
     )
 
-    event, history_event = build_process_workflow_event(
+    sqs_container = build_process_workflow_event(
         workflow.workflow_id, user=user, event_to_send="middle_to_end"
     )
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     event_handler.process()
 
     # Query for the audit records
@@ -81,7 +81,7 @@ def test_workflow_audit_created_on_process_workflow(db_session, enable_factory_c
     assert audit_record.transition_event == "Middle to end"
     assert audit_record.source_state == BasicState.MIDDLE
     assert audit_record.target_state == BasicState.END
-    assert audit_record.event_id == history_event.event_id
+    assert audit_record.event_id == sqs_container.history_event.event_id
 
 
 def test_workflow_audit_captures_metadata(db_session, enable_factory_create):
@@ -96,11 +96,11 @@ def test_workflow_audit_captures_metadata(db_session, enable_factory_create):
 
     # Create event with metadata
     test_metadata = {"test_key": "test_value", "another_key": 123}
-    event, history_event = build_process_workflow_event(
+    sqs_container = build_process_workflow_event(
         workflow.workflow_id, user=user, event_to_send="middle_to_end", metadata=test_metadata
     )
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     event_handler.process()
 
     # Query for the audit record
@@ -118,22 +118,22 @@ def test_workflow_audit_multiple_transitions(db_session, enable_factory_create):
     opportunity = OpportunityFactory.create()
 
     # Start the workflow
-    event, history_event = build_start_workflow_event(
+    sqs_container = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=user,
         entity=opportunity,
     )
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     state_machine = event_handler.process()
     workflow_id = state_machine.workflow.workflow_id
 
     # Process another event
-    event2, history_event2 = build_process_workflow_event(
+    sqs_container2 = build_process_workflow_event(
         workflow_id, user=user, event_to_send="middle_to_end"
     )
 
-    event_handler2 = EventHandler(db_session, event2, history_event2)
+    event_handler2 = EventHandler(db_session, sqs_container2)
     event_handler2.process()
 
     # Query for all audit records
@@ -165,22 +165,22 @@ def test_workflow_audit_with_approval_workflow(db_session, enable_factory_create
     opportunity = OpportunityFactory.create()
 
     # Start the workflow
-    event, history_event = build_start_workflow_event(
+    sqs_container = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=user,
         entity=opportunity,
     )
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     state_machine = event_handler.process()
     workflow_id = state_machine.workflow.workflow_id
 
     # Move to program officer approval state
-    event2, history_event2 = build_process_workflow_event(
+    sqs_container2 = build_process_workflow_event(
         workflow_id, user=user, event_to_send="middle_to_program_officer_approval"
     )
 
-    event_handler2 = EventHandler(db_session, event2, history_event2)
+    event_handler2 = EventHandler(db_session, sqs_container2)
     event_handler2.process()
 
     # Query for all audit records
@@ -213,22 +213,22 @@ def test_workflow_audit_different_users(db_session, enable_factory_create):
     opportunity = OpportunityFactory.create()
 
     # Start workflow with user1
-    event, history_event = build_start_workflow_event(
+    sqs_container = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=user1,
         entity=opportunity,
     )
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     state_machine = event_handler.process()
     workflow_id = state_machine.workflow.workflow_id
 
     # Process event with user2
-    event2, history_event2 = build_process_workflow_event(
+    sqs_container2 = build_process_workflow_event(
         workflow_id, user=user2, event_to_send="middle_to_end"
     )
 
-    event_handler2 = EventHandler(db_session, event2, history_event2)
+    event_handler2 = EventHandler(db_session, sqs_container2)
     event_handler2.process()
 
     # Query for all audit records
@@ -257,29 +257,29 @@ def test_workflow_audit_automatic_transitions_use_system_user(
     opportunity = OpportunityFactory.create()
 
     # Start the workflow - this will create one audit record
-    event, history_event = build_start_workflow_event(
+    sqs_container = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=regular_user,
         entity=opportunity,
     )
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     state_machine = event_handler.process()
     workflow_id = state_machine.workflow.workflow_id
 
     # Move to program officer approval state
-    event2, history_event2 = build_process_workflow_event(
+    sqs_container2 = build_process_workflow_event(
         workflow_id, user=regular_user, event_to_send="middle_to_program_officer_approval"
     )
 
-    event_handler2 = EventHandler(db_session, event2, history_event2)
+    event_handler2 = EventHandler(db_session, sqs_container2)
     event_handler2.process()
 
     # Now send an approval event that will trigger an automatic transition via 'after'
     # This approval event should create 2 audit records:
     # 1. The approval itself (user-initiated) - should use regular_user
     # 2. The check_program_officer_approval (automatic via 'after') - should use system_user
-    event3, history_event3 = build_process_workflow_event(
+    sqs_container3 = build_process_workflow_event(
         workflow_id,
         user=regular_user,
         event_to_send="receive_program_officer_approval",
@@ -288,7 +288,7 @@ def test_workflow_audit_automatic_transitions_use_system_user(
         },
     )
 
-    event_handler3 = EventHandler(db_session, event3, history_event3)
+    event_handler3 = EventHandler(db_session, sqs_container3)
     event_handler3.process()
 
     # Query for all audit records

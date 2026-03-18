@@ -97,7 +97,7 @@ class WorkflowApprovalEmailListener:
 
         for user in users:
             send_workflow_email(
-                workflow=state_machine_event.workflow,
+                state_machine_event=state_machine_event,
                 user=user,
                 subject=subject,
                 message=approval_message,

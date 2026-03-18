@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any
 
 from src.db.models.user_models import User
 from src.db.models.workflow_models import Workflow, WorkflowEventHistory
+from src.workflow.event.workflow_metric_context import WorkflowMetricContext
 from src.workflow.workflow_config import WorkflowConfig
 
 if TYPE_CHECKING:
@@ -40,6 +41,10 @@ class StateMachineEvent:
 
     workflow_history_event: WorkflowEventHistory
 
+    workflow_metric_context: WorkflowMetricContext = dataclasses.field(
+        default_factory=WorkflowMetricContext
+    )
+
     # Metadata for processing an event.
     metadata: dict | None = None
 
@@ -48,6 +53,7 @@ class StateMachineEvent:
             "acting_user_id": self.acting_user.user_id,
             "event_to_send": self.event_to_send,
             "event_id": self.workflow_history_event.event_id,
+            "state_machine_cls": self.state_machine_cls.__name__,
         } | self.workflow.get_log_extra()
 
     def get_metadata_value(self, field: str) -> Any:
@@ -56,3 +62,7 @@ class StateMachineEvent:
             return None
 
         return self.metadata.get(field, None)
+
+    def increment(self, name: str, value: int = 1) -> None:
+        """Increment a metric on the underlying metric context."""
+        self.workflow_metric_context.increment(name, value)
