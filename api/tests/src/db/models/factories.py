@@ -3349,7 +3349,7 @@ class WorkflowEventHistoryFactory(BaseFactory):
 
     event_id = Generators.UuidObj
     event_data = {}
-    sent_at = Generators.Now
+    sent_at = Generators.UtcNow
     is_successfully_processed = True
 
 
