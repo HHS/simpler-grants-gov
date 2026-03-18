@@ -1,10 +1,22 @@
+import path from "path";
 import { Page, TestInfo } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
 
 export interface FillFieldDefinition {
   testId?: string;
   selector?: string;
-  type: "text" | "dropdown";
+  optionTestIdPrefix?: string;
+  hasTextRegex?: string;
+  getByText?: string;
+  textExact?: boolean;
+  buttonName?: string;
+  type:
+    | "text"
+    | "dropdown"
+    | "file"
+    | "radiobutton"
+    | "checkbox"
+    | "combo-box-input";
   section?: string;
   field: string;
 }
@@ -25,24 +37,142 @@ export interface FormsFixtureData {
   fields: FillFieldDefinition[];
 }
 
+function shouldActivateField(data: string | boolean | undefined): boolean {
+  if (typeof data === "boolean") {
+    return data;
+  }
+
+  return data !== undefined && data.toLowerCase() !== "false";
+}
+
 export async function fillField(
   testInfo: TestInfo,
   page: Page,
   field: FillFieldDefinition,
-  data: string,
+  data: string | boolean | undefined,
 ): Promise<void> {
   const fieldIdentifier = field.section
     ? `${field.section}-${field.field}`
     : field.field;
   try {
-    if (field.type === "dropdown" && field.selector) {
-      await selectDropdownByValueOrLabel(page, field.selector, data);
-    } else if (field.type === "text" && field.testId) {
+    if (
+      (field.type === "dropdown" ||
+        field.type === "combo-box-input" ||
+        field.type === "text" ||
+        field.type === "file") &&
+      typeof data !== "string"
+    ) {
+      throw new Error(
+        `Field ${fieldIdentifier} requires string data, received ${typeof data}`,
+      );
+    }
+
+    if (field.type === "dropdown" && typeof data === "string") {
+      if (field.selector) {
+        await selectDropdownByValueOrLabel(page, field.selector, data);
+      } else if (field.testId) {
+        const resolvedTestId = field.testId.includes("{value}")
+          ? field.testId.replace("{value}", data)
+          : `${field.testId}${data}`;
+        const locator = page.getByTestId(resolvedTestId);
+        await locator.waitFor({ state: "visible", timeout: 5000 });
+        await locator.click();
+      } else {
+        throw new Error(
+          `Dropdown field ${fieldIdentifier} is missing selector/testId`,
+        );
+      }
+    } else if (
+      field.type === "combo-box-input" &&
+      field.testId &&
+      typeof data === "string"
+    ) {
+      const toggleLocator = page.getByTestId(field.testId);
+      await toggleLocator.waitFor({ state: "visible", timeout: 5000 });
+      await toggleLocator.click();
+
+      const optionPrefix = field.optionTestIdPrefix ?? "combo-box-option-";
+      const optionLocator = page.getByTestId(`${optionPrefix}${data}`);
+      await optionLocator.waitFor({ state: "visible", timeout: 5000 });
+      await optionLocator.click();
+    } else if (
+      field.type === "text" &&
+      field.testId &&
+      typeof data === "string"
+    ) {
       const locator = page.getByTestId(field.testId);
       await locator.waitFor({ state: "attached", timeout: 5000 });
       await locator.fill(data);
+    } else if (
+      field.type === "file" &&
+      field.buttonName &&
+      typeof data === "string"
+    ) {
+      const locator = page.getByRole("button", { name: field.buttonName });
+      await locator.waitFor({ state: "visible", timeout: 5000 });
+
+      const absolutePath = path.isAbsolute(data)
+        ? data
+        : path.resolve(__dirname, "../../../../", data);
+      await locator.setInputFiles(absolutePath);
+
+      await page.waitForLoadState("load", { timeout: 15000 });
+    } else if (
+      field.type === "radiobutton" &&
+      (field.testId || field.selector || field.getByText)
+    ) {
+      if (shouldActivateField(data)) {
+        let locator = field.getByText
+          ? page.getByText(field.getByText, {
+              exact: field.textExact ?? false,
+            })
+          : field.selector
+            ? page.locator(field.selector)
+            : page.getByTestId(field.testId as string);
+        if (field.hasTextRegex) {
+          locator = locator.filter({ hasText: new RegExp(field.hasTextRegex) });
+        }
+        await locator.waitFor({ state: "visible", timeout: 5000 });
+        await locator.click();
+      }
+    } else if (
+      field.type === "checkbox" &&
+      (field.testId || field.selector || field.getByText)
+    ) {
+      if (shouldActivateField(data)) {
+        let locator = field.getByText
+          ? page.getByText(field.getByText, {
+              exact: field.textExact ?? false,
+            })
+          : field.selector
+            ? page.locator(field.selector)
+            : page.getByTestId(field.testId as string);
+        if (field.hasTextRegex) {
+          locator = locator.filter({ hasText: new RegExp(field.hasTextRegex) });
+        }
+        await locator.waitFor({ state: "visible", timeout: 5000 });
+        try {
+          if (!(await locator.isChecked())) {
+            await locator.check();
+          }
+        } catch {
+          const nestedCheckbox = locator
+            .locator('input[type="checkbox"]')
+            .first();
+          if ((await nestedCheckbox.count()) === 0) {
+            throw new Error(
+              `Checkbox field ${fieldIdentifier} is not checkable; map to the checkbox input testId`,
+            );
+          }
+          if (!(await nestedCheckbox.isChecked())) {
+            await nestedCheckbox.check();
+          }
+        }
+      }
     } else {
-      console.error("unsupported field type or selector type", field);
+      throw new Error(
+        `Unsupported or invalid field configuration for ${fieldIdentifier}`,
+      );
     }
 
     await testInfo.attach(`fillField-${fieldIdentifier}-success`, {
@@ -75,7 +205,7 @@ export async function fillForm(
   testInfo: TestInfo,
   page: Page,
   config: FillFormConfig,
-  data: { [key: string]: string },
+  data: { [key: string]: string | boolean },
   returnToApplication = true,
 ): Promise<void> {
   const { formName, fields, saveButtonTestId } = config;
