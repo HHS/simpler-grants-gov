@@ -32,15 +32,18 @@ test.beforeEach(({ page: _ }, testInfo) => {
   }
 });
 
-test("Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL", async ({
-  page,
-  context,
-}: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
-  test.setTimeout(300_000); // 5 min timeout
+test(
+  "Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL",
+  { tag: ["@smoke", "@grantee", "@apply"] },
+  async (
+    { page, context }: { page: Page; context: BrowserContext },
+    testInfo: TestInfo,
+  ) => {
+    test.setTimeout(300_000); // 5 min timeout
 
-  const isMobile = testInfo.project.name.match(/[Mm]obile/);
+    const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
-  await authenticateE2eUser(page, context, !!isMobile);
+    await authenticateE2eUser(page, context, !!isMobile);
 
   await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
   const applicationUrl = page.url();
@@ -63,15 +66,15 @@ test("Application submission happy path - application with required SF424B and u
     applicationUrl,
   );
 
-  // Extra wait for page to fully render forms table after navigation
-  await page.waitForTimeout(10000);
+    // Extra wait for page to fully render forms table after navigation
+    await page.waitForTimeout(10000);
 
-  // Select 'No' for including SF-LLL form in submission
-  await selectFormInclusionOption(
-    page,
-    "Disclosure of Lobbying Activities (SF-LLL)",
-    "No",
-  );
+    // Select 'No' for including SF-LLL form in submission
+    await selectFormInclusionOption(
+      page,
+      "Disclosure of Lobbying Activities (SF-LLL)",
+      "No",
+    );
 
   // Submit the application and verify success
   await submitApplicationAndVerify(page, "success");
