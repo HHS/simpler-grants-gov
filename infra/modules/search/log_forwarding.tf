@@ -23,7 +23,6 @@ data "archive_file" "nr_log_forwarder" {
 resource "aws_lambda_function" "nr_log_forwarder" {
   # checkov:skip=CKV_AWS_116:DLQ not needed for log forwarding Lambda
   # checkov:skip=CKV_AWS_117:VPC access not required for log forwarding
-  # checkov:skip=CKV_AWS_173:NR license key is passed via SSM, not plaintext
   # checkov:skip=CKV_AWS_272:Code signing not required for infrastructure Lambda
   # checkov:skip=CKV_AWS_115:Reserved concurrency not needed for log forwarding Lambda
   # checkov:skip=CKV_AWS_50:X-Ray tracing not required for log forwarding Lambda
@@ -42,10 +41,10 @@ resource "aws_lambda_function" "nr_log_forwarder" {
 
   environment {
     variables = {
-      NR_LICENSE_KEY         = data.aws_ssm_parameter.newrelic_license_key.value
-      NR_LOGS_ENDPOINT       = "https://log-api.newrelic.com/log/v1"
-      AWS_ACCOUNT_ID         = data.aws_caller_identity.current.account_id
-      OPENSEARCH_DOMAIN_NAME = aws_opensearch_domain.opensearch.domain_name
+      NR_LICENSE_KEY_SSM_PATH = data.aws_ssm_parameter.newrelic_license_key.name
+      NR_LOGS_ENDPOINT        = "https://log-api.newrelic.com/log/v1"
+      AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
+      OPENSEARCH_DOMAIN_NAME  = aws_opensearch_domain.opensearch.domain_name
     }
   }
 
@@ -56,7 +55,7 @@ resource "aws_lambda_function" "nr_log_forwarder" {
 
 resource "aws_cloudwatch_log_group" "nr_log_forwarder" {
   name              = "/aws/lambda/${local.nr_log_forwarder_name}"
-  retention_in_days = 1827
+  retention_in_days = 90
   kms_key_id        = aws_kms_key.opensearch.arn
 }
 
@@ -82,6 +81,20 @@ resource "aws_iam_role" "nr_log_forwarder" {
 resource "aws_iam_role_policy_attachment" "nr_log_forwarder_basic" {
   role       = aws_iam_role.nr_log_forwarder.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy" "nr_log_forwarder_ssm" {
+  name = "${local.nr_log_forwarder_name}-ssm"
+  role = aws_iam_role.nr_log_forwarder.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "ssm:GetParameter"
+      Resource = data.aws_ssm_parameter.newrelic_license_key.arn
+    }]
+  })
 }
 
 # --- CloudWatch Logs subscription ---

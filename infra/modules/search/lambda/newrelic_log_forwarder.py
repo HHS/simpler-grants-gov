@@ -4,15 +4,34 @@ import base64
 import gzip
 import json
 import os
+import urllib.error
 import urllib.request
 
-NR_LICENSE_KEY = os.environ["NR_LICENSE_KEY"]
+import boto3
+
+ssm = boto3.client("ssm")
+
 NR_LOGS_ENDPOINT = os.environ.get(
     "NR_LOGS_ENDPOINT", "https://log-api.newrelic.com/log/v1"
 )
 AWS_ACCOUNT_ID = os.environ.get("AWS_ACCOUNT_ID", "")
 AWS_REGION = os.environ.get("AWS_REGION", "")
 OPENSEARCH_DOMAIN_NAME = os.environ.get("OPENSEARCH_DOMAIN_NAME", "")
+
+# Cache the license key across warm invocations
+_nr_license_key = None
+
+
+def get_nr_license_key():
+    """Fetch the New Relic license key from SSM Parameter Store."""
+    global _nr_license_key
+    if _nr_license_key is None:
+        response = ssm.get_parameter(
+            Name=os.environ["NR_LICENSE_KEY_SSM_PATH"],
+            WithDecryption=True,
+        )
+        _nr_license_key = response["Parameter"]["Value"]
+    return _nr_license_key
 
 
 def handler(event, context):
@@ -57,19 +76,31 @@ def handler(event, context):
         }
     ]
 
+    nr_license_key = get_nr_license_key()
+
     request = urllib.request.Request(
         NR_LOGS_ENDPOINT,
         data=gzip.compress(json.dumps(nr_payload).encode("utf-8")),
         headers={
             "Content-Type": "application/gzip",
-            "Api-Key": NR_LICENSE_KEY,
+            "Api-Key": nr_license_key,
             "Content-Encoding": "gzip",
         },
         method="POST",
     )
 
-    with urllib.request.urlopen(request, timeout=10) as response:
-        status = response.status
-        body = response.read().decode("utf-8")
-
-    return {"statusCode": status, "body": body}
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            status = response.status
+            body = response.read().decode("utf-8")
+        print(f"New Relic response: {status}")
+        return {"statusCode": status, "body": body}
+    except urllib.error.HTTPError as e:
+        print(f"New Relic HTTP error: {e.code} {e.reason}")
+        if e.code >= 500:
+            raise  # Retryable — let Lambda/CloudWatch retry
+        print(f"Non-retryable error, dropping {len(entries)} log events")
+        return {"statusCode": e.code, "body": e.reason}
+    except urllib.error.URLError as e:
+        print(f"New Relic connection error: {e.reason}")
+        raise  # Retryable — network issue
