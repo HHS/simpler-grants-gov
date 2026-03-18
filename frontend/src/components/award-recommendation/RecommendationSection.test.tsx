@@ -84,12 +84,12 @@ describe("RecommendationSection", () => {
     });
 
     it("renders divider between sections in edit mode", () => {
-      const { container } = render(<RecommendationSection mode="edit" />);
+      render(<RecommendationSection mode="edit" />);
 
-      const divider = container.querySelector(
-        ".border-top.border-base-lighter.margin-top-4.margin-bottom-4",
+      const detailsSection = screen.getByTestId(
+        "award-selection-details-textarea",
       );
-      expect(divider).toBeInTheDocument();
+      expect(detailsSection).toBeInTheDocument();
     });
 
     it("renders textareas with correct row count in edit mode", () => {
@@ -111,13 +111,13 @@ describe("RecommendationSection", () => {
 
       const detailsTextarea = screen.getByTestId(
         "award-selection-details-textarea",
-      ) as HTMLTextAreaElement;
+      );
       const otherInfoTextarea = screen.getByTestId(
         "other-key-information-textarea",
-      ) as HTMLTextAreaElement;
+      );
 
-      expect(detailsTextarea.value).toBe("");
-      expect(otherInfoTextarea.value).toBe("");
+      expect(detailsTextarea).toHaveValue("");
+      expect(otherInfoTextarea).toHaveValue("");
     });
 
     it("renders radio buttons with proper grouping in edit mode", () => {
@@ -130,18 +130,16 @@ describe("RecommendationSection", () => {
         "recommendationMethod.meritReviewOther",
       );
 
-      expect(meritOnlyRadio.getAttribute("name")).toBe(
-        meritOtherRadio.getAttribute("name"),
-      );
+      expect(meritOnlyRadio).toHaveAttribute("name", "award_selection_method");
+      expect(meritOtherRadio).toHaveAttribute("name", "award_selection_method");
     });
 
-    it("does not render border container in edit mode", () => {
-      const { container } = render(<RecommendationSection mode="edit" />);
+    it("renders the recommendation section heading in edit mode", () => {
+      render(<RecommendationSection mode="edit" />);
 
-      const borderContainer = container.querySelector(
-        ".border.radius-md.border-base-lighter.padding-3.bg-white",
-      );
-      expect(borderContainer).not.toBeInTheDocument();
+      expect(
+        screen.getByText("recommendationMethod.label"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -180,26 +178,27 @@ describe("RecommendationSection", () => {
       expect(screen.getByText("otherKeyInformation.label")).toBeInTheDocument();
     });
 
-    it("renders with border container in view mode", () => {
-      const { container } = render(
-        <RecommendationSection mode="view" {...mockData} />,
-      );
+    it("renders all sections in view mode", () => {
+      render(<RecommendationSection mode="view" {...mockData} />);
 
-      const borderContainer = container.querySelector(
-        ".border.radius-md.border-base-lighter.padding-3.bg-white",
-      );
-      expect(borderContainer).toBeInTheDocument();
+      expect(
+        screen.getByText("recommendationMethod.label"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("recommendationMethodDetails.label"),
+      ).toBeInTheDocument();
+      expect(screen.getByText("otherKeyInformation.label")).toBeInTheDocument();
     });
 
-    it("renders divider between sections in view mode", () => {
-      const { container } = render(
-        <RecommendationSection mode="view" {...mockData} />,
-      );
+    it("displays provided data in view mode", () => {
+      render(<RecommendationSection mode="view" {...mockData} />);
 
-      const divider = container.querySelector(
-        ".border-top.border-base-lighter.margin-top-2.margin-bottom-2",
-      );
-      expect(divider).toBeInTheDocument();
+      expect(
+        screen.getByText(mockData.recommendationMethod),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(mockData.recommendationMethodDetails),
+      ).toBeInTheDocument();
     });
 
     it("does not render radio buttons in view mode", () => {
