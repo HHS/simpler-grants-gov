@@ -21,7 +21,10 @@ from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.pdf_generation.models import PdfGenerationResponse
 from src.services.pdf_generation.service import generate_application_form_pdf
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
-from src.services.xml_generation.utils.attachment_mapping import create_attachment_mapping
+from src.services.xml_generation.utils.attachment_mapping import (
+    _collect_referenced_attachment_ids,
+    create_attachment_mapping,
+)
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
@@ -349,7 +352,24 @@ class CreateApplicationSubmissionTask(Task):
         }
         logger.info("Processing attachments for application submission", extra=log_extra)
 
+        # Only include attachments that are referenced in form responses.
+        # Orphaned attachments (not referenced anywhere) are excluded from the zip.
+        referenced_ids = _collect_referenced_attachment_ids(submission.application)
+
         for application_attachment in submission.application.application_attachments:
+            attachment_id_str = str(application_attachment.application_attachment_id)
+
+            if attachment_id_str not in referenced_ids:
+                logger.warning(
+                    "Skipping orphaned attachment from submission zip - not referenced in any form response",
+                    extra=log_extra
+                    | {
+                        "application_attachment_id": application_attachment.application_attachment_id,
+                        "file_name": application_attachment.file_name,
+                    },
+                )
+                continue
+
             logger.info(
                 "Adding attachment to application submission zip",
                 extra=log_extra
@@ -366,7 +386,6 @@ class CreateApplicationSubmissionTask(Task):
 
                 # Track filename overrides if the file was renamed
                 if file_name_in_zip != application_attachment.file_name:
-                    attachment_id_str = str(application_attachment.application_attachment_id)
                     submission.attachment_filename_overrides[attachment_id_str] = file_name_in_zip
 
                 with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
