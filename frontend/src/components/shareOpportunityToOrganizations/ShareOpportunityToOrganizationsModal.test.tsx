@@ -1,5 +1,5 @@
 // import { render, screen } from "@testing-library/react";
-import { Organization } from "src/types/applicationResponseTypes";
+// import { Organization } from "src/types/applicationResponseTypes";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 // import type { RefObject } from "react";
