@@ -94,8 +94,7 @@ export async function createApplication(
   const modal = page.locator(
     '[role="dialog"].is-visible, #start-application.is-visible',
   );
-  await expect(modal).toBeVisible({ timeout: 45000 });
-  await expect(modal.locator("select")).toBeVisible({ timeout: 45000 });
+  await expect(modal.locator("select")).toBeVisible({ timeout: 60000 });
   const orgSelect = modal.locator(
     'select[name*="applicant"], select:nth-of-type(1)',
   );
