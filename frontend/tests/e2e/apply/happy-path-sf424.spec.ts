@@ -14,7 +14,7 @@ import { SF424_FORM_CONFIG } from "./fixtures/sf424-field-definitions";
 import { sf424HappyPathTestData } from "./fixtures/sf424-fill-data";
 
 const { testOrgLabel } = playwrightEnv;
-const OPPORTUNITY_ID = "39cf0a5c-5fed-40b4-8f46-5374101ae419";
+const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab";
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 test("Application form completion happy path - SF424", async ({
