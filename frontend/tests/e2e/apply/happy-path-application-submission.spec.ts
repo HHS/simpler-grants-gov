@@ -7,18 +7,16 @@ import {
 import playwrightEnv from "tests/e2e/playwright-env";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import {
-  fillSf424bForm,
-  SF424B_FORM_MATCHER,
-} from "tests/e2e/utils/forms/fill-sf424b-form-utils";
-import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
-import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
+import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
 import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
+
+import { SF424B_FORM_CONFIG } from "./fixtures/sf424b-field-definitions";
+import { sf424BHappyPathTestData } from "./fixtures/sf424b-fill-data";
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
@@ -44,26 +42,20 @@ test("Application submission happy path - application with required SF424B and u
 
   await authenticateE2eUser(page, context, !!isMobile);
 
-  // Call reusable create application function from utils
   await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
   const applicationUrl = page.url();
 
-  if (!(await openForm(page, SF424B_FORM_MATCHER))) {
-    throw new Error(
-      "Could not find or open SF-424B form link on the application forms page",
-    );
-  }
+  // Fill, save, and return to application page
+  await fillForm(
+    testInfo,
+    page,
+    SF424B_FORM_CONFIG,
+    sf424BHappyPathTestData(testOrgLabel),
+    true,
+  );
 
-  // Fill SF-424B form fields using helper
-  await fillSf424bForm(page, "TESTER", testOrgLabel);
-
-  // Save the form using helper
-  await saveForm(page);
-
-  // Verify form status after save
-  await verifyFormStatusAfterSave(page, "complete");
-
-  // On application page — verify form row status/messages
+  // Verify save success alert on form page (fillForm with returnToApplication=true
+  // navigates back, so we check status on the application page directly)
   await verifyFormStatusOnApplication(
     page,
     "complete",
@@ -83,5 +75,4 @@ test("Application submission happy path - application with required SF424B and u
 
   // Submit the application and verify success
   await submitApplicationAndVerify(page, "success");
-  // Application ID is now available in appId variable for further use if needed
 });

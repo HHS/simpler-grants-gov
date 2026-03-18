@@ -1,4 +1,4 @@
-export const sf424BHappyPathTestData = {
+export const sf424BHappyPathTestData = (orgLabel: string) => ({
   title: "TESTER",
-  organization: "Test org",
-};
+  organization: orgLabel,
+});

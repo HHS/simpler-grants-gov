@@ -7,14 +7,14 @@ import {
 import playwrightEnv from "tests/e2e/playwright-env";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import {
-  fillSf424bForm,
-  SF424B_FORM_MATCHER,
-} from "tests/e2e/utils/forms/fill-sf424b-form-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
+import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
 import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
-import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
+import {
+  verifyFormStatusAfterSave,
+  verifyFormStatusOnApplication,
+} from "tests/e2e/utils/forms/verify-form-status-utils";
 import {
   verifyFormFieldsAreReadonlyAfterSubmission,
   verifyPostSubmission,
@@ -24,7 +24,13 @@ import {
   type SubmitOutcome,
 } from "tests/e2e/utils/submit-application-utils";
 
-const { testOrgLabel } = playwrightEnv;
+import {
+  SF424B_FORM_CONFIG,
+  SF424B_FORM_MATCHER,
+} from "./fixtures/sf424b-field-definitions";
+import { sf424BHappyPathTestData } from "./fixtures/sf424b-fill-data";
+
+const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
@@ -63,6 +69,16 @@ const SF424B_READONLY_FIELDS = [
   { fieldId: "applicant_organization", expectedValue: testOrgLabel },
 ];
 
+// Skip non-Chrome browsers in staging
+test.beforeEach(({ page: _ }, testInfo) => {
+  if (targetEnv === "staging") {
+    test.skip(
+      testInfo.project.name !== "Chrome",
+      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
+    );
+  }
+});
+
 test(
   "SF-424B submission and application history validation",
   { tag: "@auth" },
@@ -86,37 +102,38 @@ test(
 
     const applicationUrl = page.url();
 
-    if (await openForm(page, SF424B_FORM_MATCHER)) {
-      // Do not enter anything and click save
-      await saveForm(page, true); // expect validation errors
-
-      // Checks error alert list at top of form page
-      // Scrolls down and checks inline field errors on form page
-      // Navigates to application landing page
-      // Scrolls down and checks "Some issues found" in form row
-      await verifyFormStatusAfterSave(
-        page,
-        "incomplete",
-        "SF-424B",
-        applicationUrl,
-        sf424bErrors,
-      );
-    }
-
-    if (!(await openForm(page, SF424B_FORM_MATCHER))) {
+    const openedSf424bForValidation = await openForm(page, SF424B_FORM_MATCHER);
+    if (!openedSf424bForValidation) {
       throw new Error(
         "Could not find or open SF-424B form link on the application forms page",
       );
     }
 
-    // Fill SF-424B form fields using helper
-    await fillSf424bForm(page, "TESTER", testOrgLabel);
+    // Do not enter anything and click save
+    await saveForm(page, true); // expect validation errors
 
-    // Save the form using helper
-    await saveForm(page);
+    // Checks error alert list at top of form page and inline field errors
+    await verifyFormStatusAfterSave(page, "incomplete", sf424bErrors);
 
-    // Verify form status after save
-    await verifyFormStatusAfterSave(
+    // On application page — verify form row shows "Some issues found"
+    await verifyFormStatusOnApplication(
+      page,
+      "incomplete",
+      "SF-424B",
+      applicationUrl,
+    );
+
+    // Fill, save, and return to application page
+    await fillForm(
+      testInfo,
+      page,
+      SF424B_FORM_CONFIG,
+      sf424BHappyPathTestData(testOrgLabel),
+      true,
+    );
+
+    // On application page — verify form row shows "No issues detected"
+    await verifyFormStatusOnApplication(
       page,
       "complete",
       "SF-424B",

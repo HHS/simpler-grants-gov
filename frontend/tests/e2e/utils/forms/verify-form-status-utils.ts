@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import {
   verifyAlertErrors,
   verifyInlineErrors,
@@ -14,7 +15,6 @@ const NAVIGATION_RETRY_DELAY_MS = 3000;
 
 /**
  * Navigates to the application landing page.
- * Uses goto if applicationUrl is provided, otherwise falls back to goBack.
  * Retries up to NAVIGATION_RETRIES times to handle transient network errors.
  * @param page Playwright Page object
  * @param applicationUrl The application URL to navigate to
@@ -23,31 +23,25 @@ async function navigateToApplicationPage(
   page: Page,
   applicationUrl: string,
 ): Promise<void> {
-  if (applicationUrl) {
-    let lastError: Error = new Error(
-      `navigateToApplicationPage: all ${NAVIGATION_RETRIES} attempts failed for ${applicationUrl}`,
-    );
-    for (let attempt = 1; attempt <= NAVIGATION_RETRIES; attempt++) {
-      try {
-        await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
-        await page.waitForTimeout(10000);
-        return; // success — exit retry loop
-      } catch (e) {
-        lastError = e instanceof Error ? e : new Error(String(e));
-        console.warn(
-          `navigateToApplicationPage: attempt ${attempt}/${NAVIGATION_RETRIES} failed — ${lastError.message}`,
-        );
-        if (attempt < NAVIGATION_RETRIES) {
-          await page.waitForTimeout(NAVIGATION_RETRY_DELAY_MS);
-        }
+  let lastError: Error = new Error(
+    `navigateToApplicationPage: all ${NAVIGATION_RETRIES} attempts failed for ${applicationUrl}`,
+  );
+  for (let attempt = 1; attempt <= NAVIGATION_RETRIES; attempt++) {
+    try {
+      await page.goto(applicationUrl, { waitUntil: "domcontentloaded" });
+      await page.waitForTimeout(10000);
+      return; // success — exit retry loop
+    } catch (e) {
+      lastError = e instanceof Error ? e : new Error(String(e));
+      console.warn(
+        `navigateToApplicationPage: attempt ${attempt}/${NAVIGATION_RETRIES} failed — ${lastError.message}`,
+      );
+      if (attempt < NAVIGATION_RETRIES) {
+        await page.waitForTimeout(NAVIGATION_RETRY_DELAY_MS);
       }
     }
-    throw lastError;
-  } else {
-    await page.goBack();
-    await page.waitForLoadState("domcontentloaded");
-    await page.waitForTimeout(10000);
   }
+  throw lastError;
 }
 
 /**
@@ -62,14 +56,12 @@ export async function assertFormRowStatus(
   status: FormStatus,
   formName: string,
 ): Promise<void> {
-  // Scroll down to find form row in the table
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.waitForTimeout(5000);
 
   const escapedFormName = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const flexiblePattern = escapedFormName
     .replace(/\s+/g, "\\s*")
-    // be tolerant of SF-424B vs SF424B text variants
     .replace(/-/g, "-?");
   const formRow = page
     .locator("tr", {
@@ -94,7 +86,7 @@ export async function assertFormRowStatus(
 /**
  * Navigates to the application landing page and verifies the form row status.
  * @param page Playwright Page object
- * @param status Expected status: "complete" (No issues detected) or "incomplete" (Some issues found)
+ * @param status Expected status: "complete" or "incomplete"
  * @param formName The form name to verify status for (e.g., "SF-424B", "SF-LLL")
  * @param applicationUrl The application URL to navigate to
  */
@@ -109,16 +101,15 @@ export async function verifyFormStatusOnApplication(
 }
 
 /**
- * Verifies the post-save state on the form page, then navigates to the application
- * landing page and verifies the form row status.
+ * Verifies the post-save state on the form page (success alert or error alerts +
+ * inline errors). Does NOT navigate — assumes the form page is currently active.
  *
- * For "complete": checks success alert on form page, then verifies "no issues detected" in form row.
- * For "incomplete": checks error alert and inline errors on form page, then verifies "some issues found" in form row.
+ * For "complete": checks success alert heading and "No errors were detected." text.
+ * For "incomplete": checks the alert error list at the top and inline field errors;
+ *                   `expectedErrors` is required in this case.
  *
  * @param page Playwright Page object
  * @param status Expected status: "complete" or "incomplete"
- * @param formName The form name to verify status for (e.g., "SF-424B", "SF-LLL")
- * @param applicationUrl The application URL to navigate to
  * @param expectedErrors Required when status is "incomplete" — list of field errors to verify
  */
 export async function verifyFormStatusAfterSave(
@@ -130,10 +121,10 @@ export async function verifyFormStatusAfterSave(
     // On form page — check success alert
     const alert = page.getByTestId("alert");
     await expect(alert.locator(".usa-alert__heading")).toContainText(
-      "Form was saved",
+      FORM_DEFAULTS.formSavedHeading,
     );
     await expect(alert.locator(".usa-alert__text")).toContainText(
-      "No errors were detected.",
+      FORM_DEFAULTS.noErrorsText,
     );
   } else if (status === "incomplete") {
     // On form page — check error alert list
@@ -144,7 +135,6 @@ export async function verifyFormStatusAfterSave(
     }
     // On form page — check error alert list at top
     await verifyAlertErrors(page, expectedErrors);
-
     // On form page — scroll down and check inline field errors
     await verifyInlineErrors(page, expectedErrors);
   }

@@ -18,6 +18,7 @@ export type ReadonlyFieldCheck = {
  *
  * History entries are verified in order from most recent (index 0) to oldest
  * (last index), matching the responsive-data-{index}-1 test IDs.
+ * Also asserts there are no unexpected extra entries beyond the expected set.
  *
  * @param page Playwright Page object
  * @param expectedHistoryEntries History entries in order from most recent to oldest
@@ -45,6 +46,11 @@ export async function verifyPostSubmission(
     await expect(entryLocator).toBeVisible();
     await expect(entryLocator).toContainText(expectedHistoryEntries[i]);
   }
+
+  // Ensure there are no unexpected extra entries beyond the expected set.
+  await expect(
+    page.getByTestId(`responsive-data-${expectedHistoryEntries.length}-1`),
+  ).toHaveCount(0);
 }
 
 /**
