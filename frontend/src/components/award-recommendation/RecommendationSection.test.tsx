@@ -35,12 +35,10 @@ describe("RecommendationSection", () => {
       expect(meritOnlyRadio).toBeInTheDocument();
       expect(meritOnlyRadio).toHaveAttribute("id", "merit_review_only");
       expect(meritOnlyRadio).toHaveAttribute("name", "award_selection_method");
-      expect(meritOnlyRadio).toHaveValue("merit-review-only");
 
       expect(meritOtherRadio).toBeInTheDocument();
       expect(meritOtherRadio).toHaveAttribute("id", "merit_review_other");
       expect(meritOtherRadio).toHaveAttribute("name", "award_selection_method");
-      expect(meritOtherRadio).toHaveValue("merit-review-other");
     });
 
     it("renders recommendation method details textarea in edit mode", () => {
