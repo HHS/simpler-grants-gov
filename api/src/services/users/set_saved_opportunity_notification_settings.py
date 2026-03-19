@@ -33,7 +33,6 @@ def set_saved_opportunity_notification_settings(
     # Fetch existing row (self or org)
     setting = db_session.execute(
         select(UserSavedOpportunityNotification)
-        .options(selectinload(UserSavedOpportunityNotification.organization))
         .where(UserSavedOpportunityNotification.user_id == user.user_id)
         .where(UserSavedOpportunityNotification.organization_id == org_id)
     ).scalar_one_or_none()
