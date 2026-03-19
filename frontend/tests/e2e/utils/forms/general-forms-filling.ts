@@ -1,4 +1,4 @@
-import { Page, TestInfo } from "@playwright/test";
+import { Page, TestInfo, type Locator } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
 
 export interface FillFieldDefinition {
@@ -114,4 +114,34 @@ export async function fillForm(
     });
     throw error;
   }
+}
+
+/**
+ * Gets a form link element by matching form name text.
+ * Matches against anchor and button elements using a case-insensitive regex.
+ * @param page Playwright Page object
+ * @param formName Form name or pipe-separated pattern to match (e.g. "SF-424B|Assurances for Non-Construction Programs")
+ * @returns Locator for the matching form link or button
+ */
+export function getFormLink(page: Page, formName: string): Locator {
+  return page.locator("a, button").filter({
+    hasText: new RegExp(formName, "i"),
+  });
+}
+
+/**
+ * Verifies that a form link or button is visible on the page.
+ * Use after application creation to confirm the forms table has fully rendered
+ * before attempting to navigate into a form.
+ * @param page Playwright Page object
+ * @param formName Form name or pipe-separated pattern to match (e.g. "SF-424B|Assurances for Non-Construction Programs")
+ */
+export async function verifyFormLinkVisible(
+  page: Page,
+  formName: string,
+): Promise<void> {
+  await getFormLink(page, formName).waitFor({
+    state: "visible",
+    timeout: 60000,
+  });
 }

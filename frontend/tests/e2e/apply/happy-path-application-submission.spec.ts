@@ -7,7 +7,10 @@ import {
 import playwrightEnv from "tests/e2e/playwright-env";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
+import {
+  fillForm,
+  verifyFormLinkVisible,
+} from "tests/e2e/utils/forms/general-forms-filling";
 import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
 import {
   verifyFormStatusAfterSave,
@@ -15,7 +18,10 @@ import {
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
 
-import { SF424B_FORM_CONFIG } from "./fixtures/sf424b-field-definitions";
+import {
+  SF424B_FORM_CONFIG,
+  SF424B_FORM_MATCHER,
+} from "./fixtures/sf424b-field-definitions";
 import { sf424BHappyPathTestData } from "./fixtures/sf424b-fill-data";
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
@@ -48,10 +54,7 @@ test(
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
-    // Wait for the first form field to be visible before proceeding
-    await page
-      .getByTestId("title")
-      .waitFor({ state: "visible", timeout: 30000 });
+    await verifyFormLinkVisible(page, SF424B_FORM_MATCHER);
 
     // Fill and save, stay on form page to verify save success
     await fillForm(
