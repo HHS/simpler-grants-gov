@@ -82,7 +82,7 @@ export async function sf424aBeforeSave(page: Page): Promise<void> {
 
 /**
  * SF-424A form configuration.
- * Matches the FillFormConfig interface from general-forms-filling.ts.
+ * Matches the FillFormConfig interface from general-forms-filling.ts
  * Field keys must match the keys in sf424aHappyPathTestData().
  */
 export const SF424A_FORM_CONFIG: FillFormConfig = {
