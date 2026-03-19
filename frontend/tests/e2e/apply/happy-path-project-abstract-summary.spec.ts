@@ -14,7 +14,7 @@ import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "./fixtures/project-abstrac
 import { projectAbstractSummaryHappyPathTestData } from "./fixtures/project-abstract-summary-fill-data";
 
 const { testOrgLabel } = playwrightEnv;
-const OPPORTUNITY_ID = "39cf0a5c-5fed-40b4-8f46-5374101ae419";
+const OPPORTUNITY_ID = "c3c59562-a54f-4203-b0f6-98f2f0383481";
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 test("Application form completion happy path - Project Abstract Summary", async ({
