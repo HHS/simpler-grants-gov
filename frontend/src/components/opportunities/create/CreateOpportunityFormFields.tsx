@@ -12,6 +12,9 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
+// ----------------------------------------------------------
+// Common Text with the same styles
+// ----------------------------------------------------------
 export const CommonText = ({ textContent }: { textContent: string }) => {
   return (
     <>

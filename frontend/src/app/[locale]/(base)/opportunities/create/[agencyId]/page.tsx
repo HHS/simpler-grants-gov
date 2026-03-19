@@ -10,7 +10,7 @@ import { KeyValuePair } from "src/components/opportunities/create/CreateOpportun
 
 import { useTranslations } from "next-intl";
 import { redirect } from "next/navigation";
-import { PropsWithChildren, useEffect, useState } from "react";
+import { PropsWithChildren } from "react";
 import { Alert, GridContainer} from "@trussworks/react-uswds";
 
 
@@ -57,12 +57,6 @@ const PageHeader = () => {
       />
 
       <h1>{t("pageTitle")}</h1>
-      <h2>{ t("keyInfo")}</h2>
-      <div className="display-flex flex-justify">
-        <div>
-          {t("basicInstructions")}
-        </div>
-      </div>
     </>
   );
 };

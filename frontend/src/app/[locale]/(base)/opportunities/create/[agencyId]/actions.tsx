@@ -3,29 +3,10 @@
 import { getSession } from "src/services/auth/session";
 import { handleCreateOpportunity } from "src/services/fetch/fetchers/createOpportunityFetcher";
 import { CreateOpportunityResponse } from "src/types/grantor/createOpportunityTypes";
-import { z } from "zod";
 
-const validateFormFields = async (formData: FormData) => {
-  const schema = z.object({
-    // This is a placeholder.
-    // Future: apply any frontend field validations that
-    // have not been taken care of client-side.
-    // Backend validations will be displayed in the main error field.
-  });
-
-  const validatedFields = schema.safeParse({
-    agencyId: formData.get("agencyId"),
-    opportunityNumber: formData.get("opportunityNumber"),
-    opportunityTitle: formData.get("opportunityTitle"),
-    category: formData.get("category"),
-    categoryExplanation: formData.get("categoryExplanation"),
-  });
-
-  // Return early if the form data is invalid (server side validation!)
-  if (!validatedFields.success) {
-    return validatedFields.error.flatten().fieldErrors;
-  }
-};
+  // Future: Apply any field level validations before submitting to the backend.
+  //    These will be validations that have not been taken care of client-side.
+  // Backend validations will be displayed in the main error field.
 
 export const createOpportunityAction = async (
   _prevState: unknown,
@@ -36,7 +17,7 @@ export const createOpportunityAction = async (
   //   console.log("DEBUG: entering createOpportunityAction");
   if (!session || !session.token || !session.user_id) {
     return {
-      errorMessage: "Session timed out. Please login again.",
+      errorMessage: "Not logged in",
     };
   }
 
@@ -48,14 +29,6 @@ export const createOpportunityAction = async (
     category_explanation: formData.get("categoryExplanation") as string,
   };
 
-  const validationErrors = await validateFormFields(formData);
-  if (validationErrors) {
-    return {
-      validationErrors,
-      data: rawFormData,
-    };
-  }
-
   let createOpportunityResponse;
   try {
     createOpportunityResponse = await handleCreateOpportunity(
@@ -65,7 +38,6 @@ export const createOpportunityAction = async (
     );
     return { data: createOpportunityResponse, success: true };
   } catch (e) {
-    // TODO: parse the field validation errors
 
     // General try failure catch error
     const error = e as Error;

@@ -6,7 +6,7 @@ export interface CreateOpportunityRecord {
   category_explanation?: string;
 }
 
-export type fieldValidationErrors = {
+export type FieldValidationErrors = {
   agencyId?: string[];
   opportunityNumber?: string[];
   opportunityTitle?: string[];
@@ -15,10 +15,8 @@ export type fieldValidationErrors = {
 };
 
 export interface CreateOpportunityResponse {
-  validationErrors?: fieldValidationErrors;
-  data?: CreateOpportunityRecord;
-  showExplain?: boolean;
-  showSave?: boolean;
+  validationErrors?: FieldValidationErrors;
   errorMessage?: string;
+  data?: CreateOpportunityRecord;
   success?: boolean;
 }

@@ -97,11 +97,16 @@ export const getUserAgencies = async (
 };
 
 export const fetchUserAgencies = async (): Promise<RelevantAgencyRecord[]> => {
-  const session = await getSession();
-  if (!session || !session.token) {
-    // we shouldn't get there because the page should be checking authentication
-    throw new UnauthorizedError("No active session");
+  try {
+    const session = await getSession();
+    if (!session || !session.token) {
+      // we shouldn't get there because the page should be checking authentication
+      throw new UnauthorizedError("No active session");
+    }
+    const agencies = await getUserAgencies(session.token, session.user_id);
+    return agencies;
+  } catch (e) {
+    console.error("Error fetching user agencies");
+    throw e;
   }
-  const agencies = await getUserAgencies(session.token, session.user_id);
-  return agencies;
 };

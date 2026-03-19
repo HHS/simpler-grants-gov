@@ -37,24 +37,21 @@ export function CreateOpportunityForm({
   const th = useTranslations("CreateOpportunity");
   const [disableSave, setDisableSave] = useState<boolean>(true);
 
-  const [response, formAction, isPending] = useActionState(
-    createOpportunityAction,
-    {
+  const [response, formAction, isPending] = useActionState(createOpportunityAction, {
       validationErrors: {},
-    },
-  );
+    });
 
   // Use useEffect to detect success and redirect
   const router = useRouter();
   useEffect(() => {
+    // Scroll to top for the error or success message
     window.scrollTo({
       top: 0,
-      behavior: "smooth", // Smooth scrolling animation
+      behavior: "smooth",
     });
+    // If success, redirect to Opportunity List page
     if (response?.success) {
       router.push("/opportunities");
-    } else {
-      setDisableSave(true); // on text change does not seem to reset this?
     }
   }, [response, router]);
 
@@ -139,12 +136,7 @@ export function CreateOpportunityForm({
   return (
     <>
       {response?.errorMessage && (
-        <Alert
-          heading={tg("errorHeading")}
-          headingLevel="h2"
-          type="error"
-          validation
-        >
+        <Alert heading={tg("errorHeading")} headingLevel="h2" type="error">
           {response?.errorMessage}
         </Alert>
       )}
