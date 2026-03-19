@@ -18,6 +18,13 @@ export interface FillFormConfig {
   fields: FormFillFieldDefinitions;
   saveButtonTestId: string;
   noErrorsText?: string;
+  /**
+   * Optional form-specific hook called after all fields are filled
+   * but before the save button is clicked. Use for pre-save interactions
+   * that cannot be expressed as a field definition.
+   * e.g. SF-424A confirmation checkbox that only appears in the form
+   */
+  beforeSave?: (page: Page) => Promise<void>;
 }
 
 export interface FormsFixtureData {
@@ -99,6 +106,12 @@ export async function fillForm(
       const [fieldIdentifier, fieldConfig] = fieldDefinition;
       const dataForField = data[fieldIdentifier];
       await fillField(testInfo, page, fieldConfig, dataForField);
+    }
+
+    // Run form-specific pre-save hook if defined.
+    // Optional - existing forms without this property are unaffected.
+    if (config.beforeSave) {
+      await config.beforeSave(page);
     }
 
     await page.waitForTimeout(500);
