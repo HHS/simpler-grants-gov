@@ -45,17 +45,11 @@ describe("createOpportunityForm", () => {
     render(<CreateOpportunityForm defaultAgencyId={fakeId} userAgencies={fakeAgencies} />);
 
     // check that all agencies are in the select options
-    expect(
-      screen.getByRole('option', { name: 'Agency Alpha' }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('option', { name: 'Agency Beta' }),
-    ).toBeInTheDocument();
-
-    // Find the option element with the name/text matching the default agency id
-    const defaultOption = screen.getByRole('option', { name: 'Agency Beta' }) as HTMLOptionElement;
-    // Assert that the 'selected' property of this option is true
-    expect(defaultOption.selected).toBe(true);
+    expect(screen.getByText('Agency Beta')).toBeInTheDocument();
+    expect(screen.getByText('Agency Alpha')).toBeInTheDocument();
+    // check that the default agency was selected
+    const selectedOption = screen.getByRole('option', { name: 'Agency Beta', selected: true });
+    expect(selectedOption).toBeInTheDocument();
   });  
 
   // --- Test the return values from action ---

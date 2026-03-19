@@ -19,7 +19,7 @@ const ErrorMsgWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("CreateOpportunity");
   return (
     <GridContainer>
-      <h1 classNameName="margin-top-9 margin-bottom-7">{t("pageTitle")}</h1>
+      <h1 className="margin-top-9 margin-bottom-7">{t("pageTitle")}</h1>
       {children}
     </GridContainer>
   );
