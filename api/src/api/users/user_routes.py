@@ -826,22 +826,22 @@ def user_response_org_invitation(
 
 @user_blueprint.get("/<uuid:user_id>/saved-opportunities/notifications")
 @user_blueprint.output(UserSavedOpportunityNotificationsResponseSchema)
-@user_blueprint.doc(responses=[200, 403])
-@user_blueprint.auth_required(api_jwt_auth)
+@user_blueprint.doc(responses=[200, 401, 403], security=jwt_or_api_user_key_security_schemes)
+@jwt_or_api_user_key_multi_auth.login_required
 @flask_db.with_db_session()
 def user_get_saved_opportunity_notifications(
     db_session: db.Session, user_id: UUID
 ) -> response.ApiResponse:
     logger.info("GET /v1/users/:user_id/saved-opportunities/notifications")
-    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+    user = jwt_or_api_user_key_multi_auth.get_user()
 
     # Verify the authenticated user matches the requested user_id
-    if user_token_session.user_id != user_id:
+    if user.user_id != user_id:
         raise_flask_error(403, "Forbidden")
 
     with db_session.begin():
-        db_session.add(user_token_session)
-        result = get_saved_opportunity_notification_preferences(db_session, user_token_session.user)
+        db_session.add(user)
+        result = get_saved_opportunity_notification_preferences(db_session, user)
 
     logger.info("Successfully fetched saved opportunity notification preferences")
     return response.ApiResponse(message="Success", data=result)
