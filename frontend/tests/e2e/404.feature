@@ -10,5 +10,5 @@ Feature: 404 page
     Then the page title should be "Oops, we can't find that page."
 
   Scenario: Show the link back home
-    Then I should see "Home link" in "Page actions"
+    Then I should see a link titled "Visit our homepage"
     And "Home link" in "Page actions" should have text "Visit our homepage"
