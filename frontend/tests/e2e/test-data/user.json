@@ -1,0 +1,155 @@
+{
+  "cookies": [
+    {
+      "name": "_ga",
+      "value": "GA1.1.754187095.1773238483",
+      "domain": ".grants.gov",
+      "path": "/",
+      "expires": 1807798521.6854,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ahoy_visitor",
+      "value": "265c234b-688e-4b41-b062-2029a507ec8a",
+      "domain": "idp.int.identitysandbox.gov",
+      "path": "/",
+      "expires": 1807798483.756253,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ahoy_visit",
+      "value": "6c93e566-84dc-4189-a231-08c6a752c0e3",
+      "domain": "idp.int.identitysandbox.gov",
+      "path": "/",
+      "expires": 1773239420.515718,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ahoy_track",
+      "value": "true",
+      "domain": "idp.int.identitysandbox.gov",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "sp_issuer",
+      "value": "urn%3Agov%3Agsa%3Aopenidconnect.profiles%3Asp%3Asso%3Ahhs-staging-simpler-grants-gov",
+      "domain": "idp.int.identitysandbox.gov",
+      "path": "/",
+      "expires": 1773239420.516027,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga",
+      "value": "GA1.1.1620391092.1773238484",
+      "domain": ".identitysandbox.gov",
+      "path": "/",
+      "expires": 1807798484.216623,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "device",
+      "value": "7b3b4caacc4a821a48c4b339acea8b1a9aa75ec99a9bcf8e68c290be5d2e45b309ba38158fa707041b96e4ab770664883855fb87dabfa95248daa637694da69c",
+      "domain": "idp.int.identitysandbox.gov",
+      "path": "/",
+      "expires": 1807798520.408909,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "browser_id",
+      "value": "b1ecc836bf1efc6be658af09ac14120b06cc8052920310f7f6e3a68a46b4dc0e504a965bc10fbe4534977f2d891e839d3b104ca26be155913e25d80760dcf52d",
+      "domain": "idp.int.identitysandbox.gov",
+      "path": "/",
+      "expires": 1807798485.537617,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_identity_idp_session",
+      "value": "92c5769372df5d9221a92c5543ba6e97",
+      "domain": "idp.int.identitysandbox.gov",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_CSLL4ZEK4L",
+      "value": "GS2.1.s1773238484$o1$g0$t1773238485$j59$l0$h0",
+      "domain": ".identitysandbox.gov",
+      "path": "/",
+      "expires": 1807798485.787475,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "user_opted_remember_device_preference",
+      "value": "tOKt1ys9TU9wqSsPT4nl948ZhZ9ABwWWaxbQlD9wAk1s%2Bh3VJZWwrSJdqpal6v4EyhkaTHuWwpgubstIY3E8vSmRGm3d%2BUD1A3CasaIq9EvK6wIlJaOm%2BodYpFyx--cEtY96vqTANWqOlQ--%2FU3vmbvq4oLpUsG0AJDm6A%3D%3D",
+      "domain": "idp.int.identitysandbox.gov",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "remember_device",
+      "value": "ANExITmuHQXsdpdpxXvGQljqWFNemKfpelaEb5ysGbeinrzj%2FDJZsL%2Bvk1dj18xQLofi6d6OggnOcYf0uyWtfpsco7PkQz5Nv67XZ%2FgphXKn9sjxMGJPieVCNKb77mOX6Ejua2%2BfL%2BnrvnrOjxUPwfuTsDz5rRr0Hod%2FMb4sjCrTZRhEhEkaI8fF9dFUJrEL6Xv1UXI1cCnw%2BnEtqkTISdXPgn5Ycx%2F7hDICjaHHcJ5Ct0Kj0Jolfn83l%2FT6hT%2Bhl3FvBeKgddXE%2FANzDCV0p7UJ6TnPu%2FPFim6inc08sHs%2FhF8TsFyJ4iDKdAFY86%2FSu973W7rbPsFOMLC%2BaIe5IvuozHauYMUSAxkmWLVX0fNc0BXf4IF8vKV0Yz3tTTVKRA%3D%3D--i4xeTpPdoont91nP--inpM96VibY%2FCyFxhZNREZg%3D%3D",
+      "domain": "idp.int.identitysandbox.gov",
+      "path": "/",
+      "expires": 1775830520.409066,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "session",
+      "value": "eyJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6ImV5SmhiR2NpT2lKU1V6STFOaUlzSW5SNWNDSTZJa3BYVkNKOS5leUp6ZFdJaU9pSXdNRE13TmpFMlpDMWpNVFptTFRSaE1ETXRZbVZqTUMwd09ERXdaR0psT0dReU9HVWlMQ0pwWVhRaU9qRTNOek15TXpnMU1qQXNJbUYxWkNJNkluTnBiWEJzWlhJdFozSmhiblJ6TFdGd2FTMXpkR0ZuYVc1bklpd2lhWE56SWpvaWMybHRjR3hsY2kxbmNtRnVkSE10WVhCcExYTjBZV2RwYm1jaUxDSmxiV0ZwYkNJNkltRnZlUzV6YVcxdGIyNXpRSEpsYVhONWMzUmxiWE11WTI5dElpd2lkWE5sY2w5cFpDSTZJakl3WmpSbE5URmxMVFpoTURjdE5HRTFPQzFpTURSaExUUXlOekk1WVdFNU5UWTRNQ0lzSW5ObGMzTnBiMjVmWkhWeVlYUnBiMjVmYldsdWRYUmxjeUk2TVRWOS5VenlsOVBQQUhGTmRxN1hEZjlYLVZnc1oyZWN5LUpURTZRNUFybWxDdGJMY3N0dWl6cGpMOEV6WFhoUVBfcHhHTlZSd05DZTBlUGxteVFDeHJSbjhSOGxIUzdXckJyTEtfeEJ6eW9nOFRmOFI1dFFwVXNHMUpXSnNaVDhkMklfeWYtMHRIOWc2TU00WGJXSWtQeUdKVW9FbXFNbTRiTC10cEpJU0FqQkpKQnBMV1oyZ2lnQzRzZGlMTS1pSU1fcEJBcTl5ZWthQVNvdUZoRjhHN0NtamJtTVhxWWNsZ0xOcTcyWWhfTEwyRElVTnVHRUc1azRLbkUtLXE0TURpWkdJSDFBQUluZmlkZGVCZG1EMXBJR1VQaVBYZGZjRllEdkxLWG9CbVBfRXNLOUlNWEJyS3djME05U3dtNDdvNkswQUVGdUNPTy1EMVJkTDYwYWVneU4ySWZYNmJwLUJaSHpGNE5oVE4wN1NEU2YwS0JobXZZdjR6UmwyQ3E4RU1ZU1NnUXBsbThlUWJjcFIxV2xDdlMyUC1mdmxMbHExbDRuQll5LWw4OUE2dmpWcG02OW5kSDNyWWpuZHBmTFFBY2w0T1VzU2s5bUI2TC13Wk5hbFctemFublJEZzlpWVo5NmltdVp3bFNucVNBbHhraFlLaXJRWWhidlhLM25HMGRWNjYzSjVVXzMwY2xRdl9GV0tDNHJKWmxYVE1oLXYwRHgxWW56cktQd0daZXZnVnFpRVdtT0VfS0lXV3I5OVFOaFhlcUpTd2hDMVJKLUVheUtCeWxVejBJSU55Mzh5S2tMdUhGN0dCaElOSjc1eXhxNEFES3pBMVR6eXAxZ1VweXlRMDY4UmdJR1pZbS1LMmJma1hwTkxlczNQWUVBdC1URlF0Q0FQNlhhUHhGYyIsImlhdCI6MTc3MzIzODUyMSwiZXhwIjoxNzczMjM5NDIxfQ.07GnQeda_9BiGcOS_NlZrF5XNwWHwO4Ncn3rQF5RkXM",
+      "domain": "staging.simpler.grants.gov",
+      "path": "/",
+      "expires": 1773239421.158434,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_GGGGGGGGGG",
+      "value": "GS2.1.s1773238483$o1$g1$t1773238521$j22$l0$h0",
+      "domain": ".grants.gov",
+      "path": "/",
+      "expires": 1807798521.685068,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://staging.simpler.grants.gov",
+      "localStorage": [
+        {
+          "name": "NRBA_SESSION",
+          "value": "{\"value\":\"585ee9c9577d522d\",\"inactiveAt\":1773240283444,\"expiresAt\":1773252883142,\"updatedAt\":1773238521737,\"sessionReplayMode\":0,\"sessionReplaySentFirstChunk\":false,\"sessionTraceMode\":1,\"traceHarvestStarted\":true,\"loggingMode\":2,\"logApiMode\":2,\"serverTimeDiff\":-87,\"custom\":{},\"numOfResets\":0,\"consent\":false}"
+        }
+      ]
+    }
+  ]
+}

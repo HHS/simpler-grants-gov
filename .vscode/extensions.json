@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "ms-playwright.playwright",
+    "ms-vscode.vscode-typescript-next",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-azuretools.vscode-docker",
+    // "hashicorp.terraform",
+    "redhat.vscode-yaml",
+    "github.vscode-github-actions",
+    "ms-vscode.makefile-tools",
+    // "davidanson.vscode-markdownlint"
+  ]
+}
