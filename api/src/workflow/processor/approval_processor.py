@@ -5,6 +5,7 @@ from src.constants.lookup_constants import ApprovalResponseType, ApprovalType
 from src.db.models.user_models import User
 from src.db.models.workflow_models import WorkflowApproval
 from src.workflow.event.state_machine_event import StateMachineEvent
+from src.workflow.event.workflow_metric_context import WorkflowMetricContext
 from src.workflow.service.approval_service import get_approvals_for_workflow
 from src.workflow.workflow_config import ApprovalConfig
 from src.workflow.workflow_constants import WorkflowConstants
@@ -61,7 +62,9 @@ class ApprovalProcessor:
         * Validating that the user doesn't already have an active approval
         * Creating a record in the workflow approval table
         """
-        log_extra = self.state_machine_event.get_log_extra()
+        log_extra = self.state_machine_event.get_log_extra() | {
+            "approval_response_type": approval_response_type
+        }
         logger.info("Handling approval event for workflow", extra=log_extra)
 
         user = self.state_machine_event.acting_user
@@ -89,6 +92,7 @@ class ApprovalProcessor:
         self.db_session.add(workflow_approval)
 
         logger.info("Added approval event for workflow", extra=log_extra)
+        self.state_machine_event.increment(WorkflowMetricContext.Metrics.APPROVAL_COUNT)
         return workflow_approval
 
     def has_enough_approvals(self) -> bool:
