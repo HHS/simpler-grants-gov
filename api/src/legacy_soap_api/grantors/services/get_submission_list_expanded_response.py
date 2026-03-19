@@ -17,7 +17,8 @@ from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceL
 from src.legacy_soap_api.grantors import schemas
 from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate, verify_certificate_access
 from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import convert_bool_to_yes_no
 from src.util.datetime_util import adjust_timezone
 
