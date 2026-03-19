@@ -1,53 +1,41 @@
 import datetime
 import logging
-import uuid
 from datetime import timedelta
 from pathlib import Path
 from urllib.parse import quote
 
+import click
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
-from sqlalchemy import exists, select
+from sqlalchemy import select
 
 import src.adapters.db as db
+import src.logging
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models.agency_models import Agency
-from src.db.models.opportunity_models import Opportunity
+from src.db.models.competition_models import Competition, Opportunity
 from src.db.models.user_models import LegacyCertificate
+from tests.lib.seed_orgs_and_users import _add_application
 
 logger = logging.getLogger(__name__)
-CURRENT_DIR = Path(__file__).parent
-TARGET_DIR = CURRENT_DIR / "cache"
 PRIVILEGES = {
     Privilege.LEGACY_AGENCY_VIEWER,
     Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
     Privilege.LEGACY_AGENCY_ASSIGNER,
 }
-AGENCY_INFO = {
-    "agency_code": "SOAP",
-    "agency_id": "c8e8f2b4-0f3c-4e7e-9a4a-1e6c2b8c9d12",
-    "agency_name": "SOAP Test Agency",
-}
 
 
-def create_private_key():
-    path_key = Path(f"{TARGET_DIR}/local.key")
-    path_crt = Path(f"{TARGET_DIR}/local.crt")
-
-    if path_key.exists() and path_crt.exists():
-        print("private key & crt exists")
-        return
-    else:
-        print("creating private key & crt")
+def create_private_key(path_key):
+    logger.info("creating private key & crt")
     key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
     )
-    with open(f"{TARGET_DIR}/local.key", "wb") as f:
+    with open(path_key, "wb") as f:
         f.write(
             key.private_bytes(
                 encoding=serialization.Encoding.PEM,
@@ -58,7 +46,7 @@ def create_private_key():
     return key
 
 
-def create_cert(key) -> None:
+def create_cert(key, path_crt) -> None:
     subject = issuer = x509.Name(
         [
             x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
@@ -82,47 +70,23 @@ def create_cert(key) -> None:
         )
         .sign(key, algorithm=hashes.SHA256())
     )
-    with open(f"{TARGET_DIR}/local.crt", "wb") as f:
+    with open(path_crt, "wb") as f:
         f.write(cert.public_bytes(serialization.Encoding.PEM))
 
 
-def get_or_create_agency(db_session):
-    stmt = select(exists().where(Agency.agency_code == AGENCY_INFO["agency_code"]))
-    agency_exists = db_session.execute(stmt).first()[0]
-    if not agency_exists:
-        logger.info("Creating agency in agency table")
-        return factories.AgencyFactory.create(**AGENCY_INFO)
-    else:
-        logger.info("Test agency already exists")
-        return db_session.execute(
-            select(Agency).where(Agency.agency_id == AGENCY_INFO["agency_id"])
-        ).scalar()
-
-
-def create_opportunity(db_session, agency, status):
-    # Due to issues with agency being overridden an Opportunity is created without a factory
-    opportunity = Opportunity(
-        opportunity_number=f"{uuid.uuid4()}",
-        opportunity_title=f"Test-Opportunity-{status}",
-        agency_code=agency.agency_code,
-        is_draft=False,
-    )
-    opportunity.agency_record = agency
-    return opportunity
+def get_agency(db_session, agency_code):
+    return db_session.scalar(select(Agency).where(Agency.agency_code == agency_code))
 
 
 def get_or_create_legacy_certificate(db_session, agency, serial_number):
-    stmt = select(exists().where(LegacyCertificate.serial_number == serial_number))
-    certificate_check = db_session.execute(stmt).first()
-    legacy_certificate_exists = certificate_check[0] if certificate_check else None
-    if not legacy_certificate_exists:
-        user = factories.UserFactory()
-        # Due to issues with agency being overridden the LegacyCertificate is created without a factory
-        legacy_certificate = LegacyCertificate(
-            user=user,
+    legacy_certificate = db_session.scalar(
+        select(LegacyCertificate).where(LegacyCertificate.serial_number == serial_number)
+    )
+    if legacy_certificate is None:
+        legacy_certificate = factories.LegacyAgencyCertificateFactory(
             agency_id=agency.agency_id,
+            agency=agency,
             serial_number=serial_number,
-            cert_id=str(int(serial_number, 16)),
             expiration_date=datetime.datetime.now(datetime.UTC).date() + timedelta(days=365),
         )
         agency_user = factories.AgencyUserFactory.create(
@@ -131,54 +95,70 @@ def get_or_create_legacy_certificate(db_session, agency, serial_number):
         role = factories.RoleFactory.create(privileges=PRIVILEGES, is_agency_role=True)
         factories.AgencyUserRoleFactory.create(agency_user=agency_user, role=role)
         db_session.add(legacy_certificate)
-        logger.info("Test legacy_certificate created")
     else:
-        legacy_certificate = db_session.execute(
-            select(LegacyCertificate).where(LegacyCertificate.agency_id == agency.agency_id)
-        ).scalar()
         logger.info("Test legacy_certificate already exists")
 
 
-def create_application_submission(
-    db_session, agency, serial_number, status=ApplicationStatus.ACCEPTED
-):
-    opportunity = create_opportunity(db_session, agency, status)
-    db_session.add(opportunity)
-    competition = factories.CompetitionFactory(
-        opportunity=opportunity,
+def create_application_submission(db_session, agency, serial_number):
+    opportunity_ids = (
+        db_session.execute(
+            select(Opportunity.opportunity_id).where(
+                Opportunity.agency_code.like(f"{agency.agency_code}%")
+            )
+        )
+        .scalars()
+        .all()
     )
-    application = factories.ApplicationFactory.create(
-        competition=competition, with_forms=True, application_status=status
+    competition = (
+        db_session.execute(
+            select(Competition).where(Competition.opportunity_id.in_(opportunity_ids)).limit(4)
+        )
+        .scalars()
+        .first()
     )
-    submission = factories.ApplicationSubmissionFactory.create(application=application)
-    print(
-        f"\nTest submission GRANT{submission.legacy_tracking_number} created with status {application.application_status.upper()}"
-    )
-    get_or_create_legacy_certificate(db_session, agency, serial_number)
+    if competition:
+        for i in range(0, 2):
+            _add_application(
+                db_session,
+                competition,
+                f"Application for {competition.competition_id}-{i}",
+                factories.UserFactory.create(),
+                ApplicationStatus.ACCEPTED,
+            )
+    else:
+        logger.info(f"No competitions found for agency {agency.agency_code}")
 
 
+# Before running this command run `make db-seed-local-with-agencies`
 # This method creates a cert and key if it cannot find them in the cache
 # it then gets or creates an agency with an agency_code of 'SOAP'
 # then it creates an opportunity -> competition -> application -> application_submission
 # then it gets or creates a legacy _certificate for that agency and cert serial_number
 # it prints off the encoded cert that can be put into the Postman header
 # in order to hit the locally running instance
-def _build_legacy_certificate_and_submission(db_session: db.Session) -> None:
-    key = create_private_key()
-    if key:
-        create_cert(key)
-    with open(f"{TARGET_DIR}/local.crt", "rb") as f:
+# the command looks like `make seed-local-soap-certificate DIR_PATH="~/test/cache/" AGENCY_CODE="EPA"`
+def _build_legacy_certificate_and_submission(
+    db_session: db.Session, directory: Path, agency_code: str
+) -> None:
+    path_key = directory / "local.key"
+    path_crt = directory / "local.crt"
+    if path_key.exists() and path_crt.exists():
+        logger.info("cert and key file exist")
+    else:
+        key = create_private_key(path_key)
+        create_cert(key, path_crt)
+    with open(path_crt, "rb") as f:
         cert_data = f.read()
     cert = x509.load_pem_x509_certificate(cert_data, default_backend())
     serial_number = hex(cert.serial_number).lower().lstrip("0x")
 
-    agency = get_or_create_agency(db_session)
-    for status in ApplicationStatus:
-        create_application_submission(db_session, agency, serial_number, status=status)
+    agency = get_agency(db_session, agency_code)
+    get_or_create_legacy_certificate(db_session, agency, serial_number)
+    create_application_submission(db_session, agency, serial_number)
 
     db_session.commit()
 
-    with open(f"{TARGET_DIR}/local.crt") as f:
+    with open(path_crt) as f:
         cert_text = f.read()
 
     encoded = quote(cert_text, safe="")
@@ -189,8 +169,24 @@ def _build_legacy_certificate_and_submission(db_session: db.Session) -> None:
     print(encoded)
 
 
-if __name__ == "__main__":
-    db_client = db.PostgresDBClient()
-    with db_client.get_session() as db_session:
-        factories._db_session = db_session
-        _build_legacy_certificate_and_submission(db_session)
+@click.command()
+@click.option(
+    "--dir-path",
+    required=True,
+    help="Directory path for the certificte and key file",
+)
+@click.option(
+    "--agency-code",
+    help="Agency code to use ('DOD' is default)",
+)
+def seed_local_soap_certificate(dir_path: str, agency_code: str | None = None) -> None:
+    with src.logging.init("seed_local_soap_certificate"):
+        logger.info("Running seed script for local soap certificate testing")
+        db_client = db.PostgresDBClient()
+        with db_client.get_session() as db_session:
+            directory = Path(dir_path).expanduser()
+            directory.mkdir(parents=True, exist_ok=True)
+            factories._db_session = db_session
+            _build_legacy_certificate_and_submission(
+                db_session, directory, agency_code if agency_code else "EPA"
+            )
