@@ -103,9 +103,9 @@ export function sf424aHappyPathTestData(): Record<string, string> {
   });
 
   // ── Section F ─────────────────────────────────────────────────────────────
-  data["direct_charges_explanation"] = "TEST DIRECT CHARGES";
-  data["indirect_charges_explanation"] = "TEST INDIRECT CHARGES";
-  data["remarks"] = "TEST REMARKS";
+  data.direct_charges_explanation = "TEST DIRECT CHARGES";
+  data.indirect_charges_explanation = "TEST INDIRECT CHARGES";
+  data.remarks = "TEST REMARKS";
   // Note: confirmation checkbox is handled separately — fillForm() does not
   // support boolean fields. The generic engine will need extending or the
   // checkbox click needs adding to general-forms-filling.ts if other forms
