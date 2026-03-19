@@ -274,6 +274,12 @@ def test_user_callback_new_user_302(
     )
     assert db_state is None
 
+    # this checks that we didn't have to retry for this to return it's result
+    # when no retries are specified we start at 0 and decrement for each attempt
+    # so -1 means we only tried once
+    # without the fix Michael noted in the PR, this would incorrectly be -3, failing this test
+    assert mock_oauth_client.retries[code] == -1
+
 
 def test_user_callback_existing_user_302(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key

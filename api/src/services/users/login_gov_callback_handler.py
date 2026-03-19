@@ -181,7 +181,8 @@ def handle_login_gov_token(
                     extra={"tries": tries, "limit": limit},
                 )
                 continue
-
+        # if it's not an error we should break out of the loop since it was a successful call
+        break
     # Process the token response from login.gov
     # which will create/update a user in the DB
     return _process_token(db_session, response.id_token, login_gov_data.nonce)
