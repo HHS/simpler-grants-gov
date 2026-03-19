@@ -48,6 +48,11 @@ test(
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
+    // Wait for the first form field to be visible before proceeding
+    await page
+      .getByTestId("title")
+      .waitFor({ state: "visible", timeout: 30000 });
+
     // Fill and save, stay on form page to verify save success
     await fillForm(
       testInfo,

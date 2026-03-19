@@ -40,6 +40,9 @@ test("Application form completion happy path - SF424B", async ({
   // Call reusable create application function from utils
   await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
+  // Wait for the first form field to be visible before proceeding
+  await page.getByTestId("title").waitFor({ state: "visible", timeout: 30000 });
+
   await fillForm(
     testInfo,
     page,
