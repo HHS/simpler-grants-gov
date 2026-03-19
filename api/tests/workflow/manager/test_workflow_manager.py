@@ -22,6 +22,7 @@ from src.workflow.manager.workflow_manager import (
 )
 from tests.src.db.models.factories import OpportunityFactory, UserFactory, WorkflowFactory
 from tests.workflow.state_machine.test_state_machines import BasicState
+from tests.workflow.workflow_test_util import build_process_workflow_event
 
 logger = logging.getLogger(__name__)
 
@@ -329,7 +330,6 @@ def test_process_sqs_event_success(app, db_session):
     """Test successful processing of an SQS event."""
     # Create test user and opportunity
     user = UserFactory.create()
-    opportunity = OpportunityFactory.create()
     test_event_id = uuid.uuid4()
 
     workflow = WorkflowFactory.create(
@@ -338,27 +338,17 @@ def test_process_sqs_event_success(app, db_session):
         has_opportunity=True,
     )
 
-    process_workflow_context = ProcessWorkflowEventContext(
-        workflow_id=workflow.workflow_id, event_to_send="middle_to_end"
+    sqs_container = build_process_workflow_event(
+        workflow_id=workflow.workflow_id,
+        user=user,
+        event_to_send="middle_to_end",
+        event_id=test_event_id,
+        put_history_event_in_session=False,
     )
-
-    test_message_body = {
-        "event_id": str(test_event_id),
-        "acting_user_id": user.user_id,
-        "event_type": WorkflowEventType.PROCESS_WORKFLOW,
-        "process_workflow_context": process_workflow_context,
-        "start_workflow_context": {
-            "workflow_type": WorkflowType.BASIC_TEST_WORKFLOW,
-            "entity_type": WorkflowEntityType.OPPORTUNITY,
-            "entity_id": opportunity.opportunity_id,
-        },
-    }
-
-    test_event = WorkflowEvent.model_validate(test_message_body)
 
     # Process the event - should trigger UnexpectedStateError which is a RetryableWorkflowError
     with app.app_context():
-        result = handle_event(test_event)
+        result = handle_event(sqs_container)
 
     # Verify the workflow event history was saved in the database
     saved_history_event = (
@@ -378,7 +368,6 @@ def test_process_sqs_event_retryable_error(app):
     """Test retryable error processing of an SQS event."""
     # Create test user and opportunity
     user = UserFactory.create()
-    opportunity = OpportunityFactory.create()
 
     # setup invalid state for retryable error
     workflow = WorkflowFactory.create(
@@ -387,27 +376,16 @@ def test_process_sqs_event_retryable_error(app):
         has_opportunity=True,
     )
 
-    process_workflow_context = ProcessWorkflowEventContext(
-        workflow_id=workflow.workflow_id, event_to_send="middle_to_end"
+    sqs_container = build_process_workflow_event(
+        workflow_id=workflow.workflow_id,
+        user=user,
+        event_to_send="middle_to_end",
+        put_history_event_in_session=False,
     )
-
-    test_message_body = {
-        "event_id": str(uuid.uuid4()),
-        "acting_user_id": user.user_id,
-        "event_type": WorkflowEventType.PROCESS_WORKFLOW,
-        "process_workflow_context": process_workflow_context,
-        "start_workflow_context": {
-            "workflow_type": WorkflowType.BASIC_TEST_WORKFLOW,
-            "entity_type": WorkflowEntityType.OPPORTUNITY,
-            "entity_id": opportunity.opportunity_id,
-        },
-    }
-
-    test_event = WorkflowEvent.model_validate(test_message_body)
 
     # Process the event - should trigger UnexpectedStateError which is a RetryableWorkflowError
     with app.app_context():
-        result = handle_event(test_event)
+        result = handle_event(sqs_container)
 
     # Verify the result is a retryable error
     assert result == WorkflowEventProcessingResult.RETRYABLE_ERROR
@@ -416,7 +394,6 @@ def test_process_sqs_event_retryable_error(app):
 def test_process_sqs_event_non_retryable_error(app, db_session):
     """Test non-retryable error processing of an SQS event."""
     # Create test opportunity
-    opportunity = OpportunityFactory.create()
     test_event_id = uuid.uuid4()
 
     workflow = WorkflowFactory.create(
@@ -425,28 +402,17 @@ def test_process_sqs_event_non_retryable_error(app, db_session):
         has_opportunity=True,
     )
 
-    process_workflow_context = ProcessWorkflowEventContext(
-        workflow_id=workflow.workflow_id, event_to_send="middle_to_end"
+    sqs_container = build_process_workflow_event(
+        workflow_id=workflow.workflow_id,
+        user=None,
+        event_to_send="middle_to_end",
+        event_id=test_event_id,
+        put_history_event_in_session=False,
     )
-
-    # setup invalid user id for non-retryable error
-    test_message_body = {
-        "event_id": test_event_id,
-        "acting_user_id": "abcded1e-8a2f-4e5a-8b1c-9d2e3f4abcde",
-        "event_type": WorkflowEventType.PROCESS_WORKFLOW,
-        "process_workflow_context": process_workflow_context,
-        "start_workflow_context": {
-            "workflow_type": WorkflowType.BASIC_TEST_WORKFLOW,
-            "entity_type": WorkflowEntityType.OPPORTUNITY,
-            "entity_id": opportunity.opportunity_id,
-        },
-    }
-
-    test_event = WorkflowEvent.model_validate(test_message_body)
 
     # Process the event - should trigger non-retryable UserDoesNotExist error
     with app.app_context():
-        result = handle_event(test_event)
+        result = handle_event(sqs_container)
 
     # Verify the workflow event history was saved in the database
     saved_history_event = (
@@ -464,15 +430,29 @@ def test_process_sqs_event_non_retryable_error(app, db_session):
 
 
 @patch("src.workflow.manager.workflow_manager.EventHandler._pre_process_event")
-def test_process_sqs_event_general_error(mock_event_handler_preprocess, app, valid_sqs_message):
+def test_process_sqs_event_general_error(mock_event_handler_preprocess, app):
     """Test general error (any other error) processing of an SQS event."""
     # Setup mock for unexcpected error from eventhandler preprocess
     mock_event_handler_preprocess.return_value.process.side_effect = Exception("Unexpected error")
-    wfm = WorkflowManager(config=WorkflowManagerConfig())
-    test_event = wfm.parse_event(valid_sqs_message)
+
+    user = UserFactory.create()
+
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+        current_workflow_state=BasicState.MIDDLE,
+        has_opportunity=True,
+    )
+
+    sqs_container = build_process_workflow_event(
+        workflow_id=workflow.workflow_id,
+        user=user,
+        event_to_send="middle_to_end",
+        put_history_event_in_session=False,
+    )
+
     # Execute
     with app.app_context():
-        result = handle_event(test_event)
+        result = handle_event(sqs_container)
 
     # Verify
     assert result == WorkflowEventProcessingResult.GENERAL_ERROR

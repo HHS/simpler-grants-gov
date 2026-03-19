@@ -1,14 +1,8 @@
-import clsx from "clsx";
-import { environment } from "src/constants/environments";
-
-import { Suspense } from "react";
 import {
   Breadcrumb,
   BreadcrumbBar,
   BreadcrumbLink,
 } from "@trussworks/react-uswds";
-
-import { ReturnToGrantsNotification } from "./ReturnToGrantsNotification";
 
 export type Breadcrumb = {
   title: string;
@@ -64,18 +58,13 @@ const Breadcrumbs = ({
   });
 
   return (
-    <div className="display-flex flex-column tablet:flex-row">
-      <BreadcrumbBar
-        listProps={{ ...microdata.ol }}
-        data-testid="breadcrumb"
-        className={clsx("flex-1", className)}
-      >
-        {breadcrumArray}
-      </BreadcrumbBar>
-      <Suspense>
-        <ReturnToGrantsNotification legacyLink={environment.LEGACY_HOST} />
-      </Suspense>
-    </div>
+    <BreadcrumbBar
+      listProps={{ ...microdata.ol }}
+      data-testid="breadcrumb"
+      className={className}
+    >
+      {breadcrumArray}
+    </BreadcrumbBar>
   );
 };
 
