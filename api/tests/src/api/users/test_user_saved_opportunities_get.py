@@ -191,7 +191,7 @@ def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_sa
 
     assert len(data) == 1
     assert data[0]["opportunity_id"] == str(user_saved_opp.opportunity_id)
-    assert "saved_to_organizations" not in data[0]
+    assert "saved_to_organizations" in data[0]
 
 
 @pytest.mark.parametrize(

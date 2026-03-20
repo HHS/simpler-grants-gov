@@ -270,7 +270,7 @@ def get_saved_opportunities(
         opportunity_params.pagination, paginator
     )
 
-    if paginated_search and org_ids_to_use:
+    if paginated_search:
         # Enrich paginated opportunities with saved_to_organizations
         _enrich_with_saved_organizations_sql(db_session, paginated_search)
 
