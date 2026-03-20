@@ -147,7 +147,7 @@ def _build_legacy_certificate_and_submission(
 # in order to hit the locally running instance
 # the command looks like
 # `make seed-local-soap-certificate DIR_PATH="~/test/cache/"`
-# DIR_PATH starting with `~` will  put it on the docker instance if you don't include a `~` it will write to the api dir
+# dir_path defaults to test_cache dir that is in gitignore
 @click.command()
 @click.option(
     "--dir-path",
@@ -158,11 +158,12 @@ def _build_legacy_certificate_and_submission(
     "--agency-code",
     help="Agency code to use (defaults to agency of first submission it can find)",
 )
-def seed_local_soap_certificate(dir_path: str, agency_code: str | None = None) -> None:
+def seed_local_soap_certificate(dir_path: str | None, agency_code: str | None = None) -> None:
     with src.logging.init("seed_local_soap_certificate"):
         logger.info("Running seed script for local soap certificate testing")
         db_client = db.PostgresDBClient()
         with db_client.get_session() as db_session:
+            dir_path = dir_path if dir_path else "test_cache"
             directory = Path(dir_path)
             directory.mkdir(parents=True, exist_ok=True)
             factories._db_session = db_session
