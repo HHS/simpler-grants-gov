@@ -51,7 +51,7 @@ test("Working saved opportunities page link appears in nav when logged in", asyn
 
   await waitForURLChange(page, (url) => !!url.match(/saved-opportunities/));
   const timeout = targetEnv === "staging" ? 30000 : 5000;
-  await expect(page).toHaveTitle("Saved Opportunities | Simpler.Grants.gov", {
+  await expect(page).toHaveTitle("Saved opportunities | Simpler.Grants.gov", {
     timeout,
   });
 });
