@@ -56,13 +56,7 @@ runs:
       shell: bash
       env:
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
-        NEEDS_SETUP: ${{ inputs.needs_node_setup }}
-        TAGS: ${{ inputs.playwright_tags }}
       run: |
-        echo $PLAYWRIGHT_TARGET_ENV
-        echo $NEEDS_SETUP
-        echo $TAGS
-        echo
         if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" ]]; then echo "invalid e2e test target provided" && exit 1; fi
 
     - name: Check out code
