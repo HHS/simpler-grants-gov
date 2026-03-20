@@ -91,7 +91,7 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
   noErrorsText: "No errors were detected",
   beforeSave: sf424aBeforeSave,
   fields: {
-    // ── Section A - Budget summary ─────────────────────────────────────────
+    // ********* Section A - Budget summary *********
     // Row 1
     "activity_line_items[0]--activity_title": {
       testId: "activity_line_items[0]--activity_title",
@@ -288,7 +288,7 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
           "activity_line_items[3]--budget_summary--non_federal_new_or_revised_amount",
       },
 
-    // ── Section B - Budget categories ──────────────────────────────────────
+    // ********* Section B - Budget categories *********
     // User-editable rows: a–h and j per activity column (i and k are rule-computed)
     ...Object.fromEntries(
       [0, 1, 2, 3].flatMap((i) =>
@@ -318,7 +318,7 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
       ),
     ),
 
-    // ── Section C - Non-federal resources ──────────────────────────────────
+    // ********* Section C - Non-federal resources *********
     // User-editable: applicant_amount, state_amount, other_amount per row
     // (total_amount is rule-computed)
     ...Object.fromEntries(
@@ -338,7 +338,7 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
       ),
     ),
 
-    // ── Section D - Forecasted cash needs ──────────────────────────────────
+    // ********* Section D - Forecasted cash needs *********
     // User-editable: quarter amounts for federal and non_federal
     // (total_amount and total_forecasted_cash_needs.* are rule-computed)
     ...Object.fromEntries(
@@ -363,7 +363,7 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
       ),
     ),
 
-    // ── Section E - Federal fund estimates ─────────────────────────────────
+    // ********* Section E - Federal fund estimates *********
     ...Object.fromEntries(
       [0, 1, 2, 3].flatMap((i) =>
         [
@@ -386,7 +386,7 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
       ),
     ),
 
-    // ── Section F - Other budget information ───────────────────────────────
+    // ********* Section F - Other budget information *********
     // Schema: direct_charges_explanation (maxLength:50),
     //         indirect_charges_explanation (maxLength:50),
     //         remarks (maxLength:250), confirmation (boolean enum:[true])

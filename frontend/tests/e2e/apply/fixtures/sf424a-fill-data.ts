@@ -22,7 +22,7 @@ const ACTIVITY_TITLES = [
 export function sf424aHappyPathTestData(): Record<string, string> {
   const data: Record<string, string> = {};
 
-  // ── Section A ─────────────────────────────────────────────────────────────
+  // ********* Section A - Budget summary *********
   ACTIVITY_TITLES.forEach((title, i) => {
     data[`activity_line_items[${i}]--activity_title`] = title;
     data[`activity_line_items[${i}]--assistance_listing_number`] = CFDA;
@@ -40,7 +40,7 @@ export function sf424aHappyPathTestData(): Record<string, string> {
     ] = FILL;
   });
 
-  // ── Section B ─────────────────────────────────────────────────────────────
+  // ********* Section B - Budget categories *********
   // Fills user-editable rows a–h and j per activity column
   // Rows i (total_direct_charge_amount) and k (total_amount) are rule-computed
   const budgetCategoryFields = [
@@ -62,7 +62,7 @@ export function sf424aHappyPathTestData(): Record<string, string> {
     });
   });
 
-  // ── Section C ─────────────────────────────────────────────────────────────
+  // ********* Section C - Non-federal resources *********
   // Fills applicant_amount, state_amount, other_amount per row
   // total_amount is rule-computed
   [0, 1, 2, 3].forEach((i) => {
@@ -74,7 +74,7 @@ export function sf424aHappyPathTestData(): Record<string, string> {
       FILL;
   });
 
-  // ── Section D ─────────────────────────────────────────────────────────────
+  // ********* Section D - Forecasted cash needs *********
   // Fills quarter amounts for federal and non_federal
   // total_amount and total_forecasted_cash_needs.* are rule-computed
   (["federal", "non_federal"] as const).forEach((type) => {
@@ -89,7 +89,7 @@ export function sf424aHappyPathTestData(): Record<string, string> {
     });
   });
 
-  // ── Section E ─────────────────────────────────────────────────────────────
+  // ********* Section E - Federal fund estimates *********
   [0, 1, 2, 3].forEach((i) => {
     [
       "first_year_amount",
@@ -102,7 +102,7 @@ export function sf424aHappyPathTestData(): Record<string, string> {
     });
   });
 
-  // ── Section F ─────────────────────────────────────────────────────────────
+  // ********* Section F - Other budget information *********
   data.direct_charges_explanation = "TEST DIRECT CHARGES";
   data.indirect_charges_explanation = "TEST INDIRECT CHARGES";
   data.remarks = "TEST REMARKS";
