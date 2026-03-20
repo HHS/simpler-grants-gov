@@ -163,7 +163,7 @@ def seed_local_soap_certificate(dir_path: str, agency_code: str | None = None) -
         logger.info("Running seed script for local soap certificate testing")
         db_client = db.PostgresDBClient()
         with db_client.get_session() as db_session:
-            directory = Path(dir_path).expanduser()
+            directory = Path(dir_path)
             directory.mkdir(parents=True, exist_ok=True)
             factories._db_session = db_session
             _build_legacy_certificate_and_submission(
