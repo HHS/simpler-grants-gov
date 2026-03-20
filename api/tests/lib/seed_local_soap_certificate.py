@@ -81,11 +81,7 @@ def get_agency(db_session, agency_code):
             raise click.ClickException(
                 "No Submissions not found. Run `make db-seed-local-with-agencies` first."
             )
-        agency_code = (
-            agency_code
-            if agency_code
-            else submission.application.competition.opportunity.agency_code
-        )
+        agency_code = submission.application.competition.opportunity.agency_code
     logger.info(f"Using agency {agency_code} for legacy certificate")
     return db_session.scalar(select(Agency).where(Agency.agency_code == agency_code))
 
@@ -145,14 +141,13 @@ def _build_legacy_certificate_and_submission(
     print(encoded)
 
 
-# Before running this command run `make db-seed-local-with-agencies`
-# This method creates a cert and key if it cannot find them in the cache
-# it then gets or creates an agency with an agency_code of 'SOAP'
-# then it creates an opportunity -> competition -> application -> application_submission
-# then it gets or creates a legacy _certificate for that agency and cert serial_number
-# it prints off the encoded cert that can be put into the Postman header
+# Before running this command run
+# `make init && make db-seed-local-with-agencies && make run-logs`
+# By default it will grab the first submission it can find and make a LegacyCertificate for it
 # in order to hit the locally running instance
-# the command looks like `make seed-local-soap-certificate DIR_PATH="~/test/cache/" AGENCY_CODE="EPA"`
+# the command looks like
+# `make seed-local-soap-certificate DIR_PATH="~/test/cache/"`
+# DIR_PATH starting with `~` will  put it on the docker instance if you don't include a `~` it will write to the api dir
 @click.command()
 @click.option(
     "--dir-path",
