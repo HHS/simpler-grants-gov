@@ -27,20 +27,16 @@ import {
 import {
   SF424B_FORM_CONFIG,
   SF424B_FORM_MATCHER,
+  SF424B_REQUIRED_FIELD_ERRORS,
 } from "./fixtures/sf424b-field-definitions";
-import { sf424BHappyPathTestData } from "./fixtures/sf424b-fill-data";
+import {
+  sf424BHappyPathTestData,
+  sf424BReadonlyFields,
+} from "./fixtures/sf424b-fill-data";
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
-
-const sf424bErrors = [
-  { fieldId: "title", message: "Title is required" },
-  {
-    fieldId: "applicant_organization",
-    message: "Applicant Organization is required",
-  },
-];
 
 // Validation errors specific to required SF-424B and conditional SF-LLL form combination
 const EXPECTED_SUBMISSION_ERRORS = {
@@ -61,12 +57,6 @@ const EXPECTED_HISTORY_ENTRIES = [
   "Application submission failed", // 4
   "Organization Added", // 5
   "Application created", // 6
-];
-
-// SF-424B field values filled during the test, verified as read-only after submission
-const SF424B_READONLY_FIELDS = [
-  { fieldId: "title", expectedValue: "TESTER" },
-  { fieldId: "applicant_organization", expectedValue: testOrgLabel },
 ];
 
 // Skip non-Chrome browsers in staging
@@ -113,7 +103,11 @@ test(
     await saveForm(page, true); // expect validation errors
 
     // Checks error alert list at top of form page and inline field errors
-    await verifyFormStatusAfterSave(page, "incomplete", sf424bErrors);
+    await verifyFormStatusAfterSave(
+      page,
+      "incomplete",
+      SF424B_REQUIRED_FIELD_ERRORS,
+    );
 
     // On application page — verify form row shows "Some issues found"
     await verifyFormStatusOnApplication(
@@ -164,7 +158,7 @@ test(
       page,
       SF424B_FORM_MATCHER,
       "SF-424B",
-      SF424B_READONLY_FIELDS,
+      sf424BReadonlyFields(testOrgLabel),
     );
   },
 );
