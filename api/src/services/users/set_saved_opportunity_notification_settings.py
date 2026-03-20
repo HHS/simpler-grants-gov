@@ -3,7 +3,6 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
 from src.adapters import db
 from src.db.models.user_models import User, UserSavedOpportunityNotification
