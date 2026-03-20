@@ -1,4 +1,3 @@
-import datetime
 import logging
 from datetime import timedelta
 from pathlib import Path
@@ -14,12 +13,12 @@ from sqlalchemy import select
 
 import src.adapters.db as db
 import src.logging
+import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
-from src.constants.lookup_constants import ApplicationStatus, Privilege
+from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import Competition, Opportunity
+from src.db.models.competition_models import ApplicationSubmission
 from src.db.models.user_models import LegacyCertificate
-from tests.lib.seed_orgs_and_users import _add_application
 
 logger = logging.getLogger(__name__)
 PRIVILEGES = {
@@ -27,6 +26,7 @@ PRIVILEGES = {
     Privilege.LEGACY_AGENCY_GRANT_RETRIEVER,
     Privilege.LEGACY_AGENCY_ASSIGNER,
 }
+UTC_NOW = datetime_util.utcnow()
 
 
 def create_private_key(path_key):
@@ -62,8 +62,8 @@ def create_cert(key, path_crt) -> None:
         .issuer_name(issuer)
         .public_key(key.public_key())
         .serial_number(x509.random_serial_number())
-        .not_valid_before(datetime.datetime.now(datetime.UTC))
-        .not_valid_after(datetime.datetime.now(datetime.UTC) + timedelta(days=365))
+        .not_valid_before(UTC_NOW)
+        .not_valid_after(UTC_NOW + timedelta(days=365))
         .add_extension(
             x509.SubjectAlternativeName([x509.DNSName("example.com")]),
             critical=False,
@@ -75,6 +75,16 @@ def create_cert(key, path_crt) -> None:
 
 
 def get_agency(db_session, agency_code):
+    if not agency_code:
+        submission = db_session.execute(select(ApplicationSubmission)).scalars().first()
+        if not submission:
+            raise Exception("No valid submissions available")
+        agency_code = (
+            agency_code
+            if agency_code
+            else submission.application.competition.opportunity.agency_code
+        )
+    logger.info(f"Using agency {agency_code} for legacy certificate")
     return db_session.scalar(select(Agency).where(Agency.agency_code == agency_code))
 
 
@@ -87,7 +97,7 @@ def get_or_create_legacy_certificate(db_session, agency, serial_number):
             agency_id=agency.agency_id,
             agency=agency,
             serial_number=serial_number,
-            expiration_date=datetime.datetime.now(datetime.UTC).date() + timedelta(days=365),
+            expiration_date=UTC_NOW.date() + timedelta(days=365),
         )
         agency_user = factories.AgencyUserFactory.create(
             agency=agency, user=legacy_certificate.user
@@ -99,46 +109,8 @@ def get_or_create_legacy_certificate(db_session, agency, serial_number):
         logger.info("Test legacy_certificate already exists")
 
 
-def create_application_submission(db_session, agency, serial_number):
-    opportunity_ids = (
-        db_session.execute(
-            select(Opportunity.opportunity_id).where(
-                Opportunity.agency_code.like(f"{agency.agency_code}%")
-            )
-        )
-        .scalars()
-        .all()
-    )
-    competition = (
-        db_session.execute(
-            select(Competition).where(Competition.opportunity_id.in_(opportunity_ids)).limit(4)
-        )
-        .scalars()
-        .first()
-    )
-    if competition:
-        for i in range(0, 2):
-            _add_application(
-                db_session,
-                competition,
-                f"Application for {competition.competition_id}-{i}",
-                factories.UserFactory.create(),
-                ApplicationStatus.ACCEPTED,
-            )
-    else:
-        logger.info(f"No competitions found for agency {agency.agency_code}")
-
-
-# Before running this command run `make db-seed-local-with-agencies`
-# This method creates a cert and key if it cannot find them in the cache
-# it then gets or creates an agency with an agency_code of 'SOAP'
-# then it creates an opportunity -> competition -> application -> application_submission
-# then it gets or creates a legacy _certificate for that agency and cert serial_number
-# it prints off the encoded cert that can be put into the Postman header
-# in order to hit the locally running instance
-# the command looks like `make seed-local-soap-certificate DIR_PATH="~/test/cache/" AGENCY_CODE="EPA"`
 def _build_legacy_certificate_and_submission(
-    db_session: db.Session, directory: Path, agency_code: str
+    db_session: db.Session, directory: Path, agency_code: str | None
 ) -> None:
     path_key = directory / "local.key"
     path_crt = directory / "local.crt"
@@ -154,8 +126,6 @@ def _build_legacy_certificate_and_submission(
 
     agency = get_agency(db_session, agency_code)
     get_or_create_legacy_certificate(db_session, agency, serial_number)
-    create_application_submission(db_session, agency, serial_number)
-
     db_session.commit()
 
     with open(path_crt) as f:
@@ -169,6 +139,14 @@ def _build_legacy_certificate_and_submission(
     print(encoded)
 
 
+# Before running this command run `make db-seed-local-with-agencies`
+# This method creates a cert and key if it cannot find them in the cache
+# it then gets or creates an agency with an agency_code of 'SOAP'
+# then it creates an opportunity -> competition -> application -> application_submission
+# then it gets or creates a legacy _certificate for that agency and cert serial_number
+# it prints off the encoded cert that can be put into the Postman header
+# in order to hit the locally running instance
+# the command looks like `make seed-local-soap-certificate DIR_PATH="~/test/cache/" AGENCY_CODE="EPA"`
 @click.command()
 @click.option(
     "--dir-path",
@@ -188,5 +166,5 @@ def seed_local_soap_certificate(dir_path: str, agency_code: str | None = None) -
             directory.mkdir(parents=True, exist_ok=True)
             factories._db_session = db_session
             _build_legacy_certificate_and_submission(
-                db_session, directory, agency_code if agency_code else "EPA"
+                db_session, directory, agency_code if agency_code else None
             )
