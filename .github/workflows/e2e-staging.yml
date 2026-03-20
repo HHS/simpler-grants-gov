@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "git reference to deploy (e.g., a branch, tag, or commit SHA)"
+        description: "git reference for testing code to run (e.g., a branch, tag, or commit SHA)"
         required: true
         type: string
       target:

@@ -57,7 +57,6 @@ runs:
       env:
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
       run: |
-        echo $PLAYWRIGHT_TARGET_ENV
         if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" ]]; then echo "invalid e2e test target provided" && exit 1; fi
 
     - name: Check out code
