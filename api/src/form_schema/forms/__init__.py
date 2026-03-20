@@ -36,5 +36,5 @@ def get_active_forms() -> list[Form]:
         SupplementaryNEHCoverSheet_v3_0,
         GG_LobbyingForm_v1_1,
         EPA_FORM_4700_4_v5_0,
-        EPA_KEY_CONTACT_v2_0
+        EPA_KEY_CONTACT_v2_0,
     ]
