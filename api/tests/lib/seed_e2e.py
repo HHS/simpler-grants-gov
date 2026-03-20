@@ -25,7 +25,9 @@ def _write_token_to_file(token: str) -> None:
 
 def _build_users_and_tokens(db_session: db.Session) -> None:
     builder = (
-        UserBuilder(uuid.UUID("7edb5704-9d3b-4099-9e10-fbb9f2729aff"), db_session, "user for e2e")
+        # Reuse the seeded one_org_user so the spoofed E2E session always has
+        # organization membership (Sally's Soup Emporium) in local/CI runs.
+        UserBuilder(uuid.UUID("f15c7491-7ebc-4f4f-8de6-3ac0594d9c63"), db_session, "user for e2e")
         .with_jwt_auth()
         .with_api_key("e2e-test-key")
         .with_internal_role(E2E_TEST_USER_ROLE)

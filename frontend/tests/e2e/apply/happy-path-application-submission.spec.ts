@@ -8,17 +8,21 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import {
-  fillSf424bForm,
-  SF424B_FORM_MATCHER,
-} from "tests/e2e/utils/forms/fill-sf424b-form-utils";
-import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
-import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
+  fillForm,
+  verifyFormLinkVisible,
+} from "tests/e2e/utils/forms/general-forms-filling";
 import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
 import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
+
+import {
+  SF424B_FORM_CONFIG,
+  SF424B_FORM_MATCHER,
+} from "./fixtures/sf424b-field-definitions";
+import { sf424BHappyPathTestData } from "./fixtures/sf424b-fill-data";
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
@@ -47,26 +51,24 @@ test(
 
     await authenticateE2eUser(page, context, !!isMobile);
 
-    // Call reusable create application function from utils
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
-    if (!(await openForm(page, SF424B_FORM_MATCHER))) {
-      throw new Error(
-        "Could not find or open SF-424B form link on the application forms page",
-      );
-    }
+    await verifyFormLinkVisible(page, SF424B_FORM_MATCHER);
 
-    // Fill SF-424B form fields using helper
-    await fillSf424bForm(page, "TESTER", testOrgLabel);
+    // Fill and save, stay on form page to verify save success
+    await fillForm(
+      testInfo,
+      page,
+      SF424B_FORM_CONFIG,
+      sf424BHappyPathTestData(testOrgLabel),
+      false,
+    );
 
-    // Save the form using helper
-    await saveForm(page);
-
-    // Verify form status after save
+    // Verify save success alert on form page
     await verifyFormStatusAfterSave(page, "complete");
 
-    // On application page — verify form row status/messages
+    // On application page — verify form row shows "No issues detected"
     await verifyFormStatusOnApplication(
       page,
       "complete",
@@ -85,7 +87,6 @@ test(
     );
 
     // Submit the application and verify success
-    await submitApplicationAndVerify(page);
-    // Application ID is now available in appId variable for further use if needed
+    await submitApplicationAndVerify(page, "success");
   },
 );
