@@ -12,8 +12,12 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
-import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
+import AwardRecommendationHero, {
+  HeroButtonConfig,
+} from "src/components/award-recommendation/AwardRecommendationHero";
+import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
+import { submitAwardRecommendationForReview } from "./actions";
 
 export async function generateMetadata({
   params,
@@ -58,7 +62,7 @@ const OpportunitySection = ({
     <div>
       <Grid row className="grid-gap">
         <Grid col={9} tablet={{ col: 9 }}>
-          <div className="margin-top-5 margin-bottom-5">
+          <div className="margin-top-3 margin-bottom-3">
             <div className="margin-bottom-3">
               <h2 className="margin-top-0 margin-bottom-0">
                 {t("opportunity", { defaultValue: "Opportunity" })}
@@ -118,6 +122,21 @@ async function AwardRecommendationPageContent({
   const t = await getTranslations("AwardRecommendation");
   const opportunityId = "6a483cd8-9169-418a-8dfb-60fa6e6f51e5";
 
+  // Define button configuration for preview page
+  const heroButtons: HeroButtonConfig[] = [
+    {
+      type: "navigation",
+      label: t("heroButtons.edit"),
+      href: `/${locale}/award-recommendation/${awardRecommendationId}/edit`,
+      outline: true,
+    },
+    {
+      type: "action",
+      label: t("heroButtons.submitForReview"),
+      formAction: submitAwardRecommendationForReview,
+    },
+  ];
+
   let opportunityData: OpportunityDetail | null = null;
   if (opportunityId) {
     try {
@@ -142,7 +161,7 @@ async function AwardRecommendationPageContent({
   }
 
   return (
-    <>
+    <form>
       {awardRecommendationId && (
         <Suspense
           fallback={
@@ -151,6 +170,7 @@ async function AwardRecommendationPageContent({
         >
           <AwardRecommendationHero
             awardRecommendationId={awardRecommendationId}
+            buttons={heroButtons}
           />
         </Suspense>
       )}
@@ -161,8 +181,14 @@ async function AwardRecommendationPageContent({
             locale={locale}
           />
         )}
+        <RecommendationSection
+          mode="view"
+          recommendationMethod="Merit review ranking with other factors"
+          recommendationMethodDetails="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+          otherKeyInformation="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute ...."
+        />
       </GridContainer>
-    </>
+    </form>
   );
 }
 

@@ -21,7 +21,7 @@ inputs:
     description: "total number of test shards in parent run"
     default: "1"
   current_shard:
-    description: "total number of test shards in parent run"
+    description: "current shard number in parent run"
     default: "1"
   needs_node_setup:
     description: "does this action need to set up node and install deps"
@@ -57,7 +57,6 @@ runs:
       env:
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
       run: |
-        echo $PLAYWRIGHT_TARGET_ENV
         if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" ]]; then echo "invalid e2e test target provided" && exit 1; fi
 
     - name: Check out code
