@@ -5,6 +5,7 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
+import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import {
@@ -24,6 +25,8 @@ import {
 } from "./fixtures/sf424b-field-definitions";
 import { sf424BHappyPathTestData } from "./fixtures/sf424b-fill-data";
 
+const { APPLY, SMOKE, GRANTEE } = VALID_TAGS;
+
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
@@ -40,7 +43,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL",
-  { tag: ["@smoke", "@grantee", "@apply"] },
+  { tag: [SMOKE, GRANTEE, APPLY] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,

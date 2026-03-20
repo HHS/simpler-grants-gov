@@ -6,6 +6,7 @@ import {
   type Page,
 } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
+import { VALID_TAGS } from "tests/e2e/tags";
 import {
   clickSignIn,
   fillSignInForm,
@@ -14,9 +15,11 @@ import {
   locateMfaInput,
 } from "tests/e2e/utils/perform-login-utils";
 
+const { SMOKE, AUTH } = VALID_TAGS;
+
 const { baseUrl, targetEnv, testUserAuthKey, testUserEmail, testUserPassword } =
   playwrightEnv;
-// --- Timeouts ---
+
 const TIMEOUT_REDIRECT = 90000;
 
 // Tagging the test for config separation
@@ -41,7 +44,7 @@ test.describe("Login.gov based authentication tests", () => {
 
   test(
     "Login.gov authentication with MFA",
-    { tag: ["@smoke", "@auth"] },
+    { tag: [SMOKE, AUTH] },
     async ({ page, context }: { page: Page; context: BrowserContext }) => {
       const isMobileProject = !!test.info().project.name.match(/[Mm]obile/);
 
