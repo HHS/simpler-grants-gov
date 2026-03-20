@@ -12,6 +12,16 @@ const { testOrgLabel, opportunityId, targetEnv, baseUrl } = playwrightEnv;
 
 const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
 
+// Skip non-Chrome browsers in staging
+test.beforeEach(({ page: _ }, testInfo) => {
+  if (targetEnv === "staging") {
+    test.skip(
+      testInfo.project.name !== "Chrome",
+      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
+    );
+  }
+});
+
 test.describe("Application form completion happy path - SFLLL", () => {
   // Skip non-Chrome browsers in staging
   test.beforeEach(({ page: _ }, testInfo) => {
