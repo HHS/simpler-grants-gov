@@ -67,10 +67,13 @@ describe("AwardRecommendationHero", () => {
     });
     render(component);
 
-    const buttons = screen.getAllByRole("button");
-    expect(buttons.length).toEqual(1);
+    // Navigation links styled as buttons and action buttons
     expect(screen.getByText("Edit")).toBeInTheDocument();
     expect(screen.getByText("Submit")).toBeInTheDocument();
+
+    // Action button should have formAction attribute
+    const submitButton = screen.getByRole("button", { name: "Submit" });
+    expect(submitButton).toHaveAttribute("type", "submit");
   });
 
   it("does not render buttons when buttons prop is not provided", async () => {

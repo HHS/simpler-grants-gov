@@ -192,7 +192,7 @@ async function AwardRecommendationEditPageContent({
   }
 
   return (
-    <>
+    <form>
       {awardRecommendationId && (
         <Suspense
           fallback={
@@ -214,7 +214,7 @@ async function AwardRecommendationEditPageContent({
         )}
         <RecommendationSection mode="edit" />
       </GridContainer>
-    </>
+    </form>
   );
 }
 

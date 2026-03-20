@@ -100,16 +100,16 @@ export default async function AwardRecommendationHero({
                     );
                   } else {
                     return (
-                      <form key={index} action={button.formAction}>
-                        <Button
-                          type="submit"
-                          outline={button.outline}
-                          disabled={button.disabled}
-                          className="width-auto"
-                        >
-                          {button.label}
-                        </Button>
-                      </form>
+                      <Button
+                        key={index}
+                        type="submit"
+                        formAction={button.formAction}
+                        outline={button.outline}
+                        disabled={button.disabled}
+                        className="width-auto"
+                      >
+                        {button.label}
+                      </Button>
                     );
                   }
                 })}
