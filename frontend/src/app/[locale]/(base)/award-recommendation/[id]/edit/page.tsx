@@ -1,4 +1,8 @@
 import { Metadata } from "next";
+import {
+  saveAwardRecommendation,
+  submitAwardRecommendationForReview,
+} from "src/app/[locale]/(base)/award-recommendation/[id]/actions";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
@@ -17,7 +21,10 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
-import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
+import AwardRecommendationHero, {
+  HeroButtonConfig,
+} from "src/components/award-recommendation/AwardRecommendationHero";
+import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 
 export async function generateMetadata({
@@ -65,13 +72,13 @@ const OpportunitySection = ({
     <div>
       <Grid row className="grid-gap">
         <Grid col={9} tablet={{ col: 9 }}>
-          <div className="margin-top-5 margin-bottom-5">
+          <div className="margin-top-3 margin-bottom-3">
             <div className="margin-bottom-3">
               <h2 className="margin-top-0 margin-bottom-0">
                 {t("opportunity", { defaultValue: "Opportunity" })}
               </h2>
             </div>
-            <div className="border radius-md border-base-lighter padding-3 bg-white">
+            <div>
               <div className="margin-bottom-4 display-flex gap-3">
                 <div className="flex-1">
                   <p className="text-bold margin-bottom-1 font-sans-sm">
@@ -140,6 +147,27 @@ async function AwardRecommendationEditPageContent({
   const t = await getTranslations("AwardRecommendation");
   const opportunityId = "6a483cd8-9169-418a-8dfb-60fa6e6f51e5";
 
+  // Define button configuration for edit page
+  const heroButtons: HeroButtonConfig[] = [
+    {
+      type: "action",
+      label: t("heroButtons.save"),
+      formAction: saveAwardRecommendation,
+      outline: true,
+    },
+    {
+      type: "navigation",
+      label: t("heroButtons.preview"),
+      href: `/award-recommendation/${awardRecommendationId}`,
+      outline: true,
+    },
+    {
+      type: "action",
+      label: t("heroButtons.submitForReview"),
+      formAction: submitAwardRecommendationForReview,
+    },
+  ];
+
   let opportunityData: OpportunityDetail | null = null;
   if (opportunityId) {
     try {
@@ -164,7 +192,7 @@ async function AwardRecommendationEditPageContent({
   }
 
   return (
-    <>
+    <form>
       {awardRecommendationId && (
         <Suspense
           fallback={
@@ -173,6 +201,7 @@ async function AwardRecommendationEditPageContent({
         >
           <AwardRecommendationHero
             awardRecommendationId={awardRecommendationId}
+            buttons={heroButtons}
           />
         </Suspense>
       )}
@@ -183,8 +212,9 @@ async function AwardRecommendationEditPageContent({
             locale={locale}
           />
         )}
+        <RecommendationSection mode="edit" />
       </GridContainer>
-    </>
+    </form>
   );
 }
 
