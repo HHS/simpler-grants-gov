@@ -279,7 +279,7 @@ def transform_opportunity_summary(
     # Grants.gov stores agency contact information differently for forecasts
     # Rather than a single field, they have 2 and when they go to display it
     # they put both of them. To keep things simpler, we'll put those two together
-    # here. If they're both null, we'll have an empty string.
+    # here. If they're both null, we'll set it to null to be consistent with synopsis.
     if source_summary.is_forecast:
         agency_name = getattr(source_summary, "ac_name", None)
         agency_phone = getattr(source_summary, "ac_phone", None)
@@ -290,7 +290,8 @@ def transform_opportunity_summary(
         if agency_phone is not None:
             values.append(agency_phone)
 
-        target_summary.agency_contact_description = "\n".join(values)
+        if len(values) > 0:
+            target_summary.agency_contact_description = "\n".join(values)
 
     transform_update_create_timestamp(source_summary, target_summary, log_extra=log_extra)
 
