@@ -59,7 +59,7 @@ def _make_operation_config():
     )
 
 
-def _setup_submission(agency, application_status=ApplicationStatus.SUBMITTED):
+def _setup_submission(agency, application_status=ApplicationStatus.ACCEPTED):
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
     competition = CompetitionFactory.create(opportunity=opportunity)
     application = ApplicationFactory.create(
@@ -72,7 +72,7 @@ def _setup_submission(agency, application_status=ApplicationStatus.SUBMITTED):
 class TestUpdateApplicationInfoResponse:
     def test_successful_assign_tracking_number(self, db_session, enable_factory_create):
         agency = AgencyFactory.create()
-        submission = _setup_submission(agency, ApplicationStatus.SUBMITTED)
+        submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
         db_session.commit()
 
@@ -108,7 +108,7 @@ class TestUpdateApplicationInfoResponse:
 
     def test_successful_save_agency_notes(self, db_session, enable_factory_create):
         agency = AgencyFactory.create()
-        submission = _setup_submission(agency, ApplicationStatus.SUBMITTED)
+        submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
         db_session.commit()
 
@@ -146,7 +146,7 @@ class TestUpdateApplicationInfoResponse:
         self, db_session, enable_factory_create
     ):
         agency = AgencyFactory.create()
-        submission = _setup_submission(agency, ApplicationStatus.SUBMITTED)
+        submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
         db_session.commit()
 
@@ -231,12 +231,12 @@ class TestUpdateApplicationInfoResponse:
                 soap_config=_make_operation_config(),
             )
 
-    def test_tracking_number_already_assigned_returns_fault(
+    def test_tracking_number_already_assigned_returns_failure(
         self, db_session, enable_factory_create
     ):
         """Agency tracking number can only be assigned once."""
         agency = AgencyFactory.create()
-        submission = _setup_submission(agency, ApplicationStatus.SUBMITTED)
+        submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
 
         user, _, soap_client_certificate = setup_cert_user(
@@ -259,13 +259,15 @@ class TestUpdateApplicationInfoResponse:
             AssignAgencyTrackingNumber="NEW-AGENCY-456",
         )
 
-        with pytest.raises(SOAPFaultException):
-            update_application_info_response(
-                db_session=db_session,
-                soap_request=soap_request,
-                update_application_info_request=request_schema,
-                soap_config=_make_operation_config(),
-            )
+        result = update_application_info_response(
+            db_session=db_session,
+            soap_request=soap_request,
+            update_application_info_request=request_schema,
+            soap_config=_make_operation_config(),
+        )
+
+        assert result.assign_agency_tracking_number_result is not None
+        assert result.assign_agency_tracking_number_result.success == "false"
 
         # Verify no additional tracking number record was inserted
         tracking_numbers = (
@@ -279,7 +281,7 @@ class TestUpdateApplicationInfoResponse:
     def test_notes_can_be_saved_multiple_times(self, db_session, enable_factory_create):
         """Agency notes can be updated multiple times."""
         agency = AgencyFactory.create()
-        submission = _setup_submission(agency, ApplicationStatus.SUBMITTED)
+        submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
         db_session.commit()
 
@@ -325,7 +327,7 @@ class TestUpdateApplicationInfoResponse:
     def test_user_without_permission_returns_fault(self, db_session, enable_factory_create):
         """User without LEGACY_AGENCY_ASSIGNER privilege should be rejected."""
         agency = AgencyFactory.create()
-        submission = _setup_submission(agency, ApplicationStatus.SUBMITTED)
+        submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
         db_session.commit()
 
@@ -375,7 +377,7 @@ class TestUpdateApplicationInfoResponse:
     def test_response_envelope_has_ns2_prefix(self, db_session, enable_factory_create):
         """Verify the SOAP envelope dict uses ns2: prefix for the operation name."""
         agency = AgencyFactory.create()
-        submission = _setup_submission(agency, ApplicationStatus.SUBMITTED)
+        submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
         db_session.commit()
 
