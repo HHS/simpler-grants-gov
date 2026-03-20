@@ -1,5 +1,4 @@
-import { expect, Page, test } from "@playwright/test";
-import { BrowserContextOptions } from "playwright-core";
+import { expect, test } from "@playwright/test";
 import {
   generateRandomString,
   waitForURLContainsQueryParamValue,
