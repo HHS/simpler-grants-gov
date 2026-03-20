@@ -1,17 +1,19 @@
-import dataclasses
-import uuid
-
 import pytest
 from sqlalchemy import select
 
-from src.constants.lookup_constants import WorkflowEventType, WorkflowType, WorkflowEntityType, Privilege, \
-    ApprovalResponseType, ApprovalType
-from src.db.models.workflow_models import WorkflowEventHistory, Workflow
+from src.constants.lookup_constants import (
+    ApprovalResponseType,
+    ApprovalType,
+    Privilege,
+    WorkflowEntityType,
+    WorkflowEventType,
+    WorkflowType,
+)
+from src.db.models.workflow_models import Workflow, WorkflowEventHistory
 from src.workflow.manager.workflow_manager import WorkflowManager
 from tests.lib.internal_user_test_utils import create_internal_user_with_jwt
 from tests.src.db.models.factories import OpportunityFactory, WorkflowFactory
 from tests.workflow.state_machine.test_state_machines import BasicState
-
 
 #################################
 #
@@ -22,6 +24,7 @@ from tests.workflow.state_machine.test_state_machines import BasicState
 # but instead focus on the connection between the two.
 #
 #################################
+
 
 @pytest.fixture
 def internal_workflow_send_user_values(db_session, enable_factory_create):
@@ -42,12 +45,17 @@ def internal_send_user_jwt(internal_workflow_send_user_values):
     return internal_workflow_send_user_values[1]
 
 
-def build_process_workflow_request(event_to_send: str, workflow: Workflow, approval_response_type: ApprovalResponseType | None = None, comment: str | None = None) -> dict:
+def build_process_workflow_request(
+    event_to_send: str,
+    workflow: Workflow,
+    approval_response_type: ApprovalResponseType | None = None,
+    comment: str | None = None,
+) -> dict:
     payload = {
         "event_type": WorkflowEventType.PROCESS_WORKFLOW,
         "process_workflow_context": {
             "workflow_id": workflow.workflow_id,
-            "event_to_send": event_to_send
+            "event_to_send": event_to_send,
         },
     }
 
@@ -70,7 +78,17 @@ def send_event_and_process(client, app, payload: dict, user_jwt: str) -> str:
 
     return event_id
 
-def test_can_move_basic_test_workflow_start_to_end(db_session, enable_factory_create, client, app, internal_send_user, internal_send_user_jwt, workflow_user, workflow_sqs_queue):
+
+def test_can_move_basic_test_workflow_start_to_end(
+    db_session,
+    enable_factory_create,
+    client,
+    app,
+    internal_send_user,
+    internal_send_user_jwt,
+    workflow_user,
+    workflow_sqs_queue,
+):
 
     opportunity = OpportunityFactory.create()
 
@@ -87,7 +105,9 @@ def test_can_move_basic_test_workflow_start_to_end(db_session, enable_factory_cr
     first_event_id = send_event_and_process(client, app, payload, internal_send_user_jwt)
 
     # Find the workflow via the event ID
-    event_history = db_session.execute(select(WorkflowEventHistory).where(WorkflowEventHistory.event_id == first_event_id)).scalar_one_or_none()
+    event_history = db_session.execute(
+        select(WorkflowEventHistory).where(WorkflowEventHistory.event_id == first_event_id)
+    ).scalar_one_or_none()
     assert event_history is not None
     workflow = event_history.workflow
 
@@ -105,7 +125,9 @@ def test_can_move_basic_test_workflow_start_to_end(db_session, enable_factory_cr
     assert workflow.is_active is True
 
     # Send another event
-    payload = build_process_workflow_request("receive_budget_officer_approval", workflow, ApprovalResponseType.APPROVED)
+    payload = build_process_workflow_request(
+        "receive_budget_officer_approval", workflow, ApprovalResponseType.APPROVED
+    )
     third_event_id = send_event_and_process(client, app, payload, internal_send_user_jwt)
 
     db_session.refresh(workflow)
@@ -161,17 +183,31 @@ def test_can_move_basic_test_workflow_start_to_end(db_session, enable_factory_cr
     assert workflow_approvals[0].approval_response_type == ApprovalResponseType.APPROVED
 
 
-def test_can_move_basic_test_workflow_start_to_requires_modification_and_then_to_end(db_session, enable_factory_create, client, app, internal_send_user, internal_send_user_jwt, workflow_user, workflow_sqs_queue):
+def test_can_move_basic_test_workflow_start_to_requires_modification_and_then_to_end(
+    db_session,
+    enable_factory_create,
+    client,
+    app,
+    internal_send_user,
+    internal_send_user_jwt,
+    workflow_user,
+    workflow_sqs_queue,
+):
     """Test that if a workflow requires modification, we can then get through the workflow afterwards"""
 
     workflow = WorkflowFactory.create(
         current_workflow_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
-        has_opportunity=True
+        has_opportunity=True,
     )
 
     # Require modification, which will move it back to the start state
-    payload = build_process_workflow_request("receive_budget_officer_approval", workflow, ApprovalResponseType.REQUIRES_MODIFICATION, comment="fix it")
+    payload = build_process_workflow_request(
+        "receive_budget_officer_approval",
+        workflow,
+        ApprovalResponseType.REQUIRES_MODIFICATION,
+        comment="fix it",
+    )
     first_event_id = send_event_and_process(client, app, payload, internal_send_user_jwt)
 
     db_session.refresh(workflow)
@@ -195,7 +231,9 @@ def test_can_move_basic_test_workflow_start_to_requires_modification_and_then_to
     assert workflow.is_active is True
 
     # Finally do an actual approval
-    payload = build_process_workflow_request("receive_budget_officer_approval", workflow, ApprovalResponseType.APPROVED)
+    payload = build_process_workflow_request(
+        "receive_budget_officer_approval", workflow, ApprovalResponseType.APPROVED
+    )
     fourth_event_id = send_event_and_process(client, app, payload, internal_send_user_jwt)
 
     db_session.refresh(workflow)
@@ -255,7 +293,9 @@ def test_can_move_basic_test_workflow_start_to_requires_modification_and_then_to
     assert workflow_approvals[0].is_still_valid is False
     assert workflow_approvals[0].approving_user_id == internal_send_user.user_id
     assert workflow_approvals[0].comment == "fix it"
-    assert workflow_approvals[0].approval_response_type == ApprovalResponseType.REQUIRES_MODIFICATION
+    assert (
+        workflow_approvals[0].approval_response_type == ApprovalResponseType.REQUIRES_MODIFICATION
+    )
 
     assert str(workflow_approvals[1].event_id) == fourth_event_id
     assert workflow_approvals[1].approval_type == ApprovalType.BUDGET_OFFICER_APPROVAL
@@ -263,4 +303,3 @@ def test_can_move_basic_test_workflow_start_to_requires_modification_and_then_to
     assert workflow_approvals[1].approving_user_id == internal_send_user.user_id
     assert workflow_approvals[1].comment is None
     assert workflow_approvals[1].approval_response_type == ApprovalResponseType.APPROVED
-
