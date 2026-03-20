@@ -4,7 +4,7 @@ Feature: Opportunity page
   So I can read the page and open Grants.gov
 
   Background:
-    Given I open the Opportunity page for the configured test opportunity ID
+    Given I open the Opportunity page with a valid opportunity ID
 
   Scenario: Show the page title
     Then the page title should start with "Opportunity Listing -"
