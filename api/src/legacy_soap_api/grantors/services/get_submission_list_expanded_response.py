@@ -22,14 +22,14 @@ from src.legacy_soap_api.legacy_soap_api_utils import convert_bool_to_yes_no
 from src.util.datetime_util import adjust_timezone
 
 logger = logging.getLogger(__name__)
-
+AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS = "Agency Tracking Number Assigned"
+RECEIVED_BY_AGENCY_STATUS = "Received by Agency"
 GRANTS_APPLICATION_STATUSES = {
     None: None,
     ApplicationStatus.IN_PROGRESS: None,
     ApplicationStatus.SUBMITTED: "Received",
     ApplicationStatus.ACCEPTED: "Validated",
 }
-# TODO - this will require new statuses, we will need to adjust this later (2025-12-18)
 STATUS_TRANSFORM = {
     "Receiving": None,
     "Received": None,
@@ -37,9 +37,18 @@ STATUS_TRANSFORM = {
     "Validated": ApplicationStatus.ACCEPTED,
     "Rejected with Errors": None,
     "Download Preparation": None,
-    "Received by Agency": ApplicationStatus.ACCEPTED,
-    "Agency Tracking Number Assigned": ApplicationStatus.ACCEPTED,
 }
+
+
+def get_grants_gov_application_status(submission: ApplicationSubmission) -> str | None:
+    grants_gov_application_status = GRANTS_APPLICATION_STATUSES.get(
+        submission.application.application_status
+    )
+    if len(submission.application_submission_tracking_numbers) > 0:
+        grants_gov_application_status = AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS
+    elif len(submission.application_submission_retrievals) > 0:
+        grants_gov_application_status = RECEIVED_BY_AGENCY_STATUS
+    return grants_gov_application_status
 
 
 def transform_submission(submission: ApplicationSubmission) -> dict[str, str | datetime | None]:
@@ -51,7 +60,7 @@ def transform_submission(submission: ApplicationSubmission) -> dict[str, str | d
         "FundingOpportunityNumber": opportunity.opportunity_number,
         "CFDANumber": assistance_listing.assistance_listing_number if assistance_listing else None,
         "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
-        "GrantsGovApplicationStatus": GRANTS_APPLICATION_STATUSES[application.application_status],
+        "GrantsGovApplicationStatus": get_grants_gov_application_status(submission),
         "SubmissionTitle": application.application_name,
         "PackageID": competition.legacy_package_id,
         "ns2:ReceivedDateTime": (
@@ -112,9 +121,23 @@ def get_submissions(
             # If more than one status in filter then just return nothing
             if status and len(status) > 1:
                 return []
-            simpler_status = STATUS_TRANSFORM.get(str(status[0])) if status else None
-            if simpler_status:
-                stmt = stmt.where(Application.application_status == simpler_status)
+            elif status[0] == AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS:
+                stmt = stmt.where(
+                    ApplicationSubmission.application_submission_tracking_numbers.any()
+                )
+            elif status[0] == RECEIVED_BY_AGENCY_STATUS:
+                stmt = stmt.where(
+                    ApplicationSubmission.application_submission_retrievals.any(),
+                    ~ApplicationSubmission.application_submission_tracking_numbers.any(),
+                )
+            else:
+                simpler_status = STATUS_TRANSFORM.get(str(status[0]))
+                if simpler_status:
+                    stmt = stmt.where(
+                        ~ApplicationSubmission.application_submission_retrievals.any(),
+                        ~ApplicationSubmission.application_submission_tracking_numbers.any(),
+                        Application.application_status == simpler_status,
+                    )
         # Each one of these filters is Last One Wins so if multiple of the same type are entered the last one is the only one that matters
         if grants_gov_tracking_numbers := submission_filters.get("GrantsGovTrackingNumber"):
             stmt = stmt.where(
