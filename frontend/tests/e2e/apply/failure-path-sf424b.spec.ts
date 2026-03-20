@@ -14,19 +14,14 @@ import {
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-import { SF424B_FORM_MATCHER } from "./fixtures/sf424b-field-definitions";
+import {
+  SF424B_FORM_MATCHER,
+  SF424B_REQUIRED_FIELD_ERRORS,
+} from "./fixtures/sf424b-field-definitions";
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
-
-const sf424bErrors = [
-  { fieldId: "title", message: "Title is required" },
-  {
-    fieldId: "applicant_organization",
-    message: "Applicant Organization is required",
-  },
-];
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
@@ -62,7 +57,11 @@ test("SF-424B error validation - required fields and inline errors", async ({
   await saveForm(page, true); // expect validation errors
 
   // Checks error alert list at top of form page and inline field errors
-  await verifyFormStatusAfterSave(page, "incomplete", sf424bErrors);
+  await verifyFormStatusAfterSave(
+    page,
+    "incomplete",
+    SF424B_REQUIRED_FIELD_ERRORS,
+  );
 
   // On application page — verify form row shows "Some issues found"
   await verifyFormStatusOnApplication(

@@ -1,6 +1,8 @@
 import { Page, TestInfo, type Locator } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
 
+import { getFormLink } from "./form-navigation-utils";
+
 export interface FillFieldDefinition {
   testId?: string;
   selector?: string;
@@ -127,19 +129,6 @@ export async function fillForm(
     });
     throw error;
   }
-}
-
-/**
- * Gets a form link element by matching form name text.
- * Matches against anchor and button elements using a case-insensitive regex.
- * @param page Playwright Page object
- * @param formName Form name or pipe-separated pattern to match (e.g. "SF-424B|Assurances for Non-Construction Programs")
- * @returns Locator for the matching form link or button
- */
-export function getFormLink(page: Page, formName: string): Locator {
-  return page.locator("a, button").filter({
-    hasText: new RegExp(formName, "i"),
-  });
 }
 
 /**
