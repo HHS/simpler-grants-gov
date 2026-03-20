@@ -78,7 +78,9 @@ def get_agency(db_session, agency_code):
     if not agency_code:
         submission = db_session.execute(select(ApplicationSubmission)).scalars().first()
         if not submission:
-            raise Exception("No valid submissions available")
+            raise click.ClickException(
+                "No Submissions not found. Run `make db-seed-local-with-agencies` first."
+            )
         agency_code = (
             agency_code
             if agency_code
@@ -125,6 +127,10 @@ def _build_legacy_certificate_and_submission(
     serial_number = hex(cert.serial_number).lower().lstrip("0x")
 
     agency = get_agency(db_session, agency_code)
+    if not agency:
+        raise click.ClickException(
+            f"Agency '{agency_code}' not found. Run `make db-seed-local-with-agencies` first."
+        )
     get_or_create_legacy_certificate(db_session, agency, serial_number)
     db_session.commit()
 
@@ -151,11 +157,11 @@ def _build_legacy_certificate_and_submission(
 @click.option(
     "--dir-path",
     required=True,
-    help="Directory path for the certificte and key file",
+    help="Directory path for the certificate and key file",
 )
 @click.option(
     "--agency-code",
-    help="Agency code to use ('DOD' is default)",
+    help="Agency code to use (defaults to agency of first submission it can find)",
 )
 def seed_local_soap_certificate(dir_path: str, agency_code: str | None = None) -> None:
     with src.logging.init("seed_local_soap_certificate"):
