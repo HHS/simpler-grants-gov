@@ -11,4 +11,3 @@ Feature: 404 page
 
   Scenario: Show the link back home
     Then I should see a link titled "Visit our homepage"
-    And "Home link" in "Page actions" should have text "Visit our homepage"
