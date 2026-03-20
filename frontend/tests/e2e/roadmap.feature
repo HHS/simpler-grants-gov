@@ -1,6 +1,6 @@
 Feature: Roadmap page
   As a visitor
-  I want the roadmap to work across devices
+  I want the roadmap page to work across devices
   So I can navigate and find deliverables
 
   Background:
