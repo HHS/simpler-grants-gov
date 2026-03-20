@@ -1,4 +1,4 @@
-import { Page, TestInfo, type Locator } from "@playwright/test";
+import { Page, TestInfo } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
 
 import { getFormLink } from "./form-navigation-utils";

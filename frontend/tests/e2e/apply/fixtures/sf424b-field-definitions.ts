@@ -7,10 +7,6 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 export const SF424B_FORM_MATCHER =
   "SF\\s*[-‑–—]?\\s*424B|Assurances\\s+for\\s+Non\\s*[-‑–—]?\\s*Construction\\s+Programs";
 
-// Uses regex matcher tolerant of hyphen/dash variants for SF-424B, to be compatible with both local and staging.
-export const SF424B_FORM_MATCHER =
-  "SF\\s*[-‑–—]?\\s*424B|Assurances\\s+for\\s+Non\\s*[-‑–—]?\\s*Construction\\s+Programs";
-
 export const fieldDefinitionsSF424B: FormFillFieldDefinitions = {
   title: {
     testId: "title",
