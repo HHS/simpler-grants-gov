@@ -239,6 +239,62 @@ describe("AwardRecommendationEditPage", () => {
       expect(screen.queryByText("selectionMethod")).not.toBeInTheDocument();
       expect(screen.queryByText("Merit Review")).not.toBeInTheDocument();
     });
+
+    it("renders the recommendation section on edit page", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("recommendationMethod.label"),
+      ).toBeVisible();
+    });
+
+    it("displays recommendation method radio buttons", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("recommendationMethod.label"),
+      ).toBeVisible();
+      expect(
+        screen.getByLabelText("recommendationMethod.meritReviewOnly"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText("recommendationMethod.meritReviewOther"),
+      ).toBeInTheDocument();
+    });
+
+    it("displays recommendation method details textarea", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("recommendationMethodDetails.label"),
+      ).toBeVisible();
+      const textarea = screen.getByTestId("award-selection-details-textarea");
+      expect(textarea).toHaveAttribute("id", "award_selection_details");
+      expect(textarea).toHaveAttribute("name", "award_selection_details");
+    });
+
+    it("displays other key information textarea in recommendation section", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("otherKeyInformation.label"),
+      ).toBeVisible();
+      const textarea = screen.getByTestId("other-key-information-textarea");
+      expect(textarea).toHaveAttribute("id", "other_key_information");
+      expect(textarea).toHaveAttribute("name", "other_key_information");
+    });
   });
 
   describe("when feature flag is disabled", () => {
