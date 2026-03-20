@@ -15,7 +15,7 @@ coverage.*
 /tests/validate_legacy_soap_api/cache/*
 !/tests/validate_legacy_soap_api/cache/__init__.py
 !/tests/lib/cache/__init__.py
-/cert_cache/*
+/cert_cache_dump/*
 
 # Python virtual environments
 .venv

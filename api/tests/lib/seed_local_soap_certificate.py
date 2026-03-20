@@ -147,7 +147,7 @@ def _build_legacy_certificate_and_submission(
 # in order to hit the locally running instance
 # the command looks like
 # `make seed-local-soap-certificate DIR_PATH="~/test/cache/"`
-# dir_path defaults to test_cache dir that is in gitignore
+# dir_path defaults to cert_cache_dump dir that is in gitignore
 @click.command()
 @click.option(
     "--dir-path",
@@ -163,7 +163,7 @@ def seed_local_soap_certificate(dir_path: str | None, agency_code: str | None = 
         logger.info("Running seed script for local soap certificate testing")
         db_client = db.PostgresDBClient()
         with db_client.get_session() as db_session:
-            dir_path = dir_path if dir_path else "test_cache"
+            dir_path = dir_path if dir_path else "cert_cache_dump"
             directory = Path(dir_path)
             directory.mkdir(parents=True, exist_ok=True)
             factories._db_session = db_session
