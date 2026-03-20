@@ -234,7 +234,7 @@ def transform_opportunity_summary(
             legacy_opportunity_id=source_summary.opportunity_id,
         )
 
-    # Fields in all 4 source tables
+    # Fields in both source tables
     target_summary.version_number = source_summary.version_nbr
     target_summary.is_cost_sharing = convert_yn_bool(source_summary.cost_sharing)
     target_summary.post_date = source_summary.posting_date
@@ -275,6 +275,22 @@ def transform_opportunity_summary(
         source_summary, "est_project_start_date", None
     )
     target_summary.fiscal_year = getattr(source_summary, "fiscal_year", None)
+
+    # Grants.gov stores agency contact information differently for forecasts
+    # Rather than a single field, they have 2 and when they go to display it
+    # they put both of them. To keep things simpler, we'll put those two together
+    # here. If they're both null, we'll have an empty string.
+    if source_summary.is_forecast:
+        agency_name = getattr(source_summary, "ac_name", None)
+        agency_phone = getattr(source_summary, "ac_phone", None)
+
+        values = []
+        if agency_name is not None:
+            values.append(agency_name)
+        if agency_phone is not None:
+            values.append(agency_phone)
+
+        target_summary.agency_contact_description = "\n".join(values)
 
     transform_update_create_timestamp(source_summary, target_summary, log_extra=log_extra)
 
