@@ -37,6 +37,14 @@ export interface FormsFixtureData {
   fields: FillFieldDefinition[];
 }
 
+/**
+ * Determines whether a radio button or checkbox field should be activated (checked/selected) during form filling.
+ *
+ * Usage:
+ * - Used in form automation to decide if a radio or checkbox should be interacted with, based on the provided data value.
+ * - Returns true if the data is boolean true, or a string that is not undefined and not equal to "false" (case-insensitive).
+ * - Returns false for boolean false, undefined, or the string "false".
+ */
 function shouldActivateField(data: string | boolean | undefined): boolean {
   if (typeof data === "boolean") {
     return data;
@@ -111,9 +119,13 @@ export async function fillField(
       const locator = page.getByRole("button", { name: field.buttonName });
       await locator.waitFor({ state: "visible", timeout: 5000 });
 
+
+      // Always expect either an absolute path or just a file name (relative to a specific directory)
+      // If not absolute, resolve using a hardcoded directory for test files
+      const TEST_FILES_DIR = path.resolve(__dirname, "../../../../tests/e2e/test-files");
       const absolutePath = path.isAbsolute(data)
         ? data
-        : path.resolve(__dirname, "../../../../", data);
+        : path.join(TEST_FILES_DIR, data);
       await locator.setInputFiles(absolutePath);
 
       await page.waitForLoadState("load", { timeout: 15000 });
