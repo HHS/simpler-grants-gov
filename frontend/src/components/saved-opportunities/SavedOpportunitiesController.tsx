@@ -91,14 +91,14 @@ export function SavedOpportunitiesController({
     );
   }, [selectedOpportunity]);
 
-  const handleShareClick = (
-    opportunity: BaseOpportunity,
-    buttonElement: HTMLButtonElement,
-  ) => {
-    lastShareButtonRef.current = buttonElement;
-    setSelectedOpportunityId(opportunity.opportunity_id);
-    setShouldOpenModal(true);
-  };
+  // const handleShareClick = (
+  //   opportunity: BaseOpportunity,
+  //   buttonElement: HTMLButtonElement,
+  // ) => {
+  //   lastShareButtonRef.current = buttonElement;
+  //   setSelectedOpportunityId(opportunity.opportunity_id);
+  //   setShouldOpenModal(true);
+  // };
 
   const handleSavedOrganizationsChange = (organizationIds: Set<string>) => {
     if (!selectedOpportunityId) {
@@ -132,9 +132,9 @@ export function SavedOpportunitiesController({
               opportunity={opportunity}
               saved={true}
               index={index}
-              onShareClick={(buttonElement: HTMLButtonElement) =>
-                handleShareClick(opportunity, buttonElement)
-              }
+              // onShareClick={(buttonElement: HTMLButtonElement) =>
+              //   handleShareClick(opportunity, buttonElement)
+              // }
             />
           </li>
         ))}
