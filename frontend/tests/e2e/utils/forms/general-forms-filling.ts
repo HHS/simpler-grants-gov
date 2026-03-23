@@ -126,20 +126,9 @@ export async function fillField(
       const locator = page.getByRole("button", { name: field.buttonName });
       await locator.waitFor({ state: "visible", timeout: 5000 });
 
-      // // Always expect either an absolute path or just a file name (relative to a specific directory)
-      // // If not absolute, resolve using a relative directory for test-upload-files
-      // const TEST_FILES_DIR = path.resolve(
-      //   __dirname,
-      //   // "../../../test-upload-files",
-      //   "frontend/tests/e2e/test-upload-files",
-      // );
-      // // Always use only the filename for relative paths to avoid accidental nested paths
-      // const fileName = path.basename(data);
-      // const absolutePath = path.isAbsolute(data)
-      //   ? data
-      //   : path.join(TEST_FILES_DIR, fileName);
-
-      const absolutePath = path.isAbsolute(data) ? data : path.join("frontend/tests/e2e/test-upload-files", data);
+      const absolutePath = path.isAbsolute(data)
+        ? data
+        : path.resolve(__dirname, "../../../test-upload-files");
       await locator.setInputFiles(absolutePath);
 
       await page.waitForLoadState("load", { timeout: 15000 });
