@@ -4,7 +4,9 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { opportunityId } from "tests/e2e/get-opportunityId-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
+import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
@@ -14,32 +16,38 @@ import { SF424_FORM_CONFIG } from "./fixtures/sf424-field-definitions";
 import { sf424HappyPathTestData } from "./fixtures/sf424-fill-data";
 
 const { testOrgLabel } = playwrightEnv;
-const OPPORTUNITY_ID = "c3c59562-a54f-4203-b0f6-98f2f0383481";
-const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
-test("Application form completion happy path - SF424", async ({
-  page,
-  context,
-}: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
-  test.setTimeout(300_000); // 5 min timeout
+const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 
-  const isMobile = testInfo.project.name.match(/[Mm]obile/);
+const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
 
-  await authenticateE2eUser(page, context, !!isMobile);
+test(
+  "Application form completion happy path - SF424",
+  { tag: [APPLY, CORE_REGRESSION] },
+  async (
+    { page, context }: { page: Page; context: BrowserContext },
+    testInfo: TestInfo,
+  ) => {
+    test.setTimeout(300_000); // 5 min timeout
 
-  // Call reusable create application function from utils
-  await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
+    const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
-  await fillForm(
-    testInfo,
-    page,
-    SF424_FORM_CONFIG,
-    sf424HappyPathTestData,
-    false,
-  );
+    await authenticateE2eUser(page, context, !!isMobile);
 
-  await page.waitForTimeout(2000);
+    // Call reusable create application function from utils
+    await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
-  // Verify form status after save
-  await verifyFormStatusAfterSave(page, "complete");
-});
+    await fillForm(
+      testInfo,
+      page,
+      SF424_FORM_CONFIG,
+      sf424HappyPathTestData,
+      false,
+    );
+
+    await page.waitForTimeout(2000);
+
+    // Verify form status after save
+    await verifyFormStatusAfterSave(page, "complete");
+  },
+);
