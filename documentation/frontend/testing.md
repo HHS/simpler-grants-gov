@@ -16,6 +16,25 @@ Using this function, tests should work automatically in CI, but they will requir
 - copy the token variable declaration from the e2e_token.tmp file into your frontend .env.local file
 - that's it! Running e2e tests using the functionality mentioned above should now work locally
 
+### Test groups
+
+In order to run a subset of e2e tests in different scenarios, supporting running smaller targeted test runs in PR environments for example, each test is assigned tags that mark them as members of testing groups. These testing groups are then referenced in test related jobs in Github actions to ensure that all functionality is tested at the right times, and that we are not testing less critical behavior more than is necessary.
+
+There are two types of tags used in our grouping scheme - feature tags & execution tags. Execution tags determine the main cadence a test will run on, and feature tags can be used for more manually targeted test runs or for other identification purposes.
+
+_All_ tests should be assigned exactly _one_ execution tag, and any number of feature tags.
+
+Only defined test groups should be used, and the decision to create a new group should be made by only with approval from the testing and feature teams. [Current groups are defined here]().
+
+Current testing cadences are defined as:
+
+| Test group       | Cadence                             | Environment(s) |
+| ---------------- | ----------------------------------- | -------------- |
+| @smoke           | All PRs                             | local          |
+| @core-regression | Merge to main, Deploy to production | local, staging |
+| @full-regression | Daily                               | local, staging |
+| @extended        | Weekly                              | local, staging |
+
 ## Unit testing
 
 - We use Jest and testing-library for our unit testing
