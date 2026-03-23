@@ -3,9 +3,16 @@ from uuid import uuid4
 import pytest
 
 from src.constants.lookup_constants import OrganizationAuditEvent, Privilege
-from src.db.models.user_models import OrganizationUser, OrganizationUserRole, UserSavedOpportunityNotification
+from src.db.models.user_models import (
+    OrganizationUser,
+    OrganizationUserRole,
+    UserSavedOpportunityNotification,
+)
 from tests.lib.organization_test_utils import create_user_in_org, create_user_not_in_org
-from tests.src.db.models.factories import OrganizationFactory, UserSavedOpportunityNotificationFactory
+from tests.src.db.models.factories import (
+    OrganizationFactory,
+    UserSavedOpportunityNotificationFactory,
+)
 
 
 class TestRemoveUserFromOrganization:
