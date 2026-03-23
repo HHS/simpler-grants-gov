@@ -126,10 +126,12 @@ export async function fillField(
       const locator = page.getByRole("button", { name: field.buttonName });
       await locator.waitFor({ state: "visible", timeout: 5000 });
 
-
       // Always expect either an absolute path or just a file name (relative to a specific directory)
       // If not absolute, resolve using a hardcoded directory for test files
-      const TEST_FILES_DIR = path.resolve(__dirname, "../../../../tests/e2e/test-files");
+      const TEST_FILES_DIR = path.resolve(
+        __dirname,
+        "../../../../tests/e2e/test-files",
+      );
       const absolutePath = path.isAbsolute(data)
         ? data
         : path.join(TEST_FILES_DIR, data);
