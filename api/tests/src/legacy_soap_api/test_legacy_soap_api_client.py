@@ -631,7 +631,7 @@ class TestSimplerSOAPGetApplicationZip:
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
         response = client.get_simpler_soap_response(mock_proxy_response)
-        grants_gov_tracking_number = FAKE_GRANTS_GOV_TRACKING_NUMBER.split("GRANT")[1]
+        grants_gov_tracking_number = FAKE_GRANTS_GOV_TRACKING_NUMBER
         msg = f"Unable to find submission legacy_tracking_number {grants_gov_tracking_number}."
         assert msg in caplog.messages
         assert response.data == mock_proxy_response.data
