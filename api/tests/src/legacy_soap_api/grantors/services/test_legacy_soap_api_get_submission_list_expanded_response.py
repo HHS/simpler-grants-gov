@@ -19,10 +19,10 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPInvalidEnvelope,
-    SOAPRequest,
     SoapRequestStreamer,
     SOAPResponse,
 )
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_dict
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (

@@ -17,7 +17,8 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientCertificate,
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SoapRequestStreamer
+from src.legacy_soap_api.legacy_soap_api_schemas import SoapRequestStreamer
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from tests.src.db.models.factories import (
     AgencyFactory,
     AgencyUserFactory,
