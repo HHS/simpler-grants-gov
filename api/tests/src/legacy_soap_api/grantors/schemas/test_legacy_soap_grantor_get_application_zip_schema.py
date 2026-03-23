@@ -7,8 +7,7 @@ import pytest
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
 from src.legacy_soap_api.legacy_soap_api_client import SimplerGrantorsS2SClient
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
-from src.legacy_soap_api.legacy_soap_api_schemas import SoapRequestStreamer
-from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 
 GRANTS_GOV_TRACKING_NUMBER = "GRANT80000000"
