@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import { noop } from "lodash";
 
 import { CreateOpportunityForm } from "src/components/opportunities/create/CreateOpportunityForm";
-import { KeyValuePair } from "./CreateOpportunityFormFields";
 
 const mockUseActionState = jest.fn();
 
@@ -29,10 +28,10 @@ useSearchParams: jest.fn(() => new URLSearchParams()),
 }));
 
 const fakeId = "456-XYZ";
-const fakeAgencies: KeyValuePair[] = [
-    { key: '123-ABC', value: 'Agency Alpha' },
-    { key: '456-XYZ', value: 'Agency Beta' },
-    ];
+const fakeAgencies = {
+    '123-ABC': 'Agency Alpha',
+    '456-XYZ': 'Agency Beta' 
+  };
 
 describe("createOpportunityForm", () => {
   afterEach(() => {
@@ -47,6 +46,7 @@ describe("createOpportunityForm", () => {
     // check that all agencies are in the select options
     expect(screen.getByText('Agency Beta')).toBeInTheDocument();
     expect(screen.getByText('Agency Alpha')).toBeInTheDocument();
+
     // check that the default agency was selected
     const selectedOption = screen.getByRole('option', { name: 'Agency Beta', selected: true });
     expect(selectedOption).toBeInTheDocument();

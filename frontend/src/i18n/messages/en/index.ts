@@ -1930,7 +1930,7 @@ export const messages = {
         'If "Other" was selected, please describe the specific process used to evaluate and award these funds.',
       charactersAllowed40: "40 characters allowed",
       charactersAllowed255: "255 characters allowed",
-      successMessage: "Opportunity started. Please wait; continuing shortly...",
+      successMessage: "Opportunity started. Continuing shortly...",
     },
   },
   CommonLabels: {

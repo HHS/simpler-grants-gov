@@ -131,7 +131,7 @@ export const CommonTextArea = ({
   fieldId: string;
   isRequired: boolean;
   fieldMaxLength: number;
-  onTextChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   defaultValue?: string;
   validationError?: string;
 }) => {
@@ -147,7 +147,6 @@ export const CommonTextArea = ({
           validationError={validationError}
         />
         <Textarea
-          type="text"
           name={fieldId}
           id={fieldId}
           onChange={onTextChange}
@@ -163,10 +162,6 @@ export const CommonTextArea = ({
 // ----------------------------------------------------------
 // Common Select input with error block
 // ----------------------------------------------------------
-export interface KeyValuePair {
-  key: string;
-  value: string;
-}
 export const CommonSelectInput = ({
   labelId,
   labelText,
@@ -184,7 +179,7 @@ export const CommonSelectInput = ({
   description: string;
   fieldId: string;
   isRequired: boolean;
-  listKeyValuePairs: KeyValuePair[];
+  listKeyValuePairs: { [key: string]: string };
   defaultSelection?: string; // optional: default selection key
   pleaseSelectText?: string; // optional: e.g. --Please Select--
   onSelectionChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
@@ -224,9 +219,9 @@ export const CommonSelectInput = ({
           </option>
 
           {/* List of options */}
-          {listKeyValuePairs.map((item) => (
-            <option key={item.key} value={item.key}>
-              {item.value}
+          {Object.entries(listKeyValuePairs).map(([key, value]) => (
+            <option key={key} value={key}>
+              {value}
             </option>
           ))}
         </Select>

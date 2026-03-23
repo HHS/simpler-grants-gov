@@ -12,17 +12,16 @@ import {
   CommonText,
   CommonTextArea,
   CommonTextInput,
-  KeyValuePair,
-} from "./CreateOpportunityFormFields";
+} from "src/components/grantor/CommonFormFields";
 
 // Category options
-const categoryList: KeyValuePair[] = [
-  { key: "discretionary", value: "Discretionary" },
-  { key: "mandatory", value: "Mandatory" },
-  { key: "continuation", value: "Continuation" },
-  { key: "earmark", value: "Earmark" },
-  { key: "other", value: "Other" },
-];
+const categoryList = {
+  "discretionary": "Discretionary",
+  "mandatory": "Mandatory",
+  "continuation": "Continuation",
+  "earmark": "Earmark",
+  "other": "Other",
+};
 
 // ----- Main Form -----
 export function CreateOpportunityForm({
@@ -30,11 +29,19 @@ export function CreateOpportunityForm({
   userAgencies,
 }: {
   defaultAgencyId: string;
-  userAgencies: KeyValuePair[];
+  userAgencies: { [key: string]: string };
 }) {
   const t = useTranslations("CreateOpportunity.CreateOpportunityForm");
   const tg = useTranslations("CommonLabels");
   const th = useTranslations("CreateOpportunity");
+
+  // Define states for required fields and flags to show/hide or enable/disable components
+  const [selectedAgencyId, setAgencyId] = useState<string>(defaultAgencyId);
+  const [opportunityNumber, setOppNbr] = useState<string>("");
+  const [opportunityTitle, setOppTitle] = useState<string>("");
+  const [selectedCategoryId, setCategory] = useState<string>("");
+  const [categoryExplanation, setExplain] = useState<string>("");
+  const [showExplain, setShowExplain] = useState<boolean>(false);
   const [disableSave, setDisableSave] = useState<boolean>(true);
 
   const [response, formAction, isPending] = useActionState(createOpportunityAction, {
@@ -52,84 +59,54 @@ export function CreateOpportunityForm({
     // If success, redirect to Opportunity List page
     if (response?.success) {
       router.push("/opportunities");
+    } else {
+      setDisableSave(true);
+      if (selectedCategoryId.trim() !== 'other') {
+        setExplain('');   // need to manually set this for checks below to work correctly
+      }
     }
   }, [response, router]);
 
-  // Variables to store the form field values. Needed in order to check
-  // required fields (on individual field value change) to enable the Save button.
-  let opportunityNumber = "";
-  let opportunityTitle = "";
-  let selectedAgencyId = defaultAgencyId;
-  let selectedCategoryId = "";
-  let categoryExplanation = "";
-
-  // Form fields that we will need to check -- NOTE: this only sets the fields after
-  // code execution, i.e. on DOM refresh
-  // const [selectedAgencyId, setAgencyId] = useState<string>(defaultAgencyId);
-  // const [opportunityNumber, setOppNbr] = useState<string>("");
-  // const [opportunityTitle, setOppTitle] = useState<string>("");
-  // const [selectedCategoryId, setCategory] = useState<string>("");
-  // const [category_explanation, setExplain] = useState<string>("");
-
-  // Category: if Other then show the Explanation field
-  const [showExplain, setShowExplain] = useState<boolean>(false);
-  const onCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    // console.log("DEBUG: e.target.value is ", e.target.value);
-    // setCategory(e.target.value);
-    selectedCategoryId = e.target.value;
-    // console.log("DEBUG: category is ", selectedCategoryId);   // is still old value w/ useState()
-    checkRequiredFields();
-    if (selectedCategoryId === "other") {
+  // Use useEffect to check fields when inputs change
+  useEffect(() => {
+    // Category: if Other then show the Explanation field
+    if (selectedCategoryId.trim() === 'other') {
       setShowExplain(true);
     } else {
       setShowExplain(false);
     }
-  };
+    // Check for required fields to enable the Save button
+    const allReqFieldsFilled = 
+      opportunityNumber.trim() !== '' &&  
+      opportunityTitle.trim() !== '' && 
+      selectedAgencyId.trim() !== '' &&
+      ( (selectedCategoryId.trim() !== '' && selectedCategoryId.trim() !== 'other') ||
+      (selectedCategoryId.trim() === 'other' && categoryExplanation.trim() !== '') )
+    ;
+    setDisableSave(!allReqFieldsFilled);
+  },  // Dependencies: run whenever these fields change
+      [opportunityNumber, 
+      opportunityTitle, 
+      selectedAgencyId, 
+      selectedCategoryId, 
+      categoryExplanation]
+  ); 
 
-  // Check required fields to enable the Save button
-  // const [disableSave, setDisableSave] = useState<boolean>(true);
-  const checkRequiredFields = () => {
-    if (
-      opportunityNumber.trim().length === 0 ||
-      opportunityTitle.trim().length === 0 ||
-      selectedCategoryId === "" ||
-      selectedAgencyId === ""
-    ) {
-      setDisableSave(true);
-      return;
-    }
-    // if Category is 'Other' then an Explanation is required
-    if (
-      selectedCategoryId === "other" &&
-      categoryExplanation.trim().length === 0
-    ) {
-      setDisableSave(true);
-      return;
-    }
-    // console.log('checkRequiredFields: All requirements met');
-    setDisableSave(false);
+  // Update state on change
+  const onCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCategory(e.target.value);
   };
-
-  // Save values as the user inputs the fields & check for required fields
   const onOppNbrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // setOppNbr(e.target.value);
-    opportunityNumber = e.target.value;
-    checkRequiredFields();
+    setOppNbr(e.target.value);
   };
-  const onOppTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // setOppTitle(e.target.value);
-    opportunityTitle = e.target.value;
-    checkRequiredFields();
+  const onOppTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setOppTitle(e.target.value);
   };
   const onAgencySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    // setAgencyId(e.target.value);
-    selectedAgencyId = e.target.value;
-    checkRequiredFields();
+    setAgencyId(e.target.value);
   };
-  const onExplanationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // setExplain(e.target.value);
-    categoryExplanation = e.target.value;
-    checkRequiredFields();
+  const onExplanationChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setExplain(e.target.value);
   };
 
   // Display the form

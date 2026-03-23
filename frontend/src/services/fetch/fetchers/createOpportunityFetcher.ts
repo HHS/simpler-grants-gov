@@ -2,25 +2,19 @@
 
 import { fetchGrantorWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { CreateOpportunityRecord } from "src/types/grantor/createOpportunityTypes";
+import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 
-export const handleCreateOpportunity = async (
-  type: "POST", // "POST" | "PUT" | "DELETE"
+export const createOpportunity = async (
   token: string,
-  createOppSchema: CreateOpportunityRecord,
-  opportunityId?: string,
+  createOppSchema: JSONRequestBody,
 ): Promise<CreateOpportunityRecord> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
-  const subPath =
-    type === "POST" ? `opportunities` : `opportunities/${opportunityId}`; // for select, update and delete
-
-  const body = type === "POST" || type === "PUT" ? createOppSchema : {}; // for select and delete
-
-  const response = await fetchGrantorWithMethod(type)({
-    subPath,
+  const response = await fetchGrantorWithMethod("POST")({
+    subPath: `opportunities`,
     additionalHeaders: ssgToken,
-    body,
+    body: createOppSchema,
   });
   const json = (await response.json()) as { data: CreateOpportunityRecord };
   return json.data;

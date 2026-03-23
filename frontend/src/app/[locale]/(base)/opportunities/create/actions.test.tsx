@@ -2,7 +2,7 @@ import { identity } from "lodash";
 import { createOpportunityAction } from "src/app/[locale]/(base)/opportunities/create/[agencyId]/actions";
 
 const getSessionMock = jest.fn();
-const mockHandleCreateOpportunity = jest.fn();
+const mockCreateOpportunity = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
@@ -13,8 +13,8 @@ jest.mock("next-intl/server", () => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/createOpportunityFetcher", () => ({
-  handleCreateOpportunity: (type: "POST", token: unknown, createOppSchema: unknown) =>
-    mockHandleCreateOpportunity(type, token, createOppSchema) as unknown,
+  createOpportunity: (token: unknown, createOppSchema: unknown) =>
+    mockCreateOpportunity(token, createOppSchema) as unknown,
 }));
 
 describe("create opportunity form action", () => {
@@ -28,8 +28,8 @@ describe("create opportunity form action", () => {
     expect(result.errorMessage).toEqual("Not logged in");
   });
   it("returns result of create success", async () => {
-    getSessionMock.mockResolvedValue({ type: "POST", token: "logged in", user_id: "1" });
-    mockHandleCreateOpportunity.mockImplementation((_type, _token, data) => {
+    getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
+    mockCreateOpportunity.mockImplementation((_token, data) => {
       return data as unknown;
     });
 
@@ -49,8 +49,8 @@ describe("create opportunity form action", () => {
     });
   });
   it("returns result of create success with category explanation", async () => {
-    getSessionMock.mockResolvedValue({ type: "POST", token: "logged in", user_id: "1" });
-    mockHandleCreateOpportunity.mockImplementation((_type, _token, data) => {
+    getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
+    mockCreateOpportunity.mockImplementation((_token, data) => {
       return data as unknown;
     });
 
@@ -71,8 +71,8 @@ describe("create opportunity form action", () => {
     });
   });
   it("returns API error when applicable", async () => {
-    getSessionMock.mockResolvedValue({ type: "POST", token: "logged in", user_id: "1" });
-    mockHandleCreateOpportunity.mockRejectedValue(new Error("fake error"));
+    getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
+    mockCreateOpportunity.mockRejectedValue(new Error("fake error"));
 
     const createFormData = new FormData();
     createFormData.append("agencyId", "ABC-123-EFG-456");

@@ -1,9 +1,9 @@
-import { handleCreateOpportunity } from "src/services/fetch/fetchers/createOpportunityFetcher";
+import { createOpportunity } from "src/services/fetch/fetchers/createOpportunityFetcher";
 import { fetchGrantorWithMethod } from "src/services/fetch/fetchers/fetchers";
 
 jest.mock("src/services/fetch/fetchers/fetchers");
 
-describe("handleCreateOpportunity", () => {
+describe("createOpportunity", () => {
   let mockJsonFn: jest.Mock;
 
   beforeEach(() => {
@@ -16,7 +16,6 @@ describe("handleCreateOpportunity", () => {
   });
 
   it("should start application with all parameters", async () => {
-    const type = "POST";
     const token = "test-token";
     const createOppSchema = {
         agency_id: "123-ABC-456-DEF",
@@ -31,8 +30,7 @@ describe("handleCreateOpportunity", () => {
     };
     mockJsonFn.mockResolvedValue(expectedResponse);
 
-    const result = await handleCreateOpportunity(
-      type,
+    const result = await createOpportunity(
       token,
       createOppSchema,
     );
@@ -49,7 +47,6 @@ describe("handleCreateOpportunity", () => {
   });
 
   it("should return validation error response with 422 status", async () => {
-    const type = "POST";
     const token = "test-token";
     const createOppSchema = {
         agency_id: "123-ABC-456-DEF",
@@ -66,7 +63,7 @@ describe("handleCreateOpportunity", () => {
     };
     mockJsonFn.mockResolvedValue(expectedResponse);
 
-    const result = await handleCreateOpportunity(type, token, createOppSchema, );
+    const result = await createOpportunity(token, createOppSchema, );
 
     expect(result).toEqual(errMsg);
   });

@@ -6,7 +6,6 @@ import Breadcrumbs from "src/components/Breadcrumbs";
 import { fetchUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { CreateOpportunityForm } from "src/components/opportunities/create/CreateOpportunityForm";
-import { KeyValuePair } from "src/components/opportunities/create/CreateOpportunityFormFields";
 
 import { useTranslations } from "next-intl";
 import { redirect } from "next/navigation";
@@ -63,10 +62,10 @@ const PageHeader = () => {
 
 
 // --- Main Page ---
-interface formPageProps {
+type FormPageProps = {
   params: Promise<{ agencyId: string; locale: string }>;
 }
-async function FormPage({ params }: formPageProps) {
+async function FormPage({ params }: FormPageProps) {
   const { agencyId } = await params;
   const userSession = await getSession();
 
@@ -76,7 +75,6 @@ async function FormPage({ params }: formPageProps) {
   }
 
   // Get agencies
-  let defaultAgencyId = "";
   let userAgencies: RelevantAgencyRecord[];
   try {
     userAgencies = await fetchUserAgencies();
@@ -86,24 +84,15 @@ async function FormPage({ params }: formPageProps) {
     }
     return <PageErrorMessage />;
   }
-  // Agencies: sort alphabetically, convert to key-value pairs, set the default
-  const sortedAgencies = [...userAgencies].sort((a, b) =>
-    a.agency_name.localeCompare(b.agency_name)
-  );
-  const mapAgencyToKeyValuePair = (agency: RelevantAgencyRecord): KeyValuePair => ({
-    key: agency.agency_id.toString(), // Example mapping
-    value: agency.agency_name,
-  });
-  const keyValueList: KeyValuePair[] = sortedAgencies.map(mapAgencyToKeyValuePair);
-  // const keyValueList: KeyValuePair[] = sortedAgencies.map(agency => ({
-  //   key: agency.agency_id,
-  //   value: agency.agency_name,
-  // }));
-  keyValueList.forEach((item) => {
-    if (item.key === agencyId) {
-      defaultAgencyId = agencyId;
-    }
-  })
+  // set the default agency if it's valid
+  const defaultAgency = userAgencies.find((agency) => agency.agency_id.toString() === agencyId);
+  const defaultAgencyId = defaultAgency?.agency_id.toString() ?? "";
+  // convert to key-value list for the combobox
+  type AgencyMap = { [key: string]: string };
+  const mappedAgencies: AgencyMap = userAgencies.reduce((accumulator, agency) => {
+    accumulator[agency.agency_id] = agency.agency_name;
+    return accumulator;
+  }, {} as AgencyMap);
 
   return (
     <>
@@ -111,7 +100,7 @@ async function FormPage({ params }: formPageProps) {
         <PageHeader/>
         <CreateOpportunityForm
           defaultAgencyId={defaultAgencyId}
-          userAgencies={keyValueList}
+          userAgencies={mappedAgencies}
         />
       </GridContainer>
     </>
@@ -120,7 +109,7 @@ async function FormPage({ params }: formPageProps) {
 }
 
 
-export default withFeatureFlag<formPageProps, never>(
+export default withFeatureFlag<FormPageProps, never>(
   FormPage,
   "opportunitiesListOff",
   () => redirect("/maintenance"),

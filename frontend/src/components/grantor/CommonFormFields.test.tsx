@@ -7,8 +7,7 @@ import {
   CommonTextArea,
   CommonTextInput,
   CommonSelectInput,
-  KeyValuePair,
-} from "./CreateOpportunityFormFields";
+} from "./CommonFormFields";
 
 // --- Test Common Text ---
 const commonTextProps = {
@@ -93,39 +92,49 @@ describe("CommonTextInput", () => {
 
 
 // --- Test Common Textarea ---
+let bigTextValue = "";
+const onTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  bigTextValue = e.target.value;
+};
+const commonTextAreaProps = {
+  ...commonLabelProps,
+  fieldMaxLength: 40,
+  defaultValue: textValue,
+  onTextChange: onTextAreaChange,
+};
 describe("CommonTextArea", () => {
   it("Renders the element with maxLength", () => {
-    commonInputProps.defaultValue = "";     // clear the text from reused props
-    render(<CommonTextArea {...commonInputProps} />);
+    commonTextAreaProps.defaultValue = "";     // clear the text from reused props
+    render(<CommonTextArea {...commonTextAreaProps} />);
     const element = screen.getByRole('textbox', { name: "Label for Something" });
     expect(element).toBeInTheDocument();
     expect(element).toHaveAttribute('maxLength', '40');
     expect(element).toHaveValue('');
   });
   it("Renders the element with a default value", () => {
-    commonInputProps.defaultValue = "Prefilled text 2";
-    render(<CommonTextArea {...commonInputProps} />);
+    commonTextAreaProps.defaultValue = "Prefilled text 2";
+    render(<CommonTextArea {...commonTextAreaProps} />);
     const element = screen.getByRole('textbox', { name: "Label for Something" });
     expect(element).toBeInTheDocument();
     expect(element).toHaveValue('Prefilled text 2');
   });
   it("Renders the element and handle onChange", () => {
-    render(<CommonTextArea {...commonInputProps} />);
+    render(<CommonTextArea {...commonTextAreaProps} />);
     const element = screen.getByRole('textbox', { name: "Label for Something" });
     expect(element).toBeInTheDocument();
     // Simulate a change event and test if our variable changed
     fireEvent.change(element, { target: { value: 'Hello World 2' } });
-    expect(textValue).toBe('Hello World 2');
+    expect(bigTextValue).toBe('Hello World 2');
   });
 });  
 
 
 // --- Test Common Select ---
 const fakeId = "456-XYZ";
-const fakeAgencies: KeyValuePair[] = [
-    { key: '123-ABC', value: 'Agency Alpha' },
-    { key: '456-XYZ', value: 'Agency Beta' },
-    ];
+const fakeAgencies = {
+    '123-ABC': 'Agency Alpha',
+    '456-XYZ': 'Agency Beta' 
+  };
 let selectedValue = "";
 const onSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
   selectedValue = e.target.value;
