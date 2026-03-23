@@ -126,10 +126,8 @@ export async function fillField(
       const locator = page.getByRole("button", { name: field.buttonName });
       await locator.waitFor({ state: "visible", timeout: 5000 });
 
-      const absolutePath = path.isAbsolute(data)
-        ? data
-        : path.resolve(__dirname, "../test-upload-files", data);
-      await locator.setInputFiles(absolutePath);
+      const filePath = path.resolve(__dirname, "../../test-upload-files", data);
+      await locator.setInputFiles(filePath);
 
       await page.waitForLoadState("load", { timeout: 15000 });
     } else if (
