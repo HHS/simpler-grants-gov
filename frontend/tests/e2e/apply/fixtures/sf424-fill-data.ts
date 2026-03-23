@@ -50,7 +50,7 @@ export const sf424HappyPathTestData = {
   state_review_available_date: "2026-12-01",
   delinquent_federal_debt: "true",
   debt_explanation_attachment: "tests/e2e/test-upload-files/Test-data.docx",
-  certification_agree: true,
+  certification_agree: "true",
   authorized_representative_prefix: "Prefix 21",
   authorized_representative_first_name: "First Name 21",
   authorized_representative_middle_name: "Mid Name 21",
