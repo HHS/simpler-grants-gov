@@ -42,7 +42,7 @@ export default function SearchResultsListItem({
   saved = false,
   index,
   page = 1,
-  onShareClick,
+  // onShareClick,
 }: SearchResultsListItemProps) {
   const t = useTranslations("Search");
 

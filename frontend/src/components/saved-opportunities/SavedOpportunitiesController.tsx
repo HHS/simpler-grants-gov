@@ -19,7 +19,7 @@ export function SavedOpportunitiesController({
   opportunities,
 }: SavedOpportunitiesControllerProps) {
   const modalRef = useRef<ModalRef>(null);
-  const lastShareButtonRef = useRef<HTMLButtonElement | null>(null);
+  // const lastShareButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const [opportunitiesState, setOpportunitiesState] =
     useState<BaseOpportunity[]>(opportunities);
