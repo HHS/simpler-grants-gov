@@ -1,8 +1,6 @@
 import logging
 from typing import cast
 
-from sqlalchemy import select
-
 import src.adapters.db as db
 from src.auth.endpoint_access_util import can_access
 from src.constants.lookup_constants import ApplicationStatus
@@ -79,18 +77,7 @@ def _assign_agency_tracking_number(
     legacy_tracking_number: str,
     user: User,
 ) -> grantor_schemas.AssignAgencyTrackingNumberResult:
-    existing_tracking_number = (
-        db_session.execute(
-            select(ApplicationSubmissionTrackingNumber).where(
-                ApplicationSubmissionTrackingNumber.application_submission_id
-                == application_submission.application_submission_id,
-            )
-        )
-        .scalars()
-        .first()
-    )
-
-    if existing_tracking_number:
+    if application_submission.application_submission_tracking_numbers:
         logger.info(
             "Agency tracking number has already been assigned.",
             extra={
