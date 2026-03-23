@@ -855,8 +855,10 @@ def user_get_saved_opportunity_notifications(
 @user_blueprint.post("/<uuid:user_id>/saved-opportunities/notifications")
 @user_blueprint.input(SetUserSavedOpportunityNotificationRequestSchema)
 @user_blueprint.output(SetUserSavedOpportunityNotificationResponseSchema)
-@user_blueprint.doc(responses=[200, 401, 403, 404])
-@user_blueprint.auth_required(api_jwt_auth)
+@user_blueprint.doc(
+    responses=[200, 401, 403, 404, 422], security=jwt_or_api_user_key_security_schemes
+)
+@jwt_or_api_user_key_multi_auth.login_required
 @flask_db.with_db_session()
 def user_saved_opportunities_notifications(
     db_session: db.Session, user_id: UUID, json_data: dict
