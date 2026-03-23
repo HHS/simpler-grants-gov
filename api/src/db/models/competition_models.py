@@ -467,6 +467,7 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
         "ApplicationSubmissionRetrieved",
         back_populates="application_submission",
         uselist=True,
+        cascade="all, delete-orphan",
     )
 
     @property

@@ -4,10 +4,12 @@ info:
     Back end API for simpler.grants.gov.
 
 
-    This API is an ALPHA VERSION! Its current form is primarily for testing and feedback.
-    Features are still under heavy development, and subject to change. Not for production
-    use.
+    This API is in active development as we build out new functionalities for Simpler.Grants.gov.
+    It is currently stable for everyday use, and will be versioned with advance notice
+    for any breaking changes.
 
+
+    Learn more in our [API documentation](https://wiki.simpler.grants.gov/product/api).
 
     See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
     for further details.
@@ -348,15 +350,14 @@ paths:
       summary: Opportunity Search
       description: '
 
-        __ALPHA VERSION__
+        This API is in active development as we build out new functionalities for
+        Simpler.Grants.gov.
+
+        It is currently stable for everyday use, and will be versioned with advance
+        notice for any breaking changes.
 
 
-        This endpoint in its current form is primarily for testing and feedback.
-
-
-        Features in this endpoint are still under heavy development, and subject to
-        change. Not for production use.
-
+        Learn more in our [API documentation](https://wiki.simpler.grants.gov/product/api).
 
         See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
         for further details.
@@ -1208,15 +1209,14 @@ paths:
       summary: Opportunity Get
       description: '
 
-        __ALPHA VERSION__
+        This API is in active development as we build out new functionalities for
+        Simpler.Grants.gov.
+
+        It is currently stable for everyday use, and will be versioned with advance
+        notice for any breaking changes.
 
 
-        This endpoint in its current form is primarily for testing and feedback.
-
-
-        Features in this endpoint are still under heavy development, and subject to
-        change. Not for production use.
-
+        Learn more in our [API documentation](https://wiki.simpler.grants.gov/product/api).
 
         See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
         for further details.
@@ -1637,15 +1637,14 @@ paths:
       summary: Opportunity Get Legacy
       description: '
 
-        __ALPHA VERSION__
+        This API is in active development as we build out new functionalities for
+        Simpler.Grants.gov.
+
+        It is currently stable for everyday use, and will be versioned with advance
+        notice for any breaking changes.
 
 
-        This endpoint in its current form is primarily for testing and feedback.
-
-
-        Features in this endpoint are still under heavy development, and subject to
-        change. Not for production use.
-
+        Learn more in our [API documentation](https://wiki.simpler.grants.gov/product/api).
 
         See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
         for further details.
@@ -2512,6 +2511,45 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OpportunitySummaryCreateRequestV1'
+      security:
+      - ApiJwtAuth: []
+      - ApiUserKeyAuth: []
+  /v1/users/{user_id}/saved-opportunities/notifications:
+    get:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSavedOpportunityNotificationsResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: User Get Saved Opportunity Notifications
       security:
       - ApiJwtAuth: []
       - ApiUserKeyAuth: []
@@ -10113,6 +10151,57 @@ components:
           type:
           - object
           $ref: '#/components/schemas/OpportunitySummaryDetail'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    SavedOpportunityNotificationsSelf:
+      type: object
+      properties:
+        email_enabled:
+          type: boolean
+          description: Whether email notifications are enabled for personal saved
+            opportunities
+          example: true
+    SavedOpportunityNotificationsOrg:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+          description: The organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email_enabled:
+          type: boolean
+          description: Whether email notifications are enabled for this organization's
+            saved opportunities
+          example: false
+    SavedOpportunityNotifications:
+      type: object
+      properties:
+        self:
+          description: Personal notification settings for saved opportunities
+          type:
+          - object
+          $ref: '#/components/schemas/SavedOpportunityNotificationsSelf'
+        organizations:
+          type: array
+          description: Notification settings per organization
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SavedOpportunityNotificationsOrg'
+    UserSavedOpportunityNotificationsResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/SavedOpportunityNotifications'
         status_code:
           type: integer
           description: The HTTP status code

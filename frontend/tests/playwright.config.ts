@@ -104,6 +104,7 @@ export default defineConfig({
           url: baseUrl,
           reuseExistingServer: !isCi,
           env: webServerEnv,
+          timeout: 120_000, // default is only 60s and can be too short for cold starts in CI causing webkit failures
         }
       : undefined,
 });

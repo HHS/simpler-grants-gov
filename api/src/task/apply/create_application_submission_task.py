@@ -1,4 +1,6 @@
 import logging
+import secrets
+import string
 import uuid
 import zipfile
 from collections.abc import Sequence
@@ -17,11 +19,18 @@ from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationSta
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
 from src.services.applications.application_audit import add_audit_event
 from src.services.applications.application_validation import is_form_required
+from src.services.applications.get_field_from_application import (
+    get_project_title_from_application,
+    get_requested_amount_from_application,
+)
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.services.pdf_generation.models import PdfGenerationResponse
 from src.services.pdf_generation.service import generate_application_form_pdf
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
-from src.services.xml_generation.utils.attachment_mapping import create_attachment_mapping
+from src.services.xml_generation.utils.attachment_mapping import (
+    _collect_referenced_attachment_ids,
+    create_attachment_mapping,
+)
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
@@ -245,6 +254,9 @@ class CreateApplicationSubmissionTask(Task):
             file_location=s3_path,
             file_size_bytes=0,
             legacy_tracking_number=tracking_number,
+            application_submission_number=get_application_submission_number(application),
+            project_title=get_project_title_from_application(application),
+            total_requested_amount=get_requested_amount_from_application(application),
         )
 
         with file_util.open_stream(s3_path, "wb") as outfile:
@@ -287,6 +299,7 @@ class CreateApplicationSubmissionTask(Task):
                 "submitted_by_user_id": application.submitted_by,
                 "is_individual": application.organization_id is None,
                 "organization_id": application.organization_id,
+                "application_submission_number": application_submission.application_submission_number,
             },
         )
 
@@ -349,7 +362,24 @@ class CreateApplicationSubmissionTask(Task):
         }
         logger.info("Processing attachments for application submission", extra=log_extra)
 
+        # Only include attachments that are referenced in form responses.
+        # Orphaned attachments (not referenced anywhere) are excluded from the zip.
+        referenced_ids = _collect_referenced_attachment_ids(submission.application)
+
         for application_attachment in submission.application.application_attachments:
+            attachment_id_str = str(application_attachment.application_attachment_id)
+
+            if attachment_id_str not in referenced_ids:
+                logger.warning(
+                    "Skipping orphaned attachment from submission zip - not referenced in any form response",
+                    extra=log_extra
+                    | {
+                        "application_attachment_id": application_attachment.application_attachment_id,
+                        "file_name": application_attachment.file_name,
+                    },
+                )
+                continue
+
             logger.info(
                 "Adding attachment to application submission zip",
                 extra=log_extra
@@ -366,7 +396,6 @@ class CreateApplicationSubmissionTask(Task):
 
                 # Track filename overrides if the file was renamed
                 if file_name_in_zip != application_attachment.file_name:
-                    attachment_id_str = str(application_attachment.application_attachment_id)
                     submission.attachment_filename_overrides[attachment_id_str] = file_name_in_zip
 
                 with submission.submission_zip.open(file_name_in_zip, "w") as file_in_zip:
@@ -517,3 +546,30 @@ def create_manifest_text(submission: SubmissionContainer) -> str:
 
     # Return all sections
     return "\n\n".join(sections)
+
+
+def get_application_submission_number(application: Application) -> str:
+    """
+    Create an application submission number which is calculated as:
+        {opportunity_number}-{6 random uppercase characters/numbers}
+    """
+    opportunity_number = application.competition.opportunity.opportunity_number
+
+    # This can technically happen due to the data model
+    # but shouldn't ever happen in practice.
+    if opportunity_number is None:
+        logger.error(
+            "Opportunity does not have an opportunity number",
+            extra={
+                "opportunity_id": application.competition.opportunity_id,
+                "application_id": application.application_id,
+            },
+        )
+        opportunity_number = "APP"
+
+    # The submission number will a random
+    submission_number = "".join(
+        secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6)
+    )
+
+    return f"{opportunity_number}-{submission_number}"

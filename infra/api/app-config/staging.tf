@@ -60,4 +60,6 @@ module "staging_config" {
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
+
+  enable_workflow_service = true
 }

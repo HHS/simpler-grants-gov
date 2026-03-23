@@ -4,9 +4,20 @@ import logging
 from typing import Any
 
 from src.db.models.competition_models import Application, ApplicationAttachment
+from src.form_schema.rule_processing.json_rule_context import JsonRuleConfig, JsonRuleContext
+from src.form_schema.rule_processing.json_rule_processor import process_rule_schema_for_context
+from src.services.applications.application_validation import is_form_required
 from src.services.xml_generation.models.attachment import HASH_ALGORITHM, AttachmentFile
 
 logger = logging.getLogger(__name__)
+
+# Config for attachment ID collection: run validation rules (to trigger attachment
+# collection) but skip population steps to avoid modifying application_response.
+_ATTACHMENT_COLLECTION_CONFIG = JsonRuleConfig(
+    do_pre_population=False,
+    do_post_population=False,
+    do_field_validation=True,
+)
 
 
 class AttachmentInfo:
@@ -44,25 +55,22 @@ class AttachmentInfo:
 
 
 def _collect_referenced_attachment_ids(application: Application) -> set[str]:
-    """Collect attachment UUIDs referenced in any form's application_response.
+    """Collect attachment UUIDs referenced in included forms' application_response.
 
-    Uses each form's json_to_xml_schema attachment_fields config to identify
-    which fields hold attachment references, then reads those fields from the
-    form's application_response.
+    Runs JSON rule processing on each form included in the submission
+    (required forms, or non-required forms where is_included_in_submission=True).
+    The attachment validation rule populates context.attachment_ids as a side
+    effect, so no XML config is consulted.
     """
     referenced: set[str] = set()
     for app_form in application.application_forms:
-        schema = app_form.form.json_to_xml_schema or {}
-        attachment_fields = schema.get("_xml_config", {}).get("attachment_fields", {})
-        response = app_form.application_response
-        for field_name in attachment_fields:
-            value = response.get(field_name)
-            if isinstance(value, str):
-                referenced.add(value)
-            elif isinstance(value, list):
-                for item in value:
-                    if isinstance(item, str):
-                        referenced.add(item)
+        if not is_form_required(app_form) and app_form.is_included_in_submission is not True:
+            continue
+
+        context = JsonRuleContext(app_form, config=_ATTACHMENT_COLLECTION_CONFIG)
+        process_rule_schema_for_context(context)
+        referenced |= context.attachment_ids
+
     return referenced
 
 
