@@ -121,7 +121,7 @@ export default function SearchResultsListItem({
               {opportunity?.summary?.award_floor?.toLocaleString() || "--"}
             </span>
           </div>
-          { /* {saved && onShareClick ? (
+          {/* {saved && onShareClick ? (
             <div className="margin-top-1 text-right">
               <button
                 id={`share-opportunity-button-${opportunity.opportunity_id}`}
@@ -134,8 +134,7 @@ export default function SearchResultsListItem({
               </button>
             </div>
           ) : null}
-          */
-          }
+          */}
         </div>
       </div>
     </div>

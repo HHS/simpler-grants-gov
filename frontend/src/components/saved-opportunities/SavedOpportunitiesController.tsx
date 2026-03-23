@@ -24,9 +24,7 @@ export function SavedOpportunitiesController({
   const [opportunitiesState, setOpportunitiesState] =
     useState<BaseOpportunity[]>(opportunities);
 
-  const [selectedOpportunityId] = useState<
-    string | null
-  >(null);
+  const [selectedOpportunityId] = useState<string | null>(null);
 
   const [shouldOpenModal, setShouldOpenModal] = useState<boolean>(false);
 
