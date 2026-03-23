@@ -111,26 +111,17 @@ def remove_user_from_organization(
 def _delete_org_notification_preferences(
     db_session: db.Session, user_id: UUID, organization_id: UUID
 ) -> None:
-    """Delete the user's notification preferences for the given organization.
+    """Delete the user's notification preferences for the given organization."""
+    notification = db_session.execute(
+        select(UserSavedOpportunityNotification).where(
+            UserSavedOpportunityNotification.user_id == user_id,
+            UserSavedOpportunityNotification.organization_id == organization_id,
+        )
+    ).scalar_one_or_none()
 
-    Failures are logged but do not block the user removal.
-    """
-    try:
-        notification = db_session.execute(
-            select(UserSavedOpportunityNotification).where(
-                UserSavedOpportunityNotification.user_id == user_id,
-                UserSavedOpportunityNotification.organization_id == organization_id,
-            )
-        ).scalar_one_or_none()
-
-        if notification is not None:
-            db_session.delete(notification)
-            logger.info(
-                "Deleted organization notification preferences for removed user",
-                extra={"user_id": user_id, "organization_id": organization_id},
-            )
-    except Exception:
-        logger.exception(
-            "Failed to delete organization notification preferences for removed user",
+    if notification is not None:
+        db_session.delete(notification)
+        logger.info(
+            "Deleted organization notification preferences for removed user",
             extra={"user_id": user_id, "organization_id": organization_id},
         )
