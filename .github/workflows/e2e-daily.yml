@@ -1,0 +1,27 @@
+name: E2E Tests Daily
+on:
+  schedule:
+    # Run every day at (6/7am Eastern) before the start of the workday
+    - cron: "0 11 * * *"
+
+jobs:
+  daily-e2e-tests-deployed:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Daily E2E tests (staging)
+        uses: ./.github/workflows/e2e-staging.yml
+        with:
+          version: main
+          target: staging
+          playwright_tags: "@full-regression"
+  daily-e2e-tests-local:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Daily E2E tests (local)
+        uses: ./.github/workflows/ci-frontend-e2e.yml
+        with:
+          playwright_tags: "@full-regression"

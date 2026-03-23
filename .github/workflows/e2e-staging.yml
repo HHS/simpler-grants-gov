@@ -1,8 +1,5 @@
 name: E2E Tests (Deployed Target)
 on:
-  schedule:
-    # Run every day at (6/7am Eastern) before the start of the workday
-    - cron: "0 11 * * *"
   workflow_dispatch:
     inputs:
       version:
@@ -18,7 +15,19 @@ on:
           - staging
       playwright_tags:
         description: "pipe separated list of @tags denoting groups of tests to run"
-        required: false
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        description: "git reference for testing code to run (e.g., a branch, tag, or commit SHA)"
+        required: true
+        type: string
+      target:
+        description: "application environment to run tests against (dev / prod TK)"
+        default: "staging"
+        type: string
+      playwright_tags:
+        description: "pipe separated list of @tags denoting groups of tests to run"
         type: string
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
