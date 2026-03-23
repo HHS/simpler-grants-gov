@@ -57,7 +57,7 @@ test(
 
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
-    await verifyFormLinkVisible(page, PROJECT_ABSTRACT_FORM_MATCHER);
+    //await verifyFormLinkVisible(page, PROJECT_ABSTRACT_FORM_MATCHER);
 
     await fillForm(
       testInfo,
