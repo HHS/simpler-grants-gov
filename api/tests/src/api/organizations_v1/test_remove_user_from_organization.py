@@ -288,6 +288,7 @@ class TestRemoveUserFromOrganization:
         notification = UserSavedOpportunityNotificationFactory.create(
             user=target_user, organization=organization, email_enabled=True
         )
+        notification_id = notification.user_saved_opportunity_notification_id
 
         resp = client.delete(
             f"/v1/organizations/{organization.organization_id}/users/{target_user.user_id}",
@@ -297,10 +298,8 @@ class TestRemoveUserFromOrganization:
         assert resp.status_code == 200
 
         # Verify the notification record was deleted
-        remaining = db_session.get(
-            UserSavedOpportunityNotification,
-            notification.user_saved_opportunity_notification_id,
-        )
+        db_session.expire_all()
+        remaining = db_session.get(UserSavedOpportunityNotification, notification_id)
         assert remaining is None
 
     def test_remove_user_preserves_other_org_notification_preferences(
@@ -328,11 +327,13 @@ class TestRemoveUserFromOrganization:
         other_notification = UserSavedOpportunityNotificationFactory.create(
             user=target_user, organization=other_org, email_enabled=True
         )
+        other_notification_id = other_notification.user_saved_opportunity_notification_id
 
         # Self notification (should be preserved)
         self_notification = UserSavedOpportunityNotificationFactory.create(
             user=target_user, organization=None, email_enabled=False
         )
+        self_notification_id = self_notification.user_saved_opportunity_notification_id
 
         resp = client.delete(
             f"/v1/organizations/{organization.organization_id}/users/{target_user.user_id}",
@@ -341,23 +342,13 @@ class TestRemoveUserFromOrganization:
 
         assert resp.status_code == 200
 
+        db_session.expire_all()
+
         # Other org notification still exists
-        assert (
-            db_session.get(
-                UserSavedOpportunityNotification,
-                other_notification.user_saved_opportunity_notification_id,
-            )
-            is not None
-        )
+        assert db_session.get(UserSavedOpportunityNotification, other_notification_id) is not None
 
         # Self notification still exists
-        assert (
-            db_session.get(
-                UserSavedOpportunityNotification,
-                self_notification.user_saved_opportunity_notification_id,
-            )
-            is not None
-        )
+        assert db_session.get(UserSavedOpportunityNotification, self_notification_id) is not None
 
     def test_remove_user_succeeds_when_no_notification_preferences(
         self, enable_factory_create, client, db_session
