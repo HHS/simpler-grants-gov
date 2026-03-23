@@ -128,7 +128,7 @@ export async function fillField(
 
       const absolutePath = path.isAbsolute(data)
         ? data
-        : path.resolve(__dirname, "../../test-upload-files");
+        : path.resolve(__dirname, "frontend/tests/e2e/test-upload-files", data);
       await locator.setInputFiles(absolutePath);
 
       await page.waitForLoadState("load", { timeout: 15000 });
