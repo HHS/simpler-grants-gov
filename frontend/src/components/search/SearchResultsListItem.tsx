@@ -9,7 +9,6 @@ import Link from "next/link";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 import SearchResultListItemStatus from "./SearchResultListItemStatus";
-import { is } from "immutable";
 
 interface SearchResultsListItemProps {
   opportunity: BaseOpportunity;
