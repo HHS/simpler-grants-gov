@@ -314,7 +314,7 @@ describe("getFieldConfig", () => {
       expect(
         buildFieldListBaseId({
           fieldListName: "contacts",
-          childId: "firstName",
+          childId: "topField--firstName",
         }),
       ).toBe("contacts[~~index~~]--firstName");
     });
