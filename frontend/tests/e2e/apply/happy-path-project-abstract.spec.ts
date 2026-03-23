@@ -8,14 +8,10 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import {
-  fillForm
-} from "tests/e2e/utils/forms/general-forms-filling";
+import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-import {
-  PROJECT_ABSTRACT_FORM_CONFIG
-} from "./fixtures/project-abstract-field-definitions";
+import { PROJECT_ABSTRACT_FORM_CONFIG } from "./fixtures/project-abstract-field-definitions";
 import { projectAbstractHappyPathTestData } from "./fixtures/project-abstract-fill-data";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;

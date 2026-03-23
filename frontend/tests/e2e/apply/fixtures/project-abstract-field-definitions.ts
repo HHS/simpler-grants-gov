@@ -15,6 +15,6 @@ export const fieldDefinitionsProjectAbstract: FormFillFieldDefinitions = {
 
 export const PROJECT_ABSTRACT_FORM_CONFIG = {
   ...FORM_DEFAULTS,
-  formName: "Project Abstract",
+  formName: /^Project Abstract$/, // regex exact match — won't match "Project Abstract Summary"
   fields: fieldDefinitionsProjectAbstract,
 } as const;
