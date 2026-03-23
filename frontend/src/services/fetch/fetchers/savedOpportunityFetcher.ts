@@ -35,7 +35,6 @@ export const getSavedOpportunities = async (
   token: string,
   userId: string,
   statusFilter?: string,
-  organizationIds: string[] | null = [],
 ): Promise<MinimalOpportunity[]> => {
   const ssgToken = {
     "X-SGG-Token": token,
@@ -46,9 +45,8 @@ export const getSavedOpportunities = async (
       page_size: number;
       sort_order: { order_by: string; sort_direction: string }[];
     };
-    filters: {
-      opportunity_status?: { one_of: string[] };
-      organization_ids: { one_of: string[] | null };
+    filters?: {
+      opportunity_status: { one_of: string[] };
     };
   } = {
     pagination: {
@@ -61,17 +59,14 @@ export const getSavedOpportunities = async (
         },
       ],
     },
-    filters: {
-      organization_ids: {
-        one_of: organizationIds,
-      },
-    },
   };
 
   // Add status filter if provided
   if (statusFilter) {
-    body.filters.opportunity_status = {
-      one_of: [statusFilter],
+    body.filters = {
+      opportunity_status: {
+        one_of: [statusFilter],
+      },
     };
   }
 
