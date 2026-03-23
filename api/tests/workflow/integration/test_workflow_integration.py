@@ -67,14 +67,31 @@ def build_process_workflow_request(
     return payload
 
 
-def send_event_and_process(client, app, payload: dict, user_jwt: str) -> str:
+def send_event_and_process(
+    client,
+    app,
+    payload: dict,
+    user_jwt: str,
+    is_successful_in_api: bool = True,
+    has_service_messages: bool = True,
+) -> str:
     response = client.put("/v1/workflows/events", json=payload, headers={"X-SGG-Token": user_jwt})
-    assert response.status_code == 200
-    event_id = response.get_json()["data"]["event_id"]
+    if is_successful_in_api:
+        assert response.status_code == 200
+        event_id = response.get_json()["data"]["event_id"]
+    else:
+        assert response.status_code >= 400
+        event_id = None
 
     with app.app_context():
         messages_to_delete, messages_to_keep = WorkflowManager().process_batch()
-        assert len(messages_to_delete) == 1
+
+        if has_service_messages:
+            assert len(messages_to_delete) == 1
+            assert len(messages_to_keep) == 0
+        else:
+            assert len(messages_to_delete) == 0
+            assert len(messages_to_keep) == 0
 
     return event_id
 
@@ -303,3 +320,79 @@ def test_can_move_basic_test_workflow_start_to_requires_modification_and_then_to
     assert workflow_approvals[1].approving_user_id == internal_send_user.user_id
     assert workflow_approvals[1].comment is None
     assert workflow_approvals[1].approval_response_type == ApprovalResponseType.APPROVED
+
+
+def test_basic_test_workflow_including_bad_events(
+    db_session,
+    enable_factory_create,
+    client,
+    app,
+    internal_send_user,
+    internal_send_user_jwt,
+    workflow_user,
+    workflow_sqs_queue,
+    monkeypatch,
+):
+    """Test that we can get through the workflow while sending a few bad events."""
+    monkeypatch.setenv("WORKFLOW_CYCLE_DURATION", "0")
+
+    workflow = WorkflowFactory.create(
+        current_workflow_state=BasicState.MIDDLE,
+        workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+        has_opportunity=True,
+    )
+
+    # This event can go through the API as it is a real event
+    # But won't get applied on the backend
+    payload = build_process_workflow_request("start_workflow", workflow)
+    first_event_id = send_event_and_process(client, app, payload, internal_send_user_jwt)
+
+    db_session.refresh(workflow)
+    assert workflow.current_workflow_state == BasicState.MIDDLE
+    assert workflow.is_active is True
+
+    # This event just isn't valid so won't get through the API
+    payload = build_process_workflow_request("not-a-real-event", workflow)
+    send_event_and_process(
+        client,
+        app,
+        payload,
+        internal_send_user_jwt,
+        is_successful_in_api=False,
+        has_service_messages=False,
+    )
+
+    db_session.refresh(workflow)
+    assert workflow.current_workflow_state == BasicState.MIDDLE
+    assert workflow.is_active is True
+
+    # Then we can send a valid event through - the above events didn't break the workflow
+    payload = build_process_workflow_request("middle_to_end", workflow)
+    second_event_id = send_event_and_process(client, app, payload, internal_send_user_jwt)
+
+    db_session.refresh(workflow)
+    assert workflow.current_workflow_state == BasicState.END
+    assert workflow.is_active is False
+
+    # Validate the expected event history is present
+    # The middle event we sent isn't present as it didn't actually create an event
+    workflow_event_history = sorted(workflow.workflow_event_history, key=lambda x: x.created_at)
+    assert len(workflow_event_history) == 2
+
+    assert str(workflow_event_history[0].event_id) == first_event_id
+    assert workflow_event_history[0].is_successfully_processed is False
+
+    assert str(workflow_event_history[1].event_id) == second_event_id
+
+    # Validate the audit
+    workflow_audit_history = sorted(workflow.workflow_audits, key=lambda x: x.created_at)
+    assert len(workflow_audit_history) == 1
+
+    assert str(workflow_audit_history[0].event_id) == second_event_id
+    assert workflow_audit_history[0].acting_user_id == internal_send_user.user_id
+    assert workflow_audit_history[0].transition_event == "Middle to end"
+    assert workflow_audit_history[0].source_state == "middle"
+    assert workflow_audit_history[0].target_state == "end"
+
+    # Check the approvals
+    assert len(workflow.workflow_approvals) == 0
