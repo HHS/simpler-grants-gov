@@ -6,22 +6,14 @@ on:
 
 jobs:
   weekly-e2e-tests-deployed:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-      - name: Weekly E2E tests (staging)
-        uses: ./.github/workflows/e2e-staging.yml
-        with:
-          version: main
-          target: staging
-          playwright_tags: "@extended"
+    name: Weekly - all E2E tests (staging)
+    uses: ./.github/workflows/e2e-staging.yml
+    with:
+      version: main
+      target: staging
+      playwright_tags: "@extended"
   weekly-e2e-tests-local:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-      - name: Weekly E2E tests (local)
-        uses: ./.github/workflows/ci-frontend-e2e.yml
-        with:
-          playwright_tags: "@extended"
+    name: Weekly - all E2E tests (local)
+    uses: ./.github/workflows/ci-frontend-e2e.yml
+    with:
+      playwright_tags: "@extended"

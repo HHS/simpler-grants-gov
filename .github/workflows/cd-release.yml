@@ -87,13 +87,17 @@ jobs:
   # but do not wait, or block any deployments based on results
   e2e-test-local:
     name: E2E Local (on Deploy)
+    if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
     uses: ./.github/workflows/ci-frontend-e2e.yml
+    secrets: inherit
     with:
       playwright_tags: "@core-regression"
 
   e2e-test-staging:
     name: E2E Staging (on Deploy)
+    if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
     uses: ./.github/workflows/e2e-staging.yml
+    secrets: inherit
     with:
       version: main
       target: staging
