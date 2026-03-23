@@ -16,11 +16,12 @@ export interface FillFieldDefinition {
     | "file"
     | "radiobutton"
     | "checkbox"
-    "radio-button" | "combo-box-input";
-    OR
-    "radioButton" | "comboBoxInput";
-    OR
-    "radio_button" | "combo_box_input";
+    | "radio-button"
+    | "combo-box-input"
+    | "radioButton"
+    | "comboBoxInput"
+    | "radio_button"
+    | "combo_box_input";
   section?: string;
   field: string;
 }
