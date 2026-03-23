@@ -29,6 +29,8 @@ export default function robots(): MetadataRoute.Robots {
               "/api/",
               // Prevent crawling of static assets in the public folder.
               "/public/",
+              // Prevent crawling of dev/admin pages.
+              "/dev/feature-flags",
             ],
           }
         : {

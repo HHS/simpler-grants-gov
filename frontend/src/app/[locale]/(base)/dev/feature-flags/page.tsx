@@ -3,9 +3,12 @@ import { Metadata } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import React from "react";
+import { notFound } from "next/navigation";
 import { Button } from "@trussworks/react-uswds";
 
 import FeatureFlagsTable from "src/components/dev/FeatureFlagsTable";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 export function generateMetadata() {
   const meta: Metadata = {
@@ -15,10 +18,12 @@ export function generateMetadata() {
   return meta;
 }
 
+type FeatureFlagsProps = WithFeatureFlagProps;
+
 /**
  * View for managing feature flags
  */
-export default function FeatureFlags() {
+function FeatureFlags() {
   return (
     <>
       <Head>
@@ -44,3 +49,9 @@ export default function FeatureFlags() {
     </>
   );
 }
+
+export default withFeatureFlag<FeatureFlagsProps, never>(
+  FeatureFlags,
+  "featureFlagAdminOff",
+  () => notFound(),
+);
