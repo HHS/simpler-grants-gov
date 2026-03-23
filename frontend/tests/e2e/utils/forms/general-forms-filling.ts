@@ -128,7 +128,7 @@ export async function fillField(
 
       // Always expect either an absolute path or just a file name (relative to a specific directory)
       // If not absolute, resolve using a relative directory for test-upload-files
-      const TEST_FILES_DIR = path.resolve("test-upload-files");
+      const TEST_FILES_DIR = path.resolve(__dirname, "../test-upload-files");
       const absolutePath = path.isAbsolute(data)
         ? data
         : path.join(TEST_FILES_DIR, data);
