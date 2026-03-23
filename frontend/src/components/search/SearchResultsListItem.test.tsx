@@ -21,6 +21,20 @@ describe("SearchResultsListItem", () => {
     expect(screen.getByText("OPP-12345")).toBeInTheDocument();
   });
 
+  it("renders share with opportunity link", () => {
+    render(
+      <SearchResultsListItem
+        index={1}
+        opportunity={mockOpportunity}
+        saved={true}
+        onShareClick={jest.fn()}
+      />,
+    );
+    expect(
+      screen.getByTestId("share-opportunity-button-id"),
+    ).toBeInTheDocument();
+  });
+
   getDateTestCases().forEach(({ api_date, ui_date }) => {
     it(`renders formatted date ${ui_date} for API date ${api_date}`, () => {
       const opportunityWithDate = {
