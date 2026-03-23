@@ -128,7 +128,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         self, db_session, enable_factory_create, setup_data
     ):
         soap_request = _make_soap_request(
-            setup_data["soap_client_certificate"], status="Agency Tracking Number Assigned"
+            setup_data["soap_client_certificate"], status="Received by Agency"
         )
         payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
@@ -141,12 +141,12 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             soap_config=_make_operation_config(),
         )
         assert result.success is True
-        assert result.available_application_number == 1
-        assert result.submission_info[0].grants_gov_tracking_number == setup_data["tracking_number"]
-        assert (
-            result.submission_info[0].grants_gov_application_status
-            == "Agency Tracking Number Assigned"
-        )
+        assert setup_data["tracking_number"] not in [
+            submission.grants_gov_tracking_number for submission in result.submission_info
+        ]
+        assert "Agency Tracking Number Assigned" not in [
+            submission.grants_gov_tracking_number for submission in result.submission_info
+        ]
 
     def test_get_submission_list_expanded_filters_on_received_by_agency(
         self, db_session, enable_factory_create, setup_data

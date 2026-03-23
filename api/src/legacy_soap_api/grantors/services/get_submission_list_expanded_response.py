@@ -112,13 +112,15 @@ def get_submissions(
         )
         # Prefetch values for better performance
         .options(
+            selectinload(ApplicationSubmission.application_submission_tracking_numbers),
+            selectinload(ApplicationSubmission.application_submission_retrievals),
             selectinload(ApplicationSubmission.application).options(
                 selectinload(Application.organization),
                 selectinload(Application.competition).options(
                     selectinload(Competition.opportunity),
                     selectinload(Competition.opportunity_assistance_listing),
                 ),
-            )
+            ),
         )
     )
 
@@ -131,13 +133,13 @@ def get_submissions(
             status_value = str(status[0])
             # GrantsGovTrackingNumber comes from three different places with a hierarchy
             # A submissions is in "Agency Tracking Number Assigned Status" IF it has any rows on application_submission_tracking_numbers table
-            # A submissions is in "Received by Agency" IF it has any rows on application_submission_retrievals table AND no rows on application_submission_tracking_numbers tabke
+            # A submissions is in "Received by Agency" IF it has any rows on application_submission_retrievals table AND no rows on application_submission_tracking_numbers table
             # A submissions is in  application.application_status IF there are no rows on either of the above tables
             if status_value == AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS:
                 stmt = stmt.where(
                     ApplicationSubmission.application_submission_tracking_numbers.any()
                 )
-            if status_value == RECEIVED_BY_AGENCY_STATUS:
+            elif status_value == RECEIVED_BY_AGENCY_STATUS:
                 stmt = stmt.where(
                     ApplicationSubmission.application_submission_retrievals.any(),
                     ~ApplicationSubmission.application_submission_tracking_numbers.any(),
