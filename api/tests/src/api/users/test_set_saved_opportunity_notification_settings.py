@@ -14,7 +14,7 @@ def test_set_notification_self_create(client, db_session, user_auth_token, user)
     response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities/notifications",
         headers={"X-SGG-Token": user_auth_token},
-        json={"email_enabled": False},
+        json={"organization_id": None, "email_enabled": False},
     )
 
     assert response.status_code == 200
@@ -45,7 +45,7 @@ def test_set_notification_self_update(client, db_session, user_auth_token, user)
     response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities/notifications",
         headers={"X-SGG-Token": user_auth_token},
-        json={"email_enabled": False},
+        json={"organization_id": None, "email_enabled": False},
     )
 
     db_session.refresh(self_setting)
@@ -145,7 +145,7 @@ def test_set_notification_unauthorized_user(client, db_session, user_auth_token,
     response = client.post(
         f"/v1/users/{other_user_id}/saved-opportunities/notifications",
         headers={"X-SGG-Token": user_auth_token},
-        json={"email_enabled": True},
+        json={"organization_id": None, "email_enabled": True},
     )
 
     assert response.status_code == 403
@@ -159,7 +159,7 @@ def test_set_notification_unauthorized_user(client, db_session, user_auth_token,
     assert not res
 
 
-def test_set_notification_org_no_permission(client, db_session, user_auth_token, user):
+def test_set_notification_org_no_permission(client, db_session, enable_factory_create):
     """
     Test that a user cannot create or update notification settings for an organization
     they do not have permission to access, resulting in a 403 Forbidden response.
@@ -169,7 +169,7 @@ def test_set_notification_org_no_permission(client, db_session, user_auth_token,
 
     response = client.post(
         f"/v1/users/{user.user_id}/saved-opportunities/notifications",
-        headers={"X-SGG-Token": user_auth_token},
+        headers={"X-SGG-Token": token},
         json={"organization_id": str(org_id), "email_enabled": True},
     )
 
@@ -209,3 +209,23 @@ def test_saved_opportunity_notification_org_not_found(client, db_session, user_a
         .first()
     )
     assert res is None
+
+
+def test_saved_opportunity_notification_missing_fields(client, db_session, user_auth_token, user):
+    """
+    Test that missing required fields return a validation error.
+    """
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/notifications",
+        headers={"X-SGG-Token": user_auth_token},
+        json={},  # missing both fields
+    )
+
+    assert response.status_code == 422
+    assert response.json["message"] == "Validation error"
+
+    # Assert both fields are present in errors
+    errors = {(err["field"], err["type"]) for err in response.json["errors"]}
+
+    assert ("organization_id", "required") in errors
+    assert ("email_enabled", "required") in errors
