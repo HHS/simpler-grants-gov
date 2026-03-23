@@ -19,12 +19,12 @@ export function SavedOpportunitiesController({
   opportunities,
 }: SavedOpportunitiesControllerProps) {
   const modalRef = useRef<ModalRef>(null);
-  // const lastShareButtonRef = useRef<HTMLButtonElement | null>(null);
+  const lastShareButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const [opportunitiesState, setOpportunitiesState] =
     useState<BaseOpportunity[]>(opportunities);
 
-  const [selectedOpportunityId] = useState<string | null>(null);
+  const [selectedOpportunityId, setSelectedOpportunityId] = useState<string | null>(null);
 
   const [shouldOpenModal, setShouldOpenModal] = useState<boolean>(false);
 
@@ -89,14 +89,14 @@ export function SavedOpportunitiesController({
     );
   }, [selectedOpportunity]);
 
-  // const handleShareClick = (
-  //   opportunity: BaseOpportunity,
-  //   buttonElement: HTMLButtonElement,
-  // ) => {
-  //   lastShareButtonRef.current = buttonElement;
-  //   setSelectedOpportunityId(opportunity.opportunity_id);
-  //   setShouldOpenModal(true);
-  // };
+   const handleShareClick = (
+     opportunity: BaseOpportunity,
+     buttonElement: HTMLButtonElement,
+   ) => {
+     lastShareButtonRef.current = buttonElement;
+     setSelectedOpportunityId(opportunity.opportunity_id);
+     setShouldOpenModal(true);
+   };
 
   const handleSavedOrganizationsChange = (organizationIds: Set<string>) => {
     if (!selectedOpportunityId) {
@@ -130,9 +130,9 @@ export function SavedOpportunitiesController({
               opportunity={opportunity}
               saved={true}
               index={index}
-              // onShareClick={(buttonElement: HTMLButtonElement) =>
-              //   handleShareClick(opportunity, buttonElement)
-              // }
+              onShareClick={(buttonElement: HTMLButtonElement) =>
+                handleShareClick(opportunity, buttonElement)
+              }
             />
           </li>
         ))}
