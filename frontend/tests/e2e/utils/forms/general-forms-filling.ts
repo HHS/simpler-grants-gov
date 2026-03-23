@@ -2,6 +2,8 @@ import path from "path";
 import { Page, TestInfo } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
 
+import { getFormLink } from "./form-navigation-utils";
+
 export interface FillFieldDefinition {
   testId?: string;
   selector?: string;
@@ -222,7 +224,7 @@ export async function fillForm(
   testInfo: TestInfo,
   page: Page,
   config: FillFormConfig,
-  data: { [key: string]: string | boolean },
+  data: Record<string, string>,
   returnToApplication = true,
 ): Promise<void> {
   const { formName, fields, saveButtonTestId } = config;
@@ -261,4 +263,21 @@ export async function fillForm(
     });
     throw error;
   }
+}
+
+/**
+ * Verifies that a form link or button is visible on the page.
+ * Use after application creation to confirm the forms table has fully rendered
+ * before attempting to navigate into a form.
+ * @param page Playwright Page object
+ * @param formName Form name or pipe-separated pattern to match (e.g. "SF-424B|Assurances for Non-Construction Programs")
+ */
+export async function verifyFormLinkVisible(
+  page: Page,
+  formName: string,
+): Promise<void> {
+  await getFormLink(page, formName).waitFor({
+    state: "visible",
+    timeout: 60000,
+  });
 }

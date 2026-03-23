@@ -3,7 +3,7 @@ from datetime import date, datetime, timezone
 import pytest
 import pytz
 
-from src.util.datetime_util import adjust_timezone, parse_grants_gov_date
+from src.util.datetime_util import adjust_timezone, from_timestamp, parse_grants_gov_date
 
 
 @pytest.mark.parametrize(
@@ -125,3 +125,15 @@ class TestParseGrantsGovDate:
         for date_str, expected in test_cases:
             result = parse_grants_gov_date(date_str)
             assert result == expected, f"Failed for input: {date_str}"
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (1773762290934, datetime(2026, 3, 17, 15, 44, 50, 934000, tzinfo=timezone.utc)),
+        (1234567890000, datetime(2009, 2, 13, 23, 31, 30, 0, tzinfo=timezone.utc)),
+        (2222222222222, datetime(2040, 6, 2, 3, 57, 2, 222000, tzinfo=timezone.utc)),
+    ],
+)
+def test_from_timestamp(value, expected):
+    assert from_timestamp(value) == expected
