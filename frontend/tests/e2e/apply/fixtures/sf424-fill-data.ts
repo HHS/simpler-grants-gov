@@ -30,7 +30,7 @@ export const sf424HappyPathTestData = {
   applicant_type_other_specify: "Type of Applicant other specify test data",
   agency_name: "Simpler Grants.gov test data",
   assistance_listing_program_title: "Technical Agricultural Assistance",
-  areas_affected_attachment: "tests/e2e/test-upload-files/Test-data.docx",
+  areas_affected_attachment: "Test-data.docx",
   project_title: "Project Title test data",
   additional_project_title_attachment: "Test-data.docx",
   congressional_district_applicant: "00-000",
