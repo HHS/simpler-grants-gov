@@ -130,7 +130,7 @@ export async function fillField(
       // If not absolute, resolve using a hardcoded directory for test files
       const TEST_FILES_DIR = path.resolve(
         __dirname,
-        "../../../../tests/e2e/test-files",
+        "../../../../tests/e2e/test-upload-files",
       );
       const absolutePath = path.isAbsolute(data)
         ? data
