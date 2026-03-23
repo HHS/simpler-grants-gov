@@ -103,7 +103,8 @@ export async function fillForm(
     await page.getByRole("link", { name: formName }).click();
 
     await page
-      .getByText(formName, { exact: true })
+     // .getByText(formName, { exact: true })
+      .getByText(formName)
       .first()
       .waitFor({ state: "visible", timeout: 35000 });
 

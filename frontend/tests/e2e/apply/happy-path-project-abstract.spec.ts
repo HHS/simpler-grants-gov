@@ -9,14 +9,12 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import {
-  fillForm,
-  verifyFormLinkVisible,
+  fillForm
 } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
 import {
-  PROJECT_ABSTRACT_FORM_CONFIG,
-  PROJECT_ABSTRACT_FORM_MATCHER,
+  PROJECT_ABSTRACT_FORM_CONFIG
 } from "./fixtures/project-abstract-field-definitions";
 import { projectAbstractHappyPathTestData } from "./fixtures/project-abstract-fill-data";
 
@@ -57,7 +55,7 @@ test(
 
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
-    //await verifyFormLinkVisible(page, PROJECT_ABSTRACT_FORM_MATCHER);
+    // await verifyFormLinkVisible(page, PROJECT_ABSTRACT_FORM_MATCHER);
 
     await fillForm(
       testInfo,
