@@ -1,3 +1,5 @@
+import { VALID_TAGS } from "tests/e2e/tags";
+
 import {
   expect,
   // NextFixture,
@@ -5,6 +7,8 @@ import {
 } from "next/experimental/testmode/playwright";
 
 import playwrightEnv from "./playwright-env";
+
+const { FULL_REGRESSION } = VALID_TAGS;
 
 const { targetEnv } = playwrightEnv;
 
@@ -37,7 +41,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test("has title", async ({ page }) => {
+test("has title", { tag: [FULL_REGRESSION] }, async ({ page }) => {
   await expect(page).toHaveTitle(/Subscribe | Simpler.Grants.gov/);
 });
 

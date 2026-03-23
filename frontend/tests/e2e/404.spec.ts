@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
+import { VALID_TAGS } from "tests/e2e/tags";
+
+const { STATIC, FULL_REGRESSION, CORE_REGRESSION } = VALID_TAGS;
 
 const { targetEnv } = playwrightEnv;
 
@@ -22,16 +25,20 @@ test.beforeEach(async ({ page }) => {
   }
 });
 
-test("has title", async ({ page }) => {
+test("has title", { tag: [STATIC, CORE_REGRESSION] }, async ({ page }) => {
   const timeout = targetEnv === "staging" ? 30000 : 5000;
   await expect(page).toHaveTitle("Oops, we can't find that page.", {
     timeout,
   });
 });
 
-test("can view the home button", async ({ page }) => {
-  const timeout = targetEnv === "staging" ? 30000 : 5000;
-  await expect(
-    page.getByRole("link", { name: "Visit our homepage" }),
-  ).toHaveText("Visit our homepage", { timeout });
-});
+test(
+  "can view the home button",
+  { tag: [STATIC, FULL_REGRESSION] },
+  async ({ page }) => {
+    const timeout = targetEnv === "staging" ? 30000 : 5000;
+    await expect(
+      page.getByRole("link", { name: "Visit our homepage" }),
+    ).toHaveText("Visit our homepage", { timeout });
+  },
+);

@@ -20,7 +20,7 @@ import { openMobileNav } from "tests/e2e/playwrightUtils";
 import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";
 import { selectLocalTestUser } from "tests/e2e/utils/select-local-test-user-utils";
 
-const { baseUrl, targetEnv, testOrgLabel } = playwrightEnv;
+const { baseUrl, targetEnv, testUserLabel } = playwrightEnv;
 
 export async function authenticateE2eUser(
   page: Page,
@@ -32,11 +32,10 @@ export async function authenticateE2eUser(
     await page.waitForTimeout(1000);
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
 
-    const signInModal = page.locator('[role="dialog"], #sign-in-modal');
-    if (await signInModal.isVisible()) {
-      await selectLocalTestUser(page, testOrgLabel);
-      await page.waitForTimeout(2000);
-    }
+    // Always switch to the org user so apply flow tests have org associations.
+    // selectLocalTestUser is a no-op if the dev quick-login dropdown is absent.
+    await selectLocalTestUser(page, testUserLabel);
+    await page.waitForTimeout(2000);
   } else if (targetEnv === "staging") {
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
 

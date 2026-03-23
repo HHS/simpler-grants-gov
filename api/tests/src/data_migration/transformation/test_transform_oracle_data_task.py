@@ -75,7 +75,6 @@ class TestTransformFullRunTask(BaseTestClass):
         forecast = setup_synopsis_forecast(
             create_existing=False,
             is_forecast=True,
-            revision_number=None,
             source_values={"opportunity_id": opportunity.opportunity_id},
         )
         f.StagingTapplicanttypesForecastFactory(forecast=forecast, at_id="01")
@@ -95,7 +94,6 @@ class TestTransformFullRunTask(BaseTestClass):
         synopsis = setup_synopsis_forecast(
             create_existing=False,
             is_forecast=False,
-            revision_number=None,
             source_values={"opportunity_id": opportunity.opportunity_id},
         )
         f.StagingTapplicanttypesSynopsisFactory(synopsis=synopsis, at_id="06")
