@@ -225,17 +225,6 @@ export function CreateOpportunityForm({
           >
             {tg(isPending ? "pending" : "saveAndContinue")}
           </Button>
-
-          {/* {(disableSave || isPending) && (
-            <Button disabled type="submit" name="save_button">
-              {tg(isPending ? "pending" : "saveAndContinue")}
-            </Button>
-          )}
-          {!disableSave && !isPending && (
-            <Button type="submit" name="save_button">
-              {tg("saveAndContinue")}
-            </Button>
-          )} */}
         </div>
       </form>
     </>

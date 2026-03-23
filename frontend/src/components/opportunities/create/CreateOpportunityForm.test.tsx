@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { noop } from "lodash";
 
 import { CreateOpportunityForm } from "src/components/opportunities/create/CreateOpportunityForm";
@@ -35,8 +36,6 @@ const fakeAgencies = {
   "123-ABC": "Agency Alpha",
   "456-XYZ": "Agency Beta",
 };
-
-afterEach(cleanup);
 
 describe("createOpportunityForm", () => {
   afterEach(() => {
@@ -123,7 +122,7 @@ describe("createOpportunityForm field change events", () => {
     jest.resetAllMocks();
   });
 
-  it("the save button is enabled when required fields have values", () => {
+  it("the save button is enabled when required fields have values", async () => {
     mockUseActionState.mockReturnValue([{}, noop, false]);
 
     render(
@@ -133,64 +132,82 @@ describe("createOpportunityForm field change events", () => {
       />,
     );
 
-    // Initially default agency is selected and save button is disabled
-    const saveButton = screen.queryByText("saveAndContinue");
-    expect(saveButton).toBeInTheDocument();
-    expect(saveButton).toBeDisabled(); // BUT it's actually showing disabled=""
+    // 1. Initially default agency is selected and save button is disabled
     const selectedOption = screen.getByRole("option", {
       name: "Agency Beta",
       selected: true,
     });
+    expect(selectedOption).toBeInTheDocument();
+    const saveButton = screen.queryByText("saveAndContinue");
+    expect(saveButton).toBeInTheDocument();
+    expect(saveButton).toBeDisabled();
 
-    // Fill in Opportunity Number
+    // 2. Fill in Opportunity Number
     const textboxOppNbr = screen.getByRole("textbox", {
       name: "opportunityNumber *",
     });
     expect(textboxOppNbr).toBeInTheDocument();
     expect(textboxOppNbr).toHaveValue("");
-    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      "value",
-    ).set;
-    nativeInputValueSetter.call(textboxOppNbr, "TEST-001");
-    const event = new Event("input", { bubbles: true });
-    textboxOppNbr.dispatchEvent(event);
+    fireEvent.change(textboxOppNbr, { target: { value: "TEST-001" } });
     expect(textboxOppNbr).toHaveValue("TEST-001");
-    // Save button is still disabled
+    // Save button should still be disabled
     expect(saveButton).toBeDisabled();
 
-    // Fill in Opportunity Title
+    // 3. Fill in Opportunity Title
     const textareaOppTitle = screen.getByRole("textbox", {
       name: "opportunityTitle *",
     });
     expect(textareaOppTitle).toBeInTheDocument();
     expect(textareaOppTitle).toHaveValue("");
-    const nativeInputValueSetter2 = Object.getOwnPropertyDescriptor(
-      window.HTMLTextAreaElement.prototype,
-      "value",
-    ).set;
-    nativeInputValueSetter2.call(textareaOppTitle, "Test Opportunity 001");
-    const event2 = new Event("input", { bubbles: true });
-    textareaOppTitle.dispatchEvent(event2);
+    fireEvent.change(textareaOppTitle, {
+      target: { value: "Test Opportunity 001" },
+    });
     expect(textareaOppTitle).toHaveValue("Test Opportunity 001");
-    // Save button is still disabled
+    // Save button should still be disabled
     expect(saveButton).toBeDisabled();
 
-    // Fill in Category
+    // 4. Select a Category that is not "other"
     const selectCategory = screen.getByRole("combobox", {
       name: "category *",
     });
     expect(selectCategory).toBeInTheDocument();
     expect(selectCategory).toHaveValue("");
-    const nativeInputValueSetter3 = Object.getOwnPropertyDescriptor(
-      window.HTMLSelectElement.prototype,
-      "value",
-    ).set;
-    nativeInputValueSetter3.call(selectCategory, "discretionary");
-    const event3 = new Event("select", { bubbles: true });
-    selectCategory.dispatchEvent(event3);
+    await userEvent.selectOptions(selectCategory, "discretionary");
     expect(selectCategory).toHaveValue("discretionary");
-    // Save button should now be enabled -- FAILED with disabled=""
-    // expect(saveButton).toBeEnabled();
+    // Save button should now be enabled
+    expect(saveButton).toBeEnabled();
+    // The Explanation field should be hidden
+    const testExplain = screen.queryByRole("textbox", {
+      name: "categoryExplanation *",
+    });
+    expect(testExplain).not.toBeInTheDocument();
+
+    // 5. Select "other" for the Category
+    await userEvent.selectOptions(selectCategory, "other");
+    expect(selectCategory).toHaveValue("other");
+    // Save button should now be disabled
+    expect(saveButton).toBeDisabled();
+    // The Explanation field should now be displayed
+    const textareaExplain = screen.getByRole("textbox", {
+      name: "categoryExplanation *",
+    });
+    expect(textareaExplain).toBeInTheDocument();
+    expect(textareaExplain).toHaveValue("");
+
+    // 6. Fill in the Category Explanation field
+    fireEvent.change(textareaExplain, {
+      target: { value: "Sample Explanation" },
+    });
+    expect(textareaExplain).toHaveValue("Sample Explanation");
+    // Save button should now be enabled
+    expect(saveButton).toBeEnabled();
+
+    // 7. Remove/delete the text in Opportunity Title
+    fireEvent.change(textareaOppTitle, {
+      target: { value: "" },
+    });
+    expect(textareaOppTitle).toHaveValue("");
+    // Save button should be disabled again
+    expect(saveButton).toBeDisabled();
   });
 });
