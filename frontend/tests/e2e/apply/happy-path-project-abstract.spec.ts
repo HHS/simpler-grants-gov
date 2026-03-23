@@ -8,7 +8,6 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import {
   fillForm,
   verifyFormLinkVisible,
@@ -59,13 +58,6 @@ test(
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
     await verifyFormLinkVisible(page, PROJECT_ABSTRACT_FORM_MATCHER);
-
-    const openedForm = await openForm(page, PROJECT_ABSTRACT_FORM_MATCHER);
-    if (!openedForm) {
-      throw new Error(
-        "Could not find or open Project Abstract form link on the application forms page",
-      );
-    }
 
     await fillForm(
       testInfo,
