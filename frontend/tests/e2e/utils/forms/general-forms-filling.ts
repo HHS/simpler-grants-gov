@@ -130,11 +130,13 @@ export async function fillField(
       // If not absolute, resolve using a relative directory for test-upload-files
       const TEST_FILES_DIR = path.resolve(
         __dirname,
-        "frontend\\tests\\e2e\\test-upload-files",
+        "../../../test-upload-files",
       );
+      // Always use only the filename for relative paths to avoid accidental nested paths
+      const fileName = path.basename(data);
       const absolutePath = path.isAbsolute(data)
         ? data
-        : path.join(TEST_FILES_DIR, data);
+        : path.join(TEST_FILES_DIR, fileName);
       await locator.setInputFiles(absolutePath);
 
       await page.waitForLoadState("load", { timeout: 15000 });
