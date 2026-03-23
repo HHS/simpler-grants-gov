@@ -24,7 +24,7 @@ export function SavedOpportunitiesController({
   const [opportunitiesState, setOpportunitiesState] =
     useState<BaseOpportunity[]>(opportunities);
 
-  const [selectedOpportunityId, setSelectedOpportunityId] = useState<
+  const [selectedOpportunityId] = useState<
     string | null
   >(null);
 
