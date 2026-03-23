@@ -1936,7 +1936,7 @@ export const messages = {
   CommonLabels: {
     cancel: "Cancel",
     saveAndContinue: "Save and continue",
-    pending: "Pending..",
+    pending: "Pending...",
     errorHeading: "Error",
     successHeading: "Success",
   },

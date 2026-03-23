@@ -1,11 +1,11 @@
 import {
+  fetchUserAgencies,
+  getUserAgencies,
   performAgencySearch,
   searchAndFlattenAgencies,
-  getUserAgencies,
-  fetchUserAgencies,
 } from "src/services/fetch/fetchers/agenciesFetcher";
-import { fakeAgencyResponseData } from "src/utils/testing/fixtures";
 import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
+import { fakeAgencyResponseData } from "src/utils/testing/fixtures";
 
 const fakeResponse = {
   json: () => Promise.resolve({ data: fakeAgencyResponseData }),
@@ -31,7 +31,7 @@ jest.mock("src/services/auth/session", () => ({
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchAgencies: (arg: unknown): unknown => mockFetchAgencies(arg),
   searchAgencies: (arg: unknown): unknown => mockSearchAgencies(arg),
-  fetchUserWithMethod: jest.fn(),   // Initialize as a mock -- this works
+  fetchUserWithMethod: jest.fn(), // Initialize as a mock -- this works
 }));
 
 jest.mock("src/utils/search/filterUtils", () => ({
@@ -102,7 +102,6 @@ describe("searchAndFlattenAgencies", () => {
   });
 });
 
-
 // ------------------------------------------------------
 // Fetch user's agencies
 // ------------------------------------------------------
@@ -123,10 +122,7 @@ describe("getUserAgencies", () => {
     };
     mockJsonFn.mockResolvedValue(expectedResponse);
 
-    const result = await getUserAgencies(
-      "test-token",
-      "123-ABC",
-    );
+    const result = await getUserAgencies("test-token", "123-ABC");
 
     expect(fetchUserWithMethod).toHaveBeenCalledWith("POST");
     expect(result).toEqual(fakeAgencyResponseData);

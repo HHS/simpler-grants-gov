@@ -3,7 +3,10 @@
 import { ApiRequestError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
-import { searchAgencies, fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
+import {
+  fetchUserWithMethod,
+  searchAgencies,
+} from "src/services/fetch/fetchers/fetchers";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
 import { flattenAgencies } from "src/utils/search/filterUtils";
 import { getStatusValueForAgencySearch } from "src/utils/search/searchUtils";

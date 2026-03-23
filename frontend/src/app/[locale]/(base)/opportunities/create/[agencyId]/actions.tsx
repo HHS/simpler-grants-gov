@@ -4,9 +4,9 @@ import { getSession } from "src/services/auth/session";
 import { createOpportunity } from "src/services/fetch/fetchers/createOpportunityFetcher";
 import { CreateOpportunityResponse } from "src/types/grantor/createOpportunityTypes";
 
-  // Future: Apply any field level validations before submitting to the backend.
-  //    These will be validations that have not been taken care of client-side.
-  // Backend validations will be displayed in the main error field.
+// Future: Apply any field level validations before submitting to the backend.
+//    These will be validations that have not been taken care of client-side.
+// Backend validations will be displayed in the main error field.
 
 export const createOpportunityAction = async (
   _prevState: unknown,
@@ -37,7 +37,6 @@ export const createOpportunityAction = async (
     );
     return { data: createOpportunityResponse, success: true };
   } catch (e) {
-
     // General try failure catch error
     const error = e as Error;
     console.error(

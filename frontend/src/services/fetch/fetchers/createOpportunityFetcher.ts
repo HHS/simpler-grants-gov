@@ -1,8 +1,8 @@
 "server-only";
 
+import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import { fetchGrantorWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { CreateOpportunityRecord } from "src/types/grantor/createOpportunityTypes";
-import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 
 export const createOpportunity = async (
   token: string,

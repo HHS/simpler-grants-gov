@@ -11,9 +11,9 @@ import {
   opportunitySearchEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
+  toDynamicGrantorsEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
-  toDynamicGrantorsEndpoint,
   userLogoutEndpoint,
   userRefreshEndpoint,
 } from "src/services/fetch/endpointConfigs";
@@ -150,5 +150,6 @@ export const fetchOrganizationWithMethod = (
 
 export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);
 
-export const fetchGrantorWithMethod = (type: "POST" | "DELETE" | "PUT" | "GET") =>
-  requesterForEndpoint(toDynamicGrantorsEndpoint(type));
+export const fetchGrantorWithMethod = (
+  type: "POST" | "DELETE" | "PUT" | "GET",
+) => requesterForEndpoint(toDynamicGrantorsEndpoint(type));

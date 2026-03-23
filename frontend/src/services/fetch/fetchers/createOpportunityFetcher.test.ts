@@ -18,11 +18,11 @@ describe("createOpportunity", () => {
   it("should start application with all parameters", async () => {
     const token = "test-token";
     const createOppSchema = {
-        agency_id: "123-ABC-456-DEF",
-        opportunity_number: "TEST-OPP-001",
-        opportunity_title: "Test Opportunity 001",
-        category: "other",
-        category_explanation: "Some explanation",
+      agency_id: "123-ABC-456-DEF",
+      opportunity_number: "TEST-OPP-001",
+      opportunity_title: "Test Opportunity 001",
+      category: "other",
+      category_explanation: "Some explanation",
     };
     const expectedResponse = {
       status_code: 200,
@@ -30,10 +30,7 @@ describe("createOpportunity", () => {
     };
     mockJsonFn.mockResolvedValue(expectedResponse);
 
-    const result = await createOpportunity(
-      token,
-      createOppSchema,
-    );
+    const result = await createOpportunity(token, createOppSchema);
 
     expect(result).toEqual(createOppSchema);
     expect(fetchGrantorWithMethod).toHaveBeenCalledWith("POST");
@@ -49,11 +46,11 @@ describe("createOpportunity", () => {
   it("should return validation error response with 422 status", async () => {
     const token = "test-token";
     const createOppSchema = {
-        agency_id: "123-ABC-456-DEF",
-        opportunity_number: "TEST-OPP-001",
-        opportunity_title: "Test Opportunity 001",
-        category: "other",
-        category_explanation: "Some explanation",
+      agency_id: "123-ABC-456-DEF",
+      opportunity_number: "TEST-OPP-001",
+      opportunity_title: "Test Opportunity 001",
+      category: "other",
+      category_explanation: "Some explanation",
     };
     const errMsg = { errors: { field: "invalid" } };
     const expectedResponse = {
@@ -63,9 +60,8 @@ describe("createOpportunity", () => {
     };
     mockJsonFn.mockResolvedValue(expectedResponse);
 
-    const result = await createOpportunity(token, createOppSchema, );
+    const result = await createOpportunity(token, createOppSchema);
 
     expect(result).toEqual(errMsg);
   });
-
 });

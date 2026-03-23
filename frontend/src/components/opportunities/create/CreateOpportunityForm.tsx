@@ -16,11 +16,11 @@ import {
 
 // Category options
 const categoryList = {
-  "discretionary": "Discretionary",
-  "mandatory": "Mandatory",
-  "continuation": "Continuation",
-  "earmark": "Earmark",
-  "other": "Other",
+  discretionary: "Discretionary",
+  mandatory: "Mandatory",
+  continuation: "Continuation",
+  earmark: "Earmark",
+  other: "Other",
 };
 
 // ----- Main Form -----
@@ -44,9 +44,12 @@ export function CreateOpportunityForm({
   const [showExplain, setShowExplain] = useState<boolean>(false);
   const [disableSave, setDisableSave] = useState<boolean>(true);
 
-  const [response, formAction, isPending] = useActionState(createOpportunityAction, {
+  const [response, formAction, isPending] = useActionState(
+    createOpportunityAction,
+    {
       validationErrors: {},
-    });
+    },
+  );
 
   // Use useEffect to detect success and redirect
   const router = useRouter();
@@ -61,36 +64,40 @@ export function CreateOpportunityForm({
       router.push("/opportunities");
     } else {
       setDisableSave(true);
-      if (selectedCategoryId.trim() !== 'other') {
-        setExplain('');   // need to manually set this for checks below to work correctly
+      if (selectedCategoryId.trim() !== "other") {
+        setExplain(""); // need to manually set this for checks below to work correctly
       }
     }
   }, [response, router]);
 
   // Use useEffect to check fields when inputs change
-  useEffect(() => {
-    // Category: if Other then show the Explanation field
-    if (selectedCategoryId.trim() === 'other') {
-      setShowExplain(true);
-    } else {
-      setShowExplain(false);
-    }
-    // Check for required fields to enable the Save button
-    const allReqFieldsFilled = 
-      opportunityNumber.trim() !== '' &&  
-      opportunityTitle.trim() !== '' && 
-      selectedAgencyId.trim() !== '' &&
-      ( (selectedCategoryId.trim() !== '' && selectedCategoryId.trim() !== 'other') ||
-      (selectedCategoryId.trim() === 'other' && categoryExplanation.trim() !== '') )
-    ;
-    setDisableSave(!allReqFieldsFilled);
-  },  // Dependencies: run whenever these fields change
-      [opportunityNumber, 
-      opportunityTitle, 
-      selectedAgencyId, 
-      selectedCategoryId, 
-      categoryExplanation]
-  ); 
+  useEffect(
+    () => {
+      // Category: if Other then show the Explanation field
+      if (selectedCategoryId.trim() === "other") {
+        setShowExplain(true);
+      } else {
+        setShowExplain(false);
+      }
+      // Check for required fields to enable the Save button
+      const allReqFieldsFilled =
+        opportunityNumber.trim() !== "" &&
+        opportunityTitle.trim() !== "" &&
+        selectedAgencyId.trim() !== "" &&
+        ((selectedCategoryId.trim() !== "" &&
+          selectedCategoryId.trim() !== "other") ||
+          (selectedCategoryId.trim() === "other" &&
+            categoryExplanation.trim() !== ""));
+      setDisableSave(!allReqFieldsFilled);
+    }, // Dependencies: run whenever these fields change
+    [
+      opportunityNumber,
+      opportunityTitle,
+      selectedAgencyId,
+      selectedCategoryId,
+      categoryExplanation,
+    ],
+  );
 
   // Update state on change
   const onCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -218,6 +225,17 @@ export function CreateOpportunityForm({
           >
             {tg(isPending ? "pending" : "saveAndContinue")}
           </Button>
+
+          {/* {(disableSave || isPending) && (
+            <Button disabled type="submit" name="save_button">
+              {tg(isPending ? "pending" : "saveAndContinue")}
+            </Button>
+          )}
+          {!disableSave && !isPending && (
+            <Button type="submit" name="save_button">
+              {tg("saveAndContinue")}
+            </Button>
+          )} */}
         </div>
       </form>
     </>

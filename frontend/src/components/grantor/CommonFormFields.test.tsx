@@ -1,12 +1,12 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import {
-  CommonText,
   CommonLabel,
+  CommonSelectInput,
+  CommonText,
   CommonTextArea,
   CommonTextInput,
-  CommonSelectInput,
 } from "./CommonFormFields";
 
 // --- Test Common Text ---
@@ -37,19 +37,19 @@ describe("CommonLabel", () => {
   it("Renders with isRequired", () => {
     commonLabelProps.isRequired = true;
     render(<CommonLabel {...commonLabelProps} />);
-    const spanElement = screen.getByText('*');
+    const spanElement = screen.getByText("*");
     expect(spanElement).toBeInTheDocument();
-    expect(spanElement).toHaveClass('text-red');
+    expect(spanElement).toHaveClass("text-red");
   });
   it("Renders with error message", () => {
     const extendedProps = {
-        ...commonLabelProps,
-        validationError: "some error",
-    }
+      ...commonLabelProps,
+      validationError: "some error",
+    };
     render(<CommonLabel {...extendedProps} />);
-    const spanElement = screen.getByText('some error');
+    const spanElement = screen.getByText("some error");
     expect(spanElement).toBeInTheDocument();
-    expect(spanElement).toHaveClass('usa-error-message');
+    expect(spanElement).toHaveClass("usa-error-message");
   });
 });
 
@@ -67,29 +67,34 @@ const commonInputProps = {
 describe("CommonTextInput", () => {
   it("Renders the element with maxLength", () => {
     render(<CommonTextInput {...commonInputProps} />);
-    const element = screen.getByRole('textbox', { name: "Label for Something" });
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
     expect(element).toBeInTheDocument();
-    expect(element).toHaveAttribute('maxLength', '40');
-    expect(element).toHaveValue('');
+    expect(element).toHaveAttribute("maxLength", "40");
+    expect(element).toHaveValue("");
   });
   it("Renders the element with a default value", () => {
     commonInputProps.defaultValue = "Prefilled text";
     render(<CommonTextInput {...commonInputProps} />);
-    const element = screen.getByRole('textbox', { name: "Label for Something" });
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
     expect(element).toBeInTheDocument();
-    expect(element).toHaveAttribute('maxLength', '40');
-    expect(element).toHaveValue('Prefilled text');
+    expect(element).toHaveAttribute("maxLength", "40");
+    expect(element).toHaveValue("Prefilled text");
   });
   it("Renders the element and handle onChange", () => {
     render(<CommonTextInput {...commonInputProps} />);
-    const element = screen.getByRole('textbox', { name: "Label for Something" });
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
     expect(element).toBeInTheDocument();
     // Simulate a change event and test if our variable changed
-    fireEvent.change(element, { target: { value: 'Hello World' } });
-    expect(textValue).toBe('Hello World');
+    fireEvent.change(element, { target: { value: "Hello World" } });
+    expect(textValue).toBe("Hello World");
   });
-});  
-
+});
 
 // --- Test Common Textarea ---
 let bigTextValue = "";
@@ -104,37 +109,42 @@ const commonTextAreaProps = {
 };
 describe("CommonTextArea", () => {
   it("Renders the element with maxLength", () => {
-    commonTextAreaProps.defaultValue = "";     // clear the text from reused props
+    commonTextAreaProps.defaultValue = ""; // clear the text from reused props
     render(<CommonTextArea {...commonTextAreaProps} />);
-    const element = screen.getByRole('textbox', { name: "Label for Something" });
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
     expect(element).toBeInTheDocument();
-    expect(element).toHaveAttribute('maxLength', '40');
-    expect(element).toHaveValue('');
+    expect(element).toHaveAttribute("maxLength", "40");
+    expect(element).toHaveValue("");
   });
   it("Renders the element with a default value", () => {
     commonTextAreaProps.defaultValue = "Prefilled text 2";
     render(<CommonTextArea {...commonTextAreaProps} />);
-    const element = screen.getByRole('textbox', { name: "Label for Something" });
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
     expect(element).toBeInTheDocument();
-    expect(element).toHaveValue('Prefilled text 2');
+    expect(element).toHaveValue("Prefilled text 2");
   });
   it("Renders the element and handle onChange", () => {
     render(<CommonTextArea {...commonTextAreaProps} />);
-    const element = screen.getByRole('textbox', { name: "Label for Something" });
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
     expect(element).toBeInTheDocument();
     // Simulate a change event and test if our variable changed
-    fireEvent.change(element, { target: { value: 'Hello World 2' } });
-    expect(bigTextValue).toBe('Hello World 2');
+    fireEvent.change(element, { target: { value: "Hello World 2" } });
+    expect(bigTextValue).toBe("Hello World 2");
   });
-});  
-
+});
 
 // --- Test Common Select ---
 const fakeId = "456-XYZ";
 const fakeAgencies = {
-    '123-ABC': 'Agency Alpha',
-    '456-XYZ': 'Agency Beta' 
-  };
+  "123-ABC": "Agency Alpha",
+  "456-XYZ": "Agency Beta",
+};
 let selectedValue = "";
 const onSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
   selectedValue = e.target.value;
@@ -147,43 +157,58 @@ const commonSelectProps = {
 describe("CommonSelectInput", () => {
   it("Renders the element with a list of options", () => {
     render(<CommonSelectInput {...commonSelectProps} />);
-    expect( screen.getByRole('option', { name: 'Agency Alpha' }) ).toBeInTheDocument();
-    expect( screen.getByRole('option', { name: 'Agency Beta' }) ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: "Agency Alpha" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: "Agency Beta" }),
+    ).toBeInTheDocument();
   });
   it("Renders the element with a default selection", () => {
     const extendedProps = {
-        ...commonSelectProps,
-        defaultSelection: fakeId,
-    }
+      ...commonSelectProps,
+      defaultSelection: fakeId,
+    };
     render(<CommonSelectInput {...extendedProps} />);
-    const selectedOption = screen.getByRole('option', { name: 'Agency Beta', selected: true });
+    const selectedOption = screen.getByRole("option", {
+      name: "Agency Beta",
+      selected: true,
+    });
     expect(selectedOption).toBeInTheDocument();
   });
   it("Renders the element with a a custom 'please select' text", () => {
     const myText = "Please select an agency";
     const extendedProps = {
-        ...commonSelectProps,
-        pleaseSelectText: myText,
-    }
+      ...commonSelectProps,
+      pleaseSelectText: myText,
+    };
     render(<CommonSelectInput {...extendedProps} />);
-    const element = screen.getByRole('option', { name: myText });
+    const element = screen.getByRole("option", { name: myText });
     expect(element).toBeInTheDocument();
     expect(element).toHaveValue("");
   });
   it("Renders the element and handle onSelectionChange", async () => {
     const extendedProps = {
-        ...commonSelectProps,
-        defaultSelection: "456-XYZ",
-    }
+      ...commonSelectProps,
+      defaultSelection: "456-XYZ",
+    };
     render(<CommonSelectInput {...extendedProps} />);
-    const selectedOption = screen.getByRole('option', { name: 'Agency Beta', selected: true });
+    const selectedOption = screen.getByRole("option", {
+      name: "Agency Beta",
+      selected: true,
+    });
     expect(selectedOption).toBeInTheDocument();
 
     // Simulate a user selecting an option
-    const element = screen.getByRole('combobox', { name: "Label for Something" });
-    await userEvent.selectOptions(element, 'Agency Alpha');
-    const newSelectedOption = screen.getByRole('option', { name: 'Agency Alpha', selected: true });
+    const element = screen.getByRole("combobox", {
+      name: "Label for Something",
+    });
+    await userEvent.selectOptions(element, "Agency Alpha");
+    const newSelectedOption = screen.getByRole("option", {
+      name: "Agency Alpha",
+      selected: true,
+    });
     expect(newSelectedOption).toBeInTheDocument();
-    expect(selectedValue).toBe('123-ABC');
+    expect(selectedValue).toBe("123-ABC");
   });
-});  
+});

@@ -1,19 +1,19 @@
-import { getSession } from "src/services/auth/session";
-import { UnauthorizedError } from "src/errors";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
+import { UnauthorizedError } from "src/errors";
+import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import Breadcrumbs from "src/components/Breadcrumbs";
 import { fetchUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
-import { CreateOpportunityForm } from "src/components/opportunities/create/CreateOpportunityForm";
 
 import { useTranslations } from "next-intl";
 import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
-import { Alert, GridContainer} from "@trussworks/react-uswds";
+import { Alert, GridContainer } from "@trussworks/react-uswds";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
+import { CreateOpportunityForm } from "src/components/opportunities/create/CreateOpportunityForm";
 
-// Error Message for failed backend calls on page load 
+// Error Message for failed backend calls on page load
 const ErrorMsgWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("CreateOpportunity");
   return (
@@ -23,6 +23,7 @@ const ErrorMsgWrapper = ({ children }: PropsWithChildren) => {
     </GridContainer>
   );
 };
+
 const PageErrorMessage = () => {
   const t = useTranslations("CreateOpportunity");
   return (
@@ -60,11 +61,10 @@ const PageHeader = () => {
   );
 };
 
-
 // --- Main Page ---
 type FormPageProps = {
   params: Promise<{ agencyId: string; locale: string }>;
-}
+};
 async function FormPage({ params }: FormPageProps) {
   const { agencyId } = await params;
   const userSession = await getSession();
@@ -85,19 +85,23 @@ async function FormPage({ params }: FormPageProps) {
     return <PageErrorMessage />;
   }
   // set the default agency if it's valid
-  const defaultAgency = userAgencies.find((agency) => agency.agency_id.toString() === agencyId);
+  const defaultAgency = userAgencies.find(
+    (agency) => agency.agency_id.toString() === agencyId,
+  );
   const defaultAgencyId = defaultAgency?.agency_id.toString() ?? "";
   // convert to key-value list for the combobox
-  type AgencyMap = { [key: string]: string };
-  const mappedAgencies: AgencyMap = userAgencies.reduce((accumulator, agency) => {
-    accumulator[agency.agency_id] = agency.agency_name;
-    return accumulator;
-  }, {} as AgencyMap);
+  const mappedAgencies: Record<string, string> = userAgencies.reduce(
+    (accumulator, agency) => {
+      accumulator[agency.agency_id] = agency.agency_name;
+      return accumulator;
+    },
+    {} as Record<string, string>,
+  );
 
   return (
     <>
       <GridContainer>
-        <PageHeader/>
+        <PageHeader />
         <CreateOpportunityForm
           defaultAgencyId={defaultAgencyId}
           userAgencies={mappedAgencies}
@@ -105,9 +109,7 @@ async function FormPage({ params }: FormPageProps) {
       </GridContainer>
     </>
   );
-
 }
-
 
 export default withFeatureFlag<FormPageProps, never>(
   FormPage,
