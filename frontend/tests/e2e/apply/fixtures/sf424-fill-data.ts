@@ -32,12 +32,10 @@ export const sf424HappyPathTestData = {
   assistance_listing_program_title: "Technical Agricultural Assistance",
   areas_affected_attachment: "tests/e2e/test-upload-files/Test-data.docx",
   project_title: "Project Title test data",
-  additional_project_title_attachment:
-    "Test-data.docx",
+  additional_project_title_attachment: "Test-data.docx",
   congressional_district_applicant: "00-000",
   congressional_district_program_project: "00-000",
-  additional_congressional_attachment:
-    "Test-data.docx",
+  additional_congressional_attachment: "Test-data.docx",
   project_start_date: "2030-10-01",
   project_end_date: "2036-10-31",
   federal_estimated_funding: "1000000",
