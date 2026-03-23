@@ -54,7 +54,7 @@ def get_application_zip_response(
             application_submission.application.competition.opportunity.agency_record,
         )
         try:
-            filestream = file_util.open_stream(application_submission.download_path, mode="rb")
+            filestream = file_util.open_stream(application_submission.file_location, mode="rb")
             schema._mtom_file_stream = filestream
         except ClientError:
             logger.info(
