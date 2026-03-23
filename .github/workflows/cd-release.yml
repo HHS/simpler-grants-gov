@@ -95,6 +95,8 @@ jobs:
     name: E2E Staging (on Deploy)
     uses: ./.github/workflows/e2e-staging.yml
     with:
+      version: main
+      target: staging
       playwright_tags: "@core-regression"
 
   # =====================================================
