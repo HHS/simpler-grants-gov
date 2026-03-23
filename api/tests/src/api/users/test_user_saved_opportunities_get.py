@@ -191,7 +191,47 @@ def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_sa
 
     assert len(data) == 1
     assert data[0]["opportunity_id"] == str(user_saved_opp.opportunity_id)
-    assert "saved_to_organizations" in data[0]
+    assert data[0]["saved_to_organizations"] == []
+
+
+def test_user_get_saved_opportunities_with_empty_org_filter_returns_only_user_saves_and_correct_saved_to_organizations(
+    client, enable_factory_create, db_session
+):
+    """Test that when organization_ids is empty, only user saved opportunities should be returned
+    Also assert that the saved_to_organizations property includes appropriate data.
+    """
+    opportunity = NATURE
+
+    # Org saved opp
+    user, org, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+    OrganizationSavedOpportunityFactory.create(organization=org, opportunity=opportunity)
+
+    # User saved opp
+    user_saved_opp = UserSavedOpportunityFactory.create(user=user, opportunity=opportunity)
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={
+            "filters": {"organization_ids": {"one_of": []}},
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+
+    assert len(data) == 1
+    assert data[0]["opportunity_id"] == str(user_saved_opp.opportunity_id)
+    assert data[0]["saved_to_organizations"] == [
+        {
+            "organization_id": str(org.organization_id),
+            "organization_name": org.sam_gov_entity.legal_business_name,
+        }
+    ]
 
 
 @pytest.mark.parametrize(
