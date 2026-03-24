@@ -97,7 +97,7 @@ from statemachine import Event
 from statemachine.states import States
 
 from src.workflow.event.state_machine_event import StateMachineEvent
-
+from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.base_state_machine import BaseStateMachine
 
 # This register_workflow decorator makes it so your
