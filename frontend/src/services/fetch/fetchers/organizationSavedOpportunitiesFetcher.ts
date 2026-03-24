@@ -43,7 +43,7 @@ export const deleteSavedOpportunityForOrganization = async ({
   });
 };
 
-export const getSavedOpportunitiesForOrganization = async (
+export const getAllSavedOpportunities = async (
   organizationId: string,
 ): Promise<MinimalOpportunity[]> => {
   const session = await getSession();

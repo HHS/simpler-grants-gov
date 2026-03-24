@@ -2,9 +2,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { mockOpportunity } from "src/utils/testing/fixtures";
 
-import React from "react";
-
-import SearchResultsListItem from "src/components/search/SearchResultsListItem";
+import SearchResultsListItem, {
+  updateIsSharedWithOrganizationEnabled,
+} from "./SearchResultsListItem";
 
 describe("SearchResultsListItem", () => {
   it("should not have basic accessibility issues", async () => {
@@ -22,6 +22,7 @@ describe("SearchResultsListItem", () => {
   });
 
   it("renders share with opportunity link", () => {
+    updateIsSharedWithOrganizationEnabled(true);
     render(
       <SearchResultsListItem
         index={1}

@@ -13,6 +13,8 @@ import {
   useTranslationsMock,
 } from "src/utils/testing/intlMocks";
 
+import { updateIsSharedWithOrganizationEnabled } from "src/components/search/SearchResultsListItem";
+
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
@@ -139,6 +141,7 @@ describe("Saved Opportunities page", () => {
   });
 
   it("renders a list of saved opportunities and displays Share with organizations link", async () => {
+    updateIsSharedWithOrganizationEnabled(true);
     savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
     opportunity.mockResolvedValue({ data: mockOpportunity });
     const component = await SavedOpportunities({
@@ -160,6 +163,7 @@ describe("Saved Opportunities page", () => {
   });
 
   it("renders status filter when there are saved opportunities", async () => {
+    updateIsSharedWithOrganizationEnabled(true);
     savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
     opportunity.mockResolvedValue({ data: mockOpportunity });
     const component = await SavedOpportunities({
@@ -203,6 +207,7 @@ describe("Saved Opportunities page", () => {
   });
 
   it("shows all opportunities when no status filter is applied", async () => {
+    updateIsSharedWithOrganizationEnabled(true);
     const forecastedOpportunity: BaseOpportunity = {
       ...mockOpportunity,
       opportunity_id: "forecasted-opp-id",
