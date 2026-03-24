@@ -294,3 +294,21 @@ export NEW_RELIC_REGION="US" # Always "US".
 ```
 
 You will then be able to interact with New Relic via Terraform. There's some New Relic Terraform configuration inside of the `infra/accounts/` folder for example. From this point you can use normal Terraform CLI commands to interact with New Relic, `terraform init` `terraform apply` etc.
+
+### Metabase Version Upgrade steps are below: 
+
+#### To Note: We do not push any new image into ecr for the metabase upgrade as the images are pulled directly from Metabase's docker hub repository. 
+
+```
+cd infra/analytics/metabase
+
+terraform init --reconfigure --backend-config="dev.s3.tfbackend"
+
+terraform apply -var="image_tag=<target_version_number_here>"
+```
+
+Version numbers are prefixed with the letter "v". For example, if we wanted to upgrade to version 1.55.22 the terraform apply command would be: 
+
+```
+terraform apply -var="image_tag=v1.55.22"
+```

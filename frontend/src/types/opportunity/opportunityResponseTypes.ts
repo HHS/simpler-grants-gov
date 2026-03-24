@@ -76,6 +76,7 @@ export interface BaseOpportunity extends MinimalOpportunity {
   summary: Summary;
   top_level_agency_name: string | null;
   updated_at: string;
+  saved_to_organizations?: SavedToOrganization[];
 }
 
 export interface OpportunityDetail extends BaseOpportunity {

@@ -166,6 +166,39 @@ describe("AwardRecommendationPage", () => {
       );
     });
 
+    it("displays recommendation method field in recommendation section", async () => {
+      const component = await AwardRecommendationPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("recommendationMethod.label"),
+      ).toBeVisible();
+    });
+
+    it("displays recommendation method details field in recommendation section", async () => {
+      const component = await AwardRecommendationPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("recommendationMethodDetails.label"),
+      ).toBeVisible();
+    });
+
+    it("displays other key information field in recommendation section", async () => {
+      const component = await AwardRecommendationPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("otherKeyInformation.label"),
+      ).toBeVisible();
+    });
+
     it("handles 404 error gracefully when opportunity not found", async () => {
       const consoleSpy = jest.spyOn(console, "error").mockImplementation();
       jest

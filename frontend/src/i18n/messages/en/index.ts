@@ -439,6 +439,11 @@ export const messages = {
       navTitle: "Sections in this form",
       unsavedChangesWarning:
         "You have unsaved changes or attachments that will be lost if you select OK.",
+      fieldListWidget: {
+        entry: "Entry",
+        delete: "Delete",
+        add: "Add entry",
+      },
     },
     transferOwnershipModal: {
       title: "Transfer application ownership",
@@ -1871,8 +1876,11 @@ export const messages = {
       approved: "Approved",
     },
     heroButtons: {
-      save: "Save and finish later",
+      save: "Save",
       create: "Create",
+      edit: "Edit",
+      preview: "Preview",
+      submitForReview: "Submit for review",
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
@@ -1902,6 +1910,22 @@ export const messages = {
     errorHeadingOppurtunity: "Error fetching opportunity details",
     oppurtunityFetchError:
       "Error fetching opportunity data. Please try refreshing the page.",
+    recommendationMethod: {
+      label: "Recommendation method",
+      description: "Choose the method you'll use to rate",
+      meritReviewOnly: "Merit review ranking only",
+      meritReviewOther: "Merit review ranking with other factors",
+    },
+    recommendationMethodDetails: {
+      label: "Recommendation method details",
+      description:
+        "Add any additional information - including the selection factors used in the NOFO",
+    },
+    otherKeyInformation: {
+      label: "Other key information",
+      description:
+        "Add any relevant information related to this reviewer and decision-maker for this opportunity",
+    },
   },
   InviteLegacyUsers: {
     dataLoadingError:
