@@ -67,7 +67,7 @@ test(
       testInfo,
       page,
       PROJECT_NARRATIVE_ATTACHMENT_FORM_CONFIG,
-      projectNarrativeAttachmentHappyPathTestData(),
+      projectNarrativeAttachmentHappyPathTestData,
       false,
     );
 
