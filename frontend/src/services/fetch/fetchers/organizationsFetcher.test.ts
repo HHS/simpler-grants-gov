@@ -315,7 +315,7 @@ describe("updateOrganizationUserRoles", () => {
     expect(fetchOrganizationMock).toHaveBeenCalledWith({
       subPath: "org-123/users/user-1",
       additionalHeaders: {
-        "X-SGG-TOKEN": "faketoken",
+        "X-SGG-Token": "faketoken",
       },
       body: {
         role_ids: ["role-1", "role-2"],

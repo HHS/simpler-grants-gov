@@ -178,7 +178,7 @@ export const updateOrganizationUserRoles = async (
 
   const resp = await fetchOrganizationWithMethod("PUT")({
     subPath: `${organizationId}/users/${userId}`,
-    additionalHeaders: { "X-SGG-TOKEN": session.token },
+    additionalHeaders: { "X-SGG-Token": session.token },
     body: { role_ids: roleIds },
   });
 
@@ -205,7 +205,7 @@ export const removeOrganizationUser = async (
 
   const resp = await fetchOrganizationWithMethod("DELETE")({
     subPath: `${organizationId}/users/${userId}`,
-    additionalHeaders: { "X-SGG-TOKEN": session.token },
+    additionalHeaders: { "X-SGG-Token": session.token },
   });
 
   if (!resp.ok) {

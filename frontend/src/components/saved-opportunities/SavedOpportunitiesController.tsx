@@ -8,8 +8,8 @@ import { UserOrganization } from "src/types/userTypes";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ModalRef } from "@trussworks/react-uswds";
 
-import { ShareOpportunityToOrganizationsModal } from "src/components/opportunities/ShareOpportunityToOrganizationsModal";
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
+import { ShareOpportunityToOrganizationsModal } from "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal";
 
 interface SavedOpportunitiesControllerProps {
   opportunities: BaseOpportunity[];
@@ -19,11 +19,16 @@ export function SavedOpportunitiesController({
   opportunities,
 }: SavedOpportunitiesControllerProps) {
   const modalRef = useRef<ModalRef>(null);
+  const lastShareButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  const [
-    selectedOpportunity,
-    // setSelectedOpportunity
-  ] = useState<BaseOpportunity | null>(null);
+  const [opportunitiesState, setOpportunitiesState] =
+    useState<BaseOpportunity[]>(opportunities);
+
+  const [selectedOpportunityId, setSelectedOpportunityId] = useState<
+    string | null
+  >(null);
+
+  const [shouldOpenModal, setShouldOpenModal] = useState<boolean>(false);
 
   const { clientFetch: fetchUserOrganizations } = useClientFetch<
     UserOrganization[]
@@ -34,6 +39,10 @@ export function SavedOpportunitiesController({
     useState<boolean>(false);
   const [hasOrganizationsError, setHasOrganizationsError] =
     useState<boolean>(false);
+
+  useEffect(() => {
+    setOpportunitiesState(opportunities);
+  }, [opportunities]);
 
   useEffect(() => {
     setIsLoadingOrganizations(true);
@@ -52,27 +61,80 @@ export function SavedOpportunitiesController({
       });
   }, [fetchUserOrganizations]);
 
+  const selectedOpportunity = useMemo(() => {
+    if (!selectedOpportunityId) {
+      return null;
+    }
+
+    return (
+      opportunitiesState.find(
+        (opportunity) => opportunity.opportunity_id === selectedOpportunityId,
+      ) ?? null
+    );
+  }, [opportunitiesState, selectedOpportunityId]);
+
+  useEffect(() => {
+    if (shouldOpenModal && selectedOpportunityId) {
+      modalRef.current?.toggleModal();
+      setShouldOpenModal(false);
+    }
+  }, [selectedOpportunityId, shouldOpenModal]);
+
   const savedToOrganizationIds = useMemo<Set<string>>(() => {
     const savedToOrganizations =
       selectedOpportunity?.saved_to_organizations ?? [];
-    return new Set(savedToOrganizations.map((entry) => entry.organization_id));
+
+    return new Set(
+      savedToOrganizations.map(
+        (savedOrganization) => savedOrganization.organization_id,
+      ),
+    );
   }, [selectedOpportunity]);
 
-  //   const handleShareClick = (opportunity: BaseOpportunity) => {
-  //     setSelectedOpportunity(opportunity);
-  //     modalRef.current?.toggleModal();
-  //   };
+  const handleShareClick = (
+    opportunity: BaseOpportunity,
+    buttonElement: HTMLButtonElement,
+  ) => {
+    lastShareButtonRef.current = buttonElement;
+    setSelectedOpportunityId(opportunity.opportunity_id);
+    setShouldOpenModal(true);
+  };
+
+  const handleSavedOrganizationsChange = (organizationIds: Set<string>) => {
+    if (!selectedOpportunityId) {
+      return;
+    }
+
+    const nextSavedToOrganizations = Array.from(organizationIds).map(
+      (organizationId) => ({
+        organization_id: organizationId,
+      }),
+    );
+
+    setOpportunitiesState((previousOpportunities) =>
+      previousOpportunities.map((opportunity) =>
+        opportunity.opportunity_id === selectedOpportunityId
+          ? {
+              ...opportunity,
+              saved_to_organizations: nextSavedToOrganizations,
+            }
+          : opportunity,
+      ),
+    );
+  };
 
   return (
     <>
       <ul className="usa-list--unstyled">
-        {opportunities.map((opportunity, index) => (
+        {opportunitiesState.map((opportunity, index) => (
           <li key={opportunity.opportunity_id}>
             <SearchResultsListItem
               opportunity={opportunity}
               saved={true}
               index={index}
-              // onShareClick={() => handleShareClick(opportunity)}
+              onShareClick={(buttonElement: HTMLButtonElement) =>
+                handleShareClick(opportunity, buttonElement)
+              }
             />
           </li>
         ))}
@@ -84,7 +146,8 @@ export function SavedOpportunitiesController({
         savedToOrganizationIds={savedToOrganizationIds}
         isLoadingOrganizations={isLoadingOrganizations}
         hasOrganizationsError={hasOrganizationsError}
-        opportunityTitle={selectedOpportunity?.opportunity_title ?? null}
+        selectedOpportunity={selectedOpportunity}
+        onSavedOrganizationsChange={handleSavedOrganizationsChange}
       />
     </>
   );
