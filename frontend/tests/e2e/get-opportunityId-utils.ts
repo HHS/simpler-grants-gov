@@ -4,16 +4,6 @@ import {
 } from "./opportunity-id-data";
 import playwrightEnv from "./playwright-env";
 
-const { targetEnv } = playwrightEnv;
-
-// Select opportunityID based on targetEnv
-const opportunityId =
-  targetEnv === "local"
-    ? testdata_local_environment.opportunityID
-    : testdata_staging_environment.opportunityID;
-
-export { opportunityId };
-
 export function getOpportunityId() {
   const { targetEnv } = playwrightEnv;
   return targetEnv === "local"
