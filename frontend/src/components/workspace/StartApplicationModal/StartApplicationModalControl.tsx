@@ -35,6 +35,7 @@ export const StartApplicationModalControl = ({
   const { clientFetch: fetchCompetition } = useClientFetch<Competition>(
     "Error fetching competition",
   );
+
   const t = useTranslations("OpportunityListing.startApplicationModal");
   const headerTranslation = useTranslations("HeaderLoginModal");
   const [organizationsLoading, setOrganizationsLoading] = useState<boolean>();
