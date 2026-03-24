@@ -99,9 +99,9 @@ This focuses on a common case like approvals, but is generally applicable.
 sequenceDiagram
     participant frontend
     participant event_api
-    participant sqs
+    participant sqs@{ "type" : "queue" }
     participant workflow_service
-    participant database
+    participant database@{ "type" : "database" }
     
     Note over frontend, database: Sending an event
     frontend->>event_api: Approval Event
