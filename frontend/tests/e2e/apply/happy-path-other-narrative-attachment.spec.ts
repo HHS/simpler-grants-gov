@@ -64,7 +64,7 @@ test(
       testInfo,
       page,
       OTHER_NARRATIVE_ATTACHMENT_FORM_CONFIG,
-      otherNarrativeAttachmentHappyPathTestData(),
+      otherNarrativeAttachmentHappyPathTestData,
       false,
     );
 
