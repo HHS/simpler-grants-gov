@@ -63,7 +63,7 @@ test(
       testInfo,
       page,
       BUDGET_NARRATIVE_ATTACHMENT_FORM_CONFIG,
-      budgetNarrativeAttachmentHappyPathTestData(),
+      budgetNarrativeAttachmentHappyPathTestData,
       false,
     );
 
