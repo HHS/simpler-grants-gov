@@ -21,22 +21,22 @@ import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
-from src.api.common_grants.common_grants_schemas import (
+from src.api.common_grants.common_grants_utils import with_cg_error_handler
+from src.api.common_grants.schemas.common_grants_schemas import (
     OpportunitiesListResponse as OpportunitiesListResponseSchema,
 )
-from src.api.common_grants.common_grants_schemas import (
+from src.api.common_grants.schemas.common_grants_schemas import (
     OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
 )
-from src.api.common_grants.common_grants_schemas import (
+from src.api.common_grants.schemas.common_grants_schemas import (
     OpportunityResponse as OpportunityResponseSchema,
 )
-from src.api.common_grants.common_grants_schemas import (
+from src.api.common_grants.schemas.common_grants_schemas import (
     OpportunitySearchRequest as OpportunitySearchRequestSchema,
 )
-from src.api.common_grants.common_grants_schemas import (
+from src.api.common_grants.schemas.common_grants_schemas import (
     PaginatedQueryParams as PaginatedQueryParamsSchema,
 )
-from src.api.common_grants.common_grants_utils import with_cg_error_handler
 from src.auth.api_user_key_auth import api_user_key_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService

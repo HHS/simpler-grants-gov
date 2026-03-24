@@ -55,7 +55,7 @@ class legacySerialId(CustomField):
 
     name = fields.String(required=True, metadata={"example": "legacySerialId"})
     fieldType = fields.String(required=True, metadata={"example": "integer"})
-    value = fields.Raw(required=True, metadata={"example": "12345"})
+    value = fields.Integer(required=True, metadata={"example": 12345})
     description = fields.String(
         allow_none=True,
         metadata={
@@ -69,7 +69,7 @@ class federalOpportunityNumber(CustomField):
 
     name = fields.String(required=True, metadata={"example": "federalOpportunityNumber"})
     fieldType = fields.String(required=True, metadata={"example": "string"})
-    value = fields.Raw(required=True, metadata={"example": "ABC-123-XYZ-001"})
+    value = fields.String(required=True, metadata={"example": "ABC-123-XYZ-001"})
     description = fields.String(
         allow_none=True,
         metadata={"example": "The federal opportunity number assigned to this grant opportunity"},
@@ -88,7 +88,7 @@ class assistanceListings(CustomField):
 
     name = fields.String(required=True, metadata={"example": "assistanceListings"})
     fieldType = fields.String(required=True, metadata={"example": "array"})
-    value = fields.Raw()
+    value = fields.List(fields.Nested(AssistanceListingValue))
     description = fields.String(
         allow_none=True,
         metadata={
@@ -112,7 +112,7 @@ class agency(CustomField):
 
     name = fields.String(required=True, metadata={"example": "agency"})
     fieldType = fields.String(required=True, metadata={"example": "object"})
-    value = fields.Raw(required=True)
+    value = fields.Nested(AgencyValue, required=True)
     description = fields.String(
         allow_none=True,
         metadata={"example": "Information about the agency offering this opportunity"},
@@ -139,7 +139,7 @@ class attachments(CustomField):
 
     name = fields.String(required=True, metadata={"example": "attachments"})
     fieldType = fields.String(required=True, metadata={"example": "array"})
-    value = fields.Raw()
+    value = fields.List(fields.Nested(AttachmentValue))
     description = fields.String(
         allow_none=True,
         metadata={
@@ -153,7 +153,7 @@ class federalFundingSource(CustomField):
 
     name = fields.String(required=True, metadata={"example": "federalFundingSource"})
     fieldType = fields.String(required=True, metadata={"example": "string"})
-    value = fields.Raw(required=True, metadata={"example": "discretionary"})
+    value = fields.String(required=True, metadata={"example": "discretionary"})
     description = fields.String(
         allow_none=True,
         metadata={"example": "The category type of the grant opportunity"},
@@ -179,7 +179,7 @@ class contactInfo(CustomField):
 
     name = fields.String(required=True, metadata={"example": "contactInfo"})
     fieldType = fields.String(required=True, metadata={"example": "object"})
-    value = fields.Raw(required=True)
+    value = fields.Nested(AgencyContactValue, required=True)
     description = fields.String(
         allow_none=True,
         metadata={"example": "Contact information for the agency managing this opportunity"},
@@ -199,7 +199,7 @@ class additionalInfo(CustomField):
 
     name = fields.String(required=True, metadata={"example": "additionalInfo"})
     fieldType = fields.String(required=True, metadata={"example": "object"})
-    value = fields.Raw(required=True)
+    value = fields.Nested(AdditionalInfoValue, required=True)
     description = fields.String(
         allow_none=True,
         metadata={
@@ -213,7 +213,7 @@ class costSharing(CustomField):
 
     name = fields.String(required=True, metadata={"example": "costSharing"})
     fieldType = fields.String(required=True, metadata={"example": "boolean"})
-    value = fields.Raw(required=True, metadata={"example": True})
+    value = fields.Boolean(required=True, metadata={"example": True})
     description = fields.String(
         allow_none=True,
         metadata={
@@ -227,7 +227,7 @@ class fiscalYear(CustomField):
 
     name = fields.String(required=True, metadata={"example": "fiscalYear"})
     fieldType = fields.String(required=True, metadata={"example": "number"})
-    value = fields.Raw(required=True, metadata={"example": 2026})
+    value = fields.Integer(required=True, metadata={"example": 2026})
     description = fields.String(
         allow_none=True,
         metadata={"example": "The fiscal year associated with this opportunity"},

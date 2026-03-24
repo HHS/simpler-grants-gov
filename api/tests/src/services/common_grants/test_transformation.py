@@ -20,7 +20,13 @@ from common_grants_sdk.schemas.pydantic import (
 )
 from freezegun import freeze_time
 
-from src.api.common_grants.common_grants_schemas import OpportunityCustomFields
+from src.api.common_grants.schemas.common_grants_pydantic_custom_fields import (
+    AgencyField,
+    CostSharingField,
+    FiscalYearField,
+    LegacySerialIdField,
+)
+from src.api.common_grants.schemas.common_grants_schemas import OpportunityCustomFields
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.services.common_grants.transformation import (
     build_filter_info,
@@ -32,6 +38,7 @@ from src.services.common_grants.transformation import (
     transform_sorting_from_cg,
     transform_status_from_cg,
     transform_status_to_cg,
+    validate_custom_field,
     validate_url,
 )
 
@@ -186,38 +193,33 @@ class TestTransformation:
         assert result.custom_fields["federalFundingSource"].value == "Mandatory"
 
         assert "agency" in result.custom_fields
-        assert result.custom_fields["agency"].value["code"] == "A2345"
-        assert result.custom_fields["agency"].value["name"] == "Testing Agency"
-        assert result.custom_fields["agency"].value["parentName"] == "Testing top level agency"
-        assert result.custom_fields["agency"].value["parentCode"] == "A"
+        assert result.custom_fields["agency"].value.code == "A2345"
+        assert result.custom_fields["agency"].value.name == "Testing Agency"
+        assert result.custom_fields["agency"].value.parentName == "Testing top level agency"
+        assert result.custom_fields["agency"].value.parentCode == "A"
 
         assert "assistanceListings" in result.custom_fields
         assert len(result.custom_fields["assistanceListings"].value) == 1
         assert (
-            result.custom_fields["assistanceListings"].value[0]["assistanceListingNumber"]
-            == "10.557"
+            result.custom_fields["assistanceListings"].value[0].assistanceListingNumber == "10.557"
         )
         assert (
-            result.custom_fields["assistanceListings"].value[0]["programTitle"]
+            result.custom_fields["assistanceListings"].value[0].programTitle
             == "Special Supplemental Nutrition Program"
         )
 
         assert "contactInfo" in result.custom_fields
         assert (
-            result.custom_fields["contactInfo"].value["description"]
+            result.custom_fields["contactInfo"].value.description
             == "Contact the grants office for questions"
         )
-        assert result.custom_fields["contactInfo"].value["emailAddress"] == "grants@test-agency.gov"
-        assert (
-            result.custom_fields["contactInfo"].value["emailDescription"] == "Grants Office Email"
-        )
+        assert result.custom_fields["contactInfo"].value.emailAddress == "grants@test-agency.gov"
+        assert result.custom_fields["contactInfo"].value.emailDescription == "Grants Office Email"
 
         assert "additionalInfo" in result.custom_fields
+        assert result.custom_fields["additionalInfo"].value.url == "https://example.com/opportunity"
         assert (
-            result.custom_fields["additionalInfo"].value["url"] == "https://example.com/opportunity"
-        )
-        assert (
-            result.custom_fields["additionalInfo"].value["description"]
+            result.custom_fields["additionalInfo"].value.description
             == "Additional opportunity information"
         )
 
@@ -230,11 +232,11 @@ class TestTransformation:
         assert "attachments" in result.custom_fields
         assert len(result.custom_fields["attachments"].value) == 1
         attachment = result.custom_fields["attachments"].value[0]
-        assert attachment["downloadUrl"] == "https://example.com/opportunity"
-        assert attachment["name"] == "nofo.pdf"
-        assert attachment["description"] == "Notice of Funding Opportunity"
-        assert attachment["sizeInBytes"] == 204800
-        assert attachment["mimeType"] == "application/pdf"
+        assert attachment.downloadUrl == "https://example.com/opportunity"
+        assert attachment.name == "nofo.pdf"
+        assert attachment.description == "Notice of Funding Opportunity"
+        assert attachment.sizeInBytes == 204800
+        assert attachment.mimeType == "application/pdf"
 
     def test_url_validation_and_fixing(self):
         """Test that URLs are properly validated and fixed."""
@@ -1066,30 +1068,24 @@ class TestPopulateCustomFields:
         assert result["federalFundingSource"].value == "Discretionary"
 
         assert result["agency"].field_type == CustomFieldType.OBJECT
-        assert result["agency"].value == {
-            "code": "HHS",
-            "name": "Dept of Health and Human Services",
-            "parentName": "Health and Human Services",
-            "parentCode": "HHS",
-        }
+        assert result["agency"].value.code == "HHS"
+        assert result["agency"].value.name == "Dept of Health and Human Services"
+        assert result["agency"].value.parentName == "Health and Human Services"
+        assert result["agency"].value.parentCode == "HHS"
 
         assert result["assistanceListings"].field_type == CustomFieldType.ARRAY
-        assert result["assistanceListings"].value == [
-            {"assistanceListingNumber": "93.001", "programTitle": "Health Research"}
-        ]
+        assert len(result["assistanceListings"].value) == 1
+        assert result["assistanceListings"].value[0].assistanceListingNumber == "93.001"
+        assert result["assistanceListings"].value[0].programTitle == "Health Research"
 
         assert result["contactInfo"].field_type == CustomFieldType.OBJECT
-        assert result["contactInfo"].value == {
-            "description": "Contact the grants office",
-            "emailAddress": "grants@hhs.gov",
-            "emailDescription": "Grants Office Email",
-        }
+        assert result["contactInfo"].value.description == "Contact the grants office"
+        assert result["contactInfo"].value.emailAddress == "grants@hhs.gov"
+        assert result["contactInfo"].value.emailDescription == "Grants Office Email"
 
         assert result["additionalInfo"].field_type == CustomFieldType.OBJECT
-        assert result["additionalInfo"].value == {
-            "url": "https://hhs.gov/grants",
-            "description": "More info",
-        }
+        assert result["additionalInfo"].value.url == "https://hhs.gov/grants"
+        assert result["additionalInfo"].value.description == "More info"
 
         assert result["fiscalYear"].field_type == CustomFieldType.NUMBER
         assert result["fiscalYear"].value == 2024
@@ -1100,11 +1096,11 @@ class TestPopulateCustomFields:
         assert result["attachments"].field_type == CustomFieldType.ARRAY
         assert len(result["attachments"].value) == 1
         attachment = result["attachments"].value[0]
-        assert attachment["downloadUrl"] == "https://example.com/nofo.pdf"
-        assert attachment["name"] == "nofo.pdf"
-        assert attachment["description"] == "Notice of Funding Opportunity"
-        assert attachment["sizeInBytes"] == 102400
-        assert attachment["mimeType"] == "application/pdf"
+        assert attachment.downloadUrl == "https://example.com/nofo.pdf"
+        assert attachment.name == "nofo.pdf"
+        assert attachment.description == "Notice of Funding Opportunity"
+        assert attachment.sizeInBytes == 102400
+        assert attachment.mimeType == "application/pdf"
 
     def test_missing_optional_fields(self):
         """Test that None and missing values are handled gracefully and produce valid schema output."""
@@ -1151,3 +1147,53 @@ class TestPopulateCustomFields:
         # fields.Raw accepts any value, so malformed types should not produce errors
         assert "legacySerialId" not in errors
         assert "fiscalYear" not in errors
+
+
+class TestValidateCustomField:
+    """Tests for the validate_custom_field helper."""
+
+    def test_returns_field_on_valid_input(self):
+        result = validate_custom_field(LegacySerialIdField, value=12345)
+        assert result is not None
+        assert result.value == 12345
+        assert result.name == "legacySerialId"
+
+    def test_returns_none_on_invalid_type(self):
+        # LegacySerialIdField expects an int, not a string
+        result = validate_custom_field(LegacySerialIdField, value="not-an-integer")
+        assert result is None
+
+    def test_returns_none_on_missing_required_value(self):
+        # value is required on all CustomField subclasses
+        result = validate_custom_field(LegacySerialIdField)
+        assert result is None
+
+    def test_returns_field_with_correct_field_type(self):
+        result = validate_custom_field(CostSharingField, value=True)
+        assert result is not None
+        assert result.field_type == CustomFieldType.BOOLEAN
+
+    def test_returns_field_for_object_value(self):
+        result = validate_custom_field(
+            AgencyField,
+            value={"code": "HHS", "name": "Dept of Health", "parentName": None, "parentCode": None},
+        )
+        assert result is not None
+        assert result.value.code == "HHS"
+
+    def test_returns_none_for_object_missing_required_subfield(self):
+        # AgencyValue requires `code`
+        result = validate_custom_field(
+            AgencyField,
+            value={"name": "Dept of Health"},
+        )
+        assert result is None
+
+    def test_returns_field_for_numeric_value(self):
+        result = validate_custom_field(FiscalYearField, value=2026)
+        assert result is not None
+        assert result.value == 2026
+
+    def test_returns_none_for_invalid_numeric_type(self):
+        result = validate_custom_field(FiscalYearField, value="two-thousand-twenty-six")
+        assert result is None

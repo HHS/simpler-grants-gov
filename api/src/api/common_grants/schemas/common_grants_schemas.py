@@ -7,7 +7,7 @@ organized by category for better maintainability.
 
 from typing import Any
 
-from src.api.common_grants.common_grants_custom_fields import (
+from src.api.common_grants.schemas.common_grants_custom_fields import (
     additionalInfo,
     agency,
     assistanceListings,
