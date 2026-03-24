@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
+import { GridContainer } from "@trussworks/react-uswds";
 
 import DeveloperPageSections from "src/components/developer/DeveloperSections";
 
@@ -17,9 +18,9 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 
 export default function Developer() {
   return (
-    <div>
-      <h1>Developers</h1>
+    <GridContainer className="padding-y-4 grid-container tablet-lg:padding-y-6">
+      <h1 className="margin-bottom-5">Developers</h1>
       <DeveloperPageSections />
-    </div>
+    </GridContainer>
   );
 }
