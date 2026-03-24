@@ -144,7 +144,7 @@ const OpportunitySection = ({
 async function AwardRecommendationEditPageContent({
   params,
 }: AwardRecommendationPageProps) {
-  const { locale, id: awardRecommendationId } = await params;
+  const { id: awardRecommendationId } = await params;
 
   const t = await getTranslations("AwardRecommendation");
 

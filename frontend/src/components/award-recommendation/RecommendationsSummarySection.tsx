@@ -5,7 +5,7 @@ import { AwardRecommendationSummary } from "src/types/awardRecommendationTypes";
 import { useTranslations } from "next-intl";
 import { CharacterCount, Grid } from "@trussworks/react-uswds";
 
-import { SummaryDescriptionDisplay } from "../opportunity/OpportunityDescription";
+import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 
 interface RecommendationsSummarySectionProps {
   mode?: "view" | "edit";
