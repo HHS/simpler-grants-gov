@@ -31,9 +31,7 @@ export function CreateOpportunityForm({
   defaultAgencyId: string;
   userAgencies: { [key: string]: string };
 }) {
-  const t = useTranslations("CreateOpportunity.CreateOpportunityForm");
-  const tg = useTranslations("CommonLabels");
-  const th = useTranslations("CreateOpportunity");
+  const t = useTranslations("CreateOpportunity");
 
   // Define states for required fields and flags to show/hide or enable/disable components
   const [selectedAgencyId, setAgencyId] = useState<string>(defaultAgencyId);
@@ -120,19 +118,19 @@ export function CreateOpportunityForm({
   return (
     <>
       {response?.errorMessage && (
-        <Alert heading={tg("errorHeading")} headingLevel="h2" type="error">
+        <Alert heading={t("errorHeading")} headingLevel="h2" type="error">
           {response?.errorMessage}
         </Alert>
       )}
       {response?.success && (
-        <Alert heading={tg("successHeading")} headingLevel="h2" type="success">
-          {t("successMessage")}
+        <Alert heading={t("successHeading")} headingLevel="h2" type="success">
+          {t("CreateOpportunityForm.successMessage")}
         </Alert>
       )}
 
-      <h2>{th("keyInfo")}</h2>
+      <h2>{t("keyInfo")}</h2>
       <div className="display-flex flex-justify">
-        <div>{th("basicInstructions")}</div>
+        <div>{t("basicInstructions")}</div>
       </div>
 
       <form
@@ -143,33 +141,37 @@ export function CreateOpportunityForm({
           {/* Opportunity Number */}
           <CommonTextInput
             labelId="label-for-opportunityNumber"
-            labelText={t("opportunityNumber")}
-            description={t("opportunityNumberDesc")}
+            labelText={t("CreateOpportunityForm.opportunityNumber")}
+            description={t("CreateOpportunityForm.opportunityNumberDesc")}
             fieldId="opportunityNumber"
             fieldMaxLength={40}
             isRequired={true}
             onTextChange={onOppNbrChange}
             defaultValue={response?.data?.opportunity_number || ""}
           />
-          <CommonText textContent={t("charactersAllowed40")} />
+          <CommonText
+            textContent={t("CreateOpportunityForm.charactersAllowed40")}
+          />
 
           {/* Opportunity Title */}
           <CommonTextArea
             labelId="label-for-opportunityTitle"
-            labelText={t("opportunityTitle")}
-            description={t("opportunityTitleDesc")}
+            labelText={t("CreateOpportunityForm.opportunityTitle")}
+            description={t("CreateOpportunityForm.opportunityTitleDesc")}
             fieldId="opportunityTitle"
             fieldMaxLength={255}
             isRequired={true}
             onTextChange={onOppTitleChange}
             defaultValue={response?.data?.opportunity_title || ""}
           />
-          <CommonText textContent={t("charactersAllowed255")} />
+          <CommonText
+            textContent={t("CreateOpportunityForm.charactersAllowed255")}
+          />
 
           {/* Agency */}
           <CommonSelectInput
             labelId="label-for-agencyId"
-            labelText={t("agency")}
+            labelText={t("CreateOpportunityForm.agency")}
             description={""}
             fieldId="agencyId"
             isRequired={true}
@@ -181,8 +183,8 @@ export function CreateOpportunityForm({
           {/* Category */}
           <CommonSelectInput
             labelId="label-for-category"
-            labelText={t("category")}
-            description={t("categoryDesc")}
+            labelText={t("CreateOpportunityForm.category")}
+            description={t("CreateOpportunityForm.categoryDesc")}
             fieldId="category"
             isRequired={true}
             listKeyValuePairs={categoryList}
@@ -194,8 +196,8 @@ export function CreateOpportunityForm({
           {showExplain && (
             <CommonTextArea
               labelId="label-for-categoryExplanation"
-              labelText={t("categoryExplanation")}
-              description={t("categoryExplanationDesc")}
+              labelText={t("CreateOpportunityForm.categoryExplanation")}
+              description={t("CreateOpportunityForm.categoryExplanationDesc")}
               fieldId="categoryExplanation"
               fieldMaxLength={2000}
               isRequired={true}
@@ -204,7 +206,9 @@ export function CreateOpportunityForm({
             />
           )}
           {showExplain && (
-            <CommonText textContent={t("charactersAllowed255")} />
+            <CommonText
+              textContent={t("CreateOpportunityForm.charactersAllowed255")}
+            />
           )}
         </div>
 
@@ -215,7 +219,7 @@ export function CreateOpportunityForm({
               name="cancel_button"
               className="usa-button--outline"
             >
-              {tg("cancel")}
+              {t("cancel")}
             </Button>
           </Link>
           <Button
@@ -223,7 +227,7 @@ export function CreateOpportunityForm({
             type="submit"
             name="save_button"
           >
-            {tg(isPending ? "pending" : "saveAndContinue")}
+            {t(isPending ? "pending" : "saveAndContinue")}
           </Button>
         </div>
       </form>

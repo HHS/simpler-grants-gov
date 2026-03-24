@@ -1915,6 +1915,11 @@ export const messages = {
     keyInfo: "Key information",
     basicInstructions:
       "Fill out the basic details below to begin. Once you save this information, a draft will be created, allowing you to return at any time to add more details, upload documents, and finalize your opportunity.",
+    cancel: "Cancel",
+    saveAndContinue: "Save and continue",
+    pending: "Pending...",
+    errorHeading: "Error",
+    successHeading: "Success",
     CreateOpportunityForm: {
       opportunityNumber: "Opportunity number",
       opportunityNumberDesc:
@@ -1932,12 +1937,5 @@ export const messages = {
       charactersAllowed255: "255 characters allowed",
       successMessage: "Opportunity started. Continuing shortly...",
     },
-  },
-  CommonLabels: {
-    cancel: "Cancel",
-    saveAndContinue: "Save and continue",
-    pending: "Pending...",
-    errorHeading: "Error",
-    successHeading: "Success",
   },
 };

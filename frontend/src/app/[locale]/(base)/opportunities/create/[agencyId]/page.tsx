@@ -65,7 +65,7 @@ const PageHeader = () => {
 type FormPageProps = {
   params: Promise<{ agencyId: string; locale: string }>;
 };
-async function FormPage({ params }: FormPageProps) {
+async function CreateOpportunityPage({ params }: FormPageProps) {
   const { agencyId } = await params;
   const userSession = await getSession();
 
@@ -112,7 +112,7 @@ async function FormPage({ params }: FormPageProps) {
 }
 
 export default withFeatureFlag<FormPageProps, never>(
-  FormPage,
+  CreateOpportunityPage,
   "opportunitiesListOff",
   () => redirect("/maintenance"),
 );
