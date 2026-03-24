@@ -46,6 +46,9 @@ export const RecommendationSection = ({
                       defaultValue: "Merit review ranking only",
                     })}
                     value="merit-review-only"
+                    defaultChecked={
+                      recommendationMethod === "merit-review-only"
+                    }
                   />
                   <Radio
                     id="merit_review_other"
@@ -54,6 +57,9 @@ export const RecommendationSection = ({
                       defaultValue: "Merit review ranking with other factors",
                     })}
                     value="merit-review-other"
+                    defaultChecked={
+                      recommendationMethod === "merit-review-other"
+                    }
                   />
                 </div>
                 <div className="margin-bottom-3">
@@ -73,7 +79,7 @@ export const RecommendationSection = ({
                     name="award_selection_details"
                     maxLength={500}
                     isTextArea
-                    defaultValue=""
+                    defaultValue={recommendationMethodDetails || ""}
                     rows={6}
                     className="maxw-full"
                     data-testid="award-selection-details-textarea"
@@ -97,7 +103,7 @@ export const RecommendationSection = ({
                     name="other_key_information"
                     maxLength={500}
                     isTextArea
-                    defaultValue=""
+                    defaultValue={otherKeyInformation || ""}
                     rows={6}
                     className="maxw-full"
                     data-testid="other-key-information-textarea"
@@ -132,7 +138,9 @@ export const RecommendationSection = ({
                     defaultValue: "Recommendation method details",
                   })}
                 </p>
-                {recommendationMethodDetails || ""}
+                <SummaryDescriptionDisplay
+                  summaryDescription={recommendationMethodDetails || ""}
+                />
               </div>
               <div className="border-top border-base-lighter margin-top-2 margin-bottom-2" />
               <div className="margin-bottom-3">

@@ -1,4 +1,4 @@
-import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -28,17 +28,16 @@ export type NavigationButtonConfig = {
 export type HeroButtonConfig = ActionButtonConfig | NavigationButtonConfig;
 
 interface AwardRecommendationHeroProps {
-  awardRecommendationId: string;
+  awardRecommendationDetails: AwardRecommendationDetails;
   buttons?: HeroButtonConfig[];
 }
 
 export default async function AwardRecommendationHero({
-  awardRecommendationId,
+  awardRecommendationDetails,
   buttons,
 }: AwardRecommendationHeroProps) {
   const t = await getTranslations("AwardRecommendation");
-  const { recordNumber, datePrepared, status } =
-    await getAwardRecommendationDetails(awardRecommendationId);
+  const { recordNumber, datePrepared, status } = awardRecommendationDetails;
 
   return (
     <div
@@ -94,6 +93,7 @@ export default async function AwardRecommendationHero({
                         key={index}
                         href={button.href}
                         className={`usa-button ${button.outline ? "usa-button--outline" : ""} width-auto`}
+                        prefetch={false}
                       >
                         {button.label}
                       </Link>

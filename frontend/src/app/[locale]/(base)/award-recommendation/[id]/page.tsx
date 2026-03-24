@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
+import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { useTranslations } from "next-intl";
@@ -16,6 +16,7 @@ import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
+import { RecommendationsSummarySection } from "src/components/award-recommendation/RecommendationsSummarySection";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 import { submitAwardRecommendationForReview } from "./actions";
 
@@ -42,15 +43,14 @@ export type AwardRecommendationPageProps = {
 } & WithFeatureFlagProps;
 
 interface OpportunitySectionProps {
-  opportunityData: OpportunityDetail;
-  locale: string;
+  awardRecommendationDetails: AwardRecommendationDetails;
 }
 
 const OpportunitySection = ({
-  opportunityData,
-  locale: _locale,
+  awardRecommendationDetails,
 }: OpportunitySectionProps) => {
   const t = useTranslations("AwardRecommendation");
+  const opportunityData = awardRecommendationDetails.opportunity;
   const fundingOppName =
     opportunityData.opportunity_title || t("fundingOpportunityFallback");
   const fundingOppNumber =
@@ -78,7 +78,7 @@ const OpportunitySection = ({
                     href={`/opportunity/${opportunityData.opportunity_id}`}
                     className="text-decoration-none"
                   >
-                    <p className="text-primary-darker hover:text-primary">
+                    <p className="text-primary-darker hover:text-primary margin-top-0">
                       {fundingOppName}
                     </p>
                   </Link>
@@ -105,7 +105,16 @@ const OpportunitySection = ({
               <p className="text-bold margin-bottom-2">
                 {t("selectionMethod")}
               </p>
-              {t("meritReview")}
+              <p className="margin-top-0">
+                {awardRecommendationDetails.award_selection_method ===
+                "merit-review-only"
+                  ? t("recommendationMethod.meritReviewOnly", {
+                      defaultValue: "Merit review ranking only",
+                    })
+                  : t("recommendationMethod.meritReviewOther", {
+                      defaultValue: "Merit review ranking with other factors",
+                    })}
+              </p>
             </div>
           </div>
         </Grid>
@@ -120,14 +129,13 @@ async function AwardRecommendationPageContent({
   const { locale, id: awardRecommendationId } = await params;
 
   const t = await getTranslations("AwardRecommendation");
-  const opportunityId = "6a483cd8-9169-418a-8dfb-60fa6e6f51e5";
 
   // Define button configuration for preview page
   const heroButtons: HeroButtonConfig[] = [
     {
       type: "navigation",
       label: t("heroButtons.edit"),
-      href: `/${locale}/award-recommendation/${awardRecommendationId}/edit`,
+      href: `/award-recommendation/${awardRecommendationId}/edit`,
       outline: true,
     },
     {
@@ -137,24 +145,25 @@ async function AwardRecommendationPageContent({
     },
   ];
 
-  let opportunityData: OpportunityDetail | null = null;
-  if (opportunityId) {
+  let awardRecommendationDetails: AwardRecommendationDetails | null = null;
+  if (awardRecommendationId) {
     try {
-      const response = await getOpportunityDetails(opportunityId);
-      opportunityData = response.data;
+      awardRecommendationDetails = await getAwardRecommendationDetails(
+        awardRecommendationId,
+      );
     } catch (error) {
-      console.error("Failed to fetch opportunity details", error);
+      console.error("Failed to fetch award recommendation details", error);
       if (parseErrorStatus(error as ApiRequestError) === 404) {
-        opportunityData = null;
+        awardRecommendationDetails = null;
       }
       return (
         <Alert
-          heading={t("errorHeadingOppurtunity")}
+          heading={t("errorHeadingAwardRecommendation")}
           headingLevel="h2"
           type="warning"
           validation
         >
-          {t("oppurtunityFetchError")}
+          {t("awardRecommendationFetchError")}
         </Alert>
       );
     }
@@ -162,31 +171,49 @@ async function AwardRecommendationPageContent({
 
   return (
     <form>
-      {awardRecommendationId && (
+      {awardRecommendationDetails && (
         <Suspense
           fallback={
             <span data-testid="award-recommendation-hero-fallback"></span>
           }
         >
           <AwardRecommendationHero
-            awardRecommendationId={awardRecommendationId}
+            awardRecommendationDetails={awardRecommendationDetails}
             buttons={heroButtons}
           />
         </Suspense>
       )}
       <GridContainer>
-        {opportunityData && (
-          <OpportunitySection
-            opportunityData={opportunityData}
-            locale={locale}
-          />
+        {awardRecommendationDetails && (
+          <>
+            <OpportunitySection
+              awardRecommendationDetails={awardRecommendationDetails}
+            />
+            <RecommendationSection
+              mode="view"
+              recommendationMethod={
+                awardRecommendationDetails.award_selection_method ===
+                "merit-review-only"
+                  ? t("recommendationMethod.meritReviewOnly", {
+                      defaultValue: "Merit review ranking only",
+                    })
+                  : t("recommendationMethod.meritReviewOther", {
+                      defaultValue: "Merit review ranking with other factors",
+                    })
+              }
+              recommendationMethodDetails={
+                awardRecommendationDetails.funding_strategy
+              }
+              otherKeyInformation={
+                awardRecommendationDetails.other_key_information
+              }
+            />
+            <RecommendationsSummarySection
+              summary={awardRecommendationDetails.award_recommendation_summary}
+              fundingStrategy={awardRecommendationDetails.funding_strategy}
+            />
+          </>
         )}
-        <RecommendationSection
-          mode="view"
-          recommendationMethod="Merit review ranking with other factors"
-          recommendationMethodDetails="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-          otherKeyInformation="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute ...."
-        />
       </GridContainer>
     </form>
   );
