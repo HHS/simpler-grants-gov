@@ -57,7 +57,7 @@ test(
       testInfo,
       page,
       PROJECT_ABSTRACT_FORM_CONFIG,
-      projectAbstractHappyPathTestData(),
+      projectAbstractHappyPathTestData,
       false,
     );
     await page.waitForTimeout(5000);
