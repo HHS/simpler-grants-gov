@@ -4,14 +4,13 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import { opportunityId } from "tests/e2e/get-opportunityId-utils";
+import { getOpportunityId } from "tests/e2e/get-opportunityId-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
-
 import { SF424_FORM_CONFIG } from "./fixtures/sf424-field-definitions";
 import { sf424HappyPathTestData } from "./fixtures/sf424-fill-data";
 
@@ -19,7 +18,7 @@ const { testOrgLabel } = playwrightEnv;
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 
-const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
+const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
 
 test(
   "Application form completion happy path - SF424",
