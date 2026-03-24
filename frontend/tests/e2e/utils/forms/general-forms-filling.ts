@@ -6,7 +6,7 @@ import { getFormLink } from "./form-navigation-utils";
 export interface FillFieldDefinition {
   testId?: string;
   selector?: string;
-  type: "text" | "dropdown";
+  type: "text" | "dropdown" | "file";
   section?: string;
   field: string;
 }
@@ -43,6 +43,15 @@ export async function fillField(
       const locator = page.getByTestId(field.testId);
       await locator.waitFor({ state: "attached", timeout: 5000 });
       await locator.fill(data);
+    } else if (field.type === "file" && field.testId) {
+      const locator = page.getByTestId(field.testId);
+      await locator.waitFor({ state: "attached", timeout: 5000 });
+      await locator.setInputFiles(data);
+      // Wait for the uploaded filename to appear in the UI before proceeding
+      const fileName = data.split("/").pop() ?? data;
+      await page
+        .locator(`span:has-text("${fileName}")`)
+        .waitFor({ state: "visible", timeout: 15000 });
     } else {
       console.error("unsupported field type or selector type", field);
     }

@@ -25,11 +25,11 @@ const { testOrgLabel, targetEnv } = playwrightEnv;
 
 // Environment-specific opportunity IDs
 // Staging: ecd28401-ba6a-4ce7-928f-0f9fc77c5702
-// Local:   <replace-with-local-opportunity-id>
+// Local:   c3c59562-a54f-4203-b0f6-98f2f0383481
 const OPPORTUNITY_ID =
   targetEnv === "staging"
     ? "ecd28401-ba6a-4ce7-928f-0f9fc77c5702"
-    : "<replace-with-local-opportunity-id>";
+    : "c3c59562-a54f-4203-b0f6-98f2f0383481";
 
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
