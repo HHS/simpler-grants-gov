@@ -3,9 +3,16 @@ from uuid import uuid4
 import pytest
 
 from src.constants.lookup_constants import OrganizationAuditEvent, Privilege
-from src.db.models.user_models import OrganizationUser, OrganizationUserRole
+from src.db.models.user_models import (
+    OrganizationUser,
+    OrganizationUserRole,
+    UserSavedOpportunityNotification,
+)
 from tests.lib.organization_test_utils import create_user_in_org, create_user_not_in_org
-from tests.src.db.models.factories import OrganizationFactory
+from tests.src.db.models.factories import (
+    OrganizationFactory,
+    UserSavedOpportunityNotificationFactory,
+)
 
 
 class TestRemoveUserFromOrganization:
@@ -261,6 +268,111 @@ class TestRemoveUserFromOrganization:
             headers={"X-SGG-Token": "invalid-token"},
         )
         assert resp.status_code == 401
+
+    def test_remove_user_deletes_org_notification_preferences(
+        self, enable_factory_create, client, db_session
+    ):
+        """Test that removing a user also deletes their notification prefs for that org"""
+        admin_user, organization, admin_token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
+
+        target_user, _, _ = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+            organization=organization,
+        )
+
+        # Create a notification preference for the target user in this org
+        notification = UserSavedOpportunityNotificationFactory.create(
+            user=target_user, organization=organization, email_enabled=True
+        )
+        notification_id = notification.user_saved_opportunity_notification_id
+
+        resp = client.delete(
+            f"/v1/organizations/{organization.organization_id}/users/{target_user.user_id}",
+            headers={"X-SGG-Token": admin_token},
+        )
+
+        assert resp.status_code == 200
+
+        # Verify the notification record was deleted
+        db_session.expire_all()
+        remaining = db_session.get(UserSavedOpportunityNotification, notification_id)
+        assert remaining is None
+
+    def test_remove_user_preserves_other_org_notification_preferences(
+        self, enable_factory_create, client, db_session
+    ):
+        """Removing a user from one org should not affect their notifications in other orgs"""
+        admin_user, organization, admin_token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
+
+        target_user, _, _ = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+            organization=organization,
+        )
+
+        # Notification for the org being left (should be deleted)
+        UserSavedOpportunityNotificationFactory.create(
+            user=target_user, organization=organization, email_enabled=True
+        )
+
+        # Notification for a different org (should be preserved)
+        other_org = OrganizationFactory.create()
+        other_notification = UserSavedOpportunityNotificationFactory.create(
+            user=target_user, organization=other_org, email_enabled=True
+        )
+        other_notification_id = other_notification.user_saved_opportunity_notification_id
+
+        # Self notification (should be preserved)
+        self_notification = UserSavedOpportunityNotificationFactory.create(
+            user=target_user, organization=None, email_enabled=False
+        )
+        self_notification_id = self_notification.user_saved_opportunity_notification_id
+
+        resp = client.delete(
+            f"/v1/organizations/{organization.organization_id}/users/{target_user.user_id}",
+            headers={"X-SGG-Token": admin_token},
+        )
+
+        assert resp.status_code == 200
+
+        db_session.expire_all()
+
+        # Other org notification still exists
+        assert db_session.get(UserSavedOpportunityNotification, other_notification_id) is not None
+
+        # Self notification still exists
+        assert db_session.get(UserSavedOpportunityNotification, self_notification_id) is not None
+
+    def test_remove_user_succeeds_when_no_notification_preferences(
+        self, enable_factory_create, client, db_session
+    ):
+        """Removing a user with no notification preferences should still succeed"""
+        admin_user, organization, admin_token = create_user_in_org(
+            privileges=[Privilege.MANAGE_ORG_MEMBERS],
+            db_session=db_session,
+        )
+
+        target_user, _, _ = create_user_in_org(
+            privileges=[Privilege.VIEW_ORG_MEMBERSHIP],
+            db_session=db_session,
+            organization=organization,
+        )
+
+        # No notification records created
+
+        resp = client.delete(
+            f"/v1/organizations/{organization.organization_id}/users/{target_user.user_id}",
+            headers={"X-SGG-Token": admin_token},
+        )
+
+        assert resp.status_code == 200
 
     def test_remove_user_can_remove_non_admin_member(
         self, enable_factory_create, client, db_session
