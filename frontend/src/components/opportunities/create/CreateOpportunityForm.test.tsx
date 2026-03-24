@@ -144,7 +144,7 @@ describe("createOpportunityForm field change events", () => {
 
     // 2. Fill in Opportunity Number
     const textboxOppNbr = screen.getByRole("textbox", {
-      name: "opportunityNumber *",
+      name: "CreateOpportunityForm.opportunityNumber *",
     });
     expect(textboxOppNbr).toBeInTheDocument();
     expect(textboxOppNbr).toHaveValue("");
@@ -155,7 +155,7 @@ describe("createOpportunityForm field change events", () => {
 
     // 3. Fill in Opportunity Title
     const textareaOppTitle = screen.getByRole("textbox", {
-      name: "opportunityTitle *",
+      name: "CreateOpportunityForm.opportunityTitle *",
     });
     expect(textareaOppTitle).toBeInTheDocument();
     expect(textareaOppTitle).toHaveValue("");
@@ -168,7 +168,7 @@ describe("createOpportunityForm field change events", () => {
 
     // 4. Select a Category that is not "other"
     const selectCategory = screen.getByRole("combobox", {
-      name: "category *",
+      name: "CreateOpportunityForm.category *",
     });
     expect(selectCategory).toBeInTheDocument();
     expect(selectCategory).toHaveValue("");
@@ -178,7 +178,7 @@ describe("createOpportunityForm field change events", () => {
     expect(saveButton).toBeEnabled();
     // The Explanation field should be hidden
     const testExplain = screen.queryByRole("textbox", {
-      name: "categoryExplanation *",
+      name: "CreateOpportunityForm.categoryExplanation *",
     });
     expect(testExplain).not.toBeInTheDocument();
 
@@ -189,7 +189,7 @@ describe("createOpportunityForm field change events", () => {
     expect(saveButton).toBeDisabled();
     // The Explanation field should now be displayed
     const textareaExplain = screen.getByRole("textbox", {
-      name: "categoryExplanation *",
+      name: "CreateOpportunityForm.categoryExplanation *",
     });
     expect(textareaExplain).toBeInTheDocument();
     expect(textareaExplain).toHaveValue("");
