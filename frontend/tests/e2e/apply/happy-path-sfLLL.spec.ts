@@ -8,13 +8,12 @@ import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-sta
 
 import { SFLLL_TEST_DATA } from "./fixtures/sfLLL-field-definitions";
 import { SFLLL_FORM_CONFIG } from "./fixtures/sfLLL-fill-data";
-import { getOpportunityId } from "tests/e2e/get-opportunityId-utils";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 
-const { testOrgLabel, targetEnv, baseUrl } = playwrightEnv;
+const { testOrgLabel, opportunityId, targetEnv, baseUrl } = playwrightEnv;
 
-const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
+const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
