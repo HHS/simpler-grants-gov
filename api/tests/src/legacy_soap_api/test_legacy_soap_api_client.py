@@ -53,6 +53,7 @@ from tests.util.minifiers import minify_xml
 GRANTS_GOV_TRACKING_NUMBER = "GRANT80000000"
 CID_UUID = "aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
 BOUNDARY_UUID = "cccccccc-1111-2222-3333-dddddddddddd"
+ADDITIONAL_UUID = "eeeeeeee-1111-2222-3333-ffffffffffff"
 TZ_EST = pytz.timezone("America/New_York")
 DT_NAIVE = datetime(2025, 9, 9, 8, 15, 17)
 DT_EST_AWARE = TZ_EST.localize(DT_NAIVE)
@@ -453,7 +454,7 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
-            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
@@ -511,7 +512,7 @@ class TestSimplerSOAPGetApplicationZip:
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
         with patch.object(uuid, "uuid4") as mock_uuid4:
-            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             assert result.status_code == 200
@@ -630,7 +631,7 @@ class TestSimplerSOAPGetApplicationZip:
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
         response = client.get_simpler_soap_response(mock_proxy_response)
-        grants_gov_tracking_number = FAKE_GRANTS_GOV_TRACKING_NUMBER.split("GRANT")[1]
+        grants_gov_tracking_number = FAKE_GRANTS_GOV_TRACKING_NUMBER
         msg = f"Unable to find submission legacy_tracking_number {grants_gov_tracking_number}."
         assert msg in caplog.messages
         assert response.data == mock_proxy_response.data

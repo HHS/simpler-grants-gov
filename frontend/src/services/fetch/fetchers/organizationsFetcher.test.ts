@@ -391,9 +391,12 @@ describe("removeOrganizationUser", () => {
       throw new Error("Network error");
     });
 
-    await expect(
-      removeOrganizationUser("org-123", "user-1"),
-    ).rejects.toThrowError("Network error");
+    try {
+      await removeOrganizationUser("org-123", "user-1");
+    } catch (error: unknown) {
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toBe("Network error");
+    }
   });
 });
 

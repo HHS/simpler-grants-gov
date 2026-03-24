@@ -1,4 +1,5 @@
 import logging
+from typing import cast
 
 from apiflask.exceptions import HTTPError
 from sqlalchemy import select
@@ -6,7 +7,7 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import ApplicationStatus
-from src.db.models.competition_models import ApplicationSubmission, ApplicationSubmissionRetrieved
+from src.db.models.competition_models import ApplicationSubmissionRetrieved
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
 from src.legacy_soap_api.grantors.fault_messages import (
     ConfirmDeliveryAlreadyRetrieved,
@@ -20,21 +21,14 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
 from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest
-from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
+from src.legacy_soap_api.legacy_soap_api_utils import (
+    SOAPFaultException,
+    get_application_submission_by_legacy_tracking_number,
+)
 
 logger = logging.getLogger(__name__)
 
 VALID_STATUSES_FOR_DELIVERY = {ApplicationStatus.ACCEPTED}
-
-
-def get_application_submission_by_legacy_tracking_number(
-    db_session: db.Session, legacy_tracking_number: int
-) -> ApplicationSubmission | None:
-    return db_session.execute(
-        select(ApplicationSubmission).where(
-            ApplicationSubmission.legacy_tracking_number == legacy_tracking_number,
-        )
-    ).scalar_one_or_none()
 
 
 def confirm_application_delivery_response(
@@ -43,16 +37,12 @@ def confirm_application_delivery_response(
     confirm_application_delivery_request: grantor_schemas.ConfirmApplicationDeliveryRequest,
     soap_config: SOAPOperationConfig,
 ) -> grantor_schemas.ConfirmApplicationDeliveryResponseSOAPEnvelope:
-    legacy_tracking_number = confirm_application_delivery_request.grants_gov_tracking_number
-
-    # grants_gov_tracking_number is validated as non-None by the pydantic schema
-    assert legacy_tracking_number is not None
-
-    if legacy_tracking_number.startswith("GRANT"):
-        legacy_tracking_number = legacy_tracking_number.split("GRANT")[1]
+    legacy_tracking_number = cast(
+        str, confirm_application_delivery_request.grants_gov_tracking_number
+    )
 
     application_submission = get_application_submission_by_legacy_tracking_number(
-        db_session, int(legacy_tracking_number)
+        db_session, legacy_tracking_number
     )
 
     if not application_submission:

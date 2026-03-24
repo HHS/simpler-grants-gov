@@ -69,8 +69,18 @@ const MultipleAttachmentUploadWidget = ({
 
     let parsedValue: string[] = [];
 
-    if (Array.isArray(initialValue)) {
+    // Array-valued widget props are not guaranteed to be string arrays.
+    // MultipleAttachmentUploadWidget only supports arrays of attachment ids.
+    if (
+      Array.isArray(initialValue) &&
+      initialValue.every((item) => typeof item === "string")
+    ) {
       parsedValue = initialValue;
+    } else if (Array.isArray(initialValue)) {
+      console.warn(
+        "MultipleAttachmentUploadWidget received a non-string array value:",
+        initialValue,
+      );
     } else if (typeof initialValue === "string") {
       try {
         // casting doesn’t fully satisfy the linter because it treats schema as possibly any underneath

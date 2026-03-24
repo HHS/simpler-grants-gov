@@ -752,7 +752,15 @@ dl {
   display: none;
 }
 
+.apply-form-print-preview .field-list-widget__controls {
+  display: none !important;
+}
+
 @media print {
+  .field-list-widget__controls {
+    display: none !important;
+  }
+
   .sf424a-application-view-only {
     display: none !important;
   }
