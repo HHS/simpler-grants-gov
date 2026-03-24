@@ -607,14 +607,10 @@ export const messages = {
     },
   },
   Developer: {
-    // TODO: Make these consistent.
-    // - menu item is plural "Developers"
-    // - route is singular "/developer"
-    // - page title is "Developer portal"
-    // - page has no `h1` tag (infoTitle is an `h2`)
-    pageTitle: "Developer portal | Simpler.Grants.gov",
+    pageTitle: "Developers | Simpler.Grants.gov",
     pageDescription:
-      "Tools and resources for developers working on Simpler.Grants.gov",
+      "Tools and resources for developers working with Simpler.Grants.gov",
+    h1: "Developers",
     infoTitle: "API tools & management",
     canDoHeader: "What's available for developers",
     canDoSubHeader: "What you can do with an API key now",
