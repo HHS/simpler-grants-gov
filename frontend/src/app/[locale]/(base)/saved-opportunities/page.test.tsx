@@ -34,7 +34,7 @@ jest.mock("src/hooks/useClientFetch", () => ({
 }));
 
 jest.mock(
-  "src/components/opportunities/ShareOpportunityToOrganizationsModal",
+  "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal",
   () => ({
     ShareOpportunityToOrganizationsModal: () => null,
   }),
