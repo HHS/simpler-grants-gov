@@ -322,7 +322,7 @@ populate-search-agencies: ## Load agencies from the DB into the search index, ru
 	$(FLASK_CMD) load-search-data load-agency-data $(args)
 
 run-generate-notifications: ## Send email notifications
-	$(FLASK_CMD) generate-notifications $(args)
+	$(FLASK_CMD) task email-notifications $(args)
 
 setup-api-data: db-seed-local populate-search-opportunities populate-search-agencies  ## Load all the data, especially useful for inital setup
 

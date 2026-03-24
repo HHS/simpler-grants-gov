@@ -58,7 +58,7 @@ make test args="-x -s -vv tests/src/api/users/test_user_route_login.py"
 
 ```bash
 make run-generate-notifications
-# executes poetry run flask task generate-notifications
+# executes poetry run flask task email-notifications
 
 # more generically, you can construct poetry run flask calls with make cmd
 make cmd args="data-migration setup-foreign-tables"
@@ -70,7 +70,7 @@ Poetry CLI commands are of the form `<task group> <task name> <any other params>
 
 ### In AWS
 
-1. Ensure your [SSO login](documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up) is fresh
+1. Ensure your [SSO login](https://github.com/HHS/simpler-grants-gov/blob/main/documentation/infra/set-up-infrastructure-tools.md#recommended-aws-profile-set-up) is fresh
 2. Setup your terraform environment
 
    ```bash
@@ -80,7 +80,7 @@ Poetry CLI commands are of the form `<task group> <task name> <any other params>
 3. Run the job
 
    ```bash
-   bin/run-command api <env> '["poetry", "run", "flask", "task", "generate-notifications"]'
+   bin/run-command api <env> '["poetry", "run", "flask", "task", "email-notifications"]'
    ```
 
 ## Technical Information
