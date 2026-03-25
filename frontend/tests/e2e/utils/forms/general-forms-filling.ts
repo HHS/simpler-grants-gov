@@ -1,4 +1,3 @@
-import path from "path";
 import { Page, TestInfo } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
 
@@ -15,7 +14,6 @@ export interface FillFieldDefinition {
   type:
     | "text"
     | "dropdown"
-    | "file"
     | "radiobutton"
     | "checkbox"
     | "radio-button"
@@ -23,7 +21,8 @@ export interface FillFieldDefinition {
     | "radioButton"
     | "comboBoxInput"
     | "radio_button"
-    | "combo_box_input";
+    | "combo_box_input"
+    | "file";
   section?: string;
   field: string;
 }
@@ -33,7 +32,7 @@ export type FormFillFieldDefinitions = {
 };
 
 export interface FillFormConfig {
-  formName: string;
+  formName: string | RegExp;
   fields: FormFillFieldDefinitions;
   saveButtonTestId: string;
   noErrorsText?: string;
@@ -44,19 +43,11 @@ export interface FormsFixtureData {
   fields: FillFieldDefinition[];
 }
 
-/**
- * Determines whether a radio button or checkbox field should be activated (checked/selected) during form filling.
- *
- * Usage:
- * - Used in form automation to decide if a radio or checkbox should be interacted with, based on the provided data value.
- * - Returns true if the data is boolean true, or a string that is not undefined and not equal to "false" (case-insensitive).
- * - Returns false for boolean false, undefined, or the string "false".
- */
+// Determines whether a radio button or checkbox field should be activated (checked/selected) during form filling.
 function shouldActivateField(data: string | boolean | undefined): boolean {
   if (typeof data === "boolean") {
     return data;
   }
-
   return data !== undefined && data.toLowerCase() !== "false";
 }
 
@@ -73,8 +64,7 @@ export async function fillField(
     if (
       (field.type === "dropdown" ||
         field.type === "combo-box-input" ||
-        field.type === "text" ||
-        field.type === "file") &&
+        field.type === "text") &&
       typeof data !== "string"
     ) {
       throw new Error(
@@ -118,18 +108,6 @@ export async function fillField(
       const locator = page.getByTestId(field.testId);
       await locator.waitFor({ state: "attached", timeout: 5000 });
       await locator.fill(data);
-    } else if (
-      field.type === "file" &&
-      field.buttonName &&
-      typeof data === "string"
-    ) {
-      const locator = page.getByRole("button", { name: field.buttonName });
-      await locator.waitFor({ state: "visible", timeout: 5000 });
-
-      const filePath = path.resolve(__dirname, "../../test-upload-files", data);
-      await locator.setInputFiles(filePath);
-
-      await page.waitForLoadState("load", { timeout: 15000 });
     } else if (
       field.type === "radiobutton" &&
       (field.testId || field.selector || field.getByText)
@@ -182,10 +160,17 @@ export async function fillField(
           }
         }
       }
+    } else if (field.type === "file" && field.testId && typeof data === "string") {
+      const locator = page.getByTestId(field.testId);
+      await locator.waitFor({ state: "attached", timeout: 5000 });
+      await locator.setInputFiles(data);
+      // Wait for the uploaded filename to appear in the UI before proceeding
+      const fileName = data.split("/").pop() ?? data;
+      await page
+        .locator(`span:has-text("${fileName}")`)
+        .waitFor({ state: "visible", timeout: 15000 });
     } else {
-      throw new Error(
-        `Unsupported or invalid field configuration for ${fieldIdentifier}`,
-      );
+      console.error("unsupported field type or selector type", field);
     }
 
     await testInfo.attach(`fillField-${fieldIdentifier}-success`, {
