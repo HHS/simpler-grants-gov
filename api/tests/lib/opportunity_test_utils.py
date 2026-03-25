@@ -13,6 +13,7 @@ from src.constants.lookup_constants import (
 
 def create_opportunity_request(
     agency_id=None,
+    assistance_listing_number=None,
     opportunity_number=None,
     opportunity_title="Research Grant for Climate Innovation",
     category=OpportunityCategory.DISCRETIONARY,
@@ -40,6 +41,7 @@ def create_opportunity_request(
         "agency_id": str(agency_id),
         "category": category,
         "category_explanation": category_explanation,
+        "assistance_listing_number": assistance_listing_number,
     }
 
     return request
@@ -129,7 +131,8 @@ def create_opportunity_summary_request(
 
     # Set default values for the collections if not provided
     if funding_instruments is None:
-        funding_instruments = [FundingInstrument.GRANT, FundingInstrument.COOPERATIVE_AGREEMENT]
+        funding_instruments = [FundingInstrument.GRANT,
+                               FundingInstrument.COOPERATIVE_AGREEMENT]
 
     if funding_categories is None:
         funding_categories = [FundingCategory.AGRICULTURE]
@@ -207,7 +210,8 @@ def update_opportunity_summary_request(
         ]
 
     if applicant_types is None:
-        applicant_types = [ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS]
+        applicant_types = [
+            ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS]
 
     request = {
         "summary_description": summary_description,
