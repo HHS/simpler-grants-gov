@@ -870,14 +870,14 @@ def user_saved_opportunities_notifications(
     )
     logger.info("POST /v1/users/:user_id/saved-opportunities/notifications")
 
-    user_token_session: UserTokenSession = api_jwt_auth.get_user_token_session()
+    user = jwt_or_api_user_key_multi_auth.get_user()
 
     # Verify the authenticated user matches the requested user_id
-    if user_token_session.user_id != user_id:
+    if user.user_id != user_id:
         raise_flask_error(403, "Forbidden")
 
     with db_session.begin():
-        db_session.add(user_token_session)
-        set_saved_opportunity_notification_settings(db_session, user_token_session.user, json_data)
+        db_session.add(user)
+        set_saved_opportunity_notification_settings(db_session, user, json_data)
 
     return response.ApiResponse(message="Success")

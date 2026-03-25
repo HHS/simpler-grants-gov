@@ -851,7 +851,7 @@ class SetUserSavedOpportunityNotificationRequestSchema(Schema):
         required=True,
         allow_none=True,
         metadata={
-            "description": "The ID of the organization for which to set notification.If not provided, the setting applies to the user's own saved opportunities."
+            "description": "The ID of the organization for which to set notification. If not provided, the setting applies to the user's own saved opportunities."
         },
     )
     email_enabled = fields.Boolean(
