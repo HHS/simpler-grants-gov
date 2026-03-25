@@ -190,7 +190,7 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "Assistance Listing Program Title",
   },
   areas_affected_attachment: {
-    testId: "areas_affected_attachment",
+    testId: "file-input-input",
     type: "file",
     section: "Section 13",
     field: "Areas Affected Attachment",
@@ -202,7 +202,7 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "Project Title",
   },
   additional_project_title_attachment: {
-    testId: "additional_project_title_attachment",
+    testId: "file-input-input",
     type: "file",
     section: "Section 13",
     field: "Additional Project Title Attachment",
@@ -220,7 +220,7 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "Congressional District Program Project",
   },
   additional_congressional_attachment: {
-    testId: "additional_congressional_attachment",
+    testId: "file-input-input",
     type: "file",
     section: "Section 14",
     field: "Additional Congressional Attachment",
@@ -294,7 +294,7 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "Applicant Delinquent on Federal Debt",
   },
   debt_explanation_attachment: {
-    testId: "debt_explanation_attachment",
+    testId: "file-input-input",
     type: "file",
     section: "Section 20",
     field: "Debt Explanation Attachment",
