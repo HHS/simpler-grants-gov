@@ -8,7 +8,7 @@ from src.db.models.opportunity_models import Opportunity, OpportunitySummary
 def determine_current_and_status(
     opportunity: Opportunity, current_date: datetime.date
 ) -> tuple[OpportunitySummary | None, OpportunityStatus | None]:
-    """Determine latest forecasted and non-forecasted opportunity summaries"""
+    # Determine latest forecasted and non-forecasted opportunity summaries
     latest_forecasted_summary: OpportunitySummary | None = None
     latest_non_forecasted_summary: OpportunitySummary | None = None
 
