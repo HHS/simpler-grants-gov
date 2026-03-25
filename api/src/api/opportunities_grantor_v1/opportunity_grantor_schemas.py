@@ -92,8 +92,8 @@ class OpportunityCreateRequestSchema(Schema):
     def validate_category_explanation(self, data: dict, **kwargs: dict) -> None:
         """Validate that category_explanation is required when category is Other"""
         if data.get("category") == OpportunityCategory.OTHER:
-            explanation = data.get("category_explanation")
-            if explanation is None or explanation.strip() == "":
+            explanation = data.get("category_explanation", "")
+            if explanation.strip() == "":
                 raise ValidationError(
                     [
                         MarshmallowErrorContainer(
