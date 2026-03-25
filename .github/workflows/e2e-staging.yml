@@ -14,7 +14,7 @@ on:
         options:
           - staging
       playwright_tags:
-        description: "pipe separated list of @tags denoting groups of tests to run"
+        description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
         type: string
   workflow_call:
     inputs:
@@ -27,7 +27,7 @@ on:
         default: "staging"
         type: string
       playwright_tags:
-        description: "pipe separated list of @tags denoting groups of tests to run"
+        description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
         type: string
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

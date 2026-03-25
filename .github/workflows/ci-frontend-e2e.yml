@@ -10,7 +10,7 @@ on:
         default: false
         type: boolean
       playwright_tags:
-        description: "pipe separated list of @tags denoting groups of tests to run"
+        description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
         required: false
         type: string
   workflow_call:
@@ -20,7 +20,7 @@ on:
         default: false
         type: boolean
       playwright_tags:
-        description: "pipe separated list of @tags denoting groups of tests to run"
+        description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
         required: false
         type: string
   pull_request:
