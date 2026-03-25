@@ -40,12 +40,14 @@ STATUS_TRANSFORM = {
 }
 
 
-# This method gets the GrantsGovTrackingNumber
-# NOTE: The order of operations is VERY important to get the correct GrantsGovTrackingNumber
-# IF there's a row on the ApplicationSubmissionTrackingNumber table -> "Agency Tracking Number Assigned"
-# IF there's NOT a row on the ApplicationSubmissionTrackingNumber table but there IS a row on the ApplicationSubmissionRetrieval table -> "Received by Agency"
-# IF there's not a row on either table -> application.application_status
 def get_grants_gov_application_status(submission: ApplicationSubmission) -> str | None:
+    """
+    This method gets the GrantsGovTrackingNumber
+    NOTE: The order of operations is VERY important to get the correct GrantsGovTrackingNumber
+    IF there's a row on the ApplicationSubmissionTrackingNumber table -> "Agency Tracking Number Assigned"
+    IF there's NOT a row on the ApplicationSubmissionTrackingNumber table but there IS a row on the ApplicationSubmissionRetrieval table -> "Received by Agency"
+    IF there's not a row on either table -> application.application_status
+    """
     grants_gov_application_status = GRANTS_APPLICATION_STATUSES.get(
         submission.application.application_status
     )

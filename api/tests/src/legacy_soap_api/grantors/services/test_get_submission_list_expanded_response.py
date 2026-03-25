@@ -77,29 +77,28 @@ def _setup_submission(agency, application_status=ApplicationStatus.ACCEPTED):
     )
 
 
-@pytest.fixture(scope="class")
-def setup_data(db_session, enable_factory_create):
-    agency = AgencyFactory.create()
-    submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
-    ApplicationSubmissionTrackingNumberFactory.create(application_submission=submission)
-    ApplicationSubmissionRetrievedFactory.create(application_submission=submission)
-    for _ in range(3):
-        sub = _setup_submission(agency, ApplicationStatus.ACCEPTED)
-        ApplicationSubmissionRetrievedFactory.create(
-            application_submission=sub,
-        )
-    _setup_submission(agency, ApplicationStatus.ACCEPTED)
-    tracking_number = f"GRANT{submission.legacy_tracking_number}"
-    _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
-    return {
-        "agency": agency,
-        "submission": submission,
-        "tracking_number": tracking_number,
-        "soap_client_certificate": soap_client_certificate,
-    }
-
-
 class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
+    @pytest.fixture(scope="class")
+    def setup_data(self, db_session, enable_factory_create):
+        agency = AgencyFactory.create()
+        submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
+        ApplicationSubmissionTrackingNumberFactory.create(application_submission=submission)
+        ApplicationSubmissionRetrievedFactory.create(application_submission=submission)
+        for _ in range(3):
+            sub = _setup_submission(agency, ApplicationStatus.ACCEPTED)
+            ApplicationSubmissionRetrievedFactory.create(
+                application_submission=sub,
+            )
+        _setup_submission(agency, ApplicationStatus.ACCEPTED)
+        tracking_number = f"GRANT{submission.legacy_tracking_number}"
+        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        return {
+            "agency": agency,
+            "submission": submission,
+            "tracking_number": tracking_number,
+            "soap_client_certificate": soap_client_certificate,
+        }
+
     def test_get_submission_list_expanded_filters_on_agency_tracking_number_assigned(
         self, db_session, enable_factory_create, setup_data
     ):
