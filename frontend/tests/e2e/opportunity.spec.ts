@@ -1,7 +1,10 @@
 import { test as base, expect } from "@playwright/test";
+import { VALID_TAGS } from "tests/e2e/tags";
 
 import playwrightEnv from "./playwright-env";
 
+const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE, CORE_REGRESSION, FULL_REGRESSION } =
+  VALID_TAGS;
 type TestWithOpportunityId = {
   testOpportunityId: string;
 };
@@ -36,108 +39,124 @@ test.beforeEach(async ({ page, testOpportunityId }) => {
 
 test(
   "has title",
-  { tag: ["@smoke", "@grantee", "@opportunity-search"] },
+  { tag: [SMOKE, GRANTEE, OPPORTUNITY_SEARCH] },
   async ({ page }) => {
     await expect(page).toHaveTitle(/^Opportunity Listing - */);
   },
 );
 
-test("has page attributes", async ({ page }) => {
-  await expect(page.getByText("Application process")).toBeVisible();
-});
+test(
+  "has page attributes",
+  { tag: [SMOKE, CORE_REGRESSION, OPPORTUNITY_SEARCH] },
+  async ({ page }) => {
+    await expect(page.getByText("Application process")).toBeVisible();
+  },
+);
 
 // a bit tough to target the content display toggles on the page, since they have the same text and there's
 // nothing really special about the markup surrounding them
-test("can expand and collapse opportunity description", async ({ page }) => {
-  const descriptionExpander = page.locator(
-    "div[data-testid='opportunity-description'] div[data-testid='content-display-toggle']",
-  );
+test(
+  "can expand and collapse opportunity description",
+  { tag: [CORE_REGRESSION, GRANTEE, OPPORTUNITY_SEARCH] },
+  async ({ page }) => {
+    const descriptionExpander = page.locator(
+      "div[data-testid='opportunity-description'] div[data-testid='content-display-toggle']",
+    );
 
-  await expect(
-    descriptionExpander.getByText("Show full description"),
-  ).toBeVisible();
-  await expect(
-    descriptionExpander.getByText("Hide full description"),
-  ).not.toBeVisible();
-  const divCountBeforeExpanding = await page.locator("div:visible").count();
+    await expect(
+      descriptionExpander.getByText("Show full description"),
+    ).toBeVisible();
+    await expect(
+      descriptionExpander.getByText("Hide full description"),
+    ).not.toBeVisible();
+    const divCountBeforeExpanding = await page.locator("div:visible").count();
 
-  await descriptionExpander
-    .getByRole("button", { name: /^Show full description$/ })
-    .click();
+    await descriptionExpander
+      .getByRole("button", { name: /^Show full description$/ })
+      .click();
 
-  // validate that summary has been expanded
-  await expect(
-    descriptionExpander.getByText("Show full description"),
-  ).not.toBeVisible();
-  await expect(
-    descriptionExpander.getByText("Hide full description"),
-  ).toBeVisible();
-  const divCountAfterExpanding = await page.locator("div:visible").count();
-  expect(divCountBeforeExpanding).toBeLessThan(divCountAfterExpanding);
+    // validate that summary has been expanded
+    await expect(
+      descriptionExpander.getByText("Show full description"),
+    ).not.toBeVisible();
+    await expect(
+      descriptionExpander.getByText("Hide full description"),
+    ).toBeVisible();
+    const divCountAfterExpanding = await page.locator("div:visible").count();
+    expect(divCountBeforeExpanding).toBeLessThan(divCountAfterExpanding);
 
-  await descriptionExpander
-    .getByRole("button", { name: /^Hide full description$/ })
-    .click();
+    await descriptionExpander
+      .getByRole("button", { name: /^Hide full description$/ })
+      .click();
 
-  // validate that summary has been collapsed
-  await expect(
-    descriptionExpander.getByText("Show full description"),
-  ).toBeVisible();
-  await expect(
-    descriptionExpander.getByText("Hide full description"),
-  ).not.toBeVisible();
-  const divCountAfterCollapsing = await page.locator("div:visible").count();
-  expect(divCountAfterExpanding).toBeGreaterThan(divCountAfterCollapsing);
-});
+    // validate that summary has been collapsed
+    await expect(
+      descriptionExpander.getByText("Show full description"),
+    ).toBeVisible();
+    await expect(
+      descriptionExpander.getByText("Hide full description"),
+    ).not.toBeVisible();
+    const divCountAfterCollapsing = await page.locator("div:visible").count();
+    expect(divCountAfterExpanding).toBeGreaterThan(divCountAfterCollapsing);
+  },
+);
 
-test("can expand and collapse close date description", async ({ page }) => {
-  const descriptionExpander = page.locator(
-    "div[data-testid='opportunity-status-widget'] div[data-testid='content-display-toggle']",
-  );
+test(
+  "can expand and collapse close date description",
+  { tag: [FULL_REGRESSION, GRANTEE, OPPORTUNITY_SEARCH] },
+  async ({ page }) => {
+    const descriptionExpander = page.locator(
+      "div[data-testid='opportunity-status-widget'] div[data-testid='content-display-toggle']",
+    );
 
-  await expect(
-    descriptionExpander.getByText("Show full description"),
-  ).toBeVisible();
-  await expect(
-    descriptionExpander.getByText("Hide full description"),
-  ).not.toBeVisible();
-  const divCountBeforeExpanding = await page.locator("div:visible").count();
+    await expect(
+      descriptionExpander.getByText("Show full description"),
+    ).toBeVisible();
+    await expect(
+      descriptionExpander.getByText("Hide full description"),
+    ).not.toBeVisible();
+    const divCountBeforeExpanding = await page.locator("div:visible").count();
 
-  await descriptionExpander
-    .getByRole("button", { name: /^Show full description$/ })
-    .click();
+    await descriptionExpander
+      .getByRole("button", { name: /^Show full description$/ })
+      .click();
 
-  // validate that summary has been expanded
-  await expect(
-    descriptionExpander.getByText("Show full description"),
-  ).not.toBeVisible();
-  await expect(
-    descriptionExpander.getByText("Hide full description"),
-  ).toBeVisible();
-  const divCountAfterExpanding = await page.locator("div:visible").count();
-  expect(divCountBeforeExpanding).toBeLessThan(divCountAfterExpanding);
+    // validate that summary has been expanded
+    await expect(
+      descriptionExpander.getByText("Show full description"),
+    ).not.toBeVisible();
+    await expect(
+      descriptionExpander.getByText("Hide full description"),
+    ).toBeVisible();
+    const divCountAfterExpanding = await page.locator("div:visible").count();
+    expect(divCountBeforeExpanding).toBeLessThan(divCountAfterExpanding);
 
-  await descriptionExpander
-    .getByRole("button", { name: /^Hide full description$/ })
-    .click();
+    await descriptionExpander
+      .getByRole("button", { name: /^Hide full description$/ })
+      .click();
 
-  // validate that summary has been collapsed
-  await expect(
-    descriptionExpander.getByText("Show full description"),
-  ).toBeVisible();
-  await expect(
-    descriptionExpander.getByText("Hide full description"),
-  ).not.toBeVisible();
-  const divCountAfterCollapsing = await page.locator("div:visible").count();
-  expect(divCountAfterExpanding).toBeGreaterThan(divCountAfterCollapsing);
-});
+    // validate that summary has been collapsed
+    await expect(
+      descriptionExpander.getByText("Show full description"),
+    ).toBeVisible();
+    await expect(
+      descriptionExpander.getByText("Hide full description"),
+    ).not.toBeVisible();
+    const divCountAfterCollapsing = await page.locator("div:visible").count();
+    expect(divCountAfterExpanding).toBeGreaterThan(divCountAfterCollapsing);
+  },
+);
 
-test("can navigate to grants.gov", async ({ page, context }) => {
-  const newTabPromise = context.waitForEvent("page");
-  await page.getByRole("button", { name: "View on Grants.gov" }).click();
+test(
+  "can navigate to grants.gov",
+  { tag: [CORE_REGRESSION, GRANTEE, OPPORTUNITY_SEARCH] },
+  async ({ page, context }) => {
+    const newTabPromise = context.waitForEvent("page");
+    await page.getByRole("button", { name: "View on Grants.gov" }).click();
 
-  const newPage = await newTabPromise;
-  expect(newPage.url()).toContain(
-    "https://test.grants.gov/search-results-detail/",
-  );
-});
+    const newPage = await newTabPromise;
+    expect(newPage.url()).toContain(
+      "https://test.grants.gov/search-results-detail/",
+    );
+  },
+);

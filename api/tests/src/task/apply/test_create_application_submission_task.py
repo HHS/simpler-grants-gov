@@ -1,4 +1,5 @@
 import zipfile
+from decimal import Decimal
 from io import BytesIO
 
 import pytest
@@ -6,6 +7,7 @@ from sqlalchemy import update
 
 from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
 from src.db.models.competition_models import Application
+from src.form_schema.forms import SF424_v4_0
 from src.services.pdf_generation.config import PdfGenerationConfig
 from src.task.apply.create_application_submission_task import (
     ApplicationSubmissionConfig,
@@ -21,6 +23,7 @@ from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationFormFactory,
     ApplicationSubmissionFactory,
+    CompetitionFormFactory,
 )
 
 
@@ -146,6 +149,9 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             | {f: None for f in app_without_attachments_form_file_names},
         )
         assert no_attachment_submission.file_size_bytes > 0
+        assert no_attachment_submission.application_submission_number.startswith(
+            application_without_attachments.competition.opportunity.opportunity_number
+        )
 
         # Verify audit event added
         assert len(application_without_attachments.application_audits) == 1
@@ -158,30 +164,24 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
             == application_without_attachments.submitted_by
         )
 
-        # Validate the submission with attachments
+        # Validate the submission with attachments.
+        # All attachments are orphaned (not referenced in any form response via attachment_fields),
+        # so none should appear in the zip.
         assert application_with_attachments.application_status == ApplicationStatus.ACCEPTED
         assert len(application_with_attachments.application_submissions) == 1
         attachment_submission = application_with_attachments.application_submissions[0]
 
         validate_files_in_zip(
             attachment_submission.file_location,
-            {
-                "file_a.txt": "contents of file A",
-                "file_b.txt": "contents of file B",
-                "dupe_filename.txt": "contents of first dupe_filename.txt",
-                "1-dupe_filename.txt": "contents of second dupe_filename.txt",
-                "manifest.txt": [
-                    "file_a.txt",
-                    "file_b.txt",
-                    "dupe_filename.txt",
-                    "1-dupe_filename.txt",
-                ]
-                + app_with_attachments_form_file_names,
-            }
+            {"manifest.txt": app_with_attachments_form_file_names}
             | {f: None for f in app_with_attachments_form_file_names},
         )
         # No user attached, no audit event added
         assert len(application_with_attachments.application_audits) == 0
+
+        assert no_attachment_submission.application_submission_number.startswith(
+            application_without_attachments.competition.opportunity.opportunity_number
+        )
 
         # These weren't picked up
         assert len(not_picked_up_app1.application_submissions) == 0
@@ -189,12 +189,71 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
 
         metrics = create_submission_task.metrics
         assert metrics[create_submission_task.Metrics.APPLICATION_PROCESSED_COUNT] == 2
-        assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 4
+        assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 0
         apps_processed = [application_with_attachments, application_without_attachments]
         assert (
             metrics[create_submission_task.Metrics.APPLICATION_FORM_COUNT]
             == sum([len(app.application_forms) for app in apps_processed]) - 1
         )  # Not counting the one app form that we skip
+
+    def test_run_task_excludes_orphaned_attachments(self, db_session, create_submission_task):
+        """Referenced attachments are included in the zip; orphaned ones are excluded."""
+        application = ApplicationFactory.create(
+            application_status=ApplicationStatus.SUBMITTED,
+        )
+
+        referenced_attachment = ApplicationAttachmentFactory.create(
+            application=application,
+            file_name="referenced.txt",
+            file_contents="referenced file contents",
+        )
+        ApplicationAttachmentFactory.create(
+            application=application,
+            file_name="orphaned.txt",
+            file_contents="orphaned file contents",
+        )
+
+        app_form = ApplicationFormFactory.create(
+            application=application,
+            competition_form__competition=application.competition,
+            application_response={
+                "attachment_field": str(referenced_attachment.application_attachment_id),
+            },
+        )
+        # Configure the form for XML generation and attachment field identification.
+        # json_to_xml_schema drives GrantApplication.xml output;
+        # form_rule_schema is what _collect_referenced_attachment_ids now uses.
+        app_form.form.json_to_xml_schema = {
+            "_xml_config": {"attachment_fields": {"attachment_field": {}}}
+        }
+        app_form.form.form_rule_schema = {
+            "attachment_field": {"gg_validation": {"rule": "attachment"}}
+        }
+        db_session.flush()
+
+        create_submission_task.run()
+
+        db_session.refresh(application)
+        assert application.application_status == ApplicationStatus.ACCEPTED
+        assert len(application.application_submissions) == 1
+        submission = application.application_submissions[0]
+
+        form_file_names = [f"{app_form.form.short_form_name}.pdf"]
+
+        # Only the referenced attachment should be in the zip; orphaned is excluded.
+        # GrantApplication.xml is also generated because the form has json_to_xml_schema configured.
+        validate_files_in_zip(
+            submission.file_location,
+            {
+                "referenced.txt": "referenced file contents",
+                "GrantApplication.xml": None,
+                "manifest.txt": ["referenced.txt"] + form_file_names,
+            }
+            | {f: None for f in form_file_names},
+        )
+
+        metrics = create_submission_task.metrics
+        assert metrics[create_submission_task.Metrics.APPLICATION_ATTACHMENT_COUNT] == 1
 
     def test_run_task_with_erroring_application(
         self, db_session, create_submission_task, monkeypatch
@@ -259,6 +318,47 @@ class TestCreateApplicationSubmissionTask(BaseTestClass):
                 assert "GrantApplication.xml" not in file_names
                 # Should only have PDF and manifest
                 assert "manifest.txt" in file_names
+
+    def test_project_title_and_requested_amount_set(
+        self,
+        db_session,
+        enable_factory_create,
+        s3_config,
+        load_active_forms,
+        create_submission_task,
+    ):
+        """Test that project title and requested amount are set from values in application forms."""
+        application = ApplicationFactory.create(
+            application_status=ApplicationStatus.SUBMITTED,
+            # Add some other forms that we won't use for this
+            with_forms=True,
+        )
+
+        sf424 = db_session.merge(SF424_v4_0, load=True)
+        competition_form = CompetitionFormFactory.create(
+            competition=application.competition, form=sf424, is_required=True
+        )
+        ApplicationFormFactory.create(
+            application=application,
+            competition_form=competition_form,
+            application_response={
+                "project_title": "my fun title",
+                "federal_estimated_funding": "456.78",
+            },
+            is_included_in_submission=True,
+        )
+
+        create_submission_task.run()
+
+        assert application.application_status == ApplicationStatus.ACCEPTED
+        assert len(application.application_submissions) == 1
+        submission = application.application_submissions[0]
+
+        assert submission.application_submission_number.startswith(
+            application.competition.opportunity.opportunity_number
+        )
+        assert submission.project_title == "my fun title"
+        assert submission.total_requested_amount == Decimal("456.78")
 
 
 def test_get_file_name_in_zip():

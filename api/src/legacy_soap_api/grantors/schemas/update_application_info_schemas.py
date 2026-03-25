@@ -39,3 +39,8 @@ class UpdateApplicationInfoResponse(GrantsGovTrackingNumberRequiredSchema):
     save_agency_notes_result: SaveAgencyNotesResult | None = Field(
         default=None, alias="SaveAgencyNotesResult"
     )
+
+
+class UpdateApplicationInfoResponseSOAPEnvelope(UpdateApplicationInfoResponse):
+    def to_soap_envelope_dict(self, operation_name: str) -> dict:
+        return super().to_soap_envelope_dict(f"ns2:{operation_name}")

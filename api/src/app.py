@@ -52,8 +52,9 @@ API_OVERALL_VERSION = "v0"
 API_DESCRIPTION = """
 Back end API for simpler.grants.gov.
 
-This API is an ALPHA VERSION! Its current form is primarily for testing and feedback. Features are still under heavy development, and subject to change. Not for production use.
+This API is in active development as we build out new functionalities for Simpler.Grants.gov. It is currently stable for everyday use, and will be versioned with advance notice for any breaking changes.
 
+Learn more in our [API documentation](https://wiki.simpler.grants.gov/product/api).
 See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases) for further details.
 """
 

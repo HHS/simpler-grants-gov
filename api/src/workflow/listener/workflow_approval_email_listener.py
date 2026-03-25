@@ -15,13 +15,14 @@ logger = logging.getLogger(__name__)
 
 APPROVAL_EMAIL_SUBJECT_TEMPLATE = "Approval required for '{workflow_type}'"
 
+# Note that any newlines (\n) here will be replaced with <br/> below
+# for the purposes of email formatting.
 APPROVAL_EMAIL_TEMPLATE = """An approval is required for a {workflow_type} that is currently in state '{current_workflow_state}' from a user with the following privilege(s): {privileges}.
 
 ID: {workflow_id}
 Agency: {agency_code}: {agency_name}
 
-Please visit {url} to make this update.
-"""
+Please visit {url} to make this update."""
 
 
 class WorkflowApprovalEmailListener:
@@ -76,6 +77,10 @@ class WorkflowApprovalEmailListener:
             approval_config.required_privileges,
             filter_out_suppressed_emails=True,
         )
+        logger.info(
+            "Fetched users that could potentially do approval",
+            extra=log_extra | {"user_count": len(users), "target_state": target_state},
+        )
 
         if len(users) == 0:
             logger.warning("No users can do approval - cannot send email", extra=log_extra)
@@ -93,7 +98,7 @@ class WorkflowApprovalEmailListener:
             agency_name=agency.agency_name,
             privileges=",".join(approval_config.required_privileges),
             url=get_email_config().frontend_base_url,
-        )
+        ).replace("\n", "<br/>")
 
         for user in users:
             send_workflow_email(

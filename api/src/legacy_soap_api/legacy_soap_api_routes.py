@@ -14,7 +14,7 @@ from src.legacy_soap_api.legacy_soap_api_blueprint import legacy_soap_api_bluepr
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_proxy import get_proxy_response
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SoapRequestStreamer
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.legacy_soap_api_utils import (
     get_alternate_proxy_response,
     get_invalid_path_response,
