@@ -1,3 +1,7 @@
+import path from "path";
+
+const TEST_UPLOAD_DIR = path.resolve(__dirname, "../../test-upload-files");
+
 export const sf424HappyPathTestData = {
   submission_type: "Application",
   application_type: "New",
@@ -30,12 +34,12 @@ export const sf424HappyPathTestData = {
   applicant_type_other_specify: "Type of Applicant other specify test data",
   agency_name: "Simpler Grants.gov test data",
   assistance_listing_program_title: "Technical Agricultural Assistance",
-  areas_affected_attachment: "Test-data.docx",
+  areas_affected_attachment: `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`,
   project_title: "Project Title test data",
-  additional_project_title_attachment: "Test-data.docx",
+  additional_project_title_attachment: `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`,
   congressional_district_applicant: "00-000",
   congressional_district_program_project: "00-000",
-  additional_congressional_attachment: "Test-data.docx",
+  additional_congressional_attachment: `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`,
   project_start_date: "2030-10-01",
   project_end_date: "2036-10-31",
   federal_estimated_funding: "1000000",
@@ -47,7 +51,7 @@ export const sf424HappyPathTestData = {
   application_subject_to: "c. Program is not covered by E.O. 12372.",
   state_review_available_date: "2026-12-01",
   delinquent_federal_debt: "true",
-  debt_explanation_attachment: "Test-data.docx",
+  debt_explanation_attachment: `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`,
   certification_agree: "true",
   authorized_representative_prefix: "Prefix 21",
   authorized_representative_first_name: "First Name 21",
