@@ -39,8 +39,7 @@ def create_opportunity(db_session: db.Session, user: User, opportunity_data: dic
     check_opportunity_number_exists(db_session, request.opportunity_number)
 
     # Get assistance listing record and verify it exists
-    assistance_listing = get_assistance_listing(
-        db_session, request.assistance_listing_number)
+    assistance_listing = get_assistance_listing(db_session, request.assistance_listing_number)
 
     # Create the opportunity
     opportunity = Opportunity(
@@ -63,7 +62,7 @@ def create_opportunity(db_session: db.Session, user: User, opportunity_data: dic
         assistance_listing=assistance_listing,
         # for backwards compatibility
         assistance_listing_number=assistance_listing.assistance_listing_number,
-        program_title=assistance_listing.program_title
+        program_title=assistance_listing.program_title,
     )
 
     db_session.add(opportunity)
@@ -74,8 +73,7 @@ def create_opportunity(db_session: db.Session, user: User, opportunity_data: dic
     stmt = (
         select(Opportunity)
         .options(
-            selectinload(Opportunity.agency_record).selectinload(
-                Agency.top_level_agency),
+            selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency),
             selectinload(Opportunity.opportunity_attachments),
             selectinload(Opportunity.opportunity_assistance_listings),
             selectinload(Opportunity.current_opportunity_summary),
@@ -88,8 +86,7 @@ def create_opportunity(db_session: db.Session, user: User, opportunity_data: dic
 
     logger.info(
         "Created opportunity",
-        extra={"opportunity_id": opportunity.opportunity_id,
-               "agency_code": agency.agency_code},
+        extra={"opportunity_id": opportunity.opportunity_id, "agency_code": agency.agency_code},
     )
 
     return opportunity

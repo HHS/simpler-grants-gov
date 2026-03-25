@@ -1,13 +1,11 @@
-import pytest
 import uuid
 
+import pytest
+
+from src.constants.lookup_constants import OpportunityCategory, Privilege
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.lib.opportunity_test_utils import create_opportunity_request
 from tests.src.db.models.factories import AssistanceListingFactory
-from src.constants.lookup_constants import (
-    Privilege,
-    OpportunityCategory,
-)
 
 
 @pytest.fixture
@@ -22,7 +20,7 @@ def grantor_auth_data(db_session, enable_factory_create):
 
 @pytest.fixture
 def assistance_listing(enable_factory_create):
-    """Create an assistance_listing record """
+    """Create an assistance_listing record"""
     return AssistanceListingFactory.create()
 
 
@@ -30,20 +28,24 @@ def assistance_listing(enable_factory_create):
 def opportunity_request(grantor_auth_data, assistance_listing):
     """Return a valid opportunity creation request"""
     _, agency, _, _ = grantor_auth_data
-    return create_opportunity_request(agency_id=str(agency.agency_id),
-                                      assistance_listing_number=str(assistance_listing.assistance_listing_number))
+    return create_opportunity_request(
+        agency_id=str(agency.agency_id),
+        assistance_listing_number=str(assistance_listing.assistance_listing_number),
+    )
 
 
 @pytest.fixture
 def opportunity_request_no_explanation(grantor_auth_data, assistance_listing):
     """Return a bad opportunity creation request
-        where category is 'other' but category explanation is empty
+    where category is 'other' but category explanation is empty
     """
     _, agency, _, _ = grantor_auth_data
-    return create_opportunity_request(agency_id=str(agency.agency_id),
-                                      category=OpportunityCategory.OTHER,
-                                      category_explanation="",
-                                      assistance_listing_number=str(assistance_listing.assistance_listing_number))
+    return create_opportunity_request(
+        agency_id=str(agency.agency_id),
+        category=OpportunityCategory.OTHER,
+        category_explanation="",
+        assistance_listing_number=str(assistance_listing.assistance_listing_number),
+    )
 
 
 def test_opportunity_create_successful_creation(client, grantor_auth_data, opportunity_request):
@@ -75,7 +77,10 @@ def test_opportunity_create_successful_creation(client, grantor_auth_data, oppor
     assert "updated_at" in opportunity_data
     assert "opportunity_assistance_listings" in opportunity_data
     opportunity_assistance_listings = opportunity_data["opportunity_assistance_listings"][0]
-    assert opportunity_assistance_listings["assistance_listing_number"] == opportunity_request["assistance_listing_number"]
+    assert (
+        opportunity_assistance_listings["assistance_listing_number"]
+        == opportunity_request["assistance_listing_number"]
+    )
 
 
 def test_opportunity_create_with_invalid_jwt_token(client, grantor_auth_data, opportunity_request):
@@ -134,7 +139,9 @@ def test_opportunity_create_invalid_data(client, grantor_auth_data):
     )
 
 
-def test_opportunity_create_no_permissions(client, db_session, enable_factory_create, assistance_listing):
+def test_opportunity_create_no_permissions(
+    client, db_session, enable_factory_create, assistance_listing
+):
     # Create a user without CREATE_OPPORTUNITY privilege
     user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,
@@ -143,7 +150,8 @@ def test_opportunity_create_no_permissions(client, db_session, enable_factory_cr
 
     opportunity_request = create_opportunity_request(
         agency_id=str(agency.agency_id),
-        assistance_listing_number=str(assistance_listing.assistance_listing_number))
+        assistance_listing_number=str(assistance_listing.assistance_listing_number),
+    )
 
     response = client.post(
         "/v1/grantors/opportunities", json=opportunity_request, headers={"X-SGG-Token": token}
@@ -182,19 +190,23 @@ def test_opportunity_create_no_aln(client, grantor_auth_data):
     )
 
 
-def test_opportunity_create_category_explanation_error(client, grantor_auth_data, opportunity_request_no_explanation):
+def test_opportunity_create_category_explanation_error(
+    client, grantor_auth_data, opportunity_request_no_explanation
+):
     _, _, token, _ = grantor_auth_data
 
     # Create an opportunity
     response = client.post(
-        "/v1/grantors/opportunities", json=opportunity_request_no_explanation, headers={"X-SGG-Token": token}
+        "/v1/grantors/opportunities",
+        json=opportunity_request_no_explanation,
+        headers={"X-SGG-Token": token},
     )
 
     assert response.status_code == 422
     response_json = response.get_json()
     assert "errors" in response_json
     assert any(
-        "explanation of the category is required when category is 'other'" in error.get(
-            "message", "").lower()
+        "explanation of the category is required when category is 'other'"
+        in error.get("message", "").lower()
         for error in response_json.get("errors", [])
     )

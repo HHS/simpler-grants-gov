@@ -131,8 +131,7 @@ def create_opportunity_summary_request(
 
     # Set default values for the collections if not provided
     if funding_instruments is None:
-        funding_instruments = [FundingInstrument.GRANT,
-                               FundingInstrument.COOPERATIVE_AGREEMENT]
+        funding_instruments = [FundingInstrument.GRANT, FundingInstrument.COOPERATIVE_AGREEMENT]
 
     if funding_categories is None:
         funding_categories = [FundingCategory.AGRICULTURE]
@@ -210,8 +209,7 @@ def update_opportunity_summary_request(
         ]
 
     if applicant_types is None:
-        applicant_types = [
-            ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS]
+        applicant_types = [ApplicantType.FEDERALLY_RECOGNIZED_NATIVE_AMERICAN_TRIBAL_GOVERNMENTS]
 
     request = {
         "summary_description": summary_description,
