@@ -6,7 +6,7 @@ export const ATTACHMENT_FORM_MATCHER = "^Attachment Form$";
 
 export const fieldDefinitionsAttachment: FormFillFieldDefinitions = {
   att1: {
-    selector: 'input[name="att1"]',
+    selector: 'input[name="att1"][type="file"]',
     type: "file",
     field: "Attachment 1",
   },
