@@ -14,7 +14,6 @@ import { SimplerJwtPayload, UserSession } from "src/types/authTypes";
 import { encodeText } from "src/utils/generalUtils";
 
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 let clientJwtKey: Uint8Array;
 let loginGovJwtKey: KeyObject;
@@ -127,8 +126,4 @@ export const refreshSession = async (
   // re-encrypt the existing API token with a refreshed expiration date
   // and return decrypted user info
   return createAndReturnSession(apiSessionToken, newExpirationDate());
-};
-
-export const loginGovLogout = (redirectUrl: string) => {
-  redirect;
 };

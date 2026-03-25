@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { environment } from "src/constants/environments";
 import { getSession } from "src/services/auth/session";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 import {
@@ -57,6 +58,9 @@ async function WorkspaceDashboard() {
   } catch (e) {
     console.error("Unable to fetch user details or organizations", e);
   }
+
+  // eslint-disable-next-line no-console
+  console.log("AUTH URL ", environment.AUTH_LOGIN_URL);
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">

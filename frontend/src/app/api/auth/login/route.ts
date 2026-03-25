@@ -9,5 +9,7 @@ export function GET() {
   if (!environment.AUTH_LOGIN_URL) {
     return new NextResponse("AUTH_LOGIN_URL not defined", { status: 500 });
   }
+  // eslint-disable-next-line no-console
+  console.log("AUTH LOGIN URL: ", environment.AUTH_LOGIN_URL);
   redirect(environment.AUTH_LOGIN_URL);
 }
