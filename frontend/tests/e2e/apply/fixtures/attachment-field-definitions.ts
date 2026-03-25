@@ -14,6 +14,6 @@ export const fieldDefinitionsAttachment: FormFillFieldDefinitions = {
 
 export const ATTACHMENT_FORM_CONFIG = {
   ...FORM_DEFAULTS,
-  formName: "/^Attachment Form$/", // regex exact match for "Attachment Form"
+  formName: /^Attachment Form$/, // regex exact match for "Attachment Form"
   fields: fieldDefinitionsAttachment,
 } as const;
