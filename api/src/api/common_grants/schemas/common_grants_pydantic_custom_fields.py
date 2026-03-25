@@ -7,7 +7,7 @@ populated by the populate_custom_fields function in the transformation layer.
 from datetime import datetime
 
 from common_grants_sdk.schemas.pydantic import CustomField, CustomFieldType
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, ValidationError, field_validator
 
 # ===========================================================================================
 # Value Models
@@ -26,14 +26,29 @@ class AgencyValue(BaseModel):
     parentCode: str | None = None
 
 
+class _AttachmentUrlValidator(BaseModel):
+    url: HttpUrl
+
+
 class AttachmentValue(BaseModel):
     downloadUrl: str | None = None
-    name: str | None = None
+    name: str
     description: str | None = None
-    sizeInBytes: int | None = None
-    mimeType: str | None = None
-    createdAt: datetime | None = None
-    lastModifiedAt: datetime | None = None
+    sizeInBytes: int
+    mimeType: str
+    createdAt: datetime
+    lastModifiedAt: datetime
+
+    @field_validator("downloadUrl", mode="before")
+    @classmethod
+    def validate_download_url(cls, v: object) -> object:
+        if v is None or v == "":
+            return None
+        try:
+            _AttachmentUrlValidator.model_validate({"url": v})
+            return v
+        except ValidationError:
+            return None
 
 
 class ContactInfoValue(BaseModel):
@@ -162,9 +177,9 @@ class FiscalYearField(CustomField):
     """The fiscal year associated with this opportunity."""
 
     name: str = "fiscalYear"
-    field_type: CustomFieldType = CustomFieldType.NUMBER
+    field_type: CustomFieldType = CustomFieldType.INTEGER
     schema_url: HttpUrl | None = HttpUrl("https://commongrants.org/custom-fields/fiscalYear/")
-    value: int | float
+    value: int
     description: str | None = "The fiscal year associated with this opportunity"
 
     model_config = {"populate_by_name": True}

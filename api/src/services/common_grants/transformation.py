@@ -369,7 +369,7 @@ def validate_custom_field(field_class: type[CustomField], **kwargs: object) -> C
     """
     try:
         return field_class(**kwargs)
-    except ValidationError as e:
+    except Exception as e:
         logger.warning(
             f"Custom field validation failed for {field_class.__name__}: {e}",
             extra={"cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR},
