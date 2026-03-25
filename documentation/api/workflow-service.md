@@ -43,7 +43,7 @@ Our architecture consists of a few components:
   * `PUT /v1/workflows/events` - Send an event against a workflow, will write to SQS if valid
   * `GET /v1/workflow/:workflow_id` - Get a workflow
 * An SQS queue for storing the events
-* A SQS dead-letter-queue for storing events that fail to process multiple times
+* An SQS dead-letter-queue for storing events that fail to process multiple times
 * Workflow Service - An always running service that processes events async
   * Fetches events from the SQS queue
   * Processes them, running them against the workflow + state machine configuration
@@ -55,8 +55,10 @@ If we receive a surge in events, the queue will fill up, but the service
 can work through processing it.
 
 Our SQS queue uses the most general configuration, the order we receive
-events, and whether we may receive a duplicate event is not defined, and
-should be expected, and handled.
+events, and whether we may receive a duplicate event is not defined. It
+is expected that any work on our handler logic needs to be aware of and account
+for this. As we go forward and add multi-threading support and scale the service
+up we will account for this.
 
 ## Auth
 Authentication is handled purely in the APIs, the backend service
@@ -179,16 +181,15 @@ erDiagram
     Opportunity {}
     ApplicationSubmission {}
     
-    Workflow ||--o| WorkflowEventHistory: Maintains
-    Workflow ||--o| WorkflowAudit: Records
-    Workflow ||--o| WorkflowApproval: Records
+    Workflow ||--o{ WorkflowEventHistory: Maintains
+    Workflow ||--o{ WorkflowAudit: Records
+    Workflow ||--o{ WorkflowApproval: Records
     
-    WorkflowAudit ||--o| WorkflowEventHistory: Connected
-    WorkflowApproval ||--o| WorkflowEventHistory: Connected
+    WorkflowAudit }o--|| WorkflowEventHistory: Connected
+    WorkflowApproval |o--|| WorkflowEventHistory: Connected
     
-    
-    Opportunity ||..|| Workflow: "Can Have"
-    ApplicationSubmission ||..|| Workflow: "Can Have"
+    Opportunity ||..o{ Workflow: "Can Have"
+    ApplicationSubmission ||..o{ Workflow: "Can Have"
 ```
 
 Workflows are connected to exactly ONE entity. A workflow cannot
@@ -200,9 +201,9 @@ Workflow audit, workflow approval, and event history are all
 history tables, but serve different purposes.
 
 WorkflowEventHistory tracks every event put into the SQS queue.
-If events fail to process, but we don't think the event could be processed,
-(eg. the event doesn't exist for the workflow type), then we will
-remove it from the queue, and still record it to the database.
+If an event fails to process because it's not valid for the current
+state of the workflow (e.g. the event doesn't exist for the workflow type),
+we still remove it from the queue, and record it in the database.
 
 WorkflowAudit tracks every transition. Because we can make one
 event cause multiple transitions in the state machine, this may
