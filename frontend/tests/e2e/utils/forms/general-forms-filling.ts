@@ -160,7 +160,11 @@ export async function fillField(
           }
         }
       }
-    } else if (field.type === "file" && field.testId && typeof data === "string") {
+    } else if (
+      field.type === "file" &&
+      field.testId &&
+      typeof data === "string"
+    ) {
       const locator = page.getByTestId(field.testId);
       await locator.waitFor({ state: "attached", timeout: 5000 });
       await locator.setInputFiles(data);
