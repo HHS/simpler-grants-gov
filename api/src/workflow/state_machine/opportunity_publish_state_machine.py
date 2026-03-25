@@ -1,11 +1,17 @@
 import logging
 from enum import StrEnum
-from typing import Any
+from typing import Any, cast
 
 from statemachine import Event
 from statemachine.states import States
 
-from src.constants.lookup_constants import WorkflowEntityType, WorkflowType
+from src.constants.lookup_constants import OpportunityStatus, WorkflowEntityType, WorkflowType
+from src.db.models.opportunity_models import CurrentOpportunitySummary
+from src.services.current_opportunity.determine_current_opportunity_summary import (
+    determine_current_and_status,
+    is_opportunity_changed,
+)
+from src.util.datetime_util import get_now_us_eastern_date
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.registry.workflow_registry import WorkflowRegistry
@@ -93,3 +99,62 @@ class OpportunityPublishStateMachine(BaseStateMachine):
             )
 
         self.opportunity.is_draft = False
+
+    @calculate_current_opportunity_summary.on
+    def handle_calculate_current_opportunity_summary(
+        self, state_machine_event: StateMachineEvent
+    ) -> None:
+        """Handle calculating the opportunity summary + opportunity status for an opportunity."""
+        current_date = get_now_us_eastern_date()
+
+        current_summary, status = determine_current_and_status(self.opportunity, current_date)
+        log_extra = state_machine_event.get_log_extra() | {
+            "opportunity_id": self.opportunity.opportunity_id,
+            "current_opportunity_status": (
+                self.opportunity.current_opportunity_summary.opportunity_status
+                if self.opportunity.current_opportunity_summary
+                else None
+            ),
+            "current_opportunity_summary": (
+                self.opportunity.current_opportunity_summary.opportunity_summary_id
+                if self.opportunity.current_opportunity_summary
+                else None
+            ),
+            "new_opportunity_status": status,
+            "new_opportunity_summary": (
+                current_summary.opportunity_summary_id if current_summary else None
+            ),
+        }
+
+        if is_opportunity_changed(self.opportunity, current_summary, status):
+            logger.info(
+                "Opportunity summary / status changed", extra=log_extra | {"is_updated": True}
+            )
+        else:
+            logger.info(
+                "Opportunity summary / status not changed", extra=log_extra | {"is_updated": False}
+            )
+            return
+
+        if current_summary is None:
+            if self.opportunity.current_opportunity_summary is not None:
+                logger.info("Removing existing current opportunity summary", extra=log_extra)
+                self.db_session.delete(self.opportunity.current_opportunity_summary)
+
+            # Whether or not we needed to delete a record or if it was already null
+            # we can safely return here as there isn't anything to do
+            return
+
+        # If the current opportunity summary doesn't already exist, create it first
+        if self.opportunity.current_opportunity_summary is None:
+            logger.info("Creating new opportunity summary", extra=log_extra)
+            self.opportunity.current_opportunity_summary = CurrentOpportunitySummary(
+                opportunity=self.opportunity
+            )
+        else:
+            logger.info("Updating current opportunity summary", extra=log_extra)
+
+        self.opportunity.current_opportunity_summary.opportunity_summary = current_summary
+        self.opportunity.current_opportunity_summary.opportunity_status = cast(
+            OpportunityStatus, status
+        )
