@@ -11,6 +11,7 @@ import {
   opportunitySearchEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
+  toDynamicGrantorsEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
   userLogoutEndpoint,
@@ -152,3 +153,7 @@ export const fetchOrganizationBySavedOpportunities = (
 ) => requesterForEndpoint(toDynamicOrganizationsEndpoint(type));
 
 export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);
+
+export const fetchGrantorWithMethod = (
+  type: "POST" | "DELETE" | "PUT" | "GET",
+) => requesterForEndpoint(toDynamicGrantorsEndpoint(type));
