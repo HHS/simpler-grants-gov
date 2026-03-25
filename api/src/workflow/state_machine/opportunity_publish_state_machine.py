@@ -147,7 +147,7 @@ class OpportunityPublishStateMachine(BaseStateMachine):
 
         # If the current opportunity summary doesn't already exist, create it first
         if self.opportunity.current_opportunity_summary is None:
-            logger.info("Creating new opportunity summary", extra=log_extra)
+            logger.info("Creating new current opportunity summary", extra=log_extra)
             self.opportunity.current_opportunity_summary = CurrentOpportunitySummary(
                 opportunity=self.opportunity
             )
