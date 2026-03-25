@@ -8,10 +8,12 @@ from tests.src.db.models.factories import OpportunityFactory, UserFactory, Workf
 from tests.workflow.workflow_test_util import build_start_workflow_event, send_process_event
 
 
-def test_opportunity_publish_happy_path(db_session, enable_factory_create):
+@pytest.mark.parametrize("is_draft", [True, False])
+def test_opportunity_publish_happy_path(db_session, enable_factory_create, is_draft, caplog):
     """Verify that sending a start_workflow event will go through the whole state machine"""
     user = UserFactory.create()
-    opportunity = OpportunityFactory.create(is_draft=True)
+    # We verify it's the same regardless of the is_draft flag
+    opportunity = OpportunityFactory.create(is_draft=is_draft)
 
     sqs_container = build_start_workflow_event(
         workflow_type=WorkflowType.OPPORTUNITY_PUBLISH,
@@ -19,7 +21,18 @@ def test_opportunity_publish_happy_path(db_session, enable_factory_create):
         entity=opportunity,
     )
 
-    state_machine = EventHandler(db_session, sqs_container).process()
+    # commit so the opportunity in the DB is updated
+    with db_session.begin():
+        state_machine = EventHandler(db_session, sqs_container).process()
+
+    db_session.refresh(opportunity)
+    assert opportunity.is_draft is False
+
+    if is_draft is False:
+        assert (
+            "Opportunity that isn't currently a draft going through publishing flow."
+            in caplog.messages
+        )
 
     workflow = state_machine.workflow
     assert workflow.current_workflow_state == OpportunityPublishState.END
