@@ -7,23 +7,7 @@ import { getFormLink } from "./form-navigation-utils";
 export interface FillFieldDefinition {
   testId?: string;
   selector?: string;
-  optionTestIdPrefix?: string;
-  hasTextRegex?: string;
-  getByText?: string;
-  textExact?: boolean;
-  buttonName?: string;
-  type:
-    | "text"
-    | "dropdown"
-    | "file"
-    | "radiobutton"
-    | "checkbox"
-    | "radio-button"
-    | "combo-box-input"
-    | "radioButton"
-    | "comboBoxInput"
-    | "radio_button"
-    | "combo_box_input";
+  type: "text" | "dropdown" | "file";
   section?: string;
   field: string;
 }
@@ -33,7 +17,7 @@ export type FormFillFieldDefinitions = {
 };
 
 export interface FillFormConfig {
-  formName: string;
+  formName: string | RegExp;
   fields: FormFillFieldDefinitions;
   saveButtonTestId: string;
   noErrorsText?: string;
@@ -118,70 +102,15 @@ export async function fillField(
       const locator = page.getByTestId(field.testId);
       await locator.waitFor({ state: "attached", timeout: 5000 });
       await locator.fill(data);
-    } else if (
-      field.type === "file" &&
-      field.buttonName &&
-      typeof data === "string"
-    ) {
-      const locator = page.getByRole("button", { name: field.buttonName });
-      await locator.waitFor({ state: "visible", timeout: 5000 });
-
-      const filePath = path.resolve(__dirname, "../../test-upload-files", data);
-      await locator.setInputFiles(filePath);
-
-      await page.waitForLoadState("load", { timeout: 15000 });
-    } else if (
-      field.type === "radiobutton" &&
-      (field.testId || field.selector || field.getByText)
-    ) {
-      if (shouldActivateField(data)) {
-        let locator = field.getByText
-          ? page.getByText(field.getByText, {
-              exact: field.textExact ?? false,
-            })
-          : field.selector
-            ? page.locator(field.selector)
-            : page.getByTestId(field.testId as string);
-        if (field.hasTextRegex) {
-          locator = locator.filter({ hasText: new RegExp(field.hasTextRegex) });
-        }
-        await locator.waitFor({ state: "visible", timeout: 5000 });
-        await locator.click();
-      }
-    } else if (
-      field.type === "checkbox" &&
-      (field.testId || field.selector || field.getByText)
-    ) {
-      if (shouldActivateField(data)) {
-        let locator = field.getByText
-          ? page.getByText(field.getByText, {
-              exact: field.textExact ?? false,
-            })
-          : field.selector
-            ? page.locator(field.selector)
-            : page.getByTestId(field.testId as string);
-        if (field.hasTextRegex) {
-          locator = locator.filter({ hasText: new RegExp(field.hasTextRegex) });
-        }
-        await locator.waitFor({ state: "visible", timeout: 5000 });
-        try {
-          if (!(await locator.isChecked())) {
-            await locator.check();
-          }
-        } catch {
-          const nestedCheckbox = locator
-            .locator('input[type="checkbox"]')
-            .first();
-          if ((await nestedCheckbox.count()) === 0) {
-            throw new Error(
-              `Checkbox field ${fieldIdentifier} is not checkable; map to the checkbox input testId`,
-            );
-          }
-          if (!(await nestedCheckbox.isChecked())) {
-            await nestedCheckbox.check();
-          }
-        }
-      }
+    } else if (field.type === "file" && field.testId) {
+      const locator = page.getByTestId(field.testId);
+      await locator.waitFor({ state: "attached", timeout: 5000 });
+      await locator.setInputFiles(data);
+      // Wait for the uploaded filename to appear in the UI before proceeding
+      const fileName = data.split("/").pop() ?? data;
+      await page
+        .locator(`span:has-text("${fileName}")`)
+        .waitFor({ state: "visible", timeout: 15000 });
     } else {
       throw new Error(
         `Unsupported or invalid field configuration for ${fieldIdentifier}`,

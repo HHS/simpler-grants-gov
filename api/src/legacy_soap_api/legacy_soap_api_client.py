@@ -13,6 +13,7 @@ from src.legacy_soap_api.grantors.services import (
     confirm_application_delivery_response,
     get_application_zip_response,
     get_submission_list_expanded_response,
+    update_application_info_response,
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
@@ -264,6 +265,18 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             soap_request=self.soap_request,
             request=grantors_schemas.GetSubmissionListExpandedRequest(**soap_request_dict),
             proxy_response=proxy_response,
+            soap_config=self.operation_config,
+        )
+
+    def update_application_info_request(
+        self, proxy_response: SOAPResponse | None = None
+    ) -> grantors_schemas.UpdateApplicationInfoResponseSOAPEnvelope:
+        return update_application_info_response(
+            db_session=self.db_session,
+            soap_request=self.soap_request,
+            update_application_info_request=grantors_schemas.UpdateApplicationInfoRequest(
+                **self.get_soap_request_dict()
+            ),
             soap_config=self.operation_config,
         )
 
