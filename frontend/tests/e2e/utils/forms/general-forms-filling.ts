@@ -183,6 +183,17 @@ export async function fillField(
           }
         }
       }
+    } else if (field.type === "file" && (field.testId || field.selector)) {
+      const locator = field.selector
+        ? page.locator(field.selector)
+        : page.getByTestId(field.testId!);
+      await locator.waitFor({ state: "attached", timeout: 5000 });
+      await locator.setInputFiles(data);
+      // Wait for the uploaded filename to appear in the UI before proceeding
+      const fileName = data.split("/").pop() ?? data;
+      await page
+        .locator(`span:has-text("${fileName}")`)
+        .waitFor({ state: "visible", timeout: 15000 });
     } else {
       throw new Error(
         `Unsupported or invalid field configuration for ${fieldIdentifier}`,

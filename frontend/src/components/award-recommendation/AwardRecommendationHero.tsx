@@ -59,7 +59,6 @@ export default async function AwardRecommendationHero({
               },
               {
                 title: `${t("heroTitle", { defaultValue: "Award Rec #" })}: ${recordNumber}`,
-                path: `/`,
               },
             ]}
           />
