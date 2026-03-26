@@ -143,11 +143,8 @@ def test_opportunity_publish_calculate_current_opportunity_summary(
             opportunity.current_opportunity_summary.opportunity_summary.is_forecast
             == expected_is_forecast
         )
-        assert (
-            opportunity.current_opportunity_summary.opportunity_status
-            == OpportunityStatus.FORECASTED
-            if expected_is_forecast
-            else OpportunityStatus.POSTED
+        assert opportunity.current_opportunity_summary.opportunity_status == (
+            OpportunityStatus.FORECASTED if expected_is_forecast else OpportunityStatus.POSTED
         )
 
 
