@@ -16,7 +16,7 @@ import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
-import { RecommendationsSummarySection } from "src/components/award-recommendation/RecommendationsSummarySection";
+import { ViewRecommendationSummarySection } from "src/components/award-recommendation/ViewRecommendationSummarySection";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 import { submitAwardRecommendationForReview } from "./actions";
 
@@ -28,12 +28,8 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("AwardRecommendation.pageTitle", {
-      defaultValue: "Review your recommendation",
-    }),
-    description: t("AwardRecommendation.metaDescription", {
-      defaultValue: "View your award recommendations",
-    }),
+    title: t("AwardRecommendation.pageTitle"),
+    description: t("AwardRecommendation.metaDescription"),
   };
   return meta;
 }
@@ -65,7 +61,7 @@ const OpportunitySection = ({
           <div className="margin-top-3 margin-bottom-3">
             <div className="margin-bottom-3">
               <h2 className="margin-top-0 margin-bottom-0">
-                {t("opportunity", { defaultValue: "Opportunity" })}
+                {t("opportunity")}
               </h2>
             </div>
             <div className="border radius-md border-base-lighter padding-3 bg-white">
@@ -103,18 +99,13 @@ const OpportunitySection = ({
                 )}
               </div>
               <p className="text-bold margin-bottom-2">
-                {t("selectionMethod")}
+                {t("otherOpportunityInfo.label")}
               </p>
-              <p className="margin-top-0">
-                {awardRecommendationDetails.award_selection_method ===
-                "merit-review-only"
-                  ? t("recommendationMethod.meritReviewOnly", {
-                      defaultValue: "Merit review ranking only",
-                    })
-                  : t("recommendationMethod.meritReviewOther", {
-                      defaultValue: "Merit review ranking with other factors",
-                    })}
-              </p>
+              <SummaryDescriptionDisplay
+                summaryDescription={
+                  awardRecommendationDetails.additional_info || ""
+                }
+              />
             </div>
           </div>
         </Grid>
@@ -194,12 +185,8 @@ async function AwardRecommendationPageContent({
               recommendationMethod={
                 awardRecommendationDetails.award_selection_method ===
                 "merit-review-only"
-                  ? t("recommendationMethod.meritReviewOnly", {
-                      defaultValue: "Merit review ranking only",
-                    })
-                  : t("recommendationMethod.meritReviewOther", {
-                      defaultValue: "Merit review ranking with other factors",
-                    })
+                  ? t("recommendationMethod.meritReviewOnly")
+                  : t("recommendationMethod.meritReviewOther")
               }
               recommendationMethodDetails={
                 awardRecommendationDetails.funding_strategy
@@ -208,7 +195,7 @@ async function AwardRecommendationPageContent({
                 awardRecommendationDetails.other_key_information
               }
             />
-            <RecommendationsSummarySection
+            <ViewRecommendationSummarySection
               summary={awardRecommendationDetails.award_recommendation_summary}
               fundingStrategy={awardRecommendationDetails.funding_strategy}
             />

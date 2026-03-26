@@ -24,8 +24,8 @@ import {
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
+import { EditRecommendationSummarySection } from "src/components/award-recommendation/EditRecommendationSummarySection";
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
-import { RecommendationsSummarySection } from "src/components/award-recommendation/RecommendationsSummarySection";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 
 export async function generateMetadata({
@@ -36,12 +36,8 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("AwardRecommendation.pageTitleEdit", {
-      defaultValue: "Edit your recommendation",
-    }),
-    description: t("AwardRecommendation.metaDescriptionEdit", {
-      defaultValue: "Edit your award recommendations",
-    }),
+    title: t("AwardRecommendation.pageTitleEdit"),
+    description: t("AwardRecommendation.metaDescriptionEdit"),
   };
   return meta;
 }
@@ -75,7 +71,7 @@ const OpportunitySection = ({
           <div className="margin-top-3 margin-bottom-3">
             <div className="margin-bottom-3">
               <h2 className="margin-top-0 margin-bottom-0">
-                {t("opportunity", { defaultValue: "Opportunity" })}
+                {t("opportunity")}
               </h2>
             </div>
             <div>
@@ -225,8 +221,7 @@ async function AwardRecommendationEditPageContent({
                 awardRecommendationDetails.other_key_information
               }
             />
-            <RecommendationsSummarySection
-              mode="edit"
+            <EditRecommendationSummarySection
               summary={awardRecommendationDetails.award_recommendation_summary}
               fundingStrategy={awardRecommendationDetails.funding_strategy}
             />
