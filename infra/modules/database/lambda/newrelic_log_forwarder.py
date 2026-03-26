@@ -17,6 +17,7 @@ NR_LOGS_ENDPOINT = os.environ.get(
 AWS_ACCOUNT_ID = os.environ.get("AWS_ACCOUNT_ID", "")
 AWS_REGION = os.environ.get("AWS_REGION", "")
 RDS_CLUSTER_NAME = os.environ.get("RDS_CLUSTER_NAME", "")
+NR_ENTITY_GUID = os.environ.get("NR_ENTITY_GUID", "")
 
 # Cache the license key across warm invocations
 _nr_license_key = None
@@ -60,22 +61,26 @@ def handler(event, context):
     if not entries:
         return {"statusCode": 200, "body": "No log entries to forward."}
 
+    common_attributes = {
+        "logtype": "rds-postgresql",
+        "plugin": "cloudwatch-lambda-forwarder",
+        "instrumentation.provider": "aws",
+        "collector.name": "cloudwatch-lambda-forwarder",
+        "aws.accountId": AWS_ACCOUNT_ID,
+        "aws.region": AWS_REGION,
+        "aws.rds.clusterIdentifier": RDS_CLUSTER_NAME,
+        "hostname": RDS_CLUSTER_NAME,
+        "entity.name": RDS_CLUSTER_NAME,
+        "entity.type": "AWSRDSDBCLUSTER",
+        "provider": "RdsDbCluster",
+    }
+    if NR_ENTITY_GUID:
+        common_attributes["entity.guid"] = NR_ENTITY_GUID
+
     nr_payload = [
         {
             "common": {
-                "attributes": {
-                    "logtype": "rds-postgresql",
-                    "plugin": "cloudwatch-lambda-forwarder",
-                    "instrumentation.provider": "aws",
-                    "collector.name": "cloudwatch-lambda-forwarder",
-                    "aws.accountId": AWS_ACCOUNT_ID,
-                    "aws.region": AWS_REGION,
-                    "aws.rds.clusterIdentifier": RDS_CLUSTER_NAME,
-                    "hostname": RDS_CLUSTER_NAME,
-                    "entity.name": RDS_CLUSTER_NAME,
-                    "entity.type": "AWSRDSDBCLUSTER",
-                    "provider": "RdsDbCluster",
-                },
+                "attributes": common_attributes,
             },
             "logs": entries,
         }
