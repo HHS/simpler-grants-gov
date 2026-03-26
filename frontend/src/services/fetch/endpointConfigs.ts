@@ -6,6 +6,7 @@ export interface EndpointConfig {
   version: string;
   namespace: string;
   method: ApiMethod;
+  requiresAuth?: boolean;
 }
 
 export const opportunitySearchEndpoint = {
@@ -112,5 +113,14 @@ export const getLocalUsersEndpoint = {
   basePath: environment.API_URL,
   version: "",
   namespace: "local/local-users",
+  method: "GET" as ApiMethod,
+};
+
+// opting out of traditional X-SGG based auth since these requests will use the
+// internal auth token instead
+export const getApplicationForPrint = {
+  basePath: environment.API_URL,
+  version: "alpha",
+  namespace: "applications",
   method: "GET" as ApiMethod,
 };

@@ -209,17 +209,30 @@ export const updateApplicationFilingName = async (
  * Application Forms
  */
 
+export const getApplicationFormDetailsForPrint = async (
+  token: string,
+  applicationId: string,
+  applicationFormId: string,
+): Promise<ApplicationFormDetailApiResponse> => {
+  const additionalHeaders: Record<string, string> = {
+    "X-SGG-Internal-Token": token,
+  };
+
+  const response = await fetchApplicationWithMethod("GET")({
+    subPath: `${applicationId}/application_form/${applicationFormId}`,
+    additionalHeaders,
+  });
+
+  return (await response.json()) as ApplicationFormDetailApiResponse;
+};
+
 export const getApplicationFormDetails = async (
   token: string,
   applicationId: string,
   applicationFormId: string,
-  internalToken = false,
 ): Promise<ApplicationFormDetailApiResponse> => {
-  const tokenHeaderName = internalToken
-    ? "X-SGG-Internal-Token"
-    : "X-SGG-Token";
   const additionalHeaders: Record<string, string> = {
-    [tokenHeaderName]: token,
+    "X-SGG-Token": token,
   };
 
   const response = await fetchApplicationWithMethod("GET")({
