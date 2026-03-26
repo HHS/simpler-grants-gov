@@ -36,7 +36,6 @@ const PageBreadcrumbs = ({
         },
         {
           title: t("InviteLegacyUsers.pageHeading"),
-          path: `/organizations/${organizationId}/manage-users/legacy`,
         },
       ]}
     />

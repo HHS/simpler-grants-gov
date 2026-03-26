@@ -30,7 +30,6 @@ const ApplicationsPageWrapper = ({ children }: PropsWithChildren) => {
           },
           {
             title: t("breadcrumbApplications"),
-            path: `/applications`,
           },
         ]}
       />

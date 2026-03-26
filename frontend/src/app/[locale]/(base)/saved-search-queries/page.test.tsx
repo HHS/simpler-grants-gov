@@ -83,7 +83,6 @@ describe("Saved Searches page", () => {
         },
         {
           title: "breadcrumbSavedQueries",
-          path: "/saved-search-queries",
         },
       ],
     });

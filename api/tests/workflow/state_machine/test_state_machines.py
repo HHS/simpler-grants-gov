@@ -65,7 +65,6 @@ class BasicTestStateMachine(BaseStateMachine):
         BasicState,
         initial=BasicState.START,
         final=[BasicState.END, BasicState.DECLINED],
-        use_enum_instance=True,
     )
 
     ### Events + transitions

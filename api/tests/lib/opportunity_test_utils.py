@@ -13,6 +13,7 @@ from src.constants.lookup_constants import (
 
 def create_opportunity_request(
     agency_id=None,
+    assistance_listing_number=None,
     opportunity_number=None,
     opportunity_title="Research Grant for Climate Innovation",
     category=OpportunityCategory.DISCRETIONARY,
@@ -40,6 +41,7 @@ def create_opportunity_request(
         "agency_id": str(agency_id),
         "category": category,
         "category_explanation": category_explanation,
+        "assistance_listing_number": assistance_listing_number,
     }
 
     return request
