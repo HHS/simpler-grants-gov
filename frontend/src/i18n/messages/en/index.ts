@@ -607,9 +607,10 @@ export const messages = {
     },
   },
   Developer: {
-    pageTitle: "Developer Portal | Simpler.Grants.gov",
+    pageTitle: "Developers | Simpler.Grants.gov",
     pageDescription:
-      "Tools and resources for developers working on Simpler.Grants.gov",
+      "Tools and resources for developers working with Simpler.Grants.gov",
+    h1: "Developers",
     infoTitle: "API tools & management",
     canDoHeader: "What's available for developers",
     canDoSubHeader: "What you can do with an API key now",
@@ -638,9 +639,9 @@ export const messages = {
     ],
   },
   ApiDashboard: {
-    pageTitle: "API Dashboard | Simpler.Grants.gov",
+    pageTitle: "API dashboard | Simpler.Grants.gov",
     metaDescription: "Manage your API keys for Simpler.Grants.gov",
-    heading: "API Dashboard",
+    heading: "API dashboard",
     errorLoadingKeys: "Failed to load API keys",
     table: {
       headers: {
@@ -801,7 +802,7 @@ export const messages = {
     unauthorizedExplanation: "This content is not available",
   },
   Search: {
-    title: "Search Funding Opportunities | Simpler.Grants.gov",
+    title: "Search | Simpler.Grants.gov",
     header: "Search funding opportunities",
     metaDescription:
       "Search for and discover relevant opportunities using our improved search.",
@@ -970,7 +971,7 @@ export const messages = {
     noSavedCTAParagraphTwo:
       "As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
     searchButton: "Start a new search",
-    title: "Saved Search Queries | Simpler.Grants.gov",
+    title: "Saved search queries | Simpler.Grants.gov",
     error:
       "We encountered an issue while loading your saved search queries. If this keeps happening, please email simpler@grants.gov for help.",
     edit: "Edit name",
@@ -1028,7 +1029,7 @@ export const messages = {
     statusFilter: {
       label: "Filter by status",
     },
-    title: "Saved Opportunities | Simpler.Grants.gov",
+    title: "Saved opportunities | Simpler.Grants.gov",
   },
   Roadmap: {
     pageTitle: "Roadmap | Simpler.Grants.gov",
@@ -1627,7 +1628,7 @@ export const messages = {
     requiredForProfile: "Required to complete your profile.",
   },
   WorkspaceDashboard: {
-    pageTitle: "Workspace Dashboard | Simpler.Grants.gov",
+    pageTitle: "Workspace | Simpler.Grants.gov",
     title: "Welcome to your workspace dashboard.",
     fetchError: "Error fetching user data. Please try refreshing the page.",
     organizations: "Your organizations",
@@ -1801,7 +1802,7 @@ export const messages = {
         "Applications you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
     },
     pageHeading: "Applications",
-    pageTitle: "Applications",
+    pageTitle: "Applications | Simpler.Grants.gov",
     breadcrumbWorkspace: "Workspace",
     breadcrumbApplications: "Applications",
     tableContents: {
