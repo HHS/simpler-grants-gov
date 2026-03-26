@@ -1,6 +1,7 @@
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
+import { getScopeFromUrlParams } from "src/utils/opportunity/savedOpportunitiiesUtils";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -37,7 +38,11 @@ const NoSavedOpportunities = () => {
 };
 
 type SavedOpportunitiesPageProps = LocalizedPageProps & {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    scope?: string;
+    organization_id?: string;
+  }>;
 };
 
 export default async function SavedOpportunities({
@@ -45,15 +50,25 @@ export default async function SavedOpportunities({
   searchParams,
 }: SavedOpportunitiesPageProps) {
   const { locale } = await params;
-  const { status } = await searchParams;
+  const { scope, status, organization_id } = await searchParams;
   const t = await getTranslations({ locale });
 
+  // Get saved opportunities scope from URL params. If invalid or not provided
+  // will default to all individual saved opportunities + organization saved opportunities
+  // that the user is a member of.
+  const savedOpportunitiesScope = getScopeFromUrlParams(scope, organization_id);
+
   // Fetch saved opportunities (filtered if status is provided)
-  const savedOpportunities = await fetchSavedOpportunities(status);
+  const savedOpportunities = await fetchSavedOpportunities(
+    savedOpportunitiesScope,
+    status,
+  );
 
   let hasSavedOpportunities = savedOpportunities.length > 0;
   if (!hasSavedOpportunities && status) {
-    const allSavedOpportunities = await fetchSavedOpportunities();
+    const allSavedOpportunities = await fetchSavedOpportunities(
+      savedOpportunitiesScope,
+    );
     hasSavedOpportunities = allSavedOpportunities.length > 0;
   }
 
