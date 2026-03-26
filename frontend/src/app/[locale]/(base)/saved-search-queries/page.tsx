@@ -96,7 +96,6 @@ export default async function SavedSearchQueries({
             },
             {
               title: t("breadcrumbSavedQueries"),
-              path: `/saved-search-queries`,
             },
           ]}
         />
