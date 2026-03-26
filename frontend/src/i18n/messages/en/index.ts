@@ -1929,6 +1929,8 @@ export const messages = {
       "Error fetching award recommendation data. Please try refreshing the page.",
     recommendations: {
       heading: "Recommendations",
+      editPageDescription:
+        "Document your award recommendations and the funding strategy used for the period of performance.",
       description:
         "Award recommendations and the funding strategy used for the period of performance.",
       summary: {

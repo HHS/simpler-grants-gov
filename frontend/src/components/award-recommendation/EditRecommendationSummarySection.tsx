@@ -30,7 +30,7 @@ export const EditRecommendationSummarySection = ({
               </h2>
             </div>
             <p className="text-base margin-top-2 margin-bottom-4">
-              {t("recommendations.description")}
+              {t("recommendations.editPageDescription")}
             </p>
 
             <div className="margin-bottom-4">
@@ -65,9 +65,7 @@ export const EditRecommendationSummarySection = ({
                         {t("recommendations.summary.totalFundingRecommended")}
                       </p>
                       <p className="font-sans-xl text-normal margin-top-0">
-                        {formatCurrency(
-                          summary?.total_recommended_amount ?? 0,
-                        )}
+                        {formatCurrency(summary?.total_recommended_amount ?? 0)}
                       </p>
                     </div>
                   </Grid>
@@ -86,9 +84,7 @@ export const EditRecommendationSummarySection = ({
                   <Grid col={12} tablet={{ col: "fill" }}>
                     <div>
                       <p className="text-bold margin-bottom-1 text-no-wrap">
-                        {t(
-                          "recommendations.summary.recommendedWithoutFunding",
-                        )}
+                        {t("recommendations.summary.recommendedWithoutFunding")}
                       </p>
                       <p className="font-sans-md text-normal margin-top-0">
                         {summary?.recommended_without_funding_count ?? 0}{" "}
@@ -99,9 +95,7 @@ export const EditRecommendationSummarySection = ({
                   <Grid col={12} tablet={{ col: "fill" }}>
                     <div>
                       <p className="text-bold margin-bottom-1 text-no-wrap">
-                        {t(
-                          "recommendations.summary.notRecommendedForFunding",
-                        )}
+                        {t("recommendations.summary.notRecommendedForFunding")}
                       </p>
                       <p className="font-sans-md text-normal margin-top-0">
                         {summary?.not_recommended_count ?? 0}{" "}
@@ -114,7 +108,7 @@ export const EditRecommendationSummarySection = ({
             </div>
 
             <div className="margin-bottom-4">
-              <div className="border radius-md border-base-lighter padding-3 bg-white">
+              <div className="bg-white">
                 <h3 className="margin-top-0 margin-bottom-2 font-sans-md">
                   {t("recommendations.fundingStrategy.heading")}
                 </h3>
@@ -125,6 +119,7 @@ export const EditRecommendationSummarySection = ({
                   id="funding_strategy"
                   name="funding_strategy"
                   maxLength={1000}
+                  className="maxw-full"
                   defaultValue={fundingStrategy || ""}
                   isTextArea
                   data-testid="funding-strategy-textarea"
