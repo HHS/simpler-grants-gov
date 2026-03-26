@@ -19,30 +19,33 @@ const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
 
-test("Application form completion happy path - Project Abstract Summary",{ tag: [APPLY, CORE_REGRESSION] },
+test(
+  "Application form completion happy path - Project Abstract Summary",
+  { tag: [APPLY, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,
   ) => {
-  test.setTimeout(300_000); // 5 min timeout
+    test.setTimeout(300_000); // 5 min timeout
 
-  const isMobile = testInfo.project.name.match(/[Mm]obile/);
+    const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
-  await authenticateE2eUser(page, context, !!isMobile);
+    await authenticateE2eUser(page, context, !!isMobile);
 
-  // Call reusable create application function from utils
-  await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
+    // Call reusable create application function from utils
+    await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
-  await fillForm(
-    testInfo,
-    page,
-    PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG,
-    projectAbstractSummaryHappyPathTestData,
-    false,
-  );
+    await fillForm(
+      testInfo,
+      page,
+      PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG,
+      projectAbstractSummaryHappyPathTestData,
+      false,
+    );
 
-  await page.waitForTimeout(2000);
+    await page.waitForTimeout(2000);
 
-  // Verify form status after save
-  await verifyFormStatusAfterSave(page, "complete");
-});
+    // Verify form status after save
+    await verifyFormStatusAfterSave(page, "complete");
+  },
+);
