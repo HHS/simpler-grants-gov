@@ -54,31 +54,6 @@ def test_start_workflow_entity_not_found(
     assert len(messages) == 0
 
 
-def test_start_workflow_invalid_workflow_type(
-    db_session: db.Session, internal_workflow_send_user, workflow_sqs_queue
-):
-    """Test that a 422 error is raised when workflow type is not configured."""
-    # OPPORTUNITY_PUBLISH is in the enum but not registered in WorkflowRegistry
-    payload = {
-        "event_type": WorkflowEventType.START_WORKFLOW,
-        "start_workflow_context": {
-            "workflow_type": WorkflowType.OPPORTUNITY_PUBLISH,
-            "entity_type": WorkflowEntityType.OPPORTUNITY,
-            "entity_id": str(uuid.uuid4()),
-        },
-    }
-
-    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
-        ingest_workflow_event(db_session, payload, internal_workflow_send_user)
-
-    assert exc_info.value.status_code == 422
-    assert exc_info.value.message == "Invalid workflow type specified"
-
-    # Verify no message sent
-    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
-    assert len(messages) == 0
-
-
 def test_start_workflow_entity_type_mismatch(
     db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
 ):

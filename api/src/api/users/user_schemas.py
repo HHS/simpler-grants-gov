@@ -844,3 +844,20 @@ class SavedOpportunityNotificationsSchema(Schema):
 
 class UserSavedOpportunityNotificationsResponseSchema(AbstractResponseSchema):
     data = fields.Nested(SavedOpportunityNotificationsSchema)
+
+
+class SetUserSavedOpportunityNotificationRequestSchema(Schema):
+    organization_id = fields.UUID(
+        required=True,
+        allow_none=True,
+        metadata={
+            "description": "The ID of the organization for which to set notification. If not provided, the setting applies to the user's own saved opportunities."
+        },
+    )
+    email_enabled = fields.Boolean(
+        required=True, metadata={"description": "Whether the email notifications is enabled"}
+    )
+
+
+class SetUserSavedOpportunityNotificationResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
