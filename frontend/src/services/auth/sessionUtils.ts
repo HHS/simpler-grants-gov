@@ -69,6 +69,8 @@ export function loginGovLogout(pivRequired = false) {
       `${authURL.origin}/openid_connect/logout?client_id=${clientId}&post_logout_redirect_uri=${encodeURIComponent(redirectUri + (pivRequired ? "pivError=true" : ""))}`,
     );
   } else {
-    redirect("/login");
+    redirect(
+      `/login${pivRequired ? `pivError=true&url=${encodeURIComponent(environment.AUTH_LOGIN_URL)}` : ""}`,
+    );
   }
 }
