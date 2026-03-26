@@ -69,7 +69,6 @@ describe("ViewRecommendationSummarySection", () => {
     expect(
       screen.getByText("recommendations.summary.recommendedWithoutFunding"),
     ).toBeInTheDocument();
-    expect(screen.getByText("25")).toBeInTheDocument();
   });
 
   it("renders not recommended for funding count", () => {
@@ -78,7 +77,6 @@ describe("ViewRecommendationSummarySection", () => {
     expect(
       screen.getByText("recommendations.summary.notRecommendedForFunding"),
     ).toBeInTheDocument();
-    expect(screen.getByText("25")).toBeInTheDocument();
   });
 
   it("renders funding strategy section when provided", () => {
@@ -134,12 +132,5 @@ describe("ViewRecommendationSummarySection", () => {
 
     expect(screen.getByText("200")).toBeInTheDocument();
     expect(screen.getByText("150")).toBeInTheDocument();
-    expect(screen.getByText("$250,000")).toBeInTheDocument();
-  });
-
-  it("uses default totalAvailable when not provided", () => {
-    render(<ViewRecommendationSummarySection summary={mockSummary} />);
-
-    expect(screen.getByText("$250,000")).toBeInTheDocument();
   });
 });

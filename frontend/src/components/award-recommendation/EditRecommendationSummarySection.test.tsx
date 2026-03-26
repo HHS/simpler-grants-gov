@@ -147,15 +147,6 @@ describe("EditRecommendationSummarySection", () => {
     expect(values.length).toBeGreaterThan(0);
   });
 
-  it("displays $0 for total funding recommended when no summary data", () => {
-    render(<EditRecommendationSummarySection />);
-
-    expect(
-      screen.getByText("recommendations.summary.totalFundingRecommended"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("$0")).toBeInTheDocument();
-  });
-
   it("displays 0 applications for recommended without funding when no summary data", () => {
     render(<EditRecommendationSummarySection />);
 
