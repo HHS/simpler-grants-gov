@@ -6,7 +6,7 @@ import {
 
 export type Breadcrumb = {
   title: string;
-  path: string;
+  path?: string;
 };
 
 const microdata = {
@@ -40,7 +40,7 @@ const Breadcrumbs = ({
         current={i + 1 === breadcrumbList.length}
         {...microdata.li}
       >
-        {i + 1 !== breadcrumbList.length ? (
+        {breadcrumbInfo.path ? (
           <BreadcrumbLink
             href={breadcrumbInfo.path}
             itemID={breadcrumbInfo.path}

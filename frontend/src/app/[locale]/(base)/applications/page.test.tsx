@@ -62,7 +62,6 @@ describe("Applications", () => {
           },
           {
             title: "breadcrumbApplications",
-            path: "/applications",
           },
         ],
       });

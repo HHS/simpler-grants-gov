@@ -17,19 +17,20 @@ from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceL
 from src.legacy_soap_api.grantors import schemas
 from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate, verify_certificate_access
 from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import convert_bool_to_yes_no
 from src.util.datetime_util import adjust_timezone
 
 logger = logging.getLogger(__name__)
-
+AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS = "Agency Tracking Number Assigned"
+RECEIVED_BY_AGENCY_STATUS = "Received by Agency"
 GRANTS_APPLICATION_STATUSES = {
     None: None,
     ApplicationStatus.IN_PROGRESS: None,
     ApplicationStatus.SUBMITTED: "Received",
     ApplicationStatus.ACCEPTED: "Validated",
 }
-# TODO - this will require new statuses, we will need to adjust this later (2025-12-18)
 STATUS_TRANSFORM = {
     "Receiving": None,
     "Received": None,
@@ -37,9 +38,25 @@ STATUS_TRANSFORM = {
     "Validated": ApplicationStatus.ACCEPTED,
     "Rejected with Errors": None,
     "Download Preparation": None,
-    "Received by Agency": ApplicationStatus.ACCEPTED,
-    "Agency Tracking Number Assigned": ApplicationStatus.ACCEPTED,
 }
+
+
+def get_grants_gov_application_status(submission: ApplicationSubmission) -> str | None:
+    """
+    This method gets the GrantsGovTrackingNumber
+    NOTE: The order of operations is VERY important to get the correct GrantsGovTrackingNumber
+    IF there's a row on the ApplicationSubmissionTrackingNumber table -> "Agency Tracking Number Assigned"
+    IF there's NOT a row on the ApplicationSubmissionTrackingNumber table but there IS a row on the ApplicationSubmissionRetrieval table -> "Received by Agency"
+    IF there's not a row on either table -> application.application_status
+    """
+    grants_gov_application_status = GRANTS_APPLICATION_STATUSES.get(
+        submission.application.application_status
+    )
+    if len(submission.application_submission_tracking_numbers) > 0:
+        grants_gov_application_status = AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS
+    elif len(submission.application_submission_retrievals) > 0:
+        grants_gov_application_status = RECEIVED_BY_AGENCY_STATUS
+    return grants_gov_application_status
 
 
 def transform_submission(submission: ApplicationSubmission) -> dict[str, str | datetime | None]:
@@ -51,7 +68,7 @@ def transform_submission(submission: ApplicationSubmission) -> dict[str, str | d
         "FundingOpportunityNumber": opportunity.opportunity_number,
         "CFDANumber": assistance_listing.assistance_listing_number if assistance_listing else None,
         "GrantsGovTrackingNumber": f"GRANT{submission.legacy_tracking_number}",
-        "GrantsGovApplicationStatus": GRANTS_APPLICATION_STATUSES[application.application_status],
+        "GrantsGovApplicationStatus": None,
         "SubmissionTitle": application.application_name,
         "PackageID": competition.legacy_package_id,
         "ns2:ReceivedDateTime": (
@@ -64,6 +81,8 @@ def transform_submission(submission: ApplicationSubmission) -> dict[str, str | d
         "ActiveExclusions": None,
         "UEI": None,
     }
+    if grants_gov_application_status := get_grants_gov_application_status(submission):
+        application_list_obj.update({"GrantsGovApplicationStatus": grants_gov_application_status})
     organization = application.organization
     if organization and organization.sam_gov_entity:
         sam_gov_entity = organization.sam_gov_entity
@@ -96,13 +115,15 @@ def get_submissions(
         )
         # Prefetch values for better performance
         .options(
+            selectinload(ApplicationSubmission.application_submission_tracking_numbers),
+            selectinload(ApplicationSubmission.application_submission_retrievals),
             selectinload(ApplicationSubmission.application).options(
                 selectinload(Application.organization),
                 selectinload(Application.competition).options(
                     selectinload(Competition.opportunity),
                     selectinload(Competition.opportunity_assistance_listing),
                 ),
-            )
+            ),
         )
     )
 
@@ -112,9 +133,28 @@ def get_submissions(
             # If more than one status in filter then just return nothing
             if status and len(status) > 1:
                 return []
-            simpler_status = STATUS_TRANSFORM.get(str(status[0])) if status else None
-            if simpler_status:
-                stmt = stmt.where(Application.application_status == simpler_status)
+            status_value = str(status[0])
+            # GrantsGovTrackingNumber comes from three different places with a hierarchy
+            # A submissions is in "Agency Tracking Number Assigned Status" IF it has any rows on application_submission_tracking_numbers table
+            # A submissions is in "Received by Agency" IF it has any rows on application_submission_retrievals table AND no rows on application_submission_tracking_numbers table
+            # A submissions is in  application.application_status IF there are no rows on either of the above tables
+            if status_value == AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS:
+                stmt = stmt.where(
+                    ApplicationSubmission.application_submission_tracking_numbers.any()
+                )
+            elif status_value == RECEIVED_BY_AGENCY_STATUS:
+                stmt = stmt.where(
+                    ApplicationSubmission.application_submission_retrievals.any(),
+                    ~ApplicationSubmission.application_submission_tracking_numbers.any(),
+                )
+            else:
+                simpler_status = STATUS_TRANSFORM.get(status_value)
+                if simpler_status:
+                    stmt = stmt.where(
+                        ~ApplicationSubmission.application_submission_retrievals.any(),
+                        ~ApplicationSubmission.application_submission_tracking_numbers.any(),
+                        Application.application_status == simpler_status,
+                    )
         # Each one of these filters is Last One Wins so if multiple of the same type are entered the last one is the only one that matters
         if grants_gov_tracking_numbers := submission_filters.get("GrantsGovTrackingNumber"):
             stmt = stmt.where(
