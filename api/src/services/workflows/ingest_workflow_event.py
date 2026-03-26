@@ -25,10 +25,12 @@ from src.workflow.service.workflow_service import (
     get_and_validate_workflow,
     get_workflow_entity,
     is_event_valid_for_workflow,
+    validate_no_concurrent_workflow,
 )
 from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_constants import WorkflowConstants
 from src.workflow.workflow_errors import (
+    ConcurrentWorkflowError,
     EntityNotFound,
     InactiveWorkflowError,
     InvalidEntityForWorkflow,
@@ -117,6 +119,9 @@ def ingest_workflow_event(
     except InvalidWorkflowResponseTypeError as e:
         logger.info("Invalid or missing approval response type", extra={"error": str(e)})
         raise_flask_error(422, str(e))
+    except ConcurrentWorkflowError as e:
+        logger.info("Concurrent workflow already exists for entity", extra={"error": str(e)})
+        raise_flask_error(422, "An active workflow of this type already exists for this entity")
 
     logger.info("Successfully validated workflow event")
     send_workflow_event_to_queue(workflow_event)
@@ -145,6 +150,15 @@ def _validate_start_workflow_event(
     # Validate entity exists and matches the workflow's allowed entity type
     get_workflow_entity(
         db_session,
+        entity_type=start_context.entity_type,
+        entity_id=start_context.entity_id,
+        config=config,
+    )
+
+    # Validate no active concurrent workflow exists for this entity
+    validate_no_concurrent_workflow(
+        db_session,
+        workflow_type=start_context.workflow_type,
         entity_type=start_context.entity_type,
         entity_id=start_context.entity_id,
         config=config,

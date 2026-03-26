@@ -5,7 +5,7 @@ from typing import Any
 from sqlalchemy import select
 
 from src.adapters import db
-from src.constants.lookup_constants import WorkflowEntityType
+from src.constants.lookup_constants import WorkflowEntityType, WorkflowType
 from src.db.models.base import ApiSchemaTable
 from src.db.models.competition_models import Application
 from src.db.models.opportunity_models import Opportunity
@@ -13,6 +13,7 @@ from src.db.models.workflow_models import Workflow
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_errors import (
+    ConcurrentWorkflowError,
     EntityNotFound,
     ImplementationMissingError,
     InactiveWorkflowError,
@@ -108,3 +109,53 @@ def get_and_validate_workflow(
         raise InactiveWorkflowError("Workflow is not active - cannot receive events")
 
     return workflow
+
+
+ENTITY_TYPE_TO_COLUMN = {
+    WorkflowEntityType.OPPORTUNITY: Workflow.opportunity_id,
+    WorkflowEntityType.APPLICATION: Workflow.application_id,
+}
+
+
+def validate_no_concurrent_workflow(
+    db_session: db.Session,
+    workflow_type: WorkflowType,
+    entity_type: WorkflowEntityType,
+    entity_id: uuid.UUID,
+    config: WorkflowConfig,
+) -> None:
+    """Validate that no active workflow of the given type already exists for the entity.
+
+    If the workflow config allows concurrent workflows, this is a no-op.
+    Otherwise, raises ConcurrentWorkflowError if an active workflow already exists.
+    """
+    if config.allow_concurrent_workflow_for_entity:
+        return
+
+    entity_column = ENTITY_TYPE_TO_COLUMN.get(entity_type)
+    if entity_column is None:
+        raise ImplementationMissingError(
+            f"Entity type {entity_type} is not configured for concurrent workflow validation"
+        )
+
+    existing_workflow = db_session.scalar(
+        select(Workflow).where(
+            Workflow.workflow_type == workflow_type,
+            entity_column == entity_id,
+            Workflow.is_active == True,  # noqa: E712
+        )
+    )
+
+    if existing_workflow is not None:
+        logger.warning(
+            "An active workflow already exists for this entity",
+            extra={
+                "workflow_type": workflow_type,
+                "entity_type": entity_type,
+                "entity_id": entity_id,
+                "existing_workflow_id": existing_workflow.workflow_id,
+            },
+        )
+        raise ConcurrentWorkflowError(
+            "An active workflow of this type already exists for this entity"
+        )
