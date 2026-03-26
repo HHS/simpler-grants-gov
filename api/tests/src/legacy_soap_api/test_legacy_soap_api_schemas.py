@@ -11,10 +11,9 @@ from src.legacy_soap_api.legacy_soap_api_schemas import (
     FaultMessage,
     SOAPInvalidRequestOperationName,
     SOAPOperationNotSupported,
-    SOAPRequest,
-    SoapRequestStreamer,
     SOAPResponse,
 )
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 
 
 def get_base_body(append_to_end: bytes | None = None) -> bytes:

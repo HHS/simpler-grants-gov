@@ -12,9 +12,9 @@ from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPInvalidEnvelope,
     SOAPInvalidRequestOperationName,
     SOAPOperationNotSupported,
-    SOAPRequest,
     SOAPResponse,
 )
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
