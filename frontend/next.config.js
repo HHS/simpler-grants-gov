@@ -167,6 +167,7 @@ const nextConfig = {
       "./node_modules/@uswds",
       "./node_modules/@uswds/uswds/packages",
     ],
+    silenceDeprecations: ["if-function", "global-builtin"],
   },
   serverExternalPackages: ["newrelic"],
   webpack: (config) => {

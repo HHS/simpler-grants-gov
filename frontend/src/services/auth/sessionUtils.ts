@@ -6,6 +6,7 @@ import { clientTokenExpirationInterval } from "src/constants/auth";
 import { environment } from "src/constants/environments";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const CLIENT_JWT_ENCRYPTION_ALGORITHM = "HS256";
 export const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
@@ -57,4 +58,17 @@ export const encrypt = async (
 export async function deleteSession() {
   const cookie = await cookies();
   cookie.delete("session");
+}
+
+export function loginGovLogout(pivRequired = false) {
+  const authURL = new URL(environment.AUTH_LOGIN_URL);
+  const clientId = authURL.searchParams.get("client_id");
+  const redirectUri = authURL.searchParams.get("redirect_uri");
+  if (clientId && redirectUri) {
+    redirect(
+      `${authURL.origin}/openid_connect/logout?client_id=${clientId}&post_logout_redirect_uri=${encodeURIComponent(redirectUri + (pivRequired ? "pivError=true" : ""))}`,
+    );
+  } else {
+    redirect("/login");
+  }
 }
