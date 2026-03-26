@@ -27,7 +27,6 @@ const OrganizationsPageWrapper = ({ children }: PropsWithChildren) => {
           },
           {
             title: t("breadcrumbOrganizations"),
-            path: `/organizations`,
           },
         ]}
       />

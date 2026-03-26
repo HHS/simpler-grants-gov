@@ -51,7 +51,6 @@ class InitialPrototypeStateMachine(BaseStateMachine):
         InitialPrototypeState,
         initial=InitialPrototypeState.START,
         final=[InitialPrototypeState.END, InitialPrototypeState.DECLINED],
-        use_enum_instance=True,
     )
 
     ### Events + transitions

@@ -50,7 +50,6 @@ export const OrganizationDetail = ({
           },
           {
             title: sam_gov_entity.legal_business_name,
-            path: `/organizations`, // not used, can be whatever
           },
         ]}
       />

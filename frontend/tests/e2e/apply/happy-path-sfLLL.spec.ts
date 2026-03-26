@@ -1,4 +1,5 @@
 import { test } from "@playwright/test";
+import { getOpportunityId } from "tests/e2e/get-opportunityId-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
@@ -11,9 +12,9 @@ import { SFLLL_FORM_CONFIG } from "./fixtures/sfLLL-fill-data";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 
-const { testOrgLabel, opportunityId, targetEnv, baseUrl } = playwrightEnv;
+const { testOrgLabel, targetEnv, baseUrl } = playwrightEnv;
 
-const OPPORTUNITY_URL = `/opportunity/${opportunityId}`;
+const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {

@@ -121,7 +121,6 @@ async function FormPage({ params }: formPageProps) {
             },
             {
               title: formName,
-              path: `/applications/${applicationId}/form/${formId}`,
             },
           ]}
         />

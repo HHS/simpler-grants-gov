@@ -57,15 +57,19 @@ export default async function SavedOpportunities({
     hasSavedOpportunities = allSavedOpportunities.length > 0;
   }
 
-  // Get full opportunity details for each saved opportunity
   const opportunityPromises = savedOpportunities.map(
     async (savedOpportunity) => {
       const { data: opportunityData } = await getOpportunityDetails(
-        String(savedOpportunity.opportunity_id),
+        savedOpportunity.opportunity_id,
       );
-      return opportunityData;
+
+      return {
+        ...opportunityData,
+        saved_to_organizations: savedOpportunity.saved_to_organizations ?? [],
+      };
     },
   );
+
   const resolvedOpportunities = await Promise.all(opportunityPromises);
 
   return (
@@ -79,7 +83,6 @@ export default async function SavedOpportunities({
             },
             {
               title: t("SavedOpportunities.breadcrumbSavedOpportunities"),
-              path: `/saved-opportunities`,
             },
           ]}
         />
