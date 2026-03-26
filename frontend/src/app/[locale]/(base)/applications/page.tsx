@@ -33,7 +33,7 @@ const ApplicationsPageWrapper = ({ children }: PropsWithChildren) => {
           },
         ]}
       />
-      <h1 className="margin-top-0 margin-bottom-7">{t("pageTitle")}</h1>
+      <h1 className="margin-top-0 margin-bottom-7">{t("pageHeading")}</h1>
       {children}
     </GridContainer>
   );

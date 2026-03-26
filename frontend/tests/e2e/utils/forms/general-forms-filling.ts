@@ -43,8 +43,10 @@ export async function fillField(
       const locator = page.getByTestId(field.testId);
       await locator.waitFor({ state: "attached", timeout: 5000 });
       await locator.fill(data);
-    } else if (field.type === "file" && field.testId) {
-      const locator = page.getByTestId(field.testId);
+    } else if (field.type === "file" && (field.testId || field.selector)) {
+      const locator = field.selector
+        ? page.locator(field.selector)
+        : page.getByTestId(field.testId!);
       await locator.waitFor({ state: "attached", timeout: 5000 });
       await locator.setInputFiles(data);
       // Wait for the uploaded filename to appear in the UI before proceeding
