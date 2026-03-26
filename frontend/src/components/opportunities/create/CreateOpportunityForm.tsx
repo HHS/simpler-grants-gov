@@ -224,7 +224,7 @@ export function CreateOpportunityForm({
             labelText={t("CreateOpportunityForm.assistanceListingNumber")}
             description={t("CreateOpportunityForm.assistanceListingNumberDesc")}
             fieldId="assistanceListingNumber"
-            fieldMaxLength={40}
+            fieldMaxLength={6}
             isRequired={true}
             onTextChange={onAlnChange}
             defaultValue={response?.data?.assistance_listing_number || ""}
