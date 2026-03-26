@@ -184,6 +184,11 @@ export async function fillField(
         }
       }
     } else if (field.type === "file" && (field.testId || field.selector)) {
+      if (typeof data !== "string") {
+        throw new Error(
+          `File field ${fieldIdentifier} requires string data (file path), received ${typeof data}`,
+        );
+      }
       const locator = field.selector
         ? page.locator(field.selector)
         : page.getByTestId(field.testId!);
