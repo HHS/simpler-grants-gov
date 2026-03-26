@@ -104,7 +104,6 @@ describe("Saved Opportunities page", () => {
         },
         {
           title: "SavedOpportunities.breadcrumbSavedOpportunities",
-          path: "/saved-opportunities",
         },
       ],
     });
