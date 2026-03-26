@@ -1,13 +1,18 @@
+import logging
 from enum import StrEnum
+from typing import Any
 
 from statemachine import Event
 from statemachine.states import States
 
 from src.constants.lookup_constants import WorkflowEntityType, WorkflowType
 from src.workflow.base_state_machine import BaseStateMachine
+from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.state_persistence.opportunity_persistence_model import OpportunityPersistenceModel
 from src.workflow.workflow_config import WorkflowConfig
+
+logger = logging.getLogger(__name__)
 
 
 class OpportunityPublishState(StrEnum):
@@ -71,3 +76,20 @@ class OpportunityPublishStateMachine(BaseStateMachine):
     finish_publish = Event(
         states.OPPORTUNITY_WRITTEN_TO_SEARCH.to(states.END),
     )
+
+    def __init__(self, model: OpportunityPersistenceModel, **kwargs: Any):
+        super().__init__(model=model, **kwargs)
+        self.opportunity = model.opportunity
+
+    @flip_is_draft.on
+    def handle_flip_is_draft(self, state_machine_event: StateMachineEvent) -> None:
+        """Flip the is_draft flag to false"""
+        # We shouldn't be using this workflow for non-drafts, but nothing
+        # will break, so leave it alone.
+        if self.opportunity.is_draft is False:
+            logger.warning(
+                "Opportunity that isn't currently a draft going through publishing flow.",
+                extra=state_machine_event.get_log_extra(),
+            )
+
+        self.opportunity.is_draft = False
