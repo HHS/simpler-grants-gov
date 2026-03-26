@@ -123,7 +123,7 @@
     * [API Key Management](product/decisions/adr/2025-09-04-api-key-management.md)
     * [CommonGrants adoption in SGG](product/decisions/adr/2025-10-27-common-grants-in-sgg.md)
     * [Simpler Grants Management Data Flow](product/decisions/adr/2025-12-24-sgm-data-flow.md)
-    * [\[Draft\] Content Management System](product/decisions/adr/2026-01-content-management-system.md)
+    * [Content management system (CMS)](product/decisions/adr/2026-01-content-management-system.md)
     * [Workflow Management](product/decisions/adr/2026-02-03-workflow_management.md)
   * [Infra](product/decisions/infra/README.md)
     * [Use markdown architectural decision records](product/decisions/infra/0000-use-markdown-architectural-decision-records.md)

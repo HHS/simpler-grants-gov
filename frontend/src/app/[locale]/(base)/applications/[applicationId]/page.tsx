@@ -25,7 +25,7 @@ export const dynamic = "force-dynamic";
 
 export function generateMetadata() {
   const meta: Metadata = {
-    title: `Application landing page`,
+    title: `Application | Simpler.Grants.gov`,
   };
   return meta;
 }
