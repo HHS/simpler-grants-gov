@@ -1,6 +1,8 @@
 import dataclasses
 import typing
 
+import statistics
+
 
 @dataclasses.dataclass
 class SearchResponse:
@@ -11,6 +13,11 @@ class SearchResponse:
     aggregations: dict[str, dict[str, int]]
 
     scroll_id: str | None
+
+    took_ms: int | None = None
+    timed_out: bool | None = None
+    shards_failed: int | None = None
+    score_stats: dict[str, float | None] = dataclasses.field(default_factory=dict)
 
     @classmethod
     def from_opensearch_response(
@@ -43,6 +50,9 @@ class SearchResponse:
         }
         """
         scroll_id = raw_json.get("_scroll_id", None)
+        took = raw_json.get("took")
+        timed_out = raw_json.get("timed_out")
+        shards_failed = raw_json.get("_shards", {}).get("failed")
 
         hits = raw_json.get("hits", {})
         hits_total = hits.get("total", {})
@@ -62,8 +72,9 @@ class SearchResponse:
 
         raw_aggs: dict[str, dict[str, typing.Any]] = raw_json.get("aggregations", {})
         aggregations = _parse_aggregations(raw_aggs)
+        score_stats = _compute_score_stats(records)
 
-        return cls(total_records, records, aggregations, scroll_id)
+        return cls(total_records, records, aggregations, scroll_id, took, timed_out, shards_failed, score_stats)
 
 
 def _parse_aggregations(
@@ -128,3 +139,19 @@ def _parse_aggregations(
         aggregations[field] = field_aggregation
 
     return aggregations
+
+
+def _compute_score_stats(records: list[dict]) -> dict:
+
+    scores = [
+        r.get("relevancy_score")
+        for r in records
+        if r.get("relevancy_score") is not None
+    ]
+
+    return {
+        "search.score_min": min(scores) if scores else None,
+        "search.score_max": max(scores) if scores else None,
+        "search.score_mean": statistics.mean(scores) if scores else None,
+        "search.score_stdev": statistics.pstdev(scores) if len(scores) > 1 else None,
+    }
