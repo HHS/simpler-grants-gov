@@ -55,7 +55,7 @@ test.describe("Saved Opportunities", () => {
       await waitForURLChange(page, (url) => !!url.match(/saved-opportunities/));
       const timeout = targetEnv === "staging" ? 30000 : 5000;
       await expect(page).toHaveTitle(
-        "Saved Opportunities | Simpler.Grants.gov",
+        "Saved opportunities | Simpler.Grants.gov",
         {
           timeout,
         },
