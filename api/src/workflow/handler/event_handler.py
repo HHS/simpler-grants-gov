@@ -154,17 +154,17 @@ class EventHandler:
 
         config, state_machine_cls = self._get_state_machine_for_workflow_type(context.workflow_type)
 
+        if context.entity_type != config.entity_type:
+            raise InvalidEventError("Entity type does not match workflow configuration")
+
         workflow_entity = get_workflow_entity(
             self.db_session,
-            entity_type=context.entity_type,
             entity_id=context.entity_id,
             config=config,
         )
 
         validate_no_concurrent_workflow(
             self.db_session,
-            workflow_type=context.workflow_type,
-            entity_type=context.entity_type,
             entity_id=context.entity_id,
             config=config,
         )

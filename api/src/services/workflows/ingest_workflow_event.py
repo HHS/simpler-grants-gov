@@ -147,10 +147,13 @@ def _validate_start_workflow_event(
         event_to_send=WorkflowConstants.START_WORKFLOW,
     )
 
+    # Validate the entity type in the request matches the workflow's expected entity type
+    if start_context.entity_type != config.entity_type:
+        raise_flask_error(422, "The provided entity is not valid for this workflow type")
+
     # Validate entity exists and matches the workflow's allowed entity type
     get_workflow_entity(
         db_session,
-        entity_type=start_context.entity_type,
         entity_id=start_context.entity_id,
         config=config,
     )
@@ -158,8 +161,6 @@ def _validate_start_workflow_event(
     # Validate no active concurrent workflow exists for this entity
     validate_no_concurrent_workflow(
         db_session,
-        workflow_type=start_context.workflow_type,
-        entity_type=start_context.entity_type,
         entity_id=start_context.entity_id,
         config=config,
     )
