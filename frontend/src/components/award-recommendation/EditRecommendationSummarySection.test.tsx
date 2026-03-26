@@ -29,7 +29,9 @@ describe("EditRecommendationSummarySection", () => {
   it("renders the recommendations description", () => {
     render(<EditRecommendationSummarySection />);
 
-    expect(screen.getByText("recommendations.description")).toBeInTheDocument();
+    expect(
+      screen.getByText("recommendations.editPageDescription"),
+    ).toBeInTheDocument();
   });
 
   it("renders summary section with all labels", () => {
