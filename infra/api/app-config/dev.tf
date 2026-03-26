@@ -1,19 +1,21 @@
 module "dev_config" {
-  source                          = "./env-config"
-  project_name                    = local.project_name
-  app_name                        = local.app_name
-  default_region                  = module.project_config.default_region
-  environment                     = "dev"
-  network_name                    = "dev"
-  domain_name                     = "api.dev.simpler.grants.gov"
-  secondary_domain_names          = ["alb.dev.simpler.grants.gov"]
-  s3_cdn_domain_name              = "files.dev.simpler.grants.gov"
-  mtls_domain_name                = "soap.dev.simpler.grants.gov"
-  enable_https                    = true
-  has_database                    = local.has_database
-  database_enable_http_endpoint   = true
-  has_incident_management_service = local.has_incident_management_service
-  enable_notifications            = local.enable_notifications
+  source                            = "./env-config"
+  project_name                      = local.project_name
+  app_name                          = local.app_name
+  default_region                    = module.project_config.default_region
+  environment                       = "dev"
+  network_name                      = "dev"
+  domain_name                       = "api.dev.simpler.grants.gov"
+  secondary_domain_names            = ["alb.dev.simpler.grants.gov"]
+  s3_cdn_domain_name                = "files.dev.simpler.grants.gov"
+  mtls_domain_name                  = "soap.dev.simpler.grants.gov"
+  enable_https                      = true
+  has_database                      = local.has_database
+  database_enable_http_endpoint     = true
+  has_incident_management_service   = local.has_incident_management_service
+  enable_notifications              = local.enable_notifications
+  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyODk0OTk3NTE4Nzc4MzA4NzUz"
+  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtNTc4NjYzMjA1MjA4MDAyNTA2Mg"
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-dev/services/api-dev/health?region=us-east-1
