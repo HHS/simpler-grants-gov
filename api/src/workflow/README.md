@@ -1,5 +1,3 @@
-from src.constants.lookup_constants import ApprovalResponseType
-
 # Overview
 This folder contains functionality for running our
 workflows via state machines, as well as defining the
@@ -457,7 +455,7 @@ The easiest way to test a state machine is to use the event handler
 and a few utilities we've built.
 
 ```python
-from src.constants.lookup_constants import WorkflowEntityType, WorkflowEventType, WorkflowType
+from src.constants.lookup_constants import WorkflowEntityType, WorkflowEventType, WorkflowType, ApprovalResponseType
 from tests.src.db.models.factories import OpportunityFactory, UserFactory, WorkflowFactory
 
 from tests.workflow.workflow_test_util import (
