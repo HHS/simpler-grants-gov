@@ -1,6 +1,6 @@
 import { get } from "lodash";
 
-import React, { JSX } from "react";
+import React, { InputEvent, JSX } from "react";
 
 import TextWidget from "src/components/applyForm/widgets/TextWidget";
 import { DATA_CELL_BASE_CLASS } from "./budgetConstants";
@@ -87,7 +87,7 @@ export const CurrencyInput: React.FC<{
     maxLength={14}
     value={value}
     placeholder="0.00"
-    onInput={(e: React.FormEvent<HTMLInputElement>) => {
+    onInput={(e: InputEvent<HTMLElement & { value: string }>) => {
       const el = e.currentTarget;
       let next = el.value.replace(/[^0-9.-]/g, "");
       next = next.replace(/(?!^)-/g, "");

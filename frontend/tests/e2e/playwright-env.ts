@@ -14,12 +14,6 @@ const BASE_URLS: Record<string, string> = {
   staging: process.env.STAGING_BASE_URL || "https://staging.simpler.grants.gov",
 };
 
-// Opportunity IDs for each environment
-const OPPORTUNITY_IDS: Record<string, string> = {
-  local: "f7a1c2b3-4d5e-6789-8abc-1234567890ab",
-  staging: "f7a1c2b3-4d5e-6789-8abc-1234567890ab",
-};
-
 // Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
 const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
@@ -31,12 +25,21 @@ if (!Object.prototype.hasOwnProperty.call(BASE_URLS, targetEnv)) {
 
 const baseUrl = BASE_URLS[targetEnv];
 
-// Test organization labels for each environment
+// Label used to select the test user from the local dev quick-login dropdown.
+// Must match the OAuth login name defined in seed_orgs_and_users.py.
+const TEST_USER_LABELS: Record<string, string> = {
+  local: "one_org_user",
+  staging: "Automatic staging Organization for UEI AUTOHQDCCHBY",
+};
+
+// Organization label shown in the "Start new application" modal dropdown.
+// Must match the legal_business_name in seed_orgs_and_users.py.
 const TEST_ORG_LABELS: Record<string, string> = {
   local: "Sally's Soup Emporium",
   staging: "Automatic staging Organization for UEI AUTOHQDCCHBY",
 };
 
+const testUserLabel = TEST_USER_LABELS[targetEnv];
 const testOrgLabel = TEST_ORG_LABELS[targetEnv];
 
 // Environment for web server
@@ -51,11 +54,8 @@ const playwrightEnv = {
   webServerEnv,
   baseUrl,
   targetEnv,
+  testUserLabel,
   testOrgLabel,
-  opportunityId:
-    process.env.OPPORTUNITY_ID ||
-    OPPORTUNITY_IDS[targetEnv] ||
-    OPPORTUNITY_IDS.local,
   isCi: process.env.CI,
   totalShards: process.env.TOTAL_SHARDS,
   currentShard: process.env.CURRENT_SHARD,

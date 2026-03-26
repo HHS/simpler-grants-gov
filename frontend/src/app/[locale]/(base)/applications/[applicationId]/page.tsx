@@ -123,7 +123,6 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
             },
             {
               title: details.application_name,
-              path: `/applications`, // not used, can be whatever
             },
           ]}
         />
