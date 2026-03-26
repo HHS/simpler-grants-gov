@@ -4,7 +4,9 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { getOpportunityId } from "tests/e2e/get-opportunityId-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
+import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
@@ -13,14 +15,15 @@ import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-sta
 import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "./fixtures/project-abstract-summary-field-definitions";
 import { projectAbstractSummaryHappyPathTestData } from "./fixtures/project-abstract-summary-fill-data";
 
+const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel } = playwrightEnv;
-const OPPORTUNITY_ID = "c3c59562-a54f-4203-b0f6-98f2f0383481";
-const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
+const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
 
-test("Application form completion happy path - Project Abstract Summary", async ({
-  page,
-  context,
-}: { page: Page; context: BrowserContext }, testInfo: TestInfo) => {
+test("Application form completion happy path - Project Abstract Summary",{ tag: [APPLY, CORE_REGRESSION] },
+  async (
+    { page, context }: { page: Page; context: BrowserContext },
+    testInfo: TestInfo,
+  ) => {
   test.setTimeout(300_000); // 5 min timeout
 
   const isMobile = testInfo.project.name.match(/[Mm]obile/);
