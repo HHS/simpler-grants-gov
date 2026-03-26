@@ -97,6 +97,17 @@ export const toDynamicOrganizationsEndpoint = (
   };
 };
 
+export const toDynamicGrantorsEndpoint = (
+  type: "POST" | "DELETE" | "PUT" | "GET",
+) => {
+  return {
+    basePath: environment.API_URL,
+    version: "v1",
+    namespace: "grantors",
+    method: type as ApiMethod,
+  };
+};
+
 export const getLocalUsersEndpoint = {
   basePath: environment.API_URL,
   version: "",

@@ -83,6 +83,26 @@ jobs:
     with:
       app_name: analytics
 
+  # trigger runs of local and staging core regression e2e tests
+  # but do not wait, or block any deployments based on results
+  e2e-test-local:
+    name: E2E Local (on Deploy)
+    if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
+    uses: ./.github/workflows/ci-frontend-e2e.yml
+    secrets: inherit
+    with:
+      playwright_tags: "@core-regression"
+
+  e2e-test-staging:
+    name: E2E Staging (on Deploy)
+    if: ${{ inputs.environment == 'prod' || github.event_name == 'release' }}
+    uses: ./.github/workflows/e2e-staging.yml
+    secrets: inherit
+    with:
+      version: main
+      target: staging
+      playwright_tags: "@core-regression"
+
   # =====================================================
   # PHASE 2: Deploy to prod (or selected environment)
   #
@@ -144,7 +164,14 @@ jobs:
   deploy-api-training:
     if: ${{ github.event_name == 'release' }}
     name: Deploy API (training)
-    needs: [api-checks, api-vulnerability-scans, deploy-api, deploy-frontend, deploy-analytics]
+    needs:
+      [
+        api-checks,
+        api-vulnerability-scans,
+        deploy-api,
+        deploy-frontend,
+        deploy-analytics,
+      ]
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "api"
@@ -166,7 +193,8 @@ jobs:
   deploy-analytics-training:
     if: ${{ github.event_name == 'release' }}
     name: Deploy Analytics (training)
-    needs: [analytics-checks, analytics-vulnerability-scans, deploy-api-training]
+    needs:
+      [analytics-checks, analytics-vulnerability-scans, deploy-api-training]
     uses: ./.github/workflows/deploy.yml
     with:
       app_name: "analytics"
@@ -178,6 +206,15 @@ jobs:
   # =====================================================
   send-slack-notification:
     if: failure()
-    needs: [deploy-api, deploy-frontend, deploy-analytics, deploy-nofos, deploy-api-training, deploy-frontend-training, deploy-analytics-training]
+    needs:
+      [
+        deploy-api,
+        deploy-frontend,
+        deploy-analytics,
+        deploy-nofos,
+        deploy-api-training,
+        deploy-frontend-training,
+        deploy-analytics-training,
+      ]
     uses: ./.github/workflows/send-slack-notification.yml
     secrets: inherit
