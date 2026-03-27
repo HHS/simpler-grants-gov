@@ -6,8 +6,6 @@ import newrelic.agent
 from pydantic import BaseModel, Field
 
 import src.adapters.search as search
-from src.adapters.search.opensearch_config import get_opensearch_config
-from src.adapters.search.opensearch_explain import log_search_result_explanations
 from src.adapters.search.opensearch_response import SearchResponse
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema, SearchQueryOperator
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
@@ -259,7 +257,6 @@ def _search_opportunities(
     search_client: search.SearchClient,
     search_params: SearchOpportunityParams,
     includes: list | None = None,
-    explain: bool = False,
 ) -> SearchResponse:
     search_request = _get_search_request(search_params)
     index_alias = get_search_config().opportunity_search_index_alias
@@ -267,12 +264,34 @@ def _search_opportunities(
         "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
     )
     response = search_client.search(
-        index_alias, search_request, includes=includes, excludes=["attachments"], explain=explain
+        index_alias, search_request, includes=includes, excludes=["attachments"]
     )
 
+    log_attrs: dict = {}
+
     if response.took_ms is not None:
+        log_attrs["search.took_ms"] = response.took_ms
         newrelic.agent.add_custom_attribute("search.took_ms", response.took_ms)
-        logger.info("OpenSearch query completed", extra={"search.took_ms": response.took_ms})
+
+    if response.max_score is not None:
+        log_attrs["search.max_score"] = response.max_score
+        newrelic.agent.add_custom_attribute("search.max_score", response.max_score)
+
+    if response.total_relation is not None:
+        log_attrs["search.total_relation"] = response.total_relation
+        newrelic.agent.add_custom_attribute("search.total_relation", response.total_relation)
+
+    scoring_rule = search_params.experimental.scoring_rule.value
+    log_attrs["search.scoring_rule"] = scoring_rule
+    newrelic.agent.add_custom_attribute("search.scoring_rule", scoring_rule)
+
+    if response.agency_sum_other_doc_count is not None:
+        log_attrs["search.agency_sum_other_doc_count"] = response.agency_sum_other_doc_count
+        newrelic.agent.add_custom_attribute(
+            "search.agency_sum_other_doc_count", response.agency_sum_other_doc_count
+        )
+
+    logger.info("OpenSearch query completed", extra=log_attrs)
 
     return response
 
@@ -283,15 +302,7 @@ def search_opportunities(
 
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
 
-    explain_enabled = get_opensearch_config().opensearch_explain_enabled
-    response = _search_opportunities(search_client, search_params, explain=explain_enabled)
-
-    if explain_enabled and search_params.query:
-        log_search_result_explanations(
-            raw_hits=response.raw_hits,
-            query=search_params.query,
-            scoring_rule=search_params.experimental.scoring_rule.value,
-        )
+    response = _search_opportunities(search_client, search_params)
 
     pagination_info = PaginationInfo.from_search_response(search_params.pagination, response)
 
