@@ -2,7 +2,7 @@
  * Test data for SF-424A happy path.
  *
  * Keys must match exactly the field keys defined in SF424A_FORM_CONFIG.fields
- * in sf424a-field-definitions.ts — the generic fillForm() engine uses these
+ * in sf424a-field-definitions.ts - the generic fillForm() engine uses these
  * keys to look up which value to fill into which field.
  *
  * All numeric fields are set to "1" so computed totals are fully deterministic
@@ -113,7 +113,7 @@ export function sf424aHappyPathTestData(
   data.direct_charges_explanation = "TEST DIRECT CHARGES";
   data.indirect_charges_explanation = "TEST INDIRECT CHARGES";
   data.remarks = "TEST REMARKS";
-  // confirmation checkbox — handled via the checkbox field type in SF424A_FORM_CONFIG
+  // confirmation checkbox - handled via the checkbox field type in SF424A_FORM_CONFIG
   data.confirmation = "true";
 
   return overrides

@@ -172,7 +172,7 @@ export async function fillForm(
     await page.getByRole("link", { name: formName }).click();
 
     // Wait for the URL to change away from the application page before
-    // checking for form content — without this, getByText(formName) may
+    // checking for form content - without this, getByText(formName) may
     // immediately resolve against the link text on the application list page,
     // causing fillField to run before navigation completes.
     await page.waitForURL((url) => url.href !== applicationURL, {

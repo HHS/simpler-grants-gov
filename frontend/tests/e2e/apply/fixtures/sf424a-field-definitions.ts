@@ -7,7 +7,7 @@ export const SF424A_FORM_MATCHER =
   "SF\\s*[-\u2011\u2013\u2014]?\\s*424A|Budget\\s+Information\\s+for\\s+Non\\s*[-\u2011\u2013\u2014]?\\s*Construction\\s+Programs";
 
 // ---------------------------------------------------------------------------
-// Expected post-save computed values — derived from FORM_RULE_SCHEMA
+// Expected post-save computed values - derived from FORM_RULE_SCHEMA
 // ---------------------------------------------------------------------------
 
 const FILL = 1;
