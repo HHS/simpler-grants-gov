@@ -239,3 +239,18 @@ def test_cleanup_old_indices(search_client):
     assert search_client.index_exists(index_name_2) is False
     assert search_client.index_exists(index_name_3) is True
     assert search_client.index_exists(index_name_4) is True
+
+
+def test_get(search_client, generic_index):
+    records = [
+        {"id": 1, "title": "Green Eggs & Ham", "notes": "why are the eggs green?"},
+        {"id": 2, "title": "The Cat in the Hat", "notes": "silly cat wears a hat"},
+        {"id": 3, "title": "One Fish, Two Fish, Red Fish, Blue Fish", "notes": "fish"},
+    ]
+
+    search_client.bulk_upsert(generic_index, records, primary_key_field="id")
+
+    assert search_client.get(generic_index, 1) == records[0]
+    assert search_client.get(generic_index, 2) == records[1]
+    assert search_client.get(generic_index, 3) == records[2]
+    assert search_client.get(generic_index, 121212121) is None
