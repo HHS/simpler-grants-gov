@@ -953,8 +953,6 @@ class AwardRecommendationFactory(BaseFactory):
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
 
-    funding_strategy_id = None
-
     award_recommendation_number = factory.LazyAttribute(
         lambda s: f"{s.opportunity.agency_code or 'AGC'}_{fake.bothify('??????').upper()}"
     )
@@ -963,7 +961,6 @@ class AwardRecommendationFactory(BaseFactory):
     additional_info = sometimes_none(factory.Faker("paragraph"))
     award_selection_method = sometimes_none(factory.fuzzy.FuzzyChoice(AwardSelectionMethod))
     selection_method_detail = sometimes_none(factory.Faker("paragraph"))
-    funding_strategy = sometimes_none(factory.Faker("paragraph"))
     other_key_information = sometimes_none(factory.Faker("paragraph"))
 
     is_deleted = False
