@@ -170,6 +170,7 @@ class OpportunityPublishStateMachine(BaseStateMachine):
 
     @write_opportunity_to_search.on
     def handle_write_opportunity_to_search(self, state_machine_event: StateMachineEvent) -> None:
+        """Handle writing the opportunity to the search index if it has a status/current summary"""
         log_extra = state_machine_event.get_log_extra()
 
         if self.opportunity.current_opportunity_summary is None:
