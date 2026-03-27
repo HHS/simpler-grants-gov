@@ -7,7 +7,8 @@ import { getAgencyDisplayName } from "src/utils/search/filterUtils";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { buildSavedOpportunityTags } from "src/components/saved-opportunities/buildSavedOpportunityTags";
+import { SavedOpportunityTags } from "src/components/saved-opportunities/SavedOpportunityTags";
 import SearchResultListItemStatus from "./SearchResultListItemStatus";
 
 interface SearchResultsListItemProps {
@@ -18,7 +19,7 @@ interface SearchResultsListItemProps {
   onShareClick?: (buttonElement: HTMLButtonElement) => void;
 }
 
-const isShareWithOrganizationEnabled = false;
+const isShareWithOrganizationEnabled = true;
 
 const metadataBorderClasses = `
   display-block
@@ -47,7 +48,9 @@ export default function SearchResultsListItem({
   onShareClick,
 }: SearchResultsListItemProps) {
   const t = useTranslations("Search");
-
+  const savedOpportunityTags = saved
+    ? buildSavedOpportunityTags(opportunity)
+    : [];
   return (
     <div className={resultBorderClasses}>
       <div className="grid-row grid-gap">
@@ -60,7 +63,7 @@ export default function SearchResultsListItem({
                   className="usa-link usa-link"
                   id={`search-result-link-${page}-${index + 1}`}
                 >
-                  {opportunity?.opportunity_title}
+                  {opportunity?.opportunity_title}, {opportunity?.agency_code}
                 </Link>
               </h2>
             </div>
@@ -86,15 +89,6 @@ export default function SearchResultsListItem({
                   ? formatDate(opportunity?.summary?.post_date)
                   : "--"}
               </span>
-              {saved && (
-                <span className="padding-x-105 padding-y-2px bg-base-lighter display-flex flex-align-center font-sans-3xs radius-sm">
-                  <USWDSIcon
-                    name="star"
-                    className="text-accent-warm-dark button-icon-md padding-right-05"
-                  />
-                  {t("opportunitySaved")}
-                </span>
-              )}
               <div className="width-full tablet:width-auto" />
             </div>
             <div className="grid-col tablet:order-2 overflow-hidden font-sans-xs">
@@ -106,6 +100,14 @@ export default function SearchResultsListItem({
             <div className="grid-col tablet:order-3 overflow-hidden font-body-xs">
               <strong>{t("resultsListItem.opportunityNumber")}</strong>
               {opportunity?.opportunity_number}
+            </div>
+            <div className="grid-col tablet:order-3 overflow-hidden font-body-xs">
+              {saved ? (
+                <SavedOpportunityTags
+                  labelId={`saved-opportunity-tags-label-${opportunity.opportunity_id}`}
+                  tags={savedOpportunityTags}
+                />
+              ) : null}
             </div>
           </div>
         </div>
@@ -132,7 +134,7 @@ export default function SearchResultsListItem({
                 className="usa-button usa-button--unstyled font-sans-2xs"
                 onClick={(event) => onShareClick?.(event.currentTarget)}
               >
-                {t("callToAction.shareWithOrganization")}
+                {t("callToAction.shareWithOthers")}
               </button>
             </div>
           ) : null}

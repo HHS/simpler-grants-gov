@@ -105,11 +105,21 @@ export function SavedOpportunitiesController({
       return;
     }
 
-    const nextSavedToOrganizations = Array.from(organizationIds).map(
-      (organizationId) => ({
-        organization_id: organizationId,
-      }),
-    );
+    const nextSavedToOrganizations = Array.from(organizationIds)
+      .map((organizationId) =>
+        organizations.find(
+          (organization) => organization.organization_id === organizationId,
+        ),
+      )
+      .filter(
+        (organization): organization is Organization =>
+          organization !== undefined,
+      )
+      .map((organization) => ({
+        organization_id: organization.organization_id,
+        organization_name:
+          organization.sam_gov_entity?.legal_business_name ?? null,
+      }));
 
     setOpportunitiesState((previousOpportunities) =>
       previousOpportunities.map((opportunity) =>

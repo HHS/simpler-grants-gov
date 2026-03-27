@@ -129,12 +129,12 @@ describe("Saved Opportunities page", () => {
     });
     render(component);
 
-    expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Test Opportunity/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText("OPP-12345")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", {
-        name: "Test Opportunity",
-      }),
+      screen.getByRole("link", { name: /Test Opportunity/i }),
     ).toBeInTheDocument();
   });
 
@@ -174,7 +174,9 @@ describe("Saved Opportunities page", () => {
     // Should only be called once since filtered results were found
     expect(savedOpportunities).toHaveBeenCalledTimes(1);
     // Should show the forecasted opportunity
-    expect(screen.getByText("Forecasted Opportunity")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Forecasted Opportunity/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows all opportunities when no status filter is applied", async () => {
@@ -200,8 +202,14 @@ describe("Saved Opportunities page", () => {
     render(component);
 
     // Should show both opportunities
-    expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
-    expect(screen.getByText("Forecasted Opportunity")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Test Opportunity/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: /Test Opportunity/i,
+      }),
+    ).toBeInTheDocument();
   });
 
   it("shows no matching status message when API returns no opportunities for filter", async () => {

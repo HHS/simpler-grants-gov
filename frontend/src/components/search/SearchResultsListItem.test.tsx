@@ -17,7 +17,9 @@ describe("SearchResultsListItem", () => {
 
   it("renders opportunity title and number", () => {
     render(<SearchResultsListItem index={1} opportunity={mockOpportunity} />);
-    expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Test Opportunity/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText("OPP-12345")).toBeInTheDocument();
   });
 
