@@ -9,17 +9,25 @@ export interface SavedOpportunityTag {
 
 export function buildSavedOpportunityTags(
   opportunity: BaseOpportunity,
+  userOrganizationIds: Set<string>,
 ): SavedOpportunityTag[] {
   const organizationTags = (opportunity.saved_to_organizations ?? [])
+    // Only include organizations the current user belongs to
+    .filter((organization) =>
+      userOrganizationIds.has(organization.organization_id),
+    )
+    // Ensure valid, non-empty names
     .filter((organization) => {
       const organizationName = organization.organization_name?.trim();
       return Boolean(organizationName);
     })
+    // Sort alphabetically by name
     .sort((firstOrganization, secondOrganization) =>
       (firstOrganization.organization_name ?? "").localeCompare(
         secondOrganization.organization_name ?? "",
       ),
     )
+    // Map to tag structure
     .map((organization) => {
       const organizationName = organization.organization_name!.trim();
 

@@ -7,7 +7,7 @@ import { getAgencyDisplayName } from "src/utils/search/filterUtils";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
-import { buildSavedOpportunityTags } from "src/components/saved-opportunities/buildSavedOpportunityTags";
+import { SavedOpportunityTag } from "src/components/saved-opportunities/buildSavedOpportunityTags";
 import { SavedOpportunityTags } from "src/components/saved-opportunities/SavedOpportunityTags";
 import SearchResultListItemStatus from "./SearchResultListItemStatus";
 
@@ -17,6 +17,7 @@ interface SearchResultsListItemProps {
   index: number;
   page?: number;
   onShareClick?: (buttonElement: HTMLButtonElement) => void;
+  savedOpportunityTags?: SavedOpportunityTag[];
 }
 
 export let isShareWithOrganizationEnabled = false;
@@ -49,10 +50,11 @@ export default function SearchResultsListItem({
   index,
   page = 1,
   onShareClick,
+  savedOpportunityTags,
 }: SearchResultsListItemProps) {
   const t = useTranslations("Search");
-  const savedOpportunityTags = saved
-    ? buildSavedOpportunityTags(opportunity)
+  const savedOpportunityTagsToRender = saved
+    ? (savedOpportunityTags ?? [])
     : [];
   return (
     <div className={resultBorderClasses}>
@@ -108,7 +110,7 @@ export default function SearchResultsListItem({
               {saved ? (
                 <SavedOpportunityTags
                   labelId={`saved-opportunity-tags-label-${opportunity.opportunity_id}`}
-                  tags={savedOpportunityTags}
+                  tags={savedOpportunityTagsToRender}
                 />
               ) : null}
             </div>

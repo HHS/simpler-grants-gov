@@ -10,6 +10,7 @@ import { ModalRef } from "@trussworks/react-uswds";
 
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { ShareOpportunityToOrganizationsModal } from "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal";
+import { buildSavedOpportunityTags } from "./buildSavedOpportunityTags";
 
 interface SavedOpportunitiesControllerProps {
   opportunities: BaseOpportunity[];
@@ -72,6 +73,14 @@ export function SavedOpportunitiesController({
       ) ?? null
     );
   }, [opportunitiesState, selectedOpportunityId]);
+
+  const userOrganizationIds = useMemo(
+    () =>
+      new Set(
+        organizations.map((organization) => organization.organization_id),
+      ),
+    [organizations],
+  );
 
   useEffect(() => {
     if (shouldOpenModal && selectedOpportunityId) {
@@ -142,6 +151,10 @@ export function SavedOpportunitiesController({
               opportunity={opportunity}
               saved={true}
               index={index}
+              savedOpportunityTags={buildSavedOpportunityTags(
+                opportunity,
+                userOrganizationIds,
+              )}
               onShareClick={(buttonElement: HTMLButtonElement) =>
                 handleShareClick(opportunity, buttonElement)
               }
