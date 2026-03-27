@@ -54,6 +54,8 @@ ADDITIONAL_UUID = "eeeeeeee-1111-2222-3333-ffffffffffff"
 TZ_EST = pytz.timezone("America/New_York")
 DT_NAIVE = datetime(2025, 9, 9, 8, 15, 17)
 DT_EST_AWARE = TZ_EST.localize(DT_NAIVE)
+DT_NAIVE_EARLIER = datetime(2025, 8, 1, 8, 15, 17)
+DT_EST_AWARE_EARLIER = TZ_EST.localize(DT_NAIVE_EARLIER)
 
 
 @pytest.fixture(autouse=True)
@@ -645,6 +647,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         opportunity_assistance_listing=True,
         has_organization=True,
         legacy_competition_id=1,
+        submitted_at=DT_EST_AWARE,
     ):
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
         competition = CompetitionFactory(
@@ -660,7 +663,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         application_kwargs = dict(
             competition=competition,
             application_status=application_status,
-            submitted_at=DT_EST_AWARE,
+            submitted_at=submitted_at,
         )
         if has_organization:
             application_kwargs = application_kwargs | {
@@ -760,7 +763,9 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         sam_gov_entity_2 = SamGovEntityFactory.create(
             has_debt_subject_to_offset=False, has_exclusion_status=False
         )
-        submission_2 = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity_2)
+        submission_2 = self.setup_application_submission(
+            agency, sam_gov_entity=sam_gov_entity_2, submitted_at=DT_EST_AWARE_EARLIER
+        )
         application_2 = submission_2.application
         _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
@@ -825,7 +830,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 f"<FundingOpportunityNumber>{application_2.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
                 f"<CFDANumber>{application_2.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
                 f"<GrantsGovTrackingNumber>GRANT{submission_2.legacy_tracking_number}</GrantsGovTrackingNumber>"
-                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
+                "<ns2:ReceivedDateTime>2025-08-01T08:15:17.000-04:00</ns2:ReceivedDateTime>"
                 "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
@@ -858,7 +863,9 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         sam_gov_entity_2 = SamGovEntityFactory.create(
             has_debt_subject_to_offset=False, has_exclusion_status=False
         )
-        submission_2 = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity_2)
+        submission_2 = self.setup_application_submission(
+            agency, sam_gov_entity=sam_gov_entity_2, submitted_at=DT_EST_AWARE_EARLIER
+        )
         application_2 = submission_2.application
         _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
@@ -977,7 +984,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 f"<FundingOpportunityNumber>{application_2.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
                 f"<CFDANumber>{application_2.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
                 f"<GrantsGovTrackingNumber>GRANT{submission_2.legacy_tracking_number}</GrantsGovTrackingNumber>"
-                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
+                "<ns2:ReceivedDateTime>2025-08-01T08:15:17.000-04:00</ns2:ReceivedDateTime>"
                 "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"

@@ -36,6 +36,8 @@ from tests.src.db.models.factories import (
 TZ_EST = pytz.timezone("America/New_York")
 DT_NAIVE = datetime(2025, 9, 9, 8, 15, 17)
 DT_EST_AWARE = TZ_EST.localize(DT_NAIVE)
+DT_NAIVE_EARLIER = datetime(2025, 8, 1, 8, 15, 17)
+DT_EST_AWARE_EARLIER = TZ_EST.localize(DT_NAIVE_EARLIER)
 
 
 def setup_application_submission(
@@ -46,6 +48,7 @@ def setup_application_submission(
     opportunity_assistance_listing=True,
     has_organization=True,
     legacy_competition_id=1,
+    submitted_at=DT_EST_AWARE,
 ):
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
     competition = CompetitionFactory(
@@ -61,7 +64,7 @@ def setup_application_submission(
     application_kwargs = dict(
         competition=competition,
         application_status=application_status,
-        submitted_at=DT_EST_AWARE,
+        submitted_at=submitted_at,
     )
     if has_organization:
         application_kwargs = application_kwargs | {
@@ -348,6 +351,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_package_id="PKG00000005",
             sam_gov_entity=sam_gov_entity_2,
             application_status=ApplicationStatus.SUBMITTED,
+            submitted_at=DT_EST_AWARE_EARLIER,
         )
         other_submission = setup_application_submission(
             other_agency,
@@ -416,7 +420,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "GrantsGovApplicationStatus": "Received",
             "SubmissionTitle": submission_2.application.application_name,
             "PackageID": submission_2.application.competition.legacy_package_id,
-            "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
+            "ns2:ReceivedDateTime": "2025-08-01T08:15:17.000-04:00",
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
             "ActiveExclusions": "No",
@@ -430,8 +434,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "ns2:GetSubmissionListExpandedResponse"
         ]["ns2:SubmissionInfo"]
         assert len(expanded_application_info) == 2
-        assert expected_1 in expanded_application_info
-        assert expected_2 in expanded_application_info
+        assert expanded_application_info == [expected_1, expected_2]
         # Ensure unrelated agency submission is excluded
         assert all(
             item["PackageID"] != other_submission.application.competition.legacy_package_id
@@ -459,6 +462,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_package_id="PKG00000005",
             sam_gov_entity=sam_gov_entity_2,
             application_status=ApplicationStatus.SUBMITTED,
+            submitted_at=DT_EST_AWARE_EARLIER,
         )
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
@@ -521,7 +525,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "GrantsGovApplicationStatus": "Received",
             "SubmissionTitle": submission_2.application.application_name,
             "PackageID": submission_2.application.competition.legacy_package_id,
-            "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
+            "ns2:ReceivedDateTime": "2025-08-01T08:15:17.000-04:00",
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
             "ActiveExclusions": "No",
@@ -535,8 +539,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "ns2:GetSubmissionListExpandedResponse"
         ]["ns2:SubmissionInfo"]
         assert len(expanded_application_info) == 2
-        assert expected_1 in expanded_application_info
-        assert expected_2 in expanded_application_info
+        assert expanded_application_info == [expected_1, expected_2]
 
     def test_get_submission_list_expanded_response_no_filter_cannot_have_empty_expandedapplicationfilter(
         self, db_session, enable_factory_create
