@@ -1144,7 +1144,10 @@ class TestPopulateCustomFields:
         assert "fiscalYear" not in result
 
     def test_attachment_missing_required_fields_is_omitted(self):
-        """Test that an attachment missing required fields is excluded from the result."""
+        """Test that an attachment missing required fields is excluded from the result.
+
+        When all attachments are invalid, the entire attachments field is omitted.
+        """
         opp_data = {
             **self.BASE_OPP_DATA,
             "opportunity_attachments": [
@@ -1161,9 +1164,42 @@ class TestPopulateCustomFields:
 
         result = populate_custom_fields(opp_data)
 
-        # Other valid fields are still present; only the invalid attachments field is omitted
+        # Other valid fields are still present; the attachments field is omitted since no valid attachments remain
         assert result is not None
         assert "attachments" not in result
+
+    def test_mixed_valid_and_invalid_attachments_only_valid_included(self):
+        """Test that only valid attachments are included when some attachments fail validation."""
+        opp_data = {
+            **self.BASE_OPP_DATA,
+            "opportunity_attachments": [
+                {
+                    "download_path": "https://example.com/nofo.pdf",
+                    "file_name": "nofo.pdf",
+                    "file_description": "Notice of Funding Opportunity",
+                    "file_size_bytes": 102400,
+                    "mime_type": "application/pdf",
+                    "created_at": "2024-01-01T12:00:00",
+                    "updated_at": "2024-01-02T12:00:00",
+                },
+                {
+                    "download_path": "https://example.com/invalid.pdf",
+                    # file_name (name) is intentionally missing
+                    "file_size_bytes": 5000,
+                    "mime_type": "application/pdf",
+                    "created_at": "2024-01-01T12:00:00",
+                    "updated_at": "2024-01-02T12:00:00",
+                },
+            ],
+        }
+
+        result = populate_custom_fields(opp_data)
+
+        # The valid attachment is included; the invalid one is skipped
+        assert result is not None
+        assert "attachments" in result
+        assert len(result["attachments"].value) == 1
+        assert result["attachments"].value[0].name == "nofo.pdf"
 
     def test_attachment_with_malformed_download_url_sets_url_to_none(self):
         """Test that an invalid downloadUrl is coerced to None rather than failing validation."""

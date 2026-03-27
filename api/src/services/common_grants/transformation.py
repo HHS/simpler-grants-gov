@@ -26,6 +26,7 @@ from src.api.common_grants.schemas.common_grants_pydantic_custom_fields import (
     AdditionalInfoField,
     AgencyField,
     AssistanceListingsField,
+    AttachmentValue,
     AttachmentsField,
     ContactInfoField,
     CostSharingField,
@@ -393,8 +394,9 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
 
     attachments = opp_data.get("opportunity_attachments")
     if attachments:
-        attachment_values = [
-            {
+        valid_attachment_values = []
+        for attachment in attachments:
+            attachment_data = {
                 "downloadUrl": attachment.get("download_path"),
                 "name": attachment.get("file_name"),
                 "description": attachment.get("file_description"),
@@ -403,11 +405,17 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
                 "createdAt": attachment.get("created_at"),
                 "lastModifiedAt": attachment.get("updated_at"),
             }
-            for attachment in attachments
-        ]
-        field = validate_custom_field(AttachmentsField, value=attachment_values)
-        if field:
-            custom_fields["attachments"] = field
+            try:
+                valid_attachment_values.append(AttachmentValue.model_validate(attachment_data))
+            except Exception as e:
+                logger.warning(
+                    f"Attachment validation failed, skipping: {e}",
+                    extra={"cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR},
+                )
+        if valid_attachment_values:
+            field = validate_custom_field(AttachmentsField, value=valid_attachment_values)
+            if field:
+                custom_fields["attachments"] = field
 
     legacy_opportunity_id = opp_data.get("legacy_opportunity_id")
     if legacy_opportunity_id is not None:
