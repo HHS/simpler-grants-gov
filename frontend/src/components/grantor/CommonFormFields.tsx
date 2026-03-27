@@ -1,15 +1,13 @@
 // These fields are meant to be reusable and provide a consistent look and feel for all pages.
 // Use this in combo with FormGroup. For examples, see page opportunities/create/[agencyId]
 // Feel free to add attributes as needed, but don't delete any because others could be using them.
-
 import React, { useState } from "react";
 import {
+  CharacterCount,
   ErrorMessage,
   FormGroup,
   Label,
   Select,
-  Textarea,
-  TextInput,
 } from "@trussworks/react-uswds";
 
 // ----------------------------------------------------------
@@ -63,7 +61,7 @@ export const CommonLabel = ({
 };
 
 // ----------------------------------------------------------
-// Common TextInput with error block
+// Common TextInput with CharacterCount
 // ----------------------------------------------------------
 export const CommonTextInput = ({
   labelId,
@@ -86,6 +84,7 @@ export const CommonTextInput = ({
   defaultValue?: string;
   validationError?: string;
 }) => {
+  const ariaDescBy = fieldId + "-info " + fieldId + "-hint";
   return (
     <>
       <FormGroup error={Boolean(validationError)} className="margin-top-1">
@@ -97,14 +96,16 @@ export const CommonTextInput = ({
           isRequired={isRequired}
           validationError={validationError}
         />
-        <TextInput
-          type="text"
-          name={fieldId}
+        {/* The compiler is complaining about the ChangeEvent (for HTMLInputElement) 
+        doesn't match HTMLTextAreaElement (because CharacterCount handles both).
+        But this works. */}
+        <CharacterCount
           id={fieldId}
-          onChange={onTextChange}
+          name={fieldId}
+          aria-describedby={ariaDescBy}
           maxLength={fieldMaxLength}
-          style={{ maxWidth: "550px" }}
           defaultValue={defaultValue}
+          onChange={onTextChange}
         />
       </FormGroup>
     </>
@@ -112,7 +113,7 @@ export const CommonTextInput = ({
 };
 
 // ----------------------------------------------------------
-// Common Textarea with error block
+// Common Textarea with with CharacterCount
 // ----------------------------------------------------------
 export const CommonTextArea = ({
   labelId,
@@ -135,6 +136,7 @@ export const CommonTextArea = ({
   defaultValue?: string;
   validationError?: string;
 }) => {
+  const ariaDescBy = fieldId + "-info " + fieldId + "-hint";
   return (
     <>
       <FormGroup error={Boolean(validationError)} className="margin-top-1">
@@ -146,13 +148,14 @@ export const CommonTextArea = ({
           isRequired={isRequired}
           validationError={validationError}
         />
-        <Textarea
-          name={fieldId}
+        <CharacterCount
           id={fieldId}
-          onChange={onTextChange}
+          name={fieldId}
+          aria-describedby={ariaDescBy}
           maxLength={fieldMaxLength}
-          style={{ maxWidth: "550px" }}
           defaultValue={defaultValue}
+          onChange={onTextChange}
+          isTextArea
         />
       </FormGroup>
     </>
@@ -211,7 +214,7 @@ export const CommonSelectInput = ({
           name={fieldId}
           onChange={handleChange}
           value={selectedValue}
-          style={{ maxWidth: "550px" }}
+          style={{ maxWidth: "480px" }}
         >
           {/* Default option */}
           <option key={""} value={""} disabled>

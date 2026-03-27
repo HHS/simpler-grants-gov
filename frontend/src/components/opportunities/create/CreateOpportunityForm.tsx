@@ -9,7 +9,6 @@ import { Alert, Button, Link } from "@trussworks/react-uswds";
 
 import {
   CommonSelectInput,
-  CommonText,
   CommonTextArea,
   CommonTextInput,
 } from "src/components/grantor/CommonFormFields";
@@ -156,9 +155,6 @@ export function CreateOpportunityForm({
             onTextChange={onOppNbrChange}
             defaultValue={response?.data?.opportunity_number || ""}
           />
-          <CommonText
-            textContent={t("CreateOpportunityForm.charactersAllowed40")}
-          />
 
           {/* Opportunity Title */}
           <CommonTextArea
@@ -170,9 +166,6 @@ export function CreateOpportunityForm({
             isRequired={true}
             onTextChange={onOppTitleChange}
             defaultValue={response?.data?.opportunity_title || ""}
-          />
-          <CommonText
-            textContent={t("CreateOpportunityForm.charactersAllowed255")}
           />
 
           {/* Agency */}
@@ -206,15 +199,10 @@ export function CreateOpportunityForm({
               labelText={t("CreateOpportunityForm.categoryExplanation")}
               description={t("CreateOpportunityForm.categoryExplanationDesc")}
               fieldId="categoryExplanation"
-              fieldMaxLength={2000}
+              fieldMaxLength={255}
               isRequired={true}
               onTextChange={onExplanationChange}
               defaultValue={response?.data?.category_explanation || ""}
-            />
-          )}
-          {showExplain && (
-            <CommonText
-              textContent={t("CreateOpportunityForm.charactersAllowed255")}
             />
           )}
 

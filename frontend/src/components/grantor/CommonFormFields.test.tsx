@@ -71,8 +71,9 @@ describe("CommonTextInput", () => {
       name: "Label for Something",
     });
     expect(element).toBeInTheDocument();
-    expect(element).toHaveAttribute("maxLength", "40");
     expect(element).toHaveValue("");
+    const charCountText = screen.getByText("40 characters allowed");
+    expect(charCountText).toBeInTheDocument();
   });
   it("Renders the element with a default value", () => {
     commonInputProps.defaultValue = "Prefilled text";
@@ -81,8 +82,9 @@ describe("CommonTextInput", () => {
       name: "Label for Something",
     });
     expect(element).toBeInTheDocument();
-    expect(element).toHaveAttribute("maxLength", "40");
     expect(element).toHaveValue("Prefilled text");
+    const charCountText = screen.getByText("26 characters left");
+    expect(charCountText).toBeInTheDocument();
   });
   it("Renders the element and handle onChange", () => {
     render(<CommonTextInput {...commonInputProps} />);
@@ -91,8 +93,15 @@ describe("CommonTextInput", () => {
     });
     expect(element).toBeInTheDocument();
     // Simulate a change event and test if our variable changed
-    fireEvent.change(element, { target: { value: "Hello World" } });
-    expect(textValue).toBe("Hello World");
+    fireEvent.change(element, {
+      target: { value: "12345678901234567890123456789012345678901234567890" },
+    });
+    expect(textValue).toBe(
+      "12345678901234567890123456789012345678901234567890",
+    );
+    // Validate the character count message
+    const charCountText = screen.getByText("10 characters over limit");
+    expect(charCountText).toBeInTheDocument();
   });
 });
 
@@ -115,8 +124,9 @@ describe("CommonTextArea", () => {
       name: "Label for Something",
     });
     expect(element).toBeInTheDocument();
-    expect(element).toHaveAttribute("maxLength", "40");
     expect(element).toHaveValue("");
+    const charCountText = screen.getByText("40 characters allowed");
+    expect(charCountText).toBeInTheDocument();
   });
   it("Renders the element with a default value", () => {
     commonTextAreaProps.defaultValue = "Prefilled text 2";
@@ -126,6 +136,8 @@ describe("CommonTextArea", () => {
     });
     expect(element).toBeInTheDocument();
     expect(element).toHaveValue("Prefilled text 2");
+    const charCountText = screen.getByText("24 characters left");
+    expect(charCountText).toBeInTheDocument();
   });
   it("Renders the element and handle onChange", () => {
     render(<CommonTextArea {...commonTextAreaProps} />);
@@ -134,8 +146,15 @@ describe("CommonTextArea", () => {
     });
     expect(element).toBeInTheDocument();
     // Simulate a change event and test if our variable changed
-    fireEvent.change(element, { target: { value: "Hello World 2" } });
-    expect(bigTextValue).toBe("Hello World 2");
+    fireEvent.change(element, {
+      target: { value: "12345678901234567890123456789012345678901234567890" },
+    });
+    expect(bigTextValue).toBe(
+      "12345678901234567890123456789012345678901234567890",
+    );
+    // Validate the character count message
+    const charCountText = screen.getByText("10 characters over limit");
+    expect(charCountText).toBeInTheDocument();
   });
 });
 
