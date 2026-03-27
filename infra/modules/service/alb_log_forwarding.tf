@@ -51,8 +51,8 @@ resource "aws_lambda_function" "nr_alb_log_forwarder" {
       AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
       ALB_NAME                = var.service_name
       MTLS_ALB_NAME           = "${var.service_name}-mtls"
-      NR_ENTITY_GUID          = coalesce(var.newrelic_entity_guid, "")
-      NR_MTLS_ENTITY_GUID     = coalesce(var.newrelic_mtls_entity_guid, "")
+      NR_ENTITY_GUID          = var.newrelic_entity_guid != null ? var.newrelic_entity_guid : ""
+      NR_MTLS_ENTITY_GUID     = var.newrelic_mtls_entity_guid != null ? var.newrelic_mtls_entity_guid : ""
     }
   }
 
