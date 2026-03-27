@@ -12,6 +12,7 @@ module "dev_config" {
   enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
+  database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXw3NDM0NDY4MDExNzAwMjY1NzM1"
   has_incident_management_service   = local.has_incident_management_service
   enable_notifications              = local.enable_notifications
   service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyODk0OTk3NTE4Nzc4MzA4NzUz"

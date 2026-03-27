@@ -13,6 +13,7 @@ module "training_config" {
   database_engine_version           = "17.5"
   has_database                      = true
   database_enable_http_endpoint     = true
+  database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXwtMjEwNzYwNjQ1MjUwNjc2ODE4OQ"
   has_incident_management_service   = local.has_incident_management_service
   enable_identity_provider          = local.enable_identity_provider
   enable_notifications              = local.enable_notifications

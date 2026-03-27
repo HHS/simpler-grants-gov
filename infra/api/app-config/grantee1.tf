@@ -12,6 +12,7 @@ module "grantee1_config" {
   enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
+  database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXwyNjY5ODkxMDczODI5NDA4MTg"
   has_incident_management_service   = local.has_incident_management_service
   enable_identity_provider          = local.enable_identity_provider
   enable_notifications              = local.enable_notifications
