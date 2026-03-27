@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Suspense, use } from "react";
 
+import Loading from "src/components/Loading";
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { AndOrPanel } from "src/components/search/AndOrPanel";
 import { ClassicSearchBanner } from "src/components/search/ClassicSearchBanner";
@@ -98,11 +99,15 @@ function Search({ searchParams, params }: SearchPageProps) {
                   iconName="filter_list"
                   buttonClass="tablet:margin-x-auto"
                 >
-                  <SearchDrawerFilters
-                    searchParams={convertedSearchParams}
-                    searchResultsPromise={searchResultsPromise}
-                    agencyListPromise={filteredAgencyListPromise}
-                  />
+                  <Suspense
+                    fallback={<Loading message={t("drawer.loading")} />}
+                  >
+                    <SearchDrawerFilters
+                      searchParams={convertedSearchParams}
+                      searchResultsPromise={searchResultsPromise}
+                      agencyListPromise={filteredAgencyListPromise}
+                    />
+                  </Suspense>
                 </DrawerUnit>
               </div>
               <div className="flex-3 flex-align-self-end display-none desktop:display-block">
