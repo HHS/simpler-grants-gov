@@ -55,7 +55,7 @@ describe("CommonLabel", () => {
 
 // --- Test Common Input ---
 let textValue = "";
-const onOppNbrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+const onOppNbrChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
   textValue = e.target.value;
 };
 const commonInputProps = {

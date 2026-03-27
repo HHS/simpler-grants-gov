@@ -101,7 +101,7 @@ export function CreateOpportunityForm({
   );
 
   // Update state on change
-  const onOppNbrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onOppNbrChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setOppNbr(e.target.value);
   };
   const onOppTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -116,7 +116,7 @@ export function CreateOpportunityForm({
   const onExplanationChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setExplain(e.target.value);
   };
-  const onAlnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onAlnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAssistanceListingNumber(e.target.value);
   };
 

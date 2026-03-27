@@ -80,7 +80,7 @@ export const CommonTextInput = ({
   fieldId: string;
   isRequired: boolean;
   fieldMaxLength: number;
-  onTextChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   defaultValue?: string;
   validationError?: string;
 }) => {
@@ -96,9 +96,6 @@ export const CommonTextInput = ({
           isRequired={isRequired}
           validationError={validationError}
         />
-        {/* The compiler is complaining about the ChangeEvent (for HTMLInputElement) 
-        doesn't match HTMLTextAreaElement (because CharacterCount handles both).
-        But this works. */}
         <CharacterCount
           id={fieldId}
           name={fieldId}
