@@ -54,7 +54,7 @@ resource "aws_lambda_function" "nr_log_forwarder" {
       NR_LOGS_ENDPOINT        = "https://log-api.newrelic.com/log/v1"
       AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
       RDS_CLUSTER_NAME        = aws_rds_cluster.db.cluster_identifier
-      NR_ENTITY_GUID          = coalesce(var.newrelic_entity_guid, "")
+      NR_ENTITY_GUID          = var.newrelic_entity_guid != null ? var.newrelic_entity_guid : ""
     }
   }
 
