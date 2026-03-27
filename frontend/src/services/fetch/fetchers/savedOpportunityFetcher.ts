@@ -90,7 +90,7 @@ export const getSavedOpportunities = async (
   return json.data;
 };
 
-export const getSavedOpportunity = async (
+export const getUserSavedOpportunity = async (
   token: string,
   userId: string,
   opportunityId: string,
