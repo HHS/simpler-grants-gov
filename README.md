@@ -35,6 +35,14 @@ Documentation for the API is linked to from the [API README.md](./api/README.md)
 
 Documentation and development instructions for the front-end are provided in the [Front-end README.md](./frontend/README.md).
 
+## Getting Started
+
+To get the project running locally, you will need to set up both the API and Frontend components.
+1. **Clone the repository:** `git clone https://github.com/HHS/simpler-grants-gov.git`
+2. **Setup the API:** Follow the [API Development Guide](./documentation/api/development.md) to install Python dependencies and start the Flask server.
+3. **Setup the Frontend:** Follow the [Frontend README](./frontend/README.md) to install Node modules and start the Next.js development server.
+4. **View the site:** Once both are running, the frontend is typically accessible at `http://localhost:3000`.
+
 ## Contributing
 
 Thank you for considering contributing to an Open Source project of the US
@@ -51,14 +59,3 @@ Disclosure Policies, see [SECURITY.md](SECURITY.md).
 For more information about our Authors and maintainers, see [MAINTAINERS.md](MAINTAINERS.md).
 
 A full list of [contributors](https://github.com/HHS/simpler-grants-gov/graphs/contributors) can be found on GitHub.
-
-## Public domain
-
-This project is licensed within in the public domain within the United States,
-and copyright and related rights in the work worldwide are waived through the
-[CC0 1.0 Universal public domain
-dedication](https://creativecommons.org/publicdomain/zero/1.0/).
-
-All contributions to this project will be released under the CC0 dedication. By
-submitting a pull request or issue, you are agreeing to comply with this waiver
-of copyright interest.
