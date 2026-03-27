@@ -19,7 +19,10 @@ interface SearchResultsListItemProps {
   onShareClick?: (buttonElement: HTMLButtonElement) => void;
 }
 
-const isShareWithOrganizationEnabled = true;
+export let isShareWithOrganizationEnabled = false;
+export function updateIsSharedWithOrganizationEnabled(value: boolean) {
+  isShareWithOrganizationEnabled = value;
+}
 
 const metadataBorderClasses = `
   display-block

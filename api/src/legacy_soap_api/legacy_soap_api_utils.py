@@ -15,7 +15,8 @@ from sqlalchemy import select
 import src.adapters.db as db
 from src.db.models.competition_models import ApplicationSubmission
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
-from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.soap_payload_handler import extract_soap_xml
 
 logger = logging.getLogger(__name__)
