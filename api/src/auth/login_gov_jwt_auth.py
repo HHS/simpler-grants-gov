@@ -163,7 +163,9 @@ def get_login_gov_redirect_uri(db_session: db.Session, config: LoginGovConfig | 
     return f"{config.login_gov_auth_endpoint}?{encoded_params}"
 
 
-def get_login_gov_logout_redirect_uri(db_session: db.Session, config: LoginGovConfig | None = None) -> str:
+def get_login_gov_logout_redirect_uri(
+    db_session: db.Session, config: LoginGovConfig | None = None
+) -> str:
     if config is None:
         config = get_config()
 
@@ -179,11 +181,7 @@ def get_login_gov_logout_redirect_uri(db_session: db.Session, config: LoginGovCo
     # We want to redirect to the authorization endpoint of login.gov
     # See: https://developers.login.gov/oidc/authorization/
     encoded_params = urllib.parse.urlencode(
-        {
-            "client_id": config.client_id,
-            "state": state,
-            "post_loguout_redirect_uri": redirect_uri
-        }
+        {"client_id": config.client_id, "state": state, "post_loguout_redirect_uri": redirect_uri}
     )
 
     # Add the state to the DB
