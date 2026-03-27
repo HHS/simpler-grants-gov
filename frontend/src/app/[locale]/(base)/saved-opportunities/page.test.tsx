@@ -15,6 +15,8 @@ import {
   useTranslationsMock,
 } from "src/utils/testing/intlMocks";
 
+import { updateIsSharedWithOrganizationEnabled } from "src/components/search/SearchResultsListItem";
+
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
@@ -110,7 +112,6 @@ describe("Saved Opportunities page", () => {
         },
         {
           title: "SavedOpportunities.breadcrumbSavedOpportunities",
-          path: "/saved-opportunities",
         },
       ],
     });
@@ -146,7 +147,30 @@ describe("Saved Opportunities page", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders a list of saved opportunities and displays Share with organizations link", async () => {
+    updateIsSharedWithOrganizationEnabled(true);
+    savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
+    opportunity.mockResolvedValue({ data: mockOpportunity });
+    const component = await SavedOpportunities({
+      params: localeParams,
+      searchParams: defaultSearchParams,
+    });
+    render(component);
+
+    expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
+    expect(screen.getByText("OPP-12345")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: "Test Opportunity",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("share-opportunity-button-id"),
+    ).toBeInTheDocument();
+  });
+
   it("renders status filter when there are saved opportunities", async () => {
+    updateIsSharedWithOrganizationEnabled(true);
     savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
     opportunity.mockResolvedValue({ data: mockOpportunity });
     const component = await SavedOpportunities({
@@ -157,6 +181,10 @@ describe("Saved Opportunities page", () => {
 
     expect(screen.getByLabelText("statusFilter.label")).toBeInTheDocument();
     expect(screen.getByText("Any opportunity status")).toBeInTheDocument();
+    const shareWithOrgsButton = screen.getAllByTestId(
+      "share-opportunity-button-id",
+    );
+    expect(shareWithOrgsButton[0]).toBeInTheDocument();
   });
 
   it("passes status filter to fetchSavedOpportunities when status param is provided", async () => {
@@ -189,6 +217,7 @@ describe("Saved Opportunities page", () => {
   });
 
   it("shows all opportunities when no status filter is applied", async () => {
+    updateIsSharedWithOrganizationEnabled(true);
     const forecastedOpportunity: BaseOpportunity = {
       ...mockOpportunity,
       opportunity_id: "forecasted-opp-id",
@@ -213,6 +242,10 @@ describe("Saved Opportunities page", () => {
     // Should show both opportunities
     expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
     expect(screen.getByText("Forecasted Opportunity")).toBeInTheDocument();
+    const shareWithOrgsButton = screen.getAllByTestId(
+      "share-opportunity-button-id",
+    );
+    expect(shareWithOrgsButton[0]).toBeInTheDocument();
   });
 
   it("shows no matching status message when API returns no opportunities for filter", async () => {

@@ -98,7 +98,6 @@ export default async function SavedOpportunities({
             },
             {
               title: t("SavedOpportunities.breadcrumbSavedOpportunities"),
-              path: `/saved-opportunities`,
             },
           ]}
         />

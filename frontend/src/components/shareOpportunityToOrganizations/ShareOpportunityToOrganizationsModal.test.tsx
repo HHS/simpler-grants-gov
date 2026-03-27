@@ -108,4 +108,79 @@ describe("ShareOpportunityToOrganizationsModal", () => {
     expect(screen.getByText(/A Great Opportunity/)).toBeInTheDocument();
     expect(screen.getByLabelText("First Organization")).toBeInTheDocument();
   });
+
+  it("renders the checkbox on the modal", () => {
+    const selectedOpportunity = {
+      opportunity_id: "opportunity-2",
+      opportunity_title: "A Great Opportunity2",
+      saved_to_organizations: [],
+    } as unknown as BaseOpportunity;
+
+    render(
+      <ShareOpportunityToOrganizationsModal
+        modalRef={modalRef}
+        organizations={organizations}
+        savedToOrganizationIds={new Set<string>()}
+        isLoadingOrganizations={false}
+        hasOrganizationsError={false}
+        selectedOpportunity={selectedOpportunity}
+        onSavedOrganizationsChange={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/A Great Opportunity2/)).toBeInTheDocument();
+    expect(screen.getByTestId("checkbox")).toBeInTheDocument();
+    expect(
+      screen.getByText("Which organization should see this?"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders the checkbox on the modal and then checkbox as not checked", () => {
+    const selectedOpportunity = {
+      opportunity_id: "opportunity-3",
+      opportunity_title: "A Great Opportunity3",
+      saved_to_organizations: [],
+    } as unknown as BaseOpportunity;
+
+    render(
+      <ShareOpportunityToOrganizationsModal
+        modalRef={modalRef}
+        organizations={organizations}
+        savedToOrganizationIds={new Set<string>()}
+        isLoadingOrganizations={false}
+        hasOrganizationsError={false}
+        selectedOpportunity={selectedOpportunity}
+        onSavedOrganizationsChange={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/A Great Opportunity3/)).toBeInTheDocument();
+    const orgCheckBox = screen.getByRole("checkbox");
+    expect(screen.getByTestId("checkbox")).toBeInTheDocument();
+    expect(orgCheckBox).not.toBeChecked();
+  });
+
+  it("renders the checkbox on the modal and validate check box exists", () => {
+    const selectedOpportunity = {
+      opportunity_id: "opportunity-4",
+      opportunity_title: "A Great Opportunity4",
+      saved_to_organizations: [],
+    } as unknown as BaseOpportunity;
+
+    render(
+      <ShareOpportunityToOrganizationsModal
+        modalRef={modalRef}
+        organizations={organizations}
+        savedToOrganizationIds={new Set<string>()}
+        isLoadingOrganizations={false}
+        hasOrganizationsError={false}
+        selectedOpportunity={selectedOpportunity}
+        onSavedOrganizationsChange={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/A Great Opportunity4/)).toBeInTheDocument();
+    const orgCheckBox = screen.getByLabelText("First Organization");
+    expect(orgCheckBox).toBeInTheDocument();
+  });
 });

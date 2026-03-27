@@ -30,7 +30,9 @@ export async function generateMetadata({
 
   if (data) {
     const { formName } = data;
-    title = formName;
+    title = `${formName} | Simpler.Grants.gov`;
+  } else {
+    title = "Application form | Simpler.Grants.gov";
   }
   const meta: Metadata = {
     title,
@@ -121,7 +123,6 @@ async function FormPage({ params }: formPageProps) {
             },
             {
               title: formName,
-              path: `/applications/${applicationId}/form/${formId}`,
             },
           ]}
         />
