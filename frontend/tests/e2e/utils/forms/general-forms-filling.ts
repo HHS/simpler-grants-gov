@@ -9,8 +9,7 @@ export interface FillFieldDefinition {
   getByText?: string;
   textExact?: boolean;
   hasTextRegex?: string;
-  type: "text" | "dropdown" | "checkbox";
-  type: "text" | "dropdown" | "file";
+  type: "text" | "dropdown" | "checkbox" | "file";
   section?: string;
   field: string;
 }
@@ -108,6 +107,11 @@ export async function fillField(
         }
       }
     } else if (field.type === "file" && (field.testId || field.selector)) {
+      if (typeof data !== "string") {
+        throw new Error(
+          `File field ${fieldIdentifier} requires a string file path, received ${typeof data}`,
+        );
+      }
       const locator = field.selector
         ? page.locator(field.selector)
         : page.getByTestId(field.testId!);
