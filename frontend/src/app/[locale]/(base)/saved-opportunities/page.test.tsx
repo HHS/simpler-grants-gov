@@ -134,9 +134,6 @@ describe("Saved Opportunities page", () => {
       screen.getByRole("link", { name: /Test Opportunity/i }),
     ).toBeInTheDocument();
     expect(screen.getByText("OPP-12345")).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /Test Opportunity/i }),
-    ).toBeInTheDocument();
   });
 
   it("renders a list of saved opportunities and displays Share with organizations link", async () => {
@@ -149,13 +146,10 @@ describe("Saved Opportunities page", () => {
     });
     render(component);
 
-    expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
-    expect(screen.getByText("OPP-12345")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", {
-        name: "Test Opportunity",
-      }),
+      screen.getByRole("link", { name: /Test Opportunity/i }),
     ).toBeInTheDocument();
+    expect(screen.getByText("OPP-12345")).toBeInTheDocument();
     expect(
       screen.getByTestId("share-opportunity-button-id"),
     ).toBeInTheDocument();
@@ -231,8 +225,13 @@ describe("Saved Opportunities page", () => {
     render(component);
 
     // Should show both opportunities
-    expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
-    expect(screen.getByText("Forecasted Opportunity")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Test Opportunity/i }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("link", { name: /Forecasted Opportunity/i }),
+    ).toBeInTheDocument();
     const shareWithOrgsButton = screen.getAllByTestId(
       "share-opportunity-button-id",
     );
