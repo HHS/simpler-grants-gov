@@ -195,7 +195,7 @@ variable "database_engine_version" {
 variable "database_newrelic_entity_guid" {
   type        = string
   description = "New Relic entity GUID for the RDS cluster, used to correlate logs with the infrastructure entity in New Relic."
-  default     = ""
+  default     = null
 }
 
 variable "secondary_domain_names" {
@@ -244,4 +244,16 @@ variable "workflow_service_desired_count" {
   description = "Workflow services counter count"
   type        = number
   default     = 1
+}
+
+variable "service_newrelic_entity_guid" {
+  type        = string
+  description = "New Relic entity GUID for the primary ALB, used to correlate logs with the infrastructure entity in New Relic."
+  default     = null
+}
+
+variable "service_newrelic_mtls_entity_guid" {
+  type        = string
+  description = "New Relic entity GUID for the mTLS ALB, used to correlate logs with the infrastructure entity in New Relic."
+  default     = null
 }
