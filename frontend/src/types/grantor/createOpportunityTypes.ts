@@ -4,6 +4,7 @@ export interface CreateOpportunityRecord {
   opportunity_title: string;
   category: string;
   category_explanation?: string;
+  assistance_listing_number: string;
 }
 
 export type FieldValidationErrors = {
@@ -12,6 +13,7 @@ export type FieldValidationErrors = {
   opportunityTitle?: string[];
   category?: string[];
   categoryExplanation?: string[];
+  assistanceListingNumber?: string[];
 };
 
 export interface CreateOpportunityResponse {
