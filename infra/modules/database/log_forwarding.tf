@@ -54,7 +54,7 @@ resource "aws_lambda_function" "nr_log_forwarder" {
       NR_LOGS_ENDPOINT        = "https://log-api.newrelic.com/log/v1"
       AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
       RDS_CLUSTER_NAME        = aws_rds_cluster.db.cluster_identifier
-      NR_ENTITY_GUID          = var.newrelic_entity_guid
+      NR_ENTITY_GUID          = coalesce(var.newrelic_entity_guid, "")
     }
   }
 
@@ -107,7 +107,7 @@ resource "aws_kms_key" "nr_log_forwarder" {
 resource "aws_cloudwatch_log_group" "nr_log_forwarder" {
   # checkov:skip=CKV_AWS_338:Forwarding Lambda logs don't need long retention — actual RDS logs are in New Relic
   name              = "/aws/lambda/${local.nr_log_forwarder_name}"
-  retention_in_days = 365
+  retention_in_days = 30
   kms_key_id        = aws_kms_key.nr_log_forwarder.arn
 }
 

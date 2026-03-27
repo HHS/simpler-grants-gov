@@ -207,5 +207,7 @@ module "service" {
 
   ephemeral_write_volumes = local.service_config.ephemeral_write_volumes
 
+  newrelic_entity_guid = local.service_config.newrelic_entity_guid
+
   is_temporary = local.is_temporary
 }
