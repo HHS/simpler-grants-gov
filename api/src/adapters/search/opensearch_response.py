@@ -12,6 +12,12 @@ class SearchResponse:
 
     scroll_id: str | None
 
+    took_ms: int | None = None
+
+    # Raw hit objects from OpenSearch, preserving _explanation and _score fields.
+    # Used for explanation-based logging (e.g. SearchResultExplanation events).
+    raw_hits: list[dict[str, typing.Any]] = dataclasses.field(default_factory=list)
+
     @classmethod
     def from_opensearch_response(
         cls, raw_json: dict[str, typing.Any], include_scores: bool = True
@@ -43,6 +49,7 @@ class SearchResponse:
         }
         """
         scroll_id = raw_json.get("_scroll_id", None)
+        took_ms: int | None = raw_json.get("took", None)
 
         hits = raw_json.get("hits", {})
         hits_total = hits.get("total", {})
@@ -63,7 +70,14 @@ class SearchResponse:
         raw_aggs: dict[str, dict[str, typing.Any]] = raw_json.get("aggregations", {})
         aggregations = _parse_aggregations(raw_aggs)
 
-        return cls(total_records, records, aggregations, scroll_id)
+        return cls(
+            total_records=total_records,
+            records=records,
+            aggregations=aggregations,
+            scroll_id=scroll_id,
+            took_ms=took_ms,
+            raw_hits=list(raw_records),
+        )
 
 
 def _parse_aggregations(
