@@ -267,7 +267,11 @@ class CustomProvider(BaseProvider):
 
     # This is to help with the unique agency code conflicts
     AGENCY_CODE_FORMATS = [
-        "???",
+        # We don't make anything of format ???
+        # To avoid overlap with real agencies as we
+        # saw tests just happen to match exactly
+        # and get a unique constraint issue
+        "FAKE???",
         "????",
         "???-??",
         "???-???",
