@@ -1,7 +1,6 @@
 import dataclasses
-import typing
-
 import statistics
+import typing
 
 
 @dataclasses.dataclass
@@ -74,7 +73,16 @@ class SearchResponse:
         aggregations = _parse_aggregations(raw_aggs)
         score_stats = _compute_score_stats(records)
 
-        return cls(total_records, records, aggregations, scroll_id, took, timed_out, shards_failed, score_stats)
+        return cls(
+            total_records,
+            records,
+            aggregations,
+            scroll_id,
+            took,
+            timed_out,
+            shards_failed,
+            score_stats,
+        )
 
 
 def _parse_aggregations(
@@ -143,11 +151,7 @@ def _parse_aggregations(
 
 def _compute_score_stats(records: list[dict]) -> dict:
 
-    scores = [
-        r.get("relevancy_score")
-        for r in records
-        if r.get("relevancy_score") is not None
-    ]
+    scores = [r.get("relevancy_score") for r in records if r.get("relevancy_score") is not None]
 
     return {
         "search.score_min": min(scores) if scores else None,

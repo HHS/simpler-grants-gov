@@ -212,13 +212,15 @@ class SearchClient:
         if params is None:
             params = {}
 
-        response = self._client.search(
+        raw_response = self._client.search(
             index=index_name,
             body=search_query,
             params=params,
             _source_includes=includes,
             _source_excludes=excludes,
         )
+
+        response = SearchResponse.from_opensearch_response(raw_response, include_scores)
         # Structured logging enrichment
         add_extra_data_to_current_request_logs(
             {
@@ -231,7 +233,7 @@ class SearchClient:
             }
         )
 
-        return SearchResponse.from_opensearch_response(response, include_scores)
+        return response
 
     def scroll(
         self,

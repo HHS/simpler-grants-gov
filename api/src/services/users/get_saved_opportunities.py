@@ -229,10 +229,9 @@ def get_saved_opportunities(
         include_user_saved_opps = False
     else:
         logger.info("User saved opportunities requested")
-        _get_accessible_org_ids(user, user.organization_users)
-        org_ids_to_use =
+        org_ids_to_use = None
     # Build saved_union subquery
-    saved_union = _build_saved_union_subquery(user_id, include_user_saved_opps, org_ids_to_use)
+    saved_union = _build_saved_union_subquery(user_id, include_user_saved_opps)
 
     # Base opportunity query
     stmt = (
