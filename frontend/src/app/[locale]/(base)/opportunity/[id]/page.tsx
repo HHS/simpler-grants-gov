@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import NotFound from "src/app/[locale]/(base)/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
@@ -103,7 +102,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     opportunityData = response.data;
   } catch (error) {
     if (parseErrorStatus(error as ApiRequestError) === 404) {
-      return <NotFound />;
+      notFound();
     }
     throw error;
   }
