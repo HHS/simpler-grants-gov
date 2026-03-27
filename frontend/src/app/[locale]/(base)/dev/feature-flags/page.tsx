@@ -18,8 +18,6 @@ export function generateMetadata() {
   return meta;
 }
 
-type FeatureFlagsProps = WithFeatureFlagProps;
-
 /**
  * View for managing feature flags
  */
@@ -50,7 +48,7 @@ function FeatureFlags() {
   );
 }
 
-export default withFeatureFlag<FeatureFlagsProps, never>(
+export default withFeatureFlag<WithFeatureFlagProps, never>(
   FeatureFlags,
   "featureFlagAdminOff",
   () => notFound(),
