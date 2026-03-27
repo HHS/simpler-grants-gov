@@ -163,10 +163,11 @@ def get_login_gov_redirect_uri(db_session: db.Session, config: LoginGovConfig | 
     return f"{config.login_gov_auth_endpoint}?{encoded_params}"
 
 
-def get_login_gov_loguout_redirect_uri(db_session: db.Session, config: LoginGovConfig | None = None) -> str:
+def get_login_gov_logout_redirect_uri(db_session: db.Session, config: LoginGovConfig | None = None) -> str:
     if config is None:
         config = get_config()
 
+    nonce = uuid.uuid4()
     state = uuid.uuid4()
 
     # Ask Flask for its own URI - specifying we want the callback route
