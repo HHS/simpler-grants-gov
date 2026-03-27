@@ -32,6 +32,8 @@ ORG_ADMIN = Role(
             Privilege.VIEW_APPLICATION,
             Privilege.MODIFY_APPLICATION,
             Privilege.SUBMIT_APPLICATION,
+            Privilege.VIEW_ORG_SAVED_OPPORTUNITIES,
+            Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES,
         ],
     ),
     link_role_types=[LinkRoleRoleType(role_id=ORG_ADMIN_ID, role_type=RoleType.ORGANIZATION)],
@@ -51,6 +53,8 @@ ORG_MEMBER = Role(
             Privilege.VIEW_APPLICATION,
             Privilege.MODIFY_APPLICATION,
             Privilege.SUBMIT_APPLICATION,
+            Privilege.VIEW_ORG_SAVED_OPPORTUNITIES,
+            Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES,
         ],
     ),
     link_role_types=[LinkRoleRoleType(role_id=ORG_MEMBER_ID, role_type=RoleType.ORGANIZATION)],
@@ -121,6 +125,93 @@ LEGACY_AGENCY_S2S_ROLE = Role(
 )
 
 ############################
+# Core Opportunity Roles
+############################
+
+OPPORTUNITY_EDITOR_ID = uuid.UUID("5e612395-9e66-4c12-aae0-b62204221916")
+OPPORTUNITY_EDITOR = Role(
+    role_id=OPPORTUNITY_EDITOR_ID,
+    role_name="Opportunity Editor",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        OPPORTUNITY_EDITOR_ID,
+        [
+            Privilege.VIEW_OPPORTUNITY,
+            Privilege.CREATE_OPPORTUNITY,
+            Privilege.UPDATE_OPPORTUNITY,
+        ],
+    ),
+    link_role_types=[LinkRoleRoleType(role_id=OPPORTUNITY_EDITOR_ID, role_type=RoleType.AGENCY)],
+)
+
+OPPORTUNITY_PUBLISHER_ID = uuid.UUID("d1654d1e-01f8-437c-bdf0-636e1f182451")
+OPPORTUNITY_PUBLISHER = Role(
+    role_id=OPPORTUNITY_PUBLISHER_ID,
+    role_name="Opportunity Publisher",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        OPPORTUNITY_PUBLISHER_ID,
+        [
+            Privilege.VIEW_OPPORTUNITY,
+            Privilege.PUBLISH_OPPORTUNITY,
+            Privilege.CREATE_OPPORTUNITY,
+            Privilege.UPDATE_OPPORTUNITY,
+        ],
+    ),
+    link_role_types=[LinkRoleRoleType(role_id=OPPORTUNITY_PUBLISHER_ID, role_type=RoleType.AGENCY)],
+)
+
+############################
+# Core Award Recommendation Roles
+############################
+AWARD_RECOMMENDATION_USER_ID = uuid.UUID("a5a5881e-2b55-4044-bf4d-eec45503cc56")
+AWARD_RECOMMENDATION_USER = Role(
+    role_id=AWARD_RECOMMENDATION_USER_ID,
+    role_name="Award Recommendation User",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        AWARD_RECOMMENDATION_USER_ID,
+        [
+            Privilege.VIEW_AWARD_RECOMMENDATION,
+            Privilege.CREATE_AWARD_RECOMMENDATION,
+            Privilege.UPDATE_AWARD_RECOMMENDATION,
+            Privilege.SUBMIT_AWARD_RECOMMENDATION,
+        ],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=AWARD_RECOMMENDATION_USER_ID, role_type=RoleType.AGENCY)
+    ],
+)
+
+GRANTOR_PROGRAM_OFFICER_ID = uuid.UUID("66b4238b-8f22-4996-b6ba-712958fd5631")
+GRANTOR_PROGRAM_OFFICER = Role(
+    role_id=GRANTOR_PROGRAM_OFFICER_ID,
+    role_name="Grantor Program Officer",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        GRANTOR_PROGRAM_OFFICER_ID,
+        [Privilege.PROGRAM_OFFICER_APPROVAL],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=GRANTOR_PROGRAM_OFFICER_ID, role_type=RoleType.AGENCY)
+    ],
+)
+
+GRANTOR_BUDGET_OFFICER_ID = uuid.UUID("4d00cb3c-0cc5-4876-8e09-7067ae0530a2")
+GRANTOR_BUDGET_OFFICER = Role(
+    role_id=GRANTOR_BUDGET_OFFICER_ID,
+    role_name="Grantor Budget Officer",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        GRANTOR_BUDGET_OFFICER_ID,
+        [Privilege.BUDGET_OFFICER_APPROVAL],
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=GRANTOR_BUDGET_OFFICER_ID, role_type=RoleType.AGENCY)
+    ],
+)
+
+############################
 # Core Internal Roles
 ############################
 
@@ -136,11 +227,61 @@ NAVA_INTERNAL_ROLE = Role(
     link_role_types=[LinkRoleRoleType(role_id=NAVA_INTERNAL_ROLE_ID, role_type=RoleType.INTERNAL)],
 )
 
+E2E_TEST_USER_ROLE_ID = uuid.UUID("a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d")
+E2E_TEST_USER_ROLE = Role(
+    role_id=E2E_TEST_USER_ROLE_ID,
+    role_name="E2E Test User",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        E2E_TEST_USER_ROLE_ID,
+        [
+            Privilege.READ_TEST_USER_TOKEN,
+        ],
+    ),
+    link_role_types=[LinkRoleRoleType(role_id=E2E_TEST_USER_ROLE_ID, role_type=RoleType.INTERNAL)],
+)
+
+SYSTEM_WORKFLOW_USER_ROLE_ID = uuid.UUID("18258804-a281-41cd-9afb-06061fa7593c")
+SYSTEM_WORKFLOW_USER_ROLE = Role(
+    role_id=SYSTEM_WORKFLOW_USER_ROLE_ID,
+    role_name="System Workflow Role",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        SYSTEM_WORKFLOW_USER_ROLE_ID, [Privilege.INTERNAL_WORKFLOW_ACCESS]
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=SYSTEM_WORKFLOW_USER_ROLE_ID, role_type=RoleType.INTERNAL),
+    ],
+)
+
+# Role for us to give our own users for testing workflows
+# Allowed to send any event to the event API
+INTERNAL_WORKFLOW_USER_ROLE_ID = uuid.UUID("df17eaaf-701b-4b9f-9a88-0406beabc68e")
+INTERNAL_WORKFLOW_USER_ROLE = Role(
+    role_id=INTERNAL_WORKFLOW_USER_ROLE_ID,
+    role_name="Internal Workflow User",
+    is_core=True,
+    link_privileges=get_link_privileges(
+        INTERNAL_WORKFLOW_USER_ROLE_ID, [Privilege.INTERNAL_WORKFLOW_EVENT_SEND]
+    ),
+    link_role_types=[
+        LinkRoleRoleType(role_id=INTERNAL_WORKFLOW_USER_ROLE_ID, role_type=RoleType.INTERNAL),
+    ],
+)
+
 CORE_ROLES = [
     ORG_ADMIN,
     ORG_MEMBER,
     APPLICATION_OWNER,
     APPLICATION_CONTRIBUTOR,
+    E2E_TEST_USER_ROLE,
     LEGACY_AGENCY_S2S_ROLE,
+    OPPORTUNITY_EDITOR,
+    OPPORTUNITY_PUBLISHER,
     NAVA_INTERNAL_ROLE,
+    SYSTEM_WORKFLOW_USER_ROLE,
+    INTERNAL_WORKFLOW_USER_ROLE,
+    AWARD_RECOMMENDATION_USER,
+    GRANTOR_PROGRAM_OFFICER,
+    GRANTOR_BUDGET_OFFICER,
 ]

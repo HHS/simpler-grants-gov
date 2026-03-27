@@ -49,7 +49,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 ENV NEXT_BUILD true
 
 # Skip lint because it should have happened in the CI already
-RUN npm run build -- --no-lint
+RUN npm run build
 
 # Run the Next.js server
 # =====================================
@@ -60,8 +60,7 @@ WORKDIR /frontend
 # Update system and install security updates
 RUN apt-get update \
   && apt-get upgrade -y --no-install-recommends \
-  && apt-get install -y --only-upgrade libc-bin libc6 \
-  && apt-get install --no-install-recommends --yes libgnutls30 \
+  && apt-get install -y --only-upgrade libc-bin libc6 openssl libssl3 libgnutls30 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 

@@ -7,26 +7,22 @@ from typing import Any
 
 import click
 
-from src.form_schema.forms.epa_form_4700_4 import (
-    FORM_XML_TRANSFORM_RULES as EPA4700_4_TRANSFORM_RULES,
-)
-from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES as SF424_TRANSFORM_RULES
-from src.form_schema.forms.sf424a import FORM_XML_TRANSFORM_RULES as SF424A_TRANSFORM_RULES
-from src.form_schema.forms.sflll import FORM_XML_TRANSFORM_RULES as SFLLL_TRANSFORM_RULES
+from src.services.xml_generation.config import _build_xml_form_map
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
+from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 
 from .xsd_validator import XSDValidator
 
 logger = logging.getLogger(__name__)
 
-# Map form names to their transform rules
-FORM_TRANSFORM_RULES = {
-    "SF424_4_0": SF424_TRANSFORM_RULES,
-    "SF424A": SF424A_TRANSFORM_RULES,
-    "EPA4700_4": EPA4700_4_TRANSFORM_RULES,
-    "SFLLL_2_0": SFLLL_TRANSFORM_RULES,
-}
+# Build form map dynamically from all registered forms (case-insensitive keyed by short_form_name)
+_XML_FORM_MAP = _build_xml_form_map()
+
+
+def _get_transform_config(form_name: str) -> dict | None:
+    """Return transform config for a form, matching case-insensitively."""
+    return _XML_FORM_MAP.get(form_name.upper())
 
 
 class ValidationTestRunner:
@@ -49,6 +45,31 @@ class ValidationTestRunner:
         self.xsd_validator = XSDValidator(xsd_cache_dir)
         self.results: list[dict[str, Any]] = []
 
+    def _convert_attachment_mapping(
+        self, attachment_mapping: dict[str, Any] | None
+    ) -> dict[str, AttachmentInfo] | None:
+        """Convert dictionary attachment mapping to AttachmentInfo objects.
+
+        Args:
+            attachment_mapping: Raw dictionary with attachment data
+
+        Returns:
+            Dictionary mapping UUIDs to AttachmentInfo objects, or None
+        """
+        if not attachment_mapping:
+            return None
+
+        converted = {}
+        for uuid, data in attachment_mapping.items():
+            converted[uuid] = AttachmentInfo(
+                filename=data.get("FileName", ""),
+                mime_type=data.get("MimeType", ""),
+                file_location=data.get("FileLocation", ""),
+                hash_value=data.get("HashValue", ""),
+                hash_algorithm=data.get("HashAlgorithm", "SHA-1"),
+            )
+        return converted
+
     def run_validation_test(
         self,
         test_name: str,
@@ -56,6 +77,7 @@ class ValidationTestRunner:
         xsd_url_or_path: str,
         form_name: str = "SF424_4_0",
         pretty_print: bool = True,
+        attachment_mapping: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Run a single validation test.
 
@@ -64,6 +86,7 @@ class ValidationTestRunner:
             json_input: JSON input data
             xsd_url_or_path: URL to XSD file (will be converted to cached file path)
             form_name: Form name for XML generation
+            attachment_mapping: Optional attachment mapping for forms with attachments
             pretty_print: Whether to pretty-print XML
 
         Returns:
@@ -73,7 +96,7 @@ class ValidationTestRunner:
 
         try:
             # Get transform rules for the form
-            transform_config = FORM_TRANSFORM_RULES.get(form_name)
+            transform_config = _get_transform_config(form_name)
             if not transform_config:
                 return {
                     "test_name": test_name,
@@ -85,10 +108,14 @@ class ValidationTestRunner:
                 }
 
             # Generate XML
+            # Convert attachment_mapping dictionaries to AttachmentInfo objects
+            converted_attachments = self._convert_attachment_mapping(attachment_mapping)
+
             request = XMLGenerationRequest(
                 transform_config=transform_config,
                 application_data=json_input,
                 pretty_print=pretty_print,
+                attachment_mapping=converted_attachments,
             )
 
             response = self.xml_service.generate_xml(request)
@@ -163,6 +190,7 @@ class ValidationTestRunner:
                 xsd_url_or_path=test_case["xsd_url"],
                 form_name=test_case.get("form_name", "SF424_4_0"),
                 pretty_print=test_case.get("pretty_print", True),
+                attachment_mapping=test_case.get("attachment_mapping"),
             )
 
         # Calculate summary

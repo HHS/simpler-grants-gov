@@ -1,7 +1,5 @@
-import { fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
-import { render, screen } from "tests/react-utils";
 
 import SavedOpportunityStatusFilter from "src/components/saved-opportunities/SavedOpportunityStatusFilter";
 
@@ -14,11 +12,6 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
     setQueryParam: setQueryParamMock,
     removeQueryParam: removeQueryParamMock,
   }),
-}));
-
-jest.mock("next-intl", () => ({
-  ...jest.requireActual<typeof import("next-intl")>("next-intl"),
-  useTranslations: () => useTranslationsMock(),
 }));
 
 describe("SavedOpportunityStatusFilter", () => {

@@ -152,15 +152,19 @@ class UserSavedOpportunitiesFilterSchema(Schema):
         .with_one_of(allowed_values=OpportunityStatus, example=OpportunityStatus.POSTED)
         .build()
     )
+    organization_ids = fields.Nested(
+        UuidSearchSchemaBuilder("UserSavedOpportunitiesOrganizationIDSFilterSchema")
+        .with_one_of()
+        .build()
+    )
 
 
 class UserSavedOpportunitiesRequestSchema(Schema):
     filters = fields.Nested(UserSavedOpportunitiesFilterSchema(), required=False, allow_none=True)
-
     pagination = fields.Nested(
         generate_pagination_schema(
             "UserGetSavedOpportunityPaginationV1Schema",
-            ["created_at", "updated_at", "opportunity_title", "close_date"],
+            ["created_at", "opportunity_title", "close_date"],
             default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
         ),
         required=True,
@@ -258,6 +262,34 @@ class UserOrganizationsResponseSchema(AbstractResponseSchema):
     data = fields.List(
         fields.Nested(UserOrganizationSchema),
         metadata={"description": "List of organizations the user is associated with"},
+    )
+
+
+class UserAgencySchema(Schema):
+    agency_id = fields.String(
+        metadata={
+            "description": "The internal ID of the agency",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    agency_name = fields.String(
+        metadata={
+            "description": "The name of the agency",
+            "example": "Department of Commerce",
+        }
+    )
+    agency_code = fields.String(
+        metadata={
+            "description": "The unique code for the agency",
+            "example": "DOC",
+        }
+    )
+
+
+class UserAgenciesResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(UserAgencySchema),
+        metadata={"description": "List of agencies the user is associated with"},
     )
 
 
@@ -773,3 +805,59 @@ class OrganizationInvitationSchema(Schema):
 
 class UserResponseOrgInvitationResponseSchema(AbstractResponseSchema):
     data = fields.Nested(OrganizationInvitationSchema)
+
+
+class SavedOpportunityNotificationsSelfSchema(Schema):
+    email_enabled = fields.Boolean(
+        metadata={
+            "description": "Whether email notifications are enabled for personal saved opportunities",
+            "example": True,
+        }
+    )
+
+
+class SavedOpportunityNotificationsOrgSchema(Schema):
+    organization_id = fields.UUID(
+        metadata={
+            "description": "The organization ID",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+        }
+    )
+    email_enabled = fields.Boolean(
+        metadata={
+            "description": "Whether email notifications are enabled for this organization's saved opportunities",
+            "example": False,
+        }
+    )
+
+
+class SavedOpportunityNotificationsSchema(Schema):
+    self = fields.Nested(
+        SavedOpportunityNotificationsSelfSchema,
+        metadata={"description": "Personal notification settings for saved opportunities"},
+    )
+    organizations = fields.List(
+        fields.Nested(SavedOpportunityNotificationsOrgSchema),
+        metadata={"description": "Notification settings per organization"},
+    )
+
+
+class UserSavedOpportunityNotificationsResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(SavedOpportunityNotificationsSchema)
+
+
+class SetUserSavedOpportunityNotificationRequestSchema(Schema):
+    organization_id = fields.UUID(
+        required=True,
+        allow_none=True,
+        metadata={
+            "description": "The ID of the organization for which to set notification. If not provided, the setting applies to the user's own saved opportunities."
+        },
+    )
+    email_enabled = fields.Boolean(
+        required=True, metadata={"description": "Whether the email notifications is enabled"}
+    )
+
+
+class SetUserSavedOpportunityNotificationResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})

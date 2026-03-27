@@ -6,6 +6,7 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import getFormData from "src/utils/getFormData";
 
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
@@ -29,7 +30,9 @@ export async function generateMetadata({
 
   if (data) {
     const { formName } = data;
-    title = formName;
+    title = `${formName} | Simpler.Grants.gov`;
+  } else {
+    title = "Application form | Simpler.Grants.gov";
   }
   const meta: Metadata = {
     title,
@@ -46,6 +49,7 @@ async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
   const { data, error } = await getFormData({ applicationId, appFormId });
   const userSession = await getSession();
+  const t = await getTranslations("Application");
 
   if (!userSession || !userSession.token) {
     return <TopLevelError />;
@@ -105,18 +109,24 @@ async function FormPage({ params }: formPageProps) {
       <GridContainer>
         <Breadcrumbs
           breadcrumbList={[
-            { title: "home", path: "/" },
+            {
+              title: t("breadcrumbWorkspace"),
+              path: `/dashboard`,
+            },
+            {
+              title: t("breadcrumbApplications"),
+              path: `/applications`,
+            },
             {
               title: applicationName,
               path: `/applications/${applicationId}`,
             },
             {
               title: formName,
-              path: `/applications/${applicationId}/form/${formId}`,
             },
           ]}
         />
-        <h1>{formName}</h1>
+        <h1 className="margin-top-0">{formName}</h1>
         <ApplyForm
           applicationId={applicationId}
           validationWarnings={warnings || null}

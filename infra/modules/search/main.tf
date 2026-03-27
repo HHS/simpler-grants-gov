@@ -8,6 +8,10 @@ resource "aws_cloudwatch_log_group" "opensearch" {
   kms_key_id        = aws_kms_key.opensearch.arn
 }
 
+# The CloudWatch log resource policy for es.amazonaws.com is managed at the
+# account level in infra/accounts/logs.tf (policy: "account-level-logs").
+# AWS limits log resource policies to 10 per region per account.
+
 resource "aws_opensearch_domain" "opensearch" {
   domain_name    = var.service_name
   engine_version = var.engine_version

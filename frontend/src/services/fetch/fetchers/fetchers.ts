@@ -3,6 +3,7 @@ import "server-only";
 import { ApiRequestError } from "src/errors";
 import {
   EndpointConfig,
+  fetchAwardRecommendationEndpoint,
   fetchCompetitionEndpoint,
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
@@ -10,6 +11,7 @@ import {
   opportunitySearchEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
+  toDynamicGrantorsEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
   userLogoutEndpoint,
@@ -91,7 +93,7 @@ export function requesterForEndpoint({
       let jsonBody;
       try {
         jsonBody = (await response.json()) as APIResponse;
-      } catch (e) {
+      } catch (_e) {
         throw new Error(
           `bad Json from error response at ${url} with status code ${response.status}`,
         );
@@ -129,6 +131,10 @@ export const fetchOpportunitySearch = requesterForEndpoint(
   opportunitySearchEndpoint,
 );
 
+export const fetchAwardRecommendation = cache(
+  requesterForEndpoint(fetchAwardRecommendationEndpoint),
+);
+
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
 export const fetchUserWithMethod = (type: "POST" | "DELETE" | "PUT" | "GET") =>
@@ -142,4 +148,12 @@ export const fetchOrganizationWithMethod = (
   type: "POST" | "DELETE" | "PUT" | "GET",
 ) => requesterForEndpoint(toDynamicOrganizationsEndpoint(type));
 
+export const fetchOrganizationBySavedOpportunities = (
+  type: "DELETE" | "POST",
+) => requesterForEndpoint(toDynamicOrganizationsEndpoint(type));
+
 export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);
+
+export const fetchGrantorWithMethod = (
+  type: "POST" | "DELETE" | "PUT" | "GET",
+) => requesterForEndpoint(toDynamicGrantorsEndpoint(type));

@@ -185,6 +185,34 @@ export const closeDateOptions: FilterOption[] = [
   },
 ];
 
+export const postedDateOptions: FilterOption[] = [
+  {
+    id: "posted-date-3",
+    label: "Within the last 3 days",
+    value: "3",
+  },
+  {
+    id: "posted-date-7",
+    label: "Within the last 7 days",
+    value: "7",
+  },
+  {
+    id: "posted-date-14",
+    label: "Within the last 14 days",
+    value: "14",
+  },
+  {
+    id: "posted-date-30",
+    label: "Within the last 30 days",
+    value: "30",
+  },
+  {
+    id: "posted-date-60",
+    label: "Within the last 60 days",
+    value: "60",
+  },
+];
+
 export const costSharingOptions: FilterOption[] = [
   {
     id: "cost-sharing-yes",
@@ -215,6 +243,7 @@ export const allFilterOptions = {
   eligibility: eligibilityOptions,
   costSharing: costSharingOptions,
   closeDate: closeDateOptions,
+  postedDate: postedDateOptions,
   category: categoryOptions,
   fundingInstrument: fundingOptions,
 };

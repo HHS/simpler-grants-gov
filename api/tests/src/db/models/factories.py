@@ -20,6 +20,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
+import src.db.models.award_recommendation_models as award_recommendation_models
 import src.db.models.competition_models as competition_models
 import src.db.models.entity_models as entity_models
 import src.db.models.extract_models as extract_models
@@ -30,6 +31,7 @@ import src.db.models.sam_extract_models as sam_extract_models
 import src.db.models.staging as staging
 import src.db.models.task_models as task_models
 import src.db.models.user_models as user_models
+import src.db.models.workflow_models as workflow_models
 import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionSchema
 from src.constants.lookup_constants import (
@@ -38,6 +40,11 @@ from src.constants.lookup_constants import (
     ApplicantType,
     ApplicationAuditEvent,
     ApplicationStatus,
+    ApprovalResponseType,
+    ApprovalType,
+    AwardRecommendationStatus,
+    AwardRecommendationType,
+    AwardSelectionMethod,
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
@@ -55,10 +62,13 @@ from src.constants.lookup_constants import (
     SamGovImportType,
     SamGovProcessingStatus,
     UserType,
+    WorkflowType,
 )
 from src.constants.static_role_values import (
     APPLICATION_CONTRIBUTOR,
     APPLICATION_OWNER,
+    OPPORTUNITY_EDITOR,
+    OPPORTUNITY_PUBLISHER,
     ORG_ADMIN,
     ORG_MEMBER,
 )
@@ -492,6 +502,19 @@ class OpportunityVersionFactory(BaseFactory):
     opportunity_data = factory.LazyAttribute(lambda o: SCHEMA.dump(o.opportunity))
 
 
+class ReferencedOpportunityFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.ReferencedOpportunity
+
+    referenced_opportunity_id = Generators.UuidObj
+
+    original_opportunity = factory.SubFactory(OpportunityFactory)
+    original_opportunity_id = factory.LazyAttribute(lambda a: a.original_opportunity.opportunity_id)
+
+    derived_opportunity = factory.SubFactory(OpportunityFactory)
+    derived_opportunity_id = factory.LazyAttribute(lambda a: a.derived_opportunity.opportunity_id)
+
+
 class OpportunitySummaryFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunitySummary
@@ -544,12 +567,14 @@ class OpportunitySummaryFactory(BaseFactory):
     additional_info_url_description = factory.Faker("additional_info_desc")
 
     funding_category_description = factory.Maybe(
-        decider=factory.LazyAttribute(lambda s: fake.boolean()),  # random chance to include value
+        # random chance to include value
+        decider=factory.LazyAttribute(lambda s: fake.boolean()),
         yes_declaration=factory.Faker("paragraph", nb_sentences=1),
         no_declaration=None,
     )
     applicant_eligibility_description = factory.Maybe(
-        decider=factory.LazyAttribute(lambda s: fake.boolean()),  # random chance to include value
+        # random chance to include value
+        decider=factory.LazyAttribute(lambda s: fake.boolean()),
         yes_declaration=factory.Faker("paragraph", nb_sentences=5),
         no_declaration=None,
     )
@@ -748,6 +773,23 @@ class CurrentOpportunitySummaryFactory(BaseFactory):
         )
 
 
+class AssistanceListingFactory(BaseFactory):
+    class Meta:
+        model = opportunity_models.AssistanceListing
+
+    assistance_listing_record_id = Generators.UuidObj
+
+    program_title = factory.Faker("company")
+    assistance_listing_number = factory.Faker("assistance_listing_number")
+
+    class Params:
+        # Set the timestamps in the past rather than using the default of "now"
+        timestamps_in_past = factory.Trait(
+            created_at=factory.Faker("date_time_between", start_date="-5y", end_date="-3y"),
+            updated_at=factory.Faker("date_time_between", start_date="-3y", end_date="-1y"),
+        )
+
+
 class OpportunityAssistanceListingFactory(BaseFactory):
     class Meta:
         model = opportunity_models.OpportunityAssistanceListing
@@ -902,6 +944,75 @@ class OpportunityChangeAuditFactory(BaseFactory):
     is_loaded_to_version_table = False
 
 
+class AwardRecommendationFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendation
+
+    award_recommendation_id = Generators.UuidObj
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda s: s.opportunity.opportunity_id)
+
+    funding_strategy_id = None
+
+    award_recommendation_number = factory.LazyAttribute(
+        lambda s: f"{s.opportunity.agency_code or 'AGC'}_{fake.bothify('??????').upper()}"
+    )
+
+    award_recommendation_status = AwardRecommendationStatus.DRAFT
+    additional_info = sometimes_none(factory.Faker("paragraph"))
+    award_selection_method = sometimes_none(factory.fuzzy.FuzzyChoice(AwardSelectionMethod))
+    selection_method_detail = sometimes_none(factory.Faker("paragraph"))
+    funding_strategy = sometimes_none(factory.Faker("paragraph"))
+    other_key_information = sometimes_none(factory.Faker("paragraph"))
+
+    is_deleted = False
+    review_workflow = factory.SubFactory("tests.src.db.models.factories.WorkflowFactory")
+    review_workflow_id = factory.LazyAttribute(lambda s: s.review_workflow.workflow_id)
+
+
+class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationApplicationSubmission
+
+    award_recommendation_application_submission_id = Generators.UuidObj
+
+    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
+    award_recommendation_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation.award_recommendation_id
+    )
+
+    application_submission = factory.SubFactory(
+        "tests.src.db.models.factories.ApplicationSubmissionFactory"
+    )
+    application_submission_id = factory.LazyAttribute(
+        lambda s: s.application_submission.application_submission_id
+    )
+
+    award_recommendation_submission_detail = factory.SubFactory(
+        "tests.src.db.models.factories.AwardRecommendationSubmissionDetailFactory"
+    )
+    award_recommendation_submission_detail_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation_submission_detail.award_recommendation_submission_detail_id
+    )
+
+
+class AwardRecommendationSubmissionDetailFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationSubmissionDetail
+
+    award_recommendation_submission_detail_id = Generators.UuidObj
+
+    recommended_amount = sometimes_none(
+        factory.Faker("pydecimal", left_digits=7, right_digits=2, positive=True)
+    )
+    scoring_comment = sometimes_none(factory.LazyFunction(lambda: str(random.randint(1, 100))))
+    general_comment = sometimes_none(factory.Faker("paragraph"))
+    award_recommendation_type = sometimes_none(factory.fuzzy.FuzzyChoice(AwardRecommendationType))
+    has_exception = False
+    exception_detail = sometimes_none(factory.Faker("paragraph"))
+
+
 ###################
 # User & Auth Factories
 ###################
@@ -996,6 +1107,24 @@ class UserSavedOpportunityFactory(BaseFactory):
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
 
+class UserSavedOpportunityNotificationFactory(BaseFactory):
+    class Meta:
+        model = user_models.UserSavedOpportunityNotification
+
+    user_saved_opportunity_notification_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda o: o.user.user_id)
+
+    # None means user's own settings; set organization to an OrganizationFactory instance for org-scoped settings
+    organization = None
+    organization_id = factory.LazyAttribute(
+        lambda o: o.organization.organization_id if o.organization is not None else None
+    )
+
+    email_enabled = factory.LazyAttribute(lambda o: o.organization is None)
+
+
 class UserSavedSearchFactory(BaseFactory):
     class Meta:
         model = user_models.UserSavedSearch
@@ -1069,6 +1198,8 @@ class RoleFactory(BaseFactory):
                 Privilege.MANAGE_ORG_MEMBERS,
                 Privilege.MANAGE_ORG_ADMIN_MEMBERS,
                 Privilege.VIEW_ORG_MEMBERSHIP,
+                Privilege.VIEW_ORG_SAVED_OPPORTUNITIES,
+                Privilege.MODIFY_ORG_SAVED_OPPORTUNITIES,
             ],
             role_types=[RoleType.ORGANIZATION],
         )
@@ -1202,7 +1333,8 @@ class CompetitionInstructionFactory(BaseFactory):
 
     @classmethod
     def _build(cls, model_class, *args, **kwargs):
-        kwargs.pop("file_contents")  # Don't use file contents for build strategy
+        # Don't use file contents for build strategy
+        kwargs.pop("file_contents")
         return super()._build(model_class, *args, **kwargs)
 
     @classmethod
@@ -1501,7 +1633,7 @@ class ApplicationAttachmentFactory(BaseFactory):
     @classmethod
     def _build(cls, model_class, *args, **kwargs):
         kwargs.pop("file_contents")  # Don't file for build strategy
-        super()._build(model_class, *args, **kwargs)
+        return super()._build(model_class, *args, **kwargs)
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
@@ -1546,6 +1678,14 @@ class ApplicationSubmissionFactory(BaseFactory):
     # make sure the bucket actually exists
     file_location = factory.LazyAttribute(
         lambda s: f"s3://local-mock-public-bucket/applications/{s.application_id}/submissions/{fake.uuid4()}/submission.zip"
+    )
+
+    application_submission_number = factory.LazyAttribute(
+        lambda f: f"{f.application.competition.opportunity.opportunity_number}-{fake.unique.pystr_format(string_format="##???").upper()}"
+    )
+    project_title = factory.Faker("sentence")
+    total_requested_amount = sometimes_none(
+        factory.Faker("pydecimal", left_digits=7, right_digits=2, positive=True)
     )
 
     @classmethod
@@ -1694,6 +1834,46 @@ class ApplicationAuditFactory(BaseFactory):
         )
 
 
+class ApplicationSubmissionNoteFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationSubmissionNote
+
+    application_submission_note_id = Generators.UuidObj
+
+    application_submission = factory.SubFactory(ApplicationSubmissionFactory)
+    application_submission_id = factory.LazyAttribute(
+        lambda s: s.application_submission.application_submission_id
+    )
+
+    note = factory.Faker("test note for application submission")
+
+    created_by_user = factory.SubFactory(UserFactory)
+    created_by_user_id = factory.LazyAttribute(lambda o: o.created_by_user.user_id)
+
+    modified_by_user = factory.SubFactory(UserFactory)
+    modified_by_user_id = factory.LazyAttribute(lambda o: o.modified_by_user.user_id)
+
+
+class ApplicationSubmissionTrackingNumberFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationSubmissionTrackingNumber
+
+    application_submission_tracking_number_id = Generators.UuidObj
+
+    application_submission = factory.SubFactory(ApplicationSubmissionFactory)
+    application_submission_id = factory.LazyAttribute(
+        lambda s: s.application_submission.application_submission_id
+    )
+
+    tracking_number = factory.Faker("bothify", text="GRANT########")
+
+    created_by_user = factory.SubFactory(UserFactory)
+    created_by_user_id = factory.LazyAttribute(lambda o: o.created_by_user.user_id)
+
+    modified_by_user = factory.SubFactory(UserFactory)
+    modified_by_user_id = factory.LazyAttribute(lambda o: o.modified_by_user.user_id)
+
+
 ###################
 # Agency Factories
 ###################
@@ -1774,6 +1954,26 @@ class AgencyUserFactory(BaseFactory):
 
     user = factory.SubFactory(UserFactory)
     user_id = factory.LazyAttribute(lambda u: u.user.user_id)
+
+    class Params:
+        # New traits for role assignment
+        as_opportunity_editor = factory.Trait(
+            agency_user_roles=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.AgencyUserRoleFactory",
+                factory_related_name="agency_user",
+                size=1,
+                role_id=OPPORTUNITY_EDITOR.role_id,
+            ),
+        )
+
+        as_opportunity_publisher = factory.Trait(
+            agency_user_roles=factory.RelatedFactoryList(
+                "tests.src.db.models.factories.AgencyUserRoleFactory",
+                factory_related_name="agency_user",
+                size=1,
+                role_id=OPPORTUNITY_PUBLISHER.role_id,
+            ),
+        )
 
 
 class AgencyUserRoleFactory(BaseFactory):
@@ -2110,17 +2310,6 @@ class TfundinstrFactory(BaseFactory):
 
     creator_id = factory.Faker("first_name")
     last_upd_id = factory.Faker("first_name")
-
-
-class VOpportunitySummaryFactory(BaseFactory):
-    class Meta:
-        abstract = True
-
-    opportunity_id = factory.Sequence(lambda n: n)
-    is_draft = True
-    fo_last_upd_dt = factory.Faker("date_time_between", start_date="-5y", end_date="-5y")
-    omb_review_status_date = factory.Faker("date_time_between", start_date="-5y", end_date="-5y")
-    omb_review_status_display: None
 
 
 ####################################
@@ -2583,13 +2772,6 @@ class ForeignTsynopsisAttachmentFactory(TsynopsisAttachmentFactory):
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
 
-class ForeignVopportunitySummaryFactory(VOpportunitySummaryFactory):
-    class Meta:
-        model = foreign.opportunity.VOpportunitySummary
-
-    opportunity_id = factory.Sequence(lambda n: n)
-
-
 class ForeignTcertificatesFactory(BaseFactory):
     class Meta:
         model = foreign.certificates.Tcertificates
@@ -2857,6 +3039,8 @@ class StagingTinstructionsFactory(AbstractStagingFactory):
     last_update = factory.Faker("date_between", start_date="-1y", end_date="today")
     created_date = factory.Faker("date_time_between", start_date="-2y", end_date="-1y")
 
+    instructions = factory.LazyFunction(lambda: fake.sentence(25).encode())
+
 
 class StagingTcertificatesFactory(AbstractStagingFactory):
     class Meta:
@@ -3071,6 +3255,17 @@ class OrganizationAuditFactory(BaseFactory):
         )
 
 
+class OrganizationSavedOpportunityFactory(BaseFactory):
+    class Meta:
+        model = entity_models.OrganizationSavedOpportunity
+
+    organization = factory.SubFactory(OrganizationFactory)
+    organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
+
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+
 class SuppressedEmailFactory(BaseFactory):
     class Meta:
         model = user_models.SuppressedEmail
@@ -3081,16 +3276,6 @@ class SuppressedEmailFactory(BaseFactory):
     last_update_time = factory.Faker(
         "date_time_between", start_date="-1y", end_date="now", tzinfo=timezone.utc
     )
-
-
-class ExcludedOpportunityReviewFactory(BaseFactory):
-    class Meta:
-        model = opportunity_models.ExcludedOpportunityReview
-
-    legacy_opportunity_id = factory.Sequence(lambda n: n)
-    omb_review_status_display = factory.Faker("random_element", elements=["RETURNED", "REVIEWABLE"])
-    omb_review_status_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
-    last_update_date = factory.Faker("date_time_between", start_date="-5y", end_date="-3y")
 
 
 class BaseLegacyCertificateFactory(BaseFactory):
@@ -3119,3 +3304,99 @@ class LegacyOrganizationCertificateFactory(BaseLegacyCertificateFactory):
 
     organization_id = factory.LazyAttribute(lambda o: o.organization.organization_id)
     organization = factory.SubFactory(OrganizationFactory)
+
+
+class WorkflowFactory(BaseFactory):
+    class Meta:
+        model = workflow_models.Workflow
+
+    workflow_id = Generators.UuidObj
+    workflow_type = factory.fuzzy.FuzzyChoice(WorkflowType)
+    current_workflow_state = "start"
+    is_active = True
+
+    # By default, we'll associate a workflow with an opportunity
+    # Use the params below to change this, or pass in your own.
+    opportunity = factory.SubFactory(OpportunityFactory)
+    opportunity_id = factory.LazyAttribute(
+        lambda e: e.opportunity.opportunity_id if e.opportunity is not None else None
+    )
+
+    class Params:
+        has_opportunity = factory.Trait(
+            opportunity=factory.SubFactory(OpportunityFactory),
+            opportunity_id=factory.LazyAttribute(lambda e: e.opportunity.opportunity_id),
+        )
+
+        has_application = factory.Trait(
+            application=factory.SubFactory(ApplicationFactory),
+            application_id=factory.LazyAttribute(lambda e: e.application.application_id),
+            opportunity=None,
+        )
+
+        has_application_submission = factory.Trait(
+            application_submission=factory.SubFactory(ApplicationSubmissionFactory),
+            application_submission_id=factory.LazyAttribute(
+                lambda e: e.application_submission.application_submission_id
+            ),
+            opportunity=None,
+        )
+
+
+class WorkflowEventHistoryFactory(BaseFactory):
+    class Meta:
+        model = workflow_models.WorkflowEventHistory
+
+    event_id = Generators.UuidObj
+    event_data = {}
+    sent_at = Generators.UtcNow
+    is_successfully_processed = True
+
+
+class WorkflowAuditFactory(BaseFactory):
+    class Meta:
+        model = workflow_models.WorkflowAudit
+
+    workflow_audit_id = Generators.UuidObj
+    acting_user = factory.SubFactory(UserFactory)
+    acting_user_id = factory.LazyAttribute(lambda o: o.acting_user.user_id)
+    transition_event = "process"
+    source_state = "start"
+    target_state = "end"
+
+
+class WorkflowApprovalFactory(BaseFactory):
+    class Meta:
+        model = workflow_models.WorkflowApproval
+
+    workflow_approval_id = Generators.UuidObj
+
+    workflow = factory.SubFactory(WorkflowFactory)
+    workflow_id = factory.LazyAttribute(lambda a: a.workflow.workflow_id)
+
+    approving_user = factory.SubFactory(UserFactory)
+    approving_user_id = factory.LazyAttribute(lambda a: a.approving_user.user_id)
+    approval_type = factory.fuzzy.FuzzyChoice(ApprovalType)
+    is_still_valid = True
+    approval_response_type = ApprovalResponseType.APPROVED
+
+    event = factory.SubFactory(WorkflowEventHistoryFactory)
+    event_id = factory.LazyAttribute(lambda a: a.event.event_id)
+
+
+class ApplicationSubmissionRetrievedFactory(BaseFactory):
+    class Meta:
+        model = competition_models.ApplicationSubmissionRetrieved
+
+    application_submission_retrieved_id = Generators.UuidObj
+
+    application_submission = factory.SubFactory(ApplicationSubmissionFactory)
+    application_submission_id = factory.LazyAttribute(
+        lambda o: o.application_submission.application_submission_id
+    )
+
+    created_by_user = factory.SubFactory(UserFactory)
+    created_by_user_id = factory.LazyAttribute(lambda o: o.created_by_user.user_id)
+
+    modified_by_user = factory.SubFactory(UserFactory)
+    modified_by_user_id = factory.LazyAttribute(lambda o: o.modified_by_user.user_id)

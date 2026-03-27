@@ -1,6 +1,5 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen, waitFor } from "@testing-library/react";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
 import { UiSchema } from "src/components/applyForm/types";
@@ -25,10 +24,6 @@ type FormActionResult = Promise<{
 }>;
 
 const mockHandleFormAction = jest.fn<FormActionResult, FormActionArgs>();
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 jest.mock("src/components/applyForm/actions", () => ({
   handleFormAction: (...args: [...FormActionArgs]) =>

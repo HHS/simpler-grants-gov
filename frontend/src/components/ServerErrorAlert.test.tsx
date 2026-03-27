@@ -1,12 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import ServerErrorAlert from "src/components/ServerErrorAlert";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 describe("ServerErrorAlert", () => {
   it("should display the error message", () => {

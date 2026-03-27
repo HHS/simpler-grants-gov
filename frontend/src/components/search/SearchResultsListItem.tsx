@@ -15,6 +15,12 @@ interface SearchResultsListItemProps {
   saved?: boolean;
   index: number;
   page?: number;
+  onShareClick?: (buttonElement: HTMLButtonElement) => void;
+}
+
+export let isShareWithOrganizationEnabled = false;
+export function updateIsSharedWithOrganizationEnabled(value: boolean) {
+  isShareWithOrganizationEnabled = value;
 }
 
 const metadataBorderClasses = `
@@ -41,6 +47,7 @@ export default function SearchResultsListItem({
   saved = false,
   index,
   page = 1,
+  onShareClick,
 }: SearchResultsListItemProps) {
   const t = useTranslations("Search");
 
@@ -119,6 +126,19 @@ export default function SearchResultsListItem({
               {opportunity?.summary?.award_floor?.toLocaleString() || "--"}
             </span>
           </div>
+          {saved && onShareClick && isShareWithOrganizationEnabled ? (
+            <div className="margin-top-1 text-right">
+              <button
+                id={`share-opportunity-button-${opportunity.opportunity_id}`}
+                data-testid="share-opportunity-button-id"
+                type="button"
+                className="usa-button usa-button--unstyled font-sans-2xs"
+                onClick={(event) => onShareClick?.(event.currentTarget)}
+              >
+                {t("callToAction.shareWithOrganization")}
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

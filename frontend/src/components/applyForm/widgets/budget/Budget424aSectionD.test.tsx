@@ -1,28 +1,9 @@
 import { render, screen } from "@testing-library/react";
 
-import React from "react";
-
+import { GeneralRecord } from "src/components/applyForm/types";
 import Budget424aSectionD from "src/components/applyForm/widgets/budget/Budget424aSectionD";
 
-type MoneyString = string;
-
-interface ForecastedCashNeedsRow {
-  first_quarter_amount?: MoneyString;
-  second_quarter_amount?: MoneyString;
-  third_quarter_amount?: MoneyString;
-  fourth_quarter_amount?: MoneyString;
-  total_amount?: MoneyString;
-}
-
-interface SectionDValue {
-  forecasted_cash_needs?: {
-    federal_forecasted_cash_needs?: ForecastedCashNeedsRow;
-    non_federal_forecasted_cash_needs?: ForecastedCashNeedsRow;
-    total_forecasted_cash_needs?: ForecastedCashNeedsRow;
-  };
-}
-
-const buildWidgetProps = (value: SectionDValue) => ({
+const buildWidgetProps = (value: GeneralRecord) => ({
   id: "section-d",
   schema: {},
   rawErrors: [],
@@ -32,7 +13,7 @@ const buildWidgetProps = (value: SectionDValue) => ({
 
 describe("Budget424aSectionD", () => {
   it("renders quarterly values and totals for federal and non-federal sources", () => {
-    const value: SectionDValue = {
+    const value: GeneralRecord = {
       forecasted_cash_needs: {
         federal_forecasted_cash_needs: {
           first_quarter_amount: "1.00",

@@ -1,9 +1,7 @@
 import { Metadata } from "next";
 import NotFound from "src/app/[locale]/(base)/not-found";
-import { OPPORTUNITY_CRUMBS } from "src/constants/breadcrumbs";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { getSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
@@ -12,7 +10,6 @@ import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect, RedirectType } from "next/navigation";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
 import ContentLayout from "src/components/ContentLayout";
 import OpportunityAwardInfo from "src/components/opportunity/OpportunityAwardInfo";
 import OpportunityCTA from "src/components/opportunity/OpportunityCTA";
@@ -98,7 +95,6 @@ function emptySummary() {
 
 async function OpportunityListing({ params }: OpportunityListingProps) {
   const { id } = await params;
-  const breadcrumbs = Object.assign([], OPPORTUNITY_CRUMBS);
 
   let opportunityData = {} as OpportunityDetail;
   let opportunitySaved = false;
@@ -138,20 +134,11 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     ? opportunityData.summary
     : emptySummary();
 
-  breadcrumbs.push({
-    title: `${opportunityData.opportunity_title || ""}: ${opportunityData.opportunity_number}`,
-    path: `/opportunity/${opportunityData.opportunity_id}/`, // unused but required in breadcrumb implementation
-  });
-
   return (
     <div>
-      <div className="grid-container">
-        <Breadcrumbs breadcrumbList={breadcrumbs} />
-      </div>
       <ContentLayout
         title={opportunityData.opportunity_title}
         data-testid="opportunity-intro-content"
-        paddingTop={false}
       >
         <div className="display-flex desktop:padding-y-1 padding-y-3">
           <OpportunitySaveUserControl
@@ -196,8 +183,4 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
   );
 }
 
-export default withFeatureFlag<OpportunityListingProps, never>(
-  OpportunityListing,
-  "opportunityOff",
-  () => redirect("/maintenance"),
-);
+export default OpportunityListing;

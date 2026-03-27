@@ -1,8 +1,13 @@
 import { JSONSchema7 } from "json-schema";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
+import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import { Organization } from "src/types/applicationResponseTypes";
 import { UserProfile } from "src/types/authTypes";
+import {
+  AwardRecommendationDetails,
+  AwardRecommendationStatus,
+} from "src/types/awardRecommendationTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
   FilterOption,
@@ -27,6 +32,17 @@ import {
   UserPrivilegesResponse,
   UserRole,
 } from "src/types/userTypes";
+
+import { FormattedFormValidationWarning } from "src/components/applyForm/types";
+
+export const mockAwardRecommendationStatus: AwardRecommendationStatus =
+  "inProgress";
+
+export const mockAwardRecommendationDetails: AwardRecommendationDetails = {
+  recordNumber: "AR-26-0001",
+  datePrepared: "01/01/2026",
+  status: mockAwardRecommendationStatus,
+};
 
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: "63588df8-f2d1-44ed-a201-5804abba696a",
@@ -53,6 +69,7 @@ export const searchFetcherParams: QueryParamData = {
   category: new Set(),
   eligibility: new Set(),
   closeDate: new Set(),
+  postedDate: new Set(),
   costSharing: new Set(),
   topLevelAgency: new Set(),
   query: "research",
@@ -60,6 +77,57 @@ export const searchFetcherParams: QueryParamData = {
   actionType: "fun" as SearchFetcherActionType,
   fieldChanged: "baseball",
   andOr: "OR",
+};
+
+export const mockOpportunityDetail = {
+  opportunity_id: "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
+  legacy_opportunity_id: 1,
+  opportunity_status: "posted" as const,
+  opportunity_title: "Test Funding Opportunity",
+  opportunity_number: "OPP-2024-001",
+  agency_code: "ABC",
+  agency_name: "Test Agency",
+  top_level_agency_name: "Test Top Level Agency",
+  category: "test-category",
+  category_explanation: "This is a test category",
+  created_at: "2024-01-01T00:00:00Z",
+  updated_at: "2024-01-01T00:00:00Z",
+  opportunity_assistance_listings: [],
+  attachments: [],
+  competitions: null,
+  summary: {
+    summary_description: "",
+    close_date: null,
+    is_forecast: false,
+    post_date: "2024-01-01",
+    additional_info_url: null,
+    additional_info_url_description: null,
+    agency_code: "ABC",
+    agency_contact_description: null,
+    agency_email_address: null,
+    agency_email_address_description: null,
+    agency_name: "Test Agency",
+    agency_phone_number: null,
+    applicant_eligibility_description: null,
+    applicant_types: null,
+    archive_date: null,
+    award_ceiling: null,
+    award_floor: null,
+    close_date_description: null,
+    estimated_total_program_funding: null,
+    expected_number_of_awards: null,
+    fiscal_year: null,
+    forecasted_award_date: null,
+    forecasted_close_date: null,
+    forecasted_close_date_description: null,
+    forecasted_post_date: null,
+    forecasted_project_start_date: null,
+    funding_categories: null,
+    funding_category_description: null,
+    funding_instruments: null,
+    is_cost_sharing: null,
+    version_number: 1,
+  },
 };
 
 export const arbitrarySearchPagination = {
@@ -137,6 +205,9 @@ export const fakeFacetCounts = {
     arbitraryKey: 1,
   },
   close_date: {
+    arbitraryKey: 1,
+  },
+  post_date: {
     arbitraryKey: 1,
   },
   is_cost_sharing: {
@@ -715,4 +786,21 @@ export const fakeTestUser: TestUser = {
 export const fakeUserProfile: UserProfile = {
   token: "a token",
   user_id: "an id",
+};
+
+export const mockApplicationSubmission: ApplicationSubmission = {
+  application_submission_id: "uuid-13",
+  download_path: "http://s3signedurl.com/download.zip",
+  file_size_bytes: 10,
+  legacy_tracking_number: 1,
+};
+
+export const fakeValidationError: FormattedFormValidationWarning = {
+  definition: "/properties/field_one",
+  field: "$.field_one",
+  formatted: "Submission Type is required",
+  htmlField: "field_one",
+  message: "'field_one' is a required property",
+  type: "required",
+  value: null,
 };

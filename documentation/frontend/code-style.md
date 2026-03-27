@@ -59,9 +59,15 @@ Classes for different flavors of API errors are established in errors.ts, use th
 
 ## Testing
 
-### Snapshots & Page Component Tests
+### Page Component Tests
 
-We have observed that running typical Jest unit tests on dynamic Next.js page level components is complicated and generally does not provide much value. When creating any new pages, feel free to rely on snapshot based tests rather than functional tests for these components.
+Testing dynamic Next.js page-level components can be complex and often provides limited value when approached with traditional unit tests.
+
+For page components:
+- Prefer testing underlying logic, hooks, and child components directly.
+- When coverage is needed, favor explicit assertions (e.g., presence of key headings, landmarks, or critical content) over structural or visual comparisons.
+
+End-to-end or integration tests are generally a better fit for validating full page behavior.
 
 ## Page Metadata
 

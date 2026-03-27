@@ -1,4 +1,5 @@
 import { ApplicationHistory } from "src/types/applicationResponseTypes";
+import { formatTimestamp } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 import { Alert } from "@trussworks/react-uswds";
@@ -23,19 +24,6 @@ export const ApplicationHistoryTable = ({
       <ApplicationTable applicationHistory={applicationHistory} />
     </>
   );
-};
-
-const formatTimestamp = (time: string) => {
-  const date = new Date(time);
-  return `${date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })} ${date.toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "numeric",
-    timeZoneName: "short",
-  })}`;
 };
 
 const getActivityMessage = (activity: ApplicationHistory, message: string) => {

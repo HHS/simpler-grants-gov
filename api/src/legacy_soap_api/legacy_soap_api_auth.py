@@ -1,18 +1,22 @@
 import logging
 import ssl
+from datetime import datetime
 from typing import Any
 from urllib.parse import unquote
 
+import jwt
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
 from pydantic import BaseModel, ConfigDict
 from requests.adapters import HTTPAdapter
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 import src.adapters.db as db
+from src.auth.endpoint_access_util import can_access
+from src.db.models.agency_models import Agency
 from src.db.models.user_models import LegacyCertificate
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.util.datetime_util import get_now_us_eastern_date
@@ -20,6 +24,10 @@ from src.util.datetime_util import get_now_us_eastern_date
 logger = logging.getLogger(__name__)
 
 MTLS_CERT_HEADER_KEY = "X-Amzn-Mtls-Clientcert"
+USE_SOAP_JWT_HEADER_KEY = "Use-Soap-Jwt"
+S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY = "S2S_PARTNER_CERTID_JWT_B64"
+LOG_LOCAL_RESPONSE_HEADER_KEY = "Log-Local-Response"
+USE_SIMPLER_OVERRIDE_KEY = "Use-Simpler-Override"
 
 
 class SOAPClientCertificateNotConfigured(Exception):
@@ -30,9 +38,13 @@ class SOAPClientCertificateLookupError(Exception):
     pass
 
 
+class SOAPClientUserDoesNotHavePermission(Exception):
+    pass
+
+
 class SOAPClientCertificate(BaseModel):
     cert: str
-    serial_number: int
+    serial_number: str
     fingerprint: str
     legacy_certificate: LegacyCertificate | None = None
 
@@ -104,15 +116,29 @@ def get_soap_auth(mtls_cert: str | None, db_session: db.Session) -> SOAPAuth | N
     return auth
 
 
+def get_legacy_certificate_by_serial_number(
+    db_session: db.Session, serial_number: str
+) -> LegacyCertificate | None:
+    # Since we lower the input serial_number we wrap the column
+    # value in func.lower() to make the match case insensitive. In hexadecimal
+    # there is no distinction between upper and lower case. The serial number
+    # can be either upper or lower cased in the DB.
+    return db_session.execute(
+        select(LegacyCertificate).where(
+            func.lower(LegacyCertificate.serial_number) == serial_number.lower()
+        )
+    ).scalar_one_or_none()
+
+
 def get_soap_client_certificate(
     urlencoded_cert: str, db_session: db.Session
 ) -> SOAPClientCertificate:
     cert_str = unquote(urlencoded_cert)
     cert = load_pem_x509_certificate(cert_str.encode(), default_backend())
-
-    legacy_certificate = db_session.execute(
-        select(LegacyCertificate).where(LegacyCertificate.serial_number == str(cert.serial_number))
-    ).scalar_one_or_none()
+    # We convert the integer representation of the serial number to lower case hexadecimal here
+    # Note: the 'x' in '032x' returns it lower cased
+    serial_number_hex = format(int(cert.serial_number), "032x")
+    legacy_certificate = get_legacy_certificate_by_serial_number(db_session, serial_number_hex)
     if legacy_certificate:
         add_extra_data_to_current_request_logs(
             {
@@ -130,7 +156,7 @@ def get_soap_client_certificate(
         cert=cert_str,
         fingerprint=cert.fingerprint(hashes.SHA256()).hex(),
         issuer=cert.issuer.rfc4514_string(),
-        serial_number=cert.serial_number,
+        serial_number=str(serial_number_hex),
         legacy_certificate=legacy_certificate,
     )
 
@@ -168,3 +194,52 @@ def validate_certificate(
         raise SOAPClientCertificateLookupError("certificate does not have agency")
 
     return legacy_certificate
+
+
+def generate_soap_jwt(
+    cert_id: str,
+    expiration_time: datetime,
+    soap_partner_gateway_uri: str,
+    soap_partner_gateway_auth_key: str,
+) -> str:
+    payload = {
+        "sub": "partner_soap_call",
+        "iss": soap_partner_gateway_uri,
+        "exp": expiration_time,
+        "certId": cert_id,
+    }
+    return jwt.encode(payload=payload, key=soap_partner_gateway_auth_key, algorithm="HS256")
+
+
+def verify_certificate_access(
+    certificate: LegacyCertificate, soap_config: SOAPOperationConfig, agency: Agency | None
+) -> None:
+    if soap_config.privileges is None:
+        logger.info(
+            "Soap Config privileges not set",
+            extra={
+                "user_id": certificate.user.user_id,
+                "soap_config_request_operation_name": soap_config.request_operation_name,
+            },
+        )
+        raise SOAPClientUserDoesNotHavePermission("Soap Config privileges not set")
+    if agency is None:
+        logger.info(
+            "Agency cannot be None",
+            extra={
+                "user_id": certificate.user.user_id,
+            },
+        )
+        raise SOAPClientUserDoesNotHavePermission("Agency cannot be None")
+    if not can_access(certificate.user, soap_config.privileges, agency):
+        logger.info(
+            "User did not have permission to access this application",
+            extra={
+                "user_id": certificate.user.user_id,
+                "agency_id": agency.agency_id if agency else None,
+                "privileges": soap_config.privileges,
+            },
+        )
+        raise SOAPClientUserDoesNotHavePermission(
+            "User did not have permission to access this application"
+        )

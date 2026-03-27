@@ -1,7 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { FilterOption } from "src/types/search/searchFilterTypes";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import { AgencyFilterContent } from "src/components/search/Filters/AgencyFilterContent";
 
@@ -20,10 +19,6 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
     updateQueryParams: mockUpdateQueryParams,
   }),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 const allAgencies: FilterOption[] = [

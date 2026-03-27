@@ -91,7 +91,7 @@ describe("buildFilters", () => {
     expect(filters.agency).toEqual(undefined);
     expect(filters.funding_category).toEqual(undefined);
   });
-  it("handles date ranges", () => {
+  it("handles close date ranges", () => {
     const filters = buildFilters({
       ...searchFetcherParams,
       ...{
@@ -99,7 +99,18 @@ describe("buildFilters", () => {
       },
     });
     expect(filters.close_date).toEqual({
-      end_date_relative: "500",
+      end_date_relative: 500,
+    });
+  });
+  it("handles posted date ranges", () => {
+    const filters = buildFilters({
+      ...searchFetcherParams,
+      ...{
+        postedDate: new Set(["14"]),
+      },
+    });
+    expect(filters.post_date).toEqual({
+      start_date_relative: -14,
     });
   });
   it("handles boolean filters", () => {
@@ -232,16 +243,27 @@ describe("searchToQueryParams", () => {
     const emptyQueryParams = searchToQueryParams({} as SavedSearchQuery);
     expect(emptyQueryParams).toEqual({ query: "" });
   });
-  it("correctly handles date ranges", () => {
+  it("correctly handles close date ranges", () => {
     const queryParams = searchToQueryParams({
       ...fakeSavedSearch,
       filters: {
         ...fakeSavedSearch.filters,
-        close_date: { end_date_relative: "500" },
+        close_date: { end_date_relative: 500 },
       },
     });
 
     expect(queryParams.closeDate).toEqual("500");
+  });
+  it("correctly handles posted date ranges", () => {
+    const queryParams = searchToQueryParams({
+      ...fakeSavedSearch,
+      filters: {
+        ...fakeSavedSearch.filters,
+        post_date: { start_date_relative: -7 },
+      },
+    });
+
+    expect(queryParams.postedDate).toEqual("7");
   });
   it("correctly handles boolean filters", () => {
     const queryParams = searchToQueryParams({

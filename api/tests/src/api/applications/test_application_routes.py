@@ -1851,6 +1851,7 @@ def test_application_submit_success(
         == ApplicationAuditEvent.APPLICATION_SUBMITTED
     )
     assert application.application_audits[0].user_id == user.user_id
+    assert application.submitted_by_user.user_id == user.user_id
 
 
 def test_application_submit_logging_enhancement(
@@ -1999,6 +2000,8 @@ def test_application_submit_validation_issues(
         application.application_audits[0].application_audit_event
         == ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED
     )
+    assert application.submitted_by is None
+    assert application.submitted_by_user is None
 
 
 def test_application_submit_rule_validation_issue(
@@ -2074,6 +2077,8 @@ def test_application_submit_rule_validation_issue(
         == ApplicationAuditEvent.APPLICATION_SUBMIT_REJECTED
     )
     assert application.application_audits[0].user_id == user.user_id
+    assert application.submitted_by is None
+    assert application.submitted_by_user is None
 
 
 def test_application_submit_invalid_required_form(

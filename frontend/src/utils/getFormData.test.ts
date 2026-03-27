@@ -20,7 +20,10 @@ jest.mock("src/components/applyForm/validate", () => ({
 
 describe("getFormData", () => {
   beforeEach(() => {
-    mockProcessFormSchema.mockReturnValue({});
+    mockProcessFormSchema.mockReturnValue({
+      formSchema: {},
+      conditionalValidationRules: {},
+    });
     mockValidateUISchema.mockReturnValue(null);
   });
   afterEach(() => {
@@ -85,7 +88,10 @@ describe("getFormData", () => {
 
   it("returns data on success", async () => {
     mockGetSession.mockResolvedValue({ token: "session-token" });
-    mockProcessFormSchema.mockResolvedValue({ formSchema: {} });
+    mockProcessFormSchema.mockReturnValue({
+      formSchema: {},
+      conditionalValidationRules: {},
+    });
     mockGetApplicationFormDetails.mockResolvedValue({
       status_code: 200,
       data: {

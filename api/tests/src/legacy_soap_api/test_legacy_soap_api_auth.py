@@ -1,19 +1,25 @@
+import logging
 from datetime import date
 from unittest.mock import Mock, patch
 
 import pytest
 
+from src.constants.lookup_constants import Privilege
 from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPAuth,
     SOAPClientCertificate,
     SOAPClientCertificateLookupError,
     SOAPClientCertificateNotConfigured,
+    SOAPClientUserDoesNotHavePermission,
+    get_legacy_certificate_by_serial_number,
     get_soap_auth,
     get_soap_client_certificate,
     validate_certificate,
+    verify_certificate_access,
 )
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
-from tests.src.db.models.factories import LegacyAgencyCertificateFactory
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
+from tests.lib.data_factories import setup_cert_user
+from tests.src.db.models.factories import AgencyFactory, LegacyAgencyCertificateFactory
 
 MOCK_FINGERPRINT = "123"
 MOCK_CERT = "456"
@@ -52,6 +58,50 @@ def test_get_soap_client_certificate_legacy_certificate_can_be_none(db_session):
         mock_load_pem_x509.return_value.fingerprint.return_value.hex.return_value = "5677"
         soap_client_certificate = get_soap_client_certificate(MOCK_CERT_STR, db_session)
         assert soap_client_certificate.legacy_certificate is None
+
+
+def test_get_soap_client_certificate_legacy_certificate_gets_hex_serial_number(
+    db_session, enable_factory_create
+):
+    legacy_certificate = LegacyAgencyCertificateFactory.create(
+        serial_number="53bce80f6b5eb0e8daf727a8f2b58000"
+    )
+    with patch(
+        "src.legacy_soap_api.legacy_soap_api_auth.load_pem_x509_certificate"
+    ) as mock_load_pem_x509:
+        mock_load_pem_x509.return_value = Mock(
+            serial_number="111306782200232420456534570058862919680"
+        )
+        mock_load_pem_x509.return_value.fingerprint.return_value.hex.return_value = "5677"
+        soap_client_certificate = get_soap_client_certificate(MOCK_CERT_STR, db_session)
+        assert soap_client_certificate.legacy_certificate == legacy_certificate
+
+
+def test_get_soap_client_certificate_legacy_certificate_gets_hex_serial_number_handles_leading_zeroes(
+    db_session, enable_factory_create
+):
+    legacy_certificate = LegacyAgencyCertificateFactory.create(
+        serial_number="0000000000002799dbb5e1700fa12210"
+    )
+    with patch(
+        "src.legacy_soap_api.legacy_soap_api_auth.load_pem_x509_certificate"
+    ) as mock_load_pem_x509:
+        mock_load_pem_x509.return_value = Mock(serial_number="187010476483130230383120")
+        mock_load_pem_x509.return_value.fingerprint.return_value.hex.return_value = "5677"
+        soap_client_certificate = get_soap_client_certificate(MOCK_CERT_STR, db_session)
+        assert soap_client_certificate.legacy_certificate == legacy_certificate
+
+
+def test_get_soap_client_certificate_legacy_certificate_search_ignores_case_in_serial_number(
+    db_session, enable_factory_create
+):
+    SERIAL_NUMBER = "000000000000ABBBBBCCCCCCCCC12210"
+    legacy_certificate = LegacyAgencyCertificateFactory.create(serial_number=SERIAL_NUMBER.upper())
+    result = get_legacy_certificate_by_serial_number(
+        db_session, serial_number=SERIAL_NUMBER.lower()
+    )
+    assert result is not None
+    assert result.legacy_certificate_id == legacy_certificate.legacy_certificate_id
 
 
 def test_client_auth(db_session, enable_factory_create):
@@ -172,3 +222,95 @@ def test_validate_certificate_raises_error_if_not_soap_auth(
 ) -> None:
     with pytest.raises(SOAPClientCertificateLookupError, match="no soap auth"):
         validate_certificate(db_session, None, SimplerSoapAPI.GRANTORS)
+
+
+def test_verify_certificate_access_fails_if_there_is_no_agency(
+    enable_factory_create, db_session, caplog
+) -> None:
+    caplog.set_level(logging.INFO)
+    agency = AgencyFactory.create()
+    _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+    legacy_certificate = soap_client_certificate.legacy_certificate
+    assert legacy_certificate
+    soap_config = SOAPOperationConfig(
+        request_operation_name="GetSubmissionListExpandedRequest",
+        response_operation_name="GetSubmissionListExpandedResponse",
+        privileges={Privilege.LEGACY_AGENCY_VIEWER},
+    )
+    with pytest.raises(SOAPClientUserDoesNotHavePermission, match="Agency cannot be None"):
+        verify_certificate_access(legacy_certificate, soap_config, None)
+    records = [r for r in caplog.records if "Agency cannot be None" in r.message]
+    assert len(records) == 1
+
+
+def test_verify_certificate_access_fails_if_there_are_no_privileges_set(
+    enable_factory_create, db_session, caplog
+) -> None:
+    caplog.set_level(logging.INFO)
+    agency = AgencyFactory.create()
+    _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+    legacy_certificate = soap_client_certificate.legacy_certificate
+    assert legacy_certificate
+    soap_config = SOAPOperationConfig(
+        request_operation_name="GetSubmissionListExpandedRequest",
+        response_operation_name="GetSubmissionListExpandedResponse",
+        privileges=None,
+    )
+    with pytest.raises(SOAPClientUserDoesNotHavePermission, match="Soap Config privileges not set"):
+        verify_certificate_access(
+            legacy_certificate,
+            soap_config,
+            agency,
+        )
+    records = [r for r in caplog.records if "Soap Config privileges not set" in r.message]
+    assert len(records) == 1
+
+
+def test_verify_certificate_access_fails_if_users_do_not_have_privileges(
+    enable_factory_create, db_session, caplog
+) -> None:
+    caplog.set_level(logging.INFO)
+    agency = AgencyFactory.create()
+    _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.MANAGE_ORG_MEMBERS})
+    legacy_certificate = soap_client_certificate.legacy_certificate
+    assert legacy_certificate
+    soap_config = SOAPOperationConfig(
+        request_operation_name="GetSubmissionListExpandedRequest",
+        response_operation_name="GetSubmissionListExpandedResponse",
+        privileges={Privilege.LEGACY_AGENCY_VIEWER},
+    )
+    with pytest.raises(
+        SOAPClientUserDoesNotHavePermission,
+        match="User did not have permission to access this application",
+    ):
+        verify_certificate_access(
+            legacy_certificate,
+            soap_config,
+            agency,
+        )
+    records = [
+        r
+        for r in caplog.records
+        if "User did not have permission to access this application" in r.message
+    ]
+    assert len(records) == 1
+
+
+def test_verify_certificate_access_does_not_raise_exception_if_user_has_correct_privileges(
+    enable_factory_create, db_session, caplog
+) -> None:
+    caplog.set_level(logging.INFO)
+    agency = AgencyFactory.create()
+    _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+    legacy_certificate = soap_client_certificate.legacy_certificate
+    assert legacy_certificate
+    soap_config = SOAPOperationConfig(
+        request_operation_name="GetSubmissionListExpandedRequest",
+        response_operation_name="GetSubmissionListExpandedResponse",
+        privileges={Privilege.LEGACY_AGENCY_VIEWER},
+    )
+    verify_certificate_access(
+        legacy_certificate,
+        soap_config,
+        agency,
+    )

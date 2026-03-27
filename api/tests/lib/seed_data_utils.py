@@ -6,9 +6,16 @@ from typing import Self
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.auth.api_jwt_auth import ApiJwtConfig, create_jwt_for_user
+from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition, Form
 from src.db.models.entity_models import Organization
-from src.db.models.user_models import OrganizationUserRole, Role, User
+from src.db.models.user_models import (
+    AgencyUserRole,
+    InternalUserRole,
+    OrganizationUserRole,
+    Role,
+    User,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +115,55 @@ class UserBuilder:
             )
 
         org_user.organization_user_roles = organization_user_roles
+
+        return self
+
+    def with_agency(self, agency: Agency, roles: list[Role]) -> Self:
+        """Add a user to an agency with a specified set of roles"""
+        # First see if this user is already a member of the agency provided
+        agency_user = None
+        for a_user in self.user.agency_users:
+            if a_user.agency_id == agency.agency_id:
+                agency_user = a_user
+                break
+
+        if agency_user is None:
+            agency_user = factories.AgencyUserFactory.build(user=self.user, agency=agency)
+            self.db_session.add(agency_user)
+
+        agency_user_roles = []
+        for role in roles:
+            agency_user_roles.append(AgencyUserRole(agency_user=agency_user, role_id=role.role_id))
+
+        agency_user.agency_user_roles = agency_user_roles
+
+        return self
+
+    def with_internal_role(self, role: Role) -> Self:
+        """Assign an internal role to the user."""
+
+        # Only give them the role if they don't already have it from a prior run
+        has_role_already = False
+        for internal_role in self.user.internal_user_roles:
+            if internal_role.role_id == role.role_id:
+                has_role_already = True
+                break
+
+        if not has_role_already:
+            self.user.internal_user_roles.append(
+                InternalUserRole(user=self.user, role_id=role.role_id)
+            )
+
+        return self
+
+    def with_profile(self, first_name: str, last_name: str, middle_name: str | None = None) -> Self:
+        """Add a profile to the user."""
+        self.db_session.merge(
+            factories.UserProfileFactory.build(
+                user=self.user, first_name=first_name, middle_name=middle_name, last_name=last_name
+            ),
+            load=True,
+        )
 
         return self
 

@@ -1,6 +1,5 @@
-import { fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { render, screen } from "tests/react-utils";
 
 import React from "react";
 

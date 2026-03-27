@@ -1,56 +1,66 @@
 import { expect, test } from "@playwright/test";
+import { VALID_TAGS } from "tests/e2e/tags";
+
+const { STATIC, EXTENDED, FULL_REGRESSION } = VALID_TAGS;
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/roadmap");
 });
 
-test.afterEach(async ({ context }) => {
-  await context.close();
-});
-
-test("has title", async ({ page }) => {
+test("has title", { tag: [STATIC, FULL_REGRESSION] }, async ({ page }) => {
   await expect(page).toHaveTitle("Roadmap | Simpler.Grants.gov");
 });
 
-test("can return to top after scrolling to the bottom", async ({ page }, {
-  project: {
-    use: { isMobile, defaultBrowserType },
+test(
+  "can return to top after scrolling to the bottom",
+  { tag: [STATIC, FULL_REGRESSION] },
+  async (
+    { page },
+    {
+      project: {
+        use: { isMobile, defaultBrowserType },
+      },
+    },
+  ) => {
+    const isMobileSafari = isMobile && defaultBrowserType === "webkit";
+    const returnToTopLink = page.getByRole("link", { name: /return to top/i });
+
+    // https://github.com/microsoft/playwright/issues/2179
+    if (!isMobileSafari) {
+      await returnToTopLink.scrollIntoViewIfNeeded();
+    } else {
+      await page.evaluate(() =>
+        window.scrollTo(0, document.documentElement.scrollHeight),
+      );
+    }
+
+    await returnToTopLink.click();
+
+    await expect(returnToTopLink).not.toBeInViewport();
+    await expect(
+      page.getByRole("heading", { name: "Product roadmap" }),
+    ).toBeInViewport();
   },
-}) => {
-  const isMobileSafari = isMobile && defaultBrowserType === "webkit";
-  const returnToTopLink = page.getByRole("link", { name: /return to top/i });
+);
 
-  // https://github.com/microsoft/playwright/issues/2179
-  if (!isMobileSafari) {
-    await returnToTopLink.scrollIntoViewIfNeeded();
-  } else {
-    await page.evaluate(() =>
-      window.scrollTo(0, document.documentElement.scrollHeight),
+test(
+  "can view the 'View all deliverables on Github'",
+  { tag: [STATIC, EXTENDED] },
+  async ({ page }) => {
+    const newTabPromise = page.waitForEvent("popup");
+
+    await page
+      .getByRole("link", { name: "View all deliverables on Github" })
+      .click();
+
+    // Assert user remains on the roadmap page.
+    await expect(page).toHaveTitle(/Roadmap | Simpler.Grants.gov/);
+
+    // Assert that the github issues page for SGG is opened in a new tab.
+    const newTab = await newTabPromise;
+    await newTab.waitForLoadState();
+    await expect(newTab).toHaveURL(
+      "https://github.com/orgs/HHS/projects/12/views/8",
     );
-  }
-
-  await returnToTopLink.click();
-
-  await expect(returnToTopLink).not.toBeInViewport();
-  await expect(
-    page.getByRole("heading", { name: "Product roadmap" }),
-  ).toBeInViewport();
-});
-
-test("can view the 'View all deliverables on Github'", async ({ page }) => {
-  const newTabPromise = page.waitForEvent("popup");
-
-  await page
-    .getByRole("link", { name: "View all deliverables on Github" })
-    .click();
-
-  // Assert user remains on the roadmap page.
-  await expect(page).toHaveTitle(/Roadmap | Simpler.Grants.gov/);
-
-  // Assert that the github issues page for SGG is opened in a new tab.
-  const newTab = await newTabPromise;
-  await newTab.waitForLoadState();
-  await expect(newTab).toHaveURL(
-    "https://github.com/orgs/HHS/projects/12/views/8",
-  );
-});
+  },
+);

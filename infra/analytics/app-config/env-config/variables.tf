@@ -79,6 +79,16 @@ variable "extra_identity_provider_logout_urls" {
   default     = []
 }
 
+variable "feature_flag_overrides" {
+  type        = map(string)
+  description = "Map of overrides for feature flags"
+  default     = {}
+  validation {
+    condition     = length(setsubtract(keys(var.feature_flag_overrides), keys(local.feature_flag_defaults))) == 0
+    error_message = "All features in feature_flag_overrides must be declared in feature_flag_defaults."
+  }
+}
+
 variable "has_database" {
   type    = bool
   default = true
@@ -88,6 +98,12 @@ variable "domain" {
   type        = string
   description = "DNS domain of the website managed by HHS"
   default     = null
+}
+
+variable "database_newrelic_entity_guid" {
+  type        = string
+  description = "New Relic entity GUID for the RDS cluster, used to correlate logs with the infrastructure entity in New Relic."
+  default     = ""
 }
 
 variable "database_instance_count" {
@@ -125,6 +141,18 @@ variable "service_memory" {
   default = 512
 }
 
+variable "instance_scaling_max_capacity" {
+  description = "Maximum number of ECS container instances for the service"
+  type        = number
+  default     = 1
+}
+
+variable "instance_scaling_min_capacity" {
+  description = "Minimum number of ECS container instances for the service"
+  type        = number
+  default     = 1
+}
+
 variable "service_override_extra_environment_variables" {
   type        = map(string)
   description = <<EOT
@@ -133,3 +161,4 @@ variable "service_override_extra_environment_variables" {
   EOT
   default     = {}
 }
+

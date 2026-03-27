@@ -1,5 +1,5 @@
 
-FROM ghcr.io/hhs/python-base-image:f967fe9@sha256:14a9d9f9593159a907af4a1618f73df3c0e69d88b38b4156fd826ccff658ac54 AS base
+FROM ghcr.io/hhs/python-base-image:b94fa25@sha256:11c8f0e9766de10bc7a986bd16e4cdf7f05c3e357e48efeb6af0f98c5bdb151b AS base
 
 ARG RUN_UID
 ARG RUN_USER
@@ -35,7 +35,7 @@ COPY newrelic.ini /api/newrelic.ini
 
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
-RUN PY_MM=$(cat /tmp/py_version.txt) && \
+RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
     /usr/local/bin/python"${PY_MM}" -m poetry build --format wheel && \
     /api/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
     /api/.venv/bin/python -m pip install --no-cache-dir "virtualenv>=20.35.3" && \
@@ -48,7 +48,7 @@ RUN PY_MM=$(cat /tmp/py_version.txt) && \
       echo "ERROR: newrelic.ini missing at ${SITE_BASE}/src/newrelic.ini" >&2; \
       ls -la "${SITE_BASE}/src" || true; \
       exit 1; \
-    fi; \
+    fi && \
     (find /tmp -mindepth 1 ! -name 'py_version.txt' -delete 2>/dev/null || true) && \
     (rm -rf /root/.cache "/home/${RUN_USER}/.cache" /var/tmp/* /api/dist /api/src || true)
 

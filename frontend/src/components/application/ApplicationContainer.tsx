@@ -2,12 +2,12 @@
 
 import { useUser } from "src/services/auth/useUser";
 import { submitApplication } from "src/services/fetch/fetchers/clientApplicationFetcher";
+import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import {
   ApplicationDetail,
   ApplicationHistory,
-  Status,
+  ApplicationStatus,
 } from "src/types/applicationResponseTypes";
-import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -25,7 +25,6 @@ import { FormValidationWarning } from "src/components/applyForm/types";
 import { ApplicationFormsTable } from "./ApplicationFormsTable";
 import { ApplicationHistoryTable } from "./ApplicationHistoryTable";
 import ApplicationValidationAlert from "./ApplicationValidationAlert";
-import { AttachmentsCard } from "./attachments/AttachmentsCard";
 import { InformationCard } from "./InformationCard";
 import { OpportunityCard } from "./OpportunityCard";
 
@@ -33,14 +32,14 @@ const MY_APPLICATIONS_LINK = "/applications";
 
 const ApplicationContainer = ({
   applicationDetails,
-  attachments,
   opportunity,
   applicationHistory,
+  latestApplicationSubmission,
 }: {
   applicationDetails: ApplicationDetail;
-  attachments: Attachment[];
   opportunity: OpportunityDetail;
   applicationHistory: ApplicationHistory[];
+  latestApplicationSubmission: ApplicationSubmission | null;
 }) => {
   const forms = applicationDetails.competition.competition_forms;
   const applicationForms = applicationDetails.application_forms;
@@ -100,8 +99,9 @@ const ApplicationContainer = ({
   return (
     <>
       {(success ||
-        applicationDetails.application_status === Status.SUBMITTED ||
-        applicationDetails.application_status === Status.ACCEPTED) && (
+        applicationDetails.application_status === ApplicationStatus.SUBMITTED ||
+        applicationDetails.application_status ===
+          ApplicationStatus.ACCEPTED) && (
         <SummaryBox>
           <SummaryBoxHeading headingLevel="h3">
             {t("submissionSuccess.title")}
@@ -146,7 +146,8 @@ const ApplicationContainer = ({
         </Alert>
       )}
       {validationErrors.length > 0 &&
-        applicationDetails.application_status === "in_progress" &&
+        applicationDetails.application_status ===
+          ApplicationStatus.IN_PROGRESS &&
         !success && (
           <ApplicationValidationAlert
             applicationForms={applicationForms}
@@ -158,13 +159,14 @@ const ApplicationContainer = ({
         applicationDetails={applicationDetails}
         applicationSubmitHandler={handleSubmit}
         applicationSubmitted={
-          applicationStatus === "submitted" ||
-          applicationStatus === "accepted" ||
+          applicationStatus === ApplicationStatus.SUBMITTED ||
+          applicationStatus === ApplicationStatus.ACCEPTED ||
           success
         }
         submissionLoading={loading}
         opportunityName={opportunity.opportunity_title}
         instructionsDownloadPath={instructionsDownloadPath}
+        latestApplicationSubmission={latestApplicationSubmission}
       />
       <OpportunityCard opportunityOverview={opportunity} />
       <ApplicationFormsTable
@@ -172,11 +174,6 @@ const ApplicationContainer = ({
         competitionInstructionsDownloadPath={instructionsDownloadPath}
         errors={validationErrors}
         applicationDetailsObject={applicationDetailsObject}
-      />
-      <AttachmentsCard
-        applicationId={applicationId}
-        attachments={attachments}
-        competitionInstructionsDownloadPath={instructionsDownloadPath}
       />
       <ApplicationHistoryTable applicationHistory={applicationHistory} />
     </>

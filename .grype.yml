@@ -19,10 +19,6 @@ ignore:
   - fix-state: wont-fix
   - fix-state: unknown
 
-  # https://github.com/HHS/simpler-grants-gov/issues/3855
-  # esbuild fixed in a new minor version, but we don't install/call esbuild directly
-  - vulnerability: GHSA-67mh-4wv8-2f99
-
   # Not fixed in GA Python yet
   # https://github.com/HHS/simpler-grants-gov/issues/8109
   # Last checked: 01/23/26
@@ -57,3 +53,37 @@ ignore:
   # https://github.com/HHS/simpler-grants-gov/issues/8109
   # Last checked: 01/23/26
   - vulnerability: CVE-2025-11468
+
+  # Not fixed in GA Python yet
+  # Vulnerability in a very specific part of the python email
+  # package which we don't use.
+  # Last checked: 02/04/26
+  - vulnerability: CVE-2026-1299
+
+  # ignoring so we can get today's release out
+  - vulnerability: GHSA-2g4f-4pwh-qvx6
+
+  # serialize-javascript subdependency via terser-webpack-plugin. The vuln is patched in serialize-javascript but terser-webpack-plugin has not bumped to the next major version for serialize-javascript to remediate the vuln coming down from webpack. Dev only webpack issue, safe to ignore for now
+  - vulnerability: GHSA-5c6j-r48x-rmvq
+
+  # Not fixed in GA Python yet
+  # Last checked 3/6/2026
+  - vulnerability: CVE-2026-2297
+
+  # Not fixed in GA Python yet
+  # Last checked 3/18/2026
+  - vulnerability: CVE-2026-4224
+  - vulnerability: CVE-2025-13462
+  - vulnerability: CVE-2026-3644
+
+  # Not fixed in GA Python yet
+  # Last checked 3/25/2026
+  - vulnerability: CVE-2026-4519
+  - vulnerability: CVE-2026-3479
+
+  # ignoring so we can get today's release out
+  - vulnerability: GHSA-3x4c-7xq6-9pq8
+  - vulnerability: GHSA-ggv3-7p47-pfv8
+  - vulnerability: GHSA-h27x-g6w4-24gq
+  - vulnerability: GHSA-mq59-m269-xvcx
+  - vulnerability: GHSA-jcc7-9wpm-mj36

@@ -1,5 +1,4 @@
-import { Meta } from "@storybook/blocks";
-import { Unstyled } from '@storybook/blocks';
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks";
 
 <Meta title="Brand/Typography" />
 
@@ -12,7 +11,7 @@ import { Unstyled } from '@storybook/blocks';
     max-width: 1200px;
     margin: 0 auto;
   }
-  
+
   .typography-page h1 {
     font-size: 2.5rem;
     font-weight: 600;
@@ -20,7 +19,7 @@ import { Unstyled } from '@storybook/blocks';
     padding-bottom: 0.5rem;
     border-bottom: 1px solid #eaecef;
   }
-  
+
   .typography-page h2 {
     font-size: 1.75rem;
     font-weight: 600;
@@ -29,36 +28,36 @@ import { Unstyled } from '@storybook/blocks';
     padding-bottom: 0.3rem;
     border-bottom: 1px solid #eaecef;
   }
-  
+
   .typography-page p {
     margin-bottom: 1.5rem;
   }
-  
+
   .typography-page figure {
     margin: 2rem 0;
     text-align: center;
   }
-  
+
   .typography-page figure img {
     max-width: 100%;
     border: 1px solid #e0e0e0;
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
-  
+
   .typography-page figcaption {
     font-size: 0.9rem;
     color: #666;
     margin-top: 0.5rem;
   }
-  
+
   .dont-examples {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
     margin: 2rem 0;
   }
-  
+
   .dont-item {
     border: 1px solid #e0e0e0;
     border-radius: 8px;
@@ -66,12 +65,12 @@ import { Unstyled } from '@storybook/blocks';
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s, box-shadow 0.2s;
   }
-  
+
   .dont-item:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
-  
+
   .dont-item .img-container {
     position: relative;
     width: 100%;
@@ -82,13 +81,13 @@ import { Unstyled } from '@storybook/blocks';
     background-color: #f5f5f5;
     padding: 1rem;
   }
-  
+
   .dont-item img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
   }
-  
+
   .dont-item p {
     padding: 1rem;
     margin: 0;
@@ -96,7 +95,7 @@ import { Unstyled } from '@storybook/blocks';
     background-color: #fff;
     border-top: 1px solid #e0e0e0;
   }
-  
+
   .unapproved-colors img,
   .apply-effects img,
   .stretch-distort img,
@@ -107,12 +106,12 @@ import { Unstyled } from '@storybook/blocks';
     max-height: 100%;
     object-fit: contain;
   }
-  
+
   .adjust-spacing .img-container::before,
   .change-typeface .img-container::after {
     display: none;
   }
-  
+
   .low-contrast {
     background-color: transparent;
   }

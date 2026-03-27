@@ -14,21 +14,27 @@ locals {
   # Docs: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-client-apps.html
   logout_url_path = ""
 
+  # Customize password policy
+  # Docs: https://docs.aws.amazon.com/cognito/latest/developerguide/managing-users-passwords.html
+  password_policy = {
+    password_minimum_length          = 12
+    temporary_password_validity_days = 7
+  }
+
+  # Optionally configure email template for resetting a password.
+  # Set any attribute to a non-null value to override AWS Cognito defaults.
+  # Docs: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pool-settings-message-customizations.html
+  verification_email = {
+    verification_email_message = null
+    verification_email_subject = null
+  }
+
   identity_provider_config = var.enable_identity_provider ? {
     identity_provider_name = "${var.app_name}-${var.environment}"
 
-    password_policy = {
-      password_minimum_length          = 12
-      temporary_password_validity_days = 7
-    }
+    password_policy = local.password_policy
 
-    # Optionally configure email template for resetting a password.
-    # Set any attribute to a non-null value to override AWS Cognito defaults.
-    # Docs: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pool-settings-message-customizations.html
-    verification_email = {
-      verification_email_message = null
-      verification_email_subject = null
-    }
+    verification_email = local.verification_email
 
     # Do not modify this block directly.
     client = {

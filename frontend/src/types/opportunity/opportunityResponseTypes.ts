@@ -52,12 +52,17 @@ export interface Summary extends MinimalSummary {
   version_number: number | null;
 }
 
+export interface SavedToOrganization {
+  organization_id: string;
+}
+
 export type MinimalOpportunity = {
   opportunity_id: string;
   legacy_opportunity_id: number;
   opportunity_status: OpportunityStatus;
   opportunity_title: string | null;
   summary: MinimalSummary;
+  saved_to_organizations?: SavedToOrganization[];
 };
 
 export interface BaseOpportunity extends MinimalOpportunity {
@@ -71,6 +76,7 @@ export interface BaseOpportunity extends MinimalOpportunity {
   summary: Summary;
   top_level_agency_name: string | null;
   updated_at: string;
+  saved_to_organizations?: SavedToOrganization[];
 }
 
 export interface OpportunityDetail extends BaseOpportunity {

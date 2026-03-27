@@ -4,10 +4,10 @@ import { axe } from "jest-axe";
 import {
   ApplicationDetail,
   ApplicationHistory,
+  ApplicationStatus,
 } from "src/types/applicationResponseTypes";
-import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
+import { mockApplicationSubmission } from "src/utils/testing/fixtures";
 import applicationMock from "stories/components/application/application.mock.json";
 import historyMock from "stories/components/application/history.mock.json";
 import opportunityMock from "stories/components/application/opportunity.mock.json";
@@ -17,10 +17,6 @@ import ApplicationContainer from "src/components/application/ApplicationContaine
 // Mock dependencies
 const mockRefresh = jest.fn();
 const mockPush = jest.fn();
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -37,11 +33,6 @@ jest.mock("src/services/auth/useUser", () => ({
       user_id: "test-user-id",
     },
   }),
-}));
-
-// Mock the components that have dependencies on jose/session
-jest.mock("src/components/application/attachments/AttachmentsCard", () => ({
-  AttachmentsCard: () => <div data-testid="attachments-card">Attachments</div>,
 }));
 
 jest.mock("src/components/application/ApplicationFormsTable", () => ({
@@ -90,7 +81,6 @@ global.fetch = jest.fn();
 
 const mockApplicationDetails = applicationMock as unknown as ApplicationDetail;
 const mockOpportunity = opportunityMock as unknown as OpportunityDetail;
-const mockAttachments: Attachment[] = [];
 
 describe("ApplicationContainer", () => {
   beforeEach(() => {
@@ -111,9 +101,9 @@ describe("ApplicationContainer", () => {
     const { container } = render(
       <ApplicationContainer
         applicationDetails={mockApplicationDetails}
-        attachments={mockAttachments}
         opportunity={mockOpportunity}
         applicationHistory={historyMock as ApplicationHistory[]}
+        latestApplicationSubmission={mockApplicationSubmission}
       />,
     );
 
@@ -125,15 +115,15 @@ describe("ApplicationContainer", () => {
     it("should pass applicationSubmitted=false when application status is 'in_progress'", () => {
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -144,15 +134,15 @@ describe("ApplicationContainer", () => {
     it("should pass applicationSubmitted=true when application status is 'submitted'", () => {
       const submittedApplication = {
         ...mockApplicationDetails,
-        application_status: "submitted",
+        application_status: ApplicationStatus.SUBMITTED,
       };
 
       render(
         <ApplicationContainer
           applicationDetails={submittedApplication}
-          attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -163,15 +153,15 @@ describe("ApplicationContainer", () => {
     it("should pass applicationSubmitted=true when application status is 'accepted'", () => {
       const acceptedApplication = {
         ...mockApplicationDetails,
-        application_status: "accepted",
+        application_status: ApplicationStatus.ACCEPTED,
       };
 
       render(
         <ApplicationContainer
           applicationDetails={acceptedApplication}
-          attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -184,15 +174,15 @@ describe("ApplicationContainer", () => {
     it("should have a history section", () => {
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -206,7 +196,7 @@ describe("ApplicationContainer", () => {
       const user = userEvent.setup();
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -218,9 +208,9 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -239,7 +229,7 @@ describe("ApplicationContainer", () => {
       const user = userEvent.setup();
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -251,9 +241,9 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -271,7 +261,7 @@ describe("ApplicationContainer", () => {
       const user = userEvent.setup();
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -283,9 +273,9 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -301,7 +291,7 @@ describe("ApplicationContainer", () => {
       const user = userEvent.setup();
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       // Create a promise that we can control
@@ -315,9 +305,9 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -350,7 +340,7 @@ describe("ApplicationContainer", () => {
     it("should display the submission successful box", () => {
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "submitted",
+        application_status: ApplicationStatus.SUBMITTED,
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -362,9 +352,9 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 
@@ -377,7 +367,7 @@ describe("ApplicationContainer", () => {
     it("should not display the submission successful box when in progress", () => {
       const inProgressApplication = {
         ...mockApplicationDetails,
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -389,9 +379,9 @@ describe("ApplicationContainer", () => {
       render(
         <ApplicationContainer
           applicationDetails={inProgressApplication}
-          attachments={mockAttachments}
           opportunity={mockOpportunity}
           applicationHistory={historyMock as ApplicationHistory[]}
+          latestApplicationSubmission={mockApplicationSubmission}
         />,
       );
 

@@ -1,6 +1,9 @@
 import { UnauthorizedError } from "src/errors";
 import { fetchApplications } from "src/services/fetch/fetchers/applicationsFetcher";
-import { ApplicationDetail, Status } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  ApplicationStatus,
+} from "src/types/applicationResponseTypes";
 import { LocalizedPageProps, TFn } from "src/types/intl";
 import { formatDate } from "src/utils/dateUtil";
 
@@ -9,6 +12,7 @@ import { setRequestLocale } from "next-intl/server";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
 import {
   TableCellData,
   TableWithResponsiveHeader,
@@ -18,7 +22,18 @@ const ApplicationsPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Applications");
   return (
     <GridContainer>
-      <h1 className="margin-top-9 margin-bottom-7">{t("pageTitle")}</h1>
+      <Breadcrumbs
+        breadcrumbList={[
+          {
+            title: t("breadcrumbWorkspace"),
+            path: `/dashboard`,
+          },
+          {
+            title: t("breadcrumbApplications"),
+          },
+        ]}
+      />
+      <h1 className="margin-top-0 margin-bottom-7">{t("pageHeading")}</h1>
       {children}
     </GridContainer>
   );
@@ -60,7 +75,7 @@ const transformTableRowData = (
       { cellData: formatDate(application.competition.closing_date) },
       {
         cellData:
-          application.application_status === Status.IN_PROGRESS
+          application.application_status === ApplicationStatus.IN_PROGRESS
             ? t("Applications.tableContents.draft")
             : t("Applications.tableContents.submitted"),
       },

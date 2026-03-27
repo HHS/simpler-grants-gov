@@ -47,11 +47,6 @@ AGENCIES_TO_CREATE = [
         "agency_name": "National Science Foundation",
     },
     {
-        "agency_code": "USAID",
-        "agency_id": "094f7d5c-afe6-4e40-823b-d830076e9144",
-        "agency_name": "Agency for International Development",
-    },
-    {
         "agency_code": "USDA",
         "agency_id": "7e8c323b-8e74-457c-861c-063eb2792e63",
         "agency_name": "Department of Agriculture",
@@ -336,18 +331,6 @@ AGENCIES_TO_CREATE = [
         "agency_id": "f44cd20a-421d-4cd3-aff3-f06c7fddad0b",
         "agency_name": "Substance Abuse and Mental Health Services Adminis",
         "top_level_agency_id": "f331d496-e18e-47d5-95d4-f3b1231db153",
-    },
-    {
-        "agency_code": "USAID-ETH",
-        "agency_id": "9293aa4d-101b-4507-9725-6a180df2facd",
-        "agency_name": "Ethiopia USAID-Addis Ababa ",
-        "top_level_agency_id": "094f7d5c-afe6-4e40-823b-d830076e9144",
-    },
-    {
-        "agency_code": "USAID-SAF",
-        "agency_id": "31d754a4-6e0d-4593-b344-febef892548d",
-        "agency_name": "South Africa USAID-Pretoria",
-        "top_level_agency_id": "094f7d5c-afe6-4e40-823b-d830076e9144",
     },
     {
         "agency_code": "USDA-AMS",

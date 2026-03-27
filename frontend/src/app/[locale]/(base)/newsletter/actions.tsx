@@ -105,7 +105,6 @@ export async function subscribeEmailAction(
     // If the user is already subscribed, return an error message
     if (responseData.includes("Already subscribed")) {
       return {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
         errorMessage: t("Subscribe.errors.alreadySubscribed"),
         validationErrors: {},
       };
@@ -117,7 +116,6 @@ export async function subscribeEmailAction(
         `Error subscribing user: Sendy returned an error response: ${responseData}, Status: ${sendyResponse.status}`,
       );
       return {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
         errorMessage,
         validationErrors: {},
       };
@@ -129,7 +127,6 @@ export async function subscribeEmailAction(
       `Error subscribing user: Exception: ${error.message} ${error.cause?.toString() || ""}`,
     );
     return {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
       errorMessage,
       validationErrors: {},
     };

@@ -1,38 +1,9 @@
 import { render, screen } from "@testing-library/react";
 
-import React from "react";
-
+import { GeneralRecord } from "src/components/applyForm/types";
 import Budget424aSectionB from "src/components/applyForm/widgets/budget/Budget424aSectionB";
 
-type MoneyString = string;
-
-interface BudgetCategories {
-  personnel_amount?: MoneyString;
-  fringe_benefits_amount?: MoneyString;
-  travel_amount?: MoneyString;
-  equipment_amount?: MoneyString;
-  supplies_amount?: MoneyString;
-  contractual_amount?: MoneyString;
-  construction_amount?: MoneyString;
-  other_amount?: MoneyString;
-  total_direct_charge_amount?: MoneyString;
-  total_indirect_charge_amount?: MoneyString;
-  total_amount?: MoneyString;
-  program_income_amount?: MoneyString;
-}
-
-interface ActivityItemValue {
-  activity_title?: string;
-  assistance_listing_number?: string;
-  budget_categories?: BudgetCategories;
-}
-
-interface SectionBValue {
-  activity_line_items?: ActivityItemValue[];
-  total_budget_categories?: BudgetCategories;
-}
-
-const buildWidgetProps = (value: SectionBValue) => ({
+const buildWidgetProps = (value: GeneralRecord) => ({
   id: "section-b",
   schema: {},
   rawErrors: [],
@@ -42,7 +13,7 @@ const buildWidgetProps = (value: SectionBValue) => ({
 
 describe("Budget424aSectionB", () => {
   it("renders activity category cells and totals with provided values", () => {
-    const value: SectionBValue = {
+    const value: GeneralRecord = {
       activity_line_items: [
         {
           activity_title: "Activity One",

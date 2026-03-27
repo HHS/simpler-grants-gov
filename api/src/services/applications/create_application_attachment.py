@@ -2,12 +2,14 @@ import logging
 import uuid
 from typing import cast
 
+from sqlalchemy import func, select
 from werkzeug.datastructures import FileStorage
 
 import src.adapters.db as db
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error
+from src.app_config import AppConfig
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import ApplicationAuditEvent, Privilege, SubmissionIssue
 from src.db.models.competition_models import Application, ApplicationAttachment
@@ -26,6 +28,32 @@ def create_application_attachment(
 
     # Check privileges
     check_user_access(db_session, user, {Privilege.MODIFY_APPLICATION}, application)
+
+    # Check attachment count limit
+    app_config = AppConfig()
+    max_attachments = app_config.max_attachments_per_application
+    attachment_count = db_session.execute(
+        select(func.count())
+        .select_from(ApplicationAttachment)
+        .where(
+            ApplicationAttachment.application_id == application_id,
+            ApplicationAttachment.is_deleted.isnot(True),
+        )
+    ).scalar_one()
+    if attachment_count >= max_attachments:
+        logger.info(
+            "Application has reached the maximum number of attachments (%s)",
+            max_attachments,
+            extra={
+                "submission_issue": SubmissionIssue.ATTACHMENT_LIMIT_EXCEEDED,
+                "application_id": application_id,
+                "attachment_count": attachment_count,
+            },
+        )
+        raise_flask_error(
+            422,
+            f"Application has reached the maximum number of attachments ({max_attachments})",
+        )
 
     application_attachment = upsert_application_attachment(
         db_session=db_session,

@@ -50,6 +50,10 @@ output "enable_notifications" {
   value = local.enable_notifications
 }
 
+output "enable_waf" {
+  value = local.enable_waf
+}
+
 output "shared_network_name" {
   value = local.shared_network_name
 }

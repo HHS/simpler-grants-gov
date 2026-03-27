@@ -1,8 +1,6 @@
-import { Meta } from "@storybook/react";
-
 import OpportunityDocuments from "src/components/opportunity/OpportunityDocuments";
 
-const meta: Meta<typeof OpportunityDocuments> = {
+const meta = {
   title: "Components/OpportunityDocuments",
   component: OpportunityDocuments,
 };

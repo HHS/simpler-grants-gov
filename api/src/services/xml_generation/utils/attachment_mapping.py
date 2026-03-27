@@ -4,9 +4,20 @@ import logging
 from typing import Any
 
 from src.db.models.competition_models import Application, ApplicationAttachment
+from src.form_schema.rule_processing.json_rule_context import JsonRuleConfig, JsonRuleContext
+from src.form_schema.rule_processing.json_rule_processor import process_rule_schema_for_context
+from src.services.applications.application_validation import is_form_required
 from src.services.xml_generation.models.attachment import HASH_ALGORITHM, AttachmentFile
 
 logger = logging.getLogger(__name__)
+
+# Config for attachment ID collection: run validation rules (to trigger attachment
+# collection) but skip population steps to avoid modifying application_response.
+_ATTACHMENT_COLLECTION_CONFIG = JsonRuleConfig(
+    do_pre_population=False,
+    do_post_population=False,
+    do_field_validation=True,
+)
 
 
 class AttachmentInfo:
@@ -43,18 +54,58 @@ class AttachmentInfo:
         }
 
 
+def _collect_referenced_attachment_ids(application: Application) -> set[str]:
+    """Collect attachment UUIDs referenced in included forms' application_response.
+
+    Runs JSON rule processing on each form included in the submission
+    (required forms, or non-required forms where is_included_in_submission=True).
+    The attachment validation rule populates context.attachment_ids as a side
+    effect, so no XML config is consulted.
+    """
+    referenced: set[str] = set()
+    for app_form in application.application_forms:
+        if not is_form_required(app_form) and app_form.is_included_in_submission is not True:
+            continue
+
+        context = JsonRuleContext(app_form, config=_ATTACHMENT_COLLECTION_CONFIG)
+        process_rule_schema_for_context(context)
+        referenced |= context.attachment_ids
+
+    return referenced
+
+
 def create_attachment_mapping(
     application: Application, filename_overrides: dict[str, str] | None = None
 ) -> dict[str, AttachmentInfo]:
     filename_overrides = filename_overrides or {}
     mapping: dict[str, AttachmentInfo] = {}
 
-    # Get all attachments for this application
+    # Collect all attachment UUIDs referenced across all form responses
+    referenced_ids = _collect_referenced_attachment_ids(application)
+
+    # Get all (non-deleted) attachments for this application
     attachments = application.application_attachments
 
+    orphan_count = 0
     for attachment in attachments:
-        # Convert UUID to string for the mapping key
         attachment_id_str = str(attachment.application_attachment_id)
+
+        # Skip attachments that are not referenced in any form's application_response
+        if attachment_id_str not in referenced_ids:
+            orphan_count += 1
+            logger.warning(
+                "Orphaned attachment detected and excluded from XML generation - "
+                "attachment '%s' (id=%s) is not referenced in any form's application_response",
+                attachment.file_name,
+                attachment.application_attachment_id,
+                extra={
+                    "application_id": application.application_id,
+                    "attachment_id": attachment.application_attachment_id,
+                    "file_name": attachment.file_name,
+                    "file_location": attachment.file_location,
+                },
+            )
+            continue
 
         # Determine the filename to use (override or original)
         filename = filename_overrides.get(attachment_id_str, attachment.file_name)
@@ -89,8 +140,19 @@ def create_attachment_mapping(
 
         logger.debug(f"Mapped attachment {attachment_id_str} with filename {filename}")
 
+    if orphan_count > 0:
+        logger.warning(
+            f"Excluded {orphan_count} orphaned attachment(s) from XML generation",
+            extra={
+                "application_id": application.application_id,
+                "orphan_count": orphan_count,
+                "included_count": len(mapping),
+            },
+        )
+
     logger.info(
-        f"Created attachment mapping for {len(mapping)} attachments",
+        f"Created attachment mapping for {len(mapping)} attachments "
+        f"({orphan_count} orphaned attachments excluded)",
         extra={"application_id": application.application_id},
     )
 

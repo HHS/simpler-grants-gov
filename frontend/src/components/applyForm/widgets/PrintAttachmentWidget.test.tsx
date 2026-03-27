@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
 import { Attachment } from "src/types/attachmentTypes";

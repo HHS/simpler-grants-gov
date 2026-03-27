@@ -1,6 +1,5 @@
 "use client";
 
-import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 import { Organization } from "src/types/applicationResponseTypes";
 import { UserPrivilegesResponse } from "src/types/userTypes";
 import { userRoleForOrganization } from "src/utils/userUtils";
@@ -16,7 +15,7 @@ const ManageUsersButton = ({
 }: {
   organization: Organization;
 }) => {
-  const t = useTranslations("ActivityDashboard");
+  const t = useTranslations("WorkspaceDashboard");
   return (
     <Link href={`/organizations/${organization.organization_id}/manage-users`}>
       <Button type="button">
@@ -31,7 +30,7 @@ const ViewDetailsButton = ({
 }: {
   organization: Organization;
 }) => {
-  const t = useTranslations("ActivityDashboard");
+  const t = useTranslations("WorkspaceDashboard");
   return (
     <Link href={`/organizations/${organization.organization_id}`}>
       <Button type="button">
@@ -59,9 +58,6 @@ export const OrganizationItem = ({
     role.privileges.includes("manage_org_members"),
   );
 
-  const { checkFeatureFlag } = useFeatureFlags();
-  const manageUsersTurnedOn = !checkFeatureFlag("manageUsersOff");
-
   return (
     <li className="border-base-lighter border-1px padding-2 margin-top-2">
       <Grid row>
@@ -75,7 +71,7 @@ export const OrganizationItem = ({
           tablet={{ col: "auto" }}
           className="flex-align-self-end text-right"
         >
-          {canManageUsers && manageUsersTurnedOn ? (
+          {canManageUsers ? (
             <ManageUsersButton organization={organization} />
           ) : (
             ""

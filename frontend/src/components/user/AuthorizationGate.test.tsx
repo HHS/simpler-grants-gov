@@ -1,11 +1,8 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
+import { render, screen } from "@testing-library/react";
 import { ApiRequestError } from "src/errors";
 import { useAuthorizedData } from "src/hooks/useAuthorizedData";
 import { AuthorizedData } from "src/types/authTypes";
 import { UserPrivilegeDefinition } from "src/types/userTypes";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
-import { render, screen } from "tests/react-utils";
 
 import { JSX } from "react";
 
@@ -50,11 +47,6 @@ const mockCheckUserPrivilege = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => mockGetSession(),
-}));
-
-jest.mock("next-intl", () => ({
-  ...jest.requireActual<typeof import("next-intl")>("next-intl"),
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/services/fetch/fetchers/userFetcher", () => ({

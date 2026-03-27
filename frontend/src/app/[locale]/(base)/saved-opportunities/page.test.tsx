@@ -1,3 +1,4 @@
+import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import SavedOpportunities from "src/app/[locale]/(base)/saved-opportunities/page";
 import {
@@ -11,22 +12,35 @@ import {
   mockUseTranslations,
   useTranslationsMock,
 } from "src/utils/testing/intlMocks";
-import { render, screen, waitFor } from "tests/react-utils";
 
-import { ReactNode } from "react";
+import { updateIsSharedWithOrganizationEnabled } from "src/components/search/SearchResultsListItem";
+
+jest.mock("next-intl", () => ({
+  useTranslations: () => useTranslationsMock(),
+}));
 
 jest.mock("next-intl/server", () => ({
   getTranslations: () => mockUseTranslations,
 }));
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-  NextIntlClientProvider: ({ children }: { children: ReactNode }) => children, // this is a dumb workaround for a global wrapper we're using
-}));
-
 const savedOpportunities = jest.fn().mockResolvedValue([]);
 const opportunity = jest.fn().mockResolvedValue({ data: [] });
 const mockUseSearchParams = jest.fn().mockReturnValue(new URLSearchParams());
+const clientFetchMock = jest.fn().mockResolvedValue([]);
+const mockBreadcrumbs = jest.fn();
+
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
+  }),
+}));
+
+jest.mock(
+  "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal",
+  () => ({
+    ShareOpportunityToOrganizationsModal: () => null,
+  }),
+);
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams() as unknown,
@@ -43,6 +57,14 @@ jest.mock("src/services/fetch/fetchers/opportunityFetcher", () => ({
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
   fetchSavedOpportunities: (statusFilter?: string) =>
     savedOpportunities(statusFilter) as Promise<MinimalOpportunity[]>,
+}));
+
+jest.mock("src/components/Breadcrumbs", () => ({
+  __esModule: true,
+  default: (props: { breadcrumbList: { title: string; path: string }[] }) => {
+    mockBreadcrumbs(props);
+    return <nav data-testid="mock-breadcrumbs" />;
+  },
 }));
 
 const defaultSearchParams = Promise.resolve({});
@@ -63,6 +85,28 @@ describe("Saved Opportunities page", () => {
     const content = await screen.findByText("noSavedCTAParagraphOne");
 
     await waitFor(() => expect(content).toBeInTheDocument());
+  });
+
+  it("passes the correct breadcrumbs", async () => {
+    const component = await SavedOpportunities({
+      params: localeParams,
+      searchParams: defaultSearchParams,
+    });
+    render(component);
+
+    expect(screen.getByTestId("mock-breadcrumbs")).toBeInTheDocument();
+
+    expect(mockBreadcrumbs).toHaveBeenCalledWith({
+      breadcrumbList: [
+        {
+          title: "SavedOpportunities.breadcrumbWorkspace",
+          path: "/dashboard",
+        },
+        {
+          title: "SavedOpportunities.breadcrumbSavedOpportunities",
+        },
+      ],
+    });
   });
 
   it("does not render status filter when there are no saved opportunities", async () => {
@@ -95,7 +139,30 @@ describe("Saved Opportunities page", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders a list of saved opportunities and displays Share with organizations link", async () => {
+    updateIsSharedWithOrganizationEnabled(true);
+    savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
+    opportunity.mockResolvedValue({ data: mockOpportunity });
+    const component = await SavedOpportunities({
+      params: localeParams,
+      searchParams: defaultSearchParams,
+    });
+    render(component);
+
+    expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
+    expect(screen.getByText("OPP-12345")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: "Test Opportunity",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("share-opportunity-button-id"),
+    ).toBeInTheDocument();
+  });
+
   it("renders status filter when there are saved opportunities", async () => {
+    updateIsSharedWithOrganizationEnabled(true);
     savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
     opportunity.mockResolvedValue({ data: mockOpportunity });
     const component = await SavedOpportunities({
@@ -106,6 +173,10 @@ describe("Saved Opportunities page", () => {
 
     expect(screen.getByLabelText("statusFilter.label")).toBeInTheDocument();
     expect(screen.getByText("Any opportunity status")).toBeInTheDocument();
+    const shareWithOrgsButton = screen.getAllByTestId(
+      "share-opportunity-button-id",
+    );
+    expect(shareWithOrgsButton[0]).toBeInTheDocument();
   });
 
   it("passes status filter to fetchSavedOpportunities when status param is provided", async () => {
@@ -135,6 +206,7 @@ describe("Saved Opportunities page", () => {
   });
 
   it("shows all opportunities when no status filter is applied", async () => {
+    updateIsSharedWithOrganizationEnabled(true);
     const forecastedOpportunity: BaseOpportunity = {
       ...mockOpportunity,
       opportunity_id: "forecasted-opp-id",
@@ -159,6 +231,10 @@ describe("Saved Opportunities page", () => {
     // Should show both opportunities
     expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
     expect(screen.getByText("Forecasted Opportunity")).toBeInTheDocument();
+    const shareWithOrgsButton = screen.getAllByTestId(
+      "share-opportunity-button-id",
+    );
+    expect(shareWithOrgsButton[0]).toBeInTheDocument();
   });
 
   it("shows no matching status message when API returns no opportunities for filter", async () => {

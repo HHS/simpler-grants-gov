@@ -33,9 +33,9 @@ from src.api.application_alpha.application_schemas import (
 )
 from src.api.schemas.response_schema import AbstractResponseSchema
 from src.auth.api_jwt_auth import api_jwt_auth
-from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_or_user_api_key_multi_auth
+from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_or_api_user_key_multi_auth
 from src.constants.lookup_constants import ApplicationAuditEvent
-from src.db.models.user_models import UserApiKey, UserTokenSession
+from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.add_organization_to_application import (
     add_organization_to_application,
@@ -493,7 +493,7 @@ def application_audit_list(
 @application_blueprint.input(ApplicationSubmissionsRequestSchema())
 @application_blueprint.output(ApplicationSubmissionsResponseSchema())
 @application_blueprint.doc(responses=[200, 401, 403, 404])
-@application_blueprint.auth_required(jwt_or_user_api_key_multi_auth)
+@application_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def application_submissions_list(
     db_session: db.Session, application_id: UUID, json_data: dict
@@ -502,19 +502,10 @@ def application_submissions_list(
     add_extra_data_to_current_request_logs({"application_id": application_id})
     logger.info("POST /alpha/applications/:application_id/submissions")
 
-    # Get user from the multi-auth (supports both JWT and User API Key)
-    # TODO: Simplify this after multi-auth is updated to return user directly
-    multi_auth_user = jwt_or_user_api_key_multi_auth.get_user()
-
-    if isinstance(multi_auth_user.user, UserTokenSession):
-        user = multi_auth_user.user.user
-    elif isinstance(multi_auth_user.user, UserApiKey):
-        user = multi_auth_user.user.user
-    else:
-        raise Exception(f"Unknown user type: {type(multi_auth_user.user)}")
+    user = jwt_or_api_user_key_multi_auth.get_user()
 
     with db_session.begin():
-        db_session.add(multi_auth_user.user)
+        db_session.add(user)
         submissions, pagination_info = list_application_submissions(
             db_session, application_id, user, json_data
         )

@@ -1,11 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import OpportunityDocuments from "src/components/opportunity/OpportunityDocuments";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 const mockData = [
   {

@@ -61,8 +61,6 @@ class TestSubmissionXMLAssembler:
         )
 
         # Create competition form linking to SF424
-        from tests.src.db.models.factories import CompetitionFormFactory
-
         competition_form = CompetitionFormFactory.create(competition=competition, form=sf424_form)
 
         # Create application form with sample data
@@ -194,8 +192,9 @@ class TestSubmissionXMLAssembler:
         header_elements = root.findall(f".//{header_ns}GrantSubmissionHeader")
         assert len(header_elements) == 1
 
-        # Verify Forms element
-        forms_elements = root.findall(".//Forms")
+        # Verify Forms element with grant namespace
+        grant_forms_tag = f"{grant_ns}Forms"
+        forms_elements = root.findall(f".//{grant_forms_tag}")
         assert len(forms_elements) == 1
 
         # Verify SF424 form element inside Forms
@@ -203,10 +202,45 @@ class TestSubmissionXMLAssembler:
         sf424_elements = forms_elements[0].findall(f".//{sf424_ns}SF424_4_0")
         assert len(sf424_elements) == 1
 
+        # Verify schemaLocation is set correctly
+        # Note: The fixture includes an assistance listing with number "12.345"
+        xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
+        schema_location = root.get(f"{xsi_ns}schemaLocation")
+        assert schema_location is not None
+        assert "oppTEST-OPP-001-cfda12.345.xsd" in schema_location
+        assert "None.xsd" not in schema_location
+
         # Verify footer element
         footer_ns = f"{{{Namespace.FOOTER}}}"
         footer_elements = root.findall(f".//{footer_ns}GrantSubmissionFooter")
         assert len(footer_elements) == 1
+
+    def test_generate_complete_submission_xml_includes_cfda_when_present(
+        self, sample_application, sample_application_submission
+    ):
+        """Test that schema location includes CFDA number when present on competition."""
+
+        # Verify it's set up correctly
+        assert sample_application.competition.opportunity_assistance_listing is not None
+        assert (
+            sample_application.competition.opportunity_assistance_listing.assistance_listing_number
+            == "12.345"
+        )
+
+        assembler = SubmissionXMLAssembler(sample_application, sample_application_submission)
+
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+
+        # Parse XML to verify structure
+        parser = lxml_etree.XMLParser(remove_blank_text=True)
+        root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
+
+        # Verify schemaLocation is set correctly (includes CFDA number)
+        xsi_ns = "{http://www.w3.org/2001/XMLSchema-instance}"
+        schema_location = root.get(f"{xsi_ns}schemaLocation")
+        assert schema_location is not None
+        assert "oppTEST-OPP-001-cfda12.345.xsd" in schema_location
+        assert "None.xsd" not in schema_location
 
     def test_generate_complete_submission_xml_contains_header_data(
         self, sample_application, sample_application_submission
@@ -277,7 +311,8 @@ class TestSubmissionXMLAssembler:
 
         # Find SF424 form element
         sf424_ns = "{http://apply.grants.gov/forms/SF424_4_0-V4.0}"
-        forms_element = root.find(".//Forms")
+        grant_ns_prefix = f"{{{Namespace.GRANT}}}"
+        forms_element = root.find(f".//{grant_ns_prefix}Forms")
         sf424_element = forms_element.find(f".//{sf424_ns}SF424_4_0")
         assert sf424_element is not None, "SF424_4_0 element not found"
 
@@ -470,7 +505,8 @@ class TestSubmissionXMLAssembler:
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
-        forms_elements = root.findall(".//Forms")
+        grant_ns_prefix = f"{{{Namespace.GRANT}}}"
+        forms_elements = root.findall(f".//{grant_ns_prefix}Forms")
         assert len(forms_elements) == 1
 
         # Count child elements in Forms (should have at least 1)

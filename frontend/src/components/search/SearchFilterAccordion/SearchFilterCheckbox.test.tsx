@@ -1,8 +1,7 @@
 import "@testing-library/jest-dom";
 
-import { fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
-import { render, screen } from "tests/react-utils";
 
 import React from "react";
 

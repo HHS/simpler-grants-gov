@@ -1,14 +1,8 @@
 import { act, render, screen } from "@testing-library/react";
-import { mockMessages, useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import SubscriptionForm from "src/components/newsletter/SubscriptionForm";
 
 const mockSubscribeEmail = jest.fn();
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-  useMessages: () => mockMessages,
-}));
 
 jest.mock("src/app/[locale]/(base)/newsletter/actions", () => ({
   subscribeEmail: (...args: unknown[]): unknown => mockSubscribeEmail(...args),

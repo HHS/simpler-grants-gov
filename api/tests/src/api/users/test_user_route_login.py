@@ -11,7 +11,12 @@ from src.auth.api_jwt_auth import parse_jwt_for_user
 from src.db.models.user_models import LinkExternalUser, LoginGovState
 from src.util import datetime_util
 from tests.lib.auth_test_utils import create_jwt
-from tests.src.db.models.factories import LinkExternalUserFactory, LoginGovStateFactory
+from tests.src.db.models.factories import (
+    AgencyFactory,
+    AgencyUserFactory,
+    LinkExternalUserFactory,
+    LoginGovStateFactory,
+)
 
 ##########################################
 # Full login flow tests
@@ -269,6 +274,12 @@ def test_user_callback_new_user_302(
     )
     assert db_state is None
 
+    # this checks that we didn't have to retry for this to return it's result
+    # when no retries are specified we start at 0 and decrement for each attempt
+    # so -1 means we only tried once
+    # without the fix Michael noted in the PR, this would incorrectly be -3, failing this test
+    assert mock_oauth_client.retries[code] == -1
+
 
 def test_user_callback_existing_user_302(
     client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
@@ -500,3 +511,283 @@ def test_user_callback_token_fails_validation_no_valid_key_302(
         .one_or_none()
     )
     assert db_state is None
+
+
+def test_user_callback_null_code_302(client):
+    resp = client.get(f"/v1/users/login/callback?state={uuid.uuid4()}", follow_redirects=True)
+
+    # The final endpoint returns a 200 even when erroring as it is just a GET endpoint
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "Missing code in request"
+
+
+def test_user_callback_null_state_302(client):
+    resp = client.get("/v1/users/login/callback?code=abc123", follow_redirects=True)
+
+    # The final endpoint returns a 200 even when erroring as it is just a GET endpoint
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "Missing state in request"
+
+
+##########################################
+# PIV/CAC validation tests
+##########################################
+
+
+def test_agency_user_without_piv_fails_when_required(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key, monkeypatch
+):
+    """Agency user logging in without PIV should fail when IS_PIV_REQUIRED=true"""
+    # Enable PIV requirement
+    monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", True)
+
+    # Create state and existing agency user
+    login_gov_state = LoginGovStateFactory.create()
+    login_gov_id = str(uuid.uuid4())
+    external_user = LinkExternalUserFactory.create(external_user_id=login_gov_id)
+
+    # Make the user an agency user
+    agency = AgencyFactory.create()
+    AgencyUserFactory.create(user=external_user.user, agency=agency)
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id=login_gov_id,
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+        x509_presented=False,  # No PIV
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "Agency users must authenticate using a PIV/CAC card"
+
+
+def test_agency_user_with_piv_succeeds_when_required(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key, monkeypatch
+):
+    """Agency user logging in with PIV should succeed when IS_PIV_REQUIRED=true"""
+    # Enable PIV requirement
+    monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", True)
+
+    # Create state and existing agency user
+    login_gov_state = LoginGovStateFactory.create()
+    login_gov_id = str(uuid.uuid4())
+    external_user = LinkExternalUserFactory.create(external_user_id=login_gov_id)
+
+    # Make the user an agency user
+    agency = AgencyFactory.create()
+    AgencyUserFactory.create(user=external_user.user, agency=agency)
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id=login_gov_id,
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+        x509_presented=True,  # With PIV
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["message"] == "success"
+    assert resp_json["token"] is not None
+
+
+def test_non_agency_user_without_piv_succeeds_when_required(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key, monkeypatch
+):
+    """Non-agency user logging in without PIV should succeed even when IS_PIV_REQUIRED=true"""
+    # Enable PIV requirement
+    monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", True)
+
+    # Create state (user will be created as new, non-agency user)
+    login_gov_state = LoginGovStateFactory.create()
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id="new-non-agency-user",
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+        x509_presented=False,  # No PIV
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["message"] == "success"
+    assert resp_json["token"] is not None
+
+
+def test_agency_user_without_piv_succeeds_when_not_required(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key, monkeypatch
+):
+    """Agency user logging in without PIV should succeed when IS_PIV_REQUIRED=false"""
+    # Disable PIV requirement (default behavior)
+    monkeypatch.setattr("src.auth.login_gov_jwt_auth._config.is_piv_required", False)
+
+    # Create state and existing agency user
+    login_gov_state = LoginGovStateFactory.create()
+    login_gov_id = str(uuid.uuid4())
+    external_user = LinkExternalUserFactory.create(external_user_id=login_gov_id)
+
+    # Make the user an agency user
+    agency = AgencyFactory.create()
+    AgencyUserFactory.create(user=external_user.user, agency=agency)
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id=login_gov_id,
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+        x509_presented=False,  # No PIV
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["message"] == "success"
+    assert resp_json["token"] is not None
+
+
+def test_user_callback_retries_success(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
+):
+    # Create state so the callback gets past the check
+    login_gov_state = LoginGovStateFactory.create()
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id="bob-xyz",
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+        3,
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+    assert resp_json["is_user_new"] == "0"
+    assert resp_json["message"] == "success"
+    assert resp_json["token"] is not None
+
+    user_token_session = parse_jwt_for_user(resp_json["token"], db_session)
+    assert user_token_session.expires_at > datetime_util.utcnow()
+    assert user_token_session.is_valid is True
+
+    # Make sure the external user record is created with expected IDs
+    external_user = (
+        db_session.query(LinkExternalUser)
+        .filter(
+            LinkExternalUser.user_id == user_token_session.user_id,
+            LinkExternalUser.external_user_id == "bob-xyz",
+        )
+        .one_or_none()
+    )
+    assert external_user is not None
+
+    # Make sure the login gov state was deleted
+    db_state = (
+        db_session.query(LoginGovState)
+        .filter(LoginGovState.login_gov_state_id == login_gov_state.login_gov_state_id)
+        .one_or_none()
+    )
+    assert db_state is None
+
+
+def test_user_callback_retries_failure(
+    client, db_session, enable_factory_create, mock_oauth_client, private_rsa_key
+):
+    # Create state so the callback gets past the check
+    login_gov_state = LoginGovStateFactory.create()
+
+    code = str(uuid.uuid4())
+    id_token = create_jwt(
+        user_id="bob-xyz",
+        nonce=str(login_gov_state.nonce),
+        private_key=private_rsa_key,
+    )
+    mock_oauth_client.add_token_response(
+        code,
+        OauthTokenResponse(
+            id_token=id_token, access_token="fake_token", token_type="Bearer", expires_in=300
+        ),
+        4,
+    )
+
+    resp = client.get(
+        f"/v1/users/login/callback?state={login_gov_state.login_gov_state_id}&code={code}",
+        follow_redirects=True,
+    )
+
+    assert resp.status_code == 200
+    resp_json = resp.get_json()
+
+    assert resp_json["message"] == "error"
+    assert resp_json["error_description"] == "internal error"
+
+    # History contains each redirect, we redirected just once
+    assert len(resp.history) == 1
+    redirect = resp.history[0]
+
+    assert redirect.status_code == 302
+    redirect_url = urllib.parse.urlparse(redirect.headers["Location"])
+    assert redirect_url.path == "/v1/users/login/result"

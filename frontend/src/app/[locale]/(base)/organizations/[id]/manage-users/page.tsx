@@ -1,4 +1,3 @@
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import {
   getOrganizationPendingInvitations,
   getOrganizationRoles,
@@ -6,7 +5,6 @@ import {
 } from "src/services/fetch/fetchers/organizationsFetcher";
 
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
 
 import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
 import { AuthorizationGate } from "src/components/user/AuthorizationGate";
@@ -54,8 +52,4 @@ async function ManageUsersPage({ params }: ManageUsersPageProps) {
   );
 }
 
-export default withFeatureFlag<ManageUsersPageProps, never>(
-  ManageUsersPage,
-  "manageUsersOff",
-  () => redirect("/maintenance"),
-);
+export default ManageUsersPage;

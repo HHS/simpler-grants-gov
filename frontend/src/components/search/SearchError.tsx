@@ -12,7 +12,7 @@ function isValidJSON(str: string) {
   try {
     JSON.parse(str);
     return true;
-  } catch (e) {
+  } catch (_e) {
     return false; // String is not valid JSON
   }
 }

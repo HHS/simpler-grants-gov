@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 import { FakeQueryProvider } from "src/utils/testing/providerMocks";
 
 import { SearchResultsControls } from "src/components/search/SearchResultsControls/SearchResultsControls";
@@ -11,10 +10,6 @@ jest.mock("src/hooks/useSearchParamUpdater", () => ({
   useSearchParamUpdater: () => ({
     updateQueryParams: mockUpdateQueryParams,
   }),
-}));
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
 }));
 
 jest.mock("src/hooks/useClientFetch", () => ({

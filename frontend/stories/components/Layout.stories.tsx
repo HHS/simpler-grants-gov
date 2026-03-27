@@ -1,8 +1,6 @@
-import { Meta } from "@storybook/react";
-
 import Layout from "src/components/Layout";
 
-const meta: Meta<typeof Layout> = {
+const meta = {
   component: Layout,
 };
 export default meta;

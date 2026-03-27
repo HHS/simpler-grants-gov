@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get } from "lodash";
 
@@ -257,7 +256,7 @@ function Budget424aSectionE<
         <tbody>
           {ACTIVITY_ITEMS.map((rowIndex) => (
             <tr key={`row-${rowIndex}`} className="sf424a__row">
-              <td className="border-bottom-0 border-top-0 verticle-align-bottom">
+              <td className="sf424a__equal-sign-wrapper-cell border-bottom-0 border-top-0 verticle-align-bottom">
                 {rowIndex + 16}.
               </td>
 

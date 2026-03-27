@@ -1,0 +1,116 @@
+import logging
+from typing import Any, cast
+
+from statemachine import StateChart
+
+from src.constants.lookup_constants import ApprovalResponseType
+from src.db.models.workflow_models import Workflow
+from src.workflow.event.state_machine_event import StateMachineEvent
+from src.workflow.processor.approval_processor import ApprovalProcessor
+from src.workflow.service.approval_service import get_approval_response_type
+from src.workflow.state_persistence.base_state_persistence_model import BaseStatePersistenceModel
+
+logger = logging.getLogger(__name__)
+
+
+class BaseStateMachine(StateChart):
+    """Base state machine for all state machines
+
+    Contains functionality that will be useful for
+    all state machines that we build.
+    """
+
+    # Atomic configuration update makes it so the state
+    # only changes a single time when transitioning. With
+    # the default configuration it will go state1 -> none -> state2
+    # https://python-statemachine.readthedocs.io/en/latest/behaviour.html#atomic-configuration-update
+    atomic_configuration_update = True
+    # The state machine library will catch all errors and
+    # attempt to handle them with an event that can be customized.
+    # But we would rather let the error bubble up and handle
+    # it ourselves as errors in this logic would mean we can't process
+    # the event successfully.
+    # https://python-statemachine.readthedocs.io/en/latest/behaviour.html#catch-errors-as-events
+    catch_errors_as_events = False
+
+    def __init__(self, model: BaseStatePersistenceModel, **kwargs: Any):
+        super().__init__(model=model, **kwargs)
+        self.db_session = model.db_session
+
+    @property
+    def workflow(self) -> Workflow:
+        """Workflow property to get it from the underlying model a bit easier"""
+        # Note we have to cast as self.model gets set in the StateMachine
+        # We know it's our model class because we passed it in the __init__ function
+        return cast(BaseStatePersistenceModel, self.model).workflow
+
+    @classmethod
+    def get_valid_events(cls) -> set[str]:
+        """Utility function to get valid events (as strings) that could
+        be sent to this state machine.
+        """
+        # Note mypy thinks events (a property that returns a list) isn't
+        # iterable for some reason.
+        return {e.id for e in cls.events}  # type: ignore[attr-defined]
+
+    def get_valid_events_for_current_state(self) -> list[str]:
+        """Utility function to get valid events (as strings) that could be sent for the current state."""
+        # Note that there also exists an enabled_events() function that factors
+        # in conditionals for whether an event is allowed, we'll use the simpler
+        # naive property instead for now.
+        return [event.id for event in self.allowed_events]
+
+    @classmethod
+    def get_valid_states(cls) -> list[str]:
+        return list(cls.states_map.keys())
+
+    #############################
+    # Event Handlers
+    #############################
+
+    def on_agency_approval_approved(self, state_machine_event: StateMachineEvent) -> None:
+        """Handler for an agency approval event - when approved."""
+        ApprovalProcessor(
+            db_session=self.db_session, state_machine_event=state_machine_event
+        ).handle_agency_approval_accepted()
+
+    def on_agency_approval_declined(self, state_machine_event: StateMachineEvent) -> None:
+        """Handler for an agency approval event - when declined."""
+        ApprovalProcessor(
+            db_session=self.db_session, state_machine_event=state_machine_event
+        ).handle_agency_approval_declined()
+
+    def on_agency_approval_requires_modification(
+        self, state_machine_event: StateMachineEvent
+    ) -> None:
+        """Handler for an agency approval event - when it requires modification."""
+        ApprovalProcessor(
+            db_session=self.db_session, state_machine_event=state_machine_event
+        ).handle_agency_approval_requires_modification()
+
+    #############################
+    # Conditionals
+    #############################
+
+    def has_enough_approvals(self, state_machine_event: StateMachineEvent) -> bool:
+        """Conditional function for checking if enough approval events have been received for the current state"""
+        return ApprovalProcessor(
+            db_session=self.db_session, state_machine_event=state_machine_event
+        ).has_enough_approvals()
+
+    def is_approval_event_approved(self, state_machine_event: StateMachineEvent) -> bool:
+        """Conditional function for checking if the approval event is Approved"""
+        return get_approval_response_type(state_machine_event) == ApprovalResponseType.APPROVED
+
+    def is_approval_event_declined(self, state_machine_event: StateMachineEvent) -> bool:
+        """Conditional function for checking if the approval event is Declined"""
+        return get_approval_response_type(state_machine_event) == ApprovalResponseType.DECLINED
+
+    def is_approval_event_requires_modification(
+        self, state_machine_event: StateMachineEvent
+    ) -> bool:
+        """Conditional function for checking if the approval event is Requires Modification"""
+        return (
+            get_approval_response_type(state_machine_event)
+            == ApprovalResponseType.REQUIRES_MODIFICATION
+        )

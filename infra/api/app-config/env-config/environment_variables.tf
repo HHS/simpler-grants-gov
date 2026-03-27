@@ -96,6 +96,16 @@ locals {
       secret_store_name = "/api/${var.environment}/soap-private-keys"
     }
 
+    SOAP_PARTNER_GATEWAY_URI = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-partner-gateway-uri"
+    }
+
+    SOAP_PARTNER_GATEWAY_AUTH_KEY = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-partner-gateway-auth-key"
+    }
+
     SAM_GOV_API_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/sam-gov-api-key"

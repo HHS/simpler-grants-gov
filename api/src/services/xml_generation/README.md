@@ -90,15 +90,51 @@ The service supports two XML formatting modes:
 
 Comprehensive unit tests cover:
 - Basic XML generation functionality
-- Configuration loading from sf424.py
+- Configuration loading from form modules
 - Field mapping transformations
 - Error handling for missing data
 - XML namespace handling
+- XSD schema validation
 
-Run tests:
+### Running Unit Tests
+
+Run all XML generation unit tests:
 ```bash
 python -m pytest tests/src/services/xml_generation/
 ```
+
+### Running XSD Validation Tests
+
+To validate generated XML against official Grants.gov XSD schemas:
+
+```bash
+# Validate all forms
+make validate-xml-generation
+
+# Validate a specific form
+make test-xml-validation form=SF424_4_0
+```
+
+**Note:** The first run will download and cache XSD files from Grants.gov. Subsequent runs use the cached files from `xsd_cache/`.
+
+The validation tests:
+1. Generate XML from test data (see `src/services/xml_generation/validation/test_cases.py`)
+2. Download XSD schemas from Grants.gov if not cached
+3. Validate generated XML against the official XSD
+4. Save results to `xsd_cache/validation_results.json`
+
+### Validation Test Cases
+
+Test cases are defined in [`validation/test_cases.py`](file:///Users/mike/Documents/GitHub.nosync/simpler-grants-gov/api/src/services/xml_generation/validation/test_cases.py) and include:
+- **SF-424**: Minimal valid, revision, continuation, multiple applicant types, attachments
+- **SF-424A**: Budget sections, forecasted cash needs, complete examples  
+- **SF-LLL**: Initial filing, material change, subawardee scenarios
+- **EPA-4700-4**: Minimal, complete, construction explanation examples
+- **Attachment Forms**: Single attachment, multiple attachments, all 15 slots
+
+Each test case validates that the generated XML conforms to the official XSD schema requirements.
+
+
 ## Configuration
 
 Transformation rules are defined in each form module (e.g., `sf424.py`, `project_narrative_attachment.py`).
@@ -412,7 +448,8 @@ FORM_XML_TRANSFORM_RULES = {
 
 **Attachment Forms Notes:**
 - **Multiple attachments** (`type: "multiple"`): Used by Project Narrative, Budget Narrative, and Other Narrative Attachments
-- **Single attachment** (`type: "single"`): Used by Project Abstract with wrapper element `ProjectAbstractAddAttachment`
+- **Single attachment** (`type: "single"`): Used by Project Abstract with wrapper element `ProjectAbstractAddAttachment`. Generates a simple structure where attachment metadata (FileName, MimeType, etc.) is placed directly within the specified XML element.
+- **Single attachment with nested wrapper** (`type: "single_with_wrapper"`): Generates a nested structure where each attachment slot (e.g., ATT1-ATT15) contains an additional File wrapper element (e.g., `<ATT1><ATT1File>...</ATT1File></ATT1>`) before the attachment metadata.
 
 ### Example: Supplementary Cover Sheet for NEH Grant Programs
 

@@ -60,6 +60,16 @@ variable "extra_identity_provider_logout_urls" {
   default     = []
 }
 
+variable "feature_flag_overrides" {
+  type        = map(string)
+  description = "Map of overrides for feature flags"
+  default     = {}
+  validation {
+    condition     = length(setsubtract(keys(var.feature_flag_overrides), keys(local.feature_flag_defaults))) == 0
+    error_message = "All features in feature_flag_overrides must be declared in feature_flag_defaults."
+  }
+}
+
 variable "has_database" {
   type = bool
 }
@@ -99,6 +109,11 @@ variable "service_memory" {
   default = 512
 }
 
+variable "service_desired_instance_count" {
+  type    = number
+  default = 1
+}
+
 variable "instance_desired_instance_count" {
   type    = number
   default = 1
@@ -121,4 +136,10 @@ variable "service_override_extra_environment_variables" {
     Map from environment variable name to environment variable value
   EOT
   default     = {}
+}
+
+variable "service_newrelic_entity_guid" {
+  type        = string
+  description = "New Relic entity GUID for the primary ALB, used to correlate logs with the infrastructure entity in New Relic."
+  default     = null
 }

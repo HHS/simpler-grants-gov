@@ -16,7 +16,7 @@ resource "aws_lb" "alb" {
   idle_timeout    = "120"
   internal        = false
   security_groups = [aws_security_group.alb.id]
-  subnets         = var.public_subnet_ids
+  subnets         = module.network.public_subnet_ids
 
   # Use a separate line to support automated terraform destroy commands
   # checkov:skip=CKV_AWS_150:Allow deletion for automated tests
@@ -62,6 +62,30 @@ resource "aws_lb_listener" "alb_listener_http" {
       content_type = "text/plain"
       message_body = "Not Found"
       status_code  = "404"
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "http_to_https_redirect" {
+  count = var.certificate_arn != null ? 1 : 0
+
+  listener_arn = aws_lb_listener.alb_listener_http[0].arn
+  priority     = 50
+
+  action {
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+      host        = "#{host}"
+      path        = "/#{path}"
+      query       = "#{query}"
+    }
+  }
+  condition {
+    path_pattern {
+      values = ["/*"]
     }
   }
 }
@@ -144,7 +168,7 @@ resource "aws_lb_target_group" "app_tg" {
   name_prefix          = "app-"
   port                 = var.container_port
   protocol             = "HTTP"
-  vpc_id               = var.vpc_id
+  vpc_id               = module.network.vpc_id
   target_type          = "ip"
   deregistration_delay = "30"
 
@@ -172,7 +196,7 @@ resource "aws_lb_target_group" "mtls_tg" {
   name_prefix          = "mtls-"
   port                 = var.container_port
   protocol             = "HTTP"
-  vpc_id               = var.vpc_id
+  vpc_id               = module.network.vpc_id
   target_type          = "ip"
   deregistration_delay = "30"
 

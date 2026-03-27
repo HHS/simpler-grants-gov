@@ -1,7 +1,7 @@
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import QueryProvider, { QueryContext } from "src/services/search/QueryProvider";
 import { QueryContextParams } from "src/types/search/searchQueryTypes";
-import { render, screen } from "tests/react-utils";
 
 import React, { useContext } from "react";
 
@@ -51,7 +51,6 @@ jest.mock("next/navigation", () => ({
 describe("QueryProvider", () => {
   it("queryTerm is set to the correct default based-on useSearchParams()", async () => {
     await updateAndDisplayQueryContext({
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       onContextUpdate: (_: QueryContextParams) => {},
       onContextDisplay: (context: QueryContextParams) => context.queryTerm,
     });

@@ -10,9 +10,13 @@ from typing import Any
 import requests
 from defusedxml import minidom
 from lxml import etree
+from sqlalchemy import select
 
+import src.adapters.db as db
+from src.db.models.competition_models import ApplicationSubmission
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
-from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.soap_payload_handler import extract_soap_xml
 
 logger = logging.getLogger(__name__)
@@ -322,7 +326,7 @@ def get_gov_grants_tracking_number(xml_bytes: bytes) -> str | None:
 
 
 def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | None:
-    xml_bytes = extract_soap_xml(soap_request.data)
+    xml_bytes = extract_soap_xml(soap_request.data.head())
     if not xml_bytes:
         return None
     if soap_request.operation_name in AlternateSoapOperation:
@@ -335,6 +339,18 @@ def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | No
                 tracking_number, headers=soap_request.headers, is_get_application_zip=is_zip
             )
     return None
+
+
+def get_application_submission_by_legacy_tracking_number(
+    db_session: db.Session, legacy_tracking_number: str
+) -> ApplicationSubmission | None:
+    if legacy_tracking_number.startswith("GRANT"):
+        legacy_tracking_number = legacy_tracking_number.split("GRANT")[1]
+    return db_session.execute(
+        select(ApplicationSubmission).where(
+            ApplicationSubmission.legacy_tracking_number == int(legacy_tracking_number),
+        )
+    ).scalar_one_or_none()
 
 
 def convert_bool_to_yes_no(value: bool | None) -> str:

@@ -7,9 +7,9 @@ import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import {
   getApplicationDetails,
   getApplicationHistory,
+  getLatestApplicationSubmission,
 } from "src/services/fetch/fetchers/applicationFetcher";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { Attachment } from "src/types/attachmentTypes";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { getTranslations } from "next-intl/server";
@@ -19,12 +19,13 @@ import { GridContainer } from "@trussworks/react-uswds";
 import ApplicationContainer from "src/components/application/ApplicationContainer";
 import { ApplicationHistoryCardProps } from "src/components/application/ApplicationHistoryTable";
 import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
+import Breadcrumbs from "src/components/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
 
 export function generateMetadata() {
   const meta: Metadata = {
-    title: `Application landing page`,
+    title: `Application | Simpler.Grants.gov`,
   };
   return meta;
 }
@@ -44,7 +45,6 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   let details = {} as ApplicationDetailsCardProps;
   let historyDetails = [] as ApplicationHistoryCardProps;
   let opportunity = {} as OpportunityDetail;
-  let attachments = [] as Attachment[];
 
   try {
     const response = await getApplicationDetails(
@@ -72,7 +72,6 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
       return <TopLevelError />;
     }
     opportunity = opportunityResponse.data;
-    attachments = response.data.application_attachments;
   } catch (e) {
     if (parseErrorStatus(e as ApiRequestError) === 404) {
       console.error(
@@ -103,15 +102,36 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     );
   }
 
+  const latestApplicationSubmission = await getLatestApplicationSubmission(
+    userSession?.token,
+    applicationId,
+    details.application_status,
+  );
+
   return (
     <>
       <GridContainer>
-        <h1 className="margin-top-9 margin-bottom-7">{t("title")}</h1>
+        <Breadcrumbs
+          breadcrumbList={[
+            {
+              title: t("breadcrumbWorkspace"),
+              path: `/dashboard`,
+            },
+            {
+              title: t("breadcrumbApplications"),
+              path: `/applications`,
+            },
+            {
+              title: details.application_name,
+            },
+          ]}
+        />
+        <h1 className="margin-top-0 margin-bottom-7">{t("title")}</h1>
         <ApplicationContainer
           applicationDetails={details}
           opportunity={opportunity}
-          attachments={attachments}
           applicationHistory={historyDetails}
+          latestApplicationSubmission={latestApplicationSubmission}
         />
       </GridContainer>
     </>

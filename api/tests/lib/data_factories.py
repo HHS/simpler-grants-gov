@@ -4,10 +4,20 @@ To help simplify setup when we need many factories repeatedly
 with only a few alterations.
 """
 
+import io
+
+from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import ApplicationForm
 from src.db.models.user_models import Role, User
-from src.legacy_soap_api.legacy_soap_api_auth import SOAPClientCertificate
+from src.legacy_soap_api.legacy_soap_api_auth import (
+    LOG_LOCAL_RESPONSE_HEADER_KEY,
+    USE_SOAP_JWT_HEADER_KEY,
+    SOAPAuth,
+    SOAPClientCertificate,
+)
+from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from tests.src.db.models.factories import (
     AgencyFactory,
     AgencyUserFactory,
@@ -118,11 +128,14 @@ def setup_application_for_form_validation(
     if user_email is not None:
         app_user = ApplicationUserFactory.create(application=application)
         LinkExternalUserFactory.create(email=user_email, user=app_user.user)
+        application.submitted_by_user = app_user.user
 
     return application_form
 
 
-def setup_cert_user(agency: Agency, privileges: list) -> tuple[User, Role, SOAPClientCertificate]:
+def setup_cert_user(
+    agency: Agency, privileges: list | set
+) -> tuple[User, Role, SOAPClientCertificate]:
     legacy_certificate = LegacyAgencyCertificateFactory.create(agency=agency)
     agency_user = AgencyUserFactory.create(agency=agency, user=legacy_certificate.user)
     role = RoleFactory.create(privileges=privileges, is_agency_role=True)
@@ -134,3 +147,26 @@ def setup_cert_user(agency: Agency, privileges: list) -> tuple[User, Role, SOAPC
         legacy_certificate=legacy_certificate,
     )
     return legacy_certificate.user, role, soap_client_certificate
+
+
+def create_soap_request(
+    soap_payload: bytes, use_soap_jwt: bool = False, log_local: bool = False
+) -> SOAPRequest:
+    _, _, soap_certificate = setup_cert_user(
+        AgencyFactory.create(), [Privilege.LEGACY_AGENCY_VIEWER]
+    )
+    headers = {
+        "X-Gg-S2S-Uri": "https://google.com/xyz",
+    }
+    if log_local:
+        headers.update({f"{LOG_LOCAL_RESPONSE_HEADER_KEY}": "1"})
+    if use_soap_jwt:
+        headers.update({f"{USE_SOAP_JWT_HEADER_KEY}": "1"})
+    return SOAPRequest(
+        api_name=SimplerSoapAPI.GRANTORS,
+        headers=headers,
+        data=SoapRequestStreamer(stream=io.BytesIO(soap_payload)),
+        full_path="/grantors/x",
+        method="POST",
+        auth=SOAPAuth(certificate=soap_certificate),
+    )

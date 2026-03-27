@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { environment } from "src/constants/environments";
 import { getSession } from "src/services/auth/session";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { performAgencySearch } from "src/services/fetch/fetchers/agenciesFetcher";
 import { getSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
@@ -12,17 +11,16 @@ import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { redirect } from "next/navigation";
 import { Suspense, use } from "react";
 
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
 import { AndOrPanel } from "src/components/search/AndOrPanel";
+import { ClassicSearchBanner } from "src/components/search/ClassicSearchBanner";
 import { FilterPillPanel } from "src/components/search/FilterPillPanel";
 import { PillListSkeleton } from "src/components/search/PillList";
 import { SaveSearchPanel } from "src/components/search/SaveSearchPanel";
 import SearchAnalytics from "src/components/search/SearchAnalytics";
 import { SearchBarWithLabel } from "src/components/search/SearchBarWithLabel";
-import SearchCallToAction from "src/components/search/SearchCallToAction";
 import { SearchDrawerFilters } from "src/components/search/SearchDrawerFilters";
 import { SearchDrawerHeading } from "src/components/search/SearchDrawerHeading";
 import SearchResults from "src/components/search/SearchResults";
@@ -79,9 +77,10 @@ function Search({ searchParams, params }: SearchPageProps) {
         params={resolvedSearchParams}
         newRelicEnabled={environment.NEW_RELIC_ENABLED === "true"}
       />
-      <div className="bg-base-lightest padding-top-5">
+      <ClassicSearchBanner />
+      <div className="bg-base-lightest padding-top-4">
         <div className="grid-container">
-          <SearchCallToAction />
+          <h1 className="margin-top-0">{t("header")}</h1>
           <div className="tablet:display-flex tablet:margin-bottom-2 margin-top-0">
             <div className="flex-6 flex-align-self-end">
               <SearchBarWithLabel
@@ -131,8 +130,4 @@ function Search({ searchParams, params }: SearchPageProps) {
   );
 }
 
-export default withFeatureFlag<SearchPageProps, never>(
-  Search,
-  "searchOff",
-  () => redirect("/maintenance"),
-);
+export default Search;

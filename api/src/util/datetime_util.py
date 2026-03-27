@@ -93,3 +93,8 @@ def parse_grants_gov_date(date_str: str | None) -> date | None:
         return datetime.fromisoformat(cleaned_date_str).date()
     except ValueError as e:
         raise ValueError(f"Could not parse date string '{date_str}': {e}") from e
+
+
+def from_timestamp(timestamp: int) -> datetime:
+    """Convert an epoch timestamp (in milliseconds) into a datetime object in timezone aware UTC."""
+    return datetime.fromtimestamp(timestamp / 1000.0, timezone.utc)

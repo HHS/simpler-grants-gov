@@ -3,9 +3,12 @@ import { axe } from "jest-axe";
 import { identity } from "lodash";
 import Applications from "src/app/[locale]/(base)/applications/page";
 import { UnauthorizedError } from "src/errors";
-import { ApplicationDetail } from "src/types/applicationResponseTypes";
+import {
+  ApplicationDetail,
+  ApplicationStatus,
+} from "src/types/applicationResponseTypes";
 import { DeepPartial } from "src/utils/testing/commonTestUtils";
-import { localeParams, useTranslationsMock } from "src/utils/testing/intlMocks";
+import { localeParams } from "src/utils/testing/intlMocks";
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
@@ -19,14 +22,20 @@ jest.mock("next-intl/server", () => ({
   setRequestLocale: identity,
 }));
 
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
-
 const applications = jest.fn().mockResolvedValue([]);
 
 jest.mock("src/services/fetch/fetchers/applicationsFetcher", () => ({
   fetchApplications: () => applications() as Promise<ApplicationDetail[]>,
+}));
+
+const mockBreadcrumbs = jest.fn();
+
+jest.mock("src/components/Breadcrumbs", () => ({
+  __esModule: true,
+  default: (props: { breadcrumbList: { title: string; path: string }[] }) => {
+    mockBreadcrumbs(props);
+    return <nav data-testid="mock-breadcrumbs" />;
+  },
 }));
 
 describe("Applications", () => {
@@ -37,6 +46,25 @@ describe("Applications", () => {
   describe("no applications have been saved", () => {
     beforeEach(() => {
       applications.mockResolvedValue([]);
+    });
+
+    it("passes the correct breadcrumbs", async () => {
+      const component = await Applications({ params: localeParams });
+      render(component);
+
+      expect(screen.getByTestId("mock-breadcrumbs")).toBeInTheDocument();
+
+      expect(mockBreadcrumbs).toHaveBeenCalledWith({
+        breadcrumbList: [
+          {
+            title: "breadcrumbWorkspace",
+            path: "/dashboard",
+          },
+          {
+            title: "breadcrumbApplications",
+          },
+        ],
+      });
     });
 
     it("renders correct text", async () => {
@@ -92,7 +120,7 @@ describe("Applications", () => {
       basicApplication = {
         application_id: "1a4d247b-ca08-4855-bdcd-e48432cd6d71",
         application_name: "first!!!",
-        application_status: "in_progress",
+        application_status: ApplicationStatus.IN_PROGRESS,
         competition: {
           closing_date: "2025-11-11",
           competition_id: "642a4dda-8c13-4bc6-bbae-1a0d133d90a6",
@@ -181,7 +209,10 @@ describe("Applications", () => {
 
       it("if submitted", async () => {
         applications.mockResolvedValue([
-          { ...basicApplication, application_status: "submitted" },
+          {
+            ...basicApplication,
+            application_status: ApplicationStatus.SUBMITTED,
+          },
         ]);
         const component = await Applications({ params: localeParams });
         render(component);
@@ -193,7 +224,10 @@ describe("Applications", () => {
 
       it("if approved", async () => {
         applications.mockResolvedValue([
-          { ...basicApplication, application_status: "approved" },
+          {
+            ...basicApplication,
+            application_status: ApplicationStatus.ACCEPTED,
+          },
         ]);
         const component = await Applications({ params: localeParams });
         render(component);

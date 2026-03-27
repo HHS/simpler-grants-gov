@@ -1,9 +1,3 @@
-variable "domain_name" {
-  description = "The domain name to configure SES"
-  type        = string
-  default     = null
-}
-
 variable "domain_identity_arn" {
   description = "The ARN of the domain identity to in use for SES"
   type        = string

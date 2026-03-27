@@ -159,40 +159,44 @@ def user_token_logout(db_session: db.Session) -> response.ApiResponse:
 ```
 
 # System-to-system Auth
-Our system-to-system (S2S) authentication approach right now is in development, while a basic key auth
-approach currently exists, further improvements are being scoped out.
+Our system supports database-based API Key authentication. These are linked to specific users and can be passed via the X-API-Key header.
 
 
 # Supporting multiple authentication schemes on an endpoint
-An auth class called [MultiAuth](https://github.com/miguelgrinberg/Flask-HTTPAuth/blob/main/examples/multi_auth.py) exists
-which can be used to define multiple auth approaches on a single endpoint that get checked in order.
+We can put multiple alternative authentication approaches on a single endpoint.
 
-However, it doesn't work with APIFlask which tries to pull information out that doesn't exist, and
-can't be added as APIFlask expects at most a single security scheme per auth decorator.
+Assuming you already have authentication approaches defined as specified in the
+[APIFlask docs](https://apiflask.com/authentication/), then you can define
+a multi-auth handler by deriving it from `MultiAuth`. We have several of these
+defined, but most likely you'll want to use the one we have for JWTs + User
+API Key auth.
 
-We can work around this by not using the APIFlask decorator for your endpoint and instead doing:
-```py
+If you want to add JWT + User API Key auth to your endpoint simply do:
+```python
 from typing import cast
+
+import src.adapters.db as db
+import src.adapters.db.flask_db as flask_db
 import src.api.response as response
 
-from src.auth.multi_auth import jwt_or_key_multi_auth, jwt_or_key_security_schemes, AuthType
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 
-@jwt_or_key_multi_auth.login_required
-@example_blueprint.doc(security=jwt_or_key_security_schemes)
-def my_example_endpoint() -> response.ApiResponse:
-    user_container = jwt_or_key_multi_auth.get_user()
-    if user_container.auth_type == AuthType.API_KEY_AUTH:
-        user = cast(ApiKeyUser, user_container.user)
-    elif user_container.auth_type == AuthType.USER_JWT_AUTH:
-        user = cast(UserTokenSession, user_container.user)
+@example_blueprint.post("/example")
+# Likely a few other decorators for schemas
+@example_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def my_example_endpoint(db_session: db.Session) -> response.ApiResponse:
+    # This gets the user record regardless of whether they
+    # used JWT or API key auth.
+    user = jwt_or_api_user_key_multi_auth.get_user()
+    with db_session.begin():
+        # The user won't be in the DB session as the auth logic uses
+        # a separate DB session. Doing an add here will move it over
+        # and allow you to interact with the user. Not doing this
+        # will mean you can't fetch anything connected to the user.
+        db_session.add(user)
+        result = do_whatever(db_session, user, {})
 
-    # do auth stuff dependent on the type of user
-
-    return response.ApiResponse(message="Success")
+    return response.ApiResponse(message="Success", data=result)
 ```
-The two changes from an ordinary endpoint:
-* Instead of doing `@example_blueprint.auth_required(auth_class)`, do `auth_class.login_required`. This changes nothing about how the auth actually works, it just avoids APIFlask from trying to parse it.
-* Add the auth security schemes as a list of strings to the `security` object. The scheme values are what we pass into `security_scheme_name` function when creating the HTTPTokenAuth class objects like `api_jwt_auth`
 
-Additionally, a utility class derived from `MultiAuth` has been created
-to handle getting the user object and telling you what type they are.

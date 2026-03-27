@@ -4,13 +4,7 @@ import React, { ReactNode } from "react";
 
 import "@testing-library/jest-dom";
 
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
-
 import { RoleChangeModal } from "src/components/manageUsers/RoleChangeModal";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 interface ModalFooterProps {
   children: ReactNode;

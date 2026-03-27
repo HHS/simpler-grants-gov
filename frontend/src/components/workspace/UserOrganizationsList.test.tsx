@@ -4,15 +4,8 @@ import {
   fakeOrganizationDetailsResponse,
   fakeUserPrivilegesResponse,
 } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
-
-import React from "react";
 
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 // Mock the userRoleForOrganization helper so the component renders a predictable role string
 jest.mock("src/utils/userUtils", () => ({

@@ -141,6 +141,15 @@ it will be caught when you send a pull request.
 
 In order to remove a column, we'll first need to remove all usage of the column in the API code base.
 
+One usage case is in transformation module (e.g. \simpler-grants-gov\api\src\data_migration\transformation\transform_util.py).
+
+```diff
+def transform_example():
+    example.first_column = example_source.first_column
+-   example.my_column = example_source.my_column    # column to be removed
+    return example
+```
+
 However, since the column will still be in the database model, SQLAlchemy will still include it in `SELECT`s and `INSERT`s for the table. We'll need to set this column to `deferred`, in order to exclude it from queries, and to `evaluates_none`, to stop inserting null for it. This does require that the column be nullable to work, if it isn't you'll first need to make it nullable in an earlier migration.
 
 Note: `evaulates_none` is required if the column has a server_default as it will make it so if a field isn't set, rather than excluding it from the insert into the DB, it sets it to `null` so the server_default isn't used. If the column has no `server_default`, it isn't technically required to use it, but we recommend adding it because it's simpler to have a single pattern to follow rather than multiple.

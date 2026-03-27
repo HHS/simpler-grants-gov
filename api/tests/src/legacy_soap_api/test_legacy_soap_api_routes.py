@@ -1,8 +1,23 @@
+import logging
 from unittest import mock
 
 from lxml import etree
 
+from src.constants.lookup_constants import Privilege
+from src.legacy_soap_api.legacy_soap_api_auth import (
+    USE_SOAP_JWT_HEADER_KEY,
+    SOAPAuth,
+    SOAPClientCertificate,
+)
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
+from tests.lib.data_factories import setup_cert_user
+from tests.src.db.models.factories import (
+    AgencyFactory,
+    ApplicationFactory,
+    ApplicationSubmissionFactory,
+    CompetitionFactory,
+    OpportunityFactory,
+)
 
 NSMAP = {
     "envelope": "http://schemas.xmlsoap.org/soap/envelope/",
@@ -14,6 +29,9 @@ SIMPLER_TRACKING_NUMBER = "GRANT80000008"
 LEGACY_TRACKING_NUMBER = "GRANT00000008"
 GET_APPLICATION_PATH = f"{{{NSMAP['envelope']}}}Body/{{{NSMAP['application_request']}}}GetApplicationRequest/{{{NSMAP['tracking_number']}}}GrantsGovTrackingNumber"
 GET_APPLICATION_ZIP_PATH = f"{{{NSMAP['envelope']}}}Body/{{{NSMAP['application_request']}}}GetApplicationZipRequest/{{{NSMAP['tracking_number']}}}GrantsGovTrackingNumber"
+MOCK_FINGERPRINT = "123"
+MOCK_CERT = "456"
+MOCK_CERT_STR = "certstr"
 
 
 def test_successful_request(client, fixture_from_file, caplog) -> None:
@@ -39,6 +57,53 @@ def test_successful_request(client, fixture_from_file, caplog) -> None:
     )
     assert req_message.soap_api == "applicants"
     assert req_message.soap_request_operation_name == "GetOpportunityListRequest"
+
+
+def test_soap_jwt_flag_is_enabled_is_logged(client, fixture_from_file, caplog) -> None:
+    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
+    fixture_path = (
+        "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
+    )
+    mock_data = fixture_from_file(fixture_path)
+    response = client.post(full_path, data=mock_data, headers={f"{USE_SOAP_JWT_HEADER_KEY}": "1"})
+    assert response.status_code == 200
+    assert "soap_client_certificate: Use-Soap-Jwt flag is enabled" in caplog.messages
+
+
+def test_soap_jwt_flag_is_disabled_is_not_logged(client, fixture_from_file, caplog) -> None:
+    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
+    fixture_path = (
+        "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
+    )
+    mock_data = fixture_from_file(fixture_path)
+    response = client.post(full_path, data=mock_data, headers={f"{USE_SOAP_JWT_HEADER_KEY}": "0"})
+    assert response.status_code == 200
+    post_message = [
+        record
+        for record in caplog.records
+        if record.message == "soap_client_certificate: Use-Soap-Jwt flag is enabled"
+    ]
+    assert len(post_message) == 0
+
+
+def test_soap_jwt_flag_is_not_included_is_treated_as_if_it_is_disabled(
+    client, fixture_from_file, caplog
+) -> None:
+    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
+    fixture_path = (
+        "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
+    )
+    mock_data = fixture_from_file(fixture_path)
+    response = client.post(full_path, data=mock_data)
+    assert response.status_code == 200
+
+    # Verify that certain logs are present with expected extra values
+    post_message = [
+        record
+        for record in caplog.records
+        if record.message == "soap_client_certificate: use_soap_jwt flag is enabled"
+    ]
+    assert len(post_message) == 0
 
 
 def test_invalid_service_name_not_found(client) -> None:
@@ -196,3 +261,44 @@ def test_simpler_getapplicationzip_operation_returns_not_found_response_includes
     assert (
         response.headers["Set-Cookie"] == "JSESSIONID=xyz; Path=/grantsws-agency; Secure; HttpOnly"
     )
+
+
+def test_simpler_getapplicationzip_operation_raising_httperror_due_to_privileges_logs_info(
+    client, fixture_from_file, enable_factory_create, caplog
+) -> None:
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    WRONG_PRIVILEGES = {Privilege.READ_TEST_USER_TOKEN}
+    user, role, soap_client_certificate = setup_cert_user(agency, WRONG_PRIVILEGES)
+    application = ApplicationFactory.create(competition=competition)
+    submission = ApplicationSubmissionFactory.create(application=application)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    fixture_path = "/legacy_soap_api/grantors/get_application_zip_request.xml"
+    mock_data = fixture_from_file(fixture_path)
+    envelope = etree.fromstring(mock_data)
+    tracking_number = envelope.find(GET_APPLICATION_ZIP_PATH)
+    tracking_number.text = f"GRANT{submission.legacy_tracking_number}"
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+    )
+    with mock.patch("src.legacy_soap_api.legacy_soap_api_routes.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        response = client.post(
+            full_path, data=etree.tostring(envelope), headers={"Use-Simpler-Override": "true"}
+        )
+    assert response.status_code == 500
+    info_messages = [
+        record
+        for record in caplog.records
+        if record.message
+        == "soap_client_certificate: User did not have permission to access this application"
+    ]
+    assert len(info_messages) == 1
+    error_records = [record for record in caplog.records if record.levelno >= logging.ERROR]
+    assert len(error_records) == 0

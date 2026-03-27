@@ -1,6 +1,5 @@
 import { UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 import { getUserPrivileges } from "src/services/fetch/fetchers/userFetcher";
 import { Organization } from "src/types/applicationResponseTypes";
@@ -9,10 +8,10 @@ import { UserPrivilegesResponse } from "src/types/userTypes";
 
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
-import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
+import Breadcrumbs from "src/components/Breadcrumbs";
 import { AuthenticationGate } from "src/components/user/AuthenticationGate";
 import { UserOrganizationsList } from "src/components/workspace/UserOrganizationsList";
 
@@ -20,7 +19,18 @@ const OrganizationsPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Organizations");
   return (
     <GridContainer>
-      <h1 className="margin-top-9 margin-bottom-5">{t("pageTitle")}</h1>
+      <Breadcrumbs
+        breadcrumbList={[
+          {
+            title: t("breadcrumbWorkspace"),
+            path: `/dashboard`,
+          },
+          {
+            title: t("breadcrumbOrganizations"),
+          },
+        ]}
+      />
+      <h1 className="margin-top-0 margin-bottom-5">{t("pageTitle")}</h1>
       {children}
     </GridContainer>
   );
@@ -82,8 +92,4 @@ async function OrganizationsPage({ params }: LocalizedPageProps) {
   );
 }
 
-export default withFeatureFlag<LocalizedPageProps, never>(
-  OrganizationsPage,
-  "manageUsersOff",
-  () => redirect("/maintenance"),
-);
+export default OrganizationsPage;

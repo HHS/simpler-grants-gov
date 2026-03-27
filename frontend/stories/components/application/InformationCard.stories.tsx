@@ -1,12 +1,10 @@
-import { Meta } from "@storybook/react";
-
 import {
   ApplicationDetailsCardProps,
   InformationCard,
 } from "src/components/application/InformationCard";
 import applicationMock from "./application.mock.json";
 
-const meta: Meta<typeof InformationCard> = {
+const meta = {
   title: "Components/Application/InformationCard",
   component: InformationCard,
   args: {

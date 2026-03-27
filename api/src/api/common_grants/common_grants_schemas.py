@@ -3,18 +3,22 @@
 This file contains all Marshmallow schemas that correspond to Pydantic models,
 organized by category for better maintainability.
 
-NOTICE: This file is COPIED directly from
-simpler-grants-protocol/lib/python-sdk/common_grants_sdk/schemas/marshmallow/
-and then MODIFIED to change imports as described below.
-
-    ORIGINAL:
-        from marshmallow import Schema, fields, validate
-    MODIFIED
-        from src.api.schemas.extension import Schema, fields, validators as validate
 """
 
 from typing import Any
 
+from src.api.common_grants.common_grants_custom_fields import (
+    additionalInfo,
+    agency,
+    assistanceListings,
+    attachments,
+    contactInfo,
+    costSharing,
+    federalFundingSource,
+    federalOpportunityNumber,
+    fiscalYear,
+    legacySerialId,
+)
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.extension import validators as validate
 
@@ -26,10 +30,13 @@ from src.api.schemas.extension import validators as validate
 class Money(Schema):
     """Represents a monetary amount in a specific currency."""
 
-    amount = fields.String(required=True, metadata={"description": "The amount of money"})
+    amount = fields.String(
+        required=True,
+        metadata={"description": "The amount of money", "example": "1000000.0"},
+    )
     currency = fields.String(
         required=True,
-        metadata={"description": "The ISO 4217 currency code (e.g., 'USD', 'EUR')"},
+        metadata={"description": "The ISO 4217 currency code", "example": "USD"},
     )
 
 
@@ -37,20 +44,36 @@ class SingleDateEvent(Schema):
     """Represents a single date event."""
 
     name = fields.String(
-        allow_none=True, metadata={"description": "Human-readable name of the event"}
+        allow_none=True,
+        metadata={
+            "description": "Human-readable name of the event",
+            "example": "Application period begins",
+        },
     )
-    eventType = fields.String(allow_none=True, metadata={"description": "Type of event"})
+    eventType = fields.String(
+        allow_none=True,
+        metadata={"description": "Type of event", "example": "singleDate"},
+    )
     description = fields.String(
         allow_none=True,
-        metadata={"description": "Description of what this event represents"},
+        metadata={
+            "description": "Description of what this event represents",
+            "example": "Application period begins",
+        },
     )
     date = fields.Date(
         allow_none=True,
-        metadata={"description": "Date of the event in ISO 8601 format: YYYY-MM-DD"},
+        metadata={
+            "description": "Date of the event in ISO 8601 format: YYYY-MM-DD",
+            "example": "2026-02-27",
+        },
     )
     time = fields.Time(
         allow_none=True,
-        metadata={"description": "Time of the event in ISO 8601 format: HH:MM:SS"},
+        metadata={
+            "description": "Time of the event in ISO 8601 format: HH:MM:SS",
+            "example": "11:15:00",
+        },
     )
 
 
@@ -61,8 +84,20 @@ class DateRange(Schema):
     # when they are `Date` type they cause a runtime serialization error in an
     # APIFlask api implementation (e.g. simpler-grants-gov/api), and the only
     # currently known workaround is to use the `Raw` type instead
-    min = fields.Raw(allow_none=True, metadata={"description": "The minimum date in the range"})
-    max = fields.Raw(allow_none=True, metadata={"description": "The maximum date in the range"})
+    min = fields.Raw(
+        allow_none=True,
+        metadata={
+            "description": "The minimum date in the range",
+            "example": "2021-01-01",
+        },
+    )
+    max = fields.Raw(
+        allow_none=True,
+        metadata={
+            "description": "The maximum date in the range",
+            "example": "2021-01-02",
+        },
+    )
 
 
 class MoneyRange(Schema):
@@ -104,7 +139,8 @@ class EventBase(Schema):
     name = fields.String(
         required=True,
         metadata={
-            "description": "Human-readable name of the event (e.g., 'Application posted', 'Question deadline')"
+            "description": "Human-readable name of the event (e.g., 'Application posted', 'Question deadline')",
+            "example": "Application deadline",
         },
     )
     eventType = EventType(
@@ -112,7 +148,10 @@ class EventBase(Schema):
     )
     description = fields.String(
         allow_none=True,
-        metadata={"description": "Description of what this event represents"},
+        metadata={
+            "description": "Description of what this event represents",
+            "example": "The deadline for submitting applications",
+        },
     )
 
 
@@ -121,19 +160,31 @@ class DateRangeEvent(EventBase):
 
     startDate = fields.Date(
         required=True,
-        metadata={"description": "Start date of the event in ISO 8601 format: YYYY-MM-DD"},
+        metadata={
+            "description": "Start date of the event in ISO 8601 format: YYYY-MM-DD",
+            "example": "2026-01-01",
+        },
     )
     startTime = fields.Time(
         allow_none=True,
-        metadata={"description": "Start time of the event in ISO 8601 format: HH:MM:SS"},
+        metadata={
+            "description": "Start time of the event in ISO 8601 format: HH:MM:SS",
+            "example": "09:00:00",
+        },
     )
     endDate = fields.Date(
         required=True,
-        metadata={"description": "End date of the event in ISO 8601 format: YYYY-MM-DD"},
+        metadata={
+            "description": "End date of the event in ISO 8601 format: YYYY-MM-DD",
+            "example": "2026-12-31",
+        },
     )
     endTime = fields.Time(
         allow_none=True,
-        metadata={"description": "End time of the event in ISO 8601 format: HH:MM:SS"},
+        metadata={
+            "description": "End time of the event in ISO 8601 format: HH:MM:SS",
+            "example": "17:00:00",
+        },
     )
 
 
@@ -142,7 +193,10 @@ class OtherEvent(EventBase):
 
     details = fields.String(
         allow_none=True,
-        metadata={"description": "Details of the event's timeline (e.g. 'Every other Tuesday')"},
+        metadata={
+            "description": "Details of the event's timeline (e.g. 'Every other Tuesday')",
+            "example": "Every other Tuesday",
+        },
     )
 
 
@@ -151,35 +205,18 @@ class SystemMetadata(Schema):
 
     createdAt = fields.DateTime(
         required=True,
-        metadata={"description": "The timestamp (in UTC) at which the record was created."},
+        metadata={
+            "description": "The timestamp (in UTC) at which the record was created.",
+            "example": "2026-01-01T00:00:00Z",
+        },
     )
     lastModifiedAt = fields.DateTime(
         required=True,
-        metadata={"description": "The timestamp (in UTC) at which the record was last modified."},
+        metadata={
+            "description": "The timestamp (in UTC) at which the record was last modified.",
+            "example": "2026-02-01T00:00:00Z",
+        },
     )
-
-
-class CustomFieldType(fields.String):
-    """Enum field for custom field types."""
-
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(
-            validate=validate.OneOf(["string", "number", "integer", "boolean", "object", "array"]),
-            metadata={
-                "description": "The JSON schema type to use when de-serializing the value field"
-            },
-            **kwargs
-        )
-
-
-class CustomField(Schema):
-    """Schema for defining custom fields on a record."""
-
-    name = fields.String(required=True)
-    fieldType = CustomFieldType(required=True)
-    schema = fields.URL(allow_none=True)
-    value = fields.Raw(required=True)
-    description = fields.String(allow_none=True)
 
 
 # =============================================================================
@@ -222,7 +259,10 @@ class OppStatus(Schema):
 
     value = fields.String(
         allow_none=True,
-        metadata={"description": "The status value, from a predefined set of options"},
+        metadata={
+            "description": "The status value, from a predefined set of options",
+            "example": "active, forecasted, closed",
+        },
     )
     customValue = fields.String(allow_none=True, metadata={"description": "A custom status value"})
     description = fields.String(
@@ -237,7 +277,8 @@ class OppFunding(Schema):
     details = fields.String(
         allow_none=True,
         metadata={
-            "description": "Details about the funding available for this opportunity that don't fit other fields"
+            "description": "Details about the funding available for this opportunity that don't fit other fields",
+            "example": "Awards are subject to the availability of appropriated funds.",
         },
     )
     totalAmountAvailable = fields.Nested(
@@ -257,15 +298,18 @@ class OppFunding(Schema):
     )
     minAwardCount = fields.Integer(
         allow_none=True,
-        metadata={"description": "Minimum number of awards granted"},
+        metadata={"description": "Minimum number of awards granted", "example": 1},
     )
     maxAwardCount = fields.Integer(
         allow_none=True,
-        metadata={"description": "Maximum number of awards granted"},
+        metadata={"description": "Maximum number of awards granted", "example": 10},
     )
     estimatedAwardCount = fields.Integer(
         allow_none=True,
-        metadata={"description": "Estimated number of awards that will be granted"},
+        metadata={
+            "description": "Estimated number of awards that will be granted",
+            "example": 5,
+        },
     )
 
 
@@ -290,16 +334,40 @@ class OppTimeline(Schema):
     )
 
 
+class OpportunityCustomFields(Schema):
+    """
+    This class serves as the collection point for all custom fields on the OpportunityBase schema.
+    It is passed to (camelCase) customFields on OpportunityBase with the fields.nested property
+    """
+
+    legacySerialId = fields.Nested(legacySerialId, allow_none=True)
+    federalOpportunityNumber = fields.Nested(federalOpportunityNumber, allow_none=True)
+    assistanceListings = fields.Nested(assistanceListings, allow_none=True)
+    agency = fields.Nested(agency, allow_none=True)
+    attachments = fields.Nested(attachments, allow_none=True)
+    federalFundingSource = fields.Nested(federalFundingSource, allow_none=True)
+    fiscalYear = fields.Nested(fiscalYear, allow_none=True)
+    costSharing = fields.Nested(costSharing, allow_none=True)
+    additionalInfo = fields.Nested(additionalInfo, allow_none=True)
+    contactInfo = fields.Nested(contactInfo, allow_none=True)
+
+
 class OpportunityBase(Schema):
     """Base opportunity model."""
 
     createdAt = fields.Raw(
         allow_none=True,
-        metadata={"description": "The timestamp (in UTC) at which the record was created."},
+        metadata={
+            "description": "The timestamp (in UTC) at which the record was created.",
+            "example": "2026-01-01T00:00:00Z",
+        },
     )
     lastModifiedAt = fields.Raw(
         allow_none=True,
-        metadata={"description": "The timestamp (in UTC) at which the record was last modified."},
+        metadata={
+            "description": "The timestamp (in UTC) at which the record was last modified.",
+            "example": "2026-02-01T00:00:00Z",
+        },
     )
     id = fields.UUID(
         allow_none=True,
@@ -307,7 +375,10 @@ class OpportunityBase(Schema):
     )
     title = fields.String(
         allow_none=True,
-        metadata={"description": "Title or name of the funding opportunity"},
+        metadata={
+            "description": "Title or name of the funding opportunity",
+            "example": "Community Health Initiative Grant",
+        },
     )
     status = fields.Nested(
         OppStatus,
@@ -316,7 +387,10 @@ class OpportunityBase(Schema):
     )
     description = fields.String(
         allow_none=True,
-        metadata={"description": "Description of the opportunity's purpose and scope"},
+        metadata={
+            "description": "Description of the opportunity's purpose and scope",
+            "example": "Funding to support community health initiatives in underserved areas.",
+        },
     )
     funding = fields.Nested(
         OppFunding,
@@ -332,11 +406,13 @@ class OpportunityBase(Schema):
     )
     source = fields.Raw(
         allow_none=True,
-        metadata={"description": "URL for the original source of the opportunity"},
+        metadata={
+            "description": "URL for the original source of the opportunity",
+            "example": "https://grants.gov/web/grants/view-opportunity.html?oppId=12345",
+        },
     )
-    customFields = fields.Dict(
-        keys=fields.String(),
-        values=fields.Nested(CustomField),
+    customFields = fields.Nested(
+        OpportunityCustomFields,
         allow_none=True,
         metadata={"description": "Additional custom fields specific to this opportunity"},
     )
@@ -409,11 +485,17 @@ class DefaultFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The operator to apply to the filter value"},
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "eq",
+        },
     )
     value = fields.Raw(
         required=True,
-        metadata={"description": "The value to use for the filter operation"},
+        metadata={
+            "description": "The value to use for the filter operation",
+            "example": "open",
+        },
     )
 
 
@@ -421,13 +503,19 @@ class StringArrayFilter(Schema):
     """Filter for string arrays."""
 
     operator = fields.String(
-        allow_none=True,
-        metadata={"description": "The operator to apply to the filter value"},
+        required=True,
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "in",
+        },
     )
     value = fields.List(
         fields.String,
-        allow_none=True,
-        metadata={"description": "The array of string values"},
+        required=True,
+        metadata={
+            "description": "The array of string values",
+            "example": ["open", "forecasted"],
+        },
     )
 
 
@@ -436,11 +524,17 @@ class StringComparisonFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The operator to apply to the filter value"},
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "like",
+        },
     )
     value = fields.String(
         required=True,
-        metadata={"description": "The string value to compare against"},
+        metadata={
+            "description": "The string value to compare against",
+            "example": "health",
+        },
     )
 
 
@@ -448,11 +542,14 @@ class DateRangeFilter(Schema):
     """Filter for date ranges."""
 
     operator = fields.String(
-        allow_none=True,
-        metadata={"description": "The operator to apply to the filter value"},
+        required=True,
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "between",
+        },
     )
     value = fields.Nested(
-        DateRange, allow_none=True, metadata={"description": "The date range value"}
+        DateRange, required=True, metadata={"description": "The date range value"}
     )
 
 
@@ -461,11 +558,17 @@ class DateComparisonFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The operator to apply to the filter value"},
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "gte",
+        },
     )
     value = fields.Date(
         required=True,
-        metadata={"description": "The date value to compare against"},
+        metadata={
+            "description": "The date value to compare against",
+            "example": "2026-01-01",
+        },
     )
 
 
@@ -473,11 +576,14 @@ class MoneyRangeFilter(Schema):
     """Filter for money ranges."""
 
     operator = fields.String(
-        allow_none=True,
-        metadata={"description": "The operator to apply to the filter value"},
+        required=True,
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "between",
+        },
     )
     value = fields.Nested(
-        MoneyRange, allow_none=True, metadata={"description": "The money range value"}
+        MoneyRange, required=True, metadata={"description": "The money range value"}
     )
 
 
@@ -486,7 +592,10 @@ class MoneyComparisonFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The operator to apply to the filter value"},
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "gte",
+        },
     )
     value = fields.Nested(
         Money,
@@ -500,11 +609,11 @@ class NumberRange(Schema):
 
     min: Any = fields.Float(
         required=True,
-        metadata={"description": "The minimum value in the range"},
+        metadata={"description": "The minimum value in the range", "example": 0},
     )
     max: Any = fields.Float(
         required=True,
-        metadata={"description": "The maximum value in the range"},
+        metadata={"description": "The maximum value in the range", "example": 1000000},
     )
 
 
@@ -513,11 +622,17 @@ class NumberComparisonFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The comparison operator to apply to the filter value"},
+        metadata={
+            "description": "The comparison operator to apply to the filter value",
+            "example": "gte",
+        },
     )
     value: Any = fields.Float(
         required=True,
-        metadata={"description": "The numeric value to compare against"},
+        metadata={
+            "description": "The numeric value to compare against",
+            "example": 1000,
+        },
     )
 
 
@@ -526,7 +641,10 @@ class NumberRangeFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The operator to apply to the filter value"},
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "between",
+        },
     )
     value = fields.Nested(
         NumberRange,
@@ -540,12 +658,15 @@ class NumberArrayFilter(Schema):
 
     operator = fields.String(
         required=True,
-        metadata={"description": "The operator to apply to the filter value"},
+        metadata={
+            "description": "The operator to apply to the filter value",
+            "example": "in",
+        },
     )
     value = fields.List(
         fields.Float,
         required=True,
-        metadata={"description": "The array of numeric values"},
+        metadata={"description": "The array of numeric values", "example": [1, 2, 3]},
     )
 
 
@@ -607,9 +728,12 @@ class OppFilters(Schema):
         allow_none=True,
         metadata={"description": "`funding.maxAwardAmount` is between the given range"},
     )
-    customFilters = fields.Raw(
+    customFilters = fields.Dict(
         allow_none=True,
-        metadata={"description": "Additional custom filters to apply to the search"},
+        metadata={
+            "description": "Additional custom filters to apply to the search",
+            "example": {},
+        },
     )
 
 
@@ -621,33 +745,47 @@ class OppFilters(Schema):
 class PaginatedBodyParams(Schema):
     """Parameters for pagination in the body of a request."""
 
-    page = fields.Integer(allow_none=True, metadata={"description": "The page number to retrieve"})
+    page = fields.Integer(
+        allow_none=True,
+        metadata={"description": "The page number to retrieve", "example": 1},
+    )
     pageSize = fields.Integer(
-        allow_none=True, metadata={"description": "The number of items per page"}
+        allow_none=True,
+        metadata={"description": "The number of items per page", "example": 10},
     )
 
 
 class PaginatedQueryParams(Schema):
     """Parameters for pagination in query parameters."""
 
-    page = fields.Integer(allow_none=True, metadata={"description": "The page number to retrieve"})
+    page = fields.Integer(
+        allow_none=True,
+        metadata={"description": "The page number to retrieve", "example": 1},
+    )
     pageSize = fields.Integer(
-        allow_none=True, metadata={"description": "The number of items per page"}
+        allow_none=True,
+        metadata={"description": "The number of items per page", "example": 10},
     )
 
 
 class PaginatedResultsInfo(Schema):
     """Information about the pagination of a list."""
 
-    page = fields.Integer(allow_none=True, metadata={"description": "The page number to retrieve"})
+    page = fields.Integer(
+        allow_none=True,
+        metadata={"description": "The page number to retrieve", "example": 1},
+    )
     pageSize = fields.Integer(
-        allow_none=True, metadata={"description": "The number of items per page"}
+        allow_none=True,
+        metadata={"description": "The number of items per page", "example": 10},
     )
     totalItems = fields.Integer(
-        required=True, metadata={"description": "The total number of items"}
+        required=True,
+        metadata={"description": "The total number of items", "example": 100},
     )
     totalPages = fields.Integer(
-        required=True, metadata={"description": "The total number of pages"}
+        required=True,
+        metadata={"description": "The total number of pages", "example": 10},
     )
 
 
@@ -672,11 +810,14 @@ class SortBase(Schema):
 
     sortBy = fields.String(
         required=True,
-        metadata={"description": "The field to sort by"},
+        metadata={"description": "The field to sort by", "example": "lastModifiedAt"},
     )
     customSortBy = fields.String(
         allow_none=True,
-        metadata={"description": "Implementation-defined sort key"},
+        metadata={
+            "description": "Implementation-defined sort key",
+            "example": "custom_field_1",
+        },
     )
 
 
@@ -726,25 +867,37 @@ class OppSorting(Schema):
     sortBy = OppSortBy(required=True)
     sortOrder = fields.String(
         allow_none=True,
-        metadata={"description": "The sort order (asc or desc)"},
+        metadata={"description": "The sort order (asc or desc)", "example": "desc"},
     )
     customSortBy = fields.String(
         allow_none=True,
-        metadata={"description": "The custom field to sort by when sortBy is 'custom'"},
+        metadata={
+            "description": "The custom field to sort by when sortBy is 'custom'",
+            "example": "custom_field_1",
+        },
     )
 
 
 class SortedResultsInfo(Schema):
     """Information about sorting results."""
 
-    sortBy = fields.String(required=True, metadata={"description": "The field to sort by"})
+    sortBy = fields.String(
+        required=True,
+        metadata={"description": "The field to sort by", "example": "lastModifiedAt"},
+    )
     customSortBy = fields.String(
         allow_none=True,
-        metadata={"description": "Implementation-defined sort key"},
+        metadata={
+            "description": "Implementation-defined sort key",
+            "example": "custom_field_1",
+        },
     )
     sortOrder = fields.String(
         required=True,
-        metadata={"description": "The order in which the results are sorted"},
+        metadata={
+            "description": "The order in which the results are sorted",
+            "example": "desc",
+        },
     )
     errors = fields.List(
         fields.String,
@@ -761,18 +914,19 @@ class SortedResultsInfo(Schema):
 class OpportunitySearchRequest(Schema):
     """Request schema for searching opportunities."""
 
-    search = fields.String(allow_none=True, metadata={"description": "Search query string"})
+    search = fields.String(
+        allow_none=True,
+        metadata={"description": "Search query string", "example": "community health"},
+    )
     filters = fields.Nested(
         OppFilters,
-        allow_none=True,
         metadata={"description": "Filters to apply to the opportunity search"},
     )
     sorting = fields.Nested(
         OppSorting,
-        allow_none=True,
         metadata={"description": "Sorting parameters for opportunities"},
     )
-    pagination = fields.Nested(PaginatedBodyParams, allow_none=True)
+    pagination = fields.Nested(PaginatedBodyParams)
 
 
 # =============================================================================

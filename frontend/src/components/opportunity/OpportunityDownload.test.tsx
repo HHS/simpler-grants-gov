@@ -1,12 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { fakeOpportunityDocument } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import OpportunityDownload from "src/components/opportunity/OpportunityDownload";
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 describe("OpportunityDownload Component", () => {
   it("renders link if at least one attachment is present", () => {

@@ -8,11 +8,7 @@ from src.db.models.user_models import AgencyUser, LegacyCertificate
 from src.search.backend.load_agencies_to_index import LoadAgenciesToIndex, LoadAgenciesToIndexConfig
 from tests.conftest import BaseTestClass
 from tests.lib.db_testing import cascade_delete_from_db_table
-from tests.src.db.models.factories import (
-    AgencyFactory,
-    ExcludedOpportunityReviewFactory,
-    OpportunityFactory,
-)
+from tests.src.db.models.factories import AgencyFactory, OpportunityFactory
 
 
 class TestLoadAgenciesToIndex(BaseTestClass):
@@ -123,54 +119,3 @@ class TestLoadAgenciesToIndex(BaseTestClass):
             OpportunityStatus.FORECASTED.value
         ]
         assert archived_agency_resp["opportunity_statuses"] == [OpportunityStatus.ARCHIVED.value]
-
-    def test_load_agencies_to_index_review_status(
-        self,
-        db_session,
-        search_client,
-        load_agencies_to_index,
-        agency_index_alias,
-        enable_factory_create,
-    ):
-
-        # Setup data
-        posted_agency = AgencyFactory.create(agency_name="ABC")
-        opp = OpportunityFactory.create(agency_code=posted_agency.agency_code)  # POSTED
-        ExcludedOpportunityReviewFactory.create(legacy_opportunity_id=opp.legacy_opportunity_id)
-
-        load_agencies_to_index.index_name = (
-            load_agencies_to_index.index_name + "-review-status-data"
-        )
-        load_agencies_to_index.run()
-
-        resp = search_client.search(agency_index_alias, {"size": 50})
-
-        assert resp.total_records == 1
-        assert not resp.records[0]["opportunity_statuses"]
-
-    def test_load_agencies_to_index_review_status_multi(
-        self,
-        db_session,
-        search_client,
-        load_agencies_to_index,
-        agency_index_alias,
-        enable_factory_create,
-    ):
-        # Setup data
-        agency = AgencyFactory.create(agency_name="NIH")
-        opp_posted = OpportunityFactory.create(agency_code=agency.agency_code)  # POSTED
-        OpportunityFactory.create(agency_code=agency.agency_code, is_closed_summary=True)  # CLOSED
-
-        ExcludedOpportunityReviewFactory.create(
-            legacy_opportunity_id=opp_posted.legacy_opportunity_id
-        )
-
-        load_agencies_to_index.index_name = (
-            load_agencies_to_index.index_name + "-review-status-multi-data"
-        )
-        load_agencies_to_index.run()
-
-        resp = search_client.search(agency_index_alias, {"size": 50})
-
-        assert resp.total_records == 1
-        assert resp.records[0]["opportunity_statuses"] == [OpportunityStatus.CLOSED.value]

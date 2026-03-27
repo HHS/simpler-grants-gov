@@ -1,10 +1,10 @@
+import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { mockOpportunity } from "src/utils/testing/fixtures";
-import { render, screen, waitFor } from "tests/react-utils";
 
-import React from "react";
-
-import SearchResultsListItem from "src/components/search/SearchResultsListItem";
+import SearchResultsListItem, {
+  updateIsSharedWithOrganizationEnabled,
+} from "./SearchResultsListItem";
 
 describe("SearchResultsListItem", () => {
   it("should not have basic accessibility issues", async () => {
@@ -19,6 +19,21 @@ describe("SearchResultsListItem", () => {
     render(<SearchResultsListItem index={1} opportunity={mockOpportunity} />);
     expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
     expect(screen.getByText("OPP-12345")).toBeInTheDocument();
+  });
+
+  it("renders share with opportunity link", () => {
+    updateIsSharedWithOrganizationEnabled(true);
+    render(
+      <SearchResultsListItem
+        index={1}
+        opportunity={mockOpportunity}
+        saved={true}
+        onShareClick={jest.fn()}
+      />,
+    );
+    expect(
+      screen.getByTestId("share-opportunity-button-id"),
+    ).toBeInTheDocument();
   });
 
   getDateTestCases().forEach(({ api_date, ui_date }) => {

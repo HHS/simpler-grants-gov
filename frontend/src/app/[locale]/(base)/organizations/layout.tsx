@@ -10,7 +10,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("Organizations.pageTitle"),
+    title: `${t("Organizations.pageTitle")} | Simpler.Grants.gov`,
     description: t("Organizations.metaDescription"),
   };
   return meta;

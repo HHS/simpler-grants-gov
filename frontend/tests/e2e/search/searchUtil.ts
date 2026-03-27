@@ -24,31 +24,6 @@ export function expectURLContainsQueryParamValue(
   expect(currentURL).toContain(`${queryParamName}=${queryParamValue}`);
 }
 
-export async function waitForURLContainsQueryParamValue(
-  page: Page,
-  queryParamName: string,
-  queryParamValue: string,
-  timeout = 30000, // query params get set after a debounce period
-) {
-  const endTime = Date.now() + timeout;
-
-  while (Date.now() < endTime) {
-    const url = new URL(page.url());
-    const params = new URLSearchParams(url.search);
-    const actualValue = params.get(queryParamName);
-
-    if (actualValue === queryParamValue) {
-      return;
-    }
-
-    await page.waitForTimeout(500);
-  }
-
-  throw new Error(
-    `URL did not contain query parameter ${queryParamName}=${queryParamValue} within ${timeout}ms`,
-  );
-}
-
 export async function clickSearchNavLink(page: Page) {
   await page.click("nav >> text=Search");
 }
@@ -69,7 +44,10 @@ export async function toggleCheckbox(page: Page, idWithoutHash: string) {
 
 export async function refreshPageWithCurrentURL(page: Page) {
   const currentURL = page.url();
-  await page.goto(currentURL); // go to new url in same tab
+  await page.goto(currentURL, {
+    waitUntil: "domcontentloaded",
+    timeout: 30000,
+  }); // go to new url in same tab
   return page;
 }
 

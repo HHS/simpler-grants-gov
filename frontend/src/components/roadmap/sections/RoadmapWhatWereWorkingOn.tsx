@@ -13,40 +13,36 @@ export default function RoadmapWhatWereWorkingOn() {
   const { contentItems } = messages.Roadmap.sections.progress;
 
   return (
-    <RoadmapPageSection className={"bg-white"} title={t("title")}>
-      {contentItems.map((contentRows, contentRowsIdx) => (
+    <RoadmapPageSection className="bg-base-lightest" title={t("title")}>
+      {contentItems.map((_contentItem, contentItemIdx) => (
         <div
-          className="grid-row grid-gap"
-          key={`roadmap-what-were-working-on-${contentRowsIdx}`}
+          className="margin-bottom-4"
+          key={`roadmap-what-were-working-on-${contentItemIdx}`}
         >
-          {contentRows.map((contentRowItem, contentRowItemIdx) => (
-            <div
-              className="margin-bottom-4 tablet:grid-col-6"
-              key={`roadmap-what-were-working-on-${contentRowsIdx}-${contentRowItemIdx}`}
-            >
-              <h3>
-                {t(`contentItems.${contentRowsIdx}.${contentRowItemIdx}.title`)}
-              </h3>
-              {t.rich(
-                `contentItems.${contentRowsIdx}.${contentRowItemIdx}.content`,
-                {
-                  p: (chunks) => <p className="font-sans-2xs">{chunks}</p>,
-                  linkGithub4571: gitHubLinkForIssue(4571),
-                  linkGithub4577: gitHubLinkForIssue(4577),
-                  linkGithub4572: gitHubLinkForIssue(4572),
-                  linkGithub4575: gitHubLinkForIssue(4575),
-                  linkGithub4576: gitHubLinkForIssue(4576),
-                  linkGithub4579: gitHubLinkForIssue(4579),
-                },
-              )}
-            </div>
-          ))}
+          <h3>{t(`contentItems.${contentItemIdx}.title`)}</h3>
+          {t.rich(`contentItems.${contentItemIdx}.content`, {
+            p: (chunks) => <p className="font-sans-xs">{chunks}</p>,
+            linkGithub7832: gitHubLinkForIssue(7832),
+            linkGithub7830: gitHubLinkForIssue(7830),
+            linkGithub7831: gitHubLinkForIssue(7831),
+            linkGithub7790: gitHubLinkForIssue(7790),
+            linkGithub7906: gitHubLinkForIssue(7906),
+            fiderBoardLink: (chunks) => (
+              <a
+                href="https://simplergrants.fider.io/"
+                target="_blank"
+                className="usa-link--external"
+              >
+                {chunks}
+              </a>
+            ),
+          })}
         </div>
       ))}
       <p>
         <Link
           target="_blank"
-          className="usa-link--external"
+          className="usa-button usa-button--secondary"
           href={ExternalRoutes.GITHUB_REPO_DELIVERABLES}
         >
           <USWDSIcon

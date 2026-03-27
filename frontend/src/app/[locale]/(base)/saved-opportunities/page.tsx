@@ -1,8 +1,6 @@
-import { SAVED_OPPORTUNITIES_CRUMBS } from "src/constants/breadcrumbs";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
-import { SearchResponseData } from "src/types/search/searchRequestTypes";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -10,8 +8,8 @@ import Link from "next/link";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
+import { SavedOpportunitiesController } from "src/components/saved-opportunities/SavedOpportunitiesController";
 import SavedOpportunityStatusFilter from "src/components/saved-opportunities/SavedOpportunityStatusFilter";
-import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
 export const dynamic = "force-dynamic";
@@ -38,26 +36,6 @@ const NoSavedOpportunities = () => {
   );
 };
 
-const SavedOpportunitiesList = ({
-  opportunities,
-}: {
-  opportunities: SearchResponseData;
-}) => {
-  const savedOpportunitiesListItems = opportunities.map(
-    (opportunity, index) =>
-      opportunity && (
-        <li key={opportunity.opportunity_id}>
-          <SearchResultsListItem
-            opportunity={opportunity}
-            saved={true}
-            index={index}
-          />
-        </li>
-      ),
-  );
-  return <ul className="usa-list--unstyled">{savedOpportunitiesListItems}</ul>;
-};
-
 type SavedOpportunitiesPageProps = LocalizedPageProps & {
   searchParams: Promise<{ status?: string }>;
 };
@@ -79,21 +57,35 @@ export default async function SavedOpportunities({
     hasSavedOpportunities = allSavedOpportunities.length > 0;
   }
 
-  // Get full opportunity details for each saved opportunity
   const opportunityPromises = savedOpportunities.map(
     async (savedOpportunity) => {
       const { data: opportunityData } = await getOpportunityDetails(
-        String(savedOpportunity.opportunity_id),
+        savedOpportunity.opportunity_id,
       );
-      return opportunityData;
+
+      return {
+        ...opportunityData,
+        saved_to_organizations: savedOpportunity.saved_to_organizations ?? [],
+      };
     },
   );
+
   const resolvedOpportunities = await Promise.all(opportunityPromises);
 
   return (
     <>
       <GridContainer>
-        <Breadcrumbs breadcrumbList={SAVED_OPPORTUNITIES_CRUMBS} />
+        <Breadcrumbs
+          breadcrumbList={[
+            {
+              title: t("SavedOpportunities.breadcrumbWorkspace"),
+              path: `/dashboard`,
+            },
+            {
+              title: t("SavedOpportunities.breadcrumbSavedOpportunities"),
+            },
+          ]}
+        />
         <h1 className="margin-top-0">{t("SavedOpportunities.heading")}</h1>
       </GridContainer>
       <div className="grid-container padding-y-5">
@@ -103,7 +95,9 @@ export default async function SavedOpportunities({
               <SavedOpportunityStatusFilter status={status || null} />
             </div>
             {resolvedOpportunities.length > 0 ? (
-              <SavedOpportunitiesList opportunities={resolvedOpportunities} />
+              <SavedOpportunitiesController
+                opportunities={resolvedOpportunities}
+              />
             ) : (
               <p>{t("SavedOpportunities.noMatchingStatus")}</p>
             )}

@@ -295,6 +295,11 @@ class OpportunityV1Schema(Schema):
         },
     )
 
+    top_level_agency_code = fields.String(
+        allow_none=True,
+        metadata={"description": "The top-level (parent) agency", "example": "HHS"},
+    )
+
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
@@ -462,6 +467,14 @@ class OpportunityFacetV1Schema(Schema):
         },
     )
 
+    post_date = fields.Dict(
+        keys=fields.String(),
+        values=fields.Integer(),
+        metadata={
+            "description": "The counts of post_date values in the full response",
+        },
+    )
+
 
 class ExperimentalV1Schema(Schema):
     scoring_rule = fields.Enum(
@@ -556,6 +569,16 @@ class SavedOpportunitySummaryV1Schema(Schema):
     )
 
 
+class SavedOpportunityOrganizationSchema(Schema):
+    organization_id = fields.UUID(
+        metadata={"description": "The ID of the organization"}, allow_none=False
+    )
+    organization_name = fields.String(
+        metadata={"description": "The name of the organization", "example": "Department of Health"},
+        allow_none=True,
+    )
+
+
 class SavedOpportunityResponseV1Schema(Schema):
     opportunity_id = fields.UUID(metadata={"description": "The ID of the saved opportunity"})
     opportunity_title = fields.String(
@@ -571,6 +594,9 @@ class SavedOpportunityResponseV1Schema(Schema):
     )
 
     summary = fields.Nested(SavedOpportunitySummaryV1Schema())
+    saved_to_organizations = fields.List(
+        fields.Nested(SavedOpportunityOrganizationSchema, allow_none=True)
+    )
 
 
 class OpportunityVersionAttachmentSchema(Schema):

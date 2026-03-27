@@ -2,6 +2,7 @@ import logging
 
 from . import (
     agency_models,
+    award_recommendation_models,
     base,
     competition_models,
     entity_models,
@@ -11,6 +12,7 @@ from . import (
     sam_extract_models,
     task_models,
     user_models,
+    workflow_models,
 )
 
 logger = logging.getLogger(__name__)
@@ -22,6 +24,7 @@ metadata = base.metadata
 __all__ = [
     "metadata",
     "opportunity_models",
+    "award_recommendation_models",
     "lookup_models",
     "agency_models",
     "user_models",
@@ -30,4 +33,5 @@ __all__ = [
     "competition_models",
     "sam_extract_models",
     "entity_models",
+    "workflow_models",
 ]

@@ -80,6 +80,7 @@ describe("convertSearchParamsToProperTypes", () => {
       convertSearchParamsToProperTypes({
         unhandledParam: "whatever",
         closeDate: "7",
+        postedDate: "14",
         ...fakeSearchParamDict,
       }),
     ).toEqual({
@@ -92,6 +93,7 @@ describe("convertSearchParamsToProperTypes", () => {
       assistanceListingNumber: new Set(),
       category: new Set([fakeSearchParamDict.category]),
       closeDate: new Set(["7"]),
+      postedDate: new Set(["14"]),
       costSharing: new Set(),
       topLevelAgency: new Set(),
       andOr: fakeSearchParamDict.andOr,

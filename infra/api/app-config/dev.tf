@@ -1,19 +1,22 @@
 module "dev_config" {
-  source                          = "./env-config"
-  project_name                    = local.project_name
-  app_name                        = local.app_name
-  default_region                  = module.project_config.default_region
-  environment                     = "dev"
-  network_name                    = "dev"
-  domain_name                     = "api.dev.simpler.grants.gov"
-  secondary_domain_names          = ["alb.dev.simpler.grants.gov"]
-  s3_cdn_domain_name              = "files.dev.simpler.grants.gov"
-  mtls_domain_name                = "soap.dev.simpler.grants.gov"
-  enable_https                    = true
-  has_database                    = local.has_database
-  database_enable_http_endpoint   = true
-  has_incident_management_service = local.has_incident_management_service
-  enable_notifications            = local.enable_notifications
+  source                            = "./env-config"
+  project_name                      = local.project_name
+  app_name                          = local.app_name
+  default_region                    = module.project_config.default_region
+  environment                       = "dev"
+  network_name                      = "dev"
+  domain_name                       = "api.dev.simpler.grants.gov"
+  secondary_domain_names            = ["alb.dev.simpler.grants.gov"]
+  s3_cdn_domain_name                = "files.dev.simpler.grants.gov"
+  mtls_domain_name                  = "soap.dev.simpler.grants.gov"
+  enable_https                      = true
+  has_database                      = local.has_database
+  database_enable_http_endpoint     = true
+  database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXw3NDM0NDY4MDExNzAwMjY1NzM1"
+  has_incident_management_service   = local.has_incident_management_service
+  enable_notifications              = local.enable_notifications
+  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyODk0OTk3NTE4Nzc4MzA4NzUz"
+  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtNTc4NjYzMjA1MjA4MDAyNTA2Mg"
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-dev/services/api-dev/health?region=us-east-1
@@ -43,10 +46,7 @@ module "dev_config" {
 
   service_override_extra_environment_variables = {
 
-    # Login.gov OAuth
-    ENABLE_XML_GENERATION = 1
-
-
+    ENABLE_WORKFLOW_ENDPOINTS = 1
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"
@@ -55,6 +55,9 @@ module "dev_config" {
     FRONTEND_URL             = "https://dev.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
+
+    # Workflow
+    WORKFLOW_SERVICE_INTERNAL_USER_ID = "5711f79c-2445-47c7-bbcb-c8caa293ffad"
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
@@ -62,4 +65,6 @@ module "dev_config" {
   # enable_command_execution = true
 
   enable_identity_provider = local.enable_identity_provider
+
+  enable_workflow_service = true
 }

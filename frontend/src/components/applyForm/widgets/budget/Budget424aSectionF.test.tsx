@@ -1,16 +1,8 @@
 import { FormContextType, RJSFSchema } from "@rjsf/utils";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import React from "react";
-
+import { GeneralRecord } from "src/components/applyForm/types";
 import Budget424aSectionF from "src/components/applyForm/widgets/budget/Budget424aSectionF";
-
-interface RootValue {
-  direct_charges_explanation?: string;
-  indirect_charges_explanation?: string;
-  remarks?: string;
-  confirmation?: boolean;
-}
 
 function buildRootSchema(): RJSFSchema {
   return {
@@ -40,7 +32,7 @@ function buildRootSchema(): RJSFSchema {
   };
 }
 
-function buildWidgetProps(value: RootValue) {
+function buildWidgetProps(value: GeneralRecord) {
   const formContext: { rootSchema: RJSFSchema } = {
     rootSchema: buildRootSchema(),
   };
@@ -56,7 +48,7 @@ function buildWidgetProps(value: RootValue) {
 
 describe("Budget424aSectionF", () => {
   it("renders text areas with values and the confirmation checkbox", () => {
-    const value: RootValue = {
+    const value: GeneralRecord = {
       direct_charges_explanation: "Direct notes",
       indirect_charges_explanation: "Indirect notes",
       remarks: "Some remarks",
@@ -64,7 +56,7 @@ describe("Budget424aSectionF", () => {
     };
 
     render(
-      <Budget424aSectionF<RootValue, RJSFSchema, FormContextType>
+      <Budget424aSectionF<GeneralRecord, RJSFSchema, FormContextType>
         {...buildWidgetProps(value)}
       />,
     );
@@ -86,21 +78,21 @@ describe("Budget424aSectionF", () => {
   });
 
   it("emits updated value when toggling the confirmation checkbox", () => {
-    const initialValue: RootValue = {
+    const initialValue: GeneralRecord = {
       direct_charges_explanation: "A",
       indirect_charges_explanation: "B",
       remarks: "C",
       confirmation: false,
     };
 
-    const onChangeTyped = jest.fn<void, [RootValue]>();
+    const onChangeTyped = jest.fn<void, [GeneralRecord]>();
 
     const onChangeAdapter: (value: unknown) => void = (value) => {
-      onChangeTyped(value as RootValue);
+      onChangeTyped(value as GeneralRecord);
     };
 
     render(
-      <Budget424aSectionF<RootValue, RJSFSchema, FormContextType>
+      <Budget424aSectionF<GeneralRecord, RJSFSchema, FormContextType>
         {...buildWidgetProps(initialValue)}
         onChange={onChangeAdapter}
       />,
@@ -121,10 +113,10 @@ describe("Budget424aSectionF", () => {
   });
 
   it("renders based on schema even when values are missing", () => {
-    const emptyValue: RootValue = {};
+    const emptyValue: GeneralRecord = {};
 
     render(
-      <Budget424aSectionF<RootValue, RJSFSchema, FormContextType>
+      <Budget424aSectionF<GeneralRecord, RJSFSchema, FormContextType>
         {...buildWidgetProps(emptyValue)}
       />,
     );

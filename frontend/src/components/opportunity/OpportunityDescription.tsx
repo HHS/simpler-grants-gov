@@ -16,7 +16,7 @@ type OpportunityDescriptionProps = {
   attachments: OpportunityDocument[];
 };
 
-const SummaryDescriptionDisplay = ({
+export const SummaryDescriptionDisplay = ({
   summaryDescription = "",
 }: {
   summaryDescription: string;

@@ -99,11 +99,11 @@ resource "aws_sfn_state_machine" "file_upload_jobs" {
         "Resource" : "arn:aws:states:::ecs:runTask.sync",
         "Parameters" : {
           "Cluster" : aws_ecs_cluster.cluster.arn,
-          "TaskDefinition" : aws_ecs_task_definition.app.arn,
+          "TaskDefinition" : aws_ecs_task_definition.app.arn_without_revision,
           "LaunchType" : "FARGATE",
           "NetworkConfiguration" : {
             "AwsvpcConfiguration" : {
-              "Subnets" : var.private_subnet_ids,
+              "Subnets" : module.network.private_subnet_ids,
               "SecurityGroups" : [aws_security_group.app.id],
             }
           },

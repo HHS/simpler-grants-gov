@@ -1,6 +1,8 @@
 import csv
 import io
+import os
 from collections.abc import Sequence
+from typing import cast
 
 from src.util.dict_util import flatten_dict
 
@@ -43,12 +45,11 @@ CSV_FIELDS = [
     "fiscal_year",
     "created_at",
     "updated_at",
+    "url",
     # We put the description at the end as it's the longest value
     # which can help improve readability of other fields
     "summary_description",
 ]
-# Same as above, but faster lookup
-CSV_FIELDS_SET = set(CSV_FIELDS)
 
 
 def _process_assistance_listing(assistance_listings: list[dict]) -> str:
@@ -57,10 +58,22 @@ def _process_assistance_listing(assistance_listings: list[dict]) -> str:
     )
 
 
-def opportunities_to_csv(opportunities: Sequence[dict], output: io.StringIO) -> None:
+def _build_opportunity_url(opportunity_id: str, base_url: str) -> str:
+    """
+    Build the full frontend URL for an opportunity.
+    """
+    return f"{base_url}/opportunity/{opportunity_id}"
+
+
+def opportunities_to_csv(
+    opportunities: Sequence[dict],
+    output: io.StringIO,
+) -> None:
     writer = csv.DictWriter(output, fieldnames=CSV_FIELDS, quoting=csv.QUOTE_ALL)
     writer.writeheader()
 
+    csv_fields_set = set(CSV_FIELDS)
+    base_url = os.getenv("FRONTEND_BASE_URL")
     for opportunity in opportunities:
         opp = flatten_dict(opportunity)
 
@@ -71,7 +84,7 @@ def opportunities_to_csv(opportunities: Sequence[dict], output: io.StringIO) -> 
             k = k.removeprefix("assistance_listings.")
 
             # Remove fields we haven't configured
-            if k not in CSV_FIELDS_SET:
+            if k not in csv_fields_set:
                 continue
 
             if k == "opportunity_assistance_listings":
@@ -82,4 +95,8 @@ def opportunities_to_csv(opportunities: Sequence[dict], output: io.StringIO) -> 
 
             out_opportunity[k] = v
 
+        if base_url:
+            out_opportunity["url"] = _build_opportunity_url(
+                cast(str, opp.get("opportunity_id")), base_url
+            )
         writer.writerow(out_opportunity)

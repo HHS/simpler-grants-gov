@@ -1,8 +1,6 @@
-import { Meta } from "@storybook/react";
-
 import Snackbar from "src/components/Snackbar";
 
-const meta: Meta<typeof Snackbar> = {
+const meta = {
   title: "Components/Snackbar",
   component: Snackbar,
   args: {

@@ -94,7 +94,7 @@ export default function RadioWidget<
     const fromSchema =
       Array.isArray(enumFromSchema) && enumFromSchema.length
         ? enumFromSchema.map((enumValue) => ({
-            label: String(enumValue),
+            label: String(enumValue as string),
             value: enumValue,
           }))
         : [];

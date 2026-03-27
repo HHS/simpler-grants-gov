@@ -24,7 +24,7 @@ export const FakeQueryProvider = ({
     updateTotalResults: mockUpdateTotalResults,
     totalPages,
     queryTerm,
-    // eslint-disable-next-line
+
     updateQueryTerm: mockUpdateQueryTerm,
     totalResults,
     updateLocalAndOrParam: mockUpdateLocalAndOrParam,
@@ -60,9 +60,8 @@ export const createFakeUserContext = (featureFlags?: FeatureFlags) => {
     },
     featureFlags: {
       ...{
-        authOn: false,
-        opportunityOff: false,
-        searchOff: false,
+        applyFormPrototypeOff: false,
+        opportunitiesListOff: false,
       },
       ...featureFlags,
     },

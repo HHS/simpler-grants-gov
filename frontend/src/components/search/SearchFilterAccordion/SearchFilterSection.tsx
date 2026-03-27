@@ -48,7 +48,8 @@ const SearchFilterSection = ({
         />
         <ul className="usa-list usa-list--unstyled margin-left-4">
           {option.children?.map((child) => (
-            <li key={child.id}>
+            // Added test id for robust E2E selection in Playwright tests
+            <li key={child.id} data-testid="sub-agency-item">
               <SearchFilterCheckbox
                 option={child}
                 query={query}

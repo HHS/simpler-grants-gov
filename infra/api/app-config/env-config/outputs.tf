@@ -37,6 +37,8 @@ output "service_config" {
     memory                          = var.instance_memory
     desired_instance_count          = var.instance_desired_instance_count
     enable_command_execution        = var.enable_command_execution
+    newrelic_entity_guid            = var.service_newrelic_entity_guid
+    newrelic_mtls_entity_guid       = var.service_newrelic_mtls_entity_guid
 
     extra_environment_variables = merge(
       local.default_extra_environment_variables,
@@ -80,4 +82,17 @@ output "incident_management_service_integration" {
   value = var.has_incident_management_service ? {
     integration_url_param_name = "/monitoring/${var.app_name}/${var.environment}/incident-management-integration-url"
   } : null
+}
+
+output "sqs_config" {
+  value = local.sqs_config
+}
+
+output "workflow_service_config" {
+  value = {
+    enable        = var.enable_workflow_service
+    cpu           = var.workflow_service_cpu
+    memory        = var.workflow_service_memory
+    desired_count = var.workflow_service_desired_count
+  }
 }

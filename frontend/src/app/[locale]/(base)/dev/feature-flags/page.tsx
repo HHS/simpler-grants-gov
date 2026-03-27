@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 
 import Head from "next/head";
+import Link from "next/link";
 import React from "react";
 import { Button } from "@trussworks/react-uswds";
 
@@ -28,17 +29,17 @@ export default function FeatureFlags() {
 
         <FeatureFlagsTable />
 
-        <a href="/">
+        <Link href="/">
           <Button type="button" data-testid="apply-changes">
             Apply changes and return to the App
           </Button>
-        </a>
+        </Link>
 
-        <a href="?_ff=reset">
+        <Link href="?_ff=reset">
           <Button type="button" data-testid="reset-defaults" secondary>
             Reset all flags to defaults
           </Button>
-        </a>
+        </Link>
       </div>
     </>
   );

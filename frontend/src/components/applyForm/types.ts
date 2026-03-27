@@ -9,6 +9,16 @@ import {
 
 import { HTMLAttributes } from "react";
 
+export type GeneralRecord = Record<string, unknown>;
+
+export type BroadlyDefinedWidgetValue =
+  | string
+  | GeneralRecord
+  | GeneralRecord[]
+  | string[]
+  | number
+  | boolean;
+
 export type SchemaField = {
   type?: string;
   title?: string;
@@ -38,7 +48,7 @@ export type FormValidationWarning = {
   field: string;
   message: string;
   type: string;
-  value: string;
+  value: string | null;
 };
 
 export type FormattedFormValidationWarning = FormValidationWarning & {
@@ -63,11 +73,89 @@ export type WidgetTypes =
   | "Budget424aSectionC"
   | "Budget424aSectionD"
   | "Budget424aSectionE"
-  | "Budget424aSectionF";
+  | "Budget424aSectionF"
+  | "FieldList";
 
-export type DefinitionPath =
-  | `/properties/${string}`
-  | [`/properties/${string}`];
+type PropertyPath = `/properties/${string}`;
+
+/**
+ * Props passed to the FieldList widget.
+ *
+ * FieldList is a custom widget that renders a repeatable group of fields
+ * (similar to an array of objects in the JSON schema). Each row represents
+ * one instance of the grouped fields defined in `groupDefinition`.
+ *
+ * These props follow the general shape expected by the WidgetRenderers
+ * system so the FieldList widget can be rendered alongside other widgets
+ * in the form engine.
+ *
+ * Important fields:
+ *
+ * id
+ *   Unique identifier used for DOM association and accessibility.
+ *
+ * schema
+ *   The schema fragment associated with this widget. WidgetRenderers
+ *   expects this to exist because other widgets rely on schema metadata
+ *   such as title and description.
+ *
+ * groupDefinition
+ *   Describes the fields that appear in each repeatable row.
+ *
+ * value
+ *   The current array of row values for the FieldList.
+ *
+ * defaultSize
+ *   Initial number of rows to render when no data exists.
+ *
+ * rawErrors / requiredFields
+ *   Validation information passed down from the form engine.
+ *
+ * disabled / readOnly / isFormLocked
+ *   Control widget interactivity.
+ *
+ * formContext
+ *   Provides access to the root schema and form data when needed.
+ *
+ * onChange
+ *   Included for compatibility with the standard widget interface.
+ *   The current FieldList implementation manages row updates internally,
+ *   but this allows future versions to integrate with the normal form
+ *   change pipeline.
+ */
+export type FieldListWidgetProps = {
+  id: string;
+  key: string;
+  schema: RJSFSchema & {
+    description?: string;
+    title?: string;
+  };
+  label: string;
+  description?: string;
+  defaultSize: number;
+  groupDefinition: FieldListGroupItem[];
+  rawErrors?: FormattedFormValidationWarning[] | string[];
+  requiredFields?: string[];
+  value?: GeneralRecord[];
+  onChange?: (value: unknown) => void;
+  disabled?: boolean;
+  readOnly?: boolean;
+  isFormLocked?: boolean;
+  formContext?: {
+    rootSchema?: RJSFSchema;
+    rootFormData?: unknown;
+  };
+};
+
+export type FieldListChildWidgetTypes = Exclude<WidgetTypes, "FieldList">;
+
+export type FieldListGroupItem = {
+  widget: FieldListChildWidgetTypes;
+  generalProps: Omit<UswdsWidgetProps, "id" | "value" | "key">;
+  baseId: string;
+};
+
+export type DefinitionPath = PropertyPath | PropertyPath[];
 
 export type UiSchemaField = {
   type: "field" | "multiField" | "null";
@@ -89,11 +177,21 @@ export interface UiSchemaSection {
   type: "section";
   label: string;
   name: string;
-  children: Array<UiSchemaField | UiSchemaSection>;
+  children: UiSchema;
   description?: string;
 }
 
-export type UiSchema = Array<UiSchemaSection | UiSchemaField>;
+export interface UiSchemaFieldList {
+  type: "fieldList";
+  label: string;
+  name: string;
+  description?: string;
+  defaultSize: number;
+  children: UiSchemaField[];
+}
+
+export type UiSchemaNode = UiSchemaField | UiSchemaSection | UiSchemaFieldList;
+export type UiSchema = UiSchemaNode[];
 
 export type TextTypes =
   | "text"
@@ -104,6 +202,8 @@ export type TextTypes =
   | "tel"
   | "url";
 
+// extends the WidgetProps type from rjsf for USWDS and this project implementation
+// see https://github.com/rjsf-team/react-jsonschema-form/blob/7395afcdee6aaea128d943dd17e126c4ed301e58/packages/utils/src/types.ts#L898
 export interface UswdsWidgetProps<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
@@ -114,7 +214,8 @@ export interface UswdsWidgetProps<
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">
     > {
   id: string;
-  value?: string | Array<T> | unknown;
+  // this needs to be locked down using a generic eventually
+  value?: BroadlyDefinedWidgetValue;
   type?: string;
   minLength?: number;
   schema: RJSFSchema & {

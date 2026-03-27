@@ -130,7 +130,7 @@ export default async function getFormData({
   }
 
   try {
-    const result = await processFormSchema(form_json_schema);
+    const result = processFormSchema(form_json_schema);
     return {
       data: {
         applicationAttachments: applicationFormData.application_attachments,

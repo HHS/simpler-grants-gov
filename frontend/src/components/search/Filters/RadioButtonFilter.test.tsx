@@ -1,7 +1,7 @@
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { initialFilterOptions } from "src/utils/testing/fixtures";
-import { render, screen } from "tests/react-utils";
 
 import React from "react";
 

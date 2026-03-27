@@ -29,6 +29,9 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
     enable_verbose_logging: bool = Field(default=False, alias="SOAP_ENABLE_VERBOSE_LOGGING")
     use_simpler: bool = Field(default=False, alias="USE_SIMPLER")
 
+    soap_partner_gateway_uri: str = Field("", alias="SOAP_PARTNER_GATEWAY_URI")
+    soap_partner_gateway_auth_key: str = Field("", alias="SOAP_PARTNER_GATEWAY_AUTH_KEY")
+
     @property
     def gg_url(self) -> str:
         # Full url including port for grants.gov S2S SOAP API.
@@ -74,7 +77,6 @@ class SOAPOperationConfig:
     request_operation_name: str
     response_operation_name: str
     compare_endpoints: bool = False
-    is_mtom: bool = False
     always_call_simpler: bool = False
 
     # These are the privileges needed for these endpoints:
@@ -139,14 +141,23 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
         "GetApplicationZipRequest": SOAPOperationConfig(
             request_operation_name="GetApplicationZipRequest",
             response_operation_name="GetApplicationZipResponse",
-            is_mtom=True,
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
         ),
         "GetSubmissionListExpandedRequest": SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
-            is_mtom=True,
+            privileges={Privilege.LEGACY_AGENCY_VIEWER},
+        ),
+        "ConfirmApplicationDeliveryRequest": SOAPOperationConfig(
+            request_operation_name="ConfirmApplicationDeliveryRequest",
+            response_operation_name="ConfirmApplicationDeliveryResponse",
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
+            always_call_simpler=True,
+        ),
+        "UpdateApplicationInfoRequest": SOAPOperationConfig(
+            request_operation_name="UpdateApplicationInfoRequest",
+            response_operation_name="UpdateApplicationInfoResponse",
+            privileges={Privilege.LEGACY_AGENCY_ASSIGNER},
         ),
     },
 }

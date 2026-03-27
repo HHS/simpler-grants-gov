@@ -407,7 +407,7 @@ FORM_RULE_SCHEMA = {
                         "@THIS.non_federal_new_or_revised_amount",
                     ],
                 }
-            }
+            },
         },
         "budget_categories": {
             # Section B - Budget Categories: Total direct charge amount (Row 6I, Columns 1-4)
@@ -781,9 +781,11 @@ FORM_XML_TRANSFORM_RULES = {
         "version": "1.0",
         "form_name": "SF424A",
         "namespaces": {
-            "default": "http://apply.grants.gov/forms/SF424A-V1.0",
-            "SF424A": "http://apply.grants.gov/forms/SF424A-V1.0",
+            "att": "http://apply.grants.gov/system/Attachments-V1.0",
             "glob": "http://apply.grants.gov/system/Global-V1.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
+            "SF424A": "http://apply.grants.gov/forms/SF424A-V1.0",
+            "default": "http://apply.grants.gov/forms/SF424A-V1.0",
         },
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/SF424A-V1.0.xsd",
         "xml_structure": {
@@ -791,7 +793,7 @@ FORM_XML_TRANSFORM_RULES = {
             "root_namespace_prefix": "SF424A",  # Use SF424A: prefix for root element per XSD
             # Required attributes for XSD validation
             "root_attributes": {
-                "programType": "program_type",  # Maps to input field
+                "programType": "Non-Construction",
                 "glob:coreSchemaVersion": "1.0",  # Static value required by XSD
             },
         },
@@ -806,6 +808,7 @@ FORM_XML_TRANSFORM_RULES = {
         "xml_transform": {
             "target": "FormVersionIdentifier",
             "namespace": "glob",
+            "static_value": "1.0",
         }
     },
     # Note: program_type is handled as a root attribute via xml_structure.root_attributes
@@ -829,16 +832,8 @@ FORM_XML_TRANSFORM_RULES = {
             "target": "BudgetStateContributionAmount",
         }
     },
-    "other_amount": {
-        "xml_transform": {
-            "target": "BudgetOtherContributionAmount",
-        }
-    },
-    "total_amount": {
-        "xml_transform": {
-            "target": "BudgetTotalContributionAmount",
-        }
-    },
+    # Note: other_amount and total_amount are defined later in correct XSD order
+    # They are overridden in NonFederalResources section via field_overrides
     # CFDA/Assistance Listing Number - appears in Section A
     "assistance_listing_number": {
         "xml_transform": {
@@ -864,12 +859,6 @@ FORM_XML_TRANSFORM_RULES = {
     "non_federal_new_or_revised_amount": {
         "xml_transform": {
             "target": "BudgetNonFederalNewOrRevisedAmount",
-        }
-    },
-    # total_amount is already mapped above for multiple sections
-    "total_new_or_revised_amount": {
-        "xml_transform": {
-            "target": "BudgetTotalNewOrRevisedAmount",
         }
     },
     # Section B - Budget Categories field mappings
@@ -908,7 +897,13 @@ FORM_XML_TRANSFORM_RULES = {
             "target": "BudgetConstructionRequestedAmount",
         }
     },
-    # other_amount already mapped above for multiple sections
+    # other_amount mapping for BudgetCategories (correct XSD position)
+    # Note: This will be overridden to BudgetOtherContributionAmount in NonFederalResources via field_overrides
+    "other_amount": {
+        "xml_transform": {
+            "target": "BudgetOtherRequestedAmount",
+        }
+    },
     "total_direct_charge_amount": {
         "xml_transform": {
             "target": "BudgetTotalDirectChargesAmount",
@@ -919,7 +914,13 @@ FORM_XML_TRANSFORM_RULES = {
             "target": "BudgetIndirectChargesAmount",
         }
     },
-    # total_amount already mapped
+    # total_amount mapping for BudgetCategories (correct XSD position)
+    # Note: This will be overridden to BudgetTotalContributionAmount in NonFederalResources via field_overrides
+    "total_amount": {
+        "xml_transform": {
+            "target": "BudgetTotalAmount",
+        }
+    },
     "program_income_amount": {
         "xml_transform": {
             "target": "ProgramIncomeAmount",
@@ -977,8 +978,13 @@ FORM_XML_TRANSFORM_RULES = {
                         "item_attributes": ["activity_title"],
                         "total_field": "total_budget_summary",
                         "total_wrapper": "SummaryTotals",
+                        "field_overrides": {
+                            "total_amount": "BudgetTotalNewOrRevisedAmount",
+                        },
                     },
                     # Section B - Budget Categories (XSD requires CategorySet/CategoryTotals)
+                    # Note: Uses "Requested" naming (BudgetOtherRequestedAmount, BudgetTotalAmount)
+                    # instead of "Contribution" naming used in NonFederalResources
                     "BudgetCategories": {
                         "item_field": "budget_categories",
                         "item_wrapper": "CategorySet",
@@ -987,12 +993,19 @@ FORM_XML_TRANSFORM_RULES = {
                         "total_wrapper": "CategoryTotals",
                     },
                     # Section C - Non-Federal Resources (XSD requires ResourceLineItem/ResourceTotals)
+                    # Note: Uses "Contribution" naming (BudgetOtherContributionAmount, BudgetTotalContributionAmount)
+                    # instead of "Requested"/"Amount" naming used in BudgetCategories
                     "NonFederalResources": {
                         "item_field": "non_federal_resources",
                         "item_wrapper": "ResourceLineItem",
                         "item_attributes": ["activity_title"],
                         "total_field": "total_non_federal_resources",
                         "total_wrapper": "ResourceTotals",
+                        # Override global field mappings for this section
+                        "field_overrides": {
+                            "other_amount": "BudgetOtherContributionAmount",
+                            "total_amount": "BudgetTotalContributionAmount",
+                        },
                     },
                     # Note: FederalFundsNeeded moved to separate config after BudgetForecastedCashNeeds for correct XSD order
                 },
@@ -1064,23 +1077,16 @@ FORM_XML_TRANSFORM_RULES = {
     # Must be LAST per XSD sequence order
     "other_information": {
         "xml_transform": {
+            "type": "conditional",
             "target": "OtherInformation",
-            "type": "nested_object",
-        },
-        "direct_charges_explanation": {
-            "xml_transform": {
-                "target": "OtherDirectChargesExplanation",
-            }
-        },
-        "indirect_charges_explanation": {
-            "xml_transform": {
-                "target": "OtherIndirectChargesExplanation",
-            }
-        },
-        "remarks": {
-            "xml_transform": {
-                "target": "Remarks",
-            }
+            "conditional_transform": {
+                "type": "compose_object",
+                "field_mapping": {
+                    "OtherDirectChargesExplanation": "direct_charges_explanation",
+                    "OtherIndirectChargesExplanation": "indirect_charges_explanation",
+                    "Remarks": "remarks",
+                },
+            },
         },
     },
 }

@@ -1,16 +1,15 @@
 import logging
 from collections.abc import Callable
-from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from src.form_schema.rule_processing.json_rule_context import JsonRule, JsonRuleContext
 from src.form_schema.rule_processing.json_rule_util import get_field_values, populate_nested_value
 from src.util.datetime_util import get_now_us_eastern_date
+from src.util.decimal_util import ZERO_DECIMAL, convert_monetary_field, quantize_decimal
 
 logger = logging.getLogger(__name__)
 
 INDIVIDUAL_UEI = "00000000INDV"
-ZERO_DECIMAL = Decimal("0.00")  # For formatting and defining 0 for decimal/monetary
 EXCLUDE_VALUE = "exclude_value"
 UNKNOWN_VALUE = "unknown"
 
@@ -130,29 +129,17 @@ def get_competition_title(context: JsonRuleContext, json_rule: JsonRule) -> str 
 
 
 def get_signature(context: JsonRuleContext, json_rule: JsonRule) -> str | None:
-    """Get the name of the owner of the application"""
-    # TODO - we don't yet have users names, so this arbitrarily grabs
-    # one users email attached to the app - not ideal, will fix when we can.
-    app_users = context.application_form.application.application_users
-    if len(app_users) > 0:
-        return app_users[0].user.email
+    """Get the signature of the user submitting the application
 
+    Signatures occur during the POST_PROCESSING of application submissions.
+
+    If the submitting user has an associated email, we will sign with that, otherwise
+    log that we signed with the unknown value.
+    """
+    application = context.application_form.application
+    if application.submitted_by_user and application.submitted_by_user.email:
+        return application.submitted_by_user.email
     return UNKNOWN_VALUE
-
-
-def _convert_monetary_field(value: Any) -> Decimal:
-    # We store monetary amounts as strings, for the purposes
-    # of doing math, we want to convert those to Decimals
-    if value is None:
-        return ZERO_DECIMAL
-
-    if not isinstance(value, str):
-        raise ValueError("Cannot convert value to monetary field, is not a string")
-
-    try:
-        return Decimal(value)
-    except InvalidOperation as e:
-        raise ValueError("Invalid decimal format, cannot process") from e
 
 
 def sum_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
@@ -182,7 +169,7 @@ def sum_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
         # we'd still want to produce "6.00" from this function as that seems
         # the most intuitive to a user.
         try:
-            monetary_value = _convert_monetary_field(value)
+            monetary_value = convert_monetary_field(value)
         except ValueError:
             logger.info("Cannot convert monetary amount entered", extra=json_rule.get_log_context())
             continue
@@ -192,7 +179,7 @@ def sum_monetary_values(context: JsonRuleContext, json_rule: JsonRule) -> str:
     # Because our validation of monetary fields limits them to 2 decimals
     # this only matters when a user enters something that would be flagged
     # for a validation issue anyways, but at least this maintains consistency.
-    return str(result.quantize(ZERO_DECIMAL))
+    return str(quantize_decimal(result))
 
 
 population_func = Callable[[JsonRuleContext, JsonRule], Any]

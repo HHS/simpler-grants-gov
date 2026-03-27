@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { fakeOrganizationInvitation } from "src/utils/testing/fixtures";
-import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
 import {
   InvitationReplyForm,
@@ -10,10 +9,6 @@ import {
 } from "src/components/workspace/OrganizationInvitationReply";
 
 const clientFetchMock = jest.fn();
-
-jest.mock("next-intl", () => ({
-  useTranslations: () => useTranslationsMock(),
-}));
 
 jest.mock("src/hooks/useClientFetch", () => ({
   useClientFetch: () => ({

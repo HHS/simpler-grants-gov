@@ -1,0 +1,31 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# Run the setup-foreign-tables command to create Oracle foreign data wrapper
+# tables in the database.
+#
+# This script requires the migrator role for database permissions.
+#
+# -----------------------------------------------------------------------------
+
+set -euo pipefail
+
+app_name="$1"
+environment="$2"
+
+echo "==========================="
+echo "Running setup-foreign-tables"
+echo "==========================="
+echo "Input parameters"
+echo "  app_name=${app_name}"
+echo "  environment=${environment}"
+echo
+
+./bin/terraform-init "infra/${app_name}/service" "${environment}"
+migrator_role_arn=$(terraform -chdir="infra/${app_name}/service" output -raw migrator_role_arn)
+
+echo "Using migrator role: ${migrator_role_arn}"
+echo
+
+command='["poetry", "run", "flask", "data-migration", "setup-foreign-tables"]'
+
+./bin/run-command --task-role-arn "${migrator_role_arn}" "${app_name}" "${environment}" "${command}"

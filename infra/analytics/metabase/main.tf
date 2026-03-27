@@ -1,32 +1,7 @@
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc
 data "aws_vpc" "network" {
   filter {
     name   = "tag:Name"
-    values = [module.project_config.network_configs[var.environment_name].vpc_name]
-  }
-}
-
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
-data "aws_subnets" "private" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.network.id]
-  }
-  filter {
-    name   = "tag:subnet_type"
-    values = ["private"]
-  }
-}
-
-# docs: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet
-data "aws_subnets" "public" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.network.id]
-  }
-  filter {
-    name   = "tag:subnet_type"
-    values = ["public"]
+    values = [module.project_config.network_configs[local.environment_config.network_name].vpc_name]
   }
 }
 
@@ -103,11 +78,10 @@ module "service" {
   service_name             = local.service_name
   image_repository_url     = "docker.io/metabase/metabase-enterprise" # https://hub.docker.com/r/metabase/metabase
   image_tag                = local.image_tag
-  vpc_id                   = data.aws_vpc.network.id
-  public_subnet_ids        = data.aws_subnets.public.ids
-  private_subnet_ids       = data.aws_subnets.private.ids
-  cpu                      = 1024
-  memory                   = 2048
+  network_name             = local.environment_config.network_name
+  project_name             = module.project_config.project_name
+  fargate_cpu              = 2048
+  fargate_memory           = 4096
   container_port           = 3000
   readonly_root_filesystem = false
   drop_linux_capabilities  = false

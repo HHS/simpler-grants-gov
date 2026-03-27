@@ -3,10 +3,10 @@
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 
-ARG PYTHON_VERSION=3.14.2
+ARG PYTHON_VERSION=3.14.3
 ARG PY_MM=3.14
 ARG POETRY_VERSION=2.2.1
-ARG PIP_VERSION=25.3
+ARG PIP_VERSION=26.0
 
 SHELL ["/bin/bash", "-eux", "-c"]
 
@@ -139,6 +139,10 @@ RUN dnf install -y \
       glib2-2.82.2-767.amzn2023 \
       curl-minimal-8.11.1-4.amzn2023.0.3 \
       libcurl-minimal-8.11.1-4.amzn2023.0.3 && \
+    # CVE-2026-1757: libxml2 memory leak in xmllint (ALAS2023-2026-1446)
+    dnf update -y --releasever=2023.10.20260302 \
+      libxml2-2.10.4-1.amzn2023.0.18 \
+      libxml2-devel-2.10.4-1.amzn2023.0.18 && \
     dnf clean all && \
     # Remove the system Python RPMs
     (dnf remove -y python3 python3-libs || rpm -e --nodeps python3 python3-libs || true) && \

@@ -1,3 +1,4 @@
+import io
 import logging
 import uuid
 from collections.abc import Iterator
@@ -7,7 +8,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 import pytz
 import requests
-from apiflask import HTTPError
 from botocore.exceptions import ClientError
 from sqlalchemy import update
 
@@ -20,14 +20,15 @@ from src.legacy_soap_api.applicants.schemas import (
     GetOpportunityListResponse,
     OpportunityDetails,
 )
-from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
+from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientUserDoesNotHavePermission
 from src.legacy_soap_api.legacy_soap_api_client import (
     BaseSOAPClient,
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.util.datetime_util import parse_grants_gov_date
 from tests.lib.data_factories import setup_cert_user
 from tests.lib.db_testing import cascade_delete_from_db_table
@@ -35,8 +36,6 @@ from tests.src.db.models.factories import (
     AgencyFactory,
     ApplicationFactory,
     ApplicationSubmissionFactory,
-    ApplicationUserFactory,
-    ApplicationUserRoleFactory,
     CompetitionFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
@@ -51,6 +50,7 @@ from tests.util.minifiers import minify_xml
 GRANTS_GOV_TRACKING_NUMBER = "GRANT80000000"
 CID_UUID = "aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
 BOUNDARY_UUID = "cccccccc-1111-2222-3333-dddddddddddd"
+ADDITIONAL_UUID = "eeeeeeee-1111-2222-3333-ffffffffffff"
 TZ_EST = pytz.timezone("America/New_York")
 DT_NAIVE = datetime(2025, 9, 9, 8, 15, 17)
 DT_EST_AWARE = TZ_EST.localize(DT_NAIVE)
@@ -67,7 +67,7 @@ def get_simpler_applicants_soap_client(request_data, db_session):
     soap_request = SOAPRequest(
         method="POST",
         headers={},
-        data=request_data,
+        data=SoapRequestStreamer(stream=io.BytesIO(request_data)),
         full_path="/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort",
         api_name=SimplerSoapAPI.APPLICANTS,
     )
@@ -290,7 +290,11 @@ class TestSimplerBaseSOAPClient:
 
     def test_get_proxy_soap_response_dict_handles_data_that_is_generator(self, db_session):
         soap_request = SOAPRequest(
-            data=b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>",
+            data=SoapRequestStreamer(
+                stream=io.BytesIO(
+                    b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>"
+                )
+            ),
             full_path="x",
             headers={},
             method="POST",
@@ -311,11 +315,35 @@ class TestSimplerBaseSOAPClient:
         }
         assert proxy_soap_response_dict == expected
 
+    def test_client_get_soap_request_dict_handles_streaming_data(self, db_session):
+        request_data = (
+            b"<soap:Envelope><Body><GetOpportunityListRequest>"
+            b"<app1:OpportunityFilter>"
+            b"<gran:CFDANumber>12345</gran:CFDANumber>"
+            b"</app1:OpportunityFilter>"
+            b"</GetOpportunityListRequest></Body></soap:Envelope>"
+            b"a" * 9000
+        )
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_data)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.APPLICANTS,
+            operation_name="GetOpportunityListRequest",
+        )
+        client = BaseSOAPClient(soap_request, db_session)
+        assert client.get_soap_request_dict() == {"OpportunityFilter": {"CFDANumber": "12345"}}
+
     def test_get_simpler_soap_response_when_operation_is_get_opportunity_list_request_compares_responses(
         self, db_session, caplog
     ):
         soap_request = SOAPRequest(
-            data=b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>",
+            data=SoapRequestStreamer(
+                stream=io.BytesIO(
+                    b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>"
+                )
+            ),
             full_path="x",
             headers={},
             method="POST",
@@ -354,7 +382,11 @@ class TestSimplerBaseSOAPClient:
                 },
             )
             soap_request = SOAPRequest(
-                data=b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>",
+                data=SoapRequestStreamer(
+                    stream=io.BytesIO(
+                        b"<soap:Envelope><Body><GetOpportunityListRequest></GetOpportunityListRequest></Body></soap:Envelope>"
+                    )
+                ),
                 full_path="x",
                 headers={},
                 method="POST",
@@ -388,11 +420,12 @@ class TestSimplerSOAPGetApplicationZip:
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
-        submission = ApplicationSubmissionFactory.create()
-        application_user = ApplicationUserFactory.create(
-            application=submission.application, user=user
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory(
+            opportunity=opportunity,
         )
-        ApplicationUserRoleFactory.create(application_user=application_user, role=role)
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
         response = requests.get(submission.download_path, timeout=10)
         submission_text = response.content.decode()
         request_xml_bytes = (
@@ -408,7 +441,7 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -418,7 +451,7 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
-            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
@@ -439,10 +472,19 @@ class TestSimplerSOAPGetApplicationZip:
                 "MIME-Version": "1.0",
             }
 
-    def test_get_simpler_soap_response_returns_error_if_certificate_user_does_not_have_permissions(
+    def test_get_simpler_soap_response_can_access_endpoint_if_certificate_user_has_privileges(
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
-        submission = ApplicationSubmissionFactory.create()
+        agency = AgencyFactory.create()
+        user, role, soap_client_certificate = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+        )
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory(
+            opportunity=opportunity,
+        )
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
             'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
@@ -455,11 +497,8 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Body>"
             "</soapenv:Envelope>"
         ).encode("utf-8")
-        agency = AgencyFactory.create()
-        wrong_privileges = {Privilege.LEGACY_AGENCY_VIEWER}
-        user, _, soap_client_certificate = setup_cert_user(agency, wrong_privileges)
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -469,22 +508,24 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
-        with pytest.raises(HTTPError):
-            client.get_simpler_soap_response(mock_proxy_response)
+        with patch.object(uuid, "uuid4") as mock_uuid4:
+            mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
+            client = SimplerGrantorsS2SClient(soap_request, db_session)
+            result = client.get_simpler_soap_response(mock_proxy_response)
+            assert result.status_code == 200
 
-    def test_get_simpler_soap_response_logging_if_downloading_the_file_from_s3_fails(
-        self, db_session, enable_factory_create, caplog
+    def test_get_simpler_soap_response_cannot_access_endpoint_if_certificate_user_does_not_have_privileges(
+        self, db_session, enable_factory_create, mock_s3_bucket
     ):
-        caplog.set_level(logging.INFO)
-        submission = ApplicationSubmissionFactory.create()
-        agency = AgencyFactory()
-        user, role, soap_client_certificate = setup_cert_user(
-            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+        agency = AgencyFactory.create()
+        wrong_privileges = {Privilege.START_APPLICATION}
+        user, role, soap_client_certificate = setup_cert_user(agency, wrong_privileges)
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory(
+            opportunity=opportunity,
         )
-        application_user = ApplicationUserFactory.create(
-            application=submission.application, user=user
-        )
-        ApplicationUserRoleFactory.create(application_user=application_user, role=role)
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
             'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
@@ -498,7 +539,47 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
+            full_path="x",
+            headers={},
+            method="POST",
+            api_name=SimplerSoapAPI.GRANTORS,
+            operation_name="GetApplicationZipRequest",
+            auth=SOAPAuth(certificate=soap_client_certificate),
+        )
+        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        client = SimplerGrantorsS2SClient(soap_request, db_session)
+        with pytest.raises(SOAPClientUserDoesNotHavePermission):
+            client.get_simpler_soap_response(mock_proxy_response)
+
+    def test_get_simpler_soap_response_logging_if_downloading_the_file_from_s3_fails(
+        self, db_session, enable_factory_create, caplog
+    ):
+        caplog.set_level(logging.INFO)
+        agency = AgencyFactory.create()
+        user, role, soap_client_certificate = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+        )
+        opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+        competition = CompetitionFactory(
+            opportunity=opportunity,
+        )
+        application = ApplicationFactory.create(competition=competition)
+        submission = ApplicationSubmissionFactory.create(application=application)
+        request_xml_bytes = (
+            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+            'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+            'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+            "<soapenv:Header/>"
+            "<soapenv:Body>"
+            "<agen:GetApplicationZipRequest>"
+            f"<gran:GrantsGovTrackingNumber>{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+            "</agen:GetApplicationZipRequest>"
+            "</soapenv:Body>"
+            "</soapenv:Envelope>"
+        ).encode("utf-8")
+        soap_request = SOAPRequest(
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -537,7 +618,7 @@ class TestSimplerSOAPGetApplicationZip:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -547,44 +628,11 @@ class TestSimplerSOAPGetApplicationZip:
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
         response = client.get_simpler_soap_response(mock_proxy_response)
-        grants_gov_tracking_number = FAKE_GRANTS_GOV_TRACKING_NUMBER.split("GRANT")[1]
+        grants_gov_tracking_number = FAKE_GRANTS_GOV_TRACKING_NUMBER
         msg = f"Unable to find submission legacy_tracking_number {grants_gov_tracking_number}."
         assert msg in caplog.messages
         assert response.data == mock_proxy_response.data
         assert response.status_code == mock_proxy_response.status_code
-
-    def test_get_simpler_soap_response_returns_proxy_response_if_is_mtom_is_false_on_operation_config(
-        self, db_session
-    ):
-        request_xml_bytes = (
-            '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
-            "<soapenv:Header/>"
-            "<soapenv:Body>"
-            "<agen:GetApplicationZipRequest>"
-            f"<gran:GrantsGovTrackingNumber>{GRANTS_GOV_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>"
-            "</agen:GetApplicationZipRequest>"
-            "</soapenv:Body>"
-            "</soapenv:Envelope>"
-        ).encode("utf-8")
-        soap_request = SOAPRequest(
-            data=request_xml_bytes,
-            full_path="x",
-            headers={},
-            method="POST",
-            api_name=SimplerSoapAPI.GRANTORS,
-            operation_name="GetApplicationZipRequest",
-        )
-        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
-        with patch.object(uuid, "uuid4") as mock_uuid4:
-            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
-            client = SimplerGrantorsS2SClient(soap_request, db_session)
-            # Directly changing the config value here will change it for other tests
-            # so for safety I use a MagicMock as the operation_config
-            client.operation_config = MagicMock(**client.operation_config.__dict__)
-            client.operation_config.is_mtom = False
-            result = client.get_simpler_soap_response(mock_proxy_response)
-            assert result.data == mock_proxy_response.data
-            assert result.status_code == mock_proxy_response.status_code
 
 
 class TestSimplerSOAPGetSubmissionListExpanded:
@@ -645,7 +693,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -725,7 +773,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -823,7 +871,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -960,7 +1008,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -1076,7 +1124,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -1148,7 +1196,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
@@ -1225,7 +1273,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soapenv:Envelope>"
         ).encode("utf-8")
         soap_request = SOAPRequest(
-            data=request_xml_bytes,
+            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
             full_path="x",
             headers={},
             method="POST",
