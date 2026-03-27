@@ -6,9 +6,23 @@ import { getFormLink } from "./form-navigation-utils";
 export interface FillFieldDefinition {
   testId?: string;
   selector?: string;
-  type: "text" | "dropdown";
+  getByText?: string;
+  textExact?: boolean;
+  hasTextRegex?: string;
+  type: "text" | "dropdown" | "checkbox";
   section?: string;
   field: string;
+}
+
+/**
+ * Determines whether a checkbox field should be activated during form filling.
+ * Returns true for boolean true, or any string that isn't "false".
+ */
+function shouldActivateField(data: string | boolean | undefined): boolean {
+  if (typeof data === "boolean") {
+    return data;
+  }
+  return data !== undefined && data.toLowerCase() !== "false";
 }
 
 export type FormFillFieldDefinitions = {
@@ -16,21 +30,21 @@ export type FormFillFieldDefinitions = {
 };
 
 export interface FillFormConfig {
-  formName: string;
+  formName: string | RegExp;
   fields: FormFillFieldDefinitions;
   saveButtonTestId: string;
   noErrorsText?: string;
   /**
-   * Optional form-specific hook called after all fields are filled
-   * but before the save button is clicked. Use for pre-save interactions
+   * Optional form-specific hook for confirmation checkbox is called
+   * before the save button is clicked. Use for pre-save interactions
    * that cannot be expressed as a field definition.
-   * e.g. SF-424A confirmation checkbox that only appears in the form
+   * e.g. SF-424A confirmation checkbox that only appears in this form
    */
   beforeSave?: (page: Page) => Promise<void>;
 }
 
 export interface FormsFixtureData {
-  formName: string;
+  formName: string | RegExp;
   fields: FillFieldDefinition[];
 }
 
@@ -38,18 +52,60 @@ export async function fillField(
   testInfo: TestInfo,
   page: Page,
   field: FillFieldDefinition,
-  data: string,
+  data: string | boolean | undefined,
 ): Promise<void> {
   const fieldIdentifier = field.section
     ? `${field.section}-${field.field}`
     : field.field;
   try {
-    if (field.type === "dropdown" && field.selector) {
+    if (
+      field.type === "dropdown" &&
+      field.selector &&
+      typeof data === "string"
+    ) {
       await selectDropdownByValueOrLabel(page, field.selector, data);
-    } else if (field.type === "text" && field.testId) {
+    } else if (
+      field.type === "text" &&
+      field.testId &&
+      typeof data === "string"
+    ) {
       const locator = page.getByTestId(field.testId);
       await locator.waitFor({ state: "attached", timeout: 5000 });
       await locator.fill(data);
+    } else if (
+      field.type === "checkbox" &&
+      (field.testId || field.selector || field.getByText)
+    ) {
+      if (shouldActivateField(data)) {
+        let locator = field.getByText
+          ? page.getByText(field.getByText, { exact: field.textExact ?? false })
+          : field.selector
+            ? page.locator(field.selector)
+            : page.getByTestId(field.testId as string);
+        if (field.hasTextRegex) {
+          locator = locator.filter({
+            hasText: new RegExp(field.hasTextRegex),
+          });
+        }
+        await locator.waitFor({ state: "visible", timeout: 5000 });
+        try {
+          if (!(await locator.isChecked())) {
+            await locator.check();
+          }
+        } catch {
+          const nestedCheckbox = locator
+            .locator('input[type="checkbox"]')
+            .first();
+          if ((await nestedCheckbox.count()) === 0) {
+            throw new Error(
+              `Checkbox field ${fieldIdentifier} is not checkable; map to the checkbox input testId`,
+            );
+          }
+          if (!(await nestedCheckbox.isChecked())) {
+            await nestedCheckbox.check();
+          }
+        }
+      }
     } else {
       console.error("unsupported field type or selector type", field);
     }
@@ -84,7 +140,7 @@ export async function fillForm(
   testInfo: TestInfo,
   page: Page,
   config: FillFormConfig,
-  data: Record<string, string>,
+  data: Record<string, string | boolean>,
   returnToApplication = true,
 ): Promise<void> {
   const { formName, fields, saveButtonTestId } = config;
@@ -99,6 +155,14 @@ export async function fillForm(
   try {
     await page.getByRole("link", { name: formName }).click();
 
+    // Wait for the URL to change away from the application page before
+    // checking for form content — without this, getByText(formName) may
+    // immediately resolve against the link text on the application list page,
+    // causing fillField to run before navigation completes.
+    await page.waitForURL((url) => url.href !== applicationURL, {
+      timeout: 35000,
+    });
+
     await page
       .getByText(formName)
       .first()
@@ -110,7 +174,7 @@ export async function fillForm(
       await fillField(testInfo, page, fieldConfig, dataForField);
     }
 
-    // Run form-specific pre-save hook if defined.
+    // Run form-specific confirmation step if defined.
     // Optional - existing forms without this property are unaffected.
     if (config.beforeSave) {
       await config.beforeSave(page);

@@ -12,6 +12,19 @@
 const FILL = "1";
 const CFDA = "00.000";
 
+const BUDGET_CATEGORY_FIELDS = [
+  "personnel_amount",
+  "fringe_benefits_amount",
+  "travel_amount",
+  "equipment_amount",
+  "supplies_amount",
+  "contractual_amount",
+  "construction_amount",
+  "other_amount",
+  "total_indirect_charge_amount",
+  "program_income_amount",
+];
+
 const ACTIVITY_TITLES = [
   "TEST GPF 001",
   "TEST GPF 002",
@@ -19,7 +32,14 @@ const ACTIVITY_TITLES = [
   "TEST GPF 004",
 ] as const;
 
-export function sf424aHappyPathTestData(): Record<string, string> {
+/**
+ * Pre-computed test data for SF-424A happy path.
+ * All numeric fields are "1" so computed totals match SF424A_EXPECTED.
+ * Pass `overrides` to selectively change fields for error-case tests.
+ */
+export function sf424aHappyPathTestData(
+  overrides?: Partial<Record<string, string>>,
+): Record<string, string> {
   const data: Record<string, string> = {};
 
   // ********* Section A - Budget summary *********
@@ -43,21 +63,8 @@ export function sf424aHappyPathTestData(): Record<string, string> {
   // ********* Section B - Budget categories *********
   // Fills user-editable rows a–h and j per activity column
   // Rows i (total_direct_charge_amount) and k (total_amount) are rule-computed
-  const budgetCategoryFields = [
-    "personnel_amount",
-    "fringe_benefits_amount",
-    "travel_amount",
-    "equipment_amount",
-    "supplies_amount",
-    "contractual_amount",
-    "construction_amount",
-    "other_amount",
-    "total_indirect_charge_amount",
-    "program_income_amount",
-  ];
-
   [0, 1, 2, 3].forEach((i) => {
-    budgetCategoryFields.forEach((field) => {
+    BUDGET_CATEGORY_FIELDS.forEach((field) => {
       data[`activity_line_items[${i}]--budget_categories--${field}`] = FILL;
     });
   });
@@ -106,10 +113,22 @@ export function sf424aHappyPathTestData(): Record<string, string> {
   data.direct_charges_explanation = "TEST DIRECT CHARGES";
   data.indirect_charges_explanation = "TEST INDIRECT CHARGES";
   data.remarks = "TEST REMARKS";
-  // Note: confirmation checkbox is handled separately — fillForm() does not
-  // support boolean fields. The generic engine will need extending or the
-  // checkbox click needs adding to general-forms-filling.ts if other forms
-  // also have confirmation checkboxes.
+  // confirmation checkbox — handled via the checkbox field type in SF424A_FORM_CONFIG
+  data.confirmation = "true";
 
-  return data;
+  return overrides
+    ? {
+        ...data,
+        ...(Object.fromEntries(
+          Object.entries(overrides).filter(([, v]) => v !== undefined),
+        ) as Record<string, string>),
+      }
+    : data;
 }
+
+/**
+ * Pre-computed singleton for the default SF-424A happy path data.
+ * Use this when no overrides are needed to avoid re-computing on each call.
+ */
+export const SF424A_HAPPY_PATH_DATA: Record<string, string> =
+  sf424aHappyPathTestData();

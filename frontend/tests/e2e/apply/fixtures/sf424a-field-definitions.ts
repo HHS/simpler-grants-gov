@@ -1,4 +1,4 @@
-import { expect, Page } from "@playwright/test";
+import { numberToTwoDecimalString } from "tests/e2e/utils/forms/form-number-utils";
 import { type FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
 
 // Uses regex matcher tolerant of hyphen/dash variants for SF-424A,
@@ -14,71 +14,48 @@ const FILL = 1;
 const ROWS = 4;
 const QUARTERS = 4;
 
-function fmt(n: number): string {
-  return n.toFixed(2);
-}
-
 export const SF424A_EXPECTED = {
   sectionA: {
     // budget_summary.total_amount = sum(C+D+E+F) per row
-    rowTotalAmount: fmt(4 * FILL),
+    rowTotalAmount: numberToTwoDecimalString(4 * FILL),
     // total_budget_summary columns C/D/E/F = ROWS × FILL
-    columnCDEF: fmt(ROWS * FILL),
+    columnCDEF: numberToTwoDecimalString(ROWS * FILL),
     // total_budget_summary.total_amount = sum(activity[*].budget_summary.total_amount)
-    columnG: fmt(ROWS * 4 * FILL),
+    columnG: numberToTwoDecimalString(ROWS * 4 * FILL),
   },
   sectionB: {
     // total_budget_categories.{category} = sum across ROWS
-    categoryRowSum: fmt(ROWS * FILL),
+    categoryRowSum: numberToTwoDecimalString(ROWS * FILL),
     // total_budget_categories.total_direct_charge_amount = sum across columns
-    directChargeColumnSum: fmt(ROWS * 8 * FILL),
+    directChargeColumnSum: numberToTwoDecimalString(ROWS * 8 * FILL),
     // total_budget_categories.total_indirect_charge_amount = sum across columns
-    indirectChargeColumnSum: fmt(ROWS * FILL),
+    indirectChargeColumnSum: numberToTwoDecimalString(ROWS * FILL),
     // total_budget_categories.total_amount = sum(activity[*].budget_categories.total_amount)
-    grandTotal: fmt(ROWS * (8 * FILL + FILL)),
+    grandTotal: numberToTwoDecimalString(ROWS * (8 * FILL + FILL)),
     // total_budget_categories.program_income_amount = sum across columns
-    programIncomeSum: fmt(ROWS * FILL),
+    programIncomeSum: numberToTwoDecimalString(ROWS * FILL),
   },
   sectionC: {
     // non_federal_resources.total_amount = sum(applicant+state+other) = 3 fields
-    rowTotalAmount: fmt(3 * FILL),
+    rowTotalAmount: numberToTwoDecimalString(3 * FILL),
     // total_non_federal_resources columns B/C/D = ROWS × FILL
-    columnBCD: fmt(ROWS * FILL),
+    columnBCD: numberToTwoDecimalString(ROWS * FILL),
     // total_non_federal_resources.total_amount = sum(activity[*].non_federal_resources.total_amount)
-    grandTotal: fmt(ROWS * 3 * FILL),
+    grandTotal: numberToTwoDecimalString(ROWS * 3 * FILL),
   },
   sectionD: {
     // federal/non_federal.total_amount = sum(Q1+Q2+Q3+Q4)
-    rowTotalAmount: fmt(QUARTERS * FILL),
+    rowTotalAmount: numberToTwoDecimalString(QUARTERS * FILL),
     // total_forecasted_cash_needs.quarter = federal + non_federal per quarter
-    quarterColumnSum: fmt(2 * FILL),
+    quarterColumnSum: numberToTwoDecimalString(2 * FILL),
     // total_forecasted_cash_needs.total_amount = federal.total + non_federal.total
-    grandTotal: fmt(2 * QUARTERS * FILL),
+    grandTotal: numberToTwoDecimalString(2 * QUARTERS * FILL),
   },
   sectionE: {
     // total_federal_fund_estimates.{year} = sum across ROWS
-    yearColumnSum: fmt(ROWS * FILL),
+    yearColumnSum: numberToTwoDecimalString(ROWS * FILL),
   },
 } as const;
-
-/**
- * SF-424A specific pre-save hook.
- *
- * The confirmation checkbox is required The form shows
- * 'confirmation' is a required property" until it is clicked.
- * This must run immediately before save — not as a regular field fill.
- */
-export async function sf424aBeforeSave(page: Page): Promise<void> {
-  await expect(page.getByTestId("errorMessage")).toBeVisible();
-  await expect(page.getByTestId("errorMessage")).toContainText(
-    "'confirmation' is a required property",
-  );
-  await expect(page.getByTestId("checkbox")).toBeVisible();
-  await expect(page.getByTestId("checkbox")).toContainText(
-    "ConfirmationIs this form complete?",
-  );
-  await page.getByText("ConfirmationIs this form").click();
-}
 
 /**
  * SF-424A form configuration.
@@ -89,7 +66,6 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
   formName: "Budget Information for Non-Construction Programs (SF-424A)",
   saveButtonTestId: "apply-form-save",
   noErrorsText: "No errors were detected",
-  beforeSave: sf424aBeforeSave,
   fields: {
     // ********* Section A - Budget summary *********
     // Row 1
@@ -364,27 +340,28 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
     ),
 
     // ********* Section E - Federal fund estimates *********
-    ...Object.fromEntries(
-      [0, 1, 2, 3].flatMap((i) =>
-        [
-          "first_year_amount",
-          "second_year_amount",
-          "third_year_amount",
-          "fourth_year_amount",
-        ].map((field) => {
-          const key = `activity_line_items[${i}]--federal_fund_estimates--${field}`;
-          return [
-            key,
-            {
-              testId: key,
-              type: "text" as const,
-              section: "SectionE",
-              field,
-            },
-          ];
-        }),
-      ),
-    ),
+    ...[0, 1, 2, 3].reduce<
+      Record<
+        string,
+        { testId: string; type: "text"; section: string; field: string }
+      >
+    >((acc, i) => {
+      for (const field of [
+        "first_year_amount",
+        "second_year_amount",
+        "third_year_amount",
+        "fourth_year_amount",
+      ]) {
+        const key = `activity_line_items[${i}]--federal_fund_estimates--${field}`;
+        acc[key] = {
+          testId: key,
+          type: "text" as const,
+          section: "SectionE",
+          field,
+        };
+      }
+      return acc;
+    }, {}),
 
     // ********* Section F - Other budget information *********
     // Schema: direct_charges_explanation (maxLength:50),
@@ -407,6 +384,12 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
       type: "text",
       section: "SectionF",
       field: "remarks",
+    },
+    confirmation: {
+      getByText: "ConfirmationIs this form complete?",
+      type: "checkbox",
+      section: "SectionF",
+      field: "confirmation",
     },
   },
 };
