@@ -874,6 +874,7 @@ export const messages = {
       submit: "View results",
       clearFilters: "Clear filters",
       toggleButton: "Filters",
+      loading: "Loading filters",
     },
     callToAction: {
       shareWithOrganization: "Share with organizations",
