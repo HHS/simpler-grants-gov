@@ -12,9 +12,10 @@ module "dev_config" {
   enable_notifications            = local.enable_notifications
   enable_identity_provider        = local.enable_identity_provider
 
-  database_min_capacity   = 1
-  database_max_capacity   = 1
-  database_instance_count = 1
+  database_newrelic_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtODc2OTAyNTg4MzE5MTE2NjIwMQ"
+  database_min_capacity         = 1
+  database_max_capacity         = 1
+  database_instance_count       = 1
 
   service_override_extra_environment_variables = {}
 }

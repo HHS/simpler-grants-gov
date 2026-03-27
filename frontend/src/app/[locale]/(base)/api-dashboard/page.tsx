@@ -21,7 +21,7 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
     console.error("Failed to fetch API keys:", e);
     return (
       <>
-        <div className="grid-container">
+        <div className="grid-container margin-y-5">
           <h1 className="margin-top-0">{t("heading")}</h1>
         </div>
         <ServerErrorAlert callToAction={t("errorLoadingKeys")} />
@@ -30,9 +30,9 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
   }
 
   return (
-    <div className="grid-container">
+    <div className="grid-container margin-y-5">
       <div className="flex-justify margin-bottom-4">
-        <h1 className="margin-y-0">{t("heading")}</h1>
+        <h1>{t("heading")}</h1>
         <CreateApiKeyButton />
       </div>
 

@@ -1,17 +1,27 @@
-import pytest
+from datetime import date
 
-from src.constants.lookup_constants import WorkflowType
+import pytest
+from freezegun import freeze_time
+
+from src.constants.lookup_constants import OpportunityStatus, WorkflowType
 from src.workflow.handler.event_handler import EventHandler
 from src.workflow.state_machine.opportunity_publish_state_machine import OpportunityPublishState
 from src.workflow.workflow_errors import InvalidEventError
-from tests.src.db.models.factories import OpportunityFactory, UserFactory, WorkflowFactory
+from tests.src.db.models.factories import (
+    OpportunityFactory,
+    OpportunitySummaryFactory,
+    UserFactory,
+    WorkflowFactory,
+)
 from tests.workflow.workflow_test_util import build_start_workflow_event, send_process_event
 
 
-def test_opportunity_publish_happy_path(db_session, enable_factory_create):
+@pytest.mark.parametrize("is_draft", [True, False])
+def test_opportunity_publish_happy_path(db_session, enable_factory_create, is_draft, caplog):
     """Verify that sending a start_workflow event will go through the whole state machine"""
     user = UserFactory.create()
-    opportunity = OpportunityFactory.create(is_draft=True)
+    # We verify it's the same regardless of the is_draft flag
+    opportunity = OpportunityFactory.create(is_draft=is_draft)
 
     sqs_container = build_start_workflow_event(
         workflow_type=WorkflowType.OPPORTUNITY_PUBLISH,
@@ -19,7 +29,18 @@ def test_opportunity_publish_happy_path(db_session, enable_factory_create):
         entity=opportunity,
     )
 
-    state_machine = EventHandler(db_session, sqs_container).process()
+    # commit so the opportunity in the DB is updated
+    with db_session.begin():
+        state_machine = EventHandler(db_session, sqs_container).process()
+
+    db_session.refresh(opportunity)
+    assert opportunity.is_draft is False
+
+    if is_draft is False:
+        assert (
+            "Opportunity that isn't currently a draft going through publishing flow."
+            in caplog.messages
+        )
 
     workflow = state_machine.workflow
     assert workflow.current_workflow_state == OpportunityPublishState.END
@@ -49,6 +70,82 @@ def test_opportunity_publish_happy_path(db_session, enable_factory_create):
 
     assert audits[4].source_state == OpportunityPublishState.OPPORTUNITY_WRITTEN_TO_SEARCH
     assert audits[4].target_state == OpportunityPublishState.END
+
+
+@pytest.mark.parametrize(
+    "forecast_post_date,non_forecast_post_date,expected_is_forecast",
+    [
+        # Note we freeze the time to 2026-03-25 below
+        #
+        # No forecast / non-forecast
+        (None, None, None),
+        # No forecast, before post-date for non-forecast
+        (None, date(2026, 4, 1), None),
+        # No forecast, on post-date for non-forecast
+        (None, date(2026, 3, 25), False),
+        # Forecast before post-date, non-forecast after
+        (date(2026, 3, 30), date(2026, 3, 15), False),
+        # Forecast on post date, non-forecast on post date
+        (date(2026, 3, 25), date(2026, 3, 25), False),
+        # Forecast after post date, non-forecast before
+        (date(2026, 3, 24), date(2026, 3, 30), True),
+        # Forecast after post date, no non-forecast
+        (date(2026, 3, 16), None, True),
+    ],
+)
+@freeze_time("2026-03-25 12:00:00", tz_offset=0)
+def test_opportunity_publish_calculate_current_opportunity_summary(
+    db_session,
+    enable_factory_create,
+    forecast_post_date,
+    non_forecast_post_date,
+    expected_is_forecast,
+):
+    """Test that the opportunity status/current summary is calculated as expected."""
+    user = UserFactory.create()
+    # The is_draft flag will be flipped, if it weren't then the changes wouldn't work
+    opportunity = OpportunityFactory.create(is_draft=True, no_current_summary=True)
+
+    if forecast_post_date:
+        OpportunitySummaryFactory.create(
+            opportunity=opportunity,
+            post_date=forecast_post_date,
+            archive_date=date(2027, 1, 1),
+            is_forecast=True,
+        )
+
+    if non_forecast_post_date:
+        OpportunitySummaryFactory.create(
+            opportunity=opportunity,
+            post_date=non_forecast_post_date,
+            close_date=date(2026, 6, 1),
+            archive_date=date(2027, 1, 1),
+            is_forecast=False,
+        )
+
+    sqs_container = build_start_workflow_event(
+        workflow_type=WorkflowType.OPPORTUNITY_PUBLISH,
+        user=user,
+        entity=opportunity,
+    )
+
+    with db_session.begin():
+        EventHandler(db_session, sqs_container).process()
+
+    db_session.refresh(opportunity)
+    assert opportunity.is_draft is False
+
+    if expected_is_forecast is None:
+        assert opportunity.current_opportunity_summary is None
+    else:
+        assert opportunity.current_opportunity_summary is not None
+        assert (
+            opportunity.current_opportunity_summary.opportunity_summary.is_forecast
+            == expected_is_forecast
+        )
+        assert opportunity.current_opportunity_summary.opportunity_status == (
+            OpportunityStatus.FORECASTED if expected_is_forecast else OpportunityStatus.POSTED
+        )
 
 
 @pytest.mark.parametrize(

@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, GridContainer } from "@trussworks/react-uswds";
+import { Grid } from "@trussworks/react-uswds";
 
 interface DeveloperPageSectionProps {
   children: React.ReactNode;
@@ -14,19 +14,17 @@ export default function DeveloperPageSection({
 }: DeveloperPageSectionProps) {
   return (
     <div className={className}>
-      <GridContainer className="padding-y-4 grid-container tablet-lg:padding-y-6">
-        <Grid row gap>
-          <Grid tabletLg={{ col: 4 }}>
-            <h2>{title}</h2>
-          </Grid>
-          <Grid
-            tabletLg={{ col: 8 }}
-            className="margin-top-2 margin-bottom-0 tablet-lg:margin-0"
-          >
-            {children}
-          </Grid>
+      <Grid row gap>
+        <Grid tabletLg={{ col: 4 }}>
+          <h2>{title}</h2>
         </Grid>
-      </GridContainer>
+        <Grid
+          tabletLg={{ col: 8 }}
+          className="margin-top-2 margin-bottom-0 tablet-lg:margin-0"
+        >
+          {children}
+        </Grid>
+      </Grid>
     </div>
   );
 }

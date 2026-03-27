@@ -13,7 +13,7 @@ from src.legacy_soap_api.grantors.services.update_application_info_response impo
 )
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientUserDoesNotHavePermission
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SoapRequestStreamer
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
