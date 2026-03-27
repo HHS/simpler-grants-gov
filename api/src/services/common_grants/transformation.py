@@ -26,6 +26,7 @@ from src.api.common_grants.schemas.common_grants_pydantic_custom_fields import (
     AdditionalInfoField,
     AgencyField,
     AssistanceListingsField,
+    AssistanceListingValue,
     AttachmentsField,
     AttachmentValue,
     ContactInfoField,
@@ -433,16 +434,23 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
 
     listings = opp_data.get("opportunity_assistance_listings")
     if listings:
-        listing_values = [
-            {
+        valid_listing_values = []
+        for listing in listings:
+            listing_data = {
                 "assistanceListingNumber": listing.get("assistance_listing_number"),
                 "programTitle": listing.get("program_title"),
             }
-            for listing in listings
-        ]
-        field = validate_custom_field(AssistanceListingsField, value=listing_values)
-        if field:
-            custom_fields["assistanceListings"] = field
+            try:
+                valid_listing_values.append(AssistanceListingValue.model_validate(listing_data))
+            except Exception as e:
+                logger.warning(
+                    f"Assistance listing validation failed, skipping: {e}",
+                    extra={"cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR},
+                )
+        if valid_listing_values:
+            field = validate_custom_field(AssistanceListingsField, value=valid_listing_values)
+            if field:
+                custom_fields["assistanceListings"] = field
 
     category = opp_data.get("category")
     if category is not None:
