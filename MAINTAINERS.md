@@ -43,8 +43,8 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Julius Chang
 * Sarah Knopp
 * Billy Daly
-* Eric Valenzuela
-* David Dudas
+* Bryan Thompson
+* Jeff Crichlake
 
 ## Product and Program Management
 
