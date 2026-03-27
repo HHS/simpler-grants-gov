@@ -30,7 +30,7 @@ In order to allow branches to be easily found based on ticket, contributor, or t
 
 - Contributor handle: this can be either your github username, or any other handle by which project maintainers can easily identify you as a contributor. Most importantly, this should be consistent across all of the branches opened by any individual contributor
 - Issue number: the number of the Github issue the change pertains to
-- Change description:
+- Change description: a few words describing the purpose of the branch
 
 With this in mind, branch names should follow this general convention:
 
