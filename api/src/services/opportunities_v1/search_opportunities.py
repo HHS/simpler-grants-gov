@@ -2,6 +2,7 @@ import logging
 import uuid
 from collections.abc import Sequence
 
+import newrelic.agent
 from pydantic import BaseModel, Field
 
 import src.adapters.search as search
@@ -265,6 +266,28 @@ def _search_opportunities(
     response = search_client.search(
         index_alias, search_request, includes=includes, excludes=["attachments"]
     )
+
+    log_attrs: dict = {}
+
+    if response.max_score is not None:
+        log_attrs["search.max_score"] = response.max_score
+        newrelic.agent.add_custom_attribute("search.max_score", response.max_score)
+
+    if response.total_relation is not None:
+        log_attrs["search.total_relation"] = response.total_relation
+        newrelic.agent.add_custom_attribute("search.total_relation", response.total_relation)
+
+    scoring_rule = search_params.experimental.scoring_rule.value
+    log_attrs["search.scoring_rule"] = scoring_rule
+    newrelic.agent.add_custom_attribute("search.scoring_rule", scoring_rule)
+
+    if response.agency_sum_other_doc_count is not None:
+        log_attrs["search.agency_sum_other_doc_count"] = response.agency_sum_other_doc_count
+        newrelic.agent.add_custom_attribute(
+            "search.agency_sum_other_doc_count", response.agency_sum_other_doc_count
+        )
+
+    logger.info("OpenSearch query completed", extra=log_attrs)
 
     return response
 

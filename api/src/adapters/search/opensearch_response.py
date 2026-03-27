@@ -12,6 +12,17 @@ class SearchResponse:
 
     scroll_id: str | None
 
+    # Top-level score of the best matching result; None when no query is run (browse mode).
+    max_score: float | None = None
+
+    # "eq" when the total hit count is exact, "gte" when it is a lower bound.
+    # See: https://opensearch.org/docs/latest/api-reference/search/#the-hits-object
+    total_relation: str | None = None
+
+    # Number of agency buckets not returned due to the aggregation size cap.
+    # Non-zero values indicate the agency facet is silently truncating options.
+    agency_sum_other_doc_count: int | None = None
+
     @classmethod
     def from_opensearch_response(
         cls, raw_json: dict[str, typing.Any], include_scores: bool = True
@@ -47,6 +58,8 @@ class SearchResponse:
         hits = raw_json.get("hits", {})
         hits_total = hits.get("total", {})
         total_records = hits_total.get("value", 0)
+        total_relation: str | None = hits_total.get("relation", None)
+        max_score: float | None = hits.get("max_score", None)
 
         raw_records: list[dict[str, typing.Any]] = hits.get("hits", [])
 
@@ -62,8 +75,19 @@ class SearchResponse:
 
         raw_aggs: dict[str, dict[str, typing.Any]] = raw_json.get("aggregations", {})
         aggregations = _parse_aggregations(raw_aggs)
+        agency_sum_other_doc_count: int | None = raw_aggs.get("agency", {}).get(
+            "sum_other_doc_count", None
+        )
 
-        return cls(total_records, records, aggregations, scroll_id)
+        return cls(
+            total_records=total_records,
+            records=records,
+            aggregations=aggregations,
+            scroll_id=scroll_id,
+            max_score=max_score,
+            total_relation=total_relation,
+            agency_sum_other_doc_count=agency_sum_other_doc_count,
+        )
 
 
 def _parse_aggregations(
