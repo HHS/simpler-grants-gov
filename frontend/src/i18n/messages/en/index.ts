@@ -469,8 +469,8 @@ export const messages = {
       "Simpler.Grants.gov is improving how you discover, post, and apply for federal discretionary funding on Grants.gov.",
   },
   Vision: {
-    pageTitle: "Vision | Simpler.Grants.gov",
-    pageHeaderTitle: "Our vision",
+    pageTitle: "AAAAAAAAASDASDAS | Simpler.Grants.gov",
+    pageHeaderTitle: "Our OIJDFOIMSDOIMOMV",
     pageHeaderParagraph:
       "We believe that applying for federal financial assistance should be simple and straightforward. We aim to be the best tool for posting, finding, and sharing funding opportunities.",
     sections: {
