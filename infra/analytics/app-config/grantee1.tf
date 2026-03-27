@@ -7,9 +7,10 @@ module "grantee1_config" {
   environment    = "grantee1"
   network_name   = "grantee1"
 
-  database_instance_count = 2
-  database_min_capacity   = 2
-  database_max_capacity   = 2
+  database_newrelic_entity_guid = ""
+  database_instance_count       = 2
+  database_min_capacity         = 2
+  database_max_capacity         = 2
 
   service_override_extra_environment_variables = {
     # In staging, post results to the #z_bot-analytics-ci-test channel in slack

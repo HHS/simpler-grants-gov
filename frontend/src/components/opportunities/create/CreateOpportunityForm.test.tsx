@@ -74,6 +74,7 @@ describe("createOpportunityForm", () => {
           opportunity_title: "Test Opportunity 001",
           category: "other",
           category_explanation: "",
+          assistance_listing_number: "12-345",
         },
       },
       noop,
@@ -91,6 +92,7 @@ describe("createOpportunityForm", () => {
     expect(
       screen.getByDisplayValue("Test Opportunity 001"),
     ).toBeInTheDocument();
+    expect(screen.getByDisplayValue("12-345")).toBeInTheDocument();
   });
 
   // --- Test errors from action ---
@@ -166,7 +168,18 @@ describe("createOpportunityForm field change events", () => {
     // Save button should still be disabled
     expect(saveButton).toBeDisabled();
 
-    // 4. Select a Category that is not "other"
+    // 4. Enter an ALN
+    const assitListNbr = screen.getByRole("textbox", {
+      name: "CreateOpportunityForm.assistanceListingNumber *",
+    });
+    expect(assitListNbr).toBeInTheDocument();
+    expect(assitListNbr).toHaveValue("");
+    fireEvent.change(assitListNbr, { target: { value: "12-345" } });
+    expect(assitListNbr).toHaveValue("12-345");
+    // Save button should still be disabled
+    expect(saveButton).toBeDisabled();
+
+    // 5. Select a Category that is not "other"
     const selectCategory = screen.getByRole("combobox", {
       name: "CreateOpportunityForm.category *",
     });
@@ -182,7 +195,7 @@ describe("createOpportunityForm field change events", () => {
     });
     expect(testExplain).not.toBeInTheDocument();
 
-    // 5. Select "other" for the Category
+    // 6. Select "other" for the Category
     await userEvent.selectOptions(selectCategory, "other");
     expect(selectCategory).toHaveValue("other");
     // Save button should now be disabled
@@ -194,7 +207,7 @@ describe("createOpportunityForm field change events", () => {
     expect(textareaExplain).toBeInTheDocument();
     expect(textareaExplain).toHaveValue("");
 
-    // 6. Fill in the Category Explanation field
+    // 7. Fill in the Category Explanation field
     fireEvent.change(textareaExplain, {
       target: { value: "Sample Explanation" },
     });
@@ -202,7 +215,7 @@ describe("createOpportunityForm field change events", () => {
     // Save button should now be enabled
     expect(saveButton).toBeEnabled();
 
-    // 7. Remove/delete the text in Opportunity Title
+    // 8. Remove/delete the text in Opportunity Title
     fireEvent.change(textareaOppTitle, {
       target: { value: "" },
     });

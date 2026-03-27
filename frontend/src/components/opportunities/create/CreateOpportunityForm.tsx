@@ -39,6 +39,8 @@ export function CreateOpportunityForm({
   const [opportunityTitle, setOppTitle] = useState<string>("");
   const [selectedCategoryId, setCategory] = useState<string>("");
   const [categoryExplanation, setExplain] = useState<string>("");
+  const [assistanceListingNumber, setAssistanceListingNumber] =
+    useState<string>("");
   const [showExplain, setShowExplain] = useState<boolean>(false);
   const [disableSave, setDisableSave] = useState<boolean>(true);
 
@@ -81,6 +83,7 @@ export function CreateOpportunityForm({
       const allReqFieldsFilled =
         opportunityNumber.trim() !== "" &&
         opportunityTitle.trim() !== "" &&
+        assistanceListingNumber.trim() !== "" &&
         selectedAgencyId.trim() !== "" &&
         ((selectedCategoryId.trim() !== "" &&
           selectedCategoryId.trim() !== "other") ||
@@ -94,13 +97,11 @@ export function CreateOpportunityForm({
       selectedAgencyId,
       selectedCategoryId,
       categoryExplanation,
+      assistanceListingNumber,
     ],
   );
 
   // Update state on change
-  const onCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCategory(e.target.value);
-  };
   const onOppNbrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setOppNbr(e.target.value);
   };
@@ -110,8 +111,14 @@ export function CreateOpportunityForm({
   const onAgencySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setAgencyId(e.target.value);
   };
+  const onCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCategory(e.target.value);
+  };
   const onExplanationChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setExplain(e.target.value);
+  };
+  const onAlnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAssistanceListingNumber(e.target.value);
   };
 
   // Display the form
@@ -210,6 +217,18 @@ export function CreateOpportunityForm({
               textContent={t("CreateOpportunityForm.charactersAllowed255")}
             />
           )}
+
+          {/* Assistance Listing Number (ALN) */}
+          <CommonTextInput
+            labelId="label-for-assistanceListingNumber"
+            labelText={t("CreateOpportunityForm.assistanceListingNumber")}
+            description={t("CreateOpportunityForm.assistanceListingNumberDesc")}
+            fieldId="assistanceListingNumber"
+            fieldMaxLength={6}
+            isRequired={true}
+            onTextChange={onAlnChange}
+            defaultValue={response?.data?.assistance_listing_number || ""}
+          />
         </div>
 
         <div className="display-flex flex-left margin-top-5">
