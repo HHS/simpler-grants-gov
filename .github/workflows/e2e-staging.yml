@@ -1,8 +1,5 @@
 name: E2E Tests (Deployed Target)
 on:
-  schedule:
-    # Run every day at (6/7am Eastern) before the start of the workday
-    - cron: "0 11 * * *"
   workflow_dispatch:
     inputs:
       version:
@@ -17,8 +14,20 @@ on:
         options:
           - staging
       playwright_tags:
-        description: "pipe separated list of @tags denoting groups of tests to run"
-        required: false
+        description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        description: "git reference for testing code to run (e.g., a branch, tag, or commit SHA)"
+        required: true
+        type: string
+      target:
+        description: "application environment to run tests against (dev / prod TK)"
+        default: "staging"
+        type: string
+      playwright_tags:
+        description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
         type: string
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -31,6 +40,14 @@ jobs:
         uses: actions/checkout@v6
       - name: Set target
         run: if [[ -z "${{ inputs.target }}" ]]; then echo "defaulted_target=staging" >> "$GITHUB_ENV"; else echo "defaulted_target=${{ inputs.target }}" >> "$GITHUB_ENV"; fi
+      - name: Determine test groups to run
+        shell: bash
+        run: |
+          if [[ $GITHUB_EVENT_NAME = "push" ]]; then
+            echo "test_group_tags=@core-regression" >> "$GITHUB_ENV"
+          else
+            echo "test_group_tags=${{ inputs.playwright_tags }}" >> "$GITHUB_ENV"
+          fi
       - name: Run E2E tests
         uses: ./.github/actions/e2e
         with:
@@ -39,7 +56,7 @@ jobs:
           total_shards: 1
           current_shard: 1
           workers: 1
-          playwright_tags: ${{ inputs.playwright_tags }}
+          playwright_tags: ${{ env.test_group_tags }}
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}

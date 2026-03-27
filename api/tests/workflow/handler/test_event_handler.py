@@ -5,6 +5,7 @@ import pytest
 from src.constants.lookup_constants import WorkflowType
 from src.workflow.handler.event_handler import EventHandler
 from src.workflow.workflow_errors import (
+    ConcurrentWorkflowError,
     InactiveWorkflowError,
     InvalidEventError,
     InvalidWorkflowTypeError,
@@ -239,3 +240,57 @@ def test_process_workflow_is_already_at_end(db_session, enable_factory_create):
         InactiveWorkflowError, match="Workflow is not active - cannot receive events"
     ):
         EventHandler(db_session, sqs_container).process()
+
+
+def test_start_workflow_event_concurrent_workflow_blocked(db_session, enable_factory_create):
+    """Starting a workflow should fail if an active workflow of the same type already exists
+    for the entity and the config disallows concurrent workflows."""
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create()
+
+    # Create an existing active workflow for the same entity and workflow type
+    WorkflowFactory.create(
+        workflow_type=WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+        opportunity=opportunity,
+        is_active=True,
+    )
+
+    sqs_container = build_start_workflow_event(
+        workflow_type=WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+        user=user,
+        entity=opportunity,
+    )
+
+    event_handler = EventHandler(db_session, sqs_container)
+    with pytest.raises(
+        ConcurrentWorkflowError,
+        match="An active workflow of this type already exists for this entity",
+    ):
+        event_handler.process()
+
+
+def test_start_workflow_event_concurrent_workflow_allowed_when_inactive(
+    db_session, enable_factory_create
+):
+    """Starting a workflow should succeed if an existing workflow is inactive
+    even when the config disallows concurrent workflows."""
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create()
+
+    # Create an existing INACTIVE workflow for the same entity and workflow type
+    WorkflowFactory.create(
+        workflow_type=WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+        opportunity=opportunity,
+        is_active=False,
+    )
+
+    sqs_container = build_start_workflow_event(
+        workflow_type=WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+        user=user,
+        entity=opportunity,
+    )
+
+    event_handler = EventHandler(db_session, sqs_container)
+    state_machine = event_handler.process()
+
+    assert state_machine.workflow.is_active is True

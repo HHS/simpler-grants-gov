@@ -14,6 +14,7 @@ from src.db.models.user_models import (
     OrganizationUserRole,
     Role,
     User,
+    UserSavedOpportunityNotification,
 )
 from src.services.organizations_v1.get_organization import get_organization
 from src.services.organizations_v1.organization_audit import add_audit_event
@@ -92,6 +93,9 @@ def remove_user_from_organization(
     # Perform the deletion - cascade delete will handle OrganizationUserRole records
     db_session.delete(org_user)
 
+    # Delete the user's notification preferences for this organization
+    _delete_org_notification_preferences(db_session, target_user_id, organization_id)
+
     # Add audit event when a user role is removed
     add_audit_event(
         db_session=db_session,
@@ -102,3 +106,22 @@ def remove_user_from_organization(
     )
 
     logger.info("Successfully removed user from organization")
+
+
+def _delete_org_notification_preferences(
+    db_session: db.Session, user_id: UUID, organization_id: UUID
+) -> None:
+    """Delete the user's notification preferences for the given organization."""
+    notification = db_session.execute(
+        select(UserSavedOpportunityNotification).where(
+            UserSavedOpportunityNotification.user_id == user_id,
+            UserSavedOpportunityNotification.organization_id == organization_id,
+        )
+    ).scalar_one_or_none()
+
+    if notification is not None:
+        db_session.delete(notification)
+        logger.info(
+            "Deleted organization notification preferences for removed user",
+            extra={"user_id": user_id, "organization_id": organization_id},
+        )

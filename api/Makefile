@@ -307,6 +307,9 @@ seed-local-legacy-tables:
 generate-internal-token:
 	$(FLASK_CMD) task generate-internal-token $(args)
 
+seed-local-soap-certificate:
+	$(PY_RUN_CMD) seed-local-soap-certificate --dir-path "$(DIR_PATH)" --agency-code "${AGENCY_CODE}"
+
 
 ##################################################
 # Tasks/Jobs

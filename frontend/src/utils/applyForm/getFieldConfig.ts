@@ -9,6 +9,7 @@ import {
   FieldListGroupItem,
   FieldListWidgetProps,
   FormattedFormValidationWarning,
+  GeneralRecord,
   SchemaField,
   UiSchemaField,
   UiSchemaFieldList,
@@ -37,30 +38,40 @@ const FIELD_LIST_INDEX_TOKEN = "~~index~~" as const;
 /**
  * Builds the "baseId" used by FieldList widgets for each child field.
  *
- * FieldList entries represent a repeatable array of grouped fields.
- * Instead of generating a concrete id for a specific row (e.g. `[0]`),
- * we generate a template id containing a placeholder:
+ * FieldList rows represent an array of grouped field values, where each row
+ * is stored as an object and each child field maps to a single property
+ * within that object.
  *
- *   contacts[~~index~~]--firstName
+ * Instead of generating a concrete id for a specific row (for example `[0]`),
+ * we generate a template id containing an index placeholder:
  *
- * The FieldList widget later replaces `~~index~~` with the actual
- * array index when rendering each entry.
+ *   contact_people_test[~~index~~]--first_name
  *
- * This function adapts the id produced by existing field logic and
- * injects the `[~~index~~]` placeholder at the correct position.
+ * The FieldList widget later replaces `~~index~~` with the actual row index
+ * when rendering each row.
  *
- * Example transformations:
+ * If the child field id already contains the FieldList segment, this helper
+ * replaces that segment with the indexed version.
  *
- *   childId: "contacts--firstName"
- *   > "contacts[~~index~~]--firstName"
+ * Example:
  *
- *   childId: "top_field--contacts--firstName"
- *   > "top_field--contacts[~~index~~]--firstName"
+ *   childId: "topField--contacts--firstName"
  *
- * We check for an existing `--fieldListName--` segment so we only modify
- * the correct portion of the id while preserving any parent structure.
+ * becomes:
+ *
+ *   "topField--contacts[~~index~~]--firstName"
+ *
+ * If the FieldList segment is not present in the child id, the helper falls
+ * back to building the id from the FieldList name and the final field key.
+ *
+ * Example fallback:
+ *
+ *   childId: "topField--firstName"
+ *
+ * becomes:
+ *
+ *   "contacts[~~index~~]--firstName"
  */
-
 export function buildFieldListBaseId({
   fieldListName,
   childId,
@@ -69,13 +80,18 @@ export function buildFieldListBaseId({
   childId: string;
 }): string {
   const token = `--${fieldListName}--`;
+
   if (childId.includes(token)) {
     return childId.replace(
       token,
       `--${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--`,
     );
   }
-  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${childId}`;
+
+  const childIdParts = childId.split("--");
+  const finalFieldKey = childIdParts[childIdParts.length - 1];
+
+  return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
 }
 
 type FieldWidgetConfig = {
@@ -403,6 +419,79 @@ const getFieldInfo = ({
   );
 };
 
+const getFieldListConfig = ({
+  errors,
+  formSchema,
+  formData,
+  uiFieldObject,
+}: {
+  errors: FormattedFormValidationWarning[] | null;
+  formSchema: RJSFSchema;
+  formData: object;
+  uiFieldObject: UiSchemaFieldList;
+}): FieldListConfig => {
+  const groupDefinition: FieldListGroupItem[] = uiFieldObject.children.map(
+    (childNode) => {
+      if (childNode.type !== "field" && childNode.type !== "multiField") {
+        throw new Error("fieldList children must be field nodes");
+      }
+
+      const childWidgetConfig = getFieldConfig({
+        errors,
+        formSchema,
+        formData,
+        uiFieldObject: childNode,
+        requiredField: false,
+      });
+
+      if (childWidgetConfig.type === "FieldList") {
+        throw new Error("nested fieldList is not supported");
+      }
+
+      const {
+        id: childId,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        value: _value,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        key: _key,
+        ...rest
+      } = childWidgetConfig.props;
+
+      return {
+        widget: childWidgetConfig.type,
+        baseId: buildFieldListBaseId({
+          fieldListName: uiFieldObject.name,
+          childId,
+        }),
+        generalProps: rest,
+      };
+    },
+  );
+  const fieldListValue =
+    formData && typeof formData === "object" && !Array.isArray(formData)
+      ? (formData as Record<string, unknown>)[uiFieldObject.name]
+      : undefined;
+
+  return {
+    type: "FieldList",
+    props: {
+      id: uiFieldObject.name,
+      key: uiFieldObject.name,
+      schema: {
+        type: "array",
+        title: uiFieldObject.label,
+        description: uiFieldObject.description,
+      },
+      label: uiFieldObject.label,
+      description: uiFieldObject.description,
+      defaultSize: uiFieldObject.defaultSize,
+      groupDefinition,
+      rawErrors: [],
+      requiredFields: [],
+      value: fieldListValue as GeneralRecord[] | undefined,
+    },
+  };
+};
 // returns widget type and props for rendering data for a given JSON schema field
 export const getFieldConfig = <V extends string | Record<string, unknown>>({
   errors,
@@ -418,61 +507,12 @@ export const getFieldConfig = <V extends string | Record<string, unknown>>({
   requiredField: boolean;
 }): FieldConfig => {
   if (uiFieldObject.type === "fieldList") {
-    const groupDefinition: FieldListGroupItem[] = uiFieldObject.children.map(
-      (childNode) => {
-        if (childNode.type !== "field" && childNode.type !== "multiField") {
-          throw new Error("fieldList children must be field nodes");
-        }
-
-        const childWidgetConfig = getFieldConfig({
-          errors,
-          formSchema,
-          formData,
-          uiFieldObject: childNode,
-          requiredField: false,
-        });
-
-        if (childWidgetConfig.type === "FieldList") {
-          throw new Error("nested fieldList is not supported");
-        }
-
-        const {
-          id: childId,
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          value: _value,
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          key: _key,
-          ...rest
-        } = childWidgetConfig.props;
-
-        return {
-          widget: childWidgetConfig.type,
-          baseId: buildFieldListBaseId({
-            fieldListName: uiFieldObject.name,
-            childId,
-          }),
-          generalProps: rest,
-        };
-      },
-    );
-    return {
-      type: "FieldList",
-      props: {
-        id: uiFieldObject.name,
-        key: uiFieldObject.name,
-        schema: {
-          type: "array",
-          title: uiFieldObject.label,
-          description: uiFieldObject.description,
-        },
-        label: uiFieldObject.label,
-        description: uiFieldObject.description,
-        defaultSize: uiFieldObject.defaultSize,
-        groupDefinition,
-        rawErrors: [],
-        requiredFields: [],
-      },
-    };
+    return getFieldListConfig({
+      errors,
+      formSchema,
+      formData,
+      uiFieldObject,
+    });
   }
 
   const { definition } = uiFieldObject;
