@@ -55,8 +55,9 @@ resource "aws_lambda_function" "nr_log_forwarder" {
 }
 
 resource "aws_cloudwatch_log_group" "nr_log_forwarder" {
+  # checkov:skip=CKV_AWS_338:Forwarding Lambda logs don't need long retention — actual OpenSearch logs are in New Relic
   name              = "/aws/lambda/${local.nr_log_forwarder_name}"
-  retention_in_days = 365
+  retention_in_days = 30
   kms_key_id        = aws_kms_key.opensearch.arn
 }
 
