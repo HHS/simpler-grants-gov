@@ -173,24 +173,31 @@ def _build_saved_union_subquery(
 def _enrich_with_saved_organizations_sql(
     db_session: db.Session,
     opportunities: Sequence[Opportunity],
+    org_ids_filter: list[uuid.UUID] | None = None,
 ) -> None:
     """
     Enrich paginated Opportunity objects with `saved_to_organizations`.
 
     Behavior:
-    -  If the request is for **user-saved opportunities only**, the `saved_to_organizations` field is omitted.
-    - If the request involves organizations the `saved_to_organizations` field is always included.
+    Always enriches opportunities with organizations that have saved them.
+    - When `org_ids_filter` is provided, only organizations in that list are included.
+    - When `org_ids_filter` is None, all organizations that saved the opportunities are included.
+
     """
     opp_ids = [opp.opportunity_id for opp in opportunities]
 
-    result = db_session.execute(
+    query = (
         select(OrganizationSavedOpportunity.opportunity_id, Organization)
         .join(
             Organization,
             Organization.organization_id == OrganizationSavedOpportunity.organization_id,
         )
         .where(OrganizationSavedOpportunity.opportunity_id.in_(opp_ids))
-    ).all()
+    )
+    if org_ids_filter is not None:
+        query = query.where(OrganizationSavedOpportunity.organization_id.in_(org_ids_filter))
+
+    result = db_session.execute(query).all()
 
     # Build a mapping: opportunity_id to list of Organization objects
     saved_orgs_map: dict[uuid.UUID, list[Organization]] = {}
@@ -218,6 +225,7 @@ def get_saved_opportunities(
     user_id = user.user_id
     logger.info("Getting saved opportunities for user")
     include_user_saved_opps = True
+    org_ids_filter = None
     # Determine which orgs to consider
     if org_ids_param is None:
         logger.info("All saved opportunities requested")
@@ -230,6 +238,7 @@ def get_saved_opportunities(
     else:
         logger.info("User saved opportunities requested")
         org_ids_to_use = None
+        org_ids_filter = _get_accessible_org_ids(user, user.organization_users)
     # Build saved_union subquery
     saved_union = _build_saved_union_subquery(user_id, include_user_saved_opps, org_ids_to_use)
 
@@ -272,6 +281,6 @@ def get_saved_opportunities(
 
     if paginated_search:
         # Enrich paginated opportunities with saved_to_organizations
-        _enrich_with_saved_organizations_sql(db_session, paginated_search)
+        _enrich_with_saved_organizations_sql(db_session, paginated_search, org_ids_filter)
 
     return paginated_search, pagination_info

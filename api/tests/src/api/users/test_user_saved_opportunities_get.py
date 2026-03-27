@@ -792,3 +792,54 @@ def test_user_saved_opportunities_respect_org_privileges(
     expected_ids = {str(org_allowed_saved.opportunity_id), str(user_saved_opp.opportunity_id)}
 
     assert returned_ids == expected_ids
+
+
+def test_user_saved_opps_enriched_with_accessible_orgs_only(
+    client, db_session, enable_factory_create
+):
+    """Test that in user-saved-only mode, saved opportunities are enriched
+with only the organizations the user has access to (i.e., organizations
+for which the user has the right privilege."""
+    # Create user in org
+    user, org_allowed, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+    org_user_no_role = OrganizationUserFactory(user=user)
+
+    # Opportunities saved in both orgs
+    org_allowed_saved = OrganizationSavedOpportunityFactory.create(
+        organization=org_allowed,
+    )
+    no_access_org_opp = OrganizationSavedOpportunityFactory.create(
+        organization=org_user_no_role.organization,
+    )
+
+    # User also saves the same opportunities
+    UserSavedOpportunityFactory.create(user=user, opportunity=org_allowed_saved.opportunity)
+    UserSavedOpportunityFactory.create(user=user, opportunity=no_access_org_opp.opportunity)
+
+    # Request saved opportunities list
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={
+            "filters": {"organization_ids": {"one_of": []}},  # user-only
+            "pagination": {"page_size": 10, "page_offset": 1},
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+
+    assert len(data) == 2
+    opp_map = {item["opportunity_id"]: item for item in data}
+
+    # User-only saved opportunity: with privilege
+    accessible_org = opp_map[str(org_allowed_saved.opportunity_id)]
+    assert "saved_to_organizations" in accessible_org
+    orgs = accessible_org["saved_to_organizations"]
+    assert len(orgs) == 1
+    assert orgs[0]["organization_id"] == str(org_allowed.organization_id)
+
+    # User-only saved opportunity: without privilege
+    accessible_org = opp_map[str(no_access_org_opp.opportunity_id)]
+    assert "saved_to_organizations" in accessible_org
+    assert accessible_org["saved_to_organizations"] == []
