@@ -38,11 +38,7 @@ const NoSavedOpportunities = () => {
 };
 
 type SavedOpportunitiesPageProps = LocalizedPageProps & {
-  searchParams: Promise<{
-    status?: string;
-    scope?: string;
-    organization_id?: string;
-  }>;
+  searchParams: Promise<{ status?: string }>;
 };
 
 export default async function SavedOpportunities({
@@ -50,13 +46,13 @@ export default async function SavedOpportunities({
   searchParams,
 }: SavedOpportunitiesPageProps) {
   const { locale } = await params;
-  const { scope, status, organization_id } = await searchParams;
+  const { status } = await searchParams;
   const t = await getTranslations({ locale });
 
   // Get saved opportunities scope from URL params. If invalid or not provided
   // will default to all individual saved opportunities + organization saved opportunities
   // that the user is a member of.
-  const savedOpportunitiesScope = getScopeFromUrlParams(scope, organization_id);
+  const savedOpportunitiesScope = getScopeFromUrlParams();
 
   // Fetch saved opportunities (filtered if status is provided)
   const savedOpportunities = await fetchSavedOpportunities(
