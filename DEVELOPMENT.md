@@ -44,7 +44,7 @@ Commit messages should, but are not required, to follow [git best practice conve
 
 ### Pull Request Title
 
-Pull request should have the following format: `[Issue N] Description`. The description should follow the imperative voice and lack of period from the [git best practice conventions](https://cbea.ms/git-commit/#seven-rules).
+Pull request titles should have the following format: `[Issue N] Description`. The description should follow the imperative voice and lack of period from the [git best practice conventions](https://cbea.ms/git-commit/#seven-rules).
 
 ### Recommendations
 
