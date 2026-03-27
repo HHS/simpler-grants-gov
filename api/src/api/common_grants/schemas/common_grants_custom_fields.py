@@ -226,7 +226,7 @@ class fiscalYear(CustomField):
     """The fiscal year associated with this opportunity"""
 
     name = fields.String(required=True, metadata={"example": "fiscalYear"})
-    fieldType = fields.String(required=True, metadata={"example": "number"})
+    fieldType = fields.String(required=True, metadata={"example": "integer"})
     value = fields.Integer(required=True, metadata={"example": 2026})
     description = fields.String(
         allow_none=True,
