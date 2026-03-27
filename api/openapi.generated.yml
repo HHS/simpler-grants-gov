@@ -2550,9 +2550,56 @@ paths:
       tags:
       - User v1 - Internal Only
       summary: User Get Saved Opportunity Notifications
-      security:
+      security: &id002
       - ApiJwtAuth: []
       - ApiUserKeyAuth: []
+    post:
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetUserSavedOpportunityNotificationResponse'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - User v1 - Internal Only
+      summary: User Saved Opportunities Notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetUserSavedOpportunityNotificationRequest'
+      security: *id002
   /v1/organizations/{organization_id}/legacy-users/ignore:
     post:
       parameters:
@@ -3703,7 +3750,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: &id002
+          type: &id003
           - object
           $ref: '#/components/schemas/PaginationInfo'
         message:
@@ -3969,7 +4016,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id003
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -3993,6 +4040,7 @@ components:
           - application_submission
           - initial_prototype
           - basic_test_workflow
+          - no_concurrent_test_workflow
           type:
           - string
         entity_type:
@@ -4703,17 +4751,17 @@ components:
         funding_instruments:
           type: array
           items:
-            enum: &id009
+            enum: &id010
             - cooperative_agreement
             - grant
             - procurement_contract
             - other
-            type: &id010
+            type: &id011
             - string
         funding_categories:
           type: array
           items:
-            enum: &id011
+            enum: &id012
             - recovery_act
             - agriculture
             - arts
@@ -4741,12 +4789,12 @@ components:
             - affordable_care_act
             - other
             - energy_infrastructure_and_critical_mineral_and_materials
-            type: &id012
+            type: &id013
             - string
         applicant_types:
           type: array
           items:
-            enum: &id013
+            enum: &id014
             - state_governments
             - county_governments
             - city_or_township_governments
@@ -4764,7 +4812,7 @@ components:
             - small_businesses
             - other
             - unrestricted
-            type: &id014
+            type: &id015
             - string
         created_at:
           type: string
@@ -4826,7 +4874,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: &id003
+          enum: &id004
           - discretionary
           - mandatory
           - continuation
@@ -4845,23 +4893,23 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: &id004
+            type: &id005
             - object
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: &id005
+          type: &id006
           - object
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: &id006
+          enum: &id007
           - forecasted
           - posted
           - closed
           - archived
-          type: &id007
+          type: &id008
           - string
         top_level_agency_code:
           type:
@@ -4945,7 +4993,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id003
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -5111,8 +5159,14 @@ components:
           maxLength: 255
           description: Explanation of the category (required when category is 'other')
           example: Competitive research grant
+        assistance_listing_number:
+          type: string
+          maxLength: 6
+          description: The Assistance Listing Number
+          example: 12-ABC
       required:
       - agency_id
+      - assistance_listing_number
       - category
       - opportunity_number
       - opportunity_title
@@ -5473,7 +5527,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id003
+          enum: *id004
           type:
           - string
           - 'null'
@@ -5487,17 +5541,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id004
+            type: *id005
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: *id005
+          type: *id006
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id006
-          type: *id007
+          enum: *id007
+          type: *id008
         top_level_agency_code:
           type:
           - string
@@ -5580,7 +5634,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: &id008
+            type: &id009
             - object
             $ref: '#/components/schemas/ValidationIssue'
     FormUpdateRequest:
@@ -6547,6 +6601,7 @@ components:
           - application_submission
           - initial_prototype
           - basic_test_workflow
+          - no_concurrent_test_workflow
           type:
           - string
         current_workflow_state:
@@ -7579,7 +7634,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id003
+          enum: *id004
           type:
           - string
           - 'null'
@@ -7593,17 +7648,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id004
+            type: *id005
             $ref: '#/components/schemas/OpportunityAssistanceListingV1'
         summary:
-          type: *id005
+          type: *id006
           $ref: '#/components/schemas/OpportunitySummaryV1'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id006
-          type: *id007
+          enum: *id007
+          type: *id008
         top_level_agency_code:
           type:
           - string
@@ -8091,7 +8146,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id008
+            type: *id009
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -8432,7 +8487,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id003
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -8868,7 +8923,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id003
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -9089,7 +9144,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id003
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -9219,7 +9274,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id003
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -9445,7 +9500,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id003
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -9669,7 +9724,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id002
+          type: *id003
           $ref: '#/components/schemas/PaginationInfo'
         message:
           type: string
@@ -9821,11 +9876,11 @@ components:
           type: array
           minItems: 1
           description: Categories of funding for this opportunity
-          example: &id015
+          example: &id016
           - education
           - health
           items:
-            enum: &id016
+            enum: &id017
             - recovery_act
             - agriculture
             - arts
@@ -9853,7 +9908,7 @@ components:
             - affordable_care_act
             - other
             - energy_infrastructure_and_critical_mineral_and_materials
-            type: &id017
+            type: &id018
             - string
         funding_category_description:
           type:
@@ -9866,26 +9921,26 @@ components:
           type: array
           minItems: 1
           description: Types of funding instruments used for this opportunity
-          example: &id018
+          example: &id019
           - cooperative_agreement
           - grant
           items:
-            enum: &id019
+            enum: &id020
             - cooperative_agreement
             - grant
             - procurement_contract
             - other
-            type: &id020
+            type: &id021
             - string
         applicant_types:
           type: array
           minItems: 1
           description: Types of applicants eligible for this opportunity
-          example: &id021
+          example: &id022
           - state_governments
           - county_governments
           items:
-            enum: &id022
+            enum: &id023
             - state_governments
             - county_governments
             - city_or_township_governments
@@ -9903,7 +9958,7 @@ components:
             - small_businesses
             - other
             - unrestricted
-            type: &id023
+            type: &id024
             - string
         applicant_eligibility_description:
           type:
@@ -10113,18 +10168,18 @@ components:
         funding_instruments:
           type: array
           items:
-            enum: *id009
-            type: *id010
+            enum: *id010
+            type: *id011
         funding_categories:
           type: array
           items:
-            enum: *id011
-            type: *id012
+            enum: *id012
+            type: *id013
         applicant_types:
           type: array
           items:
-            enum: *id013
-            type: *id014
+            enum: *id014
+            type: *id015
         created_at:
           type: string
           format: date-time
@@ -10202,6 +10257,36 @@ components:
           type:
           - object
           $ref: '#/components/schemas/SavedOpportunityNotifications'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    SetUserSavedOpportunityNotificationRequest:
+      type: object
+      properties:
+        organization_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: The ID of the organization for which to set notification. If
+            not provided, the setting applies to the user's own saved opportunities.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email_enabled:
+          type: boolean
+          description: Whether the email notifications is enabled
+      required:
+      - email_enabled
+      - organization_id
+    SetUserSavedOpportunityNotificationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          example: null
         status_code:
           type: integer
           description: The HTTP status code
@@ -10352,7 +10437,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id008
+            type: *id009
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -10517,7 +10602,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id008
+            type: *id009
             $ref: '#/components/schemas/ValidationIssue'
         message:
           type: string
@@ -10778,10 +10863,10 @@ components:
           type: array
           minItems: 1
           description: Categories of funding for this opportunity
-          example: *id015
+          example: *id016
           items:
-            enum: *id016
-            type: *id017
+            enum: *id017
+            type: *id018
         funding_category_description:
           type:
           - string
@@ -10793,18 +10878,18 @@ components:
           type: array
           minItems: 1
           description: Types of funding instruments used for this opportunity
-          example: *id018
+          example: *id019
           items:
-            enum: *id019
-            type: *id020
+            enum: *id020
+            type: *id021
         applicant_types:
           type: array
           minItems: 1
           description: Types of applicants eligible for this opportunity
-          example: *id021
+          example: *id022
           items:
-            enum: *id022
-            type: *id023
+            enum: *id023
+            type: *id024
         applicant_eligibility_description:
           type:
           - string

@@ -1,15 +1,6 @@
 from collections.abc import Iterator
-from typing import Any
 
 from pydantic import BaseModel, ConfigDict
-
-from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
-from src.legacy_soap_api.legacy_soap_api_config import (
-    SimplerSoapAPI,
-    SOAPOperationConfig,
-    get_soap_operation_config,
-)
-from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
 
 
 class SOAPClientCertificateNotConfigured(Exception):
@@ -30,52 +21,6 @@ class SOAPInvalidEnvelope(Exception):
 
 class SOAPInvalidRequestOperationName(Exception):
     pass
-
-
-class SOAPRequest(BaseModel):
-    data: Any
-    full_path: str
-    headers: dict
-    method: str
-    api_name: SimplerSoapAPI
-    auth: SOAPAuth | None = None
-    operation_name: str = ""
-
-    def get_soap_request_operation_config(self) -> SOAPOperationConfig:
-        """Get operation config
-
-        This method returns the relevant Simpler SOAP API operation configuration.
-
-        Every SOAP operation that Simpler SOAP API will support will need to have a corresponding entry in SIMPLER_SOAP_OPERATION_CONFIGS.
-
-        All existing grants.gov SOAP operations can be found here:
-        Applicants: https://grants.gov/system-to-system/applicant-system-to-system/web-services
-        Grantors: https://grants.gov/system-to-system/grantor-system-to-system/web-services
-
-        These configs store data for processing SOAP XML data within simpler.
-        """
-        operation_name = (
-            get_soap_operation_name(self.data.head().decode())
-            if not self.operation_name
-            else self.operation_name
-        )
-        if not operation_name:
-            raise SOAPInvalidRequestOperationName(
-                f"Could not get SOAP operation name for {self.api_name.value}"
-            )
-
-        operation_config = get_soap_operation_config(self.api_name, operation_name)
-        if not operation_config:
-            raise SOAPOperationNotSupported(
-                f"Simpler {self.api_name.value} SOAP API does not support {operation_name}"
-            )
-
-        if operation_config.privileges is None:
-            raise SOAPOperationNotSupported(
-                f"Simpler {self.api_name.value} SOAP API has no privileges set for {operation_name}"
-            )
-
-        return operation_config
 
 
 class SOAPResponse(BaseModel):

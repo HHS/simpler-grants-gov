@@ -21,6 +21,10 @@ class WorkflowConfig:
 
     entity_type: WorkflowEntityType
 
+    # Whether to allow multiple active workflows of this type for the same entity.
+    # When False, starting a new workflow will error if one already exists and is active.
+    allow_concurrent_workflow_for_entity: bool = True
+
     # A mapping of events to approval configs
     approval_mapping: dict[str, ApprovalConfig] = dataclasses.field(default_factory=dict)
 
