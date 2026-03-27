@@ -388,11 +388,11 @@ variable "opensearch_ingest_policy_arn" {
 variable "newrelic_entity_guid" {
   type        = string
   description = "New Relic entity GUID for the primary ALB, used to correlate logs with the infrastructure entity in New Relic."
-  default     = ""
+  default     = null
 }
 
 variable "newrelic_mtls_entity_guid" {
   type        = string
   description = "New Relic entity GUID for the mTLS ALB, used to correlate logs with the infrastructure entity in New Relic."
-  default     = ""
+  default     = null
 }

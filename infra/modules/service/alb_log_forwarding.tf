@@ -51,8 +51,8 @@ resource "aws_lambda_function" "nr_alb_log_forwarder" {
       AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
       ALB_NAME                = var.service_name
       MTLS_ALB_NAME           = "${var.service_name}-mtls"
-      NR_ENTITY_GUID          = var.newrelic_entity_guid
-      NR_MTLS_ENTITY_GUID     = var.newrelic_mtls_entity_guid
+      NR_ENTITY_GUID          = coalesce(var.newrelic_entity_guid, "")
+      NR_MTLS_ENTITY_GUID     = coalesce(var.newrelic_mtls_entity_guid, "")
     }
   }
 
@@ -107,7 +107,7 @@ resource "aws_cloudwatch_log_group" "nr_alb_log_forwarder" {
   # checkov:skip=CKV_AWS_338:Forwarding Lambda logs don't need long retention — actual ALB logs are in New Relic
   count             = var.enable_load_balancer ? 1 : 0
   name              = "/aws/lambda/${local.nr_alb_log_forwarder_name}"
-  retention_in_days = 365
+  retention_in_days = 30
   kms_key_id        = aws_kms_key.nr_alb_log_forwarder[0].arn
 }
 
