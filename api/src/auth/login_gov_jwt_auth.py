@@ -43,6 +43,7 @@ class LoginGovConfig(PydanticBaseEnvConfig):
     login_gov_endpoint: str = Field(alias="LOGIN_GOV_ENDPOINT")
     login_gov_jwk_endpoint: str = Field(alias="LOGIN_GOV_JWK_ENDPOINT")
     login_gov_auth_endpoint: str = Field(alias="LOGIN_GOV_AUTH_ENDPOINT")
+    login_gov_logout_endpoint: str = Field(alias="LOGIN_GOV_LOGOUT_ENDPOINT")
     login_gov_token_endpoint: str = Field(alias="LOGIN_GOV_TOKEN_ENDPOINT")
 
     # Where we send a user after they have successfully logged in
@@ -73,6 +74,7 @@ def initialize_login_gov_config() -> None:
                 "login_gov_endpoint": _config.login_gov_endpoint,
                 "login_gov_jwk_endpoint": _config.login_gov_jwk_endpoint,
                 "login_gov_auth_endpoint": _config.login_gov_auth_endpoint,
+                "login_gov_logout_endpoint": _config.login_gov_logout_endpoint,
             },
         )
 
@@ -159,6 +161,34 @@ def get_login_gov_redirect_uri(db_session: db.Session, config: LoginGovConfig | 
     db_session.add(LoginGovState(login_gov_state_id=state, nonce=nonce))
 
     return f"{config.login_gov_auth_endpoint}?{encoded_params}"
+
+
+def get_login_gov_loguout_redirect_uri(db_session: db.Session, config: LoginGovConfig | None = None) -> str:
+    if config is None:
+        config = get_config()
+
+    state = uuid.uuid4()
+
+    # Ask Flask for its own URI - specifying we want the callback route
+    # .user_login_callback points to the function itself defined in user_routes.py
+    redirect_uri = flask.url_for(
+        ".user_login_callback", _external=True, _scheme=config.login_gov_redirect_scheme
+    )
+
+    # We want to redirect to the authorization endpoint of login.gov
+    # See: https://developers.login.gov/oidc/authorization/
+    encoded_params = urllib.parse.urlencode(
+        {
+            "client_id": config.client_id,
+            "state": state,
+            "post_loguout_redirect_uri": redirect_uri
+        }
+    )
+
+    # Add the state to the DB
+    db_session.add(LoginGovState(login_gov_state_id=state, nonce=nonce))
+
+    return f"{config.login_gov_logout_endpoint}?{encoded_params}"
 
 
 def get_login_gov_client_assertion(config: LoginGovConfig | None = None) -> str:

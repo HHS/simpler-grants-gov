@@ -15,6 +15,7 @@ const {
   FEATURE_AWARD_RECOMMENDATION_OFF,
   FEATURE_OPPORTUNITIES_LIST_OFF,
   AUTH_LOGIN_URL,
+  AUTH_LOGOUT_URL,
   AUTH_EXPIRATION_TIME,
   API_JWT_PUBLIC_KEY,
   NEW_RELIC_ENABLED,
@@ -53,6 +54,8 @@ export const environment: { [key: string]: string } = {
   SENDY_LIST_ID: SENDY_LIST_ID || "",
   API_URL: API_URL || "",
   AUTH_LOGIN_URL: AUTH_LOGIN_URL || "",
+  AUTH_LOGOUT_URL:
+    AUTH_LOGOUT_URL || "https://api.dev.simpler.grants.gov/v1/users/logout",
   API_AUTH_TOKEN: API_AUTH_TOKEN || "",
   AUTH_EXPIRATION_TIME: AUTH_EXPIRATION_TIME || "0",
   API_GW_AUTH: API_GW_AUTH || "",

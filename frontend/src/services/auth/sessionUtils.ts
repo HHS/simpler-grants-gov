@@ -4,6 +4,7 @@ import { KeyObject } from "crypto";
 import { JWTPayload, jwtVerify, SignJWT } from "jose";
 import { clientTokenExpirationInterval } from "src/constants/auth";
 import { environment } from "src/constants/environments";
+import SessionStorage from "src/services/sessionStorage/sessionStorage";
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -61,16 +62,8 @@ export async function deleteSession() {
 }
 
 export function loginGovLogout(pivRequired = false) {
-  const authURL = new URL(environment.AUTH_LOGIN_URL);
-  const clientId = authURL.searchParams.get("client_id");
-  const redirectUri = authURL.searchParams.get("redirect_uri");
-  if (clientId && redirectUri) {
-    redirect(
-      `${authURL.origin}/openid_connect/logout?client_id=${clientId}&post_logout_redirect_uri=${encodeURIComponent(redirectUri + (pivRequired ? "pivError=true" : ""))}`,
-    );
-  } else {
-    redirect(
-      `/login${pivRequired ? `pivError=true&url=${encodeURIComponent(environment.AUTH_LOGIN_URL)}` : ""}`,
-    );
+  if (pivRequired) {
+    SessionStorage.setItem("showPivError", "true");
   }
+  redirect(environment.AUTH_LOGOUT_URL);
 }

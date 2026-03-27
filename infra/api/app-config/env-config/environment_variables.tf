@@ -17,6 +17,7 @@ locals {
     LOGIN_GOV_ENDPOINT               = "https://idp.int.identitysandbox.gov/"
     LOGIN_GOV_JWK_ENDPOINT           = "https://idp.int.identitysandbox.gov/api/openid_connect/certs"
     LOGIN_GOV_AUTH_ENDPOINT          = "https://idp.int.identitysandbox.gov/openid_connect/authorize"
+    LOGIN_GOV_LOGOOUT_ENDPOINT       = "https://idp.int.identitysandbox.gov/openid_connect/logout"
     LOGIN_GOV_TOKEN_ENDPOINT         = "https://idp.int.identitysandbox.gov/api/openid_connect/token"
     LOGIN_GOV_REDIRECT_SCHEME        = var.enable_https ? "https" : "http"
     API_JWT_ISSUER                   = "simpler-grants-api-${var.environment}"

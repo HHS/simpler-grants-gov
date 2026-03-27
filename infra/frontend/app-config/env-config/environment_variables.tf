@@ -63,6 +63,11 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/auth-login-url"
     },
+    # URL for the API logout route.
+    AUTH_LOGOUT_URL = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/auth-logout-url"
+    },
     NEW_RELIC_APP_NAME = {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/new-relic-app-name"
