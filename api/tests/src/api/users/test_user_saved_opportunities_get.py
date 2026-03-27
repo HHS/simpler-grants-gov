@@ -798,8 +798,8 @@ def test_user_saved_opps_enriched_with_accessible_orgs_only(
     client, db_session, enable_factory_create
 ):
     """Test that in user-saved-only mode, saved opportunities are enriched
-with only the organizations the user has access to (i.e., organizations
-for which the user has the right privilege."""
+    with only the organizations the user has access to (i.e., organizations
+    for which the user has the right privilege."""
     # Create user in org
     user, org_allowed, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
     org_user_no_role = OrganizationUserFactory(user=user)
