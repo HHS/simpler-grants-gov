@@ -486,6 +486,37 @@ h6 {
   }
 }
 
+// Override nav link colors to meet WCAG AA contrast requirements (4.5:1 min).
+// USWDS hardcodes $nav-link-color to base-dark (#76766a, ~4.56:1) which barely
+// passes AA and the mint hover color fails AA entirely against a white header.
+// Uses ink (base-darkest) for default and mint-80 for hover to ensure compliance.
+// See: https://github.com/HHS/simpler-grants-gov/issues/3423
+.usa-nav__primary {
+  a:not(.usa-button):not(.usa-current) {
+    color: color("ink"); // #1b1b1b — contrast ratio 15.98:1 against white
+    &:hover {
+      color: color("mint-80"); // contrast ratio ~7.5:1 against white
+    }
+    &:active {
+      color: color("mint-cool-80v");
+    }
+  }
+
+  .usa-current {
+    color: color("ink");
+  }
+
+  // Update mobile button hover to match new link color
+  @include at-media-max($theme-header-min-width) {
+    button,
+    button:hover,
+    button:focus:hover,
+    button:active:hover {
+      color: color("ink");
+    }
+  }
+}
+
 // revert to behavior before upgrade https://github.com/uswds/uswds/commit/2785b67e58ae19f161101f4859afff0e9664fbda
 .usa-header--basic {
   @include at-media($theme-header-min-width) {
