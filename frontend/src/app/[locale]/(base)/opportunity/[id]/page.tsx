@@ -27,7 +27,7 @@ type OpportunityListingProps = {
 } & WithFeatureFlagProps;
 
 export const revalidate = 600; // invalidate ten minutes
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
 export async function generateMetadata({
   params,
