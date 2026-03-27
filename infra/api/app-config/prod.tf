@@ -1,21 +1,23 @@
 module "prod_config" {
-  source                          = "./env-config"
-  project_name                    = local.project_name
-  app_name                        = local.app_name
-  default_region                  = module.project_config.default_region
-  environment                     = "prod"
-  network_name                    = "prod"
-  domain_name                     = "api.simpler.grants.gov"
-  secondary_domain_names          = ["alb.simpler.grants.gov"]
-  enable_https                    = true
-  s3_cdn_domain_name              = "files.simpler.grants.gov"
-  mtls_domain_name                = "soap.simpler.grants.gov"
-  has_database                    = local.has_database
-  database_enable_http_endpoint   = true
-  database_newrelic_entity_guid   = "NTI0OTgwOXxJTkZSQXxOQXw3NTg3MzYwMjg2Njg1MjU2ODYy"
-  has_incident_management_service = local.has_incident_management_service
-  enable_identity_provider        = local.enable_identity_provider
-  enable_notifications            = local.enable_notifications
+  source                            = "./env-config"
+  project_name                      = local.project_name
+  app_name                          = local.app_name
+  default_region                    = module.project_config.default_region
+  environment                       = "prod"
+  network_name                      = "prod"
+  domain_name                       = "api.simpler.grants.gov"
+  secondary_domain_names            = ["alb.simpler.grants.gov"]
+  enable_https                      = true
+  s3_cdn_domain_name                = "files.simpler.grants.gov"
+  mtls_domain_name                  = "soap.simpler.grants.gov"
+  has_database                      = local.has_database
+  database_enable_http_endpoint     = true
+  database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXw3NTg3MzYwMjg2Njg1MjU2ODYy"
+  has_incident_management_service   = local.has_incident_management_service
+  enable_identity_provider          = local.enable_identity_provider
+  enable_notifications              = local.enable_notifications
+  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyNjMzMDEwMDY4MDkyNjI0MTY0"
+  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXw2ODQyNTI2NjUwMjY5NTAzNzM5"
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-prod/services/api-prod/health?region=us-east-1
