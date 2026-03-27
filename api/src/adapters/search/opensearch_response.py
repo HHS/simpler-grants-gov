@@ -151,11 +151,20 @@ def _parse_aggregations(
 
 def _compute_score_stats(records: list[dict]) -> dict:
 
-    scores = [r.get("relevancy_score") for r in records if r.get("relevancy_score") is not None]
-
+    scores: list[float] = [
+        r["relevancy_score"] for r in records if isinstance(r.get("relevancy_score"), (int, float))
+    ]
+    if scores:
+        return {
+            "search.score_min": min(scores),
+            "search.score_max": max(scores),
+            "search.score_mean": statistics.mean(scores),
+            "search.score_stdev": statistics.pstdev(scores) if len(scores) > 1 else 0.0,
+        }
+    # No valid scores
     return {
-        "search.score_min": min(scores) if scores else None,
-        "search.score_max": max(scores) if scores else None,
-        "search.score_mean": statistics.mean(scores) if scores else None,
-        "search.score_stdev": statistics.pstdev(scores) if len(scores) > 1 else None,
+        "search.score_min": None,
+        "search.score_max": None,
+        "search.score_mean": None,
+        "search.score_stdev": None,
     }

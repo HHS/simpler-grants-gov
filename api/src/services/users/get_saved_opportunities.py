@@ -240,7 +240,7 @@ def get_saved_opportunities(
         org_ids_to_use = None
         org_ids_filter = _get_accessible_org_ids(user, user.organization_users)
     # Build saved_union subquery
-    saved_union = _build_saved_union_subquery(user_id, include_user_saved_opps)
+    saved_union = _build_saved_union_subquery(user_id, include_user_saved_opps, org_ids_to_use)
 
     # Base opportunity query
     stmt = (
