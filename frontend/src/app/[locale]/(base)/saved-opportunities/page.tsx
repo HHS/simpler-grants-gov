@@ -1,7 +1,7 @@
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
-import { getScopeFromUrlParams } from "src/utils/opportunity/savedOpportunitiiesUtils";
+import { getScopeFromUrlParams } from "src/utils/opportunity/savedOpportunitiesUtils";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";

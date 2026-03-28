@@ -7,7 +7,7 @@ import {
   OpportunityApiResponse,
 } from "src/types/opportunity/opportunityResponseTypes";
 import { SavedOpportunitiesScope } from "src/types/opportunity/savedOpportunitiesTypes";
-import { DEFAULT_SAVED_OPPORTUNITY_SCOPE } from "src/utils/opportunity/savedOpportunitiiesUtils";
+import { DEFAULT_SAVED_OPPORTUNITY_SCOPE } from "src/utils/opportunity/savedOpportunitiesUtils";
 import { mockOpportunity } from "src/utils/testing/fixtures";
 import {
   localeParams,

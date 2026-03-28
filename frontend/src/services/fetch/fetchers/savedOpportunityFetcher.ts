@@ -7,7 +7,7 @@ import { SavedOpportunitiesScope } from "src/types/opportunity/savedOpportunitie
 import {
   getSavedOpportunitiesScopeOrganizationIds,
   INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
-} from "src/utils/opportunity/savedOpportunitiiesUtils";
+} from "src/utils/opportunity/savedOpportunitiesUtils";
 
 export const handleSavedOpportunity = async (
   type: "DELETE" | "POST",

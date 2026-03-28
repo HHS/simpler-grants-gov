@@ -4,7 +4,7 @@ import {
   getSavedOpportunitiesScopeOrganizationIds,
   getScopeFromUrlParams,
   INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
-} from "./savedOpportunitiiesUtils";
+} from "./savedOpportunitiesUtils";
 
 describe("getScopeFromUrlParams", () => {
   it("defaults to all saved opportunities scope", () => {

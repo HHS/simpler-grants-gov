@@ -7,7 +7,7 @@ import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetche
 import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { LocalizedPageProps } from "src/types/intl";
-import { INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE } from "src/utils/opportunity/savedOpportunitiiesUtils";
+import { INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE } from "src/utils/opportunity/savedOpportunitiesUtils";
 import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
