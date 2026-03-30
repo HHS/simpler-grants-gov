@@ -66,8 +66,8 @@ export default function ContentDisplayToggle({
         )}
       >
         <button
-          onClick={(event) => {
-            event.preventDefault();
+          type="button"
+          onClick={() => {
             setToggledContentVisible(!toggledContentVisible);
           }}
           aria-pressed={toggledContentVisible}

@@ -68,7 +68,7 @@ export const RecommendationSummaryDisplay = ({
           </Grid>
           <Grid col={12} tablet={{ col: "fill" }}>
             <div>
-              <p className="text-bold margin-bottom-1 text-no-wrap">
+              <p className="text-bold margin-bottom-1">
                 {t("summary.recommendedWithoutFunding")}
               </p>
               <p className="font-sans-md text-normal margin-top-0">
@@ -79,7 +79,7 @@ export const RecommendationSummaryDisplay = ({
           </Grid>
           <Grid col={12} tablet={{ col: "fill" }}>
             <div>
-              <p className="text-bold margin-bottom-1 text-no-wrap">
+              <p className="text-bold margin-bottom-1">
                 {t("summary.notRecommendedForFunding")}
               </p>
               <p className="font-sans-md text-normal margin-top-0">
