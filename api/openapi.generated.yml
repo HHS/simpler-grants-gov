@@ -33,6 +33,7 @@ tags:
 - name: Application Alpha
 - name: Form Alpha
 - name: Competition Alpha
+- name: Award Recommendation Alpha
 - name: CommonGrants Protocol
   description: CommonGrants-compliant API routes for searching opportunities to promote
     interoperability across grant systems. Learn more by visiting CommonGrants.org
@@ -2600,6 +2601,47 @@ paths:
             schema:
               $ref: '#/components/schemas/SetUserSavedOpportunityNotificationRequest'
       security: *id002
+  /alpha/award-recommendations/{award_recommendation_id}:
+    get:
+      parameters:
+      - in: path
+        name: award_recommendation_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardRecommendationGetResponse'
+          description: Successful response
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      tags:
+      - Award Recommendation Alpha
+      summary: Get Award Recommendation
+      description: Retrieve an award recommendation by ID, including opportunity details,
+        attachments, and reviews.
+      security:
+      - ApiJwtAuth: []
+      - ApiUserKeyAuth: []
   /v1/organizations/{organization_id}/legacy-users/ignore:
     post:
       parameters:
@@ -4040,6 +4082,7 @@ components:
           - application_submission
           - initial_prototype
           - basic_test_workflow
+          - no_concurrent_test_workflow
           type:
           - string
         entity_type:
@@ -6600,6 +6643,7 @@ components:
           - application_submission
           - initial_prototype
           - basic_test_workflow
+          - no_concurrent_test_workflow
           type:
           - string
         current_workflow_state:
@@ -10285,6 +10329,209 @@ components:
           example: Success
         data:
           example: null
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    AwardRecommendationOpportunitySummary:
+      type: object
+      properties:
+        opportunity_status:
+          description: The status of the opportunity
+          enum:
+          - forecasted
+          - posted
+          - closed
+          - archived
+          type:
+          - string
+          - 'null'
+          - 'null'
+        summary_description:
+          type:
+          - string
+          - 'null'
+          description: The summary of the opportunity
+          example: This opportunity aims to unravel the mysteries of the universe.
+    AwardRecommendationOpportunity:
+      type: object
+      properties:
+        opportunity_id:
+          type: string
+          format: uuid
+          description: The opportunity ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        opportunity_number:
+          type:
+          - string
+          - 'null'
+          description: The opportunity number
+          example: O-BJA-2025-202930-STG
+        opportunity_title:
+          type:
+          - string
+          - 'null'
+          description: The title of the opportunity
+          example: Research into conservation techniques
+        summary:
+          description: Summary details of the opportunity
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/AwardRecommendationOpportunitySummary'
+          - type: 'null'
+    AwardRecommendationAttachment:
+      type: object
+      properties:
+        award_recommendation_attachment_id:
+          type: string
+          format: uuid
+          description: The attachment's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        download_path:
+          type: string
+          description: The presigned URL to download the attachment
+          example: https://s3.amazonaws.com/bucket/path/to/my_example.pdf
+        file_name:
+          type: string
+          description: The file name of the attachment
+          example: my_example.pdf
+        award_recommendation_attachment_type:
+          description: The type of the attachment
+          enum:
+          - standard_terms
+          - standard_conditions
+          - program_terms
+          - program_conditions
+          - other
+          type:
+          - string
+        uploading_user:
+          description: The user who uploaded the attachment
+          type:
+          - object
+          $ref: '#/components/schemas/SimpleUser'
+        created_at:
+          type: string
+          format: date-time
+          description: When the attachment was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the attachment was last updated
+    AwardRecommendationReview:
+      type: object
+      properties:
+        award_recommendation_review_id:
+          type: string
+          format: uuid
+          description: The review's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        award_recommendation_review_type:
+          description: The type of the review
+          enum:
+          - merit_review
+          - application_budget_review
+          - programmatic_review
+          - business_and_risk_review
+          type:
+          - string
+        is_reviewed:
+          type: boolean
+          description: Whether the review has been completed
+    AwardRecommendationData:
+      type: object
+      properties:
+        award_recommendation_id:
+          type: string
+          format: uuid
+          description: The award recommendation's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        award_recommendation_number:
+          type: string
+          description: The generated award recommendation number
+          example: AR-26-0001
+        award_recommendation_status:
+          description: The status of the award recommendation
+          enum:
+          - draft
+          - in_review
+          - approved
+          type:
+          - string
+        award_selection_method:
+          description: The method used to select the award
+          enum:
+          - merit_review_ranking_only
+          - merit_review_ranking_with_other_factors
+          - formula
+          - single_source
+          - sole_source
+          - other
+          type:
+          - string
+          - 'null'
+          - 'null'
+        additional_info:
+          type:
+          - string
+          - 'null'
+          description: Additional info about the opportunity
+          example: Program office requests expedited processing due to deadline in
+            September.
+        selection_method_detail:
+          type:
+          - string
+          - 'null'
+          description: Additional detail about the selection method
+          example: Selection factors included technical merit, past performance, and
+            cost.
+        other_key_information:
+          type:
+          - string
+          - 'null'
+          description: Other key information
+          example: This opportunity aligns with the agency's rural access initiative
+            and requires interagency coordination.
+        review_workflow_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: The workflow ID for the review process
+          example: 123e4567-e89b-12d3-a456-426614174000
+        opportunity:
+          description: The associated opportunity
+          type:
+          - object
+          $ref: '#/components/schemas/AwardRecommendationOpportunity'
+        award_recommendation_attachments:
+          type: array
+          description: Attachments associated with the award recommendation
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/AwardRecommendationAttachment'
+        award_recommendation_reviews:
+          type: array
+          description: Reviews associated with the award recommendation
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/AwardRecommendationReview'
+    AwardRecommendationGetResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          description: The award recommendation details
+          type:
+          - object
+          $ref: '#/components/schemas/AwardRecommendationData'
         status_code:
           type: integer
           description: The HTTP status code

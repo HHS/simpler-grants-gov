@@ -876,7 +876,7 @@ export const messages = {
       toggleButton: "Filters",
     },
     callToAction: {
-      shareWithOrganization: "Share with organizations",
+      shareWithOthers: "Share with others",
     },
     opportunitySaved: "Saved",
     resultsHeader: {
@@ -956,6 +956,8 @@ export const messages = {
           "This search query was copied to your clipboard. Paste it as a link anywhere.",
       },
     },
+    shareWithYourList: "Shared with:",
+    shareWithOthers: "Share with others",
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
@@ -1820,6 +1822,7 @@ export const messages = {
     },
   },
   Opportunities: {
+    createOpportunityButton: "Create Opportunity",
     numOpportunities:
       "{num, plural, =1 {1 opportunity} other {# opportunities}}",
     errorMessage:
@@ -1997,6 +2000,9 @@ export const messages = {
       categoryExplanation: "Grant selection method explanation",
       categoryExplanationDesc:
         'If "Other" was selected, please describe the specific process used to evaluate and award these funds.',
+      assistanceListingNumber: "Assistance listing number",
+      assistanceListingNumberDesc:
+        "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
       charactersAllowed40: "40 characters allowed",
       charactersAllowed255: "255 characters allowed",
       successMessage: "Opportunity started. Continuing shortly...",

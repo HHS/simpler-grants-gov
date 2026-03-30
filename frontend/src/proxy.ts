@@ -87,9 +87,36 @@ export default function proxy(request: NextRequest): NextResponse {
     logRequest(request, testResponse);
     return testResponse;
   }
-  const response = request.url.match(/api\//)
+
+  const isApiRoute = !!request.url.match(/api\//);
+  const response = isApiRoute
     ? featureFlagsManager.middleware(request, NextResponse.next())
     : featureFlagsManager.middleware(request, i18nMiddleware(request));
+
+  // Check for site-wide maintenance mode.
+  // Pass searchParams so query param overrides (e.g. ?_ff=maintenanceMode:false)
+  // take effect immediately instead of reading stale request cookies.
+  const searchParamsDict: Record<string, string> = {};
+  request.nextUrl.searchParams.forEach((value, key) => {
+    searchParamsDict[key] = value;
+  });
+  const isMaintenanceMode = featureFlagsManager.isFeatureEnabled(
+    "maintenanceMode",
+    request.cookies,
+    searchParamsDict,
+  );
+  const isMaintenancePage = request.nextUrl.pathname.includes("/maintenance");
+
+  if (isMaintenanceMode && !isMaintenancePage && !isApiRoute) {
+    const maintenanceUrl = new URL("/maintenance", request.url);
+    const maintenanceResponse = NextResponse.redirect(maintenanceUrl);
+    // Copy cookies from the middleware response so flag changes persist in the browser
+    response.headers.getSetCookie().forEach((cookie) => {
+      maintenanceResponse.headers.append("Set-Cookie", cookie);
+    });
+    logRequest(request, maintenanceResponse);
+    return maintenanceResponse;
+  }
 
   // in Next 15 there is an experimental `unauthorized` function that will send a 401
   // code to the client and display an unauthorized page
