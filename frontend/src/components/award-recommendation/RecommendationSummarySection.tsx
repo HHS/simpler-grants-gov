@@ -21,7 +21,7 @@ export const RecommendationSummarySection = ({
   totalAvailable = 250000,
   viewMode = false,
 }: RecommendationSummarySectionProps) => {
-  const t = useTranslations("AwardRecommendation");
+  const t = useTranslations("AwardRecommendation.recommendations");
 
   return (
     <div>
@@ -29,14 +29,10 @@ export const RecommendationSummarySection = ({
         <Grid col={9} tablet={{ col: 9 }}>
           <div className="margin-top-5 margin-bottom-5">
             <div className="margin-bottom-3">
-              <h2 className="margin-top-0 margin-bottom-0">
-                {t("recommendations.heading")}
-              </h2>
+              <h2 className="margin-top-0 margin-bottom-0">{t("heading")}</h2>
             </div>
             <p className="text-base margin-top-2 margin-bottom-4">
-              {viewMode
-                ? t("recommendations.description")
-                : t("recommendations.editPageDescription")}
+              {viewMode ? t("description") : t("editPageDescription")}
             </p>
 
             {viewMode && !summary ? null : (
@@ -51,7 +47,7 @@ export const RecommendationSummarySection = ({
                     <div className="margin-bottom-4">
                       <div className="border radius-md border-base-lighter padding-3 bg-white">
                         <h3 className="margin-top-0 margin-bottom-2 font-sans-md">
-                          {t("recommendations.fundingStrategy.heading")}
+                          {t("fundingStrategy.heading")}
                         </h3>
                         <SummaryDescriptionDisplay
                           summaryDescription={fundingStrategy}
@@ -63,10 +59,10 @@ export const RecommendationSummarySection = ({
                   <div className="margin-bottom-4">
                     <div className="bg-white">
                       <h3 className="margin-top-0 margin-bottom-2 font-sans-md">
-                        {t("recommendations.fundingStrategy.heading")}
+                        {t("fundingStrategy.heading")}
                       </h3>
                       <p className="text-base-dark margin-top-0 margin-bottom-2">
-                        {t("recommendations.fundingStrategy.description")}
+                        {t("fundingStrategy.description")}
                       </p>
                       <CharacterCount
                         id="funding_strategy"

@@ -40,15 +40,13 @@ describe("RecommendationSummarySection", () => {
   it("renders the recommendations heading", () => {
     render(<RecommendationSummarySection />);
 
-    expect(screen.getByText("recommendations.heading")).toBeInTheDocument();
+    expect(screen.getByText("heading")).toBeInTheDocument();
   });
 
   it("renders the recommendations description", () => {
     render(<RecommendationSummarySection />);
 
-    expect(
-      screen.getByText("recommendations.editPageDescription"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("editPageDescription")).toBeInTheDocument();
   });
 
   it("renders RecommendationSummaryDisplay", () => {
@@ -88,9 +86,7 @@ describe("RecommendationSummarySection", () => {
   it("renders funding strategy description", () => {
     render(<RecommendationSummarySection summary={mockSummary} />);
 
-    expect(
-      screen.getByText("recommendations.fundingStrategy.description"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("fundingStrategy.description")).toBeInTheDocument();
   });
 
   it("renders empty textarea when no funding strategy provided", () => {
@@ -103,9 +99,7 @@ describe("RecommendationSummarySection", () => {
   it("always renders funding strategy section in edit mode", () => {
     render(<RecommendationSummarySection summary={mockSummary} />);
 
-    expect(
-      screen.getByText("recommendations.fundingStrategy.heading"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("fundingStrategy.heading")).toBeInTheDocument();
     expect(screen.getByTestId("funding-strategy-textarea")).toBeInTheDocument();
   });
 
@@ -123,12 +117,8 @@ describe("RecommendationSummarySection", () => {
         <RecommendationSummarySection summary={mockSummary} viewMode={true} />,
       );
 
-      expect(
-        screen.getByText("recommendations.description"),
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByText("recommendations.editPageDescription"),
-      ).not.toBeInTheDocument();
+      expect(screen.getByText("description")).toBeInTheDocument();
+      expect(screen.queryByText("editPageDescription")).not.toBeInTheDocument();
     });
 
     it("renders edit description when viewMode is false", () => {
@@ -136,12 +126,8 @@ describe("RecommendationSummarySection", () => {
         <RecommendationSummarySection summary={mockSummary} viewMode={false} />,
       );
 
-      expect(
-        screen.getByText("recommendations.editPageDescription"),
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByText("recommendations.description"),
-      ).not.toBeInTheDocument();
+      expect(screen.getByText("editPageDescription")).toBeInTheDocument();
+      expect(screen.queryByText("description")).not.toBeInTheDocument();
     });
 
     it("renders RecommendationSummaryDisplay in view mode when summary is provided", () => {
@@ -171,9 +157,7 @@ describe("RecommendationSummarySection", () => {
         />,
       );
 
-      expect(
-        screen.getByText("recommendations.fundingStrategy.heading"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("fundingStrategy.heading")).toBeInTheDocument();
       expect(screen.getByText(mockFundingStrategy)).toBeInTheDocument();
       expect(
         screen.queryByTestId("funding-strategy-textarea"),
@@ -186,7 +170,7 @@ describe("RecommendationSummarySection", () => {
       );
 
       expect(
-        screen.queryByText("recommendations.fundingStrategy.heading"),
+        screen.queryByText("fundingStrategy.heading"),
       ).not.toBeInTheDocument();
       expect(screen.queryByText(mockFundingStrategy)).not.toBeInTheDocument();
     });
