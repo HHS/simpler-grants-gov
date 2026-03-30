@@ -6,6 +6,8 @@ import {
   MinimalOpportunity,
   OpportunityApiResponse,
 } from "src/types/opportunity/opportunityResponseTypes";
+import { SavedOpportunitiesScope } from "src/types/opportunity/savedOpportunitiesTypes";
+import { DEFAULT_SAVED_OPPORTUNITY_SCOPE } from "src/utils/opportunity/savedOpportunitiesUtils";
 import { mockOpportunity } from "src/utils/testing/fixtures";
 import {
   localeParams,
@@ -55,8 +57,14 @@ jest.mock("src/services/fetch/fetchers/opportunityFetcher", () => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
-  fetchSavedOpportunities: (statusFilter?: string) =>
-    savedOpportunities(statusFilter) as Promise<MinimalOpportunity[]>,
+  fetchSavedOpportunities: (
+    scope: SavedOpportunitiesScope,
+    statusFilter?: string,
+  ) =>
+    savedOpportunities(
+      DEFAULT_SAVED_OPPORTUNITY_SCOPE,
+      statusFilter,
+    ) as Promise<MinimalOpportunity[]>,
 }));
 
 jest.mock("src/components/Breadcrumbs", () => ({
@@ -198,7 +206,10 @@ describe("Saved Opportunities page", () => {
     render(component);
 
     // Verify fetchSavedOpportunities was called with the status filter
-    expect(savedOpportunities).toHaveBeenCalledWith("forecasted");
+    expect(savedOpportunities).toHaveBeenCalledWith(
+      DEFAULT_SAVED_OPPORTUNITY_SCOPE,
+      "forecasted",
+    );
     // Should only be called once since filtered results were found
     expect(savedOpportunities).toHaveBeenCalledTimes(1);
     // Should show the forecasted opportunity
