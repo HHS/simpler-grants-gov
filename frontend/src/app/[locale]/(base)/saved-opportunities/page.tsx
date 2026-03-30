@@ -1,7 +1,10 @@
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
-import { getScopeFromUrlParams } from "src/utils/opportunity/savedOpportunitiesUtils";
+import {
+  getScopeFromUrlParams,
+  INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
+} from "src/utils/opportunity/savedOpportunitiesUtils";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -54,10 +57,17 @@ export default async function SavedOpportunities({
   // that the user is a member of.
   const savedOpportunitiesScope = getScopeFromUrlParams();
 
-  // Fetch saved opportunities (filtered if status is provided)
+  // Fetch saved opportunities for the current page scope.
   const savedOpportunities = await fetchSavedOpportunities(
     savedOpportunitiesScope,
     status,
+  );
+
+  // Fetch individually saved opportunities separately so the UI can preserve
+  // the Individual tag even when an opportunity is also shared with one or
+  // more organizations.
+  const individuallySavedOpportunities = await fetchSavedOpportunities(
+    INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
   );
 
   let hasSavedOpportunities = savedOpportunities.length > 0;
@@ -84,12 +94,9 @@ export default async function SavedOpportunities({
   const resolvedOpportunities = await Promise.all(opportunityPromises);
 
   const individuallySavedOpportunityIds = new Set<string>(
-    savedOpportunities
-      .filter(
-        (savedOpportunity) =>
-          (savedOpportunity.saved_to_organizations ?? []).length === 0,
-      )
-      .map((savedOpportunity) => String(savedOpportunity.opportunity_id)),
+    individuallySavedOpportunities.map((savedOpportunity) =>
+      String(savedOpportunity.opportunity_id),
+    ),
   );
 
   return (
