@@ -57,7 +57,7 @@ def test_agency_search_unauthorized_401_jwt(client, method, url, body):
     )
 
     assert response.status_code == 401
-    assert response.get_json()["message"] == "Invalid API key"
+    assert response.get_json()["message"] == "Unable to process token"
 
 
 @pytest.mark.parametrize(
