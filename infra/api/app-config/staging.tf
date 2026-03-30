@@ -24,6 +24,7 @@ module "staging_config" {
   # instance_desired_instance_count and instance_scaling_min_capacity are scaled for the average CPU and Memory
   # seen over 12 months, as of November 2024 exlucing an outlier range around February 2024.
   # With a minimum of 2, as a general best pratice.
+  instance_memory                 = 4096
   instance_desired_instance_count = 2
   instance_scaling_min_capacity   = 2
   # instance_scaling_max_capacity is 2x the instance_scaling_min_capacity
@@ -46,7 +47,8 @@ module "staging_config" {
   search_engine_version = "OpenSearch_2.15"
 
   service_override_extra_environment_variables = {
-    ENABLE_WORKFLOW_ENDPOINTS = 1
+    ENABLE_WORKFLOW_ENDPOINTS             = 1
+    ENABLE_AWARD_RECOMMENDATION_ENDPOINTS = 1
 
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING = "false"

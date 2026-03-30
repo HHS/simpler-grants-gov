@@ -5,6 +5,11 @@ import pytest
 
 from src.adapters.search import get_opensearch_config
 from src.adapters.search.opensearch_client import _get_connection_parameters
+from tests.src.adapters.search.test_opensearch_query_builder import (
+    CALL_OF_WINTER,
+    WINTER,
+    WINTERBORN_LEGACY,
+)
 
 ########################################################################
 # These tests are primarily looking to validate
@@ -239,3 +244,50 @@ def test_cleanup_old_indices(search_client):
     assert search_client.index_exists(index_name_2) is False
     assert search_client.index_exists(index_name_3) is True
     assert search_client.index_exists(index_name_4) is True
+
+
+def test_search_returns_expected_metadata(search_client, generic_index):
+
+    search_client.bulk_upsert(
+        generic_index,
+        [WINTERBORN_LEGACY, WINTER, CALL_OF_WINTER],
+        primary_key_field="id",
+    )
+
+    response = search_client.search(
+        index_name=generic_index,
+        search_query={"query": {"match_all": {}}},
+    )
+
+    # Validate top-level attributes exist
+    assert hasattr(response, "took_ms")
+    assert hasattr(response, "timed_out")
+    assert hasattr(response, "shards_failed")
+    assert hasattr(response, "total_records")
+
+    assert hasattr(response, "score_stats")
+
+    # High-level metadata checks
+    assert isinstance(response.took_ms, int)
+    assert response.took_ms >= 0
+
+    assert isinstance(response.timed_out, bool)
+    assert response.timed_out is False
+
+    assert isinstance(response.shards_failed, int)
+    assert response.shards_failed == 0
+
+    assert isinstance(response.total_records, int)
+    assert response.total_records == 3
+
+    # Validate score_stats keys exist
+    score_stats = response.score_stats
+    expected_keys = {
+        "search.score_min",
+        "search.score_max",
+        "search.score_mean",
+        "search.score_stdev",
+    }
+    for key in expected_keys:
+        assert key in score_stats
+        assert score_stats[key] is not None

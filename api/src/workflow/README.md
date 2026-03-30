@@ -170,6 +170,9 @@ example_config = WorkflowConfig(
     # defined, see the "Add a new entity type" section below
     persistence_model_cls=OpportunityPersistenceModel,
     entity_type=WorkflowEntityType.OPPORTUNITY,
+    # Whether to allow a given entity to have more than one
+    # active version of a workflow at a time. Defaults to True.
+    allow_concurrent_workflow_for_entity=False,
     approval_mapping={
         # See below for details on adding approvals
         # which need a few pieces of configuration
