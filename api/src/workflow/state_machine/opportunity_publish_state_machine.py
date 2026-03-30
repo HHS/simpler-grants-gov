@@ -216,4 +216,3 @@ class OpportunityPublishStateMachine(BaseStateMachine):
         except Exception:
             logger.exception("Failed to write opportunity to search index", extra=log_extra)
             state_machine_event.increment(self.Metrics.OPP_PUBLISH_ERROR_WRITING_TO_SEARCH_INDEX)
-
