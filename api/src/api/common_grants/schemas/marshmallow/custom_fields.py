@@ -3,7 +3,7 @@
 This file contains Marshmallow schemas that are part of the custom field portion of the specification.
 
 NOTE: Once added here the fields should be imported into another Marshmallow file to register them under the CustomFields class there.
-At this time there is only one such file and that is common_grants_schemas.py which only supports Opportunity.py
+At this time there is only one such file and that is schemas.py which only supports Opportunity.py
 
 This pattern allows for simple re-use of custom fields across different base objects since if the fields already exist
 it should be as simple as importing the already existing field into the file that requires it and adding it to the CustomFields class

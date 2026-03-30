@@ -22,7 +22,7 @@ from common_grants_sdk.schemas.pydantic import (
 from pydantic import BaseModel, Field, HttpUrl, ValidationError
 
 import src.util.datetime_util as datetime_util
-from src.api.common_grants.schemas.common_grants_pydantic_custom_fields import (
+from src.api.common_grants.schemas.pydantic.custom_fields import (
     AdditionalInfoField,
     AgencyField,
     AssistanceListingsField,

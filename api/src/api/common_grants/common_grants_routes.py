@@ -22,19 +22,19 @@ import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.api.common_grants.common_grants_blueprint import common_grants_blueprint
 from src.api.common_grants.common_grants_utils import with_cg_error_handler
-from src.api.common_grants.schemas.common_grants_schemas import (
+from src.api.common_grants.schemas.marshmallow.schemas import (
     OpportunitiesListResponse as OpportunitiesListResponseSchema,
 )
-from src.api.common_grants.schemas.common_grants_schemas import (
+from src.api.common_grants.schemas.marshmallow.schemas import (
     OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
 )
-from src.api.common_grants.schemas.common_grants_schemas import (
+from src.api.common_grants.schemas.marshmallow.schemas import (
     OpportunityResponse as OpportunityResponseSchema,
 )
-from src.api.common_grants.schemas.common_grants_schemas import (
+from src.api.common_grants.schemas.marshmallow.schemas import (
     OpportunitySearchRequest as OpportunitySearchRequestSchema,
 )
-from src.api.common_grants.schemas.common_grants_schemas import (
+from src.api.common_grants.schemas.marshmallow.schemas import (
     PaginatedQueryParams as PaginatedQueryParamsSchema,
 )
 from src.auth.api_user_key_auth import api_user_key_auth
