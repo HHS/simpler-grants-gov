@@ -132,5 +132,5 @@ variable "database_engine_version" {
 variable "database_newrelic_entity_guid" {
   type        = string
   description = "New Relic entity GUID for the RDS cluster, used to correlate logs with the infrastructure entity in New Relic."
-  default     = ""
+  default     = null
 }
