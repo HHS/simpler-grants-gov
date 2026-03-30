@@ -26,7 +26,6 @@ output "service_config" {
     memory                   = var.service_memory
     desired_instance_count   = var.service_desired_instance_count
     enable_command_execution = var.enable_command_execution
-
     extra_environment_variables = merge(
       local.default_extra_environment_variables,
       var.service_override_extra_environment_variables
