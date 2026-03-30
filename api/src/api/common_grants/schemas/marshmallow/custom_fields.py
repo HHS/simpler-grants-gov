@@ -79,8 +79,8 @@ class federalOpportunityNumber(CustomField):
 class AssistanceListingValue(Schema):
     """Schema for populating the AssistanceListing value field"""
 
-    assistanceListingNumber = fields.String(required=True, metadata={"example": "43.012"})
-    programTitle = fields.String(required=True, metadata={"example": "Space Technology"})
+    assistanceListingNumber = fields.String(allow_none=True, metadata={"example": "43.012"})
+    programTitle = fields.String(allow_none=True, metadata={"example": "Space Technology"})
 
 
 class assistanceListings(CustomField):
@@ -100,7 +100,7 @@ class assistanceListings(CustomField):
 class AgencyValue(Schema):
     """Schema for populating the Agency value field"""
 
-    code = fields.String(required=True, metadata={"example": "US-ABC"})
+    code = fields.String(allow_none=True, metadata={"example": "US-ABC"})
     name = fields.String(allow_none=True, metadata={"example": "Department of Examples"})
     parentName = fields.String(allow_none=True, metadata={"example": "Department of Examples"})
     parentCode = fields.String(allow_none=True, metadata={"example": "HHS"})
@@ -125,8 +125,8 @@ class AttachmentValue(Schema):
     description = fields.String(
         allow_none=True, metadata={"example": "A PDF file with instructions"}
     )
-    sizeInBytes = fields.Integer(required=True, metadata={"example": 1000})
-    mimeType = fields.String(required=True, metadata={"example": "application/pdf"})
+    sizeInBytes = fields.Integer(allow_none=True, metadata={"example": 1000})
+    mimeType = fields.String(allow_none=True, metadata={"example": "application/pdf"})
     createdAt = fields.DateTime(required=True, metadata={"example": "2025-01-01T17:01:01.000Z"})
     lastModifiedAt = fields.DateTime(
         required=True, metadata={"example": "2025-01-02T17:30:00.000Z"}
@@ -153,7 +153,7 @@ class federalFundingSource(CustomField):
 
     name = fields.String(required=True, metadata={"example": "federalFundingSource"})
     fieldType = fields.String(required=True, metadata={"example": "string"})
-    value = fields.String(required=True, metadata={"example": "discretionary"})
+    value = fields.List(fields.String(required=True, metadata={"example": "discretionary"}))
     description = fields.String(
         allow_none=True,
         metadata={"example": "The category type of the grant opportunity"},
@@ -189,7 +189,7 @@ class contactInfo(CustomField):
 class AdditionalInfoValue(Schema):
     """Schema for populating the AdditionalInfo value field"""
 
-    url = fields.String(allow_none=True, metadata={"example": "grants.gov"})
+    url = fields.URL(allow_none=True, metadata={"example": "https://www.grants.gov"})
     description = fields.String(allow_none=True, metadata={"example": "Click me for more info"})
 
 
@@ -208,12 +208,18 @@ class additionalInfo(CustomField):
     )
 
 
+class CostSharingValue(Schema):
+    """Schema for populating the CostSharing value field"""
+
+    isRequired = fields.Boolean(allow_none=True, metadata={"example": True})
+
+
 class costSharing(CustomField):
     """Whether cost sharing or matching funds are required for this opportunity"""
 
     name = fields.String(required=True, metadata={"example": "costSharing"})
-    fieldType = fields.String(required=True, metadata={"example": "boolean"})
-    value = fields.Boolean(required=True, metadata={"example": True})
+    fieldType = fields.String(required=True, metadata={"example": "object"})
+    value = fields.Nested(CostSharingValue, required=True)
     description = fields.String(
         allow_none=True,
         metadata={

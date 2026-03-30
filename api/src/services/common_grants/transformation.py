@@ -454,7 +454,7 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
 
     category = opp_data.get("category")
     if category is not None:
-        field = validate_custom_field(FederalFundingSourceField, value=str(category))
+        field = validate_custom_field(FederalFundingSourceField, value=[str(category)])
         if field:
             custom_fields["federalFundingSource"] = field
 
@@ -490,7 +490,7 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
             if field:
                 custom_fields["contactInfo"] = field
 
-        additional_info_url = summary.get("additional_info_url")
+        additional_info_url = validate_url(summary.get("additional_info_url"))
         additional_info_url_description = summary.get("additional_info_url_description")
         if additional_info_url is not None:
             field = validate_custom_field(
@@ -511,7 +511,7 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
 
         is_cost_sharing = summary.get("is_cost_sharing")
         if is_cost_sharing is not None:
-            field = validate_custom_field(CostSharingField, value=is_cost_sharing)
+            field = validate_custom_field(CostSharingField, value={"isRequired": is_cost_sharing})
             if field:
                 custom_fields["costSharing"] = field
 

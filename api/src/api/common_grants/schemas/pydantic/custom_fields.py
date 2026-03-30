@@ -139,11 +139,11 @@ class FederalFundingSourceField(CustomField):
     """The category type of the grant opportunity."""
 
     name: str = "federalFundingSource"
-    field_type: CustomFieldType = CustomFieldType.STRING
+    field_type: CustomFieldType = CustomFieldType.ARRAY
     schema_url: HttpUrl | None = HttpUrl(
         "https://commongrants.org/custom-fields/federalFundingSource/"
     )
-    value: str
+    value: list[str]
     description: str | None = "The category type of the grant opportunity"
 
     model_config = {"populate_by_name": True}
@@ -185,13 +185,17 @@ class FiscalYearField(CustomField):
     model_config = {"populate_by_name": True}
 
 
+class CostSharingValue(BaseModel):
+    isRequired: bool | None = None
+
+
 class CostSharingField(CustomField):
     """Whether cost sharing or matching funds are required for this opportunity."""
 
     name: str = "costSharing"
-    field_type: CustomFieldType = CustomFieldType.BOOLEAN
+    field_type: CustomFieldType = CustomFieldType.OBJECT
     schema_url: HttpUrl | None = HttpUrl("https://commongrants.org/custom-fields/costSharing/")
-    value: bool
+    value: CostSharingValue
     description: str | None = (
         "Whether cost sharing or matching funds are required for this opportunity"
     )
