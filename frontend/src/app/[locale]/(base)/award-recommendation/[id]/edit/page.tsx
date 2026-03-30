@@ -24,8 +24,8 @@ import {
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
-import { EditRecommendationSummarySection } from "src/components/award-recommendation/EditRecommendationSummarySection";
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
+import { RecommendationSummarySection } from "src/components/award-recommendation/RecommendationSummarySection";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 
 export async function generateMetadata({
@@ -221,7 +221,7 @@ async function AwardRecommendationEditPageContent({
                 awardRecommendationDetails.other_key_information
               }
             />
-            <EditRecommendationSummarySection
+            <RecommendationSummarySection
               summary={awardRecommendationDetails.award_recommendation_summary}
               fundingStrategy={awardRecommendationDetails.funding_strategy}
             />

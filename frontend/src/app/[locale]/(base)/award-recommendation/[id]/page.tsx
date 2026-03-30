@@ -16,7 +16,7 @@ import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
-import { ViewRecommendationSummarySection } from "src/components/award-recommendation/ViewRecommendationSummarySection";
+import { RecommendationSummarySection } from "src/components/award-recommendation/RecommendationSummarySection";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 import { submitAwardRecommendationForReview } from "./actions";
 
@@ -195,9 +195,10 @@ async function AwardRecommendationPageContent({
                 awardRecommendationDetails.other_key_information
               }
             />
-            <ViewRecommendationSummarySection
+            <RecommendationSummarySection
               summary={awardRecommendationDetails.award_recommendation_summary}
               fundingStrategy={awardRecommendationDetails.funding_strategy}
+              viewMode={true}
             />
           </>
         )}
