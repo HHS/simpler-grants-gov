@@ -25,9 +25,10 @@ class SearchResponse:
     # See: https://opensearch.org/docs/latest/api-reference/search/#the-hits-object
     total_relation: str | None = None
 
-    # Number of agency buckets not returned due to the aggregation size cap.
-    # Non-zero values indicate the agency facet is silently truncating options.
-    agency_sum_other_doc_count: int | None = None
+    # Per-aggregation sum_other_doc_count values. Non-zero means the aggregation
+    # is silently truncating buckets due to the size cap.
+    # e.g. {"agency": 12, "applicant_type": 0}
+    agg_overflow: dict[str, int] = dataclasses.field(default_factory=dict)
 
     @classmethod
     def from_opensearch_response(
@@ -85,9 +86,7 @@ class SearchResponse:
         raw_aggs: dict[str, dict[str, typing.Any]] = raw_json.get("aggregations", {})
         aggregations = _parse_aggregations(raw_aggs)
         score_stats = _compute_score_stats(records) if include_scores else {}
-        agency_sum_other_doc_count: int | None = raw_aggs.get("agency", {}).get(
-            "sum_other_doc_count", None
-        )
+        agg_overflow = _extract_agg_overflow(raw_aggs)
 
         return cls(
             total_records=total_records,
@@ -100,7 +99,7 @@ class SearchResponse:
             score_stats=score_stats,
             max_score=max_score,
             total_relation=total_relation,
-            agency_sum_other_doc_count=agency_sum_other_doc_count,
+            agg_overflow=agg_overflow,
         )
 
 
@@ -166,6 +165,21 @@ def _parse_aggregations(
         aggregations[field] = field_aggregation
 
     return aggregations
+
+
+def _extract_agg_overflow(
+    raw_aggs: dict[str, dict[str, typing.Any]] | None,
+) -> dict[str, int]:
+    """Extract sum_other_doc_count from each aggregation that has it."""
+    if not raw_aggs:
+        return {}
+
+    overflow: dict[str, int] = {}
+    for field, agg_value in raw_aggs.items():
+        count = agg_value.get("sum_other_doc_count")
+        if count is not None:
+            overflow[field] = count
+    return overflow
 
 
 def _compute_score_stats(records: list[dict]) -> dict:
