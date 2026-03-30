@@ -8,6 +8,8 @@ import {
   FormGroup,
   Label,
   Select,
+  Textarea,
+  TextInput,
 } from "@trussworks/react-uswds";
 
 // ----------------------------------------------------------
@@ -61,7 +63,7 @@ export const CommonLabel = ({
 };
 
 // ----------------------------------------------------------
-// Common TextInput with CharacterCount
+// Common TextInput with error block
 // ----------------------------------------------------------
 export const CommonTextInput = ({
   labelId,
@@ -80,11 +82,10 @@ export const CommonTextInput = ({
   fieldId: string;
   isRequired: boolean;
   fieldMaxLength: number;
-  onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onTextChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   defaultValue?: string;
   validationError?: string;
 }) => {
-  const ariaDescBy = fieldId + "-info " + fieldId + "-hint";
   return (
     <>
       <FormGroup error={Boolean(validationError)} className="margin-top-1">
@@ -96,13 +97,14 @@ export const CommonTextInput = ({
           isRequired={isRequired}
           validationError={validationError}
         />
-        <CharacterCount
-          id={fieldId}
+        <TextInput
+          type="text"
           name={fieldId}
-          aria-describedby={ariaDescBy}
-          maxLength={fieldMaxLength}
-          defaultValue={defaultValue}
+          id={fieldId}
           onChange={onTextChange}
+          maxLength={fieldMaxLength}
+          style={{ maxWidth: "550px" }}
+          defaultValue={defaultValue}
         />
       </FormGroup>
     </>
@@ -110,7 +112,7 @@ export const CommonTextInput = ({
 };
 
 // ----------------------------------------------------------
-// Common Textarea with with CharacterCount
+// Common Textarea with error block
 // ----------------------------------------------------------
 export const CommonTextArea = ({
   labelId,
@@ -133,7 +135,56 @@ export const CommonTextArea = ({
   defaultValue?: string;
   validationError?: string;
 }) => {
-  const ariaDescBy = fieldId + "-info " + fieldId + "-hint";
+  return (
+    <>
+      <FormGroup error={Boolean(validationError)} className="margin-top-1">
+        <CommonLabel
+          labelId={labelId}
+          labelText={labelText}
+          description={description}
+          fieldId={fieldId}
+          isRequired={isRequired}
+          validationError={validationError}
+        />
+        <Textarea
+          name={fieldId}
+          id={fieldId}
+          onChange={onTextChange}
+          maxLength={fieldMaxLength}
+          style={{ maxWidth: "550px" }}
+          defaultValue={defaultValue}
+        />
+      </FormGroup>
+    </>
+  );
+};
+
+// ----------------------------------------------------------
+// Common CharacterCount
+// ----------------------------------------------------------
+export const CommonCharacterCount = ({
+  isTextArea = false,
+  labelId,
+  labelText,
+  description, // or instructions
+  fieldId,
+  isRequired,
+  fieldMaxLength,
+  onTextChange,
+  defaultValue = "",
+  validationError = "",
+}: {
+  isTextArea?: boolean;
+  labelId: string;
+  labelText: string;
+  description: string;
+  fieldId: string;
+  isRequired: boolean;
+  fieldMaxLength: number;
+  onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  defaultValue?: string;
+  validationError?: string;
+}) => {
   return (
     <>
       <FormGroup error={Boolean(validationError)} className="margin-top-1">
@@ -148,11 +199,10 @@ export const CommonTextArea = ({
         <CharacterCount
           id={fieldId}
           name={fieldId}
-          aria-describedby={ariaDescBy}
           maxLength={fieldMaxLength}
           defaultValue={defaultValue}
           onChange={onTextChange}
-          isTextArea
+          isTextArea={isTextArea}
         />
       </FormGroup>
     </>

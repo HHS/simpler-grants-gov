@@ -8,9 +8,8 @@ import { useActionState, useEffect, useState } from "react";
 import { Alert, Button, Link } from "@trussworks/react-uswds";
 
 import {
+  CommonCharacterCount,
   CommonSelectInput,
-  CommonTextArea,
-  CommonTextInput,
 } from "src/components/grantor/CommonFormFields";
 
 // Category options
@@ -145,7 +144,7 @@ export function CreateOpportunityForm({
       >
         <div data-testid="formGroup" className="width-full">
           {/* Opportunity Number */}
-          <CommonTextInput
+          <CommonCharacterCount
             labelId="label-for-opportunityNumber"
             labelText={t("CreateOpportunityForm.opportunityNumber")}
             description={t("CreateOpportunityForm.opportunityNumberDesc")}
@@ -157,7 +156,8 @@ export function CreateOpportunityForm({
           />
 
           {/* Opportunity Title */}
-          <CommonTextArea
+          <CommonCharacterCount
+            isTextArea={true}
             labelId="label-for-opportunityTitle"
             labelText={t("CreateOpportunityForm.opportunityTitle")}
             description={t("CreateOpportunityForm.opportunityTitleDesc")}
@@ -194,7 +194,8 @@ export function CreateOpportunityForm({
 
           {/* Category-Other Explanation */}
           {showExplain && (
-            <CommonTextArea
+            <CommonCharacterCount
+              isTextArea={true}
               labelId="label-for-categoryExplanation"
               labelText={t("CreateOpportunityForm.categoryExplanation")}
               description={t("CreateOpportunityForm.categoryExplanationDesc")}
@@ -207,7 +208,7 @@ export function CreateOpportunityForm({
           )}
 
           {/* Assistance Listing Number (ALN) */}
-          <CommonTextInput
+          <CommonCharacterCount
             labelId="label-for-assistanceListingNumber"
             labelText={t("CreateOpportunityForm.assistanceListingNumber")}
             description={t("CreateOpportunityForm.assistanceListingNumberDesc")}
