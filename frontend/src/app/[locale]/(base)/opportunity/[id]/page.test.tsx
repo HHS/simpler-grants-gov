@@ -91,12 +91,6 @@ jest.mock("src/components/user/OpportunitySaveUserControl", () => ({
   OpportunitySaveUserControl: () => <div />,
 }));
 
-const mockOpportunityData = {
-  data: mockOpportunityDetail,
-  message: "Success",
-  status_code: 200,
-};
-
 const opportunityParams = Promise.resolve({
   locale: "en",
   id: mockOpportunityDetail.opportunity_id,
