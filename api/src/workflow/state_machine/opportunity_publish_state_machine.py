@@ -189,7 +189,7 @@ class OpportunityPublishStateMachine(BaseStateMachine):
         log_extra |= {"search_index_alias": config.opportunity_search_index_alias}
         logger.info("Writing opportunity to search index", extra=log_extra)
 
-        # Writing to the search index is a nice-to-have, in the vent there
+        # Writing to the search index is a nice-to-have, in the event there
         # is any issue, we aren't going to error the whole workflow and block
         # publish. We have an hourly job that loads everything to the search index
         # that can handle retrying.
@@ -202,6 +202,8 @@ class OpportunityPublishStateMachine(BaseStateMachine):
                 primary_key_field="opportunity_id",
                 refresh=True,
             )
+            state_machine_event.increment(self.Metrics.OPP_PUBLISH_WRITTEN_TO_SEARCH_INDEX)
+
         except (TransportError, ConnectionTimeout):
             # These are pretty generic network blips that
             # we have retries for when loading elsewhere.
@@ -215,4 +217,3 @@ class OpportunityPublishStateMachine(BaseStateMachine):
             logger.exception("Failed to write opportunity to search index", extra=log_extra)
             state_machine_event.increment(self.Metrics.OPP_PUBLISH_ERROR_WRITING_TO_SEARCH_INDEX)
 
-        state_machine_event.increment(self.Metrics.OPP_PUBLISH_WRITTEN_TO_SEARCH_INDEX)
