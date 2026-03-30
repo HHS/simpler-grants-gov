@@ -1,7 +1,6 @@
 # Maintainers
 
-This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOWNERS) for list of reviewers for different parts of the codebase. Team members include:
-
+This is a list of maintainers for this project. Team members include:
 
 ## Engineering
 
