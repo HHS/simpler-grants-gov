@@ -14,7 +14,6 @@ export const createOpportunityAction = async (
 ): Promise<CreateOpportunityResponse> => {
   const session = await getSession();
 
-  //   console.log("DEBUG: entering createOpportunityAction");
   if (!session || !session.token || !session.user_id) {
     return {
       errorMessage: "Not logged in",
@@ -27,6 +26,9 @@ export const createOpportunityAction = async (
     opportunity_title: formData.get("opportunityTitle") as string,
     category: formData.get("category") as string,
     category_explanation: formData.get("categoryExplanation") as string,
+    assistance_listing_number: formData.get(
+      "assistanceListingNumber",
+    ) as string,
   };
 
   let createOpportunityResponse;

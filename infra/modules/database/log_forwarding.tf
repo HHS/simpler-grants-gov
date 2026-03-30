@@ -1,13 +1,21 @@
 #--------------------------------------------
-# Forward OpenSearch CloudWatch logs to New Relic
+# Forward RDS CloudWatch logs to New Relic
 #--------------------------------------------
 
 locals {
-  nr_log_forwarder_name = "${var.service_name}-nr-log-forwarder"
+  nr_log_forwarder_name = "${var.name}-nr-rds-log-forwarder"
+  # RDS auto-creates this log group when enabled_cloudwatch_logs_exports includes "postgresql"
+  rds_log_group_name = "/aws/rds/cluster/${aws_rds_cluster.db.cluster_identifier}/postgresql"
 }
 
 data "aws_ssm_parameter" "newrelic_license_key" {
   name = "/new-relic-license-key"
+}
+
+data "aws_cloudwatch_log_group" "rds_postgresql" {
+  name = local.rds_log_group_name
+
+  depends_on = [aws_rds_cluster.db]
 }
 
 data "archive_file" "nr_log_forwarder" {
@@ -29,7 +37,7 @@ resource "aws_lambda_function" "nr_log_forwarder" {
   # checkov:skip=CKV_AWS_50:X-Ray tracing not required for log forwarding Lambda
 
   function_name = local.nr_log_forwarder_name
-  description   = "Forwards OpenSearch CloudWatch logs to New Relic"
+  description   = "Forwards RDS PostgreSQL CloudWatch logs to New Relic"
   runtime       = "python3.12"
   handler       = "index.handler"
   timeout       = 30
@@ -45,7 +53,8 @@ resource "aws_lambda_function" "nr_log_forwarder" {
       NR_LICENSE_KEY_SSM_PATH = data.aws_ssm_parameter.newrelic_license_key.name
       NR_LOGS_ENDPOINT        = "https://log-api.newrelic.com/log/v1"
       AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
-      OPENSEARCH_DOMAIN_NAME  = aws_opensearch_domain.opensearch.domain_name
+      RDS_CLUSTER_NAME        = aws_rds_cluster.db.cluster_identifier
+      NR_ENTITY_GUID          = var.newrelic_entity_guid != null ? var.newrelic_entity_guid : ""
     }
   }
 
@@ -54,11 +63,52 @@ resource "aws_lambda_function" "nr_log_forwarder" {
   ]
 }
 
+resource "aws_kms_key" "nr_log_forwarder" {
+  description         = "Key for Lambda function ${local.nr_log_forwarder_name}"
+  enable_key_rotation = true
+  # checkov:skip=CKV2_AWS_64:Key policy grants CloudWatch Logs access below
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "EnableRootAccountAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action   = "kms:*"
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowCloudWatchLogs"
+        Effect = "Allow"
+        Principal = {
+          Service = "logs.${data.aws_region.current.name}.amazonaws.com"
+        }
+        Action = [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey",
+        ]
+        Resource = "*"
+        Condition = {
+          ArnLike = {
+            "kms:EncryptionContext:aws:logs:arn" = "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.nr_log_forwarder_name}"
+          }
+        }
+      },
+    ]
+  })
+}
+
 resource "aws_cloudwatch_log_group" "nr_log_forwarder" {
-  # checkov:skip=CKV_AWS_338:Forwarding Lambda logs don't need long retention — actual OpenSearch logs are in New Relic
+  # checkov:skip=CKV_AWS_338:Forwarding Lambda logs don't need long retention — actual RDS logs are in New Relic
   name              = "/aws/lambda/${local.nr_log_forwarder_name}"
   retention_in_days = 30
-  kms_key_id        = aws_kms_key.opensearch.arn
+  kms_key_id        = aws_kms_key.nr_log_forwarder.arn
 }
 
 # --- IAM ---
@@ -101,19 +151,19 @@ resource "aws_iam_role_policy" "nr_log_forwarder_ssm" {
 
 # --- CloudWatch Logs subscription ---
 
-resource "aws_lambda_permission" "allow_cloudwatch_opensearch" {
-  statement_id  = "AllowCloudWatchOpenSearch"
+resource "aws_lambda_permission" "allow_cloudwatch_rds" {
+  statement_id  = "AllowCloudWatchRDS"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.nr_log_forwarder.function_name
   principal     = "logs.amazonaws.com"
-  source_arn    = "${aws_cloudwatch_log_group.opensearch.arn}:*"
+  source_arn    = "${data.aws_cloudwatch_log_group.rds_postgresql.arn}:*"
 }
 
-resource "aws_cloudwatch_log_subscription_filter" "opensearch_to_newrelic" {
-  name            = "${var.service_name}-opensearch-to-newrelic"
-  log_group_name  = aws_cloudwatch_log_group.opensearch.name
+resource "aws_cloudwatch_log_subscription_filter" "rds_to_newrelic" {
+  name            = "${var.name}-rds-to-newrelic"
+  log_group_name  = data.aws_cloudwatch_log_group.rds_postgresql.name
   filter_pattern  = ""
   destination_arn = aws_lambda_function.nr_log_forwarder.arn
 
-  depends_on = [aws_lambda_permission.allow_cloudwatch_opensearch]
+  depends_on = [aws_lambda_permission.allow_cloudwatch_rds]
 }

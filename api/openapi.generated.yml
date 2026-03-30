@@ -4040,6 +4040,7 @@ components:
           - application_submission
           - initial_prototype
           - basic_test_workflow
+          - no_concurrent_test_workflow
           type:
           - string
         entity_type:
@@ -6600,6 +6601,7 @@ components:
           - application_submission
           - initial_prototype
           - basic_test_workflow
+          - no_concurrent_test_workflow
           type:
           - string
         current_workflow_state:
