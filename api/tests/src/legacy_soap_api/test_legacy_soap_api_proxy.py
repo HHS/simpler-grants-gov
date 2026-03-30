@@ -46,7 +46,7 @@ def test_get_cert_file_returns_cert_data_from_soap_request(enable_factory_create
 
 
 def test_get_proxy_response(enable_factory_create, monkeypatch, db_session):
-    soap_request = create_soap_request(SOAP_PAYLOAD)
+    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_cert=True)
     legacy_certificate = soap_request.auth.certificate.legacy_certificate
     with db_session.begin():
         legacy_certificate.legacy_certificate_id = "e57e1c7f-cf2e-455e-9db5-3e03650174a7"
@@ -63,7 +63,7 @@ def test_get_proxy_response_logs_soap_client_lookup_error_and_returns_proxy_resp
     caplog, enable_factory_create
 ):
     caplog.set_level(logging.INFO)
-    soap_request = create_soap_request(SOAP_PAYLOAD)
+    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_cert=True)
     with patch("src.legacy_soap_api.legacy_soap_api_proxy.Session.send") as mock_send, patch(
         "src.legacy_soap_api.legacy_soap_api_proxy.get_cert_file"
     ) as mock_cert_file:
@@ -77,7 +77,7 @@ def test_get_proxy_response_logs_soap_client_certificate_not_configured_error_an
     caplog, enable_factory_create
 ):
     caplog.set_level(logging.INFO)
-    soap_request = create_soap_request(SOAP_PAYLOAD)
+    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_cert=True)
     with patch(
         "src.legacy_soap_api.legacy_soap_api_proxy.get_soap_error_response"
     ) as mock_error_response, patch(

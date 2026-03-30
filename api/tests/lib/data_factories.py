@@ -150,7 +150,7 @@ def setup_cert_user(
 
 
 def create_soap_request(
-    soap_payload: bytes, use_soap_cert: bool = True, log_local: bool = False
+    soap_payload: bytes, use_soap_cert: bool = False, log_local: bool = False
 ) -> SOAPRequest:
     _, _, soap_certificate = setup_cert_user(
         AgencyFactory.create(), [Privilege.LEGACY_AGENCY_VIEWER]
