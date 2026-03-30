@@ -65,10 +65,9 @@ jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
     scope: SavedOpportunitiesScope,
     statusFilter?: string,
   ) =>
-    savedOpportunitiesMock(
-      scope,
-      statusFilter,
-    ) as Promise<MinimalOpportunity[]>,
+    savedOpportunitiesMock(scope, statusFilter) as Promise<
+      MinimalOpportunity[]
+    >,
 }));
 
 jest.mock("src/components/Breadcrumbs", () => ({
@@ -166,10 +165,14 @@ describe("Saved Opportunities page", () => {
   it("renders a list of saved opportunities", async () => {
     mockSavedOpportunitiesByScope({
       combinedSavedOpportunities: [
-        { opportunity_id: mockOpportunity.opportunity_id } as MinimalOpportunity,
+        {
+          opportunity_id: mockOpportunity.opportunity_id,
+        } as MinimalOpportunity,
       ],
       individuallySavedOpportunities: [
-        { opportunity_id: mockOpportunity.opportunity_id } as MinimalOpportunity,
+        {
+          opportunity_id: mockOpportunity.opportunity_id,
+        } as MinimalOpportunity,
       ],
     });
     opportunityMock.mockResolvedValue({ data: mockOpportunity });
@@ -189,7 +192,9 @@ describe("Saved Opportunities page", () => {
   it("renders status filter when there are saved opportunities", async () => {
     mockSavedOpportunitiesByScope({
       combinedSavedOpportunities: [
-        { opportunity_id: mockOpportunity.opportunity_id } as MinimalOpportunity,
+        {
+          opportunity_id: mockOpportunity.opportunity_id,
+        } as MinimalOpportunity,
       ],
       individuallySavedOpportunities: [],
     });
@@ -210,10 +215,14 @@ describe("Saved Opportunities page", () => {
 
     mockSavedOpportunitiesByScope({
       combinedSavedOpportunities: [
-        { opportunity_id: mockOpportunity.opportunity_id } as MinimalOpportunity,
+        {
+          opportunity_id: mockOpportunity.opportunity_id,
+        } as MinimalOpportunity,
       ],
       individuallySavedOpportunities: [
-        { opportunity_id: mockOpportunity.opportunity_id } as MinimalOpportunity,
+        {
+          opportunity_id: mockOpportunity.opportunity_id,
+        } as MinimalOpportunity,
       ],
     });
     opportunityMock.mockResolvedValue({ data: mockOpportunity });
@@ -249,7 +258,9 @@ describe("Saved Opportunities page", () => {
         } as MinimalOpportunity,
       ],
       individuallySavedOpportunities: [
-        { opportunity_id: mockOpportunity.opportunity_id } as MinimalOpportunity,
+        {
+          opportunity_id: mockOpportunity.opportunity_id,
+        } as MinimalOpportunity,
       ],
     });
 
@@ -332,13 +343,17 @@ describe("Saved Opportunities page", () => {
 
     mockSavedOpportunitiesByScope({
       combinedSavedOpportunities: [
-        { opportunity_id: mockOpportunity.opportunity_id } as MinimalOpportunity,
+        {
+          opportunity_id: mockOpportunity.opportunity_id,
+        } as MinimalOpportunity,
         {
           opportunity_id: forecastedOpportunity.opportunity_id,
         } as MinimalOpportunity,
       ],
       individuallySavedOpportunities: [
-        { opportunity_id: mockOpportunity.opportunity_id } as MinimalOpportunity,
+        {
+          opportunity_id: mockOpportunity.opportunity_id,
+        } as MinimalOpportunity,
       ],
     });
 
@@ -400,10 +415,14 @@ describe("Saved Opportunities page", () => {
   it("passes accessibility scan", async () => {
     mockSavedOpportunitiesByScope({
       combinedSavedOpportunities: [
-        { opportunity_id: mockOpportunity.opportunity_id } as MinimalOpportunity,
+        {
+          opportunity_id: mockOpportunity.opportunity_id,
+        } as MinimalOpportunity,
       ],
       individuallySavedOpportunities: [
-        { opportunity_id: mockOpportunity.opportunity_id } as MinimalOpportunity,
+        {
+          opportunity_id: mockOpportunity.opportunity_id,
+        } as MinimalOpportunity,
       ],
     });
     opportunityMock.mockResolvedValue({ data: mockOpportunity });
