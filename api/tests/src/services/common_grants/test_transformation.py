@@ -20,6 +20,7 @@ from common_grants_sdk.schemas.pydantic import (
 )
 from freezegun import freeze_time
 
+from src.api.common_grants.schemas.marshmallow.schemas import OpportunityCustomFields
 from src.api.common_grants.schemas.pydantic.custom_fields import (
     AgencyField,
     AttachmentsField,
@@ -27,7 +28,6 @@ from src.api.common_grants.schemas.pydantic.custom_fields import (
     FiscalYearField,
     LegacySerialIdField,
 )
-from src.api.common_grants.schemas.marshmallow.schemas import OpportunityCustomFields
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.services.common_grants.transformation import (
     build_filter_info,
