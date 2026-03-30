@@ -14,10 +14,12 @@ import { buildSavedOpportunityTags } from "./buildSavedOpportunityTags";
 
 interface SavedOpportunitiesControllerProps {
   opportunities: BaseOpportunity[];
+  individuallySavedOpportunityIds?: Set<string>;
 }
 
 export function SavedOpportunitiesController({
   opportunities,
+  individuallySavedOpportunityIds = new Set<string>(),
 }: SavedOpportunitiesControllerProps) {
   const modalRef = useRef<ModalRef>(null);
   const lastShareButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -145,22 +147,34 @@ export function SavedOpportunitiesController({
   return (
     <>
       <ul className="usa-list--unstyled">
-        {opportunitiesState.map((opportunity, index) => (
-          <li key={opportunity.opportunity_id}>
-            <SearchResultsListItem
-              opportunity={opportunity}
-              saved={true}
-              index={index}
-              savedOpportunityTags={buildSavedOpportunityTags(
-                opportunity,
-                userOrganizationIds,
-              )}
-              onShareClick={(buttonElement: HTMLButtonElement) =>
-                handleShareClick(opportunity, buttonElement)
-              }
-            />
-          </li>
-        ))}
+        {opportunitiesState.map((opportunity, index) => {
+          const isSavedByUser = individuallySavedOpportunityIds.has(
+            opportunity.opportunity_id,
+          );
+
+          const savedOpportunityTags = buildSavedOpportunityTags(
+            opportunity,
+            userOrganizationIds,
+            isSavedByUser,
+          );
+
+          const hasVisibleSavedOpportunityTags =
+            savedOpportunityTags.length > 0;
+
+          return (
+            <li key={opportunity.opportunity_id}>
+              <SearchResultsListItem
+                opportunity={opportunity}
+                saved={hasVisibleSavedOpportunityTags}
+                index={index}
+                savedOpportunityTags={savedOpportunityTags}
+                onShareClick={(buttonElement: HTMLButtonElement) =>
+                  handleShareClick(opportunity, buttonElement)
+                }
+              />
+            </li>
+          );
+        })}
       </ul>
 
       <ShareOpportunityToOrganizationsModal

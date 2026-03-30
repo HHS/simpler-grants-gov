@@ -6,155 +6,190 @@ import {
 } from "./buildSavedOpportunityTags";
 
 describe("buildSavedOpportunityTags", () => {
-  it("returns Individual first when there are no organizations", () => {
-    const opportunity = createMockOpportunity();
-
-    const tags = buildSavedOpportunityTags(opportunity, new Set());
-
-    expect(tags).toEqual<SavedOpportunityTag[]>([
-      {
-        key: "individual",
-        kind: "individual",
-        label: "Individual",
-        screenReaderLabel: "Saved to your list",
-      },
-    ]);
-  });
-
-  it("sorts organization tags alphabetically after Individual", () => {
+  it("returns Individual when the opportunity is saved by the user and there are no matching organizations", () => {
     const opportunity = createMockOpportunity({
-      saved_to_organizations: [
-        {
-          organization_id: "organization-2",
-          organization_name: "Zebra Foundation",
-        },
-        {
-          organization_id: "organization-1",
-          organization_name: "Alpha Coalition",
-        },
-      ],
+      saved_to_organizations: [],
     });
 
-    const userOrganizationIds = new Set(["organization-1", "organization-2"]);
-
-    const tags = buildSavedOpportunityTags(opportunity, userOrganizationIds);
+    const tags = buildSavedOpportunityTags(
+      opportunity,
+      new Set<string>(),
+      true,
+    );
 
     expect(tags).toEqual<SavedOpportunityTag[]>([
       {
         key: "individual",
-        kind: "individual",
         label: "Individual",
         screenReaderLabel: "Saved to your list",
-      },
-      {
-        key: "organization-organization-1",
-        kind: "organization",
-        label: "Alpha Coalition",
-        screenReaderLabel: "Shared with Alpha Coalition",
-      },
-      {
-        key: "organization-organization-2",
-        kind: "organization",
-        label: "Zebra Foundation",
-        screenReaderLabel: "Shared with Zebra Foundation",
+        kind: "individual",
       },
     ]);
   });
 
-  it("trims organization names before rendering labels", () => {
+  it("does not return Individual when the opportunity is not saved by the user", () => {
+    const opportunity = createMockOpportunity({
+      saved_to_organizations: [],
+    });
+
+    const tags = buildSavedOpportunityTags(
+      opportunity,
+      new Set<string>(),
+      false,
+    );
+
+    expect(tags).toEqual<SavedOpportunityTag[]>([]);
+  });
+
+  it("returns only organization tags when the opportunity is saved only by organizations", () => {
     const opportunity = createMockOpportunity({
       saved_to_organizations: [
         {
-          organization_id: "organization-1",
-          organization_name: "  Alpha Coalition  ",
+          organization_id: "2",
+          organization_name: "Bravo Org",
+        },
+        {
+          organization_id: "1",
+          organization_name: "Alpha Org",
         },
       ],
     });
 
     const tags = buildSavedOpportunityTags(
       opportunity,
-      new Set(["organization-1"]),
+      new Set<string>(["1", "2"]),
+      false,
     );
 
-    expect(tags[1]).toEqual<SavedOpportunityTag>({
-      key: "organization-organization-1",
-      kind: "organization",
-      label: "Alpha Coalition",
-      screenReaderLabel: "Shared with Alpha Coalition",
-    });
+    expect(tags).toEqual<SavedOpportunityTag[]>([
+      {
+        key: "organization-1",
+        label: "Alpha Org",
+        screenReaderLabel: "Shared with Alpha Org",
+        kind: "organization",
+      },
+      {
+        key: "organization-2",
+        label: "Bravo Org",
+        screenReaderLabel: "Shared with Bravo Org",
+        kind: "organization",
+      },
+    ]);
   });
 
-  it("filters out null and blank organization names", () => {
+  it("returns Individual first and sorted organization tags after it when both apply", () => {
     const opportunity = createMockOpportunity({
       saved_to_organizations: [
         {
-          organization_id: "organization-1",
-          organization_name: null,
+          organization_id: "2",
+          organization_name: "Bravo Org",
         },
         {
-          organization_id: "organization-2",
+          organization_id: "1",
+          organization_name: "Alpha Org",
+        },
+      ],
+    });
+
+    const tags = buildSavedOpportunityTags(
+      opportunity,
+      new Set<string>(["1", "2"]),
+      true,
+    );
+
+    expect(tags).toEqual<SavedOpportunityTag[]>([
+      {
+        key: "individual",
+        label: "Individual",
+        screenReaderLabel: "Saved to your list",
+        kind: "individual",
+      },
+      {
+        key: "organization-1",
+        label: "Alpha Org",
+        screenReaderLabel: "Shared with Alpha Org",
+        kind: "organization",
+      },
+      {
+        key: "organization-2",
+        label: "Bravo Org",
+        screenReaderLabel: "Shared with Bravo Org",
+        kind: "organization",
+      },
+    ]);
+  });
+
+  it("filters out organizations the user does not belong to", () => {
+    const opportunity = createMockOpportunity({
+      saved_to_organizations: [
+        {
+          organization_id: "1",
+          organization_name: "Alpha Org",
+        },
+        {
+          organization_id: "2",
+          organization_name: "Bravo Org",
+        },
+      ],
+    });
+
+    const tags = buildSavedOpportunityTags(
+      opportunity,
+      new Set<string>(["2"]),
+      false,
+    );
+
+    expect(tags).toEqual<SavedOpportunityTag[]>([
+      {
+        key: "organization-2",
+        label: "Bravo Org",
+        screenReaderLabel: "Shared with Bravo Org",
+        kind: "organization",
+      },
+    ]);
+  });
+
+  it("filters out organizations with empty or whitespace-only names", () => {
+    const opportunity = createMockOpportunity({
+      saved_to_organizations: [
+        {
+          organization_id: "1",
           organization_name: "   ",
         },
         {
-          organization_id: "organization-3",
-          organization_name: "Valid Organization",
+          organization_id: "2",
+          organization_name: "Bravo Org",
         },
       ],
     });
 
     const tags = buildSavedOpportunityTags(
       opportunity,
-      new Set(["organization-1", "organization-2", "organization-3"]),
+      new Set<string>(["1", "2"]),
+      false,
     );
 
     expect(tags).toEqual<SavedOpportunityTag[]>([
       {
-        key: "individual",
-        kind: "individual",
-        label: "Individual",
-        screenReaderLabel: "Saved to your list",
-      },
-      {
-        key: "organization-organization-3",
+        key: "organization-2",
+        label: "Bravo Org",
+        screenReaderLabel: "Shared with Bravo Org",
         kind: "organization",
-        label: "Valid Organization",
-        screenReaderLabel: "Shared with Valid Organization",
       },
     ]);
   });
 
-  it("only includes organizations the user belongs to", () => {
+  it("returns an empty array when there are no visible tags", () => {
     const opportunity = createMockOpportunity({
-      saved_to_organizations: [
-        {
-          organization_id: "organization-1",
-          organization_name: "Alpha Coalition",
-        },
-        {
-          organization_id: "organization-2",
-          organization_name: "Beta Foundation",
-        },
-      ],
+      saved_to_organizations: undefined,
     });
 
     const tags = buildSavedOpportunityTags(
       opportunity,
-      new Set(["organization-1"]),
+      new Set<string>(),
+      false,
     );
 
-    expect(tags).toEqual<SavedOpportunityTag[]>([
-      {
-        key: "individual",
-        kind: "individual",
-        label: "Individual",
-        screenReaderLabel: "Saved to your list",
-      },
-      {
-        key: "organization-organization-1",
-        kind: "organization",
-        label: "Alpha Coalition",
-        screenReaderLabel: "Shared with Alpha Coalition",
-      },
-    ]);
+    expect(tags).toEqual<SavedOpportunityTag[]>([]);
   });
 });

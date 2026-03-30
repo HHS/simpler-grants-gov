@@ -9,7 +9,8 @@ export interface SavedOpportunityTag {
 
 export function buildSavedOpportunityTags(
   opportunity: BaseOpportunity,
-  userOrganizationIds: Set<string>,
+  userOrganizationIds: Set<string> = new Set<string>(),
+  isSavedByUser: boolean,
 ): SavedOpportunityTag[] {
   const organizationTags = (opportunity.saved_to_organizations ?? [])
     // Only include organizations the current user belongs to
@@ -21,13 +22,13 @@ export function buildSavedOpportunityTags(
       const organizationName = organization.organization_name?.trim();
       return Boolean(organizationName);
     })
-    // Sort alphabetically by name
+    // Sort organization tags alphabetically by display name
     .sort((firstOrganization, secondOrganization) =>
       (firstOrganization.organization_name ?? "").localeCompare(
         secondOrganization.organization_name ?? "",
       ),
     )
-    // Map to tag structure
+    // Map organizations into the shared tag structure
     .map((organization) => {
       const organizationName = organization.organization_name!.trim();
 
@@ -39,13 +40,19 @@ export function buildSavedOpportunityTags(
       };
     });
 
-  return [
-    {
-      key: "individual",
-      label: "Individual",
-      screenReaderLabel: "Saved to your list",
-      kind: "individual" as const,
-    },
-    ...organizationTags,
-  ];
+  // Only show the Individual tag when the opportunity was saved by the user.
+  // Opportunities may now appear in the saved list because they were saved only
+  // by one of the user's organizations.
+  const individualTags: SavedOpportunityTag[] = isSavedByUser
+    ? [
+        {
+          key: "individual",
+          label: "Individual",
+          screenReaderLabel: "Saved to your list",
+          kind: "individual",
+        },
+      ]
+    : [];
+
+  return [...individualTags, ...organizationTags];
 }

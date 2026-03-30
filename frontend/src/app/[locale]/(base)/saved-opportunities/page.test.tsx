@@ -69,7 +69,7 @@ jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
 
 jest.mock("src/components/Breadcrumbs", () => ({
   __esModule: true,
-  default: (props: { breadcrumbList: { title: string; path: string }[] }) => {
+  default: (props: { breadcrumbList: { title: string; path?: string }[] }) => {
     mockBreadcrumbs(props);
     return <nav data-testid="mock-breadcrumbs" />;
   },
@@ -81,6 +81,7 @@ describe("Saved Opportunities page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     savedOpportunities.mockResolvedValue([]);
+    updateIsSharedWithOrganizationEnabled(false);
   });
 
   it("renders intro text for user with no saved opportunities", async () => {
@@ -130,8 +131,11 @@ describe("Saved Opportunities page", () => {
   });
 
   it("renders a list of saved opportunities", async () => {
-    savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
+    savedOpportunities.mockResolvedValue([
+      { opportunity_id: mockOpportunity.opportunity_id },
+    ]);
     opportunity.mockResolvedValue({ data: mockOpportunity });
+
     const component = await SavedOpportunities({
       params: localeParams,
       searchParams: defaultSearchParams,
@@ -142,31 +146,14 @@ describe("Saved Opportunities page", () => {
       screen.getByRole("link", { name: /Test Opportunity/i }),
     ).toBeInTheDocument();
     expect(screen.getByText("OPP-12345")).toBeInTheDocument();
-  });
-
-  it("renders a list of saved opportunities and displays Share with organizations link", async () => {
-    updateIsSharedWithOrganizationEnabled(true);
-    savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
-    opportunity.mockResolvedValue({ data: mockOpportunity });
-    const component = await SavedOpportunities({
-      params: localeParams,
-      searchParams: defaultSearchParams,
-    });
-    render(component);
-
-    expect(
-      screen.getByRole("link", { name: /Test Opportunity/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByText("OPP-12345")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("share-opportunity-button-id"),
-    ).toBeInTheDocument();
   });
 
   it("renders status filter when there are saved opportunities", async () => {
-    updateIsSharedWithOrganizationEnabled(true);
-    savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
+    savedOpportunities.mockResolvedValue([
+      { opportunity_id: mockOpportunity.opportunity_id },
+    ]);
     opportunity.mockResolvedValue({ data: mockOpportunity });
+
     const component = await SavedOpportunities({
       params: localeParams,
       searchParams: defaultSearchParams,
@@ -175,10 +162,25 @@ describe("Saved Opportunities page", () => {
 
     expect(screen.getByLabelText("statusFilter.label")).toBeInTheDocument();
     expect(screen.getByText("Any opportunity status")).toBeInTheDocument();
-    const shareWithOrgsButton = screen.getAllByTestId(
-      "share-opportunity-button-id",
-    );
-    expect(shareWithOrgsButton[0]).toBeInTheDocument();
+  });
+
+  it("renders the share button when the feature is enabled and the opportunity is individually saved", async () => {
+    updateIsSharedWithOrganizationEnabled(true);
+
+    savedOpportunities.mockResolvedValue([
+      { opportunity_id: mockOpportunity.opportunity_id },
+    ]);
+    opportunity.mockResolvedValue({ data: mockOpportunity });
+
+    const component = await SavedOpportunities({
+      params: localeParams,
+      searchParams: defaultSearchParams,
+    });
+    render(component);
+
+    expect(
+      await screen.findByTestId("share-opportunity-button-id"),
+    ).toBeInTheDocument();
   });
 
   it("passes status filter to fetchSavedOpportunities when status param is provided", async () => {
@@ -189,7 +191,6 @@ describe("Saved Opportunities page", () => {
       opportunity_status: "forecasted",
     };
 
-    // With optimized logic: first call is filtered, returns results so no second call needed
     savedOpportunities.mockResolvedValueOnce([{ opportunity_id: 67890 }]);
     opportunity.mockResolvedValue({ data: forecastedOpportunity });
 
@@ -199,21 +200,18 @@ describe("Saved Opportunities page", () => {
     });
     render(component);
 
-    // Verify fetchSavedOpportunities was called with the status filter
     expect(savedOpportunities).toHaveBeenCalledWith(
       DEFAULT_SAVED_OPPORTUNITY_SCOPE,
       "forecasted",
     );
-    // Should only be called once since filtered results were found
     expect(savedOpportunities).toHaveBeenCalledTimes(1);
-    // Should show the forecasted opportunity
+
     expect(
       screen.getByRole("link", { name: /Forecasted Opportunity/i }),
     ).toBeInTheDocument();
   });
 
   it("shows all opportunities when no status filter is applied", async () => {
-    updateIsSharedWithOrganizationEnabled(true);
     const forecastedOpportunity: BaseOpportunity = {
       ...mockOpportunity,
       opportunity_id: "forecasted-opp-id",
@@ -235,7 +233,6 @@ describe("Saved Opportunities page", () => {
     });
     render(component);
 
-    // Should show both opportunities
     expect(
       screen.getByRole("link", { name: /Test Opportunity/i }),
     ).toBeInTheDocument();
@@ -243,18 +240,12 @@ describe("Saved Opportunities page", () => {
     expect(
       screen.getByRole("link", { name: /Forecasted Opportunity/i }),
     ).toBeInTheDocument();
-    const shareWithOrgsButton = screen.getAllByTestId(
-      "share-opportunity-button-id",
-    );
-    expect(shareWithOrgsButton[0]).toBeInTheDocument();
   });
 
   it("shows no matching status message when API returns no opportunities for filter", async () => {
-    // With optimized logic: first call is filtered (returns empty),
-    // second call is unfiltered to check if user has any saved opportunities
     savedOpportunities
-      .mockResolvedValueOnce([]) // filtered call returns empty
-      .mockResolvedValueOnce([{ opportunity_id: 12345 }]); // unfiltered call returns opportunities
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ opportunity_id: 12345 }]);
 
     const component = await SavedOpportunities({
       params: localeParams,
@@ -262,17 +253,18 @@ describe("Saved Opportunities page", () => {
     });
     render(component);
 
-    // Should show the no matching status message
     expect(
       screen.getByText("SavedOpportunities.noMatchingStatus"),
     ).toBeInTheDocument();
-    // Should still show the filter
     expect(screen.getByLabelText("statusFilter.label")).toBeInTheDocument();
   });
 
   it("passes accessibility scan", async () => {
-    savedOpportunities.mockResolvedValue([{ opportunity_id: 12345 }]);
+    savedOpportunities.mockResolvedValue([
+      { opportunity_id: mockOpportunity.opportunity_id },
+    ]);
     opportunity.mockResolvedValue({ data: mockOpportunity });
+
     const component = await SavedOpportunities({
       params: localeParams,
       searchParams: defaultSearchParams,

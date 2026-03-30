@@ -83,6 +83,15 @@ export default async function SavedOpportunities({
 
   const resolvedOpportunities = await Promise.all(opportunityPromises);
 
+  const individuallySavedOpportunityIds = new Set<string>(
+    savedOpportunities
+      .filter(
+        (savedOpportunity) =>
+          (savedOpportunity.saved_to_organizations ?? []).length === 0,
+      )
+      .map((savedOpportunity) => String(savedOpportunity.opportunity_id)),
+  );
+
   return (
     <>
       <GridContainer>
@@ -108,6 +117,9 @@ export default async function SavedOpportunities({
             {resolvedOpportunities.length > 0 ? (
               <SavedOpportunitiesController
                 opportunities={resolvedOpportunities}
+                individuallySavedOpportunityIds={
+                  individuallySavedOpportunityIds
+                }
               />
             ) : (
               <p>{t("SavedOpportunities.noMatchingStatus")}</p>
