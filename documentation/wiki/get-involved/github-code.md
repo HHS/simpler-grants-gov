@@ -61,11 +61,9 @@ API Development Instructions [API Development Instructions](../../api/developmen
 Front End Development Instructions [Front End Development Instructions](../../../frontend/)
 
 {% hint style="info" %}
-Nee**d help with your local development environment?**\
+**Need help with your local development environment?**\
 \
-Post in the [Discourse forum](https://forum.simpler.grants.gov/) if you're having issues. We can walk you through the process of resolving blockers.\
-\
-We also use a CODEOWNERS file to automatically suggest and add folks knowledgeable about the area of the code you're making changes to.
+Post in the [Discourse forum](https://forum.simpler.grants.gov/) if you're having issues. We can walk you through the process of resolving blockers.
 {% endhint %}
 
 ### 3. Make & Commit changes
