@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field
 
 import src.adapters.search as search
 from src.adapters.search.opensearch_response import SearchResponse
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema, SearchQueryOperator
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
 from src.search.search_models import (

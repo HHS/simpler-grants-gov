@@ -3,6 +3,8 @@ Unit tests for SearchResponse parsing edge cases — missing and None fields
 that can't easily be exercised via integration tests against a real OpenSearch instance.
 """
 
+import pytest
+
 from src.adapters.search.opensearch_response import SearchResponse
 
 
@@ -48,7 +50,7 @@ class TestSearchResponseParsing:
         )
         response = SearchResponse.from_opensearch_response(raw)
 
-        assert response.max_score == 4.25
+        assert response.max_score == pytest.approx(4.25)
         assert response.total_relation == "eq"
         assert response.took_ms == 5
         assert response.timed_out is False

@@ -23,6 +23,4 @@ class TestSearchOpportunitiesScoringRuleLogging:
             {"pagination": {"page_offset": 1, "page_size": 10}, "query": "climate"},
         )
 
-        mock_add_extra_data.assert_called_once_with(
-            {"search.scoring_rule": "default"}
-        )
+        mock_add_extra_data.assert_called_once_with({"search.scoring_rule": "default"})
