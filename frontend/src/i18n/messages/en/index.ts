@@ -397,7 +397,8 @@ export const messages = {
         pending: "Reviewing...",
       },
       alerts: {
-        success: "Draft opportunity details saved.",
+        success: "Saved successfully",
+        successBody: "Your changes have been saved.",
         genericError: "Unable to save draft opportunity details.",
         missingSummaryContext: "Missing opportunity summary context for save.",
         forbidden: "You do not have permission to update this opportunity.",

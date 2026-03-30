@@ -319,7 +319,9 @@ export default function OpportunityEditForm({
             heading={formState.successMessage}
             headingLevel="h3"
             noIcon
-          />
+          >
+            {t("content.alerts.successBody")}
+          </Alert>
         </div>
       ) : null}
 
