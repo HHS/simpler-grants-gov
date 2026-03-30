@@ -4,6 +4,7 @@ import { UserAgency } from "src/services/fetch/fetchers/userAgenciesFetcher";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { Label, Select } from "@trussworks/react-uswds";
 
 export const AgencySelector = ({
   agencies,
@@ -19,11 +20,10 @@ export const AgencySelector = ({
 
   return (
     <div className={className ?? "usa-form-group margin-bottom-4"}>
-      <label className="usa-label text-bold" htmlFor="agency-selector">
+      <Label htmlFor="agency-selector" className="text-bold">
         {t("agencySelector")}
-      </label>
-      <select
-        className="usa-select"
+      </Label>
+      <Select
         id="agency-selector"
         name="agency"
         defaultValue={currentAgencyId}
@@ -34,7 +34,7 @@ export const AgencySelector = ({
             {agency.agency_name}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 };
