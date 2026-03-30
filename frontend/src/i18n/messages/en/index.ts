@@ -475,7 +475,7 @@ export const messages = {
       "We believe that applying for federal financial assistance should be simple and straightforward. We aim to be the best tool for posting, finding, and sharing funding opportunities.",
     sections: {
       mission: {
-        title: "Our mission",
+        title: "Our DFDSFDFDFSDF",
         paragraph:
           "We're dedicated to making federal funding opportunities simpler to navigate and the grants experience more seamless for everyone.",
         contentItems: [

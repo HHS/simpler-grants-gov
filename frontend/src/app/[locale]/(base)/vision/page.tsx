@@ -5,6 +5,8 @@ import { getTranslations } from "next-intl/server";
 
 import VisionPageSections from "src/components/vision/VisionSections";
 
+export const dynamic = "force-static";
+
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });

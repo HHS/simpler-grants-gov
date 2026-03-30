@@ -26,8 +26,8 @@ type OpportunityListingProps = {
   params: Promise<{ id: string }>;
 } & WithFeatureFlagProps;
 
-export const revalidate = 600; // invalidate ten minutes
-export const dynamic = "force-static";
+// can't statically generate these since they have a dynamic "save" button state for authenticated users
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
