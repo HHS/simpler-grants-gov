@@ -16,7 +16,7 @@ jest.mock("next-intl/server", () => ({
 }));
 
 // Mock the DevelopersPageSections component
-jest.mock("src/components/developers/DeveloperSections", () => {
+jest.mock("src/components/developers/DevelopersSections", () => {
   return function MockDevelopersPageSections() {
     return (
       <div data-testid="developer-sections">
