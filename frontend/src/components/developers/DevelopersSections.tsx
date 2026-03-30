@@ -1,9 +1,9 @@
-import DeveloperInfo from "src/components/developer/sections/DeveloperInfo";
+import DevelopersInfo from "src/components/developers/sections/DevelopersInfo";
 
-export default function DeveloperPageSections() {
+export default function DevelopersPageSections() {
   return (
     <>
-      <DeveloperInfo />
+      <DevelopersInfo />
     </>
   );
 }

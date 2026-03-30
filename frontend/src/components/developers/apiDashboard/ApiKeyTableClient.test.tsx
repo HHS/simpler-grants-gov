@@ -10,7 +10,7 @@ import {
   usedApiKey,
 } from "src/utils/testing/fixtures";
 
-import ApiKeyTableClient from "src/components/developer/apiDashboard/ApiKeyTableClient";
+import ApiKeyTableClient from "src/components/developers/apiDashboard/ApiKeyTableClient";
 
 const mockClientFetch = jest.fn();
 const mockWriteText = jest.fn(() => Promise.resolve());

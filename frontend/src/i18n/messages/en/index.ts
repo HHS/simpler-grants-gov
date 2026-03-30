@@ -606,7 +606,7 @@ export const messages = {
       visitHomepageButton: "Visit our homepage",
     },
   },
-  Developer: {
+  Developers: {
     pageTitle: "Developers | Simpler.Grants.gov",
     pageDescription:
       "Tools and resources for developers working with Simpler.Grants.gov",
