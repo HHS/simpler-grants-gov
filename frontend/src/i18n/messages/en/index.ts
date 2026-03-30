@@ -273,6 +273,165 @@ export const messages = {
       close: "Close",
     },
   },
+  OpportunityEdit: {
+    sections: {
+      keyInformation: "Key information",
+      fundingDetails: "Funding details",
+      eligibility: "Eligibility",
+      additionalInformation: "Additional information",
+    },
+    labels: {
+      title: "Title",
+      agency: "Agency",
+      assistanceListings: "Assistance listings:",
+      opportunityNumber: "Opportunity number",
+      opportunityStage: "Opportunity stage",
+      awardSelectionMethod: "Award selection method",
+      awardSelectionMethodExplanation: "Award selection method explanation",
+      fundingType: "Funding type",
+      costSharing: "Cost sharing or matching requirements?",
+      category: "Category",
+      expectedNumberOfAwards: "Expected number of awards",
+      estimatedTotalProgramFunding: "Estimated total program funding",
+      awardMinimum: "Award minimum",
+      awardMaximum: "Award maximum",
+      publishDate: "Publish date",
+      closeDate: "Close date",
+      closeDateExplanation: "Close date explanation",
+      eligibleApplicants: "Eligible applicants",
+      additionalEligibilityInfo: "Additional information on eligibility",
+      fundingCategoryExplanation: "Category explanation",
+      description: "Description",
+      additionalInfoUrl: "Link to additional information",
+      additionalInfoUrlText: "Link display text",
+      grantorContactDetails: "Grantor contact details",
+      contactEmail: "Contact email",
+      contactEmailText: "Email display text",
+      yes: "Yes",
+      no: "No",
+      eligibilityBusiness: "Business",
+      eligibilityEducation: "Education",
+      eligibilityGovernment: "Government entities",
+      eligibilityNonprofit: "Nonprofit",
+      eligibilityMiscellaneous: "Miscellaneous",
+    },
+    eligibilityOptions: {
+      forProfitOrganizationsOtherThanSmallBusinesses:
+        "For profit organizations other than small businesses",
+      smallBusinesses: "Small businesses",
+      independentSchoolDistricts: "Independent school districts",
+      privateInstitutionsOfHigherEducation:
+        "Private institutions of higher education",
+      publicAndStateInstitutionsOfHigherEducation:
+        "Public and State controlled institutions of higher education",
+      cityOrTownshipGovernments: "City or township governments",
+      countyGovernments: "County governments",
+      federallyRecognizedNativeAmericanTribalGovernments:
+        "Native American tribal governments (Federally recognized)",
+      publicAndIndianHousingAuthorities:
+        "Public housing authorities/Indian housing authorities",
+      specialDistrictGovernments: "Special district governments",
+      stateGovernments: "State governments",
+      otherNativeAmericanTribalOrganizations:
+        "Native American tribal organizations (other than Federally recognized tribal governments)",
+      nonprofitsNonHigherEducationWith501c3:
+        "Nonprofits having a 501(c)(3) status with the IRS, other than institutions of higher education",
+      nonprofitsNonHigherEducationWithout501c3:
+        "Nonprofits that do not have a 501(c)(3) status with the IRS, other than institutions of higher education",
+      individuals: "Individuals",
+      other:
+        "Others. See the Additional Information on Eligibility field for clarification.",
+      unrestricted:
+        "Unrestricted. Open to any type of entity above, subject to any clarification in the Additional Information on Eligibility field.",
+    },
+    content: {
+      keyInformationIntro:
+        "Below is a summary of the key information for this opportunity. You can edit specific fields directly in this section.",
+      fundingDetailsIntro:
+        "Provide the financial structure of this opportunity. This includes the total funding available, expected number of awards, and critical dates for the application window.",
+      eligibilityIntro:
+        "Define who is eligible to apply for these funds. Select all applicable applicant types and provide any specific requirements or restrictions regarding organizational status or geographic location.",
+      additionalInformationIntro:
+        "Use this section to provide supplementary context, such as a summary of the program's goals, agency-specific links, and contact information for programmatic or technical inquiries.",
+      draftOnlyWarning:
+        "Only draft opportunities should be editable from this page.",
+      notAvailable: "Not available",
+      fundingTypeHint:
+        "Select the legal relationship between the agency and the recipient",
+      costSharingHint:
+        "Indicate if the applicant is required to provide a specific percentage of non-federal funds.",
+      categoryHint: "Choose the primary functional area this funding supports",
+      fundingCategoryExplanationHint: "If category is Other",
+      expectedNumberOfAwardsHint:
+        "Enter the estimated number of individual awards the agency intends to fund.",
+      estimatedTotalProgramFundingHint:
+        "Enter the total amount of funding available for all awards under this opportunity.",
+      awardMinimumHint:
+        "Enter the smallest dollar amount that can be awarded to a single recipient.",
+      awardMaximumHint:
+        "Enter the largest dollar amount that can be awarded to a single recipient.",
+      publishDateHint:
+        "The date this opportunity will be visible to the public",
+      closeDateHint: "The final deadline for all applications to be submitted",
+      closeDateExplanationHint:
+        "Provide a reason if a specific close date is not set, such as continuous review or a rolling deadline.",
+      select: "Select",
+      selectFundingCategory: "Select funding category",
+      eligibleApplicantsHint:
+        "Select all categories of organizations or individuals that may apply for this grant.",
+      additionalEligibilityInfoHint:
+        "If eligible applicant is Other, provide further clarification on specific requirements",
+      descriptionHint:
+        "Provide a high-level summary of the funding purpose and the problems it intends to solve.",
+      additionalInfoUrlHint:
+        "Enter the full web address for more program details.",
+      additionalInfoUrlTextHint:
+        "Enter the text that will appear as the clickable link.",
+      grantorContactDetailsHint:
+        "Provide the name or department and phone number for the primary contact.",
+      contactEmailHint: "Enter a valid email address.",
+      contactEmailTextHint:
+        "Enter the text that will be shown as the email link.",
+      reviewButton: {
+        idle: "Review required fields",
+        pending: "Reviewing...",
+      },
+      alerts: {
+        success: "Draft opportunity details saved.",
+        genericError: "Unable to save draft opportunity details.",
+        missingSummaryContext: "Missing opportunity summary context for save.",
+        forbidden: "You do not have permission to update this opportunity.",
+        notFound: "The opportunity summary could not be found.",
+        draftOnly: "Only draft opportunity summaries can be updated.",
+        validationHeading: "Please fix the highlighted fields.",
+      },
+    },
+    validationErrors: {
+      title: "Enter a title.",
+      awardSelectionMethod: "Select an award selection method.",
+      description: "Enter a description.",
+      publishDate: "Enter a publish date.",
+      closeDate: "Enter a close date.",
+      contactEmailRequired: "Enter a contact email.",
+      contactEmailInvalid: "Enter a valid contact email.",
+      contactEmailText: "Enter email display text.",
+      closeDateOrder: "Close date must be on or after publish date.",
+      awardMinimum: "Enter an award minimum.",
+      awardMaximum: "Enter an award maximum.",
+      awardMaximumOrder:
+        "Award maximum must be greater than or equal to award minimum.",
+      fundingType: "Select a funding type.",
+      fundingCategory: "Select a funding category.",
+      expectedNumberOfAwards: "Enter the expected number of awards.",
+      estimatedTotalProgramFunding:
+        "Enter the estimated total program funding.",
+      eligibleApplicants: "Select at least one eligible applicant type.",
+      additionalEligibilityInfo: "Enter additional eligibility information.",
+      additionalInfoUrl: "Enter an additional information URL.",
+      additionalInfoUrlText: "Enter additional information URL text.",
+      grantorContactDetails: "Enter grantor contact details.",
+    },
+  },
   Application: {
     title: "Application",
     breadcrumbWorkspace: "Workspace",

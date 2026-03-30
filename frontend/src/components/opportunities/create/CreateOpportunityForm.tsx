@@ -59,9 +59,9 @@ export function CreateOpportunityForm({
       top: 0,
       behavior: "smooth",
     });
-    // If success, redirect to Opportunity List page
-    if (response?.success) {
-      router.push("/opportunities");
+    // If success, redirect to the edit page (Part 2 of create)
+    if (response?.success && response.data?.opportunity_id) {
+      router.push(`/opportunity/${response.data.opportunity_id}/edit`);
     } else {
       setDisableSave(true);
       if (selectedCategoryId.trim() !== "other") {
