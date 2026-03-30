@@ -1,5 +1,8 @@
 name: E2E Tests (Deployed Target)
 on:
+  push:
+    branches:
+      - "main"
   workflow_dispatch:
     inputs:
       version:
@@ -30,7 +33,7 @@ on:
         description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
         type: string
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ inputs.target }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   e2e-tests-deployed:
@@ -68,6 +71,7 @@ jobs:
     secrets: inherit
     with:
       run_id: ${{ github.run_id }}
+      target: ${{ inputs.target }}
   send-slack-notification:
     if: failure()
     needs: [create-report]

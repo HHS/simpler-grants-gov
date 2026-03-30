@@ -42,7 +42,7 @@ env:
   NODE_OPTIONS: --dns-result-order=ipv4first
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-local-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

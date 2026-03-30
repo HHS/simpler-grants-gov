@@ -1,8 +1,9 @@
-name: E2E Tests Daily
+name: E2E Tests Daily (EXPERIMENTTTT)
 on:
-  schedule:
-    # Run every day at (6/7am Eastern) before the start of the workday
-    - cron: "0 11 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - "fix-e2e-scheduled-jobs"
 
 jobs:
   daily-e2e-tests-deployed:
