@@ -20,6 +20,7 @@ from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOpera
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPInvalidEnvelope, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_dict
+from src.util.datetime_util import make_timezone_aware
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -36,8 +37,7 @@ from tests.src.db.models.factories import (
 TZ_EST = pytz.timezone("America/New_York")
 DT_NAIVE = datetime(2025, 9, 9, 8, 15, 17)
 DT_EST_AWARE = TZ_EST.localize(DT_NAIVE)
-DT_NAIVE_EARLIER = datetime(2025, 8, 1, 8, 15, 17)
-DT_EST_AWARE_EARLIER = TZ_EST.localize(DT_NAIVE_EARLIER)
+DT_EST_AWARE_EARLIER = make_timezone_aware(datetime(2025, 8, 1, 8, 15, 17), "America/New_York")
 
 
 def setup_application_submission(
