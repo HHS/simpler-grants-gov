@@ -1820,6 +1820,7 @@ export const messages = {
     },
   },
   Opportunities: {
+    createOpportunityButton: "Create Opportunity",
     numOpportunities:
       "{num, plural, =1 {1 opportunity} other {# opportunities}}",
     errorMessage:
