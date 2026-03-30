@@ -141,15 +141,12 @@ describe("CommonTextArea", () => {
 });
 
 // --- Test Common CharacterCount ---
-let bigTextValue2 = "";
-const onCharacterCountChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-  bigTextValue2 = e.target.value;
-};
+const mockOnChangeCharCnt = jest.fn();
 const commonCharacterCountProps = {
   ...commonLabelProps,
   fieldMaxLength: 40,
   defaultValue: "",
-  onTextChange: onCharacterCountChange,
+  onTextChange: mockOnChangeCharCnt,
   isTextArea: false,
 };
 describe("CommonCharacterCount", () => {
@@ -196,9 +193,8 @@ describe("CommonCharacterCount", () => {
     fireEvent.change(element, {
       target: { value: "12345678901234567890123456789012345678901234567890" },
     });
-    expect(bigTextValue2).toBe(
-      "12345678901234567890123456789012345678901234567890",
-    );
+    expect(mockOnChangeCharCnt).toHaveBeenCalledTimes(1);
+    expect(mockOnChangeCharCnt).toHaveBeenCalledWith(expect.any(Object));
     // Validate the character count message
     const charCountText = screen.getByText("10 characters over limit");
     expect(charCountText).toBeInTheDocument();

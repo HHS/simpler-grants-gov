@@ -12,6 +12,8 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
+import "@trussworks/react-uswds/lib/index.css";
+
 // ----------------------------------------------------------
 // Common Text with the same styles
 // ----------------------------------------------------------
@@ -203,6 +205,7 @@ export const CommonCharacterCount = ({
           defaultValue={defaultValue}
           onChange={onTextChange}
           isTextArea={isTextArea}
+          aria-describedby={labelId}
         />
       </FormGroup>
     </>
@@ -261,7 +264,7 @@ export const CommonSelectInput = ({
           name={fieldId}
           onChange={handleChange}
           value={selectedValue}
-          style={{ maxWidth: "480px" }}
+          className="maxw-mobile-lg"
         >
           {/* Default option */}
           <option key={""} value={""} disabled>
