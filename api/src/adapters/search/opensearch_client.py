@@ -224,6 +224,7 @@ class SearchClient:
         # Structured logging enrichment
         add_extra_data_to_current_request_logs(
             {
+                "search.index": index_name,
                 "search.took_ms": response.took_ms,
                 "search.timed_out": response.timed_out,
                 "search.shards_failed": response.shards_failed,

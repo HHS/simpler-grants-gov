@@ -71,8 +71,7 @@ class SearchResponse:
 
         raw_aggs: dict[str, dict[str, typing.Any]] = raw_json.get("aggregations", {})
         aggregations = _parse_aggregations(raw_aggs)
-        score_stats = _compute_score_stats(records)
-
+        score_stats = _compute_score_stats(records) if include_scores else {}
         return cls(
             total_records,
             records,

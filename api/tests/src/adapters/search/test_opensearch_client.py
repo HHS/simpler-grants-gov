@@ -263,7 +263,6 @@ def test_search_returns_expected_metadata(search_client, generic_index):
     assert hasattr(response, "took_ms")
     assert hasattr(response, "timed_out")
     assert hasattr(response, "shards_failed")
-    assert hasattr(response, "shards_failed")
     assert hasattr(response, "total_records")
 
     assert hasattr(response, "score_stats")
