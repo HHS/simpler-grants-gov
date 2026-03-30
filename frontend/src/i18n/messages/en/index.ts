@@ -1036,7 +1036,7 @@ export const messages = {
       toggleButton: "Filters",
     },
     callToAction: {
-      shareWithOrganization: "Share with organizations",
+      shareWithOthers: "Share with others",
     },
     opportunitySaved: "Saved",
     resultsHeader: {
@@ -1116,6 +1116,8 @@ export const messages = {
           "This search query was copied to your clipboard. Paste it as a link anywhere.",
       },
     },
+    shareWithYourList: "Shared with:",
+    shareWithOthers: "Share with others",
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",

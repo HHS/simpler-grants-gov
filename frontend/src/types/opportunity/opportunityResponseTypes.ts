@@ -85,6 +85,7 @@ export type OpportunitySummaryUpdateRequest = {
 
 export interface SavedToOrganization {
   organization_id: string;
+  organization_name: string | null;
 }
 
 export type MinimalOpportunity = {
