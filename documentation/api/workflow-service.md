@@ -216,3 +216,93 @@ only some transitions within a workflow will be. Importantly, an
 approval says whether it is still valid, in certain cases we may invalidate
 an approval (a later approver kicking it back to an earlier step). We
 want to keep a history of approvals, but mark them as no longer valid.
+
+# Working with the API
+For those that need to interact with our workflow APIs, here is the
+general pattern we would expect.
+* A workflow is created as part of another endpoint (a submit, publish, or ready-for-review endpoint)
+* You fetch the workflow ID via some GET endpoint for the particular entity
+* You send events against the `PUT /v1/workflows/events` API
+* You can get information about the workflow from `GET /v1/workflows/:workflow_id`
+
+```mermaid
+flowchart LR
+    
+    create[Create Entity]
+    publish[Publish Entity]
+    start_workflow[Start the Workflow]
+    get_workflow[Get the Workflow]
+    send_event[Send Events]
+    done[Done]
+    
+    subgraph Publish / Create
+        create --> publish
+        subgraph Publish Endpoint
+            publish --> start_workflow
+        end
+    end
+    
+    subgraph Approval Cycle
+      start_workflow --> get_workflow
+      get_workflow --> send_event
+      send_event -->  send_event
+    end
+    send_event --> done
+```
+
+## Example
+Let's assume a workflow exists for publishing your example entity. That workflow
+has a few approval steps, and a few automated steps after the approvals complete
+like setting a few fields on the entity like a `published_at` timestamp.
+
+You would need to first build out whatever experience is needed for creating and populating
+all of the values within your entity. Presumably at the end of that, you'd want to publish it
+and have a publish-entity endpoint. This publish endpoint would validate everything is in a good
+state, and as a final measure, it would send a message to the workflow service SQS queue. This
+message would contain information like:
+* What workflow
+* What entity ID
+* What type of entity
+* Who did it (the person who called the endpoint)
+
+This event would be processed asynchronously, and a workflow would be created. It's recommended
+that if you want to be able to easily find this workflow, you could have the workflow state machine
+you created set a workflow ID foreign key in the entity table. That way your `GET /entity/:entity_id`
+endpoint could easily return the ID.
+
+Once you have the workflow ID, you can get information about the workflow from the `GET /v1/workflows/:workflow_id`
+endpoint. Importantly this returns the following information:
+* What is the current state
+* What approvals are needed
+* What users can do approvals
+
+Importantly, once you have the workflow ID and information about the workflow, you can send
+events against the workflow with the `PUT /v1/workflows/events` endpoint. To send an approval event
+you can send an event like the following:
+
+```json
+{
+  "event_type": "process_workflow",
+  "metadata": {
+    "approval_response_type": "approved",
+    "comment": "example comment - optional"
+  },
+  "process_workflow_context": {
+    "event_to_send": "receive_example_approval",
+    "workflow_id": "123e4567-e89b-12d3-a456-426614174000"
+  }
+}
+```
+
+For each of these fields:
+* `event_type` - Can be one of `process_workflow` or `start_workflow` although for an existing workflow it will always be `process_workflow`
+* `approval_response_type` - Can be one of `approved`, `declined` or `requires_modification` - required for approval events
+* `comment` - Optional, will be attached to a workflow approval if provided
+* `event_to_send` - The event you want to send
+* `workflow_id` - The ID of the workflow
+
+The user calling the endpoint will be used to authorize on whether they can
+send the event. A user needs to have whatever privilege is configured for the
+event against the agency that owns the entity associated with the workflow.
+The GET workflow endpoint returns exactly which users can do that for each approval event.
+

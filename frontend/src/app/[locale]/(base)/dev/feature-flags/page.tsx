@@ -1,7 +1,10 @@
 import { Metadata } from "next";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import Head from "next/head";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import React from "react";
 import { Button } from "@trussworks/react-uswds";
 
@@ -18,7 +21,7 @@ export function generateMetadata() {
 /**
  * View for managing feature flags
  */
-export default function FeatureFlags() {
+function FeatureFlags() {
   return (
     <>
       <Head>
@@ -44,3 +47,9 @@ export default function FeatureFlags() {
     </>
   );
 }
+
+export default withFeatureFlag<WithFeatureFlagProps, never>(
+  FeatureFlags,
+  "featureFlagAdminOff",
+  () => notFound(),
+);

@@ -882,7 +882,7 @@ export const messages = {
       toggleButton: "Filters",
     },
     callToAction: {
-      shareWithOrganization: "Share with organizations",
+      shareWithOthers: "Share with others",
     },
     opportunitySaved: "Saved",
     resultsHeader: {
@@ -962,6 +962,8 @@ export const messages = {
           "This search query was copied to your clipboard. Paste it as a link anywhere.",
       },
     },
+    shareWithYourList: "Shared with:",
+    shareWithOthers: "Share with others",
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
@@ -1826,6 +1828,7 @@ export const messages = {
     },
   },
   Opportunities: {
+    createOpportunityButton: "Create Opportunity",
     numOpportunities:
       "{num, plural, =1 {1 opportunity} other {# opportunities}}",
     errorMessage:
@@ -1914,9 +1917,6 @@ export const messages = {
     showLess: "Show less",
     opportunity: "Opportunity",
     editOpportunityDetails: "Edit opportunity details",
-    errorHeadingOppurtunity: "Error fetching opportunity details",
-    oppurtunityFetchError:
-      "Error fetching opportunity data. Please try refreshing the page.",
     recommendationMethod: {
       label: "Recommendation method",
       description: "Choose the method you'll use to rate",
@@ -1932,6 +1932,32 @@ export const messages = {
       label: "Other key information",
       description:
         "Add any relevant information related to this reviewer and decision-maker for this opportunity",
+    },
+    errorHeadingAwardRecommendation:
+      "Error fetching award recommendation details",
+    awardRecommendationFetchError:
+      "Error fetching award recommendation data. Please try refreshing the page.",
+    recommendations: {
+      heading: "Recommendations",
+      editPageDescription:
+        "Document your award recommendations and the funding strategy used for the period of performance.",
+      description:
+        "Award recommendations and the funding strategy used for the period of performance.",
+      summary: {
+        heading: "Summary",
+        appsReceived: "Apps received",
+        appsRecommended: "Apps recommended",
+        totalFundingRecommended: "Total funding recommended",
+        totalAvailable: "Total available",
+        recommendedWithoutFunding: "Recommended without funding",
+        notRecommendedForFunding: "Not recommended for funding",
+        applications: "applications",
+      },
+      fundingStrategy: {
+        heading: "Funding strategy",
+        description:
+          "Explain how you plan to provide funding over time. For example, will the agency award all funding in a single award or in multiple budget periods across a longer period of performance.",
+      },
     },
   },
   InviteLegacyUsers: {
@@ -2003,6 +2029,9 @@ export const messages = {
       categoryExplanation: "Grant selection method explanation",
       categoryExplanationDesc:
         'If "Other" was selected, please describe the specific process used to evaluate and award these funds.',
+      assistanceListingNumber: "Assistance listing number",
+      assistanceListingNumberDesc:
+        "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
       charactersAllowed40: "40 characters allowed",
       charactersAllowed255: "255 characters allowed",
       successMessage: "Opportunity started. Continuing shortly...",

@@ -7,9 +7,10 @@ module "training_config" {
   environment    = "training"
   network_name   = "training"
 
-  database_instance_count = 2
-  database_min_capacity   = 2
-  database_max_capacity   = 2
+  database_newrelic_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtODQ0ODk0NzY5Njc5NTA3MDUwNA"
+  database_instance_count       = 2
+  database_min_capacity         = 2
+  database_max_capacity         = 2
 
   service_override_extra_environment_variables = {
     # In prod, post results to the #z_bot-sprint-reporting channel in slack

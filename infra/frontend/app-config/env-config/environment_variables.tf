@@ -88,13 +88,13 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-award-recommendation-off"
     },
-    FEATURE_SEARCH_DRAWER_ON = {
+    FEATURE_MAINTENANCE_MODE = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-search-drawer-on"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-maintenance-mode"
     },
-    FEATURE_SEARCH_TABLE_ON = {
+    FEATURE_FEATURE_FLAG_ADMIN_OFF = {
       manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/feature-search-table-on"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-feature-flag-admin-off"
     },
     API_JWT_PUBLIC_KEY = {
       manage_method     = "manual"
