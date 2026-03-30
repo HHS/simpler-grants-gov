@@ -12,7 +12,7 @@ from src.db.models.competition_models import ApplicationForm
 from src.db.models.user_models import Role, User
 from src.legacy_soap_api.legacy_soap_api_auth import (
     LOG_LOCAL_RESPONSE_HEADER_KEY,
-    USE_SOAP_JWT_HEADER_KEY,
+    USE_SOAP_CERT_HEADER_KEY,
     SOAPAuth,
     SOAPClientCertificate,
 )
@@ -150,7 +150,7 @@ def setup_cert_user(
 
 
 def create_soap_request(
-    soap_payload: bytes, use_soap_jwt: bool = False, log_local: bool = False
+    soap_payload: bytes, use_soap_cert: bool = True, log_local: bool = False
 ) -> SOAPRequest:
     _, _, soap_certificate = setup_cert_user(
         AgencyFactory.create(), [Privilege.LEGACY_AGENCY_VIEWER]
@@ -160,8 +160,8 @@ def create_soap_request(
     }
     if log_local:
         headers.update({f"{LOG_LOCAL_RESPONSE_HEADER_KEY}": "1"})
-    if use_soap_jwt:
-        headers.update({f"{USE_SOAP_JWT_HEADER_KEY}": "1"})
+    if use_soap_cert:
+        headers.update({f"{USE_SOAP_CERT_HEADER_KEY}": "1"})
     return SOAPRequest(
         api_name=SimplerSoapAPI.GRANTORS,
         headers=headers,

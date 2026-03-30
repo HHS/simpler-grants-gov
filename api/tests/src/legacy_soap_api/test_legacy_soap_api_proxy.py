@@ -117,37 +117,11 @@ def test_get_soap_jwt_auth_jwt(enable_factory_create, caplog):
 
 
 @freeze_time("2024-04-03 12:00:00", tz_offset=0)
-def test_get_soap_jwt_auth_request_when_use_jwt_is_set_on_headers(enable_factory_create, caplog):
-    caplog.set_level(logging.INFO)
-    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_jwt=True)
-    legacy_certificate = soap_request.auth.certificate.legacy_certificate
-    with patch(
-        "src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response"
-    ) as mock_get_soap_response:
-        get_proxy_response(soap_request)
-        encoded = mock_get_soap_response.call_args_list[0][0][0].headers.get(
-            "S2S_PARTNER_CERTID_JWT_B64"
-        )
-        decoded_base64 = base64.b64decode(encoded).decode("utf-8")
-        original_payload = jwt.decode(
-            decoded_base64, key="soap_partner_gateway_auth_key", algorithms=["HS256"]
-        )
-        config = get_soap_config()
-        expected = {
-            "sub": "partner_soap_call",
-            "iss": config.soap_partner_gateway_uri,
-            "exp": 1712145660,
-            "certId": legacy_certificate.cert_id,
-        }
-        assert original_payload == expected
-
-
-@freeze_time("2024-04-03 12:00:00", tz_offset=0)
-def test_request_with_jwt_is_created_when_use_soap_jwt_auth_is_flagged(
+def test_get_soap_jwt_auth_request_when_use_soap_cert_is_not_on_headers(
     enable_factory_create, caplog
 ):
     caplog.set_level(logging.INFO)
-    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_jwt=True)
+    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_cert=False)
     legacy_certificate = soap_request.auth.certificate.legacy_certificate
     with patch(
         "src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response"
@@ -168,16 +142,11 @@ def test_request_with_jwt_is_created_when_use_soap_jwt_auth_is_flagged(
             "certId": legacy_certificate.cert_id,
         }
         assert original_payload == expected
-        assert "soap_client_certificate: created SOAP JWT" in caplog.messages
-        assert (
-            "soap_client_certificate: Sending soap request without client certificate"
-            in caplog.messages
-        )
+        assert "soap_client_certificate: using jwt auth" in caplog.messages
 
 
-def test_request_with_jwt_gets_correct_proxy_url(enable_factory_create, caplog):
-    caplog.set_level(logging.INFO)
-    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_jwt=True)
+def test_request_without_use_soap_cert_header_gets_correct_proxy_url(enable_factory_create):
+    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_cert=False)
     with patch(
         "src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response"
     ) as mock_get_soap_response:
@@ -187,11 +156,10 @@ def test_request_with_jwt_gets_correct_proxy_url(enable_factory_create, caplog):
         assert mock_get_soap_response.call_args_list[0][0][0].url == expected
 
 
-def test_request_with_jwt_does_not_log_locally_when_header_is_not_set(
-    enable_factory_create, caplog
+def test_request_without_use_soap_cert_header_does_not_log_locally_if_log_local_header_not_included(
+    enable_factory_create,
 ):
-    caplog.set_level(logging.INFO)
-    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_jwt=True)
+    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_cert=False)
     with patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response") as _, patch(
         "src.legacy_soap_api.legacy_soap_api_proxy.log_local"
     ) as mock_log_local:
@@ -199,9 +167,9 @@ def test_request_with_jwt_does_not_log_locally_when_header_is_not_set(
         mock_log_local.assert_not_called()
 
 
-def test_request_with_jwt_logs_locally_when_header_is_set(enable_factory_create, caplog):
+def test_request_logs_locally_when_use_soap_cert_header_is_disabled(enable_factory_create, caplog):
     caplog.set_level(logging.INFO)
-    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_jwt=True, log_local=True)
+    soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_cert=False, log_local=True)
     config = get_soap_config()
     config.enable_verbose_logging = True
     response_bytes = (
