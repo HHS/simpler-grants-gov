@@ -191,7 +191,7 @@ class TestTransformation:
         assert result.custom_fields["federalOpportunityNumber"].value == "2024-010"
 
         assert "federalFundingSource" in result.custom_fields
-        assert result.custom_fields["federalFundingSource"].value == "Mandatory"
+        assert result.custom_fields["federalFundingSource"].value == ["Mandatory"]
 
         assert "agency" in result.custom_fields
         assert result.custom_fields["agency"].value.code == "A2345"
@@ -214,8 +214,9 @@ class TestTransformation:
             result.custom_fields["contactInfo"].value.description
             == "Contact the grants office for questions"
         )
-        assert result.custom_fields["contactInfo"].value.emailAddress == "grants@test-agency.gov"
-        assert result.custom_fields["contactInfo"].value.emailDescription == "Grants Office Email"
+        assert result.custom_fields["contactInfo"].value.email == "grants@test-agency.gov"
+        assert result.custom_fields["contactInfo"].value.name is None
+        assert result.custom_fields["contactInfo"].value.phone is None
 
         assert "additionalInfo" in result.custom_fields
         assert result.custom_fields["additionalInfo"].value.url == "https://example.com/opportunity"
@@ -228,7 +229,7 @@ class TestTransformation:
         assert result.custom_fields["fiscalYear"].value == 2024
 
         assert "costSharing" in result.custom_fields
-        assert result.custom_fields["costSharing"].value is False
+        assert result.custom_fields["costSharing"].value.isRequired is False
 
         assert "attachments" in result.custom_fields
         assert len(result.custom_fields["attachments"].value) == 1
@@ -1065,8 +1066,8 @@ class TestPopulateCustomFields:
         assert result["federalOpportunityNumber"].field_type == CustomFieldType.STRING
         assert result["federalOpportunityNumber"].value == "HHS-2024-001"
 
-        assert result["federalFundingSource"].field_type == CustomFieldType.STRING
-        assert result["federalFundingSource"].value == "Discretionary"
+        assert result["federalFundingSource"].field_type == CustomFieldType.ARRAY
+        assert result["federalFundingSource"].value == ["Discretionary"]
 
         assert result["agency"].field_type == CustomFieldType.OBJECT
         assert result["agency"].value.code == "HHS"
@@ -1081,8 +1082,9 @@ class TestPopulateCustomFields:
 
         assert result["contactInfo"].field_type == CustomFieldType.OBJECT
         assert result["contactInfo"].value.description == "Contact the grants office"
-        assert result["contactInfo"].value.emailAddress == "grants@hhs.gov"
-        assert result["contactInfo"].value.emailDescription == "Grants Office Email"
+        assert result["contactInfo"].value.email == "grants@hhs.gov"
+        assert result["contactInfo"].value.name is None
+        assert result["contactInfo"].value.phone is None
 
         assert result["additionalInfo"].field_type == CustomFieldType.OBJECT
         assert result["additionalInfo"].value.url == "https://hhs.gov/grants"
@@ -1091,8 +1093,8 @@ class TestPopulateCustomFields:
         assert result["fiscalYear"].field_type == CustomFieldType.INTEGER
         assert result["fiscalYear"].value == 2024
 
-        assert result["costSharing"].field_type == CustomFieldType.BOOLEAN
-        assert result["costSharing"].value is False
+        assert result["costSharing"].field_type == CustomFieldType.OBJECT
+        assert result["costSharing"].value.isRequired is False
 
         assert result["attachments"].field_type == CustomFieldType.ARRAY
         assert len(result["attachments"].value) == 1
@@ -1246,9 +1248,9 @@ class TestValidateCustomField:
         assert result is None
 
     def test_returns_field_with_correct_field_type(self):
-        result = validate_custom_field(CostSharingField, value=True)
+        result = validate_custom_field(CostSharingField, value={"isRequired": True})
         assert result is not None
-        assert result.field_type == CustomFieldType.BOOLEAN
+        assert result.field_type == CustomFieldType.OBJECT
 
     def test_returns_field_for_object_value(self):
         result = validate_custom_field(

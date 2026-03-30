@@ -52,9 +52,10 @@ class AttachmentValue(BaseModel):
 
 
 class ContactInfoValue(BaseModel):
+    name: str | None = None
+    email: str | None = None
+    phone: str | None = None
     description: str | None = None
-    emailAddress: str | None = None
-    emailDescription: str | None = None
 
 
 class AdditionalInfoValue(BaseModel):
@@ -156,7 +157,9 @@ class ContactInfoField(CustomField):
     field_type: CustomFieldType = CustomFieldType.OBJECT
     schema_url: HttpUrl | None = HttpUrl("https://commongrants.org/custom-fields/contactInfo/")
     value: ContactInfoValue
-    description: str | None = "Contact information for the agency managing this opportunity"
+    description: str | None = (
+        "Contact information (name, email, phone, description) for this resource"
+    )
 
     model_config = {"populate_by_name": True}
 

@@ -358,12 +358,17 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
         return None
 
 
-def validate_custom_field(field_class: type[CustomField], **kwargs: object) -> CustomField | None:
+def validate_custom_field(
+    field_class: type[CustomField],
+    opportunity_id: object = None,
+    **kwargs: object,
+) -> CustomField | None:
     """
     Validate a custom field value against its typed Pydantic schema.
 
     Args:
         field_class: The typed CustomField subclass to validate against
+        opportunity_id: The opportunity id, included in warning messages on failure
         **kwargs: Field constructor arguments (typically just `value`)
 
     Returns:
@@ -373,8 +378,11 @@ def validate_custom_field(field_class: type[CustomField], **kwargs: object) -> C
         return field_class(**kwargs)
     except Exception as e:
         logger.warning(
-            f"Custom field validation failed for {field_class.__name__}: {e}",
-            extra={"cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR},
+            f"Custom field validation failed for {field_class.__name__} on opportunity {opportunity_id}: {e}",
+            extra={
+                "cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR,
+                "opportunity_id": opportunity_id,
+            },
         )
         return None
 
@@ -391,6 +399,7 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
     """
 
     custom_fields: dict[str, CustomField] = {}
+    opportunity_id = opp_data.get("opportunity_id")
     summary = opp_data.get("summary")
 
     attachments = opp_data.get("opportunity_attachments")
@@ -414,20 +423,26 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
                     extra={"cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR},
                 )
         if valid_attachment_values:
-            field = validate_custom_field(AttachmentsField, value=valid_attachment_values)
+            field = validate_custom_field(
+                AttachmentsField, opportunity_id=opportunity_id, value=valid_attachment_values
+            )
             if field:
                 custom_fields["attachments"] = field
 
     legacy_opportunity_id = opp_data.get("legacy_opportunity_id")
     if legacy_opportunity_id is not None:
-        field = validate_custom_field(LegacySerialIdField, value=legacy_opportunity_id)
+        field = validate_custom_field(
+            LegacySerialIdField, opportunity_id=opportunity_id, value=legacy_opportunity_id
+        )
         if field:
             custom_fields["legacySerialId"] = field
 
     federal_opportunity_number = opp_data.get("opportunity_number")
     if federal_opportunity_number is not None:
         field = validate_custom_field(
-            FederalOpportunityNumberField, value=federal_opportunity_number
+            FederalOpportunityNumberField,
+            opportunity_id=opportunity_id,
+            value=federal_opportunity_number,
         )
         if field:
             custom_fields["federalOpportunityNumber"] = field
@@ -448,13 +463,17 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
                     extra={"cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR},
                 )
         if valid_listing_values:
-            field = validate_custom_field(AssistanceListingsField, value=valid_listing_values)
+            field = validate_custom_field(
+                AssistanceListingsField, opportunity_id=opportunity_id, value=valid_listing_values
+            )
             if field:
                 custom_fields["assistanceListings"] = field
 
     category = opp_data.get("category")
     if category is not None:
-        field = validate_custom_field(FederalFundingSourceField, value=[str(category)])
+        field = validate_custom_field(
+            FederalFundingSourceField, opportunity_id=opportunity_id, value=[str(category)]
+        )
         if field:
             custom_fields["federalFundingSource"] = field
 
@@ -462,6 +481,7 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
     if agency is not None:
         field = validate_custom_field(
             AgencyField,
+            opportunity_id=opportunity_id,
             value={
                 "code": agency,
                 "name": opp_data.get("agency_name"),
@@ -475,16 +495,15 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
     if summary:
         agency_contact_description = summary.get("agency_contact_description")
         agency_email_address = summary.get("agency_email_address")
-        agency_email_address_description = summary.get("agency_email_address_description")
-        if any(
-            [agency_contact_description, agency_email_address, agency_email_address_description]
-        ):
+        if any([agency_contact_description, agency_email_address]):
             field = validate_custom_field(
                 ContactInfoField,
+                opportunity_id=opportunity_id,
                 value={
+                    "name": None,
+                    "email": agency_email_address,
+                    "phone": None,
                     "description": agency_contact_description,
-                    "emailAddress": agency_email_address,
-                    "emailDescription": agency_email_address_description,
                 },
             )
             if field:
@@ -495,6 +514,7 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
         if additional_info_url is not None:
             field = validate_custom_field(
                 AdditionalInfoField,
+                opportunity_id=opportunity_id,
                 value={
                     "url": additional_info_url,
                     "description": additional_info_url_description,
@@ -505,13 +525,19 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
 
         fiscal_year = summary.get("fiscal_year")
         if fiscal_year is not None:
-            field = validate_custom_field(FiscalYearField, value=fiscal_year)
+            field = validate_custom_field(
+                FiscalYearField, opportunity_id=opportunity_id, value=fiscal_year
+            )
             if field:
                 custom_fields["fiscalYear"] = field
 
         is_cost_sharing = summary.get("is_cost_sharing")
         if is_cost_sharing is not None:
-            field = validate_custom_field(CostSharingField, value={"isRequired": is_cost_sharing})
+            field = validate_custom_field(
+                CostSharingField,
+                opportunity_id=opportunity_id,
+                value={"isRequired": is_cost_sharing},
+            )
             if field:
                 custom_fields["costSharing"] = field
 

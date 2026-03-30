@@ -79,7 +79,7 @@ class federalOpportunityNumber(CustomField):
 class AssistanceListingValue(Schema):
     """Schema for populating the AssistanceListing value field"""
 
-    assistanceListingNumber = fields.String(allow_none=True, metadata={"example": "43.012"})
+    identifier = fields.String(allow_none=True, metadata={"example": "43.012"})
     programTitle = fields.String(allow_none=True, metadata={"example": "Space Technology"})
 
 
