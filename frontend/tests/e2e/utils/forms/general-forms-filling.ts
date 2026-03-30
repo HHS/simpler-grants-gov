@@ -52,11 +52,13 @@ export async function fillField(
       await locator.waitFor({ state: "attached", timeout: 30000 });
       await locator.scrollIntoViewIfNeeded();
       await locator.setInputFiles(data);
-      // Wait for the uploaded filename to appear in the UI before proceeding
+      // Wait for the uploaded filename to appear in the UI before proceeding.
+      // Webkit renders the post-upload filename span more slowly, so use a
+      // generous timeout matching the file-input wait above.
       const fileName = data.split("/").pop() ?? data;
       await page
         .locator(`span:has-text("${fileName}")`)
-        .waitFor({ state: "visible", timeout: 15000 });
+        .waitFor({ state: "visible", timeout: 30000 });
     } else {
       console.error("unsupported field type or selector type", field);
     }
