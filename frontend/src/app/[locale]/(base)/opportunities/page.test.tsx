@@ -26,10 +26,22 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("src/components/workspace/AgencySelector", () => ({
-  AgencySelector: ({ agencies }: { agencies: UserAgency[] }) => (
+  AgencySelector: ({
+    agencies,
+    className,
+  }: {
+    agencies: UserAgency[];
+    className?: string;
+  }) => (
     <div>
-      <label htmlFor="agency-selector-mock">Select Agency</label>
-      <select id="agency-selector-mock" data-testid="agency-selector">
+      <label htmlFor="agency-selector-mock" data-testid="agency-selector-label">
+        Select Agency
+      </label>
+      <select
+        id="agency-selector-mock"
+        data-testid="agency-selector"
+        data-classname={className}
+      >
         {agencies.map((a) => (
           <option key={a.agency_id} value={a.agency_id}>
             {a.agency_name}
@@ -198,6 +210,24 @@ describe("Opportunities", () => {
       expect(await screen.findByText("primary")).toBeVisible();
     });
 
+    it("renders create opportunity button when list is empty", async () => {
+      mockSearchForOpportunities.mockResolvedValue({ data: [] });
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      const createOpportunityLink = screen.getByRole("link", {
+        name: "createOpportunityButton",
+      });
+      expect(createOpportunityLink).toBeVisible();
+      expect(createOpportunityLink).toHaveAttribute(
+        "href",
+        "/opportunities/create/agency-uuid-1",
+      );
+    });
+
     it("passes accessibility scan", async () => {
       mockSearchForOpportunities.mockResolvedValue({
         data: [basicOpportunity],
@@ -227,6 +257,29 @@ describe("Opportunities", () => {
       render(component);
 
       expect(await screen.findByTestId("agency-selector")).toBeVisible();
+    });
+
+    it("renders create opportunity button alongside agency selector", async () => {
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(await screen.findByTestId("agency-selector")).toBeVisible();
+      expect(
+        await screen.findByRole("link", { name: "createOpportunityButton" }),
+      ).toBeVisible();
+    });
+
+    it("renders opportunity count above the selector row", async () => {
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(await screen.findByText("numOpportunities")).toBeVisible();
     });
 
     it("passes accessibility scan", async () => {
@@ -286,6 +339,77 @@ describe("Opportunities", () => {
           searchParams: Promise.resolve({ agency: agency1.agency_id }),
         }),
       ).rejects.toThrow();
+    });
+  });
+
+  describe("single agency opportunity list", () => {
+    beforeEach(() => {
+      mockFetchUserAgencies.mockResolvedValue([agency1]);
+      mockSearchForOpportunities.mockResolvedValue({
+        data: [basicOpportunity],
+      });
+    });
+
+    it("passes accessibility scan", async () => {
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      const { container } = render(component);
+      const results = await waitFor(() => axe(container));
+
+      expect(results).toHaveNoViolations();
+    });
+
+    it("renders headings", async () => {
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(screen.getAllByText("tableHeadings.agency")).toHaveLength(2);
+      expect(screen.getAllByText("tableHeadings.title")).toHaveLength(2);
+      expect(screen.getAllByText("tableHeadings.status")).toHaveLength(2);
+      expect(screen.getAllByText("tableHeadings.actions")).toHaveLength(2);
+    });
+
+    it("renders opportunity name and agency", async () => {
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(await screen.findByText("Test Opportunity")).toBeVisible();
+      expect(await screen.findByText("Agency One")).toBeVisible();
+    });
+
+    it("renders create opportunity button with placeholder URL", async () => {
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      const createOpportunityLink = screen.getByRole("link", {
+        name: "createOpportunityButton",
+      });
+      expect(createOpportunityLink).toBeVisible();
+      expect(createOpportunityLink).toHaveAttribute(
+        "href",
+        "/opportunities/create/agency-uuid-1",
+      );
+    });
+
+    it("renders status", async () => {
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(await screen.findByText("posted")).toBeVisible();
     });
   });
 });
