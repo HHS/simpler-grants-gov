@@ -3,54 +3,15 @@ import { axe } from "jest-axe";
 import OpportunitiesListPage from "src/app/[locale]/(base)/opportunities/page";
 import { UnauthorizedError } from "src/errors";
 import { UserAgency } from "src/services/fetch/fetchers/userAgenciesFetcher";
-import { LocalizedPageProps } from "src/types/intl";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
-import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { DeepPartial } from "src/utils/testing/commonTestUtils";
 import { localeParams, useTranslationsMock } from "src/utils/testing/intlMocks";
-
-import { FunctionComponent, ReactNode } from "react";
-
-type onEnabled = (props: LocalizedPageProps) => ReactNode;
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
   use: jest.fn(() => ({
     locale: "en",
   })),
-}));
-
-const withFeatureFlagMock = jest
-  .fn()
-  .mockImplementation(
-    (
-      WrappedComponent: FunctionComponent<LocalizedPageProps>,
-      _featureFlagName,
-      _onEnabled,
-    ) =>
-      (props: { params: Promise<{ locale: string }> }) =>
-        WrappedComponent(props) as unknown,
-  );
-
-jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
-  __esModule: true,
-  default:
-    (
-      WrappedComponent: FunctionComponent<LocalizedPageProps>,
-      featureFlagName: string,
-      onEnabled: onEnabled,
-    ) =>
-    (props: LocalizedPageProps) =>
-      (
-        withFeatureFlagMock as FeatureFlaggedPageWrapper<
-          LocalizedPageProps,
-          ReactNode
-        >
-      )(
-        WrappedComponent,
-        featureFlagName,
-        onEnabled,
-      )(props) as FunctionComponent<LocalizedPageProps>,
 }));
 
 jest.mock("next-intl", () => ({
@@ -114,15 +75,6 @@ const basicOpportunity: DeepPartial<BaseOpportunity> = {
 describe("Opportunities", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    withFeatureFlagMock.mockImplementation(
-      (
-        WrappedComponent: FunctionComponent<LocalizedPageProps>,
-        _featureFlagName: "",
-        _onEnabled: () => void,
-      ) =>
-        (props: { params: Promise<{ locale: string }> }) =>
-          WrappedComponent(props) as unknown,
-    );
   });
 
   describe("user has no agencies", () => {
