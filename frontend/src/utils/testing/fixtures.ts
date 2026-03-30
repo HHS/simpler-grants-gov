@@ -90,6 +90,19 @@ export const mockOpportunity: BaseOpportunity = {
   opportunity_number: "OPP-12345",
 } as BaseOpportunity;
 
+export const createMockOpportunity = (
+  overrides: Partial<BaseOpportunity> = {},
+): BaseOpportunity => ({
+  ...mockOpportunity,
+  // ensure required nested objects are safe to override
+  summary: {
+    ...mockOpportunity.summary,
+    ...(overrides.summary ?? {}),
+  },
+  saved_to_organizations: [],
+  ...overrides,
+});
+
 export const searchFetcherParams: QueryParamData = {
   page: 1,
   status: new Set(["forecasted", "posted"]),

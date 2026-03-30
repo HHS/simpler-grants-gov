@@ -7,6 +7,7 @@ import opensearchpy
 
 from src.adapters.search.opensearch_config import OpensearchConfig, get_opensearch_config
 from src.adapters.search.opensearch_response import SearchResponse
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 
@@ -211,14 +212,29 @@ class SearchClient:
         if params is None:
             params = {}
 
-        response = self._client.search(
+        raw_response = self._client.search(
             index=index_name,
             body=search_query,
             params=params,
             _source_includes=includes,
             _source_excludes=excludes,
         )
-        return SearchResponse.from_opensearch_response(response, include_scores)
+
+        response = SearchResponse.from_opensearch_response(raw_response, include_scores)
+        # Structured logging enrichment
+        add_extra_data_to_current_request_logs(
+            {
+                "search.index": index_name,
+                "search.took_ms": response.took_ms,
+                "search.timed_out": response.timed_out,
+                "search.shards_failed": response.shards_failed,
+                "search.total_records": response.total_records,
+                "search.is_zero_result": response.total_records == 0,
+                **response.score_stats,
+            }
+        )
+
+        return response
 
     def scroll(
         self,

@@ -1,4 +1,5 @@
 import dataclasses
+import statistics
 import typing
 
 
@@ -11,6 +12,11 @@ class SearchResponse:
     aggregations: dict[str, dict[str, int]]
 
     scroll_id: str | None
+
+    took_ms: int | None = None
+    timed_out: bool | None = None
+    shards_failed: int | None = None
+    score_stats: dict[str, float | None] = dataclasses.field(default_factory=dict)
 
     @classmethod
     def from_opensearch_response(
@@ -43,6 +49,9 @@ class SearchResponse:
         }
         """
         scroll_id = raw_json.get("_scroll_id", None)
+        took = raw_json.get("took")
+        timed_out = raw_json.get("timed_out")
+        shards_failed = raw_json.get("_shards", {}).get("failed")
 
         hits = raw_json.get("hits", {})
         hits_total = hits.get("total", {})
@@ -62,8 +71,17 @@ class SearchResponse:
 
         raw_aggs: dict[str, dict[str, typing.Any]] = raw_json.get("aggregations", {})
         aggregations = _parse_aggregations(raw_aggs)
-
-        return cls(total_records, records, aggregations, scroll_id)
+        score_stats = _compute_score_stats(records) if include_scores else {}
+        return cls(
+            total_records,
+            records,
+            aggregations,
+            scroll_id,
+            took,
+            timed_out,
+            shards_failed,
+            score_stats,
+        )
 
 
 def _parse_aggregations(
@@ -128,3 +146,24 @@ def _parse_aggregations(
         aggregations[field] = field_aggregation
 
     return aggregations
+
+
+def _compute_score_stats(records: list[dict]) -> dict:
+
+    scores: list[float] = [
+        r["relevancy_score"] for r in records if isinstance(r.get("relevancy_score"), (int, float))
+    ]
+    if scores:
+        return {
+            "search.score_min": min(scores),
+            "search.score_max": max(scores),
+            "search.score_mean": statistics.mean(scores),
+            "search.score_stdev": statistics.pstdev(scores) if len(scores) > 1 else 0.0,
+        }
+    # No valid scores
+    return {
+        "search.score_min": None,
+        "search.score_max": None,
+        "search.score_mean": None,
+        "search.score_stdev": None,
+    }
