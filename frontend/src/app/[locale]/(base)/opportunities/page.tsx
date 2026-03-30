@@ -116,14 +116,12 @@ const transformTableRowData = (
 const OpportunitiesHeader = ({
   userOpportunitiesCount,
   agencyName,
-  agencyCode,
   agencies,
   currentAgencyId,
   isSingleAgency,
 }: {
   userOpportunitiesCount: number;
   agencyName: string;
-  agencyCode: string;
   agencies: UserAgency[];
   currentAgencyId: string;
   isSingleAgency: boolean;
@@ -150,7 +148,7 @@ const OpportunitiesHeader = ({
           )}
         </div>
         <Link
-          href={`/opportunities/create/${agencyCode}`}
+          href={`/opportunities/create/${currentAgencyId}`}
           className="usa-button margin-left-auto"
         >
           {t("createOpportunityButton")}
@@ -244,7 +242,6 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       <OpportunitiesHeader
         userOpportunitiesCount={userOpportunities.length}
         agencyName={selectedAgency.agency_name}
-        agencyCode={selectedAgency.agency_code}
         agencies={sortedUserAgencies}
         currentAgencyId={selectedAgencyId}
         isSingleAgency={sortedUserAgencies.length === 1}
