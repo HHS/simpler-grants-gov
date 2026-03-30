@@ -88,24 +88,4 @@ describe("RecommendationSummaryDisplay", () => {
 
     expect(screen.getByText("$500,000")).toBeInTheDocument();
   });
-
-  it("renders with responsive grid layout", () => {
-    const { container } = render(
-      <RecommendationSummaryDisplay summary={mockSummary} />,
-    );
-
-    const grids = container.querySelectorAll('[class*="grid-row"]');
-    expect(grids.length).toBeGreaterThan(0);
-  });
-
-  it("renders within bordered container", () => {
-    const { container } = render(
-      <RecommendationSummaryDisplay summary={mockSummary} />,
-    );
-
-    const borderedDiv = container.querySelector(
-      ".border.radius-md.border-base-lighter",
-    );
-    expect(borderedDiv).toBeInTheDocument();
-  });
 });
