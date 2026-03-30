@@ -1,20 +1,20 @@
 import { Suspense } from "react";
 
-import DeveloperInfoButtons from "./DeveloperInfoButtons";
-import DeveloperInfoServer from "./DeveloperInfoServer";
+import DevelopersInfoButtons from "./DevelopersInfoButtons";
+import DevelopersInfoServer from "./DevelopersInfoServer";
 
-const DeveloperInfoContent = () => {
+const DevelopersInfoContent = () => {
   return (
-    <DeveloperInfoServer>
+    <DevelopersInfoServer>
       <Suspense
         fallback={
           <div className="height-10 width-40 bg-base-lighter margin-y-2 animate-pulse" />
         }
       >
-        <DeveloperInfoButtons />
+        <DevelopersInfoButtons />
       </Suspense>
-    </DeveloperInfoServer>
+    </DevelopersInfoServer>
   );
 };
 
-export default DeveloperInfoContent;
+export default DevelopersInfoContent;
