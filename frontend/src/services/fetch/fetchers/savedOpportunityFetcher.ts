@@ -86,7 +86,7 @@ export const getSavedOpportunities = async (
     additionalHeaders: ssgToken,
     body,
   });
-  const json = (await resp.json()) as { data: [] };
+  const json = (await resp.json()) as { data: MinimalOpportunity[] };
   return json.data;
 };
 
