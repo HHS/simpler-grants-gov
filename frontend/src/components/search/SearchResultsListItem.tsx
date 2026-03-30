@@ -18,7 +18,7 @@ interface SearchResultsListItemProps {
   onShareClick?: (buttonElement: HTMLButtonElement) => void;
 }
 
-export let isShareWithOrganizationEnabled = false;
+export let isShareWithOrganizationEnabled = true;
 export function updateIsSharedWithOrganizationEnabled(value: boolean) {
   isShareWithOrganizationEnabled = value;
 }
