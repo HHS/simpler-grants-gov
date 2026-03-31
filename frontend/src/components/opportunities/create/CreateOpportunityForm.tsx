@@ -61,7 +61,9 @@ export function CreateOpportunityForm({
     });
     // If success, redirect to the edit page (Part 2 of create)
     if (response?.success && response.data?.opportunity_id) {
-      router.push(`/opportunity/${response.data.opportunity_id}/edit`);
+      router.push(
+        `/opportunity/${response.data.opportunity_id}/edit?fromCreate=true`,
+      );
     } else {
       setDisableSave(true);
       if (selectedCategoryId.trim() !== "other") {

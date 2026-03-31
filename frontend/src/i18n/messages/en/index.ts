@@ -399,6 +399,9 @@ export const messages = {
       alerts: {
         success: "Saved successfully",
         successBody: "Your changes have been saved.",
+        newOpportunityHeading: "Opportunity draft started",
+        newOpportunityBody:
+          "Your initial information has been saved. Complete the sections below to finish your opportunity details",
         genericError: "Unable to save draft opportunity details.",
         missingSummaryContext: "Missing opportunity summary context for save.",
         forbidden: "You do not have permission to update this opportunity.",

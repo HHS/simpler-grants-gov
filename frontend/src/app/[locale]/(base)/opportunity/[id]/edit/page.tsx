@@ -14,6 +14,7 @@ import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
+  searchParams?: Promise<Record<string, string>>;
 };
 
 export const dynamic = "force-dynamic";
@@ -55,8 +56,13 @@ function formatOpportunityStage(opportunityStatus: string | null | undefined) {
   );
 }
 
-export default async function OpportunityEditPage({ params }: PageProps) {
+export default async function OpportunityEditPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const isNewlyCreated = resolvedSearchParams.fromCreate === "true";
 
   const session = await getSession();
   if (!session || !session.token) {
@@ -244,6 +250,7 @@ export default async function OpportunityEditPage({ params }: PageProps) {
               initialValues={initialValues}
               isDraft={isEditableOpportunity}
               opportunityKeyInformation={opportunityKeyInformation}
+              isNewlyCreated={isNewlyCreated}
             />
           </section>
         </div>

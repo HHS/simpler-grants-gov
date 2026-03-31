@@ -36,6 +36,7 @@ type Props = {
   isForecast?: boolean;
   initialValues: OpportunityEditFormValues;
   isDraft?: boolean;
+  isNewlyCreated?: boolean;
   opportunityKeyInformation: {
     title: string;
     agency: string;
@@ -53,6 +54,7 @@ export default function OpportunityEditForm({
   isForecast = false,
   initialValues,
   isDraft = false,
+  isNewlyCreated = false,
   opportunityKeyInformation,
 }: Props) {
   const t = useTranslations("OpportunityEdit");
@@ -301,6 +303,20 @@ export default function OpportunityEditForm({
         </div>
       ) : null}
 
+      {isNewlyCreated &&
+      !formState.successMessage &&
+      !formState.errorMessage ? (
+        <div className="margin-top-2">
+          <Alert
+            type="success"
+            heading={t("content.alerts.newOpportunityHeading")}
+            headingLevel="h3"
+          >
+            {t("content.alerts.newOpportunityBody")}
+          </Alert>
+        </div>
+      ) : null}
+
       {formState.errorMessage ? (
         <div className="margin-top-2">
           <Alert
@@ -503,30 +519,35 @@ export default function OpportunityEditForm({
             </div>
           </div>
 
-          <div className="width-full">
-            <FormGroup>
-              <Label
-                htmlFor="funding-category-explanation"
-                className="font-sans-sm text-bold"
-              >
-                {t("labels.fundingCategoryExplanation")}
-              </Label>
-              <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                {t("content.fundingCategoryExplanationHint")}
-              </p>
-              <Textarea
-                id="funding-category-explanation"
-                name="fundingCategoryExplanation"
-                value={values.fundingCategoryExplanation}
-                onChange={(event) =>
-                  updateField("fundingCategoryExplanation", event.target.value)
-                }
-                rows={5}
-                className="width-full"
-                disabled={!isDraft}
-              />
-            </FormGroup>
-          </div>
+          {values.fundingCategories[0] === "other" && (
+            <div className="width-full">
+              <FormGroup>
+                <Label
+                  htmlFor="funding-category-explanation"
+                  className="font-sans-sm text-bold"
+                >
+                  {t("labels.fundingCategoryExplanation")}
+                </Label>
+                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
+                  {t("content.fundingCategoryExplanationHint")}
+                </p>
+                <Textarea
+                  id="funding-category-explanation"
+                  name="fundingCategoryExplanation"
+                  value={values.fundingCategoryExplanation}
+                  onChange={(event) =>
+                    updateField(
+                      "fundingCategoryExplanation",
+                      event.target.value,
+                    )
+                  }
+                  rows={5}
+                  className="width-full"
+                  disabled={!isDraft}
+                />
+              </FormGroup>
+            </div>
+          )}
 
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
