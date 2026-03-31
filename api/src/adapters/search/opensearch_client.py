@@ -230,6 +230,9 @@ class SearchClient:
                 "search.shards_failed": response.shards_failed,
                 "search.total_records": response.total_records,
                 "search.is_zero_result": response.total_records == 0,
+                "search.max_score": response.max_score,
+                "search.total_relation": response.total_relation,
+                **{f"search.agg_overflow.{k}": v for k, v in response.agg_overflow.items()},
                 **response.score_stats,
             }
         )
