@@ -24,7 +24,7 @@ const mockRedirect = jest.fn((..._args: unknown[]) => {
 });
 
 jest.mock("next/navigation", () => ({
-  notFound: (...args: unknown[]) => mockNotFound(...args),
+  notFound: () => mockNotFound(),
   redirect: (...args: unknown[]) => mockRedirect(...args),
   RedirectType: { push: "push" },
 }));
