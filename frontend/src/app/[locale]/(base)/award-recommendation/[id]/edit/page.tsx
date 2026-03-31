@@ -5,8 +5,8 @@ import {
 } from "src/app/[locale]/(base)/award-recommendation/[id]/actions";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
+import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { useTranslations } from "next-intl";
@@ -25,6 +25,7 @@ import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
+import { RecommendationSummarySection } from "src/components/award-recommendation/RecommendationSummarySection";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 
 export async function generateMetadata({
@@ -35,12 +36,8 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("AwardRecommendation.pageTitleEdit", {
-      defaultValue: "Edit your recommendation",
-    }),
-    description: t("AwardRecommendation.metaDescriptionEdit", {
-      defaultValue: "Edit your award recommendations",
-    }),
+    title: t("AwardRecommendation.pageTitleEdit"),
+    description: t("AwardRecommendation.metaDescriptionEdit"),
   };
   return meta;
 }
@@ -52,15 +49,14 @@ export type AwardRecommendationPageProps = {
 } & WithFeatureFlagProps;
 
 interface OpportunitySectionProps {
-  opportunityData: OpportunityDetail;
-  locale: string;
+  awardRecommendationDetails: AwardRecommendationDetails;
 }
 
 const OpportunitySection = ({
-  opportunityData,
-  locale: _locale,
+  awardRecommendationDetails,
 }: OpportunitySectionProps) => {
   const t = useTranslations("AwardRecommendation");
+  const opportunityData = awardRecommendationDetails.opportunity;
   const fundingOppName =
     opportunityData.opportunity_title || t("fundingOpportunityFallback");
   const fundingOppNumber =
@@ -75,7 +71,7 @@ const OpportunitySection = ({
           <div className="margin-top-3 margin-bottom-3">
             <div className="margin-bottom-3">
               <h2 className="margin-top-0 margin-bottom-0">
-                {t("opportunity", { defaultValue: "Opportunity" })}
+                {t("opportunity")}
               </h2>
             </div>
             <div>
@@ -125,7 +121,9 @@ const OpportunitySection = ({
                   name="additional_info"
                   maxLength={1000}
                   isTextArea
-                  defaultValue=""
+                  defaultValue={
+                    awardRecommendationDetails.additional_info || ""
+                  }
                   rows={6}
                   className="maxw-full"
                   data-testid="additional-info-textarea"
@@ -142,10 +140,9 @@ const OpportunitySection = ({
 async function AwardRecommendationEditPageContent({
   params,
 }: AwardRecommendationPageProps) {
-  const { locale, id: awardRecommendationId } = await params;
+  const { id: awardRecommendationId } = await params;
 
   const t = await getTranslations("AwardRecommendation");
-  const opportunityId = "6a483cd8-9169-418a-8dfb-60fa6e6f51e5";
 
   // Define button configuration for edit page
   const heroButtons: HeroButtonConfig[] = [
@@ -168,24 +165,25 @@ async function AwardRecommendationEditPageContent({
     },
   ];
 
-  let opportunityData: OpportunityDetail | null = null;
-  if (opportunityId) {
+  let awardRecommendationDetails: AwardRecommendationDetails | null = null;
+  if (awardRecommendationId) {
     try {
-      const response = await getOpportunityDetails(opportunityId);
-      opportunityData = response.data;
+      awardRecommendationDetails = await getAwardRecommendationDetails(
+        awardRecommendationId,
+      );
     } catch (error) {
-      console.error("Failed to fetch opportunity details", error);
+      console.error("Failed to fetch award recommendation details", error);
       if (parseErrorStatus(error as ApiRequestError) === 404) {
-        opportunityData = null;
+        awardRecommendationDetails = null;
       }
       return (
         <Alert
-          heading={t("errorHeadingOppurtunity")}
+          heading={t("errorHeadingAwardRecommendation")}
           headingLevel="h2"
           type="warning"
           validation
         >
-          {t("oppurtunityFetchError")}
+          {t("awardRecommendationFetchError")}
         </Alert>
       );
     }
@@ -193,26 +191,42 @@ async function AwardRecommendationEditPageContent({
 
   return (
     <form>
-      {awardRecommendationId && (
+      {awardRecommendationDetails && (
         <Suspense
           fallback={
             <span data-testid="award-recommendation-hero-fallback"></span>
           }
         >
           <AwardRecommendationHero
-            awardRecommendationId={awardRecommendationId}
+            awardRecommendationDetails={awardRecommendationDetails}
             buttons={heroButtons}
           />
         </Suspense>
       )}
       <GridContainer>
-        {opportunityData && (
-          <OpportunitySection
-            opportunityData={opportunityData}
-            locale={locale}
-          />
+        {awardRecommendationDetails && (
+          <>
+            <OpportunitySection
+              awardRecommendationDetails={awardRecommendationDetails}
+            />
+            <RecommendationSection
+              mode="edit"
+              recommendationMethod={
+                awardRecommendationDetails.award_selection_method
+              }
+              recommendationMethodDetails={
+                awardRecommendationDetails.award_selection_method_details
+              }
+              otherKeyInformation={
+                awardRecommendationDetails.other_key_information
+              }
+            />
+            <RecommendationSummarySection
+              summary={awardRecommendationDetails.award_recommendation_summary}
+              fundingStrategy={awardRecommendationDetails.funding_strategy}
+            />
+          </>
         )}
-        <RecommendationSection mode="edit" />
       </GridContainer>
     </form>
   );

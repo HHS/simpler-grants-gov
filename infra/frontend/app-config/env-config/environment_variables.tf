@@ -87,6 +87,10 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/feature-maintenance-mode"
     },
+    FEATURE_FEATURE_FLAG_ADMIN_OFF = {
+      manage_method     = "manual"
+      secret_store_name = "/${var.app_name}/${var.environment}/feature-feature-flag-admin-off"
+    },
     API_JWT_PUBLIC_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/api-jwt-public-key"

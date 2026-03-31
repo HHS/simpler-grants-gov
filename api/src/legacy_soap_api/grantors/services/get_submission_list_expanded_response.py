@@ -241,6 +241,7 @@ def get_submission_list_expanded_response(
     for submission in submissions:
         submission_list_obj = transform_submission(submission)
         info.append(schemas.SubmissionInfo(**submission_list_obj))
+    info.sort(key=lambda x: x.received_date_time or datetime.min, reverse=True)
     return schemas.GetSubmissionListExpandedResponse(
         success=True, available_application_number=len(info), submission_info=info
     )

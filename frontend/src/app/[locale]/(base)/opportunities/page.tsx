@@ -1,15 +1,17 @@
 import { UnauthorizedError } from "src/errors";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetcher";
 import {
   fetchUserAgencies,
   UserAgency,
 } from "src/services/fetch/fetchers/userAgenciesFetcher";
-import { OptionalStringDict } from "src/types/generalTypes";
 import { LocalizedPageProps, TFn } from "src/types/intl";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PropsWithChildren } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
@@ -20,9 +22,7 @@ import {
 } from "src/components/TableWithResponsiveHeader";
 import { AgencySelector } from "src/components/workspace/AgencySelector";
 
-type OpportunitiesListProps = LocalizedPageProps & {
-  searchParams?: Promise<OptionalStringDict>;
-};
+type OpportunitiesListProps = LocalizedPageProps & WithFeatureFlagProps;
 
 const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {
   const t = useTranslations("Opportunities");
@@ -113,14 +113,55 @@ const transformTableRowData = (
   });
 };
 
-const OpportunitiesTable = ({
-  userOpportunities,
+const OpportunitiesHeader = ({
+  userOpportunitiesCount,
   agencyName,
+  agencies,
+  currentAgencyId,
   isSingleAgency,
 }: {
-  userOpportunities: BaseOpportunity[];
+  userOpportunitiesCount: number;
   agencyName: string;
+  agencies: UserAgency[];
+  currentAgencyId: string;
   isSingleAgency: boolean;
+}) => {
+  const t = useTranslations("Opportunities");
+
+  return (
+    <div className="display-flex flex-column gap-3 margin-bottom-4">
+      <div className="font-sans-lg text-bold">
+        {t("numOpportunities", { num: userOpportunitiesCount })}
+      </div>
+      <div className="display-flex flex-justify flex-align-end">
+        <div className="maxw-mobile-lg width-full">
+          {isSingleAgency ? (
+            <div className="font-sans-md text-bold line-height-sans-3">
+              {t("showingOpportunitiesFor", { agencyName })}
+            </div>
+          ) : (
+            <AgencySelector
+              agencies={agencies}
+              currentAgencyId={currentAgencyId}
+              className="usa-form-group margin-bottom-0"
+            />
+          )}
+        </div>
+        <Link
+          href={`/opportunities/create/${currentAgencyId}`}
+          className="usa-button margin-left-auto"
+        >
+          {t("createOpportunityButton")}
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+const OpportunitiesTable = ({
+  userOpportunities,
+}: {
+  userOpportunities: BaseOpportunity[];
 }) => {
   const t = useTranslations("Opportunities");
 
@@ -132,27 +173,10 @@ const OpportunitiesTable = ({
   ];
 
   return (
-    <div>
-      {isSingleAgency ? (
-        <div className="margin-bottom-2">
-          <div className="font-sans-lg text-bold margin-bottom-2">
-            {t("numOpportunities", { num: userOpportunities.length })}
-          </div>
-          <div className="font-sans-lg text-bold">
-            {t("showingOpportunitiesFor", { agencyName })}
-          </div>
-        </div>
-      ) : (
-        <span className="font-sans-lg text-bold">
-          {t("numOpportunities", { num: userOpportunities.length })}
-        </span>
-      )}
-
-      <TableWithResponsiveHeader
-        headerContent={headerTitles}
-        tableRowData={transformTableRowData(userOpportunities, t)}
-      />
-    </div>
+    <TableWithResponsiveHeader
+      headerContent={headerTitles}
+      tableRowData={transformTableRowData(userOpportunities, t)}
+    />
   );
 };
 
@@ -215,18 +239,15 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
 
   return (
     <OpportunitiesPageWrapper>
-      {sortedUserAgencies.length > 1 && (
-        <AgencySelector
-          agencies={sortedUserAgencies}
-          currentAgencyId={selectedAgencyId}
-        />
-      )}
+      <OpportunitiesHeader
+        userOpportunitiesCount={userOpportunities.length}
+        agencyName={selectedAgency.agency_name}
+        agencies={sortedUserAgencies}
+        currentAgencyId={selectedAgencyId}
+        isSingleAgency={sortedUserAgencies.length === 1}
+      />
       {userOpportunities.length ? (
-        <OpportunitiesTable
-          userOpportunities={userOpportunities}
-          agencyName={selectedAgency.agency_name}
-          isSingleAgency={sortedUserAgencies.length === 1}
-        />
+        <OpportunitiesTable userOpportunities={userOpportunities} />
       ) : (
         <NoStartedOpportunities />
       )}
@@ -234,4 +255,8 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   );
 }
 
-export default OpportunitiesListPage;
+export default withFeatureFlag<OpportunitiesListProps, never>(
+  OpportunitiesListPage,
+  "opportunitiesListOff",
+  () => redirect("/maintenance"),
+);

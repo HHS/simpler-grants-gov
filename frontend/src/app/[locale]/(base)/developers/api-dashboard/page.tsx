@@ -3,8 +3,8 @@ import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 
-import ApiKeyTable from "src/components/developer/apiDashboard/ApiKeyTable";
-import { CreateApiKeyButton } from "src/components/developer/apiDashboard/CreateApiKeyButton";
+import ApiKeyTable from "src/components/developers/apiDashboard/ApiKeyTable";
+import { CreateApiKeyButton } from "src/components/developers/apiDashboard/CreateApiKeyButton";
 import ServerErrorAlert from "src/components/ServerErrorAlert";
 
 export const dynamic = "force-dynamic";
