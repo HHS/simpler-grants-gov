@@ -211,10 +211,10 @@ export default async function OpportunityEditPage({
       </section>
 
       <div className="grid-container padding-bottom-4">
-        <div className="desktop:display-flex desktop:flex-align-start grid-gap-4 width-full">
+        <div className="usa-in-page-nav-container">
           <ApplyFormNav title="On this page" fields={navigationItems} />
 
-          <section className="width-full maxw-tablet-xl padding-top-4">
+          <section className="order-2 width-full maxw-tablet-xl padding-top-4">
             <OpportunityEditForm
               opportunityId={opportunityData.opportunity_id}
               opportunitySummaryId={opportunitySummaryId}
