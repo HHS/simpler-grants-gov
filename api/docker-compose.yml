@@ -51,23 +51,28 @@ services:
     networks:
      - default
 
-  localstack:
-    container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"
-    image: localstack/localstack:4.14.0
-    ports:
-      - "127.0.0.1:4566:4566" # LocalStack Gateway
-      - "127.0.0.1:4510-4559:4510-4559" # external services port range
+  s3mock:
+    container_name: s3mock
+    image: adobe/s3mock:latest
     environment:
-      # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
-      - DEBUG=${DEBUG:-0}
-      # To improve startup time, only add services we use
-      - SERVICES=s3,sqs
-      - EAGER_SERVICES_LOADING=1
+      - COM_ADOBE_TESTING_S3MOCK_STORE_ROOT=containers3root
+      - COM_ADOBE_TESTING_S3MOCK_STORE_RETAIN_FILES_ON_EXIT=true
+      - COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS=local-mock-public-bucket,local-mock-draft-bucket
+    ports:
+      - 9090:9090
     volumes:
-      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - ./locals3root:/containers3root
     networks:
       - default
+
+  sqsmock:
+    container_name: sqsmock
+    image: softwaremill/elasticmq-native
+    ports:
+      - 9324:9324
+    volumes:
+      - ./mock-sqs/custom.conf:/opt/elasticmq.conf
+
 
   grants-api:
     build:
@@ -105,7 +110,8 @@ services:
     depends_on:
       - grants-db
       - opensearch-node
-      - localstack
+      - s3mock
+      - sqsmock
       - mock-oauth2-server
       - mock-applicants-soap-api
     networks:
