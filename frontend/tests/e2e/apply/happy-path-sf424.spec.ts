@@ -15,11 +15,21 @@ import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-sta
 import { SF424_FORM_CONFIG } from "./fixtures/sf424-field-definitions";
 import { sf424HappyPathTestData } from "./fixtures/sf424-fill-data";
 
-const { testOrgLabel } = playwrightEnv;
-
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 
+const { testOrgLabel, targetEnv} = playwrightEnv;
+
 const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
+
+// Skip non-Chrome browsers in staging
+test.beforeEach(({ page: _ }, testInfo) => {
+  if (targetEnv === "staging") {
+    test.skip(
+      testInfo.project.name !== "Chrome",
+      "Staging MFA login is limited to Chrome to avoid OTP rate-limiting",
+    );
+  }
+});
 
 test(
   "Application form completion happy path - SF424",
