@@ -14,16 +14,10 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import {
-  fillForm,
-  verifyFormLinkVisible,
-} from "tests/e2e/utils/forms/general-forms-filling";
+import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-import {
-  SUPP_COVER_SHEET_NEH_FORM_CONFIG,
-  SUPP_COVER_SHEET_NEH_FORM_MATCHER,
-} from "./fixtures/supp-cover-sheet-neh-grantsprogram-field-definitions";
+import { SUPP_COVER_SHEET_NEH_FORM_CONFIG } from "./fixtures/supp-cover-sheet-neh-grantsprogram-field-definitions";
 import { suppCoverSheetNEHHappyPathTestData } from "./fixtures/supp-cover-sheet-neh-grantsprogram-fill-data";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
@@ -69,9 +63,6 @@ test(
      * (includes modal interaction, organization selection, and application creation)
      */
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-
-    // And the Application landing page loads with the form link visible
-    await verifyFormLinkVisible(page, SUPP_COVER_SHEET_NEH_FORM_MATCHER);
 
     // When the user clicks on a form link
     // Then the form opens

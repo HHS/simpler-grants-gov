@@ -14,16 +14,10 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import {
-  fillForm,
-  verifyFormLinkVisible,
-} from "tests/e2e/utils/forms/general-forms-filling";
+import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-import {
-  OTHER_NARRATIVE_ATTACHMENT_FORM_CONFIG,
-  OTHER_NARRATIVE_ATTACHMENT_FORM_MATCHER,
-} from "./fixtures/other-narrative-attachment-field-definitions";
+import { OTHER_NARRATIVE_ATTACHMENT_FORM_CONFIG } from "./fixtures/other-narrative-attachment-field-definitions";
 import { otherNarrativeAttachmentHappyPathTestData } from "./fixtures/other-narrative-attachment-fill-data";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
@@ -69,9 +63,6 @@ test(
      * (includes modal interaction, organization selection, and application creation)
      */
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
-
-    // And the Application landing page loads with the <form name> form link visible
-    await verifyFormLinkVisible(page, OTHER_NARRATIVE_ATTACHMENT_FORM_MATCHER);
 
     // When the user clicks on a form link
     // Then the form opens

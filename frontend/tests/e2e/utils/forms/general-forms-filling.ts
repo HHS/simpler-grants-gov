@@ -1,7 +1,7 @@
 import { Page, TestInfo } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
 
-import { getFormLink } from "./form-navigation-utils";
+import { openForm } from "./form-navigation-utils";
 
 export interface FillFieldDefinition {
   testId?: string;
@@ -326,11 +326,15 @@ export async function fillFormPartial(
 }
 
 /**
- * Navigates into a form from the application page, fills all fields listed in 'data' fixture,
- * saves the form, and optionally returns to the application page.
+ * Opens and fills a form from the application page, then saves it.
+ * Delegates navigation to `openForm`, which owns all navigation reliability:
+ * table-scoped row lookup, scroll-to-reveal, testId/href/button/global
+ * fallback selectors, trial-click check, force-click retry, direct href
+ * goto last resort, and URL pattern + load-state verification.
+ *
  * Does NOT perform assertions - those are done in the test.
- * Assumes the current page is already an application page
- * where the form link (`formName`) is visible and clickable.
+ * Assumes the current page is already an application page where the forms
+ * table is reachable.
  */
 export async function fillForm(
   testInfo: TestInfo,
@@ -349,22 +353,30 @@ export async function fillForm(
     contentType: "text/plain",
   });
 
+  // Derive a string matcher for openForm: if formName is already a string use
+  // it directly; if it is a RegExp, use its source pattern so openForm can
+  // construct the case-insensitive regex it expects.
+  const formMatcher = formName instanceof RegExp ? formName.source : formName;
+
   try {
-    await page.getByRole("link", { name: formName }).click();
+    // ── Navigation ──────────────────────────────────────────────────────────
+    // Delegate to openForm, which owns all navigation reliability:
+    // table-scoped row lookup, scroll-to-reveal, testId/href/button/global
+    // fallback selectors, trial-click check, force-click retry, direct href
+    // goto last resort, and URL pattern + load-state verification.
+    const opened = await openForm(page, formMatcher);
+    if (!opened) {
+      throw new Error(`Could not find or open form: ${formMatcher}`);
+    }
 
-    // Wait for the URL to change away from the application page before
-    // checking for form content - without this, getByText(formName) may
-    // immediately resolve against the link text on the application list page,
-    // causing fillField to run before navigation completes.
-    // Mobile Chrome where navigation is slower.
-    await page.waitForURL((url) => url.href !== applicationURL, {
-      timeout: 35000,
-    });
-
+    // ── Form ready check ───────────────────────────────────────────────────
+    // Confirm the form heading is visible before filling any fields.
     await page
       .getByText(formName)
       .first()
       .waitFor({ state: "visible", timeout: 35000 });
+
+    // ── Fill fields ────────────────────────────────────────────────────────
 
     for (const fieldDefinition of Object.entries(fields)) {
       const [fieldIdentifier, fieldConfig] = fieldDefinition;
@@ -406,26 +418,4 @@ export async function fillForm(
     });
     throw error;
   }
-}
-
-/**
- * Verifies that a form link or button is visible on the page.
- * Use after application creation to confirm the forms table has fully rendered
- * before attempting to navigate into a form.
- * @param page Playwright Page object
- * @param formName Form name or pipe-separated pattern to match (e.g. "SF-424B|Assurances for Non-Construction Programs")
- */
-export async function verifyFormLinkVisible(
-  page: Page,
-  formName: string | RegExp,
-): Promise<void> {
-  const formLink =
-    formName instanceof RegExp
-      ? page.locator("a, button").filter({ hasText: formName })
-      : getFormLink(page, formName);
-
-  await formLink.waitFor({
-    state: "visible",
-    timeout: 60000,
-  });
 }

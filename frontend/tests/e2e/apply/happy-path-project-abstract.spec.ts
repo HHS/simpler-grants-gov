@@ -74,6 +74,7 @@ test(
       projectAbstractHappyPathTestData,
       false,
     );
+    
     await page.waitForTimeout(5000);
 
     /* Covers "Form status validation" flow in the feature file,
