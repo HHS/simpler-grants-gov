@@ -1005,6 +1005,9 @@ dl {
   margin: 25px 0px 0px 0px;
   padding: 0;
 }
+.usa-fieldset .usa-legend {
+  padding-bottom: 16px;
+}
 .padding-0 {
   padding: 0px 0px 10px 0px !important;
 }
@@ -1039,7 +1042,7 @@ li.display-block.border.border-base-light.padding-1.radius-md.share-opportunity-
   input[type="checkbox"]:checked,
 .radius-md:has(input[type="checkbox"]:checked) {
   background-color: #dbf6ed;
-  border: #286846 2px solid !important;
+  border: #5ABF95 2px solid !important;
 }
 li.display-block.border.border-base-light.padding-1.radius-md.share-opportunity-checkboxes
   input[type="checkbox"]:not(checked),
