@@ -1,9 +1,14 @@
 import pytest
 
+from src.adapters.search import SearchClient
 from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
+from src.workflow.registry.workflow_client_registry import (
+    WorkflowClientRegistry,
+    init_workflow_client_registry,
+)
 from tests.lib.agency_test_utils import create_user_in_agency
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -72,3 +77,8 @@ def other_agency_program_officer(enable_factory_create) -> User:
 @pytest.fixture
 def opportunity(agency) -> Opportunity:
     return OpportunityFactory.create(agency_code=agency.agency_code)
+
+
+@pytest.fixture(scope="session")
+def workflow_client_registry(search_client: SearchClient) -> WorkflowClientRegistry:
+    return init_workflow_client_registry(search_client=search_client)

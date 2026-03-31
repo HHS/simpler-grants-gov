@@ -292,6 +292,18 @@ class SearchClient:
         # close scroll
         self._client.clear_scroll(scroll_id=scroll_id)
 
+    def get(self, index_name: str, id: Any) -> dict | None:
+        """Get a record directly from an OpenSearch index. Returns None if not found."""
+        try:
+            raw_result = self._client.get(index=index_name, id=id)
+        except opensearchpy.exceptions.NotFoundError:
+            return None
+
+        # The raw result looks like:
+        # {"_index": "...", '_id': '1', '_version': 1, '_seq_no': 0, '_primary_term': 1, 'found': True, '_source': {'id': 1, 'title': 'Green Eggs & Ham'}}
+        # We only really care about the result itself, so grab that
+        return raw_result.get("_source", None)
+
 
 def _get_connection_parameters(opensearch_config: OpensearchConfig) -> dict[str, Any]:
     # See: https://opensearch.org/docs/latest/clients/python-low-level/#connecting-to-opensearch
