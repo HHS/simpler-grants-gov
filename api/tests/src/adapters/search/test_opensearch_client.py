@@ -5,6 +5,11 @@ import pytest
 
 from src.adapters.search import get_opensearch_config
 from src.adapters.search.opensearch_client import _get_connection_parameters
+from tests.src.adapters.search.test_opensearch_query_builder import (
+    CALL_OF_WINTER,
+    WINTER,
+    WINTERBORN_LEGACY,
+)
 
 ########################################################################
 # These tests are primarily looking to validate
@@ -239,3 +244,59 @@ def test_cleanup_old_indices(search_client):
     assert search_client.index_exists(index_name_2) is False
     assert search_client.index_exists(index_name_3) is True
     assert search_client.index_exists(index_name_4) is True
+
+
+def test_search_returns_expected_metadata(search_client, generic_index):
+
+    search_client.bulk_upsert(
+        generic_index,
+        [WINTERBORN_LEGACY, WINTER, CALL_OF_WINTER],
+        primary_key_field="id",
+    )
+
+    response = search_client.search(
+        index_name=generic_index,
+        search_query={"query": {"match_all": {}}},
+    )
+
+    # Performance metadata
+    assert isinstance(response.took_ms, int)
+    assert response.took_ms >= 0
+    assert response.timed_out is False
+    assert response.shards_failed == 0
+    assert response.total_records == 3
+
+    # Relevance metadata
+    assert isinstance(response.max_score, float)
+    assert response.total_relation == "eq"
+
+    # Score stats
+    score_stats = response.score_stats
+    for key in ("search.score_min", "search.score_max", "search.score_mean", "search.score_stdev"):
+        assert key in score_stats
+        assert score_stats[key] is not None
+
+
+def test_search_agg_overflow(search_client, generic_index):
+    # 3 records with distinct authors
+    search_client.bulk_upsert(
+        generic_index,
+        [WINTERBORN_LEGACY, WINTER, CALL_OF_WINTER],
+        primary_key_field="id",
+    )
+
+    # Aggregate on author with size=1 to force overflow
+    response = search_client.search(
+        index_name=generic_index,
+        search_query={
+            "query": {"match_all": {}},
+            "aggs": {
+                "author": {
+                    "terms": {"field": "author.keyword", "size": 1},
+                },
+            },
+        },
+    )
+
+    assert "author" in response.agg_overflow
+    assert response.agg_overflow["author"] > 0

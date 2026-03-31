@@ -2,7 +2,6 @@ import logging
 import uuid
 from collections.abc import Sequence
 
-import newrelic.agent
 from pydantic import BaseModel, Field
 
 import src.adapters.search as search
@@ -10,6 +9,7 @@ from src.adapters.search.opensearch_config import get_opensearch_config
 from src.adapters.search.opensearch_explain import log_search_result_explanations
 from src.adapters.search.opensearch_response import SearchResponse
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema, SearchQueryOperator
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
 from src.search.search_models import (
@@ -270,9 +270,9 @@ def _search_opportunities(
         index_alias, search_request, includes=includes, excludes=["attachments"], explain=explain
     )
 
-    if response.took_ms is not None:
-        newrelic.agent.add_custom_attribute("search.took_ms", response.took_ms)
-        logger.info("OpenSearch query completed", extra={"search.took_ms": response.took_ms})
+    add_extra_data_to_current_request_logs(
+        {"search.scoring_rule": search_params.experimental.scoring_rule.value}
+    )
 
     return response
 

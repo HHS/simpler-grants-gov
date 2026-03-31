@@ -1,5 +1,5 @@
 """
-Unit tests for the explain/logging wiring in search_opportunities.
+Unit tests for scoring rule logging and explain wiring in search_opportunities.
 """
 
 from unittest.mock import MagicMock, patch
@@ -14,7 +14,6 @@ def _make_search_response(raw_hits: list | None = None) -> SearchResponse:
         records=[],
         aggregations={},
         scroll_id=None,
-        took_ms=42,
         raw_hits=raw_hits or [],
     )
 
@@ -24,6 +23,22 @@ def _base_params(query: str | None = "climate") -> dict:
         "pagination": {"page_offset": 1, "page_size": 10},
         "query": query,
     }
+
+
+class TestSearchOpportunitiesScoringRuleLogging:
+    @patch("src.services.opportunities_v1.search_opportunities.log_search_result_explanations")
+    @patch("src.services.opportunities_v1.search_opportunities.get_opensearch_config")
+    @patch(
+        "src.services.opportunities_v1.search_opportunities.add_extra_data_to_current_request_logs"
+    )
+    def test_logs_scoring_rule(self, mock_add_extra_data, mock_config, mock_log):
+        mock_config.return_value.opensearch_explain_enabled = False
+        search_client = MagicMock()
+        search_client.search.return_value = _make_search_response()
+
+        search_opportunities(search_client, _base_params())
+
+        mock_add_extra_data.assert_called_once_with({"search.scoring_rule": "default"})
 
 
 class TestSearchOpportunitiesExplain:

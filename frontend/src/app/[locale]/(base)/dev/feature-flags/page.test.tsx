@@ -37,6 +37,11 @@ jest.mock("react", () => ({
   })),
 }));
 
+jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
+  __esModule: true,
+  default: (WrappedComponent: React.FC) => WrappedComponent,
+}));
+
 jest.mock("src/hooks/useFeatureFlags", () => ({
   useFeatureFlags: () => mockUseFeatureFlags(),
 }));
