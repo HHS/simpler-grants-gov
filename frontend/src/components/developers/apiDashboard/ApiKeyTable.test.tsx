@@ -10,7 +10,7 @@ import {
   specialCharApiKey,
 } from "src/utils/testing/fixtures";
 
-import ApiKeyTable from "src/components/developer/apiDashboard/ApiKeyTable";
+import ApiKeyTable from "src/components/developers/apiDashboard/ApiKeyTable";
 
 // Mock dependencies
 const mockClientFetch = jest.fn();
