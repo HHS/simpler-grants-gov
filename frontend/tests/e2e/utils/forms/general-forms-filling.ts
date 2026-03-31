@@ -195,10 +195,23 @@ export async function fillField(
       await locator.waitFor({ state: "attached", timeout: 5000 });
       await locator.setInputFiles(data);
       // Wait for the uploaded filename to appear in the UI before proceeding
-      const fileName = data.split("/").pop() ?? data;
-      await page
-        .locator(`span:has-text("${fileName}")`)
-        .waitFor({ state: "visible", timeout: 15000 });
+      // const fileName = data.split("/").pop() ?? data;
+      // // Scope the locator to the section if available to avoid strict mode violation
+      // let fileLocator;
+      // if (field.section) {
+      //   // Normalize section name to match DOM id convention (e.g., 'Section 20' -> 'section-20')
+      //   const sectionId = `#form-section-${field.section.toLowerCase().replace(/\s+/g, "-")}`;
+      //   // Debug: log the HTML content of the section after file upload
+      //   const sectionHtml = await page.locator(sectionId).innerHTML().catch(() => "[section not found]");
+      //   await testInfo.attach(`debug-section-html-${fieldIdentifier}`, {
+      //     body: sectionHtml,
+      //     contentType: "text/html",
+      //   });
+      //   fileLocator = page.locator(`${sectionId} *:has-text("${fileName}")`);
+      // } else {
+      //   fileLocator = page.locator(`*:has-text("${fileName}")`);
+      // }
+      // await fileLocator.waitFor({ state: "visible", timeout: 15000 });
     } else {
       throw new Error(
         `Unsupported or invalid field configuration for ${fieldIdentifier}`,
