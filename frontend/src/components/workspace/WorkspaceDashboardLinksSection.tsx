@@ -38,7 +38,7 @@ export const WorkspaceDashboardLinksSection = async () => {
               heading={t("applications.heading")}
               description={t("applications.description")}
               linkText={t("applications.linkText")}
-              linkTarget="/applications"
+              linkTarget="/workspace/applications"
             />
           </Grid>
         }

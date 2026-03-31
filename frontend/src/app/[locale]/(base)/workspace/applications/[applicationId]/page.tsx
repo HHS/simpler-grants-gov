@@ -118,7 +118,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
             },
             {
               title: t("breadcrumbApplications"),
-              path: `/applications`,
+              path: `/workspace/applications`,
             },
             {
               title: details.application_name,

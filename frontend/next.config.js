@@ -226,7 +226,17 @@ const nextConfig = {
       },
       {
         source: "/workspace/applications/application/:segments*",
-        destination: "/applications/:segments*",
+        destination: "/workspace/applications/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/applications/application/:segments*",
+        destination: "/workspace/applications/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/applications/:segments*",
+        destination: "/workspace/applications/:segments*",
         permanent: false,
       },
       {

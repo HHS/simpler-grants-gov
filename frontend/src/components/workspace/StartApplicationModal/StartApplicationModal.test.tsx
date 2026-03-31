@@ -160,7 +160,9 @@ describe("StartApplicationModal", () => {
     });
 
     await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledWith(`/applications/999`);
+      expect(mockRouterPush).toHaveBeenCalledWith(
+        `/workspace/applications/999`,
+      );
     });
   });
   it("renders the standard modal for org-only competitions even when user has no organizations", async () => {
@@ -199,7 +201,9 @@ describe("StartApplicationModal", () => {
     });
 
     await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledWith(`/applications/999`);
+      expect(mockRouterPush).toHaveBeenCalledWith(
+        `/workspace/applications/999`,
+      );
     });
   });
 

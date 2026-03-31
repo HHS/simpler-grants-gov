@@ -131,7 +131,7 @@ const NavLinks = ({
 
     workspaceSubNavs.push({
       text: t("applications"),
-      href: "/applications",
+      href: "/workspace/applications",
     });
     workspaceSubNavs.push({
       text: t("organizations"),
