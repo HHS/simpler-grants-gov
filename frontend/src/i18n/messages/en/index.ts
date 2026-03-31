@@ -408,6 +408,9 @@ export const messages = {
         notFound: "The opportunity summary could not be found.",
         draftOnly: "Only draft opportunity summaries can be updated.",
         validationHeading: "Please fix the highlighted fields.",
+        validationWarningHeading: "Progress saved",
+        validationWarningBody:
+          "Your progress has been saved. However, this opportunity cannot be submitted/published until the following required fields are completed:",
       },
     },
     validationErrors: {

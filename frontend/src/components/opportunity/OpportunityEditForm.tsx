@@ -345,11 +345,21 @@ export default function OpportunityEditForm({
       Object.keys(formState.validationErrors).length > 0 ? (
         <div className="margin-top-2">
           <Alert
-            type="error"
-            heading={t("content.alerts.validationHeading")}
+            type="warning"
+            heading={t("content.alerts.validationWarningHeading")}
             headingLevel="h3"
-            noIcon
-          />
+          >
+            <p className="margin-top-1 margin-bottom-1">
+              {t("content.alerts.validationWarningBody")}
+            </p>
+            <ul className="margin-top-1">
+              {Object.values(formState.validationErrors)
+                .flat()
+                .map((error, i) => (
+                  <li key={i}>{error}</li>
+                ))}
+            </ul>
+          </Alert>
         </div>
       ) : null}
 
