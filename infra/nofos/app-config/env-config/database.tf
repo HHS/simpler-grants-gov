@@ -13,6 +13,8 @@ locals {
     migrator_access_policy_name = "${var.app_name}-${var.environment}-migrator-access"
     enable_http_endpoint        = true
 
+    newrelic_entity_guid = var.database_newrelic_entity_guid
+
     # Enable extensions that require the rds_superuser role to be created here
     # See docs/infra/set-up-database.md for more information
     superuser_extensions = {}

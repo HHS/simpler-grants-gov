@@ -2,6 +2,8 @@ export type FeatureFlags = { [name: string]: boolean };
 
 export const defaultFeatureFlags: FeatureFlags = {
   applyFormPrototypeOff: false,
-  opportunitiesListOff: false,
   awardRecommendationOff: true,
+  featureFlagAdminOff: false,
+  maintenanceMode: false,
+  opportunitiesListOff: false,
 };

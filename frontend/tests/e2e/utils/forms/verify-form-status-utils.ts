@@ -84,11 +84,16 @@ export async function verifyFormStatusAfterSave(
 ): Promise<void> {
   if (status === "complete") {
     const alert = page.getByTestId("alert");
+    // Use a generous timeout: Webkit renders the save-confirmation alert more
+    // slowly than Chrome/Firefox, and the Playwright default (5000ms) is
+    // insufficient on some CI runners.
     await expect(alert.locator(".usa-alert__heading")).toContainText(
       FORM_DEFAULTS.formSavedHeading,
+      { timeout: 15000 },
     );
     await expect(alert.locator(".usa-alert__text")).toContainText(
       FORM_DEFAULTS.noErrorsText,
+      { timeout: 15000 },
     );
   } else {
     if (!expectedErrors?.length) {

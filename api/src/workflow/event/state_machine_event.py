@@ -48,6 +48,11 @@ class StateMachineEvent:
     # Metadata for processing an event.
     metadata: dict | None = None
 
+    def __post_init__(self) -> None:
+        # Whatever metrics class is defined on the state machine class
+        # Initialize all its metrics to 0
+        self.workflow_metric_context.set_metrics({v: 0 for v in self.state_machine_cls.Metrics})
+
     def get_log_extra(self) -> dict[str, Any]:
         return {
             "acting_user_id": self.acting_user.user_id,

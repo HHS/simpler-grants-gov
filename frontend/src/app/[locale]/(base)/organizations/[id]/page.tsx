@@ -21,14 +21,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, id } = await params;
   const t = await getTranslations({ locale });
-  let title = `${t("OrganizationDetail.pageTitle")}`;
+  let title = `${t("OrganizationDetail.pageTitle")} | Simpler.Grants.gov`;
   try {
     const session = await getSession();
     if (!session?.token) {
       throw new Error("not logged in");
     }
     const organizationDetails = await getOrganizationDetails(id);
-    title = `${t("OrganizationDetail.pageTitle")} - ${organizationDetails.sam_gov_entity.legal_business_name || ""}`;
+    title = `${t("OrganizationDetail.pageTitle")}: ${organizationDetails.sam_gov_entity.legal_business_name || ""} | Simpler.Grants.gov`;
   } catch (error) {
     console.error("Failed to render page title due to API error", error);
     if (parseErrorStatus(error as ApiRequestError) === 404) {
