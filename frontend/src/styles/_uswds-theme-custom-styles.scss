@@ -989,3 +989,43 @@ dl {
 .share-opportunity-checkboxes .usa-checkbox__label {
   margin-top: 0;
 }
+
+// Saved Opportunities Tags
+.saved-opportunity-tags {
+  position: relative;
+
+  &__list {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  &__item {
+    flex: 0 0 auto;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1rem;
+    pointer-events: none;
+    background: linear-gradient(to right, transparent, white);
+  }
+
+  @include at-media("tablet") {
+    &__list {
+      flex-wrap: wrap;
+      overflow-x: visible;
+    }
+
+    // We hide the gradient fade on larger screens since the tags wrap instead of overflow.
+    &::after {
+      display: none;
+    }
+  }
+}

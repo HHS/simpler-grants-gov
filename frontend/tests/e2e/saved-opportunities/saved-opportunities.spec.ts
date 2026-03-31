@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
-import { waitForURLChange } from "tests/e2e/playwrightUtils";
+import { openMobileNav, waitForURLChange } from "tests/e2e/playwrightUtils";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 
@@ -39,6 +39,12 @@ test.describe("Saved Opportunities", () => {
       const isMobile = project.name.match(/[Mm]obile/);
 
       await authenticateE2eUser(page, context, !!isMobile);
+
+      // On mobile, the desktop nav is collapsed into a hamburger menu.
+      // Open it first so the Workspace dropdown button becomes visible.
+      if (isMobile) {
+        await openMobileNav(page);
+      }
 
       // find the Workspace nav dropdown item and open it
       const dropDownButton = page.locator("#nav-dropdown-button-4");

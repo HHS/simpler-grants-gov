@@ -1,17 +1,17 @@
 import React from "react";
 import { Grid } from "@trussworks/react-uswds";
 
-interface DeveloperPageSectionProps {
+interface DevelopersPageSectionProps {
   children: React.ReactNode;
   className?: string;
   title?: string;
 }
 
-export default function DeveloperPageSection({
+export default function DevelopersPageSection({
   children,
   className = "",
   title = "",
-}: DeveloperPageSectionProps) {
+}: DevelopersPageSectionProps) {
   return (
     <div className={className}>
       <Grid row gap>
