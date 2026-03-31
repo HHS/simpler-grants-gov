@@ -190,7 +190,8 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "Assistance Listing Program Title",
   },
   areas_affected_attachment: {
-    testId: "file-input-input",
+    // buttonName: "Areas Affected",
+    selector: 'input[name="areas_affected"][type="file"]',
     type: "file",
     section: "Section 13",
     field: "Areas Affected Attachment",
@@ -202,7 +203,8 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "Project Title",
   },
   additional_project_title_attachment: {
-    testId: "file-input-input",
+    // buttonName: "Additional Project Title",
+     selector: 'input[name="additional_project_title"][type="file"]',   
     type: "file",
     section: "Section 13",
     field: "Additional Project Title Attachment",
@@ -220,7 +222,8 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "Congressional District Program Project",
   },
   additional_congressional_attachment: {
-    testId: "file-input-input",
+    // buttonName: "Additional Congressional",
+    selector: 'input[name="additional_congressional_districts"][type="file"]',
     type: "file",
     section: "Section 14",
     field: "Additional Congressional Attachment",
@@ -287,14 +290,15 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "State Review Available Date",
   },
   delinquent_federal_debt: {
-    getByText: "Yes",
+    getByText: "No",
     textExact: true,
     type: "radiobutton",
     section: "Section 20",
     field: "Applicant Delinquent on Federal Debt",
   },
   debt_explanation_attachment: {
-    testId: "file-input-input",
+    // buttonName: "Debt Explanation",
+    selector: 'input[name="debt_explanation"][type="file"]',
     type: "file",
     section: "Section 20",
     field: "Debt Explanation Attachment",
