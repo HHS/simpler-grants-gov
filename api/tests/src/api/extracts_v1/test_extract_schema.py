@@ -93,7 +93,7 @@ def test_response_schema_list(sample_extract_metadata, monkeypatch):
     assert result["data"][1]["extract_metadata_id"] == other_extract_metadata.extract_metadata_id
     assert result["data"][1]["extract_type"] == "opportunities_json"
     assert result["data"][1]["download_path"].startswith(
-        "http://localhost:4566/local-mock-public-bucket/test/path/test_extract2.xml"
+        "http://localhost:9090/local-mock-public-bucket/test/path/test_extract2.xml"
     )
 
 
