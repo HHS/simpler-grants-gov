@@ -8,10 +8,8 @@ import { useActionState, useEffect, useState } from "react";
 import { Alert, Button, Link } from "@trussworks/react-uswds";
 
 import {
+  CommonCharacterCount,
   CommonSelectInput,
-  CommonText,
-  CommonTextArea,
-  CommonTextInput,
 } from "src/components/grantor/CommonFormFields";
 
 // Category options
@@ -39,6 +37,8 @@ export function CreateOpportunityForm({
   const [opportunityTitle, setOppTitle] = useState<string>("");
   const [selectedCategoryId, setCategory] = useState<string>("");
   const [categoryExplanation, setExplain] = useState<string>("");
+  const [assistanceListingNumber, setAssistanceListingNumber] =
+    useState<string>("");
   const [showExplain, setShowExplain] = useState<boolean>(false);
   const [disableSave, setDisableSave] = useState<boolean>(true);
 
@@ -81,6 +81,7 @@ export function CreateOpportunityForm({
       const allReqFieldsFilled =
         opportunityNumber.trim() !== "" &&
         opportunityTitle.trim() !== "" &&
+        assistanceListingNumber.trim() !== "" &&
         selectedAgencyId.trim() !== "" &&
         ((selectedCategoryId.trim() !== "" &&
           selectedCategoryId.trim() !== "other") ||
@@ -94,14 +95,12 @@ export function CreateOpportunityForm({
       selectedAgencyId,
       selectedCategoryId,
       categoryExplanation,
+      assistanceListingNumber,
     ],
   );
 
   // Update state on change
-  const onCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCategory(e.target.value);
-  };
-  const onOppNbrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onOppNbrChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setOppNbr(e.target.value);
   };
   const onOppTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -110,8 +109,14 @@ export function CreateOpportunityForm({
   const onAgencySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setAgencyId(e.target.value);
   };
+  const onCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCategory(e.target.value);
+  };
   const onExplanationChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setExplain(e.target.value);
+  };
+  const onAlnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setAssistanceListingNumber(e.target.value);
   };
 
   // Display the form
@@ -139,7 +144,7 @@ export function CreateOpportunityForm({
       >
         <div data-testid="formGroup" className="width-full">
           {/* Opportunity Number */}
-          <CommonTextInput
+          <CommonCharacterCount
             labelId="label-for-opportunityNumber"
             labelText={t("CreateOpportunityForm.opportunityNumber")}
             description={t("CreateOpportunityForm.opportunityNumberDesc")}
@@ -149,12 +154,10 @@ export function CreateOpportunityForm({
             onTextChange={onOppNbrChange}
             defaultValue={response?.data?.opportunity_number || ""}
           />
-          <CommonText
-            textContent={t("CreateOpportunityForm.charactersAllowed40")}
-          />
 
           {/* Opportunity Title */}
-          <CommonTextArea
+          <CommonCharacterCount
+            isTextArea={true}
             labelId="label-for-opportunityTitle"
             labelText={t("CreateOpportunityForm.opportunityTitle")}
             description={t("CreateOpportunityForm.opportunityTitleDesc")}
@@ -163,9 +166,6 @@ export function CreateOpportunityForm({
             isRequired={true}
             onTextChange={onOppTitleChange}
             defaultValue={response?.data?.opportunity_title || ""}
-          />
-          <CommonText
-            textContent={t("CreateOpportunityForm.charactersAllowed255")}
           />
 
           {/* Agency */}
@@ -194,22 +194,30 @@ export function CreateOpportunityForm({
 
           {/* Category-Other Explanation */}
           {showExplain && (
-            <CommonTextArea
+            <CommonCharacterCount
+              isTextArea={true}
               labelId="label-for-categoryExplanation"
               labelText={t("CreateOpportunityForm.categoryExplanation")}
               description={t("CreateOpportunityForm.categoryExplanationDesc")}
               fieldId="categoryExplanation"
-              fieldMaxLength={2000}
+              fieldMaxLength={255}
               isRequired={true}
               onTextChange={onExplanationChange}
               defaultValue={response?.data?.category_explanation || ""}
             />
           )}
-          {showExplain && (
-            <CommonText
-              textContent={t("CreateOpportunityForm.charactersAllowed255")}
-            />
-          )}
+
+          {/* Assistance Listing Number (ALN) */}
+          <CommonCharacterCount
+            labelId="label-for-assistanceListingNumber"
+            labelText={t("CreateOpportunityForm.assistanceListingNumber")}
+            description={t("CreateOpportunityForm.assistanceListingNumberDesc")}
+            fieldId="assistanceListingNumber"
+            fieldMaxLength={6}
+            isRequired={true}
+            onTextChange={onAlnChange}
+            defaultValue={response?.data?.assistance_listing_number || ""}
+          />
         </div>
 
         <div className="display-flex flex-left margin-top-5">

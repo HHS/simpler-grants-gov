@@ -12,6 +12,7 @@ from src.adapters import db
 from src.adapters.aws import SQSConfig
 from src.adapters.aws.sqs_adapter import SQSClient, SQSMessage
 from src.adapters.db import flask_db
+from src.adapters.search import SearchClient, flask_opensearch
 from src.constants.lookup_constants import WorkflowEventProcessingResult
 from src.db.models.workflow_models import WorkflowEventHistory
 from src.util import datetime_util
@@ -20,6 +21,7 @@ from src.util.json_util import json_encoder
 from src.workflow.event.sqs_message_container import SqsMessageContainer
 from src.workflow.event.workflow_event import WorkflowEvent
 from src.workflow.handler.event_handler import EventHandler
+from src.workflow.registry.workflow_client_registry import init_workflow_client_registry
 from src.workflow.workflow_background_task import workflow_transaction
 from src.workflow.workflow_errors import NonRetryableWorkflowError, RetryableWorkflowError
 
@@ -135,6 +137,7 @@ class WorkflowManager:
         The 'main' loop of the workflow manager.
         """
         logger.info("Processing workflow events")
+        initialize_workflow_client_registry()
 
         batch_count = 0
         while True:
@@ -342,3 +345,8 @@ def _handle_event(
     logger.info("Finished handling event", extra=log_extra)
 
     return result
+
+
+@flask_opensearch.with_search_client()
+def initialize_workflow_client_registry(search_client: SearchClient) -> None:
+    init_workflow_client_registry(search_client)
