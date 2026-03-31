@@ -1,9 +1,9 @@
 // These fields are meant to be reusable and provide a consistent look and feel for all pages.
 // Use this in combo with FormGroup. For examples, see page opportunities/create/[agencyId]
 // Feel free to add attributes as needed, but don't delete any because others could be using them.
-
 import React, { useState } from "react";
 import {
+  CharacterCount,
   ErrorMessage,
   FormGroup,
   Label,
@@ -160,6 +160,57 @@ export const CommonTextArea = ({
 };
 
 // ----------------------------------------------------------
+// Common CharacterCount
+// ----------------------------------------------------------
+export const CommonCharacterCount = ({
+  isTextArea = false,
+  labelId,
+  labelText,
+  description, // or instructions
+  fieldId,
+  isRequired,
+  fieldMaxLength,
+  onTextChange,
+  defaultValue = "",
+  validationError = "",
+}: {
+  isTextArea?: boolean;
+  labelId: string;
+  labelText: string;
+  description: string;
+  fieldId: string;
+  isRequired: boolean;
+  fieldMaxLength: number;
+  onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  defaultValue?: string;
+  validationError?: string;
+}) => {
+  return (
+    <>
+      <FormGroup error={Boolean(validationError)} className="margin-top-1">
+        <CommonLabel
+          labelId={labelId}
+          labelText={labelText}
+          description={description}
+          fieldId={fieldId}
+          isRequired={isRequired}
+          validationError={validationError}
+        />
+        <CharacterCount
+          id={fieldId}
+          name={fieldId}
+          maxLength={fieldMaxLength}
+          defaultValue={defaultValue}
+          onChange={onTextChange}
+          isTextArea={isTextArea}
+          aria-describedby={labelId}
+        />
+      </FormGroup>
+    </>
+  );
+};
+
+// ----------------------------------------------------------
 // Common Select input with error block
 // ----------------------------------------------------------
 export const CommonSelectInput = ({
@@ -211,7 +262,7 @@ export const CommonSelectInput = ({
           name={fieldId}
           onChange={handleChange}
           value={selectedValue}
-          style={{ maxWidth: "550px" }}
+          className="maxw-mobile-lg"
         >
           {/* Default option */}
           <option key={""} value={""} disabled>
