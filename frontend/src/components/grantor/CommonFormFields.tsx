@@ -45,9 +45,7 @@ export const CommonTextInput = ({
           required={isRequired}
           description={description}
         />
-        {error && (
-          <FieldErrors fieldName={fieldId} rawErrors={rawErrors as string[]} />
-        )}
+        {error && <FieldErrors fieldName={fieldId} rawErrors={rawErrors} />}
         <TextInput
           type="text"
           name={fieldId}
@@ -94,9 +92,7 @@ export const CommonTextArea = ({
           required={isRequired}
           description={description}
         />
-        {error && (
-          <FieldErrors fieldName={fieldId} rawErrors={rawErrors as string[]} />
-        )}
+        {error && <FieldErrors fieldName={fieldId} rawErrors={rawErrors} />}
         <Textarea
           name={fieldId}
           id={fieldId}
@@ -144,9 +140,7 @@ export const CommonCharacterCount = ({
           required={isRequired}
           description={description}
         />
-        {error && (
-          <FieldErrors fieldName={fieldId} rawErrors={rawErrors as string[]} />
-        )}
+        {error && <FieldErrors fieldName={fieldId} rawErrors={rawErrors} />}
         <CharacterCount
           id={fieldId}
           name={fieldId}
@@ -205,9 +199,7 @@ export const CommonSelectInput = ({
           required={isRequired}
           description={description}
         />
-        {error && (
-          <FieldErrors fieldName={fieldId} rawErrors={rawErrors as string[]} />
-        )}
+        {error && <FieldErrors fieldName={fieldId} rawErrors={rawErrors} />}
         <Select
           id={fieldId}
           name={fieldId}
