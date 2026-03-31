@@ -14,15 +14,15 @@ const PageBreadcrumbs = ({ organizationId }: { organizationId: string }) => {
         },
         {
           title: t("ManageUsers.breadcrumbOrganizations"),
-          path: `/organizations`,
+          path: `/workspace/organizations`,
         },
         {
           title: t("OrganizationDetail.pageTitle"),
-          path: `/organizations/${organizationId}`,
+          path: `/workspace/organizations/${organizationId}`,
         },
         {
           title: t("ManageUsers.pageHeading"),
-          path: `/organizations/${organizationId}/manage-users`,
+          path: `/workspace/organizations/${organizationId}/manage-users`,
         },
         {
           title: t("InviteLegacyUsers.pageHeading"),

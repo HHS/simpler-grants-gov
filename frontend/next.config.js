@@ -216,7 +216,12 @@ const nextConfig = {
       },
       {
         source: "/organization/:segments*",
-        destination: "/organizations/:segments*",
+        destination: "/workspace/organizations/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/organizations/:segments*",
+        destination: "/workspace/organizations/:segments*",
         permanent: false,
       },
       {

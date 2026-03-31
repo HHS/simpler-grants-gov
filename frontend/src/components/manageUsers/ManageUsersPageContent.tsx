@@ -54,11 +54,11 @@ export async function ManageUsersPageContent({
           },
           {
             title: t("breadcrumbOrganizations"),
-            path: `/organizations`,
+            path: `/workspace/organizations`,
           },
           {
             title: name ?? "Organization",
-            path: `/organizations/${organizationId}`,
+            path: `/workspace/organizations/${organizationId}`,
           },
           {
             title: t("pageHeading"),

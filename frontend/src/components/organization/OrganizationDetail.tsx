@@ -46,7 +46,7 @@ export const OrganizationDetail = ({
           },
           {
             title: t("breadcrumbOrganizations"),
-            path: `/organizations`,
+            path: `/workspace/organizations`,
           },
           {
             title: sam_gov_entity.legal_business_name,
