@@ -46,7 +46,6 @@ export function requesterForEndpoint({
       nextOptions?: NextFetchRequestConfig;
       allowedErrorStatuses?: number[];
       addContentType?: boolean;
-      // userAuthToken?: string;
     } = {},
   ): Promise<Response> {
     const {
@@ -56,7 +55,6 @@ export function requesterForEndpoint({
       nextOptions,
       allowedErrorStatuses = [],
       addContentType = true,
-      // userAuthToken,
     } = options;
     const url = createRequestUrl(
       method,
@@ -69,7 +67,6 @@ export function requesterForEndpoint({
     const defaultHeaders = await getDefaultHeaders({
       addContentType,
       requiresUserAuthToken: requiresAuth,
-      // userAuthToken,
     });
     const headers = {
       ...defaultHeaders,

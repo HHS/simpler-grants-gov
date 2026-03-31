@@ -24,11 +24,9 @@ import { QueryParamData } from "src/types/search/searchRequestTypes";
 export async function getDefaultHeaders({
   addContentType = true,
   requiresUserAuthToken = false,
-  // userAuthToken,
 }: {
   addContentType?: boolean;
   requiresUserAuthToken?: boolean;
-  // userAuthToken?: string;
 }): Promise<Record<string, string>> {
   const headers: Record<string, string> = {};
 
@@ -46,9 +44,7 @@ export async function getDefaultHeaders({
   if (requiresUserAuthToken) {
     const session = await getSession();
     if (!session?.token) {
-      // Should make sure this works ok - expect API to send back a 403 if the header is missing
-      // we could throw an error, but maybe best to make the API request and let it fail there?
-      // maybe bring this to the group.
+      // May want to throw here
       console.warn("no user token present for authorized endpoint call");
     } else {
       headers["X-SGG-Token"] = session.token;
