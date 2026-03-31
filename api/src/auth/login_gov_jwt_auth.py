@@ -43,7 +43,10 @@ class LoginGovConfig(PydanticBaseEnvConfig):
     login_gov_endpoint: str = Field(alias="LOGIN_GOV_ENDPOINT")
     login_gov_jwk_endpoint: str = Field(alias="LOGIN_GOV_JWK_ENDPOINT")
     login_gov_auth_endpoint: str = Field(alias="LOGIN_GOV_AUTH_ENDPOINT")
-    login_gov_logout_endpoint: str = Field(alias="LOGIN_GOV_LOGOUT_ENDPOINT", default="https://idp.int.identitysandbox.gov/openid_connect/logout")
+    login_gov_logout_endpoint: str = Field(
+        alias="LOGIN_GOV_LOGOUT_ENDPOINT",
+        default="https://idp.int.identitysandbox.gov/openid_connect/logout",
+    )
     login_gov_token_endpoint: str = Field(alias="LOGIN_GOV_TOKEN_ENDPOINT")
 
     # Where we send a user after they have successfully logged in
