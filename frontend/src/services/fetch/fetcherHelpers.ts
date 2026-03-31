@@ -17,6 +17,8 @@ import {
 import { APIResponse } from "src/types/apiResponseTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
+import { getSession } from "../auth/session";
+
 export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
 export interface JSONRequestBody {
   [key: string]: unknown;
@@ -27,7 +29,16 @@ export interface HeadersDict {
 }
 
 // Configuration of headers to send with all requests
-export function getDefaultHeaders(addContentType = true): HeadersDict {
+// optionally adds content type and user auth token
+export async function getDefaultHeaders({
+  addContentType = true,
+  requiresUserAuthToken = false,
+  // userAuthToken,
+}: {
+  addContentType?: boolean;
+  requiresUserAuthToken?: boolean;
+  // userAuthToken?: string;
+}): Promise<HeadersDict> {
   const headers: HeadersDict = {};
 
   if (environment.API_GW_AUTH) {
@@ -40,6 +51,17 @@ export function getDefaultHeaders(addContentType = true): HeadersDict {
   if (addContentType) {
     headers["Content-Type"] = "application/json";
   }
+
+  if (requiresUserAuthToken) {
+    const session = await getSession();
+    if (!session?.token) {
+      // Should make sure this works ok - expect API to send back a 403 if the header is missing
+      console.warn("no user token present for authorized endpoint call");
+    } else {
+      headers["X-SGG-Token"] = session.token;
+    }
+  }
+
   return headers;
 }
 
