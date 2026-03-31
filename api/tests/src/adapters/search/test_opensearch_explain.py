@@ -188,9 +188,7 @@ class TestLogSearchResultExplanations:
 
     @patch("src.adapters.search.opensearch_explain.record_custom_event")
     def test_no_boost_when_field_has_no_boost(self, mock_record_event):
-        explanation = _make_explanation(
-            [_make_weight_detail_no_boost("summary_description", 5.0)]
-        )
+        explanation = _make_explanation([_make_weight_detail_no_boost("summary_description", 5.0)])
         hits = [_make_hit("opp-1", "NUM-1", "DOC", 5.0, explanation=explanation)]
         log_search_result_explanations(hits, query="test", scoring_rule="default")
 
