@@ -452,7 +452,7 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
         valid_listing_values = []
         for listing in listings:
             listing_data = {
-                "assistanceListingNumber": listing.get("assistance_listing_number"),
+                "identifier": listing.get("assistance_listing_number"),
                 "programTitle": listing.get("program_title"),
             }
             try:

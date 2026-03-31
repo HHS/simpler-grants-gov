@@ -201,9 +201,7 @@ class TestTransformation:
 
         assert "assistanceListings" in result.custom_fields
         assert len(result.custom_fields["assistanceListings"].value) == 1
-        assert (
-            result.custom_fields["assistanceListings"].value[0].assistanceListingNumber == "10.557"
-        )
+        assert result.custom_fields["assistanceListings"].value[0].identifier == "10.557"
         assert (
             result.custom_fields["assistanceListings"].value[0].programTitle
             == "Special Supplemental Nutrition Program"
@@ -1077,7 +1075,7 @@ class TestPopulateCustomFields:
 
         assert result["assistanceListings"].field_type == CustomFieldType.ARRAY
         assert len(result["assistanceListings"].value) == 1
-        assert result["assistanceListings"].value[0].assistanceListingNumber == "93.001"
+        assert result["assistanceListings"].value[0].identifier == "93.001"
         assert result["assistanceListings"].value[0].programTitle == "Health Research"
 
         assert result["contactInfo"].field_type == CustomFieldType.OBJECT

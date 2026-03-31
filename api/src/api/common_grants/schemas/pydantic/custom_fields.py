@@ -15,7 +15,7 @@ from pydantic import BaseModel, HttpUrl, ValidationError, field_validator
 
 
 class AssistanceListingValue(BaseModel):
-    assistanceListingNumber: str | None = None
+    identifier: str | None = None
     programTitle: str | None = None
 
 

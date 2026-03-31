@@ -163,13 +163,12 @@ class federalFundingSource(CustomField):
 class AgencyContactValue(Schema):
     """Schema for populating the AgencyContact value field"""
 
+    name = fields.String(allow_none=True, metadata={"example": "Jane Smith"})
+    email = fields.String(allow_none=True, metadata={"example": "fake_email@grants.gov"})
+    phone = fields.String(allow_none=True, metadata={"example": "123-456-7890"})
     description = fields.String(
         allow_none=True,
         metadata={"example": "For more information, reach out to Jane Smith at agency US-ABC"},
-    )
-    emailAddress = fields.String(allow_none=True, metadata={"example": "fake_email@grants.gov"})
-    emailDescription = fields.String(
-        allow_none=True, metadata={"example": "Click me to email the agency"}
     )
 
 
