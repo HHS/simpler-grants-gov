@@ -3,56 +3,18 @@ import userEvent from "@testing-library/user-event";
 
 import {
   CommonCharacterCount,
-  CommonLabel,
   CommonSelectInput,
-  CommonText,
   CommonTextArea,
   CommonTextInput,
 } from "./CommonFormFields";
 
-// --- Test Common Text ---
-const commonTextProps = {
-  textContent: "Some text here.",
-};
-describe("CommonText", () => {
-  it("Renders the element", () => {
-    render(<CommonText {...commonTextProps} />);
-    expect(screen.getByText(commonTextProps.textContent)).toBeInTheDocument();
-  });
-});
-
-// --- Test Common Label ---
-const commonLabelProps = {
+const dynamicFieldLabelProps = {
   labelId: "label-for-something",
   labelText: "Label for Something",
   description: "Enter something",
   fieldId: "someId",
   isRequired: false,
 };
-describe("CommonLabel", () => {
-  it("Renders the element", () => {
-    render(<CommonLabel {...commonLabelProps} />);
-    expect(screen.getByText(commonLabelProps.labelText)).toBeInTheDocument();
-    expect(screen.getByText(commonLabelProps.description)).toBeInTheDocument();
-  });
-  it("Renders with isRequired", () => {
-    commonLabelProps.isRequired = true;
-    render(<CommonLabel {...commonLabelProps} />);
-    const spanElement = screen.getByText("*");
-    expect(spanElement).toBeInTheDocument();
-    expect(spanElement).toHaveClass("text-red");
-  });
-  it("Renders with error message", () => {
-    const extendedProps = {
-      ...commonLabelProps,
-      validationError: "some error",
-    };
-    render(<CommonLabel {...extendedProps} />);
-    const spanElement = screen.getByText("some error");
-    expect(spanElement).toBeInTheDocument();
-    expect(spanElement).toHaveClass("usa-error-message");
-  });
-});
 
 // --- Test Common Input ---
 let textValue = "";
@@ -60,7 +22,7 @@ const onOppNbrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   textValue = e.target.value;
 };
 const commonInputProps = {
-  ...commonLabelProps,
+  ...dynamicFieldLabelProps,
   fieldMaxLength: 40,
   defaultValue: textValue,
   onTextChange: onOppNbrChange,
@@ -103,7 +65,7 @@ const onTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
   bigTextValue = e.target.value;
 };
 const commonTextAreaProps = {
-  ...commonLabelProps,
+  ...dynamicFieldLabelProps,
   fieldMaxLength: 40,
   defaultValue: textValue,
   onTextChange: onTextAreaChange,
@@ -143,7 +105,7 @@ describe("CommonTextArea", () => {
 // --- Test Common CharacterCount ---
 const mockOnChangeCharCnt = jest.fn();
 const commonCharacterCountProps = {
-  ...commonLabelProps,
+  ...dynamicFieldLabelProps,
   fieldMaxLength: 40,
   defaultValue: "",
   onTextChange: mockOnChangeCharCnt,
@@ -212,7 +174,7 @@ const onSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
   selectedValue = e.target.value;
 };
 const commonSelectProps = {
-  ...commonLabelProps,
+  ...dynamicFieldLabelProps,
   listKeyValuePairs: fakeAgencies,
   onSelectionChange: onSelectChange,
 };

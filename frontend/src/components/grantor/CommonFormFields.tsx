@@ -1,72 +1,22 @@
 // These fields are meant to be reusable and provide a consistent look and feel for all pages.
-// Use this in combo with FormGroup. For examples, see page opportunities/create/[agencyId]
-// Feel free to add attributes as needed, but don't delete any because others could be using them.
+// For examples, see page opportunities/create
+
 import React, { useState } from "react";
 import {
   CharacterCount,
-  ErrorMessage,
   FormGroup,
-  Label,
   Select,
   Textarea,
   TextInput,
 } from "@trussworks/react-uswds";
 
-// ----------------------------------------------------------
-// Common Text with the same styles
-// ----------------------------------------------------------
-export const CommonText = ({ textContent }: { textContent: string }) => {
-  return (
-    <>
-      <div className="font-sans-2xs" style={{ maxWidth: "550px" }}>
-        {textContent}
-      </div>
-    </>
-  );
-};
-
-// ----------------------------------------------------------
-// Common Label with ErrorMessage
-// ----------------------------------------------------------
-export const CommonLabel = ({
-  labelId,
-  labelText,
-  description, // or instructions
-  fieldId,
-  isRequired,
-  validationError = "",
-}: {
-  labelId: string;
-  labelText: string;
-  description: string;
-  fieldId: string;
-  isRequired: boolean;
-  validationError?: string;
-}) => {
-  return (
-    <>
-      <Label
-        id={labelId}
-        key={labelId}
-        htmlFor={fieldId}
-        className="font-sans-sm margin-top-3 text-bold"
-      >
-        {labelText}
-        {isRequired && <span className="text-red"> * </span>}
-      </Label>
-      <div className="font-sans-2xs" style={{ maxWidth: "550px" }}>
-        {description}
-      </div>
-      {validationError ? <ErrorMessage>{validationError}</ErrorMessage> : null}
-    </>
-  );
-};
+import { FieldErrors } from "src/components/applyForm/FieldErrors";
+import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
 
 // ----------------------------------------------------------
 // Common TextInput with error block
 // ----------------------------------------------------------
 export const CommonTextInput = ({
-  labelId,
   labelText,
   description, // or instructions
   fieldId,
@@ -74,9 +24,8 @@ export const CommonTextInput = ({
   fieldMaxLength,
   onTextChange,
   defaultValue = "",
-  validationError = "",
+  rawErrors = [],
 }: {
-  labelId: string;
   labelText: string;
   description: string;
   fieldId: string;
@@ -84,19 +33,21 @@ export const CommonTextInput = ({
   fieldMaxLength: number;
   onTextChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   defaultValue?: string;
-  validationError?: string;
+  rawErrors?: string[];
 }) => {
+  const error = rawErrors.length ? true : undefined;
   return (
     <>
-      <FormGroup error={Boolean(validationError)} className="margin-top-1">
-        <CommonLabel
-          labelId={labelId}
-          labelText={labelText}
+      <FormGroup key={`form-group__text-input--${fieldId}`} error={error}>
+        <DynamicFieldLabel
+          idFor={fieldId}
+          title={labelText}
+          required={isRequired}
           description={description}
-          fieldId={fieldId}
-          isRequired={isRequired}
-          validationError={validationError}
         />
+        {error && (
+          <FieldErrors fieldName={fieldId} rawErrors={rawErrors as string[]} />
+        )}
         <TextInput
           type="text"
           name={fieldId}
@@ -115,7 +66,6 @@ export const CommonTextInput = ({
 // Common Textarea with error block
 // ----------------------------------------------------------
 export const CommonTextArea = ({
-  labelId,
   labelText,
   description, // or instructions
   fieldId,
@@ -123,9 +73,8 @@ export const CommonTextArea = ({
   fieldMaxLength,
   onTextChange,
   defaultValue = "",
-  validationError = "",
+  rawErrors = [],
 }: {
-  labelId: string;
   labelText: string;
   description: string;
   fieldId: string;
@@ -133,19 +82,21 @@ export const CommonTextArea = ({
   fieldMaxLength: number;
   onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   defaultValue?: string;
-  validationError?: string;
+  rawErrors?: string[];
 }) => {
+  const error = rawErrors.length ? true : undefined;
   return (
     <>
-      <FormGroup error={Boolean(validationError)} className="margin-top-1">
-        <CommonLabel
-          labelId={labelId}
-          labelText={labelText}
+      <FormGroup key={`form-group__text-input--${fieldId}`} error={error}>
+        <DynamicFieldLabel
+          idFor={fieldId}
+          title={labelText}
+          required={isRequired}
           description={description}
-          fieldId={fieldId}
-          isRequired={isRequired}
-          validationError={validationError}
         />
+        {error && (
+          <FieldErrors fieldName={fieldId} rawErrors={rawErrors as string[]} />
+        )}
         <Textarea
           name={fieldId}
           id={fieldId}
@@ -164,38 +115,38 @@ export const CommonTextArea = ({
 // ----------------------------------------------------------
 export const CommonCharacterCount = ({
   isTextArea = false,
-  labelId,
   labelText,
   description, // or instructions
   fieldId,
   isRequired,
   fieldMaxLength,
-  onTextChange,
   defaultValue = "",
-  validationError = "",
+  onTextChange,
+  rawErrors = [],
 }: {
   isTextArea?: boolean;
-  labelId: string;
   labelText: string;
   description: string;
   fieldId: string;
   isRequired: boolean;
   fieldMaxLength: number;
-  onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   defaultValue?: string;
-  validationError?: string;
+  onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  rawErrors?: string[];
 }) => {
+  const error = rawErrors.length ? true : undefined;
   return (
     <>
-      <FormGroup error={Boolean(validationError)} className="margin-top-1">
-        <CommonLabel
-          labelId={labelId}
-          labelText={labelText}
+      <FormGroup key={`form-group__text-input--${fieldId}`} error={error}>
+        <DynamicFieldLabel
+          idFor={fieldId}
+          title={labelText}
+          required={isRequired}
           description={description}
-          fieldId={fieldId}
-          isRequired={isRequired}
-          validationError={validationError}
         />
+        {error && (
+          <FieldErrors fieldName={fieldId} rawErrors={rawErrors as string[]} />
+        )}
         <CharacterCount
           id={fieldId}
           name={fieldId}
@@ -203,7 +154,7 @@ export const CommonCharacterCount = ({
           defaultValue={defaultValue}
           onChange={onTextChange}
           isTextArea={isTextArea}
-          aria-describedby={labelId}
+          aria-describedby={`label-for-${fieldId}`}
         />
       </FormGroup>
     </>
@@ -214,28 +165,27 @@ export const CommonCharacterCount = ({
 // Common Select input with error block
 // ----------------------------------------------------------
 export const CommonSelectInput = ({
-  labelId,
   labelText,
   description, // or instructions
   fieldId,
   isRequired,
   listKeyValuePairs,
-  defaultSelection,
   pleaseSelectText = "-Select-",
+  defaultSelection,
   onSelectionChange,
-  validationError = "",
+  rawErrors = [],
 }: {
-  labelId: string;
   labelText: string;
   description: string;
   fieldId: string;
   isRequired: boolean;
   listKeyValuePairs: { [key: string]: string };
-  defaultSelection?: string; // optional: default selection key
   pleaseSelectText?: string; // optional: e.g. --Please Select--
+  defaultSelection?: string; // optional: default selection key
   onSelectionChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  validationError?: string;
+  rawErrors?: string[];
 }) => {
+  const error = rawErrors.length ? true : undefined;
   const [selectedValue, setSelectedValue] = useState<string>(
     defaultSelection || "",
   );
@@ -248,15 +198,16 @@ export const CommonSelectInput = ({
 
   return (
     <>
-      <FormGroup error={Boolean(validationError)} className="margin-top-1">
-        <CommonLabel
-          labelId={labelId}
-          labelText={labelText}
+      <FormGroup key={`form-group__text-input--${fieldId}`} error={error}>
+        <DynamicFieldLabel
+          idFor={fieldId}
+          title={labelText}
+          required={isRequired}
           description={description}
-          fieldId={fieldId}
-          isRequired={isRequired}
-          validationError={validationError}
         />
+        {error && (
+          <FieldErrors fieldName={fieldId} rawErrors={rawErrors as string[]} />
+        )}
         <Select
           id={fieldId}
           name={fieldId}
