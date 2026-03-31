@@ -86,10 +86,7 @@ export async function fillField(
       if (field.selector) {
         await selectDropdownByValueOrLabel(page, field.selector, data);
       } else if (field.testId) {
-        const resolvedTestId = field.testId.includes("{value}")
-          ? field.testId.replace("{value}", data)
-          : `${field.testId}${data}`;
-        const locator = page.getByTestId(resolvedTestId);
+        const locator = page.getByTestId(`${field.testId}${data}`);
         await locator.waitFor({ state: "visible", timeout: 5000 });
         await locator.click();
       } else {
@@ -99,8 +96,7 @@ export async function fillField(
       }
     } else if (
       field.type === "combo-box-input" &&
-      field.testId &&
-      typeof data === "string"
+      field.testId
     ) {
       const toggleLocator = page.getByTestId(field.testId);
       await toggleLocator.waitFor({ state: "visible", timeout: 5000 });
@@ -192,29 +188,10 @@ export async function fillField(
       const locator = field.selector
         ? page.locator(field.selector)
         : page.getByTestId(field.testId!);
-      // Use a generous timeout: Mobile Chrome renders the file input more slowly
-      // than desktop Chrome, so 5000ms is insufficient.
       await locator.waitFor({ state: "attached", timeout: 30000 });
       await locator.scrollIntoViewIfNeeded();
       await locator.setInputFiles(data);
-      // Wait for the uploaded filename to appear in the UI before proceeding
-      // const fileName = data.split("/").pop() ?? data;
-      // // Scope the locator to the section if available to avoid strict mode violation
-      // let fileLocator;
-      // if (field.section) {
-      //   // Normalize section name to match DOM id convention (e.g., 'Section 20' -> 'section-20')
-      //   const sectionId = `#form-section-${field.section.toLowerCase().replace(/\s+/g, "-")}`;
-      //   // Debug: log the HTML content of the section after file upload
-      //   const sectionHtml = await page.locator(sectionId).innerHTML().catch(() => "[section not found]");
-      //   await testInfo.attach(`debug-section-html-${fieldIdentifier}`, {
-      //     body: sectionHtml,
-      //     contentType: "text/html",
-      //   });
-      //   fileLocator = page.locator(`${sectionId} *:has-text("${fileName}")`);
-      // } else {
-      //   fileLocator = page.locator(`*:has-text("${fileName}")`);
-      // }
-      // await fileLocator.waitFor({ state: "visible", timeout: 15000 });
+      
     } else {
       throw new Error(
         `Unsupported or invalid field configuration for ${fieldIdentifier}`,
