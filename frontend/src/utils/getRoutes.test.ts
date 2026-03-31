@@ -35,13 +35,13 @@ describe("getNextRoutes", () => {
       "/(base)",
       "/(base)/research-participant-guide",
       "/(base)/roadmap",
-      "/(base)/saved-opportunities",
-      "/(base)/saved-search-queries",
       "/(base)/search",
       "/(base)/settings",
       "/(base)/unauthenticated",
       "/(base)/vision",
       "/(base)/workspace",
+      "/(base)/workspace/saved-opportunities",
+      "/(base)/workspace/saved-search-queries",
       "/(print)/print/application/[applicationId]/form/[appFormId]",
     ]);
   });

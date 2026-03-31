@@ -140,12 +140,12 @@ const NavLinks = ({
 
     workspaceSubNavs.push({
       text: t("savedOpportunities"),
-      href: "/saved-opportunities",
+      href: "/workspace/saved-opportunities",
     });
 
     workspaceSubNavs.push({
       text: t("savedSearches"),
-      href: "/saved-search-queries",
+      href: "/workspace/saved-search-queries",
     });
 
     return anonymousNavLinks.toSpliced(anonymousNavLinks.length, 0, {

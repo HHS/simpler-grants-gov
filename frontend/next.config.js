@@ -239,6 +239,16 @@ const nextConfig = {
         destination: "/workspace",
         permanent: false,
       },
+      {
+        source: "/saved-opportunities",
+        destination: "/workspace/saved-opportunities",
+        permanent: false,
+      },
+      {
+        source: "/saved-search-queries",
+        destination: "/workspace/saved-search-queries",
+        permanent: false,
+      },
     ];
   },
 };

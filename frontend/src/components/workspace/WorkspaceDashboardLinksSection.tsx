@@ -47,7 +47,7 @@ export const WorkspaceDashboardLinksSection = async () => {
             heading={t("savedQueries.heading")}
             description={t("savedQueries.description")}
             linkText={t("savedQueries.linkText")}
-            linkTarget="/saved-search-queries"
+            linkTarget="/workspace/saved-search-queries"
           />
         </Grid>
         <Grid tablet={{ col: 4 }}>
@@ -55,7 +55,7 @@ export const WorkspaceDashboardLinksSection = async () => {
             heading={t("savedOpportunities.heading")}
             description={t("savedOpportunities.description")}
             linkText={t("savedOpportunities.linkText")}
-            linkTarget="/saved-opportunities"
+            linkTarget="/workspace/saved-opportunities"
           />
         </Grid>
       </Grid>

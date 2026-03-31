@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
-import SavedOpportunities from "src/app/[locale]/(base)/saved-opportunities/page";
+import SavedOpportunities from "src/app/[locale]/(base)/workspace/saved-opportunities/page";
 import { Organization } from "src/types/applicationResponseTypes";
 import {
   BaseOpportunity,
