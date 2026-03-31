@@ -163,13 +163,13 @@ export default async function OpportunityEditPage({
               className="padding-y-0 bg-transparent font-sans-sm"
             />
           </div>
-          <div className="display-flex flex-column gap-2 width-full">
-            <div className="maxw-tablet-lg">
+          <div className="display-flex flex-column width-full">
+            <div className="maxw-tablet-lg margin-bottom-2">
               <h1 className="margin-0 font-heading-2xl">{pageTitle}</h1>
             </div>
-            <div className="display-flex flex-column gap-3 width-full desktop:display-flex desktop:flex-row desktop:flex-justify desktop:flex-align-end">
-              <div className="display-flex flex-column gap-2 maxw-mobile-lg">
-                <div className="font-sans-md line-height-sans-5">
+            <div className="display-flex flex-column width-full desktop:display-flex desktop:flex-row desktop:flex-justify desktop:flex-align-end">
+              <div className="display-flex flex-column maxw-mobile-lg">
+                <div className="font-sans-md line-height-sans-5 margin-bottom-2">
                   <span className="text-bold">Last updated:</span> {lastUpdated}
                 </div>
                 <div className="display-flex flex-align-center">
