@@ -55,24 +55,20 @@ export default async function getFormData({
   let applicationFormData = {} as ApplicationFormDetail;
   let formValidationWarnings: FormValidationWarning[] | null;
   let formData: FormDetail | null;
-  let sessionToken = "";
 
   // API can take either internal token or session token to auth
-  if (internalToken) {
-    sessionToken = internalToken;
-  } else {
+  if (!internalToken) {
     const session = await getSession();
 
     if (!session || !session.token) {
       console.error("No active session to access form");
       return { error: "UnauthorizedError" };
     }
-    sessionToken = session.token;
   }
 
   const formDetailsPromise = internalToken
-    ? getApplicationFormDetailsForPrint(sessionToken, applicationId, appFormId)
-    : getApplicationFormDetails(sessionToken, applicationId, appFormId);
+    ? getApplicationFormDetailsForPrint(internalToken, applicationId, appFormId)
+    : getApplicationFormDetails(applicationId, appFormId);
 
   try {
     const response = await formDetailsPromise;

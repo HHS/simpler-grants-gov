@@ -47,10 +47,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   let opportunity = {} as OpportunityDetail;
 
   try {
-    const response = await getApplicationDetails(
-      applicationId,
-      userSession?.token,
-    );
+    const response = await getApplicationDetails(applicationId);
 
     if (response.status_code !== 200) {
       console.error(
@@ -83,10 +80,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
     return <TopLevelError />;
   }
   try {
-    const historyResponse = await getApplicationHistory(
-      applicationId,
-      userSession?.token,
-    );
+    const historyResponse = await getApplicationHistory(applicationId);
     if (historyResponse.status_code !== 200) {
       console.error(
         `Error retrieving application history details for (${applicationId})`,
@@ -103,7 +97,6 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   }
 
   const latestApplicationSubmission = await getLatestApplicationSubmission(
-    userSession?.token,
     applicationId,
     details.application_status,
   );

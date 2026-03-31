@@ -55,7 +55,7 @@ async function FormPage({ params }: formPageProps) {
 
   let response;
   try {
-    response = await getApplicationDetails(applicationId, userSession?.token);
+    response = await getApplicationDetails(applicationId);
 
     if (response.status_code !== 200) {
       console.error(

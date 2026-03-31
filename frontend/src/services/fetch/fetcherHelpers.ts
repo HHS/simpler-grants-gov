@@ -14,19 +14,10 @@ import {
   UnauthorizedError,
   ValidationError,
 } from "src/errors";
+import { getSession } from "src/services/auth/session";
 import { APIResponse } from "src/types/apiResponseTypes";
+import { ApiMethod } from "src/types/generalTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
-
-import { getSession } from "../auth/session";
-
-export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
-export interface JSONRequestBody {
-  [key: string]: unknown;
-}
-
-export interface HeadersDict {
-  [header: string]: string;
-}
 
 // Configuration of headers to send with all requests
 // optionally adds content type and user auth token
@@ -38,8 +29,8 @@ export async function getDefaultHeaders({
   addContentType?: boolean;
   requiresUserAuthToken?: boolean;
   // userAuthToken?: string;
-}): Promise<HeadersDict> {
-  const headers: HeadersDict = {};
+}): Promise<Record<string, string>> {
+  const headers: Record<string, string> = {};
 
   if (environment.API_GW_AUTH) {
     headers["X-API-KEY"] = environment.API_GW_AUTH;
@@ -56,6 +47,8 @@ export async function getDefaultHeaders({
     const session = await getSession();
     if (!session?.token) {
       // Should make sure this works ok - expect API to send back a 403 if the header is missing
+      // we could throw an error, but maybe best to make the API request and let it fail there?
+      // maybe bring this to the group.
       console.warn("no user token present for authorized endpoint call");
     } else {
       headers["X-SGG-Token"] = session.token;
@@ -71,7 +64,7 @@ export function createRequestUrl(
   version: string,
   namespace: string,
   subPath = "",
-  body?: JSONRequestBody | FormData,
+  body?: Record<string, unknown> | FormData,
 ) {
   const cleanedPaths = compact([basePath, version, namespace, subPath]);
   let url = [...cleanedPaths].map(removeRedundantSlashes).join("/");
@@ -101,7 +94,7 @@ export function removeRedundantSlashes(path: string) {
  * Transform the request body into a format that fetch expects
  */
 export function createRequestBody(
-  payload?: JSONRequestBody | FormData,
+  payload?: Record<string, unknown> | FormData,
 ): XMLHttpRequestBodyInit {
   if (payload instanceof FormData) {
     return payload;

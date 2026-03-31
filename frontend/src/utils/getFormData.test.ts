@@ -117,11 +117,7 @@ describe("getFormData", () => {
       appFormId: "form1",
     });
     expect(mockGetApplicationFormDetailsForPrint).not.toHaveBeenCalled();
-    expect(mockGetApplicationFormDetails).toHaveBeenCalledWith(
-      "session-token",
-      "app1",
-      "form1",
-    );
+    expect(mockGetApplicationFormDetails).toHaveBeenCalledWith("app1", "form1");
     expect(result).toEqual({
       data: {
         applicationResponse: { foo: "bar" },

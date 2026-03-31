@@ -1,5 +1,5 @@
 import { environment } from "src/constants/environments";
-import { ApiMethod } from "src/services/fetch/fetcherHelpers";
+import { ApiMethod } from "src/types/generalTypes";
 
 export interface EndpointConfig {
   basePath: string;
@@ -38,6 +38,7 @@ export const toDynamicApplicationsEndpoint = (
     version: "alpha",
     namespace: "applications",
     method: type as ApiMethod,
+    requiresAuth: true,
   };
 };
 

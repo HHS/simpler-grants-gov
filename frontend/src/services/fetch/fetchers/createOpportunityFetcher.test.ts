@@ -1,18 +1,17 @@
 import { createOpportunity } from "src/services/fetch/fetchers/createOpportunityFetcher";
-import { fetchGrantorWithMethod } from "src/services/fetch/fetchers/fetchers";
 
-jest.mock("src/services/fetch/fetchers/fetchers");
+const mockJsonFn = jest.fn();
+const mockResponse = { json: mockJsonFn };
+const mockFetcher = jest.fn().mockResolvedValue(mockResponse);
+const mockFetchGrantorWithMethod = jest.fn((_args: unknown) => mockFetcher);
+jest.mock("src/services/fetch/fetchers/fetchers", () => ({
+  fetchGrantorWithMethod: (...args: unknown[]) =>
+    mockFetchGrantorWithMethod(...(args as [unknown])),
+}));
 
 describe("createOpportunity", () => {
-  let mockJsonFn: jest.Mock;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockJsonFn = jest.fn();
-    const mockResponse = { json: mockJsonFn };
-    (fetchGrantorWithMethod as jest.Mock).mockReturnValue(
-      jest.fn().mockResolvedValue(mockResponse),
-    );
   });
 
   it("should start application with all parameters", async () => {
@@ -33,10 +32,8 @@ describe("createOpportunity", () => {
     const result = await createOpportunity(token, createOppSchema);
 
     expect(result).toEqual(createOppSchema);
-    expect(fetchGrantorWithMethod).toHaveBeenCalledWith("POST");
-    const mockFn = (fetchGrantorWithMethod as jest.Mock).mock.results[0]
-      .value as jest.Mock;
-    expect(mockFn).toHaveBeenCalledWith({
+    expect(mockFetchGrantorWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetcher).toHaveBeenCalledWith({
       subPath: "opportunities",
       additionalHeaders: { "X-SGG-Token": token },
       body: createOppSchema,

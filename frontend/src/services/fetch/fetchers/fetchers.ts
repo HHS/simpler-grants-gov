@@ -22,8 +22,6 @@ import {
   createRequestUrl,
   fetchErrorToNetworkError,
   getDefaultHeaders,
-  HeadersDict,
-  JSONRequestBody,
   throwError,
 } from "src/services/fetch/fetcherHelpers";
 import { APIResponse } from "src/types/apiResponseTypes";
@@ -43,8 +41,8 @@ export function requesterForEndpoint({
   return async function (
     options: {
       subPath?: string;
-      body?: JSONRequestBody | FormData;
-      additionalHeaders?: HeadersDict;
+      body?: Record<string, unknown> | FormData;
+      additionalHeaders?: Record<string, string>;
       nextOptions?: NextFetchRequestConfig;
       allowedErrorStatuses?: number[];
       addContentType?: boolean;
@@ -73,7 +71,7 @@ export function requesterForEndpoint({
       requiresUserAuthToken: requiresAuth,
       // userAuthToken,
     });
-    const headers: HeadersDict = {
+    const headers = {
       ...defaultHeaders,
       ...additionalHeaders,
     };
@@ -162,6 +160,5 @@ export const fetchOrganizationBySavedOpportunities = (
 
 export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);
 
-export const fetchGrantorWithMethod = (
-  type: "POST" | "DELETE" | "PUT" | "GET",
-) => requesterForEndpoint(toDynamicGrantorsEndpoint(type));
+export const fetchGrantorWithMethod = (type: "POST") =>
+  requesterForEndpoint(toDynamicGrantorsEndpoint(type));
