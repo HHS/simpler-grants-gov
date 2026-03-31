@@ -1911,9 +1911,6 @@ export const messages = {
     showLess: "Show less",
     opportunity: "Opportunity",
     editOpportunityDetails: "Edit opportunity details",
-    errorHeadingOppurtunity: "Error fetching opportunity details",
-    oppurtunityFetchError:
-      "Error fetching opportunity data. Please try refreshing the page.",
     recommendationMethod: {
       label: "Recommendation method",
       description: "Choose the method you'll use to rate",
@@ -1929,6 +1926,32 @@ export const messages = {
       label: "Other key information",
       description:
         "Add any relevant information related to this reviewer and decision-maker for this opportunity",
+    },
+    errorHeadingAwardRecommendation:
+      "Error fetching award recommendation details",
+    awardRecommendationFetchError:
+      "Error fetching award recommendation data. Please try refreshing the page.",
+    recommendations: {
+      heading: "Recommendations",
+      editPageDescription:
+        "Document your award recommendations and the funding strategy used for the period of performance.",
+      description:
+        "Award recommendations and the funding strategy used for the period of performance.",
+      summary: {
+        heading: "Summary",
+        appsReceived: "Apps received",
+        appsRecommended: "Apps recommended",
+        totalFundingRecommended: "Total funding recommended",
+        totalAvailable: "Total available",
+        recommendedWithoutFunding: "Recommended without funding",
+        notRecommendedForFunding: "Not recommended for funding",
+        applications: "applications",
+      },
+      fundingStrategy: {
+        heading: "Funding strategy",
+        description:
+          "Explain how you plan to provide funding over time. For example, will the agency award all funding in a single award or in multiple budget periods across a longer period of performance.",
+      },
     },
   },
   InviteLegacyUsers: {
