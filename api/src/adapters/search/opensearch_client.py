@@ -208,9 +208,13 @@ class SearchClient:
         params: dict | None = None,
         includes: list[str] | None = None,
         excludes: list[str] | None = None,
+        explain: bool = False,
     ) -> SearchResponse:
         if params is None:
             params = {}
+
+        if explain:
+            search_query = search_query | {"explain": True}
 
         raw_response = self._client.search(
             index=index_name,
