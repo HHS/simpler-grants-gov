@@ -60,7 +60,7 @@ export default async function OpportunityEditPage({ params }: PageProps) {
 
   const session = await getSession();
   if (!session || !session.token) {
-    redirect(`/login`, RedirectType.push);
+    redirect(`/opportunity/${id}`, RedirectType.push);
   }
 
   // TODO(#8601): Replace this fail-closed placeholder with a real grantor authorization
