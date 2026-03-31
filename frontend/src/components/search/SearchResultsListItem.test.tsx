@@ -52,35 +52,35 @@ describe("SearchResultsListItem", () => {
     ).not.toBeInTheDocument();
   });
 
-  getDateTestCases().forEach(({ apiDate, uiDate }) => {
-    it(`renders formatted date ${uiDate} for API date ${apiDate}`, () => {
+  getDateTestCases().forEach(({ api_date, ui_date }) => {
+    it(`renders formatted date ${ui_date} for API date ${api_date}`, () => {
       const opportunityWithDate = {
         ...mockOpportunity,
         summary: {
           ...mockOpportunity.summary,
-          post_date: apiDate,
+          post_date: api_date,
         },
       };
 
       render(
         <SearchResultsListItem index={1} opportunity={opportunityWithDate} />,
       );
-      expect(screen.getByText(uiDate)).toBeInTheDocument();
+      expect(screen.getByText(ui_date)).toBeInTheDocument();
     });
   });
 });
 
 function getDateTestCases() {
   return [
-    { apiDate: "2024-05-01", uiDate: "May 1, 2024" },
-    { apiDate: "2023-07-21", uiDate: "July 21, 2023" },
-    { apiDate: "2022-11-30", uiDate: "November 30, 2022" },
-    { apiDate: "2021-01-15", uiDate: "January 15, 2021" },
-    { apiDate: "2020-06-17", uiDate: "June 17, 2020" },
-    { apiDate: "2019-08-25", uiDate: "August 25, 2019" },
-    { apiDate: "2018-12-05", uiDate: "December 5, 2018" },
-    { apiDate: "2017-09-13", uiDate: "September 13, 2017" },
-    { apiDate: "2016-04-07", uiDate: "April 7, 2016" },
-    { apiDate: "2015-03-23", uiDate: "March 23, 2015" },
+    { api_date: "2024-05-01", ui_date: "May 1, 2024" },
+    { api_date: "2023-07-21", ui_date: "July 21, 2023" },
+    { api_date: "2022-11-30", ui_date: "November 30, 2022" },
+    { api_date: "2021-01-15", ui_date: "January 15, 2021" },
+    { api_date: "2020-06-17", ui_date: "June 17, 2020" },
+    { api_date: "2019-08-25", ui_date: "August 25, 2019" },
+    { api_date: "2018-12-05", ui_date: "December 5, 2018" },
+    { api_date: "2017-09-13", ui_date: "September 13, 2017" },
+    { api_date: "2016-04-07", ui_date: "April 7, 2016" },
+    { api_date: "2015-03-23", ui_date: "March 23, 2015" },
   ];
 }
