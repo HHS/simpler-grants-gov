@@ -30,6 +30,10 @@ class SearchResponse:
     # e.g. {"agency": 12, "applicant_type": 0}
     agg_overflow: dict[str, int] = dataclasses.field(default_factory=dict)
 
+    # Raw hit objects from OpenSearch, preserving _explanation and _score fields.
+    # Used for explanation-based logging (e.g. SearchResultExplanation events).
+    raw_hits: list[dict[str, typing.Any]] = dataclasses.field(default_factory=list)
+
     @classmethod
     def from_opensearch_response(
         cls, raw_json: dict[str, typing.Any], include_scores: bool = True
@@ -100,6 +104,7 @@ class SearchResponse:
             max_score=max_score,
             total_relation=total_relation,
             agg_overflow=agg_overflow,
+            raw_hits=list(raw_records),
         )
 
 

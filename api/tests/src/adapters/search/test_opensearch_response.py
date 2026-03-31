@@ -35,6 +35,15 @@ def _make_raw_response(
     return response
 
 
+def _make_hit(
+    doc_id: str, source: dict, score: float = 1.0, explanation: dict | None = None
+) -> dict:
+    hit: dict = {"_id": doc_id, "_score": score, "_source": source}
+    if explanation is not None:
+        hit["_explanation"] = explanation
+    return hit
+
+
 class TestSearchResponseParsing:
     def test_parses_all_fields_when_present(self):
         raw = _make_raw_response(
@@ -73,6 +82,7 @@ class TestSearchResponseParsing:
             "search.score_stdev": None,
         }
         assert response.agg_overflow == {}
+        assert response.raw_hits == []
 
     def test_parses_fields_when_explicitly_none(self):
         raw = _make_raw_response(
@@ -100,3 +110,60 @@ class TestSearchResponseParsing:
         response = SearchResponse.from_opensearch_response(raw)
 
         assert response.agg_overflow == {"agency": 5}
+
+
+class TestSearchResponseRawHits:
+    def test_raw_hits_preserved(self):
+        hit = _make_hit("1", {"opportunity_id": "abc", "title": "Test"}, score=5.0)
+        raw = _make_raw_response(hits=[hit])
+        response = SearchResponse.from_opensearch_response(raw)
+
+        assert len(response.raw_hits) == 1
+        assert response.raw_hits[0]["_id"] == "1"
+        assert response.raw_hits[0]["_score"] == pytest.approx(5.0)
+        assert response.raw_hits[0]["_source"]["opportunity_id"] == "abc"
+
+    def test_raw_hits_include_explanation_when_present(self):
+        explanation = {
+            "value": 5.0,
+            "description": "sum of:",
+            "details": [
+                {
+                    "value": 5.0,
+                    "description": "weight(agency_code^16:usaid in 0) [PerFieldSimilarity]",
+                    "details": [],
+                }
+            ],
+        }
+        hit = _make_hit("1", {"opportunity_id": "abc"}, explanation=explanation)
+        raw = _make_raw_response(hits=[hit])
+        response = SearchResponse.from_opensearch_response(raw)
+
+        assert response.raw_hits[0]["_explanation"] == explanation
+
+    def test_raw_hits_empty_when_no_hits(self):
+        raw = _make_raw_response(hits=[])
+        response = SearchResponse.from_opensearch_response(raw)
+        assert response.raw_hits == []
+
+    def test_raw_hits_do_not_affect_records(self):
+        """records should still contain only _source data with relevancy_score."""
+        source = {"opportunity_id": "abc", "title": "Test"}
+        hit = _make_hit("1", source, score=7.5)
+        raw = _make_raw_response(hits=[hit])
+        response = SearchResponse.from_opensearch_response(raw, include_scores=True)
+
+        assert response.records == [
+            {"opportunity_id": "abc", "title": "Test", "relevancy_score": 7.5}
+        ]
+
+    def test_multiple_raw_hits_order_preserved(self):
+        hits = [
+            _make_hit(str(i), {"opportunity_id": str(i)}, score=float(10 - i)) for i in range(5)
+        ]
+        raw = _make_raw_response(hits=hits)
+        response = SearchResponse.from_opensearch_response(raw)
+
+        assert len(response.raw_hits) == 5
+        for i, raw_hit in enumerate(response.raw_hits):
+            assert raw_hit["_id"] == str(i)
