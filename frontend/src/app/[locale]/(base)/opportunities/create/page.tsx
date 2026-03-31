@@ -3,7 +3,9 @@ import { UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { fetchUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
+import { LocalizedPageProps } from "src/types/intl";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { useTranslations } from "next-intl";
 import { redirect } from "next/navigation";
@@ -62,11 +64,18 @@ const PageHeader = () => {
 };
 
 // --- Main Page ---
-type FormPageProps = {
-  params: Promise<{ agencyId: string; locale: string }>;
-};
-async function CreateOpportunityPage({ params }: FormPageProps) {
-  const { agencyId } = await params;
+type CreateOpportunityProps = LocalizedPageProps & WithFeatureFlagProps;
+
+async function CreateOpportunityPage(props: CreateOpportunityProps) {
+  const { searchParams } = props;
+  const resolvedSearchParams: Record<string, string | string[] | undefined> =
+    searchParams ? await searchParams : {};
+  const selectedAgencyParam: string | string[] | undefined =
+    resolvedSearchParams.agency;
+  const agencyId: string | undefined = Array.isArray(selectedAgencyParam)
+    ? selectedAgencyParam[0]
+    : selectedAgencyParam;
+
   const userSession = await getSession();
 
   // Check the user's session
@@ -111,7 +120,7 @@ async function CreateOpportunityPage({ params }: FormPageProps) {
   );
 }
 
-export default withFeatureFlag<FormPageProps, never>(
+export default withFeatureFlag<CreateOpportunityProps, never>(
   CreateOpportunityPage,
   "opportunitiesListOff",
   () => redirect("/maintenance"),
