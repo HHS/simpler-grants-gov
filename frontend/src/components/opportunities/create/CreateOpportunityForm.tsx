@@ -145,7 +145,6 @@ export function CreateOpportunityForm({
         <div data-testid="formGroup" className="width-full">
           {/* Opportunity Number */}
           <CommonCharacterCount
-            labelId="label-for-opportunityNumber"
             labelText={t("CreateOpportunityForm.opportunityNumber")}
             description={t("CreateOpportunityForm.opportunityNumberDesc")}
             fieldId="opportunityNumber"
@@ -158,7 +157,6 @@ export function CreateOpportunityForm({
           {/* Opportunity Title */}
           <CommonCharacterCount
             isTextArea={true}
-            labelId="label-for-opportunityTitle"
             labelText={t("CreateOpportunityForm.opportunityTitle")}
             description={t("CreateOpportunityForm.opportunityTitleDesc")}
             fieldId="opportunityTitle"
@@ -170,7 +168,6 @@ export function CreateOpportunityForm({
 
           {/* Agency */}
           <CommonSelectInput
-            labelId="label-for-agencyId"
             labelText={t("CreateOpportunityForm.agency")}
             description={""}
             fieldId="agencyId"
@@ -182,7 +179,6 @@ export function CreateOpportunityForm({
 
           {/* Category */}
           <CommonSelectInput
-            labelId="label-for-category"
             labelText={t("CreateOpportunityForm.category")}
             description={t("CreateOpportunityForm.categoryDesc")}
             fieldId="category"
@@ -196,7 +192,6 @@ export function CreateOpportunityForm({
           {showExplain && (
             <CommonCharacterCount
               isTextArea={true}
-              labelId="label-for-categoryExplanation"
               labelText={t("CreateOpportunityForm.categoryExplanation")}
               description={t("CreateOpportunityForm.categoryExplanationDesc")}
               fieldId="categoryExplanation"
@@ -209,7 +204,6 @@ export function CreateOpportunityForm({
 
           {/* Assistance Listing Number (ALN) */}
           <CommonCharacterCount
-            labelId="label-for-assistanceListingNumber"
             labelText={t("CreateOpportunityForm.assistanceListingNumber")}
             description={t("CreateOpportunityForm.assistanceListingNumberDesc")}
             fieldId="assistanceListingNumber"
