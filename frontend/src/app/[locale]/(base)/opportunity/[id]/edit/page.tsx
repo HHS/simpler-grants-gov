@@ -137,8 +137,15 @@ export default async function OpportunityEditPage({
     awardSelectionMethod: opportunityData.category || "",
     awardSelectionMethodExplanation: opportunityData.category_explanation || "",
   };
-  const lastUpdated =
+  const rawLastUpdated =
     opportunityData.summary?.post_date || opportunityData.updated_at || "";
+  const lastUpdated = rawLastUpdated
+    ? new Date(rawLastUpdated).toLocaleDateString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
+      })
+    : "";
   const navigationItems = [
     { text: "Key information", href: "key-information" },
     { text: "Funding details", href: "funding-details" },
@@ -165,8 +172,8 @@ export default async function OpportunityEditPage({
                 <div className="font-sans-md line-height-sans-5">
                   <span className="text-bold">Last updated:</span> {lastUpdated}
                 </div>
-                <div className="display-flex flex-align-center grid-gap-1">
-                  <span className="text-bold font-sans-md line-height-sans-5">
+                <div className="display-flex flex-align-center">
+                  <span className="text-bold font-sans-md line-height-sans-5 margin-right-1">
                     Status:
                   </span>
                   <span className="display-inline-flex flex-align-center bg-accent-warm text-ink padding-y-05 padding-x-1 radius-sm">
