@@ -26,7 +26,7 @@ const ApplicationsPageWrapper = ({ children }: PropsWithChildren) => {
         breadcrumbList={[
           {
             title: t("breadcrumbWorkspace"),
-            path: `/dashboard`,
+            path: `/workspace`,
           },
           {
             title: t("breadcrumbApplications"),

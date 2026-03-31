@@ -15,7 +15,6 @@ describe("getNextRoutes", () => {
       "/(base)/applications",
       "/(base)/award-recommendation/1/edit",
       "/(base)/award-recommendation/1",
-      "/(base)/dashboard",
       "/(base)/dev/feature-flags",
       "/(base)/developers/api-dashboard",
       "/(base)/developers",
@@ -42,6 +41,7 @@ describe("getNextRoutes", () => {
       "/(base)/settings",
       "/(base)/unauthenticated",
       "/(base)/vision",
+      "/(base)/workspace",
       "/(print)/print/application/[applicationId]/form/[appFormId]",
     ]);
   });

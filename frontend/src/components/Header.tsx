@@ -126,7 +126,7 @@ const NavLinks = ({
 
     workspaceSubNavs.push({
       text: t("workspaceDashboard"),
-      href: "/dashboard",
+      href: "/workspace",
     });
 
     workspaceSubNavs.push({

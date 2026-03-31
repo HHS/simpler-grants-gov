@@ -10,7 +10,7 @@ const PageBreadcrumbs = ({ organizationId }: { organizationId: string }) => {
       breadcrumbList={[
         {
           title: t("ManageUsers.breadcrumbWorkspace"),
-          path: `/dashboard`,
+          path: `/workspace`,
         },
         {
           title: t("ManageUsers.breadcrumbOrganizations"),

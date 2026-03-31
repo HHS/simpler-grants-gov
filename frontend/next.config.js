@@ -234,6 +234,11 @@ const nextConfig = {
         destination: "/developers/api-dashboard",
         permanent: false,
       },
+      {
+        source: "/dashboard",
+        destination: "/workspace",
+        permanent: false,
+      },
     ];
   },
 };

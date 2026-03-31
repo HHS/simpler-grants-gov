@@ -79,7 +79,7 @@ describe("Saved Searches page", () => {
       breadcrumbList: [
         {
           title: "breadcrumbWorkspace",
-          path: "/dashboard",
+          path: "/workspace",
         },
         {
           title: "breadcrumbSavedQueries",

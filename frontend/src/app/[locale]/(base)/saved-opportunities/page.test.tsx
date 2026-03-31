@@ -175,7 +175,7 @@ describe("Saved Opportunities page", () => {
       breadcrumbList: [
         {
           title: "SavedOpportunities.breadcrumbWorkspace",
-          path: "/dashboard",
+          path: "/workspace",
         },
         {
           title: "SavedOpportunities.breadcrumbSavedOpportunities",

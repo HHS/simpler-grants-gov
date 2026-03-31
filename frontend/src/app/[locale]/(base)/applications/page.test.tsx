@@ -58,7 +58,7 @@ describe("Applications", () => {
         breadcrumbList: [
           {
             title: "breadcrumbWorkspace",
-            path: "/dashboard",
+            path: "/workspace",
           },
           {
             title: "breadcrumbApplications",
