@@ -8,6 +8,7 @@ import pytest
 
 from src.adapters.search.opensearch_explain import (
     EXPLAIN_TOP_N,
+    FieldExplanation,
     log_search_result_explanations,
     parse_field_scores,
 )
@@ -42,8 +43,8 @@ def _make_weight_detail_no_boost(field: str, score: float) -> dict:
 class TestParseFieldScores:
     def test_single_field(self):
         explanation = _make_explanation([_make_weight_detail("agency_code", 16, 16.0)])
-        scores = parse_field_scores(explanation)
-        assert scores == {"agency_code": 16.0}
+        result = parse_field_scores(explanation)
+        assert result == {"agency_code": FieldExplanation(score=16.0, boost=16.0)}
 
     def test_multiple_fields(self):
         explanation = _make_explanation(
@@ -53,17 +54,17 @@ class TestParseFieldScores:
                 _make_weight_detail("opportunity_title", 2, 2.0),
             ]
         )
-        scores = parse_field_scores(explanation)
-        assert scores == {
-            "agency_code": 16.0,
-            "opportunity_number": 12.0,
-            "opportunity_title": 2.0,
+        result = parse_field_scores(explanation)
+        assert result == {
+            "agency_code": FieldExplanation(score=16.0, boost=16.0),
+            "opportunity_number": FieldExplanation(score=12.0, boost=12.0),
+            "opportunity_title": FieldExplanation(score=2.0, boost=2.0),
         }
 
     def test_field_with_keyword_suffix(self):
         explanation = _make_explanation([_make_weight_detail("agency_code.keyword", 16, 16.0)])
-        scores = parse_field_scores(explanation)
-        assert scores == {"agency_code.keyword": 16.0}
+        result = parse_field_scores(explanation)
+        assert result == {"agency_code.keyword": FieldExplanation(score=16.0, boost=16.0)}
 
     def test_duplicate_field_scores_are_summed(self):
         # The same field can appear more than once in a bool query (multiple should clauses)
@@ -73,13 +74,13 @@ class TestParseFieldScores:
                 _make_weight_detail("agency_code", 16, 4.0),
             ]
         )
-        scores = parse_field_scores(explanation)
-        assert scores == {"agency_code": 12.0}
+        result = parse_field_scores(explanation)
+        assert result == {"agency_code": FieldExplanation(score=12.0, boost=16.0)}
 
     def test_field_without_boost(self):
         explanation = _make_explanation([_make_weight_detail_no_boost("summary_description", 5.0)])
-        scores = parse_field_scores(explanation)
-        assert scores == {"summary_description": 5.0}
+        result = parse_field_scores(explanation)
+        assert result == {"summary_description": FieldExplanation(score=5.0, boost=None)}
 
     def test_nested_explanation(self):
         # OpenSearch sometimes nests weight nodes under intermediate sum nodes
@@ -90,12 +91,12 @@ class TestParseFieldScores:
             "details": [inner_detail],
         }
         explanation = _make_explanation([outer_sum])
-        scores = parse_field_scores(explanation)
-        assert scores == {"opportunity_number": 12.0}
+        result = parse_field_scores(explanation)
+        assert result == {"opportunity_number": FieldExplanation(score=12.0, boost=12.0)}
 
     def test_empty_explanation(self):
-        scores = parse_field_scores({})
-        assert scores == {}
+        result = parse_field_scores({})
+        assert result == {}
 
     def test_explanation_with_no_weight_nodes(self):
         explanation = {
@@ -103,8 +104,8 @@ class TestParseFieldScores:
             "description": "ConstantScore(*:*)",
             "details": [],
         }
-        scores = parse_field_scores(explanation)
-        assert scores == {}
+        result = parse_field_scores(explanation)
+        assert result == {}
 
 
 # ---------------------------------------------------------------------------
@@ -168,7 +169,7 @@ class TestLogSearchResultExplanations:
         assert mock_record_event.call_count == EXPLAIN_TOP_N
 
     @patch("src.adapters.search.opensearch_explain.record_custom_event")
-    def test_includes_field_scores_when_explanation_present(self, mock_record_event):
+    def test_includes_field_scores_and_boosts_when_explanation_present(self, mock_record_event):
         explanation = _make_explanation(
             [
                 _make_weight_detail("agency_code", 16, 16.0),
@@ -181,7 +182,21 @@ class TestLogSearchResultExplanations:
         _, params = mock_record_event.call_args_list[0][0]
         assert params["total_score"] == pytest.approx(28.0)
         assert params["field_score.agency_code"] == pytest.approx(16.0)
+        assert params["field_boost.agency_code"] == pytest.approx(16.0)
         assert params["field_score.opportunity_number"] == pytest.approx(12.0)
+        assert params["field_boost.opportunity_number"] == pytest.approx(12.0)
+
+    @patch("src.adapters.search.opensearch_explain.record_custom_event")
+    def test_no_boost_when_field_has_no_boost(self, mock_record_event):
+        explanation = _make_explanation(
+            [_make_weight_detail_no_boost("summary_description", 5.0)]
+        )
+        hits = [_make_hit("opp-1", "NUM-1", "DOC", 5.0, explanation=explanation)]
+        log_search_result_explanations(hits, query="test", scoring_rule="default")
+
+        _, params = mock_record_event.call_args_list[0][0]
+        assert params["field_score.summary_description"] == pytest.approx(5.0)
+        assert "field_boost.summary_description" not in params
 
     @patch("src.adapters.search.opensearch_explain.record_custom_event")
     def test_no_field_scores_when_no_explanation(self, mock_record_event):
@@ -190,6 +205,7 @@ class TestLogSearchResultExplanations:
 
         _, params = mock_record_event.call_args_list[0][0]
         assert not any(k.startswith("field_score.") for k in params)
+        assert not any(k.startswith("field_boost.") for k in params)
 
     @patch("src.adapters.search.opensearch_explain.record_custom_event")
     def test_empty_hits_logs_no_events(self, mock_record_event):

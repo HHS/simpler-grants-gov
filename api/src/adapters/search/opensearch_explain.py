@@ -19,41 +19,59 @@ logger = logging.getLogger(__name__)
 
 # Only log explanations for the top N results to limit event volume
 EXPLAIN_TOP_N = 10
+SEARCH_RESULT_EXPLANATION_EVENT = "SearchResultExplanation"
 
 
-def parse_field_scores(explanation: dict[str, typing.Any]) -> dict[str, float]:
+class FieldExplanation(typing.NamedTuple):
+    score: float
+    boost: float | None
+
+
+def parse_field_scores(
+    explanation: dict[str, typing.Any],
+) -> dict[str, FieldExplanation]:
     """
-    Parse an OpenSearch _explanation object and return a field_name -> score mapping.
+    Parse an OpenSearch _explanation object and return a field_name -> FieldExplanation mapping.
 
     Traverses the explanation tree looking for "weight(...)" leaf nodes, which
-    represent individual field contributions to the total score. For example:
+    represent individual field score contributions. For example:
 
-        weight(agency_code^16:usaid in 0) [PerFieldSimilarity], result of:
+        {"value": 22.5, "description": "weight(agency_code^16:usaid in 0) [PerFieldSimilarity]"}
 
-    yields {"agency_code": 16.0}.
+    yields {"agency_code": FieldExplanation(score=22.5, boost=16.0)}.
+
+    Fields without a boost (e.g. "weight(summary_description:term ...)") will
+    have boost=None.
 
     Fields that appear multiple times (e.g. from multiple query clauses) have
-    their scores summed.
+    their scores summed. Boost is taken from the first occurrence.
     """
-    scores: dict[str, float] = {}
-    _collect_field_scores(explanation, scores)
-    return scores
+    results: dict[str, FieldExplanation] = {}
+    _collect_field_scores(explanation, results)
+    return results
 
 
-def _collect_field_scores(node: dict[str, typing.Any], scores: dict[str, float]) -> None:
+def _collect_field_scores(
+    node: dict[str, typing.Any], results: dict[str, FieldExplanation]
+) -> None:
     description: str = node.get("description", "")
     value: float = float(node.get("value", 0.0))
 
     # Match descriptions like: weight(FIELD_NAME^BOOST:term ...) or weight(FIELD_NAME:term ...)
-    match = re.match(r"^weight\(([^:^]+?)(?:\^[\d.]+)?:", description)
+    match = re.match(r"^weight\(([^:^]+?)(?:\^([\d.]+))?:", description)
     if match:
         field_name = match.group(1)
-        scores[field_name] = scores.get(field_name, 0.0) + value
+        boost = float(match.group(2)) if match.group(2) else None
+        existing = results.get(field_name)
+        results[field_name] = FieldExplanation(
+            score=(existing.score if existing else 0.0) + value,
+            boost=existing.boost if existing else boost,
+        )
         # Don't recurse into weight sub-details; they are sub-computations, not additional fields
         return
 
     for detail in node.get("details", []):
-        _collect_field_scores(detail, scores)
+        _collect_field_scores(detail, results)
 
 
 def log_search_result_explanations(
@@ -73,7 +91,8 @@ def log_search_result_explanations(
       - agency_code      – the agency code
       - position         – 1-based rank in the result set
       - total_score      – the overall _score from OpenSearch
-      - field_score.*    – one attribute per scored field (e.g. field_score.agency_code)
+      - field_score.*    – BM25 score contribution per field (e.g. field_score.agency_code)
+      - field_boost.*    – configured boost weight per field, when present (e.g. field_boost.agency_code)
     """
     correlation_id: str | None = None
     if flask.has_request_context():
@@ -97,8 +116,10 @@ def log_search_result_explanations(
         }
 
         if explanation:
-            field_scores = parse_field_scores(explanation)
-            for field_name, score in field_scores.items():
-                params[f"field_score.{field_name}"] = score
+            field_explanations = parse_field_scores(explanation)
+            for field_name, field_exp in field_explanations.items():
+                params[f"field_score.{field_name}"] = field_exp.score
+                if field_exp.boost is not None:
+                    params[f"field_boost.{field_name}"] = field_exp.boost
 
-        record_custom_event("SearchResultExplanation", params)
+        record_custom_event(SEARCH_RESULT_EXPLANATION_EVENT, params)
