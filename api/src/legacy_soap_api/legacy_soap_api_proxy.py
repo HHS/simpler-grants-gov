@@ -12,7 +12,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     LOG_LOCAL_RESPONSE_HEADER_KEY,
     MTLS_CERT_HEADER_KEY,
     S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY,
-    USE_SOAP_JWT_HEADER_KEY,
+    USE_SOAP_CERT_HEADER_KEY,
     SessionResumptionAdapter,
     SOAPAuth,
     SOAPClientCertificateLookupError,
@@ -37,46 +37,56 @@ logger = logging.getLogger(__name__)
 PROXY_TIMEOUT = 3600
 
 
+def get_proxy_headers(
+    soap_request: SOAPRequest,
+    config: LegacySoapAPIConfig,
+    soap_auth: SOAPAuth | None,
+    use_soap_cert: bool,
+) -> dict:
+    # Exclude header keys that are utilized only in simpler soap api. Not needed for proxy request.
+    if use_soap_cert or not soap_auth or not soap_auth.certificate.legacy_certificate:
+        return filter_headers(
+            soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
+        )
+    return {
+        S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY: get_soap_jwt_auth_jwt(
+            config, soap_auth.certificate.legacy_certificate
+        )
+    }
+
+
 def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) -> SOAPResponse:
     config = get_soap_config()
 
     soap_auth = soap_request.auth
-    use_soap_jwt = soap_request.headers.get(USE_SOAP_JWT_HEADER_KEY) == "1"
+    use_soap_cert = soap_request.headers.get(USE_SOAP_CERT_HEADER_KEY) == "1"
     should_log_response = soap_request.headers.get(LOG_LOCAL_RESPONSE_HEADER_KEY) == "1"
-    if use_soap_jwt and soap_auth and soap_auth.certificate.legacy_certificate:
-        logger.info(
-            "soap_client_certificate: sending certificate with jwt",
-            extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_JWT},
-        )
-        proxy_headers = {
-            S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY: get_soap_jwt_auth_jwt(
-                config, soap_auth.certificate.legacy_certificate
-            )
-        }
-        proxy_url = join(
-            config.soap_partner_gateway_uri,
-            "grantsws-agency-partner/services/v2/AgencyWebServicesSoapPort",
-        )
-    else:
-        # Exclude header keys that are utilized only in simpler soap api. Not needed for proxy request.
-        proxy_headers = filter_headers(
-            soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
-        )
+    is_valid_soap_certificate = soap_auth and soap_auth.certificate.legacy_certificate
+    proxy_headers = get_proxy_headers(soap_request, config, soap_auth, use_soap_cert)
+    if use_soap_cert or not is_valid_soap_certificate:
         # Use X-Gg-S2S-Uri header locally if passed, otherwise default to GRANTS_GOV_URI:GRANTS_GOV_PORT.
         proxy_url = join(
             soap_request.headers.get(config.gg_s2s_proxy_header_key, config.gg_url),
             soap_request.full_path.lstrip("/"),
         )
-
+    else:
+        logger.info(
+            "soap_client_certificate: using jwt auth",
+            extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_JWT},
+        )
+        proxy_url = join(
+            config.soap_partner_gateway_uri,
+            "grantsws-agency-partner/services/v2/AgencyWebServicesSoapPort",
+        )
     _request = Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
 
-    if not soap_auth or config.soap_auth_map == {} or use_soap_jwt:
+    if not soap_auth or config.soap_auth_map == {} or not use_soap_cert:
         logger.info(
             "soap_client_certificate: Sending soap request without client certificate",
             extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITHOUT_CERT},
         )
         response = _get_soap_response(_request, timeout=timeout)
-        if use_soap_jwt and should_log_response:
+        if not use_soap_cert and should_log_response:
             log_local(
                 msg="soap jwt proxy response",
                 data=response.to_bytes().decode("utf-8"),

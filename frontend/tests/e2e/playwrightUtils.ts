@@ -228,19 +228,29 @@ export const performSignIn = async (page: Page, project: FullProject) => {
 
 export const openMobileNav = async (page: Page) => {
   const menuOpener = page.locator(`button[data-testid="navMenuButton"]`);
-  await menuOpener.click();
-
-  // Wait for animation to complete on slow staging environment
-  if (targetEnv === "staging") {
-    await page.waitForTimeout(5000);
-  }
-
   const nav = page.locator(".usa-nav");
   const overlay = page.locator(".usa-overlay");
   const timeout = targetEnv === "staging" ? 120000 : 10000;
 
-  await expect(nav).toHaveClass(/is-visible/, { timeout });
-  await expect(overlay).toBeVisible({ timeout });
+  // If the nav is already open (e.g. left open by authenticateE2eUser), skip
+  // clicking the hamburger button — clicking it again would close the nav and
+  // the open nav overlay would intercept the click causing a timeout.
+  const alreadyOpen = await nav
+    .evaluate((el) => el.classList.contains("is-visible"))
+    .catch(() => false);
+
+  if (!alreadyOpen) {
+    await menuOpener.click();
+
+    // Wait for animation to complete on slow staging environment
+    if (targetEnv === "staging") {
+      await page.waitForTimeout(5000);
+    }
+
+    await expect(nav).toHaveClass(/is-visible/, { timeout });
+    await expect(overlay).toBeVisible({ timeout });
+  }
+
   return menuOpener;
 };
 
