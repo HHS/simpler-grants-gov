@@ -14,13 +14,14 @@ import SearchResultListItemStatus from "./SearchResultListItemStatus";
 interface SearchResultsListItemProps {
   opportunity: BaseOpportunity;
   saved?: boolean;
+  showShareButton?: boolean;
   index: number;
   page?: number;
   onShareClick?: (buttonElement: HTMLButtonElement) => void;
   savedOpportunityTags?: SavedOpportunityTag[];
 }
 
-export let isShareWithOrganizationEnabled = true;
+export let isShareWithOrganizationEnabled = false;
 export function updateIsSharedWithOrganizationEnabled(value: boolean) {
   isShareWithOrganizationEnabled = value;
 }
@@ -47,6 +48,7 @@ const resultBorderClasses = `
 export default function SearchResultsListItem({
   opportunity,
   saved = false,
+  showShareButton = false,
   index,
   page = 1,
   onShareClick,
@@ -134,14 +136,14 @@ export default function SearchResultsListItem({
               {opportunity?.summary?.award_floor?.toLocaleString() || "--"}
             </span>
           </div>
-          {saved && onShareClick && isShareWithOrganizationEnabled ? (
+          {showShareButton && onShareClick ? (
             <div className="margin-top-1 text-right">
               <button
                 id={`share-opportunity-button-${opportunity.opportunity_id}`}
                 data-testid="share-opportunity-button-id"
                 type="button"
                 className="usa-button usa-button--unstyled font-sans-2xs"
-                onClick={(event) => onShareClick?.(event.currentTarget)}
+                onClick={(event) => onShareClick(event.currentTarget)}
               >
                 {t("callToAction.shareWithOthers")}
               </button>
