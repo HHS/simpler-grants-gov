@@ -1047,7 +1047,7 @@ input[type="checkbox"]:not(checked) ~ .radius-md,
 .radius-md:has(input[type="checkbox"]:not(checked)) {
   background-color: white;
   border: #e9e9e9 1px solid !important;
-
+}
 // Saved Opportunities Tags
 .saved-opportunity-tags {
   position: relative;
