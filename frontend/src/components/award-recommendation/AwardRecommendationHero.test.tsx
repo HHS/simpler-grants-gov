@@ -19,16 +19,10 @@ jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
 }));
 
-jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
-  getAwardRecommendationDetails: jest
-    .fn()
-    .mockResolvedValue(mockAwardRecommendationDetails),
-}));
-
 describe("AwardRecommendationHero", () => {
-  it("renders hero using details from getAwardRecommendationDetails", async () => {
+  it("renders hero using details from props", async () => {
     const component = await AwardRecommendationHero({
-      awardRecommendationId: "AR-26-0001",
+      awardRecommendationDetails: mockAwardRecommendationDetails,
     });
     render(component);
 
@@ -62,7 +56,7 @@ describe("AwardRecommendationHero", () => {
     ];
 
     const component = await AwardRecommendationHero({
-      awardRecommendationId: "AR-26-0001",
+      awardRecommendationDetails: mockAwardRecommendationDetails,
       buttons: mockButtons,
     });
     render(component);
@@ -78,7 +72,7 @@ describe("AwardRecommendationHero", () => {
 
   it("does not render buttons when buttons prop is not provided", async () => {
     const component = await AwardRecommendationHero({
-      awardRecommendationId: "AR-26-0001",
+      awardRecommendationDetails: mockAwardRecommendationDetails,
     });
     render(component);
 
