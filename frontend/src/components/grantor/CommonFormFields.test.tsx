@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {
+  CommonCharacterCount,
   CommonLabel,
   CommonSelectInput,
   CommonText,
@@ -136,6 +137,67 @@ describe("CommonTextArea", () => {
     // Simulate a change event and test if our variable changed
     fireEvent.change(element, { target: { value: "Hello World 2" } });
     expect(bigTextValue).toBe("Hello World 2");
+  });
+});
+
+// --- Test Common CharacterCount ---
+const mockOnChangeCharCnt = jest.fn();
+const commonCharacterCountProps = {
+  ...commonLabelProps,
+  fieldMaxLength: 40,
+  defaultValue: "",
+  onTextChange: mockOnChangeCharCnt,
+  isTextArea: false,
+};
+describe("CommonCharacterCount", () => {
+  it("Renders the element with maxLength", () => {
+    render(<CommonCharacterCount {...commonCharacterCountProps} />);
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeInTheDocument();
+    expect(element).toHaveValue("");
+    const charCountText = screen.getByText("40 characters allowed");
+    expect(charCountText).toBeInTheDocument();
+  });
+  it("Renders the element with a default value", () => {
+    commonCharacterCountProps.defaultValue = "Prefilled text 2";
+    render(<CommonCharacterCount {...commonCharacterCountProps} />);
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeInTheDocument();
+    expect(element).toHaveValue("Prefilled text 2");
+    const charCountText = screen.getByText("24 characters left");
+    expect(charCountText).toBeInTheDocument();
+    expect(element instanceof HTMLInputElement).toBe(true);
+    expect(element instanceof HTMLTextAreaElement).not.toBe(true);
+  });
+  it("Renders the element as a textarea", () => {
+    commonCharacterCountProps.isTextArea = true;
+    render(<CommonCharacterCount {...commonCharacterCountProps} />);
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeInTheDocument();
+    expect(element instanceof HTMLInputElement).not.toBe(true);
+    expect(element instanceof HTMLTextAreaElement).toBe(true);
+  });
+  it("Renders the element and handle onChange", () => {
+    render(<CommonCharacterCount {...commonCharacterCountProps} />);
+    const element = screen.getByRole("textbox", {
+      name: "Label for Something",
+    });
+    expect(element).toBeInTheDocument();
+    // Simulate a change event and test if our variable changed
+    fireEvent.change(element, {
+      target: { value: "12345678901234567890123456789012345678901234567890" },
+    });
+    expect(mockOnChangeCharCnt).toHaveBeenCalledTimes(1);
+    expect(mockOnChangeCharCnt).toHaveBeenCalledWith(expect.any(Object));
+    // Validate the character count message
+    const charCountText = screen.getByText("10 characters over limit");
+    expect(charCountText).toBeInTheDocument();
   });
 });
 
