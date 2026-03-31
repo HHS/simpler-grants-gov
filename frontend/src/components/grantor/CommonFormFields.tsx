@@ -12,8 +12,6 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import "@trussworks/react-uswds/lib/index.css";
-
 // ----------------------------------------------------------
 // Common Text with the same styles
 // ----------------------------------------------------------
