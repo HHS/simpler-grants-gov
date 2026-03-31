@@ -175,7 +175,7 @@ export const buildOpportunityEditInitialValues = (
     ),
     description: emptyString(summary?.summary_description),
     fundingType: summary?.funding_instruments ?? [],
-    costSharing: summary?.is_cost_sharing ?? false,
+    costSharing: summary?.is_cost_sharing ?? true,
     publishDate: emptyString(summary?.post_date),
     closeDate: emptyString(summary?.close_date),
     closeDateExplanation: emptyString(summary?.close_date_description),

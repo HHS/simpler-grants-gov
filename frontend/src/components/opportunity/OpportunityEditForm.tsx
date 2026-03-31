@@ -759,30 +759,32 @@ export default function OpportunityEditForm({
             </div>
           </div>
 
-          <div className="width-full">
-            <FormGroup>
-              <Label
-                htmlFor="close-date-explanation"
-                className="font-sans-sm text-bold"
-              >
-                {t("labels.closeDateExplanation")}
-              </Label>
-              <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                {t("content.closeDateExplanationHint")}
-              </p>
-              <Textarea
-                id="close-date-explanation"
-                name="closeDateExplanation"
-                value={values.closeDateExplanation}
-                onChange={(event) =>
-                  updateField("closeDateExplanation", event.target.value)
-                }
-                rows={5}
-                className="width-full"
-                disabled={!isDraft}
-              />
-            </FormGroup>
-          </div>
+          {!values.closeDate && (
+            <div className="width-full">
+              <FormGroup>
+                <Label
+                  htmlFor="close-date-explanation"
+                  className="font-sans-sm text-bold"
+                >
+                  {t("labels.closeDateExplanation")}
+                </Label>
+                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
+                  {t("content.closeDateExplanationHint")}
+                </p>
+                <Textarea
+                  id="close-date-explanation"
+                  name="closeDateExplanation"
+                  value={values.closeDateExplanation}
+                  onChange={(event) =>
+                    updateField("closeDateExplanation", event.target.value)
+                  }
+                  rows={5}
+                  className="width-full"
+                  disabled={!isDraft}
+                />
+              </FormGroup>
+            </div>
+          )}
         </div>
       </section>
 
@@ -854,38 +856,38 @@ export default function OpportunityEditForm({
             </div>
           </div>
 
-          <div className="width-full">
-            <FormGroup error={!!getFieldError("additionalEligibilityInfo")}>
-              <Label
-                htmlFor="additional-eligibility-info"
-                className="font-sans-sm text-bold"
-              >
-                {t("labels.additionalEligibilityInfo")}
-                <span className="text-secondary-dark">
-                  <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                </span>
-              </Label>
-              <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                {t("content.additionalEligibilityInfoHint")}
-              </p>
-              {getFieldError("additionalEligibilityInfo") ? (
-                <ErrorMessage>
-                  {getFieldError("additionalEligibilityInfo")}
-                </ErrorMessage>
-              ) : null}
-              <Textarea
-                id="additional-eligibility-info"
-                name="additionalEligibilityInfo"
-                value={values.additionalEligibilityInfo}
-                onChange={(event) =>
-                  updateField("additionalEligibilityInfo", event.target.value)
-                }
-                rows={5}
-                className="width-full"
-                disabled={!isDraft}
-              />
-            </FormGroup>
-          </div>
+          {(values.eligibleApplicants.includes("other") ||
+            values.eligibleApplicants.includes("unrestricted")) && (
+            <div className="width-full">
+              <FormGroup error={!!getFieldError("additionalEligibilityInfo")}>
+                <Label
+                  htmlFor="additional-eligibility-info"
+                  className="font-sans-sm text-bold"
+                >
+                  {t("labels.additionalEligibilityInfo")}
+                </Label>
+                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
+                  {t("content.additionalEligibilityInfoHint")}
+                </p>
+                {getFieldError("additionalEligibilityInfo") ? (
+                  <ErrorMessage>
+                    {getFieldError("additionalEligibilityInfo")}
+                  </ErrorMessage>
+                ) : null}
+                <Textarea
+                  id="additional-eligibility-info"
+                  name="additionalEligibilityInfo"
+                  value={values.additionalEligibilityInfo}
+                  onChange={(event) =>
+                    updateField("additionalEligibilityInfo", event.target.value)
+                  }
+                  rows={5}
+                  className="width-full"
+                  disabled={!isDraft}
+                />
+              </FormGroup>
+            </div>
+          )}
         </div>
       </section>
 
