@@ -1,0 +1,70 @@
+// Happy-path test data for the EPA Key Contacts form (EPA_KeyContacts_2_0).
+// Covers all four contact sections: Authorized Representative, Payee,
+// Administrative Contact, and Project Manager.
+// Keys match the fieldIdentifiers in epa-key-contacts-field-definitions.ts.
+
+export const epaKeyContactsHappyPathTestData = {
+  // ************ Authorized Representative ************
+  authorized_representative_name_prefix: "Dr.",
+  authorized_representative_name_first_name: "Auth First",
+  authorized_representative_name_middle_name: "Auth Middle",
+  authorized_representative_name_last_name: "Auth Last",
+  authorized_representative_name_suffix: "Jr.",
+  authorized_representative_title: "Authorized Rep Title",
+  authorized_representative_address_street1: "1234 Auth Street",
+  authorized_representative_address_street2: "Suite 100",
+  authorized_representative_address_city: "Auth City",
+  authorized_representative_address_state: "VA: Virginia",
+  authorized_representative_address_zip_code: "22201",
+  authorized_representative_address_country: "USA: United States",
+  authorized_representative_phone: "5555550101",
+  authorized_representative_email: "auth.rep@example.com",
+
+  // ************ Payee ************
+  payee_name_prefix: "Ms.",
+  payee_name_first_name: "Payee First",
+  payee_name_middle_name: "Payee Middle",
+  payee_name_last_name: "Payee Last",
+  payee_name_suffix: "Sr.",
+  payee_title: "Payee Title",
+  payee_address_street1: "5678 Payee Avenue",
+  payee_address_street2: "Floor 2",
+  payee_address_city: "Payee City",
+  payee_address_state: "CA: California",
+  payee_address_zip_code: "90001",
+  payee_address_country: "USA: United States",
+  payee_phone: "5555550202",
+  payee_email: "payee@example.com",
+
+  // ************ Administrative Contact ************
+  administrative_contact_name_prefix: "Mr.",
+  administrative_contact_name_first_name: "Admin First",
+  administrative_contact_name_middle_name: "Admin Middle",
+  administrative_contact_name_last_name: "Admin Last",
+  administrative_contact_name_suffix: "III",
+  administrative_contact_title: "Administrative Contact Title",
+  administrative_contact_address_street1: "9012 Admin Blvd",
+  administrative_contact_address_street2: "Room 300",
+  administrative_contact_address_city: "Admin City",
+  administrative_contact_address_state: "TX: Texas",
+  administrative_contact_address_zip_code: "75001",
+  administrative_contact_address_country: "USA: United States",
+  administrative_contact_phone: "5555550303",
+  administrative_contact_email: "admin.contact@example.com",
+
+  // ************ Project Manager ************
+  project_manager_name_prefix: "Prof.",
+  project_manager_name_first_name: "PM First",
+  project_manager_name_middle_name: "PM Middle",
+  project_manager_name_last_name: "PM Last",
+  project_manager_name_suffix: "Ph.D.",
+  project_manager_title: "Project Manager Title",
+  project_manager_address_street1: "3456 PM Road",
+  project_manager_address_street2: "Unit 400",
+  project_manager_address_city: "PM City",
+  project_manager_address_state: "NY: New York",
+  project_manager_address_zip_code: "10001",
+  project_manager_address_country: "USA: United States",
+  project_manager_phone: "5555550404",
+  project_manager_email: "project.manager@example.com",
+} as const;
