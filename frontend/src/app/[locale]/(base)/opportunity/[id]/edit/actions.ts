@@ -61,89 +61,34 @@ function validateOpportunityEditForm(
 ) {
   const reviewOpportunityEditSchema = z
     .object({
-      title: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("title") }),
-      awardSelectionMethod: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("awardSelectionMethod") }),
-      description: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("description") }),
-      publishDate: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("publishDate") }),
+      title: z.string().trim(),
+      awardSelectionMethod: z.string().trim(),
+      description: z.string().trim(),
+      publishDate: z.string().trim(),
       closeDate: z.string().trim(),
       contactEmail: z
         .string()
         .trim()
         .superRefine((value, ctx) => {
-          if (!value) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: validationErrors("contactEmailRequired"),
-            });
-            return;
-          }
-
-          if (!z.string().email().safeParse(value).success) {
+          if (value && !z.string().email().safeParse(value).success) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: validationErrors("contactEmailInvalid"),
             });
           }
         }),
-      contactEmailText: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("contactEmailText") }),
-      fundingType: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("fundingType") }),
-      fundingCategory: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("fundingCategory") }),
-      expectedNumberOfAwards: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("expectedNumberOfAwards") }),
-      estimatedTotalProgramFunding: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("estimatedTotalProgramFunding") }),
-      awardMinimum: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("awardMinimum") }),
-      awardMaximum: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("awardMaximum") }),
-      eligibleApplicants: z
-        .array(z.string())
-        .min(1, { message: validationErrors("eligibleApplicants") }),
-      additionalEligibilityInfo: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("additionalEligibilityInfo") }),
-      additionalInfoUrl: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("additionalInfoUrl") }),
-      additionalInfoUrlText: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("additionalInfoUrlText") }),
-      grantorContactDetails: z
-        .string()
-        .trim()
-        .min(1, { message: validationErrors("grantorContactDetails") }),
+      contactEmailText: z.string().trim(),
+      fundingType: z.string().trim(),
+      fundingCategory: z.string().trim(),
+      expectedNumberOfAwards: z.string().trim(),
+      estimatedTotalProgramFunding: z.string().trim(),
+      awardMinimum: z.string().trim(),
+      awardMaximum: z.string().trim(),
+      eligibleApplicants: z.array(z.string()),
+      additionalEligibilityInfo: z.string().trim(),
+      additionalInfoUrl: z.string().trim(),
+      additionalInfoUrlText: z.string().trim(),
+      grantorContactDetails: z.string().trim(),
     })
     .superRefine(({ publishDate, closeDate }, ctx) => {
       if (!publishDate || !closeDate) {

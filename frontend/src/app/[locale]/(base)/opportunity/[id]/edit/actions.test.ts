@@ -71,30 +71,14 @@ describe("saveOpportunityEditAction", () => {
     mockGetSession.mockResolvedValue({ token: "test-token" } as UserSession);
   });
 
-  it("returns validation errors for missing required fields", async () => {
+  it("allows saving with empty fields (draft partial save)", async () => {
     const formData = new FormData();
 
     const result = await saveOpportunityEditAction(initialState, formData);
 
-    expect(result.validationErrors).toEqual({
-      title: ["title"],
-      awardSelectionMethod: ["awardSelectionMethod"],
-      description: ["description"],
-      publishDate: ["publishDate"],
-      contactEmail: ["contactEmailRequired"],
-      contactEmailText: ["contactEmailText"],
-      awardMinimum: ["awardMinimum"],
-      awardMaximum: ["awardMaximum"],
-      fundingType: ["fundingType"],
-      fundingCategory: ["fundingCategory"],
-      expectedNumberOfAwards: ["expectedNumberOfAwards"],
-      estimatedTotalProgramFunding: ["estimatedTotalProgramFunding"],
-      eligibleApplicants: ["eligibleApplicants"],
-      additionalEligibilityInfo: ["additionalEligibilityInfo"],
-      additionalInfoUrl: ["additionalInfoUrl"],
-      additionalInfoUrlText: ["additionalInfoUrlText"],
-      grantorContactDetails: ["grantorContactDetails"],
-    });
+    // Validation passes; fails at missing opportunityId, not validation errors
+    expect(result.validationErrors).toBeUndefined();
+    expect(result.errorMessage).toBeDefined();
   });
 
   it("returns only the format error for a non-empty invalid email", async () => {

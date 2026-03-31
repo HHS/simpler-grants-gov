@@ -123,7 +123,14 @@ export default async function OpportunityEditPage({
     },
   ];
   const isEditableOpportunity = canEditOpportunity(opportunityData);
-  const initialValues = buildOpportunityEditInitialValues(opportunityData);
+  const activeSummary =
+    opportunityData.forecast_summary ??
+    opportunityData.non_forecast_summary ??
+    opportunityData.summary;
+  const initialValues = buildOpportunityEditInitialValues({
+    ...opportunityData,
+    summary: activeSummary,
+  });
   const pageTitle = `Opportunity #: ${opportunityData.opportunity_number}`;
   const opportunityKeyInformation = {
     title: opportunityData.opportunity_title || "",
