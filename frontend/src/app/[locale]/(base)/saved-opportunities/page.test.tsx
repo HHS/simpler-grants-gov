@@ -18,8 +18,6 @@ import {
   useTranslationsMock,
 } from "src/utils/testing/intlMocks";
 
-import { updateIsSharedWithOrganizationEnabled } from "src/components/search/SearchResultsListItem";
-
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
@@ -108,12 +106,13 @@ function mockSavedOpportunitiesByScope({
 describe("Saved Opportunities page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    updateIsSharedWithOrganizationEnabled(false);
 
     mockSavedOpportunitiesByScope({
       combinedSavedOpportunities: [],
       individuallySavedOpportunities: [],
     });
+
+    clientFetchMock.mockResolvedValue([]);
   });
 
   it("renders intro text for user with no saved opportunities", async () => {
@@ -210,9 +209,7 @@ describe("Saved Opportunities page", () => {
     expect(screen.getByText("Any opportunity status")).toBeInTheDocument();
   });
 
-  it("renders the share button when the feature is enabled and the opportunity is individually saved", async () => {
-    updateIsSharedWithOrganizationEnabled(true);
-
+  it("does not render the share button when the user has no organizations", async () => {
     mockSavedOpportunitiesByScope({
       combinedSavedOpportunities: [
         {
@@ -226,6 +223,39 @@ describe("Saved Opportunities page", () => {
       ],
     });
     opportunityMock.mockResolvedValue({ data: mockOpportunity });
+    clientFetchMock.mockResolvedValue([]);
+
+    const component = await SavedOpportunities({
+      params: localeParams,
+      searchParams: defaultSearchParams,
+    });
+    render(component);
+
+    expect(
+      screen.queryByTestId("share-opportunity-button-id"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the share button when the user has at least one organization", async () => {
+    mockSavedOpportunitiesByScope({
+      combinedSavedOpportunities: [
+        {
+          opportunity_id: mockOpportunity.opportunity_id,
+        } as MinimalOpportunity,
+      ],
+      individuallySavedOpportunities: [
+        {
+          opportunity_id: mockOpportunity.opportunity_id,
+        } as MinimalOpportunity,
+      ],
+    });
+    opportunityMock.mockResolvedValue({ data: mockOpportunity });
+    clientFetchMock.mockResolvedValue([
+      {
+        organization_id: "org-1",
+        sam_gov_entity: { legal_business_name: "Alpha Org" },
+      },
+    ]);
 
     const component = await SavedOpportunities({
       params: localeParams,
@@ -239,8 +269,6 @@ describe("Saved Opportunities page", () => {
   });
 
   it("preserves the Individual tag when an individually saved opportunity is also shared with organizations", async () => {
-    updateIsSharedWithOrganizationEnabled(true);
-
     mockSavedOpportunitiesByScope({
       combinedSavedOpportunities: [
         {
