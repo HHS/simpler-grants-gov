@@ -64,7 +64,10 @@ function validateOpportunityEditForm(
       title: z.string().trim(),
       awardSelectionMethod: z.string().trim(),
       description: z.string().trim(),
-      publishDate: z.string().trim(),
+      publishDate: z
+        .string()
+        .trim()
+        .min(1, { message: validationErrors("publishDate") }),
       closeDate: z.string().trim(),
       contactEmail: z
         .string()
@@ -78,13 +81,21 @@ function validateOpportunityEditForm(
           }
         }),
       contactEmailText: z.string().trim(),
-      fundingType: z.string().trim(),
-      fundingCategory: z.string().trim(),
+      fundingType: z
+        .string()
+        .trim()
+        .min(1, { message: validationErrors("fundingType") }),
+      fundingCategory: z
+        .string()
+        .trim()
+        .min(1, { message: validationErrors("fundingCategory") }),
       expectedNumberOfAwards: z.string().trim(),
       estimatedTotalProgramFunding: z.string().trim(),
       awardMinimum: z.string().trim(),
       awardMaximum: z.string().trim(),
-      eligibleApplicants: z.array(z.string()),
+      eligibleApplicants: z
+        .array(z.string())
+        .min(1, { message: validationErrors("eligibleApplicants") }),
       additionalEligibilityInfo: z.string().trim(),
       additionalInfoUrl: z.string().trim(),
       additionalInfoUrlText: z.string().trim(),

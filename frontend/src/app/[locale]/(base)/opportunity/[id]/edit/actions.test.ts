@@ -71,14 +71,17 @@ describe("saveOpportunityEditAction", () => {
     mockGetSession.mockResolvedValue({ token: "test-token" } as UserSession);
   });
 
-  it("allows saving with empty fields (draft partial save)", async () => {
+  it("returns validation errors only for API-required fields when form is empty", async () => {
     const formData = new FormData();
 
     const result = await saveOpportunityEditAction(initialState, formData);
 
-    // Validation passes; fails at missing opportunityId, not validation errors
-    expect(result.validationErrors).toBeUndefined();
-    expect(result.errorMessage).toBeDefined();
+    expect(result.validationErrors).toEqual({
+      publishDate: ["publishDate"],
+      fundingType: ["fundingType"],
+      fundingCategory: ["fundingCategory"],
+      eligibleApplicants: ["eligibleApplicants"],
+    });
   });
 
   it("returns only the format error for a non-empty invalid email", async () => {
