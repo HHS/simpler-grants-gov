@@ -2032,8 +2032,6 @@ export const messages = {
       assistanceListingNumber: "Assistance listing number",
       assistanceListingNumberDesc:
         "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
-      charactersAllowed40: "40 characters allowed",
-      charactersAllowed255: "255 characters allowed",
       successMessage: "Opportunity started. Continuing shortly...",
     },
   },

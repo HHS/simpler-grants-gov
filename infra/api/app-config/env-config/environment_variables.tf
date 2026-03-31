@@ -40,6 +40,9 @@ locals {
     DOCRAPTOR_API_URL                    = "https://docraptor.com/docs"
     SHORT_LIVED_TOKEN_EXPIRATION_MINUTES = "60"
     PDF_GENERATION_USE_MOCKS             = "false"
+
+    # OpenSearch explanation logging (kill switch if explain queries cause latency issues)
+    OPENSEARCH_EXPLAIN_ENABLED = "true"
   }
 
   # Configuration for secrets
