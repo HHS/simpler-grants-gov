@@ -16,8 +16,18 @@ from tests.src.db.models.factories import (
 from tests.workflow.workflow_test_util import build_start_workflow_event, send_process_event
 
 
+@pytest.fixture(scope="module", autouse=True)
+def setup_index(
+    search_client, opportunity_index, opportunity_index_alias, workflow_client_registry
+):
+    """Setup the index - making sure the alias is set"""
+    search_client.swap_alias_index(opportunity_index, opportunity_index_alias)
+
+
 @pytest.mark.parametrize("is_draft", [True, False])
-def test_opportunity_publish_happy_path(db_session, enable_factory_create, is_draft, caplog):
+def test_opportunity_publish_happy_path(
+    db_session, enable_factory_create, is_draft, caplog, search_client, opportunity_index_alias
+):
     """Verify that sending a start_workflow event will go through the whole state machine"""
     user = UserFactory.create()
     # We verify it's the same regardless of the is_draft flag
@@ -71,6 +81,12 @@ def test_opportunity_publish_happy_path(db_session, enable_factory_create, is_dr
     assert audits[4].source_state == OpportunityPublishState.OPPORTUNITY_WRITTEN_TO_SEARCH
     assert audits[4].target_state == OpportunityPublishState.END
 
+    # Verify the opportunity is in the search index
+    result = search_client.get(opportunity_index_alias, opportunity.opportunity_id)
+    assert result is not None
+    assert result["opportunity_id"] == str(opportunity.opportunity_id)
+    assert result["opportunity_title"] == opportunity.opportunity_title
+
 
 @pytest.mark.parametrize(
     "forecast_post_date,non_forecast_post_date,expected_is_forecast",
@@ -100,6 +116,8 @@ def test_opportunity_publish_calculate_current_opportunity_summary(
     forecast_post_date,
     non_forecast_post_date,
     expected_is_forecast,
+    search_client,
+    opportunity_index_alias,
 ):
     """Test that the opportunity status/current summary is calculated as expected."""
     user = UserFactory.create()
@@ -135,10 +153,13 @@ def test_opportunity_publish_calculate_current_opportunity_summary(
     db_session.refresh(opportunity)
     assert opportunity.is_draft is False
 
+    search_result = search_client.get(opportunity_index_alias, opportunity.opportunity_id)
     if expected_is_forecast is None:
         assert opportunity.current_opportunity_summary is None
+        assert search_result is None
     else:
         assert opportunity.current_opportunity_summary is not None
+
         assert (
             opportunity.current_opportunity_summary.opportunity_summary.is_forecast
             == expected_is_forecast
@@ -146,6 +167,10 @@ def test_opportunity_publish_calculate_current_opportunity_summary(
         assert opportunity.current_opportunity_summary.opportunity_status == (
             OpportunityStatus.FORECASTED if expected_is_forecast else OpportunityStatus.POSTED
         )
+
+        assert search_result is not None
+        assert search_result["opportunity_id"] == str(opportunity.opportunity_id)
+        assert search_result["opportunity_title"] == opportunity.opportunity_title
 
 
 @pytest.mark.parametrize(
@@ -158,7 +183,12 @@ def test_opportunity_publish_calculate_current_opportunity_summary(
     ],
 )
 def test_opportunity_publish_state_machine_invalid_events(
-    db_session, enable_factory_create, current_workflow_state, event_to_send
+    db_session,
+    enable_factory_create,
+    current_workflow_state,
+    event_to_send,
+    search_client,
+    opportunity_index_alias,
 ):
     user = UserFactory.create()
     opportunity = OpportunityFactory.create(is_draft=True)
@@ -178,3 +208,6 @@ def test_opportunity_publish_state_machine_invalid_events(
             # This won't matter as we won't check it due to the error
             expected_state=OpportunityPublishState.START,
         )
+
+    search_result = search_client.get(opportunity_index_alias, opportunity.opportunity_id)
+    assert search_result is None

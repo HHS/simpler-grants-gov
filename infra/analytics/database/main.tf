@@ -100,4 +100,5 @@ module "database" {
   environment_name               = var.environment_name
   grants_gov_oracle_cidr_block   = module.project_config.network_configs[var.environment_name].grants_gov_oracle_cidr_block
   is_temporary                   = local.is_temporary
+  newrelic_entity_guid           = local.database_config.newrelic_entity_guid
 }

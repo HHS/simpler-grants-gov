@@ -14,7 +14,11 @@ from src.workflow.event.workflow_metric_context import WorkflowMetricContext
 from src.workflow.listener.workflow_approval_email_listener import WorkflowApprovalEmailListener
 from src.workflow.listener.workflow_audit_listener import WorkflowAuditListener
 from src.workflow.registry.workflow_registry import WorkflowRegistry
-from src.workflow.service.workflow_service import get_and_validate_workflow, get_workflow_entity
+from src.workflow.service.workflow_service import (
+    get_and_validate_workflow,
+    get_workflow_entity,
+    validate_no_concurrent_workflow,
+)
 from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_constants import WorkflowConstants
 from src.workflow.workflow_errors import (
@@ -150,9 +154,17 @@ class EventHandler:
 
         config, state_machine_cls = self._get_state_machine_for_workflow_type(context.workflow_type)
 
+        if context.entity_type != config.entity_type:
+            raise InvalidEventError("Entity type does not match workflow configuration")
+
         workflow_entity = get_workflow_entity(
             self.db_session,
-            entity_type=context.entity_type,
+            entity_id=context.entity_id,
+            config=config,
+        )
+
+        validate_no_concurrent_workflow(
+            self.db_session,
             entity_id=context.entity_id,
             config=config,
         )
