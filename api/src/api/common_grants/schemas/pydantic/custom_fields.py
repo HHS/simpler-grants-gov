@@ -140,11 +140,11 @@ class FederalFundingSourceField(CustomField):
     """The category type of the grant opportunity."""
 
     name: str = "federalFundingSource"
-    field_type: CustomFieldType = CustomFieldType.ARRAY
+    field_type: CustomFieldType = CustomFieldType.STRING
     schema_url: HttpUrl | None = HttpUrl(
         "https://commongrants.org/custom-fields/federalFundingSource/"
     )
-    value: list[str]
+    value: str
     description: str | None = "The category type of the grant opportunity"
 
     model_config = {"populate_by_name": True}

@@ -191,7 +191,7 @@ class TestTransformation:
         assert result.custom_fields["federalOpportunityNumber"].value == "2024-010"
 
         assert "federalFundingSource" in result.custom_fields
-        assert result.custom_fields["federalFundingSource"].value == ["Mandatory"]
+        assert result.custom_fields["federalFundingSource"].value == "Mandatory"
 
         assert "agency" in result.custom_fields
         assert result.custom_fields["agency"].value.code == "A2345"
@@ -1064,8 +1064,8 @@ class TestPopulateCustomFields:
         assert result["federalOpportunityNumber"].field_type == CustomFieldType.STRING
         assert result["federalOpportunityNumber"].value == "HHS-2024-001"
 
-        assert result["federalFundingSource"].field_type == CustomFieldType.ARRAY
-        assert result["federalFundingSource"].value == ["Discretionary"]
+        assert result["federalFundingSource"].field_type == CustomFieldType.STRING
+        assert result["federalFundingSource"].value == "Discretionary"
 
         assert result["agency"].field_type == CustomFieldType.OBJECT
         assert result["agency"].value.code == "HHS"

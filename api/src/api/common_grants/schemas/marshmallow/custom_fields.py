@@ -153,7 +153,7 @@ class federalFundingSource(CustomField):
 
     name = fields.String(required=True, metadata={"example": "federalFundingSource"})
     fieldType = fields.String(required=True, metadata={"example": "string"})
-    value = fields.List(fields.String(required=True, metadata={"example": "discretionary"}))
+    value = fields.String(required=True, metadata={"example": "discretionary"})
     description = fields.String(
         allow_none=True,
         metadata={"example": "The category type of the grant opportunity"},

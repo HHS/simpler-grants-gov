@@ -472,7 +472,7 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
     category = opp_data.get("category")
     if category is not None:
         field = validate_custom_field(
-            FederalFundingSourceField, opportunity_id=opportunity_id, value=[str(category)]
+            FederalFundingSourceField, opportunity_id=opportunity_id, value=str(category)
         )
         if field:
             custom_fields["federalFundingSource"] = field
