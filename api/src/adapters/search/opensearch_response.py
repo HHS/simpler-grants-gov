@@ -18,6 +18,22 @@ class SearchResponse:
     shards_failed: int | None = None
     score_stats: dict[str, float | None] = dataclasses.field(default_factory=dict)
 
+    # Top-level score of the best matching result; None when no query is run (browse mode).
+    max_score: float | None = None
+
+    # "eq" when the total hit count is exact, "gte" when it is a lower bound.
+    # See: https://opensearch.org/docs/latest/api-reference/search/#the-hits-object
+    total_relation: str | None = None
+
+    # Per-aggregation sum_other_doc_count values. Non-zero means the aggregation
+    # is silently truncating buckets due to the size cap.
+    # e.g. {"agency": 12, "applicant_type": 0}
+    agg_overflow: dict[str, int] = dataclasses.field(default_factory=dict)
+
+    # Raw hit objects from OpenSearch, preserving _explanation and _score fields.
+    # Used for explanation-based logging (e.g. SearchResultExplanation events).
+    raw_hits: list[dict[str, typing.Any]] = dataclasses.field(default_factory=list)
+
     @classmethod
     def from_opensearch_response(
         cls, raw_json: dict[str, typing.Any], include_scores: bool = True
@@ -56,6 +72,8 @@ class SearchResponse:
         hits = raw_json.get("hits", {})
         hits_total = hits.get("total", {})
         total_records = hits_total.get("value", 0)
+        total_relation: str | None = hits_total.get("relation", None)
+        max_score: float | None = hits.get("max_score", None)
 
         raw_records: list[dict[str, typing.Any]] = hits.get("hits", [])
 
@@ -72,15 +90,21 @@ class SearchResponse:
         raw_aggs: dict[str, dict[str, typing.Any]] = raw_json.get("aggregations", {})
         aggregations = _parse_aggregations(raw_aggs)
         score_stats = _compute_score_stats(records) if include_scores else {}
+        agg_overflow = _extract_agg_overflow(raw_aggs)
+
         return cls(
-            total_records,
-            records,
-            aggregations,
-            scroll_id,
-            took,
-            timed_out,
-            shards_failed,
-            score_stats,
+            total_records=total_records,
+            records=records,
+            aggregations=aggregations,
+            scroll_id=scroll_id,
+            took_ms=took,
+            timed_out=timed_out,
+            shards_failed=shards_failed,
+            score_stats=score_stats,
+            max_score=max_score,
+            total_relation=total_relation,
+            agg_overflow=agg_overflow,
+            raw_hits=list(raw_records),
         )
 
 
@@ -146,6 +170,21 @@ def _parse_aggregations(
         aggregations[field] = field_aggregation
 
     return aggregations
+
+
+def _extract_agg_overflow(
+    raw_aggs: dict[str, dict[str, typing.Any]] | None,
+) -> dict[str, int]:
+    """Extract sum_other_doc_count from each aggregation that has it."""
+    if not raw_aggs:
+        return {}
+
+    overflow: dict[str, int] = {}
+    for field, agg_value in raw_aggs.items():
+        count = agg_value.get("sum_other_doc_count")
+        if count is not None:
+            overflow[field] = count
+    return overflow
 
 
 def _compute_score_stats(records: list[dict]) -> dict:
