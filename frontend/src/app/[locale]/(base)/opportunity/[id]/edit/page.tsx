@@ -7,6 +7,7 @@ import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityRespo
 import { notFound, redirect, RedirectType } from "next/navigation";
 import { Button } from "@trussworks/react-uswds";
 
+import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
 import Breadcrumbs, { Breadcrumb } from "src/components/Breadcrumbs";
 import OpportunityEditForm from "src/components/opportunity/OpportunityEditForm";
 import { buildOpportunityEditInitialValues } from "src/components/opportunity/opportunityEditFormConfig";
@@ -139,11 +140,11 @@ export default async function OpportunityEditPage({
   const lastUpdated =
     opportunityData.summary?.post_date || opportunityData.updated_at || "";
   const navigationItems = [
-    "Key information",
-    "Funding details",
-    "Eligibility",
-    "Additional information",
-    "Attachments",
+    { text: "Key information", href: "key-information" },
+    { text: "Funding details", href: "funding-details" },
+    { text: "Eligibility", href: "eligibility" },
+    { text: "Additional information", href: "additional-information" },
+    { text: "Attachments", href: "attachments" },
   ];
   return (
     <div className="bg-white">
@@ -211,36 +212,7 @@ export default async function OpportunityEditPage({
 
       <div className="grid-container padding-bottom-4">
         <div className="desktop:display-flex desktop:flex-align-start grid-gap-4 width-full">
-          <aside className="display-none desktop:display-block width-card-lg">
-            <div className="bg-white radius-lg padding-2 width-full">
-              <div className="margin-bottom-2 font-sans-xs line-height-sans-3">
-                On this page
-              </div>
-              <nav aria-label="In-page navigation">
-                {navigationItems.map((item, index) => (
-                  <div
-                    className={
-                      index === 0
-                        ? "display-flex border-left-05 border-base-dark minh-4"
-                        : "display-flex border-left border-base-lighter minh-4"
-                    }
-                    key={item}
-                  >
-                    <a
-                      className={
-                        index === 0
-                          ? "display-block text-no-underline width-full padding-y-1 padding-x-2 font-sans-3xs line-height-sans-2"
-                          : "display-block text-no-underline width-full padding-y-1 padding-x-2 font-sans-3xs line-height-sans-2 text-primary"
-                      }
-                      href="#"
-                    >
-                      {item}
-                    </a>
-                  </div>
-                ))}
-              </nav>
-            </div>
-          </aside>
+          <ApplyFormNav title="On this page" fields={navigationItems} />
 
           <section className="width-full maxw-tablet-xl padding-top-4">
             <OpportunityEditForm

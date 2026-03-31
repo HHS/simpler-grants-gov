@@ -363,7 +363,7 @@ export default function OpportunityEditForm({
         </div>
       ) : null}
 
-      <section className="margin-top-4">
+      <section id="key-information" className="margin-top-4">
         <h2 className="font-heading-xl margin-top-0 margin-bottom-2">
           {t("sections.keyInformation")}
         </h2>
@@ -397,7 +397,7 @@ export default function OpportunityEditForm({
         </Fieldset>
       </section>
 
-      <section className="margin-top-4">
+      <section id="funding-details" className="margin-top-4">
         <h2 className="margin-top-0 margin-bottom-4 font-heading-xl">
           {t("sections.fundingDetails")}
         </h2>
@@ -780,7 +780,10 @@ export default function OpportunityEditForm({
         </div>
       </section>
 
-      <section className="margin-top-4 padding-bottom-4 border-bottom border-base-light">
+      <section
+        id="eligibility"
+        className="margin-top-4 padding-bottom-4 border-bottom border-base-light"
+      >
         <div className="display-flex flex-column gap-2 margin-bottom-4">
           <h2 className="margin-0 font-heading-xl">
             {t("sections.eligibility")}
@@ -880,7 +883,10 @@ export default function OpportunityEditForm({
         </div>
       </section>
 
-      <section className="margin-top-4 padding-bottom-4 border-bottom border-base-light">
+      <section
+        id="additional-information"
+        className="margin-top-4 padding-bottom-4 border-bottom border-base-light"
+      >
         <div className="display-flex flex-column gap-2 margin-bottom-4">
           <h2 className="margin-0 font-heading-xl">
             {t("sections.additionalInformation")}
