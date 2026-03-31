@@ -3,23 +3,23 @@ import { UswdsIconNames } from "src/types/generalTypes";
 import { useMessages, useTranslations } from "next-intl";
 import { Grid } from "@trussworks/react-uswds";
 
-import DeveloperPageSection from "src/components/developer/DeveloperPageSection";
+import DevelopersPageSection from "src/components/developers/DevelopersPageSection";
 import IconInfo from "src/components/homepage/IconInfoSection";
 
-interface DeveloperInfoServerProps {
+interface DevelopersInfoServerProps {
   children?: React.ReactNode;
 }
 
-export default function DeveloperInfoServer({
+export default function DevelopersInfoServer({
   children,
-}: DeveloperInfoServerProps) {
-  const t = useTranslations("Developer");
+}: DevelopersInfoServerProps) {
+  const t = useTranslations("Developers");
   const messages = useMessages() as unknown as IntlMessages;
-  const { iconSections } = messages.Developer;
+  const { iconSections } = messages.Developers;
 
   return (
-    <DeveloperPageSection className="bg-base-white" title={t("infoTitle")}>
-      <h3 data-testid="developer-info">{t("canDoHeader")}</h3>
+    <DevelopersPageSection className="bg-base-white" title={t("infoTitle")}>
+      <h3 data-testid="developers-info">{t("canDoHeader")}</h3>
       <h4>{t("canDoSubHeader")}</h4>
       <p>{t("canDoParagraph")}</p>
 
@@ -34,7 +34,7 @@ export default function DeveloperInfoServer({
       })}
       <Grid row className="padding-y-2" gap="md">
         {iconSections.map((iconSection, iconSectionIdx) => (
-          <Grid col={6} key={`developer-iconsection-${iconSectionIdx}`}>
+          <Grid col={6} key={`developers-iconsection-${iconSectionIdx}`}>
             <IconInfo
               description={iconSection.description}
               iconName={iconSection.iconName as UswdsIconNames}
@@ -45,6 +45,6 @@ export default function DeveloperInfoServer({
           </Grid>
         ))}
       </Grid>
-    </DeveloperPageSection>
+    </DevelopersPageSection>
   );
 }
