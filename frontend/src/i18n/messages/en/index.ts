@@ -1032,6 +1032,11 @@ export const messages = {
       label: "Filter by status",
     },
     title: "Saved opportunities | Simpler.Grants.gov",
+    ownershipFilter: {
+      label: "Filter by organization",
+      showAll: "Show all",
+      individual: "Individual",
+    },
   },
   Roadmap: {
     pageTitle: "Roadmap | Simpler.Grants.gov",

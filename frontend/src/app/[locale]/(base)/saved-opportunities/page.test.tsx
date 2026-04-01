@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import SavedOpportunities from "src/app/[locale]/(base)/saved-opportunities/page";
+import { Organization } from "src/types/applicationResponseTypes";
 import {
   BaseOpportunity,
   MinimalOpportunity,
@@ -18,6 +19,24 @@ import {
   useTranslationsMock,
 } from "src/utils/testing/intlMocks";
 
+const getSessionMock = jest.fn<
+  Promise<{ token: string; user_id: string; email: string } | null>,
+  []
+>();
+
+const getUserOrganizationsMock = jest.fn<
+  Promise<Organization[]>,
+  [string, string]
+>();
+jest.mock("src/services/auth/session", () => ({
+  getSession: () => getSessionMock(),
+}));
+
+jest.mock("src/services/fetch/fetchers/organizationsFetcher", () => ({
+  getUserOrganizations: (token: string, userId: string) =>
+    getUserOrganizationsMock(token, userId),
+}));
+
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
@@ -29,14 +48,7 @@ jest.mock("next-intl/server", () => ({
 const savedOpportunitiesMock = jest.fn();
 const opportunityMock = jest.fn().mockResolvedValue({ data: [] });
 const mockUseSearchParams = jest.fn().mockReturnValue(new URLSearchParams());
-const clientFetchMock = jest.fn().mockResolvedValue([]);
 const mockBreadcrumbs = jest.fn();
-
-jest.mock("src/hooks/useClientFetch", () => ({
-  useClientFetch: () => ({
-    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
-  }),
-}));
 
 jest.mock(
   "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal",
@@ -62,10 +74,13 @@ jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
   fetchSavedOpportunities: (
     scope: SavedOpportunitiesScope,
     statusFilter?: string,
+    organizationIdsFilter?: string[] | null,
   ) =>
-    savedOpportunitiesMock(scope, statusFilter) as Promise<
-      MinimalOpportunity[]
-    >,
+    savedOpportunitiesMock(
+      scope,
+      statusFilter,
+      organizationIdsFilter,
+    ) as Promise<MinimalOpportunity[]>,
 }));
 
 jest.mock("src/components/Breadcrumbs", () => ({
@@ -75,6 +90,23 @@ jest.mock("src/components/Breadcrumbs", () => ({
     return <nav data-testid="mock-breadcrumbs" />;
   },
 }));
+
+beforeEach(() => {
+  jest.clearAllMocks();
+
+  mockSavedOpportunitiesByScope({
+    combinedSavedOpportunities: [],
+    individuallySavedOpportunities: [],
+  });
+
+  getSessionMock.mockResolvedValue({
+    token: "test-token",
+    user_id: "user-1",
+    email: "test@example.com",
+  });
+
+  getUserOrganizationsMock.mockResolvedValue([]);
+});
 
 const defaultSearchParams = Promise.resolve({});
 
@@ -111,8 +143,6 @@ describe("Saved Opportunities page", () => {
       combinedSavedOpportunities: [],
       individuallySavedOpportunities: [],
     });
-
-    clientFetchMock.mockResolvedValue([]);
   });
 
   it("renders intro text for user with no saved opportunities", async () => {
@@ -223,7 +253,7 @@ describe("Saved Opportunities page", () => {
       ],
     });
     opportunityMock.mockResolvedValue({ data: mockOpportunity });
-    clientFetchMock.mockResolvedValue([]);
+    getUserOrganizationsMock.mockResolvedValue([]);
 
     const component = await SavedOpportunities({
       params: localeParams,
@@ -250,10 +280,17 @@ describe("Saved Opportunities page", () => {
       ],
     });
     opportunityMock.mockResolvedValue({ data: mockOpportunity });
-    clientFetchMock.mockResolvedValue([
+    getUserOrganizationsMock.mockResolvedValue([
       {
         organization_id: "org-1",
-        sam_gov_entity: { legal_business_name: "Alpha Org" },
+        sam_gov_entity: {
+          legal_business_name: "Alpha Org",
+          expiration_date: "",
+          uei: "",
+          ebiz_poc_email: "",
+          ebiz_poc_first_name: "",
+          ebiz_poc_last_name: ""
+        },
       },
     ]);
 
@@ -294,14 +331,28 @@ describe("Saved Opportunities page", () => {
 
     opportunityMock.mockResolvedValue({ data: mockOpportunity });
 
-    clientFetchMock.mockResolvedValue([
+    getUserOrganizationsMock.mockResolvedValue([
       {
         organization_id: "org-1",
-        sam_gov_entity: { legal_business_name: "Alpha Org" },
+        sam_gov_entity: {
+          legal_business_name: "Alpha Org",
+          expiration_date: "",
+          uei: "",
+          ebiz_poc_email: "",
+          ebiz_poc_first_name: "",
+          ebiz_poc_last_name: ""
+        },
       },
       {
         organization_id: "org-2",
-        sam_gov_entity: { legal_business_name: "Bravo Org" },
+        sam_gov_entity: {
+          legal_business_name: "Bravo Org",
+          expiration_date: "",
+          uei: "",
+          ebiz_poc_email: "",
+          ebiz_poc_first_name: "",
+          ebiz_poc_last_name: ""
+        },
       },
     ]);
 
@@ -312,8 +363,8 @@ describe("Saved Opportunities page", () => {
     render(component);
 
     expect(await screen.findByText("Individual")).toBeInTheDocument();
-    expect(screen.getByText("Alpha Org")).toBeInTheDocument();
-    expect(screen.getByText("Bravo Org")).toBeInTheDocument();
+    expect(screen.getAllByText("Alpha Org").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Bravo Org").length).toBeGreaterThan(0);
   });
 
   it("passes status filter to fetchSavedOpportunities when status param is provided", async () => {
@@ -354,6 +405,7 @@ describe("Saved Opportunities page", () => {
     expect(savedOpportunitiesMock).toHaveBeenCalledWith(
       DEFAULT_SAVED_OPPORTUNITY_SCOPE,
       "forecasted",
+      null,
     );
 
     expect(
@@ -438,6 +490,21 @@ describe("Saved Opportunities page", () => {
       screen.getByText("SavedOpportunities.noMatchingStatus"),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("statusFilter.label")).toBeInTheDocument();
+  });
+
+  it("passes organization filter to fetchSavedOpportunities", async () => {
+    const component = await SavedOpportunities({
+      params: localeParams,
+      searchParams: Promise.resolve({
+        savedBy: "organization:org-1",
+      }),
+    });
+    render(component);
+    expect(savedOpportunitiesMock).toHaveBeenCalledWith(
+      DEFAULT_SAVED_OPPORTUNITY_SCOPE,
+      undefined,
+      ["org-1"],
+    );
   });
 
   it("passes accessibility scan", async () => {

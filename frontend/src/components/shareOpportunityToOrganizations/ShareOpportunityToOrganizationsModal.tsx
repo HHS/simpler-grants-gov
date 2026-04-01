@@ -26,7 +26,6 @@ export interface ShareOpportunityToOrganizationsModalProps {
   modalRef: RefObject<ModalRef | null>;
   organizations: Organization[];
   savedToOrganizationIds: Set<string>;
-  isLoadingOrganizations: boolean;
   hasOrganizationsError: boolean;
   selectedOpportunity?: BaseOpportunity | null;
   onSavedOrganizationsChange: (organizationIds: Set<string>) => void;
@@ -36,7 +35,6 @@ export function ShareOpportunityToOrganizationsModal({
   modalRef,
   organizations,
   savedToOrganizationIds,
-  isLoadingOrganizations,
   hasOrganizationsError,
   selectedOpportunity,
   onSavedOrganizationsChange,
@@ -124,10 +122,6 @@ export function ShareOpportunityToOrganizationsModal({
           {t("modal.error")}
         </Alert>
       );
-    }
-
-    if (isLoadingOrganizations) {
-      return <p>{t("modal.loadingOrganizations")}</p>;
     }
 
     if (organizations.length === 0) {

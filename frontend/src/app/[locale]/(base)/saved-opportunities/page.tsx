@@ -1,5 +1,8 @@
+import { getSession } from "src/services/auth/session";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
+import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import { Organization } from "src/types/applicationResponseTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import {
   getScopeFromUrlParams,
@@ -13,6 +16,11 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { SavedOpportunitiesController } from "src/components/saved-opportunities/SavedOpportunitiesController";
+import {
+  getOrganizationIdsFilter,
+  parseOwnershipFilterValue,
+} from "src/components/saved-opportunities/savedOpportunitiesOwnershipFilter";
+import SavedOpportunityOwnershipFilter from "src/components/saved-opportunities/SavedOpportunityOwnershipFilter";
 import SavedOpportunityStatusFilter from "src/components/saved-opportunities/SavedOpportunityStatusFilter";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
@@ -41,7 +49,7 @@ const NoSavedOpportunities = () => {
 };
 
 type SavedOpportunitiesPageProps = LocalizedPageProps & {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; savedBy?: string }>;
 };
 
 export default async function SavedOpportunities({
@@ -49,18 +57,42 @@ export default async function SavedOpportunities({
   searchParams,
 }: SavedOpportunitiesPageProps) {
   const { locale } = await params;
-  const { status } = await searchParams;
+  const { status, savedBy } = await searchParams;
   const t = await getTranslations({ locale });
+  const session = await getSession();
+
+  let organizations: Organization[] = [];
+  let hasOrganizationsError = false;
+
+  if (session?.token) {
+    try {
+      organizations = await getUserOrganizations(
+        session.token,
+        session.user_id,
+      );
+    } catch (error: unknown) {
+      console.error("Unable to fetch user organizations", error);
+      hasOrganizationsError = true;
+    }
+  }
 
   // Get saved opportunities scope from URL params. If invalid or not provided
   // will default to all individual saved opportunities + organization saved opportunities
   // that the user is a member of.
   const savedOpportunitiesScope = getScopeFromUrlParams();
 
-  // Fetch saved opportunities for the current page scope.
+  // Convert the UI ownership filter into the API's organization_ids filter.
+  // API semantics:
+  // - null => show all
+  // - [] => individual only
+  // - ["org-id"] => specific organization only
+  const ownershipFilter = parseOwnershipFilterValue(savedBy);
+  const organizationIdsFilter = getOrganizationIdsFilter(ownershipFilter);
+  // Fetch saved opportunities for the current page scope and selected filters.
   const savedOpportunities = await fetchSavedOpportunities(
     savedOpportunitiesScope,
     status,
+    organizationIdsFilter,
   );
 
   // Fetch individually saved opportunities separately so the UI can preserve
@@ -74,6 +106,8 @@ export default async function SavedOpportunities({
   if (!hasSavedOpportunities && status) {
     const allSavedOpportunities = await fetchSavedOpportunities(
       savedOpportunitiesScope,
+      undefined,
+      organizationIdsFilter,
     );
     hasSavedOpportunities = allSavedOpportunities.length > 0;
   }
@@ -118,15 +152,23 @@ export default async function SavedOpportunities({
       <div className="grid-container padding-y-5">
         {hasSavedOpportunities ? (
           <>
-            <div className="margin-bottom-3 display-flex flex-justify-end">
+            <div className="margin-bottom-3 display-flex flex-column tablet:flex-row flex-justify-end tablet:flex-align-end">
+              <div className="margin-bottom-2 tablet:margin-bottom-0 tablet:margin-right-2">
+                <SavedOpportunityOwnershipFilter
+                  organizations={organizations}
+                  savedBy={savedBy || null}
+                />
+              </div>
               <SavedOpportunityStatusFilter status={status || null} />
             </div>
             {resolvedOpportunities.length > 0 ? (
               <SavedOpportunitiesController
                 opportunities={resolvedOpportunities}
+                organizations={organizations}
                 individuallySavedOpportunityIds={
                   individuallySavedOpportunityIds
                 }
+                hasOrganizationsError={hasOrganizationsError}
               />
             ) : (
               <p>{t("SavedOpportunities.noMatchingStatus")}</p>
