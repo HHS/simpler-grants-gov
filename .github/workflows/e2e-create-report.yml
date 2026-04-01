@@ -6,10 +6,6 @@ on:
         description: "github actions id for run to grab artifacts from"
         type: string
       target:
-        description: "application environment to run tests against (dev / prod TK)"
-        default: "staging"
-        type: string
-      target:
         description: "application environment the test was run against"
         default: "local"
         type: string
