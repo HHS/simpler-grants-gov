@@ -4,7 +4,7 @@ from marshmallow import ValidationError, validates_schema
 
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
-from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.constants.lookup_constants import (
     ApprovalResponseType,
     ApprovalType,
@@ -13,6 +13,7 @@ from src.constants.lookup_constants import (
     WorkflowEventType,
     WorkflowType,
 )
+from src.pagination.pagination_schema import generate_pagination_schema
 from src.validation.validation_constants import ValidationErrorType
 
 
@@ -316,4 +317,29 @@ class WorkflowGetResponseSchema(AbstractResponseSchema):
         metadata={
             "description": "The workflow details with audit history and approval configuration"
         },
+    )
+
+
+class WorkflowAuditRequestSchema(Schema):
+    """Request schema for POST /v1/workflows/:workflow_id/audit endpoint."""
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            cls_name="WorkflowAuditPaginationSchema",
+            order_by_fields=["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+            default_page_size=25,
+            default_page_offset=1,
+        ),
+        required=True,
+        metadata={"description": "Pagination parameters for the workflow audit events"},
+    )
+
+
+class WorkflowAuditResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    """Response schema for POST /v1/workflows/:workflow_id/audit endpoint."""
+
+    data = fields.List(
+        fields.Nested(WorkflowAuditEventSchema),
+        metadata={"description": "Ordered list of audit events (sorted by created_at)"},
     )
