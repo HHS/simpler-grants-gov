@@ -7,6 +7,7 @@ import { searchForOpportunities } from "src/services/fetch/fetchers/searchFetche
 import QueryProvider from "src/services/search/QueryProvider";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { LocalizedPageProps } from "src/types/intl";
+import { INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE } from "src/utils/opportunity/savedOpportunitiesUtils";
 import { convertSearchParamsToProperTypes } from "src/utils/search/searchUtils";
 
 import { useTranslations } from "next-intl";
@@ -14,6 +15,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Suspense, use } from "react";
 
 import { DrawerUnit } from "src/components/drawer/DrawerUnit";
+import Loading from "src/components/Loading";
 import { AndOrPanel } from "src/components/search/AndOrPanel";
 import { ClassicSearchBanner } from "src/components/search/ClassicSearchBanner";
 import { FilterPillPanel } from "src/components/search/FilterPillPanel";
@@ -68,7 +70,13 @@ function Search({ searchParams, params }: SearchPageProps) {
   const agencyListPromise = performAgencySearch();
 
   const savedOpportunitiesPromise = getSession().then((session) =>
-    session ? getSavedOpportunities(session.token, session.user_id) : [],
+    session
+      ? getSavedOpportunities(
+          session.token,
+          session.user_id,
+          INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
+        )
+      : [],
   );
 
   return (
@@ -98,11 +106,15 @@ function Search({ searchParams, params }: SearchPageProps) {
                   iconName="filter_list"
                   buttonClass="tablet:margin-x-auto"
                 >
-                  <SearchDrawerFilters
-                    searchParams={convertedSearchParams}
-                    searchResultsPromise={searchResultsPromise}
-                    agencyListPromise={filteredAgencyListPromise}
-                  />
+                  <Suspense
+                    fallback={<Loading message={t("drawer.loading")} />}
+                  >
+                    <SearchDrawerFilters
+                      searchParams={convertedSearchParams}
+                      searchResultsPromise={searchResultsPromise}
+                      agencyListPromise={filteredAgencyListPromise}
+                    />
+                  </Suspense>
                 </DrawerUnit>
               </div>
               <div className="flex-3 flex-align-self-end display-none desktop:display-block">

@@ -73,3 +73,9 @@ load-test-staging: # Load test the staging environment in aws
 
 load-test-prod: # Load test the production environment in aws. Please test responsibly
 	artillery run -e prod artillery-load-test.yml
+
+test-group-counts: # Print the number of tests currently assigned to each test group
+	grep -roE 'tag:.*SMOKE*]' ./tests/e2e/ | wc -l
+	grep -roE 'tag:.*CORE_REGRESSION.*]' ./tests/e2e/ | wc -l
+	grep -roE 'tag:.*FULL_REGRESSION.*]' ./tests/e2e/ | wc -l
+	grep -roE 'tag:.*EXTENDED.*]' ./tests/e2e/ | wc -l

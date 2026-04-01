@@ -6,7 +6,7 @@ import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 from src.legacy_soap_api.legacy_soap_api_auth import (
     MTLS_CERT_HEADER_KEY,
-    USE_SOAP_JWT_HEADER_KEY,
+    USE_SOAP_CERT_HEADER_KEY,
     SOAPClientUserDoesNotHavePermission,
     get_soap_auth,
 )
@@ -14,7 +14,7 @@ from src.legacy_soap_api.legacy_soap_api_blueprint import legacy_soap_api_bluepr
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_proxy import get_proxy_response
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SoapRequestStreamer
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.legacy_soap_api_utils import (
     get_alternate_proxy_response,
     get_invalid_path_response,
@@ -40,10 +40,10 @@ def simpler_soap_api_route(
     )
     logger.info("POST /<service_name>/services/v2/<service_port_name>")
 
-    use_soap_jwt = request.headers.get(USE_SOAP_JWT_HEADER_KEY) == "1"
-    if use_soap_jwt:
+    use_soap_cert = request.headers.get(USE_SOAP_CERT_HEADER_KEY) == "1"
+    if not use_soap_cert:
         logger.info(
-            "soap_client_certificate: Use-Soap-Jwt flag is enabled",
+            "soap_client_certificate: Using the soap jwt",
             extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_JWT},
         )
 

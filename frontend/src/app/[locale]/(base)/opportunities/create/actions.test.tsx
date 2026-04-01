@@ -1,5 +1,5 @@
 import { identity } from "lodash";
-import { createOpportunityAction } from "src/app/[locale]/(base)/opportunities/create/[agencyId]/actions";
+import { createOpportunityAction } from "src/app/[locale]/(base)/opportunities/create/actions";
 
 const getSessionMock = jest.fn();
 const mockCreateOpportunity = jest.fn();
@@ -38,6 +38,7 @@ describe("create opportunity form action", () => {
     createFormData.append("opportunityNumber", "MY-TEST-001");
     createFormData.append("opportunityTitle", "Test Opportunity 001");
     createFormData.append("category", "discretionary");
+    createFormData.append("assistanceListingNumber", "12-345");
 
     const result = await createOpportunityAction(null, createFormData);
     expect(result.data).toEqual({
@@ -46,6 +47,7 @@ describe("create opportunity form action", () => {
       opportunity_title: "Test Opportunity 001",
       category: "discretionary",
       category_explanation: null,
+      assistance_listing_number: "12-345",
     });
   });
   it("returns result of create success with category explanation", async () => {
@@ -60,6 +62,7 @@ describe("create opportunity form action", () => {
     createFormData.append("opportunityTitle", "Test Opportunity 001");
     createFormData.append("category", "other");
     createFormData.append("categoryExplanation", "Some explanation");
+    createFormData.append("assistanceListingNumber", "12-345");
 
     const result = await createOpportunityAction(null, createFormData);
     expect(result.data).toEqual({
@@ -68,6 +71,7 @@ describe("create opportunity form action", () => {
       opportunity_title: "Test Opportunity 001",
       category: "other",
       category_explanation: "Some explanation",
+      assistance_listing_number: "12-345",
     });
   });
   it("returns API error when applicable", async () => {

@@ -62,7 +62,6 @@ export async function ManageUsersPageContent({
           },
           {
             title: t("pageHeading"),
-            path: `/organizations/${organizationId}/manage-users`,
           },
         ]}
       />

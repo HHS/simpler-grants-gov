@@ -1,4 +1,4 @@
-import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -28,17 +28,16 @@ export type NavigationButtonConfig = {
 export type HeroButtonConfig = ActionButtonConfig | NavigationButtonConfig;
 
 interface AwardRecommendationHeroProps {
-  awardRecommendationId: string;
+  awardRecommendationDetails: AwardRecommendationDetails;
   buttons?: HeroButtonConfig[];
 }
 
 export default async function AwardRecommendationHero({
-  awardRecommendationId,
+  awardRecommendationDetails,
   buttons,
 }: AwardRecommendationHeroProps) {
   const t = await getTranslations("AwardRecommendation");
-  const { recordNumber, datePrepared, status } =
-    await getAwardRecommendationDetails(awardRecommendationId);
+  const { recordNumber, datePrepared, status } = awardRecommendationDetails;
 
   return (
     <div
@@ -51,35 +50,31 @@ export default async function AwardRecommendationHero({
             className="padding-y-0 bg-transparent"
             breadcrumbList={[
               {
-                title: t("awardRecs", {
-                  defaultValue: "Award Recs",
-                }),
+                title: t("awardRecs"),
                 // TODO: add link to award recommendations page
                 path: "/",
               },
               {
-                title: `${t("heroTitle", { defaultValue: "Award Rec #" })}: ${recordNumber}`,
+                title: `${t("heroTitle")}: ${recordNumber}`,
                 path: `/`,
               },
             ]}
           />
           <Grid className="padding-bottom-4 mobile-lg:padding-y-4 tablet:padding-y-3">
             <h1 className="font-sans-xl tablet:font-sans-2xl">
-              {t("heroTitle", { defaultValue: "Award Rec #" })}: {recordNumber}
+              {t("heroTitle")}: {recordNumber}
             </h1>
           </Grid>
           <Grid row gap>
             <Grid tablet={{ col: "fill" }}>
               <Grid>
-                <strong>
-                  {t("datePrepared", { defaultValue: "Date Prepared" })}:{" "}
-                </strong>
+                <strong>{t("datePrepared")}: </strong>
                 <span className="margin-left-1 display-inline-flex flex-align-center">
                   {datePrepared}
                 </span>
               </Grid>
               <Grid className="padding-top-2 tablet:padding-top-2 display-flex flex-align-center">
-                <strong>{t("status", { defaultValue: "Status" })}:</strong>{" "}
+                <strong>{t("status")}:</strong>{" "}
                 <span className="margin-left-1 display-inline-flex flex-align-center">
                   <AwardRecommendationStatusTag status={status} />
                 </span>
@@ -94,6 +89,7 @@ export default async function AwardRecommendationHero({
                         key={index}
                         href={button.href}
                         className={`usa-button ${button.outline ? "usa-button--outline" : ""} width-auto`}
+                        prefetch={false}
                       >
                         {button.label}
                       </Link>

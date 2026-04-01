@@ -6,7 +6,7 @@ import { getFormLink } from "./form-navigation-utils";
 export interface FillFieldDefinition {
   testId?: string;
   selector?: string;
-  type: "text" | "dropdown";
+  type: "text" | "dropdown" | "file";
   section?: string;
   field: string;
 }
@@ -16,7 +16,7 @@ export type FormFillFieldDefinitions = {
 };
 
 export interface FillFormConfig {
-  formName: string;
+  formName: string | RegExp;
   fields: FormFillFieldDefinitions;
   saveButtonTestId: string;
   noErrorsText?: string;
@@ -43,6 +43,22 @@ export async function fillField(
       const locator = page.getByTestId(field.testId);
       await locator.waitFor({ state: "attached", timeout: 5000 });
       await locator.fill(data);
+    } else if (field.type === "file" && (field.testId || field.selector)) {
+      const locator = field.selector
+        ? page.locator(field.selector)
+        : page.getByTestId(field.testId!);
+      // Use a generous timeout: Mobile Chrome renders the file input more slowly
+      // than desktop Chrome, so 5000ms is insufficient.
+      await locator.waitFor({ state: "attached", timeout: 30000 });
+      await locator.scrollIntoViewIfNeeded();
+      await locator.setInputFiles(data);
+      // Wait for the uploaded filename to appear in the UI before proceeding.
+      // Webkit renders the post-upload filename span more slowly, so use a
+      // generous timeout matching the file-input wait above.
+      const fileName = data.split("/").pop() ?? data;
+      await page
+        .locator(`span:has-text("${fileName}")`)
+        .waitFor({ state: "visible", timeout: 30000 });
     } else {
       console.error("unsupported field type or selector type", field);
     }
@@ -91,6 +107,15 @@ export async function fillForm(
 
   try {
     await page.getByRole("link", { name: formName }).click();
+
+    // Wait for the URL to change away from the application page before
+    // checking for form content - without this, getByText(formName) may
+    // immediately resolve against the link text on the application list page,
+    // causing fillField to run before navigation completes.
+    // Mobile Chrome where navigation is slower.
+    await page.waitForURL((url) => url.href !== applicationURL, {
+      timeout: 35000,
+    });
 
     await page
       .getByText(formName)

@@ -1,6 +1,10 @@
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { LocalizedPageProps } from "src/types/intl";
+import {
+  getScopeFromUrlParams,
+  INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
+} from "src/utils/opportunity/savedOpportunitiesUtils";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -48,12 +52,29 @@ export default async function SavedOpportunities({
   const { status } = await searchParams;
   const t = await getTranslations({ locale });
 
-  // Fetch saved opportunities (filtered if status is provided)
-  const savedOpportunities = await fetchSavedOpportunities(status);
+  // Get saved opportunities scope from URL params. If invalid or not provided
+  // will default to all individual saved opportunities + organization saved opportunities
+  // that the user is a member of.
+  const savedOpportunitiesScope = getScopeFromUrlParams();
+
+  // Fetch saved opportunities for the current page scope.
+  const savedOpportunities = await fetchSavedOpportunities(
+    savedOpportunitiesScope,
+    status,
+  );
+
+  // Fetch individually saved opportunities separately so the UI can preserve
+  // the Individual tag even when an opportunity is also shared with one or
+  // more organizations.
+  const individuallySavedOpportunities = await fetchSavedOpportunities(
+    INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
+  );
 
   let hasSavedOpportunities = savedOpportunities.length > 0;
   if (!hasSavedOpportunities && status) {
-    const allSavedOpportunities = await fetchSavedOpportunities();
+    const allSavedOpportunities = await fetchSavedOpportunities(
+      savedOpportunitiesScope,
+    );
     hasSavedOpportunities = allSavedOpportunities.length > 0;
   }
 
@@ -72,6 +93,12 @@ export default async function SavedOpportunities({
 
   const resolvedOpportunities = await Promise.all(opportunityPromises);
 
+  const individuallySavedOpportunityIds = new Set<string>(
+    individuallySavedOpportunities.map((savedOpportunity) =>
+      String(savedOpportunity.opportunity_id),
+    ),
+  );
+
   return (
     <>
       <GridContainer>
@@ -83,7 +110,6 @@ export default async function SavedOpportunities({
             },
             {
               title: t("SavedOpportunities.breadcrumbSavedOpportunities"),
-              path: `/saved-opportunities`,
             },
           ]}
         />
@@ -98,6 +124,9 @@ export default async function SavedOpportunities({
             {resolvedOpportunities.length > 0 ? (
               <SavedOpportunitiesController
                 opportunities={resolvedOpportunities}
+                individuallySavedOpportunityIds={
+                  individuallySavedOpportunityIds
+                }
               />
             ) : (
               <p>{t("SavedOpportunities.noMatchingStatus")}</p>

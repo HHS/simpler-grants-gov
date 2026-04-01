@@ -507,7 +507,7 @@ def test_add_organization_repopulates_application_response_from_org(
         organization_user=OrganizationUserFactory.create(user=user, organization=organization),
         role=RoleFactory.create(privileges=[Privilege.START_APPLICATION]),
     )
-    # 🔥 Call function
+    # Call function
     add_organization_to_application(
         db_session, application.application_id, organization.organization_id, user
     )
