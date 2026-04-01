@@ -1,0 +1,25 @@
+name: E2E Tests Daily (EXPERIMENTTTT)
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "dschrashun/9379-fix-e2e-reports-on-deploy"
+
+jobs:
+  # trigger runs of local and staging core regression e2e tests
+  # but do not wait, or block any deployments based on results
+  e2e-test-local:
+    name: E2E Local (on Deploy)
+    uses: ./.github/workflows/ci-frontend-e2e.yml
+    secrets: inherit
+    with:
+      playwright_tags: "@core-regression"
+
+  e2e-test-staging:
+    name: E2E Staging (on Deploy)
+    uses: ./.github/workflows/e2e-staging.yml
+    secrets: inherit
+    with:
+      version: main
+      target: staging
+      playwright_tags: "@core-regression"
