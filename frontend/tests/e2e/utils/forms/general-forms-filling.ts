@@ -82,11 +82,12 @@ export async function fillField(
       );
     }
 
-    if (field.type === "dropdown" && typeof data === "string") {
+    if (field.type === "dropdown") {
+      const dropdownValue = data as string;
       if (field.selector) {
-        await selectDropdownByValueOrLabel(page, field.selector, data);
+        await selectDropdownByValueOrLabel(page, field.selector, dropdownValue);
       } else if (field.testId) {
-        const locator = page.getByTestId(`${field.testId}${data}`);
+        const locator = page.getByTestId(`${field.testId}${dropdownValue}`);
         await locator.waitFor({ state: "visible", timeout: 5000 });
         await locator.click();
       } else {
