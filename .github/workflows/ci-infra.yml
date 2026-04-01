@@ -79,17 +79,20 @@ jobs:
           directory: infra
           framework: terraform
           quiet: true # only displays failed checks
-  # check-compliance-with-tfsec:
-  #   name: Check compliance with tfsec
-  #   runs-on: ubuntu-22.04
+  check-compliance-with-trivy:
+    name: Check IaC compliance with Trivy
+    runs-on: ubuntu-22.04
 
-  #   permissions:
-  #     contents: read
-  #     pull-requests: write
+    permissions:
+      contents: read
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Run tfsec check
-  #       uses: aquasecurity/tfsec-pr-commenter-action@v1.3.1
-  #       with:
-  #         github_token: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Trivy IaC scan
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          scan-type: config
+          scan-ref: infra
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
