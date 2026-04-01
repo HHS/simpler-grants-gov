@@ -80,20 +80,32 @@ export async function fillField(
         `Field ${fieldIdentifier} requires string data, received ${typeof data}`,
       );
     }
-
     if (field.type === "dropdown") {
-      const dropdownValue = data as string;
-      if (field.selector) {
-        await selectDropdownByValueOrLabel(page, field.selector, dropdownValue);
-      } else if (field.testId) {
-        const locator = page.getByTestId(`${field.testId}${dropdownValue}`);
-        await locator.waitFor({ state: "visible", timeout: 5000 });
-        await locator.click();
-      } else {
+      // Validate data type
+      if (typeof data !== "string") {
         throw new Error(
-          `Dropdown field ${fieldIdentifier} is missing selector/testId`,
+          `Dropdown field ${fieldIdentifier} requires string data, received ${typeof data}`,
         );
       }
+
+      // Handle selector-based dropdown (native <select>)
+      if (field.selector) {
+        await selectDropdownByValueOrLabel(page, field.selector, data);
+        return;
+      }
+
+      // Handle testId-based dropdown (custom component)
+      if (field.testId) {
+        const locator = page.getByTestId(`${field.testId}${data}`);
+        await locator.waitFor({ state: "visible", timeout: 5000 });
+        await locator.click();
+        return;
+      }
+
+      // Fail fast if misconfigured
+      throw new Error(
+        `Dropdown field ${fieldIdentifier} is missing selector or testId`,
+      );
     } else if (field.type === "combo-box-input" && field.testId) {
       const toggleLocator = page.getByTestId(field.testId);
       await toggleLocator.waitFor({ state: "visible", timeout: 5000 });
