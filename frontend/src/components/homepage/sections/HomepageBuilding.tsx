@@ -38,14 +38,6 @@ const BuildingContent = () => {
                 span: (chunks) => <span className="text-italic">{chunks}</span>,
               })}
             </h2>
-            {/* {paragraphs.map((paragraph: string, paragraphIdx: number) => (
-              <p
-                className="font-sans-md tablet-lg:font-sans-lg"
-                key={paragraphIdx}
-              >
-                {paragraph}
-              </p>
-            ))} */}
             <p className="font-sans-md tablet-lg:font-sans-lg">
               {t("paragraph1")}
             </p>
