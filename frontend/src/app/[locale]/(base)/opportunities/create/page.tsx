@@ -3,9 +3,7 @@ import { UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { fetchUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
-import { LocalizedPageProps } from "src/types/intl";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
-import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { useTranslations } from "next-intl";
 import { redirect } from "next/navigation";
