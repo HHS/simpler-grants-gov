@@ -33,7 +33,7 @@ export type FormFillFieldDefinitions = {
 };
 
 export interface FillFormConfig {
-  formName: string;
+  formName: string | RegExp;
   fields: FormFillFieldDefinitions;
   saveButtonTestId: string;
   noErrorsText?: string;
