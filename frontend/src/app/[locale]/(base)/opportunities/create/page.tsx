@@ -66,7 +66,17 @@ const PageHeader = () => {
 // --- Main Page ---
 type CreateOpportunityProps = LocalizedPageProps & WithFeatureFlagProps;
 
-async function CreateOpportunityPage(props: CreateOpportunityProps) {
+
+async function CreateOpportunityPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  const selectedAgencyParam = resolvedSearchParams?.agency;
+  const agencyId = Array.isArray(selectedAgencyParam)
+    ? selectedAgencyParam[0]
+    : selectedAgencyParam;
   const { searchParams } = props;
   const resolvedSearchParams: Record<string, string | string[] | undefined> =
     searchParams ? await searchParams : {};
