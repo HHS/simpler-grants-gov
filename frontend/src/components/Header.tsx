@@ -281,6 +281,12 @@ const NavLinks = ({
               onClick={closeDropdownAndMobileNav}
               text={t("settings")}
             />,
+            <NavLink
+              href="/notifications"
+              key="notifications"
+              onClick={closeDropdownAndMobileNav}
+              text={t("notifications")}
+            />,
             isApplicationTestUser && <TestApplicationLink />,
             <SignOutNavLink key="logout" onClick={closeDropdownAndMobileNav} />,
           ]}
