@@ -17,7 +17,7 @@ import { sf424HappyPathTestData } from "./fixtures/sf424-fill-data";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 
-const { testOrgLabel, targetEnv} = playwrightEnv;
+const { testOrgLabel, targetEnv } = playwrightEnv;
 
 const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
 
