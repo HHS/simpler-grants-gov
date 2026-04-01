@@ -58,6 +58,6 @@ jobs:
       - name: Upload Merged HTML Report
         uses: actions/upload-artifact@v6
         with:
-          name: merged-html-report-$${{ inputs.target }}
+          name: merged-html-report-${{ inputs.target }}
           path: frontend/playwright-report
           retention-days: 30
