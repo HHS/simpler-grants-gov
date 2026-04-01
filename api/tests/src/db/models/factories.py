@@ -43,6 +43,7 @@ from src.constants.lookup_constants import (
     ApprovalResponseType,
     ApprovalType,
     AwardRecommendationAttachmentType,
+    AwardRecommendationRiskType,
     AwardRecommendationStatus,
     AwardRecommendationType,
     AwardSelectionMethod,
@@ -988,6 +989,24 @@ class AwardRecommendationAttachmentFactory(BaseFactory):
     )
     uploading_user = factory.SubFactory("tests.src.db.models.factories.UserFactory")
     uploading_user_id = factory.LazyAttribute(lambda s: s.uploading_user.user_id)
+    is_deleted = False
+
+
+class AwardRecommendationRiskFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationRisk
+
+    award_recommendation_risk_id = Generators.UuidObj
+
+    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
+    award_recommendation_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation.award_recommendation_id
+    )
+    award_recommendation_risk_number = factory.LazyAttribute(
+        lambda _: f"RISK-{random.randint(1, 99999999):08d}"
+    )
+    award_recommendation_risk_type = AwardRecommendationRiskType.ADDITIONAL_MONITORING
+    comment = factory.Faker("paragraph")
     is_deleted = False
 
 

@@ -124,6 +124,30 @@ class AwardRecommendationAttachment(ApiSchemaTable, TimestampMixin):
         return None
 
 
+class AwardRecommendationRisk(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "award_recommendation_risk"
+
+    award_recommendation_risk_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    award_recommendation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
+        ForeignKey(AwardRecommendation.award_recommendation_id),
+        index=True,
+    )
+    award_recommendation: Mapped[AwardRecommendation] = relationship(
+        AwardRecommendation, back_populates="award_recommendation_risks"
+    )
+    award_recommendation_risk_number: Mapped[str] = mapped_column(index=True)
+    award_recommendation_risk_type: Mapped[AwardRecommendationRiskType] = mapped_column(
+        "award_recommendation_risk_type_id",
+        LookupColumn(LkAwardRecommendationRiskType),
+        ForeignKey(LkAwardRecommendationRiskType.award_recommendation_risk_type_id),
+    )
+    comment: Mapped[str]
+    is_deleted: Mapped[bool] = mapped_column(default=False)
+
+
 class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
     __tablename__ = "award_recommendation_application_submission"
 
