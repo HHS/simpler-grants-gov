@@ -268,7 +268,6 @@ describe("DELETE /api/user/api-keys/[apiKeyId]", () => {
     expect(response.status).toBe(200);
     expect(data.message).toBe("API key deleted successfully");
     expect(mockHandleDeleteApiKey).toHaveBeenCalledWith(
-      "test-token",
       "test-user-id",
       "test-key-id",
     );

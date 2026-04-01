@@ -3,7 +3,6 @@
 import {
   fetchLocalUsers,
   fetchUserWithMethod,
-  postUserLogout,
 } from "src/services/fetch/fetchers/fetchers";
 import {
   OrganizationInvitation,
@@ -13,11 +12,6 @@ import {
   UserPrivilegeDefinition,
   UserPrivilegesResponse,
 } from "src/types/userTypes";
-
-export const postLogout = async (token: string) => {
-  const jwtAuthHeader = { "X-SGG-Token": token };
-  return postUserLogout({ additionalHeaders: jwtAuthHeader });
-};
 
 export const getUserDetails = async (
   token: string,
