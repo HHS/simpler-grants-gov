@@ -95,10 +95,7 @@ export async function fillField(
           `Dropdown field ${fieldIdentifier} is missing selector/testId`,
         );
       }
-    } else if (
-      field.type === "combo-box-input" &&
-      field.testId
-    ) {
+    } else if (field.type === "combo-box-input" && field.testId) {
       const toggleLocator = page.getByTestId(field.testId);
       await toggleLocator.waitFor({ state: "visible", timeout: 5000 });
       await toggleLocator.click();
@@ -192,7 +189,6 @@ export async function fillField(
       await locator.waitFor({ state: "attached", timeout: 30000 });
       await locator.scrollIntoViewIfNeeded();
       await locator.setInputFiles(data);
-      
     } else {
       throw new Error(
         `Unsupported or invalid field configuration for ${fieldIdentifier}`,
