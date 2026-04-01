@@ -183,7 +183,7 @@ export async function fillField(
         ? page.locator(field.selector)
         : page.getByTestId(field.testId!);
       // Use a generous timeout: Mobile Chrome renders the file input more slowly
-      // than desktop Chrome, so 5000ms is insufficient.     
+      // than desktop Chrome, so 5000ms is insufficient.
       await locator.waitFor({ state: "attached", timeout: 30000 });
       await locator.scrollIntoViewIfNeeded();
       await locator.setInputFiles(data);
@@ -271,7 +271,10 @@ export async function fillForm(
 
     await page.waitForTimeout(500);
     const saveButton = page.getByTestId(saveButtonTestId);
-    await saveButton.waitFor({ state: "visible", timeout: SAVE_BUTTON_TIMEOUT_MS });
+    await saveButton.waitFor({
+      state: "visible",
+      timeout: SAVE_BUTTON_TIMEOUT_MS,
+    });
     await saveButton.click({ timeout: SAVE_BUTTON_TIMEOUT_MS });
 
     if (returnToApplication) {
