@@ -63,7 +63,7 @@ async function OrganizationsPage({ params }: LocalizedPageProps) {
         "No active session for viewing Organizations.",
       );
     }
-    const userRolesPromise = getUserPrivileges(session.token, session.user_id);
+    const userRolesPromise = getUserPrivileges(session.user_id);
     const userOrganizationsPromise = getUserOrganizations(session.user_id);
 
     [userRoles, userOrganizations] = await Promise.all([
