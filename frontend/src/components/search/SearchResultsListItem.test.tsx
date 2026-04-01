@@ -2,9 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { mockOpportunity } from "src/utils/testing/fixtures";
 
-import SearchResultsListItem, {
-  updateIsSharedWithOrganizationEnabled,
-} from "./SearchResultsListItem";
+import SearchResultsListItem from "./SearchResultsListItem";
 
 describe("SearchResultsListItem", () => {
   it("should not have basic accessibility issues", async () => {
@@ -17,23 +15,41 @@ describe("SearchResultsListItem", () => {
 
   it("renders opportunity title and number", () => {
     render(<SearchResultsListItem index={1} opportunity={mockOpportunity} />);
-    expect(screen.getByText("Test Opportunity")).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("link", { name: /Test Opportunity/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText("OPP-12345")).toBeInTheDocument();
   });
 
-  it("renders share with opportunity link", () => {
-    updateIsSharedWithOrganizationEnabled(true);
+  it("renders share with opportunity button when showShareButton is true", () => {
     render(
       <SearchResultsListItem
         index={1}
         opportunity={mockOpportunity}
-        saved={true}
+        showShareButton={true}
         onShareClick={jest.fn()}
       />,
     );
+
     expect(
       screen.getByTestId("share-opportunity-button-id"),
     ).toBeInTheDocument();
+  });
+
+  it("does not render share with opportunity button when showShareButton is false", () => {
+    render(
+      <SearchResultsListItem
+        index={1}
+        opportunity={mockOpportunity}
+        showShareButton={false}
+        onShareClick={jest.fn()}
+      />,
+    );
+
+    expect(
+      screen.queryByTestId("share-opportunity-button-id"),
+    ).not.toBeInTheDocument();
   });
 
   getDateTestCases().forEach(({ api_date, ui_date }) => {

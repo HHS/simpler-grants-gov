@@ -1,13 +1,12 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
-import NotFound from "src/app/[locale]/(base)/not-found";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
 import getFormData from "src/utils/getFormData";
 
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplyForm from "src/components/applyForm/ApplyForm";
@@ -78,7 +77,7 @@ async function FormPage({ params }: formPageProps) {
 
   if (error || !data) {
     if (error === "UnauthorizedError") return redirect("/unauthenticated");
-    if (error === "NotFound") return <NotFound />;
+    if (error === "NotFound") notFound();
     return <TopLevelError />;
   }
 

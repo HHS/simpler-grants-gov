@@ -51,7 +51,7 @@ If any manual testing was performed, document it in enough detail in the PR desc
 
 ### Reviewers
 
-Assign reviewers applicable to the domain of your pull request. See [CODEOWNERS](.github/CODEOWNERS) for more details.
+Assign reviewers applicable to the domain of your pull request. See [Review Assignment](CONTRIBUTING.md#review-assignment) for more details.
 
 ### Pull in Own Requests
 

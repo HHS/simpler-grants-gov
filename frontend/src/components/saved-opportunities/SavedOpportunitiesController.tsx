@@ -10,13 +10,16 @@ import { ModalRef } from "@trussworks/react-uswds";
 
 import SearchResultsListItem from "src/components/search/SearchResultsListItem";
 import { ShareOpportunityToOrganizationsModal } from "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal";
+import { buildSavedOpportunityTags } from "./buildSavedOpportunityTags";
 
 interface SavedOpportunitiesControllerProps {
   opportunities: BaseOpportunity[];
+  individuallySavedOpportunityIds?: Set<string>;
 }
 
 export function SavedOpportunitiesController({
   opportunities,
+  individuallySavedOpportunityIds = new Set<string>(),
 }: SavedOpportunitiesControllerProps) {
   const modalRef = useRef<ModalRef>(null);
   const lastShareButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -39,6 +42,8 @@ export function SavedOpportunitiesController({
     useState<boolean>(false);
   const [hasOrganizationsError, setHasOrganizationsError] =
     useState<boolean>(false);
+
+  const hasOrganizations = organizations.length > 0;
 
   useEffect(() => {
     setOpportunitiesState(opportunities);
@@ -73,6 +78,14 @@ export function SavedOpportunitiesController({
     );
   }, [opportunitiesState, selectedOpportunityId]);
 
+  const userOrganizationIds = useMemo(
+    () =>
+      new Set(
+        organizations.map((organization) => organization.organization_id),
+      ),
+    [organizations],
+  );
+
   useEffect(() => {
     if (shouldOpenModal && selectedOpportunityId) {
       modalRef.current?.toggleModal();
@@ -105,11 +118,21 @@ export function SavedOpportunitiesController({
       return;
     }
 
-    const nextSavedToOrganizations = Array.from(organizationIds).map(
-      (organizationId) => ({
-        organization_id: organizationId,
-      }),
-    );
+    const nextSavedToOrganizations = Array.from(organizationIds)
+      .map((organizationId) =>
+        organizations.find(
+          (organization) => organization.organization_id === organizationId,
+        ),
+      )
+      .filter(
+        (organization): organization is Organization =>
+          organization !== undefined,
+      )
+      .map((organization) => ({
+        organization_id: organization.organization_id,
+        organization_name:
+          organization.sam_gov_entity?.legal_business_name ?? null,
+      }));
 
     setOpportunitiesState((previousOpportunities) =>
       previousOpportunities.map((opportunity) =>
@@ -126,18 +149,35 @@ export function SavedOpportunitiesController({
   return (
     <>
       <ul className="usa-list--unstyled">
-        {opportunitiesState.map((opportunity, index) => (
-          <li key={opportunity.opportunity_id}>
-            <SearchResultsListItem
-              opportunity={opportunity}
-              saved={true}
-              index={index}
-              onShareClick={(buttonElement: HTMLButtonElement) =>
-                handleShareClick(opportunity, buttonElement)
-              }
-            />
-          </li>
-        ))}
+        {opportunitiesState.map((opportunity, index) => {
+          const isSavedByUser = individuallySavedOpportunityIds.has(
+            opportunity.opportunity_id,
+          );
+
+          const savedOpportunityTags = buildSavedOpportunityTags(
+            opportunity,
+            userOrganizationIds,
+            isSavedByUser,
+          );
+
+          const hasVisibleSavedOpportunityTags =
+            savedOpportunityTags.length > 0;
+
+          return (
+            <li key={opportunity.opportunity_id}>
+              <SearchResultsListItem
+                opportunity={opportunity}
+                saved={hasVisibleSavedOpportunityTags}
+                showShareButton={hasOrganizations}
+                index={index}
+                savedOpportunityTags={savedOpportunityTags}
+                onShareClick={(buttonElement: HTMLButtonElement) =>
+                  handleShareClick(opportunity, buttonElement)
+                }
+              />
+            </li>
+          );
+        })}
       </ul>
 
       <ShareOpportunityToOrganizationsModal
