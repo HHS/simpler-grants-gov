@@ -43,6 +43,8 @@ from src.constants.lookup_constants import (
     ApprovalResponseType,
     ApprovalType,
     AwardRecommendationAttachmentType,
+    AwardRecommendationAuditEvent,
+    AwardRecommendationReviewType,
     AwardRecommendationRiskType,
     AwardRecommendationStatus,
     AwardRecommendationType,
@@ -1066,6 +1068,66 @@ class AwardRecommendationSubmissionDetailFactory(BaseFactory):
     award_recommendation_type = sometimes_none(factory.fuzzy.FuzzyChoice(AwardRecommendationType))
     has_exception = False
     exception_detail = sometimes_none(factory.Faker("paragraph"))
+
+
+class AwardRecommendationReviewFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationReview
+
+    award_recommendation_review_id = Generators.UuidObj
+
+    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
+    award_recommendation_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation.award_recommendation_id
+    )
+    award_recommendation_review_type = factory.fuzzy.FuzzyChoice(AwardRecommendationReviewType)
+    is_reviewed = False
+
+
+class AwardRecommendationAuditFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationAudit
+
+    award_recommendation_audit_id = Generators.UuidObj
+
+    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
+    award_recommendation_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation.award_recommendation_id
+    )
+    user = factory.SubFactory("tests.src.db.models.factories.UserFactory")
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+    award_recommendation_audit_event = factory.fuzzy.FuzzyChoice(AwardRecommendationAuditEvent)
+    award_recommendation_risk = factory.SubFactory(
+        AwardRecommendationRiskFactory,
+        award_recommendation=factory.SelfAttribute("..award_recommendation"),
+    )
+    award_recommendation_risk_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation_risk.award_recommendation_risk_id
+    )
+    award_recommendation_attachment = factory.SubFactory(
+        AwardRecommendationAttachmentFactory,
+        award_recommendation=factory.SelfAttribute("..award_recommendation"),
+    )
+    award_recommendation_attachment_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation_attachment.award_recommendation_attachment_id
+    )
+    award_recommendation_review = factory.SubFactory(
+        AwardRecommendationReviewFactory,
+        award_recommendation=factory.SelfAttribute("..award_recommendation"),
+    )
+    award_recommendation_review_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation_review.award_recommendation_review_id
+    )
+    award_recommendation_application_submission = factory.SubFactory(
+        AwardRecommendationApplicationSubmissionFactory,
+        award_recommendation=factory.SelfAttribute("..award_recommendation"),
+    )
+    award_recommendation_application_submission_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation_application_submission.award_recommendation_application_submission_id
+    )
+    workflow_approval = factory.SubFactory("tests.src.db.models.factories.WorkflowApprovalFactory")
+    workflow_approval_id = factory.LazyAttribute(lambda s: s.workflow_approval.workflow_approval_id)
+    audit_metadata = sometimes_none(factory.LazyFunction(dict))
 
 
 ###################
