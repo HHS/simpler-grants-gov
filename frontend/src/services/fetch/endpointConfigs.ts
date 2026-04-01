@@ -61,6 +61,7 @@ export const userLogoutEndpoint = {
   version: "v1",
   namespace: "users/token/logout",
   method: "POST" as ApiMethod,
+  requiresAuth: true,
 };
 
 export const toDynamicUsersEndpoint = (
@@ -71,6 +72,7 @@ export const toDynamicUsersEndpoint = (
     version: "v1",
     namespace: "users",
     method: type as ApiMethod,
+    requiresAuth: true,
   };
 };
 
@@ -79,6 +81,7 @@ export const userRefreshEndpoint = {
   version: "v1",
   namespace: "users/token/refresh",
   method: "POST" as ApiMethod,
+  requiresAuth: true,
 };
 
 export const searchAgenciesEndpoint = {
@@ -100,14 +103,13 @@ export const toDynamicOrganizationsEndpoint = (
   };
 };
 
-export const toDynamicGrantorsEndpoint = (
-  type: "POST" | "DELETE" | "PUT" | "GET",
-) => {
+export const toDynamicGrantorsEndpoint = (type: "POST") => {
   return {
     basePath: environment.API_URL,
     version: "v1",
     namespace: "grantors",
     method: type as ApiMethod,
+    requiresAuth: true,
   };
 };
 
