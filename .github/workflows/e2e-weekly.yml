@@ -13,11 +13,11 @@ jobs:
     with:
       version: main
       target: staging
-      playwright_tags: "@extended"
+      playwright_tags: "@smoke|@core-regession|@full-regression|@extended"
   weekly-e2e-tests-local:
     name: Weekly - all E2E tests (local)
     uses: ./.github/workflows/ci-frontend-e2e.yml
     if: always()
     secrets: inherit
     with:
-      playwright_tags: "@extended"
+      playwright_tags: "@smoke|@core-regession|@full-regression|@extended"

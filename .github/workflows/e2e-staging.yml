@@ -47,7 +47,7 @@ jobs:
         shell: bash
         run: |
           if [[ $GITHUB_EVENT_NAME = "push" ]]; then
-            echo "test_group_tags=@core-regression" >> "$GITHUB_ENV"
+            echo "test_group_tags=@smoke|@core-regression" >> "$GITHUB_ENV"
           else
             echo "test_group_tags=${{ inputs.playwright_tags }}" >> "$GITHUB_ENV"
           fi
