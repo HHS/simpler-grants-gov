@@ -148,7 +148,7 @@ const OpportunitiesHeader = ({
           )}
         </div>
         <Link
-          href={`/opportunities/create/${currentAgencyId}`}
+          href={`/opportunities/create?agency=${currentAgencyId}`}
           className="usa-button margin-left-auto"
         >
           {t("createOpportunityButton")}
