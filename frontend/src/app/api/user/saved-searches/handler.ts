@@ -36,7 +36,6 @@ export const saveSearchHandler = async (request: Request) => {
     savedSearch.pagination.page_offset = 1;
 
     const response = await handleSavedSearch(
-      session.token,
       session.user_id,
       savedSearch,
       savedSearchBody.name,
@@ -78,7 +77,6 @@ export const deleteSearchHandler = async (request: Request) => {
     }
 
     const response = await handleDeleteSavedSearch(
-      session.token,
       session.user_id,
       savedSearchBody.searchId,
     );
@@ -118,7 +116,6 @@ export const updateSavedSearchHandler = async (request: Request) => {
     }
 
     const response = await handleUpdateSavedSearch(
-      session.token,
       session.user_id,
       savedSearchBody.searchId,
       savedSearchBody.name,
