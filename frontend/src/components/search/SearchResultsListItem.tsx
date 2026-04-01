@@ -21,11 +21,6 @@ interface SearchResultsListItemProps {
   savedOpportunityTags?: SavedOpportunityTag[];
 }
 
-export let isShareWithOrganizationEnabled = false;
-export function updateIsSharedWithOrganizationEnabled(value: boolean) {
-  isShareWithOrganizationEnabled = value;
-}
-
 const metadataBorderClasses = `
   display-block
   tablet:display-inline-block
