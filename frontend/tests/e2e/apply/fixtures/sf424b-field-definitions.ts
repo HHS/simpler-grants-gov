@@ -22,7 +22,7 @@ export const fieldDefinitionsSF424B: FormFillFieldDefinitions = {
 
 export const SF424B_FORM_CONFIG = {
   ...FORM_DEFAULTS,
-  formName: "Assurances for Non-Construction Programs (SF-424B)",
+  formName: new RegExp(SF424B_FORM_MATCHER, "i"),
   fields: fieldDefinitionsSF424B,
 } as const;
 
