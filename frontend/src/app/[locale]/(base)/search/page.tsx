@@ -72,7 +72,6 @@ function Search({ searchParams, params }: SearchPageProps) {
   const savedOpportunitiesPromise = getSession().then((session) =>
     session
       ? getSavedOpportunities(
-          session.token,
           session.user_id,
           INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
         )
