@@ -64,10 +64,7 @@ async function OrganizationsPage({ params }: LocalizedPageProps) {
       );
     }
     const userRolesPromise = getUserPrivileges(session.token, session.user_id);
-    const userOrganizationsPromise = getUserOrganizations(
-      session.token,
-      session.user_id,
-    );
+    const userOrganizationsPromise = getUserOrganizations(session.user_id);
 
     [userRoles, userOrganizations] = await Promise.all([
       userRolesPromise,

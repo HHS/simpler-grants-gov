@@ -96,6 +96,7 @@ export const toDynamicOrganizationsEndpoint = (
     version: "v1",
     namespace: "organizations",
     method: type as ApiMethod,
+    requiresAuth: true,
   };
 };
 

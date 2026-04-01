@@ -62,7 +62,7 @@ describe("user profile form action", () => {
   });
   it("returns result of update on success", async () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
-    mockCreateInvitation.mockImplementation((_token, data) => {
+    mockCreateInvitation.mockImplementation((data) => {
       return { ...data, organization_invitation_id: "fun_id" } as unknown;
     });
 

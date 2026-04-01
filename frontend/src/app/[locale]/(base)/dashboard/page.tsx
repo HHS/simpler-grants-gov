@@ -40,10 +40,7 @@ async function WorkspaceDashboard() {
   let userOrganizations;
   let userInvitations: OrganizationInvitation[] = [];
   const userRolesPromise = getUserPrivileges(session.token, session.user_id);
-  const userOrganizationsPromise = getUserOrganizations(
-    session.token,
-    session.user_id,
-  );
+  const userOrganizationsPromise = getUserOrganizations(session.user_id);
   const userInvitationsPromise = getUserInvitations(
     session.token,
     session.user_id,
