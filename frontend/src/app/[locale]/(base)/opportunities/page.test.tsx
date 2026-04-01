@@ -272,7 +272,7 @@ describe("Opportunities", () => {
       expect(createOpportunityLink).toBeVisible();
       expect(createOpportunityLink).toHaveAttribute(
         "href",
-        "/opportunities/create/agency-uuid-1",
+        "/opportunities/create?agency=agency-uuid-1",
       );
     });
 
@@ -446,7 +446,7 @@ describe("Opportunities", () => {
       expect(createOpportunityLink).toBeVisible();
       expect(createOpportunityLink).toHaveAttribute(
         "href",
-        "/opportunities/create/agency-uuid-1",
+        "/opportunities/create?agency=agency-uuid-1",
       );
     });
 
