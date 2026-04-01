@@ -1036,6 +1036,22 @@ class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
     )
 
 
+class AwardRecommendationRiskSubmissionFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationRiskSubmission
+
+    award_recommendation_risk = factory.SubFactory(AwardRecommendationRiskFactory)
+    award_recommendation_risk_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation_risk.award_recommendation_risk_id
+    )
+    award_recommendation_application_submission = factory.SubFactory(
+        AwardRecommendationApplicationSubmissionFactory
+    )
+    award_recommendation_application_submission_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation_application_submission.award_recommendation_application_submission_id
+    )
+
+
 class AwardRecommendationSubmissionDetailFactory(BaseFactory):
     class Meta:
         model = award_recommendation_models.AwardRecommendationSubmissionDetail

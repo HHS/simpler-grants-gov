@@ -147,6 +147,13 @@ class AwardRecommendationRisk(ApiSchemaTable, TimestampMixin):
     comment: Mapped[str]
     is_deleted: Mapped[bool] = mapped_column(default=False)
 
+    award_recommendation_risk_submissions: Mapped[list[AwardRecommendationRiskSubmission]] = (
+        relationship(
+            back_populates="award_recommendation_risk",
+            cascade="all, delete-orphan",
+        )
+    )
+
 
 class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
     __tablename__ = "award_recommendation_application_submission"
@@ -176,6 +183,38 @@ class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
     award_recommendation_submission_detail: Mapped[AwardRecommendationSubmissionDetail] = (
         relationship("AwardRecommendationSubmissionDetail")
     )
+
+    award_recommendation_risk_submissions: Mapped[list[AwardRecommendationRiskSubmission]] = (
+        relationship(
+            back_populates="award_recommendation_application_submission",
+            cascade="all, delete-orphan",
+        )
+    )
+
+
+class AwardRecommendationRiskSubmission(ApiSchemaTable, TimestampMixin):
+    """Links an award recommendation risk to an award recommendation application submission."""
+
+    __tablename__ = "award_recommendation_risk_submission"
+
+    award_recommendation_risk_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
+        ForeignKey("api.award_recommendation_risk.award_recommendation_risk_id"),
+        primary_key=True,
+    )
+    award_recommendation_risk: Mapped[AwardRecommendationRisk] = relationship(
+        back_populates="award_recommendation_risk_submissions"
+    )
+    award_recommendation_application_submission_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
+        ForeignKey(
+            "api.award_recommendation_application_submission.award_recommendation_application_submission_id"
+        ),
+        primary_key=True,
+    )
+    award_recommendation_application_submission: Mapped[
+        AwardRecommendationApplicationSubmission
+    ] = relationship(back_populates="award_recommendation_risk_submissions")
 
 
 class AwardRecommendationSubmissionDetail(ApiSchemaTable, TimestampMixin):
