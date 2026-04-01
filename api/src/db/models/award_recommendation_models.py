@@ -8,20 +8,26 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.adapters.db.type_decorators.postgres_type_decorators import LookupColumn
 from src.constants.lookup_constants import (
+    AwardRecommendationAttachmentType,
+    AwardRecommendationRiskType,
     AwardRecommendationStatus,
     AwardRecommendationType,
     AwardSelectionMethod,
 )
 from src.db.models.base import ApiSchemaTable, TimestampMixin
 from src.db.models.lookup_models import (
+    LkAwardRecommendationAttachmentType,
+    LkAwardRecommendationRiskType,
     LkAwardRecommendationStatus,
     LkAwardRecommendationType,
     LkAwardSelectionMethod,
 )
+from src.util.file_util import presign_or_s3_cdnify_url
 
 if TYPE_CHECKING:
     from src.db.models.competition_models import ApplicationSubmission
     from src.db.models.opportunity_models import Opportunity
+    from src.db.models.user_models import User
     from src.db.models.workflow_models import Workflow
 
 
@@ -69,6 +75,53 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
         uselist=True,
         cascade="all, delete-orphan",
     )
+    award_recommendation_attachments: Mapped[list[AwardRecommendationAttachment]] = relationship(
+        "AwardRecommendationAttachment",
+        back_populates="award_recommendation",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+    award_recommendation_risks: Mapped[list[AwardRecommendationRisk]] = relationship(
+        "AwardRecommendationRisk",
+        back_populates="award_recommendation",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
+
+class AwardRecommendationAttachment(ApiSchemaTable, TimestampMixin):
+    __tablename__ = "award_recommendation_attachment"
+
+    award_recommendation_attachment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID, primary_key=True, default=uuid.uuid4
+    )
+    award_recommendation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
+        ForeignKey(AwardRecommendation.award_recommendation_id),
+        index=True,
+    )
+    award_recommendation: Mapped[AwardRecommendation] = relationship(
+        AwardRecommendation, back_populates="award_recommendation_attachments"
+    )
+    file_location: Mapped[str]
+    file_name: Mapped[str]
+    award_recommendation_attachment_type: Mapped[AwardRecommendationAttachmentType] = mapped_column(
+        "award_recommendation_attachment_type_id",
+        LookupColumn(LkAwardRecommendationAttachmentType),
+        ForeignKey(LkAwardRecommendationAttachmentType.award_recommendation_attachment_type_id),
+    )
+    uploading_user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
+        ForeignKey("api.user.user_id"),
+    )
+    uploading_user: Mapped[User] = relationship("User")
+    is_deleted: Mapped[bool] = mapped_column(default=False)
+
+    @property
+    def download_path(self) -> str | None:
+        if self.file_location:
+            return presign_or_s3_cdnify_url(self.file_location)
+        return None
 
 
 class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):

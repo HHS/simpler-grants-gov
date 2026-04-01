@@ -42,6 +42,7 @@ from src.constants.lookup_constants import (
     ApplicationStatus,
     ApprovalResponseType,
     ApprovalType,
+    AwardRecommendationAttachmentType,
     AwardRecommendationStatus,
     AwardRecommendationType,
     AwardSelectionMethod,
@@ -966,6 +967,28 @@ class AwardRecommendationFactory(BaseFactory):
     is_deleted = False
     review_workflow = factory.SubFactory("tests.src.db.models.factories.WorkflowFactory")
     review_workflow_id = factory.LazyAttribute(lambda s: s.review_workflow.workflow_id)
+
+
+class AwardRecommendationAttachmentFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationAttachment
+
+    award_recommendation_attachment_id = Generators.UuidObj
+
+    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
+    award_recommendation_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation.award_recommendation_id
+    )
+    file_location = factory.LazyAttribute(
+        lambda o: f"s3://local-mock-public-bucket/award-recommendations/{o.award_recommendation_id}/attachments/{o.award_recommendation_attachment_id}/{o.file_name}"
+    )
+    file_name = factory.Faker("file_name", extension="pdf")
+    award_recommendation_attachment_type = factory.fuzzy.FuzzyChoice(
+        AwardRecommendationAttachmentType
+    )
+    uploading_user = factory.SubFactory("tests.src.db.models.factories.UserFactory")
+    uploading_user_id = factory.LazyAttribute(lambda s: s.uploading_user.user_id)
+    is_deleted = False
 
 
 class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
