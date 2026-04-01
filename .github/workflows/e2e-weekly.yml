@@ -1,19 +1,23 @@
 name: E2E Tests Weekly
 on:
   schedule:
-    # Run every Sunday at (6/7am Eastern) before the start of the workday
+    # Run every Sunday at (6/7am Eastern)
     - cron: "0 11 * * 0"
 
 jobs:
   weekly-e2e-tests-deployed:
     name: Weekly - all E2E tests (staging)
     uses: ./.github/workflows/e2e-staging.yml
+    if: always()
+    secrets: inherit
     with:
       version: main
       target: staging
-      playwright_tags: "@extended"
+      playwright_tags: "@smoke|@core-regession|@full-regression|@extended"
   weekly-e2e-tests-local:
     name: Weekly - all E2E tests (local)
     uses: ./.github/workflows/ci-frontend-e2e.yml
+    if: always()
+    secrets: inherit
     with:
-      playwright_tags: "@extended"
+      playwright_tags: "@smoke|@core-regession|@full-regression|@extended"
