@@ -1,6 +1,10 @@
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import { FormFillFieldDefinitions } from "tests/e2e/utils/forms/general-forms-filling";
 
+// Regex matcher for SF-LLL: matches both "SF-LLL" and "Disclosure of Lobbying Activities"
+export const SFLLL_FORM_MATCHER =
+  "SF\\s*[-‑–—]?\\s*LLL|Disclosure\\s+of\\s+Lobbying\\s+Activities";
+
 const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
   federalAction_type: {
     selector: "#federal_action_type",
@@ -332,6 +336,6 @@ const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
 
 export const SFLLL_FORM_CONFIG = {
   ...FORM_DEFAULTS,
-  formName: "Disclosure of Lobbying Activities (SF-LLL)",
+  formName: new RegExp(SFLLL_FORM_MATCHER, "i"),
   fields: fieldDefinitionsSFLLL,
 } as const;
