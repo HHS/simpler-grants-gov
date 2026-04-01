@@ -289,7 +289,7 @@ describe("Saved Opportunities page", () => {
           uei: "",
           ebiz_poc_email: "",
           ebiz_poc_first_name: "",
-          ebiz_poc_last_name: ""
+          ebiz_poc_last_name: "",
         },
       },
     ]);
@@ -340,7 +340,7 @@ describe("Saved Opportunities page", () => {
           uei: "",
           ebiz_poc_email: "",
           ebiz_poc_first_name: "",
-          ebiz_poc_last_name: ""
+          ebiz_poc_last_name: "",
         },
       },
       {
@@ -351,7 +351,7 @@ describe("Saved Opportunities page", () => {
           uei: "",
           ebiz_poc_email: "",
           ebiz_poc_first_name: "",
-          ebiz_poc_last_name: ""
+          ebiz_poc_last_name: "",
         },
       },
     ]);
