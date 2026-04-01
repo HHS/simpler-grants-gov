@@ -1,4 +1,3 @@
-import path from "path";
 import { Page, TestInfo } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
 
@@ -121,9 +120,6 @@ export async function fillField(
       const locator = page.getByRole("button", { name: field.buttonName });
       await locator.waitFor({ state: "visible", timeout: 5000 });
 
-      const filePath = path.resolve(__dirname, "../../test-upload-files", data);
-      await locator.setInputFiles(filePath);
-
       await page.waitForLoadState("load", { timeout: 15000 });
     } else if (
       field.type === "radiobutton" &&
@@ -186,9 +182,21 @@ export async function fillField(
       const locator = field.selector
         ? page.locator(field.selector)
         : page.getByTestId(field.testId!);
+      // Use a generous timeout: Mobile Chrome renders the file input more slowly
+      // than desktop Chrome, so 5000ms is insufficient.     
       await locator.waitFor({ state: "attached", timeout: 30000 });
       await locator.scrollIntoViewIfNeeded();
       await locator.setInputFiles(data);
+      // Wait for the uploaded filename to appear for this specific field.
+      // The same file can be uploaded in multiple sections, so avoid a
+      // page-wide text query that can match more than one preview element.
+      const fileName = data.split(/[/\\]/).pop()!;
+      const fieldContainer = locator.locator(
+        "xpath=ancestor::*[starts-with(@id, 'form-section-')][1]",
+      );
+      await fieldContainer
+        .getByText(fileName, { exact: true })
+        .waitFor({ state: "visible", timeout: 60000 });
     } else {
       throw new Error(
         `Unsupported or invalid field configuration for ${fieldIdentifier}`,
@@ -228,6 +236,7 @@ export async function fillForm(
   data: Record<string, string>,
   returnToApplication = true,
 ): Promise<void> {
+  const SAVE_BUTTON_TIMEOUT_MS = 30000;
   const { formName, fields, saveButtonTestId } = config;
 
   const applicationURL = page.url();
@@ -261,7 +270,9 @@ export async function fillForm(
     }
 
     await page.waitForTimeout(500);
-    await page.getByTestId(saveButtonTestId).click();
+    const saveButton = page.getByTestId(saveButtonTestId);
+    await saveButton.waitFor({ state: "visible", timeout: SAVE_BUTTON_TIMEOUT_MS });
+    await saveButton.click({ timeout: SAVE_BUTTON_TIMEOUT_MS });
 
     if (returnToApplication) {
       await page.goto(applicationURL);
