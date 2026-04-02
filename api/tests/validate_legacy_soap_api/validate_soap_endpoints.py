@@ -124,7 +124,7 @@ def validate_grantors_get_application_zip_request(soap_context: ValidateSoapCont
 
     # Adding the cert to the headers and the cert kwarg in order to make this work if you call locally or call a lower env
     resp = requests.post(
-        SOAP_URI, data=data, headers=HEADERS, cert=(soap_context.cert, soap_context.key)
+        SOAP_URI, data=data, headers=HEADERS, cert=(soap_context.cert, soap_context.key), timeout=10
     )
     simpler_match = re.search(rb"<soap:Envelope.*</soap:Envelope>", resp.content, re.DOTALL)
     if simpler_match is None:
