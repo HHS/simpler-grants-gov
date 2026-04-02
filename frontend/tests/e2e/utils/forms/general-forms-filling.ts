@@ -359,7 +359,7 @@ export async function fillForm(
   const formMatcher = formName instanceof RegExp ? formName.source : formName;
 
   try {
-    // ── Navigation ──────────────────────────────────────────────────────────
+    // *********** Navigation ***********
     // Delegate to openForm, which owns all navigation reliability:
     // table-scoped row lookup, scroll-to-reveal, testId/href/button/global
     // fallback selectors, trial-click check, force-click retry, direct href
@@ -369,14 +369,14 @@ export async function fillForm(
       throw new Error(`Could not find or open form: ${formMatcher}`);
     }
 
-    // ── Form ready check ───────────────────────────────────────────────────
+    // *********** Form ready check ***********
     // Confirm the form heading is visible before filling any fields.
     await page
       .getByText(formName)
       .first()
       .waitFor({ state: "visible", timeout: 35000 });
 
-    // ── Fill fields ────────────────────────────────────────────────────────
+    // *********** Fill fields ***********
 
     for (const fieldDefinition of Object.entries(fields)) {
       const [fieldIdentifier, fieldConfig] = fieldDefinition;
