@@ -205,7 +205,11 @@ export async function fillField(
       const fileName = data.split(/[/\\]/).pop()!;
       const fieldContainer = locator.locator(
         "xpath=ancestor::*[starts-with(@id, 'form-section-')][1]",
-      );
+      const fileName = data.split(/[/\\]/).pop() ?? data;
+      await page
+        .locator(`span:has-text("${fileName}")`)
+        .waitFor({ state: "visible", timeout: 60000 });
+    }
       await fieldContainer
         .getByText(fileName, { exact: true })
         .waitFor({ state: "visible", timeout: 60000 });
