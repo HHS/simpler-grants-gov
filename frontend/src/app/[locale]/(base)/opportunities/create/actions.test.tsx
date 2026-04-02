@@ -1,5 +1,5 @@
 import { identity } from "lodash";
-import { createOpportunityAction } from "src/app/[locale]/(base)/opportunities/create/[agencyId]/actions";
+import { createOpportunityAction } from "src/app/[locale]/(base)/opportunities/create/actions";
 
 const getSessionMock = jest.fn();
 const mockCreateOpportunity = jest.fn();
