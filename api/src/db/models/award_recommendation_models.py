@@ -28,7 +28,7 @@ from src.db.models.lookup_models import (
     LkAwardRecommendationType,
     LkAwardSelectionMethod,
 )
-from src.util.file_util import presign_or_s3_cdnify_url
+from src.util.file_util import pre_sign_file_location
 
 if TYPE_CHECKING:
     from src.db.models.competition_models import ApplicationSubmission
@@ -134,10 +134,8 @@ class AwardRecommendationAttachment(ApiSchemaTable, TimestampMixin):
     is_deleted: Mapped[bool] = mapped_column(default=False)
 
     @property
-    def download_path(self) -> str | None:
-        if self.file_location:
-            return presign_or_s3_cdnify_url(self.file_location)
-        return None
+    def download_path(self) -> str:
+        return pre_sign_file_location(self.file_location)
 
 
 class AwardRecommendationRisk(ApiSchemaTable, TimestampMixin):
