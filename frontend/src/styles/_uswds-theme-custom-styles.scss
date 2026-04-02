@@ -1043,6 +1043,7 @@ input[type="checkbox"]:not(checked) ~ .saved-opportunity-radius-md,
 .saved-opportunity-radius-md:has(input[type="checkbox"]:not(checked)) {
   background-color: white;
   border: #e9e9e9 1px solid !important;
+  padding: 0.6rem;
 }
 // Saved Opportunities Tags
 .saved-opportunity-tags {
