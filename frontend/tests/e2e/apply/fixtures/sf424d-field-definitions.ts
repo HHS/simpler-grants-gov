@@ -10,7 +10,16 @@ export const SF424D_FORM_MATCHER =
   "SF\\s*[-‑–—]?\\s*424D|Assurances\\s+for\\s+Construction\\s+Programs";
 
 export const fieldDefinitionsSF424D: FormFillFieldDefinitions = {
-  // Add actual field definitions here as needed
+  title: {
+    testId: "title",
+    type: "text",
+    field: "Title",
+  },
+  applicant_organization: {
+    testId: "applicant_organization",
+    type: "text",
+    field: "Applicant Organization",
+  },
 };
 
 export const SF424D_FORM_CONFIG = {
