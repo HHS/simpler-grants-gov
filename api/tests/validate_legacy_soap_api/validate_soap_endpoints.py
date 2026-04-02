@@ -9,18 +9,20 @@ from urllib.parse import quote
 import click
 import requests
 from lxml import etree
+from pydantic import Field
 
 import src.adapters.db as db
 import src.logging
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
+from src.util.env_config import PydanticBaseEnvConfig
 from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
 
 """
-Add following to soap-api.env
+Add following to local.env
 CERT_DATA =
 KEY_DATA =
 SOAP_URI =
@@ -31,10 +33,15 @@ May need to run `poetry install` to update command
 To run use: `make validate-simpler-endpoints``
 """
 
-SOAP_URI = os.getenv(
-    "SOAP_URI",
-    b"http://host.docker.internal:8080/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
-)
+
+class SOAPValidationEnvConfig(PydanticBaseEnvConfig):
+    cert_data: str = Field(alias="CERT_DATA")
+    key_data: str = Field(alias="KEY_DATA")
+    soap_uri: str = Field(alias="SOAP_URI")
+
+
+_config = SOAPValidationEnvConfig()
+
 HEADERS = {"Content-Type": "application/xml", "Use-Simpler-Override": "1", "Use-Soap-Cert": "1"}
 
 
@@ -117,14 +124,18 @@ def build_schema_validator(wsdl_path: str, operation_name: str) -> etree.XMLSche
 
 
 def validate_grantors_get_application_zip_request(soap_context: ValidateSoapContext) -> None:
-    cert = os.getenv("CERT_DATA", "")
+    cert = _config.cert_data
     encoded = quote(cert, safe="")
     HEADERS.update({"X-Amzn-Mtls-Clientcert": encoded})
     data = get_grantors_get_application_zip_request_data("GRANT80000000")
 
     # Adding the cert to the headers and the cert kwarg in order to make this work if you call locally or call a lower env
     resp = requests.post(
-        SOAP_URI, data=data, headers=HEADERS, cert=(soap_context.cert, soap_context.key), timeout=10
+        _config.soap_uri,
+        data=data,
+        headers=HEADERS,
+        cert=(soap_context.cert, soap_context.key),
+        timeout=10,
     )
     simpler_match = re.search(rb"<soap:Envelope.*</soap:Envelope>", resp.content, re.DOTALL)
     if simpler_match is None:
@@ -169,8 +180,8 @@ def validate_grantors_get_application_zip_request(soap_context: ValidateSoapCont
 
 
 def get_credentials(stack: ExitStack) -> tuple:
-    cert_data_encoded = os.getenv("CERT_DATA")
-    key_data_encoded = os.getenv("KEY_DATA")
+    cert_data_encoded = _config.cert_data
+    key_data_encoded = _config.key_data
     if cert_data_encoded and key_data_encoded:
         cert_data = cert_data_encoded.replace("\\n", "\n")
         key_data = key_data_encoded.replace("\\n", "\n")
