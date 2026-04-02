@@ -203,7 +203,9 @@ export async function fillField(
       // The same file can be uploaded in multiple sections, so avoid a
       // page-wide text query that can match more than one preview element.
       const fileName = data.split(/[/\\]/).pop() ?? data;
-      await page.locator(`span:has-text("${fileName}")`).waitFor({ state: "visible", timeout: 60000 });
+      await page
+        .locator(`span:has-text("${fileName}")`)
+        .waitFor({ state: "visible", timeout: 60000 });
     } else {
       throw new Error(
         `Unsupported or invalid field configuration for ${fieldIdentifier}`,
