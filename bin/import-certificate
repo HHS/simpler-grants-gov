@@ -10,7 +10,7 @@ set -euo pipefail
 BASE_DOMAIN="simpler.grants.gov"
 
 # AWS region and profile from environment (standard AWS CLI convention)
-AWS_REGION="${AWS_DEFAULT_REGION:-us-east-1}"
+AWS_REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-us-east-1}}"
 AWS_PROFILE="${AWS_PROFILE:-}"
 PRIVATE_KEY_FILE=""
 CHAIN_FILE=""
@@ -84,7 +84,7 @@ if [[ "${CERT_FILE##*.}" != "crt" ]]; then
   exit 1
 fi
 
-if ! head -c 10 "$CERT_FILE" | grep -q "^-----BEGIN"; then
+if ! head -c 20 "$CERT_FILE" | grep -q "^-----BEGIN"; then
   echo "Error: Certificate file does not appear to be PEM-encoded: ${CERT_FILE}" >&2
   exit 1
 fi
@@ -174,7 +174,7 @@ fi
 # -----------------------------------------------------------------------
 echo
 echo "Running: aws acm import-certificate ..."
-CERTIFICATE_ARN="$("${AWS_CMD[@]}")"
+CERTIFICATE_ARN="$("${AWS_CMD[@]}" --output text)"
 
 echo
 echo "======================================"
