@@ -1123,38 +1123,66 @@ class AwardRecommendationAuditFactory(BaseFactory):
     )
     user = factory.SubFactory("tests.src.db.models.factories.UserFactory")
     user_id = factory.LazyAttribute(lambda s: s.user.user_id)
-    award_recommendation_audit_event = factory.fuzzy.FuzzyChoice(AwardRecommendationAuditEvent)
-    award_recommendation_risk = factory.SubFactory(
-        AwardRecommendationRiskFactory,
-        award_recommendation=factory.SelfAttribute("..award_recommendation"),
-    )
-    award_recommendation_risk_id = factory.LazyAttribute(
-        lambda s: s.award_recommendation_risk.award_recommendation_risk_id
-    )
-    award_recommendation_attachment = factory.SubFactory(
-        AwardRecommendationAttachmentFactory,
-        award_recommendation=factory.SelfAttribute("..award_recommendation"),
-    )
-    award_recommendation_attachment_id = factory.LazyAttribute(
-        lambda s: s.award_recommendation_attachment.award_recommendation_attachment_id
-    )
-    award_recommendation_review = factory.SubFactory(
-        AwardRecommendationReviewFactory,
-        award_recommendation=factory.SelfAttribute("..award_recommendation"),
-    )
-    award_recommendation_review_id = factory.LazyAttribute(
-        lambda s: s.award_recommendation_review.award_recommendation_review_id
-    )
-    award_recommendation_application_submission = factory.SubFactory(
-        AwardRecommendationApplicationSubmissionFactory,
-        award_recommendation=factory.SelfAttribute("..award_recommendation"),
-    )
-    award_recommendation_application_submission_id = factory.LazyAttribute(
-        lambda s: s.award_recommendation_application_submission.award_recommendation_application_submission_id
-    )
-    workflow_approval = factory.SubFactory("tests.src.db.models.factories.WorkflowApprovalFactory")
-    workflow_approval_id = factory.LazyAttribute(lambda s: s.workflow_approval.workflow_approval_id)
-    audit_metadata = sometimes_none(factory.LazyFunction(dict))
+
+    award_recommendation_audit_event = AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_CREATED
+
+    class Params:
+        is_created = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_CREATED,
+        )
+        is_updated = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_UPDATED,
+        )
+        is_attachment_created = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.ATTACHMENT_CREATED,
+            award_recommendation_attachment=factory.SubFactory(
+                AwardRecommendationAttachmentFactory,
+                award_recommendation=factory.SelfAttribute("..award_recommendation"),
+            ),
+            award_recommendation_attachment_id=factory.LazyAttribute(
+                lambda s: s.award_recommendation_attachment.award_recommendation_attachment_id
+            ),
+        )
+        is_attachment_deleted = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.ATTACHMENT_DELETED,
+            award_recommendation_attachment=factory.SubFactory(
+                AwardRecommendationAttachmentFactory,
+                award_recommendation=factory.SelfAttribute("..award_recommendation"),
+            ),
+            award_recommendation_attachment_id=factory.LazyAttribute(
+                lambda s: s.award_recommendation_attachment.award_recommendation_attachment_id
+            ),
+        )
+        is_risk_created = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.RISK_CREATED,
+            award_recommendation_risk=factory.SubFactory(
+                AwardRecommendationRiskFactory,
+                award_recommendation=factory.SelfAttribute("..award_recommendation"),
+            ),
+            award_recommendation_risk_id=factory.LazyAttribute(
+                lambda s: s.award_recommendation_risk.award_recommendation_risk_id
+            ),
+        )
+        is_review_created = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.REVIEW_CREATED,
+            award_recommendation_review=factory.SubFactory(
+                AwardRecommendationReviewFactory,
+                award_recommendation=factory.SelfAttribute("..award_recommendation"),
+            ),
+            award_recommendation_review_id=factory.LazyAttribute(
+                lambda s: s.award_recommendation_review.award_recommendation_review_id
+            ),
+        )
+        is_application_submission_updated = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.APPLICATION_SUBMISSION_UPDATED,
+            award_recommendation_application_submission=factory.SubFactory(
+                AwardRecommendationApplicationSubmissionFactory,
+                award_recommendation=factory.SelfAttribute("..award_recommendation"),
+            ),
+            award_recommendation_application_submission_id=factory.LazyAttribute(
+                lambda s: s.award_recommendation_application_submission.award_recommendation_application_submission_id
+            ),
+        )
 
 
 ###################
