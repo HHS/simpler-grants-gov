@@ -42,7 +42,7 @@ env:
   NODE_OPTIONS: --dns-result-order=ipv4first
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-local-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -107,7 +107,7 @@ jobs:
           if [[ $GITHUB_EVENT_NAME = "pull_request" ]]; then
             echo "test_group_tags=@smoke" >> "$GITHUB_ENV"
           elif [[ $GITHUB_EVENT_NAME = "push" ]]; then
-            echo "test_group_tags=@core-regression" >> "$GITHUB_ENV"
+            echo "test_group_tags=@smoke|@core-regression" >> "$GITHUB_ENV"
           else
             echo "test_group_tags=${{ inputs.playwright_tags }}" >> "$GITHUB_ENV"
           fi

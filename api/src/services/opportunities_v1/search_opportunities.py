@@ -5,8 +5,11 @@ from collections.abc import Sequence
 from pydantic import BaseModel, Field
 
 import src.adapters.search as search
+from src.adapters.search.opensearch_config import get_opensearch_config
+from src.adapters.search.opensearch_explain import log_search_result_explanations
 from src.adapters.search.opensearch_response import SearchResponse
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema, SearchQueryOperator
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
 from src.search.search_models import (
@@ -256,6 +259,7 @@ def _search_opportunities(
     search_client: search.SearchClient,
     search_params: SearchOpportunityParams,
     includes: list | None = None,
+    explain: bool = False,
 ) -> SearchResponse:
     search_request = _get_search_request(search_params)
     index_alias = get_search_config().opportunity_search_index_alias
@@ -263,7 +267,11 @@ def _search_opportunities(
         "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
     )
     response = search_client.search(
-        index_alias, search_request, includes=includes, excludes=["attachments"]
+        index_alias, search_request, includes=includes, excludes=["attachments"], explain=explain
+    )
+
+    add_extra_data_to_current_request_logs(
+        {"search.scoring_rule": search_params.experimental.scoring_rule.value}
     )
 
     return response
@@ -275,7 +283,15 @@ def search_opportunities(
 
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
 
-    response = _search_opportunities(search_client, search_params)
+    explain_enabled = get_opensearch_config().opensearch_explain_enabled
+    response = _search_opportunities(search_client, search_params, explain=explain_enabled)
+
+    if explain_enabled and search_params.query:
+        log_search_result_explanations(
+            raw_hits=response.raw_hits,
+            query=search_params.query,
+            scoring_rule=search_params.experimental.scoring_rule.value,
+        )
 
     pagination_info = PaginationInfo.from_search_response(search_params.pagination, response)
 

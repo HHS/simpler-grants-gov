@@ -62,11 +62,17 @@ const PageHeader = () => {
 };
 
 // --- Main Page ---
-type FormPageProps = {
-  params: Promise<{ agencyId: string; locale: string }>;
+type CreateOpportunityProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
-async function CreateOpportunityPage({ params }: FormPageProps) {
-  const { agencyId } = await params;
+
+async function CreateOpportunityPage({ searchParams }: CreateOpportunityProps) {
+  const resolvedSearchParams = await searchParams;
+  const selectedAgencyParam = resolvedSearchParams?.agency;
+  const agencyId = Array.isArray(selectedAgencyParam)
+    ? selectedAgencyParam[0]
+    : selectedAgencyParam;
+
   const userSession = await getSession();
 
   // Check the user's session
@@ -111,7 +117,7 @@ async function CreateOpportunityPage({ params }: FormPageProps) {
   );
 }
 
-export default withFeatureFlag<FormPageProps, never>(
+export default withFeatureFlag<CreateOpportunityProps, never>(
   CreateOpportunityPage,
   "opportunitiesListOff",
   () => redirect("/maintenance"),

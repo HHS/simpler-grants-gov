@@ -3,7 +3,7 @@
 import React from "react";
 import { Label } from "@trussworks/react-uswds";
 
-type DynamicLabelType = "default" | "hide-helper-text";
+export type DynamicLabelType = "default" | "hide-helper-text";
 
 type DynamicFieldLabelProps = {
   idFor: string;

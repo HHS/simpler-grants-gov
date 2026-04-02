@@ -6,7 +6,7 @@ import { useUser } from "src/services/auth/useUser";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { baseApiKey } from "src/utils/testing/fixtures";
 
-import ApiKeyModal from "src/components/developer/apiDashboard/ApiKeyModal";
+import ApiKeyModal from "src/components/developers/apiDashboard/ApiKeyModal";
 
 // Mock dependencies
 const mockClientFetch = jest.fn();

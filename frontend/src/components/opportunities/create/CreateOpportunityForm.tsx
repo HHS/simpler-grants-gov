@@ -1,6 +1,6 @@
 "use client";
 
-import { createOpportunityAction } from "src/app/[locale]/(base)/opportunities/create/[agencyId]/actions";
+import { createOpportunityAction } from "src/app/[locale]/(base)/opportunities/create/actions";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -8,10 +8,8 @@ import { useActionState, useEffect, useState } from "react";
 import { Alert, Button, Link } from "@trussworks/react-uswds";
 
 import {
+  CommonCharacterCount,
   CommonSelectInput,
-  CommonText,
-  CommonTextArea,
-  CommonTextInput,
 } from "src/components/grantor/CommonFormFields";
 
 // Category options
@@ -102,7 +100,7 @@ export function CreateOpportunityForm({
   );
 
   // Update state on change
-  const onOppNbrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onOppNbrChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setOppNbr(e.target.value);
   };
   const onOppTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -117,7 +115,7 @@ export function CreateOpportunityForm({
   const onExplanationChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setExplain(e.target.value);
   };
-  const onAlnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onAlnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAssistanceListingNumber(e.target.value);
   };
 
@@ -146,8 +144,7 @@ export function CreateOpportunityForm({
       >
         <div data-testid="formGroup" className="width-full">
           {/* Opportunity Number */}
-          <CommonTextInput
-            labelId="label-for-opportunityNumber"
+          <CommonCharacterCount
             labelText={t("CreateOpportunityForm.opportunityNumber")}
             description={t("CreateOpportunityForm.opportunityNumberDesc")}
             fieldId="opportunityNumber"
@@ -156,13 +153,10 @@ export function CreateOpportunityForm({
             onTextChange={onOppNbrChange}
             defaultValue={response?.data?.opportunity_number || ""}
           />
-          <CommonText
-            textContent={t("CreateOpportunityForm.charactersAllowed40")}
-          />
 
           {/* Opportunity Title */}
-          <CommonTextArea
-            labelId="label-for-opportunityTitle"
+          <CommonCharacterCount
+            isTextArea={true}
             labelText={t("CreateOpportunityForm.opportunityTitle")}
             description={t("CreateOpportunityForm.opportunityTitleDesc")}
             fieldId="opportunityTitle"
@@ -171,13 +165,9 @@ export function CreateOpportunityForm({
             onTextChange={onOppTitleChange}
             defaultValue={response?.data?.opportunity_title || ""}
           />
-          <CommonText
-            textContent={t("CreateOpportunityForm.charactersAllowed255")}
-          />
 
           {/* Agency */}
           <CommonSelectInput
-            labelId="label-for-agencyId"
             labelText={t("CreateOpportunityForm.agency")}
             description={""}
             fieldId="agencyId"
@@ -189,7 +179,6 @@ export function CreateOpportunityForm({
 
           {/* Category */}
           <CommonSelectInput
-            labelId="label-for-category"
             labelText={t("CreateOpportunityForm.category")}
             description={t("CreateOpportunityForm.categoryDesc")}
             fieldId="category"
@@ -201,26 +190,20 @@ export function CreateOpportunityForm({
 
           {/* Category-Other Explanation */}
           {showExplain && (
-            <CommonTextArea
-              labelId="label-for-categoryExplanation"
+            <CommonCharacterCount
+              isTextArea={true}
               labelText={t("CreateOpportunityForm.categoryExplanation")}
               description={t("CreateOpportunityForm.categoryExplanationDesc")}
               fieldId="categoryExplanation"
-              fieldMaxLength={2000}
+              fieldMaxLength={255}
               isRequired={true}
               onTextChange={onExplanationChange}
               defaultValue={response?.data?.category_explanation || ""}
             />
           )}
-          {showExplain && (
-            <CommonText
-              textContent={t("CreateOpportunityForm.charactersAllowed255")}
-            />
-          )}
 
           {/* Assistance Listing Number (ALN) */}
-          <CommonTextInput
-            labelId="label-for-assistanceListingNumber"
+          <CommonCharacterCount
             labelText={t("CreateOpportunityForm.assistanceListingNumber")}
             description={t("CreateOpportunityForm.assistanceListingNumberDesc")}
             fieldId="assistanceListingNumber"
