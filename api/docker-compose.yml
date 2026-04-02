@@ -72,6 +72,8 @@ services:
       - 9324:9324
     volumes:
       - ./mock-sqs/custom.conf:/opt/elasticmq.conf
+    networks:
+      - default
 
 
   grants-api:
