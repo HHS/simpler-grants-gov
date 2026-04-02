@@ -91,7 +91,7 @@ jobs:
     uses: ./.github/workflows/ci-frontend-e2e.yml
     secrets: inherit
     with:
-      playwright_tags: "@core-regression"
+      playwright_tags: "@smoke|@core-regression"
 
   e2e-test-staging:
     name: E2E Staging (on Deploy)
@@ -101,7 +101,7 @@ jobs:
     with:
       version: main
       target: staging
-      playwright_tags: "@core-regression"
+      playwright_tags: "@smoke|@core-regression"
 
   # =====================================================
   # PHASE 2: Deploy to prod (or selected environment)
