@@ -982,16 +982,43 @@ class AwardRecommendationAttachmentFactory(BaseFactory):
     award_recommendation_id = factory.LazyAttribute(
         lambda s: s.award_recommendation.award_recommendation_id
     )
+    file_contents = factory.Faker("sentence")
+    file_name = factory.Faker("file_name", extension="pdf")
     file_location = factory.LazyAttribute(
         lambda o: f"s3://local-mock-public-bucket/award-recommendations/{o.award_recommendation_id}/attachments/{o.award_recommendation_attachment_id}/{o.file_name}"
     )
-    file_name = factory.Faker("file_name", extension="pdf")
     award_recommendation_attachment_type = factory.fuzzy.FuzzyChoice(
         AwardRecommendationAttachmentType
     )
     uploading_user = factory.SubFactory("tests.src.db.models.factories.UserFactory")
     uploading_user_id = factory.LazyAttribute(lambda s: s.uploading_user.user_id)
     is_deleted = False
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        kwargs.pop("file_contents")  # Not a model field
+        return super()._build(model_class, *args, **kwargs)
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        file_contents = kwargs.pop("file_contents")
+        attachment = super()._create(model_class, *args, **kwargs)
+
+        try:
+            with file_util.open_stream(attachment.file_location, "w") as my_file:
+                my_file.write(file_contents)
+        except Exception as e:
+            raise Exception(
+                f"""There was an error writing your attachment to {attachment.file_location}.
+
+                Does this location exist? If you are running in unit tests, make sure
+                `enable_factory_create` is pulled in as a fixture to your test.
+
+                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                """
+            ) from e
+
+        return attachment
 
 
 class AwardRecommendationRiskFactory(BaseFactory):
