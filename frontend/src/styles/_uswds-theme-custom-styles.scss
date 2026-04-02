@@ -523,6 +523,19 @@ h6 {
         }
       }
     }
+
+    .usa-current {
+      color: color($simpler-nav-link-color-hover);
+    }
+
+    @include at-media-max($theme-header-min-width) {
+      button,
+      .usa-current {
+        &:hover {
+          background-color: color("base-lightest");
+        }
+      }
+    }
   }
 }
 
