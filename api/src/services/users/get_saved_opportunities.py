@@ -3,7 +3,7 @@ import uuid
 from collections.abc import Sequence
 
 from pydantic import BaseModel
-from sqlalchemy import asc, desc, func, nulls_last, select
+from sqlalchemy import DateTime, asc, cast, desc, func, null, nulls_last, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select, Subquery, union_all
 
@@ -113,34 +113,50 @@ def _build_saved_union_subquery(
     user_id: uuid.UUID, include_user_saved_opps: bool, org_ids_to_use: list | None = None
 ) -> Subquery:
     """
-    Returns a saved_union subquery with one row per opportunity and a saved_at timestamp that combines user + org saves based on org_ids_to_use.
+    Returns a saved_union subquery with one row per opportunity and a saved_at timestamp
+    that prioritizes the individual user's save timestamp over any organizational save timestamp.
+
+    Sorting logic:
+    - If the user has personally saved the opportunity, saved_at = user's save timestamp
+    - If only an org has saved the opportunity, saved_at = org's save timestamp
+
+    This prevents org shares from reordering the list when a user has already saved an opportunity.
+
     Example query generated:
-    SELECT anon_1.opportunity_id, max(anon_1.saved_at) AS saved_at
-            FROM (
-                SELECT organization_saved_opportunity.opportunity_id AS opportunity_id,
-                       organization_saved_opportunity.created_at AS saved_at
-                FROM organization_saved_opportunity
-                WHERE organization_saved_opportunity.organization_id IN (__[POSTCOMPILE_organization_id_1])
+    SELECT anon_1.opportunity_id,
+           max(anon_1.user_saved_at) AS user_saved_at,
+           max(anon_1.org_saved_at) AS org_saved_at,
+           coalesce(max(anon_1.user_saved_at), max(anon_1.org_saved_at)) AS saved_at
+    FROM (
+        SELECT organization_saved_opportunity.opportunity_id AS opportunity_id,
+               NULL AS user_saved_at,
+               organization_saved_opportunity.created_at AS org_saved_at
+        FROM organization_saved_opportunity
+        WHERE organization_saved_opportunity.organization_id IN (__[POSTCOMPILE_organization_id_1])
 
-                UNION ALL
+        UNION ALL
 
-                SELECT user_saved_opportunity.opportunity_id AS opportunity_id,
-                       user_saved_opportunity.created_at AS saved_at
-                FROM user_saved_opportunity
-                WHERE user_saved_opportunity.user_id = :user_id_1
-                  AND user_saved_opportunity.is_deleted IS NOT true
-            ) AS anon_1
-            GROUP BY anon_1.opportunity_id
+        SELECT user_saved_opportunity.opportunity_id AS opportunity_id,
+               user_saved_opportunity.created_at AS user_saved_at,
+               NULL AS org_saved_at
+        FROM user_saved_opportunity
+        WHERE user_saved_opportunity.user_id = :user_id_1
+          AND user_saved_opportunity.is_deleted IS NOT true
+    ) AS anon_1
+    GROUP BY anon_1.opportunity_id
     """
 
     subqueries = []
+
+    _null_ts = cast(null(), DateTime(timezone=True))
 
     # Add org saved subquery if applicable
     if org_ids_to_use:
         subqueries.append(
             select(
                 OrganizationSavedOpportunity.opportunity_id.label("opportunity_id"),
-                OrganizationSavedOpportunity.created_at.label("saved_at"),
+                _null_ts.label("user_saved_at"),
+                OrganizationSavedOpportunity.created_at.label("org_saved_at"),
             ).where(OrganizationSavedOpportunity.organization_id.in_(org_ids_to_use))
         )
 
@@ -149,7 +165,8 @@ def _build_saved_union_subquery(
         subqueries.append(
             select(
                 UserSavedOpportunity.opportunity_id.label("opportunity_id"),
-                UserSavedOpportunity.created_at.label("saved_at"),
+                UserSavedOpportunity.created_at.label("user_saved_at"),
+                _null_ts.label("org_saved_at"),
             ).where(
                 UserSavedOpportunity.user_id == user_id, UserSavedOpportunity.is_deleted.isnot(True)
             )
@@ -158,11 +175,15 @@ def _build_saved_union_subquery(
     # Combine subqueries
     saved_sq = union_all(*subqueries).subquery()
 
-    # Aggregate to get one row per opportunity
+    # Aggregate to get one row per opportunity, prioritizing user save timestamp for sorting
     saved_union = (
         select(
             saved_sq.c.opportunity_id,
-            func.max(saved_sq.c.saved_at).label("saved_at"),
+            func.max(saved_sq.c.user_saved_at).label("user_saved_at"),
+            func.max(saved_sq.c.org_saved_at).label("org_saved_at"),
+            func.coalesce(
+                func.max(saved_sq.c.user_saved_at), func.max(saved_sq.c.org_saved_at)
+            ).label("saved_at"),
         )
         .group_by(saved_sq.c.opportunity_id)
         .subquery()
