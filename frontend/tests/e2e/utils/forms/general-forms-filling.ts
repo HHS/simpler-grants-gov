@@ -202,14 +202,8 @@ export async function fillField(
       // Wait for the uploaded filename to appear for this specific field.
       // The same file can be uploaded in multiple sections, so avoid a
       // page-wide text query that can match more than one preview element.
-      const fileName = data.split(/[/\\]/).pop()!;
-      const fieldContainer = locator.locator(
-        "xpath=ancestor::*[starts-with(@id, 'form-section-')][1]",
       const fileName = data.split(/[/\\]/).pop() ?? data;
-    }
-      await fieldContainer
-        .getByText(fileName, { exact: true })
-        .waitFor({ state: "visible", timeout: 60000 });
+      await page.locator(`span:has-text("${fileName}")`).waitFor({ state: "visible", timeout: 60000 });
     } else {
       throw new Error(
         `Unsupported or invalid field configuration for ${fieldIdentifier}`,
