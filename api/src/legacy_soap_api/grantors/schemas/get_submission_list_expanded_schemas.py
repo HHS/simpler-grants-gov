@@ -5,6 +5,7 @@ from typing import Any
 from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
 
 from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema, SOAPInvalidEnvelope
+from src.util.datetime_util import make_timezone_aware
 
 
 class SubmissionInfo(BaseSOAPSchema):
@@ -19,6 +20,13 @@ class SubmissionInfo(BaseSOAPSchema):
     delinquent_federal_debt: str | None = Field(alias="DelinquentFederalDebt")
     active_exclusions: str | None = Field(alias="ActiveExclusions")
     uei: str | None = Field(alias="UEI")
+
+    @field_validator("received_date_time", mode="before")
+    @classmethod
+    def ensure_timezone_aware(cls, received_date_time: datetime | None) -> datetime | None:
+        if isinstance(received_date_time, datetime) and received_date_time.tzinfo is None:
+            return make_timezone_aware(received_date_time, "US/Eastern")
+        return received_date_time
 
     @field_serializer("received_date_time")
     def serialize_dt(self, dt: datetime) -> str:
