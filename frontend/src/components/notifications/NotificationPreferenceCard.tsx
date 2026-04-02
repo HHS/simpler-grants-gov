@@ -2,7 +2,7 @@
 
 import { ReactElement } from "react";
 
-import { SimplerSwitchField } from "../SimplerSwitch";
+import { SimplerSwitchField } from "src/components/SimplerSwitch";
 
 interface NotificationPreferenceCardProps {
   checkboxId: string;

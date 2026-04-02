@@ -131,7 +131,9 @@ export function NotificationsPageContent({
           isLoading={isSavingSavedOpportunities}
           hasError={hasSavedOpportunitiesError}
           onCheckedChange={() => {
-            void handlePreferenceToggle("saved-opportunities");
+            handlePreferenceToggle("saved-opportunities").catch(() => {
+              // no-op
+            });
           }}
         />
       </section>
