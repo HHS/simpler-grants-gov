@@ -149,7 +149,7 @@ Running in the native/local approach may require additional packages to be insta
 
 ```dotenv
 DB_HOST=localhost
-S3_ENDPOINT_URL=http://localhost:4566
+S3_ENDPOINT_URL=http://localhost:9090
 LOGIN_GOV_JWK_ENDPOINT=http://localhost:5001/issuer1/jwks
 
 SEARCH_ENDPOINT=localhost
