@@ -28,13 +28,13 @@ from src.db.models.lookup_models import (
     LkAwardRecommendationType,
     LkAwardSelectionMethod,
 )
+from src.db.models.user_models import User
+from src.db.models.workflow_models import Workflow, WorkflowApproval
 from src.util.file_util import pre_sign_file_location
 
 if TYPE_CHECKING:
     from src.db.models.competition_models import ApplicationSubmission
     from src.db.models.opportunity_models import Opportunity
-    from src.db.models.user_models import User
-    from src.db.models.workflow_models import Workflow, WorkflowApproval
 
 
 class AwardRecommendation(ApiSchemaTable, TimestampMixin):
@@ -72,7 +72,7 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
     review_workflow_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID, ForeignKey("api.workflow.workflow_id")
     )
-    review_workflow: Mapped[Workflow | None] = relationship("Workflow")
+    review_workflow: Mapped[Workflow | None] = relationship(Workflow)
 
     award_recommendation_application_submissions: Mapped[
         list[AwardRecommendationApplicationSubmission]
@@ -130,7 +130,7 @@ class AwardRecommendationAttachment(ApiSchemaTable, TimestampMixin):
         UUID,
         ForeignKey("api.user.user_id"),
     )
-    uploading_user: Mapped[User] = relationship("User")
+    uploading_user: Mapped[User] = relationship(User)
     is_deleted: Mapped[bool] = mapped_column(default=False)
 
     @property
@@ -288,7 +288,7 @@ class AwardRecommendationAudit(ApiSchemaTable, TimestampMixin):
         AwardRecommendation, back_populates="award_recommendation_audit_events"
     )
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("api.user.user_id"))
-    user: Mapped[User] = relationship("User")
+    user: Mapped[User] = relationship(User)
     award_recommendation_audit_event: Mapped[AwardRecommendationAuditEvent] = mapped_column(
         "award_recommendation_audit_event_id",
         LookupColumn(LkAwardRecommendationAuditEvent),
@@ -328,5 +328,5 @@ class AwardRecommendationAudit(ApiSchemaTable, TimestampMixin):
         UUID,
         ForeignKey("api.workflow_approval.workflow_approval_id"),
     )
-    workflow_approval: Mapped[WorkflowApproval | None] = relationship("WorkflowApproval")
+    workflow_approval: Mapped[WorkflowApproval | None] = relationship(WorkflowApproval)
     audit_metadata: Mapped[dict | None] = mapped_column(JSONB)
