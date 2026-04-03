@@ -680,27 +680,26 @@ def test_user_and_org_save_timestamp_precedence(
     db_session,
 ):
     """
-    Test if the same opportunity is saved by both the user and the org,
-    the most recent saved_at across both tables should determine sort order.
+    Test that when the same opportunity is saved by both the user and the org,
+    the user's personal save timestamp takes priority for sort order — even if
+    the org saved it more recently.
     """
 
     user, org, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
 
     # Same opportunity saved by both user and org
-    # User saves earlier
+    # User saves earlier (2024-01-01), org saves later (2024-12-01)
     user_saved_opp = UserSavedOpportunityFactory.create(
         user=user,
         created_at="2024-01-01",
     )
-
-    # Org saves later
-    org_saved_opp = OrganizationSavedOpportunityFactory.create(
+    OrganizationSavedOpportunityFactory.create(
         organization=org,
         opportunity=user_saved_opp.opportunity,
         created_at="2024-12-01",
     )
 
-    # Another opportunity saved only by user with mid timestamp
+    # Another opportunity saved only by user with a later timestamp than the user's save above
     uso = UserSavedOpportunityFactory.create(
         user=user,
         created_at="2024-06-01",
@@ -723,9 +722,107 @@ def test_user_and_org_save_timestamp_precedence(
     # Should return 2 unique opportunities
     assert len(data) == 2
 
-    # opp_a should come first because org saved it most recently (2024-12-01)
-    assert data[0]["opportunity_id"] == str(org_saved_opp.opportunity_id)
-    assert data[1]["opportunity_id"] == str(uso.opportunity_id)
+    # uso should come first: user saved it at 2024-06-01
+    # user_saved_opp should come second: user saved it at 2024-01-01
+    # The org's later save (2024-12-01) does NOT affect sort order since the user saved it personally
+    assert data[0]["opportunity_id"] == str(uso.opportunity_id)
+    assert data[1]["opportunity_id"] == str(user_saved_opp.opportunity_id)
+
+
+def test_org_only_save_uses_org_timestamp_for_sort(
+    client,
+    enable_factory_create,
+    db_session,
+):
+    """
+    Test that when an opportunity is saved only by an org (not the user personally),
+    the org's save timestamp is used for sort order.
+    """
+    user, org, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+
+    # Org saves two opportunities at different times; user saves neither
+    org_saved_early = OrganizationSavedOpportunityFactory.create(
+        organization=org,
+        created_at="2024-03-01",
+    )
+    org_saved_late = OrganizationSavedOpportunityFactory.create(
+        organization=org,
+        created_at="2024-09-01",
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={"pagination": {"page_offset": 1, "page_size": 25}},
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+    assert len(data) == 2
+
+    # org_saved_late should come first (most recent org save), since user hasn't saved either
+    assert data[0]["opportunity_id"] == str(org_saved_late.opportunity_id)
+    assert data[1]["opportunity_id"] == str(org_saved_early.opportunity_id)
+
+
+def test_user_save_timestamp_beats_org_save_timestamp(
+    client,
+    enable_factory_create,
+    db_session,
+):
+    """
+    Test that an opportunity saved by the user at an earlier date sorts before an
+    opportunity saved only by an org at a later date, because user timestamp takes priority.
+    """
+    user, org, token = create_user_in_org(db_session, role=RoleFactory(is_org_role=True))
+
+    # User saves opp_a early; org saves opp_b later (but user never saved opp_b)
+    user_saved = UserSavedOpportunityFactory.create(
+        user=user,
+        created_at="2024-02-01",
+    )
+    OrganizationSavedOpportunityFactory.create(
+        organization=org,
+        created_at="2024-11-01",
+    )
+
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+                "sort_order": [{"order_by": "created_at", "sort_direction": "descending"}],
+            }
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+    assert len(data) == 2
+
+    # org-only opp sorts by org timestamp (2024-11-01), which is more recent than user's (2024-02-01)
+    # so it comes first when descending
+    assert data[0]["opportunity_id"] != str(user_saved.opportunity_id)
+    assert data[1]["opportunity_id"] == str(user_saved.opportunity_id)
+
+    # Now test ascending: user_saved (2024-02-01) should come before org-only (2024-11-01)
+    response = client.post(
+        f"/v1/users/{user.user_id}/saved-opportunities/list",
+        headers={"X-SGG-Token": token},
+        json={
+            "pagination": {
+                "page_offset": 1,
+                "page_size": 25,
+                "sort_order": [{"order_by": "created_at", "sort_direction": "ascending"}],
+            }
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json["data"]
+    assert data[0]["opportunity_id"] == str(user_saved.opportunity_id)
 
 
 def test_user_get_saved_opportunities_nonexistent_org(client, enable_factory_create, db_session):

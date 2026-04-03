@@ -495,6 +495,63 @@ h6 {
   }
 }
 
+// a11y bug: https://github.com/HHS/simpler-grants-gov/issues/3423
+// USWDS to implement theme settings: https://github.com/uswds/uswds/issues/6176
+.usa-nav__primary {
+  // $nav-link-color hardcoded to "base-dark" (which we theme to "gray-warm-50")
+  // &:hover is hardcoded to "primary" (which we theme to "mint-30")
+  // We need a magic number of 50+ to pass WCAG 2.0 AA contrast (70+ for AAA).
+  // Note that hover & current states have "gray-warm-5" bg on mobile,
+  // so we need to use color grades > 55 for AA.
+  $simpler-nav-link-color: "gray-warm-60";
+  $simpler-nav-link-color-hover: "mint-60";
+
+  > .usa-nav__primary-item {
+    > a,
+    > a:not(.usa-button):not(.usa-current),
+    button {
+      color: color($simpler-nav-link-color);
+
+      &:hover {
+        color: color($simpler-nav-link-color-hover);
+      }
+
+      @include at-media($theme-header-min-width) {
+        // don't clobber color of open dropdowns larger viewports
+        &[aria-expanded="true"] {
+          color: color("white");
+        }
+      }
+    }
+
+    .usa-current {
+      color: color($simpler-nav-link-color-hover);
+    }
+
+    @include at-media-max($theme-header-min-width) {
+      button,
+      .usa-current {
+        &:hover {
+          background-color: color("base-lightest");
+        }
+      }
+    }
+  }
+}
+
+// mobile "Menu" button also needs a11y fix as above
+.usa-menu-btn {
+  // match primary buttons
+  background-color: color("mint-50");
+  border-bottom: 5px solid color("mint-cool-40v");
+  line-height: 3rem;
+
+  &:hover {
+    background-color: color("mint-60");
+    border-bottom: 5px solid color("mint-cool-50v");
+  }
+}
+
 .icon-btn {
   display: flex;
   align-items: baseline;
