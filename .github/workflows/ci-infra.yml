@@ -93,6 +93,19 @@ jobs:
         with:
           scan-type: config
           scan-ref: infra
-          format: table
+          format: json
+          output: trivy-results.json
           exit-code: "1"
           severity: CRITICAL,HIGH
+          trivyignores: infra/.trivyignore.yaml
+      - name: Make step summary
+        if: always()
+        run: |
+          OUTPUT=$(python3 scripts/utilities/trivy_to_markdown.py \
+            --results trivy-results.json \
+            --directory infra \
+            --env iac \
+            --scan-ref infra)
+          if [ -n "$OUTPUT" ]; then
+            echo "$OUTPUT" >> "$GITHUB_STEP_SUMMARY"
+          fi

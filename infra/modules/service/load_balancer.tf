@@ -27,6 +27,7 @@ resource "aws_lb" "alb" {
 
   # TODO(https://github.com/navapbc/template-infra/issues/165) Protect ALB with WAF
   # checkov:skip=CKV2_AWS_28:Implement WAF in issue #165
+  # trivy:ignore:AVD-AWS-0053
 
   # Drop invalid HTTP headers for improved security
   # Note that header names cannot contain underscores
@@ -47,6 +48,7 @@ resource "aws_lb_listener" "alb_listener_http" {
   # TODO(https://github.com/navapbc/template-infra/issues/163) Use HTTPS protocol
   # checkov:skip=CKV_AWS_2:Implement HTTPS in issue #163
   # checkov:skip=CKV_AWS_103:Require TLS 1.2 as part of implementing HTTPS support
+  # trivy:ignore:AVD-AWS-0054
 
   # there is no mtls for http so we don't need to do the same dance here
   count = var.enable_load_balancer ? 1 : 0

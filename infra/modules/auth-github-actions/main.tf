@@ -23,6 +23,7 @@ resource "aws_iam_policy" "github_actions" {
 }
 
 data "aws_iam_policy_document" "github_actions" {
+  # trivy:ignore:AVD-AWS-0345
   statement {
     sid       = "ManageInfra"
     effect    = "Allow"

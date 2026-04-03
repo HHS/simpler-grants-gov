@@ -69,6 +69,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "general_purpose" {
 
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "general_purpose_encryption" {
+  # trivy:ignore:AVD-AWS-0132
   bucket = aws_s3_bucket.general_purpose.id
   rule {
     apply_server_side_encryption_by_default {

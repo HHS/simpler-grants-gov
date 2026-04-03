@@ -574,6 +574,7 @@ resource "aws_api_gateway_domain_name" "api" {
   }
 
   # checkov:skip=CKV_AWS_206: Address in future work
+  # trivy:ignore:AVD-AWS-0005
 }
 
 resource "aws_api_gateway_base_path_mapping" "api_domain_name_mapping_v1" {

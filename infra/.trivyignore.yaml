@@ -1,0 +1,36 @@
+# Trivy IaC ignore rules for infra/ directory
+# Format: https://aquasecurity.github.io/trivy/latest/docs/configuration/filtering/#trivyignoreyaml
+#
+# Each entry requires:
+#   id:        Trivy AVD check ID
+#   paths:     Glob patterns matching the target paths reported by Trivy
+#   statement: Why this finding is suppressed
+
+misconfigurations:
+  # Third-party NewRelic Terraform module pulled in as a remote module source.
+  # We cannot modify this code and the findings are in example/integration code,
+  # not production infrastructure.
+  - id: AVD-AWS-0086
+    paths:
+      - "**newrelic**"
+    statement: "Third-party module — cannot modify"
+  - id: AVD-AWS-0087
+    paths:
+      - "**newrelic**"
+    statement: "Third-party module — cannot modify"
+  - id: AVD-AWS-0091
+    paths:
+      - "**newrelic**"
+    statement: "Third-party module — cannot modify"
+  - id: AVD-AWS-0093
+    paths:
+      - "**newrelic**"
+    statement: "Third-party module — cannot modify"
+  - id: AVD-AWS-0132
+    paths:
+      - "**newrelic**"
+    statement: "Third-party module — cannot modify"
+  - id: AVD-AWS-0345
+    paths:
+      - "**newrelic**"
+    statement: "Third-party module — cannot modify"
