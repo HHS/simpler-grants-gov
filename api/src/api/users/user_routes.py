@@ -52,10 +52,7 @@ from src.api.users.user_schemas import (
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
-from src.auth.login_gov_jwt_auth import (
-    get_final_redirect_uri,
-    get_login_gov_redirect_uri,
-)
+from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
