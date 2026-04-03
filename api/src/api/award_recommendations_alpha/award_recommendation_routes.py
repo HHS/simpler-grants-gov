@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
     description="Retrieve an award recommendation by ID, including opportunity details, attachments, and reviews.",
     responses=[200, 401, 403, 404],
 )
-@jwt_or_api_user_key_multi_auth.login_required
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def award_recommendation_get(
     db_session: db.Session, award_recommendation_id: uuid.UUID
