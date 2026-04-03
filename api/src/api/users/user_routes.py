@@ -52,7 +52,11 @@ from src.api.users.user_schemas import (
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
-from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
+from src.auth.login_gov_jwt_auth import (
+    get_final_redirect_uri,
+    get_login_gov_logout_redirect_uri,
+    get_login_gov_redirect_uri,
+)
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
@@ -118,11 +122,10 @@ def user_login(db_session: db.Session) -> flask.Response:
 @flask_db.with_db_session()
 def user_logout(db_session: db.Session) -> flask.Response:
     logger.info("GET /v1/users/logout")
-    # with db_session.begin():
-    #     redirect_uri = get_login_gov_logout_redirect_uri(db_session)
+    with db_session.begin():
+        redirect_uri = get_login_gov_logout_redirect_uri(db_session)
 
-    # return response.redirect_response(redirect_uri)
-    return response.redirect_response("https://idp.int.identitysandbox.gov/openid_connect/logout")
+    return response.redirect_response(redirect_uri)
 
 
 @user_blueprint.get("/login/callback")
