@@ -21,6 +21,7 @@ import {
   getFieldNameForHtml,
   getFieldPathFromHtml,
   getFieldSchema,
+  getRequiredProperties,
 } from "src/components/applyForm/utils";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
@@ -436,6 +437,16 @@ const getFieldListConfig = ({
         throw new Error("fieldList children must be field nodes");
       }
 
+      if (!childNode.definition) {
+        throw new Error("fieldList child field must include a definition");
+      }
+
+      if (Array.isArray(childNode.definition)) {
+        throw new Error(
+          "fieldList child field definition must be a single path",
+        );
+      }
+
       const childWidgetConfig = getFieldConfig({
         errors,
         formSchema,
@@ -464,6 +475,7 @@ const getFieldListConfig = ({
           childId,
         }),
         generalProps: rest,
+        definition: childNode.definition,
       };
     },
   );
@@ -471,6 +483,10 @@ const getFieldListConfig = ({
     formData && typeof formData === "object" && !Array.isArray(formData)
       ? (formData as Record<string, unknown>)[uiFieldObject.name]
       : undefined;
+  const requiredFields = getRequiredProperties({
+    schema: formSchema,
+    fieldName: uiFieldObject.name,
+  });
 
   return {
     type: "FieldList",
@@ -485,9 +501,10 @@ const getFieldListConfig = ({
       label: uiFieldObject.label,
       description: uiFieldObject.description,
       defaultSize: uiFieldObject.defaultSize,
+      name: uiFieldObject.name,
       groupDefinition,
-      rawErrors: [],
-      requiredFields: [],
+      rawErrors: errors ?? [],
+      requiredFields,
       value: fieldListValue as GeneralRecord[] | undefined,
     },
   };

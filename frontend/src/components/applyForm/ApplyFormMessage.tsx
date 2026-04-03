@@ -21,6 +21,28 @@ export const ApplyFormMessage = ({
     ),
     p: (content) => <p>{content}</p>,
   });
+
+  /**
+   * Deduplicate validation warnings before rendering in the summary.
+   *
+   * Some warnings (particularly for FieldList child fields) can be emitted
+   * multiple times during validation tree construction. This ensures each
+   * unique warning message is only displayed once in the alert.
+   *
+   * Uses a composite key of `definition || field` and `message` to identify
+   * unique warnings without altering the original warning shape.
+   */
+  const uniqueValidationWarnings = validationWarnings
+  ? Array.from(
+      new Map(
+        validationWarnings.map((warning) => [
+          `${warning.definition ?? warning.field}-${warning.message}`,
+          warning,
+        ]),
+      ).values(),
+    )
+  : null;
+
   if (!saved) {
     return <></>;
   } else if (error) {
@@ -34,7 +56,7 @@ export const ApplyFormMessage = ({
         {errorMessage}
       </Alert>
     );
-  } else if (validationWarnings && validationWarnings.length > 0) {
+  } else if (uniqueValidationWarnings && uniqueValidationWarnings.length > 0) {
     return (
       <Alert
         heading={t("savedTitle")}
@@ -44,13 +66,13 @@ export const ApplyFormMessage = ({
       >
         {t("validationMessage")}
         <ul>
-          {validationWarnings.map((warning, index) => {
+          {uniqueValidationWarnings.map((warning, index) => {
             const link = isBudgetForm ? (
               <a href={`#${warning.field}`}>{warning.message}</a>
             ) : (
               <a href={`#${warning.htmlField || ""}`}>{warning.formatted}</a>
             );
-            return <li key={index}>{link}</li>;
+            return <li key={`${warning.definition ?? warning.field}-${warning.message}`}>{link}</li>;
           })}
         </ul>
       </Alert>
