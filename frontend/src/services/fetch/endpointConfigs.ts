@@ -108,6 +108,17 @@ export const toDynamicGrantorsEndpoint = (
   };
 };
 
+export const toDynamicGrantorOpportunityEndpoint = (
+  type: "POST" | "DELETE" | "GET",
+) => {
+  return {
+    basePath: environment.API_URL,
+    version: "v1",
+    namespace: "grantors/opportunities",
+    method: type as ApiMethod,
+  };
+};
+
 export const getLocalUsersEndpoint = {
   basePath: environment.API_URL,
   version: "",
