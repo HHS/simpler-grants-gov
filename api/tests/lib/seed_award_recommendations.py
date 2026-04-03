@@ -13,7 +13,6 @@ from src.constants.lookup_constants import (
 )
 from src.db.models.award_recommendation_models import AwardRecommendation
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
-from src.db.models.opportunity_models import Opportunity
 
 logger = logging.getLogger(__name__)
 
@@ -334,8 +333,8 @@ def _build_award_recommendations(db_session: db.Session) -> None:
                     # 5 recommended for funding with varying amounts
                     rec_type = AwardRecommendationType.RECOMMENDED_FOR_FUNDING
                     amount = 60000 - (i * 5000)  # $60k, $55k, $50k, $45k, $40k
-                    comment = f"Recommended for funding - Rank #{i+1}"
-                    score = f"{90 - i*2}"
+                    comment = f"Recommended for funding - Rank #{i + 1}"
+                    score = f"{90 - i * 2}"
                 elif i < 7:
                     # 2 recommended without funding
                     rec_type = AwardRecommendationType.RECOMMENDED_WITHOUT_FUNDING
@@ -347,7 +346,7 @@ def _build_award_recommendations(db_session: db.Session) -> None:
                     rec_type = AwardRecommendationType.NOT_RECOMMENDED
                     amount = 0
                     comment = "Does not meet minimum criteria"
-                    score = f"{65 - (i-7)*5}"
+                    score = f"{65 - (i - 7) * 5}"
 
                 _add_application_to_award_recommendation(
                     db_session,
@@ -459,7 +458,7 @@ def _create_competition_with_accepted_applications(db_session: db.Session) -> Co
             competition=competition,
             organization=org,
             application_status=ApplicationStatus.ACCEPTED,
-            application_name=f"Test Application {i+1}",
+            application_name=f"Test Application {i + 1}",
         )
 
         # Create application forms
@@ -480,7 +479,7 @@ def _create_competition_with_accepted_applications(db_session: db.Session) -> Co
     logger.info(f"✓ Created competition '{competition.opportunity.opportunity_title}'")
     logger.info(f"  Competition ID: {competition.competition_id}")
     logger.info(f"  Opportunity ID: {competition.opportunity_id}")
-    logger.info(f"  Applications: 25 (all ACCEPTED status)")
+    logger.info("  Applications: 25 (all ACCEPTED status)")
     logger.info(f"  URL: http://localhost:3000/opportunity/{competition.opportunity_id}")
     logger.info("")
 
