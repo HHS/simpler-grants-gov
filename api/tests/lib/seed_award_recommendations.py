@@ -435,21 +435,20 @@ def _create_competition_with_accepted_applications(db_session: db.Session) -> Co
         opportunity__opportunity_title="Award Recommendation Test Opportunity",
     )
 
-    # Get existing organizations from database (safer than creating new ones)
+    # Get existing organizations from database and reuse them
     from src.db.models.entity_models import Organization
 
-    existing_orgs = db_session.execute(select(Organization).limit(8)).scalars().all()
+    existing_orgs = db_session.execute(select(Organization).limit(25)).scalars().all()
 
-    # If not enough exist, create only the needed amount
-    organizations = list(existing_orgs)
-    if len(organizations) < 8:
-        logger.info(
-            f"Found {len(organizations)} existing orgs, creating {8 - len(organizations)} more"
-        )
-        for _ in range(8 - len(organizations)):
-            # Create with unique sequence to avoid UEI conflicts
-            org = factories.OrganizationFactory.create()
-            organizations.append(org)
+    # Use existing orgs or create just one if none exist
+    if existing_orgs:
+        organizations = list(existing_orgs)
+        logger.info(f"Reusing {len(organizations)} existing organizations")
+    else:
+        # Only create one org if absolutely necessary and reuse it
+        logger.info("No existing organizations found, creating one")
+        org = factories.OrganizationFactory.create()
+        organizations = [org]
 
     # Create 25 accepted applications with variety across organizations
     for i in range(25):
