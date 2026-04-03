@@ -102,6 +102,9 @@ resource "aws_cloudfront_cache_policy" "api_no_cache" {
   }
 }
 
+# TODO(https://github.com/navapbc/template-infra/issues/165) Protect CDN with WAF
+# trivy:ignore:AVD-AWS-0011
+# trivy:ignore:AVD-AWS-0013
 resource "aws_cloudfront_distribution" "cdn" {
   count = local.enable_cdn ? 1 : 0
 

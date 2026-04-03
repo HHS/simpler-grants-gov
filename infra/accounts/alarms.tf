@@ -11,10 +11,10 @@ resource "aws_cloudwatch_metric_alarm" "container_log_failure" {
   treat_missing_data  = "ignore"
   alarm_actions       = [aws_sns_topic.log_failure.arn]
 }
+# trivy:ignore:AVD-AWS-0095
 resource "aws_sns_topic" "log_failure" {
   name = "security-no-logs"
   # checkov:skip=CKV_AWS_26:SNS encryption for alerts is unnecessary
-  # trivy:ignore:AVD-AWS-0095
 }
 
 resource "aws_sns_topic_subscription" "log_failure" {
