@@ -486,15 +486,6 @@ h6 {
   }
 }
 
-// revert to behavior before upgrade https://github.com/uswds/uswds/commit/2785b67e58ae19f161101f4859afff0e9664fbda
-.usa-header--basic {
-  @include at-media($theme-header-min-width) {
-    .usa-nav {
-      padding: 0 0 units(0.5) units(1);
-    }
-  }
-}
-
 // a11y bug: https://github.com/HHS/simpler-grants-gov/issues/3423
 // USWDS to implement theme settings: https://github.com/uswds/uswds/issues/6176
 .usa-nav__primary {
