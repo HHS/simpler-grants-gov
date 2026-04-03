@@ -4,7 +4,7 @@ import uuid
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Numeric
+from sqlalchemy import ForeignKey, Numeric, and_
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -83,11 +83,44 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
     )
     award_recommendation_attachments: Mapped[list[AwardRecommendationAttachment]] = relationship(
         "AwardRecommendationAttachment",
-        back_populates="award_recommendation",
         uselist=True,
-        cascade="all, delete-orphan",
+        primaryjoin=lambda: and_(
+            AwardRecommendation.award_recommendation_id
+            == AwardRecommendationAttachment.award_recommendation_id,
+            AwardRecommendationAttachment.is_deleted.isnot(True),
+        ),
+        # This version of the relationship is view-only and excludes deleted records.
+        # For the one that can be used to modify, use _all_award_recommendation_attachments.
+        viewonly=True,
     )
+
+    # Relationship that gets all award recommendation attachments INCLUDING DELETED
+    # We likely don't want to use this in most cases, preferring the above
+    # one which has only non-deleted ones.
+    _all_award_recommendation_attachments: Mapped[list[AwardRecommendationAttachment]] = (
+        relationship(
+            "AwardRecommendationAttachment",
+            back_populates="award_recommendation",
+            uselist=True,
+            cascade="all, delete-orphan",
+        )
+    )
+
     award_recommendation_risks: Mapped[list[AwardRecommendationRisk]] = relationship(
+        "AwardRecommendationRisk",
+        uselist=True,
+        primaryjoin=lambda: and_(
+            AwardRecommendation.award_recommendation_id
+            == AwardRecommendationRisk.award_recommendation_id,
+            AwardRecommendationRisk.is_deleted.isnot(True),
+        ),
+        viewonly=True,
+    )
+
+    # Relationship that gets all award recommendation risks INCLUDING DELETED
+    # We likely don't want to use this in most cases, preferring the above
+    # one which has only non-deleted ones.
+    _all_award_recommendation_risks: Mapped[list[AwardRecommendationRisk]] = relationship(
         "AwardRecommendationRisk",
         back_populates="award_recommendation",
         uselist=True,
@@ -117,7 +150,7 @@ class AwardRecommendationAttachment(ApiSchemaTable, TimestampMixin):
         index=True,
     )
     award_recommendation: Mapped[AwardRecommendation] = relationship(
-        AwardRecommendation, back_populates="award_recommendation_attachments"
+        AwardRecommendation, back_populates="_all_award_recommendation_attachments"
     )
     file_location: Mapped[str]
     file_name: Mapped[str]
@@ -150,7 +183,7 @@ class AwardRecommendationRisk(ApiSchemaTable, TimestampMixin):
         index=True,
     )
     award_recommendation: Mapped[AwardRecommendation] = relationship(
-        AwardRecommendation, back_populates="award_recommendation_risks"
+        AwardRecommendation, back_populates="_all_award_recommendation_risks"
     )
     award_recommendation_risk_number: Mapped[str] = mapped_column(index=True)
     award_recommendation_risk_type: Mapped[AwardRecommendationRiskType] = mapped_column(
