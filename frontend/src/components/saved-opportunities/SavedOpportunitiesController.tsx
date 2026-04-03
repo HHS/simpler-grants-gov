@@ -43,6 +43,8 @@ export function SavedOpportunitiesController({
   const [hasOrganizationsError, setHasOrganizationsError] =
     useState<boolean>(false);
 
+  const hasOrganizations = organizations.length > 0;
+
   useEffect(() => {
     setOpportunitiesState(opportunities);
   }, [opportunities]);
@@ -166,6 +168,7 @@ export function SavedOpportunitiesController({
               <SearchResultsListItem
                 opportunity={opportunity}
                 saved={hasVisibleSavedOpportunityTags}
+                showShareButton={hasOrganizations}
                 index={index}
                 savedOpportunityTags={savedOpportunityTags}
                 onShareClick={(buttonElement: HTMLButtonElement) =>

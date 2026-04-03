@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
-import Developer from "src/app/[locale]/(base)/developer/page";
+import Developer from "src/app/[locale]/(base)/developers/page";
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
@@ -15,12 +15,12 @@ jest.mock("next-intl/server", () => ({
   setRequestLocale: identity,
 }));
 
-// Mock the DeveloperPageSections component
-jest.mock("src/components/developer/DeveloperSections", () => {
-  return function MockDeveloperPageSections() {
+// Mock the DevelopersPageSections component
+jest.mock("src/components/developers/DevelopersSections", () => {
+  return function MockDevelopersPageSections() {
     return (
       <div data-testid="developer-sections">
-        <h1>Developer Portal</h1>
+        <h1>Developers</h1>
         <p>Welcome to the developer portal</p>
       </div>
     );
@@ -32,7 +32,7 @@ describe("Developer Page", () => {
     render(<Developer />);
 
     expect(screen.getByTestId("developer-sections")).toBeInTheDocument();
-    expect(screen.getByText("Developer Portal")).toBeInTheDocument();
+    expect(screen.getByText("Developers")).toBeInTheDocument();
     expect(
       screen.getByText("Welcome to the developer portal"),
     ).toBeInTheDocument();

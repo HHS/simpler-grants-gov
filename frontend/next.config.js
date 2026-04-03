@@ -225,6 +225,16 @@ const nextConfig = {
         destination: "/applications/:segments*",
         permanent: false,
       },
+      {
+        source: "/developer",
+        destination: "/developers",
+        permanent: false,
+      },
+      {
+        source: "/api-dashboard",
+        destination: "/developers/api-dashboard",
+        permanent: false,
+      },
     ];
   },
 };

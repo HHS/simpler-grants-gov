@@ -8,6 +8,10 @@ on:
       artifact-ids:
         description: "comma separated string of test report artifact ids to download"
         type: string
+      target:
+        description: "application environment the test was run against"
+        default: "local"
+        type: string
 env:
   NODE_VERSION: 24
   LOCKFILE_PATH: ./frontend/package-lock.json
@@ -54,6 +58,6 @@ jobs:
       - name: Upload Merged HTML Report
         uses: actions/upload-artifact@v6
         with:
-          name: merged-html-report
+          name: merged-html-report-${{ inputs.target }}
           path: frontend/playwright-report
           retention-days: 30

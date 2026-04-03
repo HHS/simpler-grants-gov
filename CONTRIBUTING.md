@@ -64,12 +64,11 @@ This project follows [trunk-based development](./DEVELOPMENT.md#branching-model)
 
 1.  Fork the project
 1.  Check out the `main` branch
-1.  Create a feature branch
+1.  Create a feature branch using [the naming convention mentioned here](./DEVELOPMENT.md#branch-naming-convention)
 1.  Write code and tests for your change
-1.  From your branch, make a pull request against `hhs/simpler-grants-gov/main`
+1.  From your branch, make a pull request against `hhs/simpler-grants-gov/main` using [the naming convention mentioned here](./DEVELOPMENT.md#pull-request-title)
 1.  Work with repo maintainers to get your change reviewed
 1.  Wait for your change to be pulled into `hhs/simpler-grants-gov/main`
-1.  Delete your feature branch
 
 ### Testing, Coding Style and Linters
 
@@ -91,9 +90,10 @@ Pull requests should follow the conventions in [DEVELOPMENT.md](./DEVELOPMENT.md
 This repository uses a hybrid review assignment model powered by a GitHub Action rather than the traditional CODEOWNERS file.
 
 **For external contributors (community/fork PRs):**
-When you open a pull request from a fork, we request that you tag one or all of our designated maintainers to review your PR prior to us merging it. 
+When you open a pull request from a fork, we request that you tag one or all of our designated maintainers to review your PR prior to us merging it.
 
 Current designated maintainers:
+
 - @btabaska
 - @mdragon
 - @KevinJBoyer
