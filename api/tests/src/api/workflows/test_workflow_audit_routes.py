@@ -1,4 +1,3 @@
-import time
 import uuid
 
 import pytest
@@ -43,8 +42,14 @@ class TestWorkflowAuditEndpoint:
     ):
         """Test successfully fetching an opportunity workflow with audits and approvals."""
         # Create a user with VIEW_OPPORTUNITY privilege in the agency
+        # if first_name or last_name provided, user profile will be created
         user, _, token = create_user_in_agency_with_jwt(
-            db_session, agency=agency, privileges=[Privilege.VIEW_OPPORTUNITY]
+            db_session,
+            agency=agency,
+            privileges=[Privilege.VIEW_OPPORTUNITY],
+            email="testWorkflowAudit@example.com",
+            first_name="testFirstNameWA",
+            last_name="testLastNameWA",
         )
 
         # Create workflow
@@ -55,8 +60,11 @@ class TestWorkflowAuditEndpoint:
             opportunity=opportunity,
         )
 
+        event_ids = []
+
         # Create audit events
         start_event = WorkflowEventHistoryFactory.create()
+        event_ids.append(str(start_event.event_id))
 
         audit_events = []
 
@@ -70,9 +78,9 @@ class TestWorkflowAuditEndpoint:
                 event_id=start_event.event_id,
             )
         )
-        time.sleep(0.1)
         for i in range(4):
             middle_event = WorkflowEventHistoryFactory.create()
+            event_ids.append(str(middle_event.event_id))
             audit_events.append(
                 WorkflowAuditFactory.create(
                     workflow=workflow,
@@ -83,7 +91,6 @@ class TestWorkflowAuditEndpoint:
                     event_id=middle_event.event_id,
                 )
             )
-            time.sleep(0.1)
 
         response = client.post(
             f"/v1/workflows/{workflow.workflow_id}/audit",
@@ -110,6 +117,24 @@ class TestWorkflowAuditEndpoint:
             event1_created_at = response.json["data"][i]["created_at"]
             event2_created_at = response.json["data"][i + 1]["created_at"]
             assert event1_created_at >= event2_created_at
+
+        # Verify acting user info (from user_profile) is included and correct
+        # Sanity check source_state and event info
+        for i in range(len(response.json["data"])):
+            first_name = response.json["data"][i]["acting_user"]["first_name"]
+            last_name = response.json["data"][i]["acting_user"]["last_name"]
+            email = response.json["data"][i]["acting_user"]["email"]
+            source_state = response.json["data"][i]["source_state"]
+            event_id = response.json["data"][i]["event"]["event_id"]
+            sent_at = response.json["data"][i]["event"]["sent_at"]
+
+            assert first_name == "testFirstNameWA"
+            assert last_name == "testLastNameWA"
+            assert email == "testWorkflowAudit@example.com"
+
+            assert source_state in [BasicState.START.value, BasicState.MIDDLE.value]
+            assert event_id in event_ids
+            assert sent_at is not None
 
     def test_workflow_audit_not_found(self, client, db_session, agency):
         """Test workflow audit endpoint with non-existent workflow ID."""
@@ -182,7 +207,6 @@ class TestWorkflowAuditEndpoint:
                 event_id=start_event.event_id,
             )
         )
-        time.sleep(0.1)
         for i in range(4):
             middle_event = WorkflowEventHistoryFactory.create()
             audit_events.append(
@@ -195,7 +219,6 @@ class TestWorkflowAuditEndpoint:
                     event_id=middle_event.event_id,
                 )
             )
-            time.sleep(0.1)
 
         # Make the request with ascending sort
         response = client.post(

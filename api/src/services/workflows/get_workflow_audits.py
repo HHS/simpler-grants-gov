@@ -35,13 +35,16 @@ def get_workflow_audits(
 
     # First verify the user has access to the workflow
     # This will raise appropriate errors if workflow doesn't exist or user lacks access
-    _ = get_workflow_and_verify_access(db_session, user, workflow_id)
+    get_workflow_and_verify_access(db_session, user, workflow_id)
 
     # Build the base query for workflow audit events
     stmt = (
         select(WorkflowAudit)
         .where(WorkflowAudit.workflow_id == workflow_id)
-        .options(selectinload(WorkflowAudit.acting_user))
+        .options(
+            selectinload(WorkflowAudit.acting_user).options(selectinload(User.profile)),
+            selectinload(WorkflowAudit.event),
+        )
     )
 
     stmt = apply_sorting(stmt, WorkflowAudit, params.pagination.sort_order)

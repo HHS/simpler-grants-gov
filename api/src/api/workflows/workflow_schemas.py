@@ -129,6 +129,13 @@ class WorkflowEventRequestSchema(Schema):
                 )
 
 
+class WorkflowEventHistorySchema(Schema):
+    """Schema for event information including ID and timestamp."""
+
+    event_id = fields.UUID(metadata={"description": "The tracking ID for the workflow event"})
+    sent_at = fields.DateTime(metadata={"description": "When the event was sent"})
+
+
 class WorkflowEventResponseDataSchema(Schema):
     event_id = fields.UUID(metadata={"description": "The tracking ID for the workflow event"})
 
@@ -172,7 +179,10 @@ class WorkflowAuditEventSchema(Schema):
     target_state = fields.String(
         metadata={"description": "The state after the transition", "example": "approved"}
     )
-    event_id = fields.UUID(metadata={"description": "The workflow event that triggered this audit"})
+    event = fields.Nested(
+        WorkflowEventHistorySchema,
+        metadata={"description": "The workflow event that triggered this audit"},
+    )
     audit_metadata = fields.Dict(
         allow_none=True,
         metadata={
