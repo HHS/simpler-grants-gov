@@ -1,4 +1,5 @@
 import logging
+from enum import StrEnum
 from typing import Any, cast
 
 from statemachine import StateChart
@@ -32,6 +33,17 @@ class BaseStateMachine(StateChart):
     # the event successfully.
     # https://python-statemachine.readthedocs.io/en/latest/behaviour.html#catch-errors-as-events
     catch_errors_as_events = False
+
+    class Metrics(StrEnum):
+        """
+        Base metrics class for state machines
+
+        Define and add your own in subclasses to automatically
+        initialize metrics to 0 / increment them during processing
+        by doing: state_machine_event.increment(self.Metrics.WHATEVER)
+        """
+
+        pass
 
     def __init__(self, model: BaseStatePersistenceModel, **kwargs: Any):
         super().__init__(model=model, **kwargs)

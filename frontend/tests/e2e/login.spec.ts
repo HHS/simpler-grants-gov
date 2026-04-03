@@ -50,7 +50,7 @@ test.describe("Login Page Redirect", () => {
     "should redirect to home page when no redirect URL is stored",
     { tag: [AUTH, CORE_REGRESSION] },
     async ({ page }) => {
-      await page.goto("/login");
+      await page.goto("/login", { waitUntil: "domcontentloaded" });
       await expect(page).toHaveURL("/");
     },
   );
@@ -62,7 +62,7 @@ test.describe("Login Page Redirect", () => {
       await page.evaluate(() => {
         sessionStorage.setItem("login-redirect", "/opportunities");
       });
-      await page.goto("/login");
+      await page.goto("/login", { waitUntil: "domcontentloaded" });
       await expect(page).toHaveURL(`/opportunities`);
     },
   );
@@ -74,7 +74,7 @@ test.describe("Login Page Redirect", () => {
       await page.evaluate(() => {
         sessionStorage.setItem("login-redirect", "/");
       });
-      await page.goto("/login");
+      await page.goto("/login", { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(TEST_REDIRECT_TIMEOUT);
       await expect(page).toHaveURL("/", { timeout: TEST_REDIRECT_TIMEOUT });
     },
@@ -87,7 +87,7 @@ test.describe("Login Page Redirect", () => {
       await page.evaluate(() => {
         sessionStorage.setItem("login-redirect", "https://external.com");
       });
-      await page.goto("/login");
+      await page.goto("/login", { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(TEST_REDIRECT_TIMEOUT);
       await expect(page).toHaveURL("/", { timeout: TEST_REDIRECT_TIMEOUT });
     },
@@ -101,7 +101,7 @@ test.describe("Login Page Redirect", () => {
         sessionStorage.setItem("login-redirect", "/opportunities");
       });
 
-      await page.goto("/login");
+      await page.goto("/login", { waitUntil: "domcontentloaded" });
       const redirectingText = page.getByText("Redirecting...");
       const redirectResult = await Promise.race([
         redirectingText

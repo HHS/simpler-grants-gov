@@ -9,8 +9,8 @@ import { Button, ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
 import { LoginModal } from "src/components/LoginModal";
 
-export default function DeveloperInfoButtons() {
-  const t = useTranslations("Developer");
+export default function DevelopersInfoButtons() {
+  const t = useTranslations("Developers");
   const headerTranslations = useTranslations("HeaderLoginModal");
   const { user } = useUser();
   const modalRef = useRef<ModalRef>(null);
@@ -18,7 +18,7 @@ export default function DeveloperInfoButtons() {
   return (
     <>
       {user?.token ? (
-        <Link href="/api-dashboard">
+        <Link href="/developers/api-dashboard">
           <Button
             className="margin-y-2 usa-button--secondary"
             type="button"
