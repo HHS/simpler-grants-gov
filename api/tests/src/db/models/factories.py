@@ -271,7 +271,11 @@ class CustomProvider(BaseProvider):
 
     # This is to help with the unique agency code conflicts
     AGENCY_CODE_FORMATS = [
-        "???",
+        # We don't make anything of format ???
+        # To avoid overlap with real agencies as we
+        # saw tests just happen to match exactly
+        # and get a unique constraint issue
+        "FAKE???",
         "????",
         "???-??",
         "???-???",
@@ -1014,7 +1018,7 @@ class AwardRecommendationAttachmentFactory(BaseFactory):
                 Does this location exist? If you are running in unit tests, make sure
                 `enable_factory_create` is pulled in as a fixture to your test.
 
-                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                 """
             ) from e
 
