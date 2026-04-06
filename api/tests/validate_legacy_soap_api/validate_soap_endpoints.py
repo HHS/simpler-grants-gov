@@ -59,12 +59,12 @@ class ValidateSoapContext:
 def get_response(soap_context: ValidateSoapContext, request_operation: str) -> requests.Response:
     cert = _config.cert_data
     encoded = quote(cert, safe="")
-    HEADERS.update({"X-Amzn-Mtls-Clientcert": encoded})
+    headers = {"X-Amzn-Mtls-Clientcert": encoded, **HEADERS}
     data = REQUEST_BODY[request_operation]
     return requests.post(
         _config.soap_uri,
         data=data,
-        headers=HEADERS,
+        headers=headers,
         cert=(soap_context.cert, soap_context.key),
         timeout=10,
     )
@@ -118,7 +118,7 @@ def get_grantors_get_submission_list_expanded_request_body() -> bytes:
 
 
 REQUEST_BODY = {
-    "GetSubmissionListRequest": get_grantors_get_submission_list_expanded_request_body(),
+    "GetSubmissionListExpandedRequest": get_grantors_get_submission_list_expanded_request_body(),
     "GetApplicationZipRequest": get_grantors_get_application_zip_request_body(),
 }
 
@@ -169,6 +169,7 @@ def validate_response_xml(
         raise Exception("Envelope not found")
     xml_tree = etree.fromstring(simpler_match.group(0))
     ns = {
+        None: "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
         "xop": "http://www.w3.org/2004/08/xop/include",
         "soap": "http://schemas.xmlsoap.org/soap/envelope/",
         "ns2": "http://apply.grants.gov/services/AgencyWebServices-V2.0",
@@ -197,7 +198,7 @@ def validate_response_xml(
     etree.cleanup_namespaces(operation_element)
     temp_files = get_temp_files(soap_context.stack)
     schema_validator = build_schema_validator(
-        temp_files["AgencyWebServices-V2.0.wsdl"], f"{operation_response_name}"
+        temp_files["AgencyWebServices-V2.0.wsdl"], operation_response_name
     )
     schema_validator.assertValid(operation_element)
 
@@ -212,7 +213,7 @@ def validate_grantors_get_application_zip_request(soap_context: ValidateSoapCont
 def validate_grantors_get_submission_list_expanded_request(
     soap_context: ValidateSoapContext,
 ) -> None:
-    resp = get_response(soap_context, "GetSubmissionListRequest")
+    resp = get_response(soap_context, "GetSubmissionListExpandedRequest")
     assert resp.status_code == 200
     # The incoming xml namespaces conflict with the wsdl settings.
     # According to the wsdl, due to the elementFormDetail = qualified,
