@@ -19,6 +19,7 @@ module "staging_config" {
   # With a minimum of 2, so CPU doesn't spike to infinity on deploys.
   instance_desired_instance_count = 2
   instance_scaling_min_capacity   = 2
+  instance_memory                 = 4096
   # instance_scaling_max_capacity is 5x the instance_scaling_min_capacity
   instance_scaling_max_capacity = 10
 
