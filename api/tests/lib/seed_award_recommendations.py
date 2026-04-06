@@ -20,7 +20,9 @@ from tests.lib.seed_orgs_and_users import _add_application
 logger = logging.getLogger(__name__)
 
 
-def _build_award_recommendations(db_session: db.Session, agencies: list[Agency] | None = None) -> None:
+def _build_award_recommendations(
+    db_session: db.Session, agencies: list[Agency] | None = None
+) -> None:
     """
     Create award recommendations with application submissions for testing.
 
@@ -44,16 +46,28 @@ def _build_award_recommendations(db_session: db.Session, agencies: list[Agency] 
     )
 
     award_recommendations_created = []
-    award_recommendations_created.extend(_create_draft_scenario(db_session, competition, applications))
-    award_recommendations_created.extend(_create_in_review_scenario(db_session, competition, applications))
-    award_recommendations_created.extend(_create_approved_scenario(db_session, competition, applications))
-    award_recommendations_created.extend(_create_exception_scenario(db_session, competition, applications))
-    award_recommendations_created.extend(_create_static_scenario(db_session, competition, applications))
+    award_recommendations_created.extend(
+        _create_draft_scenario(db_session, competition, applications)
+    )
+    award_recommendations_created.extend(
+        _create_in_review_scenario(db_session, competition, applications)
+    )
+    award_recommendations_created.extend(
+        _create_approved_scenario(db_session, competition, applications)
+    )
+    award_recommendations_created.extend(
+        _create_exception_scenario(db_session, competition, applications)
+    )
+    award_recommendations_created.extend(
+        _create_static_scenario(db_session, competition, applications)
+    )
 
     _log_summary(award_recommendations_created)
 
 
-def _create_draft_scenario(db_session: db.Session, competition: Competition, applications: list[Application]) -> list[tuple]:
+def _create_draft_scenario(
+    db_session: db.Session, competition: Competition, applications: list[Application]
+) -> list[tuple]:
     """Create draft award recommendation with mixed recommendation types."""
     draft_ar = factories.AwardRecommendationFactory.create(
         opportunity=competition.opportunity,
@@ -86,10 +100,15 @@ def _create_draft_scenario(db_session: db.Session, competition: Competition, app
         )
         apps_added += 1
 
-    logger.info(f"Created draft AR {draft_ar.award_recommendation_number} with {apps_added} applications")
+    logger.info(
+        f"Created draft AR {draft_ar.award_recommendation_number} with {apps_added} applications"
+    )
     return [(draft_ar, "Draft", competition.opportunity.opportunity_number)]
 
-def _create_in_review_scenario(db_session: db.Session, competition: Competition, applications: list[Application]) -> list[tuple]:
+
+def _create_in_review_scenario(
+    db_session: db.Session, competition: Competition, applications: list[Application]
+) -> list[tuple]:
     """Create in-review award recommendation with detailed comments."""
     if len(applications) <= 10:
         return []
@@ -139,10 +158,15 @@ def _create_in_review_scenario(db_session: db.Session, competition: Competition,
                 general_comment="Does not meet minimum requirements for this opportunity.",
             )
 
-    logger.info(f"Created in-review AR {in_progress_ar.award_recommendation_number} with {apps_added} applications")
+    logger.info(
+        f"Created in-review AR {in_progress_ar.award_recommendation_number} with {apps_added} applications"
+    )
     return [(in_progress_ar, "In Review", competition.opportunity.opportunity_number)]
 
-def _create_approved_scenario(db_session: db.Session, competition: Competition, applications: list[Application]) -> list[tuple]:
+
+def _create_approved_scenario(
+    db_session: db.Session, competition: Competition, applications: list[Application]
+) -> list[tuple]:
     """Create approved award recommendation with final decisions."""
     if len(applications) <= 15:
         return []
@@ -191,10 +215,15 @@ def _create_approved_scenario(db_session: db.Session, competition: Competition, 
                 general_comment="Does not meet funding threshold.",
             )
 
-    logger.info(f"Created approved AR {approved_ar.award_recommendation_number} with {apps_added} applications")
+    logger.info(
+        f"Created approved AR {approved_ar.award_recommendation_number} with {apps_added} applications"
+    )
     return [(approved_ar, "Approved", competition.opportunity.opportunity_number)]
 
-def _create_exception_scenario(db_session: db.Session, competition: Competition, applications: list[Application]) -> list[tuple]:
+
+def _create_exception_scenario(
+    db_session: db.Session, competition: Competition, applications: list[Application]
+) -> list[tuple]:
     """Create award recommendation with exception case."""
     if len(applications) <= 20 or not applications[20].application_submissions:
         return []
@@ -220,10 +249,15 @@ def _create_exception_scenario(db_session: db.Session, competition: Competition,
         application_submission=applications[20].application_submissions[0],
         award_recommendation_submission_detail=detail,
     )
-    logger.info(f"Created exception AR {exception_ar.award_recommendation_number} with 1 application")
+    logger.info(
+        f"Created exception AR {exception_ar.award_recommendation_number} with 1 application"
+    )
     return [(exception_ar, "With Exception", competition.opportunity.opportunity_number)]
 
-def _create_static_scenario(db_session: db.Session, competition: Competition, applications: list[Application]) -> list[tuple]:
+
+def _create_static_scenario(
+    db_session: db.Session, competition: Competition, applications: list[Application]
+) -> list[tuple]:
     """Create static award recommendation with known ID for E2E testing."""
     static_ar_id = uuid.UUID("b9c15d13-8ff1-4e15-80b8-3cf5acf84851")
     existing_static_ar = db_session.get(AwardRecommendation, static_ar_id)
@@ -277,8 +311,12 @@ def _create_static_scenario(db_session: db.Session, competition: Competition, ap
             general_comment=comment,
         )
 
-    logger.info(f"Created static AR {static_ar.award_recommendation_number} with {apps_added} applications")
-    logger.info(f"✓ Static award recommendation ready - http://localhost:3000/award-recommendation/{static_ar_id}/edit")
+    logger.info(
+        f"Created static AR {static_ar.award_recommendation_number} with {apps_added} applications"
+    )
+    logger.info(
+        f"✓ Static award recommendation ready - http://localhost:3000/award-recommendation/{static_ar_id}/edit"
+    )
     return [(static_ar, "Static (E2E)", competition.opportunity.opportunity_number)]
 
 
@@ -316,21 +354,23 @@ def _add_application_to_award_recommendation(
         "award_recommendation": award_recommendation,
         "application_submission": application_submission,
     }
-    
+
     if award_recommendation_type == AwardRecommendationType.RECOMMENDED_FOR_FUNDING:
         factory_kwargs["recommended_for_funding"] = True
         if recommended_amount != 50000:
-            factory_kwargs["award_recommendation_submission_detail__recommended_amount"] = recommended_amount
+            factory_kwargs["award_recommendation_submission_detail__recommended_amount"] = (
+                recommended_amount
+            )
     elif award_recommendation_type == AwardRecommendationType.RECOMMENDED_WITHOUT_FUNDING:
         factory_kwargs["recommended_without_funding"] = True
     elif award_recommendation_type == AwardRecommendationType.NOT_RECOMMENDED:
         factory_kwargs["not_recommended"] = True
-    
+
     if scoring_comment is not None:
         factory_kwargs["award_recommendation_submission_detail__scoring_comment"] = scoring_comment
     if general_comment is not None:
         factory_kwargs["award_recommendation_submission_detail__general_comment"] = general_comment
-    
+
     factories.AwardRecommendationApplicationSubmissionFactory.create(**factory_kwargs)
 
 
@@ -338,11 +378,11 @@ def _create_competition_with_accepted_applications(
     db_session: db.Session, agencies: list[Agency] | None = None
 ) -> tuple[Competition, list[Application]]:
     """Create a competition with many accepted applications for comprehensive testing.
-    
+
     Args:
         db_session: Database session
         agencies: Optional list of agencies to associate the opportunity with.
-    
+
     Returns:
         Tuple of (competition, applications list)
     """
@@ -357,7 +397,7 @@ def _create_competition_with_accepted_applications(
     if agencies and len(agencies) > 0:
         competition_kwargs["opportunity__agency_code"] = agencies[0].agency_code
         logger.info(f"Associating opportunity with agency: {agencies[0].agency_code}")
-    
+
     competition = factories.CompetitionFactory.create(**competition_kwargs)
 
     logger.info("Creating 8 fresh organizations for applications")
@@ -377,7 +417,7 @@ def _create_competition_with_accepted_applications(
             app_owner=org,
             application_status=ApplicationStatus.SUBMITTED,
         )
-        
+
         factories.ApplicationSubmissionFactory(
             application=app,
             file_location=f"s3://test-bucket/submissions/{app.application_id}.zip",
