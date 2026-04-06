@@ -931,7 +931,7 @@ class OpportunityAttachmentFactory(BaseFactory):
                 Does this location exist? If you are running in unit tests, make sure
                 `enable_factory_create` is pulled in as a fixture to your test.
 
-                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                 """
             ) from e
 
@@ -1524,7 +1524,7 @@ class CompetitionInstructionFactory(BaseFactory):
                 Does this location exist? If you are running in unit tests, make sure
                 `enable_factory_create` is pulled in as a fixture to your test.
 
-                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                 """
             ) from e
 
@@ -1565,7 +1565,7 @@ class FormInstructionFactory(BaseFactory):
                 Does this location exist? If you are running in unit tests, make sure
                 `enable_factory_create` is pulled in as a fixture to your test.
 
-                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                 """
             ) from e
 
@@ -1825,7 +1825,7 @@ class ApplicationAttachmentFactory(BaseFactory):
                     Does this location exist? If you are running in unit tests, make sure
                     `enable_factory_create` is pulled in as a fixture to your test.
 
-                    If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                    If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                     """
             ) from e
 
@@ -1883,7 +1883,7 @@ class ApplicationSubmissionFactory(BaseFactory):
                     Does this location exist? If you are running in unit tests, make sure
                     `enable_factory_create` is pulled in as a fixture to your test.
 
-                    If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                    If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                     """
             ) from e
 
