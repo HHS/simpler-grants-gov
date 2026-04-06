@@ -217,8 +217,7 @@ $(DOMAIN):
 	@:
 endif
 
-infra-create-csr: ## Generate a private key and CSR for $DOMAIN (appends .simpler.grants.gov if needed). Output written to certs/
-	@:$(call check_defined, DOMAIN, the domain name e.g. "api" or "api.simpler.grants.gov")
+infra-create-csr: ## Generate a private key and CSR. Optionally pass $DOMAIN (e.g. "api"); defaults to simpler.grants.gov. Output written to certs/
 	./bin/create-csr $(DOMAIN)
 
 infra-import-certificate: ## Import a signed certificate into AWS ACM for $DOMAIN using $CERTIFICATE_FILE

@@ -8,6 +8,7 @@
 #   certs/<domain>.csr  - Certificate Signing Request
 #
 # Examples:
+#   bin/create-csr            (uses simpler.grants.gov)
 #   bin/create-csr api
 #   bin/create-csr api.simpler.grants.gov
 # -----------------------------------------------------------------------------
@@ -19,22 +20,23 @@ BASE_DOMAIN="simpler.grants.gov"
 COUNTRY="US"
 ORGANIZATION="Simpler Grants Gov"
 KEY_BITS=4096
-
 OUTPUT_DIR="certs"
 
 usage() {
-  echo "Usage: $0 <domain>"
+  echo "Usage: $0 [domain]"
   echo
   echo "  domain    Short name (e.g. 'api') or fully qualified (e.g. 'api.simpler.grants.gov')"
   echo "            '.simpler.grants.gov' is appended automatically if not present."
+  echo "            Omit to use the base domain '${BASE_DOMAIN}' directly."
   exit 1
 }
 
+# Default to base domain if no argument is provided
 if [[ $# -lt 1 ]]; then
-  usage
+  INPUT_DOMAIN="$BASE_DOMAIN"
+else
+  INPUT_DOMAIN="$1"
 fi
-
-INPUT_DOMAIN="$1"
 
 # Append the base domain suffix if not already present
 if [[ "$INPUT_DOMAIN" == *".$BASE_DOMAIN" ]] || [[ "$INPUT_DOMAIN" == "$BASE_DOMAIN" ]]; then
