@@ -2,8 +2,6 @@ import logging
 import random
 import uuid
 
-from sqlalchemy import select
-
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import (
@@ -402,7 +400,7 @@ def _create_competition_with_accepted_applications(
 
     logger.info("Creating 8 fresh organizations for applications")
     organizations = []
-    for i in range(8):
+    for _ in range(8):
         unique_uei = f"UEI{random.randint(10000000, 99999999):08d}"
         org = factories.OrganizationFactory.create(sam_gov_entity__uei=unique_uei)
         organizations.append(org)
