@@ -383,19 +383,24 @@ This section documents the NRQL queries used in each page of the **Find Metrics*
 
 ### 9.1 OpenSearch Health Page
 
-Implemented in [#9167](https://github.com/HHS/simpler-grants-gov/issues/9167). Requires instrumentation from [#9147](https://github.com/HHS/simpler-grants-gov/issues/9147), [#9149](https://github.com/HHS/simpler-grants-gov/issues/9149), and [#9150](https://github.com/HHS/simpler-grants-gov/issues/9150).
+Implemented in [#9167](https://github.com/HHS/simpler-grants-gov/issues/9167) and [#9393](https://github.com/HHS/simpler-grants-gov/issues/9393). Requires instrumentation from [#9147](https://github.com/HHS/simpler-grants-gov/issues/9147), [#9149](https://github.com/HHS/simpler-grants-gov/issues/9149), and [#9150](https://github.com/HHS/simpler-grants-gov/issues/9150).
 
-**Data source:** `Log` events where `request.url_rule = '/v1/opportunities/search'`
+Most panels use `Log` events where `request.url_rule = '/v1/opportunities/search'`. Panels 8–9 use `SearchResultExplanation` custom APM events emitted by [`opensearch_explain.py`](../../../api/src/adapters/search/opensearch_explain.py) when `OPENSEARCH_EXPLAIN_ENABLED=true`. Custom events do not carry an `environment` attribute, so they are scoped to production using `appName = 'api-prod'` (set in [`newrelic.ini`](../../../api/newrelic.ini)).
 
 **Attributes used:**
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `search.took_ms` | int | Time OpenSearch spent executing the query (ms) |
-| `search.timed_out` | bool | Whether OpenSearch returned a partial result due to timeout |
-| `search.shards_failed` | int | Number of shards that failed during the query |
-| `search.max_score` | float | Relevancy score of the top result; `0` for browse-mode (no query text) |
-| `search.scoring_rule` | string | Active scoring profile: `default`, `expanded`, or `agency` |
+| Attribute | Event type | Description |
+|-----------|------------|-------------|
+| `search.took_ms` | `Log` | Time OpenSearch spent executing the query (ms) |
+| `search.timed_out` | `Log` | Whether OpenSearch returned a partial result due to timeout |
+| `search.shards_failed` | `Log` | Number of shards that failed during the query |
+| `search.max_score` | `Log` | Relevancy score of the top result; `0` for browse-mode (no query text) |
+| `search.scoring_rule` | `Log` | Active scoring profile: `default`, `expanded`, or `agency` |
+| `search.total_relation` | `Log` | `'eq'` = exact count; `'gte'` = lower bound (hit count exceeds 10k) |
+| `search.agg_overflow.agency` | `Log` | `sum_other_doc_count` for the agency aggregation; non-zero means >1000 unique agencies were truncated |
+| `field_score.<field>` | `SearchResultExplanation` | BM25 score contribution from a specific field (e.g. `field_score.agency_code`, `field_score.opportunity_title`) |
+| `position` | `SearchResultExplanation` | 1-based rank of this hit in the result set (1–10) |
+| `scoring_rule` | `SearchResultExplanation` | Active scoring profile: `default`, `expanded`, or `agency` |
 
 **Panel: Search Latency — p50 / p95 / p99**
 ```sql
@@ -449,6 +454,70 @@ WHERE request.url_rule = '/v1/opportunities/search'
   AND search.max_score > 0
 FACET search.scoring_rule
 TIMESERIES AUTO
+SINCE 7 days ago
+```
+
+**Panel: Total Relation Accuracy**
+
+Flags searches where OpenSearch returned an approximate hit count (`gte`) rather than an exact one (`eq`). This happens when results exceed 10k and `track_total_hits` is not enabled. A non-zero rate here indicates the result count shown to users is a lower bound, not exact.
+
+```sql
+SELECT percentage(count(*), WHERE search.total_relation = 'gte') AS 'Approx. Result Count Rate %'
+FROM Log
+WHERE request.url_rule = '/v1/opportunities/search'
+  AND environment = 'prod'
+TIMESERIES AUTO
+SINCE 7 days ago
+```
+
+> In practice this should always be 0% — the search query sets `track_total_hits: true` explicitly. Any non-zero value is worth investigating.
+
+**Panel: Agency Aggregation Truncation**
+
+Tracks searches where the agency facet aggregation was silently truncated. The agency aggregation uses `size=1000`; if more than 1000 unique agency codes match the query, `sum_other_doc_count` will be non-zero and some agencies will be missing from the filter counts shown to users.
+
+```sql
+SELECT count(*) AS 'Searches with Truncated Agency Aggregation'
+FROM Log
+WHERE request.url_rule = '/v1/opportunities/search'
+  AND environment = 'prod'
+  AND search.agg_overflow.agency > 0
+TIMESERIES AUTO
+SINCE 7 days ago
+```
+
+**Panel: Top Contributing Fields by Position**
+
+Shows the average BM25 score contribution per field at each result position (1–10), using `SearchResultExplanation` events. Helps identify whether high-ranked results are being driven by the expected fields (e.g. `agency_code` for agency searches, `opportunity_title` for title searches). Chart type: **bar** with `FACET position`.
+
+```sql
+SELECT average(field_score.agency_code) AS 'agency_code',
+       average(field_score.opportunity_title) AS 'opportunity_title',
+       average(field_score.opportunity_number) AS 'opportunity_number',
+       average(field_score.agency_name) AS 'agency_name',
+       average(field_score.top_level_agency_code) AS 'top_level_agency_code'
+FROM SearchResultExplanation
+WHERE appName = 'api-prod'
+FACET position
+SINCE 7 days ago
+LIMIT 10
+```
+
+> `field_score.*` attributes are only present when `OPENSEARCH_EXPLAIN_ENABLED=true` and the request included a non-empty query string. Browse-mode searches (no query) produce no `SearchResultExplanation` events.
+
+**Panel: Average Field Score Contribution by Scoring Rule**
+
+Compares average field score contributions across the three scoring rules (`default`, `expanded`, `agency`). Useful for verifying that each scoring rule is emphasising the expected fields. Chart type: **bar** with `FACET scoring_rule`.
+
+```sql
+SELECT average(field_score.agency_code) AS 'agency_code',
+       average(field_score.opportunity_title) AS 'opportunity_title',
+       average(field_score.opportunity_number) AS 'opportunity_number',
+       average(field_score.agency_name) AS 'agency_name',
+       average(field_score.top_level_agency_code) AS 'top_level_agency_code'
+FROM SearchResultExplanation
+WHERE appName = 'api-prod'
+FACET scoring_rule
 SINCE 7 days ago
 ```
 
