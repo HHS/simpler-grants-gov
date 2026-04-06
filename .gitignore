@@ -158,6 +158,3 @@ frontend/tests/artillery/params.json
 
 # XSD cache for XML validation
 xsd_cache/
-
-# ssl certificates directory
-certs/
