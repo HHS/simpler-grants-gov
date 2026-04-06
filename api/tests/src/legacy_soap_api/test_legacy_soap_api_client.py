@@ -1324,7 +1324,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "<UEI>E9T7F9N2ERR4</UEI>"
             "</ns2:SubmissionInfo>"
             "<ns2:SubmissionInfo>"
-            "<GARBAGE>E9T7F9N2ERR4</GARBAGE>"
+            "<ns2:ReceivedDateTime>NOT_A_VALID_DATETIME</ns2:ReceivedDateTime>"
             "</ns2:SubmissionInfo>"
             "</ns2:GetSubmissionListExpandedResponse>"
             "</soap:Body>"
