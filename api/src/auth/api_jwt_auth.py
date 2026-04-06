@@ -20,7 +20,7 @@ from src.util.env_config import PydanticBaseEnvConfig
 logger = logging.getLogger(__name__)
 
 api_jwt_auth = JwtUserHttpTokenAuth(
-    "ApiKey", header="X-SGG-Token", security_scheme_name="ApiJwtAuth"
+    "ApiKey", param_name="X-SGG-Token", security_scheme_name="ApiJwtAuth"
 )
 
 
