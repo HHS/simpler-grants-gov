@@ -6,6 +6,8 @@ from src.adapters.db import flask_db
 from src.api import response
 from src.api.workflows.workflow_blueprint import workflow_blueprint
 from src.api.workflows.workflow_schemas import (
+    WorkflowAuditRequestSchema,
+    WorkflowAuditResponseSchema,
     WorkflowEventRequestSchema,
     WorkflowEventResponseSchema,
     WorkflowGetResponseSchema,
@@ -13,6 +15,7 @@ from src.api.workflows.workflow_schemas import (
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.workflows.get_workflow import get_workflow_and_verify_access
+from src.services.workflows.get_workflow_audits import get_workflow_audits
 from src.services.workflows.ingest_workflow_event import ingest_workflow_event
 
 logger = logging.getLogger(__name__)
@@ -62,3 +65,34 @@ def workflow_get(db_session: db.Session, workflow_id: uuid.UUID) -> response.Api
         workflow = get_workflow_and_verify_access(db_session, user, workflow_id)
 
     return response.ApiResponse(message="Success", data=workflow)
+
+
+@workflow_blueprint.post("/<uuid:workflow_id>/audit")
+@workflow_blueprint.input(WorkflowAuditRequestSchema)
+@workflow_blueprint.output(WorkflowAuditResponseSchema)
+@workflow_blueprint.doc(
+    summary="Get Workflow Audit Events",
+    description="Retrieve a paginated list of audit events for a specific workflow. Access is controlled by entity-based privileges (VIEW_OPPORTUNITY or VIEW_APPLICATION).",
+    security=jwt_or_api_user_key_security_schemes,
+    responses=[200, 401, 403, 404],
+)
+@jwt_or_api_user_key_multi_auth.login_required
+@flask_db.with_db_session()
+def workflow_audit_post(
+    db_session: db.Session, workflow_id: uuid.UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"workflow_id": str(workflow_id)})
+    logger.info("POST /v1/workflows/:workflow_id/audit")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        # Get audit events and pagination info
+        audit_events, pagination_info = get_workflow_audits(
+            db_session, user, workflow_id, json_data
+        )
+
+    return response.ApiResponse(
+        message="Success", data=audit_events, pagination_info=pagination_info
+    )
