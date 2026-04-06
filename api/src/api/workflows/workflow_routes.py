@@ -12,7 +12,7 @@ from src.api.workflows.workflow_schemas import (
     WorkflowEventResponseSchema,
     WorkflowGetResponseSchema,
 )
-from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.workflows.get_workflow import get_workflow_and_verify_access
 from src.services.workflows.get_workflow_audits import get_workflow_audits
@@ -27,10 +27,9 @@ logger = logging.getLogger(__name__)
 @workflow_blueprint.doc(
     summary="Send Workflow Event",
     description="Trigger a new workflow or progress an existing one.",
-    security=jwt_or_api_user_key_security_schemes,
     responses=[200, 401, 403, 404, 422],
 )
-@jwt_or_api_user_key_multi_auth.login_required
+@workflow_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def workflow_event_put(db_session: db.Session, json_data: dict) -> response.ApiResponse:
 
@@ -51,10 +50,9 @@ def workflow_event_put(db_session: db.Session, json_data: dict) -> response.ApiR
 @workflow_blueprint.doc(
     summary="Get Workflow Details",
     description="Retrieve detailed information about a specific workflow including audit history, approvals, and approval configuration. Access is controlled by entity-based privileges (VIEW_OPPORTUNITY or VIEW_APPLICATION).",
-    security=jwt_or_api_user_key_security_schemes,
     responses=[200, 401, 403, 404],
 )
-@jwt_or_api_user_key_multi_auth.login_required
+@workflow_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def workflow_get(db_session: db.Session, workflow_id: uuid.UUID) -> response.ApiResponse:
     add_extra_data_to_current_request_logs({"workflow_id": str(workflow_id)})
@@ -75,10 +73,9 @@ def workflow_get(db_session: db.Session, workflow_id: uuid.UUID) -> response.Api
 @workflow_blueprint.doc(
     summary="Get Workflow Audit Events",
     description="Retrieve a paginated list of audit events for a specific workflow. Access is controlled by entity-based privileges (VIEW_OPPORTUNITY or VIEW_APPLICATION).",
-    security=jwt_or_api_user_key_security_schemes,
     responses=[200, 401, 403, 404],
 )
-@jwt_or_api_user_key_multi_auth.login_required
+@workflow_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def workflow_audit_post(
     db_session: db.Session, workflow_id: uuid.UUID, json_data: dict
