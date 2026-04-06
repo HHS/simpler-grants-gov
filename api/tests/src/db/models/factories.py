@@ -1064,6 +1064,20 @@ class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
         lambda s: s.award_recommendation_submission_detail.award_recommendation_submission_detail_id
     )
 
+    class Params:
+        recommended_for_funding = factory.Trait(
+            award_recommendation_submission_detail__award_recommendation_type=AwardRecommendationType.RECOMMENDED_FOR_FUNDING,
+            award_recommendation_submission_detail__recommended_amount=50000,
+        )
+        recommended_without_funding = factory.Trait(
+            award_recommendation_submission_detail__award_recommendation_type=AwardRecommendationType.RECOMMENDED_WITHOUT_FUNDING,
+            award_recommendation_submission_detail__recommended_amount=0,
+        )
+        not_recommended = factory.Trait(
+            award_recommendation_submission_detail__award_recommendation_type=AwardRecommendationType.NOT_RECOMMENDED,
+            award_recommendation_submission_detail__recommended_amount=0,
+        )
+
 
 class AwardRecommendationRiskSubmissionFactory(BaseFactory):
     class Meta:

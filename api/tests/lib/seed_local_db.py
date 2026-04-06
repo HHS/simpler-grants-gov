@@ -531,5 +531,8 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
     if seed_config.seed_e2e:
         _build_users_and_tokens(db_session)
     if seed_config.seed_award_recommendations:
-        _build_award_recommendations(db_session)
+        # Fetch agencies to associate with opportunities for auth
+        from src.db.models.agency_models import Agency
+        agencies = db_session.query(Agency).limit(5).all()
+        _build_award_recommendations(db_session, agencies=agencies if agencies else None)
     db_session.commit()
