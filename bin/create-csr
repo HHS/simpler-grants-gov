@@ -20,7 +20,7 @@ BASE_DOMAIN="simpler.grants.gov"
 COUNTRY="US"
 ORGANIZATION="Simpler Grants Gov"
 KEY_BITS=4096
-OUTPUT_DIR="certs"
+OUTPUT_DIR="/tmp"
 
 usage() {
   echo "Usage: $0 [domain]"
