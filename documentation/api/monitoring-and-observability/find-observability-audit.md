@@ -327,7 +327,7 @@ No Metabase dashboards exist for Find functionality. All existing queries focus 
 ### 7.1 Build a Dedicated Find Product Metrics Dashboard
 
 Model a new NR dashboard after the existing Apply Metrics dashboard, consolidating Find-specific metrics into a single product view. Suggested panels:
- 
+
 - Search volume over time (from NR Logs: `request.url_rule = '/v1/opportunities/search'`)
 - Zero-result search rate (from NR Logs: `response.pagination.total_records = 0`)
 - Search result count distribution (bucketed)
@@ -349,7 +349,6 @@ TIMESERIES AUTO
 SELECT percentile(duration, 50, 95, 99) FROM Transaction
 WHERE name LIKE '%opportunity_search%' TIMESERIES AUTO
 ```
-
 
 ### 7.2 Add Find-Specific Alerts
 
