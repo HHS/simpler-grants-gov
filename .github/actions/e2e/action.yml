@@ -144,6 +144,6 @@ runs:
       if: always()
       uses: actions/upload-artifact@v6
       with:
-        name: blob-report-shard-${{ inputs.current_shard }}
+        name: blob-report-shard-${{ inputs.target }}-${{ inputs.current_shard }}
         path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
         retention-days: 1
