@@ -125,7 +125,7 @@ export const ApplyFormMessage = ({
       >
         {t("validationMessage")}
         <ul>
-          {uniqueValidationWarnings.map((warning, index) => {
+          {uniqueValidationWarnings.map((warning) => {
             const link = isBudgetForm ? (
               <a href={`#${warning.field}`}>{warning.message}</a>
             ) : (

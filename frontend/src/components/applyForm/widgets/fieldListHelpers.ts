@@ -1,4 +1,4 @@
-import { FormattedFormValidationWarning } from "../types";
+import { FormattedFormValidationWarning } from "src/components/applyForm/types";
 
 /**
  * Returns validation warnings that apply to the FieldList as a whole.
