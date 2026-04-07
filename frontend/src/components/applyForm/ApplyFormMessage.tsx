@@ -4,20 +4,20 @@ import { Alert } from "@trussworks/react-uswds";
 import { FormattedFormValidationWarning } from "./types";
 
 /**
- * Summary link text for validation warnings.
+ * Builds Summary link text for validation warnings.
  *
  * For repeatable FieldList inputs, multiple rows can contain the same child
  * field name (for example, multiple `first_name` fields). In those cases,
  * the base formatted message alone is not specific enough in the summary.
  *
  * When the warning points to a row-specific FieldList input, we append:
- * - the FieldList name derived from the schema definition
+ * - the FieldList label
+ * - the 1-based entry number derived from the rendered html field id
  *
  * Example:
  *   "First Name is required"
  *
  * becomes:
- *   [field (definition, row number)]
  *   "First Name is required (Contact People, Entry 2)"
  */
 
@@ -25,8 +25,8 @@ export const getWarningLinkText = (
   warning: FormattedFormValidationWarning,
 ): string => {
   const baseText = warning.formatted ?? warning.message;
-
   const rowMatch = warning.htmlField?.match(/\[(\d+)\]--/);
+  const fieldListLabel = warning.fieldListLabel ?? "";
 
   if (!rowMatch) {
     return baseText;
@@ -36,20 +36,6 @@ export const getWarningLinkText = (
 
   if (Number.isNaN(rowIndex)) {
     return baseText;
-  }
-
-  const definitionMatch = warning.definition?.match(
-    /^\/properties\/([^/]+)\/items\/properties\/[^/]+$/,
-  );
-
-  let fieldListLabel = "";
-
-  if (definitionMatch) {
-    const rawName = definitionMatch[1];
-
-    fieldListLabel = rawName
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
   if (fieldListLabel) {

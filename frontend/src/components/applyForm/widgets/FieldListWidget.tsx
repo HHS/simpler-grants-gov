@@ -12,6 +12,7 @@ import {
   GeneralRecord,
   UswdsWidgetProps,
 } from "src/components/applyForm/types";
+import { isFieldRequired } from "src/components/applyForm/utils";
 import {
   getFieldListChildErrors,
   getFieldListGroupErrors,
@@ -179,6 +180,7 @@ function FieldListEntry({
   rawErrors,
   fieldListPath,
   groupDefinition,
+  requiredFields,
 }: {
   id: string;
   rowIndex: number;
@@ -189,6 +191,7 @@ function FieldListEntry({
   rawErrors?: FormattedFormValidationWarning[];
   fieldListPath: string;
   groupDefinition: FieldListGroupItem[];
+  requiredFields?: string[];
 }) {
   const t = useTranslations("Application.applyForm.fieldListWidget");
 
@@ -211,6 +214,11 @@ function FieldListEntry({
       </div>
 
       {groupDefinition.map((groupItem: FieldListGroupItem) => {
+        const isRequired = isFieldRequired(
+          groupItem.definition,
+          requiredFields ?? [],
+        );
+
         const generatedId = replaceFieldListIndexPlaceholder({
           baseId: groupItem.baseId,
           rowIndex,
@@ -242,6 +250,7 @@ function FieldListEntry({
           key: generatedId,
           value: currentValue,
           rawErrors: childErrors,
+          required: isRequired,
           onChange: (nextValue) =>
             handleFieldChange({
               rowIndex,
@@ -249,7 +258,6 @@ function FieldListEntry({
               nextValue,
             }),
         };
-
         return renderWidget({
           type: groupItem.widget,
           props: childWidgetProps,
@@ -400,6 +408,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
             groupDefinition={groupDefinition}
             rawErrors={rawErrors}
             fieldListPath={fieldListPath}
+            requiredFields={widgetProps.requiredFields}
           />
         );
       })}

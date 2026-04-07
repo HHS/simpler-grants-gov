@@ -23,6 +23,7 @@ const nestedWarningsForField = ({
   fieldSchema,
   formSchema,
   path,
+  uiSchema,
 }: {
   definition: string;
   errors: FormValidationWarning[];
@@ -30,6 +31,7 @@ const nestedWarningsForField = ({
   fieldSchema: SchemaField;
   formSchema: RJSFSchema;
   path: string;
+  uiSchema: UiSchema;
 }): FormattedFormValidationWarning[] => {
   const parent = definition.replace(/\/properties\/\w+$/, "");
   const parentFieldDefinition = getFieldSchema({
@@ -59,6 +61,10 @@ const nestedWarningsForField = ({
   }
 
   return matchingErrors.map((error) => {
+    const fieldListLabel = getFieldListLabelFromDefinition({
+      definition,
+      uiSchema,
+    });
     const message = error.message.replace(/'\S+'/, fieldName);
     const formatted = formatValidationWarning(fieldName, message, fieldSchema);
     const formattedWithParent = parentFieldDefinition.title
@@ -74,6 +80,7 @@ const nestedWarningsForField = ({
       formatted: formattedWithParent,
       htmlField,
       definition,
+      fieldListLabel,
     };
   });
 };
@@ -103,6 +110,7 @@ const findValidationErrors = (
   definition: string | undefined,
   schema: SchemaField | undefined,
   formSchema: RJSFSchema,
+  uiSchema: UiSchema,
 ): FormattedFormValidationWarning[] => {
   const fieldSchema = getFieldSchema({
     definition,
@@ -132,6 +140,10 @@ const findValidationErrors = (
 
   if (directWarnings.length > 0) {
     return directWarnings.map((directWarning) => {
+      const fieldListLabel = getFieldListLabelFromDefinition({
+        definition,
+        uiSchema,
+      });
       const formatted = formatValidationWarning(
         fieldName,
         directWarning.message,
@@ -143,7 +155,13 @@ const findValidationErrors = (
         schema: fieldSchema,
       });
 
-      return { ...directWarning, formatted, htmlField, definition };
+      return {
+        ...directWarning,
+        formatted,
+        htmlField,
+        definition,
+        fieldListLabel,
+      };
     });
   }
   if (fieldSchema && definition) {
@@ -154,6 +172,7 @@ const findValidationErrors = (
       errors,
       fieldSchema,
       formSchema,
+      uiSchema,
     });
   }
   return [];
@@ -164,7 +183,10 @@ export const buildWarningTree = (
   parent: UiSchema | UiSchemaField[] | UiSchemaNode | null,
   formValidationWarnings: FormValidationWarning[],
   formSchema: RJSFSchema,
+  rootUiSchema?: UiSchema,
 ): FormattedFormValidationWarning[] => {
+  const resolvedRootUiSchema =
+    rootUiSchema ?? (Array.isArray(uiSchema) ? uiSchema : []);
   if (
     !Array.isArray(uiSchema) &&
     typeof uiSchema === "object" &&
@@ -175,6 +197,7 @@ export const buildWarningTree = (
       uiSchema,
       formValidationWarnings,
       formSchema,
+      resolvedRootUiSchema,
     );
   } else if (Array.isArray(uiSchema)) {
     const childErrors = uiSchema.reduce<FormattedFormValidationWarning[]>(
@@ -186,6 +209,7 @@ export const buildWarningTree = (
             uiSchema,
             formValidationWarnings,
             formSchema,
+            resolvedRootUiSchema,
           );
           return errors.concat(nodeError);
         } else if (!parent && ("definition" in node || "schema" in node)) {
@@ -196,6 +220,7 @@ export const buildWarningTree = (
               : node.definition,
             node.schema,
             formSchema,
+            resolvedRootUiSchema,
           );
           if (matchingWarnings.length > 0) {
             return errors.concat(matchingWarnings);
@@ -215,6 +240,7 @@ export const buildWarningTree = (
               uiSchema,
               formValidationWarnings,
               formSchema,
+              resolvedRootUiSchema,
             );
             return errors.concat(nodeError);
           } else {
@@ -225,6 +251,7 @@ export const buildWarningTree = (
                 : node.definition,
               node.schema,
               formSchema,
+              resolvedRootUiSchema,
             );
             if (matchingWarnings.length > 0) {
               return errors.concat(matchingWarnings);
@@ -303,6 +330,9 @@ function getHtmlFieldForWarning({
         const [, rowIndex] = rowMatch;
         return `${fieldListName}[${rowIndex}]--${childFieldName}`;
       }
+
+      // Fallback: default to first row when no index is present
+      return `${fieldListName}[0]--${childFieldName}`;
     }
   }
 
@@ -310,6 +340,49 @@ function getHtmlFieldForWarning({
     definition,
     schema,
   });
+}
+
+// Returns validation messages for a specific FieldList group,
+// which may include warnings for any child fields within the group as well.
+function getFieldListLabelFromDefinition({
+  definition,
+  uiSchema,
+}: {
+  definition?: string;
+  uiSchema: UiSchema;
+}): string | undefined {
+  if (!definition) {
+    return undefined;
+  }
+
+  const match = definition.match(
+    /^\/properties\/([^/]+)\/items\/properties\/[^/]+$/,
+  );
+
+  if (!match) {
+    return undefined;
+  }
+
+  const [, fieldListName] = match;
+
+  const findFieldListLabel = (nodes: UiSchema): string | undefined => {
+    for (const node of nodes) {
+      if (node.type === "fieldList" && node.name === fieldListName) {
+        return node.label;
+      }
+
+      if ("children" in node && Array.isArray(node.children)) {
+        const nestedLabel = findFieldListLabel(node.children as UiSchema);
+        if (nestedLabel) {
+          return nestedLabel;
+        }
+      }
+    }
+
+    return undefined;
+  };
+
+  return findFieldListLabel(uiSchema);
 }
 
 // transform a form data field name / id into a json path that can be used to reference the form schema
@@ -474,8 +547,14 @@ export const shapeFormData = <T extends object>(
 };
 
 const removePropertyPaths = (path: unknown): string => {
-  if (typeof path !== "string") return "";
-  return path.replace(/properties\//g, "").replace(/^\//, "");
+  if (typeof path !== "string") {
+    return "";
+  }
+
+  return path
+    .replace(/properties\//g, "")
+    .replace(/items\//g, "")
+    .replace(/^\//, "");
 };
 
 export const getKeyParentPath = (key: string, parentPath?: string) => {

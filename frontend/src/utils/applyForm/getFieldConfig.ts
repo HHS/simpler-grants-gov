@@ -21,7 +21,6 @@ import {
   getFieldNameForHtml,
   getFieldPathFromHtml,
   getFieldSchema,
-  getRequiredProperties,
 } from "src/components/applyForm/utils";
 
 type WidgetOptions = NonNullable<UswdsWidgetProps["options"]>;
@@ -94,6 +93,37 @@ export function buildFieldListBaseId({
 
   return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
 }
+
+const getFieldListRequiredFields = ({
+  formSchema,
+  fieldListName,
+}: {
+  formSchema: RJSFSchema;
+  fieldListName: string;
+}): string[] => {
+  const fieldListSchema = formSchema.properties?.[fieldListName] as
+    | RJSFSchema
+    | undefined;
+
+  if (!fieldListSchema || fieldListSchema.type !== "array") {
+    return [];
+  }
+
+  const itemSchema =
+    fieldListSchema.items &&
+    !Array.isArray(fieldListSchema.items) &&
+    typeof fieldListSchema.items === "object"
+      ? (fieldListSchema.items as RJSFSchema)
+      : undefined;
+
+  if (!itemSchema?.required || !Array.isArray(itemSchema.required)) {
+    return [];
+  }
+
+  return itemSchema.required.map(
+    (requiredFieldName) => `${fieldListName}/${requiredFieldName}`,
+  );
+};
 
 type FieldWidgetConfig = {
   type: FieldListChildWidgetTypes;
@@ -483,9 +513,9 @@ const getFieldListConfig = ({
     formData && typeof formData === "object" && !Array.isArray(formData)
       ? (formData as Record<string, unknown>)[uiFieldObject.name]
       : undefined;
-  const requiredFields = getRequiredProperties({
-    schema: formSchema,
-    fieldName: uiFieldObject.name,
+  const requiredFields = getFieldListRequiredFields({
+    formSchema,
+    fieldListName: uiFieldObject.name,
   });
 
   return {

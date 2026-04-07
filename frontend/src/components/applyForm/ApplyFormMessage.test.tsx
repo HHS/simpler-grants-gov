@@ -18,6 +18,7 @@ describe("getWarningLinkText", () => {
       value: null,
       htmlField: "demo_text",
       definition: "/properties/demo_text",
+      fieldListLabel: "Contact People",
     };
 
     expect(getWarningLinkText(warning)).toBe("Demo Text is required");
@@ -31,6 +32,7 @@ describe("getWarningLinkText", () => {
       value: null,
       htmlField: "demo_text",
       definition: "/properties/demo_text",
+      fieldListLabel: "Contact People",
     };
 
     expect(getWarningLinkText(warning)).toBe(
@@ -47,6 +49,7 @@ describe("getWarningLinkText", () => {
       value: null,
       htmlField: "contact_people_test[1]--first_name",
       definition: "/properties/contact_people_test/items/properties/first_name",
+      fieldListLabel: "Contact People Test",
     };
 
     expect(getWarningLinkText(warning)).toBe(
@@ -63,6 +66,7 @@ describe("getWarningLinkText", () => {
       value: null,
       htmlField: "weird_field[2]--value",
       definition: "/properties/weird_field",
+      fieldListLabel: "",
     };
 
     expect(getWarningLinkText(warning)).toBe("Something is wrong (Entry 3)");
@@ -147,6 +151,7 @@ describe("ApplyFormMessage", () => {
         htmlField: "contact_people_test[1]--first_name",
         definition:
           "/properties/contact_people_test/items/properties/first_name",
+        fieldListLabel: "Contact People Test",
       },
       {
         field: "$.contact_people_test[2].first_name",
@@ -157,6 +162,7 @@ describe("ApplyFormMessage", () => {
         htmlField: "contact_people_test[2]--first_name",
         definition:
           "/properties/contact_people_test/items/properties/first_name",
+        fieldListLabel: "Contact People Test",
       },
     ];
 

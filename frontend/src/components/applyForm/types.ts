@@ -55,6 +55,7 @@ export type FormattedFormValidationWarning = FormValidationWarning & {
   htmlField?: string;
   formatted?: string;
   definition?: string | undefined;
+  fieldListLabel?: string;
 };
 
 export type WidgetTypes =
