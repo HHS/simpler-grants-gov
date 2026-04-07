@@ -69,7 +69,6 @@ const nestedWarningsForField = ({
       field: error.field,
       schema: fieldSchema,
     });
-
     return {
       ...error,
       formatted: formattedWithParent,
@@ -92,7 +91,6 @@ const validationWarningOverrides = (
     .replace("[] should be non-empty", `${formattedTitle} is required`)
     .replace("is a required property", "is required");
 };
-
 const formatValidationWarning = (
   fieldName: string,
   message: string,
@@ -100,7 +98,6 @@ const formatValidationWarning = (
 ): string => {
   return validationWarningOverrides(message, fieldName, fieldSchema?.title);
 };
-
 const findValidationErrors = (
   errors: FormValidationWarning[],
   definition: string | undefined,
