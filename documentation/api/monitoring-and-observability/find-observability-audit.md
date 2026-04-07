@@ -444,53 +444,6 @@ Average BM25 score contribution per field at each result position (1–10), usin
 
 Compares average field score contributions across the three scoring rules (`default`, `expanded`, `agency`). Useful for verifying that each rule emphasises the expected fields. Chart type: **bar** with `FACET scoring_rule`.
 
----
-
-### 9.2 Search Engagement & Usage Page — Saved Search Metrics
-
-Implemented in [#9357](https://github.com/HHS/simpler-grants-gov/issues/9357).
-
-**Data sources:**
-
-- `PageView` (NR Browser) — `search_param_savedSearch` is set as a custom attribute by [`analyticsUtil.ts`](../../../frontend/src/utils/analyticsUtil.ts) whenever a user selects a saved search from the dropdown. The value is the `saved_search_id` UUID. This is the saved search *execution* signal.
-- `Log` (NR APM) — POST to `/v1/users/<user_id>/saved-searches` is the saved search *creation* signal. `auth.user_id` and `saved_search_id` are logged on each request.
-
-**Attributes used:**
-
-| Attribute | Event type | Description |
-|-----------|------------|-------------|
-| `search_param_savedSearch` | `PageView` | UUID of the saved search selected by the user; empty string when no saved search is active |
-| `session` | `PageView` | NR Browser session identifier |
-| `auth.user_id` | `Log` | UUID of the authenticated user making the request |
-| `saved_search_id` | `Log` | UUID of the saved search created or modified |
-
-> **Note on activation rate:** "Saved Search Activation Rate" requires comparing created searches (`Log`) against executed searches (`PageView`). NRQL does not support cross-event-type joins, so panels 3a and 3b provide the two sides of that ratio as separate metrics. The rate is 3b ÷ 3a.
-
-**Panel: Saved Search Creation Volume**
-
-New saved searches created over time. Measures feature adoption.
-
-**Panel: Unique Users Saving Searches**
-
-Distinct users creating saved searches over time. Separates adoption breadth from power-user concentration.
-
-**Panel: Active Saved Searches per Day**
-
-Daily count of distinct saved search IDs executed. Measures usage growth independent of creation volume.
-
-**Panel: Saved Search Activation Rate (created — 3a)**
-
-Denominator for the activation rate: how many distinct saved searches were created in the last 30 days.
-
-**Panel: Saved Search Activation Rate (executed — 3b)**
-
-Numerator for the activation rate: how many distinct saved search IDs were actually run in the last 30 days.
-
-**Panel: Saved Search Stickiness**
-
-Average sessions per saved search — how often users return to the same saved search. Computed as `uniqueCount(session) / uniqueCount(search_param_savedSearch)`.
-
-> NR does not support median across dynamic groups in a single query. Average is the practical approximation here.
 
 ---
 
