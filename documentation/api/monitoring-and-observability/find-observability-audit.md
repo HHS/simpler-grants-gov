@@ -327,7 +327,7 @@ No Metabase dashboards exist for Find functionality. All existing queries focus 
 ### 7.1 Build a Dedicated Find Product Metrics Dashboard
 
 Model a new NR dashboard after the existing Apply Metrics dashboard, consolidating Find-specific metrics into a single product view. Suggested panels:
-
+ 
 - Search volume over time (from NR Logs: `request.url_rule = '/v1/opportunities/search'`)
 - Zero-result search rate (from NR Logs: `response.pagination.total_records = 0`)
 - Search result count distribution (bucketed)
@@ -349,6 +349,7 @@ TIMESERIES AUTO
 SELECT percentile(duration, 50, 95, 99) FROM Transaction
 WHERE name LIKE '%opportunity_search%' TIMESERIES AUTO
 ```
+
 
 ### 7.2 Add Find-Specific Alerts
 
@@ -388,3 +389,23 @@ OpenSearch has its own metrics (index health, query performance, shard stats) th
 4. **Add Find-Specific Alerts as Code** — Define and deploy NR alerts for search error rate, latency, zero-result rate, and opportunity view errors via the NR Terraform provider (alerts, unlike dashboards, are well-suited to code management).
 5. **Add Logging to Saved Opportunities/Searches Routes** — Extend `add_extra_data_to_current_request_logs` to save/unsave and saved search endpoints, following the existing pattern in `opportunity_routes.py`.
 6. **Dashboard Backups** — Script a periodic export of NR dashboard JSON to the repository for backup and diff history.
+
+
+## 9.2 Search Quality & Relevance Dashboard
+
+[**Panel: Search Click Through Rate**
+](https://onenr.io/0gR7dJAKWjo)
+Measures the percentage of searches where users click on a result, using UserAction data on search-result-link-* targets. It serves as the baseline indicator of search effectiveness, showing whether results are relevant and compelling enough for users to engage.
+
+[**Panel: Search Click Through Rate Trend**](https://onenr.io/0BQrgXmeNwZ)
+Shows how CTR changes over time, providing a view into whether search quality is improving or degrading. This is especially useful for evaluating the impact of releases, ranking changes, or UI updates.
+
+**[Panel: CTR With Filters vs Without Filters](https://onenr.io/0oR8dJZMaRG)**
+Compares CTR between searches where users apply filters and those where they do not. This helps determine whether filters are aiding discovery or adding friction. If CTR is higher with filters, they are likely helping users narrow down to relevant results; if lower, filters may be too restrictive, confusing, or not well-aligned with user needs.
+
+**[Panel: Saved Search CTR vs Manual Search CTR
+](https://onenr.io/02R5dJ13mwb)**
+Compares engagement between searches initiated from saved searches and those entered manually. This helps evaluate whether saved searches provide lasting value. Higher CTR for saved searches suggests users benefit from them, while lower CTR may indicate that saved queries become stale as available opportunities change over time.
+
+**[Panel: Top 3 Results CTR by Sort Type](https://onenr.io/0qQa17KOVQ1)**
+Measures the CTR for the top three search results, broken down by sort type, with the default (null) treated as relevance. Since most user interaction happens with top-ranked results, this panel helps assess ranking effectiveness. Higher CTR for relevance indicates strong ranking quality, while better performance from other sort types may suggest users prefer alternative ordering strategies.
