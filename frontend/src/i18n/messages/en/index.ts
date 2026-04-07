@@ -1853,6 +1853,11 @@ export const messages = {
       status: "Status",
       actions: "Actions",
     },
+    actionButtons: {
+      edit: "Edit",
+      copy: "Copy",
+      delete: "Delete",
+    },
   },
   Organizations: {
     errorMessage:

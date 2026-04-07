@@ -15,6 +15,8 @@ import {
   UserPrivilegesResponse,
 } from "src/types/userTypes";
 
+import { UserPrivilegeRequest } from "src/components/user/UserPrivileges";
+
 export const postLogout = async (token: string) => {
   const jwtAuthHeader = { "X-SGG-Token": token };
   return postUserLogout({ additionalHeaders: jwtAuthHeader });
@@ -72,7 +74,7 @@ export const getUserPrivileges = async (
 export const checkUserPrivilege = async (
   token: string,
   userId: string,
-  privilegeDefinition: UserPrivilegeDefinition,
+  privilegeDefinition: UserPrivilegeDefinition | UserPrivilegeRequest,
 ): Promise<undefined> => {
   const { privilege, resourceId, resourceType } = privilegeDefinition;
   const ssgToken = {
