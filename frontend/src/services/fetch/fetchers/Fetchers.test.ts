@@ -25,9 +25,11 @@ const fakeResponse = {
 const fetchMock = jest.fn().mockResolvedValue(fakeResponse);
 
 const createRequestBodyMock = jest.fn((obj) => JSON.stringify(obj));
-const getDefaultHeadersMock = jest.fn(() => ({
-  "Content-Type": "application/json",
-}));
+const getDefaultHeadersMock = jest.fn((_arg) =>
+  Promise.resolve({
+    "Content-Type": "application/json",
+  }),
+);
 const throwErrorMock = jest.fn();
 
 jest.mock("src/services/fetch/fetcherHelpers", () => ({
@@ -48,7 +50,7 @@ jest.mock("src/services/fetch/fetcherHelpers", () => ({
       _body,
     ),
   createRequestBody: (arg: unknown) => createRequestBodyMock(arg),
-  getDefaultHeaders: () => getDefaultHeadersMock(),
+  getDefaultHeaders: (arg: unknown) => getDefaultHeadersMock(arg),
   throwError: (...args: unknown[]): unknown => throwErrorMock(...args),
 }));
 
@@ -63,6 +65,7 @@ describe("requesterForEndpoint", () => {
     version: "some-strange-version",
     namespace: "sure",
     method: "POST",
+    requiresAuth: true,
   };
 
   let originalFetch: typeof global.fetch;
@@ -97,6 +100,10 @@ describe("requesterForEndpoint", () => {
       "1",
       { key: "value" },
     );
+    expect(getDefaultHeadersMock).toHaveBeenCalledWith({
+      addContentType: true,
+      requiresUserAuthToken: true,
+    });
     expect(fetchMock).toHaveBeenCalledWith("fakeurl/1", {
       body: JSON.stringify({ key: "value" }),
       headers: {

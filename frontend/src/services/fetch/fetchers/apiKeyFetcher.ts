@@ -5,6 +5,7 @@ import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { APIResponse } from "src/types/apiResponseTypes";
 
+// this is a duplicate - resolve with handleListApiKeys
 export const fetchApiKeys = async (): Promise<ApiKey[]> => {
   const session = await getSession();
   if (!session || !session.token) {

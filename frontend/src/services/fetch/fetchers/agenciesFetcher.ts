@@ -2,7 +2,6 @@
 
 import { ApiRequestError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import {
   fetchUserWithMethod,
   searchAgencies,
@@ -18,7 +17,7 @@ export const performAgencySearch = async ({
   keyword?: string;
   selectedStatuses?: string[];
 } = {}): Promise<RelevantAgencyRecord[]> => {
-  const requestBody: JSONRequestBody = {
+  const requestBody: Record<string, unknown> = {
     pagination: {
       page_offset: 1,
       page_size: 1500, // 969 agencies in prod as of 3/7/25

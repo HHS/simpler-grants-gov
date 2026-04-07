@@ -1,6 +1,5 @@
 "server only";
 
-import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import {
   fetchLocalUsers,
   fetchUserWithMethod,
@@ -39,7 +38,7 @@ export const getUserDetails = async (
 export const updateUserDetails = async (
   token: string,
   userId: string,
-  updates: JSONRequestBody,
+  updates: Record<string, unknown>,
 ): Promise<UserDetailProfile> => {
   const ssgToken = {
     "X-SGG-Token": token,
