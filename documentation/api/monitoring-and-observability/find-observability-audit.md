@@ -487,3 +487,12 @@ Compares engagement between searches initiated from saved searches and those ent
 
 **[Panel: Top 3 Results CTR by Sort Type](https://onenr.io/0qQa17KOVQ1)**
 Measures the CTR for the top three search results, broken down by sort type, with the default (null) treated as relevance. Since most user interaction happens with top-ranked results, this panel helps assess ranking effectiveness. Higher CTR for relevance indicates strong ranking quality, while better performance from other sort types may suggest users prefer alternative ordering strategies.
+
+[**Zero-Result Rate**](https://onenr.io/0oR8dJYL3RG)
+Shows the number or percentage of searches that return no results over time. It highlights gaps in search coverage and is a key indicator of whether users can successfully find content. Spikes may point to indexing issues, missing synonyms, overly strict filters, or sudden changes in user behavior.
+
+[**Result Count Distribution**](https://onenr.io/0BQ1dJ8KAjx)
+Shows how many results users typically receive per search, grouped into buckets (e.g., 0, 1–10, 10–100, 100+). This helps assess whether search is returning an appropriate range of results. Too many results may indicate weak relevance or a need for better ranking and filtering, while too few results suggest overly narrow matching or missing data.
+
+[**Top Queries Returning Zero Results**](https://onenr.io/0ERz8G57ZQr)
+Lists the most frequent search terms that return no results. This is a highly actionable view into user intent, helping identify missing content, gaps in indexing, or opportunities to add synonyms and improve search relevance.
