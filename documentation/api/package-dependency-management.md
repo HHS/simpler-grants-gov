@@ -111,10 +111,15 @@ the package version you want to upgrade to is allowed by the configuration in th
 
 ## Update Poetry itself
 
+### Locally
+
 As I always lose [the command](https://python-poetry.org/docs/cli/#self-update), for your convenience:
 ```shell
 poetry self update
 ```
+
+### For build
+Update the `ARG POETRY_VERSION` [line](https://github.com/HHS/simpler-grants-gov/blob/d48d969d68d41a04fa7b4f5052b93594c829feb8/api/docker-python-base#L8) in the Dockerfile for the [base image](#docker-base-image-updates) `api/docker-python-base`
 
 # Verification
 
@@ -169,9 +174,9 @@ for any breaking changes of features you may use
 To upgrade the Python version, make changes in the following places:
 1. Local Python version (see more about managing local Python versions in [development](./development.md))
 2. [Dockerfile](/api/docker-python-base)
-    search for the line `ARG PYTHON_VERSION` and `ARG PY_MM` - supported versions can be found on the official python: [releases page](https://www.python.org/downloads/) The PYTHON_VERSION should include the full version number <major.minor.patch> and the PY_MM should only include the <major.minor> format. 
-3. Build the new python base image from [github actions](https://github.com/HHS/simpler-grants-gov/actions/workflows/cd-python-base-image.yml) and retrieve the new image tag from the [github packages](https://github.com/HHS/simpler-grants-gov/pkgs/container/python-base-image) The image tag should have the github branch name and the commit hash associated with it. 
-2. Update the [Dockerfile](api/Dockerfile) base image tag on line #1. 
+    search for the line `ARG PYTHON_VERSION` and `ARG PY_MM` - supported versions can be found on the official python: [releases page](https://www.python.org/downloads/) The PYTHON_VERSION should include the full version number <major.minor.patch> and the PY_MM should only include the <major.minor> format.
+3. Build the new python base image from [github actions](https://github.com/HHS/simpler-grants-gov/actions/workflows/cd-python-base-image.yml) and retrieve the new image tag from the [github packages](https://github.com/HHS/simpler-grants-gov/pkgs/container/python-base-image) The image tag should have the github branch name and the commit hash associated with it.
+2. Update the [Dockerfile](api/Dockerfile) base image tag on line #1.
 4. [pyproject.toml](/api/pyproject.toml)
     search for the line
     ```toml
@@ -179,8 +184,8 @@ To upgrade the Python version, make changes in the following places:
     python = "~3.12"
     ```
    Then run `poetry lock --no-update` to update the [poetry.lock](/api/poetry.lock) file.
-5. Ensure linters and formatters are passing by running the commands below in the `api` directory. 
+5. Ensure linters and formatters are passing by running the commands below in the `api` directory.
 ```
-make format 
+make format
 make lint
 ```
