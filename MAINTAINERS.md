@@ -42,8 +42,8 @@ This is a list of maintainers for this project. Team members include:
 * Julius Chang
 * Sarah Knopp
 * Billy Daly
-* Eric Valenzuela
-* David Dudas
+* Bryan Thompson
+* Jeff Crichlake
 
 ## Product and Program Management
 

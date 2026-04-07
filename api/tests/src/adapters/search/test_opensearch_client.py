@@ -246,6 +246,21 @@ def test_cleanup_old_indices(search_client):
     assert search_client.index_exists(index_name_4) is True
 
 
+def test_get(search_client, generic_index):
+    records = [
+        {"id": 1, "title": "Green Eggs & Ham", "notes": "why are the eggs green?"},
+        {"id": 2, "title": "The Cat in the Hat", "notes": "silly cat wears a hat"},
+        {"id": 3, "title": "One Fish, Two Fish, Red Fish, Blue Fish", "notes": "fish"},
+    ]
+
+    search_client.bulk_upsert(generic_index, records, primary_key_field="id")
+
+    assert search_client.get(generic_index, 1) == records[0]
+    assert search_client.get(generic_index, 2) == records[1]
+    assert search_client.get(generic_index, 3) == records[2]
+    assert search_client.get(generic_index, 121212121) is None
+
+
 def test_search_returns_expected_metadata(search_client, generic_index):
 
     search_client.bulk_upsert(
@@ -259,35 +274,44 @@ def test_search_returns_expected_metadata(search_client, generic_index):
         search_query={"query": {"match_all": {}}},
     )
 
-    # Validate top-level attributes exist
-    assert hasattr(response, "took_ms")
-    assert hasattr(response, "timed_out")
-    assert hasattr(response, "shards_failed")
-    assert hasattr(response, "total_records")
-
-    assert hasattr(response, "score_stats")
-
-    # High-level metadata checks
+    # Performance metadata
     assert isinstance(response.took_ms, int)
     assert response.took_ms >= 0
-
-    assert isinstance(response.timed_out, bool)
     assert response.timed_out is False
-
-    assert isinstance(response.shards_failed, int)
     assert response.shards_failed == 0
-
-    assert isinstance(response.total_records, int)
     assert response.total_records == 3
 
-    # Validate score_stats keys exist
+    # Relevance metadata
+    assert isinstance(response.max_score, float)
+    assert response.total_relation == "eq"
+
+    # Score stats
     score_stats = response.score_stats
-    expected_keys = {
-        "search.score_min",
-        "search.score_max",
-        "search.score_mean",
-        "search.score_stdev",
-    }
-    for key in expected_keys:
+    for key in ("search.score_min", "search.score_max", "search.score_mean", "search.score_stdev"):
         assert key in score_stats
         assert score_stats[key] is not None
+
+
+def test_search_agg_overflow(search_client, generic_index):
+    # 3 records with distinct authors
+    search_client.bulk_upsert(
+        generic_index,
+        [WINTERBORN_LEGACY, WINTER, CALL_OF_WINTER],
+        primary_key_field="id",
+    )
+
+    # Aggregate on author with size=1 to force overflow
+    response = search_client.search(
+        index_name=generic_index,
+        search_query={
+            "query": {"match_all": {}},
+            "aggs": {
+                "author": {
+                    "terms": {"field": "author.keyword", "size": 1},
+                },
+            },
+        },
+    )
+
+    assert "author" in response.agg_overflow
+    assert response.agg_overflow["author"] > 0

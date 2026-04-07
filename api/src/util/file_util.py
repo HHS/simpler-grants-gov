@@ -110,7 +110,7 @@ def pre_sign_file_location(file_path: str, s3_config: S3Config | None = None) ->
     if s3_config.s3_endpoint_url:
         # Only relevant when local, due to docker path issues
         pre_sign_file_loc = pre_sign_file_loc.replace(
-            s3_config.s3_endpoint_url, "http://localhost:4566"
+            s3_config.s3_endpoint_url, "http://localhost:9090"
         )
 
     return pre_sign_file_loc
@@ -120,7 +120,7 @@ def get_file_length_bytes(path: str) -> int:
     if is_s3_path(path):
         s3_client = (
             get_s3_client()
-        )  # from our aws utils - handles some of the weird localstack stuff
+        )  # from our aws utils - handles hitting our s3mock if run locally
 
         bucket, key = split_s3_url(path)
         file_metadata = s3_client.head_object(Bucket=bucket, Key=key)

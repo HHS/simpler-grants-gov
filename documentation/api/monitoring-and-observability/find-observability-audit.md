@@ -375,6 +375,85 @@ OpenSearch has its own metrics (index health, query performance, shard stats) th
 
 ---
 
+## 9. Find Metrics Dashboard — NRQL Query Reference
+
+This section documents the NRQL queries used in each page of the **Find Metrics** dashboard. All queries target `environment = 'prod'` and the `Log` event type unless otherwise noted. Attributes are logged via `add_extra_data_to_current_request_logs` in the API layer and forwarded to New Relic Logs via the FluentBit sidecar.
+
+---
+
+### 9.1 OpenSearch Health Page
+
+Implemented in [#9167](https://github.com/HHS/simpler-grants-gov/issues/9167). Requires instrumentation from [#9147](https://github.com/HHS/simpler-grants-gov/issues/9147), [#9149](https://github.com/HHS/simpler-grants-gov/issues/9149), and [#9150](https://github.com/HHS/simpler-grants-gov/issues/9150).
+
+**Data source:** `Log` events where `request.url_rule = '/v1/opportunities/search'`
+
+**Attributes used:**
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `search.took_ms` | int | Time OpenSearch spent executing the query (ms) |
+| `search.timed_out` | bool | Whether OpenSearch returned a partial result due to timeout |
+| `search.shards_failed` | int | Number of shards that failed during the query |
+| `search.max_score` | float | Relevancy score of the top result; `0` for browse-mode (no query text) |
+| `search.scoring_rule` | string | Active scoring profile: `default`, `expanded`, or `agency` |
+
+**Panel: Search Latency — p50 / p95 / p99**
+```sql
+SELECT percentile(search.took_ms, 50, 95, 99)
+FROM Log
+WHERE request.url_rule = '/v1/opportunities/search'
+  AND environment = 'prod'
+TIMESERIES AUTO
+SINCE 7 days ago
+```
+
+**Panel: Timeout Rate**
+```sql
+SELECT percentage(count(*), WHERE search.timed_out IS TRUE) AS 'Timeout Rate %'
+FROM Log
+WHERE request.url_rule = '/v1/opportunities/search'
+  AND environment = 'prod'
+TIMESERIES AUTO
+SINCE 7 days ago
+```
+
+**Panel: Shard Failure Rate**
+```sql
+SELECT percentage(count(*), WHERE search.shards_failed > 0) AS 'Shard Failure Rate %'
+FROM Log
+WHERE request.url_rule = '/v1/opportunities/search'
+  AND environment = 'prod'
+TIMESERIES AUTO
+SINCE 7 days ago
+```
+
+**Panel: Max Score Trend**
+```sql
+SELECT average(search.max_score), percentile(search.max_score, 50, 95)
+FROM Log
+WHERE request.url_rule = '/v1/opportunities/search'
+  AND environment = 'prod'
+  AND search.max_score > 0
+TIMESERIES AUTO
+SINCE 7 days ago
+```
+
+> `search.max_score = 0` for browse-mode searches (no query text). The `> 0` filter excludes these so the chart reflects only scored result sets.
+
+**Panel: Max Score by Scoring Rule**
+```sql
+SELECT average(search.max_score)
+FROM Log
+WHERE request.url_rule = '/v1/opportunities/search'
+  AND environment = 'prod'
+  AND search.max_score > 0
+FACET search.scoring_rule
+TIMESERIES AUTO
+SINCE 7 days ago
+```
+
+---
+
 ## 8. Next Steps
 
 ### Existing Companion Tickets
