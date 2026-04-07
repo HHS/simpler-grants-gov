@@ -124,7 +124,7 @@ def _setup_agency_and_users(db_session: db.Session) -> Agency:
         ).build()
         logger.info("Created user: ar_budget_officer (Grantor Budget Officer)")
 
-    logger.info(f"✓ Created 1 agency and 4 users with different AR roles")
+    logger.info("✓ Created 1 agency and 4 users with different AR roles")
     logger.info("")
 
     return agency
