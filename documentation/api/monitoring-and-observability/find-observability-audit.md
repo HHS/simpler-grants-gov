@@ -471,11 +471,21 @@ SINCE 7 days ago
 
 ## 9.2 Search Quality & Relevance Dashboard
 
-[**Zero-Result Rate**](https://onenr.io/0oR8dJYL3RG)
-Shows the number or percentage of searches that return no results over time. It highlights gaps in search coverage and is a key indicator of whether users can successfully find content. Spikes may point to indexing issues, missing synonyms, overly strict filters, or sudden changes in user behavior.
+**[OpenSearch Query Latency**
+](https://onenr.io/01wZ10vJLQ6)
+Tracks the time each search query takes at the engine level (using search.took_ms) and reports the p50, p95, and p99 percentiles. This isolates OpenSearch performance from API or application code latency, helping identify whether slow searches are caused by the search engine itself or by upstream processing.
 
-[**Result Count Distribution**](https://onenr.io/0BQ1dJ8KAjx)
-Shows how many results users typically receive per search, grouped into buckets (e.g., 0, 1–10, 10–100, 100+). This helps assess whether search is returning an appropriate range of results. Too many results may indicate weak relevance or a need for better ranking and filtering, while too few results suggest overly narrow matching or missing data.
+[**Score Distribution Trends**](https://onenr.io/0Vwg7mYNOwJ)
+Shows how the minimum, mean, and maximum search scores evolve over time. Sudden shifts in these metrics can indicate changes in the index, ranking configuration, or scoring rules that affect result relevance.
 
-[**Top Queries Returning Zero Results**](https://onenr.io/0ERz8G57ZQr)
-Lists the most frequent search terms that return no results. This is a highly actionable view into user intent, helping identify missing content, gaps in indexing, or opportunities to add synonyms and improve search relevance.
+**[Score Distribution by Scoring Rule**
+](https://onenr.io/0BR6dJ6VbQO)
+Breaks down average search scores by scoring rule types such as DEFAULT, EXPANDED, and AGENCY. This allows comparison of scoring behavior across rules and helps detect anomalies after updates to scoring logic.
+
+**[Top Contributing Fields by Position**
+](https://onenr.io/0nQxXGP75QV)
+Uses data from `SearchResultExplanation` events to show which fields are driving the ranking for each result position. This panel is essential for tuning field weights and understanding which attributes most influence search relevance.
+
+**[Average Field Score Contribution by Scoring Rule**
+](https://onenr.io/0bRK10P49QE)
+Uses `SearchResultExplanation` events and displays how much each field contributes to scores across different scoring rules. This supports A/B testing of scoring changes and helps optimize the ranking algorithm for better search quality.
