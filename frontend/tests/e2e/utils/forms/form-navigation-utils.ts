@@ -20,9 +20,10 @@ export function getFormLink(page: Page, formName: string): Locator {
  */
 export async function openForm(
   page: Page,
-  formMatcher: string,
+  formMatcher: string | RegExp, // <- string | RegExp
 ): Promise<boolean> {
-  const formNameRegex = new RegExp(formMatcher, "i");
+  const formNameRegex =
+    formMatcher instanceof RegExp ? formMatcher : new RegExp(formMatcher, "i"); // <- guard
   const formsTable = page.locator(".simpler-application-forms-table").first();
   await formsTable.waitFor({ state: "visible", timeout: 60000 });
 

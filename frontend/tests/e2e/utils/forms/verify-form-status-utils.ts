@@ -19,18 +19,20 @@ export type FormStatus = "complete" | "incomplete";
 export async function assertFormRowStatus(
   page: Page,
   status: FormStatus,
-  formName: string,
+  formName: string | RegExp, // ← string | RegExp
 ): Promise<void> {
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await page.waitForTimeout(5000);
-
-  const escapedFormName = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const flexiblePattern = escapedFormName
-    .replace(/\s+/g, "\\s*")
-    .replace(/-/g, "-?");
+  // ...
+  const rowPattern =
+    formName instanceof RegExp
+      ? formName
+      : (() => {
+          const escaped = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const flexible = escaped.replace(/\s+/g, "\\s*").replace(/-/g, "-?");
+          return new RegExp(flexible, "i");
+        })();
   const formRow = page
     .locator("tr", {
-      hasText: new RegExp(flexiblePattern, "i"),
+      hasText: rowPattern, // ← use rowPattern
     })
     .filter({
       has: page.locator('a[href*="/form/"]'),
@@ -57,7 +59,7 @@ export async function assertFormRowStatus(
 export async function verifyFormStatusOnApplication(
   page: Page,
   status: FormStatus,
-  formName: string,
+  formName: string | RegExp,
   applicationUrl: string,
 ): Promise<void> {
   await gotoWithRetry(page, applicationUrl, { waitUntil: "domcontentloaded" });
