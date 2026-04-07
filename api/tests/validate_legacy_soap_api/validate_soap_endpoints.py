@@ -117,9 +117,23 @@ def get_grantors_get_submission_list_expanded_request_body() -> bytes:
     """.encode()
 
 
+def get_grantors_get_confirm_application_delivery_body() -> bytes:
+    return """
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:ConfirmApplicationDeliveryRequest>
+        <gran:GrantsGovTrackingNumber>GRANT80000000</gran:GrantsGovTrackingNumber>
+        </agen:ConfirmApplicationDeliveryRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """.encode()
+
+
 REQUEST_BODY = {
     "GetSubmissionListExpandedRequest": get_grantors_get_submission_list_expanded_request_body(),
     "GetApplicationZipRequest": get_grantors_get_application_zip_request_body(),
+    "ConfirmApplicationDeliveryRequest": get_grantors_get_confirm_application_delivery_body(),
 }
 
 
@@ -169,7 +183,6 @@ def validate_response_xml(
         raise Exception("Envelope not found")
     xml_tree = etree.fromstring(simpler_match.group(0))
     ns = {
-        None: "http://apply.grants.gov/system/GrantsCommonElements-V1.0",
         "xop": "http://www.w3.org/2004/08/xop/include",
         "soap": "http://schemas.xmlsoap.org/soap/envelope/",
         "ns2": "http://apply.grants.gov/services/AgencyWebServices-V2.0",
@@ -203,18 +216,7 @@ def validate_response_xml(
     schema_validator.assertValid(operation_element)
 
 
-def validate_grantors_get_application_zip_request(soap_context: ValidateSoapContext) -> None:
-    resp = get_response(soap_context, "GetApplicationZipRequest")
-    assert resp.status_code == 200
-    validate_response_xml(resp.content, "GetApplicationZipResponse", soap_context)
-    print("Validation: GetApplicationZip is validated")
-
-
-def validate_grantors_get_submission_list_expanded_request(
-    soap_context: ValidateSoapContext,
-) -> None:
-    resp = get_response(soap_context, "GetSubmissionListExpandedRequest")
-    assert resp.status_code == 200
+def clean_xml_namespaces(content: bytes) -> bytes:
     # The incoming xml namespaces conflict with the wsdl settings.
     # According to the wsdl, due to the elementFormDetail = qualified,
     # the default namespace for elements without an explicit namespace should be associated with the
@@ -225,9 +227,36 @@ def validate_grantors_get_submission_list_expanded_request(
     wrong_ns = b'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0"'
     # The expected (correct) namespace
     right_ns = b'xmlns="http://apply.grants.gov/services/AgencyWebServices-V2.0"'
-    fixed_bytes = resp.content.replace(wrong_ns, right_ns)
+    return content.replace(wrong_ns, right_ns)
+
+
+def validate_grantors_get_application_zip_request(soap_context: ValidateSoapContext) -> None:
+    resp = get_response(soap_context, "GetApplicationZipRequest")
+    assert resp.status_code == 200
+    # The xml namespaces here do not need to be cleaned because there are no
+    # blank namepsaces to default to the wrong url here
+    validate_response_xml(resp.content, "GetApplicationZipResponse", soap_context)
+    print("Validation: GetApplicationZip is validated")
+
+
+def validate_grantors_get_submission_list_expanded_request(
+    soap_context: ValidateSoapContext,
+) -> None:
+    resp = get_response(soap_context, "GetSubmissionListExpandedRequest")
+    assert resp.status_code == 200
+    fixed_bytes = clean_xml_namespaces(resp.content)
     validate_response_xml(fixed_bytes, "GetSubmissionListExpandedResponse", soap_context)
     print("Validation: GetSubmissionListExpanded is validated")
+
+
+def validate_confirm_application_delivery_request(
+    soap_context: ValidateSoapContext,
+) -> None:
+    resp = get_response(soap_context, "ConfirmApplicationDeliveryRequest")
+    assert resp.status_code == 200
+    fixed_bytes = clean_xml_namespaces(resp.content)
+    validate_response_xml(fixed_bytes, "ConfirmApplicationDeliveryResponse", soap_context)
+    print("Validation: ConfirmApplicationDelivery is validated")
 
 
 def get_credentials(stack: ExitStack) -> tuple:
@@ -255,6 +284,7 @@ def get_credentials(stack: ExitStack) -> tuple:
 VALIDATIONS = [
     validate_grantors_get_application_zip_request,
     validate_grantors_get_submission_list_expanded_request,
+    validate_confirm_application_delivery_request,
 ]
 
 

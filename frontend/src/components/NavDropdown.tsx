@@ -87,12 +87,7 @@ export default function NavDropdown({
           "text-bold": true,
         })}
       />
-      <Menu
-        id={linkText}
-        items={menuItems}
-        isOpen={isOpen}
-        className="margin-top-05"
-      />
+      <Menu id={linkText} items={menuItems} isOpen={isOpen} />
     </>
   );
 }

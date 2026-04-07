@@ -22,17 +22,17 @@ class UpdateApplicationInfoRequest(GrantsGovTrackingNumberRequiredSchema):
 
 
 class SaveAgencyNotesResult(BaseSOAPSchema):
-    success: str = Field(alias="Success")
+    success: str | None = Field(default=None, alias="Success")
     error_message: str | None = Field(default=None, alias="ErrorMessage")
 
 
 class AssignAgencyTrackingNumberResult(BaseSOAPSchema):
-    success: str = Field(alias="Success")
+    success: str | None = Field(default=None, alias="Success")
     error_message: str | None = Field(default=None, alias="ErrorMessage")
 
 
 class UpdateApplicationInfoResponse(GrantsGovTrackingNumberRequiredSchema):
-    success: str = Field(alias="Success")
+    success: str | None = Field(default=None, alias="Success")
     assign_agency_tracking_number_result: AssignAgencyTrackingNumberResult | None = Field(
         default=None, alias="AssignAgencyTrackingNumberResult"
     )
