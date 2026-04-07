@@ -469,23 +469,24 @@ SINCE 7 days ago
 
 ---
 
-## 9.2 Search Quality & Relevance Dashboard
+## 9.3 Search Engagement & Usage Dashboard
 
-**[OpenSearch Query Latency**
-](https://onenr.io/01wZ10vJLQ6)
-Tracks the time each search query takes at the engine level (using search.took_ms) and reports the p50, p95, and p99 percentiles. This isolates OpenSearch performance from API or application code latency, helping identify whether slow searches are caused by the search engine itself or by upstream processing.
+**[Tools Usage Distribution**
+](https://onenr.io/0ERP10N9ajW)
+Shows the percentage of search sessions where users interact with each available search tool. This helps identify which tools are most relied on, which may need better visibility, or which are underused and potentially confusing for users.
 
-[**Score Distribution Trends**](https://onenr.io/0Vwg7mYNOwJ)
-Shows how the minimum, mean, and maximum search scores evolve over time. Sudden shifts in these metrics can indicate changes in the index, ranking configuration, or scoring rules that affect result relevance.
+**[Most Frequent Search Terms**
+](https://onenr.io/0vwBd0ekVjp)
+Lists the top search keywords by count and by unique sessions, providing insight into what users are searching for most often. This information can guide improvements such as promoted filters, synonym additions, or content coverage enhancements.
 
-**[Score Distribution by Scoring Rule**
-](https://onenr.io/0BR6dJ6VbQO)
-Breaks down average search scores by scoring rule types such as DEFAULT, EXPANDED, and AGENCY. This allows comparison of scoring behavior across rules and helps detect anomalies after updates to scoring logic.
+[Sessions by Search Page Number
+](https://onenr.io/0LRE10xpeRa)
+Tracks how far users go into paginated search results. Frequent navigation beyond page 1 indicates that users may not be finding relevant results immediately, highlighting potential ranking or filtering issues.
 
-**[Top Contributing Fields by Position**
-](https://onenr.io/0nQxXGP75QV)
-Uses data from `SearchResultExplanation` events to show which fields are driving the ranking for each result position. This panel is essential for tuning field weights and understanding which attributes most influence search relevance.
+**[Search Usage per Session**
+](https://onenr.io/0dQenebBowe)
+Measures the median, average, and maximum number of searches performed within a single user session. Higher averages suggest users need multiple attempts to find what they want, signaling potential usability or relevance concerns.
 
-**[Average Field Score Contribution by Scoring Rule**
-](https://onenr.io/0bRK10P49QE)
-Uses `SearchResultExplanation` events and displays how much each field contributes to scores across different scoring rules. This supports A/B testing of scoring changes and helps optimize the ranking algorithm for better search quality.
+**[Search Usage per Session Trend**
+](https://onenr.io/07wkeLga3jL)
+Tracks how the number of searches per session changes over time. A downward trend may indicate search improvements, while an upward trend could signal increased user frustration or more complex search needs emerging.
