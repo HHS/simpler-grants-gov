@@ -377,7 +377,7 @@ OpenSearch has its own metrics (index health, query performance, shard stats) th
 
 ## 9. Find Metrics Dashboard — NRQL Query Reference
 
-This section documents the NRQL queries used in each page of the **Find Metrics** dashboard. All queries target `environment = 'prod'` and the `Log` event type unless otherwise noted. Attributes are logged via `add_extra_data_to_current_request_logs` in the API layer and forwarded to New Relic Logs via the FluentBit sidecar.
+This section documents the NRQL queries used in each page of the **Find Metrics** dashboard. Queries use the `{{environment}}` dashboard template variable so they filter to whichever environment is selected in the dashboard UI. Attributes on `Log` events are logged via `add_extra_data_to_current_request_logs` in the API layer and forwarded to New Relic Logs via the FluentBit sidecar.
 
 ---
 
@@ -385,7 +385,7 @@ This section documents the NRQL queries used in each page of the **Find Metrics*
 
 Implemented in [#9167](https://github.com/HHS/simpler-grants-gov/issues/9167) and [#9393](https://github.com/HHS/simpler-grants-gov/issues/9393). Requires instrumentation from [#9147](https://github.com/HHS/simpler-grants-gov/issues/9147), [#9149](https://github.com/HHS/simpler-grants-gov/issues/9149), and [#9150](https://github.com/HHS/simpler-grants-gov/issues/9150).
 
-Most panels use `Log` events where `request.url_rule = '/v1/opportunities/search'`. Panels 8–9 use `SearchResultExplanation` custom APM events emitted by [`opensearch_explain.py`](../../../api/src/adapters/search/opensearch_explain.py) when `OPENSEARCH_EXPLAIN_ENABLED=true`. Custom events do not carry an `environment` attribute, so they are scoped to production using `appName = 'api-prod'` (set in [`newrelic.ini`](../../../api/newrelic.ini)).
+Most panels use `Log` events where `request.url_rule = '/v1/opportunities/search'`. Panels 8–9 use `SearchResultExplanation` custom APM events emitted by [`opensearch_explain.py`](../../../api/src/adapters/search/opensearch_explain.py) when `OPENSEARCH_EXPLAIN_ENABLED=true`. Custom events do not carry an `environment` attribute and NR does not support template variable interpolation inside string literals, so these panels are hardcoded to `appName = 'api-prod'` (app names are set per environment in [`newrelic.ini`](../../../api/newrelic.ini)).
 
 **Attributes used:**
 
@@ -403,41 +403,53 @@ Most panels use `Log` events where `request.url_rule = '/v1/opportunities/search
 | `scoring_rule` | `SearchResultExplanation` | Active scoring profile: `default`, `expanded`, or `agency` |
 
 **Panel: Search Latency — p50 / p95 / p99**
+
+Time OpenSearch spent executing each query (the `took` field from the response, in milliseconds). Useful for distinguishing whether API latency originates in OpenSearch or in application code.
+
 ```sql
 SELECT percentile(search.took_ms, 50, 95, 99)
 FROM Log
 WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
+  AND environment = {{environment}}
 TIMESERIES AUTO
 SINCE 7 days ago
 ```
 
 **Panel: Timeout Rate**
+
+Percentage of searches where OpenSearch returned a partial result due to hitting its internal query timeout. Any non-zero value means users may be seeing incomplete results.
+
 ```sql
 SELECT percentage(count(*), WHERE search.timed_out IS TRUE) AS 'Timeout Rate %'
 FROM Log
 WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
+  AND environment = {{environment}}
 TIMESERIES AUTO
 SINCE 7 days ago
 ```
 
 **Panel: Shard Failure Rate**
+
+Percentage of searches where one or more shards failed to respond. Shard failures indicate infrastructure-level problems and may silently reduce result quality.
+
 ```sql
 SELECT percentage(count(*), WHERE search.shards_failed > 0) AS 'Shard Failure Rate %'
 FROM Log
 WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
+  AND environment = {{environment}}
 TIMESERIES AUTO
 SINCE 7 days ago
 ```
 
 **Panel: Max Score Trend**
+
+The relevancy score of the top result over time. A declining trend may indicate index or scoring degradation. Browse-mode searches (no query text) are excluded since they produce no relevancy scores.
+
 ```sql
 SELECT average(search.max_score), percentile(search.max_score, 50, 95)
 FROM Log
 WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
+  AND environment = {{environment}}
   AND search.max_score > 0
 TIMESERIES AUTO
 SINCE 7 days ago
@@ -446,11 +458,14 @@ SINCE 7 days ago
 > `search.max_score = 0` for browse-mode searches (no query text). The `> 0` filter excludes these so the chart reflects only scored result sets.
 
 **Panel: Max Score by Scoring Rule**
+
+Max score trend broken out by active scoring profile. Useful for comparing how aggressively each rule scores its top result.
+
 ```sql
 SELECT average(search.max_score)
 FROM Log
 WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
+  AND environment = {{environment}}
   AND search.max_score > 0
 FACET search.scoring_rule
 TIMESERIES AUTO
@@ -465,7 +480,7 @@ Flags searches where OpenSearch returned an approximate hit count (`gte`) rather
 SELECT percentage(count(*), WHERE search.total_relation = 'gte') AS 'Approx. Result Count Rate %'
 FROM Log
 WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
+  AND environment = {{environment}}
 TIMESERIES AUTO
 SINCE 7 days ago
 ```
@@ -480,7 +495,7 @@ Tracks searches where the agency facet aggregation was silently truncated. The a
 SELECT count(*) AS 'Searches with Truncated Agency Aggregation'
 FROM Log
 WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
+  AND environment = {{environment}}
   AND search.agg_overflow.agency > 0
 TIMESERIES AUTO
 SINCE 7 days ago
@@ -491,11 +506,11 @@ SINCE 7 days ago
 Shows the average BM25 score contribution per field at each result position (1–10), using `SearchResultExplanation` events. Helps identify whether high-ranked results are being driven by the expected fields (e.g. `agency_code` for agency searches, `opportunity_title` for title searches). Chart type: **bar** with `FACET position`.
 
 ```sql
-SELECT average(field_score.agency_code) AS 'agency_code',
+SELECT (average(field_score.agency_code) + average(field_score.agency_code.keyword)) AS 'agency_code',
+       (average(field_score.top_level_agency_code) + average(field_score.top_level_agency_code.keyword)) AS 'top_level_agency_code',
+       (average(field_score.opportunity_number) + average(field_score.opportunity_number.keyword)) AS 'opportunity_number',
        average(field_score.opportunity_title) AS 'opportunity_title',
-       average(field_score.opportunity_number) AS 'opportunity_number',
-       average(field_score.agency_name) AS 'agency_name',
-       average(field_score.top_level_agency_code) AS 'top_level_agency_code'
+       average(field_score.agency_name) AS 'agency_name'
 FROM SearchResultExplanation
 WHERE appName = 'api-prod'
 FACET position
@@ -510,11 +525,11 @@ LIMIT 10
 Compares average field score contributions across the three scoring rules (`default`, `expanded`, `agency`). Useful for verifying that each scoring rule is emphasising the expected fields. Chart type: **bar** with `FACET scoring_rule`.
 
 ```sql
-SELECT average(field_score.agency_code) AS 'agency_code',
+SELECT (average(field_score.agency_code) + average(field_score.agency_code.keyword)) AS 'agency_code',
+       (average(field_score.top_level_agency_code) + average(field_score.top_level_agency_code.keyword)) AS 'top_level_agency_code',
+       (average(field_score.opportunity_number) + average(field_score.opportunity_number.keyword)) AS 'opportunity_number',
        average(field_score.opportunity_title) AS 'opportunity_title',
-       average(field_score.opportunity_number) AS 'opportunity_number',
-       average(field_score.agency_name) AS 'agency_name',
-       average(field_score.top_level_agency_code) AS 'top_level_agency_code'
+       average(field_score.agency_name) AS 'agency_name'
 FROM SearchResultExplanation
 WHERE appName = 'api-prod'
 FACET scoring_rule
