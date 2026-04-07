@@ -10,7 +10,7 @@ import {
 } from "./NotificationTypes";
 import { OrganizationPreferenceSection } from "./OrganizationPreferenceSection";
 
-interface NotificationsPageContentProps {
+export interface NotificationsPageContentProps {
   pageHeading: string;
   fetchErrorMessage: string;
   managePreferencesTitle: string;

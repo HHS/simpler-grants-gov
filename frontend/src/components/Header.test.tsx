@@ -428,6 +428,25 @@ describe("Header", () => {
       expect(screen.getByText("logout")).toBeInTheDocument();
     });
 
+    it("Account dropdown contains Notifications and Sign out when opened", async () => {
+      mockUseUser.mockReturnValue({
+        user: { token: "faketoken" },
+        hasBeenLoggedOut: false,
+        resetHasBeenLoggedOut: jest.fn(),
+      });
+      const user = userEvent.setup();
+      render(<Header {...props} />);
+
+      const accountButton = screen.getByRole("button", { name: "account" });
+      await user.click(accountButton);
+
+      expect(accountButton).toHaveAttribute("aria-expanded", "true");
+      const settingsLink = screen.getByRole("link", { name: "settings" });
+      expect(settingsLink).toBeInTheDocument();
+      expect(settingsLink).toHaveAttribute("href", "/settings");
+      expect(screen.getByText("logout")).toBeInTheDocument();
+    });
+
     it("does not display test application link if not for a test application user", async () => {
       mockUseUser.mockReturnValue({
         user: { token: "faketoken" },
