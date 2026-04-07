@@ -2,6 +2,8 @@ import logging
 import random
 import uuid
 
+from sqlalchemy import select
+
 import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import (
@@ -10,24 +12,25 @@ from src.constants.lookup_constants import (
     AwardRecommendationType,
     AwardSelectionMethod,
 )
+from src.constants.static_role_values import (
+    AWARD_RECOMMENDATION_USER,
+    GRANTOR_BUDGET_OFFICER,
+    GRANTOR_PROGRAM_OFFICER,
+)
 from src.db.models.agency_models import Agency
 from src.db.models.award_recommendation_models import AwardRecommendation
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
+from src.db.models.user_models import User
+from tests.lib.seed_data_utils import UserBuilder
 from tests.lib.seed_orgs_and_users import _add_application
+from tests.src.db.models.factories import AgencyFactory
 
 logger = logging.getLogger(__name__)
 
 
-def _build_award_recommendations(
-    db_session: db.Session, agencies: list[Agency] | None = None
-) -> None:
+def _build_award_recommendations(db_session: db.Session) -> None:
     """
     Create award recommendations with application submissions for testing.
-
-    Args:
-        db_session: Database session
-        agencies: Optional list of agencies to associate opportunities with for auth.
-                  If None, opportunities will be created without specific agency associations.
 
     This creates various scenarios:
     - Award recommendations in different statuses (draft, in_review, approved)
@@ -37,7 +40,8 @@ def _build_award_recommendations(
     """
     logger.info("Creating award recommendations with application submissions")
 
-    competition, applications = _create_competition_with_accepted_applications(db_session, agencies)
+    agency = _setup_agency_and_users(db_session)
+    competition, applications = _create_competition_with_accepted_applications(db_session, agency)
 
     logger.info(
         f"Processing opportunity {competition.opportunity.opportunity_number} with {len(applications)} accepted applications"
@@ -45,28 +49,94 @@ def _build_award_recommendations(
 
     award_recommendations_created = []
     award_recommendations_created.extend(
-        _create_draft_scenario(db_session, competition, applications)
+        _create_draft_scenario(db_session, competition, applications[:10])
     )
     award_recommendations_created.extend(
-        _create_in_review_scenario(db_session, competition, applications)
+        _create_in_review_scenario(db_session, competition, applications[10:20])
     )
     award_recommendations_created.extend(
-        _create_approved_scenario(db_session, competition, applications)
+        _create_approved_scenario(db_session, competition, applications[15:20])
     )
     award_recommendations_created.extend(
-        _create_exception_scenario(db_session, competition, applications)
+        _create_exception_scenario(db_session, competition, applications[20:21])
     )
     award_recommendations_created.extend(
-        _create_static_scenario(db_session, competition, applications)
+        _create_static_scenario(db_session, competition, applications[:10])
     )
 
     _log_summary(award_recommendations_created)
+
+
+def _setup_agency_and_users(db_session: db.Session) -> Agency:
+    """Create agency and users with award recommendation roles for testing."""
+    logger.info("")
+    logger.info("Setting up agency and users for award recommendations...")
+
+    agency_id = uuid.UUID("550e8400-e29b-41d4-a716-446655440000")
+    existing_agency = db_session.execute(
+        select(Agency).where(Agency.agency_id == agency_id)
+    ).scalar_one_or_none()
+
+    if existing_agency:
+        logger.info(f"Using existing agency: {existing_agency.agency_code}")
+        agency = existing_agency
+    else:
+        agency = AgencyFactory.create(
+            agency_id=agency_id,
+            agency_code="AR-TEST",
+            agency_name="Award Recommendation Test Agency",
+        )
+        logger.info(f"Created agency: {agency.agency_code}")
+
+    user1_id = uuid.UUID("660e8400-e29b-41d4-a716-446655440000")
+    if not db_session.get(User, user1_id):
+        UserBuilder(user1_id, db_session, "AR User - Award Recommendation User").with_oauth_login(
+            "ar_rec_user1"
+        ).with_api_key("ar_rec_user1_key").with_jwt_auth().with_agency(
+            agency, roles=[AWARD_RECOMMENDATION_USER]
+        ).build()
+        logger.info("Created user: ar_rec_user1 (Award Recommendation User)")
+
+    user2_id = uuid.UUID("660e8400-e29b-41d4-a716-446655440001")
+    if not db_session.get(User, user2_id):
+        UserBuilder(user2_id, db_session, "AR User - Award Recommendation User").with_oauth_login(
+            "ar_rec_user2"
+        ).with_api_key("ar_rec_user2_key").with_jwt_auth().with_agency(
+            agency, roles=[AWARD_RECOMMENDATION_USER]
+        ).build()
+        logger.info("Created user: ar_rec_user2 (Award Recommendation User)")
+
+    user3_id = uuid.UUID("660e8400-e29b-41d4-a716-446655440002")
+    if not db_session.get(User, user3_id):
+        UserBuilder(user3_id, db_session, "AR User - Program Officer").with_oauth_login(
+            "ar_program_officer"
+        ).with_api_key("ar_program_officer_key").with_jwt_auth().with_agency(
+            agency, roles=[GRANTOR_PROGRAM_OFFICER]
+        ).build()
+        logger.info("Created user: ar_program_officer (Grantor Program Officer)")
+
+    user4_id = uuid.UUID("660e8400-e29b-41d4-a716-446655440003")
+    if not db_session.get(User, user4_id):
+        UserBuilder(user4_id, db_session, "AR User - Budget Officer").with_oauth_login(
+            "ar_budget_officer"
+        ).with_api_key("ar_budget_officer_key").with_jwt_auth().with_agency(
+            agency, roles=[GRANTOR_BUDGET_OFFICER]
+        ).build()
+        logger.info("Created user: ar_budget_officer (Grantor Budget Officer)")
+
+    logger.info(f"✓ Created 1 agency and 4 users with different AR roles")
+    logger.info("")
+
+    return agency
 
 
 def _create_draft_scenario(
     db_session: db.Session, competition: Competition, applications: list[Application]
 ) -> list[tuple]:
     """Create draft award recommendation with mixed recommendation types."""
+    if not applications:
+        return []
+
     draft_ar = factories.AwardRecommendationFactory.create(
         opportunity=competition.opportunity,
         award_recommendation_status=AwardRecommendationStatus.DRAFT,
@@ -75,7 +145,7 @@ def _create_draft_scenario(
     )
 
     apps_added = 0
-    for idx, app in enumerate(applications[:10]):
+    for idx, app in enumerate(applications):
         if not app.application_submissions:
             continue
 
@@ -108,7 +178,7 @@ def _create_in_review_scenario(
     db_session: db.Session, competition: Competition, applications: list[Application]
 ) -> list[tuple]:
     """Create in-review award recommendation with detailed comments."""
-    if len(applications) <= 10:
+    if not applications:
         return []
 
     in_progress_ar = factories.AwardRecommendationFactory.create(
@@ -120,7 +190,7 @@ def _create_in_review_scenario(
     )
 
     apps_added = 0
-    for i, app in enumerate(applications[10:20]):
+    for i, app in enumerate(applications):
         if not app.application_submissions:
             continue
         apps_added += 1
@@ -166,7 +236,7 @@ def _create_approved_scenario(
     db_session: db.Session, competition: Competition, applications: list[Application]
 ) -> list[tuple]:
     """Create approved award recommendation with final decisions."""
-    if len(applications) <= 15:
+    if not applications:
         return []
 
     approved_ar = factories.AwardRecommendationFactory.create(
@@ -177,7 +247,7 @@ def _create_approved_scenario(
     )
 
     apps_added = 0
-    for i, app in enumerate(applications[15:20]):
+    for i, app in enumerate(applications):
         if not app.application_submissions:
             continue
         apps_added += 1
@@ -223,7 +293,7 @@ def _create_exception_scenario(
     db_session: db.Session, competition: Competition, applications: list[Application]
 ) -> list[tuple]:
     """Create award recommendation with exception case."""
-    if len(applications) <= 20 or not applications[20].application_submissions:
+    if not applications or not applications[0].application_submissions:
         return []
 
     exception_ar = factories.AwardRecommendationFactory.create(
@@ -244,7 +314,7 @@ def _create_exception_scenario(
 
     factories.AwardRecommendationApplicationSubmissionFactory.create(
         award_recommendation=exception_ar,
-        application_submission=applications[20].application_submissions[0],
+        application_submission=applications[0].application_submissions[0],
         award_recommendation_submission_detail=detail,
     )
     logger.info(
@@ -267,7 +337,7 @@ def _create_static_scenario(
     if not applications:
         return []
 
-    logger.info(f"Creating static AR with {len(applications[:10])} applications")
+    logger.info(f"Creating static AR with {len(applications)} applications")
     static_ar = factories.AwardRecommendationFactory.create(
         award_recommendation_id=static_ar_id,
         opportunity=competition.opportunity,
@@ -277,7 +347,7 @@ def _create_static_scenario(
     )
 
     apps_added = 0
-    for i, app in enumerate(applications[:10]):
+    for i, app in enumerate(applications):
         if not app.application_submissions:
             logger.warning(f"Application {app.application_id} has no submissions, skipping")
             continue
@@ -373,13 +443,13 @@ def _add_application_to_award_recommendation(
 
 
 def _create_competition_with_accepted_applications(
-    db_session: db.Session, agencies: list[Agency] | None = None
+    db_session: db.Session, agency: Agency
 ) -> tuple[Competition, list[Application]]:
     """Create a competition with many accepted applications for comprehensive testing.
 
     Args:
         db_session: Database session
-        agencies: Optional list of agencies to associate the opportunity with.
+        agency: Agency to associate the opportunity with for auth.
 
     Returns:
         Tuple of (competition, applications list)
@@ -389,14 +459,11 @@ def _create_competition_with_accepted_applications(
         "Creating a competition with 25 accepted applications for award recommendation testing..."
     )
 
-    competition_kwargs = {
-        "opportunity__opportunity_title": "Award Recommendation Test Opportunity",
-    }
-    if agencies and len(agencies) > 0:
-        competition_kwargs["opportunity__agency_code"] = agencies[0].agency_code
-        logger.info(f"Associating opportunity with agency: {agencies[0].agency_code}")
-
-    competition = factories.CompetitionFactory.create(**competition_kwargs)
+    competition = factories.CompetitionFactory.create(
+        opportunity__opportunity_title="Award Recommendation Test Opportunity",
+        opportunity__agency_code=agency.agency_code,
+    )
+    logger.info(f"Associating opportunity with agency: {agency.agency_code}")
 
     logger.info("Creating 8 fresh organizations for applications")
     organizations = []
