@@ -233,6 +233,8 @@ def clean_xml_namespaces(content: bytes) -> bytes:
 def validate_grantors_get_application_zip_request(soap_context: ValidateSoapContext) -> None:
     resp = get_response(soap_context, "GetApplicationZipRequest")
     assert resp.status_code == 200
+    # The xml namespaces here do not need to be cleaned because there are no
+    # blank namepsaces to default to the wrong url here
     validate_response_xml(resp.content, "GetApplicationZipResponse", soap_context)
     print("Validation: GetApplicationZip is validated")
 
