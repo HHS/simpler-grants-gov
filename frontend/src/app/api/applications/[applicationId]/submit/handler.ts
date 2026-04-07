@@ -13,10 +13,7 @@ export const submitApplicationHandler = async (
     }
     const applicationId = (await params).applicationId;
 
-    const response = await handleSubmitApplication(
-      applicationId,
-      session.token,
-    );
+    const response = await handleSubmitApplication(applicationId);
     const status = response.status_code;
 
     if (!response || (status !== 200 && status !== 422)) {

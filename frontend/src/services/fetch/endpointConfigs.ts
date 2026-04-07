@@ -1,11 +1,12 @@
 import { environment } from "src/constants/environments";
-import { ApiMethod } from "src/services/fetch/fetcherHelpers";
+import { ApiMethod } from "src/types/generalTypes";
 
 export interface EndpointConfig {
   basePath: string;
   version: string;
   namespace: string;
   method: ApiMethod;
+  requiresAuth?: boolean;
 }
 
 export const opportunitySearchEndpoint = {
@@ -37,6 +38,7 @@ export const toDynamicApplicationsEndpoint = (
     version: "alpha",
     namespace: "applications",
     method: type as ApiMethod,
+    requiresAuth: true,
   };
 };
 
@@ -112,5 +114,14 @@ export const getLocalUsersEndpoint = {
   basePath: environment.API_URL,
   version: "",
   namespace: "local/local-users",
+  method: "GET" as ApiMethod,
+};
+
+// opting out of traditional X-SGG based auth since these requests will use the
+// internal auth token instead
+export const getApplicationForPrint = {
+  basePath: environment.API_URL,
+  version: "alpha",
+  namespace: "applications",
   method: "GET" as ApiMethod,
 };
