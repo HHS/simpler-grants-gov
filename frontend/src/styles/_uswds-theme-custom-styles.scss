@@ -1100,8 +1100,8 @@ dl {
   // [contentEditable="true"]:focus
 
   .usa-button:not([disabled]),
-  .usa-nav__primary-item > a,
-  .usa-nav__primary-item > button,
+  .usa-nav__primary-item a,
+  .usa-nav__primary-item button,
   .usa-accordion__button:not([disabled]) {
     &:focus {
       outline-width: 0;
