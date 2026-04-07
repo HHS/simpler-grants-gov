@@ -454,6 +454,40 @@ SINCE 7 days ago
 
 ---
 
+### 9.2 Search Engagement & Usage Page
+
+Implemented in [#9357](https://github.com/HHS/simpler-grants-gov/issues/9357).
+
+**Attributes used:**
+
+| Attribute | Event type | Description |
+|-----------|------------|-------------|
+| `search_param_savedSearch` | `PageView` | UUID of the saved search selected by the user; set when a saved search is applied from the dropdown |
+| `saved_search_id` | `Log` | UUID of the newly created saved search; logged on POST to the saved-searches endpoint |
+| `request.url_rule` | `Log` | Flask URL rule for the request, e.g. `/v1/users/<uuid:user_id>/saved-searches` |
+
+**Panel: Saved Search Stickiness**
+
+Average number of sessions in which each saved search is executed. A value greater than 1 indicates users are returning to their saved searches across multiple sessions. Sources `PageView` events filtered to rows where `search_param_savedSearch IS NOT NULL`.
+
+**Panel: Active Saved Searches per Day**
+
+Number of distinct saved searches executed each day. Tracks whether the saved search feature is growing in active use over time. Sources `PageView` events, counting `uniqueCount(search_param_savedSearch)`.
+
+**Panel: Activation Rate**
+
+What percentage of created saved searches are reused within 30 days. Expressed as two side-by-side billboards because NRQL cannot join across event types — rate = Executed ÷ Created. Created count sources `Log` events on the saved-searches endpoint; Executed count sources `PageView` events where `search_param_savedSearch IS NOT NULL`.
+
+**Panel: Saved Search Creation Volume**
+
+New saved searches created per day. Sources `Log` events where `request.url_rule = '/v1/users/<uuid:user_id>/saved-searches'`, filtered by environment.
+
+**Panel: Unique Users Saving Searches**
+
+Number of distinct users who have created a saved search per day. Distinguishes broad adoption from power-user concentration. Sources `Log` events on the saved-searches endpoint, counting `uniqueCount(user_id)`.
+
+---
+
 ## 8. Next Steps
 
 ### Existing Companion Tickets
