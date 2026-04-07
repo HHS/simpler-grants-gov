@@ -2,7 +2,7 @@ import { UswdsIconNames } from "src/types/generalTypes";
 
 import { useMessages, useTranslations } from "next-intl";
 import Link from "next/link";
-import { Button, Grid } from "@trussworks/react-uswds";
+import { Grid } from "@trussworks/react-uswds";
 
 import HomePageSection from "src/components/homepage/homePageSection";
 import IconInfo from "src/components/homepage/IconInfoSection";
@@ -17,14 +17,11 @@ const ExperimentalContent = () => {
       <h3 data-testid="homepage-experimental">{t("canDoHeader")}</h3>
       <h4>{t("canDoSubHeader")}</h4>
       <p>{t("canDoParagraph")}</p>
-      <Link href="/search">
-        <Button
-          className="margin-y-2 usa-button--secondary"
-          type="button"
-          size="big"
-        >
-          {t("tryLink")}
-        </Button>
+      <Link
+        href="/search"
+        className="margin-y-2 usa-button usa-button--secondary usa-button--big"
+      >
+        {t("tryLink")}
       </Link>
       <h4>{t("cantDoHeader")}</h4>
       <p>{t("cantDoParagraph")}</p>

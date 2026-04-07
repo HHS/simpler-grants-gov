@@ -248,6 +248,23 @@ def test_soap_response_to_flask_response_returns_bytes_when_passed_bytes_as_data
     assert flask_response == expected
 
 
+def test_base_soap_schema_hides_input_in_validation_errors() -> None:
+    """Verify that BaseSOAPSchema hides PII from validation error messages."""
+
+    class TestSchema(BaseSOAPSchema):
+        name: str
+        age: int
+
+    sensitive_input = "secret-pii-value-12345"
+    with pytest.raises(ValidationError) as exc_info:
+        TestSchema(name=sensitive_input, age="not-an-int")
+
+    error_str = str(exc_info.value)
+    # Sensitive input values must not appear in the string representation
+    assert sensitive_input not in error_str
+    assert "not-an-int" not in error_str
+
+
 def test_soap_response_stream_returns_iterator_when_data_is_an_iterator() -> None:
     soap_response = SOAPResponse(data=xml_streamer(), status_code=200, headers={})
     stream_response = soap_response.stream()
