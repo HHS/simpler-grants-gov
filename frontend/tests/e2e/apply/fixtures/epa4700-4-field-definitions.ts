@@ -1,4 +1,4 @@
-import {FORM_DEFAULTS} from "tests/e2e/utils/forms/form-defaults";
+import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import { FormFillFieldDefinitions } from "tests/e2e/utils/forms/general-forms-filling";
 
 export const fieldDefinitionsEPA47004: FormFillFieldDefinitions = {
@@ -56,7 +56,7 @@ export const fieldDefinitionsEPA47004: FormFillFieldDefinitions = {
     section: "Point of Contact",
     field: "Title",
   },
-    applicant_signature_aor_title: {
+  applicant_signature_aor_title: {
     testId: "applicant_signature--aor_title",
     type: "text",
     section: "Authorized Official's Title",
