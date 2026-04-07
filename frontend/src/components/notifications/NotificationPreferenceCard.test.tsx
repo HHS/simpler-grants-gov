@@ -50,7 +50,6 @@ describe("NotificationPreferenceCard", () => {
   it("passes checked state correctly", () => {
     render(<NotificationPreferenceCard {...baseProps} isChecked={true} />);
 
-    // checked state validated via interaction
     const button = screen.getByTestId("switch");
     expect(button).toBeInTheDocument();
   });
@@ -135,7 +134,6 @@ describe("NotificationPreferenceCard", () => {
       <NotificationPreferenceCard {...baseProps} ariaLabel="Custom label" />,
     );
 
-    // indirect validation: component renders without error
     expect(screen.getByTestId("switch")).toBeInTheDocument();
   });
 });
