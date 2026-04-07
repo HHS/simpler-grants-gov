@@ -375,9 +375,9 @@ OpenSearch has its own metrics (index health, query performance, shard stats) th
 
 ---
 
-## 9. Find Metrics Dashboard — NRQL Query Reference
+## 9. Find Metrics Dashboard — Panel Reference
 
-This section documents the NRQL queries used in each page of the **Find Metrics** dashboard. Queries use the `{{environment}}` dashboard template variable so they filter to whichever environment is selected in the dashboard UI. Attributes on `Log` events are logged via `add_extra_data_to_current_request_logs` in the API layer and forwarded to New Relic Logs via the FluentBit sidecar.
+This section documents the panels on each page of the **Find Metrics** dashboard: what they measure, which NR attributes they use, and any caveats. Attributes on `Log` events are logged via `add_extra_data_to_current_request_logs` in the API layer and forwarded to New Relic Logs via the FluentBit sidecar.
 
 ---
 
@@ -385,7 +385,7 @@ This section documents the NRQL queries used in each page of the **Find Metrics*
 
 Implemented in [#9167](https://github.com/HHS/simpler-grants-gov/issues/9167) and [#9393](https://github.com/HHS/simpler-grants-gov/issues/9393). Requires instrumentation from [#9147](https://github.com/HHS/simpler-grants-gov/issues/9147), [#9149](https://github.com/HHS/simpler-grants-gov/issues/9149), and [#9150](https://github.com/HHS/simpler-grants-gov/issues/9150).
 
-Most panels use `Log` events where `request.url_rule = '/v1/opportunities/search'`. Panels 8–9 use `SearchResultExplanation` custom APM events emitted by [`opensearch_explain.py`](../../../api/src/adapters/search/opensearch_explain.py) when `OPENSEARCH_EXPLAIN_ENABLED=true`. Custom events do not carry an `environment` attribute and NR does not support template variable interpolation inside string literals, so these panels are hardcoded to `appName = 'api-prod'` (app names are set per environment in [`newrelic.ini`](../../../api/newrelic.ini)).
+Most panels use `Log` events where `request.url_rule = '/v1/opportunities/search'`. Panels 8–9 use `SearchResultExplanation` custom APM events emitted by [`opensearch_explain.py`](../../../api/src/adapters/search/opensearch_explain.py) when `OPENSEARCH_EXPLAIN_ENABLED=true`. Custom events do not carry an `environment` attribute and NR does not support template variable interpolation inside string literals, so these panels are hardcoded to `appName = 'api-prod'`.
 
 **Attributes used:**
 
@@ -406,54 +406,17 @@ Most panels use `Log` events where `request.url_rule = '/v1/opportunities/search
 
 Time OpenSearch spent executing each query (the `took` field from the response, in milliseconds). Useful for distinguishing whether API latency originates in OpenSearch or in application code.
 
-```sql
-SELECT percentile(search.took_ms, 50, 95, 99)
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = {{environment}}
-TIMESERIES AUTO
-SINCE 7 days ago
-```
-
 **Panel: Timeout Rate**
 
 Percentage of searches where OpenSearch returned a partial result due to hitting its internal query timeout. Any non-zero value means users may be seeing incomplete results.
-
-```sql
-SELECT percentage(count(*), WHERE search.timed_out IS TRUE) AS 'Timeout Rate %'
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = {{environment}}
-TIMESERIES AUTO
-SINCE 7 days ago
-```
 
 **Panel: Shard Failure Rate**
 
 Percentage of searches where one or more shards failed to respond. Shard failures indicate infrastructure-level problems and may silently reduce result quality.
 
-```sql
-SELECT percentage(count(*), WHERE search.shards_failed > 0) AS 'Shard Failure Rate %'
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = {{environment}}
-TIMESERIES AUTO
-SINCE 7 days ago
-```
-
 **Panel: Max Score Trend**
 
 The relevancy score of the top result over time. A declining trend may indicate index or scoring degradation. Browse-mode searches (no query text) are excluded since they produce no relevancy scores.
-
-```sql
-SELECT average(search.max_score), percentile(search.max_score, 50, 95)
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = {{environment}}
-  AND search.max_score > 0
-TIMESERIES AUTO
-SINCE 7 days ago
-```
 
 > `search.max_score = 0` for browse-mode searches (no query text). The `> 0` filter excludes these so the chart reflects only scored result sets.
 
@@ -461,80 +424,73 @@ SINCE 7 days ago
 
 Max score trend broken out by active scoring profile. Useful for comparing how aggressively each rule scores its top result.
 
-```sql
-SELECT average(search.max_score)
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = {{environment}}
-  AND search.max_score > 0
-FACET search.scoring_rule
-TIMESERIES AUTO
-SINCE 7 days ago
-```
-
 **Panel: Total Relation Accuracy**
 
-Flags searches where OpenSearch returned an approximate hit count (`gte`) rather than an exact one (`eq`). This happens when results exceed 10k and `track_total_hits` is not enabled. A non-zero rate here indicates the result count shown to users is a lower bound, not exact.
-
-```sql
-SELECT percentage(count(*), WHERE search.total_relation = 'gte') AS 'Approx. Result Count Rate %'
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = {{environment}}
-TIMESERIES AUTO
-SINCE 7 days ago
-```
+Flags searches where OpenSearch returned an approximate hit count (`gte`) rather than an exact one (`eq`). A non-zero rate indicates the result count shown to users is a lower bound, not exact.
 
 > In practice this should always be 0% — the search query sets `track_total_hits: true` explicitly. Any non-zero value is worth investigating.
 
 **Panel: Agency Aggregation Truncation**
 
-Tracks searches where the agency facet aggregation was silently truncated. The agency aggregation uses `size=1000`; if more than 1000 unique agency codes match the query, `sum_other_doc_count` will be non-zero and some agencies will be missing from the filter counts shown to users.
-
-```sql
-SELECT count(*) AS 'Searches with Truncated Agency Aggregation'
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = {{environment}}
-  AND search.agg_overflow.agency > 0
-TIMESERIES AUTO
-SINCE 7 days ago
-```
+Tracks searches where the agency facet aggregation was silently truncated. The agency aggregation uses `size=1000`; if more than 1000 unique agency codes match the query, some agencies will be missing from the filter counts shown to users.
 
 **Panel: Top Contributing Fields by Position**
 
-Shows the average BM25 score contribution per field at each result position (1–10), using `SearchResultExplanation` events. Helps identify whether high-ranked results are being driven by the expected fields (e.g. `agency_code` for agency searches, `opportunity_title` for title searches). Chart type: **bar** with `FACET position`.
+Average BM25 score contribution per field at each result position (1–10), using `SearchResultExplanation` events. Helps identify whether high-ranked results are being driven by the expected fields. `.keyword` variant scores are summed with their base field (e.g. `field_score.agency_code + field_score.agency_code.keyword`). Chart type: **bar** with `FACET position`.
 
-```sql
-SELECT (average(field_score.agency_code) + average(field_score.agency_code.keyword)) AS 'agency_code',
-       (average(field_score.top_level_agency_code) + average(field_score.top_level_agency_code.keyword)) AS 'top_level_agency_code',
-       (average(field_score.opportunity_number) + average(field_score.opportunity_number.keyword)) AS 'opportunity_number',
-       average(field_score.opportunity_title) AS 'opportunity_title',
-       average(field_score.agency_name) AS 'agency_name'
-FROM SearchResultExplanation
-WHERE appName = 'api-prod'
-FACET position
-SINCE 7 days ago
-LIMIT 10
-```
-
-> `field_score.*` attributes are only present when `OPENSEARCH_EXPLAIN_ENABLED=true` and the request included a non-empty query string. Browse-mode searches (no query) produce no `SearchResultExplanation` events.
+> `field_score.*` attributes are only present when `OPENSEARCH_EXPLAIN_ENABLED=true` and the request included a non-empty query string. Browse-mode searches produce no `SearchResultExplanation` events.
 
 **Panel: Average Field Score Contribution by Scoring Rule**
 
-Compares average field score contributions across the three scoring rules (`default`, `expanded`, `agency`). Useful for verifying that each scoring rule is emphasising the expected fields. Chart type: **bar** with `FACET scoring_rule`.
+Compares average field score contributions across the three scoring rules (`default`, `expanded`, `agency`). Useful for verifying that each rule emphasises the expected fields. Chart type: **bar** with `FACET scoring_rule`.
 
-```sql
-SELECT (average(field_score.agency_code) + average(field_score.agency_code.keyword)) AS 'agency_code',
-       (average(field_score.top_level_agency_code) + average(field_score.top_level_agency_code.keyword)) AS 'top_level_agency_code',
-       (average(field_score.opportunity_number) + average(field_score.opportunity_number.keyword)) AS 'opportunity_number',
-       average(field_score.opportunity_title) AS 'opportunity_title',
-       average(field_score.agency_name) AS 'agency_name'
-FROM SearchResultExplanation
-WHERE appName = 'api-prod'
-FACET scoring_rule
-SINCE 7 days ago
-```
+---
+
+### 9.2 Search Engagement & Usage Page — Saved Search Metrics
+
+Implemented in [#9357](https://github.com/HHS/simpler-grants-gov/issues/9357).
+
+**Data sources:**
+
+- `PageView` (NR Browser) — `search_param_savedSearch` is set as a custom attribute by [`analyticsUtil.ts`](../../../frontend/src/utils/analyticsUtil.ts) whenever a user selects a saved search from the dropdown. The value is the `saved_search_id` UUID. This is the saved search *execution* signal.
+- `Log` (NR APM) — POST to `/v1/users/<user_id>/saved-searches` is the saved search *creation* signal. `auth.user_id` and `saved_search_id` are logged on each request.
+
+**Attributes used:**
+
+| Attribute | Event type | Description |
+|-----------|------------|-------------|
+| `search_param_savedSearch` | `PageView` | UUID of the saved search selected by the user; empty string when no saved search is active |
+| `session` | `PageView` | NR Browser session identifier |
+| `auth.user_id` | `Log` | UUID of the authenticated user making the request |
+| `saved_search_id` | `Log` | UUID of the saved search created or modified |
+
+> **Note on activation rate:** "Saved Search Activation Rate" requires comparing created searches (`Log`) against executed searches (`PageView`). NRQL does not support cross-event-type joins, so panels 3a and 3b provide the two sides of that ratio as separate metrics. The rate is 3b ÷ 3a.
+
+**Panel: Saved Search Creation Volume**
+
+New saved searches created over time. Measures feature adoption.
+
+**Panel: Unique Users Saving Searches**
+
+Distinct users creating saved searches over time. Separates adoption breadth from power-user concentration.
+
+**Panel: Active Saved Searches per Day**
+
+Daily count of distinct saved search IDs executed. Measures usage growth independent of creation volume.
+
+**Panel: Saved Search Activation Rate (created — 3a)**
+
+Denominator for the activation rate: how many distinct saved searches were created in the last 30 days.
+
+**Panel: Saved Search Activation Rate (executed — 3b)**
+
+Numerator for the activation rate: how many distinct saved search IDs were actually run in the last 30 days.
+
+**Panel: Saved Search Stickiness**
+
+Average sessions per saved search — how often users return to the same saved search. Computed as `uniqueCount(session) / uniqueCount(search_param_savedSearch)`.
+
+> NR does not support median across dynamic groups in a single query. Average is the practical approximation here.
 
 ---
 
