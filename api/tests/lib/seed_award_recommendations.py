@@ -40,7 +40,7 @@ def _build_award_recommendations(
     competition, applications = _create_competition_with_accepted_applications(db_session, agencies)
 
     logger.info(
-        f"Processing competition {competition.opportunity.opportunity_number} with {len(applications)} accepted applications"
+        f"Processing opportunity {competition.opportunity.opportunity_number} with {len(applications)} accepted applications"
     )
 
     award_recommendations_created = []
