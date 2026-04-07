@@ -177,6 +177,7 @@ function FieldListEntry({
   handleDeleteRow,
   handleFieldChange,
   rawErrors,
+  fieldListPath,
   groupDefinition,
 }: {
   id: string;
@@ -186,6 +187,7 @@ function FieldListEntry({
   handleDeleteRow: (rowIndex: number) => void;
   handleFieldChange: (params: FieldListChangeParams) => void;
   rawErrors?: FormattedFormValidationWarning[];
+  fieldListPath: string;
   groupDefinition: FieldListGroupItem[];
 }) {
   const t = useTranslations("Application.applyForm.fieldListWidget");
@@ -220,6 +222,9 @@ function FieldListEntry({
 
         const childErrors = getFieldListChildErrors({
           rawErrors,
+          fieldListPath,
+          rowIndex,
+          storageKey,
           childDefinition: groupItem.definition,
         });
 
@@ -394,6 +399,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
             handleFieldChange={handleFieldChange}
             groupDefinition={groupDefinition}
             rawErrors={rawErrors}
+            fieldListPath={fieldListPath}
           />
         );
       })}

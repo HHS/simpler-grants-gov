@@ -3,6 +3,62 @@ import { Alert } from "@trussworks/react-uswds";
 
 import { FormattedFormValidationWarning } from "./types";
 
+/**
+ * Summary link text for validation warnings.
+ *
+ * For repeatable FieldList inputs, multiple rows can contain the same child
+ * field name (for example, multiple `first_name` fields). In those cases,
+ * the base formatted message alone is not specific enough in the summary.
+ *
+ * When the warning points to a row-specific FieldList input, we append:
+ * - the FieldList name derived from the schema definition
+ *
+ * Example:
+ *   "First Name is required"
+ *
+ * becomes:
+ *   [field (definition, row number)]
+ *   "First Name is required (Contact People, Entry 2)"
+ */
+
+const getWarningLinkText = (
+  warning: FormattedFormValidationWarning,
+): string => {
+  const baseText = warning.formatted ?? warning.message;
+
+  const rowMatch = warning.htmlField?.match(/\[(\d+)\]--/);
+
+  if (!rowMatch) {
+    return baseText;
+  }
+
+  const rowIndex = Number(rowMatch[1]);
+
+  if (Number.isNaN(rowIndex)) {
+    return baseText;
+  }
+
+  const definitionMatch = warning.definition?.match(
+    /^\/properties\/([^/]+)\/items\/properties\/[^/]+$/,
+  );
+
+  let fieldListLabel = "";
+
+  if (definitionMatch) {
+    const rawName = definitionMatch[1];
+
+    fieldListLabel = rawName
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  if (fieldListLabel) {
+    return `${baseText} (${fieldListLabel}, Entry ${rowIndex + 1})`;
+  }
+
+  return `${baseText} (Entry ${rowIndex + 1})`;
+};
+
 export const ApplyFormMessage = ({
   error,
   validationWarnings,
@@ -27,21 +83,24 @@ export const ApplyFormMessage = ({
    *
    * Some warnings (particularly for FieldList child fields) can be emitted
    * multiple times during validation tree construction. This ensures each
-   * unique warning message is only displayed once in the alert.
+   * unique warning is only displayed once in the alert.
    *
-   * Uses a composite key of `definition || field` and `message` to identify
-   * unique warnings without altering the original warning shape.
+   * For row-aware FieldList warnings, `htmlField` is used as the primary key.
+   * This preserves distinct warnings for different rows (e.g. Entry 2 vs Entry 3),
+   * since each row produces a unique html field id.
+   *
+   * Falls back to `field` and then `definition` for non-row-aware warnings.
    */
   const uniqueValidationWarnings = validationWarnings
-  ? Array.from(
-      new Map(
-        validationWarnings.map((warning) => [
-          `${warning.definition ?? warning.field}-${warning.message}`,
-          warning,
-        ]),
-      ).values(),
-    )
-  : null;
+    ? Array.from(
+        new Map(
+          validationWarnings.map((warning) => [
+            `${warning.htmlField ?? warning.field ?? warning.definition}-${warning.message}`,
+            warning,
+          ]),
+        ).values(),
+      )
+    : null;
 
   if (!saved) {
     return <></>;
@@ -70,9 +129,17 @@ export const ApplyFormMessage = ({
             const link = isBudgetForm ? (
               <a href={`#${warning.field}`}>{warning.message}</a>
             ) : (
-              <a href={`#${warning.htmlField || ""}`}>{warning.formatted}</a>
+              <a href={`#${warning.htmlField || ""}`}>
+                {getWarningLinkText(warning)}
+              </a>
             );
-            return <li key={`${warning.definition ?? warning.field}-${warning.message}`}>{link}</li>;
+            return (
+              <li
+                key={`${warning.htmlField ?? warning.field ?? warning.definition}-${warning.message}`}
+              >
+                {link}
+              </li>
+            );
           })}
         </ul>
       </Alert>

@@ -26,10 +26,7 @@ export function getFieldListGroupErrors({
   const uniqueWarnings = new Map<string, FormattedFormValidationWarning>();
 
   rawErrors
-    .filter(
-      (warning) =>
-        warning.field === fieldListPath && !warning.definition,
-    )
+    .filter((warning) => warning.field === fieldListPath && !warning.definition)
     .forEach((warning) => {
       const warningKey = `${warning.field}-${warning.message}`;
       if (!uniqueWarnings.has(warningKey)) {
@@ -41,32 +38,55 @@ export function getFieldListGroupErrors({
 }
 
 /**
- * Returns validation messages for a specific child field within the FieldList.
+ * Returns validation messages for a specific child field within a specific
+ * FieldList row.
  *
- * Matches warnings using the child's schema `definition`, which provides a
- * stable identifier for the field regardless of row index.
+ * Row-aware warnings are matched first using the indexed warning path
+ * (for example `$.contact_people_test[1].first_name`) so that identical
+ * child fields across different rows do not share the same error state.
  *
- * This allows FieldList to correctly map validation messages to each child
- * widget, even when row-aware paths are not available in the warning data.
+ * If a warning does not include row-aware path information, the helper
+ * falls back to matching by the child's schema `definition`.
  *
  * Results are deduplicated to prevent duplicate messages from rendering.
  */
 
 export function getFieldListChildErrors({
   rawErrors,
+  fieldListPath,
+  rowIndex,
+  storageKey,
   childDefinition,
 }: {
   rawErrors?: FormattedFormValidationWarning[];
+  fieldListPath: string;
+  rowIndex: number;
+  storageKey: string;
   childDefinition: string;
 }): string[] {
   if (!rawErrors?.length) {
     return [];
   }
 
+  const rowAwareFieldPath = `${fieldListPath}[${rowIndex}].${storageKey}`;
+
   return Array.from(
     new Set(
       rawErrors
-        .filter((warning) => warning.definition === childDefinition)
+        .filter((warning) => {
+          if (warning.field === rowAwareFieldPath) {
+            return true;
+          }
+
+          // Checks if the warning field includes a row index (e.g. [1])
+          const hasIndexedFieldPath = /\[\d+\]/.test(warning.field);
+
+          if (hasIndexedFieldPath) {
+            return false;
+          }
+
+          return warning.definition === childDefinition;
+        })
         .map((warning) => warning.formatted ?? warning.message),
     ),
   );

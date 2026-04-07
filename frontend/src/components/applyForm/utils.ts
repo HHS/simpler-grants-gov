@@ -16,7 +16,7 @@ import {
   UiSchemaNode,
 } from "./types";
 
-const nestedWarningForField = ({
+const nestedWarningsForField = ({
   definition,
   errors,
   fieldName,
@@ -30,7 +30,7 @@ const nestedWarningForField = ({
   fieldSchema: SchemaField;
   formSchema: RJSFSchema;
   path: string;
-}): FormattedFormValidationWarning | null => {
+}): FormattedFormValidationWarning[] => {
   const parent = definition.replace(/\/properties\/\w+$/, "");
   const parentFieldDefinition = getFieldSchema({
     definition: parent,
@@ -38,56 +38,45 @@ const nestedWarningForField = ({
     schema: undefined,
   });
 
-  if (!parentFieldDefinition) return null;
+  if (!parentFieldDefinition) {
+    return [];
+  }
 
-  const error = errors.find(({ field }) => {
+  const matchingErrors = errors.filter(({ field }) => {
     if (
-      // field is within parent
       path.includes(field) &&
       path !== field &&
-      // field is in the parent required definition
       "required" in parentFieldDefinition &&
       parentFieldDefinition.required?.indexOf(fieldName) !== -1
-    )
+    ) {
       return true;
+    }
     return false;
   });
 
-  if (error) {
+  if (matchingErrors.length < 1) {
+    return [];
+  }
+
+  return matchingErrors.map((error) => {
     const message = error.message.replace(/'\S+'/, fieldName);
     const formatted = formatValidationWarning(fieldName, message, fieldSchema);
     const formattedWithParent = parentFieldDefinition.title
       ? `${parentFieldDefinition.title} ${formatted}`
       : formatted;
-    const htmlField = getFieldNameForHtml({
+    const htmlField = getHtmlFieldForWarning({
       definition,
+      field: error.field,
       schema: fieldSchema,
     });
+
     return {
       ...error,
       formatted: formattedWithParent,
       htmlField,
       definition,
     };
-  }
-  return null;
-};
-
-const formatValidationWarning = (
-  fieldName: string,
-  message: string,
-  fieldSchema: SchemaField,
-) => {
-  // some schemas might not have a title
-  const title =
-    fieldSchema &&
-    typeof fieldSchema === "object" &&
-    fieldSchema !== null &&
-    "title" in fieldSchema
-      ? fieldSchema.title
-      : null;
-
-  return validationWarningOverrides(message, fieldName, title);
+  });
 };
 
 // formats warning messages for more helpful display
@@ -104,12 +93,20 @@ const validationWarningOverrides = (
     .replace("is a required property", "is required");
 };
 
-const findValidationError = (
+const formatValidationWarning = (
+  fieldName: string,
+  message: string,
+  fieldSchema?: SchemaField,
+): string => {
+  return validationWarningOverrides(message, fieldName, fieldSchema?.title);
+};
+
+const findValidationErrors = (
   errors: FormValidationWarning[],
   definition: string | undefined,
   schema: SchemaField | undefined,
   formSchema: RJSFSchema,
-): FormattedFormValidationWarning | null => {
+): FormattedFormValidationWarning[] => {
   const fieldSchema = getFieldSchema({
     definition,
     formSchema,
@@ -119,23 +116,41 @@ const findValidationError = (
   const fieldName = definition
     ? definition.split("/")[definition.split("/").length - 1]
     : "";
-  const directWarning = errors.find((error) => error.field === path);
-
-  if (directWarning) {
-    const formatted = formatValidationWarning(
-      fieldName,
-      directWarning.message,
-      fieldSchema,
+  const directWarnings = errors.filter((error) => {
+    if (error.field === path) {
+      return true;
+    }
+    const fieldListMatch = definition?.match(
+      /^\/properties\/([^/]+)\/items\/properties\/([^/]+)$/,
     );
-    const htmlField = getFieldNameForHtml({
-      definition,
-      schema: fieldSchema,
-    });
 
-    return { ...directWarning, formatted, htmlField, definition };
+    if (!fieldListMatch) {
+      return false;
+    }
+    const [, fieldListName, childFieldName] = fieldListMatch;
+    return new RegExp(
+      `^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldName}$`,
+    ).test(error.field);
+  });
+
+  if (directWarnings.length > 0) {
+    return directWarnings.map((directWarning) => {
+      const formatted = formatValidationWarning(
+        fieldName,
+        directWarning.message,
+        fieldSchema,
+      );
+      const htmlField = getHtmlFieldForWarning({
+        definition,
+        field: directWarning.field,
+        schema: fieldSchema,
+      });
+
+      return { ...directWarning, formatted, htmlField, definition };
+    });
   }
   if (fieldSchema && definition) {
-    return nestedWarningForField({
+    return nestedWarningsForField({
       path,
       definition,
       fieldName,
@@ -144,7 +159,7 @@ const findValidationError = (
       formSchema,
     });
   }
-  return null;
+  return [];
 };
 
 export const buildWarningTree = (
@@ -177,7 +192,7 @@ export const buildWarningTree = (
           );
           return errors.concat(nodeError);
         } else if (!parent && ("definition" in node || "schema" in node)) {
-          const error = findValidationError(
+          const matchingWarnings = findValidationErrors(
             formValidationWarnings,
             Array.isArray(node.definition)
               ? node.definition[0]
@@ -185,9 +200,10 @@ export const buildWarningTree = (
             node.schema,
             formSchema,
           );
-          if (error) {
-            return errors.concat([error]);
+          if (matchingWarnings.length > 0) {
+            return errors.concat(matchingWarnings);
           }
+          return errors;
         }
         return errors;
       },
@@ -205,7 +221,7 @@ export const buildWarningTree = (
             );
             return errors.concat(nodeError);
           } else {
-            const error = findValidationError(
+            const matchingWarnings = findValidationErrors(
               formValidationWarnings,
               Array.isArray(node.definition)
                 ? node.definition[0]
@@ -213,8 +229,8 @@ export const buildWarningTree = (
               node.schema,
               formSchema,
             );
-            if (error) {
-              return errors.concat([error]);
+            if (matchingWarnings.length > 0) {
+              return errors.concat(matchingWarnings);
             }
             return errors;
           }
@@ -265,6 +281,39 @@ export const getFieldNameForHtml = ({
   }
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
+function getHtmlFieldForWarning({
+  definition,
+  field,
+  schema,
+}: {
+  definition?: string;
+  field?: string;
+  schema?: SchemaField;
+}): string | undefined {
+  if (definition) {
+    const match = definition.match(
+      /^\/properties\/([^/]+)\/items\/properties\/([^/]+)$/,
+    );
+
+    if (match) {
+      const [, fieldListName, childFieldName] = match;
+
+      const rowMatch = field?.match(
+        new RegExp(`^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldName}$`),
+      );
+
+      if (rowMatch) {
+        const [, rowIndex] = rowMatch;
+        return `${fieldListName}[${rowIndex}]--${childFieldName}`;
+      }
+    }
+  }
+
+  return getFieldNameForHtml({
+    definition,
+    schema,
+  });
+}
 
 // transform a form data field name / id into a json path that can be used to reference the form schema
 export const getFieldPathFromHtml = (fieldName: string) =>
