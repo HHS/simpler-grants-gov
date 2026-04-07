@@ -671,6 +671,132 @@ describe("buildWarningTree", () => {
     const errors = buildWarningTree(uiSchema, null, warnings, formSchema);
     expect(errors.length).toBeGreaterThan(0);
   });
+
+  it("preserves multiple row-aware warnings for the same FieldList child field", () => {
+    const uiSchema: UiSchema = [
+      {
+        type: "fieldList",
+        name: "contact_people_test",
+        label: "Contact People",
+        defaultSize: 1,
+        children: [
+          {
+            type: "field",
+            definition:
+              "/properties/contact_people_test/items/properties/first_name",
+            schema: { title: "First Name", type: "string" },
+          },
+        ],
+      },
+    ];
+
+    const warnings = [
+      {
+        field: "$.contact_people_test[1].first_name",
+        message: "'first_name' is a required property",
+        type: "required",
+        value: null,
+      },
+      {
+        field: "$.contact_people_test[2].first_name",
+        message: "'first_name' is a required property",
+        type: "required",
+        value: null,
+      },
+    ];
+
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        contact_people_test: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              first_name: {
+                type: "string",
+                title: "First Name",
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const result = buildWarningTree(uiSchema, null, warnings, formSchema);
+
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          field: "$.contact_people_test[1].first_name",
+          htmlField: "contact_people_test[1]--first_name",
+          formatted: "First Name is required",
+        }),
+        expect.objectContaining({
+          field: "$.contact_people_test[2].first_name",
+          htmlField: "contact_people_test[2]--first_name",
+          formatted: "First Name is required",
+        }),
+      ]),
+    );
+
+    expect(result).toHaveLength(2);
+  });
+  it("builds a row-aware htmlField for FieldList child warnings", () => {
+    const uiSchema: UiSchema = [
+      {
+        type: "fieldList",
+        name: "contact_people_test",
+        label: "Contact People",
+        defaultSize: 1,
+        children: [
+          {
+            type: "field",
+            definition:
+              "/properties/contact_people_test/items/properties/first_name",
+            schema: { title: "First Name", type: "string" },
+          },
+        ],
+      },
+    ];
+
+    const warnings = [
+      {
+        field: "$.contact_people_test[2].first_name",
+        message: "'first_name' is a required property",
+        type: "required",
+        value: null,
+      },
+    ];
+
+    const formSchema: RJSFSchema = {
+      type: "object",
+      properties: {
+        contact_people_test: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              first_name: {
+                type: "string",
+                title: "First Name",
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const result = buildWarningTree(uiSchema, null, warnings, formSchema);
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        field: "$.contact_people_test[2].first_name",
+        htmlField: "contact_people_test[2]--first_name",
+        formatted: "First Name is required",
+      }),
+    ]);
+  });
 });
 
 it("pushes direct warnings for uiSchema fields", () => {

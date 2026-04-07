@@ -21,7 +21,7 @@ import { FormattedFormValidationWarning } from "./types";
  *   "First Name is required (Contact People, Entry 2)"
  */
 
-const getWarningLinkText = (
+export const getWarningLinkText = (
   warning: FormattedFormValidationWarning,
 ): string => {
   const baseText = warning.formatted ?? warning.message;
