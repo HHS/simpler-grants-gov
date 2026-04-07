@@ -1,3 +1,6 @@
+import zoneinfo
+from datetime import datetime
+
 import pytest
 
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
@@ -229,3 +232,85 @@ class TestLegacySoapGrantorGetSubmissionListExtendedSchema:
             }
         }
         assert schema.model_dump() == expected
+
+
+class TestSubmissionInfoTimezoneValidation:
+    SUBMISSION_DEFAULTS = {
+        "FundingOpportunityNumber": "OPP-001",
+        "CFDANumber": "10.001",
+        "GrantsGovTrackingNumber": "GRANT12345",
+        "GrantsGovApplicationStatus": "Received",
+        "SubmissionMethod": "web",
+        "SubmissionTitle": "Test",
+        "PackageID": "PKG-001",
+        "DelinquentFederalDebt": "No",
+        "ActiveExclusions": "No",
+        "UEI": "ABC123",
+    }
+
+    def _make_submission_info(self, received_date_time):
+        return grantors_schemas.SubmissionInfo(
+            **{**self.SUBMISSION_DEFAULTS, "ns2:ReceivedDateTime": received_date_time}
+        )
+
+    def test_naive_datetime_is_made_timezone_aware(self):
+        naive_dt = datetime(2025, 3, 15, 10, 30, 0)
+        info = self._make_submission_info(naive_dt)
+        assert info.received_date_time is not None
+        assert info.received_date_time.tzinfo is not None
+        assert info.received_date_time.tzinfo == zoneinfo.ZoneInfo("US/Eastern")
+
+    def test_aware_datetime_is_not_modified(self):
+        utc_tz = zoneinfo.ZoneInfo("UTC")
+        aware_dt = datetime(2025, 3, 15, 10, 30, 0, tzinfo=utc_tz)
+        info = self._make_submission_info(aware_dt)
+        assert info.received_date_time is not None
+        assert info.received_date_time.tzinfo == utc_tz
+
+    def test_none_datetime_stays_none(self):
+        info = self._make_submission_info(None)
+        assert info.received_date_time is None
+
+    def test_naive_and_aware_datetimes_can_be_sorted(self):
+        naive_dt = datetime(2025, 3, 15, 10, 30, 0)
+        eastern_tz = zoneinfo.ZoneInfo("US/Eastern")
+        aware_dt = datetime(2025, 6, 1, 12, 0, 0, tzinfo=eastern_tz)
+        info_naive = self._make_submission_info(naive_dt)
+        info_aware = self._make_submission_info(aware_dt)
+        # This should not raise TypeError
+        sorted_info = sorted(
+            [info_naive, info_aware],
+            key=lambda x: x.received_date_time or datetime.min.replace(tzinfo=eastern_tz),
+            reverse=True,
+        )
+        assert sorted_info[0].received_date_time == aware_dt
+
+
+class TestSubmissionInfoDefaultNone:
+    """Test that SubmissionInfo fields default to None when keys are missing from input."""
+
+    def test_submission_info_from_empty_dict(self):
+        info = grantors_schemas.SubmissionInfo(**{})
+        assert info.funding_opportunity_number is None
+        assert info.cfda_number is None
+        assert info.grants_gov_tracking_number is None
+        assert info.received_date_time is None
+        assert info.grants_gov_application_status is None
+        assert info.submission_method is None
+        assert info.submission_title is None
+        assert info.package_id is None
+        assert info.delinquent_federal_debt is None
+        assert info.active_exclusions is None
+        assert info.uei is None
+
+    def test_submission_info_with_partial_dict(self):
+        info = grantors_schemas.SubmissionInfo(**{"UEI": "00000000INDV"})
+        assert info.uei == "00000000INDV"
+        assert info.cfda_number is None
+        assert info.funding_opportunity_number is None
+
+    def test_get_submission_list_expanded_response_from_empty_dict(self):
+        response = grantors_schemas.GetSubmissionListExpandedResponse(**{})
+        assert response.success is True
+        assert response.available_application_number is None
+        assert response.submission_info == []
