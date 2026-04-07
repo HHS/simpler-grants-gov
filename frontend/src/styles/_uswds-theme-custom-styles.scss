@@ -1144,7 +1144,6 @@ input[type="checkbox"]:not(checked) ~ .saved-opportunity-radius-md,
   }
 }
 
-<<<<<<< hmurdock/8987-Notifications-Page
 .notifications-page-error-enter {
   animation: notifications-page-error-fade-in 180ms ease-out;
 }
@@ -1343,7 +1342,8 @@ $simpler-switch-transition-easing: ease;
   .simpler-switch-field__control {
     flex: 0 0 auto;
     align-self: flex-start;
-=======
+  }
+}
 // Prevent SPA's persistent focus for mouse users
 @supports selector(:focus-visible) {
   // Selectors need more specificity than:
@@ -1378,6 +1378,5 @@ $simpler-switch-transition-easing: ease;
     &:focus-visible + [class*="__label"]::before {
       outline-width: units($theme-focus-width);
     }
->>>>>>> main
   }
 }
