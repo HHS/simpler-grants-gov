@@ -147,7 +147,7 @@ export type FieldListWidgetProps = {
   rawErrors?: FormattedFormValidationWarning[];
   requiredFields?: string[];
   value?: GeneralRecord[];
-  onChange?: (value: GeneralRecord[]) => void;
+  onChange?: UswdsWidgetProps["onChange"];
   disabled?: boolean;
   readOnly?: boolean;
   isFormLocked?: boolean;
