@@ -471,23 +471,6 @@ SINCE 7 days ago
 
 ## 9.2 Search Quality & Relevance Dashboard
 
-[**Panel: Search Click Through Rate**
-](https://onenr.io/0gR7dJAKWjo)
-Measures the percentage of searches where users click on a result, using UserAction data on search-result-link-* targets. It serves as the baseline indicator of search effectiveness, showing whether results are relevant and compelling enough for users to engage.
-
-[**Panel: Search Click Through Rate Trend**](https://onenr.io/0BQrgXmeNwZ)
-Shows how CTR changes over time, providing a view into whether search quality is improving or degrading. This is especially useful for evaluating the impact of releases, ranking changes, or UI updates.
-
-**[Panel: CTR With Filters vs Without Filters](https://onenr.io/0oR8dJZMaRG)**
-Compares CTR between searches where users apply filters and those where they do not. This helps determine whether filters are aiding discovery or adding friction. If CTR is higher with filters, they are likely helping users narrow down to relevant results; if lower, filters may be too restrictive, confusing, or not well-aligned with user needs.
-
-**[Panel: Saved Search CTR vs Manual Search CTR
-](https://onenr.io/02R5dJ13mwb)**
-Compares engagement between searches initiated from saved searches and those entered manually. This helps evaluate whether saved searches provide lasting value. Higher CTR for saved searches suggests users benefit from them, while lower CTR may indicate that saved queries become stale as available opportunities change over time.
-
-**[Panel: Top 3 Results CTR by Sort Type](https://onenr.io/0qQa17KOVQ1)**
-Measures the CTR for the top three search results, broken down by sort type, with the default (null) treated as relevance. Since most user interaction happens with top-ranked results, this panel helps assess ranking effectiveness. Higher CTR for relevance indicates strong ranking quality, while better performance from other sort types may suggest users prefer alternative ordering strategies.
-
 [**Zero-Result Rate**](https://onenr.io/0oR8dJYL3RG)
 Shows the number or percentage of searches that return no results over time. It highlights gaps in search coverage and is a key indicator of whether users can successfully find content. Spikes may point to indexing issues, missing synonyms, overly strict filters, or sudden changes in user behavior.
 
