@@ -207,29 +207,36 @@ export async function fillField(
 
       const inputName = await locator.getAttribute("name");
       const inputId = await locator.getAttribute("id");
-      const fileName = data.split(/[/\\]/).pop() ?? data;
-      const fieldContainer = locator.locator(
-        "xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' usa-form-group ') or contains(concat(' ', normalize-space(@class), ' '), ' simpler-formgroup ')][1]",
-      );
-
-      await locator.setInputFiles(data);
-
-      await fieldContainer
-        .locator("span")
-        .filter({ hasText: fileName })
-        .first()
-        .waitFor({ state: "visible", timeout: 30000 });
-
       const hiddenInputSelector = inputName
         ? `input[type="hidden"][name="${inputName}"]`
         : inputId
           ? `input[type="hidden"][name="${inputId}"], input[type="hidden"]#${inputId}`
           : null;
 
+      await locator.setInputFiles(data);
+
+      const fileName = data.split(/[/\\]/).pop() ?? data;
+
+      // Wait for the uploaded filename to appear in the UI before proceeding.
+      // Webkit renders the post-upload filename span more slowly, so use a
+      // generous timeout matching the file-input wait above.
       if (hiddenInputSelector) {
-        // Wait for the uploaded filename to appear in the UI before proceeding.
-        // Webkit renders the post-upload filename span more slowly, so use a
-        // generous timeout matching the file-input wait above.
+        await page
+          .locator(hiddenInputSelector)
+          .locator(
+            "xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' usa-form-group ') or contains(concat(' ', normalize-space(@class), ' '), ' simpler-formgroup ')][1]",
+          )
+          .locator("span")
+          .filter({ hasText: fileName })
+          .first()
+          .waitFor({ state: "visible", timeout: 30000 });
+      } else {
+        await page
+          .locator(`span:has-text("${fileName}")`)
+          .waitFor({ state: "visible", timeout: 30000 });
+      }
+
+      if (hiddenInputSelector) {
         await page.waitForFunction(
           ({ selector, uploadedFileName }) => {
             const hiddenInput =
