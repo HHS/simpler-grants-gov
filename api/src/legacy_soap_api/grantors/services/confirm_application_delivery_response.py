@@ -31,12 +31,20 @@ logger = logging.getLogger(__name__)
 VALID_STATUSES_FOR_DELIVERY = {ApplicationStatus.ACCEPTED}
 
 
-def confirm_application_delivery_response(
+def confirm_application_delivery(
     db_session: db.Session,
     soap_request: SOAPRequest,
     confirm_application_delivery_request: grantor_schemas.ConfirmApplicationDeliveryRequest,
     soap_config: SOAPOperationConfig,
-) -> grantor_schemas.ConfirmApplicationDeliveryResponseSOAPEnvelope:
+) -> str:
+    """Validate and process the confirm application delivery request.
+
+    Performs all data gathering, validation, authorization, and creates an
+    ApplicationSubmissionRetrieved record as a side effect.
+
+    Returns the grants_gov_tracking_number on success.
+    Raises SOAPFaultException or SOAPClientUserDoesNotHavePermission on failure.
+    """
     legacy_tracking_number = cast(
         str, confirm_application_delivery_request.grants_gov_tracking_number
     )
@@ -136,7 +144,14 @@ def confirm_application_delivery_response(
     )
     db_session.add(retrieval)
 
+    return legacy_tracking_number
+
+
+def confirm_application_delivery_response(
+    grants_gov_tracking_number: str,
+) -> grantor_schemas.ConfirmApplicationDeliveryResponseSOAPEnvelope:
+    """Build the SOAP response envelope from the gathered data."""
     return grantor_schemas.ConfirmApplicationDeliveryResponseSOAPEnvelope(
-        grants_gov_tracking_number=confirm_application_delivery_request.grants_gov_tracking_number,
+        grants_gov_tracking_number=grants_gov_tracking_number,
         response_message="Success",
     )
