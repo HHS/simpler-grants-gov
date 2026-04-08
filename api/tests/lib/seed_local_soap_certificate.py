@@ -140,6 +140,12 @@ def _build_legacy_certificate_and_submission(
     print("\nCOPY AND PASTE THIS STRING INTO THE POSTMAN HEADER AS 'X-Amzn-Mtls-Clientcert'")
     print(encoded)
 
+    print("\nFOR LOCAL VALIDATION TESTING USE THESE IN THE SOAP-API.ENV:")
+    print(f"CERT_DATA={cert_text!r}\n")
+    with open(path_key) as f:
+        key_text = f.read()
+        print(f"KEY_DATA={key_text!r}")
+
 
 # Before running this command run
 # `make init && make db-seed-local-with-agencies && make run-logs`
