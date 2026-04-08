@@ -6,23 +6,51 @@ import { getFormLink } from "./form-navigation-utils";
 export interface FillFieldDefinition {
   testId?: string;
   selector?: string;
-  getByText?: string;
-  textExact?: boolean;
+  optionTestIdPrefix?: string;
   hasTextRegex?: string;
-  type: "text" | "dropdown" | "checkbox" | "file";
+  getByText?: string;
+  useDataAsText?: boolean;
+  textExact?: boolean;
+  dependsOn?: {
+    field: string;
+    value: string | boolean;
+  };
+  type:
+    | "text"
+    | "dropdown"
+    | "file"
+    | "radiobutton"
+    | "checkbox"
+    | "combo-box-input";
   section?: string;
   field: string;
 }
 
 /**
- * Determines whether a checkbox field should be activated during form filling.
- * Returns true for boolean true, or any string that isn't "false".
+ * Determines whether a radio button or checkbox field should be activated (checked/selected) during form filling.
+ *
+ * Usage:
+ * - Used in form automation to decide if a radio or checkbox should be interacted with, based on the provided data value.
+ * - Returns true if the data is boolean true, or a string that is not undefined and not equal to "false" (case-insensitive).
+ * - Returns false for boolean false, undefined, or the string "false".
  */
 function shouldActivateField(data: string | boolean | undefined): boolean {
   if (typeof data === "boolean") {
     return data;
   }
+
   return data !== undefined && data.toLowerCase() !== "false";
+}
+
+function shouldFillField(
+  field: FillFieldDefinition,
+  formData: Record<string, string>,
+): boolean {
+  if (!field.dependsOn) {
+    return true;
+  }
+
+  return formData[field.dependsOn.field] === String(field.dependsOn.value);
 }
 
 export type FormFillFieldDefinitions = {
@@ -58,12 +86,60 @@ export async function fillField(
     ? `${field.section}-${field.field}`
     : field.field;
   try {
+    if (data === undefined) {
+      await testInfo.attach(`fillField-${fieldIdentifier}-skipped`, {
+        body: `Skipped ${fieldIdentifier}: no data provided`,
+        contentType: "text/plain",
+      });
+      return;
+    }
+
     if (
-      field.type === "dropdown" &&
-      field.selector &&
-      typeof data === "string"
+      (field.type === "dropdown" ||
+        field.type === "combo-box-input" ||
+        field.type === "text" ||
+        field.type === "file") &&
+      typeof data !== "string"
     ) {
-      await selectDropdownByValueOrLabel(page, field.selector, data);
+      throw new Error(
+        `Field ${fieldIdentifier} requires string data, received ${typeof data}`,
+      );
+    }
+    if (field.type === "dropdown") {
+      // Validate data type
+      if (typeof data !== "string") {
+        throw new Error(
+          `Dropdown field ${fieldIdentifier} requires string data, received ${typeof data}`,
+        );
+      }
+
+      // Handle selector-based dropdown (native <select>)
+      if (field.selector) {
+        await selectDropdownByValueOrLabel(page, field.selector, data);
+        return;
+      }
+
+      // Handle testId-based dropdown (custom component)
+      if (field.testId) {
+        const locator = page.getByTestId(`${field.testId}${data}`);
+        await locator.waitFor({ state: "visible", timeout: 5000 });
+        await locator.click();
+        return;
+      }
+
+      // Fail fast if misconfigured
+      throw new Error(
+        `Dropdown field ${fieldIdentifier} is missing selector or testId`,
+      );
+    } else if (field.type === "combo-box-input" && field.testId) {
+      const toggleLocator = page.getByTestId(field.testId);
+      await toggleLocator.waitFor({ state: "visible", timeout: 5000 });
+      await toggleLocator.click();
+
+      const optionPrefix = field.optionTestIdPrefix ?? "combo-box-option-";
+      const optionLocator = page.getByTestId(`${optionPrefix}${data}`);
+      await optionLocator.waitFor({ state: "visible", timeout: 5000 });
+      await optionLocator.click();
     } else if (
       field.type === "text" &&
       field.testId &&
@@ -73,19 +149,41 @@ export async function fillField(
       await locator.waitFor({ state: "attached", timeout: 5000 });
       await locator.fill(data);
     } else if (
+      field.type === "radiobutton" &&
+      (field.testId || field.selector || field.getByText || field.useDataAsText)
+    ) {
+      if (shouldActivateField(data)) {
+        let locator = field.getByText
+          ? page.getByText(field.getByText, {
+              exact: field.textExact ?? false,
+            })
+          : field.selector
+            ? page.locator(field.selector)
+            : field.testId
+              ? page.getByTestId(field.testId)
+              : page.getByText(String(data), {
+                  exact: field.textExact ?? field.useDataAsText ?? false,
+                });
+        if (field.hasTextRegex) {
+          locator = locator.filter({ hasText: new RegExp(field.hasTextRegex) });
+        }
+        await locator.waitFor({ state: "visible", timeout: 5000 });
+        await locator.click();
+      }
+    } else if (
       field.type === "checkbox" &&
       (field.testId || field.selector || field.getByText)
     ) {
       if (shouldActivateField(data)) {
         let locator = field.getByText
-          ? page.getByText(field.getByText, { exact: field.textExact ?? false })
+          ? page.getByText(field.getByText, {
+              exact: field.textExact ?? false,
+            })
           : field.selector
             ? page.locator(field.selector)
             : page.getByTestId(field.testId as string);
         if (field.hasTextRegex) {
-          locator = locator.filter({
-            hasText: new RegExp(field.hasTextRegex),
-          });
+          locator = locator.filter({ hasText: new RegExp(field.hasTextRegex) });
         }
         await locator.waitFor({ state: "visible", timeout: 5000 });
         try {
@@ -109,7 +207,7 @@ export async function fillField(
     } else if (field.type === "file" && (field.testId || field.selector)) {
       if (typeof data !== "string") {
         throw new Error(
-          `File field ${fieldIdentifier} requires a string file path, received ${typeof data}`,
+          `File field ${fieldIdentifier} requires string data (file path), received ${typeof data}`,
         );
       }
       const locator = field.selector
@@ -192,6 +290,9 @@ export async function fillForm(
 
     for (const fieldDefinition of Object.entries(fields)) {
       const [fieldIdentifier, fieldConfig] = fieldDefinition;
+      if (!shouldFillField(fieldConfig, data as Record<string, string>)) {
+        continue;
+      }
       const dataForField = data[fieldIdentifier];
       await fillField(testInfo, page, fieldConfig, dataForField);
     }
