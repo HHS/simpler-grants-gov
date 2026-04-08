@@ -110,6 +110,16 @@ function mockSavedOpportunitiesByScope({
       if (scope === INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE) {
         return Promise.resolve(individuallySavedOpportunities);
       }
+      // The page now fetches DEFAULT scope separately to determine whether the
+      // user has any saved opportunities at all, so always return the combined
+      // list for that unfiltered request.
+      if (
+        scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
+        statusFilter === undefined &&
+        organizationIdsFilter === undefined
+      ) {
+        return Promise.resolve(combinedSavedOpportunities);
+      }
 
       if (
         scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE ||
@@ -133,6 +143,7 @@ describe("Saved Opportunities page", () => {
       combinedSavedOpportunities: [],
       individuallySavedOpportunities: [],
     });
+
     getSessionMock.mockResolvedValue({
       token: "test-token",
       user_id: "user-1",
@@ -378,6 +389,15 @@ describe("Saved Opportunities page", () => {
         if (scope === INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE) {
           return Promise.resolve([]);
         }
+        if (
+          scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
+          statusFilter === undefined &&
+          organizationIdsFilter === undefined
+        ) {
+          return Promise.resolve([
+            { opportunity_id: forecastedOpportunity.opportunity_id },
+          ]);
+        }
 
         if (
           scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
@@ -467,19 +487,20 @@ describe("Saved Opportunities page", () => {
 
         if (
           scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
-          statusFilter === "archived" &&
-          organizationIdsFilter === null
-        ) {
-          return Promise.resolve([]);
-        }
-
-        if (
-          scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
-          organizationIdsFilter === null
+          statusFilter === undefined &&
+          organizationIdsFilter === undefined
         ) {
           return Promise.resolve([
             { opportunity_id: mockOpportunity.opportunity_id },
           ]);
+        }
+
+        if (
+          scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
+          statusFilter === "archived" &&
+          organizationIdsFilter === null
+        ) {
+          return Promise.resolve([]);
         }
 
         return Promise.resolve([]);
@@ -497,14 +518,79 @@ describe("Saved Opportunities page", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText("statusFilter.label")).toBeInTheDocument();
   });
+  it("keeps filters visible and shows filtered empty state when the selected organization has no saved opportunities", async () => {
+    savedOpportunitiesMock.mockImplementation(
+      (
+        scope: SavedOpportunitiesScope,
+        statusFilter?: string,
+        organizationIdsFilter?: string[] | null,
+      ) => {
+        if (scope === INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE) {
+          return Promise.resolve([
+            { opportunity_id: mockOpportunity.opportunity_id },
+          ]);
+        }
+
+        if (
+          scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
+          statusFilter === undefined &&
+          organizationIdsFilter === undefined
+        ) {
+          return Promise.resolve([
+            { opportunity_id: mockOpportunity.opportunity_id },
+          ]);
+        }
+
+        if (
+          scope.scope === "organization" &&
+          organizationIdsFilter?.includes("org-1")
+        ) {
+          return Promise.resolve([]);
+        }
+
+        return Promise.resolve([]);
+      },
+    );
+
+    getUserOrganizationsMock.mockResolvedValue([
+      {
+        organization_id: "org-1",
+        sam_gov_entity: {
+          legal_business_name: "Alpha Org",
+          expiration_date: "",
+          uei: "",
+          ebiz_poc_email: "",
+          ebiz_poc_first_name: "",
+          ebiz_poc_last_name: "",
+        },
+      },
+    ]);
+
+    const component = await SavedOpportunities({
+      params: localeParams,
+      searchParams: Promise.resolve({ savedBy: "organization:org-1" }),
+    });
+    render(component);
+
+    expect(screen.getByLabelText("ownershipFilter.label")).toBeInTheDocument();
+    expect(screen.getByLabelText("statusFilter.label")).toBeInTheDocument();
+    expect(
+      screen.getByText("SavedOpportunities.noMatchingStatus"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("noSavedCTAParagraphOne"),
+    ).not.toBeInTheDocument();
+  });
 
   it("passes organization filter to fetchSavedOpportunities", async () => {
     const savedBy = "organization:org-1";
+
     const component = await SavedOpportunities({
       params: localeParams,
       searchParams: Promise.resolve({ savedBy }),
     });
     render(component);
+
     expect(savedOpportunitiesMock).toHaveBeenCalledWith(
       getScopeFromSavedByQueryParam(savedBy),
       undefined,
