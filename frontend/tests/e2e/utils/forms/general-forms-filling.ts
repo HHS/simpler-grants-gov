@@ -207,6 +207,7 @@ export async function fillField(
 
       const inputName = await locator.getAttribute("name");
       const inputId = await locator.getAttribute("id");
+      const fileName = data.split(/[/\\]/).pop() ?? data;
 
       await locator.setInputFiles(data);
 
@@ -217,13 +218,31 @@ export async function fillField(
           : null;
 
       if (hiddenInputSelector) {
+        // Wait for the uploaded filename to appear in the UI before proceeding.
+        // Webkit renders the post-upload filename span more slowly, so use a
+        // generous timeout matching the file-input wait above.
         await page.waitForFunction(
-          ({ selector }) => {
+          ({ selector, uploadedFileName }) => {
             const hiddenInput =
               document.querySelector<HTMLInputElement>(selector);
-            return Boolean(hiddenInput?.value);
+
+            if (!hiddenInput?.value) {
+              return false;
+            }
+
+            const fieldContainer =
+              hiddenInput.closest(".usa-form-group, .simpler-formgroup") ??
+              hiddenInput.parentElement;
+
+            if (!fieldContainer) {
+              return false;
+            }
+
+            return Array.from(fieldContainer.querySelectorAll("span")).some(
+              (span) => span.textContent?.trim() === uploadedFileName,
+            );
           },
-          { selector: hiddenInputSelector },
+          { selector: hiddenInputSelector, uploadedFileName: fileName },
           { timeout: 60000 },
         );
       }
