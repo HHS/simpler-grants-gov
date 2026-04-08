@@ -38,6 +38,18 @@ on:
         type: boolean
         default: false
         description: Skip vulnerability scans while deploying
+  workflow_call:
+    inputs:
+      skip_checks:
+        required: true
+        type: boolean
+        default: false
+        description: Skip unit tests, lint, etc while deploying
+      skip_vuln_scans:
+        required: true
+        type: boolean
+        default: false
+        description: Skip vulnerability scans while deploying
 
 jobs:
   api-checks:
