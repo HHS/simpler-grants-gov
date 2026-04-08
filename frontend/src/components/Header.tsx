@@ -307,6 +307,7 @@ const NavLinks = ({
       items={navItems}
       mobileExpanded={mobileExpanded}
       onToggleMobileNav={onToggleMobileNav}
+      className="padding-bottom-05"
     ></PrimaryNav>
   );
 };
