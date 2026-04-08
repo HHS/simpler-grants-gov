@@ -48,4 +48,5 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checks skipped
+        working-directory: ./
         run: exit 0
