@@ -33,7 +33,7 @@ on:
         type: boolean
         default: false
         description: Skip unit tests, lint, etc while deploying
-     skip_vuln_scans:
+      skip_vuln_scans:
         required: true
         type: boolean
         default: false
