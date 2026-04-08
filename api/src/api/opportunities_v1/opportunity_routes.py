@@ -257,11 +257,10 @@ def opportunity_search(
     arg_name="search_params",
     examples=csv_examples,
 )
-@api_key_multi_auth.login_required
+@opportunity_blueprint.auth_required(api_key_multi_auth)
 @opportunity_blueprint.doc(
     description=SHARED_ALPHA_DESCRIPTION,
     summary="Search opportunities and return CSV",
-    security=api_key_multi_auth_security_schemes,
     responses={200: {"content": {"text/csv": {}}}},  # type: ignore
 )
 @flask_opensearch.with_search_client()
