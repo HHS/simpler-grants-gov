@@ -1,11 +1,15 @@
 import logging
+import time
+from typing import Any
 from uuid import UUID
 
 import flask
+from flask import current_app, stream_with_context
 
 import src.adapters.search.flask_opensearch as flask_opensearch
 from src.adapters import db, search
 from src.adapters.db import flask_db
+from src.adapters.db.flask_db import get_db
 from src.api import response
 from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
@@ -879,3 +883,33 @@ def user_saved_opportunities_notifications(
         set_saved_opportunity_notification_settings(db_session, user, json_data)
 
     return response.ApiResponse(message="Success")
+
+
+@user_blueprint.get("/<uuid:user_id>/stream-test")
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+def user_stream_test(user_id: UUID) -> Any:
+    user = jwt_or_api_user_key_multi_auth.get_user()
+
+    # Verify the authenticated user matches the requested user_id
+    if user.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    # this is hacky, need to keep the DB session open after returning from this method
+    # will look into an alternative way.
+    with get_db(current_app, client_name="default").get_session() as db_session:
+
+        def generate() -> Any:
+            with db_session.begin():
+
+                for i in range(90):
+                    db_session.add(user)
+                    db_session.refresh(user)
+
+                    # yield f"<p>{user.user_id}, {user.first_name}, {user.last_name}</p>\n"
+                    logger.info(f"Iteration #{i}")
+                    yield str(i) + "---" + str(user.for_json()) + "---" + str(
+                        user.profile.for_json() if user.profile else ""
+                    ) + "\n"
+                    time.sleep(1)
+
+        return stream_with_context(generate())
