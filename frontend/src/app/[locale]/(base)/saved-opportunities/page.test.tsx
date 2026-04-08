@@ -10,6 +10,7 @@ import {
 import { SavedOpportunitiesScope } from "src/types/opportunity/savedOpportunitiesTypes";
 import {
   DEFAULT_SAVED_OPPORTUNITY_SCOPE,
+  getScopeFromSavedByQueryParam,
   INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
 } from "src/utils/opportunity/savedOpportunitiesUtils";
 import { mockOpportunity } from "src/utils/testing/fixtures";
@@ -91,23 +92,6 @@ jest.mock("src/components/Breadcrumbs", () => ({
   },
 }));
 
-beforeEach(() => {
-  jest.clearAllMocks();
-
-  mockSavedOpportunitiesByScope({
-    combinedSavedOpportunities: [],
-    individuallySavedOpportunities: [],
-  });
-
-  getSessionMock.mockResolvedValue({
-    token: "test-token",
-    user_id: "user-1",
-    email: "test@example.com",
-  });
-
-  getUserOrganizationsMock.mockResolvedValue([]);
-});
-
 const defaultSearchParams = Promise.resolve({});
 
 function mockSavedOpportunitiesByScope({
@@ -118,14 +102,20 @@ function mockSavedOpportunitiesByScope({
   individuallySavedOpportunities?: MinimalOpportunity[];
 }) {
   savedOpportunitiesMock.mockImplementation(
-    (scope: SavedOpportunitiesScope, statusFilter?: string) => {
+    (
+      scope: SavedOpportunitiesScope,
+      statusFilter?: string,
+      organizationIdsFilter?: string[] | null,
+    ) => {
       if (scope === INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE) {
         return Promise.resolve(individuallySavedOpportunities);
       }
 
       if (
         scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE ||
-        statusFilter !== undefined
+        scope.scope === "organization" ||
+        statusFilter !== undefined ||
+        organizationIdsFilter !== undefined
       ) {
         return Promise.resolve(combinedSavedOpportunities);
       }
@@ -143,6 +133,12 @@ describe("Saved Opportunities page", () => {
       combinedSavedOpportunities: [],
       individuallySavedOpportunities: [],
     });
+    getSessionMock.mockResolvedValue({
+      token: "test-token",
+      user_id: "user-1",
+      email: "test@example.com",
+    });
+    getUserOrganizationsMock.mockResolvedValue([]);
   });
 
   it("renders intro text for user with no saved opportunities", async () => {
@@ -165,7 +161,6 @@ describe("Saved Opportunities page", () => {
     render(component);
 
     expect(screen.getByTestId("mock-breadcrumbs")).toBeInTheDocument();
-
     expect(mockBreadcrumbs).toHaveBeenCalledWith({
       breadcrumbList: [
         {
@@ -330,7 +325,6 @@ describe("Saved Opportunities page", () => {
     });
 
     opportunityMock.mockResolvedValue({ data: mockOpportunity });
-
     getUserOrganizationsMock.mockResolvedValue([
       {
         organization_id: "org-1",
@@ -376,14 +370,19 @@ describe("Saved Opportunities page", () => {
     };
 
     savedOpportunitiesMock.mockImplementation(
-      (scope: SavedOpportunitiesScope, statusFilter?: string) => {
+      (
+        scope: SavedOpportunitiesScope,
+        statusFilter?: string,
+        organizationIdsFilter?: string[] | null,
+      ) => {
         if (scope === INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE) {
           return Promise.resolve([]);
         }
 
         if (
           scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
-          statusFilter === "forecasted"
+          statusFilter === "forecasted" &&
+          organizationIdsFilter === null
         ) {
           return Promise.resolve([
             { opportunity_id: forecastedOpportunity.opportunity_id },
@@ -450,7 +449,6 @@ describe("Saved Opportunities page", () => {
     expect(
       screen.getByRole("link", { name: /Test Opportunity/i }),
     ).toBeInTheDocument();
-
     expect(
       screen.getByRole("link", { name: /Forecasted Opportunity/i }),
     ).toBeInTheDocument();
@@ -458,19 +456,27 @@ describe("Saved Opportunities page", () => {
 
   it("shows no matching status message when API returns no opportunities for filter", async () => {
     savedOpportunitiesMock.mockImplementation(
-      (scope: SavedOpportunitiesScope, statusFilter?: string) => {
+      (
+        scope: SavedOpportunitiesScope,
+        statusFilter?: string,
+        organizationIdsFilter?: string[] | null,
+      ) => {
         if (scope === INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE) {
           return Promise.resolve([]);
         }
 
         if (
           scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
-          statusFilter === "archived"
+          statusFilter === "archived" &&
+          organizationIdsFilter === null
         ) {
           return Promise.resolve([]);
         }
 
-        if (scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE) {
+        if (
+          scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
+          organizationIdsFilter === null
+        ) {
           return Promise.resolve([
             { opportunity_id: mockOpportunity.opportunity_id },
           ]);
@@ -493,15 +499,14 @@ describe("Saved Opportunities page", () => {
   });
 
   it("passes organization filter to fetchSavedOpportunities", async () => {
+    const savedBy = "organization:org-1";
     const component = await SavedOpportunities({
       params: localeParams,
-      searchParams: Promise.resolve({
-        savedBy: "organization:org-1",
-      }),
+      searchParams: Promise.resolve({ savedBy }),
     });
     render(component);
     expect(savedOpportunitiesMock).toHaveBeenCalledWith(
-      DEFAULT_SAVED_OPPORTUNITY_SCOPE,
+      getScopeFromSavedByQueryParam(savedBy),
       undefined,
       ["org-1"],
     );

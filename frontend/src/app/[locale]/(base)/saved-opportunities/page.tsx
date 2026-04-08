@@ -5,7 +5,9 @@ import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpport
 import { Organization } from "src/types/applicationResponseTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import {
-  getScopeFromUrlParams,
+  DEFAULT_SAVED_OPPORTUNITY_SCOPE,
+  getSavedOpportunitiesScopeOrganizationIds,
+  getScopeFromSavedByQueryParam,
   INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
 } from "src/utils/opportunity/savedOpportunitiesUtils";
 
@@ -16,10 +18,6 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { SavedOpportunitiesController } from "src/components/saved-opportunities/SavedOpportunitiesController";
-import {
-  getOrganizationIdsFilter,
-  parseOwnershipFilterValue,
-} from "src/components/saved-opportunities/savedOpportunitiesOwnershipFilter";
 import SavedOpportunityOwnershipFilter from "src/components/saved-opportunities/SavedOpportunityOwnershipFilter";
 import SavedOpportunityStatusFilter from "src/components/saved-opportunities/SavedOpportunityStatusFilter";
 import { USWDSIcon } from "src/components/USWDSIcon";
@@ -76,23 +74,21 @@ export default async function SavedOpportunities({
     }
   }
 
-  // Get saved opportunities scope from URL params. If invalid or not provided
-  // will default to all individual saved opportunities + organization saved opportunities
-  // that the user is a member of.
-  const savedOpportunitiesScope = getScopeFromUrlParams();
+  const savedOpportunitiesScope = getScopeFromSavedByQueryParam(savedBy);
+  const organizationIdsFilter =
+    getSavedOpportunitiesScopeOrganizationIds(savedOpportunitiesScope);
 
-  // Convert the UI ownership filter into the API's organization_ids filter.
-  // API semantics:
-  // - null => show all
-  // - [] => individual only
-  // - ["org-id"] => specific organization only
-  const ownershipFilter = parseOwnershipFilterValue(savedBy);
-  const organizationIdsFilter = getOrganizationIdsFilter(ownershipFilter);
-  // Fetch saved opportunities for the current page scope and selected filters.
   const savedOpportunities = await fetchSavedOpportunities(
     savedOpportunitiesScope,
     status,
     organizationIdsFilter,
+  );
+
+  // Fetch all saved opportunities separately so we can distinguish:
+  // - user has no saved opportunities at all
+  // - current filter returns no saved opportunities
+  const allSavedOpportunities = await fetchSavedOpportunities(
+    DEFAULT_SAVED_OPPORTUNITY_SCOPE,
   );
 
   // Fetch individually saved opportunities separately so the UI can preserve
@@ -102,15 +98,8 @@ export default async function SavedOpportunities({
     INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
   );
 
-  let hasSavedOpportunities = savedOpportunities.length > 0;
-  if (!hasSavedOpportunities && status) {
-    const allSavedOpportunities = await fetchSavedOpportunities(
-      savedOpportunitiesScope,
-      undefined,
-      organizationIdsFilter,
-    );
-    hasSavedOpportunities = allSavedOpportunities.length > 0;
-  }
+  const hasFilteredSavedOpportunities = savedOpportunities.length > 0;
+  const hasAnySavedOpportunities = allSavedOpportunities.length > 0;
 
   const opportunityPromises = savedOpportunities.map(
     async (savedOpportunity) => {
@@ -150,7 +139,7 @@ export default async function SavedOpportunities({
         <h1 className="margin-top-0">{t("SavedOpportunities.heading")}</h1>
       </GridContainer>
       <div className="grid-container padding-y-5">
-        {hasSavedOpportunities ? (
+        {hasAnySavedOpportunities ? (
           <>
             <div className="margin-bottom-3 display-flex flex-column tablet:flex-row flex-justify-end tablet:flex-align-end">
               <div className="margin-bottom-2 tablet:margin-bottom-0 tablet:margin-right-2">
@@ -161,7 +150,8 @@ export default async function SavedOpportunities({
               </div>
               <SavedOpportunityStatusFilter status={status || null} />
             </div>
-            {resolvedOpportunities.length > 0 ? (
+
+            {hasFilteredSavedOpportunities ? (
               <SavedOpportunitiesController
                 opportunities={resolvedOpportunities}
                 organizations={organizations}

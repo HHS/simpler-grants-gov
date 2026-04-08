@@ -14,8 +14,14 @@ export const DEFAULT_SAVED_OPPORTUNITY_SCOPE: SavedOpportunitiesScope =
 export function getSavedOpportunitiesScopeOrganizationIds(
   scope: SavedOpportunitiesScope,
 ): string[] | null {
-  if (scope.scope === "all") return null;
-  if (scope.scope === "individual") return [];
+  if (scope.scope === "all") {
+    return null;
+  }
+
+  if (scope.scope === "individual") {
+    return [];
+  }
+
   return scope.organizationIds;
 }
 
@@ -23,11 +29,11 @@ export function getSavedOpportunitiesScopeOrganizationIds(
  * Get the saved opportunities scope data from URL params. If the params are not
  * valid, will fall back to default scope of "all".
  *
- * Valid scope param combinations
- *  ?scope=individual
- *  ?scope=all
- *  ?scope=organization&organization_id=<uuid>
- *  ?organization_id=<uuid>
+ * Valid scope param combinations:
+ *   ?scope=individual
+ *   ?scope=all
+ *   ?scope=organization&organization_id=<uuid>
+ *   ?organization_id=<uuid>
  *
  * @param scope all|individual|organization
  * @param organization_id uuid of organization. If this is specified, scope is ignored
@@ -37,8 +43,39 @@ export function getScopeFromUrlParams(
   scope?: string,
   organization_id?: string,
 ): SavedOpportunitiesScope {
-  if (scope === "individual" || scope === "all") return { scope };
-  if (organization_id)
+  if (scope === "individual" || scope === "all") {
+    return { scope };
+  }
+
+  if (organization_id) {
     return { scope: "organization", organizationIds: [organization_id] };
+  }
+
+  return DEFAULT_SAVED_OPPORTUNITY_SCOPE;
+}
+
+/**
+ * Get the saved opportunities scope from the savedBy query param used by the
+ * saved opportunities ownership filter.
+ *
+ * Supported values:
+ * - undefined / null / "all" -> all saved opportunities
+ * - "individual" -> individually saved opportunities only
+ * - "organization:<uuid>" -> opportunities saved by that organization only
+ */
+export function getScopeFromSavedByQueryParam(
+  savedBy?: string | null,
+): SavedOpportunitiesScope {
+  if (savedBy === "individual") {
+    return INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE;
+  }
+
+  if (savedBy?.startsWith("organization:")) {
+    return {
+      scope: "organization",
+      organizationIds: [savedBy.replace("organization:", "")],
+    };
+  }
+
   return DEFAULT_SAVED_OPPORTUNITY_SCOPE;
 }
