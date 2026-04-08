@@ -50,7 +50,7 @@ export const sf424HappyPathTestData = {
   program_income_estimated_funding: "25000",
   application_subject_to: "c. Program is not covered by E.O. 12372.",
   state_review_available_date: "2026-12-01",
-  delinquent_federal_debt: "true",
+  delinquent_federal_debt: "Yes",
   debt_explanation_attachment: `${TEST_UPLOAD_DIR}/sample-upload-kb.pdf`,
   certification_agree: "true",
   authorized_representative_prefix: "Prefix 21",
