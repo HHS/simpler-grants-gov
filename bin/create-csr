@@ -1,0 +1,81 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# Creates a private key and Certificate Signing Request (CSR) for a domain.
+#
+# Output files are named after the fully qualified domain name and placed in
+# the certs/ directory:
+#   certs/<domain>.key  - RSA private key
+#   certs/<domain>.csr  - Certificate Signing Request
+#
+# Examples:
+#   bin/create-csr            (uses simpler.grants.gov)
+#   bin/create-csr api
+#   bin/create-csr api.simpler.grants.gov
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+BASE_DOMAIN="simpler.grants.gov"
+
+# CSR subject fields
+COUNTRY="US"
+ORGANIZATION="Simpler Grants Gov"
+KEY_BITS=4096
+OUTPUT_DIR="/tmp"
+
+usage() {
+  echo "Usage: $0 [domain]"
+  echo
+  echo "  domain    Short name (e.g. 'api') or fully qualified (e.g. 'api.simpler.grants.gov')"
+  echo "            '.simpler.grants.gov' is appended automatically if not present."
+  echo "            Omit to use the base domain '${BASE_DOMAIN}' directly."
+  exit 1
+}
+
+# Default to base domain if no argument is provided
+if [[ $# -lt 1 ]]; then
+  INPUT_DOMAIN="$BASE_DOMAIN"
+else
+  INPUT_DOMAIN="$1"
+fi
+
+# Append the base domain suffix if not already present
+if [[ "$INPUT_DOMAIN" == *".$BASE_DOMAIN" ]] || [[ "$INPUT_DOMAIN" == "$BASE_DOMAIN" ]]; then
+  DOMAIN="$INPUT_DOMAIN"
+else
+  DOMAIN="${INPUT_DOMAIN}.${BASE_DOMAIN}"
+fi
+
+KEY_FILE="${OUTPUT_DIR}/${DOMAIN}.key"
+CSR_FILE="${OUTPUT_DIR}/${DOMAIN}.csr"
+
+# Validate openssl is available
+if ! command -v openssl &> /dev/null; then
+  echo "Error: openssl is required but not found in PATH" >&2
+  exit 1
+fi
+
+# Create output directory if it does not exist
+mkdir -p "$OUTPUT_DIR"
+
+# Warn if key file already exists
+if [[ -f "$KEY_FILE" ]]; then
+  echo "Warning: Key file already exists: ${KEY_FILE}"
+  echo "Overwriting..."
+fi
+
+echo "Generating RSA private key..."
+openssl genrsa -out "$KEY_FILE" "$KEY_BITS" 2>/dev/null
+chmod 600 "$KEY_FILE"
+
+echo "Generating CSR..."
+openssl req -new \
+  -key "$KEY_FILE" \
+  -out "$CSR_FILE" \
+  -subj "/C=${COUNTRY}/O=${ORGANIZATION}/CN=${DOMAIN}"
+
+echo
+echo "======================================"
+echo "Output files"
+echo "======================================"
+echo "  Private key : ${KEY_FILE}"
+echo "  CSR         : ${CSR_FILE}"
