@@ -1,5 +1,7 @@
 from enum import StrEnum
 
+from marshmallow import RAISE
+
 from src.api.competition_alpha.competition_schema import CompetitionAlphaSchema
 from src.api.schemas.extension import Schema, fields, validators
 from src.api.schemas.response_schema import (
@@ -536,6 +538,28 @@ class OpportunitySearchRequestV1Schema(Schema):
             "default": SearchResponseFormat.JSON,
         },
     )
+
+
+class OpportunitySearchCSVRequestV1Schema(Schema):
+    query = fields.String(
+        metadata={
+            "description": "Query string which searches against several text fields",
+            "example": "research",
+        },
+        validate=[validators.Length(min=1, max=100)],
+    )
+    query_operator = fields.Enum(
+        SearchQueryOperator,
+        load_default=SearchQueryOperator.AND,
+        metadata={
+            "description": "Query operator for combining search conditions",
+            "example": "OR",
+        },
+    )
+    filters = fields.Nested(OpportunitySearchFilterV1Schema())
+
+    class Meta:
+        unknown = RAISE
 
 
 class OpportunityGetResponseV1Schema(AbstractResponseSchema):

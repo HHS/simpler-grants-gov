@@ -10,6 +10,7 @@ from tests.src.db.models.factories import OpportunityFactory, UserApiKeyFactory
     "method,url,body",
     [
         ("POST", "/v1/opportunities/search", get_search_request()),
+        ("POST", "/v1/opportunities/search/csv", get_search_request()),
         ("GET", "/v1/opportunities/1", None),
     ],
 )
@@ -25,6 +26,7 @@ def test_opportunity_unauthorized_401_api_user_key(client, method, url, body):
     "method,url,body",
     [
         ("POST", "/v1/opportunities/search", get_search_request()),
+        ("POST", "/v1/opportunities/search/csv", get_search_request()),
         ("GET", "/v1/opportunities/1", None),
     ],
 )
@@ -88,6 +90,23 @@ def test_opportunity_search_with_inactive_api_user_key(client, enable_factory_cr
 
     response = client.post(
         "/v1/opportunities/search",
+        json=get_search_request(),
+        headers={"X-API-Key": inactive_api_key.key_id},
+    )
+
+    assert response.status_code == 401
+    assert response.get_json()["message"] == "API key is inactive"
+
+
+def test_opportunity_search_csv_with_inactive_api_user_key(
+    client, enable_factory_create, db_session
+):
+    """Test opportunity search CSV endpoint with inactive API user key"""
+    inactive_api_key = UserApiKeyFactory.create(is_active=False)
+    db_session.commit()
+
+    response = client.post(
+        "/v1/opportunities/search/csv",
         json=get_search_request(),
         headers={"X-API-Key": inactive_api_key.key_id},
     )

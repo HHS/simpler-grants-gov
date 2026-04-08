@@ -331,8 +331,13 @@ paths:
           content:
             application/json:
               schema:
+<<<<<<< Updated upstream
                 $ref: '#/components/schemas/OpportunitySearchResponseV1Schema'
             application/octet-stream: {}
+=======
+                $ref: '#/components/schemas/OpportunitySearchResponseV1'
+            text/csv: {}
+>>>>>>> Stashed changes
           description: Successful response
         '422':
           content:
@@ -690,6 +695,69 @@ paths:
               $ref: '#/components/schemas/FormUpdateRequestSchema'
       security:
       - ApiUserKeyAuth: []
+  /v1/opportunities/search/csv:
+    post:
+      parameters: []
+      responses:
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Authentication error
+        '200':
+          content:
+            text/csv: {}
+      tags:
+      - Opportunity v1
+      summary: Search opportunities and return CSV
+      description: '
+
+        This API is in active development as we build out new functionalities for
+        Simpler.Grants.gov.
+
+        It is currently stable for everyday use, and will be versioned with advance
+        notice for any breaking changes.
+
+
+        Learn more in our [API documentation](https://wiki.simpler.grants.gov/product/api).
+
+        See [Release Phases](https://github.com/github/roadmap?tab=readme-ov-file#release-phases)
+        for further details.
+
+        '
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunitySearchCSVRequestV1'
+            examples:
+              example1:
+                summary: No filters
+                value: {}
+              example2:
+                summary: Query and filters
+                value:
+                  query: research
+                  query_operator: OR
+                  filters:
+                    agency:
+                      one_of:
+                      - USAID
+                      - DOC
+                    opportunity_status:
+                      one_of:
+                      - forecasted
+                      - posted
+      security:
+      - ApiUserKeyAuth: []
+      - ApiKeyAuth: []
   /common-grants/opportunities:
     get:
       parameters:
@@ -5880,6 +5948,48 @@ components:
       - form_ui_schema
       - form_version
       - short_form_name
+<<<<<<< Updated upstream
+=======
+    FormUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type:
+          - object
+          $ref: '#/components/schemas/FormAlpha'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    OpportunitySearchCSVRequestV1:
+      type: object
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Query string which searches against several text fields
+          example: research
+        query_operator:
+          default: !!python/object/apply:src.api.opportunities_v1.opportunity_schemas.SearchQueryOperator
+          - AND
+          description: Query operator for combining search conditions
+          example: OR
+          enum:
+          - AND
+          - OR
+          type:
+          - string
+        filters:
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunitySearchFilterV1'
+      additionalProperties: false
+>>>>>>> Stashed changes
     OppStatus:
       type: object
       properties:

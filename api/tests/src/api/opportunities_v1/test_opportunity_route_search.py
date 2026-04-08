@@ -2,6 +2,7 @@ import base64
 import csv
 import re
 from datetime import date
+from unittest.mock import patch
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -1891,3 +1892,66 @@ class TestOpportunityRouteSearch(BaseTestClass):
                 assert row["award_floor"] is not None
                 assert row["award_ceiling"] is not None
                 assert row["post_date"] is not None
+
+    def test_opportunity_search_csv_endpoint_returns_csv(
+        self, client, user_api_key_id, monkeypatch
+    ):
+        monkeypatch.setenv("FRONTEND_BASE_URL", "https://example.com")
+        search_request = {"filters": {"is_cost_sharing": {"one_of": [True, False]}}}
+        resp = client.post(
+            "/v1/opportunities/search/csv", json=search_request, headers={"X-API-Key": user_api_key_id}
+        )
+
+        assert resp.status_code == 200
+        assert "text/csv" in resp.headers["Content-Type"]
+        assert "attachment; filename=opportunity_search_results_" in resp.headers.get(
+            "Content-Disposition", ""
+        )
+
+        reader = csv.DictReader(resp.text.split("\n"))
+        rows = list(reader)
+        assert "opportunity_id" in reader.fieldnames
+        assert len(rows) > 0
+
+    def test_opportunity_search_csv_endpoint_rejects_format_field_422(self, client, user_api_key_id):
+        search_request = get_search_request(is_cost_sharing_one_of=[True, False])
+        search_request["format"] = "json"
+        resp = client.post(
+            "/v1/opportunities/search/csv", json=search_request, headers={"X-API-Key": user_api_key_id}
+        )
+
+        assert resp.status_code == 422
+
+    def test_opportunity_search_csv_endpoint_rejects_pagination_422(self, client, user_api_key_id):
+        search_request = get_search_request(is_cost_sharing_one_of=[True, False])
+        resp = client.post(
+            "/v1/opportunities/search/csv", json=search_request, headers={"X-API-Key": user_api_key_id}
+        )
+
+        assert resp.status_code == 422
+
+    def test_opportunity_search_csv_endpoint_invalid_request_422(self, client, user_api_key_id):
+        resp = client.post(
+            "/v1/opportunities/search/csv",
+            json={"invalid": "data"},
+            headers={"X-API-Key": user_api_key_id},
+        )
+
+        assert resp.status_code == 422
+
+    @patch("src.api.opportunities_v1.opportunity_routes.search_opportunities")
+    @patch("src.api.opportunities_v1.opportunity_routes.search_opportunities_csv")
+    def test_opportunity_search_format_csv_uses_optimized_service_path(
+        self, mock_search_csv, mock_search_json, client, user_api_key_id
+    ):
+        mock_search_csv.return_value = []
+        search_request = get_search_request(format="csv")
+
+        resp = client.post(
+            "/v1/opportunities/search", json=search_request, headers={"X-API-Key": user_api_key_id}
+        )
+
+        assert resp.status_code == 200
+        assert "text/csv" in resp.headers["Content-Type"]
+        mock_search_csv.assert_called_once()
+        mock_search_json.assert_not_called()
