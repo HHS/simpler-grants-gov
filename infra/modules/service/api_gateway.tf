@@ -41,7 +41,7 @@ locals {
       ".well-known/pki-validation"  = [],
       "alpha/applications"          = [],
       "alpha/forms"                 = [],
-      "grantsws-agency/services"    = [{ "timeout_milliseconds" : 900000, "response_transfer_mode" : "STREAM" }],
+      "grantsws-agency/services"    = [],
       "grantsws-applicant/services" = [],
       "static/{proxy+}" = [{
         "method" : "ANY",
@@ -100,6 +100,8 @@ locals {
         "request_parameters" : {
           "integration.request.path.service_port_name" : "method.request.path.service_port_name",
         }
+        "timeout_milliseconds" : 900000,
+        "response_transfer_mode" : "STREAM"
       }],
       "grantsws-applicant/services/v2/{service_port_name}" = [{
         "method" : "POST",
