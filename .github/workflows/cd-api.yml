@@ -28,9 +28,15 @@ on:
         required: true
         default: "main"
         description: Tag or branch or SHA to deploy
+      skip_checks:
+        required: true
+        type: boolean
+        default: false
+        description: Skip unit tests, lint, etc while deploying
 
 jobs:
   api-checks:
+    if: inputs.skip_checks == false
     name: Run API Checks
     uses: ./.github/workflows/ci-api.yml
 
