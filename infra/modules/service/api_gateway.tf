@@ -41,7 +41,7 @@ locals {
       ".well-known/pki-validation"  = [],
       "alpha/applications"          = [],
       "alpha/forms"                 = [],
-      "grantsws-agency/services"    = [],
+      "grantsws-agency/services"    = [{ "timeout_milliseconds" : 900000, "response_transfer_mode" : "STREAM" }],
       "grantsws-applicant/services" = [],
       "static/{proxy+}" = [{
         "method" : "ANY",
