@@ -208,8 +208,17 @@ export async function fillField(
       const inputName = await locator.getAttribute("name");
       const inputId = await locator.getAttribute("id");
       const fileName = data.split(/[/\\]/).pop() ?? data;
+      const fieldContainer = locator.locator(
+        "xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' usa-form-group ') or contains(concat(' ', normalize-space(@class), ' '), ' simpler-formgroup ')][1]",
+      );
 
       await locator.setInputFiles(data);
+
+      await fieldContainer
+        .locator("span")
+        .filter({ hasText: fileName })
+        .first()
+        .waitFor({ state: "visible", timeout: 30000 });
 
       const hiddenInputSelector = inputName
         ? `input[type="hidden"][name="${inputName}"]`
