@@ -52,7 +52,7 @@ jobs:
     name: Run API Checks
     uses: ./.github/workflows/ci-api.yml
     with:
-      skip_checks: ${{ inputs.skip_checks != null && inputs.skip_checks == false }}
+      skip_checks: ${{ inputs.skip_checks != null && inputs.skip_checks != false }}
 
   vulnerability-scans:
     name: Vulnerability Scans
