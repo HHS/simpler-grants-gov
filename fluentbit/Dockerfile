@@ -5,7 +5,7 @@
 FROM buildpack-deps:oracular AS build
 
 # Copy the fluentbit binary from the official image.
-FROM fluent/fluent-bit:4.0.14-amd64@sha256:f2a3b358f6481e636cc60e7dedd786431c78517ad5360c65b17d785dce8cf84f AS fluentbit
+FROM fluent/fluent-bit:4.2.3.1-amd64@sha256:56aa5b426f113b6322cda5f33323e6e80f1af7a7780a2c043bd25e00c3e8fa6a AS fluentbit
 
 FROM build AS release
 
