@@ -89,40 +89,36 @@ def _setup_agency_and_users(db_session: db.Session) -> Agency:
         logger.info(f"Created agency: {agency.agency_code}")
 
     user1_id = uuid.UUID("660e8400-e29b-41d4-a716-446655440000")
-    if not db_session.get(User, user1_id):
-        UserBuilder(user1_id, db_session, "AR User - Award Recommendation User").with_oauth_login(
-            "ar_rec_user1"
-        ).with_api_key("ar_rec_user1_key").with_jwt_auth().with_agency(
-            agency, roles=[AWARD_RECOMMENDATION_USER]
-        ).build()
-        logger.info("Created user: ar_rec_user1 (Award Recommendation User)")
+    UserBuilder(user1_id, db_session, "AR User - Award Recommendation User").with_oauth_login(
+        "ar_rec_user1"
+    ).with_api_key("ar_rec_user1_key").with_jwt_auth().with_agency(
+        agency, roles=[AWARD_RECOMMENDATION_USER]
+    ).build()
+    logger.info("Created user: ar_rec_user1 (Award Recommendation User)")
 
     user2_id = uuid.UUID("660e8400-e29b-41d4-a716-446655440001")
-    if not db_session.get(User, user2_id):
-        UserBuilder(user2_id, db_session, "AR User - Award Recommendation User").with_oauth_login(
-            "ar_rec_user2"
-        ).with_api_key("ar_rec_user2_key").with_jwt_auth().with_agency(
-            agency, roles=[AWARD_RECOMMENDATION_USER]
-        ).build()
-        logger.info("Created user: ar_rec_user2 (Award Recommendation User)")
+    UserBuilder(user2_id, db_session, "AR User - Award Recommendation User").with_oauth_login(
+        "ar_rec_user2"
+    ).with_api_key("ar_rec_user2_key").with_jwt_auth().with_agency(
+        agency, roles=[AWARD_RECOMMENDATION_USER]
+    ).build()
+    logger.info("Created user: ar_rec_user2 (Award Recommendation User)")
 
     user3_id = uuid.UUID("660e8400-e29b-41d4-a716-446655440002")
-    if not db_session.get(User, user3_id):
-        UserBuilder(user3_id, db_session, "AR User - Program Officer").with_oauth_login(
-            "ar_program_officer"
-        ).with_api_key("ar_program_officer_key").with_jwt_auth().with_agency(
-            agency, roles=[GRANTOR_PROGRAM_OFFICER]
-        ).build()
-        logger.info("Created user: ar_program_officer (Grantor Program Officer)")
+    UserBuilder(user3_id, db_session, "AR User - Program Officer").with_oauth_login(
+        "ar_program_officer"
+    ).with_api_key("ar_program_officer_key").with_jwt_auth().with_agency(
+        agency, roles=[GRANTOR_PROGRAM_OFFICER]
+    ).build()
+    logger.info("Created user: ar_program_officer (Grantor Program Officer)")
 
     user4_id = uuid.UUID("660e8400-e29b-41d4-a716-446655440003")
-    if not db_session.get(User, user4_id):
-        UserBuilder(user4_id, db_session, "AR User - Budget Officer").with_oauth_login(
-            "ar_budget_officer"
-        ).with_api_key("ar_budget_officer_key").with_jwt_auth().with_agency(
-            agency, roles=[GRANTOR_BUDGET_OFFICER]
-        ).build()
-        logger.info("Created user: ar_budget_officer (Grantor Budget Officer)")
+    UserBuilder(user4_id, db_session, "AR User - Budget Officer").with_oauth_login(
+        "ar_budget_officer"
+    ).with_api_key("ar_budget_officer_key").with_jwt_auth().with_agency(
+        agency, roles=[GRANTOR_BUDGET_OFFICER]
+    ).build()
+    logger.info("Created user: ar_budget_officer (Grantor Budget Officer)")
 
     logger.info("✓ Created 1 agency and 4 users with different AR roles")
     logger.info("")
