@@ -264,9 +264,7 @@ def opportunity_search(
     responses={200: {"content": {"text/csv": {}}}},  # type: ignore
 )
 @flask_opensearch.with_search_client()
-def opportunity_search_csv(
-    search_client: search.SearchClient, search_params: dict
-) -> Response:
+def opportunity_search_csv(search_client: search.SearchClient, search_params: dict) -> Response:
     add_extra_data_to_current_request_logs(flatten_dict(search_params, prefix="request.body"))
     logger.info("POST /v1/opportunities/search/csv")
 

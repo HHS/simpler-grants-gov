@@ -1899,7 +1899,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
         monkeypatch.setenv("FRONTEND_BASE_URL", "https://example.com")
         search_request = {"filters": {"is_cost_sharing": {"one_of": [True, False]}}}
         resp = client.post(
-            "/v1/opportunities/search/csv", json=search_request, headers={"X-API-Key": user_api_key_id}
+            "/v1/opportunities/search/csv",
+            json=search_request,
+            headers={"X-API-Key": user_api_key_id},
         )
 
         assert resp.status_code == 200
@@ -1913,11 +1915,15 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert "opportunity_id" in reader.fieldnames
         assert len(rows) > 0
 
-    def test_opportunity_search_csv_endpoint_rejects_format_field_422(self, client, user_api_key_id):
+    def test_opportunity_search_csv_endpoint_rejects_format_field_422(
+        self, client, user_api_key_id
+    ):
         search_request = get_search_request(is_cost_sharing_one_of=[True, False])
         search_request["format"] = "json"
         resp = client.post(
-            "/v1/opportunities/search/csv", json=search_request, headers={"X-API-Key": user_api_key_id}
+            "/v1/opportunities/search/csv",
+            json=search_request,
+            headers={"X-API-Key": user_api_key_id},
         )
 
         assert resp.status_code == 422
@@ -1925,7 +1931,9 @@ class TestOpportunityRouteSearch(BaseTestClass):
     def test_opportunity_search_csv_endpoint_rejects_pagination_422(self, client, user_api_key_id):
         search_request = get_search_request(is_cost_sharing_one_of=[True, False])
         resp = client.post(
-            "/v1/opportunities/search/csv", json=search_request, headers={"X-API-Key": user_api_key_id}
+            "/v1/opportunities/search/csv",
+            json=search_request,
+            headers={"X-API-Key": user_api_key_id},
         )
 
         assert resp.status_code == 422

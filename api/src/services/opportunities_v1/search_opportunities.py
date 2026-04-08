@@ -18,13 +18,13 @@ from src.search.search_models import (
     IntSearchFilter,
     StrSearchFilter,
 )
-from src.services.opportunities_v1.opportunity_to_csv import CSV_FIELDS
 from src.services.opportunities_v1.experimental_constant import (
     AGENCY,
     DEFAULT,
     EXPANDED,
     ScoringRule,
 )
+from src.services.opportunities_v1.opportunity_to_csv import CSV_FIELDS
 from src.services.service_utils import _add_search_filters, _adjust_field_name
 
 logger = logging.getLogger(__name__)
@@ -367,7 +367,9 @@ def search_opportunities(
     return records, response.aggregations, pagination_info
 
 
-def search_opportunities_csv(search_client: search.SearchClient, raw_search_params: dict) -> Sequence[dict]:
+def search_opportunities_csv(
+    search_client: search.SearchClient, raw_search_params: dict
+) -> Sequence[dict]:
     csv_search_params = SearchOpportunityParams.model_validate(
         raw_search_params | {"pagination": CSV_EXPORT_PAGINATION}
     )

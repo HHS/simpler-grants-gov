@@ -23,9 +23,7 @@ def test_opportunity_search_csv_schema_accepts_query_filters_only():
 @pytest.mark.parametrize("field_name", ["pagination", "format"])
 def test_opportunity_search_csv_schema_rejects_non_contract_fields(field_name):
     schema = OpportunitySearchCSVRequestV1Schema()
-    payload = {
-        field_name: "csv" if field_name == "format" else {"page_offset": 1, "page_size": 25}
-    }
+    payload = {field_name: "csv" if field_name == "format" else {"page_offset": 1, "page_size": 25}}
 
     with pytest.raises(ValidationError) as exc_info:
         schema.load(payload)
