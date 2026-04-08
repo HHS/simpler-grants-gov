@@ -56,7 +56,7 @@ jobs:
     name: Run API Checks
     uses: ./.github/workflows/ci-api.yml
     with:
-      skip_checks: inputs.skip_checks
+      skip_checks: inputs.skip_checks != null && inputs.skip_checks == false
 
   vulnerability-scans:
     name: Vulnerability Scans
@@ -64,6 +64,7 @@ jobs:
     with:
       app_name: api
       fail_on_vulns: ${{ ! (contains(fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.ref_name == 'main' && '["staging"]' || '["dev"]'), 'staging') || contains(fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.ref_name == 'main' && '["staging"]' || '["dev"]'), 'dev')) }}
+      skip_vuln_scans: inputs.skip_vuln_scans != null && inputs.skip_vuln_scans == false
 
   deploy:
     name: Deploy
