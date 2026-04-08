@@ -21,8 +21,7 @@ export interface FillFieldDefinition {
     | "file"
     | "radiobutton"
     | "checkbox"
-    | "combo-box-input"
-    ;
+    | "combo-box-input";
   section?: string;
   field: string;
 }
@@ -62,15 +61,6 @@ function shouldFillField(
   }
 
   return formData[field.dependsOn.field] === String(field.dependsOn.value);
-}
-
-function getInputNameFromSelector(selector?: string): string | null {
-  if (!selector) {
-    return null;
-  }
-
-  const match = selector.match(/name="([^"]+)"/);
-  return match?.[1] ?? null;
 }
 
 export async function fillField(
@@ -214,18 +204,26 @@ export async function fillField(
       // than desktop Chrome, so 5000ms is insufficient.
       await locator.waitFor({ state: "attached", timeout: 30000 });
       await locator.scrollIntoViewIfNeeded();
+
+      const inputName = await locator.getAttribute("name");
+      const inputId = await locator.getAttribute("id");
+
       await locator.setInputFiles(data);
 
-      const inputName = getInputNameFromSelector(field.selector);
-      if (inputName) {
+      const hiddenInputSelector = inputName
+        ? `input[type="hidden"][name="${inputName}"]`
+        : inputId
+          ? `input[type="hidden"][name="${inputId}"], input[type="hidden"]#${inputId}`
+          : null;
+
+      if (hiddenInputSelector) {
         await page.waitForFunction(
-          ({ name }) => {
-            const hiddenInput = document.querySelector<HTMLInputElement>(
-              `input[type="hidden"][name="${name}"]`,
-            );
+          ({ selector }) => {
+            const hiddenInput =
+              document.querySelector<HTMLInputElement>(selector);
             return Boolean(hiddenInput?.value);
           },
-          { name: inputName },
+          { selector: hiddenInputSelector },
           { timeout: 60000 },
         );
       }
