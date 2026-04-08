@@ -147,7 +147,7 @@ def confirm_application_delivery(
     return legacy_tracking_number
 
 
-def confirm_application_delivery_response(
+def get_confirm_application_delivery_response(
     grants_gov_tracking_number: str,
 ) -> grantor_schemas.ConfirmApplicationDeliveryResponseSOAPEnvelope:
     """Build the SOAP response envelope from the gathered data."""

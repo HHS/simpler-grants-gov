@@ -7,7 +7,7 @@ from src.db.models.competition_models import ApplicationSubmissionRetrieved
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
 from src.legacy_soap_api.grantors.services.confirm_application_delivery_response import (
     confirm_application_delivery,
-    confirm_application_delivery_response,
+    get_confirm_application_delivery_response,
 )
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientUserDoesNotHavePermission
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
@@ -90,7 +90,7 @@ class TestConfirmApplicationDeliveryResponse:
             soap_config=_make_operation_config(),
         )
 
-        result = confirm_application_delivery_response(
+        result = get_confirm_application_delivery_response(
             grants_gov_tracking_number=tracking_number,
         )
 
@@ -205,7 +205,7 @@ class TestConfirmApplicationDeliveryResponse:
             soap_config=_make_operation_config(),
         )
 
-        result = confirm_application_delivery_response(
+        result = get_confirm_application_delivery_response(
             grants_gov_tracking_number=tracking_number,
         )
 
@@ -302,7 +302,7 @@ class TestConfirmApplicationDeliveryResponse:
     def test_response_envelope_dict_structure(self):
         tracking_number = "GRANT12345678"
 
-        result = confirm_application_delivery_response(
+        result = get_confirm_application_delivery_response(
             grants_gov_tracking_number=tracking_number,
         )
 
