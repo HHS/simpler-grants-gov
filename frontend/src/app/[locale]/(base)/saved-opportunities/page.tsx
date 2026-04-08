@@ -75,8 +75,9 @@ export default async function SavedOpportunities({
   }
 
   const savedOpportunitiesScope = getScopeFromSavedByQueryParam(savedBy);
-  const organizationIdsFilter =
-    getSavedOpportunitiesScopeOrganizationIds(savedOpportunitiesScope);
+  const organizationIdsFilter = getSavedOpportunitiesScopeOrganizationIds(
+    savedOpportunitiesScope,
+  );
 
   const savedOpportunities = await fetchSavedOpportunities(
     savedOpportunitiesScope,
