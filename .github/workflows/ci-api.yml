@@ -41,3 +41,11 @@ jobs:
 
       - name: Start tests
         run: make test-coverage
+
+  skip-checks:
+    if: ${{ inputs.skip_checks != null && inputs.skip_checks == true }}
+    name: Skip Checks
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checks skipped
+        run: exit 0
