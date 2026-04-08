@@ -370,8 +370,13 @@ def search_opportunities(
 def search_opportunities_csv(
     search_client: search.SearchClient, raw_search_params: dict
 ) -> Sequence[dict]:
+    # Preserve caller-provided pagination/sort for `/opportunities/search` with `format=csv`.
+    # Only apply export pagination defaults for the dedicated `/opportunities/search/csv` endpoint,
+    # which does not accept pagination in its request schema.
     csv_search_params = SearchOpportunityParams.model_validate(
-        raw_search_params | {"pagination": CSV_EXPORT_PAGINATION}
+        raw_search_params
+        if raw_search_params.get("pagination") is not None
+        else raw_search_params | {"pagination": CSV_EXPORT_PAGINATION}
     )
     response = _search_opportunities(
         search_client,
