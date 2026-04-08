@@ -10,7 +10,7 @@ from tests.src.db.models.factories import OpportunityFactory, UserApiKeyFactory
     "method,url,body",
     [
         ("POST", "/v1/opportunities/search", get_search_request()),
-        ("POST", "/v1/opportunities/search/csv", get_search_request()),
+        ("POST", "/v1/opportunities/search/csv", {}),
         ("GET", "/v1/opportunities/1", None),
     ],
 )
@@ -26,7 +26,7 @@ def test_opportunity_unauthorized_401_api_user_key(client, method, url, body):
     "method,url,body",
     [
         ("POST", "/v1/opportunities/search", get_search_request()),
-        ("POST", "/v1/opportunities/search/csv", get_search_request()),
+        ("POST", "/v1/opportunities/search/csv", {}),
         ("GET", "/v1/opportunities/1", None),
     ],
 )
@@ -107,7 +107,7 @@ def test_opportunity_search_csv_with_inactive_api_user_key(
 
     response = client.post(
         "/v1/opportunities/search/csv",
-        json=get_search_request(),
+        json={},
         headers={"X-API-Key": inactive_api_key.key_id},
     )
 
