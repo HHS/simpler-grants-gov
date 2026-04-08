@@ -1,9 +1,9 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
-import NotFound from "src/app/[locale]/(base)/not-found";
 import getFormData from "src/utils/getFormData";
 
 import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 
 import PrintForm from "src/components/applyForm/PrintForm";
 import { addPrintWidgetToFields } from "src/components/applyForm/utils";
@@ -65,7 +65,7 @@ export default async function FormPage({ params }: FormPageProps) {
   });
 
   if (error || !data) {
-    if (error === "NotFound") return <NotFound />;
+    if (error === "NotFound") notFound();
     return <TopLevelError />;
   }
 

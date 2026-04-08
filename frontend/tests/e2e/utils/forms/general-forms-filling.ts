@@ -217,16 +217,68 @@ export async function fillField(
       // than desktop Chrome, so 5000ms is insufficient.
       await locator.waitFor({ state: "attached", timeout: 30000 });
       await locator.scrollIntoViewIfNeeded();
+
+      const inputName = await locator.getAttribute("name");
+      const inputId = await locator.getAttribute("id");
+      const hiddenInputSelector = inputName
+        ? `input[type="hidden"][name="${inputName}"]`
+        : inputId
+          ? `input[type="hidden"][name="${inputId}"], input[type="hidden"]#${inputId}`
+          : null;
+
       await locator.setInputFiles(data);
+
+      const fileName = data.split(/[/\\]/).pop() ?? data;
+
       // Wait for the uploaded filename to appear in the UI before proceeding.
       // Webkit renders the post-upload filename span more slowly, so use a
       // generous timeout matching the file-input wait above.
-      const fileName = data.split("/").pop() ?? data;
-      await page
-        .locator(`span:has-text("${fileName}")`)
-        .waitFor({ state: "visible", timeout: 30000 });
+      if (hiddenInputSelector) {
+        await page
+          .locator(hiddenInputSelector)
+          .locator(
+            "xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' usa-form-group ') or contains(concat(' ', normalize-space(@class), ' '), ' simpler-formgroup ')][1]",
+          )
+          .locator("span")
+          .filter({ hasText: fileName })
+          .first()
+          .waitFor({ state: "visible", timeout: 30000 });
+      } else {
+        await page
+          .locator(`span:has-text("${fileName}")`)
+          .waitFor({ state: "visible", timeout: 30000 });
+      }
+
+      if (hiddenInputSelector) {
+        await page.waitForFunction(
+          ({ selector, uploadedFileName }) => {
+            const hiddenInput =
+              document.querySelector<HTMLInputElement>(selector);
+
+            if (!hiddenInput?.value) {
+              return false;
+            }
+
+            const fieldContainer =
+              hiddenInput.closest(".usa-form-group, .simpler-formgroup") ??
+              hiddenInput.parentElement;
+
+            if (!fieldContainer) {
+              return false;
+            }
+
+            return Array.from(fieldContainer.querySelectorAll("span")).some(
+              (span) => span.textContent?.trim() === uploadedFileName,
+            );
+          },
+          { selector: hiddenInputSelector, uploadedFileName: fileName },
+          { timeout: 60000 },
+        );
+      }
     } else {
-      console.error("unsupported field type or selector type", field);
+      throw new Error(
+        `Unsupported or invalid field configuration for ${fieldIdentifier}`,
+      );
     }
 
     await testInfo.attach(`fillField-${fieldIdentifier}-success`, {
@@ -262,6 +314,7 @@ export async function fillForm(
   data: Record<string, string | boolean>,
   returnToApplication = true,
 ): Promise<void> {
+  const SAVE_BUTTON_TIMEOUT_MS = 30000;
   const { formName, fields, saveButtonTestId } = config;
 
   const applicationURL = page.url();
@@ -294,6 +347,16 @@ export async function fillForm(
         continue;
       }
       const dataForField = data[fieldIdentifier];
+      if (dataForField === undefined) {
+        continue;
+      }
+      if (!shouldFillField(fieldConfig, data)) {
+        await testInfo.attach(`fillField-${fieldIdentifier}-skipped`, {
+          body: `Skipped ${fieldIdentifier}: dependency ${fieldConfig.dependsOn?.field} did not match ${fieldConfig.dependsOn?.value}`,
+          contentType: "text/plain",
+        });
+        continue;
+      }
       await fillField(testInfo, page, fieldConfig, dataForField);
     }
 
@@ -304,7 +367,12 @@ export async function fillForm(
     }
 
     await page.waitForTimeout(500);
-    await page.getByTestId(saveButtonTestId).click();
+    const saveButton = page.getByTestId(saveButtonTestId);
+    await saveButton.waitFor({
+      state: "visible",
+      timeout: SAVE_BUTTON_TIMEOUT_MS,
+    });
+    await saveButton.click({ timeout: SAVE_BUTTON_TIMEOUT_MS });
 
     if (returnToApplication) {
       await page.goto(applicationURL);

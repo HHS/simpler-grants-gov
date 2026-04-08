@@ -42,6 +42,10 @@ from src.constants.lookup_constants import (
     ApplicationStatus,
     ApprovalResponseType,
     ApprovalType,
+    AwardRecommendationAttachmentType,
+    AwardRecommendationAuditEvent,
+    AwardRecommendationReviewType,
+    AwardRecommendationRiskType,
     AwardRecommendationStatus,
     AwardRecommendationType,
     AwardSelectionMethod,
@@ -267,7 +271,11 @@ class CustomProvider(BaseProvider):
 
     # This is to help with the unique agency code conflicts
     AGENCY_CODE_FORMATS = [
-        "???",
+        # We don't make anything of format ???
+        # To avoid overlap with real agencies as we
+        # saw tests just happen to match exactly
+        # and get a unique constraint issue
+        "FAKE???",
         "????",
         "???-??",
         "???-???",
@@ -927,7 +935,7 @@ class OpportunityAttachmentFactory(BaseFactory):
                 Does this location exist? If you are running in unit tests, make sure
                 `enable_factory_create` is pulled in as a fixture to your test.
 
-                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                 """
             ) from e
 
@@ -968,6 +976,73 @@ class AwardRecommendationFactory(BaseFactory):
     review_workflow_id = factory.LazyAttribute(lambda s: s.review_workflow.workflow_id)
 
 
+class AwardRecommendationAttachmentFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationAttachment
+
+    award_recommendation_attachment_id = Generators.UuidObj
+
+    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
+    award_recommendation_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation.award_recommendation_id
+    )
+    file_contents = factory.Faker("sentence")
+    file_name = factory.Faker("file_name", extension="pdf")
+    file_location = factory.LazyAttribute(
+        lambda o: f"s3://local-mock-public-bucket/award-recommendations/{o.award_recommendation_id}/attachments/{o.award_recommendation_attachment_id}/{o.file_name}"
+    )
+    award_recommendation_attachment_type = factory.fuzzy.FuzzyChoice(
+        AwardRecommendationAttachmentType
+    )
+    uploading_user = factory.SubFactory("tests.src.db.models.factories.UserFactory")
+    uploading_user_id = factory.LazyAttribute(lambda s: s.uploading_user.user_id)
+    is_deleted = False
+
+    @classmethod
+    def _build(cls, model_class, *args, **kwargs):
+        kwargs.pop("file_contents")  # Not a model field
+        return super()._build(model_class, *args, **kwargs)
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        file_contents = kwargs.pop("file_contents")
+        attachment = super()._create(model_class, *args, **kwargs)
+
+        try:
+            with file_util.open_stream(attachment.file_location, "w") as my_file:
+                my_file.write(file_contents)
+        except Exception as e:
+            raise Exception(
+                f"""There was an error writing your attachment to {attachment.file_location}.
+
+                Does this location exist? If you are running in unit tests, make sure
+                `enable_factory_create` is pulled in as a fixture to your test.
+
+                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
+                """
+            ) from e
+
+        return attachment
+
+
+class AwardRecommendationRiskFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationRisk
+
+    award_recommendation_risk_id = Generators.UuidObj
+
+    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
+    award_recommendation_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation.award_recommendation_id
+    )
+    award_recommendation_risk_number = factory.LazyAttribute(
+        lambda _: f"RISK-{random.randint(1, 99999999):08d}"
+    )
+    award_recommendation_risk_type = AwardRecommendationRiskType.ADDITIONAL_MONITORING
+    comment = factory.Faker("paragraph")
+    is_deleted = False
+
+
 class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
     class Meta:
         model = award_recommendation_models.AwardRecommendationApplicationSubmission
@@ -993,6 +1068,36 @@ class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
         lambda s: s.award_recommendation_submission_detail.award_recommendation_submission_detail_id
     )
 
+    class Params:
+        recommended_for_funding = factory.Trait(
+            award_recommendation_submission_detail__award_recommendation_type=AwardRecommendationType.RECOMMENDED_FOR_FUNDING,
+            award_recommendation_submission_detail__recommended_amount=50000,
+        )
+        recommended_without_funding = factory.Trait(
+            award_recommendation_submission_detail__award_recommendation_type=AwardRecommendationType.RECOMMENDED_WITHOUT_FUNDING,
+            award_recommendation_submission_detail__recommended_amount=0,
+        )
+        not_recommended = factory.Trait(
+            award_recommendation_submission_detail__award_recommendation_type=AwardRecommendationType.NOT_RECOMMENDED,
+            award_recommendation_submission_detail__recommended_amount=0,
+        )
+
+
+class AwardRecommendationRiskSubmissionFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationRiskSubmission
+
+    award_recommendation_risk = factory.SubFactory(AwardRecommendationRiskFactory)
+    award_recommendation_risk_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation_risk.award_recommendation_risk_id
+    )
+    award_recommendation_application_submission = factory.SubFactory(
+        AwardRecommendationApplicationSubmissionFactory
+    )
+    award_recommendation_application_submission_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation_application_submission.award_recommendation_application_submission_id
+    )
+
 
 class AwardRecommendationSubmissionDetailFactory(BaseFactory):
     class Meta:
@@ -1008,6 +1113,94 @@ class AwardRecommendationSubmissionDetailFactory(BaseFactory):
     award_recommendation_type = sometimes_none(factory.fuzzy.FuzzyChoice(AwardRecommendationType))
     has_exception = False
     exception_detail = sometimes_none(factory.Faker("paragraph"))
+
+
+class AwardRecommendationReviewFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationReview
+
+    award_recommendation_review_id = Generators.UuidObj
+
+    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
+    award_recommendation_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation.award_recommendation_id
+    )
+    award_recommendation_review_type = factory.fuzzy.FuzzyChoice(AwardRecommendationReviewType)
+    is_reviewed = False
+
+
+class AwardRecommendationAuditFactory(BaseFactory):
+    class Meta:
+        model = award_recommendation_models.AwardRecommendationAudit
+
+    award_recommendation_audit_id = Generators.UuidObj
+
+    award_recommendation = factory.SubFactory(AwardRecommendationFactory)
+    award_recommendation_id = factory.LazyAttribute(
+        lambda s: s.award_recommendation.award_recommendation_id
+    )
+    user = factory.SubFactory("tests.src.db.models.factories.UserFactory")
+    user_id = factory.LazyAttribute(lambda s: s.user.user_id)
+
+    award_recommendation_audit_event = AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_CREATED
+
+    class Params:
+        is_created = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_CREATED,
+        )
+        is_updated = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_UPDATED,
+        )
+        is_attachment_created = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.ATTACHMENT_CREATED,
+            award_recommendation_attachment=factory.SubFactory(
+                AwardRecommendationAttachmentFactory,
+                award_recommendation=factory.SelfAttribute("..award_recommendation"),
+            ),
+            award_recommendation_attachment_id=factory.LazyAttribute(
+                lambda s: s.award_recommendation_attachment.award_recommendation_attachment_id
+            ),
+        )
+        is_attachment_deleted = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.ATTACHMENT_DELETED,
+            award_recommendation_attachment=factory.SubFactory(
+                AwardRecommendationAttachmentFactory,
+                award_recommendation=factory.SelfAttribute("..award_recommendation"),
+            ),
+            award_recommendation_attachment_id=factory.LazyAttribute(
+                lambda s: s.award_recommendation_attachment.award_recommendation_attachment_id
+            ),
+        )
+        is_risk_created = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.RISK_CREATED,
+            award_recommendation_risk=factory.SubFactory(
+                AwardRecommendationRiskFactory,
+                award_recommendation=factory.SelfAttribute("..award_recommendation"),
+            ),
+            award_recommendation_risk_id=factory.LazyAttribute(
+                lambda s: s.award_recommendation_risk.award_recommendation_risk_id
+            ),
+        )
+        is_review_created = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.REVIEW_CREATED,
+            award_recommendation_review=factory.SubFactory(
+                AwardRecommendationReviewFactory,
+                award_recommendation=factory.SelfAttribute("..award_recommendation"),
+            ),
+            award_recommendation_review_id=factory.LazyAttribute(
+                lambda s: s.award_recommendation_review.award_recommendation_review_id
+            ),
+        )
+        is_application_submission_updated = factory.Trait(
+            award_recommendation_audit_event=AwardRecommendationAuditEvent.APPLICATION_SUBMISSION_UPDATED,
+            award_recommendation_application_submission=factory.SubFactory(
+                AwardRecommendationApplicationSubmissionFactory,
+                award_recommendation=factory.SelfAttribute("..award_recommendation"),
+            ),
+            award_recommendation_application_submission_id=factory.LazyAttribute(
+                lambda s: s.award_recommendation_application_submission.award_recommendation_application_submission_id
+            ),
+        )
 
 
 ###################
@@ -1349,7 +1542,7 @@ class CompetitionInstructionFactory(BaseFactory):
                 Does this location exist? If you are running in unit tests, make sure
                 `enable_factory_create` is pulled in as a fixture to your test.
 
-                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                 """
             ) from e
 
@@ -1390,7 +1583,7 @@ class FormInstructionFactory(BaseFactory):
                 Does this location exist? If you are running in unit tests, make sure
                 `enable_factory_create` is pulled in as a fixture to your test.
 
-                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                 """
             ) from e
 
@@ -1650,7 +1843,7 @@ class ApplicationAttachmentFactory(BaseFactory):
                     Does this location exist? If you are running in unit tests, make sure
                     `enable_factory_create` is pulled in as a fixture to your test.
 
-                    If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                    If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                     """
             ) from e
 
@@ -1708,7 +1901,7 @@ class ApplicationSubmissionFactory(BaseFactory):
                     Does this location exist? If you are running in unit tests, make sure
                     `enable_factory_create` is pulled in as a fixture to your test.
 
-                    If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                    If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                     """
             ) from e
 

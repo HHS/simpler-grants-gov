@@ -5,8 +5,9 @@ on:
       run_id:
         description: "github actions id for run to grab artifacts from"
         type: string
-      artifact-ids:
-        description: "comma separated string of test report artifact ids to download"
+      target:
+        description: "application environment the test was run against"
+        default: "local"
         type: string
 env:
   NODE_VERSION: 24
@@ -37,9 +38,8 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           path: frontend/all-blob-reports
-          # artifact-ids: ${{ inputs.artifact-ids }}
           run-id: ${{ inputs.run_id }}
-          pattern: blob-report-shard-*
+          pattern: blob-report-shard-${{ inputs.target }}-*
           merge-multiple: true
       - name: Verify Downloaded Artifacts
         run: |
@@ -54,6 +54,6 @@ jobs:
       - name: Upload Merged HTML Report
         uses: actions/upload-artifact@v6
         with:
-          name: merged-html-report
+          name: merged-html-report-${{ inputs.target }}
           path: frontend/playwright-report
           retention-days: 30

@@ -1,29 +1,28 @@
-import io
 import logging
 import os
 import re
 import tempfile
 from contextlib import ExitStack
 from dataclasses import dataclass, field
+from urllib.parse import quote
 
 import click
 import requests
 from lxml import etree
+from pydantic import Field
 
 import src.adapters.db as db
 import src.logging
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
-from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
-from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
-from src.legacy_soap_api.legacy_soap_api_utils import get_alternate_proxy_response
+from src.util.env_config import PydanticBaseEnvConfig
 from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
 
 """
-Add following to soap-api.env
+Add following to local.env
 CERT_DATA =
 KEY_DATA =
 SOAP_URI =
@@ -35,8 +34,15 @@ To run use: `make validate-simpler-endpoints``
 """
 
 
-SOAP_URI = os.getenv("SOAP_URI", b"")
-HEADERS = {"Content-Type": "application/xml"}
+class SOAPValidationEnvConfig(PydanticBaseEnvConfig):
+    cert_data: str = Field(alias="CERT_DATA")
+    key_data: str = Field(alias="KEY_DATA")
+    soap_uri: str = Field(alias="SOAP_URI")
+
+
+_config = SOAPValidationEnvConfig()
+
+HEADERS = {"Content-Type": "application/xml", "Use-Simpler-Override": "1", "Use-Soap-Cert": "1"}
 
 
 @dataclass
@@ -50,19 +56,26 @@ class ValidateSoapContext:
         self.cert, self.key = get_credentials(self.stack)
 
 
+def get_response(soap_context: ValidateSoapContext, request_operation: str) -> requests.Response:
+    cert = _config.cert_data
+    encoded = quote(cert, safe="")
+    headers = {"X-Amzn-Mtls-Clientcert": encoded, **HEADERS}
+    data = REQUEST_BODY[request_operation]
+    return requests.post(
+        _config.soap_uri,
+        data=data,
+        headers=headers,
+        cert=(soap_context.cert, soap_context.key),
+        timeout=10,
+    )
+
+
 def get_temp_files(stack: ExitStack) -> dict:
+    # Training Environment wsdl: https://trainingws.grants.gov/grantsws-agency/services/v2/AgencyWebServicesSoapPort?wsdl
+    # Production Environment wsdl: https://ws07.grants.gov/grantsws-agency/services/v2/AgencyWebServicesSoapPort?wsdl
+    # see: https://www.grants.gov/system-to-system/grantor-system-to-system/versions-wsdls
     dependencies = {
-        "GrantsFundingSynopsis-V2.0": "https://trainingapply.grants.gov/apply/system/schemas/GrantsFundingSynopsis-V2.0.xsd",
-        "GrantsCommonElements-V1.0": "https://trainingapply.grants.gov/apply/system/schemas/GrantsCommonElements-V1.0.xsd",
-        "GrantsCommonTypes-V1.0": "https://trainingapply.grants.gov/apply/system/schemas/GrantsCommonTypes-V1.0.xsd",
-        "GrantsOpportunity-V1.0": "https://trainingapply.grants.gov/apply/system/schemas/GrantsOpportunity-V1.0.xsd",
-        "GrantsForecastSynopsis-V1.0": "https://trainingapply.grants.gov/apply/system/schemas/GrantsForecastSynopsis-V1.0.xsd",
-        "GrantsPackage-V1.0": "https://trainingapply.grants.gov/apply/system/schemas/GrantsPackage-V1.0.xsd",
-        "GrantsTemplate-V1.0": "https://trainingapply.grants.gov/apply/system/schemas/GrantsTemplate-V1.0.xsd",
-        "GrantsRelatedDocument-V1.0": "https://trainingapply.grants.gov/apply/system/schemas/GrantsRelatedDocument-V1.0.xsd",
-        "AgencyManagePackage-V1.0": "https://trainingapply.grants.gov/apply/system/schemas/AgencyManagePackage-V1.0.xsd",
-        "AgencyUpdateApplicationInfo-V1.0": "https://trainingapply.grants.gov/apply/system/schemas/AgencyUpdateApplicationInfo-V1.0.xsd",
-        "AgencyWebServices-V2.0": "https://trainingws.grants.gov/grantsws-agency/services/v2/AgencyWebServicesSoapPort?wsdl",
+        "AgencyWebServices-V2.0.wsdl": "https://ws07.grants.gov/grantsws-agency/services/v2/AgencyWebServicesSoapPort?wsdl",
     }
     temp_files = {}
     for key, url in dependencies.items():
@@ -76,138 +89,179 @@ def get_temp_files(stack: ExitStack) -> dict:
     return temp_files
 
 
-def get_xml_schema_bytes(temp_files: dict, soap_context: ValidateSoapContext) -> bytes:
-    TARGET_URI = "http://apply.grants.gov/services/AgencyWebServices-V2.0"
-    filepath = "/api/tests/validate_legacy_soap_api/cache/AgencyWebServices-V2.0"
-    f = soap_context.stack.enter_context(open(filepath, "rb"))
-    wsdl_root = etree.fromstring(f.read())
-    NS = {"wsdl": "http://schemas.xmlsoap.org/wsdl/", "xs": "http://www.w3.org/2001/XMLSchema"}
-    schema_xpath_query = f".//xs:schema[@targetNamespace='{TARGET_URI}']"
-    schema = wsdl_root.find(schema_xpath_query, namespaces=NS)
-    import_xpath_query = "./xs:import"
-    import_elements = schema.findall(import_xpath_query, namespaces=NS)
-    for import_elem in import_elements:
-        target_name = import_elem.get("namespace")
-        filename_from_url = os.path.basename(target_name)
-        if filename_from_url in temp_files:
-            import_elem.set("schemaLocation", temp_files[filename_from_url])
-    return etree.tostring(schema)
-
-
-def get_grantors_get_application_zip_request_data(gov_grants_tracking_number: str) -> bytes:
+def get_grantors_get_application_zip_request_body() -> bytes:
     return (
         '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
         "<soapenv:Header/>"
         "<soapenv:Body>"
         "<agen:GetApplicationZipRequest>"
-        f"<gran:GrantsGovTrackingNumber>{gov_grants_tracking_number}</gran:GrantsGovTrackingNumber>"
+        "<gran:GrantsGovTrackingNumber>GRANT80000000</gran:GrantsGovTrackingNumber>"
         "</agen:GetApplicationZipRequest>"
         "</soapenv:Body>"
         "</soapenv:Envelope>"
     ).encode("utf-8")
 
 
-def validate_grantor_get_application_zip_request_not_found(
-    soap_context: ValidateSoapContext,
+def get_grantors_get_submission_list_expanded_request_body() -> bytes:
+    return """
+        <soapenv:Envelope
+        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+        xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0"
+        xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:GetSubmissionListExpandedRequest>
+        </agen:GetSubmissionListExpandedRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """.encode()
+
+
+def get_grantors_get_confirm_application_delivery_body() -> bytes:
+    return """
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:ConfirmApplicationDeliveryRequest>
+        <gran:GrantsGovTrackingNumber>GRANT80000000</gran:GrantsGovTrackingNumber>
+        </agen:ConfirmApplicationDeliveryRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """.encode()
+
+
+REQUEST_BODY = {
+    "GetSubmissionListExpandedRequest": get_grantors_get_submission_list_expanded_request_body(),
+    "GetApplicationZipRequest": get_grantors_get_application_zip_request_body(),
+    "ConfirmApplicationDeliveryRequest": get_grantors_get_confirm_application_delivery_body(),
+}
+
+
+def build_schema_validator(wsdl_path: str, operation_name: str) -> etree.XMLSchema:
+    wsdl_tree = etree.parse(wsdl_path)
+    xs_ns = {"xs": "http://www.w3.org/2001/XMLSchema"}
+
+    all_schemas = wsdl_tree.xpath("//xs:schema", namespaces=xs_ns)
+
+    main_schema_element = None
+    for schema in all_schemas:
+        check = schema.xpath(f"./xs:element[@name='{operation_name}']", namespaces=xs_ns)
+        if check:
+            main_schema_element = schema
+            break
+
+    if main_schema_element is None:
+        raise ValueError(f"Could not find global element '{operation_name}' in WSDL")
+
+    # Setting these schemaLocation tells the parser where to look for the data which then directs it to the MemoryResolver
+    for imp in main_schema_element.xpath("//xs:import", namespaces=xs_ns):
+        ns_uri = imp.get("namespace")
+        if ns_uri:
+            imp.set("schemaLocation", ns_uri)
+
+    schema_map = {s.get("targetNamespace"): s for s in all_schemas if s.get("targetNamespace")}
+
+    # This prevents the parser from trying ot find the data locally or on the internet but use the schema_map instead
+    class MemoryResolver(etree.Resolver):
+        def resolve(self, url: str, pubid: str, context: etree._ParserContext) -> str | None:
+            if url in schema_map:
+                return self.resolve_string(etree.tostring(schema_map[url]), context)
+            return None
+
+    parser = etree.XMLParser()
+    parser.resolvers.add(MemoryResolver())
+    schema_string = etree.tostring(main_schema_element)
+    schema_root = etree.fromstring(schema_string, parser=parser)
+    return etree.XMLSchema(schema_root)
+
+
+def validate_response_xml(
+    response_bytes: bytes, operation_response_name: str, soap_context: ValidateSoapContext
 ) -> None:
-    """
-    Get legacy xml
-    """
-    legacy_tracking_number = "GRANT60000001"
-    legacy_resp = requests.post(
-        SOAP_URI,
-        data=get_grantors_get_application_zip_request_data(legacy_tracking_number),
-        headers=HEADERS,
-        cert=(soap_context.cert, soap_context.key),
-        timeout=10,
-    )
-    assert legacy_resp.status_code == 500
-    legacy_match = re.search(
-        r"<soap:Envelope.*</soap:Envelope>", legacy_resp.content.decode(), re.DOTALL
-    )
-    if not legacy_match:
-        raise Exception("No legacy response")
-
-    """
-    Get xml from simpler
-    """
-    simpler_tracking_number = "GRANT80000001"
-    soap_request = SOAPRequest(
-        api_name=SimplerSoapAPI.GRANTORS,
-        method="POST",
-        full_path=SOAP_URI,
-        headers=HEADERS,
-        data=SoapRequestStreamer(
-            stream=io.BytesIO(
-                get_grantors_get_application_zip_request_data(simpler_tracking_number)
-            )
-        ),
-        operation_name="GetApplicationZipRequest",
-    )
-    simpler_resp = get_alternate_proxy_response(soap_request)
-    if simpler_resp is None:
-        raise Exception("No simpler response found")
-    simpler_xml_response = simpler_resp.to_flask_response()[0]
-    simpler_match = re.search(
-        r"<soap:Envelope.*</soap:Envelope>", simpler_xml_response.decode(), re.DOTALL
-    )
-    if not simpler_match:
-        raise Exception("No xml found")
-
-    """
-    Compare the cleaned xml output from the legacy endpoint to the cleaned xml generated by simpler
-    """
-    pattern = r"tracking number:(.*?)\)"
-    simpler_xml = simpler_match.group(0)
-    legacy_xml = legacy_match.group(0)
-    cleaned_legacy = re.sub(pattern, "tracking number:", legacy_xml, flags=re.DOTALL)
-    cleaned_simpler = re.sub(pattern, "tracking number:", simpler_xml, flags=re.DOTALL)
-    assert cleaned_legacy == cleaned_simpler
-
-
-def validate_grantors_get_application_zip_request(soap_context: ValidateSoapContext) -> None:
-    simpler_xml = b"""
-        <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-            <soap:Body>
-                <ns2:GetApplicationZipResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
-                    <ns2:FileDataHandler><xop:Include xmlns:xop="http://www.w3.org/2004/08/xop/include" href="cid:bf208f6c-170c-40e6-b87f-13305da5ca03-10@apply.grants.gov"/></ns2:FileDataHandler>
-                </ns2:GetApplicationZipResponse>
-            </soap:Body>
-        </soap:Envelope>
-    """
-    simpler_match = re.search(r"<soap:Envelope.*</soap:Envelope>", simpler_xml.decode(), re.DOTALL)
-    assert simpler_match is not None
-    simpler_tree = etree.fromstring(simpler_match.group(0))
-    operation_element = next(
-        simpler_tree.iterfind(
-            ".//{http://apply.grants.gov/services/AgencyWebServices-V2.0}GetApplicationZipResponse"
-        )
-    )
+    simpler_match = re.search(rb"<soap:Envelope.*</soap:Envelope>", response_bytes, re.DOTALL)
+    if simpler_match is None:
+        raise Exception("Envelope not found")
+    xml_tree = etree.fromstring(simpler_match.group(0))
+    ns = {
+        "xop": "http://www.w3.org/2004/08/xop/include",
+        "soap": "http://schemas.xmlsoap.org/soap/envelope/",
+        "ns2": "http://apply.grants.gov/services/AgencyWebServices-V2.0",
+        "ns3": "http://apply.grants.gov/system/GrantsTemplate-V1.0",
+        "ns4": "http://apply.grants.gov/system/GrantsRelatedDocument-V1.0",
+        "ns5": "http://apply.grants.gov/system/GrantsOpportunity-V1.0",
+        "ns6": "http://apply.grants.gov/system/GrantsPackage-V1.0",
+        "ns7": "http://apply.grants.gov/system/AgencyManagePackage-V1.0",
+        "ns8": "http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0",
+        "ns9": "http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0",
+        "ns10": "http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0",
+        "ns11": "http://schemas.xmlsoap.org/wsdl/",
+        "ns12": "http://schemas.xmlsoap.org/wsdl/soap/",
+    }
+    operation_element = xml_tree.xpath(f"//ns2:{operation_response_name}", namespaces=ns)[0]
     # XOP element removed due to it being a pointer to where data is stored not part of a model defined in the xsd
-    NS_XOP = {"xop": "http://www.w3.org/2004/08/xop/include"}
     file_handler_elements = operation_element.findall(
-        ".//ns:FileDataHandler",
-        namespaces={"ns": "http://apply.grants.gov/services/AgencyWebServices-V2.0"},
+        ".//ns2:FileDataHandler",
+        namespaces=ns,
     )
     for handler in file_handler_elements:
-        xop_include = handler.find("xop:Include", namespaces=NS_XOP)
+        xop_include = handler.find("xop:Include", namespaces=ns)
         handler.remove(xop_include)
         handler.text = None
+    # This step is defensive in case that extracting the GetApplicationZipResponse breaks namespace connections
+    etree.cleanup_namespaces(operation_element)
     temp_files = get_temp_files(soap_context.stack)
-    filepath = "/api/tests/validate_legacy_soap_api/cache/base_xsd"
-    if not os.path.isfile(filepath):
-        base_xsd = get_xml_schema_bytes(temp_files, soap_context)
-        schema_file = soap_context.stack.enter_context(open(filepath, "wb"))
-        schema_file.write(base_xsd)
-        schema_file.flush()
-    schema_tree = etree.parse(filepath)
-    schema_validator = etree.XMLSchema(schema_tree)
+    schema_validator = build_schema_validator(
+        temp_files["AgencyWebServices-V2.0.wsdl"], operation_response_name
+    )
     schema_validator.assertValid(operation_element)
 
 
+def clean_xml_namespaces(content: bytes) -> bytes:
+    # The incoming xml namespaces conflict with the wsdl settings.
+    # According to the wsdl, due to the elementFormDetail = qualified,
+    # the default namespace for elements without an explicit namespace should be associated with the
+    # TargetNamespace (tns prefix) which is AgencyWebServices, not CommonElements.
+    # See wsdl:
+    # xmlns:tns="http://apply.grants.gov/services/AgencyWebServices-V2.0"
+    # The original (wrong) namespace
+    wrong_ns = b'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0"'
+    # The expected (correct) namespace
+    right_ns = b'xmlns="http://apply.grants.gov/services/AgencyWebServices-V2.0"'
+    return content.replace(wrong_ns, right_ns)
+
+
+def validate_grantors_get_application_zip_request(soap_context: ValidateSoapContext) -> None:
+    resp = get_response(soap_context, "GetApplicationZipRequest")
+    assert resp.status_code == 200
+    # The xml namespaces here do not need to be cleaned because there are no
+    # blank namepsaces to default to the wrong url here
+    validate_response_xml(resp.content, "GetApplicationZipResponse", soap_context)
+    print("Validation: GetApplicationZip is validated")
+
+
+def validate_grantors_get_submission_list_expanded_request(
+    soap_context: ValidateSoapContext,
+) -> None:
+    resp = get_response(soap_context, "GetSubmissionListExpandedRequest")
+    assert resp.status_code == 200
+    fixed_bytes = clean_xml_namespaces(resp.content)
+    validate_response_xml(fixed_bytes, "GetSubmissionListExpandedResponse", soap_context)
+    print("Validation: GetSubmissionListExpanded is validated")
+
+
+def validate_confirm_application_delivery_request(
+    soap_context: ValidateSoapContext,
+) -> None:
+    resp = get_response(soap_context, "ConfirmApplicationDeliveryRequest")
+    assert resp.status_code == 200
+    fixed_bytes = clean_xml_namespaces(resp.content)
+    validate_response_xml(fixed_bytes, "ConfirmApplicationDeliveryResponse", soap_context)
+    print("Validation: ConfirmApplicationDelivery is validated")
+
+
 def get_credentials(stack: ExitStack) -> tuple:
-    cert_data_encoded = os.getenv("CERT_DATA")
-    key_data_encoded = os.getenv("KEY_DATA")
+    cert_data_encoded = _config.cert_data
+    key_data_encoded = _config.key_data
     if cert_data_encoded and key_data_encoded:
         cert_data = cert_data_encoded.replace("\\n", "\n")
         key_data = key_data_encoded.replace("\\n", "\n")
@@ -228,8 +282,9 @@ def get_credentials(stack: ExitStack) -> tuple:
 
 
 VALIDATIONS = [
-    validate_grantor_get_application_zip_request_not_found,
     validate_grantors_get_application_zip_request,
+    validate_grantors_get_submission_list_expanded_request,
+    validate_confirm_application_delivery_request,
 ]
 
 
