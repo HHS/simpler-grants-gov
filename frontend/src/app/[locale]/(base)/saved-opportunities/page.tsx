@@ -7,7 +7,7 @@ import { LocalizedPageProps } from "src/types/intl";
 import {
   DEFAULT_SAVED_OPPORTUNITY_SCOPE,
   getSavedOpportunitiesScopeOrganizationIds,
-  getScopeFromSavedByQueryParam,
+  getScopeFromUrlParams,
   INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
 } from "src/utils/opportunity/savedOpportunitiesUtils";
 
@@ -74,7 +74,12 @@ export default async function SavedOpportunities({
     }
   }
 
-  const savedOpportunitiesScope = getScopeFromSavedByQueryParam(savedBy);
+  const savedOpportunitiesScope = getScopeFromUrlParams(
+    undefined,
+    undefined,
+    savedBy,
+  );
+
   const organizationIdsFilter = getSavedOpportunitiesScopeOrganizationIds(
     savedOpportunitiesScope,
   );
@@ -85,16 +90,10 @@ export default async function SavedOpportunities({
     organizationIdsFilter,
   );
 
-  // Fetch all saved opportunities separately so we can distinguish:
-  // - user has no saved opportunities at all
-  // - current filter returns no saved opportunities
   const allSavedOpportunities = await fetchSavedOpportunities(
     DEFAULT_SAVED_OPPORTUNITY_SCOPE,
   );
 
-  // Fetch individually saved opportunities separately so the UI can preserve
-  // the Individual tag even when an opportunity is also shared with one or
-  // more organizations.
   const individuallySavedOpportunities = await fetchSavedOpportunities(
     INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
   );

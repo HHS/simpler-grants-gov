@@ -10,7 +10,6 @@ import {
 import { SavedOpportunitiesScope } from "src/types/opportunity/savedOpportunitiesTypes";
 import {
   DEFAULT_SAVED_OPPORTUNITY_SCOPE,
-  getScopeFromSavedByQueryParam,
   INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
 } from "src/utils/opportunity/savedOpportunitiesUtils";
 import { mockOpportunity } from "src/utils/testing/fixtures";
@@ -592,7 +591,7 @@ describe("Saved Opportunities page", () => {
     render(component);
 
     expect(savedOpportunitiesMock).toHaveBeenCalledWith(
-      getScopeFromSavedByQueryParam(savedBy),
+      { scope: "organization", organizationIds: ["org-1"] },
       undefined,
       ["org-1"],
     );
