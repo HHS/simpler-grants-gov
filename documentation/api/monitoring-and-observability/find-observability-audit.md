@@ -471,22 +471,10 @@ SINCE 7 days ago
 
 ## 9.3 Search Engagement & Usage Dashboard
 
-**[Tools Usage Distribution**
-](https://onenr.io/0ERP10N9ajW)
-Shows the percentage of search sessions where users interact with each available search tool. This helps identify which tools are most relied on, which may need better visibility, or which are underused and potentially confusing for users.
+**[Search Activity by Day of Week](https://onenr.io/0kjnolMM7Qo)**
 
-**[Most Frequent Search Terms**
-](https://onenr.io/0vwBd0ekVjp)
-Lists the top search keywords by count and by unique sessions, providing insight into what users are searching for most often. This information can guide improvements such as promoted filters, synonym additions, or content coverage enhancements.
+Shows which days users search the most. It helps understand weekly usage patterns, plan maintenance, and spot changes in user behavior.
 
-[Sessions by Search Page Number
-](https://onenr.io/0LRE10xpeRa)
-Tracks how far users go into paginated search results. Frequent navigation beyond page 1 indicates that users may not be finding relevant results immediately, highlighting potential ranking or filtering issues.
+**[Search Activity by Hour of Day](https://onenr.io/0nQxX9N2XQV)**
 
-**[Search Usage per Session**
-](https://onenr.io/0dQenebBowe)
-Measures the median, average, and maximum number of searches performed within a single user session. Higher averages suggest users need multiple attempts to find what they want, signaling potential usability or relevance concerns.
-
-**[Search Usage per Session Trend**
-](https://onenr.io/07wkeLga3jL)
-Tracks how the number of searches per session changes over time. A downward trend may indicate search improvements, while an upward trend could signal increased user frustration or more complex search needs emerging.
+Shows which hours users search the most. It helps identify peak usage times and plan maintenance or feature releases around user activity.
