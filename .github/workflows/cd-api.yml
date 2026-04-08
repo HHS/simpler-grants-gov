@@ -33,12 +33,18 @@ on:
         type: boolean
         default: false
         description: Skip unit tests, lint, etc while deploying
+     skip_vuln_scans:
+        required: true
+        type: boolean
+        default: false
+        description: Skip vulnerability scans while deploying
 
 jobs:
   api-checks:
-    if: inputs.skip_checks == false
     name: Run API Checks
     uses: ./.github/workflows/ci-api.yml
+    with:
+      skip_checks: inputs.skip_checks
 
   vulnerability-scans:
     name: Vulnerability Scans

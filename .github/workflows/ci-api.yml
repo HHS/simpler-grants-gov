@@ -2,6 +2,12 @@ name: API Checks
 
 on:
   workflow_call:
+    inputs:
+      skip_checks:
+        required: true
+        type: boolean
+        default: false
+        description: Skip the guts of this workflow, but we have to run the workflow for dependency reasons when calling from CD workflows
   pull_request:
     paths:
       - api/**
@@ -13,6 +19,7 @@ defaults:
 
 jobs:
   lint-test:
+    if: inputs.skip_checks == false
     name: API Lint, Format & Tests
     runs-on: ubuntu-22.04
     steps:
