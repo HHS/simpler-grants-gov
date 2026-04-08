@@ -287,13 +287,16 @@ export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
     field: "State Review Available Date",
   },
   delinquent_federal_debt: {
-    getByText: "No",
-    textExact: true,
+    useDataAsText: true,
     type: "radiobutton",
     section: "Section 20",
     field: "Applicant Delinquent on Federal Debt",
   },
   debt_explanation_attachment: {
+    dependsOn: {
+      field: "delinquent_federal_debt",
+      value: "Yes",
+    },
     selector: 'input[name="debt_explanation"][type="file"]',
     type: "file",
     section: "Section 20",
