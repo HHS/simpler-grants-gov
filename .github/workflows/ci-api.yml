@@ -18,7 +18,7 @@ defaults:
 
 jobs:
   lint-test:
-    if: inputs.skip_checks == null || inputs.skip_checks == false
+    if: ${{ inputs.skip_checks == null || inputs.skip_checks == false }}
     name: API Lint, Format & Tests
     runs-on: ubuntu-22.04
     steps:
