@@ -20,7 +20,6 @@ from src.constants.static_role_values import (
 from src.db.models.agency_models import Agency
 from src.db.models.award_recommendation_models import AwardRecommendation
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
-from src.db.models.user_models import User
 from tests.lib.seed_data_utils import UserBuilder
 from tests.lib.seed_orgs_and_users import _add_application
 from tests.src.db.models.factories import AgencyFactory
