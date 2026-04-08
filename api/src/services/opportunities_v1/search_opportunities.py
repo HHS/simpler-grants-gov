@@ -368,13 +368,25 @@ def search_opportunities(
 
 
 def search_opportunities_csv(
-    search_client: search.SearchClient, raw_search_params: dict
+    search_client: search.SearchClient,
+    raw_search_params: dict,
+    *,
+    apply_export_pagination: bool = True,
 ) -> Sequence[dict]:
-    # CSV export always uses export pagination (cap + stable sort). Client pagination on
-    # `POST /opportunities/search` with `format=csv` is ignored for the OpenSearch query.
-    csv_search_params = SearchOpportunityParams.model_validate(
+    """Run the CSV-optimized OpenSearch query (no aggs/scores, CSV field includes).
+
+    When ``apply_export_pagination`` is True (default), pagination is replaced with
+    ``CSV_EXPORT_PAGINATION`` — used by ``POST /v1/opportunities/search/csv`` for bulk export.
+
+    When False, the caller's ``pagination`` from ``raw_search_params`` is used — used by
+    ``POST /v1/opportunities/search`` with ``format=csv`` so ordering and page windows match JSON.
+    """
+    merged_params = (
         raw_search_params | {"pagination": CSV_EXPORT_PAGINATION}
+        if apply_export_pagination
+        else raw_search_params
     )
+    csv_search_params = SearchOpportunityParams.model_validate(merged_params)
     response = _search_opportunities(
         search_client,
         csv_search_params,

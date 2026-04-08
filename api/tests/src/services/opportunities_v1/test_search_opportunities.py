@@ -129,7 +129,7 @@ class TestSearchOpportunitiesCsv:
         assert kwargs["excludes"] == ["attachments"]
         assert kwargs["explain"] is False
 
-    def test_csv_search_ignores_client_pagination(self):
+    def test_csv_export_search_ignores_client_pagination(self):
         search_client = MagicMock()
         search_client.search.return_value = _make_search_response()
 
@@ -143,6 +143,7 @@ class TestSearchOpportunitiesCsv:
                     "sort_order": [{"order_by": "opportunity_id", "sort_direction": "ascending"}],
                 },
             },
+            apply_export_pagination=True,
         )
 
         args, _ = search_client.search.call_args
@@ -151,3 +152,27 @@ class TestSearchOpportunitiesCsv:
         assert search_request["size"] == 5000
         assert search_request["from"] == 0
         assert search_request["sort"] == [{"summary.post_date": {"order": "desc"}}]
+
+    def test_csv_search_respects_client_pagination_when_export_disabled(self):
+        search_client = MagicMock()
+        search_client.search.return_value = _make_search_response()
+
+        search_opportunities_csv(
+            search_client,
+            {
+                "query": "climate",
+                "pagination": {
+                    "page_offset": 3,
+                    "page_size": 7,
+                    "sort_order": [{"order_by": "opportunity_id", "sort_direction": "ascending"}],
+                },
+            },
+            apply_export_pagination=False,
+        )
+
+        args, _ = search_client.search.call_args
+        search_request = args[1]
+
+        assert search_request["size"] == 7
+        assert search_request["from"] == 14
+        assert search_request["sort"] == [{"opportunity_id.keyword": {"order": "asc"}}]

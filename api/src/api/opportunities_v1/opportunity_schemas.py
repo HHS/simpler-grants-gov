@@ -534,7 +534,12 @@ class OpportunitySearchRequestV1Schema(Schema):
         SearchResponseFormat,
         load_default=SearchResponseFormat.JSON,
         metadata={
-            "description": "The format of the response",
+            "description": (
+                "Response serialization. `json` returns the standard envelope with facet counts. "
+                "`csv` returns a CSV file; pagination and sort_order match the JSON response for the same request. "
+                "For a bulk export (up to 5000 rows, fixed sort by post_date descending), use "
+                "`POST /v1/opportunities/search/csv` instead."
+            ),
             "default": SearchResponseFormat.JSON,
         },
     )

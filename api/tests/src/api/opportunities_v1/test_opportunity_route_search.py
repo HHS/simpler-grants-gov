@@ -1962,4 +1962,6 @@ class TestOpportunityRouteSearch(BaseTestClass):
         assert resp.status_code == 200
         assert "text/csv" in resp.headers["Content-Type"]
         mock_search_csv.assert_called_once()
+        _, kwargs = mock_search_csv.call_args
+        assert kwargs.get("apply_export_pagination") is False
         mock_search_json.assert_not_called()

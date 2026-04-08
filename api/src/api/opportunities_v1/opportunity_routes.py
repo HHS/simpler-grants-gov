@@ -216,6 +216,7 @@ def _build_opportunities_csv_response(opportunities: Sequence[dict]) -> Response
 @opportunity_blueprint.auth_required(api_key_multi_auth)
 @opportunity_blueprint.doc(
     description=SHARED_ALPHA_DESCRIPTION,
+    summary="Search opportunities (JSON or CSV)",
     # This adds a file response schema
     # in addition to the one added by the output decorator
     responses={200: {"content": {"text/csv": {}}}},  # type: ignore
@@ -228,7 +229,9 @@ def opportunity_search(
     logger.info("POST /v1/opportunities/search")
 
     if search_params.get("format") == opportunity_schemas.SearchResponseFormat.CSV:
-        opportunities = search_opportunities_csv(search_client, search_params)
+        opportunities = search_opportunities_csv(
+            search_client, search_params, apply_export_pagination=False
+        )
         logger.info("Successfully fetched opportunities for CSV response")
         return _build_opportunities_csv_response(opportunities)
 
@@ -260,7 +263,6 @@ def opportunity_search(
 @opportunity_blueprint.auth_required(api_key_multi_auth)
 @opportunity_blueprint.doc(
     description=SHARED_ALPHA_DESCRIPTION,
-    summary="Search opportunities and return CSV",
     responses={200: {"content": {"text/csv": {}}}},  # type: ignore
 )
 @flask_opensearch.with_search_client()
@@ -268,7 +270,9 @@ def opportunity_search_csv(search_client: search.SearchClient, search_params: di
     add_extra_data_to_current_request_logs(flatten_dict(search_params, prefix="request.body"))
     logger.info("POST /v1/opportunities/search/csv")
 
-    opportunities = search_opportunities_csv(search_client, search_params)
+    opportunities = search_opportunities_csv(
+        search_client, search_params, apply_export_pagination=True
+    )
     logger.info("Successfully fetched opportunities for CSV response")
 
     return _build_opportunities_csv_response(opportunities)
