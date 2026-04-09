@@ -225,7 +225,10 @@ describe("Header", () => {
         name: "applications",
       });
       expect(applicationsLink).toBeInTheDocument();
-      expect(applicationsLink).toHaveAttribute("href", "/applications");
+      expect(applicationsLink).toHaveAttribute(
+        "href",
+        "/workspace/applications",
+      );
     });
   });
 

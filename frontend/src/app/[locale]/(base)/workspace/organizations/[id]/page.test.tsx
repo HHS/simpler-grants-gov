@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import OrganizationsPage from "src/app/[locale]/(base)/organizations/page";
+import OrganizationsPage from "src/app/[locale]/(base)/workspace/organizations/page";
 import { Organization } from "src/types/applicationResponseTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";

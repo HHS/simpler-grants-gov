@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 from apiflask import MultiAuth
+from apiflask.types import HTTPAuthType
 
 from ..db.models.competition_models import ShortLivedInternalToken
 from ..db.models.user_models import User, UserApiKey, UserTokenSession
@@ -43,6 +44,17 @@ class MultiHttpTokenAuth(MultiAuth):
 
         raise Exception("Unknown user type %s", type(current_user))
 
+    @property
+    def _auths(self) -> list[HTTPAuthType]:
+        # Override the parent _auths because it assumes the field it wants
+        # is additional_auth and that was recently renamed to additional_auths
+        # This just grabs both. Once APIFlask fixes this, we can remove this.
+        return (
+            [self.main_auth]
+            + list(getattr(self, "additional_auth", []))
+            + list(getattr(self, "additional_auths", []))
+        )
+
 
 class MultiHttpTokenAuthSimpler(MultiAuth):
     def get_user(self) -> User:
@@ -52,6 +64,17 @@ class MultiHttpTokenAuthSimpler(MultiAuth):
             return current_user.user
 
         raise Exception(f"Unsupported user type: {type(current_user)}")
+
+    @property
+    def _auths(self) -> list[HTTPAuthType]:
+        # Override the parent _auths because it assumes the field it wants
+        # is additional_auth and that was recently renamed to additional_auths
+        # This just grabs both. Once APIFlask fixes this, we can remove this.
+        return (
+            [self.main_auth]
+            + list(getattr(self, "additional_auth", []))
+            + list(getattr(self, "additional_auths", []))
+        )
 
 
 # Define the multi auth that supports

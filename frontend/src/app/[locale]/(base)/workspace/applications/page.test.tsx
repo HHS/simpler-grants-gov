@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { identity } from "lodash";
-import Applications from "src/app/[locale]/(base)/applications/page";
+import Applications from "src/app/[locale]/(base)/workspace/applications/page";
 import { UnauthorizedError } from "src/errors";
 import {
   ApplicationDetail,
@@ -58,7 +58,7 @@ describe("Applications", () => {
         breadcrumbList: [
           {
             title: "breadcrumbWorkspace",
-            path: "/dashboard",
+            path: "/workspace",
           },
           {
             title: "breadcrumbApplications",
