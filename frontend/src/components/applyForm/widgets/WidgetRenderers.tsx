@@ -1,12 +1,12 @@
 import { omit } from "lodash";
-
-import { JSX } from "react";
-
 import {
   DefinitionPath,
   UswdsWidgetProps,
   WidgetTypes,
 } from "src/types/applyForm/types";
+
+import { JSX } from "react";
+
 import { FieldsetWidget } from "./FieldsetWidget";
 import { widgetComponents } from "./Widgets";
 

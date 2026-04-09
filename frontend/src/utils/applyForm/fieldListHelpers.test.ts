@@ -1,4 +1,5 @@
 import { FormattedFormValidationWarning } from "src/types/applyForm/types";
+
 import {
   getFieldListChildErrors,
   getFieldListGroupErrors,

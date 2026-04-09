@@ -1,10 +1,9 @@
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { useApplicationAttachments } from "src/hooks/ApplicationAttachments";
+import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 
 import { FormGroup } from "@trussworks/react-uswds";
-
-import { UswdsWidgetProps } from "src/types/applyForm/types";
 
 const hydrateAttachmentReferences = (
   attachmentIds: unknown,

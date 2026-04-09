@@ -6,6 +6,7 @@ import {
   RJSFSchema,
   StrictRJSFSchema,
 } from "@rjsf/utils";
+import { UswdsWidgetProps } from "src/types/applyForm/types";
 
 import React, { useCallback, useMemo, useRef } from "react";
 import {
@@ -16,7 +17,6 @@ import {
 } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { Pill } from "src/components/Pill";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";

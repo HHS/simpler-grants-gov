@@ -6,7 +6,6 @@ import { isArray, isObject } from "lodash";
 import { extricateConditionalValidationRules } from "src/utils/applyForm/formSchemaProcessors";
 import { isBasicallyAnObject } from "src/utils/generalUtils";
 
-import { formDataToObject } from "./formDataToJson";
 import {
   FormattedFormValidationWarning,
   FormValidationWarning,
@@ -15,6 +14,7 @@ import {
   UiSchemaField,
   UiSchemaNode,
 } from "../../types/applyForm/types";
+import { formDataToObject } from "./formDataToJson";
 
 const nestedWarningsForField = ({
   definition,

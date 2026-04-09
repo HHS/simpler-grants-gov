@@ -84,7 +84,10 @@ export const ApplyFormMessage = ({
   const uniqueValidationWarnings = validationWarnings
     ? Array.from(
         new Map(
-          validationWarnings.map((warning) => [getWarningKey(warning), warning]),
+          validationWarnings.map((warning) => [
+            getWarningKey(warning),
+            warning,
+          ]),
         ).values(),
       )
     : null;
@@ -120,11 +123,7 @@ export const ApplyFormMessage = ({
                 {getWarningLinkText(warning)}
               </a>
             );
-            return (
-              <li key={getWarningKey(warning)}>
-                {link}
-              </li>
-            );
+            return <li key={getWarningKey(warning)}>{link}</li>;
           })}
         </ul>
       </Alert>

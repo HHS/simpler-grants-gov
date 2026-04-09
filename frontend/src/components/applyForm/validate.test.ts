@@ -1,6 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
-
 import { UiSchema } from "src/types/applyForm/types";
+
 import {
   validateJsonBySchema,
   validateUiSchema,

@@ -2,7 +2,6 @@ import { EnumOptionsType, RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { get } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
-
 import {
   BroadlyDefinedWidgetValue,
   FieldListChildWidgetTypes,
@@ -16,6 +15,7 @@ import {
   UswdsWidgetProps,
   WidgetTypes,
 } from "src/types/applyForm/types";
+
 import {
   getByPointer,
   getFieldNameForHtml,

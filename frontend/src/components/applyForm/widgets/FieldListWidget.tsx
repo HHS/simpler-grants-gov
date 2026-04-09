@@ -1,9 +1,4 @@
 import { RJSFSchema } from "@rjsf/utils/lib/types";
-
-import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
-import { Button } from "@trussworks/react-uswds";
-
 import {
   BroadlyDefinedWidgetValue,
   FieldListGroupItem,
@@ -12,6 +7,11 @@ import {
   GeneralRecord,
   UswdsWidgetProps,
 } from "src/types/applyForm/types";
+
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useState } from "react";
+import { Button } from "@trussworks/react-uswds";
+
 import { isFieldRequired } from "src/components/applyForm/utils";
 import {
   getFieldListChildErrors,
@@ -127,7 +127,9 @@ const removeFieldListRow = ({
   rows: GeneralRecord[];
   entryIndex: number;
 }): GeneralRecord[] => {
-  return rows.filter((_, currentEntryIndex) => currentEntryIndex !== entryIndex);
+  return rows.filter(
+    (_, currentEntryIndex) => currentEntryIndex !== entryIndex,
+  );
 };
 
 /**
@@ -236,7 +238,9 @@ function FieldListEntry({
           childDefinition: groupItem.definition,
         });
 
-        const currentValue = toBroadlyDefinedWidgetValue(entryValue[storageKey]);
+        const currentValue = toBroadlyDefinedWidgetValue(
+          entryValue[storageKey],
+        );
 
         /**
          * Build a standard widget prop object for the child field so it

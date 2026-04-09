@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { useTranslationsMock } from "src/utils/testing/intlMocks";
 
-import { ApplyFormMessage, getWarningLinkText } from "./ApplyFormMessage";
 import { FormattedFormValidationWarning } from "../../types/applyForm/types";
+import { ApplyFormMessage, getWarningLinkText } from "./ApplyFormMessage";
 
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),

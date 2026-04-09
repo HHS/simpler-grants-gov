@@ -3,6 +3,7 @@ import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import { Organization } from "src/types/applicationResponseTypes";
+import { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import { UserProfile } from "src/types/authTypes";
 import {
   AwardRecommendationDetails,
@@ -32,8 +33,6 @@ import {
   UserPrivilegesResponse,
   UserRole,
 } from "src/types/userTypes";
-
-import { FormattedFormValidationWarning } from "src/types/applyForm/types";
 
 export const mockAwardRecommendationStatus: AwardRecommendationStatus =
   "inProgress";

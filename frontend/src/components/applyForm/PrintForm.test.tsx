@@ -2,10 +2,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
+import { UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 
 import PrintForm from "src/components/applyForm/PrintForm";
-import { UiSchema } from "src/types/applyForm/types";
 
 // Mock FormFields component
 jest.mock("src/components/applyForm/FormFields", () => ({
