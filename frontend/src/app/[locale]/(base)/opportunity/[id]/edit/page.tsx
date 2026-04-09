@@ -46,10 +46,6 @@ export async function generateMetadata({
   };
 }
 
-function canEditOpportunity(opportunity: GrantorOpportunityDetail) {
-  return opportunity.is_draft === true;
-}
-
 const stageLabels: Record<string, string> = {
   archived: "Archived",
   closed: "Closed",
@@ -137,7 +133,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
       path: `/opportunity/${opportunityData.opportunity_id}/`,
     },
   ];
-  const isEditableOpportunity = canEditOpportunity(opportunityData);
   const activeSummary =
     opportunityData.forecast_summary ??
     opportunityData.non_forecast_summary ??
@@ -249,7 +244,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
               opportunitySummaryId={opportunitySummaryId}
               isForecast={opportunityData.is_draft}
               initialValues={initialValues}
-              isDraft={isEditableOpportunity}
+              isDraft={!!opportunityData.is_draft}
               opportunityKeyInformation={opportunityKeyInformation}
               isNewlyCreated={isNewlyCreated}
             />
