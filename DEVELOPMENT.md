@@ -24,15 +24,27 @@ This project uses **continuous deployment** using [Github Actions](https://githu
 
 Pull-requests are merged to `main` and the changes are immediately deployed to the development environment. Releases are created to push changes to production.
 
-## Writing Pull Requests
+### Branch Naming Convention
 
-Prefix the branch name with your name, and include the ticket number in the branch name e.g. `cooldev/issue-1234-new-feature`.
+In order to allow branches to be easily found based on ticket, contributor, or the purpose of the branch, branch names should contain the following information:
+
+- Contributor handle: this can be either your github username, or any other handle by which project maintainers can easily identify you as a contributor. Most importantly, this should be consistent across all of the branches opened by any individual contributor
+- Issue number: the number of the Github issue the change pertains to
+- Change description: a few words describing the purpose of the branch
+
+With this in mind, branch names should follow this general convention:
+
+```
+[contributor-handle]/[issue-number]-[change-description]
+```
+
+## Writing Pull Requests
 
 Commit messages should, but are not required, to follow [git best practice conventions](https://cbea.ms/git-commit/#seven-rules) for consistency and legibility. Commit messages will be squashed, so individual commit messages will only be visible in the commit history of the pull request.
 
-### Title
+### Pull Request Title
 
-Pull request should have the following format: `[Issue N] Description`. The description should follow the imperative voice and lack of period from the [git best practice conventions](https://cbea.ms/git-commit/#seven-rules).
+Pull request titles should have the following format: `[Issue N] Description`. The description should follow the imperative voice and lack of period from the [git best practice conventions](https://cbea.ms/git-commit/#seven-rules).
 
 ### Recommendations
 
@@ -51,7 +63,7 @@ If any manual testing was performed, document it in enough detail in the PR desc
 
 ### Reviewers
 
-Assign reviewers applicable to the domain of your pull request. See [CODEOWNERS](.github/CODEOWNERS) for more details.
+Assign reviewers applicable to the domain of your pull request. See [Review Assignment](CONTRIBUTING.md#review-assignment) for more details.
 
 ### Pull in Own Requests
 
@@ -89,8 +101,6 @@ Releases follow the [CalVer](https://calver.org/) versioning using a `YYYY.MM.DD
 Releases are [created in Github](https://github.com/HHS/simpler-grants-gov/releases) and with a log of changes.
 
 Step by step instructions for creating a release:
-
-
 
 - On Github.com, open the Releases page: https://github.com/HHS/simpler-grants-gov/releases
 - Click "Draft a new release"

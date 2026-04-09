@@ -10,12 +10,15 @@ from src.legacy_soap_api.applicants import schemas as applicants_schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
 from src.legacy_soap_api.grantors.services import (
+    confirm_application_delivery_response,
     get_application_zip_response,
     get_submission_list_expanded_response,
+    update_application_info_response,
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import (
     diff_soap_dicts,
     get_soap_response,
@@ -242,6 +245,18 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             soap_config=self.operation_config,
         )
 
+    def confirm_application_delivery_request(
+        self, proxy_response: SOAPResponse | None = None
+    ) -> grantors_schemas.ConfirmApplicationDeliveryResponseSOAPEnvelope:
+        return confirm_application_delivery_response(
+            db_session=self.db_session,
+            soap_request=self.soap_request,
+            confirm_application_delivery_request=grantors_schemas.ConfirmApplicationDeliveryRequest(
+                **self.get_soap_request_dict()
+            ),
+            soap_config=self.operation_config,
+        )
+
     def get_submission_list_expanded_request(
         self, proxy_response: SOAPResponse
     ) -> grantors_schemas.GetSubmissionListExpandedResponse:
@@ -251,6 +266,19 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             soap_request=self.soap_request,
             request=grantors_schemas.GetSubmissionListExpandedRequest(**soap_request_dict),
             proxy_response=proxy_response,
+            soap_config=self.operation_config,
+        )
+
+    def update_application_info_request(
+        self, proxy_response: SOAPResponse | None = None
+    ) -> grantors_schemas.UpdateApplicationInfoResponseSOAPEnvelope:
+        return update_application_info_response(
+            db_session=self.db_session,
+            soap_request=self.soap_request,
+            update_application_info_request=grantors_schemas.UpdateApplicationInfoRequest(
+                **self.get_soap_request_dict()
+            ),
+            soap_config=self.operation_config,
         )
 
     def _gen_response_data(

@@ -54,31 +54,6 @@ def test_start_workflow_entity_not_found(
     assert len(messages) == 0
 
 
-def test_start_workflow_invalid_workflow_type(
-    db_session: db.Session, internal_workflow_send_user, workflow_sqs_queue
-):
-    """Test that a 422 error is raised when workflow type is not configured."""
-    # OPPORTUNITY_PUBLISH is in the enum but not registered in WorkflowRegistry
-    payload = {
-        "event_type": WorkflowEventType.START_WORKFLOW,
-        "start_workflow_context": {
-            "workflow_type": WorkflowType.OPPORTUNITY_PUBLISH,
-            "entity_type": WorkflowEntityType.OPPORTUNITY,
-            "entity_id": str(uuid.uuid4()),
-        },
-    }
-
-    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
-        ingest_workflow_event(db_session, payload, internal_workflow_send_user)
-
-    assert exc_info.value.status_code == 422
-    assert exc_info.value.message == "Invalid workflow type specified"
-
-    # Verify no message sent
-    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
-    assert len(messages) == 0
-
-
 def test_start_workflow_entity_type_mismatch(
     db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
 ):
@@ -250,3 +225,76 @@ def test_process_workflow_valid_event(
     assert message.event_type == WorkflowEventType.PROCESS_WORKFLOW
     assert message.process_workflow_context.workflow_id == workflow.workflow_id
     assert message.process_workflow_context.event_to_send == "start_workflow"
+
+
+# ========================================
+# Concurrent Workflow Validation Tests
+# ========================================
+
+
+def test_start_workflow_concurrent_blocked(
+    db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
+):
+    """Test that a 422 error is raised when an active workflow already exists for the entity
+    and the config disallows concurrent workflows."""
+    opportunity = OpportunityFactory.create()
+
+    # Create an existing active workflow for the same entity and workflow type
+    WorkflowFactory.create(
+        workflow_type=WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+        opportunity=opportunity,
+        is_active=True,
+    )
+
+    payload = {
+        "event_type": WorkflowEventType.START_WORKFLOW,
+        "start_workflow_context": {
+            "workflow_type": WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+            "entity_type": WorkflowEntityType.OPPORTUNITY,
+            "entity_id": str(opportunity.opportunity_id),
+        },
+    }
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        ingest_workflow_event(db_session, payload, internal_workflow_send_user)
+
+    assert exc_info.value.status_code == 422
+    assert (
+        exc_info.value.message == "An active workflow of this type already exists for this entity"
+    )
+
+    # Verify no message sent
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 0
+
+
+def test_start_workflow_concurrent_allowed_when_inactive(
+    db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
+):
+    """Test that starting a workflow succeeds when existing workflow is inactive
+    even with concurrent disallowed."""
+    opportunity = OpportunityFactory.create()
+
+    # Create an existing INACTIVE workflow
+    WorkflowFactory.create(
+        workflow_type=WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+        opportunity=opportunity,
+        is_active=False,
+    )
+
+    payload = {
+        "event_type": WorkflowEventType.START_WORKFLOW,
+        "start_workflow_context": {
+            "workflow_type": WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+            "entity_type": WorkflowEntityType.OPPORTUNITY,
+            "entity_id": str(opportunity.opportunity_id),
+        },
+    }
+
+    event_id = ingest_workflow_event(db_session, payload, internal_workflow_send_user)
+
+    assert event_id is not None
+    assert isinstance(event_id, uuid.UUID)
+
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 1

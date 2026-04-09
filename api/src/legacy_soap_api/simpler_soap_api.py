@@ -12,9 +12,9 @@ from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPInvalidEnvelope,
     SOAPInvalidRequestOperationName,
     SOAPOperationNotSupported,
-    SOAPRequest,
     SOAPResponse,
 )
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ def get_simpler_soap_response(
     )
 
     use_simpler = get_soap_config().use_simpler
-    if soap_request.headers.get(USE_SIMPLER_OVERRIDE_KEY, None) == "true":
+    if soap_request.headers.get(USE_SIMPLER_OVERRIDE_KEY, None) == "1":
         use_simpler = True
         logger.info(
             "soap_client_certificate: Use-Simpler-Override flag is enabled",

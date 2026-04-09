@@ -5,7 +5,7 @@ from collections.abc import Sequence
 from pydantic import BaseModel
 from sqlalchemy import asc, desc, func, nulls_last, select
 from sqlalchemy.orm import selectinload
-from sqlalchemy.sql import Select, Subquery, union_all
+from sqlalchemy.sql import Select, Subquery
 
 from src.adapters import db
 from src.api.route_utils import raise_flask_error
@@ -113,84 +113,118 @@ def _build_saved_union_subquery(
     user_id: uuid.UUID, include_user_saved_opps: bool, org_ids_to_use: list | None = None
 ) -> Subquery:
     """
-    Returns a saved_union subquery with one row per opportunity and a saved_at timestamp that combines user + org saves based on org_ids_to_use.
-    Example query generated:
-    SELECT anon_1.opportunity_id, max(anon_1.saved_at) AS saved_at
-            FROM (
-                SELECT organization_saved_opportunity.opportunity_id AS opportunity_id,
-                       organization_saved_opportunity.created_at AS saved_at
-                FROM organization_saved_opportunity
-                WHERE organization_saved_opportunity.organization_id IN (__[POSTCOMPILE_organization_id_1])
+    Returns a saved_union subquery with one row per opportunity and a saved_at timestamp
+    that prioritizes the individual user's save timestamp over any organizational save timestamp.
 
-                UNION ALL
+    Sorting logic:
+    - If the user has personally saved the opportunity, saved_at = user's save timestamp
+    - If only an org has saved the opportunity, saved_at = org's save timestamp
 
-                SELECT user_saved_opportunity.opportunity_id AS opportunity_id,
-                       user_saved_opportunity.created_at AS saved_at
-                FROM user_saved_opportunity
-                WHERE user_saved_opportunity.user_id = :user_id_1
-                  AND user_saved_opportunity.is_deleted IS NOT true
-            ) AS anon_1
-            GROUP BY anon_1.opportunity_id
+    This prevents org shares from reordering the list when a user has already saved an opportunity.
+
+    Example query generated (when both user and org saves are included):
+    SELECT coalesce(user_sq.opportunity_id, org_sq.opportunity_id) AS opportunity_id,
+           coalesce(user_sq.user_saved_at, org_sq.org_saved_at) AS saved_at
+    FROM (
+        SELECT user_saved_opportunity.opportunity_id AS opportunity_id,
+               user_saved_opportunity.created_at AS user_saved_at
+        FROM user_saved_opportunity
+        WHERE user_saved_opportunity.user_id = :user_id_1
+          AND user_saved_opportunity.is_deleted IS NOT true
+    ) AS user_sq
+    FULL OUTER JOIN (
+        SELECT organization_saved_opportunity.opportunity_id AS opportunity_id,
+               max(organization_saved_opportunity.created_at) AS org_saved_at
+        FROM organization_saved_opportunity
+        WHERE organization_saved_opportunity.organization_id IN (__[POSTCOMPILE_organization_id_1])
+        GROUP BY organization_saved_opportunity.opportunity_id
+    ) AS org_sq ON user_sq.opportunity_id = org_sq.opportunity_id
     """
 
-    subqueries = []
+    user_sq = None
+    org_sq = None
 
-    # Add org saved subquery if applicable
-    if org_ids_to_use:
-        subqueries.append(
-            select(
-                OrganizationSavedOpportunity.opportunity_id.label("opportunity_id"),
-                OrganizationSavedOpportunity.created_at.label("saved_at"),
-            ).where(OrganizationSavedOpportunity.organization_id.in_(org_ids_to_use))
-        )
-
-    # Add user saved subquery if applicable
     if include_user_saved_opps:
-        subqueries.append(
+        user_sq = (
             select(
                 UserSavedOpportunity.opportunity_id.label("opportunity_id"),
-                UserSavedOpportunity.created_at.label("saved_at"),
-            ).where(
-                UserSavedOpportunity.user_id == user_id, UserSavedOpportunity.is_deleted.isnot(True)
+                UserSavedOpportunity.created_at.label("user_saved_at"),
             )
+            .where(
+                UserSavedOpportunity.user_id == user_id,
+                UserSavedOpportunity.is_deleted.isnot(True),
+            )
+            .subquery()
         )
 
-    # Combine subqueries
-    saved_sq = union_all(*subqueries).subquery()
-
-    # Aggregate to get one row per opportunity
-    saved_union = (
-        select(
-            saved_sq.c.opportunity_id,
-            func.max(saved_sq.c.saved_at).label("saved_at"),
+    if org_ids_to_use:
+        org_sq = (
+            select(
+                OrganizationSavedOpportunity.opportunity_id.label("opportunity_id"),
+                func.max(OrganizationSavedOpportunity.created_at).label("org_saved_at"),
+            )
+            .where(OrganizationSavedOpportunity.organization_id.in_(org_ids_to_use))
+            .group_by(OrganizationSavedOpportunity.opportunity_id)
+            .subquery()
         )
-        .group_by(saved_sq.c.opportunity_id)
-        .subquery()
-    )
-    return saved_union
+
+    if user_sq is not None and org_sq is not None:
+        # Full outer join: NULLs come from the join itself (properly typed), no cast needed.
+        # COALESCE picks the user timestamp when present, otherwise falls back to the org timestamp.
+        return (
+            select(
+                func.coalesce(user_sq.c.opportunity_id, org_sq.c.opportunity_id).label(
+                    "opportunity_id"
+                ),
+                func.coalesce(user_sq.c.user_saved_at, org_sq.c.org_saved_at).label("saved_at"),
+            )
+            .select_from(
+                user_sq.outerjoin(
+                    org_sq, user_sq.c.opportunity_id == org_sq.c.opportunity_id, full=True
+                )
+            )
+            .subquery()
+        )
+    elif user_sq is not None:
+        return select(
+            user_sq.c.opportunity_id,
+            user_sq.c.user_saved_at.label("saved_at"),
+        ).subquery()
+    else:
+        return select(
+            org_sq.c.opportunity_id,  # type: ignore[union-attr]
+            org_sq.c.org_saved_at.label("saved_at"),  # type: ignore[union-attr]
+        ).subquery()
 
 
 def _enrich_with_saved_organizations_sql(
     db_session: db.Session,
     opportunities: Sequence[Opportunity],
+    org_ids_filter: list[uuid.UUID] | None = None,
 ) -> None:
     """
     Enrich paginated Opportunity objects with `saved_to_organizations`.
 
     Behavior:
-    -  If the request is for **user-saved opportunities only**, the `saved_to_organizations` field is omitted.
-    - If the request involves organizations the `saved_to_organizations` field is always included.
+    Always enriches opportunities with organizations that have saved them.
+    - When `org_ids_filter` is provided, only organizations in that list are included.
+    - When `org_ids_filter` is None, all organizations that saved the opportunities are included.
+
     """
     opp_ids = [opp.opportunity_id for opp in opportunities]
 
-    result = db_session.execute(
+    query = (
         select(OrganizationSavedOpportunity.opportunity_id, Organization)
         .join(
             Organization,
             Organization.organization_id == OrganizationSavedOpportunity.organization_id,
         )
         .where(OrganizationSavedOpportunity.opportunity_id.in_(opp_ids))
-    ).all()
+    )
+    if org_ids_filter is not None:
+        query = query.where(OrganizationSavedOpportunity.organization_id.in_(org_ids_filter))
+
+    result = db_session.execute(query).all()
 
     # Build a mapping: opportunity_id to list of Organization objects
     saved_orgs_map: dict[uuid.UUID, list[Organization]] = {}
@@ -218,6 +252,7 @@ def get_saved_opportunities(
     user_id = user.user_id
     logger.info("Getting saved opportunities for user")
     include_user_saved_opps = True
+    org_ids_filter = None
     # Determine which orgs to consider
     if org_ids_param is None:
         logger.info("All saved opportunities requested")
@@ -230,6 +265,7 @@ def get_saved_opportunities(
     else:
         logger.info("User saved opportunities requested")
         org_ids_to_use = None
+        org_ids_filter = _get_accessible_org_ids(user, user.organization_users)
     # Build saved_union subquery
     saved_union = _build_saved_union_subquery(user_id, include_user_saved_opps, org_ids_to_use)
 
@@ -270,8 +306,8 @@ def get_saved_opportunities(
         opportunity_params.pagination, paginator
     )
 
-    if paginated_search and org_ids_to_use:
+    if paginated_search:
         # Enrich paginated opportunities with saved_to_organizations
-        _enrich_with_saved_organizations_sql(db_session, paginated_search)
+        _enrich_with_saved_organizations_sql(db_session, paginated_search, org_ids_filter)
 
     return paginated_search, pagination_info

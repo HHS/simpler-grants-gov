@@ -1,9 +1,8 @@
 import { Metadata } from "next";
-import NotFound from "src/app/[locale]/(base)/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { getSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import { getUserSavedOpportunity } from "src/services/fetch/fetchers/savedOpportunityFetcher";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
@@ -103,7 +102,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     opportunityData = response.data;
   } catch (error) {
     if (parseErrorStatus(error as ApiRequestError) === 404) {
-      return <NotFound />;
+      notFound();
     }
     throw error;
   }
@@ -117,7 +116,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
   try {
     const session = await getSession();
     if (session?.user_id && session.token) {
-      const savedOpportunity = await getSavedOpportunity(
+      const savedOpportunity = await getUserSavedOpportunity(
         session.token,
         session.user_id,
         id,

@@ -3,17 +3,17 @@ from collections.abc import Iterator
 from unittest.mock import patch
 
 import pytest
-from pydantic import ValidationError
+from pydantic import Field, ValidationError
 
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import (
+    BaseSOAPSchema,
     FaultMessage,
     SOAPInvalidRequestOperationName,
     SOAPOperationNotSupported,
-    SOAPRequest,
-    SoapRequestStreamer,
     SOAPResponse,
 )
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 
 
 def get_base_body(append_to_end: bytes | None = None) -> bytes:
@@ -248,6 +248,23 @@ def test_soap_response_to_flask_response_returns_bytes_when_passed_bytes_as_data
     assert flask_response == expected
 
 
+def test_base_soap_schema_hides_input_in_validation_errors() -> None:
+    """Verify that BaseSOAPSchema hides PII from validation error messages."""
+
+    class TestSchema(BaseSOAPSchema):
+        name: str
+        age: int
+
+    sensitive_input = "secret-pii-value-12345"
+    with pytest.raises(ValidationError) as exc_info:
+        TestSchema(name=sensitive_input, age="not-an-int")
+
+    error_str = str(exc_info.value)
+    # Sensitive input values must not appear in the string representation
+    assert sensitive_input not in error_str
+    assert "not-an-int" not in error_str
+
+
 def test_soap_response_stream_returns_iterator_when_data_is_an_iterator() -> None:
     soap_response = SOAPResponse(data=xml_streamer(), status_code=200, headers={})
     stream_response = soap_response.stream()
@@ -323,3 +340,28 @@ def test_soap_request_streamer_reconstructs_head_with_the_rest_of_the_stream():
     soap_request_streamer = SoapRequestStreamer(stream=fake_stream)
     assert len(soap_request_streamer.head()) == 10000
     assert b"".join(soap_request_streamer) == data
+
+
+class SOAPExample(BaseSOAPSchema):
+    bool_value: bool = Field(alias="BoolValue")
+
+
+@pytest.mark.parametrize(
+    ("val", "expected"),
+    [
+        ("YES", True),
+        ("no", False),
+        ("tRue", True),
+        ("falSe", False),
+        ("1", True),
+        ("0", False),
+        (1, True),
+        (0, False),
+    ],
+)
+def test_bool_values_parse_as_expected(val: str | int, expected: bool) -> None:
+    assert SOAPExample(**{"bool_value": val}).bool_value is expected
+
+
+def test_base_schema_field_name_alias() -> None:
+    assert SOAPExample(**{"BoolValue": True}).bool_value is True

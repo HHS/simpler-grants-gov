@@ -20,6 +20,12 @@ class OpensearchConfig(PydanticBaseEnvConfig):
     # This requires the ECS task role to have the appropriate OpenSearch permissions
     aws_region: str | None = Field(default=None)  # AWS_REGION
 
+    # Whether to request score explanations from OpenSearch for search queries.
+    # When enabled, the top 10 results will be logged as SearchResultExplanation
+    # custom events in New Relic with per-field score breakdowns.
+    # Can be disabled via environment variable if performance degrades.
+    opensearch_explain_enabled: bool = Field(default=True)  # OPENSEARCH_EXPLAIN_ENABLED
+
 
 def get_opensearch_config() -> OpensearchConfig:
     opensearch_config = OpensearchConfig()
@@ -33,6 +39,7 @@ def get_opensearch_config() -> OpensearchConfig:
             "search_verify_certs": opensearch_config.search_verify_certs,
             "search_connection_pool_size": opensearch_config.search_connection_pool_size,
             "aws_region": opensearch_config.aws_region,
+            "opensearch_explain_enabled": opensearch_config.opensearch_explain_enabled,
         },
     )
 

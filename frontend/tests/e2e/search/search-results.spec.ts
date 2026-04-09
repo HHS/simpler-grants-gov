@@ -1,10 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { waitForURLContainsQueryParamValue } from "tests/e2e/playwrightUtils";
+import { VALID_TAGS } from "tests/e2e/tags";
 
 import {
   fillSearchInputAndSubmit,
   waitForSearchResultsInitialLoad,
 } from "./searchSpecUtil";
+
+const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE, CORE_REGRESSION } = VALID_TAGS;
 
 test.beforeEach(async ({ page }) => {
   const searchTerm = "grants";
@@ -24,17 +27,23 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("Search page results tests", () => {
-  test("should return at least 1 result when searching with valid term", async ({
-    page,
-  }) => {
-    const resultsHeading = page.locator("h3", {
-      hasText: /^[1-9]\d*\s+Opportunities$/i,
-    });
-    await expect(resultsHeading).toBeAttached();
-  });
+  test(
+    "should return at least 1 result when searching with valid term",
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, SMOKE] },
+    async ({ page }) => {
+      const resultsHeading = page.locator("h3", {
+        hasText: /^[1-9]\d*\s+Opportunities$/i,
+      });
+      await expect(resultsHeading).toBeAttached();
+    },
+  );
 
-  test("search list should have at least 1 item", async ({ page }) => {
-    const searchList = page.locator("ul.usa-list--unstyled");
-    await expect(searchList.locator("li >> nth=1")).toBeAttached();
-  });
+  test(
+    "search list should have at least 1 item",
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    async ({ page }) => {
+      const searchList = page.locator("ul.usa-list--unstyled");
+      await expect(searchList.locator("li >> nth=1")).toBeAttached();
+    },
+  );
 });

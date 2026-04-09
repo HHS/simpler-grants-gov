@@ -33,6 +33,12 @@ export const ExternalRoutes = {
   USA: "https://www.usa.gov",
   WIKI: "https://wiki.simpler.grants.gov/",
   WIKI_RELEASE_NOTES: "https://wiki.simpler.grants.gov/product/release-notes",
+  WIKI_CONTRIBUTE_CODE:
+    "https://wiki.simpler.grants.gov/get-involved/github-code",
+  WIKI_USER_RESEARCH_ARCHETYPES:
+    "https://wiki.simpler.grants.gov/design-and-research/user-research/grants.gov-archetypes",
   GRANTOR_SUPPORT: "https://www.grants.gov/grantors/grantor-help",
   FORUM: "https://forum.simpler.grants.gov/",
+  ETHNIO_VOLUNTEER: "https://ethn.io/91822",
+  FIDER: "https://simplergrants.fider.io",
 };

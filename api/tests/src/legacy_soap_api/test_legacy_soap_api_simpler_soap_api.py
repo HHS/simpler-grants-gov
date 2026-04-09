@@ -4,11 +4,8 @@ from unittest.mock import patch
 from src.legacy_soap_api import legacy_soap_api_config as soap_api_config
 from src.legacy_soap_api.legacy_soap_api_auth import USE_SIMPLER_OVERRIDE_KEY
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
-from src.legacy_soap_api.legacy_soap_api_schemas import (
-    SOAPRequest,
-    SoapRequestStreamer,
-    SOAPResponse,
-)
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.simpler_soap_api import get_simpler_soap_response
 
 
@@ -66,7 +63,7 @@ class TestSimplerSoapApi:
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
-            headers={USE_SIMPLER_OVERRIDE_KEY: "true"},
+            headers={USE_SIMPLER_OVERRIDE_KEY: "1"},
             method="POST",
             api_name=SimplerSoapAPI.APPLICANTS,
             operation_name="GetOpportunityListRequest",

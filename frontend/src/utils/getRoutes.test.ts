@@ -9,7 +9,6 @@ describe("getNextRoutes", () => {
 
     expect(result).toEqual([
       "/(base)/[...not-found]",
-      "/(base)/api-dashboard",
       "/(base)/applications/[applicationId]/form/[appFormId]",
       "/(base)/applications/[applicationId]/form/[appFormId]/success",
       "/(base)/applications/[applicationId]",
@@ -18,7 +17,8 @@ describe("getNextRoutes", () => {
       "/(base)/award-recommendation/1",
       "/(base)/dashboard",
       "/(base)/dev/feature-flags",
-      "/(base)/developer",
+      "/(base)/developers/api-dashboard",
+      "/(base)/developers",
       "/(base)/error",
       "/(base)/events",
       "/(base)/login",
@@ -26,6 +26,7 @@ describe("getNextRoutes", () => {
       "/(base)/newsletter/confirmation",
       "/(base)/newsletter",
       "/(base)/newsletter/unsubscribe",
+      "/(base)/opportunities/create",
       "/(base)/opportunities",
       "/(base)/opportunity/1",
       "/(base)/organizations/1/manage-users/legacy",

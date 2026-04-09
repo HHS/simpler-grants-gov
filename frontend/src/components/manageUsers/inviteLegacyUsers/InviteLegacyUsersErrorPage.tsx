@@ -9,6 +9,14 @@ const PageBreadcrumbs = ({ organizationId }: { organizationId: string }) => {
     <Breadcrumbs
       breadcrumbList={[
         {
+          title: t("ManageUsers.breadcrumbWorkspace"),
+          path: `/dashboard`,
+        },
+        {
+          title: t("ManageUsers.breadcrumbOrganizations"),
+          path: `/organizations`,
+        },
+        {
           title: t("OrganizationDetail.pageTitle"),
           path: `/organizations/${organizationId}`,
         },
@@ -18,7 +26,6 @@ const PageBreadcrumbs = ({ organizationId }: { organizationId: string }) => {
         },
         {
           title: t("InviteLegacyUsers.pageHeading"),
-          path: `/organizations/${organizationId}/manage-users/legacy`,
         },
       ]}
     />

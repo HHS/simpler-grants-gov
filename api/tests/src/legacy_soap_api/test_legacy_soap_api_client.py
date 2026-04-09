@@ -8,7 +8,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 import pytz
 import requests
-from apiflask import HTTPError
 from botocore.exceptions import ClientError
 from sqlalchemy import update
 
@@ -21,19 +20,16 @@ from src.legacy_soap_api.applicants.schemas import (
     GetOpportunityListResponse,
     OpportunityDetails,
 )
-from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
+from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientUserDoesNotHavePermission
 from src.legacy_soap_api.legacy_soap_api_client import (
     BaseSOAPClient,
     SimplerApplicantsS2SClient,
     SimplerGrantorsS2SClient,
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
-from src.legacy_soap_api.legacy_soap_api_schemas import (
-    SOAPRequest,
-    SoapRequestStreamer,
-    SOAPResponse,
-)
-from src.util.datetime_util import parse_grants_gov_date
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
+from src.util.datetime_util import make_timezone_aware, parse_grants_gov_date
 from tests.lib.data_factories import setup_cert_user
 from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.db.models.factories import (
@@ -54,9 +50,11 @@ from tests.util.minifiers import minify_xml
 GRANTS_GOV_TRACKING_NUMBER = "GRANT80000000"
 CID_UUID = "aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
 BOUNDARY_UUID = "cccccccc-1111-2222-3333-dddddddddddd"
+ADDITIONAL_UUID = "eeeeeeee-1111-2222-3333-ffffffffffff"
 TZ_EST = pytz.timezone("America/New_York")
 DT_NAIVE = datetime(2025, 9, 9, 8, 15, 17)
 DT_EST_AWARE = TZ_EST.localize(DT_NAIVE)
+DT_EST_AWARE_EARLIER = make_timezone_aware(datetime(2025, 8, 1, 8, 15, 17), "America/New_York")
 
 
 @pytest.fixture(autouse=True)
@@ -454,7 +452,7 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
-            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             expected = (
@@ -512,7 +510,7 @@ class TestSimplerSOAPGetApplicationZip:
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
         with patch.object(uuid, "uuid4") as mock_uuid4:
-            mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
+            mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             result = client.get_simpler_soap_response(mock_proxy_response)
             assert result.status_code == 200
@@ -552,7 +550,7 @@ class TestSimplerSOAPGetApplicationZip:
         )
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
-        with pytest.raises(HTTPError):
+        with pytest.raises(SOAPClientUserDoesNotHavePermission):
             client.get_simpler_soap_response(mock_proxy_response)
 
     def test_get_simpler_soap_response_logging_if_downloading_the_file_from_s3_fails(
@@ -631,7 +629,7 @@ class TestSimplerSOAPGetApplicationZip:
         mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
         response = client.get_simpler_soap_response(mock_proxy_response)
-        grants_gov_tracking_number = FAKE_GRANTS_GOV_TRACKING_NUMBER.split("GRANT")[1]
+        grants_gov_tracking_number = FAKE_GRANTS_GOV_TRACKING_NUMBER
         msg = f"Unable to find submission legacy_tracking_number {grants_gov_tracking_number}."
         assert msg in caplog.messages
         assert response.data == mock_proxy_response.data
@@ -648,6 +646,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         opportunity_assistance_listing=True,
         has_organization=True,
         legacy_competition_id=1,
+        submitted_at=DT_EST_AWARE,
     ):
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
         competition = CompetitionFactory(
@@ -663,7 +662,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         application_kwargs = dict(
             competition=competition,
             application_status=application_status,
-            submitted_at=DT_EST_AWARE,
+            submitted_at=submitted_at,
         )
         if has_organization:
             application_kwargs = application_kwargs | {
@@ -763,7 +762,9 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         sam_gov_entity_2 = SamGovEntityFactory.create(
             has_debt_subject_to_offset=False, has_exclusion_status=False
         )
-        submission_2 = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity_2)
+        submission_2 = self.setup_application_submission(
+            agency, sam_gov_entity=sam_gov_entity_2, submitted_at=DT_EST_AWARE_EARLIER
+        )
         application_2 = submission_2.application
         _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
@@ -828,7 +829,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 f"<FundingOpportunityNumber>{application_2.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
                 f"<CFDANumber>{application_2.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
                 f"<GrantsGovTrackingNumber>GRANT{submission_2.legacy_tracking_number}</GrantsGovTrackingNumber>"
-                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
+                "<ns2:ReceivedDateTime>2025-08-01T08:15:17.000-04:00</ns2:ReceivedDateTime>"
                 "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
@@ -861,7 +862,9 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         sam_gov_entity_2 = SamGovEntityFactory.create(
             has_debt_subject_to_offset=False, has_exclusion_status=False
         )
-        submission_2 = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity_2)
+        submission_2 = self.setup_application_submission(
+            agency, sam_gov_entity=sam_gov_entity_2, submitted_at=DT_EST_AWARE_EARLIER
+        )
         application_2 = submission_2.application
         _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
@@ -980,7 +983,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 f"<FundingOpportunityNumber>{application_2.competition.opportunity.opportunity_number}</FundingOpportunityNumber>"
                 f"<CFDANumber>{application_2.competition.opportunity_assistance_listing.assistance_listing_number}</CFDANumber>"
                 f"<GrantsGovTrackingNumber>GRANT{submission_2.legacy_tracking_number}</GrantsGovTrackingNumber>"
-                "<ns2:ReceivedDateTime>2025-09-09T08:15:17.000-04:00</ns2:ReceivedDateTime>"
+                "<ns2:ReceivedDateTime>2025-08-01T08:15:17.000-04:00</ns2:ReceivedDateTime>"
                 "<GrantsGovApplicationStatus>Validated</GrantsGovApplicationStatus>"
                 "<SubmissionMethod>web</SubmissionMethod>"
                 f"<SubmissionTitle>{application_2.application_name}</SubmissionTitle>"
@@ -1321,7 +1324,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "<UEI>E9T7F9N2ERR4</UEI>"
             "</ns2:SubmissionInfo>"
             "<ns2:SubmissionInfo>"
-            "<GARBAGE>E9T7F9N2ERR4</GARBAGE>"
+            "<ns2:ReceivedDateTime>NOT_A_VALID_DATETIME</ns2:ReceivedDateTime>"
             "</ns2:SubmissionInfo>"
             "</ns2:GetSubmissionListExpandedResponse>"
             "</soap:Body>"

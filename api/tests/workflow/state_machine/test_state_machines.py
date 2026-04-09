@@ -44,12 +44,14 @@ basic_test_workflow_config = WorkflowConfig(
         # Program Officer Approvals
         "receive_program_officer_approval": ApprovalConfig(
             approval_type=ApprovalType.PROGRAM_OFFICER_APPROVAL,
+            approval_state=BasicState.PENDING_PROGRAM_OFFICER_APPROVAL,
             required_privileges=[Privilege.PROGRAM_OFFICER_APPROVAL],
             minimum_approvals_required=3,  # require 3 approvals
         ),
         # Budget Officer Approvals
         "receive_budget_officer_approval": ApprovalConfig(
             approval_type=ApprovalType.BUDGET_OFFICER_APPROVAL,
+            approval_state=BasicState.PENDING_BUDGET_OFFICER_APPROVAL,
             required_privileges=[Privilege.BUDGET_OFFICER_APPROVAL],
         ),
     },
@@ -63,7 +65,6 @@ class BasicTestStateMachine(BaseStateMachine):
         BasicState,
         initial=BasicState.START,
         final=[BasicState.END, BasicState.DECLINED],
-        use_enum_instance=True,
     )
 
     ### Events + transitions
@@ -75,8 +76,7 @@ class BasicTestStateMachine(BaseStateMachine):
         states.MIDDLE.to(states.END),
     )
 
-    # These need to exist even if we don't use them
-    # as StateMachine doesn't like states to be unreachable from the start state.
+    # These exist so we can test logic on entering approval states
     middle_to_program_officer_approval = Event(
         states.MIDDLE.to(states.PENDING_PROGRAM_OFFICER_APPROVAL),
     )
@@ -157,6 +157,55 @@ class BasicTestStateMachine(BaseStateMachine):
         self.db_session = model.db_session
 
         # For testing purposes, store the transition events.
+        self.transition_history: list[StateMachineEvent] = []
+
+    def on_transition(self, state_machine_event: StateMachineEvent) -> None:
+        self.transition_history.append(state_machine_event)
+
+
+#########################
+# No Concurrent State Machine
+#########################
+# For testing that concurrent workflows for the same
+# entity are disallowed when configured.
+
+
+class NoConcurrentState(StrEnum):
+    START = "start"
+    MIDDLE = "middle"
+    END = "end"
+
+
+no_concurrent_test_workflow_config = WorkflowConfig(
+    workflow_type=WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+    persistence_model_cls=OpportunityPersistenceModel,
+    entity_type=WorkflowEntityType.OPPORTUNITY,
+    allow_concurrent_workflow_for_entity=False,
+)
+
+
+@WorkflowRegistry.register_workflow(no_concurrent_test_workflow_config)
+class NoConcurrentTestStateMachine(BaseStateMachine):
+
+    states = States.from_enum(
+        NoConcurrentState,
+        initial=NoConcurrentState.START,
+        final=[NoConcurrentState.END],
+    )
+
+    ### Events + transitions
+    start_workflow = Event(
+        states.START.to(states.MIDDLE),
+    )
+
+    middle_to_end = Event(
+        states.MIDDLE.to(states.END),
+    )
+
+    def __init__(self, model: OpportunityPersistenceModel, **kwargs):
+        super().__init__(model=model, **kwargs)
+        self.opportunity = model.opportunity
+        self.db_session = model.db_session
         self.transition_history: list[StateMachineEvent] = []
 
     def on_transition(self, state_machine_event: StateMachineEvent) -> None:

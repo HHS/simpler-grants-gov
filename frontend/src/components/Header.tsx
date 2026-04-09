@@ -112,7 +112,7 @@ const NavLinks = ({
         children: [
           { text: t("newsletter"), href: "/newsletter" },
           { text: t("events"), href: "/events" },
-          { text: t("developers"), href: "/developer" },
+          { text: t("developers"), href: "/developers" },
           { text: t("wiki"), href: ExternalRoutes.WIKI },
           { text: t("forum"), href: ExternalRoutes.FORUM },
         ],
@@ -307,6 +307,7 @@ const NavLinks = ({
       items={navItems}
       mobileExpanded={mobileExpanded}
       onToggleMobileNav={onToggleMobileNav}
+      className="padding-bottom-05"
     ></PrimaryNav>
   );
 };

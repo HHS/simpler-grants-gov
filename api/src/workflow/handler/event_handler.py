@@ -6,13 +6,19 @@ from sqlalchemy import select
 from src.adapters import db
 from src.constants.lookup_constants import WorkflowEventType, WorkflowType
 from src.db.models.user_models import User
-from src.db.models.workflow_models import Workflow, WorkflowEventHistory
+from src.db.models.workflow_models import Workflow
 from src.workflow.base_state_machine import BaseStateMachine
+from src.workflow.event.sqs_message_container import SqsMessageContainer
 from src.workflow.event.state_machine_event import StateMachineEvent
-from src.workflow.event.workflow_event import WorkflowEvent
+from src.workflow.event.workflow_metric_context import WorkflowMetricContext
+from src.workflow.listener.workflow_approval_email_listener import WorkflowApprovalEmailListener
 from src.workflow.listener.workflow_audit_listener import WorkflowAuditListener
 from src.workflow.registry.workflow_registry import WorkflowRegistry
-from src.workflow.service.workflow_service import get_and_validate_workflow, get_workflow_entity
+from src.workflow.service.workflow_service import (
+    get_and_validate_workflow,
+    get_workflow_entity,
+    validate_no_concurrent_workflow,
+)
 from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_constants import WorkflowConstants
 from src.workflow.workflow_errors import (
@@ -51,12 +57,13 @@ class EventHandler:
              ...
     """
 
-    def __init__(
-        self, db_session: db.Session, event: WorkflowEvent, history_event: WorkflowEventHistory
-    ):
+    def __init__(self, db_session: db.Session, sqs_message_container: SqsMessageContainer):
         self.db_session = db_session
-        self.event = event
-        self.history_event = history_event
+        self.event = sqs_message_container.workflow_event
+        self.history_event = sqs_message_container.history_event
+        self.workflow_metric_context = sqs_message_container.workflow_metric_context
+
+        self.sqs_message_container = sqs_message_container
 
     def process(self) -> BaseStateMachine:
         """Process an event."""
@@ -65,17 +72,17 @@ class EventHandler:
 
     def _process_event(self, state_machine_event: StateMachineEvent) -> BaseStateMachine:
         """Run the state machine event against the state machine."""
+        log_extra = state_machine_event.get_log_extra()
+        logger.info("Processing event against state machine", extra=log_extra)
+        state_machine_event.increment(WorkflowMetricContext.Metrics.WORKFLOW_EVENT_COUNT)
+        self.workflow_metric_context.add_log_extra(state_machine_event.get_log_extra())
+
         # Attach the workflow to the history event.
         self.history_event.workflow = state_machine_event.workflow
 
         persistence_model = state_machine_event.config.persistence_model_cls(
             db_session=self.db_session, workflow=state_machine_event.workflow
         )
-
-        log_extra = self.event.get_log_extra() | {"current_workflow_state": persistence_model.state}
-
-        # Create the audit listener to track all state transitions
-        audit_listener = WorkflowAuditListener(db_session=self.db_session)
 
         if (
             state_machine_event.workflow.current_workflow_state
@@ -85,7 +92,7 @@ class EventHandler:
             raise UnexpectedStateError("Workflow record has an unexpected state")
 
         state_machine = state_machine_event.state_machine_cls(
-            persistence_model, listeners=[audit_listener]
+            persistence_model, listeners=self.get_listeners()
         )
 
         if (
@@ -101,6 +108,9 @@ class EventHandler:
         state_machine.send(
             event=state_machine_event.event_to_send, state_machine_event=state_machine_event
         )
+
+        # After processing the event, calculate the duration we spent in the event handler
+        state_machine_event.workflow_metric_context.calc_duration()
 
         return state_machine
 
@@ -132,6 +142,7 @@ class EventHandler:
         which can have stronger type enforcement.
         """
         log_extra = self.event.get_log_extra()
+        logger.info("Processing event as new workflow event", extra=log_extra)
 
         if self.event.start_workflow_context is None:
             logger.warning(
@@ -143,9 +154,17 @@ class EventHandler:
 
         config, state_machine_cls = self._get_state_machine_for_workflow_type(context.workflow_type)
 
+        if context.entity_type != config.entity_type:
+            raise InvalidEventError("Entity type does not match workflow configuration")
+
         workflow_entity = get_workflow_entity(
             self.db_session,
-            entity_type=context.entity_type,
+            entity_id=context.entity_id,
+            config=config,
+        )
+
+        validate_no_concurrent_workflow(
+            self.db_session,
             entity_id=context.entity_id,
             config=config,
         )
@@ -169,6 +188,7 @@ class EventHandler:
             config=config,
             state_machine_cls=state_machine_cls,
             workflow_history_event=self.history_event,
+            workflow_metric_context=self.workflow_metric_context,
             metadata=self.event.metadata,
         )
 
@@ -185,6 +205,7 @@ class EventHandler:
         """
 
         log_extra = self.event.get_log_extra()
+        logger.info("Processing event as process workflow event", extra=log_extra)
 
         if self.event.process_workflow_context is None:
             logger.warning(
@@ -207,6 +228,7 @@ class EventHandler:
             config=config,
             state_machine_cls=state_machine_cls,
             workflow_history_event=self.history_event,
+            workflow_metric_context=self.workflow_metric_context,
             metadata=self.event.metadata,
         )
 
@@ -233,3 +255,11 @@ class EventHandler:
             )
             raise UserDoesNotExist("User does not exist, cannot process event.")
         return user
+
+    def get_listeners(self) -> list:
+        # Create the audit listener to track all state transitions
+        audit_listener = WorkflowAuditListener(db_session=self.db_session)
+        # Create a listener that sends emails whenever a workflow enters an approval state
+        approval_email_listener = WorkflowApprovalEmailListener(db_session=self.db_session)
+
+        return [audit_listener, approval_email_listener]

@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
-import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
+import { getAwardRecommendationDetails } from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
 import { useTranslations } from "next-intl";
@@ -12,8 +12,13 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
-import AwardRecommendationHero from "src/components/award-recommendation/AwardRecommendationHero";
+import AwardRecommendationHero, {
+  HeroButtonConfig,
+} from "src/components/award-recommendation/AwardRecommendationHero";
+import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
+import { RecommendationSummarySection } from "src/components/award-recommendation/RecommendationSummarySection";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
+import { submitAwardRecommendationForReview } from "./actions";
 
 export async function generateMetadata({
   params,
@@ -23,12 +28,8 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   const meta: Metadata = {
-    title: t("AwardRecommendation.pageTitle", {
-      defaultValue: "Review your recommendation",
-    }),
-    description: t("AwardRecommendation.metaDescription", {
-      defaultValue: "View your award recommendations",
-    }),
+    title: t("AwardRecommendation.pageTitle"),
+    description: t("AwardRecommendation.metaDescription"),
   };
   return meta;
 }
@@ -38,15 +39,14 @@ export type AwardRecommendationPageProps = {
 } & WithFeatureFlagProps;
 
 interface OpportunitySectionProps {
-  opportunityData: OpportunityDetail;
-  locale: string;
+  awardRecommendationDetails: AwardRecommendationDetails;
 }
 
 const OpportunitySection = ({
-  opportunityData,
-  locale: _locale,
+  awardRecommendationDetails,
 }: OpportunitySectionProps) => {
   const t = useTranslations("AwardRecommendation");
+  const opportunityData = awardRecommendationDetails.opportunity;
   const fundingOppName =
     opportunityData.opportunity_title || t("fundingOpportunityFallback");
   const fundingOppNumber =
@@ -58,10 +58,10 @@ const OpportunitySection = ({
     <div>
       <Grid row className="grid-gap">
         <Grid col={9} tablet={{ col: 9 }}>
-          <div className="margin-top-5 margin-bottom-5">
+          <div className="margin-top-3 margin-bottom-3">
             <div className="margin-bottom-3">
               <h2 className="margin-top-0 margin-bottom-0">
-                {t("opportunity", { defaultValue: "Opportunity" })}
+                {t("opportunity")}
               </h2>
             </div>
             <div className="border radius-md border-base-lighter padding-3 bg-white">
@@ -74,7 +74,7 @@ const OpportunitySection = ({
                     href={`/opportunity/${opportunityData.opportunity_id}`}
                     className="text-decoration-none"
                   >
-                    <p className="text-primary-darker hover:text-primary">
+                    <p className="text-primary-darker hover:text-primary margin-top-0">
                       {fundingOppName}
                     </p>
                   </Link>
@@ -99,9 +99,13 @@ const OpportunitySection = ({
                 )}
               </div>
               <p className="text-bold margin-bottom-2">
-                {t("selectionMethod")}
+                {t("otherOpportunityInfo.label")}
               </p>
-              {t("meritReview")}
+              <SummaryDescriptionDisplay
+                summaryDescription={
+                  awardRecommendationDetails.additional_info || ""
+                }
+              />
             </div>
           </div>
         </Grid>
@@ -113,56 +117,93 @@ const OpportunitySection = ({
 async function AwardRecommendationPageContent({
   params,
 }: AwardRecommendationPageProps) {
-  const { locale, id: awardRecommendationId } = await params;
+  const { id: awardRecommendationId } = await params;
 
   const t = await getTranslations("AwardRecommendation");
-  const opportunityId = "6a483cd8-9169-418a-8dfb-60fa6e6f51e5";
 
-  let opportunityData: OpportunityDetail | null = null;
-  if (opportunityId) {
+  // Define button configuration for preview page
+  const heroButtons: HeroButtonConfig[] = [
+    {
+      type: "navigation",
+      label: t("heroButtons.edit"),
+      href: `/award-recommendation/${awardRecommendationId}/edit`,
+      outline: true,
+    },
+    {
+      type: "action",
+      label: t("heroButtons.submitForReview"),
+      formAction: submitAwardRecommendationForReview,
+    },
+  ];
+
+  let awardRecommendationDetails: AwardRecommendationDetails | null = null;
+  if (awardRecommendationId) {
     try {
-      const response = await getOpportunityDetails(opportunityId);
-      opportunityData = response.data;
+      awardRecommendationDetails = await getAwardRecommendationDetails(
+        awardRecommendationId,
+      );
     } catch (error) {
-      console.error("Failed to fetch opportunity details", error);
+      console.error("Failed to fetch award recommendation details", error);
       if (parseErrorStatus(error as ApiRequestError) === 404) {
-        opportunityData = null;
+        awardRecommendationDetails = null;
       }
       return (
         <Alert
-          heading={t("errorHeadingOppurtunity")}
+          heading={t("errorHeadingAwardRecommendation")}
           headingLevel="h2"
           type="warning"
           validation
         >
-          {t("oppurtunityFetchError")}
+          {t("awardRecommendationFetchError")}
         </Alert>
       );
     }
   }
 
   return (
-    <>
-      {awardRecommendationId && (
+    <form>
+      {awardRecommendationDetails && (
         <Suspense
           fallback={
             <span data-testid="award-recommendation-hero-fallback"></span>
           }
         >
           <AwardRecommendationHero
-            awardRecommendationId={awardRecommendationId}
+            awardRecommendationDetails={awardRecommendationDetails}
+            buttons={heroButtons}
           />
         </Suspense>
       )}
       <GridContainer>
-        {opportunityData && (
-          <OpportunitySection
-            opportunityData={opportunityData}
-            locale={locale}
-          />
+        {awardRecommendationDetails && (
+          <>
+            <OpportunitySection
+              awardRecommendationDetails={awardRecommendationDetails}
+            />
+            <RecommendationSection
+              mode="view"
+              recommendationMethod={
+                awardRecommendationDetails.award_selection_method ===
+                "merit-review-only"
+                  ? t("recommendationMethod.meritReviewOnly")
+                  : t("recommendationMethod.meritReviewOther")
+              }
+              recommendationMethodDetails={
+                awardRecommendationDetails.funding_strategy
+              }
+              otherKeyInformation={
+                awardRecommendationDetails.other_key_information
+              }
+            />
+            <RecommendationSummarySection
+              summary={awardRecommendationDetails.award_recommendation_summary}
+              fundingStrategy={awardRecommendationDetails.funding_strategy}
+              viewMode={true}
+            />
+          </>
         )}
       </GridContainer>
-    </>
+    </form>
   );
 }
 

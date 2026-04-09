@@ -6,6 +6,7 @@ from src.adapters import db
 from src.db.models.workflow_models import WorkflowAudit
 from src.workflow.config.workflow_service_config import WorkflowServiceConfig
 from src.workflow.event.state_machine_event import StateMachineEvent
+from src.workflow.event.workflow_metric_context import WorkflowMetricContext
 
 logger = logging.getLogger(__name__)
 
@@ -74,9 +75,11 @@ class WorkflowAuditListener:
 
         logger.info(
             "Created workflow audit record for transition",
-            extra={
+            extra=state_machine_event.get_log_extra()
+            | {
                 "transition_event": event_data.event.name,
-                "acting_user_id": acting_user_id,
                 "is_automatic": self.transition_count > 1,
             },
         )
+
+        state_machine_event.increment(WorkflowMetricContext.Metrics.WORKFLOW_TRANSITION_COUNT)

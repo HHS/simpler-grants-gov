@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
-import NotFound from "src/app/[locale]/(base)/not-found";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
@@ -13,18 +12,19 @@ import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFe
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import ApplicationContainer from "src/components/application/ApplicationContainer";
 import { ApplicationHistoryCardProps } from "src/components/application/ApplicationHistoryTable";
 import { ApplicationDetailsCardProps } from "src/components/application/InformationCard";
+import Breadcrumbs from "src/components/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
 
 export function generateMetadata() {
   const meta: Metadata = {
-    title: `Application landing page`,
+    title: `Application | Simpler.Grants.gov`,
   };
   return meta;
 }
@@ -77,7 +77,7 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
         `Error retrieving application details for application (${applicationId})`,
         e,
       );
-      return <NotFound />;
+      notFound();
     }
     return <TopLevelError />;
   }
@@ -110,7 +110,22 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
   return (
     <>
       <GridContainer>
-        <h1 className="margin-top-9 margin-bottom-7">{t("title")}</h1>
+        <Breadcrumbs
+          breadcrumbList={[
+            {
+              title: t("breadcrumbWorkspace"),
+              path: `/dashboard`,
+            },
+            {
+              title: t("breadcrumbApplications"),
+              path: `/applications`,
+            },
+            {
+              title: details.application_name,
+            },
+          ]}
+        />
+        <h1 className="margin-top-0 margin-bottom-7">{t("title")}</h1>
         <ApplicationContainer
           applicationDetails={details}
           opportunity={opportunity}

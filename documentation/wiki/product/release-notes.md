@@ -1,5 +1,61 @@
 # Release Notes
 
+## [Simpler.Grants.Gov](release-notes.md#simpler.grants.gov-hosted-a-public-demonstration) Release Notes - April 3, 2026
+
+April 3rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.04.01-1):&#x20;
+
+{% columns %}
+{% column width="25%" %}
+#### Announcement
+{% endcolumn %}
+
+{% column width="75%" %}
+### More consistent breadcrumb navigation
+
+Since [Simpler.Grants.gov](http://simpler.grants.gov) has added more features and nested pages, it's important that users can quickly understand where they are in relation to other content, how they got there, and how various functionalities relate to each other. This latest release makes our use of breadcrumbs consistent at the top of pages to show the location of the current page within the site structure. The team has removed breadcrumbs where they were not necessary, and standardized them where they are helpful — such as pages nested under the improved Workspace menu.
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+#### Bug Fix
+{% endcolumn %}
+
+{% column width="75%" %}
+### Fixed root cause of 404 pages on [Simpler.Grants.gov](http://simpler.grants.gov)
+
+Pages for opportunities, applications, and forms were returning HTTP 200 instead of 404 when resources weren't found. The root cause was incorrect rendering of the function that sets the 404 status code, which was addressed and fixed across 4 pages that had the same bug pattern.
+
+This is a result of a great [open source contribution](https://github.com/HHS/simpler-grants-gov/pull/9301) made by user [vijaygovindaraja](https://github.com/vijaygovindaraja) to address this bug in our backlog - thank you for your contribution!&#x20;
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+#### Bug Fix
+{% endcolumn %}
+
+{% column width="75%" %}
+### Opportunity Forecasts now correctly populate agency contact information
+
+Previously, when an opportunity forecast was published in Grants.gov, some of the Grantor contact information [was not being properly transferred](https://github.com/HHS/simpler-grants-gov/issues/9186) to [Simpler.Grants.gov](http://simpler.grants.gov) due to how the data was structured in [grants.gov](http://grants.gov). To correct this, we [made a change](https://github.com/HHS/simpler-grants-gov/pull/9187) to capture this information when the forecast is published, in addition to the already-captured information on the opportunity itself.
+
+As a result of this change, the Simpler.Grants.gov team recently did a data update backfilling description information resulting in additional emails being sent to users related to forecasted opportunities. There are no further changes or responses required from users, and functionality is back to normal.&#x20;
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+#### Improvement
+{% endcolumn %}
+
+{% column width="75%" %}
+### Updated workflow emails
+
+Previously, when an opportunity forecast was published in We [updated workflow emails](https://github.com/HHS/simpler-grants-gov/pull/9104) to render correctly and modified the email format to handle new lines more effectively. Additionally, we made minor logging adjustments based on needs for the dashboard.
+{% endcolumn %}
+{% endcolumns %}
+
 ## [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - February 23, 2026
 
 February 23rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.02.18-1):&#x20;

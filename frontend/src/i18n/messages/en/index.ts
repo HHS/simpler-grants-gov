@@ -6,15 +6,15 @@ export const messages = {
     githubLink: "Follow on GitHub",
     sections: {
       experimental: {
-        title: "New Features, simpler experience",
+        title: "New features, simpler experience",
         canDoHeader: "Tell us what's working (and what's not)",
         canDoSubHeader: "What you can do now",
         canDoParagraph:
           "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
         tryLink: "Use the new simpler search",
-        cantDoHeader: "What you can't do quite yet",
+        cantDoHeader: "What we're working on",
         cantDoParagraph:
-          "For now, you need to visit Grants.gov to access more advanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
+          "We're currently working with agencies on a simpler application process. You may need to visit <grantsLink>Grants.gov</grantsLink> to apply for most opportunities. In the meantime, follow our <roadmapLink>roadmap</roadmapLink> to stay updated on our progress.",
         iconSections: [
           {
             description:
@@ -35,17 +35,18 @@ export const messages = {
         ],
       },
       building: {
-        title: "Building <span>with</span> you, not <span>for</span> you",
-        paragraphs: [
+        title: "Community-prioritized improvements & open source",
+        paragraph1:
           "Transparency is the foundation of good government. That's why we're committed to sharing our process and working in the open.",
-          "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
-        ],
+        paragraph2:
+          "All of <code>our code is open-source</code> and <roadmap>our roadmap</roadmap> is public. We welcome everyone to collaborate with us on <vision>the vision</vision> and details of every feature we build.",
       },
       involved: {
         title: "More ways to get involved",
         technicalTitle: "Contribute your technical expertise",
         technicalDescription:
           "We're always excited to welcome new open source developers to our community.",
+        fiderLink: "Vote for the feature you want to see implemented next",
         technicalLink: "Learn how to contribute code",
         participateTitle: "Participate in user research",
         participateDescription:
@@ -275,6 +276,8 @@ export const messages = {
   },
   Application: {
     title: "Application",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbApplications: "Applications",
     submissionValidationError: {
       title: "Your application could not be submitted",
       description:
@@ -437,6 +440,11 @@ export const messages = {
       navTitle: "Sections in this form",
       unsavedChangesWarning:
         "You have unsaved changes or attachments that will be lost if you select OK.",
+      fieldListWidget: {
+        entry: "Entry",
+        delete: "Delete",
+        add: "Add entry",
+      },
     },
     transferOwnershipModal: {
       title: "Transfer application ownership",
@@ -533,6 +541,7 @@ export const messages = {
           "Our research has helped us understand the needs of all types of Grants.gov users—from first-time visitors to experienced applicants managing multiple grants. These insights drive our efforts to create a simpler, more accessible system for everyone.",
         linkText1: "Read more about the research on our public wiki",
         linkText2: "Sign up to participate in future user studies",
+        linkText3: "Vote for the feature you want to see implemented next",
       },
     },
   },
@@ -540,9 +549,9 @@ export const messages = {
     pageTitle: "Newsletter | Simpler.Grants.gov",
     metaDescription:
       "Sign up for email updates from the Simpler.Grants.gov team.",
-    title: "Simpler Grants Newsletter",
+    title: "Simpler.Grants.gov newsletter",
     paragraph1:
-      "Sign up to get project updates delivered to your inbox every few weeks.",
+      "Sign up to get project updates delivered to your inbox every month.",
     paragraph2:
       "You'll be the first to hear about feature launches, upcoming events, user research, and more.",
     formLabel: "Subscribe to our newsletter",
@@ -599,10 +608,11 @@ export const messages = {
       visitHomepageButton: "Visit our homepage",
     },
   },
-  Developer: {
-    pageTitle: "Developer Portal | Simpler.Grants.gov",
+  Developers: {
+    pageTitle: "Developers | Simpler.Grants.gov",
     pageDescription:
-      "Tools and resources for developers working on Simpler.Grants.gov",
+      "Tools and resources for developers working with Simpler.Grants.gov",
+    h1: "Developers",
     infoTitle: "API tools & management",
     canDoHeader: "What's available for developers",
     canDoSubHeader: "What you can do with an API key now",
@@ -631,9 +641,9 @@ export const messages = {
     ],
   },
   ApiDashboard: {
-    pageTitle: "API Dashboard | Simpler.Grants.gov",
+    pageTitle: "API dashboard | Simpler.Grants.gov",
     metaDescription: "Manage your API keys for Simpler.Grants.gov",
-    heading: "API Dashboard",
+    heading: "API dashboard",
     errorLoadingKeys: "Failed to load API keys",
     table: {
       headers: {
@@ -794,10 +804,13 @@ export const messages = {
     unauthorizedExplanation: "This content is not available",
   },
   Search: {
-    title: "Search Funding Opportunities | Simpler.Grants.gov",
+    title: "Search | Simpler.Grants.gov",
+    header: "Search funding opportunities",
     metaDescription:
       "Search for and discover relevant opportunities using our improved search.",
     description: "Try out our experimental search page.",
+    goToGG:
+      "Simpler.Grants.gov is the new way to <search-link>search</search-link>. To access classic search, you must sign in to <gg-link>www.grants.gov</gg-link>.",
     filters: {
       searchNoResults: {
         title: "Your search didn't return any results.",
@@ -863,10 +876,10 @@ export const messages = {
       submit: "View results",
       clearFilters: "Clear filters",
       toggleButton: "Filters",
+      loading: "Loading filters",
     },
     callToAction: {
-      title: "Search funding opportunities",
-      shareWithOrganization: "Share with organizations",
+      sharingOptions: "Sharing Options",
     },
     opportunitySaved: "Saved",
     resultsHeader: {
@@ -946,6 +959,8 @@ export const messages = {
           "This search query was copied to your clipboard. Paste it as a link anywhere.",
       },
     },
+    shareWithYourList: "Shared with:",
+    sharingOptions: "Sharing Options",
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
@@ -955,11 +970,13 @@ export const messages = {
   },
   SavedSearches: {
     heading: "Saved search queries",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedQueries: "Saved search queries",
     noSavedCTAParagraphOne: "You don't have any saved queries yet.",
     noSavedCTAParagraphTwo:
       "As you search for opportunities, save your preferred combinations of terms and filters for easy access later. Return here to view and manage your saved queries.",
     searchButton: "Start a new search",
-    title: "Saved Search Queries | Simpler.Grants.gov",
+    title: "Saved search queries | Simpler.Grants.gov",
     error:
       "We encountered an issue while loading your saved search queries. If this keeps happening, please email simpler@grants.gov for help.",
     edit: "Edit name",
@@ -1005,6 +1022,8 @@ export const messages = {
   SavedOpportunities: {
     metaDescription: "View your saved funding opportunities.",
     heading: "Saved opportunities",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbSavedOpportunities: "Saved opportunities",
     noSavedCTAParagraphOne:
       "To add an opportunity to your list, use the Save button next to its title on the listing's page.",
     noSavedCTAParagraphTwo:
@@ -1015,7 +1034,12 @@ export const messages = {
     statusFilter: {
       label: "Filter by status",
     },
-    title: "Saved Opportunities | Simpler.Grants.gov",
+    title: "Saved opportunities | Simpler.Grants.gov",
+    ownershipFilter: {
+      label: "Filter by organization",
+      showAll: "Show all",
+      individual: "Individual",
+    },
   },
   Roadmap: {
     pageTitle: "Roadmap | Simpler.Grants.gov",
@@ -1029,7 +1053,7 @@ export const messages = {
           {
             title: "Piloting smarter, easier budget forms",
             content:
-              "<p>In collaboration with users from the Simpler Grants Co-Design Group, we're prototyping a smarter, easier-to-use budget form to directly address the most common challenges applicants face. The redesigned form will incorporate clearer instructions, simplified user flow, and auto-calculation of fields to reduce confusion and errors.</p><p><linkGithub7832>Follow #7832 on GitHub</linkGithub7832></p>",
+              "<p>In collaboration with users from the Simpler.Grants.gov Co-Design Group, we're prototyping a smarter, easier-to-use budget form to directly address the most common challenges applicants face. The redesigned form will incorporate clearer instructions, simplified user flow, and auto-calculation of fields to reduce confusion and errors.</p><p><linkGithub7832>Follow #7832 on GitHub</linkGithub7832></p>",
           },
           {
             title:
@@ -1234,7 +1258,7 @@ export const messages = {
           },
           {
             date: "2027",
-            title: "Simpler Grants replaces legacy Grants.gov",
+            title: "Simpler.Grants.gov replaces legacy Grants.gov",
             content:
               "<p>The Simpler.Grants.gov experience becomes the default experience of Grants.gov, providing a modern, consistent experience for all users.</p>",
           },
@@ -1585,9 +1609,6 @@ export const messages = {
     "ZMB: ZAMBIA": "Zambia",
     "ZWE: ZIMBABWE": "Zimbabwe",
   },
-  returnToGrants: {
-    message: "Return to Grants.gov",
-  },
   Settings: {
     pageTitle: "Settings | Simpler.Grants.gov",
     title: "Settings",
@@ -1617,7 +1638,7 @@ export const messages = {
     requiredForProfile: "Required to complete your profile.",
   },
   WorkspaceDashboard: {
-    pageTitle: "Workspace Dashboard | Simpler.Grants.gov",
+    pageTitle: "Workspace | Simpler.Grants.gov",
     title: "Welcome to your workspace dashboard.",
     fetchError: "Error fetching user data. Please try refreshing the page.",
     organizations: "Your organizations",
@@ -1678,6 +1699,8 @@ export const messages = {
   },
   OrganizationDetail: {
     pageTitle: "Organization",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
     fetchError: "Unable to fetch organization details",
     organizationDetailsHeader: "Organization details",
     ebizPoc: "eBiz POC",
@@ -1701,6 +1724,8 @@ export const messages = {
   },
   ManageUsers: {
     pageTitle: "Manage users | Simpler.Grants.gov",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
     pageHeading: "Manage users",
     activeUsersHeading: "Active Users Roster",
     activeUsersTableDescription:
@@ -1787,7 +1812,9 @@ export const messages = {
         "Applications you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
     },
     pageHeading: "Applications",
-    pageTitle: "Applications",
+    pageTitle: "Applications | Simpler.Grants.gov",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbApplications: "Applications",
     tableContents: {
       agency: "Agency: ",
       draft: "Draft",
@@ -1803,6 +1830,7 @@ export const messages = {
     },
   },
   Opportunities: {
+    createOpportunityButton: "Create Opportunity",
     numOpportunities:
       "{num, plural, =1 {1 opportunity} other {# opportunities}}",
     errorMessage:
@@ -1813,6 +1841,11 @@ export const messages = {
       secondary:
         "Opportunities you start or work on will be saved here.  Return anytime to view, continue, or manage them.",
     },
+    showingOpportunitiesFor: "Showing opportunities for {agencyName}",
+    agencySelector: "Select agency",
+    agencyNotAuthorized:
+      "You do not have access to this agency's opportunities.",
+    noAgencies: "You are not associated with any agencies.",
     pageHeading: "Opportunities",
     pageTitle: "Opportunities",
     tableContents: {
@@ -1835,6 +1868,8 @@ export const messages = {
     metaDescription: "View your organizations",
     pageHeading: "Organizations",
     pageTitle: "Organizations",
+    breadcrumbWorkspace: "Workspace",
+    breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
     awardRecs: "Award Recs",
@@ -1853,8 +1888,11 @@ export const messages = {
       approved: "Approved",
     },
     heroButtons: {
-      save: "Save and finish later",
+      save: "Save",
       create: "Create",
+      edit: "Edit",
+      preview: "Preview",
+      submitForReview: "Submit for review",
     },
     pageTitle: "Review your Recommendation",
     pageTitleEdit: "Edit your recommendation",
@@ -1881,9 +1919,48 @@ export const messages = {
     showLess: "Show less",
     opportunity: "Opportunity",
     editOpportunityDetails: "Edit opportunity details",
-    errorHeadingOppurtunity: "Error fetching opportunity details",
-    oppurtunityFetchError:
-      "Error fetching opportunity data. Please try refreshing the page.",
+    recommendationMethod: {
+      label: "Recommendation method",
+      description: "Choose the method you'll use to rate",
+      meritReviewOnly: "Merit review ranking only",
+      meritReviewOther: "Merit review ranking with other factors",
+    },
+    recommendationMethodDetails: {
+      label: "Recommendation method details",
+      description:
+        "Add any additional information - including the selection factors used in the NOFO",
+    },
+    otherKeyInformation: {
+      label: "Other key information",
+      description:
+        "Add any relevant information related to this reviewer and decision-maker for this opportunity",
+    },
+    errorHeadingAwardRecommendation:
+      "Error fetching award recommendation details",
+    awardRecommendationFetchError:
+      "Error fetching award recommendation data. Please try refreshing the page.",
+    recommendations: {
+      heading: "Recommendations",
+      editPageDescription:
+        "Document your award recommendations and the funding strategy used for the period of performance.",
+      description:
+        "Award recommendations and the funding strategy used for the period of performance.",
+      summary: {
+        heading: "Summary",
+        appsReceived: "Apps received",
+        appsRecommended: "Apps recommended",
+        totalFundingRecommended: "Total funding recommended",
+        totalAvailable: "Total available",
+        recommendedWithoutFunding: "Recommended without funding",
+        notRecommendedForFunding: "Not recommended for funding",
+        applications: "applications",
+      },
+      fundingStrategy: {
+        heading: "Funding strategy",
+        description:
+          "Explain how you plan to provide funding over time. For example, will the agency award all funding in a single award or in multiple budget periods across a longer period of performance.",
+      },
+    },
   },
   InviteLegacyUsers: {
     dataLoadingError:
@@ -1928,5 +2005,36 @@ export const messages = {
       "At the end of the session, we will ask you for your verbal permission to use what we learn to make the product better.",
       "If you opt in to using what we learn, your feedback will be anonymized and included in our research findings as part of trends we see across many participants.",
     ],
+  },
+  CreateOpportunity: {
+    pageTitle: "Create an opportunity",
+    errorMessage:
+      "We have encountered an error loading this page, please try again later.",
+    keyInfo: "Key information",
+    basicInstructions:
+      "Fill out the basic details below to begin. Once you save this information, a draft will be created, allowing you to return at any time to add more details, upload documents, and finalize your opportunity.",
+    cancel: "Cancel",
+    saveAndContinue: "Save and continue",
+    pending: "Pending...",
+    errorHeading: "Error",
+    successHeading: "Success",
+    CreateOpportunityForm: {
+      opportunityNumber: "Opportunity number",
+      opportunityNumberDesc:
+        "Enter the unique ID assigned to this funding opportunity.",
+      opportunityTitle: "Opportunity title",
+      opportunityTitleDesc:
+        "Provide a concise, descriptive name that helps applicants identify the grant's purpose.",
+      agency: "Agency",
+      category: "Grant selection method",
+      categoryDesc: "Choose the evaluation process used to award these funds.",
+      categoryExplanation: "Grant selection method explanation",
+      categoryExplanationDesc:
+        'If "Other" was selected, please describe the specific process used to evaluate and award these funds.',
+      assistanceListingNumber: "Assistance listing number",
+      assistanceListingNumberDesc:
+        "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
+      successMessage: "Opportunity started. Continuing shortly...",
+    },
   },
 };

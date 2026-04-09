@@ -10,8 +10,9 @@ from src.adapters import db
 from src.constants.lookup_constants import WorkflowEntityType, WorkflowEventType, WorkflowType
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
-from src.db.models.workflow_models import WorkflowApproval, WorkflowEventHistory
+from src.db.models.workflow_models import WorkflowApproval
 from src.workflow.base_state_machine import BaseStateMachine
+from src.workflow.event.sqs_message_container import SqsMessageContainer
 from src.workflow.event.workflow_event import (
     ProcessWorkflowEventContext,
     StartWorkflowEventContext,
@@ -44,7 +45,8 @@ def build_start_workflow_event(
     user: User | None,
     entity,
     exclude_start_workflow_context: bool = False,
-) -> tuple[WorkflowEvent, WorkflowEventHistory]:
+    receipt_handle: str | None = None,
+) -> SqsMessageContainer:
     user_id = user.user_id if user else uuid.uuid4()
 
     if isinstance(entity, Opportunity):
@@ -78,7 +80,13 @@ def build_start_workflow_event(
         workflow=None,
     )
 
-    return event, workflow_event_history
+    if receipt_handle is None:
+        # Make up a receipt handle if not passed in just so it's set
+        receipt_handle = str(uuid.uuid4())
+
+    return SqsMessageContainer(
+        receipt_handle=receipt_handle, workflow_event=event, history_event=workflow_event_history
+    )
 
 
 def build_process_workflow_event(
@@ -87,8 +95,14 @@ def build_process_workflow_event(
     event_to_send: str,
     metadata: dict | None = None,
     exclude_process_workflow_context: bool = False,
-) -> tuple[WorkflowEvent, WorkflowEventHistory]:
+    receipt_handle: str | None = None,
+    event_id: uuid.UUID | None = None,
+    put_history_event_in_session: bool = True,
+) -> SqsMessageContainer:
     user_id = user.user_id if user else uuid.uuid4()
+
+    if event_id is None:
+        event_id = uuid.uuid4()
 
     if exclude_process_workflow_context:
         process_workflow_context = None
@@ -98,23 +112,37 @@ def build_process_workflow_event(
         )
 
     event = WorkflowEvent(
-        event_id=uuid.uuid4(),
+        event_id=event_id,
         acting_user_id=user_id,
         event_type=WorkflowEventType.PROCESS_WORKFLOW,
         process_workflow_context=process_workflow_context,
         metadata=metadata,
     )
 
-    workflow_event_history = WorkflowEventHistoryFactory.create(
+    # For most uses of this util, we want the history event to be
+    # in the session, but for testing at the top-level of the workflow
+    # logic, we want it detached like it would be there.
+    event_history_params = dict(
         event_id=event.event_id,
         event_data=event.model_dump_json(),
+        is_successfully_processed=True,
         # Despite having the workflow, we don't attach it here
         # as that wouldn't be connected until the event handler processes it.
         workflow_id=None,
         workflow=None,
     )
+    if put_history_event_in_session:
+        workflow_event_history = WorkflowEventHistoryFactory.create(**event_history_params)
+    else:
+        workflow_event_history = WorkflowEventHistoryFactory.build(**event_history_params)
 
-    return event, workflow_event_history
+    if receipt_handle is None:
+        # Make up a receipt handle if not passed in just so it's set
+        receipt_handle = str(uuid.uuid4())
+
+    return SqsMessageContainer(
+        receipt_handle=receipt_handle, workflow_event=event, history_event=workflow_event_history
+    )
 
 
 def send_process_event(
@@ -138,14 +166,14 @@ def send_process_event(
     if len(metadata) == 0:
         metadata = None
 
-    process_workflow_event, history_event = build_process_workflow_event(
+    sqs_container = build_process_workflow_event(
         workflow_id=workflow_id,
         user=user,
         event_to_send=event_to_send,
         metadata=metadata,
     )
 
-    state_machine = EventHandler(db_session, process_workflow_event, history_event).process()
+    state_machine = EventHandler(db_session, sqs_container).process()
     assert (
         state_machine.workflow.current_workflow_state == expected_state
     ), f"Expected {expected_state} but got {state_machine.workflow.current_workflow_state}"

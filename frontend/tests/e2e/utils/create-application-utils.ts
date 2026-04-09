@@ -3,6 +3,8 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 
+import { gotoWithRetry } from "./lifecycle-utils";
+
 const { baseUrl } = playwrightEnv;
 
 async function selectOptionByLabelSubstring(
@@ -12,12 +14,23 @@ async function selectOptionByLabelSubstring(
   const select = selectLocator.first();
   await select.waitFor({ state: "visible", timeout: 5000 });
   await expect(select).toBeEnabled({ timeout: 10000 });
+
+  // Wait for org options to load — on WebKit the dropdown may initially only
+  // show default options before the org list is fetched from the API.
+  // If the org never appears (e.g. e2e user has no orgs), fall back to individual.
   await expect
-    .poll(async () =>
-      select.evaluate((el) => {
-        if (!(el instanceof HTMLSelectElement)) return false;
-        return Array.from(el.options).some((opt) => !opt.disabled);
-      }),
+    .poll(
+      async () => {
+        const options = await select.locator("option").allTextContents();
+        return (
+          options.some((opt) => opt.includes(labelSubstring)) ||
+          options.some((opt) => opt.includes("As an individual"))
+        );
+      },
+      {
+        message: `Waiting for options to load in dropdown`,
+        timeout: 30000,
+      },
     )
     .toBe(true);
 
@@ -31,25 +44,34 @@ async function selectOptionByLabelSubstring(
     );
 
   const resolvedLabel =
-    options.find((opt: string) => opt.includes(labelSubstring)) || options[0];
+    options.find((opt: string) => opt.includes(labelSubstring)) ??
+    options.find((opt: string) => opt.includes("As an individual (myself)"));
 
-  if (resolvedLabel) {
-    const value = await select
-      .locator("option")
-      .filter({ hasText: resolvedLabel })
-      .first()
-      .getAttribute("value");
+  if (!resolvedLabel) {
+    throw new Error(
+      `Could not find option matching "${labelSubstring}" in dropdown. Available options: ${options.join(", ")}`,
+    );
+  }
 
-    if (value && enabledOptionValues.includes(value)) {
-      await select.selectOption({ value });
-    } else if (enabledOptionValues.length > 0) {
-      await select.selectOption({ value: enabledOptionValues[0] });
-    }
+  const value = await select
+    .locator("option")
+    .filter({ hasText: resolvedLabel })
+    .first()
+    .getAttribute("value");
+
+  if (value && enabledOptionValues.includes(value)) {
+    await select.selectOption({ value });
+  } else {
+    throw new Error(
+      `Option "${resolvedLabel}" is disabled or has no value. Enabled options: ${enabledOptionValues.join(", ")}`,
+    );
   }
 
   const selectedValue = await select.inputValue();
-  if (!selectedValue && enabledOptionValues.length > 0) {
-    await select.selectOption({ value: enabledOptionValues[0] });
+  if (!selectedValue) {
+    throw new Error(
+      `Failed to select option "${resolvedLabel}" — no value was set after selection.`,
+    );
   }
 }
 
@@ -64,7 +86,7 @@ export async function createApplication(
   opportunityUrl: string,
   orgLabel: string,
 ) {
-  await page.goto(`${baseUrl}${opportunityUrl}`, {
+  await gotoWithRetry(page, `${baseUrl}${opportunityUrl}`, {
     waitUntil: "domcontentloaded",
   });
   await page.waitForTimeout(3000);
@@ -76,9 +98,9 @@ export async function createApplication(
   const modal = page.locator(
     '[role="dialog"].is-visible, #start-application.is-visible',
   );
-  await expect(modal.locator("select")).toBeVisible({ timeout: 15000 });
+  await expect(modal.locator("select")).toBeVisible({ timeout: 60000 });
   const orgSelect = modal.locator(
-    'select[name*="applicant"], select:nth-of-type(1)',
+    '#create-application-organization-select, select[name*="orgnization"], select[name*="organization"]',
   );
   const orgSelectCount = await orgSelect.count();
   if (orgSelectCount > 0) {
@@ -95,39 +117,27 @@ export async function createApplication(
       timeout: 5000,
     });
   }
-  const createButton = modal.getByRole("button", {
-    name: /create|submit|start|next/i,
-  });
+  const createButton = modal.getByTestId("application-start-save");
   const createRequest = page.waitForResponse(
     (response) =>
       response.request().method() === "POST" &&
       response.url().includes("/api/applications"),
     { timeout: 60000 },
   );
-  await expect(createButton.first()).toBeEnabled({ timeout: 10000 });
-  await modal.scrollIntoViewIfNeeded();
-  await modal
-    .locator(".usa-modal__main, .usa-modal__content, .usa-modal__body")
-    .first()
-    .evaluate((el) => {
-      (el as HTMLElement).scrollTop = (el as HTMLElement).scrollHeight;
-    })
-    .catch(() => undefined);
-  await createButton.first().scrollIntoViewIfNeeded();
-  try {
-    await createButton.first().click({ timeout: 15000 });
-  } catch (_error) {
-    await createButton.first().click({ force: true });
-    await createButton.first().evaluate((el) => (el as HTMLElement).click());
-  }
+  await expect(createButton).toBeEnabled({ timeout: 10000 });
+  await createButton.click({ force: true });
   await createRequest;
   await page.waitForTimeout(3000);
   await page.waitForURL(/\/applications\/[a-f0-9-]+/, { timeout: 60000 });
   await page.waitForLoadState("domcontentloaded");
-  await page.waitForLoadState("networkidle");
+  // Avoid strict networkidle waits on pages with background polling.
+  await page.waitForLoadState("load").catch(() => undefined);
   await page.waitForTimeout(2000);
   const mainContent = page.locator("main");
   await expect(mainContent).toBeVisible();
+  await expect(
+    page.locator(".simpler-application-forms-table").first(),
+  ).toBeVisible({ timeout: 30000 });
   const requiredFormsHeading = page.locator(
     "text=/Required Forms/i, text=/forms required/i",
   );

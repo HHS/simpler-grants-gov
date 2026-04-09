@@ -1,7 +1,15 @@
-import { SAVED_OPPORTUNITIES_CRUMBS } from "src/constants/breadcrumbs";
+import { getSession } from "src/services/auth/session";
 import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
+import { getUserOrganizations } from "src/services/fetch/fetchers/organizationsFetcher";
 import { fetchSavedOpportunities } from "src/services/fetch/fetchers/savedOpportunityFetcher";
+import { Organization } from "src/types/applicationResponseTypes";
 import { LocalizedPageProps } from "src/types/intl";
+import {
+  DEFAULT_SAVED_OPPORTUNITY_SCOPE,
+  getSavedOpportunitiesScopeOrganizationIds,
+  getScopeFromUrlParams,
+  INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
+} from "src/utils/opportunity/savedOpportunitiesUtils";
 
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -10,6 +18,7 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
 import { SavedOpportunitiesController } from "src/components/saved-opportunities/SavedOpportunitiesController";
+import SavedOpportunityOwnershipFilter from "src/components/saved-opportunities/SavedOpportunityOwnershipFilter";
 import SavedOpportunityStatusFilter from "src/components/saved-opportunities/SavedOpportunityStatusFilter";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
@@ -22,7 +31,7 @@ const NoSavedOpportunities = () => {
     <>
       <USWDSIcon
         name="star_outline"
-        className="text-primary-vivid grid-col-1 usa-icon usa-icon--size-6 margin-top-4"
+        className="text-primary-vivid grid-col-1 saved-opportunity-usa-icon usa-icon--size-6 margin-top-4"
       />
       <div className="margin-top-2 grid-col-11">
         <p>{t("noSavedCTAParagraphOne")}</p>
@@ -38,7 +47,7 @@ const NoSavedOpportunities = () => {
 };
 
 type SavedOpportunitiesPageProps = LocalizedPageProps & {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; savedBy?: string }>;
 };
 
 export default async function SavedOpportunities({
@@ -46,44 +55,110 @@ export default async function SavedOpportunities({
   searchParams,
 }: SavedOpportunitiesPageProps) {
   const { locale } = await params;
-  const { status } = await searchParams;
+  const { status, savedBy } = await searchParams;
   const t = await getTranslations({ locale });
+  const session = await getSession();
 
-  // Fetch saved opportunities (filtered if status is provided)
-  const savedOpportunities = await fetchSavedOpportunities(status);
+  let organizations: Organization[] = [];
+  let hasOrganizationsError = false;
 
-  let hasSavedOpportunities = savedOpportunities.length > 0;
-  if (!hasSavedOpportunities && status) {
-    const allSavedOpportunities = await fetchSavedOpportunities();
-    hasSavedOpportunities = allSavedOpportunities.length > 0;
+  if (session?.token) {
+    try {
+      organizations = await getUserOrganizations(
+        session.token,
+        session.user_id,
+      );
+    } catch (error: unknown) {
+      console.error("Unable to fetch user organizations", error);
+      hasOrganizationsError = true;
+    }
   }
 
-  // Get full opportunity details for each saved opportunity
+  const savedOpportunitiesScope = getScopeFromUrlParams(
+    undefined,
+    undefined,
+    savedBy,
+  );
+
+  const organizationIdsFilter = getSavedOpportunitiesScopeOrganizationIds(
+    savedOpportunitiesScope,
+  );
+
+  const savedOpportunities = await fetchSavedOpportunities(
+    savedOpportunitiesScope,
+    status,
+    organizationIdsFilter,
+  );
+
+  const allSavedOpportunities = await fetchSavedOpportunities(
+    DEFAULT_SAVED_OPPORTUNITY_SCOPE,
+  );
+
+  const individuallySavedOpportunities = await fetchSavedOpportunities(
+    INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
+  );
+
+  const hasFilteredSavedOpportunities = savedOpportunities.length > 0;
+  const hasAnySavedOpportunities = allSavedOpportunities.length > 0;
+
   const opportunityPromises = savedOpportunities.map(
     async (savedOpportunity) => {
       const { data: opportunityData } = await getOpportunityDetails(
-        String(savedOpportunity.opportunity_id),
+        savedOpportunity.opportunity_id,
       );
-      return opportunityData;
+
+      return {
+        ...opportunityData,
+        saved_to_organizations: savedOpportunity.saved_to_organizations ?? [],
+      };
     },
   );
+
   const resolvedOpportunities = await Promise.all(opportunityPromises);
+
+  const individuallySavedOpportunityIds = new Set<string>(
+    individuallySavedOpportunities.map((savedOpportunity) =>
+      String(savedOpportunity.opportunity_id),
+    ),
+  );
 
   return (
     <>
       <GridContainer>
-        <Breadcrumbs breadcrumbList={SAVED_OPPORTUNITIES_CRUMBS} />
+        <Breadcrumbs
+          breadcrumbList={[
+            {
+              title: t("SavedOpportunities.breadcrumbWorkspace"),
+              path: `/dashboard`,
+            },
+            {
+              title: t("SavedOpportunities.breadcrumbSavedOpportunities"),
+            },
+          ]}
+        />
         <h1 className="margin-top-0">{t("SavedOpportunities.heading")}</h1>
       </GridContainer>
       <div className="grid-container padding-y-5">
-        {hasSavedOpportunities ? (
+        {hasAnySavedOpportunities ? (
           <>
-            <div className="margin-bottom-3 display-flex flex-justify-end">
+            <div className="margin-bottom-3 display-flex flex-column tablet:flex-row flex-justify-end tablet:flex-align-end">
+              <div className="margin-bottom-2 tablet:margin-bottom-0 tablet:margin-right-2">
+                <SavedOpportunityOwnershipFilter
+                  organizations={organizations}
+                  savedBy={savedBy || null}
+                />
+              </div>
               <SavedOpportunityStatusFilter status={status || null} />
             </div>
-            {resolvedOpportunities.length > 0 ? (
+
+            {hasFilteredSavedOpportunities ? (
               <SavedOpportunitiesController
                 opportunities={resolvedOpportunities}
+                organizations={organizations}
+                individuallySavedOpportunityIds={
+                  individuallySavedOpportunityIds
+                }
+                hasOrganizationsError={hasOrganizationsError}
               />
             ) : (
               <p>{t("SavedOpportunities.noMatchingStatus")}</p>

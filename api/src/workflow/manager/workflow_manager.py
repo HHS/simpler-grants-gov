@@ -1,32 +1,31 @@
+import json
 import logging
-import random
 import signal
 import sys
 import time
-from dataclasses import dataclass
+from datetime import datetime
 from types import FrameType
 
-from sqlalchemy import text
+from pydantic import ValidationError
 
 from src.adapters import db
+from src.adapters.aws import SQSConfig
+from src.adapters.aws.sqs_adapter import SQSClient, SQSMessage
 from src.adapters.db import flask_db
+from src.adapters.search import SearchClient, flask_opensearch
+from src.constants.lookup_constants import WorkflowEventProcessingResult
+from src.db.models.workflow_models import WorkflowEventHistory
+from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
+from src.util.json_util import json_encoder
+from src.workflow.event.sqs_message_container import SqsMessageContainer
+from src.workflow.event.workflow_event import WorkflowEvent
+from src.workflow.handler.event_handler import EventHandler
+from src.workflow.registry.workflow_client_registry import init_workflow_client_registry
 from src.workflow.workflow_background_task import workflow_transaction
 from src.workflow.workflow_errors import NonRetryableWorkflowError, RetryableWorkflowError
 
 logger = logging.getLogger(__name__)
-
-# Stub event types just to have something to differentiate transactions
-# for the purposes of logging, will be changed later.
-STUB_EVENT_TYPES = ["event_type1", "event_type2"]
-
-
-@dataclass
-class StubEvent:
-    # Placeholder class until we have the
-    # actual event types setup.
-    event_data: str
-    event_type: str
 
 
 class WorkflowManagerConfig(PydanticBaseEnvConfig):
@@ -51,13 +50,14 @@ class WorkflowManager:
             config = WorkflowManagerConfig()
         self.config = config
 
-        # Not sure yet how we'll handle metrics
-        # This is just here to aid in testing at
-        # the moment
+        # Record a few metrics that we'll log when the process exits.
         self.metrics = {
             "events_processed": 0,
             "batches_processed": 0,
         }
+
+        self.sqs_config = SQSConfig()
+        self.sqs_client = SQSClient(queue_url=self.sqs_config.workflow_queue_url)
 
     def _register_signal_handlers(self) -> None:
         """Register signal handlers to handle expected
@@ -96,20 +96,40 @@ class WorkflowManager:
         logger.info("Received keyboard interrupt, exiting immediately.")
         sys.exit(0)
 
-    def fetch_events(self) -> list[StubEvent]:
-        # This will eventually be fetching events
-        # from an SQS queue, just having it return a
-        # random set of dummy events for the purposes
-        # of testing.
-        logger.info("Fetching workflow events")
+    def parse_event(self, message: SQSMessage) -> WorkflowEvent:
+        try:
+            message_body = json.loads(message.body)
+            return WorkflowEvent.model_validate(message_body)
+        except json.JSONDecodeError as e:
+            logger.exception(
+                "Failed to parse SQS message body as JSON", extra={"message_id": message.message_id}
+            )
+            raise ValueError(f"Invalid JSON in SQS message body: {e}") from e
+        except ValidationError:
+            logger.exception(
+                "Failed to validate SQS message as WorkflowEvent",
+                extra={"message_id": message.message_id},
+            )
+            raise
 
-        # Generate 1-5 random events
-        events = []
-        for i in range(random.randint(1, 5)):
-            event_type = random.choice(STUB_EVENT_TYPES)
-            events.append(StubEvent(f"Random event {i}", event_type))
+    def parse_sent_timestamp(self, message: SQSMessage) -> datetime:
+        """Parse the SQS messages timestamp - defaulting to now on errors"""
+        sent_timestamp = message.attributes.get("SentTimestamp", None)
+        if sent_timestamp is None:
+            logger.warning(
+                "SQS message was missing sent timestamp - defaulting to now",
+                extra={"message_id": message.message_id},
+            )
+            return datetime_util.utcnow()
 
-        return events
+        try:
+            return datetime_util.from_timestamp(int(sent_timestamp))
+        except Exception:
+            logger.exception(
+                "Could not convert timestamp from SQS message to datetime - defaulting to now",
+                extra={"message_id": message.message_id},
+            )
+            return datetime_util.utcnow()
 
     def process_events(self) -> None:
         """Process workflow events constantly
@@ -117,6 +137,7 @@ class WorkflowManager:
         The 'main' loop of the workflow manager.
         """
         logger.info("Processing workflow events")
+        initialize_workflow_client_registry()
 
         batch_count = 0
         while True:
@@ -147,55 +168,185 @@ class WorkflowManager:
                 logger.info("Exiting after batch limit reached.")
                 break
 
-            # We want batches to run every 10 seconds at most
-            # so sleep for the remaining time
-            time_to_sleep = round(self.config.workflow_cycle_duration - batch_duration, 3)
-            if time_to_sleep <= 0:
-                time_to_sleep = 0
-            logger.info("Sleeping after processing events", extra={"time_to_sleep": time_to_sleep})
-            time.sleep(time_to_sleep)
-            logger.info("Finished sleeping.")
+        logger.info("Finished processing workflow events - exiting process", extra=self.metrics)
 
-        logger.info("Finished processing workflow events")
-
-    def process_batch(self) -> None:
+    def process_batch(self) -> tuple[list[str], list[str]]:
         """Fetch and process a batch of events from SQS."""
-        events = self.fetch_events()
+        sqs_containers = self.fetch_messages()
+        logger.info("Fetched SQS messages", extra={"message_count": len(sqs_containers)})
+        messages_to_delete: list[str] = []
+        messages_to_keep: list[str] = []
 
         # Note that the initial approach won't be multi-threaded
         # We'll follow-up on that later
-        for event in events:
+        for sqs_container in sqs_containers:
             try:
-                handle_event(event)
-            except RetryableWorkflowError:
-                logger.warning("Encountered retryable workflow error", exc_info=True)
-            except NonRetryableWorkflowError:
-                logger.warning("Encountered non-retryable workflow error", exc_info=True)
-                # In a future ticket, we'll write back the event to SQS
+                event_result = handle_event(sqs_container)
             except Exception:
-                logger.exception("Failed to process event")
+                logger.exception(
+                    "Failed to handle current event",
+                    extra=sqs_container.get_log_extra(),
+                )
+                messages_to_keep.append(sqs_container.receipt_handle)
+                continue
+
+            if event_result in [
+                WorkflowEventProcessingResult.SUCCESS,
+                WorkflowEventProcessingResult.NON_RETRYABLE_ERROR,
+            ]:
+                messages_to_delete.append(sqs_container.receipt_handle)
+            else:
+                messages_to_keep.append(sqs_container.receipt_handle)
+
+        self.delete_messages(messages_to_delete)
 
         # Very simple metrics for test purposes
         self.metrics["batches_processed"] += 1
-        self.metrics["events_processed"] += len(events)
+        self.metrics["events_processed"] += len(sqs_containers)
+
+        # return messages to delete and messages to keep handles for testing purposes
+        logger.info(
+            "Processed SQS messages",
+            extra={
+                "successful_message_count": len(messages_to_delete),
+                "failed_message_count": len(messages_to_keep),
+            },
+        )
+        return messages_to_delete, messages_to_keep
+
+    def fetch_messages(self) -> list[SqsMessageContainer]:
+        containers: list[SqsMessageContainer] = []
+        try:
+            messages = self.sqs_client.receive_messages(
+                wait_time=self.config.workflow_cycle_duration
+            )
+        except Exception:
+            logger.exception("Failed to fetch messages from SQS")
+            return containers
+
+        for message in messages:
+            try:
+                event = self.parse_event(message)
+                history_event = WorkflowEventHistory(
+                    event_data=json.dumps(event.model_dump(), default=json_encoder),
+                    sent_at=self.parse_sent_timestamp(message),
+                    # This might change if it errors - but default to True
+                    is_successfully_processed=True,
+                    event_id=event.event_id,
+                )
+                containers.append(
+                    SqsMessageContainer(
+                        receipt_handle=message.receipt_handle,
+                        workflow_event=event,
+                        history_event=history_event,
+                    )
+                )
+            except Exception:
+                logger.exception("Failed to convert SQS message")
+                continue
+
+        return containers
+
+    def delete_messages(self, receipt_handles: list[str]) -> None:
+        # Delete messages that were successfully processed or had non-retryable errors
+        try:
+            delete_result = self.sqs_client.delete_message_batch(receipt_handles)
+            if delete_result.failed_deletes:
+                logger.error(
+                    "Failed to delete messages from SQS queue",
+                    extra={"failed_deletes": list(delete_result.failed_deletes)},
+                )
+        except Exception:
+            logger.exception("Failed to delete messages from SQS queue")
 
 
 @flask_db.with_db_session()
-def handle_event(db_session: db.Session, event: StubEvent) -> None:
-    with workflow_transaction(event.event_type):
+def handle_event(
+    db_session: db.Session, sqs_container: SqsMessageContainer
+) -> WorkflowEventProcessingResult:
+    """Handle an SQS event"""
+    with workflow_transaction(sqs_container.workflow_event.event_type):
         logger.info(
             "Processing event",
-            extra={"event_data": event.event_data, "event_type": event.event_type},
+            extra=sqs_container.get_log_extra(),
         )
-        with db_session.begin():
-            # Just verify that the DB connection works for now
-            # by doing a very simple query.
-            # Will replace later with more meaningful logic.
-            result = db_session.scalar(text("SELECT 1 AS healthy"))
-            if result != 1:
-                raise Exception("Cannot query DB")
 
-        logger.info(
-            "Finished processing event",
-            extra={"event_data": event.event_data, "event_type": event.event_type},
+        return _handle_event(db_session, sqs_container)
+
+
+def _handle_event(
+    db_session: db.Session, sqs_container: SqsMessageContainer
+) -> WorkflowEventProcessingResult:
+    """
+    Handle the SQS event:
+
+    * DB session management - any errors will rollback all changes
+                              except non-retryable ones which only
+                              persist their history event.
+    * Logging / metrics inclusion
+    * Error handling of the various cases
+    """
+
+    log_extra = sqs_container.get_log_extra()
+    result = WorkflowEventProcessingResult.SUCCESS
+    error: Exception | None = None
+
+    try:
+        with db_session.begin():
+            db_session.add(sqs_container.history_event)
+            EventHandler(db_session, sqs_container).process()
+
+    except NonRetryableWorkflowError as e:
+        if db_session.is_active:
+            db_session.rollback()
+
+        with db_session.begin():
+            sqs_container.history_event.is_successfully_processed = False
+            db_session.add(sqs_container.history_event)
+        logger.warning(
+            "Encountered non-retryable workflow error while processing event",
+            exc_info=True,
+            extra=log_extra,
         )
+        result = WorkflowEventProcessingResult.NON_RETRYABLE_ERROR
+        error = e
+
+    except RetryableWorkflowError as e:
+        logger.warning(
+            "Encountered retryable workflow error while processing event",
+            exc_info=True,
+            extra=log_extra,
+        )
+        result = WorkflowEventProcessingResult.RETRYABLE_ERROR
+        error = e
+
+    except Exception as e:
+        # log specific error for any other exception
+        logger.exception("Unexpected error processing workflow event", extra=log_extra)
+        result = WorkflowEventProcessingResult.GENERAL_ERROR
+        error = e
+
+    # Add whatever to the log extra that was added to the metric context
+    # Even if the above errored, there could be a bit more info we pull out
+    log_extra |= sqs_container.workflow_metric_context.log_extra
+    log_extra |= sqs_container.workflow_metric_context.metrics
+
+    log_extra |= {
+        "event_result": result,
+        "event_lifecycle_duration_sec": (
+            datetime_util.utcnow() - sqs_container.history_event.sent_at
+        ).total_seconds(),
+    }
+
+    if error is not None:
+        log_extra["error_cls"] = error.__class__.__name__
+
+    # This log is one that we'll tie into heavily for metrics
+    logger.info("Finished handling event", extra=log_extra)
+
+    return result
+
+
+@flask_opensearch.with_search_client()
+def initialize_workflow_client_registry(search_client: SearchClient) -> None:
+    init_workflow_client_registry(search_client)

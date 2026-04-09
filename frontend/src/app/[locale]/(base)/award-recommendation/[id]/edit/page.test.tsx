@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import AwardRecommendationEditPage from "src/app/[locale]/(base)/award-recommendation/[id]/edit/page";
-import * as opportunityFetcher from "src/services/fetch/fetchers/opportunityFetcher";
+import * as awardRecommendationFetcher from "src/services/fetch/fetchers/awardRecommendationFetcher";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
-import { mockOpportunityDetail } from "src/utils/testing/fixtures";
+import { mockAwardRecommendationDetails } from "src/utils/testing/fixtures";
 
 import { FunctionComponent, ReactNode } from "react";
 
@@ -53,7 +53,7 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
       )(props) as FunctionComponent<LocalizedPageProps>,
 }));
 
-jest.mock("src/services/fetch/fetchers/opportunityFetcher");
+jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher");
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
@@ -63,12 +63,6 @@ jest.mock("react", () => ({
 jest.mock("next-intl", () => ({
   useTranslations: () => identity,
 }));
-
-const mockOpportunityData = {
-  data: mockOpportunityDetail,
-  message: "Success",
-  status_code: 200,
-};
 
 const awardRecommendationParams = Promise.resolve({
   locale: "en",
@@ -93,8 +87,8 @@ describe("AwardRecommendationEditPage", () => {
       );
 
       jest
-        .spyOn(opportunityFetcher, "getOpportunityDetails")
-        .mockResolvedValue(mockOpportunityData);
+        .spyOn(awardRecommendationFetcher, "getAwardRecommendationDetails")
+        .mockResolvedValue(mockAwardRecommendationDetails);
     });
 
     it("includes the AwardRecommendationHero component in the page", async () => {
@@ -122,10 +116,14 @@ describe("AwardRecommendationEditPage", () => {
       render(component);
 
       expect(
-        await screen.findByText(mockOpportunityDetail.opportunity_title),
+        await screen.findByText(
+          mockAwardRecommendationDetails.opportunity.opportunity_title,
+        ),
       ).toBeVisible();
       expect(
-        await screen.findByText(mockOpportunityDetail.opportunity_number),
+        await screen.findByText(
+          mockAwardRecommendationDetails.opportunity.opportunity_number,
+        ),
       ).toBeVisible();
     });
 
@@ -156,14 +154,14 @@ describe("AwardRecommendationEditPage", () => {
 
     it("renders 'No summary available' when opportunity has no summary description", async () => {
       jest
-        .spyOn(opportunityFetcher, "getOpportunityDetails")
+        .spyOn(awardRecommendationFetcher, "getAwardRecommendationDetails")
         .mockResolvedValue({
-          ...mockOpportunityData,
-          data: {
-            ...mockOpportunityDetail,
+          ...mockAwardRecommendationDetails,
+          opportunity: {
+            ...mockAwardRecommendationDetails.opportunity,
             summary: {
-              ...mockOpportunityDetail.summary,
-              summary_description: null,
+              ...mockAwardRecommendationDetails.opportunity.summary,
+              summary_description: "",
             },
           },
         });
@@ -176,32 +174,32 @@ describe("AwardRecommendationEditPage", () => {
       expect(await screen.findByText("noSummaryAvailable")).toBeVisible();
     });
 
-    it("calls getOpportunityDetails with expected id", async () => {
+    it("calls getAwardRecommendationDetails with expected id", async () => {
       jest
-        .spyOn(opportunityFetcher, "getOpportunityDetails")
-        .mockResolvedValue(mockOpportunityData);
+        .spyOn(awardRecommendationFetcher, "getAwardRecommendationDetails")
+        .mockResolvedValue(mockAwardRecommendationDetails);
 
       await AwardRecommendationEditPage({
         params: awardRecommendationParams,
         searchParams: Promise.resolve({}),
       });
 
-      expect(opportunityFetcher.getOpportunityDetails).toHaveBeenCalledWith(
-        "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
-      );
+      expect(
+        awardRecommendationFetcher.getAwardRecommendationDetails,
+      ).toHaveBeenCalledWith("AR-26-0001");
     });
 
-    it("handles 404 error gracefully when opportunity not found", async () => {
+    it("handles 404 error gracefully when award recommendation not found", async () => {
       const consoleSpy = jest.spyOn(console, "error").mockImplementation();
       jest
-        .spyOn(opportunityFetcher, "getOpportunityDetails")
+        .spyOn(awardRecommendationFetcher, "getAwardRecommendationDetails")
         .mockRejectedValue({
           response: { status: 404 },
         });
 
       const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
-        searchParams: Promise.resolve({ opportunityId: "non-existent" }),
+        searchParams: Promise.resolve({}),
       });
       render(component);
 
@@ -209,21 +207,21 @@ describe("AwardRecommendationEditPage", () => {
       consoleSpy.mockRestore();
     });
 
-    it("handles generic error when fetching opportunity fails", async () => {
+    it("handles generic error when fetching award recommendation fails", async () => {
       const consoleSpy = jest.spyOn(console, "error").mockImplementation();
       jest
-        .spyOn(opportunityFetcher, "getOpportunityDetails")
+        .spyOn(awardRecommendationFetcher, "getAwardRecommendationDetails")
         .mockRejectedValue(new Error("Network error"));
 
       const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
-        searchParams: Promise.resolve({ opportunityId: "123" }),
+        searchParams: Promise.resolve({}),
       });
 
       render(component);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        "Failed to fetch opportunity details",
+        "Failed to fetch award recommendation details",
         expect.any(Error),
       );
 
@@ -238,6 +236,62 @@ describe("AwardRecommendationEditPage", () => {
 
       expect(screen.queryByText("selectionMethod")).not.toBeInTheDocument();
       expect(screen.queryByText("Merit Review")).not.toBeInTheDocument();
+    });
+
+    it("renders the recommendation section on edit page", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("recommendationMethod.label"),
+      ).toBeVisible();
+    });
+
+    it("displays recommendation method radio buttons", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("recommendationMethod.label"),
+      ).toBeVisible();
+      expect(
+        screen.getByLabelText("recommendationMethod.meritReviewOnly"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText("recommendationMethod.meritReviewOther"),
+      ).toBeInTheDocument();
+    });
+
+    it("displays recommendation method details textarea", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("recommendationMethodDetails.label"),
+      ).toBeVisible();
+      const textarea = screen.getByTestId("award-selection-details-textarea");
+      expect(textarea).toHaveAttribute("id", "award_selection_details");
+      expect(textarea).toHaveAttribute("name", "award_selection_details");
+    });
+
+    it("displays other key information textarea in recommendation section", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      expect(
+        await screen.findByText("otherKeyInformation.label"),
+      ).toBeVisible();
+      const textarea = screen.getByTestId("other-key-information-textarea");
+      expect(textarea).toHaveAttribute("id", "other_key_information");
+      expect(textarea).toHaveAttribute("name", "other_key_information");
     });
   });
 

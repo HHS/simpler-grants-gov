@@ -11,6 +11,8 @@ from src.api.route_utils import raise_flask_error
 from src.api.users import user_schemas
 from src.api.users.user_blueprint import user_blueprint
 from src.api.users.user_schemas import (
+    SetUserSavedOpportunityNotificationRequestSchema,
+    SetUserSavedOpportunityNotificationResponseSchema,
     UserAgenciesResponseSchema,
     UserApiKeyCreateRequestSchema,
     UserApiKeyCreateResponseSchema,
@@ -34,6 +36,7 @@ from src.api.users.user_schemas import (
     UserResponseOrgInvitationResponseSchema,
     UserSavedOpportunitiesRequestSchema,
     UserSavedOpportunitiesResponseSchema,
+    UserSavedOpportunityNotificationsResponseSchema,
     UserSavedSearchesRequestSchema,
     UserSavedSearchesResponseSchema,
     UserSaveOpportunityRequestSchema,
@@ -50,7 +53,7 @@ from src.api.users.user_schemas import (
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
 from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
-from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.users.create_api_key import create_api_key
@@ -61,6 +64,9 @@ from src.services.users.delete_saved_opportunity import delete_saved_opportunity
 from src.services.users.delete_saved_search import delete_saved_search
 from src.services.users.get_roles_and_privileges import get_roles_and_privileges
 from src.services.users.get_saved_opportunities import get_saved_opportunities
+from src.services.users.get_saved_opportunity_notification_preferences import (
+    get_saved_opportunity_notification_preferences,
+)
 from src.services.users.get_saved_searches import get_saved_searches
 from src.services.users.get_user import get_user
 from src.services.users.get_user_agencies import get_user_agencies
@@ -74,6 +80,9 @@ from src.services.users.login_gov_callback_handler import (
 )
 from src.services.users.org_invitation_response import org_invitation_response
 from src.services.users.rename_api_key import rename_api_key
+from src.services.users.set_saved_opportunity_notification_settings import (
+    set_saved_opportunity_notification_settings,
+)
 from src.services.users.update_saved_searches import update_saved_search
 from src.services.users.update_user_profile import update_user_profile
 from src.services.users.user_can_access import check_user_can_access
@@ -233,8 +242,8 @@ def user_get_organizations(db_session: db.Session, user_id: UUID) -> response.Ap
 
 @user_blueprint.post("/<uuid:user_id>/agencies")
 @user_blueprint.output(UserAgenciesResponseSchema)
-@user_blueprint.doc(responses=[200, 401, 403], security=jwt_or_api_user_key_security_schemes)
-@jwt_or_api_user_key_multi_auth.login_required
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def user_get_agencies(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
     logger.info("POST /v1/users/:user_id/agencies")
@@ -818,3 +827,55 @@ def user_response_org_invitation(
         )
 
     return response.ApiResponse(message="Success", data=invitation_response)
+
+
+@user_blueprint.get("/<uuid:user_id>/saved-opportunities/notifications")
+@user_blueprint.output(UserSavedOpportunityNotificationsResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def user_get_saved_opportunity_notifications(
+    db_session: db.Session, user_id: UUID
+) -> response.ApiResponse:
+    logger.info("GET /v1/users/:user_id/saved-opportunities/notifications")
+    user = jwt_or_api_user_key_multi_auth.get_user()
+
+    # Verify the authenticated user matches the requested user_id
+    if user.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        db_session.add(user)
+        result = get_saved_opportunity_notification_preferences(db_session, user)
+
+    logger.info("Successfully fetched saved opportunity notification preferences")
+    return response.ApiResponse(message="Success", data=result)
+
+
+@user_blueprint.post("/<uuid:user_id>/saved-opportunities/notifications")
+@user_blueprint.input(SetUserSavedOpportunityNotificationRequestSchema)
+@user_blueprint.output(SetUserSavedOpportunityNotificationResponseSchema)
+@user_blueprint.doc(responses=[200, 401, 403, 404, 422])
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def user_saved_opportunities_notifications(
+    db_session: db.Session, user_id: UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {
+            "user_id": user_id,
+        }
+    )
+    logger.info("POST /v1/users/:user_id/saved-opportunities/notifications")
+
+    user = jwt_or_api_user_key_multi_auth.get_user()
+
+    # Verify the authenticated user matches the requested user_id
+    if user.user_id != user_id:
+        raise_flask_error(403, "Forbidden")
+
+    with db_session.begin():
+        db_session.add(user)
+        set_saved_opportunity_notification_settings(db_session, user, json_data)
+
+    return response.ApiResponse(message="Success")

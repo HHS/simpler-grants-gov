@@ -28,6 +28,16 @@ jest.mock("src/services/fetch/fetchers/applicationsFetcher", () => ({
   fetchApplications: () => applications() as Promise<ApplicationDetail[]>,
 }));
 
+const mockBreadcrumbs = jest.fn();
+
+jest.mock("src/components/Breadcrumbs", () => ({
+  __esModule: true,
+  default: (props: { breadcrumbList: { title: string; path: string }[] }) => {
+    mockBreadcrumbs(props);
+    return <nav data-testid="mock-breadcrumbs" />;
+  },
+}));
+
 describe("Applications", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -36,6 +46,25 @@ describe("Applications", () => {
   describe("no applications have been saved", () => {
     beforeEach(() => {
       applications.mockResolvedValue([]);
+    });
+
+    it("passes the correct breadcrumbs", async () => {
+      const component = await Applications({ params: localeParams });
+      render(component);
+
+      expect(screen.getByTestId("mock-breadcrumbs")).toBeInTheDocument();
+
+      expect(mockBreadcrumbs).toHaveBeenCalledWith({
+        breadcrumbList: [
+          {
+            title: "breadcrumbWorkspace",
+            path: "/dashboard",
+          },
+          {
+            title: "breadcrumbApplications",
+          },
+        ],
+      });
     });
 
     it("renders correct text", async () => {

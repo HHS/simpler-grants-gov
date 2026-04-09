@@ -103,7 +103,7 @@ start-debug:
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init: setup-env-override-file build init-db init-opensearch init-localstack init-mock-soap-services ## Run all of the init tasks to set up DB, Search, Local Stack, and Mock services. To do this "from scratch" use remake-backend instead
+init: setup-env-override-file build init-db init-opensearch init-s3mock init-sqsmock init-mock-soap-services ## Run all of the init tasks to set up DB, Search, s3/sqs mocks, and Mock services. To do this "from scratch" use remake-backend instead
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
@@ -201,16 +201,25 @@ start-opensearch-dashboards:
 	docker compose up --detach opensearch-dashboards
 
 ##################################################
-# Localstack
+# S3 Mock
 ##################################################
 
-init-localstack: start-localstack setup-localstack ## Start localstack (local s3, sqs) and setup buckets, queues
+init-s3mock: start-s3mock
 
-start-localstack:
-	docker compose up --detach localstack
+start-s3mock:
+	docker compose up --detach s3mock
 
-setup-localstack:
-	$(PY_RUN_CMD) setup-localstack
+
+##################################################
+# SQS Mock
+##################################################
+
+init-sqsmock: start-sqsmock
+
+start-sqsmock:
+	docker compose up --detach sqsmock
+
+
 ##################################################
 # Form Schema
 # Example usage:
@@ -306,6 +315,9 @@ seed-local-legacy-tables:
 
 generate-internal-token:
 	$(FLASK_CMD) task generate-internal-token $(args)
+
+seed-local-soap-certificate:
+	$(PY_RUN_CMD) seed-local-soap-certificate --dir-path "$(DIR_PATH)" --agency-code "${AGENCY_CODE}"
 
 
 ##################################################

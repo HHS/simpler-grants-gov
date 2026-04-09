@@ -4,6 +4,7 @@ import logging
 from datetime import date, datetime
 
 from common_grants_sdk.schemas.pydantic import (
+    CustomField,
     FilterInfo,
     Money,
     MoneyRangeFilter,
@@ -21,6 +22,20 @@ from common_grants_sdk.schemas.pydantic import (
 from pydantic import BaseModel, Field, HttpUrl, ValidationError
 
 import src.util.datetime_util as datetime_util
+from src.api.common_grants.schemas.pydantic.custom_fields import (
+    AdditionalInfoField,
+    AgencyField,
+    AssistanceListingsField,
+    AssistanceListingValue,
+    AttachmentsField,
+    AttachmentValue,
+    ContactInfoField,
+    CostSharingField,
+    FederalFundingSourceField,
+    FederalOpportunityNumberField,
+    FiscalYearField,
+    LegacySerialIdField,
+)
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
@@ -194,6 +209,20 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
         "opportunity_id": v1_opportunity.opportunity_id,
         "opportunity_title": v1_opportunity.opportunity_title or "Untitled Opportunity",
         "opportunity_status": v1_opportunity.opportunity_status,
+        "legacy_opportunity_id": v1_opportunity.legacy_opportunity_id,
+        "opportunity_number": v1_opportunity.opportunity_number,
+        "category": v1_opportunity.category,
+        "agency_code": v1_opportunity.agency_code,
+        "agency_name": v1_opportunity.agency_name,
+        "top_level_agency_name": v1_opportunity.top_level_agency_name,
+        "top_level_agency_code": v1_opportunity.top_level_agency_code,
+        "opportunity_assistance_listings": [
+            {
+                "assistance_listing_number": listing.assistance_listing_number,
+                "program_title": listing.program_title,
+            }
+            for listing in v1_opportunity.opportunity_assistance_listings
+        ],
         "created_at": v1_opportunity.created_at,
         "updated_at": v1_opportunity.updated_at,
         "summmary": {},
@@ -209,9 +238,28 @@ def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase 
             "award_ceiling": v1_opportunity.summary.award_ceiling,
             "award_floor": v1_opportunity.summary.award_floor,
             "additional_info_url": v1_opportunity.summary.additional_info_url,
+            "additional_info_url_description": v1_opportunity.summary.additional_info_url_description,
+            "agency_contact_description": v1_opportunity.summary.agency_contact_description,
+            "agency_email_address": v1_opportunity.summary.agency_email_address,
+            "agency_email_address_description": v1_opportunity.summary.agency_email_address_description,
+            "fiscal_year": v1_opportunity.summary.fiscal_year,
+            "is_cost_sharing": v1_opportunity.summary.is_cost_sharing,
             "created_at": v1_opportunity.summary.created_at,
             "updated_at": v1_opportunity.summary.updated_at,
         }
+
+    opp_data["opportunity_attachments"] = [
+        {
+            "download_path": attachment.download_path,
+            "file_name": attachment.file_name,
+            "file_description": attachment.file_description,
+            "file_size_bytes": attachment.file_size_bytes,
+            "mime_type": attachment.mime_type,
+            "created_at": attachment.created_at,
+            "updated_at": attachment.updated_at,
+        }
+        for attachment in v1_opportunity.opportunity_attachments
+    ]
 
     return transform_search_result_to_cg(opp_data)
 
@@ -295,7 +343,7 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
                 minAwardAmount=min_award_money,
             ),
             source=validate_url(summary.get("additional_info_url")),
-            custom_fields={},
+            customFields=populate_custom_fields(opp_data),
             createdAt=summary.get("created_at") or datetime_util.utcnow(),
             lastModifiedAt=summary.get("updated_at") or datetime_util.utcnow(),
         )
@@ -307,6 +355,195 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
                 "opportunity_id": opportunity_id,
             },
         )
+        return None
+
+
+def validate_custom_field(
+    field_class: type[CustomField],
+    opportunity_id: object = None,
+    **kwargs: object,
+) -> CustomField | None:
+    """
+    Validate a custom field value against its typed Pydantic schema.
+
+    Args:
+        field_class: The typed CustomField subclass to validate against
+        opportunity_id: The opportunity id, included in warning messages on failure
+        **kwargs: Field constructor arguments (typically just `value`)
+
+    Returns:
+        A validated CustomField instance, or None if validation fails
+    """
+    try:
+        return field_class(**kwargs)
+    except Exception as e:
+        logger.warning(
+            f"Custom field validation failed for {field_class.__name__} on opportunity {opportunity_id}: {e}",
+            extra={
+                "cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR,
+                "opportunity_id": opportunity_id,
+            },
+        )
+        return None
+
+
+def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
+    """
+    Helper function to assemble custom fields from the data and pass them back as part of the response.
+
+    Args:
+        opp_data: Opportunity data from the SGG database
+
+    Returns:
+        custom_fields: A dict with the values recovered from the input and stored in the appropriate field
+    """
+
+    custom_fields: dict[str, CustomField] = {}
+    opportunity_id = opp_data.get("opportunity_id")
+    summary = opp_data.get("summary")
+
+    attachments = opp_data.get("opportunity_attachments")
+    if attachments:
+        valid_attachment_values = []
+        for attachment in attachments:
+            attachment_data = {
+                "downloadUrl": attachment.get("download_path"),
+                "name": attachment.get("file_name"),
+                "description": attachment.get("file_description"),
+                "sizeInBytes": attachment.get("file_size_bytes"),
+                "mimeType": attachment.get("mime_type"),
+                "createdAt": attachment.get("created_at"),
+                "lastModifiedAt": attachment.get("updated_at"),
+            }
+            try:
+                valid_attachment_values.append(AttachmentValue.model_validate(attachment_data))
+            except Exception as e:
+                logger.warning(
+                    f"Attachment validation failed, skipping: {e}",
+                    extra={"cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR},
+                )
+        if valid_attachment_values:
+            field = validate_custom_field(
+                AttachmentsField, opportunity_id=opportunity_id, value=valid_attachment_values
+            )
+            if field:
+                custom_fields["attachments"] = field
+
+    legacy_opportunity_id = opp_data.get("legacy_opportunity_id")
+    if legacy_opportunity_id is not None:
+        field = validate_custom_field(
+            LegacySerialIdField, opportunity_id=opportunity_id, value=legacy_opportunity_id
+        )
+        if field:
+            custom_fields["legacySerialId"] = field
+
+    federal_opportunity_number = opp_data.get("opportunity_number")
+    if federal_opportunity_number is not None:
+        field = validate_custom_field(
+            FederalOpportunityNumberField,
+            opportunity_id=opportunity_id,
+            value=federal_opportunity_number,
+        )
+        if field:
+            custom_fields["federalOpportunityNumber"] = field
+
+    listings = opp_data.get("opportunity_assistance_listings")
+    if listings:
+        valid_listing_values = []
+        for listing in listings:
+            listing_data = {
+                "identifier": listing.get("assistance_listing_number"),
+                "programTitle": listing.get("program_title"),
+            }
+            try:
+                valid_listing_values.append(AssistanceListingValue.model_validate(listing_data))
+            except Exception as e:
+                logger.warning(
+                    f"Assistance listing validation failed, skipping: {e}",
+                    extra={"cg_event": CommonGrantsEvent.OPPORTUNITY_VALIDATION_ERROR},
+                )
+        if valid_listing_values:
+            field = validate_custom_field(
+                AssistanceListingsField, opportunity_id=opportunity_id, value=valid_listing_values
+            )
+            if field:
+                custom_fields["assistanceListings"] = field
+
+    category = opp_data.get("category")
+    if category is not None:
+        field = validate_custom_field(
+            FederalFundingSourceField, opportunity_id=opportunity_id, value=str(category)
+        )
+        if field:
+            custom_fields["federalFundingSource"] = field
+
+    agency = opp_data.get("agency_code")
+    if agency is not None:
+        field = validate_custom_field(
+            AgencyField,
+            opportunity_id=opportunity_id,
+            value={
+                "code": agency,
+                "name": opp_data.get("agency_name"),
+                "parentName": opp_data.get("top_level_agency_name"),
+                "parentCode": opp_data.get("top_level_agency_code"),
+            },
+        )
+        if field:
+            custom_fields["agency"] = field
+
+    if summary:
+        agency_contact_description = summary.get("agency_contact_description")
+        agency_email_address = summary.get("agency_email_address")
+        if any([agency_contact_description, agency_email_address]):
+            field = validate_custom_field(
+                ContactInfoField,
+                opportunity_id=opportunity_id,
+                value={
+                    "name": None,
+                    "email": agency_email_address,
+                    "phone": None,
+                    "description": agency_contact_description,
+                },
+            )
+            if field:
+                custom_fields["contactInfo"] = field
+
+        additional_info_url = validate_url(summary.get("additional_info_url"))
+        additional_info_url_description = summary.get("additional_info_url_description")
+        if additional_info_url is not None:
+            field = validate_custom_field(
+                AdditionalInfoField,
+                opportunity_id=opportunity_id,
+                value={
+                    "url": additional_info_url,
+                    "description": additional_info_url_description,
+                },
+            )
+            if field:
+                custom_fields["additionalInfo"] = field
+
+        fiscal_year = summary.get("fiscal_year")
+        if fiscal_year is not None:
+            field = validate_custom_field(
+                FiscalYearField, opportunity_id=opportunity_id, value=fiscal_year
+            )
+            if field:
+                custom_fields["fiscalYear"] = field
+
+        is_cost_sharing = summary.get("is_cost_sharing")
+        if is_cost_sharing is not None:
+            field = validate_custom_field(
+                CostSharingField,
+                opportunity_id=opportunity_id,
+                value={"isRequired": is_cost_sharing},
+            )
+            if field:
+                custom_fields["costSharing"] = field
+
+    if custom_fields:
+        return custom_fields
+    else:
         return None
 
 

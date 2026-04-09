@@ -15,11 +15,13 @@ inputs:
     description: "password for staging test user"
   staging_test_user_mfa_key:
     description: "mfa key for staging test user"
+  playwright_tags:
+    description: "pipe separated list of tags denoting groups of tests to run"
   total_shards:
     description: "total number of test shards in parent run"
     default: "1"
   current_shard:
-    description: "total number of test shards in parent run"
+    description: "current shard number in parent run"
     default: "1"
   needs_node_setup:
     description: "does this action need to set up node and install deps"
@@ -39,6 +41,9 @@ inputs:
   node_options:
     description: "options to pass to node"
     default: "--dns-result-order=ipv4first"
+  workers:
+    description: "number of workers to use for test run"
+    default: ""
 outputs:
   artifact-id:
     description: "artifact ids for uploaded test reports"
@@ -52,7 +57,6 @@ runs:
       env:
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
       run: |
-        echo $PLAYWRIGHT_TARGET_ENV
         if [[ $PLAYWRIGHT_TARGET_ENV != "local" && $PLAYWRIGHT_TARGET_ENV != "staging" ]]; then echo "invalid e2e test target provided" && exit 1; fi
 
     - name: Check out code
@@ -65,9 +69,9 @@ runs:
       if: ${{ inputs.needs_node_setup == 'true' }}
       uses: actions/setup-node@v6
       with:
-        node-version: ${{ inputs.NODE_VERSION }}
-        cache: ${{ inputs.PACKAGE_MANAGER }}
-        cache-dependency-path: ${{ inputs.LOCKFILE_PATH }}
+        node-version: ${{ inputs.node_version }}
+        cache: ${{ inputs.package_manager }}
+        cache-dependency-path: ${{ inputs.lockfile_path }}
 
     - name: Install Node dependencies & Playwright
       if: ${{ inputs.needs_node_setup == 'true' }}
@@ -77,23 +81,40 @@ runs:
         npm install @playwright/test
         npx playwright install --with-deps
 
-    - name: Run e2e tests (Shard ${{ inputs.shard }}/${{ inputs.total_shards }})
+    - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
+      if: ${{ inputs.playwright_tags == '' }}
       working-directory: ./frontend
       env:
         CI: true
         TOTAL_SHARDS: ${{ inputs.total_shards }}
         CURRENT_SHARD: ${{ inputs.current_shard }}
         PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        PLAYWRIGHT_WORKERS: ${{ inputs.workers }}
         STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
         STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
       run: |
-        echo $STAGING_TEST_USER_EMAIL
         npm run test:e2e
       shell: bash
 
+    - name: Run e2e tests for ${{ inputs.playwright_tags }} (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
+      if: ${{ inputs.playwright_tags != '' }}
+      working-directory: ./frontend
+      env:
+        CI: true
+        TOTAL_SHARDS: ${{ inputs.total_shards }}
+        CURRENT_SHARD: ${{ inputs.current_shard }}
+        PLAYWRIGHT_TARGET_ENV: ${{ inputs.target }}
+        PLAYWRIGHT_WORKERS: ${{ inputs.workers }}
+        STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
+        STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
+        STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
+      run: |
+        npm run test:e2e -- --grep "${{ inputs.playwright_tags }}"
+      shell: bash
+
     - name: Debug logging on failure
-      if:  ${{ failure() && inputs.api_logs == 'true' }}
+      if: ${{ failure() && inputs.api_logs == 'true' }}
       working-directory: ./frontend
       run: |
         cd ../api
@@ -123,6 +144,6 @@ runs:
       if: always()
       uses: actions/upload-artifact@v6
       with:
-        name: blob-report-shard-${{ inputs.current_shard }}
+        name: blob-report-shard-${{ inputs.target }}-${{ inputs.current_shard }}
         path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
         retention-days: 1

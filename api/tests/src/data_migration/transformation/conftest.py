@@ -110,7 +110,6 @@ def setup_cfda(
 
 def setup_synopsis_forecast(
     is_forecast: bool,
-    revision_number: int | None,
     create_existing: bool,
     opportunity: Opportunity | None = None,
     is_delete: bool = False,
@@ -122,18 +121,9 @@ def setup_synopsis_forecast(
         source_values = {}
 
     if is_forecast:
-        if revision_number is None:
-            factory_cls = f.StagingTforecastFactory
-        else:
-            factory_cls = f.StagingTforecastHistFactory
+        factory_cls = f.StagingTforecastFactory
     else:
-        if revision_number is None:
-            factory_cls = f.StagingTsynopsisFactory
-        else:
-            factory_cls = f.StagingTsynopsisHistFactory
-
-    if revision_number is not None:
-        source_values["revision_number"] = revision_number
+        factory_cls = f.StagingTsynopsisFactory
 
     if isinstance(opportunity, Opportunity):
         source_values["opportunity_id"] = opportunity.legacy_opportunity_id
@@ -612,7 +602,7 @@ def validate_opportunity_summary(
         ("ac_email_desc", "agency_email_address_description"),
     ]
 
-    if isinstance(source_summary, (staging.synopsis.Tsynopsis, staging.synopsis.TsynopsisHist)):
+    if isinstance(source_summary, staging.synopsis.Tsynopsis):
         matching_fields.extend(
             [
                 ("syn_desc", "summary_description"),
@@ -622,7 +612,7 @@ def validate_opportunity_summary(
                 ("unarchive_date", "unarchive_date"),
             ]
         )
-    else:  # Forecast+ForecastHist
+    else:  # Forecast
         matching_fields.extend(
             [
                 ("forecast_desc", "summary_description"),
@@ -634,6 +624,18 @@ def validate_opportunity_summary(
                 ("fiscal_year", "fiscal_year"),
             ]
         )
+
+        # This field is made of multiple fields, so check that they're
+        # both present if they aren't null
+        agency_contact_description = opportunity_summary.agency_contact_description
+        if source_summary.ac_name is not None:
+            assert source_summary.ac_name in agency_contact_description
+        if source_summary.ac_phone is not None:
+            assert source_summary.ac_phone in agency_contact_description
+
+    validate_matching_fields(
+        source_summary, opportunity_summary, matching_fields, expect_values_to_match
+    )
 
 
 def validate_summary_and_nested(

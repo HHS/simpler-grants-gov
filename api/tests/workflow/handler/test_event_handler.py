@@ -5,6 +5,7 @@ import pytest
 from src.constants.lookup_constants import WorkflowType
 from src.workflow.handler.event_handler import EventHandler
 from src.workflow.workflow_errors import (
+    ConcurrentWorkflowError,
     InactiveWorkflowError,
     InvalidEventError,
     InvalidWorkflowTypeError,
@@ -25,13 +26,13 @@ def test_start_workflow_event(db_session, enable_factory_create):
     user = UserFactory.create()
     opportunity = OpportunityFactory.create()
 
-    event, history_event = build_start_workflow_event(
+    sqs_container = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=user,
         entity=opportunity,
     )
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     state_machine = event_handler.process()
 
     assert state_machine.workflow.current_workflow_state == BasicState.MIDDLE
@@ -57,11 +58,11 @@ def test_process_workflow_event(db_session, enable_factory_create):
         has_opportunity=True,
     )
 
-    event, history_event = build_process_workflow_event(
+    sqs_container = build_process_workflow_event(
         workflow.workflow_id, user=user, event_to_send="middle_to_end"
     )
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     state_machine = event_handler.process()
 
     assert state_machine.workflow.current_workflow_state == BasicState.END
@@ -78,14 +79,14 @@ def test_start_workflow_event_missing_start_context(db_session, enable_factory_c
     user = UserFactory.create()
     opportunity = OpportunityFactory.create()
 
-    event, history_event = build_start_workflow_event(
+    sqs_container = build_start_workflow_event(
         workflow_type=WorkflowType.INITIAL_PROTOTYPE,
         user=user,
         entity=opportunity,
         exclude_start_workflow_context=True,
     )
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     with pytest.raises(InvalidEventError, match="Start workflow event cannot have null context"):
         event_handler.process()
 
@@ -99,14 +100,14 @@ def test_process_workflow_event_missing_process_context(db_session, enable_facto
         has_opportunity=True,
     )
 
-    event, history_event = build_process_workflow_event(
+    sqs_container = build_process_workflow_event(
         workflow.workflow_id,
         user=user,
         event_to_send="middle_to_end",
         exclude_process_workflow_context=True,
     )
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     with pytest.raises(
         InvalidEventError, match="Process workflow event has a null process workflow context"
     ):
@@ -118,16 +119,16 @@ def test_start_workflow_event_invalid_workflow_type(db_session, enable_factory_c
 
     opportunity = OpportunityFactory.create()
 
-    event, history_event = build_start_workflow_event(
+    sqs_container = build_start_workflow_event(
         # We'll override this below
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=user,
         entity=opportunity,
     )
     # Pydantic doesn't validate on assignment, so change it to something invalid here
-    event.start_workflow_context.workflow_type = "not-a-valid-workflow-type"
+    sqs_container.workflow_event.start_workflow_context.workflow_type = "not-a-valid-workflow-type"
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     with pytest.raises(
         InvalidWorkflowTypeError, match="Workflow event does not map to an actual state machine"
     ):
@@ -137,13 +138,13 @@ def test_start_workflow_event_invalid_workflow_type(db_session, enable_factory_c
 def test_start_workflow_event_missing_user(db_session, enable_factory_create):
     opportunity = OpportunityFactory.create()
 
-    event, history_event = build_start_workflow_event(
+    sqs_container = build_start_workflow_event(
         workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
         user=None,  # A random ID will be added
         entity=opportunity,
     )
 
-    event_handler = EventHandler(db_session, event, history_event)
+    event_handler = EventHandler(db_session, sqs_container)
     with pytest.raises(UserDoesNotExist, match="User does not exist"):
         event_handler.process()
 
@@ -155,22 +156,22 @@ def test_process_workflow_event_missing_user(db_session, enable_factory_create):
         has_opportunity=True,
     )
 
-    event, history_event = build_process_workflow_event(
+    sqs_container = build_process_workflow_event(
         workflow.workflow_id, user=None, event_to_send="middle_to_end"
     )
     with pytest.raises(UserDoesNotExist, match="User does not exist"):
-        EventHandler(db_session, event, history_event).process()
+        EventHandler(db_session, sqs_container).process()
 
 
 def test_process_workflow_event_workflow_does_not_exist(db_session, enable_factory_create):
     user = UserFactory.create()
 
-    event, history_event = build_process_workflow_event(
+    sqs_container = build_process_workflow_event(
         workflow_id=uuid.uuid4(), user=user, event_to_send="middle_to_end"
     )
 
     with pytest.raises(WorkflowDoesNotExistError, match="Workflow does not exist"):
-        EventHandler(db_session, event, history_event).process()
+        EventHandler(db_session, sqs_container).process()
 
 
 def test_process_workflow_event_invalid_event(db_session, enable_factory_create):
@@ -182,11 +183,11 @@ def test_process_workflow_event_invalid_event(db_session, enable_factory_create)
         has_opportunity=True,
     )
 
-    event, history_event = build_process_workflow_event(
+    sqs_container = build_process_workflow_event(
         workflow.workflow_id, user=user, event_to_send="not-a-real-event"
     )
     with pytest.raises(InvalidEventError, match="Event is not valid for workflow"):
-        EventHandler(db_session, event, history_event).process()
+        EventHandler(db_session, sqs_container).process()
 
 
 def test_process_workflow_event_invalid_event_for_current_state(db_session, enable_factory_create):
@@ -199,11 +200,11 @@ def test_process_workflow_event_invalid_event_for_current_state(db_session, enab
     )
 
     # start_workflow is valid, just not for the current state
-    event, history_event = build_process_workflow_event(
+    sqs_container = build_process_workflow_event(
         workflow.workflow_id, user=user, event_to_send="start_workflow"
     )
     with pytest.raises(InvalidEventError, match="Event is not valid for workflow"):
-        EventHandler(db_session, event, history_event).process()
+        EventHandler(db_session, sqs_container).process()
 
 
 def test_process_workflow_event_invalid_current_state(db_session, enable_factory_create):
@@ -215,11 +216,11 @@ def test_process_workflow_event_invalid_current_state(db_session, enable_factory
         has_opportunity=True,
     )
 
-    event, history_event = build_process_workflow_event(
+    sqs_container = build_process_workflow_event(
         workflow.workflow_id, user=user, event_to_send="middle_to_end"
     )
     with pytest.raises(UnexpectedStateError, match="Workflow record has an unexpected state"):
-        EventHandler(db_session, event, history_event).process()
+        EventHandler(db_session, sqs_container).process()
 
 
 def test_process_workflow_is_already_at_end(db_session, enable_factory_create):
@@ -232,10 +233,64 @@ def test_process_workflow_is_already_at_end(db_session, enable_factory_create):
         is_active=False,
     )
 
-    event, history_event = build_process_workflow_event(
+    sqs_container = build_process_workflow_event(
         workflow.workflow_id, user=user, event_to_send="middle_to_end"
     )
     with pytest.raises(
         InactiveWorkflowError, match="Workflow is not active - cannot receive events"
     ):
-        EventHandler(db_session, event, history_event).process()
+        EventHandler(db_session, sqs_container).process()
+
+
+def test_start_workflow_event_concurrent_workflow_blocked(db_session, enable_factory_create):
+    """Starting a workflow should fail if an active workflow of the same type already exists
+    for the entity and the config disallows concurrent workflows."""
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create()
+
+    # Create an existing active workflow for the same entity and workflow type
+    WorkflowFactory.create(
+        workflow_type=WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+        opportunity=opportunity,
+        is_active=True,
+    )
+
+    sqs_container = build_start_workflow_event(
+        workflow_type=WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+        user=user,
+        entity=opportunity,
+    )
+
+    event_handler = EventHandler(db_session, sqs_container)
+    with pytest.raises(
+        ConcurrentWorkflowError,
+        match="An active workflow of this type already exists for this entity",
+    ):
+        event_handler.process()
+
+
+def test_start_workflow_event_concurrent_workflow_allowed_when_inactive(
+    db_session, enable_factory_create
+):
+    """Starting a workflow should succeed if an existing workflow is inactive
+    even when the config disallows concurrent workflows."""
+    user = UserFactory.create()
+    opportunity = OpportunityFactory.create()
+
+    # Create an existing INACTIVE workflow for the same entity and workflow type
+    WorkflowFactory.create(
+        workflow_type=WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+        opportunity=opportunity,
+        is_active=False,
+    )
+
+    sqs_container = build_start_workflow_event(
+        workflow_type=WorkflowType.NO_CONCURRENT_TEST_WORKFLOW,
+        user=user,
+        entity=opportunity,
+    )
+
+    event_handler = EventHandler(db_session, sqs_container)
+    state_machine = event_handler.process()
+
+    assert state_machine.workflow.is_active is True

@@ -1,7 +1,6 @@
 # Maintainers
 
-This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOWNERS) for list of reviewers for different parts of the codebase. Team members include:
-
+This is a list of maintainers for this project. Team members include:
 
 ## Engineering
 
@@ -43,8 +42,8 @@ This is a list of maintainers for this project. See [CODEOWNERS](/.github/CODEOW
 * Julius Chang
 * Sarah Knopp
 * Billy Daly
-* Eric Valenzuela
-* David Dudas
+* Bryan Thompson
+* Jeff Crichlake
 
 ## Product and Program Management
 
