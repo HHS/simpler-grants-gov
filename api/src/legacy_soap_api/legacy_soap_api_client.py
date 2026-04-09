@@ -10,8 +10,9 @@ from src.legacy_soap_api.applicants import schemas as applicants_schemas
 from src.legacy_soap_api.applicants.services import get_opportunity_list_response
 from src.legacy_soap_api.grantors import schemas as grantors_schemas
 from src.legacy_soap_api.grantors.services import (
-    confirm_application_delivery_response,
+    confirm_application_delivery,
     get_application_zip_response,
+    get_confirm_application_delivery_response,
     get_submission_list_expanded_response,
     update_application_info_response,
 )
@@ -248,13 +249,15 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
     def confirm_application_delivery_request(
         self, proxy_response: SOAPResponse | None = None
     ) -> grantors_schemas.ConfirmApplicationDeliveryResponseSOAPEnvelope:
-        return confirm_application_delivery_response(
+        request = grantors_schemas.ConfirmApplicationDeliveryRequest(**self.get_soap_request_dict())
+        tracking_number = confirm_application_delivery(
             db_session=self.db_session,
             soap_request=self.soap_request,
-            confirm_application_delivery_request=grantors_schemas.ConfirmApplicationDeliveryRequest(
-                **self.get_soap_request_dict()
-            ),
+            confirm_application_delivery_request=request,
             soap_config=self.operation_config,
+        )
+        return get_confirm_application_delivery_response(
+            grants_gov_tracking_number=tracking_number,
         )
 
     def get_submission_list_expanded_request(
