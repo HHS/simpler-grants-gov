@@ -7,8 +7,10 @@ import {
   fetchUserAgencies,
   UserAgency,
 } from "src/services/fetch/fetchers/userAgenciesFetcher";
+import { LocalizedPageProps, TFn } from "src/types/intl";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
+import { WithFeatureFlagProps } from "src/types/uiTypes";
 import {
   checkRequiredPrivileges,
   UserPrivilegeRequest,
@@ -135,9 +137,9 @@ const EditAction = ({
 const transformTableRowData = (
   userOpportunities: BaseOpportunity[],
   canUpdate: boolean,
+  _t: TFn,
 ) => {
   return userOpportunities.map((opportunity: BaseOpportunity) => {
-    const t = useTranslations("Opportunities");
     const status = opportunity.is_draft
       ? "Draft"
       : opportunity.opportunity_status;
@@ -160,7 +162,7 @@ const transformTableRowData = (
               canUpdate={canUpdate}
               opportunityId={opportunity.opportunity_id}
             />
-            , {t("actionButtons.copy")}, {t("actionButtons.delete")}
+            , {_t("actionButtons.copy")}, {_t("actionButtons.delete")}
           </span>
         ) : (
           "" // Don't show any actions for published opportunities
@@ -241,7 +243,7 @@ const OpportunitiesTable = ({
   return (
     <TableWithResponsiveHeader
       headerContent={headerTitles}
-      tableRowData={transformTableRowData(userOpportunities, canUpdate)}
+      tableRowData={transformTableRowData(userOpportunities, canUpdate, t)}
     />
   );
 };
@@ -307,13 +309,16 @@ const parseUserPrivileges = (
 // --------------------------------------------------
 // The Main Page
 // --------------------------------------------------
-type OpportunitiesListProps = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
-async function OpportunitiesListPage({ searchParams }: OpportunitiesListProps) {
-  const resolvedSearchParams = await searchParams;
-  const selectedAgencyParam = resolvedSearchParams?.agency;
-  const selectedAgencyId = Array.isArray(selectedAgencyParam)
+type OpportunitiesListProps = LocalizedPageProps & WithFeatureFlagProps;
+async function OpportunitiesListPage(props: OpportunitiesListProps) {
+  const { searchParams } = props;
+  const resolvedSearchParams: Record<string, string | string[] | undefined> =
+    searchParams ? await searchParams : {};
+  const selectedAgencyParam: string | string[] | undefined =
+    resolvedSearchParams.agency;
+  const selectedAgencyId: string | undefined = Array.isArray(
+    selectedAgencyParam,
+  )
     ? selectedAgencyParam[0]
     : selectedAgencyParam;
 
