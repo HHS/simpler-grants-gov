@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
@@ -57,10 +58,7 @@ function formatOpportunityStage(opportunityStatus: string | null | undefined) {
   );
 }
 
-export default async function OpportunityEditPage({
-  params,
-  searchParams,
-}: PageProps) {
+async function OpportunityEditPage({ params, searchParams }: PageProps) {
   const { id } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const isNewlyCreated = resolvedSearchParams.fromCreate === "true";
@@ -244,3 +242,9 @@ export default async function OpportunityEditPage({
     </div>
   );
 }
+
+export default withFeatureFlag<PageProps, never>(
+  OpportunityEditPage,
+  "opportunityOff",
+  () => redirect("/maintenance"),
+);
