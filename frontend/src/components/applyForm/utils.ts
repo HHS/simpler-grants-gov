@@ -3,9 +3,6 @@ import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
 import { isArray, isObject } from "lodash";
-import { extricateConditionalValidationRules } from "src/utils/applyForm/formSchemaProcessors";
-import { isBasicallyAnObject } from "src/utils/generalUtils";
-
 import {
   FormattedFormValidationWarning,
   FormValidationWarning,
@@ -13,7 +10,10 @@ import {
   UiSchema,
   UiSchemaField,
   UiSchemaNode,
-} from "../../types/applyForm/types";
+} from "src/types/applyForm/types";
+import { extricateConditionalValidationRules } from "src/utils/applyForm/formSchemaProcessors";
+import { isBasicallyAnObject } from "src/utils/generalUtils";
+
 import { formDataToObject } from "./formDataToJson";
 
 const nestedWarningsForField = ({

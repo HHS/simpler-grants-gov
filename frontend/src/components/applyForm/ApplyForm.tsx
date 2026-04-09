@@ -4,6 +4,11 @@ import { RJSFSchema } from "@rjsf/utils";
 import { isEmpty } from "lodash";
 import { useFormStatus } from "react-dom";
 import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
+import {
+  FormattedFormValidationWarning,
+  FormValidationWarning,
+  UiSchema,
+} from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 
 import { useTranslations } from "next-intl";
@@ -11,11 +16,6 @@ import { useNavigationGuard } from "next-navigation-guard";
 import React, { ReactNode, useActionState, useMemo, useState } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
-import {
-  FormattedFormValidationWarning,
-  FormValidationWarning,
-  UiSchema,
-} from "../../types/applyForm/types";
 import { handleFormAction } from "./actions";
 import { ApplyFormMessage } from "./ApplyFormMessage";
 import ApplyFormNav from "./ApplyFormNav";

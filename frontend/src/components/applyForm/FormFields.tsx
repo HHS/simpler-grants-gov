@@ -1,15 +1,15 @@
 import { RJSFSchema } from "@rjsf/utils";
-import { getFieldConfig } from "src/utils/applyForm/getFieldConfig";
-
-import React, { JSX } from "react";
-import { Alert } from "@trussworks/react-uswds";
-
 import {
   FormattedFormValidationWarning,
   UiSchema,
   UiSchemaField,
   UiSchemaFieldList,
-} from "../../types/applyForm/types";
+} from "src/types/applyForm/types";
+import { getFieldConfig } from "src/utils/applyForm/getFieldConfig";
+
+import React, { JSX } from "react";
+import { Alert } from "@trussworks/react-uswds";
+
 import { getRequiredProperties, isFieldRequired } from "./utils";
 import { renderWidget, wrapSection } from "./widgets/WidgetRenderers";
 

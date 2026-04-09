@@ -1,7 +1,7 @@
+import { FormattedFormValidationWarning } from "src/types/applyForm/types";
+
 import { useTranslations } from "next-intl";
 import { Alert } from "@trussworks/react-uswds";
-
-import { FormattedFormValidationWarning } from "../../types/applyForm/types";
 
 const getWarningKey = (warning: FormattedFormValidationWarning): string => {
   return `${warning.htmlField ?? warning.field ?? warning.definition}-${warning.message}`;

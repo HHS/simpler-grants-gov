@@ -2,9 +2,9 @@
 
 import { RJSFSchema } from "@rjsf/utils";
 import { AttachmentsProvider } from "src/hooks/ApplicationAttachments";
+import { UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 
-import { UiSchema } from "../../types/applyForm/types";
 import { FormFields } from "./FormFields";
 
 export default function PrintForm({
