@@ -26,17 +26,6 @@ export interface FillFieldDefinition {
   field: string;
 }
 
-/**
- * Determines whether a checkbox field should be activated during form filling.
- * Returns true for boolean true, or any string that isn't "false".
- */
-function shouldActivateField(data: string | boolean | undefined): boolean {
-  if (typeof data === "boolean") {
-    return data;
-  }
-  return data !== undefined && data.toLowerCase() !== "false";
-}
-
 export type FormFillFieldDefinitions = {
   [fieldIdentifier: string]: FillFieldDefinition;
 };

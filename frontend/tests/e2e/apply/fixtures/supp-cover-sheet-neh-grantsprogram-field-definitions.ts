@@ -49,7 +49,7 @@ export const fieldDefinitionsSuppCoverSheetNEH: FormFillFieldDefinitions = {
   "application_info--additional_funding": {
     getByText: "No",
     textExact: true,
-    type: "radio",
+    type: "radiobutton",
     section: "Application Information",
     field: "Additional Funding",
   },
