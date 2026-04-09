@@ -55,6 +55,10 @@ class InvalidWorkflowResponseTypeError(NonRetryableWorkflowError):
     pass
 
 
+class DisallowedApprovalResponseTypeError(NonRetryableWorkflowError):
+    """Error raised when an approval response type is not allowed for a specific approval configuration."""
+
+
 class WorkflowDoesNotExistError(NonRetryableWorkflowError):
     pass
 
