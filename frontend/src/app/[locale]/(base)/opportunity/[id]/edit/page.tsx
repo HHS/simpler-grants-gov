@@ -127,9 +127,11 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
       title: "Opportunities",
       path: "/opportunities",
     },
+    ...(isNewlyCreated
+      ? [{ title: "Create opportunity", path: "/opportunities/create" }]
+      : []),
     {
-      title: `${opportunityData.opportunity_title || ""}: ${opportunityData.opportunity_number}`,
-      path: `/opportunity/${opportunityData.opportunity_id}/`,
+      title: "Opportunity details",
     },
   ];
   const activeSummary =
@@ -176,7 +178,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
           <div className="padding-y-2">
             <Breadcrumbs
               breadcrumbList={breadcrumbs}
-              className="padding-y-0 bg-transparent font-sans-sm"
+              className="bg-transparent"
             />
           </div>
           <div className="display-flex flex-column width-full">
