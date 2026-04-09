@@ -60,10 +60,9 @@ def award_recommendation_get(
 @award_recommendation_blueprint.doc(
     summary="List Award Recommendation Submissions",
     description="Get paginated list of application submissions for an award recommendation.",
-    security=jwt_or_api_user_key_security_schemes,
     responses=[200, 401, 403, 404],
 )
-@jwt_or_api_user_key_multi_auth.login_required
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def award_recommendation_submission_list(
     db_session: db.Session, award_recommendation_id: uuid.UUID, json_data: dict
