@@ -320,7 +320,7 @@ const FormLink = ({
           // Enables Playwright to select the correct link regardless of text or layout changes.
           data-testid="application-form-link"
           data-form-id={formId}
-          href={`/applications/${applicationId}/form/${appFormId}`}
+          href={`/workspace/applications/${applicationId}/form/${appFormId}`}
         >
           {formName}
         </Link>

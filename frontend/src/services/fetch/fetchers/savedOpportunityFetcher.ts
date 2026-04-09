@@ -41,10 +41,16 @@ export const getSavedOpportunities = async (
   userId: string,
   scope: SavedOpportunitiesScope,
   statusFilter?: string,
+  organizationIdsFilter?: string[] | null,
 ): Promise<MinimalOpportunity[]> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
+  const organizationIds =
+    organizationIdsFilter === undefined
+      ? getSavedOpportunitiesScopeOrganizationIds(scope)
+      : organizationIdsFilter;
+
   const body: {
     pagination: {
       page_offset: number;
@@ -68,7 +74,7 @@ export const getSavedOpportunities = async (
     },
     filters: {
       organization_ids: {
-        one_of: getSavedOpportunitiesScopeOrganizationIds(scope),
+        one_of: organizationIds,
       },
     },
   };
@@ -81,12 +87,12 @@ export const getSavedOpportunities = async (
   }
 
   const subPath = `${userId}/saved-opportunities/list`;
-  const resp = await fetchUserWithMethod("POST")({
+  const response = await fetchUserWithMethod("POST")({
     subPath,
     additionalHeaders: ssgToken,
     body,
   });
-  const json = (await resp.json()) as { data: MinimalOpportunity[] };
+  const json = (await response.json()) as { data: MinimalOpportunity[] };
   return json.data;
 };
 
@@ -110,6 +116,7 @@ export const getUserSavedOpportunity = async (
 export const fetchSavedOpportunities = async (
   scope: SavedOpportunitiesScope,
   statusFilter?: string,
+  organizationIdsFilter?: string[] | null,
 ): Promise<MinimalOpportunity[]> => {
   try {
     const session = await getSession();
@@ -121,10 +128,11 @@ export const fetchSavedOpportunities = async (
       session.user_id,
       scope,
       statusFilter,
+      organizationIdsFilter,
     );
     return savedOpportunities;
-  } catch (e) {
-    console.error("Error fetching saved opportunities:", e);
+  } catch (error: unknown) {
+    console.error("Error fetching saved opportunities:", error);
     return [];
   }
 };
