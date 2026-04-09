@@ -108,23 +108,24 @@ const EditAction = ({
   canUpdate: boolean;
   opportunityId: string;
 }) => {
-  const t = useTranslations("Opportunities.actionButtons");
+  const t = useTranslations("Opportunities");
   return canUpdate ? (
     <span>
-      <a href={`/opportunity/${opportunityId}/edit`}>{t("edit")}</a>
+      <a href={`/opportunity/${opportunityId}/edit`}>
+        {t("actionButtons.edit")}
+      </a>
     </span>
   ) : (
-    <span>{t("edit")}</span>
+    <span>{t("actionButtons.edit")}</span>
   );
 };
 
 const transformTableRowData = (
   userOpportunities: BaseOpportunity[],
   canUpdate: boolean,
-  _t: TFn,
 ) => {
   return userOpportunities.map((opportunity: BaseOpportunity) => {
-    const t = useTranslations("Opportunities.actionButtons");
+    const t = useTranslations("Opportunities");
     const status = opportunity.is_draft
       ? "Draft"
       : opportunity.opportunity_status;
@@ -147,7 +148,7 @@ const transformTableRowData = (
               canUpdate={canUpdate}
               opportunityId={opportunity.opportunity_id}
             />
-            , {t("copy")}, {t("delete")}
+            , {t("actionButtons.copy")}, {t("actionButtons.delete")}
           </span>
         ) : (
           "" // Don't show any actions for published opportunities
@@ -173,7 +174,7 @@ export const OpportunitiesHeader = ({
   canCreate: boolean;
 }) => {
   const t = useTranslations("Opportunities");
-  const showOpportunities = currentAgencyId != "" ? true : false;
+  const showOpportunities = currentAgencyId !== "";
 
   return (
     <div className="display-flex flex-column gap-3 margin-bottom-4">
@@ -228,7 +229,7 @@ export const OpportunitiesTable = ({
   return (
     <TableWithResponsiveHeader
       headerContent={headerTitles}
-      tableRowData={transformTableRowData(userOpportunities, canUpdate, t)}
+      tableRowData={transformTableRowData(userOpportunities, canUpdate)}
     />
   );
 };

@@ -61,7 +61,7 @@ const getUserPrivilegeDefinition = (
 const parseUserPrivileges = (
   userPrivilegeResult: UserPrivilegeResult[],
 ): AgencyUserPrivileges => {
-  let agencyUserPrivileges: AgencyUserPrivileges = {
+  const agencyUserPrivileges: AgencyUserPrivileges = {
     canView: false,
     canCreate: false,
     canUpdate: false,

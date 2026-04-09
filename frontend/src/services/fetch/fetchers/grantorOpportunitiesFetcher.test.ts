@@ -13,9 +13,9 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
     mockFetchGrantorWithMethod(arg),
 }));
 
-//---------------------------------------------
+// ---------------------------------------------
 // Tests for searchOpportunitiesByAgency
-//---------------------------------------------
+// ---------------------------------------------
 const pageRequest: PaginationRequestBody = {
   page_offset: 1,
   page_size: 25,
@@ -82,9 +82,9 @@ describe("searchOpportunitiesByAgency", () => {
   });
 });
 
-//---------------------------------------------
+// ---------------------------------------------
 // Tests for createOpportunity
-//---------------------------------------------
+// ---------------------------------------------
 describe("createOpportunity", () => {
   afterEach(() => {
     jest.clearAllMocks();

@@ -28,7 +28,7 @@ export const AgencySelector = ({
         name="agency"
         defaultValue={currentAgencyId}
         onChange={(e) =>
-          e.target.value != "" ? router.push(`?agency=${e.target.value}`) : {}
+          e.target.value !== "" ? router.push(`?agency=${e.target.value}`) : {}
         }
       >
         <option key={""} value={""} disabled>
