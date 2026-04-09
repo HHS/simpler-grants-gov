@@ -1,4 +1,4 @@
-FROM fluent/fluent-bit:5.0.2-amd64@sha256:405dc8f28394a2a7adb3b96a7215b3f91b10aae84d8f94bbc90a5c38118725d4 AS fluentbit
+FROM fluent/fluent-bit:4.2.3.1-amd64@sha256:4e63b245e64067927e8b4f3a1788c7312d750481c6bbdbfbcce09263d08216bd AS fluentbit
 
 FROM fluentbit AS release
 
