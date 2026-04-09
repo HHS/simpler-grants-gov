@@ -26,6 +26,28 @@ export interface FillFieldDefinition {
   field: string;
 }
 
+export type FormFillFieldDefinitions = {
+  [fieldIdentifier: string]: FillFieldDefinition;
+};
+
+export interface FillFormConfig {
+  formName: string | RegExp;
+  fields: FormFillFieldDefinitions;
+  saveButtonTestId: string;
+  noErrorsText?: string;
+  /**
+   * Optional form-specific hook called before the save button is clicked.
+   * Use for pre-save interactions that cannot be expressed as a field definition.
+   * e.g. SF-424A confirmation checkbox that only appears in this form.
+   */
+  beforeSave?: (page: Page) => Promise<void>;
+}
+
+export interface FormsFixtureData {
+  formName: string | RegExp;
+  fields: FillFieldDefinition[];
+}
+
 /**
  * Determines whether a radio button or checkbox field should be activated (checked/selected) during form filling.
  *
@@ -53,29 +75,6 @@ function shouldFillField(
   return (
     String(formData[field.dependsOn.field]) === String(field.dependsOn.value)
   );
-}
-
-export type FormFillFieldDefinitions = {
-  [fieldIdentifier: string]: FillFieldDefinition;
-};
-
-export interface FillFormConfig {
-  formName: string | RegExp;
-  fields: FormFillFieldDefinitions;
-  saveButtonTestId: string;
-  noErrorsText?: string;
-  /**
-   * Optional form-specific hook for confirmation checkbox is called
-   * before the save button is clicked. Use for pre-save interactions
-   * that cannot be expressed as a field definition.
-   * e.g. SF-424A confirmation checkbox that only appears in this form
-   */
-  beforeSave?: (page: Page) => Promise<void>;
-}
-
-export interface FormsFixtureData {
-  formName: string | RegExp;
-  fields: FillFieldDefinition[];
 }
 
 export async function fillField(
@@ -219,16 +218,68 @@ export async function fillField(
       // than desktop Chrome, so 5000ms is insufficient.
       await locator.waitFor({ state: "attached", timeout: 30000 });
       await locator.scrollIntoViewIfNeeded();
+
+      const inputName = await locator.getAttribute("name");
+      const inputId = await locator.getAttribute("id");
+      const hiddenInputSelector = inputName
+        ? `input[type="hidden"][name="${inputName}"]`
+        : inputId
+          ? `input[type="hidden"][name="${inputId}"], input[type="hidden"]#${inputId}`
+          : null;
+
       await locator.setInputFiles(data);
+
+      const fileName = data.split(/[/\\]/).pop() ?? data;
+
       // Wait for the uploaded filename to appear in the UI before proceeding.
       // Webkit renders the post-upload filename span more slowly, so use a
       // generous timeout matching the file-input wait above.
-      const fileName = data.split("/").pop() ?? data;
-      await page
-        .locator(`span:has-text("${fileName}")`)
-        .waitFor({ state: "visible", timeout: 30000 });
+      if (hiddenInputSelector) {
+        await page
+          .locator(hiddenInputSelector)
+          .locator(
+            "xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' usa-form-group ') or contains(concat(' ', normalize-space(@class), ' '), ' simpler-formgroup ')][1]",
+          )
+          .locator("span")
+          .filter({ hasText: fileName })
+          .first()
+          .waitFor({ state: "visible", timeout: 30000 });
+      } else {
+        await page
+          .locator(`span:has-text("${fileName}")`)
+          .waitFor({ state: "visible", timeout: 30000 });
+      }
+
+      if (hiddenInputSelector) {
+        await page.waitForFunction(
+          ({ selector, uploadedFileName }) => {
+            const hiddenInput =
+              document.querySelector<HTMLInputElement>(selector);
+
+            if (!hiddenInput?.value) {
+              return false;
+            }
+
+            const fieldContainer =
+              hiddenInput.closest(".usa-form-group, .simpler-formgroup") ??
+              hiddenInput.parentElement;
+
+            if (!fieldContainer) {
+              return false;
+            }
+
+            return Array.from(fieldContainer.querySelectorAll("span")).some(
+              (span) => span.textContent?.trim() === uploadedFileName,
+            );
+          },
+          { selector: hiddenInputSelector, uploadedFileName: fileName },
+          { timeout: 60000 },
+        );
+      }
     } else {
-      console.error("unsupported field type or selector type", field);
+      throw new Error(
+        `Unsupported or invalid field configuration for ${fieldIdentifier}`,
+      );
     }
 
     await testInfo.attach(`fillField-${fieldIdentifier}-success`, {
@@ -264,6 +315,7 @@ export async function fillForm(
   data: Record<string, string | boolean>,
   returnToApplication = true,
 ): Promise<void> {
+  const SAVE_BUTTON_TIMEOUT_MS = 30000;
   const { formName, fields, saveButtonTestId } = config;
 
   const applicationURL = page.url();
@@ -292,21 +344,33 @@ export async function fillForm(
 
     for (const fieldDefinition of Object.entries(fields)) {
       const [fieldIdentifier, fieldConfig] = fieldDefinition;
-      if (!shouldFillField(fieldConfig, data)) {
+      const dataForField = data[fieldIdentifier];
+      if (dataForField === undefined) {
         continue;
       }
-      const dataForField = data[fieldIdentifier];
+      if (!shouldFillField(fieldConfig, data)) {
+        await testInfo.attach(`fillField-${fieldIdentifier}-skipped`, {
+          body: `Skipped ${fieldIdentifier}: dependency ${fieldConfig.dependsOn?.field} did not match ${fieldConfig.dependsOn?.value}`,
+          contentType: "text/plain",
+        });
+        continue;
+      }
       await fillField(testInfo, page, fieldConfig, dataForField);
     }
 
-    // Run form-specific confirmation step if defined.
+    // Run form-specific pre-save hook if defined.
     // Optional - existing forms without this property are unaffected.
     if (config.beforeSave) {
       await config.beforeSave(page);
     }
 
     await page.waitForTimeout(500);
-    await page.getByTestId(saveButtonTestId).click();
+    const saveButton = page.getByTestId(saveButtonTestId);
+    await saveButton.waitFor({
+      state: "visible",
+      timeout: SAVE_BUTTON_TIMEOUT_MS,
+    });
+    await saveButton.click({ timeout: SAVE_BUTTON_TIMEOUT_MS });
 
     if (returnToApplication) {
       await page.goto(applicationURL);
