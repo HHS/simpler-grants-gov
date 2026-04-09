@@ -2,7 +2,6 @@ import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
-import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
@@ -32,13 +31,13 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   let title = t("OpportunityEdit.pageTitle");
   try {
-    const { data: opportunityData } = await getOpportunityDetails(id);
-    title = `${t("OpportunityEdit.pageTitle")} - ${opportunityData.opportunity_title || ""}`;
-  } catch (error) {
-    console.error("Failed to render page title due to API error", error);
-    if (parseErrorStatus(error as ApiRequestError) === 404) {
-      return notFound();
+    const session = await getSession();
+    if (session?.token) {
+      const { data } = await getOpportunityForGrantor(id, session.token);
+      title = `${t("OpportunityEdit.pageTitle")} - ${data.opportunity_title || ""}`;
     }
+  } catch {
+    // fall back to static title
   }
   return {
     title,
