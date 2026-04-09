@@ -204,25 +204,25 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
                   </span>
                 </div>
               </div>
-              <div className="display-flex flex-wrap flex-align-center">
+              <div className="display-flex flex-wrap flex-align-center margin-top-2 desktop:margin-top-0">
                 <Button
                   type="submit"
                   form="opportunity-edit-form"
                   outline
-                  className="margin-0 margin-right-105 font-sans-sm text-bold line-height-sans-1"
+                  className="height-auto margin-0 margin-bottom-1 margin-right-105 font-sans-sm text-bold line-height-sans-1"
                 >
                   Save
                 </Button>
                 <Button
                   type="button"
                   outline
-                  className="margin-0 margin-right-105 font-sans-sm text-bold line-height-sans-1"
+                  className="height-auto margin-0 margin-bottom-1 margin-right-105 font-sans-sm text-bold line-height-sans-1"
                 >
                   Preview
                 </Button>
                 <Button
                   type="button"
-                  className="margin-0 font-sans-sm text-bold line-height-sans-1"
+                  className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
                 >
                   Submit for review
                 </Button>
