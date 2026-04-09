@@ -318,35 +318,6 @@ export const messages = {
       eligibilityNonprofit: "Nonprofit",
       eligibilityMiscellaneous: "Miscellaneous",
     },
-    eligibilityOptions: {
-      forProfitOrganizationsOtherThanSmallBusinesses:
-        "For profit organizations other than small businesses",
-      smallBusinesses: "Small businesses",
-      independentSchoolDistricts: "Independent school districts",
-      privateInstitutionsOfHigherEducation:
-        "Private institutions of higher education",
-      publicAndStateInstitutionsOfHigherEducation:
-        "Public and State controlled institutions of higher education",
-      cityOrTownshipGovernments: "City or township governments",
-      countyGovernments: "County governments",
-      federallyRecognizedNativeAmericanTribalGovernments:
-        "Native American tribal governments (Federally recognized)",
-      publicAndIndianHousingAuthorities:
-        "Public housing authorities/Indian housing authorities",
-      specialDistrictGovernments: "Special district governments",
-      stateGovernments: "State governments",
-      otherNativeAmericanTribalOrganizations:
-        "Native American tribal organizations (other than Federally recognized tribal governments)",
-      nonprofitsNonHigherEducationWith501c3:
-        "Nonprofits having a 501(c)(3) status with the IRS, other than institutions of higher education",
-      nonprofitsNonHigherEducationWithout501c3:
-        "Nonprofits that do not have a 501(c)(3) status with the IRS, other than institutions of higher education",
-      individuals: "Individuals",
-      other:
-        "Others. See the Additional Information on Eligibility field for clarification.",
-      unrestricted:
-        "Unrestricted. Open to any type of entity above, subject to any clarification in the Additional Information on Eligibility field.",
-    },
     content: {
       keyInformationIntro:
         "Below is a summary of the key information for this opportunity. You can edit specific fields directly in this section.",

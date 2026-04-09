@@ -1,3 +1,8 @@
+import { eligibilityTypes } from "src/constants/opportunity";
+import {
+  categoryOptions,
+  fundingOptions,
+} from "src/constants/searchFilterOptions";
 import {
   OpportunityDetail,
   OpportunitySummaryUpdateRequest,
@@ -29,76 +34,21 @@ export type OpportunityEditFormValues = {
   contactEmailText: string;
 };
 
-export type CheckboxOption = {
-  label: string;
-  value: string;
-};
-
 export type SelectOption = {
   label: string;
   value: string;
 };
+
+export type CheckboxOption = SelectOption;
 
 const emptyString = (value: string | null | undefined) => value ?? "";
 
 const numberToString = (value: number | null | undefined) =>
   value === null || value === undefined ? "" : String(value);
 
-export const ELIGIBILITY_OPTIONS: CheckboxOption[] = [
-  {
-    label: "For profit organizations other than small businesses",
-    value: "for_profit_organizations_other_than_small_businesses",
-  },
-  { label: "Small businesses", value: "small_businesses" },
-  {
-    label: "Independent school districts",
-    value: "independent_school_districts",
-  },
-  {
-    label: "Private institutions of higher education",
-    value: "private_institutions_of_higher_education",
-  },
-  {
-    label: "Public and State controlled institutions of higher education",
-    value: "public_and_state_institutions_of_higher_education",
-  },
-  {
-    label: "City or township governments",
-    value: "city_or_township_governments",
-  },
-  { label: "County governments", value: "county_governments" },
-  {
-    label: "Native American tribal governments (Federally recognized)",
-    value: "federally_recognized_native_american_tribal_governments",
-  },
-  {
-    label: "Public housing authorities/Indian housing authorities",
-    value: "public_and_indian_housing_authorities",
-  },
-  {
-    label: "Special district governments",
-    value: "special_district_governments",
-  },
-  { label: "State governments", value: "state_governments" },
-  {
-    label:
-      "Native American tribal organizations (other than Federally recognized tribal governments)",
-    value: "other_native_american_tribal_organizations",
-  },
-  {
-    label:
-      "Nonprofits having a 501(c)(3) status with the IRS, other than institutions of higher education",
-    value: "nonprofits_non_higher_education_with_501c3",
-  },
-  {
-    label:
-      "Nonprofits that do not have a 501(c)(3) status with the IRS, other than institutions of higher education",
-    value: "nonprofits_non_higher_education_without_501c3",
-  },
-  { label: "Individuals", value: "individuals" },
-  { label: "Others", value: "other" },
-  { label: "Unrestricted", value: "unrestricted" },
-];
+export const ELIGIBILITY_OPTIONS: CheckboxOption[] = eligibilityTypes.map(
+  ({ label, value }) => ({ label, value }),
+);
 
 export const OPPORTUNITY_CATEGORY_OPTIONS: SelectOption[] = [
   { label: "Discretionary", value: "discretionary" },
@@ -108,58 +58,13 @@ export const OPPORTUNITY_CATEGORY_OPTIONS: SelectOption[] = [
   { label: "Other", value: "other" },
 ];
 
-export const FUNDING_INSTRUMENT_OPTIONS: CheckboxOption[] = [
-  { label: "Cooperative agreement", value: "cooperative_agreement" },
-  { label: "Grant", value: "grant" },
-  { label: "Procurement contract", value: "procurement_contract" },
-  { label: "Other", value: "other" },
-];
+export const FUNDING_INSTRUMENT_OPTIONS: CheckboxOption[] = fundingOptions.map(
+  ({ label, value }) => ({ label: label.trim(), value }),
+);
 
-export const FUNDING_CATEGORY_OPTIONS: CheckboxOption[] = [
-  { label: "Agriculture", value: "agriculture" },
-  { label: "Arts", value: "arts" },
-  { label: "Business and commerce", value: "business_and_commerce" },
-  { label: "Community development", value: "community_development" },
-  { label: "Consumer protection", value: "consumer_protection" },
-  {
-    label: "Disaster prevention and relief",
-    value: "disaster_prevention_and_relief",
-  },
-  { label: "Education", value: "education" },
-  {
-    label: "Employment, labor, and training",
-    value: "employment_labor_and_training",
-  },
-  { label: "Energy", value: "energy" },
-  { label: "Environment", value: "environment" },
-  { label: "Food and nutrition", value: "food_and_nutrition" },
-  { label: "Health", value: "health" },
-  { label: "Housing", value: "housing" },
-  { label: "Humanities", value: "humanities" },
-  {
-    label: "Infrastructure investment and jobs act",
-    value: "infrastructure_investment_and_jobs_act",
-  },
-  { label: "Information and statistics", value: "information_and_statistics" },
-  {
-    label: "Income security and social services",
-    value: "income_security_and_social_services",
-  },
-  {
-    label: "Law, justice, and legal services",
-    value: "law_justice_and_legal_services",
-  },
-  { label: "Natural resources", value: "natural_resources" },
-  { label: "Opportunity zone benefits", value: "opportunity_zone_benefits" },
-  { label: "Regional development", value: "regional_development" },
-  {
-    label: "Science, technology, and other research and development",
-    value: "science_technology_and_other_research_and_development",
-  },
-  { label: "Transportation", value: "transportation" },
-  { label: "Affordable care act", value: "affordable_care_act" },
-  { label: "Other", value: "other" },
-];
+export const FUNDING_CATEGORY_OPTIONS: CheckboxOption[] = categoryOptions.map(
+  ({ label, value }) => ({ label, value }),
+);
 
 export const buildOpportunityEditInitialValues = (
   opportunity: OpportunityDetail,

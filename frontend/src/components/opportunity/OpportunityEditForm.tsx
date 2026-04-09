@@ -193,47 +193,9 @@ export default function OpportunityEditForm({
       ["individuals", "other", "unrestricted"].includes(option.value),
     ),
   };
-  const eligibilityDisplayLabels: Record<string, string> = {
-    for_profit_organizations_other_than_small_businesses: t(
-      "eligibilityOptions.forProfitOrganizationsOtherThanSmallBusinesses",
-    ),
-    small_businesses: t("eligibilityOptions.smallBusinesses"),
-    independent_school_districts: t(
-      "eligibilityOptions.independentSchoolDistricts",
-    ),
-    private_institutions_of_higher_education: t(
-      "eligibilityOptions.privateInstitutionsOfHigherEducation",
-    ),
-    public_and_state_institutions_of_higher_education: t(
-      "eligibilityOptions.publicAndStateInstitutionsOfHigherEducation",
-    ),
-    city_or_township_governments: t(
-      "eligibilityOptions.cityOrTownshipGovernments",
-    ),
-    county_governments: t("eligibilityOptions.countyGovernments"),
-    federally_recognized_native_american_tribal_governments: t(
-      "eligibilityOptions.federallyRecognizedNativeAmericanTribalGovernments",
-    ),
-    public_and_indian_housing_authorities: t(
-      "eligibilityOptions.publicAndIndianHousingAuthorities",
-    ),
-    special_district_governments: t(
-      "eligibilityOptions.specialDistrictGovernments",
-    ),
-    state_governments: t("eligibilityOptions.stateGovernments"),
-    other_native_american_tribal_organizations: t(
-      "eligibilityOptions.otherNativeAmericanTribalOrganizations",
-    ),
-    nonprofits_non_higher_education_with_501c3: t(
-      "eligibilityOptions.nonprofitsNonHigherEducationWith501c3",
-    ),
-    nonprofits_non_higher_education_without_501c3: t(
-      "eligibilityOptions.nonprofitsNonHigherEducationWithout501c3",
-    ),
-    individuals: t("eligibilityOptions.individuals"),
-    other: t("eligibilityOptions.other"),
-    unrestricted: t("eligibilityOptions.unrestricted"),
-  };
+  const eligibilityDisplayLabels: Record<string, string> = Object.fromEntries(
+    ELIGIBILITY_OPTIONS.map(({ value, label }) => [value, label]),
+  );
 
   function renderEligibilityCheckboxGroup(
     title: string,

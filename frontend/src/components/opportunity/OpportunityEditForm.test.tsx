@@ -91,7 +91,7 @@ describe("OpportunityEditForm", () => {
     // eslint-disable-next-line jest-dom/prefer-to-have-value
     expect(
       screen.getByRole("checkbox", {
-        name: /eligibilityOptions\.forProfitOrganizationsOtherThanSmallBusinesses/i,
+        name: /for-profit organizations other than small businesses/i,
       }),
     ).toHaveAttribute(
       "value",
