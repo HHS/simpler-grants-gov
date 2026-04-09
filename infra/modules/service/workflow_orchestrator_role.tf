@@ -76,6 +76,22 @@ data "aws_iam_policy_document" "workflow_orchestrator" {
   }
 
   statement {
+    sid = "StepFunctionsManagedRules"
+    actions = [
+      "events:CreateManagedRule",
+      "events:DeleteManagedRule",
+      "events:DescribeManagedRule",
+      "events:DisableManagedRule",
+      "events:EnableManagedRule",
+      "events:PutManagedRule",
+      "events:PutTargets",
+    ]
+    resources = [
+      "arn:aws:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:managed-rule/*",
+    ]
+  }
+
+  statement {
     effect  = "Allow"
     actions = ["ecs:RunTask"]
     resources = [

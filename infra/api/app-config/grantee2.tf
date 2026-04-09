@@ -1,23 +1,23 @@
-module "grantee1_config" {
+module "grantee2_config" {
   source                            = "./env-config"
   project_name                      = local.project_name
   app_name                          = local.app_name
   default_region                    = module.project_config.default_region
-  environment                       = "grantee1"
-  network_name                      = "grantee1"
-  domain_name                       = "api.grantee1.teams.simpler.grants.gov"
-  secondary_domain_names            = ["alb.grantee1.teams.simpler.grants.gov"]
-  # s3_cdn_domain_name              = "files.grantee1.teams.simpler.grants.gov"   # uncomment once SSL cert is provisioned
-  # mtls_domain_name                = "soap.grantee1.teams.simpler.grants.gov"    # uncomment once SSL cert and SSM params are provisioned
+  environment                       = "grantee2"
+  network_name                      = "grantee2"
+  domain_name                       = "api.grantee2.teams.simpler.grants.gov"
+  secondary_domain_names            = ["alb.grantee2.teams.simpler.grants.gov"]
+  # s3_cdn_domain_name              = "files.grantee2.teams.simpler.grants.gov"   # uncomment once SSL cert is provisioned
+  # mtls_domain_name                = "soap.grantee2.teams.simpler.grants.gov"    # uncomment once SSL cert and SSM params are provisioned
   enable_https                      = false # set to true once SSL cert is provisioned
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
-  database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXwyNjY5ODkxMDczODI5NDA4MTg"
+  database_newrelic_entity_guid     = ""
   has_incident_management_service   = local.has_incident_management_service
   enable_identity_provider          = local.enable_identity_provider
   enable_notifications              = false # set to true once Route53 hosted zone and SSL cert are provisioned
-  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyOTQ0MjI1MTY3MzU4ODU5ODY4"
-  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtOTg3MzU3MDI4MjI5NDg3MDk4"
+  service_newrelic_entity_guid      = ""
+  service_newrelic_mtls_entity_guid = ""
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-staging/services/api-staging/health?region=us-east-1
@@ -50,7 +50,7 @@ module "grantee1_config" {
     RESET_EMAILS_WITHOUT_SENDING = "false"
 
     # PDF Generation - Staging overrides
-    FRONTEND_URL             = "https://grantee1.teams.simpler.grants.gov"
+    FRONTEND_URL             = "https://grantee2.teams.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
   }

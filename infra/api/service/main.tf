@@ -27,6 +27,16 @@ data "aws_subnets" "public" {
   }
 }
 
+data "aws_cloudfront_cache_policy" "dev_default" {
+  count = contains(["grantee1", "grantee2"], var.environment_name) ? 1 : 0
+  name  = "api-dev"
+}
+
+data "aws_cloudfront_cache_policy" "dev_api_no_cache" {
+  count = contains(["grantee1", "grantee2"], var.environment_name) ? 1 : 0
+  name  = "api-dev-api-no-cache"
+}
+
 locals {
   # The prefix is used to create uniquely named resources per terraform workspace, which
   # are needed in CI/CD for preview environments and tests.
@@ -34,6 +44,8 @@ locals {
   # To isolate changes during infrastructure development by using manually created
   # terraform workspaces, see: /docs/infra/develop-and-test-infrastructure-in-isolation-using-workspaces.md
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
+
+  use_existing_cache_policy = contains(["grantee1", "grantee2"], var.environment_name)
 
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
@@ -119,8 +131,8 @@ data "aws_acm_certificate" "cert" {
 }
 
 data "aws_acm_certificate" "secondary_certs" {
-  # Get secondary domain names if they exists
-  for_each    = toset(lookup(local.service_config, "secondary_domain_names", []))
+  # Get secondary domain names only when HTTPS is enabled (certs must exist)
+  for_each    = local.service_config.enable_https ? toset(lookup(local.service_config, "secondary_domain_names", [])) : toset([])
   domain      = each.value
   most_recent = true
 }
@@ -190,7 +202,7 @@ module "service" {
   hosted_zone_id = null
 
   # This is used by the API when hosting a side-by-side ALB for mTLS traffic to the API
-  enable_mtls_load_balancer = true
+  enable_mtls_load_balancer = local.service_config.mtls_domain_name != null
   mtls_domain_name          = local.service_config.mtls_domain_name
   mtls_certificate_arn      = local.service_config.mtls_domain_name != null ? data.aws_acm_certificate.mtls_cert[0].arn : null
 
@@ -265,6 +277,9 @@ module "service" {
 
   newrelic_entity_guid      = local.service_config.newrelic_entity_guid
   newrelic_mtls_entity_guid = local.service_config.newrelic_mtls_entity_guid
+
+  existing_cdn_default_cache_policy_id  = local.use_existing_cache_policy ? data.aws_cloudfront_cache_policy.dev_default[0].id : null
+  existing_cdn_api_no_cache_policy_id   = local.use_existing_cache_policy ? data.aws_cloudfront_cache_policy.dev_api_no_cache[0].id : null
 
   is_temporary = local.is_temporary
 }

@@ -24,4 +24,9 @@ module "search" {
 
   # IAM access control - SSO admin role for OpenSearch access
   sso_admin_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_7531ec3bb3ba9352"
+
+  # Disable log publishing for grantee environments — the account-level CloudWatch
+  # log resource policy conditions block OpenSearch from writing logs in these envs.
+  # Re-enable once the account-level policy conditions are resolved.
+  enable_log_publishing = !contains(["grantee1", "grantee2"], var.environment_name)
 }

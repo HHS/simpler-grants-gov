@@ -55,7 +55,7 @@ resource "aws_cloudfront_origin_request_policy" "forward_all_cookies" {
 }
 
 resource "aws_cloudfront_cache_policy" "default" {
-  count = local.enable_cdn ? 1 : 0
+  count = local.enable_cdn && var.existing_cdn_default_cache_policy_id == null ? 1 : 0
 
   name = var.service_name
 
@@ -80,7 +80,7 @@ resource "aws_cloudfront_cache_policy" "default" {
 }
 
 resource "aws_cloudfront_cache_policy" "api_no_cache" {
-  count = local.enable_cdn ? 1 : 0
+  count = local.enable_cdn && var.existing_cdn_api_no_cache_policy_id == null ? 1 : 0
 
   name = "${var.service_name}-api-no-cache"
 
@@ -106,7 +106,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   count = local.enable_cdn ? 1 : 0
 
   enabled = local.enable_cdn ? true : false
-  aliases = local.cdn_domain_name == null ? null : [local.cdn_domain_name]
+  aliases = local.cdn_certificate_arn != null && local.cdn_domain_name != null ? [local.cdn_domain_name] : null
 
   dynamic "origin" {
     for_each = var.enable_alb_cdn ? [1] : []
@@ -159,7 +159,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods           = ["GET", "HEAD"]
     target_origin_id         = local.default_origin_id
-    cache_policy_id          = aws_cloudfront_cache_policy.api_no_cache[0].id
+    cache_policy_id          = var.existing_cdn_api_no_cache_policy_id != null ? var.existing_cdn_api_no_cache_policy_id : aws_cloudfront_cache_policy.api_no_cache[0].id
     origin_request_policy_id = var.enable_alb_cdn ? aws_cloudfront_origin_request_policy.forward_all_cookies[0].id : null
     compress                 = true
     viewer_protocol_policy   = "redirect-to-https"
@@ -169,7 +169,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods           = ["GET", "HEAD", "OPTIONS"]
     target_origin_id         = local.default_origin_id
-    cache_policy_id          = aws_cloudfront_cache_policy.default[0].id
+    cache_policy_id          = var.existing_cdn_default_cache_policy_id != null ? var.existing_cdn_default_cache_policy_id : aws_cloudfront_cache_policy.default[0].id
     origin_request_policy_id = var.enable_alb_cdn ? aws_cloudfront_origin_request_policy.forward_all_cookies[0].id : null
     compress                 = true
     viewer_protocol_policy   = "redirect-to-https"

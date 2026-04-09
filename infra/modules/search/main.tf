@@ -66,25 +66,25 @@ resource "aws_opensearch_domain" "opensearch" {
   log_publishing_options {
     cloudwatch_log_group_arn = aws_cloudwatch_log_group.opensearch.arn
     log_type                 = "AUDIT_LOGS"
-    enabled                  = true
+    enabled                  = var.enable_log_publishing
   }
 
   log_publishing_options {
     cloudwatch_log_group_arn = aws_cloudwatch_log_group.opensearch.arn
     log_type                 = "ES_APPLICATION_LOGS"
-    enabled                  = true
+    enabled                  = var.enable_log_publishing
   }
 
   log_publishing_options {
     cloudwatch_log_group_arn = aws_cloudwatch_log_group.opensearch.arn
     log_type                 = "INDEX_SLOW_LOGS"
-    enabled                  = true
+    enabled                  = var.enable_log_publishing
   }
 
   log_publishing_options {
     cloudwatch_log_group_arn = aws_cloudwatch_log_group.opensearch.arn
     log_type                 = "SEARCH_SLOW_LOGS"
-    enabled                  = true
+    enabled                  = var.enable_log_publishing
   }
 
   software_update_options {

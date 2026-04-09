@@ -1,11 +1,11 @@
-module "grantee1_config" {
+module "grantee2_config" {
   source                          = "./env-config"
   project_name                    = local.project_name
   app_name                        = local.app_name
   default_region                  = module.project_config.default_region
-  environment                     = "grantee1"
-  network_name                    = "grantee1"
-  domain_name                     = "grantee1.teams.simpler.grants.gov"
+  environment                     = "grantee2"
+  network_name                    = "grantee2"
+  domain_name                     = "grantee2.teams.simpler.grants.gov"
   enable_https                    = false # set to true once SSL cert is provisioned
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
