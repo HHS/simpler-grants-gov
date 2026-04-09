@@ -274,6 +274,9 @@ export const messages = {
     },
   },
   OpportunityEdit: {
+    pageTitle: "Edit opportunity",
+    metaDescription:
+      "Edit draft opportunity information and non-forecast summary fields.",
     sections: {
       keyInformation: "Key information",
       fundingDetails: "Funding details",

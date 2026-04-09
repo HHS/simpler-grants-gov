@@ -2,9 +2,11 @@ import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+import { getOpportunityDetails } from "src/services/fetch/fetchers/opportunityFetcher";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
+import { getTranslations } from "next-intl/server";
 import { notFound, redirect, RedirectType } from "next/navigation";
 import { Button } from "@trussworks/react-uswds";
 
@@ -21,16 +23,27 @@ type PageProps = {
 
 export const dynamic = "force-dynamic";
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string; locale: string }>;
+}): Promise<Metadata> {
+  const { id, locale } = await params;
+  const t = await getTranslations({ locale });
+  let title = t("OpportunityEdit.pageTitle");
+  try {
+    const { data: opportunityData } = await getOpportunityDetails(id);
+    title = `${t("OpportunityEdit.pageTitle")} - ${opportunityData.opportunity_title || ""}`;
+  } catch (error) {
+    console.error("Failed to render page title due to API error", error);
+    if (parseErrorStatus(error as ApiRequestError) === 404) {
+      return notFound();
+    }
+  }
   return {
-    title: "Edit opportunity",
-    description:
-      "Edit draft opportunity information and non-forecast summary fields.",
+    title,
+    description: t("OpportunityEdit.metaDescription"),
   };
-}
-
-export function generateStaticParams() {
-  return [];
 }
 
 function canEditOpportunity(opportunity: GrantorOpportunityDetail) {
@@ -59,7 +72,7 @@ function formatOpportunityStage(opportunityStatus: string | null | undefined) {
 }
 
 async function OpportunityEditPage({ params, searchParams }: PageProps) {
-  const { id } = await params;
+  const { id, locale } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const isNewlyCreated = resolvedSearchParams.fromCreate === "true";
 
@@ -145,7 +158,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
   const rawLastUpdated =
     opportunityData.summary?.post_date || opportunityData.updated_at || "";
   const lastUpdated = rawLastUpdated
-    ? new Date(rawLastUpdated).toLocaleDateString("en-US", {
+    ? new Date(rawLastUpdated).toLocaleDateString(locale, {
         month: "2-digit",
         day: "2-digit",
         year: "numeric",
