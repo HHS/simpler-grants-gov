@@ -1,12 +1,12 @@
 module "grantee2_config" {
-  source                            = "./env-config"
-  project_name                      = local.project_name
-  app_name                          = local.app_name
-  default_region                    = module.project_config.default_region
-  environment                       = "grantee2"
-  network_name                      = "grantee2"
-  domain_name                       = "api.grantee2.teams.simpler.grants.gov"
-  secondary_domain_names            = ["alb.grantee2.teams.simpler.grants.gov"]
+  source                 = "./env-config"
+  project_name           = local.project_name
+  app_name               = local.app_name
+  default_region         = module.project_config.default_region
+  environment            = "grantee2"
+  network_name           = "grantee2"
+  domain_name            = "api.grantee2.teams.simpler.grants.gov"
+  secondary_domain_names = ["alb.grantee2.teams.simpler.grants.gov"]
   # s3_cdn_domain_name              = "files.grantee2.teams.simpler.grants.gov"   # uncomment once SSL cert is provisioned
   # mtls_domain_name                = "soap.grantee2.teams.simpler.grants.gov"    # uncomment once SSL cert and SSM params are provisioned
   enable_https                      = false # set to true once SSL cert is provisioned
