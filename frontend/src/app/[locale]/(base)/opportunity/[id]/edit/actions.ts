@@ -45,20 +45,14 @@ function readStringValue(value: FormDataEntryValue | null): string {
 }
 
 async function getOpportunityEditTranslations() {
+  const alerts = await getTranslations("OpportunityEdit.content.alerts");
+  return { alerts };
+}
+
+async function validateOpportunityEditForm(formData: FormData) {
   const validationErrors = await getTranslations(
     "OpportunityEdit.validationErrors",
   );
-  const alerts = await getTranslations("OpportunityEdit.content.alerts");
-
-  return { validationErrors, alerts };
-}
-
-function validateOpportunityEditForm(
-  formData: FormData,
-  validationErrors: Awaited<
-    ReturnType<typeof getTranslations<"OpportunityEdit.validationErrors">>
-  >,
-) {
   const reviewOpportunityEditSchema = z
     .object({
       title: z.string().trim(),
@@ -174,11 +168,8 @@ export async function saveOpportunityEditAction(
   _prevState: OpportunityEditActionState,
   formData: FormData,
 ): Promise<OpportunityEditActionState> {
-  const { validationErrors, alerts } = await getOpportunityEditTranslations();
-  const validatedFields = validateOpportunityEditForm(
-    formData,
-    validationErrors,
-  );
+  const { alerts } = await getOpportunityEditTranslations();
+  const validatedFields = await validateOpportunityEditForm(formData);
 
   if (!validatedFields.success) {
     return {
