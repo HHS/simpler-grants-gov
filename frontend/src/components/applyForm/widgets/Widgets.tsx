@@ -4,7 +4,7 @@ import {
   FieldListWidgetProps,
   UswdsWidgetProps,
   WidgetTypes,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
 import AttachmentWidget from "./AttachmentUploadWidget";
 import Budget424aSectionA from "./budget/Budget424aSectionA";
 import Budget424aSectionB from "./budget/Budget424aSectionB";

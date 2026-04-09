@@ -7,7 +7,7 @@ import { Table } from "@trussworks/react-uswds";
 import {
   FormValidationWarning,
   UswdsWidgetProps,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
 import { getBudgetErrors } from "./budgetErrorLabels";
 import { MoneyString } from "./budgetTypes";
 import { CurrencyInput, HelperText } from "./budgetUiComponents";

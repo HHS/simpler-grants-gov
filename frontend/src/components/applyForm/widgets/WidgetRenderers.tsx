@@ -6,7 +6,7 @@ import {
   DefinitionPath,
   UswdsWidgetProps,
   WidgetTypes,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
 import { FieldsetWidget } from "./FieldsetWidget";
 import { widgetComponents } from "./Widgets";
 

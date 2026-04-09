@@ -11,7 +11,7 @@ import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { FormGroup, TextInput } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { TextTypes, UswdsWidgetProps } from "src/components/applyForm/types";
+import { TextTypes, UswdsWidgetProps } from "src/types/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 

@@ -14,7 +14,7 @@ import {
   UiSchema,
   UiSchemaField,
   UiSchemaNode,
-} from "./types";
+} from "../../types/applyForm/types";
 
 const nestedWarningsForField = ({
   definition,
@@ -225,7 +225,6 @@ export const buildWarningTree = (
           if (matchingWarnings.length > 0) {
             return errors.concat(matchingWarnings);
           }
-          return errors;
         }
         return errors;
       },
@@ -314,36 +313,34 @@ function getHtmlFieldForWarning({
   field?: string;
   schema?: SchemaField;
 }): string | undefined {
-  if (definition) {
-    const match = definition.match(
-      /^\/properties\/([^/]+)\/items\/properties\/([^/]+)$/,
-    );
+  const match = definition
+    ? definition.match(/^\/properties\/([^/]+)\/items\/properties\/([^/]+)$/)
+    : null;
 
-    if (match) {
-      const [, fieldListName, childFieldName] = match;
-
-      const rowMatch = field?.match(
-        new RegExp(`^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldName}$`),
-      );
-
-      if (rowMatch) {
-        const [, rowIndex] = rowMatch;
-        return `${fieldListName}[${rowIndex}]--${childFieldName}`;
-      }
-
-      // Fallback: default to first row when no index is present
-      return `${fieldListName}[0]--${childFieldName}`;
-    }
+  if (!match) {
+    return getFieldNameForHtml({
+      definition,
+      schema,
+    });
   }
 
-  return getFieldNameForHtml({
-    definition,
-    schema,
-  });
+  const [, fieldListName, childFieldName] = match;
+
+  const entryMatch = field?.match(
+    new RegExp(`^\\$\\.${fieldListName}\\[(\\d+)\\]\\.${childFieldName}$`),
+  );
+
+  if (entryMatch) {
+    const [, entryIndex] = entryMatch;
+    return `${fieldListName}[${entryIndex}]--${childFieldName}`;
+  }
+
+  // Fallback: default to first row when no index is present
+  return `${fieldListName}[0]--${childFieldName}`;
 }
 
-// Returns validation messages for a specific FieldList group,
-// which may include warnings for any child fields within the group as well.
+// Finds the parent FieldList label for a child field definition so it can be
+// used in summary text like "First Name is required (Contact People, Entry 2)".
 function getFieldListLabelFromDefinition({
   definition,
   uiSchema,

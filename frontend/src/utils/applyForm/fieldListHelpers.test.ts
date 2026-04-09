@@ -1,4 +1,4 @@
-import { FormattedFormValidationWarning } from "src/components/applyForm/types";
+import { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import {
   getFieldListChildErrors,
   getFieldListGroupErrors,
@@ -95,7 +95,7 @@ describe("fieldListHelpers", () => {
         getFieldListChildErrors({
           rawErrors: undefined,
           fieldListPath: "$.contact_people_test",
-          rowIndex: 1,
+          entryIndex: 1,
           storageKey: "first_name",
           childDefinition,
         }),
@@ -118,7 +118,7 @@ describe("fieldListHelpers", () => {
         getFieldListChildErrors({
           rawErrors,
           fieldListPath: "$.contact_people_test",
-          rowIndex: 1,
+          entryIndex: 1,
           storageKey: "first_name",
           childDefinition,
         }),
@@ -128,7 +128,7 @@ describe("fieldListHelpers", () => {
         getFieldListChildErrors({
           rawErrors,
           fieldListPath: "$.contact_people_test",
-          rowIndex: 0,
+          entryIndex: 0,
           storageKey: "first_name",
           childDefinition,
         }),
@@ -151,7 +151,7 @@ describe("fieldListHelpers", () => {
         getFieldListChildErrors({
           rawErrors,
           fieldListPath: "$.contact_people_test",
-          rowIndex: 1,
+          entryIndex: 1,
           storageKey: "first_name",
           childDefinition,
         }),
@@ -174,7 +174,7 @@ describe("fieldListHelpers", () => {
         getFieldListChildErrors({
           rawErrors,
           fieldListPath: "$.contact_people_test",
-          rowIndex: 0,
+          entryIndex: 0,
           storageKey: "first_name",
           childDefinition,
         }),
@@ -205,7 +205,7 @@ describe("fieldListHelpers", () => {
         getFieldListChildErrors({
           rawErrors,
           fieldListPath: "$.contact_people_test",
-          rowIndex: 1,
+          entryIndex: 1,
           storageKey: "first_name",
           childDefinition,
         }),
@@ -227,7 +227,7 @@ describe("fieldListHelpers", () => {
         getFieldListChildErrors({
           rawErrors,
           fieldListPath: "$.contact_people_test",
-          rowIndex: 1,
+          entryIndex: 1,
           storageKey: "first_name",
           childDefinition,
         }),

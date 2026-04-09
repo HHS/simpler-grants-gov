@@ -33,7 +33,7 @@ import {
   UserRole,
 } from "src/types/userTypes";
 
-import { FormattedFormValidationWarning } from "src/components/applyForm/types";
+import { FormattedFormValidationWarning } from "src/types/applyForm/types";
 
 export const mockAwardRecommendationStatus: AwardRecommendationStatus =
   "inProgress";

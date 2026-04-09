@@ -14,7 +14,7 @@ import { fakeValidationError } from "src/utils/testing/fixtures";
 import {
   UiSchemaField,
   UiSchemaFieldList,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
 
 const mockGetSimpleTranslationsSync = jest.fn().mockImplementation(identity);
 

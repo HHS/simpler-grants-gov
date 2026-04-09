@@ -1,7 +1,11 @@
 import { useTranslations } from "next-intl";
 import { Alert } from "@trussworks/react-uswds";
 
-import { FormattedFormValidationWarning } from "./types";
+import { FormattedFormValidationWarning } from "../../types/applyForm/types";
+
+const getWarningKey = (warning: FormattedFormValidationWarning): string => {
+  return `${warning.htmlField ?? warning.field ?? warning.definition}-${warning.message}`;
+};
 
 /**
  * Builds Summary link text for validation warnings.
@@ -25,24 +29,24 @@ export const getWarningLinkText = (
   warning: FormattedFormValidationWarning,
 ): string => {
   const baseText = warning.formatted ?? warning.message;
-  const rowMatch = warning.htmlField?.match(/\[(\d+)\]--/);
+  const entryMatch = warning.htmlField?.match(/\[(\d+)\]--/);
   const fieldListLabel = warning.fieldListLabel ?? "";
 
-  if (!rowMatch) {
+  if (!entryMatch) {
     return baseText;
   }
 
-  const rowIndex = Number(rowMatch[1]);
+  const entryIndex = Number(entryMatch[1]);
 
-  if (Number.isNaN(rowIndex)) {
+  if (Number.isNaN(entryMatch)) {
     return baseText;
   }
 
   if (fieldListLabel) {
-    return `${baseText} (${fieldListLabel}, Entry ${rowIndex + 1})`;
+    return `${baseText} (${fieldListLabel}, Entry ${entryIndex + 1})`;
   }
 
-  return `${baseText} (Entry ${rowIndex + 1})`;
+  return `${baseText} (Entry ${entryIndex + 1})`;
 };
 
 export const ApplyFormMessage = ({
@@ -80,10 +84,7 @@ export const ApplyFormMessage = ({
   const uniqueValidationWarnings = validationWarnings
     ? Array.from(
         new Map(
-          validationWarnings.map((warning) => [
-            `${warning.htmlField ?? warning.field ?? warning.definition}-${warning.message}`,
-            warning,
-          ]),
+          validationWarnings.map((warning) => [getWarningKey(warning), warning]),
         ).values(),
       )
     : null;
@@ -120,9 +121,7 @@ export const ApplyFormMessage = ({
               </a>
             );
             return (
-              <li
-                key={`${warning.htmlField ?? warning.field ?? warning.definition}-${warning.message}`}
-              >
+              <li key={getWarningKey(warning)}>
                 {link}
               </li>
             );

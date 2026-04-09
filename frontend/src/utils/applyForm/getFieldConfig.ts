@@ -15,7 +15,7 @@ import {
   UiSchemaFieldList,
   UswdsWidgetProps,
   WidgetTypes,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
 import {
   getByPointer,
   getFieldNameForHtml,
@@ -94,6 +94,7 @@ export function buildFieldListBaseId({
   return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
 }
 
+// Assumes the FieldList field exists at the root of formSchema.properties.
 const getFieldListRequiredFields = ({
   formSchema,
   fieldListName,

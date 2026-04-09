@@ -2,7 +2,7 @@ import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 
 import { FormGroup } from "@trussworks/react-uswds";
 
-import { UswdsWidgetProps } from "src/components/applyForm/types";
+import { UswdsWidgetProps } from "src/types/applyForm/types";
 
 function PrintWidget<
   T = unknown,

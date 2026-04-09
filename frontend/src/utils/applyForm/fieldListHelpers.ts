@@ -1,4 +1,4 @@
-import { FormattedFormValidationWarning } from "src/components/applyForm/types";
+import { FormattedFormValidationWarning } from "src/types/applyForm/types";
 
 /**
  * Returns validation warnings that apply to the FieldList as a whole.
@@ -54,13 +54,13 @@ export function getFieldListGroupErrors({
 export function getFieldListChildErrors({
   rawErrors,
   fieldListPath,
-  rowIndex,
+  entryIndex,
   storageKey,
   childDefinition,
 }: {
   rawErrors?: FormattedFormValidationWarning[];
   fieldListPath: string;
-  rowIndex: number;
+  entryIndex: number;
   storageKey: string;
   childDefinition: string;
 }): string[] {
@@ -68,7 +68,7 @@ export function getFieldListChildErrors({
     return [];
   }
 
-  const rowAwareFieldPath = `${fieldListPath}[${rowIndex}].${storageKey}`;
+  const rowAwareFieldPath = `${fieldListPath}[${entryIndex}].${storageKey}`;
 
   return Array.from(
     new Set(

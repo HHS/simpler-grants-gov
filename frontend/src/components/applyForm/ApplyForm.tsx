@@ -19,7 +19,7 @@ import {
   FormattedFormValidationWarning,
   FormValidationWarning,
   UiSchema,
-} from "./types";
+} from "../../types/applyForm/types";
 import { getFieldsForNav } from "./utils";
 
 type Translator = ((

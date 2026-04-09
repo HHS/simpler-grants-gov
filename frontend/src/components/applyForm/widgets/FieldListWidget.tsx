@@ -11,12 +11,12 @@ import {
   FormattedFormValidationWarning,
   GeneralRecord,
   UswdsWidgetProps,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
 import { isFieldRequired } from "src/components/applyForm/utils";
 import {
   getFieldListChildErrors,
   getFieldListGroupErrors,
-} from "./fieldListHelpers";
+} from "../../../utils/applyForm/fieldListHelpers";
 import { renderWidget } from "./WidgetRenderers";
 
 /**
@@ -27,7 +27,7 @@ import { renderWidget } from "./WidgetRenderers";
  * `BroadlyDefinedWidgetValue` inside `handleFieldChange`.
  */
 type FieldListChangeParams = {
-  rowIndex: number;
+  entryIndex: number;
   storageKey: string;
   nextValue: unknown;
 };
@@ -56,8 +56,8 @@ const normalizeFieldListRows = ({
   defaultSize: number;
 }): GeneralRecord[] => {
   const startingRows = Array.isArray(value)
-    ? value.filter((rowValue): rowValue is GeneralRecord => {
-        return typeof rowValue === "object" && rowValue !== null;
+    ? value.filter((entryValue): entryValue is GeneralRecord => {
+        return typeof entryValue === "object" && entryValue !== null;
       })
     : [];
 
@@ -82,12 +82,12 @@ const normalizeFieldListRows = ({
  */
 const replaceFieldListIndexPlaceholder = ({
   baseId,
-  rowIndex,
+  entryIndex,
 }: {
   baseId: string;
-  rowIndex: number;
+  entryIndex: number;
 }): string => {
-  return baseId.replace(FIELD_LIST_INDEX_TOKEN, String(rowIndex));
+  return baseId.replace(FIELD_LIST_INDEX_TOKEN, String(entryIndex));
 };
 
 /**
@@ -118,16 +118,16 @@ const addFieldListRow = ({
 };
 
 /**
- * Returns a new row array with the row at `rowIndex` removed.
+ * Returns a new row array with the row at `entryIndex` removed.
  */
 const removeFieldListRow = ({
   rows,
-  rowIndex,
+  entryIndex,
 }: {
   rows: GeneralRecord[];
-  rowIndex: number;
+  entryIndex: number;
 }): GeneralRecord[] => {
-  return rows.filter((_, currentRowIndex) => currentRowIndex !== rowIndex);
+  return rows.filter((_, currentEntryIndex) => currentEntryIndex !== entryIndex);
 };
 
 /**
@@ -172,8 +172,8 @@ const toBroadlyDefinedWidgetValue = (
 
 function FieldListEntry({
   id,
-  rowIndex,
-  rowValue,
+  entryIndex,
+  entryValue,
   isInteractionDisabled,
   handleDeleteRow,
   handleFieldChange,
@@ -183,10 +183,10 @@ function FieldListEntry({
   requiredFields,
 }: {
   id: string;
-  rowIndex: number;
-  rowValue: GeneralRecord;
+  entryIndex: number;
+  entryValue: GeneralRecord;
   isInteractionDisabled: boolean;
-  handleDeleteRow: (rowIndex: number) => void;
+  handleDeleteRow: (entryIndex: number) => void;
   handleFieldChange: (params: FieldListChangeParams) => void;
   rawErrors?: FormattedFormValidationWarning[];
   fieldListPath: string;
@@ -197,16 +197,16 @@ function FieldListEntry({
 
   return (
     <div
-      key={`${id}--row-${rowIndex}`}
+      key={`${id}--row-${entryIndex}`}
       className="field-list-widget__row border radius-md border-base-lighter padding-2 margin-2"
     >
       <div className="field-list-widget__controls display-flex flex-align-center flex-justify margin-bottom-2">
         <strong>
-          {t("entry")} {rowIndex + 1}
+          {t("entry")} {entryIndex + 1}
         </strong>
         <Button
           type="button"
-          onClick={() => handleDeleteRow(rowIndex)}
+          onClick={() => handleDeleteRow(entryIndex)}
           disabled={isInteractionDisabled}
         >
           {t("delete")}
@@ -221,7 +221,7 @@ function FieldListEntry({
 
         const generatedId = replaceFieldListIndexPlaceholder({
           baseId: groupItem.baseId,
-          rowIndex,
+          entryIndex,
         });
 
         const storageKey = getFieldListStorageKey({
@@ -231,12 +231,12 @@ function FieldListEntry({
         const childErrors = getFieldListChildErrors({
           rawErrors,
           fieldListPath,
-          rowIndex,
+          entryIndex,
           storageKey,
           childDefinition: groupItem.definition,
         });
 
-        const currentValue = toBroadlyDefinedWidgetValue(rowValue[storageKey]);
+        const currentValue = toBroadlyDefinedWidgetValue(entryValue[storageKey]);
 
         /**
          * Build a standard widget prop object for the child field so it
@@ -253,7 +253,7 @@ function FieldListEntry({
           required: isRequired,
           onChange: (nextValue) =>
             handleFieldChange({
-              rowIndex,
+              entryIndex,
               storageKey,
               nextValue,
             }),
@@ -325,11 +325,11 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   }, [handleRowsChange]);
 
   const handleDeleteRow = useCallback(
-    (rowIndex: number): void => {
+    (entryIndex: number): void => {
       handleRowsChange((previousRows) =>
         removeFieldListRow({
           rows: previousRows,
-          rowIndex,
+          entryIndex,
         }),
       );
     },
@@ -346,12 +346,12 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
    * row and field, and preserves immutability of the rows array.
    */
   const handleFieldChange = useCallback(
-    ({ rowIndex, storageKey, nextValue }: FieldListChangeParams): void => {
+    ({ entryIndex, storageKey, nextValue }: FieldListChangeParams): void => {
       const normalizedNextValue = toBroadlyDefinedWidgetValue(nextValue);
 
       handleRowsChange((previousRows) =>
-        previousRows.map((previousRow, currentRowIndex) => {
-          if (currentRowIndex !== rowIndex) {
+        previousRows.map((previousRow, currentEntryIndex) => {
+          if (currentEntryIndex !== entryIndex) {
             return previousRow;
           }
 
@@ -395,13 +395,13 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
         </ul>
       ) : null}
 
-      {rows.map((rowValue, rowIndex) => {
+      {rows.map((entryValue, entryIndex) => {
         return (
           <FieldListEntry
-            key={`${id}-${rowIndex}`}
+            key={`${id}-${entryIndex}`}
             id={id}
-            rowIndex={rowIndex}
-            rowValue={rowValue}
+            entryIndex={entryIndex}
+            entryValue={entryValue}
             isInteractionDisabled={isInteractionDisabled}
             handleDeleteRow={handleDeleteRow}
             handleFieldChange={handleFieldChange}

@@ -7,7 +7,7 @@ import {
   FormattedFormValidationWarning,
   FormValidationWarning,
   UswdsWidgetProps,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
 import CheckboxWidget from "src/components/applyForm/widgets/CheckboxWidget";
 import TextAreaWidget from "src/components/applyForm/widgets/TextAreaWidget";
 import TextWidget from "src/components/applyForm/widgets/TextWidget";

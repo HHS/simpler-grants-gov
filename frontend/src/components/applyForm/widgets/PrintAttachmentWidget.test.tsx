@@ -2,7 +2,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
 import { Attachment } from "src/types/attachmentTypes";
 
-import { UswdsWidgetProps } from "src/components/applyForm/types";
+import { UswdsWidgetProps } from "src/types/applyForm/types";
 import PrintAttachmentWidget from "src/components/applyForm/widgets/PrintAttachmentWidget";
 
 type UseApplicationAttachmentsResult = {

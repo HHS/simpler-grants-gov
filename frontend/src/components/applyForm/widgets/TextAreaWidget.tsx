@@ -6,7 +6,7 @@ import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { FormGroup, Textarea } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { UswdsWidgetProps } from "src/components/applyForm/types";
+import { UswdsWidgetProps } from "src/types/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 

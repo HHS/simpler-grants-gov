@@ -1,4 +1,4 @@
-import { FormValidationWarning } from "src/components/applyForm/types";
+import { FormValidationWarning } from "src/types/applyForm/types";
 import { getBudgetErrors } from "./budgetErrorLabels";
 
 export const getErrorsForSection =

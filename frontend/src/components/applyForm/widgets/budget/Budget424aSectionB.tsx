@@ -7,7 +7,7 @@ import { Table } from "@trussworks/react-uswds";
 import {
   FormValidationWarning,
   UswdsWidgetProps,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
 import {
   ACTIVITY_ITEMS,
   SECTION_B_ROW_I_KEY,

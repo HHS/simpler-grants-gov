@@ -8,7 +8,7 @@ import { Table } from "@trussworks/react-uswds";
 import {
   FormValidationWarning,
   UswdsWidgetProps,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
 import TextWidget from "src/components/applyForm/widgets/TextWidget";
 import { ACTIVITY_ITEMS } from "./budgetConstants";
 import { getErrorsForSection } from "./budgetErrors";

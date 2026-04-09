@@ -4,7 +4,7 @@ import { Attachment } from "src/types/attachmentTypes";
 
 import { FormGroup } from "@trussworks/react-uswds";
 
-import { UswdsWidgetProps } from "src/components/applyForm/types";
+import { UswdsWidgetProps } from "src/types/applyForm/types";
 
 const hydrateAttachmentReferences = (
   attachmentIds: unknown,

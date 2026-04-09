@@ -19,7 +19,7 @@ import {
   SchemaWithLabelOption,
   UploadedFile,
   UswdsWidgetProps,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 import { MultipleAttachmentUploadList } from "./MultiAttachmentUploadList";

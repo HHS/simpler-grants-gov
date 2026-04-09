@@ -4,7 +4,7 @@ import { CompetitionForms } from "src/types/competitionsResponseTypes";
 import { useTranslations } from "next-intl";
 import { Alert } from "@trussworks/react-uswds";
 
-import { FormValidationWarning } from "src/components/applyForm/types";
+import { FormValidationWarning } from "src/types/applyForm/types";
 
 const ApplicationValidationAlert = ({
   applicationForms,

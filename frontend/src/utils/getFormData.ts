@@ -12,7 +12,7 @@ import { FormDetail } from "src/types/formResponseTypes";
 import {
   FormValidationWarning,
   UiSchema,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
 import { processFormSchema } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 

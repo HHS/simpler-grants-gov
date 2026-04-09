@@ -9,7 +9,7 @@ import {
   UiSchema,
   UiSchemaField,
   UiSchemaFieldList,
-} from "./types";
+} from "../../types/applyForm/types";
 import { getRequiredProperties, isFieldRequired } from "./utils";
 import { renderWidget, wrapSection } from "./widgets/WidgetRenderers";
 

@@ -21,7 +21,7 @@ import {
   SummaryBoxHeading,
 } from "@trussworks/react-uswds";
 
-import { FormValidationWarning } from "src/components/applyForm/types";
+import { FormValidationWarning } from "src/types/applyForm/types";
 import { ApplicationFormsTable } from "./ApplicationFormsTable";
 import { ApplicationHistoryTable } from "./ApplicationHistoryTable";
 import ApplicationValidationAlert from "./ApplicationValidationAlert";

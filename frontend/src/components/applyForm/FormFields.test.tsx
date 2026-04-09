@@ -2,7 +2,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import { render, screen } from "@testing-library/react";
 
 import { FormFields } from "src/components/applyForm/FormFields";
-import { UiSchema } from "src/components/applyForm/types";
+import { UiSchema } from "src/types/applyForm/types";
 
 type FormActionArgs = [
   {
