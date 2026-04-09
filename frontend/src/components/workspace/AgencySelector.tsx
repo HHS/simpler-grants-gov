@@ -27,8 +27,14 @@ export const AgencySelector = ({
         id="agency-selector"
         name="agency"
         defaultValue={currentAgencyId}
-        onChange={(e) => router.push(`?agency=${e.target.value}`)}
+        onChange={(e) =>
+          e.target.value != "" ? router.push(`?agency=${e.target.value}`) : {}
+        }
       >
+        <option key={""} value={""} disabled>
+          -Select-
+        </option>
+
         {agencies.map((agency) => (
           <option key={agency.agency_id} value={agency.agency_id}>
             {agency.agency_name}

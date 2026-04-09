@@ -14,8 +14,7 @@ import {
   UserPrivilegeDefinition,
   UserPrivilegesResponse,
 } from "src/types/userTypes";
-
-import { UserPrivilegeRequest } from "src/components/user/UserPrivileges";
+import { UserPrivilegeRequest } from "src/utils/userPrivileges";
 
 export const postLogout = async (token: string) => {
   const jwtAuthHeader = { "X-SGG-Token": token };

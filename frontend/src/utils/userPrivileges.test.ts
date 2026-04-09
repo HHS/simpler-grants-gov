@@ -1,10 +1,9 @@
 import { ApiRequestError } from "src/errors";
-
 import {
   checkRequiredPrivileges,
   UserPrivilegeRequest,
   UserPrivilegeResult,
-} from "src/components/user/UserPrivileges";
+} from "src/utils/userPrivileges";
 
 // Request params and responses for checkUserPrivilege
 const fakeSession = {

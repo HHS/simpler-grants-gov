@@ -19,11 +19,7 @@ export interface UserPrivilegeResult extends UserPrivilegeRequest {
   error?: string;
 }
 
-// calls the API to check all required privileges,
-// and formats results into a format to be used downstream
-// note that if a non-403 is returned, that error will be passed along
-// since we'll consider a non-403 as unauthorized, children should check for errors
-// first before checking "authorized"
+// Check the user's privileges
 export const checkRequiredPrivileges = async (
   token: string,
   userId: string,
@@ -39,7 +35,7 @@ export const checkRequiredPrivileges = async (
           if (parseErrorStatus(e) === 403) {
             return { ...privilege, authorized: false };
           }
-          return { ...privilege, authorized: false, error: e.message };
+          throw e;
         });
     }),
   );

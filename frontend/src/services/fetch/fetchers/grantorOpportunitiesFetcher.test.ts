@@ -1,4 +1,3 @@
-import { fetchGrantorWithMethod } from "src/services/fetch/fetchers/fetchers";
 import {
   createOpportunity,
   searchOpportunitiesByAgency,
@@ -6,6 +5,17 @@ import {
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 import { fakeAgencyResponseData } from "src/utils/testing/fixtures";
 
+// Mock the main fetchGrantorWithMethod and the sub-method it calls, fetch
+const mockFetcher = jest.fn();
+const mockFetchGrantorWithMethod = jest.fn((_args: unknown) => mockFetcher);
+jest.mock("src/services/fetch/fetchers/fetchers", () => ({
+  fetchGrantorWithMethod: (arg: unknown): unknown =>
+    mockFetchGrantorWithMethod(arg),
+}));
+
+//---------------------------------------------
+// Tests for searchOpportunitiesByAgency
+//---------------------------------------------
 const pageRequest: PaginationRequestBody = {
   page_offset: 1,
   page_size: 25,
@@ -16,32 +26,22 @@ const pageRequest: PaginationRequestBody = {
     },
   ],
 };
-type PaginationBody = {
-  pagination: PaginationRequestBody;
+const pageBody: { pagination: PaginationRequestBody } = {
+  pagination: pageRequest,
 };
-const pageBody: PaginationBody = { pagination: pageRequest };
-
-jest.mock("src/services/fetch/fetchers/fetchers");
 
 describe("searchOpportunitiesByAgency", () => {
-  let mockJsonFn: jest.Mock;
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
-    mockJsonFn = jest.fn();
-    const mockResponse = { json: mockJsonFn };
-    (fetchGrantorWithMethod as jest.Mock).mockReturnValue(
-      jest.fn().mockResolvedValue(mockResponse),
-    );
   });
-
   it("calls request function with correct parameters", async () => {
     const token = "test-token";
     const agencyId = "123-ABC-456-DEF";
     const fakeResponse = {
-      data: fakeAgencyResponseData,
       status: 200,
+      json: () => Promise.resolve({ data: fakeAgencyResponseData }),
     };
-    mockJsonFn.mockResolvedValue(fakeResponse);
+    mockFetcher.mockResolvedValue(fakeResponse);
 
     const result = await searchOpportunitiesByAgency(
       token,
@@ -50,10 +50,9 @@ describe("searchOpportunitiesByAgency", () => {
     );
 
     expect(result).toEqual(fakeAgencyResponseData);
-    expect(fetchGrantorWithMethod).toHaveBeenCalledWith("POST");
-    const mockFn = (fetchGrantorWithMethod as jest.Mock).mock.results[0]
-      .value as jest.Mock;
-    expect(mockFn).toHaveBeenCalledWith({
+    expect(mockFetchGrantorWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetcher).toHaveBeenCalledWith({
       subPath: "agencies/123-ABC-456-DEF/opportunities",
       additionalHeaders: { "X-SGG-Token": token },
       body: pageBody,
@@ -67,9 +66,9 @@ describe("searchOpportunitiesByAgency", () => {
     const expectedResponse = {
       status_code: 422,
       message: "Validation failed",
-      data: errMsg,
+      json: () => Promise.resolve({ data: errMsg }),
     };
-    mockJsonFn.mockResolvedValue(expectedResponse);
+    mockFetcher.mockResolvedValue(expectedResponse);
 
     const result = await searchOpportunitiesByAgency(
       token,
@@ -78,21 +77,18 @@ describe("searchOpportunitiesByAgency", () => {
     );
 
     expect(result).toEqual(errMsg);
+    expect(mockFetchGrantorWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorWithMethod).toHaveBeenCalledWith("POST");
   });
 });
 
+//---------------------------------------------
+// Tests for createOpportunity
+//---------------------------------------------
 describe("createOpportunity", () => {
-  let mockJsonFn: jest.Mock;
-
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
-    mockJsonFn = jest.fn();
-    const mockResponse = { json: mockJsonFn };
-    (fetchGrantorWithMethod as jest.Mock).mockReturnValue(
-      jest.fn().mockResolvedValue(mockResponse),
-    );
   });
-
   it("calls request function with correct parameters", async () => {
     const token = "test-token";
     const createOppSchema = {
@@ -104,17 +100,16 @@ describe("createOpportunity", () => {
     };
     const expectedResponse = {
       status_code: 200,
-      data: createOppSchema,
+      json: () => Promise.resolve({ data: createOppSchema }),
     };
-    mockJsonFn.mockResolvedValue(expectedResponse);
+    mockFetcher.mockResolvedValue(expectedResponse);
 
     const result = await createOpportunity(token, createOppSchema);
 
     expect(result).toEqual(createOppSchema);
-    expect(fetchGrantorWithMethod).toHaveBeenCalledWith("POST");
-    const mockFn = (fetchGrantorWithMethod as jest.Mock).mock.results[0]
-      .value as jest.Mock;
-    expect(mockFn).toHaveBeenCalledWith({
+    expect(mockFetchGrantorWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorWithMethod).toHaveBeenCalledWith("POST");
+    expect(mockFetcher).toHaveBeenCalledWith({
       subPath: "opportunities",
       additionalHeaders: { "X-SGG-Token": token },
       body: createOppSchema,
@@ -134,12 +129,14 @@ describe("createOpportunity", () => {
     const expectedResponse = {
       status_code: 422,
       message: "Validation failed",
-      data: errMsg,
+      json: () => Promise.resolve({ data: errMsg }),
     };
-    mockJsonFn.mockResolvedValue(expectedResponse);
+    mockFetcher.mockResolvedValue(expectedResponse);
 
     const result = await createOpportunity(token, createOppSchema);
 
     expect(result).toEqual(errMsg);
+    expect(mockFetchGrantorWithMethod).toHaveBeenCalledTimes(1);
+    expect(mockFetchGrantorWithMethod).toHaveBeenCalledWith("POST");
   });
 });
