@@ -114,11 +114,11 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
           breadcrumbList={[
             {
               title: t("breadcrumbWorkspace"),
-              path: `/dashboard`,
+              path: `/workspace`,
             },
             {
               title: t("breadcrumbApplications"),
-              path: `/applications`,
+              path: `/workspace/applications`,
             },
             {
               title: details.application_name,

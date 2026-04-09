@@ -129,7 +129,7 @@ export default async function SavedOpportunities({
           breadcrumbList={[
             {
               title: t("SavedOpportunities.breadcrumbWorkspace"),
-              path: `/dashboard`,
+              path: `/workspace`,
             },
             {
               title: t("SavedOpportunities.breadcrumbSavedOpportunities"),
