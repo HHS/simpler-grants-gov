@@ -12,7 +12,7 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationSubmissionListRequestSchema,
     AwardRecommendationSubmissionListResponseSchema,
 )
-from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_and_verify_access,
@@ -29,10 +29,9 @@ logger = logging.getLogger(__name__)
 @award_recommendation_blueprint.doc(
     summary="Get Award Recommendation",
     description="Retrieve an award recommendation by ID, including opportunity details, attachments, and reviews.",
-    security=jwt_or_api_user_key_security_schemes,
     responses=[200, 401, 403, 404],
 )
-@jwt_or_api_user_key_multi_auth.login_required
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def award_recommendation_get(
     db_session: db.Session, award_recommendation_id: uuid.UUID
