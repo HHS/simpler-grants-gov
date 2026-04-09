@@ -85,7 +85,7 @@ export function getFieldListChildErrors({
             return false;
           }
 
-          return warning.definition === childDefinition;
+          return entryIndex === 0 && warning.definition === childDefinition;
         })
         .map((warning) => warning.formatted ?? warning.message),
     ),
