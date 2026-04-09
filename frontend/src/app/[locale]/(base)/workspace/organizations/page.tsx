@@ -23,7 +23,7 @@ const OrganizationsPageWrapper = ({ children }: PropsWithChildren) => {
         breadcrumbList={[
           {
             title: t("breadcrumbWorkspace"),
-            path: `/dashboard`,
+            path: `/workspace`,
           },
           {
             title: t("breadcrumbOrganizations"),
