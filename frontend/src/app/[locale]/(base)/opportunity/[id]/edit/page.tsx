@@ -7,8 +7,8 @@ import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunit
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { getTranslations } from "next-intl/server";
-import { notFound, redirect, RedirectType } from "next/navigation";
-import { Button } from "@trussworks/react-uswds";
+import { notFound, redirect } from "next/navigation";
+import { Alert, Button, GridContainer } from "@trussworks/react-uswds";
 
 import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
 import Breadcrumbs, { Breadcrumb } from "src/components/Breadcrumbs";
@@ -50,17 +50,17 @@ function canEditOpportunity(opportunity: GrantorOpportunityDetail) {
   return opportunity.is_draft === true;
 }
 
+const stageLabels: Record<string, string> = {
+  archived: "Archived",
+  closed: "Closed",
+  forecasted: "Forecasted",
+  posted: "Open for applications",
+};
+
 function formatOpportunityStage(opportunityStatus: string | null | undefined) {
   if (!opportunityStatus) {
     return "";
   }
-
-  const stageLabels: Record<string, string> = {
-    archived: "Archived",
-    closed: "Closed",
-    forecasted: "Forecasted",
-    posted: "Open for applications",
-  };
 
   return (
     stageLabels[opportunityStatus] ??
@@ -75,10 +75,11 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
   const { id, locale } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const isNewlyCreated = resolvedSearchParams.fromCreate === "true";
+  const t = await getTranslations({ locale, namespace: "Errors" });
 
   const session = await getSession();
   if (!session || !session.token) {
-    redirect(`/opportunity/${id}`, RedirectType.push);
+    return <UnauthorizedMessage />;
   }
 
   // TODO(#8601): Replace this fail-closed placeholder with a real grantor authorization
@@ -107,9 +108,12 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
   }
 
   if (id !== opportunityData.opportunity_id) {
-    redirect(
-      `/opportunity/${opportunityData.opportunity_id}`,
-      RedirectType.push,
+    return (
+      <GridContainer className="margin-top-4">
+        <Alert type="error" heading={t("heading")} headingLevel="h4">
+          {t("genericMessage")}
+        </Alert>
+      </GridContainer>
     );
   }
 
