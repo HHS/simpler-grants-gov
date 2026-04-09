@@ -2045,12 +2045,12 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
         get_submission_list_expanded(
             db_session=db_session,
-            request=get_submission_list_expanded_rquest_schema,
+            request=get_submission_list_expanded_request_schema,
             soap_request=soap_request,
             soap_config=soap_config,
         )
