@@ -397,14 +397,3 @@ variable "newrelic_mtls_entity_guid" {
   default     = null
 }
 
-variable "existing_cdn_default_cache_policy_id" {
-  type        = string
-  description = "ID of an existing CloudFront cache policy to use instead of creating a new one. Use when the account cache policy limit has been reached."
-  default     = null
-}
-
-variable "existing_cdn_api_no_cache_policy_id" {
-  type        = string
-  description = "ID of an existing CloudFront api-no-cache policy to use instead of creating a new one. Use when the account cache policy limit has been reached."
-  default     = null
-}

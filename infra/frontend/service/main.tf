@@ -35,9 +35,6 @@ locals {
   # terraform workspaces, see: /docs/infra/develop-and-test-infrastructure-in-isolation-using-workspaces.md
   prefix = terraform.workspace == "default" ? "" : "${terraform.workspace}-"
 
-  # Grantee environments reuse the dev cache policies to stay within the account limit
-  use_existing_cache_policy = contains(["grantee1", "grantee2"], var.environment_name)
-
   # Add environment specific tags
   tags = merge(module.project_config.default_tags, {
     owner        = "navapbc"
@@ -119,16 +116,6 @@ data "aws_acm_certificate" "certificate" {
   domain = local.service_config.domain_name
 }
 
-data "aws_cloudfront_cache_policy" "dev_default" {
-  count = local.use_existing_cache_policy ? 1 : 0
-  name  = "frontend-dev"
-}
-
-data "aws_cloudfront_cache_policy" "dev_api_no_cache" {
-  count = local.use_existing_cache_policy ? 1 : 0
-  name  = "frontend-dev-api-no-cache"
-}
-
 # data "aws_route53_zone" "zone" {
 #   count = local.service_config.domain_name != null ? 1 : 0
 #   name  = local.network_config.domain_config.hosted_zone
@@ -165,9 +152,6 @@ module "service" {
   scheduled_jobs   = local.environment_config.scheduled_jobs
 
   enable_alb_cdn = true
-
-  existing_cdn_default_cache_policy_id = local.use_existing_cache_policy ? data.aws_cloudfront_cache_policy.dev_default[0].id : null
-  existing_cdn_api_no_cache_policy_id  = local.use_existing_cache_policy ? data.aws_cloudfront_cache_policy.dev_api_no_cache[0].id : null
 
   db_vars = module.app_config.has_database ? {
     security_group_ids         = module.database[0].security_group_ids
