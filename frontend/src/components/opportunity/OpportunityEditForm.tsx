@@ -30,7 +30,7 @@ import {
   OpportunityEditFormValues,
 } from "./opportunityEditFormConfig";
 
-type Props = {
+type OpportunityEditFormProps = {
   opportunityId: string;
   opportunitySummaryId: string;
   isForecast?: boolean;
@@ -56,7 +56,7 @@ export default function OpportunityEditForm({
   isDraft = false,
   isNewlyCreated = false,
   opportunityKeyInformation,
-}: Props) {
+}: OpportunityEditFormProps) {
   const t = useTranslations("OpportunityEdit");
   const [values, setValues] =
     useState<OpportunityEditFormValues>(initialValues);

@@ -14,6 +14,7 @@ import Breadcrumbs, { Breadcrumb } from "src/components/Breadcrumbs";
 import OpportunityEditForm from "src/components/opportunity/OpportunityEditForm";
 import { buildOpportunityEditInitialValues } from "src/components/opportunity/opportunityEditFormConfig";
 import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
+import { USWDSIcon } from "src/components/USWDSIcon";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
@@ -195,14 +196,10 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
                     Status:
                   </span>
                   <span className="display-inline-flex flex-align-center bg-accent-warm text-ink padding-y-05 padding-x-1 radius-sm">
-                    <svg
+                    <USWDSIcon
+                      name="schedule"
                       className="usa-icon width-2 height-2 margin-right-05"
-                      aria-hidden="true"
-                      focusable="false"
-                      role="img"
-                    >
-                      <use href="/uswds/img/sprite.svg#schedule" />
-                    </svg>
+                    />
                     {opportunityKeyInformation.opportunityStage}
                   </span>
                 </div>
@@ -243,7 +240,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
             <OpportunityEditForm
               opportunityId={opportunityData.opportunity_id}
               opportunitySummaryId={opportunitySummaryId}
-              isForecast={opportunityData.is_draft}
+              isForecast={!!opportunityData.forecast_summary}
               initialValues={initialValues}
               isDraft={!!opportunityData.is_draft}
               opportunityKeyInformation={opportunityKeyInformation}
