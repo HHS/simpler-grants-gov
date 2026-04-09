@@ -1,15 +1,6 @@
-# Build on top of the buildpack-deps image so that we have a
-# standard selection of tools available (ls, cat, etc.)
-# This produces a large image overall,
-# but the image is dramatically easier to work with.
-FROM buildpack-deps:oracular AS build
-
-# Copy the fluentbit binary from the official image.
 FROM fluent/fluent-bit:5.0.2-amd64@sha256:405dc8f28394a2a7adb3b96a7215b3f91b10aae84d8f94bbc90a5c38118725d4 AS fluentbit
 
-FROM build AS release
-
-COPY --from=fluentbit /fluent-bit /fluent-bit
+FROM fluentbit AS release
 
 # The healthcheck is used to determine if the container is running.
 # AWS doesn't use it, but it's useful for local development.
@@ -25,4 +16,4 @@ COPY truncate_logs.lua /fluent-bit/etc/truncate_logs.lua
 
 ENTRYPOINT ["/fluent-bit/bin/fluent-bit"]
 
-CMD ["-c", "/fluent-bit/etc/fluent-bit-custom.yml"]
+CMD ["/fluent-bit/bin/fluent-bit", "-c", "/fluent-bit/etc/fluent-bit-custom.yml"]
