@@ -13,6 +13,7 @@ from src.legacy_soap_api.grantors.services import (
     confirm_application_delivery,
     get_application_zip_response,
     get_confirm_application_delivery_response,
+    get_submission_list_expanded,
     get_submission_list_expanded_response,
     update_application_info_response,
 )
@@ -264,12 +265,15 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         self, proxy_response: SOAPResponse
     ) -> grantors_schemas.GetSubmissionListExpandedResponse:
         soap_request_dict = self.get_soap_request_dict() or {}
-        return get_submission_list_expanded_response(
+        simpler_submissions = get_submission_list_expanded(
             db_session=self.db_session,
             soap_request=self.soap_request,
             request=grantors_schemas.GetSubmissionListExpandedRequest(**soap_request_dict),
-            proxy_response=proxy_response,
             soap_config=self.operation_config,
+        )
+        return get_submission_list_expanded_response(
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
 
     def update_application_info_request(
