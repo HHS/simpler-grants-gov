@@ -974,18 +974,22 @@ Werkzeug = ">=0.7"
 
 [[package]]
 name = "flask-httpauth"
-version = "4.8.0"
+version = "4.8.1"
 description = "HTTP authentication for Flask routes"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "Flask-HTTPAuth-4.8.0.tar.gz", hash = "sha256:66568a05bc73942c65f1e2201ae746295816dc009edd84b482c44c758d75097a"},
-    {file = "Flask_HTTPAuth-4.8.0-py3-none-any.whl", hash = "sha256:a58fedd09989b9975448eef04806b096a3964a7feeebc0a78831ff55685b62b0"},
+    {file = "flask_httpauth-4.8.1-py3-none-any.whl", hash = "sha256:0080393d70e12327781f7509115175ec5e47209816489a620d4fd39e20cea2e8"},
+    {file = "flask_httpauth-4.8.1.tar.gz", hash = "sha256:88499b22f1353893743c3cd68f2ca561c4ad9ef75cd6bcc7f621161cd0e80744"},
 ]
 
 [package.dependencies]
 flask = "*"
+
+[package.extras]
+dev = ["tox"]
+docs = ["furo", "sphinx"]
 
 [[package]]
 name = "flask-marshmallow"
@@ -3750,4 +3754,4 @@ test = ["pytest", "pytest-cov"]
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.14"
-content-hash = "4ac82ec2d048ee6f8e4c5418c4161770e2c781b2e662b9b17bf37e03e79b11df"
+content-hash = "bee5a8d5a2cfab203bb4457a61c32ca695142a6a29b077aa689e7b54420afc02"
