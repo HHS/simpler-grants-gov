@@ -9,7 +9,7 @@ from src.util.env_config import PydanticBaseEnvConfig
 
 class S3Config(PydanticBaseEnvConfig):
     # We should generally not need to set this except
-    # locally to use localstack
+    # locally to use s3mock
     s3_endpoint_url: str | None = None
     presigned_s3_duration: int = 7200  # 2 hours in seconds
 

@@ -47,7 +47,9 @@ __check_defined = \
 	infra-configure-app-service \
 	infra-configure-monitoring-secrets \
 	infra-configure-network \
+	infra-create-csr \
 	infra-format \
+	infra-import-certificate \
 	infra-lint \
 	infra-lint-markdown \
 	infra-lint-scripts \
@@ -207,6 +209,21 @@ infra-check-app-database-roles: ## Check that app database roles have been confi
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	@:$(call check_defined, ENVIRONMENT, the name of the application environment e.g. "prod" or "staging")
 	./bin/check-database-roles $(APP_NAME) $(ENVIRONMENT)
+
+# Support domain arg: make infra-create-csr my-domain
+ifeq ($(firstword $(MAKECMDGOALS)),infra-create-csr)
+DOMAIN := $(or $(DOMAIN),$(word 2,$(MAKECMDGOALS)))
+$(DOMAIN):
+	@:
+endif
+
+infra-create-csr: ## Generate a private key and CSR. Optionally pass $DOMAIN (e.g. "api"); defaults to simpler.grants.gov. Output written to certs/
+	./bin/create-csr $(DOMAIN)
+
+infra-import-certificate: ## Import a signed certificate into AWS ACM for $DOMAIN using $CERTIFICATE_FILE
+	@:$(call check_defined, DOMAIN, the domain name e.g. "api" or "api.simpler.grants.gov")
+	@:$(call check_defined, CERTIFICATE_FILE, path to the signed certificate file)
+	./bin/import-certificate $(DOMAIN) $(CERTIFICATE_FILE)
 
 infra-check-compliance: ## Run compliance checks
 infra-check-compliance: infra-check-compliance-checkov infra-check-compliance-tfsec

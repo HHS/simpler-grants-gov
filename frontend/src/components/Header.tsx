@@ -126,26 +126,26 @@ const NavLinks = ({
 
     workspaceSubNavs.push({
       text: t("workspaceDashboard"),
-      href: "/dashboard",
+      href: "/workspace",
     });
 
     workspaceSubNavs.push({
       text: t("applications"),
-      href: "/applications",
+      href: "/workspace/applications",
     });
     workspaceSubNavs.push({
       text: t("organizations"),
-      href: "/organizations",
+      href: "/workspace/organizations",
     });
 
     workspaceSubNavs.push({
       text: t("savedOpportunities"),
-      href: "/saved-opportunities",
+      href: "/workspace/saved-opportunities",
     });
 
     workspaceSubNavs.push({
       text: t("savedSearches"),
-      href: "/saved-search-queries",
+      href: "/workspace/saved-search-queries",
     });
 
     return anonymousNavLinks.toSpliced(anonymousNavLinks.length, 0, {
@@ -307,6 +307,7 @@ const NavLinks = ({
       items={navItems}
       mobileExpanded={mobileExpanded}
       onToggleMobileNav={onToggleMobileNav}
+      className="padding-bottom-05"
     ></PrimaryNav>
   );
 };

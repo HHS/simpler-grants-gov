@@ -5,18 +5,10 @@ import { createMockOpportunity } from "src/utils/testing/fixtures";
 
 import { SavedOpportunitiesController } from "./SavedOpportunitiesController";
 
-const mockClientFetch = jest.fn<
-  Promise<unknown>,
-  [string, RequestInit | undefined]
->();
-
 interface MockSearchResultsListItemProps {
   opportunity: BaseOpportunity;
+  showShareButton?: boolean;
   onShareClick?: (buttonElement: HTMLButtonElement) => void;
-}
-
-interface MockShareOpportunityToOrganizationsModalProps {
-  onSavedOrganizationsChange: (organizationIds: Set<string>) => void;
 }
 
 interface MockShareOpportunityToOrganizationsModalProps {
@@ -24,27 +16,32 @@ interface MockShareOpportunityToOrganizationsModalProps {
   organizations: Organization[];
 }
 
-jest.mock("src/hooks/useClientFetch", () => ({
-  useClientFetch: () => ({
-    clientFetch: mockClientFetch,
-  }),
-}));
-
 jest.mock("src/components/search/SearchResultsListItem", () => ({
   __esModule: true,
-  default: ({ opportunity, onShareClick }: MockSearchResultsListItemProps) => (
+  default: ({
+    opportunity,
+    showShareButton,
+    onShareClick,
+  }: MockSearchResultsListItemProps) => (
     <div>
       <div data-testid={`organizations-${opportunity.opportunity_id}`}>
         {JSON.stringify(opportunity.saved_to_organizations ?? [])}
       </div>
-      <button
-        type="button"
-        onClick={(event) =>
-          onShareClick?.(event.currentTarget as HTMLButtonElement)
-        }
-      >
-        Open share modal
-      </button>
+
+      <div data-testid={`show-share-button-${opportunity.opportunity_id}`}>
+        {String(showShareButton)}
+      </div>
+
+      {showShareButton ? (
+        <button
+          type="button"
+          onClick={(event) =>
+            onShareClick?.(event.currentTarget as HTMLButtonElement)
+          }
+        >
+          Open share modal
+        </button>
+      ) : null}
     </div>
   ),
 }));
@@ -77,8 +74,60 @@ jest.mock(
 );
 
 describe("SavedOpportunitiesController", () => {
-  beforeEach(() => {
-    mockClientFetch.mockReset();
+  it("passes showShareButton as false when the user has no organizations", async () => {
+    const opportunity = createMockOpportunity();
+
+    render(
+      <SavedOpportunitiesController
+        opportunities={[opportunity]}
+        organizations={[]}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`show-share-button-${opportunity.opportunity_id}`),
+      ).toHaveTextContent("false");
+    });
+
+    expect(
+      screen.queryByRole("button", { name: "Open share modal" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("passes showShareButton as true when the user has at least one organization", async () => {
+    const opportunity = createMockOpportunity();
+
+    const organizations: Organization[] = [
+      {
+        organization_id: "organization-1",
+        sam_gov_entity: {
+          ebiz_poc_email: "test@example.com",
+          ebiz_poc_first_name: "Test",
+          ebiz_poc_last_name: "User",
+          expiration_date: "2026-12-31",
+          legal_business_name: "Alpha Coalition",
+          uei: "ABC123456789",
+        },
+      },
+    ];
+
+    render(
+      <SavedOpportunitiesController
+        opportunities={[opportunity]}
+        organizations={organizations}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`show-share-button-${opportunity.opportunity_id}`),
+      ).toHaveTextContent("true");
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Open share modal" }),
+    ).toBeInTheDocument();
   });
 
   it("maps organization names into saved_to_organizations after modal updates", async () => {
@@ -98,9 +147,12 @@ describe("SavedOpportunitiesController", () => {
       },
     ];
 
-    mockClientFetch.mockResolvedValueOnce(organizations);
-
-    render(<SavedOpportunitiesController opportunities={[opportunity]} />);
+    render(
+      <SavedOpportunitiesController
+        opportunities={[opportunity]}
+        organizations={organizations}
+      />,
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId("modal-organizations")).toHaveTextContent(

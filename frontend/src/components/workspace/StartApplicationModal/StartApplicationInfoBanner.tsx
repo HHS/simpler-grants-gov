@@ -25,7 +25,7 @@ export const StartApplicationInfoBanner = () => {
         <li style={{ marginBottom: 0 }}>
           {t.rich("bullet2", {
             applicationsPageLink: (chunk) => (
-              <Link href="/applications" className="usa-link">
+              <Link href="/workspace/applications" className="usa-link">
                 {chunk}
               </Link>
             ),

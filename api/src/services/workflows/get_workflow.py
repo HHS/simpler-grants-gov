@@ -36,11 +36,12 @@ def _get_workflow(db_session: db.Session, workflow_id: uuid.UUID) -> Workflow | 
         .where(Workflow.workflow_id == workflow_id)
         .options(
             # Load audit events with acting user details
-            selectinload(Workflow.workflow_audits)
-            .selectinload(WorkflowAudit.acting_user)
-            .options(
-                selectinload(User.linked_login_gov_external_user),
-                selectinload(User.profile),
+            selectinload(Workflow.workflow_audits).options(
+                selectinload(WorkflowAudit.acting_user).options(
+                    selectinload(User.linked_login_gov_external_user),
+                    selectinload(User.profile),
+                ),
+                selectinload(WorkflowAudit.event),
             ),
             # Load approvals with approving user details
             selectinload(Workflow.workflow_approvals)

@@ -6,10 +6,22 @@ import { getFormLink } from "./form-navigation-utils";
 export interface FillFieldDefinition {
   testId?: string;
   selector?: string;
-  getByText?: string;
-  textExact?: boolean;
+  optionTestIdPrefix?: string;
   hasTextRegex?: string;
-  type: "text" | "dropdown" | "checkbox" | "radio" | "file";
+  getByText?: string;
+  useDataAsText?: boolean;
+  textExact?: boolean;
+  dependsOn?: {
+    field: string;
+    value: string | boolean;
+  };
+  type:
+    | "text"
+    | "dropdown"
+    | "file"
+    | "radiobutton"
+    | "checkbox"
+    | "combo-box-input";
   section?: string;
   field: string;
 }
@@ -35,10 +47,9 @@ export interface FillFormConfig {
   saveButtonTestId: string;
   noErrorsText?: string;
   /**
-   * Optional form-specific hook for confirmation checkbox is called
-   * before the save button is clicked. Use for pre-save interactions
-   * that cannot be expressed as a field definition.
-   * e.g. SF-424A confirmation checkbox that only appears in this form
+   * Optional form-specific hook called before the save button is clicked.
+   * Use for pre-save interactions that cannot be expressed as a field definition.
+   * e.g. SF-424A confirmation checkbox that only appears in this form.
    */
   beforeSave?: (page: Page) => Promise<void>;
 }
@@ -46,6 +57,35 @@ export interface FillFormConfig {
 export interface FormsFixtureData {
   formName: string | RegExp;
   fields: FillFieldDefinition[];
+}
+
+/**
+ * Determines whether a radio button or checkbox field should be activated (checked/selected) during form filling.
+ *
+ * Usage:
+ * - Used in form automation to decide if a radio or checkbox should be interacted with, based on the provided data value.
+ * - Returns true if the data is boolean true, or a string that is not undefined and not equal to "false" (case-insensitive).
+ * - Returns false for boolean false, undefined, or the string "false".
+ */
+function shouldActivateField(data: string | boolean | undefined): boolean {
+  if (typeof data === "boolean") {
+    return data;
+  }
+
+  return data !== undefined && data.toLowerCase() !== "false";
+}
+
+function shouldFillField(
+  field: FillFieldDefinition,
+  formData: Record<string, string | boolean>,
+): boolean {
+  if (!field.dependsOn) {
+    return true;
+  }
+
+  return (
+    String(formData[field.dependsOn.field]) === String(field.dependsOn.value)
+  );
 }
 
 export async function fillField(
@@ -58,12 +98,60 @@ export async function fillField(
     ? `${field.section}-${field.field}`
     : field.field;
   try {
+    if (data === undefined) {
+      await testInfo.attach(`fillField-${fieldIdentifier}-skipped`, {
+        body: `Skipped ${fieldIdentifier}: no data provided`,
+        contentType: "text/plain",
+      });
+      return;
+    }
+
     if (
-      field.type === "dropdown" &&
-      field.selector &&
-      typeof data === "string"
+      (field.type === "dropdown" ||
+        field.type === "combo-box-input" ||
+        field.type === "text" ||
+        field.type === "file") &&
+      typeof data !== "string"
     ) {
-      await selectDropdownByValueOrLabel(page, field.selector, data);
+      throw new Error(
+        `Field ${fieldIdentifier} requires string data, received ${typeof data}`,
+      );
+    }
+    if (field.type === "dropdown") {
+      // Validate data type
+      if (typeof data !== "string") {
+        throw new Error(
+          `Dropdown field ${fieldIdentifier} requires string data, received ${typeof data}`,
+        );
+      }
+
+      // Handle selector-based dropdown (native <select>)
+      if (field.selector) {
+        await selectDropdownByValueOrLabel(page, field.selector, data);
+        return;
+      }
+
+      // Handle testId-based dropdown (custom component)
+      if (field.testId) {
+        const locator = page.getByTestId(`${field.testId}${data}`);
+        await locator.waitFor({ state: "visible", timeout: 5000 });
+        await locator.click();
+        return;
+      }
+
+      // Fail fast if misconfigured
+      throw new Error(
+        `Dropdown field ${fieldIdentifier} is missing selector or testId`,
+      );
+    } else if (field.type === "combo-box-input" && field.testId) {
+      const toggleLocator = page.getByTestId(field.testId);
+      await toggleLocator.waitFor({ state: "visible", timeout: 5000 });
+      await toggleLocator.click();
+
+      const optionPrefix = field.optionTestIdPrefix ?? "combo-box-option-";
+      const optionLocator = page.getByTestId(`${optionPrefix}${data}`);
+      await optionLocator.waitFor({ state: "visible", timeout: 5000 });
+      await optionLocator.click();
     } else if (
       field.type === "text" &&
       field.testId &&
@@ -73,19 +161,41 @@ export async function fillField(
       await locator.waitFor({ state: "attached", timeout: 5000 });
       await locator.fill(data);
     } else if (
+      field.type === "radiobutton" &&
+      (field.testId || field.selector || field.getByText || field.useDataAsText)
+    ) {
+      if (shouldActivateField(data)) {
+        let locator = field.getByText
+          ? page.getByText(field.getByText, {
+              exact: field.textExact ?? false,
+            })
+          : field.selector
+            ? page.locator(field.selector)
+            : field.testId
+              ? page.getByTestId(field.testId)
+              : page.getByText(String(data), {
+                  exact: field.textExact ?? field.useDataAsText ?? false,
+                });
+        if (field.hasTextRegex) {
+          locator = locator.filter({ hasText: new RegExp(field.hasTextRegex) });
+        }
+        await locator.waitFor({ state: "visible", timeout: 5000 });
+        await locator.click();
+      }
+    } else if (
       field.type === "checkbox" &&
       (field.testId || field.selector || field.getByText)
     ) {
       if (shouldActivateField(data)) {
         let locator = field.getByText
-          ? page.getByText(field.getByText, { exact: field.textExact ?? false })
+          ? page.getByText(field.getByText, {
+              exact: field.textExact ?? false,
+            })
           : field.selector
             ? page.locator(field.selector)
             : page.getByTestId(field.testId as string);
         if (field.hasTextRegex) {
-          locator = locator.filter({
-            hasText: new RegExp(field.hasTextRegex),
-          });
+          locator = locator.filter({ hasText: new RegExp(field.hasTextRegex) });
         }
         await locator.waitFor({ state: "visible", timeout: 5000 });
         try {
@@ -106,23 +216,10 @@ export async function fillField(
           }
         }
       }
-    } else if (
-      field.type === "radio" &&
-      (field.testId || field.selector || field.getByText) &&
-      data !== undefined
-    ) {
-      // Radio buttons: always click the specified option (getByText defines which option to select)
-      const locator = field.getByText
-        ? page.getByText(field.getByText, { exact: field.textExact ?? false })
-        : field.selector
-          ? page.locator(field.selector)
-          : page.getByTestId(field.testId as string);
-      await locator.waitFor({ state: "visible", timeout: 5000 });
-      await locator.click();
     } else if (field.type === "file" && (field.testId || field.selector)) {
       if (typeof data !== "string") {
         throw new Error(
-          `File field ${fieldIdentifier} requires a string file path, received ${typeof data}`,
+          `File field ${fieldIdentifier} requires string data (file path), received ${typeof data}`,
         );
       }
       const locator = field.selector
@@ -132,16 +229,68 @@ export async function fillField(
       // than desktop Chrome, so 5000ms is insufficient.
       await locator.waitFor({ state: "attached", timeout: 30000 });
       await locator.scrollIntoViewIfNeeded();
+
+      const inputName = await locator.getAttribute("name");
+      const inputId = await locator.getAttribute("id");
+      const hiddenInputSelector = inputName
+        ? `input[type="hidden"][name="${inputName}"]`
+        : inputId
+          ? `input[type="hidden"][name="${inputId}"], input[type="hidden"]#${inputId}`
+          : null;
+
       await locator.setInputFiles(data);
+
+      const fileName = data.split(/[/\\]/).pop() ?? data;
+
       // Wait for the uploaded filename to appear in the UI before proceeding.
       // Webkit renders the post-upload filename span more slowly, so use a
       // generous timeout matching the file-input wait above.
-      const fileName = data.split("/").pop() ?? data;
-      await page
-        .locator(`span:has-text("${fileName}")`)
-        .waitFor({ state: "visible", timeout: 30000 });
+      if (hiddenInputSelector) {
+        await page
+          .locator(hiddenInputSelector)
+          .locator(
+            "xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' usa-form-group ') or contains(concat(' ', normalize-space(@class), ' '), ' simpler-formgroup ')][1]",
+          )
+          .locator("span")
+          .filter({ hasText: fileName })
+          .first()
+          .waitFor({ state: "visible", timeout: 30000 });
+      } else {
+        await page
+          .locator(`span:has-text("${fileName}")`)
+          .waitFor({ state: "visible", timeout: 30000 });
+      }
+
+      if (hiddenInputSelector) {
+        await page.waitForFunction(
+          ({ selector, uploadedFileName }) => {
+            const hiddenInput =
+              document.querySelector<HTMLInputElement>(selector);
+
+            if (!hiddenInput?.value) {
+              return false;
+            }
+
+            const fieldContainer =
+              hiddenInput.closest(".usa-form-group, .simpler-formgroup") ??
+              hiddenInput.parentElement;
+
+            if (!fieldContainer) {
+              return false;
+            }
+
+            return Array.from(fieldContainer.querySelectorAll("span")).some(
+              (span) => span.textContent?.trim() === uploadedFileName,
+            );
+          },
+          { selector: hiddenInputSelector, uploadedFileName: fileName },
+          { timeout: 60000 },
+        );
+      }
     } else {
-      console.error("unsupported field type or selector type", field);
+      throw new Error(
+        `Unsupported or invalid field configuration for ${fieldIdentifier}`,
+      );
     }
 
     await testInfo.attach(`fillField-${fieldIdentifier}-success`, {
@@ -177,6 +326,7 @@ export async function fillForm(
   data: Record<string, string | boolean>,
   returnToApplication = true,
 ): Promise<void> {
+  const SAVE_BUTTON_TIMEOUT_MS = 30000;
   const { formName, fields, saveButtonTestId } = config;
 
   const applicationURL = page.url();
@@ -206,17 +356,32 @@ export async function fillForm(
     for (const fieldDefinition of Object.entries(fields)) {
       const [fieldIdentifier, fieldConfig] = fieldDefinition;
       const dataForField = data[fieldIdentifier];
+      if (dataForField === undefined) {
+        continue;
+      }
+      if (!shouldFillField(fieldConfig, data)) {
+        await testInfo.attach(`fillField-${fieldIdentifier}-skipped`, {
+          body: `Skipped ${fieldIdentifier}: dependency ${fieldConfig.dependsOn?.field} did not match ${fieldConfig.dependsOn?.value}`,
+          contentType: "text/plain",
+        });
+        continue;
+      }
       await fillField(testInfo, page, fieldConfig, dataForField);
     }
 
-    // Run form-specific confirmation step if defined.
+    // Run form-specific pre-save hook if defined.
     // Optional - existing forms without this property are unaffected.
     if (config.beforeSave) {
       await config.beforeSave(page);
     }
 
     await page.waitForTimeout(500);
-    await page.getByTestId(saveButtonTestId).click();
+    const saveButton = page.getByTestId(saveButtonTestId);
+    await saveButton.waitFor({
+      state: "visible",
+      timeout: SAVE_BUTTON_TIMEOUT_MS,
+    });
+    await saveButton.click({ timeout: SAVE_BUTTON_TIMEOUT_MS });
 
     if (returnToApplication) {
       await page.goto(applicationURL);

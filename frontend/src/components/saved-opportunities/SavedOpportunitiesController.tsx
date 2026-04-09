@@ -1,9 +1,7 @@
 "use client";
 
-import { useClientFetch } from "src/hooks/useClientFetch";
 import { Organization } from "src/types/applicationResponseTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
-import { UserOrganization } from "src/types/userTypes";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ModalRef } from "@trussworks/react-uswds";
@@ -14,12 +12,16 @@ import { buildSavedOpportunityTags } from "./buildSavedOpportunityTags";
 
 interface SavedOpportunitiesControllerProps {
   opportunities: BaseOpportunity[];
+  organizations: Organization[];
   individuallySavedOpportunityIds?: Set<string>;
+  hasOrganizationsError?: boolean;
 }
 
 export function SavedOpportunitiesController({
   opportunities,
+  organizations,
   individuallySavedOpportunityIds = new Set<string>(),
+  hasOrganizationsError = false,
 }: SavedOpportunitiesControllerProps) {
   const modalRef = useRef<ModalRef>(null);
   const lastShareButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -33,36 +35,11 @@ export function SavedOpportunitiesController({
 
   const [shouldOpenModal, setShouldOpenModal] = useState<boolean>(false);
 
-  const { clientFetch: fetchUserOrganizations } = useClientFetch<
-    UserOrganization[]
-  >("Error fetching user organizations");
-
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [isLoadingOrganizations, setIsLoadingOrganizations] =
-    useState<boolean>(false);
-  const [hasOrganizationsError, setHasOrganizationsError] =
-    useState<boolean>(false);
+  const hasOrganizations = organizations.length > 0 && !hasOrganizationsError;
 
   useEffect(() => {
     setOpportunitiesState(opportunities);
   }, [opportunities]);
-
-  useEffect(() => {
-    setIsLoadingOrganizations(true);
-    setHasOrganizationsError(false);
-
-    fetchUserOrganizations("/api/user/organizations", { cache: "no-store" })
-      .then((fetchedOrganizations) => {
-        setOrganizations(fetchedOrganizations);
-      })
-      .catch((error: unknown) => {
-        console.error("Error fetching user organizations", error);
-        setHasOrganizationsError(true);
-      })
-      .finally(() => {
-        setIsLoadingOrganizations(false);
-      });
-  }, [fetchUserOrganizations]);
 
   const selectedOpportunity = useMemo(() => {
     if (!selectedOpportunityId) {
@@ -166,6 +143,7 @@ export function SavedOpportunitiesController({
               <SearchResultsListItem
                 opportunity={opportunity}
                 saved={hasVisibleSavedOpportunityTags}
+                showShareButton={hasOrganizations}
                 index={index}
                 savedOpportunityTags={savedOpportunityTags}
                 onShareClick={(buttonElement: HTMLButtonElement) =>
@@ -181,7 +159,6 @@ export function SavedOpportunitiesController({
         modalRef={modalRef}
         organizations={organizations}
         savedToOrganizationIds={savedToOrganizationIds}
-        isLoadingOrganizations={isLoadingOrganizations}
         hasOrganizationsError={hasOrganizationsError}
         selectedOpportunity={selectedOpportunity}
         onSavedOrganizationsChange={handleSavedOrganizationsChange}
