@@ -34,6 +34,18 @@ export interface FillFormConfig {
   formName: string | RegExp;
   fields: FormFillFieldDefinitions;
   saveButtonTestId: string;
+  noErrorsText?: string;
+  /**
+   * Optional form-specific hook called before the save button is clicked.
+   * Use for pre-save interactions that cannot be expressed as a field definition.
+   * e.g. SF-424A confirmation checkbox that only appears in this form.
+   */
+  beforeSave?: (page: Page) => Promise<void>;
+}
+
+export interface FormsFixtureData {
+  formName: string | RegExp;
+  fields: FillFieldDefinition[];
 }
 
 /**
@@ -54,13 +66,15 @@ function shouldActivateField(data: string | boolean | undefined): boolean {
 
 function shouldFillField(
   field: FillFieldDefinition,
-  formData: Record<string, string>,
+  formData: Record<string, string | boolean>,
 ): boolean {
   if (!field.dependsOn) {
     return true;
   }
 
-  return formData[field.dependsOn.field] === String(field.dependsOn.value);
+  return (
+    String(formData[field.dependsOn.field]) === String(field.dependsOn.value)
+  );
 }
 
 export async function fillField(
@@ -298,7 +312,7 @@ export async function fillForm(
   testInfo: TestInfo,
   page: Page,
   config: FillFormConfig,
-  data: Record<string, string>,
+  data: Record<string, string | boolean>,
   returnToApplication = true,
 ): Promise<void> {
   const SAVE_BUTTON_TIMEOUT_MS = 30000;
@@ -342,6 +356,12 @@ export async function fillForm(
         continue;
       }
       await fillField(testInfo, page, fieldConfig, dataForField);
+    }
+
+    // Run form-specific pre-save hook if defined.
+    // Optional - existing forms without this property are unaffected.
+    if (config.beforeSave) {
+      await config.beforeSave(page);
     }
 
     await page.waitForTimeout(500);
