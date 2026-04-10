@@ -1,6 +1,6 @@
-import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import { FormFillFieldDefinitions } from "tests/e2e/utils/forms/general-forms-filling";
+import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 // Regex matcher tolerant of hyphen/dash variants for the NEH Supplementary Cover Sheet,
 // compatible with both local and staging environments.
@@ -32,6 +32,7 @@ export const SUPP_COVER_SHEET_NEH_REQUIRED_FIELD_ERRORS: FieldError[] = [
     message: "Primary Project Discipline is required",
   },
 ];
+
 export const fieldDefinitionsSuppCoverSheetNEH: FormFillFieldDefinitions = {
   // ********* Section 1 - Project Director *********
   major_field: {
