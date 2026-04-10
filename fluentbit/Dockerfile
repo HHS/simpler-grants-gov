@@ -1,4 +1,4 @@
-FROM fluent/fluent-bit:4.2.3.1-amd64@sha256:4e63b245e64067927e8b4f3a1788c7312d750481c6bbdbfbcce09263d08216bd AS fluentbit
+FROM amazon/aws-for-fluent-bit:3.2.5 as fluentbit
 
 FROM fluentbit AS release
 
