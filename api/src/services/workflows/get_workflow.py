@@ -25,9 +25,47 @@ from src.workflow.workflow_errors import OpportunityWithoutAgencyError
 logger = logging.getLogger(__name__)
 
 
+def _workflow_load_options() -> list:
+    """Return the selectinload options needed to fully load a Workflow for the GET response."""
+    return [
+        # Load audit events with acting user details
+        selectinload(Workflow.workflow_audits).options(
+            selectinload(WorkflowAudit.acting_user).options(
+                selectinload(User.linked_login_gov_external_user),
+                selectinload(User.profile),
+            ),
+            selectinload(WorkflowAudit.event),
+        ),
+        # Load approvals with approving user details
+        selectinload(Workflow.workflow_approvals)
+        .selectinload(WorkflowApproval.approving_user)
+        .options(
+            selectinload(User.linked_login_gov_external_user),
+            selectinload(User.profile),
+        ),
+        # Load entity relationships for auth checks
+        selectinload(Workflow.opportunity).selectinload(Opportunity.agency_record),
+        selectinload(Workflow.application)
+        .selectinload(Application.competition)
+        .selectinload(Competition.opportunity)
+        .selectinload(Opportunity.agency_record),
+        selectinload(Workflow.application_submission)
+        .selectinload(ApplicationSubmission.application)
+        .selectinload(Application.competition)
+        .selectinload(Competition.opportunity)
+        .selectinload(Opportunity.agency_record),
+    ]
+
+
+def _sort_workflow_collections(workflow: Workflow) -> None:
+    """Sort audit and approval collections on a workflow by created_at."""
+    workflow.workflow_audits.sort(key=lambda a: a.created_at)
+    workflow.workflow_approvals.sort(key=lambda a: a.created_at)
+
+
 def _get_workflow(db_session: db.Session, workflow_id: uuid.UUID) -> Workflow | None:
     """
-    Internal function to fetch workflow with comprehensive eager loading.
+    Internal function to fetch workflow.
 
     Args:
         db_session: Database session
@@ -39,41 +77,13 @@ def _get_workflow(db_session: db.Session, workflow_id: uuid.UUID) -> Workflow | 
     stmt = (
         select(Workflow)
         .where(Workflow.workflow_id == workflow_id)
-        .options(
-            # Load audit events with acting user details
-            selectinload(Workflow.workflow_audits).options(
-                selectinload(WorkflowAudit.acting_user).options(
-                    selectinload(User.linked_login_gov_external_user),
-                    selectinload(User.profile),
-                ),
-                selectinload(WorkflowAudit.event),
-            ),
-            # Load approvals with approving user details
-            selectinload(Workflow.workflow_approvals)
-            .selectinload(WorkflowApproval.approving_user)
-            .options(
-                selectinload(User.linked_login_gov_external_user),
-                selectinload(User.profile),
-            ),
-            # Load entity relationships for auth checks
-            selectinload(Workflow.opportunity).selectinload(Opportunity.agency_record),
-            selectinload(Workflow.application)
-            .selectinload(Application.competition)
-            .selectinload(Competition.opportunity)
-            .selectinload(Opportunity.agency_record),
-            selectinload(Workflow.application_submission)
-            .selectinload(ApplicationSubmission.application)
-            .selectinload(Application.competition)
-            .selectinload(Competition.opportunity)
-            .selectinload(Opportunity.agency_record),
-        )
+        .options(*_workflow_load_options())
     )
 
     workflow = db_session.execute(stmt).scalar_one_or_none()
 
     if workflow is not None:
-        workflow.workflow_audits.sort(key=lambda a: a.created_at)
-        workflow.workflow_approvals.sort(key=lambda a: a.created_at)
+        _sort_workflow_collections(workflow)
 
     return workflow
 
@@ -188,25 +198,25 @@ def get_workflow_by_event_id_and_verify_access(
     log_extra: dict = {"user_id": user.user_id, "event_id": event_id}
     logger.info("Fetching workflow by event ID for user", extra=log_extra)
 
-    event = db_session.execute(
-        select(WorkflowEventHistory).where(WorkflowEventHistory.event_id == event_id)
-    ).scalar_one_or_none()
+    stmt = (
+        select(WorkflowEventHistory)
+        .where(WorkflowEventHistory.event_id == event_id)
+        .options(selectinload(WorkflowEventHistory.workflow).options(*_workflow_load_options()))
+    )
+
+    event = db_session.execute(stmt).scalar_one_or_none()
 
     if event is None:
         logger.info("Event not found", extra=log_extra)
         raise_flask_error(404, message=f"Could not find Event with ID {event_id}")
 
-    if event.workflow_id is None:
+    if event.workflow is None:
         logger.info("Event has no associated workflow", extra=log_extra)
         raise_flask_error(404, message=f"Could not find Workflow for Event with ID {event_id}")
 
-    workflow = _get_workflow(db_session, event.workflow_id)
+    _sort_workflow_collections(event.workflow)
 
-    if workflow is None:
-        logger.info("Workflow not found for event", extra=log_extra)
-        raise_flask_error(404, message=f"Could not find Workflow for Event with ID {event_id}")
-
-    return _verify_workflow_access_and_build_config(db_session, user, workflow)
+    return _verify_workflow_access_and_build_config(db_session, user, event.workflow)
 
 
 def build_workflow_approval_config(
