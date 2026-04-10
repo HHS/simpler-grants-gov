@@ -28,12 +28,32 @@ on:
         required: true
         default: "main"
         description: Tag or branch or SHA to deploy
+      skip_checks:
+        type: boolean
+        default: false
+        description: Skip unit tests, lint, etc
+      skip_vuln_scans:
+        type: boolean
+        default: false
+        description: Skip vulnerability scans
+  workflow_call:
+    inputs:
+      skip_checks:
+        type: boolean
+        default: false
+        description: Skip unit tests, lint, etc while deploying
+      skip_vuln_scans:
+        type: boolean
+        default: false
+        description: Skip vulnerability scans while deploying
 
 jobs:
   analytics-checks:
     name: Run Analytics Checks
     uses: ./.github/workflows/ci-analytics.yml
     secrets: inherit
+    with:
+      skip_checks: ${{ inputs.skip_checks != null && inputs.skip_checks != false }}
 
   vulnerability-scans:
     name: Vulnerability Scans
@@ -41,6 +61,7 @@ jobs:
     with:
       app_name: analytics
       fail_on_vulns: ${{ ! contains(fromJSON(inputs.environment != null && format('["{0}"]', inputs.environment) || github.ref_name == 'main' && '["staging"]' || '["dev"]'), 'staging') }}
+      skip_vuln_scans: ${{ inputs.skip_vuln_scans != null && inputs.skip_vuln_scans != false }}
 
   deploy:
     name: Deploy
