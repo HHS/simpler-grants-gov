@@ -46,7 +46,7 @@ def test_user_save_opportunity_post_no_auth(client, db_session, user, enable_fac
     )
 
     assert response.status_code == 401
-    assert response.json["message"] == "Unable to process token"
+    assert response.json["message"] == "Unauthorized"
 
     # Verify no opportunity was saved
     saved_opportunities = (

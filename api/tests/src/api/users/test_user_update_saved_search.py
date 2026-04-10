@@ -99,7 +99,7 @@ def test_user_update_saved_search_no_auth(
     db_session.refresh(saved_search)
 
     assert response.status_code == 401
-    assert response.json["message"] == "Unable to process token"
+    assert response.json["message"] == "Unauthorized"
 
     # Verify search was not updated
     saved_searches = db_session.query(UserSavedSearch).first()

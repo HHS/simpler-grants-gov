@@ -92,7 +92,7 @@ export default async function SavedSearchQueries({
           breadcrumbList={[
             {
               title: t("breadcrumbWorkspace"),
-              path: `/dashboard`,
+              path: `/workspace`,
             },
             {
               title: t("breadcrumbSavedQueries"),

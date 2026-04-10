@@ -879,7 +879,7 @@ export const messages = {
       loading: "Loading filters",
     },
     callToAction: {
-      shareWithOthers: "Share with others",
+      sharingOptions: "Sharing Options",
     },
     opportunitySaved: "Saved",
     resultsHeader: {
@@ -960,7 +960,7 @@ export const messages = {
       },
     },
     shareWithYourList: "Shared with:",
-    shareWithOthers: "Share with others",
+    sharingOptions: "Sharing Options",
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
@@ -1035,6 +1035,11 @@ export const messages = {
       label: "Filter by status",
     },
     title: "Saved opportunities | Simpler.Grants.gov",
+    ownershipFilter: {
+      label: "Filter by organization",
+      showAll: "Show all",
+      individual: "Individual",
+    },
   },
   Roadmap: {
     pageTitle: "Roadmap | Simpler.Grants.gov",

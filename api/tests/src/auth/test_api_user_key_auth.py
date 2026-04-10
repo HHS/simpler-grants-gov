@@ -117,7 +117,7 @@ def test_api_user_key_auth_empty_key_header(mini_app, enable_factory_create, db_
     resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={"X-API-Key": ""})
 
     assert resp.status_code == 401
-    assert resp.get_json()["message"] == "Invalid API key"
+    assert resp.get_json()["message"] == "Unauthorized"
 
 
 def test_api_user_key_auth_multiple_active_keys(mini_app, enable_factory_create, db_session):

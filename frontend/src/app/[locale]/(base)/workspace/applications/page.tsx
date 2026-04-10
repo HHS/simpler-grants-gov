@@ -26,7 +26,7 @@ const ApplicationsPageWrapper = ({ children }: PropsWithChildren) => {
         breadcrumbList={[
           {
             title: t("breadcrumbWorkspace"),
-            path: `/dashboard`,
+            path: `/workspace`,
           },
           {
             title: t("breadcrumbApplications"),
@@ -81,7 +81,7 @@ const transformTableRowData = (
       },
       {
         cellData: (
-          <a href={`/applications/${application.application_id}`}>
+          <a href={`/workspace/applications/${application.application_id}`}>
             {application.application_name}
           </a>
         ),
