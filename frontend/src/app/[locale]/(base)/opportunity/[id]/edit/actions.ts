@@ -169,14 +169,6 @@ export async function saveOpportunityEditAction(
   formData: FormData,
 ): Promise<OpportunityEditActionState> {
   const { alerts } = await getOpportunityEditTranslations();
-  const validatedFields = await validateOpportunityEditForm(formData);
-
-  if (!validatedFields.success) {
-    return {
-      validationErrors: validatedFields.error.flatten()
-        .fieldErrors as OpportunityEditValidationErrors,
-    };
-  }
 
   const opportunityId = readStringValue(formData.get("opportunityId")).trim();
   const opportunitySummaryId = readStringValue(
@@ -194,6 +186,15 @@ export async function saveOpportunityEditAction(
   const session = await getSession();
   if (!session?.token) {
     return { errorMessage: alerts("forbidden") };
+  }
+
+  const validatedFields = await validateOpportunityEditForm(formData);
+
+  if (!validatedFields.success) {
+    return {
+      validationErrors: validatedFields.error.flatten()
+        .fieldErrors as OpportunityEditValidationErrors,
+    };
   }
 
   try {
