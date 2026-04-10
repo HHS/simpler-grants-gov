@@ -901,7 +901,7 @@ def user_stream_test(user_id: UUID) -> Any:
         def generate() -> Any:
             with db_session.begin():
 
-                for i in range(90):
+                for i in range(20):
                     db_session.add(user)
                     db_session.refresh(user)
 
