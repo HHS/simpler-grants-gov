@@ -22,7 +22,6 @@ from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_and_verify_access,
 )
 
-
 COLUMN_MAPPING = {
     "application_submission_number": ApplicationSubmission.application_submission_number,
 }
