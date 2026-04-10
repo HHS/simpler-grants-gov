@@ -1272,10 +1272,8 @@ class TestOpportunityNotification:
     ):
         """Users with email_enabled=False should not receive emails, but last_notified_at
         must still be advanced so they don't accumulate a backlog."""
-        # Link an email address so the user would normally be eligible for notifications
-        factories.LinkExternalUserFactory.create(user=user, email="disabled@example.com")
-
         # Explicitly disable email notifications for this user's personal saved opportunities
+        # (the user_with_email autouse fixture already gives `user` a linked email address)
         factories.UserSavedOpportunityNotificationFactory.create(
             user=user, organization=None, email_enabled=False
         )
@@ -1316,7 +1314,6 @@ class TestOpportunityNotification:
     ):
         """When a user re-enables notifications after a period of being disabled,
         they should not receive emails for changes that occurred while disabled."""
-        factories.LinkExternalUserFactory.create(user=user, email="reenable@example.com")
 
         # Create a preference row with email disabled
         notification_pref = factories.UserSavedOpportunityNotificationFactory.create(
