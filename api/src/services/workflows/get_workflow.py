@@ -12,7 +12,12 @@ from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
-from src.db.models.workflow_models import Workflow, WorkflowApproval, WorkflowAudit
+from src.db.models.workflow_models import (
+    Workflow,
+    WorkflowApproval,
+    WorkflowAudit,
+    WorkflowEventHistory,
+)
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.approval_service import get_agency_for_workflow
 from src.workflow.workflow_errors import OpportunityWithoutAgencyError
@@ -73,32 +78,24 @@ def _get_workflow(db_session: db.Session, workflow_id: uuid.UUID) -> Workflow | 
     return workflow
 
 
-def get_workflow_and_verify_access(
-    db_session: db.Session, user: User, workflow_id: uuid.UUID
+def _verify_workflow_access_and_build_config(
+    db_session: db.Session, user: User, workflow: Workflow
 ) -> Workflow:
     """
-    Public function to fetch a workflow with authorization checks.
+    Verify user access to a workflow and build its approval config.
 
     Args:
         db_session: Database session
-        user: User requesting the workflow
-        workflow_id: UUID of the workflow to fetch
+        user: User requesting access
+        workflow: Workflow to verify access for
 
     Returns:
-        Workflow object if user has access
+        Workflow object with approval config attached
 
     Raises:
-        404: If workflow doesn't exist
         403: If user doesn't have required privilege or entity type not supported
     """
-    log_extra: dict = {"user_id": user.user_id, "workflow_id": workflow_id}
-    logger.info("Fetching workflow for user", extra=log_extra)
-
-    workflow = _get_workflow(db_session, workflow_id)
-
-    if workflow is None:
-        logger.info("Workflow not found", extra=log_extra)
-        raise_flask_error(404, message=f"Could not find Workflow with ID {workflow_id}")
+    log_extra: dict = {"user_id": user.user_id, "workflow_id": workflow.workflow_id}
 
     try:
         agency = get_agency_for_workflow(workflow)
@@ -138,6 +135,78 @@ def get_workflow_and_verify_access(
     workflow.workflow_approval_config = approval_config  # type: ignore[attr-defined]
 
     return workflow
+
+
+def get_workflow_and_verify_access(
+    db_session: db.Session, user: User, workflow_id: uuid.UUID
+) -> Workflow:
+    """
+    Public function to fetch a workflow with authorization checks.
+
+    Args:
+        db_session: Database session
+        user: User requesting the workflow
+        workflow_id: UUID of the workflow to fetch
+
+    Returns:
+        Workflow object if user has access
+
+    Raises:
+        404: If workflow doesn't exist
+        403: If user doesn't have required privilege or entity type not supported
+    """
+    log_extra: dict = {"user_id": user.user_id, "workflow_id": workflow_id}
+    logger.info("Fetching workflow for user", extra=log_extra)
+
+    workflow = _get_workflow(db_session, workflow_id)
+
+    if workflow is None:
+        logger.info("Workflow not found", extra=log_extra)
+        raise_flask_error(404, message=f"Could not find Workflow with ID {workflow_id}")
+
+    return _verify_workflow_access_and_build_config(db_session, user, workflow)
+
+
+def get_workflow_by_event_id_and_verify_access(
+    db_session: db.Session, user: User, event_id: uuid.UUID
+) -> Workflow:
+    """
+    Fetch a workflow via its event ID with authorization checks.
+
+    Args:
+        db_session: Database session
+        user: User requesting the workflow
+        event_id: UUID of the workflow event history entry
+
+    Returns:
+        Workflow object if user has access
+
+    Raises:
+        404: If event or its associated workflow doesn't exist
+        403: If user doesn't have required privilege or entity type not supported
+    """
+    log_extra: dict = {"user_id": user.user_id, "event_id": event_id}
+    logger.info("Fetching workflow by event ID for user", extra=log_extra)
+
+    event = db_session.execute(
+        select(WorkflowEventHistory).where(WorkflowEventHistory.event_id == event_id)
+    ).scalar_one_or_none()
+
+    if event is None:
+        logger.info("Event not found", extra=log_extra)
+        raise_flask_error(404, message=f"Could not find Event with ID {event_id}")
+
+    if event.workflow_id is None:
+        logger.info("Event has no associated workflow", extra=log_extra)
+        raise_flask_error(404, message=f"Could not find Workflow for Event with ID {event_id}")
+
+    workflow = _get_workflow(db_session, event.workflow_id)
+
+    if workflow is None:
+        logger.info("Workflow not found for event", extra=log_extra)
+        raise_flask_error(404, message=f"Could not find Workflow for Event with ID {event_id}")
+
+    return _verify_workflow_access_and_build_config(db_session, user, workflow)
 
 
 def build_workflow_approval_config(
