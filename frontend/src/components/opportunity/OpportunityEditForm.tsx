@@ -14,14 +14,13 @@ import {
   ErrorMessage,
   Fieldset,
   FormGroup,
-  Label,
   Radio,
   Select,
   Textarea,
   TextInput,
 } from "@trussworks/react-uswds";
 
-import { RequiredFieldIndicator } from "src/components/RequiredFieldIndicator";
+import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
 import {
   ELIGIBILITY_OPTIONS,
   FUNDING_CATEGORY_OPTIONS,
@@ -377,18 +376,12 @@ export default function OpportunityEditForm({
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("fundingType")}>
-                <Label
-                  htmlFor="funding-type-values"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.fundingType")}
-                  <span className="text-secondary-dark">
-                    <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                  </span>
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.fundingTypeHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="funding-type-values"
+                  title={t("labels.fundingType")}
+                  required
+                  description={t("content.fundingTypeHint")}
+                />
                 {getFieldError("fundingType") ? (
                   <ErrorMessage>{getFieldError("fundingType")}</ErrorMessage>
                 ) : null}
@@ -416,15 +409,11 @@ export default function OpportunityEditForm({
             </div>
             <div className="tablet:grid-col-6">
               <FormGroup>
-                <Label
-                  htmlFor="cost-sharing-yes"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.costSharing")}
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.costSharingHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="cost-sharing-yes"
+                  title={t("labels.costSharing")}
+                  description={t("content.costSharingHint")}
+                />
                 <div className="grid-row">
                   <div className="grid-col-6">
                     <Radio
@@ -456,18 +445,12 @@ export default function OpportunityEditForm({
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("fundingCategory")}>
-                <Label
-                  htmlFor="funding-category-values"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.category")}
-                  <span className="text-secondary-dark">
-                    <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                  </span>
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.categoryHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="funding-category-values"
+                  title={t("labels.category")}
+                  required
+                  description={t("content.categoryHint")}
+                />
                 {getFieldError("fundingCategory") ? (
                   <ErrorMessage>
                     {getFieldError("fundingCategory")}
@@ -500,15 +483,11 @@ export default function OpportunityEditForm({
           {values.fundingCategories[0] === "other" && (
             <div className="width-full">
               <FormGroup>
-                <Label
-                  htmlFor="funding-category-explanation"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.fundingCategoryExplanation")}
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.fundingCategoryExplanationHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="funding-category-explanation"
+                  title={t("labels.fundingCategoryExplanation")}
+                  description={t("content.fundingCategoryExplanationHint")}
+                />
                 <Textarea
                   id="funding-category-explanation"
                   name="fundingCategoryExplanation"
@@ -530,18 +509,12 @@ export default function OpportunityEditForm({
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("expectedNumberOfAwards")}>
-                <Label
-                  htmlFor="expected-number-of-awards"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.expectedNumberOfAwards")}
-                  <span className="text-secondary-dark">
-                    <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                  </span>
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.expectedNumberOfAwardsHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="expected-number-of-awards"
+                  title={t("labels.expectedNumberOfAwards")}
+                  required
+                  description={t("content.expectedNumberOfAwardsHint")}
+                />
                 {getFieldError("expectedNumberOfAwards") ? (
                   <ErrorMessage>
                     {getFieldError("expectedNumberOfAwards")}
@@ -564,18 +537,12 @@ export default function OpportunityEditForm({
               <FormGroup
                 error={!!getFieldError("estimatedTotalProgramFunding")}
               >
-                <Label
-                  htmlFor="estimated-total-program-funding"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.estimatedTotalProgramFunding")}
-                  <span className="text-secondary-dark">
-                    <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                  </span>
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.estimatedTotalProgramFundingHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="estimated-total-program-funding"
+                  title={t("labels.estimatedTotalProgramFunding")}
+                  required
+                  description={t("content.estimatedTotalProgramFundingHint")}
+                />
                 {getFieldError("estimatedTotalProgramFunding") ? (
                   <ErrorMessage>
                     {getFieldError("estimatedTotalProgramFunding")}
@@ -602,18 +569,12 @@ export default function OpportunityEditForm({
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("awardMinimum")}>
-                <Label
-                  htmlFor="award-minimum"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.awardMinimum")}
-                  <span className="text-secondary-dark">
-                    <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                  </span>
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.awardMinimumHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="award-minimum"
+                  title={t("labels.awardMinimum")}
+                  required
+                  description={t("content.awardMinimumHint")}
+                />
                 {getFieldError("awardMinimum") ? (
                   <ErrorMessage>{getFieldError("awardMinimum")}</ErrorMessage>
                 ) : null}
@@ -635,18 +596,12 @@ export default function OpportunityEditForm({
             </div>
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("awardMaximum")}>
-                <Label
-                  htmlFor="award-maximum"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.awardMaximum")}
-                  <span className="text-secondary-dark">
-                    <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                  </span>
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.awardMaximumHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="award-maximum"
+                  title={t("labels.awardMaximum")}
+                  required
+                  description={t("content.awardMaximumHint")}
+                />
                 {getFieldError("awardMaximum") ? (
                   <ErrorMessage>{getFieldError("awardMaximum")}</ErrorMessage>
                 ) : null}
@@ -671,18 +626,12 @@ export default function OpportunityEditForm({
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("publishDate")}>
-                <Label
-                  htmlFor="publish-date"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.publishDate")}
-                  <span className="text-secondary-dark">
-                    <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                  </span>
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.publishDateHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="publish-date"
+                  title={t("labels.publishDate")}
+                  required
+                  description={t("content.publishDateHint")}
+                />
                 {getFieldError("publishDate") ? (
                   <ErrorMessage>{getFieldError("publishDate")}</ErrorMessage>
                 ) : null}
@@ -699,12 +648,11 @@ export default function OpportunityEditForm({
             </div>
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("closeDate")}>
-                <Label htmlFor="close-date" className="font-sans-sm text-bold">
-                  {t("labels.closeDate")}
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.closeDateHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="close-date"
+                  title={t("labels.closeDate")}
+                  description={t("content.closeDateHint")}
+                />
                 {getFieldError("closeDate") ? (
                   <ErrorMessage>{getFieldError("closeDate")}</ErrorMessage>
                 ) : null}
@@ -724,15 +672,11 @@ export default function OpportunityEditForm({
           {!values.closeDate && (
             <div className="width-full">
               <FormGroup>
-                <Label
-                  htmlFor="close-date-explanation"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.closeDateExplanation")}
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.closeDateExplanationHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="close-date-explanation"
+                  title={t("labels.closeDateExplanation")}
+                  description={t("content.closeDateExplanationHint")}
+                />
                 <Textarea
                   id="close-date-explanation"
                   name="closeDateExplanation"
@@ -765,18 +709,12 @@ export default function OpportunityEditForm({
 
         <div className="display-flex flex-column gap-3">
           <FormGroup error={!!getFieldError("eligibleApplicants")}>
-            <Label
-              htmlFor="eligible-applicants-values"
-              className="font-sans-sm text-bold"
-            >
-              {t("labels.eligibleApplicants")}
-              <span className="text-secondary-dark">
-                <RequiredFieldIndicator> *</RequiredFieldIndicator>
-              </span>
-            </Label>
-            <p className="margin-top-1 margin-bottom-0 font-sans-sm text-base maxw-mobile-lg">
-              {t("content.eligibleApplicantsHint")}
-            </p>
+            <DynamicFieldLabel
+              idFor="eligible-applicants-values"
+              title={t("labels.eligibleApplicants")}
+              required
+              description={t("content.eligibleApplicantsHint")}
+            />
             {getFieldError("eligibleApplicants") ? (
               <ErrorMessage>{getFieldError("eligibleApplicants")}</ErrorMessage>
             ) : null}
@@ -822,15 +760,11 @@ export default function OpportunityEditForm({
             values.eligibleApplicants.includes("unrestricted")) && (
             <div className="width-full">
               <FormGroup error={!!getFieldError("additionalEligibilityInfo")}>
-                <Label
-                  htmlFor="additional-eligibility-info"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.additionalEligibilityInfo")}
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.additionalEligibilityInfoHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="additional-eligibility-info"
+                  title={t("labels.additionalEligibilityInfo")}
+                  description={t("content.additionalEligibilityInfoHint")}
+                />
                 {getFieldError("additionalEligibilityInfo") ? (
                   <ErrorMessage>
                     {getFieldError("additionalEligibilityInfo")}
@@ -869,15 +803,12 @@ export default function OpportunityEditForm({
         <div className="display-flex flex-column gap-2">
           <div className="width-full">
             <FormGroup error={!!getFieldError("description")}>
-              <Label htmlFor="description" className="font-sans-sm text-bold">
-                {t("labels.description")}
-                <span className="text-secondary-dark">
-                  <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                </span>
-              </Label>
-              <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                {t("content.descriptionHint")}
-              </p>
+              <DynamicFieldLabel
+                idFor="description"
+                title={t("labels.description")}
+                required
+                description={t("content.descriptionHint")}
+              />
               {getFieldError("description") ? (
                 <ErrorMessage>{getFieldError("description")}</ErrorMessage>
               ) : null}
@@ -898,18 +829,12 @@ export default function OpportunityEditForm({
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("additionalInfoUrl")}>
-                <Label
-                  htmlFor="additional-info-url"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.additionalInfoUrl")}
-                  <span className="text-secondary-dark">
-                    <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                  </span>
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.additionalInfoUrlHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="additional-info-url"
+                  title={t("labels.additionalInfoUrl")}
+                  required
+                  description={t("content.additionalInfoUrlHint")}
+                />
                 {getFieldError("additionalInfoUrl") ? (
                   <ErrorMessage>
                     {getFieldError("additionalInfoUrl")}
@@ -930,18 +855,12 @@ export default function OpportunityEditForm({
             </div>
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("additionalInfoUrlText")}>
-                <Label
-                  htmlFor="additional-info-url-text"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.additionalInfoUrlText")}
-                  <span className="text-secondary-dark">
-                    <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                  </span>
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.additionalInfoUrlTextHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="additional-info-url-text"
+                  title={t("labels.additionalInfoUrlText")}
+                  required
+                  description={t("content.additionalInfoUrlTextHint")}
+                />
                 {getFieldError("additionalInfoUrlText") ? (
                   <ErrorMessage>
                     {getFieldError("additionalInfoUrlText")}
@@ -964,18 +883,12 @@ export default function OpportunityEditForm({
 
           <div className="width-full">
             <FormGroup error={!!getFieldError("grantorContactDetails")}>
-              <Label
-                htmlFor="grantor-contact-details"
-                className="font-sans-sm text-bold"
-              >
-                {t("labels.grantorContactDetails")}
-                <span className="text-secondary-dark">
-                  <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                </span>
-              </Label>
-              <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                {t("content.grantorContactDetailsHint")}
-              </p>
+              <DynamicFieldLabel
+                idFor="grantor-contact-details"
+                title={t("labels.grantorContactDetails")}
+                required
+                description={t("content.grantorContactDetailsHint")}
+              />
               {getFieldError("grantorContactDetails") ? (
                 <ErrorMessage>
                   {getFieldError("grantorContactDetails")}
@@ -998,18 +911,12 @@ export default function OpportunityEditForm({
           <div className="grid-row grid-gap-lg">
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("contactEmail")}>
-                <Label
-                  htmlFor="contact-email"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.contactEmail")}
-                  <span className="text-secondary-dark">
-                    <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                  </span>
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.contactEmailHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="contact-email"
+                  title={t("labels.contactEmail")}
+                  required
+                  description={t("content.contactEmailHint")}
+                />
                 {getFieldError("contactEmail") ? (
                   <ErrorMessage>{getFieldError("contactEmail")}</ErrorMessage>
                 ) : null}
@@ -1028,18 +935,12 @@ export default function OpportunityEditForm({
             </div>
             <div className="tablet:grid-col-6">
               <FormGroup error={!!getFieldError("contactEmailText")}>
-                <Label
-                  htmlFor="contact-email-text"
-                  className="font-sans-sm text-bold"
-                >
-                  {t("labels.contactEmailText")}
-                  <span className="text-secondary-dark">
-                    <RequiredFieldIndicator> *</RequiredFieldIndicator>
-                  </span>
-                </Label>
-                <p className="margin-top-1 margin-bottom-2 font-sans-sm text-base">
-                  {t("content.contactEmailTextHint")}
-                </p>
+                <DynamicFieldLabel
+                  idFor="contact-email-text"
+                  title={t("labels.contactEmailText")}
+                  required
+                  description={t("content.contactEmailTextHint")}
+                />
                 {getFieldError("contactEmailText") ? (
                   <ErrorMessage>
                     {getFieldError("contactEmailText")}
