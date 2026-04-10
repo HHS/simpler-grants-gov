@@ -91,11 +91,13 @@ def list_award_recommendation_submissions(
             .selectinload(Application.organization)
             .selectinload(Organization.sam_gov_entity),
         )
+        # Joined for sorting by application_submission_number
         .join(
             ApplicationSubmission,
             AwardRecommendationApplicationSubmission.application_submission_id
             == ApplicationSubmission.application_submission_id,
         )
+        # Joined for filtering by award_recommendation_type / has_exception
         .join(
             AwardRecommendationSubmissionDetail,
             AwardRecommendationApplicationSubmission.award_recommendation_submission_detail_id
