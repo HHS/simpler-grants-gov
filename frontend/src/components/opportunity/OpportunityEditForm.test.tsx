@@ -88,6 +88,8 @@ describe("OpportunityEditForm", () => {
     expect(screen.getByRole("radio", { name: /yes/i })).toBeInTheDocument();
     // Verify checkbox value attribute so the correct enum string is submitted with the form
     // (checkboxes without a value= prop default to "on" and fail API validation)
+    // .toHaveValue() cannot be used here: for unchecked checkboxes it always returns null
+    // regardless of the value attribute, so .toHaveAttribute() is required instead.
     // eslint-disable-next-line jest-dom/prefer-to-have-value
     expect(
       screen.getByRole("checkbox", {
