@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
-import SavedOpportunities from "src/app/[locale]/(base)/saved-opportunities/page";
+import SavedOpportunities from "src/app/[locale]/(base)/workspace/saved-opportunities/page";
+import { Organization } from "src/types/applicationResponseTypes";
 import {
   BaseOpportunity,
   MinimalOpportunity,
@@ -18,6 +19,24 @@ import {
   useTranslationsMock,
 } from "src/utils/testing/intlMocks";
 
+const getSessionMock = jest.fn<
+  Promise<{ token: string; user_id: string; email: string } | null>,
+  []
+>();
+
+const getUserOrganizationsMock = jest.fn<
+  Promise<Organization[]>,
+  [string, string]
+>();
+jest.mock("src/services/auth/session", () => ({
+  getSession: () => getSessionMock(),
+}));
+
+jest.mock("src/services/fetch/fetchers/organizationsFetcher", () => ({
+  getUserOrganizations: (token: string, userId: string) =>
+    getUserOrganizationsMock(token, userId),
+}));
+
 jest.mock("next-intl", () => ({
   useTranslations: () => useTranslationsMock(),
 }));
@@ -29,14 +48,7 @@ jest.mock("next-intl/server", () => ({
 const savedOpportunitiesMock = jest.fn();
 const opportunityMock = jest.fn().mockResolvedValue({ data: [] });
 const mockUseSearchParams = jest.fn().mockReturnValue(new URLSearchParams());
-const clientFetchMock = jest.fn().mockResolvedValue([]);
 const mockBreadcrumbs = jest.fn();
-
-jest.mock("src/hooks/useClientFetch", () => ({
-  useClientFetch: () => ({
-    clientFetch: (...args: unknown[]) => clientFetchMock(...args) as unknown,
-  }),
-}));
 
 jest.mock(
   "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal",
@@ -62,10 +74,13 @@ jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
   fetchSavedOpportunities: (
     scope: SavedOpportunitiesScope,
     statusFilter?: string,
+    organizationIdsFilter?: string[] | null,
   ) =>
-    savedOpportunitiesMock(scope, statusFilter) as Promise<
-      MinimalOpportunity[]
-    >,
+    savedOpportunitiesMock(
+      scope,
+      statusFilter,
+      organizationIdsFilter,
+    ) as Promise<MinimalOpportunity[]>,
 }));
 
 jest.mock("src/components/Breadcrumbs", () => ({
@@ -86,14 +101,30 @@ function mockSavedOpportunitiesByScope({
   individuallySavedOpportunities?: MinimalOpportunity[];
 }) {
   savedOpportunitiesMock.mockImplementation(
-    (scope: SavedOpportunitiesScope, statusFilter?: string) => {
+    (
+      scope: SavedOpportunitiesScope,
+      statusFilter?: string,
+      organizationIdsFilter?: string[] | null,
+    ) => {
       if (scope === INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE) {
         return Promise.resolve(individuallySavedOpportunities);
+      }
+      // The page now fetches DEFAULT scope separately to determine whether the
+      // user has any saved opportunities at all, so always return the combined
+      // list for that unfiltered request.
+      if (
+        scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
+        statusFilter === undefined &&
+        organizationIdsFilter === undefined
+      ) {
+        return Promise.resolve(combinedSavedOpportunities);
       }
 
       if (
         scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE ||
-        statusFilter !== undefined
+        scope.scope === "organization" ||
+        statusFilter !== undefined ||
+        organizationIdsFilter !== undefined
       ) {
         return Promise.resolve(combinedSavedOpportunities);
       }
@@ -112,7 +143,12 @@ describe("Saved Opportunities page", () => {
       individuallySavedOpportunities: [],
     });
 
-    clientFetchMock.mockResolvedValue([]);
+    getSessionMock.mockResolvedValue({
+      token: "test-token",
+      user_id: "user-1",
+      email: "test@example.com",
+    });
+    getUserOrganizationsMock.mockResolvedValue([]);
   });
 
   it("renders intro text for user with no saved opportunities", async () => {
@@ -135,12 +171,11 @@ describe("Saved Opportunities page", () => {
     render(component);
 
     expect(screen.getByTestId("mock-breadcrumbs")).toBeInTheDocument();
-
     expect(mockBreadcrumbs).toHaveBeenCalledWith({
       breadcrumbList: [
         {
           title: "SavedOpportunities.breadcrumbWorkspace",
-          path: "/dashboard",
+          path: "/workspace",
         },
         {
           title: "SavedOpportunities.breadcrumbSavedOpportunities",
@@ -223,7 +258,7 @@ describe("Saved Opportunities page", () => {
       ],
     });
     opportunityMock.mockResolvedValue({ data: mockOpportunity });
-    clientFetchMock.mockResolvedValue([]);
+    getUserOrganizationsMock.mockResolvedValue([]);
 
     const component = await SavedOpportunities({
       params: localeParams,
@@ -250,10 +285,17 @@ describe("Saved Opportunities page", () => {
       ],
     });
     opportunityMock.mockResolvedValue({ data: mockOpportunity });
-    clientFetchMock.mockResolvedValue([
+    getUserOrganizationsMock.mockResolvedValue([
       {
         organization_id: "org-1",
-        sam_gov_entity: { legal_business_name: "Alpha Org" },
+        sam_gov_entity: {
+          legal_business_name: "Alpha Org",
+          expiration_date: "",
+          uei: "",
+          ebiz_poc_email: "",
+          ebiz_poc_first_name: "",
+          ebiz_poc_last_name: "",
+        },
       },
     ]);
 
@@ -293,15 +335,28 @@ describe("Saved Opportunities page", () => {
     });
 
     opportunityMock.mockResolvedValue({ data: mockOpportunity });
-
-    clientFetchMock.mockResolvedValue([
+    getUserOrganizationsMock.mockResolvedValue([
       {
         organization_id: "org-1",
-        sam_gov_entity: { legal_business_name: "Alpha Org" },
+        sam_gov_entity: {
+          legal_business_name: "Alpha Org",
+          expiration_date: "",
+          uei: "",
+          ebiz_poc_email: "",
+          ebiz_poc_first_name: "",
+          ebiz_poc_last_name: "",
+        },
       },
       {
         organization_id: "org-2",
-        sam_gov_entity: { legal_business_name: "Bravo Org" },
+        sam_gov_entity: {
+          legal_business_name: "Bravo Org",
+          expiration_date: "",
+          uei: "",
+          ebiz_poc_email: "",
+          ebiz_poc_first_name: "",
+          ebiz_poc_last_name: "",
+        },
       },
     ]);
 
@@ -312,8 +367,8 @@ describe("Saved Opportunities page", () => {
     render(component);
 
     expect(await screen.findByText("Individual")).toBeInTheDocument();
-    expect(screen.getByText("Alpha Org")).toBeInTheDocument();
-    expect(screen.getByText("Bravo Org")).toBeInTheDocument();
+    expect(screen.getAllByText("Alpha Org").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Bravo Org").length).toBeGreaterThan(0);
   });
 
   it("passes status filter to fetchSavedOpportunities when status param is provided", async () => {
@@ -325,14 +380,28 @@ describe("Saved Opportunities page", () => {
     };
 
     savedOpportunitiesMock.mockImplementation(
-      (scope: SavedOpportunitiesScope, statusFilter?: string) => {
+      (
+        scope: SavedOpportunitiesScope,
+        statusFilter?: string,
+        organizationIdsFilter?: string[] | null,
+      ) => {
         if (scope === INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE) {
           return Promise.resolve([]);
+        }
+        if (
+          scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
+          statusFilter === undefined &&
+          organizationIdsFilter === undefined
+        ) {
+          return Promise.resolve([
+            { opportunity_id: forecastedOpportunity.opportunity_id },
+          ]);
         }
 
         if (
           scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
-          statusFilter === "forecasted"
+          statusFilter === "forecasted" &&
+          organizationIdsFilter === null
         ) {
           return Promise.resolve([
             { opportunity_id: forecastedOpportunity.opportunity_id },
@@ -354,6 +423,7 @@ describe("Saved Opportunities page", () => {
     expect(savedOpportunitiesMock).toHaveBeenCalledWith(
       DEFAULT_SAVED_OPPORTUNITY_SCOPE,
       "forecasted",
+      null,
     );
 
     expect(
@@ -398,7 +468,6 @@ describe("Saved Opportunities page", () => {
     expect(
       screen.getByRole("link", { name: /Test Opportunity/i }),
     ).toBeInTheDocument();
-
     expect(
       screen.getByRole("link", { name: /Forecasted Opportunity/i }),
     ).toBeInTheDocument();
@@ -406,22 +475,31 @@ describe("Saved Opportunities page", () => {
 
   it("shows no matching status message when API returns no opportunities for filter", async () => {
     savedOpportunitiesMock.mockImplementation(
-      (scope: SavedOpportunitiesScope, statusFilter?: string) => {
+      (
+        scope: SavedOpportunitiesScope,
+        statusFilter?: string,
+        organizationIdsFilter?: string[] | null,
+      ) => {
         if (scope === INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE) {
           return Promise.resolve([]);
         }
 
         if (
           scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
-          statusFilter === "archived"
+          statusFilter === undefined &&
+          organizationIdsFilter === undefined
         ) {
-          return Promise.resolve([]);
-        }
-
-        if (scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE) {
           return Promise.resolve([
             { opportunity_id: mockOpportunity.opportunity_id },
           ]);
+        }
+
+        if (
+          scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
+          statusFilter === "archived" &&
+          organizationIdsFilter === null
+        ) {
+          return Promise.resolve([]);
         }
 
         return Promise.resolve([]);
@@ -438,6 +516,85 @@ describe("Saved Opportunities page", () => {
       screen.getByText("SavedOpportunities.noMatchingStatus"),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("statusFilter.label")).toBeInTheDocument();
+  });
+  it("keeps filters visible and shows filtered empty state when the selected organization has no saved opportunities", async () => {
+    savedOpportunitiesMock.mockImplementation(
+      (
+        scope: SavedOpportunitiesScope,
+        statusFilter?: string,
+        organizationIdsFilter?: string[] | null,
+      ) => {
+        if (scope === INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE) {
+          return Promise.resolve([
+            { opportunity_id: mockOpportunity.opportunity_id },
+          ]);
+        }
+
+        if (
+          scope === DEFAULT_SAVED_OPPORTUNITY_SCOPE &&
+          statusFilter === undefined &&
+          organizationIdsFilter === undefined
+        ) {
+          return Promise.resolve([
+            { opportunity_id: mockOpportunity.opportunity_id },
+          ]);
+        }
+
+        if (
+          scope.scope === "organization" &&
+          organizationIdsFilter?.includes("org-1")
+        ) {
+          return Promise.resolve([]);
+        }
+
+        return Promise.resolve([]);
+      },
+    );
+
+    getUserOrganizationsMock.mockResolvedValue([
+      {
+        organization_id: "org-1",
+        sam_gov_entity: {
+          legal_business_name: "Alpha Org",
+          expiration_date: "",
+          uei: "",
+          ebiz_poc_email: "",
+          ebiz_poc_first_name: "",
+          ebiz_poc_last_name: "",
+        },
+      },
+    ]);
+
+    const component = await SavedOpportunities({
+      params: localeParams,
+      searchParams: Promise.resolve({ savedBy: "organization:org-1" }),
+    });
+    render(component);
+
+    expect(screen.getByLabelText("ownershipFilter.label")).toBeInTheDocument();
+    expect(screen.getByLabelText("statusFilter.label")).toBeInTheDocument();
+    expect(
+      screen.getByText("SavedOpportunities.noMatchingStatus"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("noSavedCTAParagraphOne"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("passes organization filter to fetchSavedOpportunities", async () => {
+    const savedBy = "organization:org-1";
+
+    const component = await SavedOpportunities({
+      params: localeParams,
+      searchParams: Promise.resolve({ savedBy }),
+    });
+    render(component);
+
+    expect(savedOpportunitiesMock).toHaveBeenCalledWith(
+      { scope: "organization", organizationIds: ["org-1"] },
+      undefined,
+      ["org-1"],
+    );
   });
 
   it("passes accessibility scan", async () => {

@@ -1,12 +1,10 @@
+import { ExternalRoutes } from "src/constants/routes";
+
 import { useTranslations } from "next-intl";
 import { Grid } from "@trussworks/react-uswds";
 
 import HomePageSection from "src/components/homepage/homePageSection";
 import IconInfo from "src/components/homepage/IconInfoSection";
-
-const codeLink = "https://wiki.simpler.grants.gov/get-involved/github-code";
-const discourseLink = "https://forum.simpler.grants.gov/";
-const participateLink = "https://ethn.io/91822";
 
 const InvolvedContent = () => {
   const t = useTranslations("Homepage.sections.involved");
@@ -26,12 +24,35 @@ const InvolvedContent = () => {
           <IconInfo
             description={t("technicalDescription")}
             iconName="code"
-            link={codeLink}
-            linkText={t("technicalLink")}
             title={t("technicalTitle")}
           />
           <p>
-            <a href={discourseLink} target="_blank" rel="noopener noreferrer">
+            <a
+              href={ExternalRoutes.FIDER}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="usa-link--external"
+            >
+              {t("fiderLink")}
+            </a>
+          </p>
+          <p>
+            <a
+              href={ExternalRoutes.WIKI_CONTRIBUTE_CODE}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="usa-link--external"
+            >
+              {t("technicalLink")}
+            </a>
+          </p>
+          <p>
+            <a
+              href={ExternalRoutes.FORUM}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="usa-link--external"
+            >
               {t("discourseLink")}
             </a>
           </p>
@@ -40,10 +61,18 @@ const InvolvedContent = () => {
           <IconInfo
             description={t("participateDescription")}
             iconName="chat"
-            link={participateLink}
-            linkText={t("participateLink")}
             title={t("participateTitle")}
           />
+          <p>
+            <a
+              href={ExternalRoutes.ETHNIO_VOLUNTEER}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="usa-link--external"
+            >
+              {t("participateLink")}
+            </a>
+          </p>
         </Grid>
       </Grid>
     </HomePageSection>

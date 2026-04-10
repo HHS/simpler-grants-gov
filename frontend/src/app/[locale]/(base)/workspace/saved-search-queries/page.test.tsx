@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
-import SavedSearchQueries from "src/app/[locale]/(base)/saved-search-queries/page";
+import SavedSearchQueries from "src/app/[locale]/(base)/workspace/saved-search-queries/page";
 import { fakeSavedSearch } from "src/utils/testing/fixtures";
 import { localeParams, mockUseTranslations } from "src/utils/testing/intlMocks";
 
@@ -79,7 +79,7 @@ describe("Saved Searches page", () => {
       breadcrumbList: [
         {
           title: "breadcrumbWorkspace",
-          path: "/dashboard",
+          path: "/workspace",
         },
         {
           title: "breadcrumbSavedQueries",

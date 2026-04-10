@@ -110,15 +110,15 @@ async function FormPage({ params }: formPageProps) {
           breadcrumbList={[
             {
               title: t("breadcrumbWorkspace"),
-              path: `/dashboard`,
+              path: `/workspace`,
             },
             {
               title: t("breadcrumbApplications"),
-              path: `/applications`,
+              path: `/workspace/applications`,
             },
             {
               title: applicationName,
-              path: `/applications/${applicationId}`,
+              path: `/workspace/applications/${applicationId}`,
             },
             {
               title: formName,
