@@ -269,7 +269,7 @@ def test_simpler_getapplicationzip_operation_raising_httperror_due_to_privileges
         serial_number="1235",
         legacy_certificate=soap_client_certificate.legacy_certificate,
     )
-    with mock.patch("src.legacy_soap_api.legacy_soap_api_routes.get_soap_auth") as mock_get_auth:
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         response = client.post(
             full_path, data=etree.tostring(envelope), headers={"Use-Simpler-Override": "true"}
