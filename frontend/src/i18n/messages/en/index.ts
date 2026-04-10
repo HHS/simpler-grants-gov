@@ -378,6 +378,7 @@ export const messages = {
           "Your initial information has been saved. Complete the sections below to finish your opportunity details",
         genericError: "Unable to save draft opportunity details.",
         missingSummaryContext: "Missing opportunity summary context for save.",
+        unauthenticated: "You must be signed in to update this opportunity.",
         forbidden: "You do not have permission to update this opportunity.",
         notFound: "The opportunity summary could not be found.",
         draftOnly: "Only draft opportunity summaries can be updated.",

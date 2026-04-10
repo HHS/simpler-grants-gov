@@ -185,7 +185,7 @@ export async function saveOpportunityEditAction(
 
   const session = await getSession();
   if (!session?.token) {
-    return { errorMessage: alerts("forbidden") };
+    return { errorMessage: alerts("unauthenticated") };
   }
 
   const validatedFields = await validateOpportunityEditForm(formData);
