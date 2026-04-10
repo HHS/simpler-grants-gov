@@ -23,6 +23,11 @@ from src.services.award_recommendations.get_award_recommendation import (
 )
 
 
+COLUMN_MAPPING = {
+    "application_submission_number": ApplicationSubmission.application_submission_number,
+}
+
+
 class AwardRecommendationSubmissionFilters(BaseModel):
     award_recommendation_type: StrSearchFilter | None = None
     has_exception: BoolSearchFilter | None = None
@@ -99,13 +104,7 @@ def list_award_recommendation_submissions(
     )
 
     stmt = apply_filters(stmt, params.filters)
-    stmt = apply_sorting(
-        stmt,
-        params.pagination.sort_order,
-        {
-            "application_submission_number": ApplicationSubmission.application_submission_number,
-        },
-    )
+    stmt = apply_sorting(stmt, params.pagination.sort_order, COLUMN_MAPPING)
 
     paginator: Paginator[AwardRecommendationApplicationSubmission] = Paginator(
         AwardRecommendationApplicationSubmission,
