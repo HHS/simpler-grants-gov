@@ -56,12 +56,7 @@ export interface OpportunitySummaryDetail extends Summary {
   opportunity_summary_id: string;
 }
 
-export type OpportunitySummaryCreateRequest =
-  OpportunitySummaryUpdateRequest & {
-    is_forecast: boolean;
-  };
-
-export type OpportunitySummaryUpdateRequest = {
+export interface OpportunitySummaryUpdateRequest {
   is_cost_sharing: boolean | null;
   summary_description: string | null;
   post_date: string | null;
@@ -81,7 +76,12 @@ export type OpportunitySummaryUpdateRequest = {
   agency_contact_description: string | null;
   agency_email_address: string | null;
   agency_email_address_description: string | null;
-};
+}
+
+export interface OpportunitySummaryCreateRequest
+  extends OpportunitySummaryUpdateRequest {
+  is_forecast: boolean;
+}
 
 export interface SavedToOrganization {
   organization_id: string;
