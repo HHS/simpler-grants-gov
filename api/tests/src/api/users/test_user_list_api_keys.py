@@ -163,4 +163,4 @@ def test_list_api_keys_no_authentication(enable_factory_create, db_session, clie
     response = client.post(f"/v1/users/{user.user_id}/api-keys/list", json={})
 
     assert response.status_code == 401
-    assert response.json["message"] == "Unable to process token"
+    assert response.json["message"] == "Unauthorized"

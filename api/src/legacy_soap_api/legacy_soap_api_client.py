@@ -15,7 +15,8 @@ from src.legacy_soap_api.grantors.services import (
     get_confirm_application_delivery_response,
     get_submission_list_expanded,
     get_submission_list_expanded_response,
-    update_application_info_response,
+    get_update_application_info_response,
+    update_application_info,
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
@@ -279,13 +280,18 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
     def update_application_info_request(
         self, proxy_response: SOAPResponse | None = None
     ) -> grantors_schemas.UpdateApplicationInfoResponseSOAPEnvelope:
-        return update_application_info_response(
+        tracking_number, assign_result, notes_result = update_application_info(
             db_session=self.db_session,
             soap_request=self.soap_request,
             update_application_info_request=grantors_schemas.UpdateApplicationInfoRequest(
                 **self.get_soap_request_dict()
             ),
             soap_config=self.operation_config,
+        )
+        return get_update_application_info_response(
+            grants_gov_tracking_number=tracking_number,
+            assign_agency_tracking_number_result=assign_result,
+            save_agency_notes_result=notes_result,
         )
 
     def _gen_response_data(
