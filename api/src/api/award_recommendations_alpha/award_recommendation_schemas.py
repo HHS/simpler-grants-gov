@@ -202,7 +202,7 @@ class AwardRecommendationSubmissionListRequestSchema(Schema):
     )
 
 
-class SubmissionOrganizationSchema(Schema):
+class AwardRecommendationOrganizationSchema(Schema):
     """Schema for the award recommendation submission organization"""
 
     organization_id = fields.UUID(metadata={"description": "The organization ID"})
@@ -212,20 +212,20 @@ class SubmissionOrganizationSchema(Schema):
     )
 
 
-class SubmissionApplicationSchema(Schema):
+class AwardRecommendationApplicationSchema(Schema):
     """Schema for the award recommendation submission application"""
 
     application_id = fields.UUID(metadata={"description": "The application ID"})
     competition_id = fields.UUID(metadata={"description": "The competition ID"})
     organization = fields.Nested(
-        SubmissionOrganizationSchema,
+        AwardRecommendationOrganizationSchema,
         allow_none=True,
         metadata={"description": "The organization that submitted the application"},
     )
 
 
-class SubmissionApplicationSubmissionSchema(Schema):
-    """Schema for the award recommendation submission application"""
+class AwardRecommendationApplicationSubmissionSchema(Schema):
+    """Schema for the award recommendation application submission"""
 
     application_submission_id = fields.UUID(
         metadata={"description": "The application submission ID"}
@@ -253,7 +253,7 @@ class SubmissionApplicationSubmissionSchema(Schema):
         },
     )
     application = fields.Nested(
-        SubmissionApplicationSchema,
+        AwardRecommendationApplicationSchema,
         metadata={"description": "The application associated with this submission"},
     )
 
@@ -298,7 +298,7 @@ class AwardRecommendationSubmissionDataSchema(Schema):
         metadata={"description": "The award recommendation application submission ID"}
     )
     application_submission = fields.Nested(
-        SubmissionApplicationSubmissionSchema,
+        AwardRecommendationApplicationSubmissionSchema,
         metadata={"description": "The application submission"},
     )
     submission_detail = fields.Nested(
