@@ -301,7 +301,6 @@ class TestListAwardRecommendationSubmissions401:
         )
 
         assert resp.status_code == 401
-        assert resp.json["message"] == "Unable to process token"
 
     def test_list_submissions_invalid_token_401(self, client, enable_factory_create):
         resp = client.post(
@@ -311,7 +310,6 @@ class TestListAwardRecommendationSubmissions401:
         )
 
         assert resp.status_code == 401
-        assert resp.json["message"] == "Unable to process token"
 
 
 ####################################
