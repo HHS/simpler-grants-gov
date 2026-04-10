@@ -78,7 +78,7 @@ function SuccessContent({
       <p>
         {t.rich("successDescription", {
           workspaceLink: (chunks) => (
-            <Link href="/saved-search-queries">{chunks}</Link>
+            <Link href="/workspace/saved-search-queries">{chunks}</Link>
           ),
         })}
       </p>

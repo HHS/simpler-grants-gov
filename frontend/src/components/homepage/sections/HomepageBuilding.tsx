@@ -1,13 +1,13 @@
 import BuildingImage from "public/img/homepage-building.jpg";
+import { ExternalRoutes } from "src/constants/routes";
 
-import { useMessages, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
+import Link from "next/link";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
 const BuildingContent = () => {
   const t = useTranslations("Homepage.sections.building");
-  const messages = useMessages() as unknown as IntlMessages;
-  const { paragraphs } = messages.Homepage.sections.building;
 
   return (
     <GridContainer
@@ -38,14 +38,25 @@ const BuildingContent = () => {
                 span: (chunks) => <span className="text-italic">{chunks}</span>,
               })}
             </h2>
-            {paragraphs.map((paragraph: string, paragraphIdx: number) => (
-              <p
-                className="font-sans-md tablet-lg:font-sans-lg"
-                key={paragraphIdx}
-              >
-                {paragraph}
-              </p>
-            ))}
+            <p className="font-sans-md tablet-lg:font-sans-lg">
+              {t("paragraph1")}
+            </p>
+            <p className="font-sans-md tablet-lg:font-sans-lg">
+              {t.rich("paragraph2", {
+                code: (chunks) => (
+                  <a
+                    href={ExternalRoutes.GITHUB_REPO}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="usa-link--external"
+                  >
+                    {chunks}
+                  </a>
+                ),
+                roadmap: (chunks) => <Link href="/roadmap">{chunks}</Link>,
+                vision: (chunks) => <Link href="/vision">{chunks}</Link>,
+              })}
+            </p>
           </Grid>
         </Grid>
       </Grid>

@@ -9,7 +9,8 @@ from src.db.models.competition_models import (
 )
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
 from src.legacy_soap_api.grantors.services.update_application_info_response import (
-    update_application_info_response,
+    get_update_application_info_response,
+    update_application_info,
 )
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientUserDoesNotHavePermission
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
@@ -69,7 +70,7 @@ def _setup_submission(agency, application_status=ApplicationStatus.ACCEPTED):
     return ApplicationSubmissionFactory.create(application=application)
 
 
-class TestUpdateApplicationInfoResponse:
+class TestUpdateApplicationInfo:
     def test_successful_assign_tracking_number(self, db_session, enable_factory_create):
         agency = AgencyFactory.create()
         submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
@@ -83,18 +84,17 @@ class TestUpdateApplicationInfoResponse:
             AssignAgencyTrackingNumber="AGENCY-123",
         )
 
-        result = update_application_info_response(
+        tracking_num, assign_result, notes_result = update_application_info(
             db_session=db_session,
             soap_request=soap_request,
             update_application_info_request=request_schema,
             soap_config=_make_operation_config(),
         )
 
-        assert result.success == "true"
-        assert result.grants_gov_tracking_number == tracking_number
-        assert result.assign_agency_tracking_number_result is not None
-        assert result.assign_agency_tracking_number_result.success == "true"
-        assert result.save_agency_notes_result is None
+        assert tracking_num == tracking_number
+        assert assign_result is not None
+        assert assign_result.success == "true"
+        assert notes_result is None
 
         # Verify tracking number record was inserted
         tracking_numbers = (
@@ -118,18 +118,17 @@ class TestUpdateApplicationInfoResponse:
             SaveAgencyNotes="Test agency notes",
         )
 
-        result = update_application_info_response(
+        tracking_num, assign_result, notes_result = update_application_info(
             db_session=db_session,
             soap_request=soap_request,
             update_application_info_request=request_schema,
             soap_config=_make_operation_config(),
         )
 
-        assert result.success == "true"
-        assert result.grants_gov_tracking_number == tracking_number
-        assert result.assign_agency_tracking_number_result is None
-        assert result.save_agency_notes_result is not None
-        assert result.save_agency_notes_result.success == "true"
+        assert tracking_num == tracking_number
+        assert assign_result is None
+        assert notes_result is not None
+        assert notes_result.success == "true"
 
         # Verify note record was inserted
         notes = (
@@ -156,18 +155,17 @@ class TestUpdateApplicationInfoResponse:
             SaveAgencyNotes="Notes with tracking number",
         )
 
-        result = update_application_info_response(
+        _, assign_result, notes_result = update_application_info(
             db_session=db_session,
             soap_request=soap_request,
             update_application_info_request=request_schema,
             soap_config=_make_operation_config(),
         )
 
-        assert result.success == "true"
-        assert result.assign_agency_tracking_number_result is not None
-        assert result.assign_agency_tracking_number_result.success == "true"
-        assert result.save_agency_notes_result is not None
-        assert result.save_agency_notes_result.success == "true"
+        assert assign_result is not None
+        assert assign_result.success == "true"
+        assert notes_result is not None
+        assert notes_result.success == "true"
 
         # Verify both records were inserted
         tracking_numbers = (
@@ -197,7 +195,7 @@ class TestUpdateApplicationInfoResponse:
         )
 
         with pytest.raises(SOAPFaultException):
-            update_application_info_response(
+            update_application_info(
                 db_session=db_session,
                 soap_request=soap_request,
                 update_application_info_request=request_schema,
@@ -219,7 +217,7 @@ class TestUpdateApplicationInfoResponse:
         )
 
         with pytest.raises(SOAPFaultException):
-            update_application_info_response(
+            update_application_info(
                 db_session=db_session,
                 soap_request=soap_request,
                 update_application_info_request=request_schema,
@@ -253,15 +251,15 @@ class TestUpdateApplicationInfoResponse:
             AssignAgencyTrackingNumber="NEW-AGENCY-456",
         )
 
-        result = update_application_info_response(
+        _, assign_result, _ = update_application_info(
             db_session=db_session,
             soap_request=soap_request,
             update_application_info_request=request_schema,
             soap_config=_make_operation_config(),
         )
 
-        assert result.assign_agency_tracking_number_result is not None
-        assert result.assign_agency_tracking_number_result.success == "false"
+        assert assign_result is not None
+        assert assign_result.success == "false"
 
         # Verify no additional tracking number record was inserted
         tracking_numbers = (
@@ -286,28 +284,28 @@ class TestUpdateApplicationInfoResponse:
             GrantsGovTrackingNumber=tracking_number,
             SaveAgencyNotes="First note",
         )
-        result_1 = update_application_info_response(
+        _, _, notes_result_1 = update_application_info(
             db_session=db_session,
             soap_request=soap_request,
             update_application_info_request=request_schema_1,
             soap_config=_make_operation_config(),
         )
-        assert result_1.save_agency_notes_result is not None
-        assert result_1.save_agency_notes_result.success == "true"
+        assert notes_result_1 is not None
+        assert notes_result_1.success == "true"
 
         # Save notes second time
         request_schema_2 = grantor_schemas.UpdateApplicationInfoRequest(
             GrantsGovTrackingNumber=tracking_number,
             SaveAgencyNotes="Second note",
         )
-        result_2 = update_application_info_response(
+        _, _, notes_result_2 = update_application_info(
             db_session=db_session,
             soap_request=soap_request,
             update_application_info_request=request_schema_2,
             soap_config=_make_operation_config(),
         )
-        assert result_2.save_agency_notes_result is not None
-        assert result_2.save_agency_notes_result.success == "true"
+        assert notes_result_2 is not None
+        assert notes_result_2.success == "true"
 
         # Verify both notes were saved
         notes = (
@@ -333,7 +331,7 @@ class TestUpdateApplicationInfoResponse:
         )
 
         with pytest.raises(SOAPClientUserDoesNotHavePermission):
-            update_application_info_response(
+            update_application_info(
                 db_session=db_session,
                 soap_request=soap_request,
                 update_application_info_request=request_schema,
@@ -354,37 +352,54 @@ class TestUpdateApplicationInfoResponse:
             SaveAgencyNotes="Notes for accepted app",
         )
 
-        result = update_application_info_response(
+        tracking_num, _, notes_result = update_application_info(
             db_session=db_session,
             soap_request=soap_request,
             update_application_info_request=request_schema,
             soap_config=_make_operation_config(),
         )
 
-        assert result.success == "true"
-        assert result.save_agency_notes_result is not None
-        assert result.save_agency_notes_result.success == "true"
+        assert tracking_num == tracking_number
+        assert notes_result is not None
+        assert notes_result.success == "true"
 
-    def test_response_envelope_has_ns2_prefix(self, db_session, enable_factory_create):
+
+class TestGetUpdateApplicationInfoResponse:
+    def test_response_envelope_structure(self):
+        response = get_update_application_info_response(
+            grants_gov_tracking_number="GRANT12345678",
+            assign_agency_tracking_number_result=grantor_schemas.AssignAgencyTrackingNumberResult(
+                success="true"
+            ),
+            save_agency_notes_result=grantor_schemas.SaveAgencyNotesResult(success="true"),
+        )
+
+        assert response.success == "true"
+        assert response.grants_gov_tracking_number == "GRANT12345678"
+        assert response.assign_agency_tracking_number_result is not None
+        assert response.assign_agency_tracking_number_result.success == "true"
+        assert response.save_agency_notes_result is not None
+        assert response.save_agency_notes_result.success == "true"
+
+    def test_response_envelope_with_no_optional_results(self):
+        response = get_update_application_info_response(
+            grants_gov_tracking_number="GRANT12345678",
+            assign_agency_tracking_number_result=None,
+            save_agency_notes_result=None,
+        )
+
+        assert response.success == "true"
+        assert response.grants_gov_tracking_number == "GRANT12345678"
+        assert response.assign_agency_tracking_number_result is None
+        assert response.save_agency_notes_result is None
+
+    def test_response_envelope_has_ns2_prefix(self):
         """Verify the SOAP envelope dict uses ns2: prefix for the operation name."""
-        agency = AgencyFactory.create()
-        submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
-        tracking_number = f"GRANT{submission.legacy_tracking_number}"
-
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_ASSIGNER})
-        soap_request = _make_soap_request(soap_client_certificate, tracking_number)
-
-        request_schema = grantor_schemas.UpdateApplicationInfoRequest(
-            GrantsGovTrackingNumber=tracking_number,
-            SaveAgencyNotes="Test notes",
+        response = get_update_application_info_response(
+            grants_gov_tracking_number="GRANT12345678",
+            assign_agency_tracking_number_result=None,
+            save_agency_notes_result=grantor_schemas.SaveAgencyNotesResult(success="true"),
         )
 
-        result = update_application_info_response(
-            db_session=db_session,
-            soap_request=soap_request,
-            update_application_info_request=request_schema,
-            soap_config=_make_operation_config(),
-        )
-
-        envelope_dict = result.to_soap_envelope_dict("UpdateApplicationInfoResponse")
+        envelope_dict = response.to_soap_envelope_dict("UpdateApplicationInfoResponse")
         assert "ns2:UpdateApplicationInfoResponse" in envelope_dict["Envelope"]["Body"]

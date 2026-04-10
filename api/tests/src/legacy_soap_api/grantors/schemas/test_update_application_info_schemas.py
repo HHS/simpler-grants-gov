@@ -4,6 +4,8 @@ import pytest
 from pydantic import ValidationError
 
 from src.legacy_soap_api.grantors.schemas.update_application_info_schemas import (
+    AssignAgencyTrackingNumberResult,
+    SaveAgencyNotesResult,
     UpdateApplicationInfoRequest,
     UpdateApplicationInfoResponse,
 )
@@ -69,6 +71,20 @@ class TestUpdateApplicationInfoResponseSchema(unittest.TestCase):
             UpdateApplicationInfoResponse(**schema_dict), UpdateApplicationInfoResponse
         )
 
-    def test_missing_success_fields(self) -> None:
-        with pytest.raises(ValidationError):
-            UpdateApplicationInfoResponse(**{"grants_gov_tracking_number": "GRANT12345678"})
+    def test_success_defaults_to_none(self) -> None:
+        response = UpdateApplicationInfoResponse(**{"grants_gov_tracking_number": "GRANT12345678"})
+        assert response.success is None
+
+
+class TestSaveAgencyNotesResultDefaultNone:
+    def test_from_empty_dict(self) -> None:
+        result = SaveAgencyNotesResult(**{})
+        assert result.success is None
+        assert result.error_message is None
+
+
+class TestAssignAgencyTrackingNumberResultDefaultNone:
+    def test_from_empty_dict(self) -> None:
+        result = AssignAgencyTrackingNumberResult(**{})
+        assert result.success is None
+        assert result.error_message is None

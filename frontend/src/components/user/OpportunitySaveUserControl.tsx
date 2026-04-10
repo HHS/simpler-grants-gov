@@ -14,7 +14,7 @@ import SaveButton from "src/components/SaveButton";
 import SaveIcon from "src/components/SaveIcon";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-const SAVED_OPPS_PAGE_LINK = "/saved-opportunities";
+const SAVED_OPPS_PAGE_LINK = "/workspace/saved-opportunities";
 
 export const OpportunitySaveUserControl = ({
   opportunityId,

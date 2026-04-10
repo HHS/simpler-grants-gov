@@ -134,3 +134,4 @@ jobs:
     secrets: inherit
     with:
       run_id: ${{ github.run_id }}
+      target: local

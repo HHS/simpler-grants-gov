@@ -92,7 +92,7 @@ def test_user_get_saved_searches_no_auth(client, db_session, user, saved_searche
     )
 
     assert response.status_code == 401
-    assert response.json["message"] == "Unable to process token"
+    assert response.json["message"] == "Unauthorized"
 
 
 def test_user_get_saved_searches_empty(client, user, user_auth_token):

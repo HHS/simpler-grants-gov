@@ -9,17 +9,19 @@ from src.util.datetime_util import make_timezone_aware
 
 
 class SubmissionInfo(BaseSOAPSchema):
-    funding_opportunity_number: str | None = Field(alias="FundingOpportunityNumber")
-    cfda_number: str | None = Field(alias="CFDANumber")
-    grants_gov_tracking_number: str | None = Field(alias="GrantsGovTrackingNumber")
-    received_date_time: datetime | None = Field(alias="ns2:ReceivedDateTime")
-    grants_gov_application_status: str | None = Field(alias="GrantsGovApplicationStatus")
-    submission_method: str | None = Field(alias="SubmissionMethod")
-    submission_title: str | None = Field(alias="SubmissionTitle")
-    package_id: str | None = Field(alias="PackageID")
-    delinquent_federal_debt: str | None = Field(alias="DelinquentFederalDebt")
-    active_exclusions: str | None = Field(alias="ActiveExclusions")
-    uei: str | None = Field(alias="UEI")
+    funding_opportunity_number: str | None = Field(default=None, alias="FundingOpportunityNumber")
+    cfda_number: str | None = Field(default=None, alias="CFDANumber")
+    grants_gov_tracking_number: str | None = Field(default=None, alias="GrantsGovTrackingNumber")
+    received_date_time: datetime | None = Field(default=None, alias="ns2:ReceivedDateTime")
+    grants_gov_application_status: str | None = Field(
+        default=None, alias="GrantsGovApplicationStatus"
+    )
+    submission_method: str | None = Field(default=None, alias="SubmissionMethod")
+    submission_title: str | None = Field(default=None, alias="SubmissionTitle")
+    package_id: str | None = Field(default=None, alias="PackageID")
+    delinquent_federal_debt: str | None = Field(default=None, alias="DelinquentFederalDebt")
+    active_exclusions: str | None = Field(default=None, alias="ActiveExclusions")
+    uei: str | None = Field(default=None, alias="UEI")
 
     @field_validator("received_date_time", mode="before")
     @classmethod
@@ -35,8 +37,10 @@ class SubmissionInfo(BaseSOAPSchema):
 
 class GetSubmissionListExpandedResponse(BaseSOAPSchema):
     success: bool = Field(default=True, alias="ns2:Success")
-    available_application_number: int = Field(alias="ns2:AvailableApplicationNumber")
-    submission_info: list[SubmissionInfo] = Field(alias="ns2:SubmissionInfo")
+    available_application_number: int | None = Field(
+        default=None, alias="ns2:AvailableApplicationNumber"
+    )
+    submission_info: list[SubmissionInfo] = Field(default_factory=list, alias="ns2:SubmissionInfo")
 
     def to_soap_envelope_dict(self, operation_name: str) -> dict:
         return super().to_soap_envelope_dict(f"ns2:{operation_name}")

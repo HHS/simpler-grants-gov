@@ -2,6 +2,11 @@ name: Frontend Checks
 
 on:
   workflow_call:
+    inputs:
+      skip_checks:
+        type: boolean
+        default: false
+        description: Skip the guts of this workflow, but we have to run the workflow for dependency reasons when calling from CD workflows
   pull_request:
     paths:
       - frontend/**
@@ -22,6 +27,7 @@ concurrency:
 
 jobs:
   tests:
+    if: ${{ inputs.skip_checks == null || inputs.skip_checks == false }}
     name: FE Lint, Type Check, Format & Tests
     runs-on: ubuntu-22.04
 
@@ -57,6 +63,7 @@ jobs:
 
   # Confirms the front end still builds successfully
   check-frontend-builds:
+    if: ${{ inputs.skip_checks == null || inputs.skip_checks == false }}
     name: FE Build Check
     runs-on: ubuntu-22.04
 
@@ -85,6 +92,7 @@ jobs:
 
   # Confirms Storybook still builds successfully
   check-storybook-builds:
+    if: ${{ inputs.skip_checks == null || inputs.skip_checks == false }}
     name: FE Storybook Build Check
     runs-on: ubuntu-22.04
 
@@ -97,3 +105,12 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
       - run: npm ci
       - run: npm run storybook-build
+
+  skip-checks:
+    if: ${{ inputs.skip_checks != null && inputs.skip_checks == true }}
+    name: Skip Checks
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checks skipped
+        working-directory: ./
+        run: exit 0

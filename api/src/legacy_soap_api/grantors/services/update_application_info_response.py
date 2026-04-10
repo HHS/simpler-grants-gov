@@ -116,12 +116,24 @@ def _save_agency_notes(
     return grantor_schemas.SaveAgencyNotesResult(success="true")
 
 
-def update_application_info_response(
+def update_application_info(
     db_session: db.Session,
     soap_request: SOAPRequest,
     update_application_info_request: grantor_schemas.UpdateApplicationInfoRequest,
     soap_config: SOAPOperationConfig,
-) -> grantor_schemas.UpdateApplicationInfoResponseSOAPEnvelope:
+) -> tuple[
+    str | None,
+    grantor_schemas.AssignAgencyTrackingNumberResult | None,
+    grantor_schemas.SaveAgencyNotesResult | None,
+]:
+    """Validate and process the update application info request.
+
+    Performs all data gathering, validation, authorization, and creates
+    tracking number / note records as side effects.
+
+    Returns a tuple of (grants_gov_tracking_number, assign_result, notes_result).
+    Raises SOAPFaultException or SOAPClientUserDoesNotHavePermission on failure.
+    """
     legacy_tracking_number = cast(str, update_application_info_request.grants_gov_tracking_number)
 
     application_submission = _validate_application_submission(db_session, legacy_tracking_number)
@@ -170,9 +182,22 @@ def update_application_info_response(
             certificate.user,
         )
 
+    return (
+        update_application_info_request.grants_gov_tracking_number,
+        assign_result,
+        notes_result,
+    )
+
+
+def get_update_application_info_response(
+    grants_gov_tracking_number: str | None,
+    assign_agency_tracking_number_result: grantor_schemas.AssignAgencyTrackingNumberResult | None,
+    save_agency_notes_result: grantor_schemas.SaveAgencyNotesResult | None,
+) -> grantor_schemas.UpdateApplicationInfoResponseSOAPEnvelope:
+    """Build the SOAP response envelope from the gathered data."""
     return grantor_schemas.UpdateApplicationInfoResponseSOAPEnvelope(
-        grants_gov_tracking_number=update_application_info_request.grants_gov_tracking_number,
+        grants_gov_tracking_number=grants_gov_tracking_number,
         success="true",
-        assign_agency_tracking_number_result=assign_result,
-        save_agency_notes_result=notes_result,
+        assign_agency_tracking_number_result=assign_agency_tracking_number_result,
+        save_agency_notes_result=save_agency_notes_result,
     )

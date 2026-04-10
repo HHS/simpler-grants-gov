@@ -2,6 +2,11 @@ name: Analytics Checks
 
 on:
   workflow_call:
+    inputs:
+      skip_checks:
+        type: boolean
+        default: false
+        description: Skip the guts of this workflow, but we have to run the workflow for dependency reasons when calling from CD workflows
   pull_request:
     paths:
       - analytics/**
@@ -13,6 +18,7 @@ defaults:
 
 jobs:
   lint-test:
+    if: ${{ inputs.skip_checks == null || inputs.skip_checks == false }}
     name: Analytics Lint, Format & Tests
     runs-on: ubuntu-22.04
     env:
@@ -51,3 +57,11 @@ jobs:
 
       # - name: Run reports
       #   run: make sprint-reports
+  skip-checks:
+    if: ${{ inputs.skip_checks != null && inputs.skip_checks == true }}
+    name: Skip Checks
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checks skipped
+        working-directory: ./
+        run: exit 0

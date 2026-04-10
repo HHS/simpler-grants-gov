@@ -144,7 +144,7 @@ class BaseSOAPSchema(BaseModel):
     as a dict since the XML attributes typically come in as camel case.
     """
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, hide_input_in_errors=True)
 
     def to_soap_envelope_dict(self, operation_name: str) -> dict:
         return {

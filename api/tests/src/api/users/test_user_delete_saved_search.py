@@ -55,7 +55,7 @@ def test_user_delete_saved_search_no_auth(
     )
 
     assert response.status_code == 401
-    assert response.json["message"] == "Unable to process token"
+    assert response.json["message"] == "Unauthorized"
 
     # Verify search was not deleted
     saved_searches = (

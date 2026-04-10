@@ -313,7 +313,7 @@ def test_internal_jwt_auth_no_token(mini_app):
     """Test internal JWT auth fails without token"""
     resp = mini_app.test_client().get("/dummy_internal_auth_endpoint", headers={})
     assert resp.status_code == 401
-    assert resp.get_json()["message"] == "Unable to process token"
+    assert resp.get_json()["message"] == "Unauthorized"
 
 
 def test_internal_jwt_auth_malformed_token(mini_app):

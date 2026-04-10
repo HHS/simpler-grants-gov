@@ -1,0 +1,195 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+# Imports a signed SSL/TLS certificate into AWS Certificate Manager (ACM).
+#
+# Examples:
+#   bin/import-certificate api ./certs/api.simpler.grants.gov.crt
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+BASE_DOMAIN="simpler.grants.gov"
+
+# AWS region and profile from environment (standard AWS CLI convention)
+AWS_REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-us-east-1}}"
+AWS_PROFILE="${AWS_PROFILE:-}"
+PRIVATE_KEY_FILE=""
+CHAIN_FILE=""
+
+usage() {
+  echo "Usage: $0 <domain> <certificate_file> [-k private_key_file] [-n chain_file]"
+  echo
+  echo "  domain            Short name (e.g. 'api') or fully qualified (e.g. 'api.simpler.grants.gov')"
+  echo "  certificate_file  Path to the signed .crt file from the CA"
+  exit 1
+}
+
+if [[ $# -lt 2 ]]; then
+  usage
+fi
+
+INPUT_DOMAIN="$1"
+CERT_FILE="$2"
+shift 2
+
+while getopts "k:n:" opt; do
+  case "$opt" in
+    k) PRIVATE_KEY_FILE="$OPTARG" ;;
+    n) CHAIN_FILE="$OPTARG" ;;
+    *) usage ;;
+  esac
+done
+
+# Append the base domain suffix if not already present
+if [[ "$INPUT_DOMAIN" == *".$BASE_DOMAIN" ]] || [[ "$INPUT_DOMAIN" == "$BASE_DOMAIN" ]]; then
+  DOMAIN="$INPUT_DOMAIN"
+else
+  DOMAIN="${INPUT_DOMAIN}.${BASE_DOMAIN}"
+fi
+
+CERT_DIR="$(dirname "$CERT_FILE")"
+
+# Resolve private key path by convention if not specified
+if [[ -z "$PRIVATE_KEY_FILE" ]]; then
+  PRIVATE_KEY_FILE="${CERT_DIR}/${DOMAIN}.key"
+fi
+
+# Resolve chain file by convention if not specified
+if [[ -z "$CHAIN_FILE" ]] && [[ -f "${CERT_DIR}/${DOMAIN}.chain.crt" ]]; then
+  CHAIN_FILE="${CERT_DIR}/${DOMAIN}.chain.crt"
+fi
+
+echo "======================================"
+echo "Import Certificate to AWS ACM"
+echo "======================================"
+echo "Input parameters"
+echo "  domain          = ${DOMAIN}"
+echo "  certificate     = ${CERT_FILE}"
+
+# Validate required tools
+for cmd in openssl aws; do
+  if ! command -v "$cmd" &> /dev/null; then
+    echo "Error: ${cmd} is required but not found in PATH" >&2
+    exit 1
+  fi
+done
+
+# Validate certificate file
+if [[ ! -f "$CERT_FILE" ]]; then
+  echo "Error: Certificate file not found: ${CERT_FILE}" >&2
+  exit 1
+fi
+
+if [[ "${CERT_FILE##*.}" != "crt" ]]; then
+  echo "Error: Certificate file must be a .crt file: ${CERT_FILE}" >&2
+  exit 1
+fi
+
+if ! head -c 20 "$CERT_FILE" | grep -q "^-----BEGIN"; then
+  echo "Error: Certificate file does not appear to be PEM-encoded: ${CERT_FILE}" >&2
+  exit 1
+fi
+
+# Validate private key file
+if [[ ! -f "$PRIVATE_KEY_FILE" ]]; then
+  echo "Error: Private key file not found: ${PRIVATE_KEY_FILE}" >&2
+  echo "       Use -k to specify the path to the private key." >&2
+  exit 1
+fi
+
+# Validate chain file if provided
+if [[ -n "$CHAIN_FILE" ]] && [[ ! -f "$CHAIN_FILE" ]]; then
+  echo "Error: Chain file not found: ${CHAIN_FILE}" >&2
+  exit 1
+fi
+
+# -----------------------------------------------------------------------
+# Verify the certificate and private key match
+# -----------------------------------------------------------------------
+echo "Verifying certificate and private key match..."
+CERT_MODULUS="$(openssl x509 -noout -modulus -in "$CERT_FILE" | openssl md5)"
+KEY_MODULUS="$(openssl rsa -noout -modulus -in "$PRIVATE_KEY_FILE" 2>/dev/null | openssl md5)"
+
+if [[ "$CERT_MODULUS" != "$KEY_MODULUS" ]]; then
+  echo "Error: Certificate and private key do not match." >&2
+  echo "       Certificate modulus: ${CERT_MODULUS}" >&2
+  echo "       Key modulus:         ${KEY_MODULUS}" >&2
+  exit 1
+fi
+echo "Certificate and private key match confirmed."
+
+# -----------------------------------------------------------------------
+# Print certificate details before importing
+# -----------------------------------------------------------------------
+echo
+echo "Certificate details:"
+openssl x509 -noout -subject -issuer -dates -in "$CERT_FILE"
+
+# -----------------------------------------------------------------------
+# Build the aws acm import-certificate command
+# -----------------------------------------------------------------------
+AWS_CMD=(aws acm import-certificate
+  --region "$AWS_REGION"
+  --certificate "fileb://${CERT_FILE}"
+  --private-key "fileb://${PRIVATE_KEY_FILE}"
+)
+
+if [[ -n "$AWS_PROFILE" ]]; then
+  AWS_CMD+=(--profile "$AWS_PROFILE")
+fi
+
+if [[ -n "$CHAIN_FILE" ]]; then
+  AWS_CMD+=(--certificate-chain "fileb://${CHAIN_FILE}")
+  echo "Including certificate chain: ${CHAIN_FILE}"
+fi
+
+# -----------------------------------------------------------------------
+# Check for an existing certificate with this domain to decide whether to
+# import a new certificate or re-import (update) an existing one.
+# -----------------------------------------------------------------------
+echo
+echo "Checking for existing ACM certificate for ${DOMAIN}..."
+
+EXISTING_CERT_ARN=""
+AWS_LIST_CMD=(aws acm list-certificates
+  --region "$AWS_REGION"
+  --query "CertificateSummaryList[?DomainName=='${DOMAIN}'].CertificateArn"
+  --output text
+)
+if [[ -n "$AWS_PROFILE" ]]; then
+  AWS_LIST_CMD+=(--profile "$AWS_PROFILE")
+fi
+
+EXISTING_CERT_ARN="$("${AWS_LIST_CMD[@]}" 2>/dev/null || true)"
+
+if [[ -n "$EXISTING_CERT_ARN" ]]; then
+  echo "Found existing certificate: ${EXISTING_CERT_ARN}"
+  echo "Re-importing (updating) certificate..."
+  AWS_CMD+=(--certificate-arn "$EXISTING_CERT_ARN")
+else
+  echo "No existing certificate found. Importing as new certificate..."
+fi
+
+# -----------------------------------------------------------------------
+# Import the certificate
+# -----------------------------------------------------------------------
+echo
+echo "Running: aws acm import-certificate ..."
+CERTIFICATE_ARN="$("${AWS_CMD[@]}" --output text)"
+
+echo
+echo "======================================"
+echo "Success"
+echo "======================================"
+echo "  Certificate ARN : ${CERTIFICATE_ARN}"
+echo "  Domain          : ${DOMAIN}"
+echo "  Region          : ${AWS_REGION}"
+echo
+echo "Next steps:"
+echo "  Add or update the certificate_configs in infra/project-config/networks.tf"
+echo "  for the relevant environment, for example:"
+echo
+echo "    certificate_configs = {"
+echo "      \"${DOMAIN}\" = {"
+echo "        source = \"imported\""
+echo "      }"
+echo "    }"

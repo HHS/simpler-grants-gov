@@ -456,7 +456,7 @@ def test_list_application_audit_no_auth_401(client):
         json={"pagination": {"page_offset": 1, "page_size": 25}},
     )
     assert response.status_code == 401
-    assert response.json["message"] == "Unable to process token"
+    assert response.json["message"] == "Unauthorized"
 
 
 def test_list_application_audit_missing_required_422(client, db_session, enable_factory_create):

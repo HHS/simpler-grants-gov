@@ -352,7 +352,7 @@ def test_put_workflow_event_missing_token_401(client, workflow_sqs_queue):
     }
     response = client.put("/v1/workflows/events", json=payload)
     assert response.status_code == 401
-    assert response.get_json()["message"] == "Unable to process token"
+    assert response.get_json()["message"] == "Unauthorized"
 
     # Verify no message sent
     messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
@@ -829,7 +829,7 @@ class TestWorkflowGet:
         response = client.get(f"/v1/workflows/{uuid.uuid4()}")
 
         assert response.status_code == 401
-        assert response.json["message"] == "Unable to process token"
+        assert response.json["message"] == "Unauthorized"
 
     def test_get_workflow_invalid_token_401(self, client):
         """Test that requests with invalid JWT are rejected."""

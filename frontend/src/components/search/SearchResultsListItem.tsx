@@ -140,7 +140,7 @@ export default function SearchResultsListItem({
                 className="usa-button usa-button--unstyled font-sans-2xs"
                 onClick={(event) => onShareClick(event.currentTarget)}
               >
-                {t("callToAction.shareWithOthers")}
+                {t("callToAction.sharingOptions")}
               </button>
             </div>
           ) : null}

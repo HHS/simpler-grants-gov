@@ -21,7 +21,7 @@ describe("buildSavedOpportunityTags", () => {
       {
         key: "individual",
         label: "Individual",
-        screenReaderLabel: "Saved to your list",
+        screenReaderLabel: "Saved by you",
         kind: "individual",
       },
     ]);
@@ -65,13 +65,13 @@ describe("buildSavedOpportunityTags", () => {
       {
         key: "organization-1",
         label: "Alpha Org",
-        screenReaderLabel: "Shared with Alpha Org",
+        screenReaderLabel: "Saved by Alpha Org",
         kind: "organization",
       },
       {
         key: "organization-2",
         label: "Bravo Org",
-        screenReaderLabel: "Shared with Bravo Org",
+        screenReaderLabel: "Saved by Bravo Org",
         kind: "organization",
       },
     ]);
@@ -101,19 +101,19 @@ describe("buildSavedOpportunityTags", () => {
       {
         key: "individual",
         label: "Individual",
-        screenReaderLabel: "Saved to your list",
+        screenReaderLabel: "Saved by you",
         kind: "individual",
       },
       {
         key: "organization-1",
         label: "Alpha Org",
-        screenReaderLabel: "Shared with Alpha Org",
+        screenReaderLabel: "Saved by Alpha Org",
         kind: "organization",
       },
       {
         key: "organization-2",
         label: "Bravo Org",
-        screenReaderLabel: "Shared with Bravo Org",
+        screenReaderLabel: "Saved by Bravo Org",
         kind: "organization",
       },
     ]);
@@ -143,7 +143,7 @@ describe("buildSavedOpportunityTags", () => {
       {
         key: "organization-2",
         label: "Bravo Org",
-        screenReaderLabel: "Shared with Bravo Org",
+        screenReaderLabel: "Saved by Bravo Org",
         kind: "organization",
       },
     ]);
@@ -173,7 +173,7 @@ describe("buildSavedOpportunityTags", () => {
       {
         key: "organization-2",
         label: "Bravo Org",
-        screenReaderLabel: "Shared with Bravo Org",
+        screenReaderLabel: "Saved by Bravo Org",
         kind: "organization",
       },
     ]);

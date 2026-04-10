@@ -284,3 +284,33 @@ class TestSubmissionInfoTimezoneValidation:
             reverse=True,
         )
         assert sorted_info[0].received_date_time == aware_dt
+
+
+class TestSubmissionInfoDefaultNone:
+    """Test that SubmissionInfo fields default to None when keys are missing from input."""
+
+    def test_submission_info_from_empty_dict(self):
+        info = grantors_schemas.SubmissionInfo(**{})
+        assert info.funding_opportunity_number is None
+        assert info.cfda_number is None
+        assert info.grants_gov_tracking_number is None
+        assert info.received_date_time is None
+        assert info.grants_gov_application_status is None
+        assert info.submission_method is None
+        assert info.submission_title is None
+        assert info.package_id is None
+        assert info.delinquent_federal_debt is None
+        assert info.active_exclusions is None
+        assert info.uei is None
+
+    def test_submission_info_with_partial_dict(self):
+        info = grantors_schemas.SubmissionInfo(**{"UEI": "00000000INDV"})
+        assert info.uei == "00000000INDV"
+        assert info.cfda_number is None
+        assert info.funding_opportunity_number is None
+
+    def test_get_submission_list_expanded_response_from_empty_dict(self):
+        response = grantors_schemas.GetSubmissionListExpandedResponse(**{})
+        assert response.success is True
+        assert response.available_application_number is None
+        assert response.submission_info == []

@@ -11,7 +11,9 @@ export async function InviteLegacyUsersButton({
 }) {
   const t = await getTranslations("ManageUsers");
   return (
-    <Link href={`/organizations/${organizationId}/manage-users/legacy`}>
+    <Link
+      href={`/workspace/organizations/${organizationId}/manage-users/legacy`}
+    >
       <Button type="button">
         <USWDSIcon name="groups" />
         {t("inviteLegacyUsers")}

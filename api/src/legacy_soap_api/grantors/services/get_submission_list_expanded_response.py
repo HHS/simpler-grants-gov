@@ -223,24 +223,40 @@ def _apply_agency_filter(stmt: Select, agency: Agency | None) -> Select:
     return stmt.where(Opportunity.agency_code == agency.agency_code)
 
 
-def get_submission_list_expanded_response(
+def get_submission_list_expanded(
     db_session: db.Session,
     request: schemas.GetSubmissionListExpandedRequest,
     soap_request: SOAPRequest,
-    proxy_response: SOAPResponse,
     soap_config: SOAPOperationConfig,
-) -> schemas.GetSubmissionListExpandedResponse:
+) -> list[schemas.SubmissionInfo]:
+    """Gather submission data from the database.
+
+    Performs authentication, authorization, filtering, and transforms
+    database submissions into SubmissionInfo objects.
+
+    Returns a list of SubmissionInfo from Simpler.
+    """
     submissions = get_submissions(db_session, request, soap_request, soap_config)
-    info = []
-    proxy_submissions = []
+    return [
+        schemas.SubmissionInfo(**transform_submission(submission)) for submission in submissions
+    ]
+
+
+def get_submission_list_expanded_response(
+    simpler_submissions: list[schemas.SubmissionInfo],
+    proxy_response: SOAPResponse,
+) -> schemas.GetSubmissionListExpandedResponse:
+    """Build the SOAP response envelope from Simpler and proxy data.
+
+    Parses proxy submissions, merges with Simpler submissions,
+    sorts by date, and constructs the response.
+    """
+    info: list[schemas.SubmissionInfo] = []
     try:
-        proxy_submissions = parse_submissions_from_proxy(proxy_response)
+        info.extend(parse_submissions_from_proxy(proxy_response))
     except Exception:
         logger.exception("Failed to parse submission list expanded XML response")
-    info.extend(proxy_submissions)
-    for submission in submissions:
-        submission_list_obj = transform_submission(submission)
-        info.append(schemas.SubmissionInfo(**submission_list_obj))
+    info.extend(simpler_submissions)
     info.sort(
         key=lambda x: x.received_date_time or datetime.min.replace(tzinfo=timezone.utc),
         reverse=True,

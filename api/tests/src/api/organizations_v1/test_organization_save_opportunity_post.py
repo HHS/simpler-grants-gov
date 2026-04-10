@@ -82,7 +82,7 @@ class TestOrganizationSaveOpportunityPost:
         )
 
         assert resp.status_code == 401
-        assert resp.get_json()["message"] == "Unable to process token"
+        assert resp.get_json()["message"] == "Unauthorized"
 
     def test_save_opportunity_403_not_org_member(self, enable_factory_create, client, db_session):
         """User who is not a member of the organization gets 403"""

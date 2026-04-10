@@ -206,4 +206,4 @@ def test_api_jwt_auth_token_unknown_audience(mini_app, enable_factory_create, db
 def test_api_jwt_auth_no_token(mini_app, enable_factory_create, db_session):
     resp = mini_app.test_client().get("/dummy_auth_endpoint", headers={})
     assert resp.status_code == 401
-    assert resp.get_json()["message"] == "Unable to process token"
+    assert resp.get_json()["message"] == "Unauthorized"

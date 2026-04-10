@@ -138,7 +138,8 @@ Run the initialization command which will:
 - Build Docker images (grants-api and opensearch-node)
 - Set up the PostgreSQL database with migrations
 - Initialize OpenSearch
-- Set up LocalStack (S3 mock) with required buckets
+- Set up S3Mock with required buckets
+- Set up elasticMq (sqs mock) with required queues
 - Initialize mock SOAP services
 - Initialize mock OAuth2 server
 
@@ -178,11 +179,12 @@ Check that all containers are running:
 docker compose ps
 ```
 
-You should see 6 containers with status "Up":
+You should see 7 containers with status "Up":
 - `grants-api` (the main API) - port 8080
 - `grants-db` (PostgreSQL database) - port 5432
 - `opensearch-node` (search engine) - port 9200
-- `localstack-main` (S3 mock) - port 4566
+- `s3mock` - port 9090
+- `sqsmock` - port 9324
 - `api-mock-oauth2-server-1` (authentication mock) - port 5001
 - `mock-applicants-soap-api` (SOAP API mock) - port 8082
 

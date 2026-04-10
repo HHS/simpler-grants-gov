@@ -81,7 +81,7 @@ def test_internal_multi_auth_with_api_key(mini_app, api_auth_token):
     )
     # API keys should not be accepted for internal multi-auth endpoints for security reasons
     assert resp.status_code == 401
-    assert resp.json["message"] == "Unable to process token"
+    assert resp.json["message"] == "Unauthorized"
 
 
 def test_internal_multi_auth_with_internal_jwt(mini_app, enable_factory_create, db_session):

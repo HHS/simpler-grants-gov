@@ -5,11 +5,6 @@ import { createMockOpportunity } from "src/utils/testing/fixtures";
 
 import { SavedOpportunitiesController } from "./SavedOpportunitiesController";
 
-const mockClientFetch = jest.fn<
-  Promise<unknown>,
-  [string, RequestInit | undefined]
->();
-
 interface MockSearchResultsListItemProps {
   opportunity: BaseOpportunity;
   showShareButton?: boolean;
@@ -20,12 +15,6 @@ interface MockShareOpportunityToOrganizationsModalProps {
   onSavedOrganizationsChange: (organizationIds: Set<string>) => void;
   organizations: Organization[];
 }
-
-jest.mock("src/hooks/useClientFetch", () => ({
-  useClientFetch: () => ({
-    clientFetch: mockClientFetch,
-  }),
-}));
 
 jest.mock("src/components/search/SearchResultsListItem", () => ({
   __esModule: true,
@@ -85,16 +74,15 @@ jest.mock(
 );
 
 describe("SavedOpportunitiesController", () => {
-  beforeEach(() => {
-    mockClientFetch.mockReset();
-  });
-
   it("passes showShareButton as false when the user has no organizations", async () => {
     const opportunity = createMockOpportunity();
 
-    mockClientFetch.mockResolvedValueOnce([]);
-
-    render(<SavedOpportunitiesController opportunities={[opportunity]} />);
+    render(
+      <SavedOpportunitiesController
+        opportunities={[opportunity]}
+        organizations={[]}
+      />,
+    );
 
     await waitFor(() => {
       expect(
@@ -124,9 +112,12 @@ describe("SavedOpportunitiesController", () => {
       },
     ];
 
-    mockClientFetch.mockResolvedValueOnce(organizations);
-
-    render(<SavedOpportunitiesController opportunities={[opportunity]} />);
+    render(
+      <SavedOpportunitiesController
+        opportunities={[opportunity]}
+        organizations={organizations}
+      />,
+    );
 
     await waitFor(() => {
       expect(
@@ -156,9 +147,12 @@ describe("SavedOpportunitiesController", () => {
       },
     ];
 
-    mockClientFetch.mockResolvedValueOnce(organizations);
-
-    render(<SavedOpportunitiesController opportunities={[opportunity]} />);
+    render(
+      <SavedOpportunitiesController
+        opportunities={[opportunity]}
+        organizations={organizations}
+      />,
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId("modal-organizations")).toHaveTextContent(

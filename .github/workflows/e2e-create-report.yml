@@ -5,9 +5,6 @@ on:
       run_id:
         description: "github actions id for run to grab artifacts from"
         type: string
-      artifact-ids:
-        description: "comma separated string of test report artifact ids to download"
-        type: string
       target:
         description: "application environment the test was run against"
         default: "local"
@@ -41,9 +38,8 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           path: frontend/all-blob-reports
-          # artifact-ids: ${{ inputs.artifact-ids }}
           run-id: ${{ inputs.run_id }}
-          pattern: blob-report-shard-*
+          pattern: blob-report-shard-${{ inputs.target }}-*
           merge-multiple: true
       - name: Verify Downloaded Artifacts
         run: |

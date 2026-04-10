@@ -37,6 +37,8 @@ export const ApplyFormMessage = ({
   } else if (validationWarnings && validationWarnings.length > 0) {
     return (
       <Alert
+        // Added data-testid to ensure success and warning alerts are detectable in tests
+        data-testid="alert"
         heading={t("savedTitle")}
         headingLevel="h2"
         type="warning"
@@ -57,7 +59,13 @@ export const ApplyFormMessage = ({
     );
   } else {
     return (
-      <Alert heading={t("savedTitle")} headingLevel="h3" type="success">
+      // Added data-testid to ensure success and warning alerts are detectable in tests
+      <Alert
+        data-testid="alert"
+        heading={t("savedTitle")}
+        headingLevel="h3"
+        type="success"
+      >
         {t("savedMessage")}
       </Alert>
     );

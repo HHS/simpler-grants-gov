@@ -1,3 +1,5 @@
+import { ExternalRoutes } from "src/constants/routes";
+
 import { useTranslations } from "next-intl";
 
 import VisionPageSection from "src/components/vision/visionPageSection";
@@ -13,22 +15,32 @@ export default function VisionGetThere() {
         <p>{t("paragraph2")}</p>
         <p>
           <a
-            className="font-sans-xs line-height-sans-4 "
+            href={ExternalRoutes.WIKI_USER_RESEARCH_ARCHETYPES}
             target="_blank"
             rel="noopener noreferrer"
-            href="https://wiki.simpler.grants.gov/design-and-research/user-research/grants.gov-archetypes"
+            className="usa-link--external"
           >
             {t("linkText1")}
           </a>
         </p>
         <p>
           <a
-            className="font-sans-xs line-height-sans-4"
+            href={ExternalRoutes.ETHNIO_VOLUNTEER}
             target="_blank"
             rel="noopener noreferrer"
-            href="https://ethn.io/91822"
+            className="usa-link--external"
           >
             {t("linkText2")}
+          </a>
+        </p>
+        <p>
+          <a
+            href={ExternalRoutes.FIDER}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="usa-link--external"
+          >
+            {t("linkText3")}
           </a>
         </p>
       </div>

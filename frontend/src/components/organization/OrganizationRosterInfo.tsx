@@ -27,7 +27,7 @@ export const OrganizationRosterInfo = ({
         {t("explanation")} {t("manageUsersExplanation")}{" "}
         {manageUsersPrivilege?.authorized && (
           <Link
-            href={`/organizations/${organizationId}/manage-users`}
+            href={`/workspace/organizations/${organizationId}/manage-users`}
             className="usa-button usa-button--secondary float-right"
           >
             <USWDSIcon name="people" />

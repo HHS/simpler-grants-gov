@@ -28,7 +28,7 @@ import ApplicationValidationAlert from "./ApplicationValidationAlert";
 import { InformationCard } from "./InformationCard";
 import { OpportunityCard } from "./OpportunityCard";
 
-const MY_APPLICATIONS_LINK = "/applications";
+const MY_APPLICATIONS_LINK = "/workspace/applications";
 
 const ApplicationContainer = ({
   applicationDetails,
