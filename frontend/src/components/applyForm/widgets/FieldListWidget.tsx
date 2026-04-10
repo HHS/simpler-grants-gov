@@ -288,7 +288,10 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   } = widgetProps;
   const t = useTranslations("Application.applyForm.fieldListWidget");
   const fieldListPath = `$.${name}`;
-  const groupErrors = getFieldListGroupErrors({ rawErrors, fieldListPath });
+  const groupErrors = getFieldListGroupErrors({
+    rawErrors,
+    fieldListPath,
+  });
 
   /**
    * FieldList manages entry add/remove behavior locally so the UI updates
@@ -303,6 +306,9 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
       defaultSize,
     }),
   );
+
+  const onFieldListEntryDelete =
+    widgetProps.formContext?.widgetSupport?.onFieldListEntryDelete;
 
   /**
    * Updates local entry state and optionally forwards the new value through
@@ -330,6 +336,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
 
   const handleDeleteRow = useCallback(
     (entryIndex: number): void => {
+      onFieldListEntryDelete?.(fieldListPath, entryIndex);
       handleRowsChange((previousRows) =>
         removeFieldListRow({
           rows: previousRows,
@@ -337,7 +344,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
         }),
       );
     },
-    [handleRowsChange],
+    [fieldListPath, handleRowsChange, onFieldListEntryDelete],
   );
 
   const isInteractionDisabled = Boolean(disabled || readOnly || isFormLocked);

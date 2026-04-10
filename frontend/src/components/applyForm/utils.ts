@@ -98,14 +98,14 @@ const validationWarningOverrides = (
     .replace("[] should be non-empty", `${formattedTitle} is required`)
     .replace("is a required property", "is required");
 };
-const formatValidationWarning = (
+export const formatValidationWarning = (
   fieldName: string,
   message: string,
   fieldSchema?: SchemaField,
 ): string => {
   return validationWarningOverrides(message, fieldName, fieldSchema?.title);
 };
-const findValidationErrors = (
+export const findValidationErrors = (
   errors: FormValidationWarning[],
   definition: string | undefined,
   schema: SchemaField | undefined,
@@ -304,7 +304,7 @@ export const getFieldNameForHtml = ({
   }
   return (schema?.title ?? "untitled").replace(/\s/g, "-");
 };
-function getHtmlFieldForWarning({
+export function getHtmlFieldForWarning({
   definition,
   field,
   schema,
@@ -341,7 +341,7 @@ function getHtmlFieldForWarning({
 
 // Finds the parent FieldList label for a child field definition so it can be
 // used in summary text like "First Name is required (Contact People, Entry 2)".
-function getFieldListLabelFromDefinition({
+export function getFieldListLabelFromDefinition({
   definition,
   uiSchema,
 }: {

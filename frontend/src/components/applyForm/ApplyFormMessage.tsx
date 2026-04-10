@@ -8,7 +8,7 @@ const getWarningKey = (warning: FormattedFormValidationWarning): string => {
 };
 
 /**
- * Builds Summary link text for validation warnings.
+ * Builds summary link text for validation warnings.
  *
  * For repeatable FieldList inputs, multiple rows can contain the same child
  * field name (for example, multiple `first_name` fields). In those cases,
@@ -24,7 +24,6 @@ const getWarningKey = (warning: FormattedFormValidationWarning): string => {
  * becomes:
  *   "First Name is required (Contact People, Entry 2)"
  */
-
 export const getWarningLinkText = (
   warning: FormattedFormValidationWarning,
 ): string => {
@@ -38,7 +37,7 @@ export const getWarningLinkText = (
 
   const entryIndex = Number(entryMatch[1]);
 
-  if (Number.isNaN(entryMatch)) {
+  if (Number.isNaN(entryIndex)) {
     return baseText;
   }
 
@@ -68,19 +67,6 @@ export const ApplyFormMessage = ({
     p: (content) => <p>{content}</p>,
   });
 
-  /**
-   * Deduplicate validation warnings before rendering in the summary.
-   *
-   * Some warnings (particularly for FieldList child fields) can be emitted
-   * multiple times during validation tree construction. This ensures each
-   * unique warning is only displayed once in the alert.
-   *
-   * For row-aware FieldList warnings, `htmlField` is used as the primary key.
-   * This preserves distinct warnings for different rows (e.g. Entry 2 vs Entry 3),
-   * since each row produces a unique html field id.
-   *
-   * Falls back to `field` and then `definition` for non-row-aware warnings.
-   */
   const uniqueValidationWarnings = validationWarnings
     ? Array.from(
         new Map(

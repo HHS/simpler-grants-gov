@@ -155,6 +155,16 @@ export type FieldListWidgetProps = {
   formContext?: {
     rootSchema?: RJSFSchema;
     rootFormData?: unknown;
+    widgetSupport?: {
+      validationWarnings?:
+        | FormattedFormValidationWarning[]
+        | FormValidationWarning[];
+      deletedEntryIndexesByFieldListPath?: Record<string, number[]>;
+      onFieldListEntryDelete?: (
+        fieldListPath: string,
+        deletedEntryIndex: number,
+      ) => void;
+    };
   };
 };
 
@@ -261,6 +271,16 @@ export interface UswdsWidgetProps<
   formContext?: {
     rootSchema?: RJSFSchema;
     rootFormData?: unknown;
+    widgetSupport?: {
+      validationWarnings?:
+        | FormattedFormValidationWarning[]
+        | FormValidationWarning[];
+      deletedEntryIndexesByFieldListPath?: Record<string, number[]>;
+      onFieldListEntryDelete?: (
+        fieldListPath: string,
+        deletedEntryIndex: number,
+      ) => void;
+    };
   };
 }
 

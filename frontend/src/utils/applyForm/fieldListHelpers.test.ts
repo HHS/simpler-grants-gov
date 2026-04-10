@@ -103,7 +103,7 @@ describe("fieldListHelpers", () => {
       ).toEqual([]);
     });
 
-    it("returns the row-aware warning for the matching row only", () => {
+    it("returns the row-aware warning for the matching entry only", () => {
       const rawErrors: FormattedFormValidationWarning[] = [
         {
           field: "$.contact_people_test[1].first_name",
@@ -136,7 +136,7 @@ describe("fieldListHelpers", () => {
       ).toEqual([]);
     });
 
-    it("does not leak indexed warnings across rows", () => {
+    it("does not leak indexed warnings across entries", () => {
       const rawErrors: FormattedFormValidationWarning[] = [
         {
           field: "$.contact_people_test[2].first_name",
@@ -159,7 +159,7 @@ describe("fieldListHelpers", () => {
       ).toEqual([]);
     });
 
-    it("falls back to definition matching when the warning is not row-aware", () => {
+    it("falls back to definition matching for entry 0 when the warning is not indexed", () => {
       const rawErrors: FormattedFormValidationWarning[] = [
         {
           field: "$.contact_people_test",
@@ -180,6 +180,29 @@ describe("fieldListHelpers", () => {
           childDefinition,
         }),
       ).toEqual(["First Name is required"]);
+    });
+
+    it("does not apply the non-indexed fallback to later entries", () => {
+      const rawErrors: FormattedFormValidationWarning[] = [
+        {
+          field: "$.contact_people_test",
+          message: "[] should be non-empty",
+          formatted: "First Name is required",
+          type: "minItems",
+          value: null,
+          definition: childDefinition,
+        },
+      ];
+
+      expect(
+        getFieldListChildErrors({
+          rawErrors,
+          fieldListPath: "$.contact_people_test",
+          entryIndex: 1,
+          storageKey: "first_name",
+          childDefinition,
+        }),
+      ).toEqual([]);
     });
 
     it("deduplicates duplicate child messages", () => {

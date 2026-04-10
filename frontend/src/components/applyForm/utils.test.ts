@@ -6,10 +6,14 @@ import {
   addPrintWidgetToFields,
   buildWarningTree,
   condenseFormSchemaProperties,
+  findValidationErrors,
+  formatValidationWarning,
+  getFieldListLabelFromDefinition,
   getFieldNameForHtml,
   getFieldPathFromHtml,
   getFieldSchema,
   getFieldsForNav,
+  getHtmlFieldForWarning,
   getKeyParentPath,
   getRequiredProperties,
   isFieldRequired,
@@ -1170,5 +1174,210 @@ describe("addPrintWidgetToFields", () => {
         ],
       },
     ]);
+  });
+
+  describe("formatValidationWarning", () => {
+    it("formats required property messages using the schema title", () => {
+      expect(
+        formatValidationWarning(
+          "first_name",
+          "'first_name' is a required property",
+          {
+            title: "First Name",
+            type: "string",
+          },
+        ),
+      ).toBe("First Name is required");
+    });
+
+    it("formats non-empty array messages using the schema title", () => {
+      expect(
+        formatValidationWarning("first_name", "[] should be non-empty", {
+          title: "First Name",
+          type: "string",
+        }),
+      ).toBe("First Name is required");
+    });
+
+    it("falls back to a generic field label when no title exists", () => {
+      expect(
+        formatValidationWarning(
+          "first_name",
+          "'first_name' is a required property",
+        ),
+      ).toBe("Field is required");
+    });
+  });
+
+  describe("getHtmlFieldForWarning", () => {
+    it("builds a row-aware html field for indexed FieldList warnings", () => {
+      expect(
+        getHtmlFieldForWarning({
+          definition:
+            "/properties/contact_people_test/items/properties/first_name",
+          field: "$.contact_people_test[2].first_name",
+          schema: {
+            title: "First Name",
+            type: "string",
+          },
+        }),
+      ).toBe("contact_people_test[2]--first_name");
+    });
+
+    it("falls back to entry 0 when the FieldList warning is not indexed", () => {
+      expect(
+        getHtmlFieldForWarning({
+          definition:
+            "/properties/contact_people_test/items/properties/first_name",
+          field: "$.contact_people_test",
+          schema: {
+            title: "First Name",
+            type: "string",
+          },
+        }),
+      ).toBe("contact_people_test[0]--first_name");
+    });
+
+    it("falls back to standard html field generation for non-FieldList definitions", () => {
+      expect(
+        getHtmlFieldForWarning({
+          definition: "/properties/demo_text",
+          field: "$.demo_text",
+          schema: {
+            title: "Demo Text",
+            type: "string",
+          },
+        }),
+      ).toBe("demo_text");
+    });
+  });
+
+  describe("getFieldListLabelFromDefinition", () => {
+    it("finds a top-level FieldList label", () => {
+      const uiSchema: UiSchema = [
+        {
+          type: "fieldList",
+          name: "contact_people_test",
+          label: "Contact People",
+          defaultSize: 1,
+          children: [],
+        },
+      ];
+
+      expect(
+        getFieldListLabelFromDefinition({
+          definition:
+            "/properties/contact_people_test/items/properties/first_name",
+          uiSchema,
+        }),
+      ).toBe("Contact People");
+    });
+
+    it("finds a nested FieldList label inside a section", () => {
+      const uiSchema: UiSchema = [
+        {
+          type: "section",
+          name: "contacts-section",
+          label: "Contacts Section",
+          children: [
+            {
+              type: "fieldList",
+              name: "contact_people_test",
+              label: "Contact People",
+              defaultSize: 1,
+              children: [],
+            },
+          ],
+        },
+      ];
+
+      expect(
+        getFieldListLabelFromDefinition({
+          definition:
+            "/properties/contact_people_test/items/properties/first_name",
+          uiSchema,
+        }),
+      ).toBe("Contact People");
+    });
+
+    it("returns undefined when no matching FieldList exists", () => {
+      expect(
+        getFieldListLabelFromDefinition({
+          definition:
+            "/properties/contact_people_test/items/properties/first_name",
+          uiSchema: [],
+        }),
+      ).toBeUndefined();
+    });
+  });
+
+  describe("findValidationErrors", () => {
+    it("returns multiple row-aware warnings for the same FieldList child definition", () => {
+      const warnings = [
+        {
+          field: "$.contact_people_test[1].first_name",
+          message: "'first_name' is a required property",
+          type: "required",
+          value: null,
+        },
+        {
+          field: "$.contact_people_test[2].first_name",
+          message: "'first_name' is a required property",
+          type: "required",
+          value: null,
+        },
+      ];
+
+      const formSchema: RJSFSchema = {
+        type: "object",
+        properties: {
+          contact_people_test: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                first_name: {
+                  type: "string",
+                  title: "First Name",
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const uiSchema: UiSchema = [
+        {
+          type: "fieldList",
+          name: "contact_people_test",
+          label: "Contact People",
+          defaultSize: 1,
+          children: [],
+        },
+      ];
+
+      const result = findValidationErrors(
+        warnings,
+        "/properties/contact_people_test/items/properties/first_name",
+        { title: "First Name", type: "string" },
+        formSchema,
+        uiSchema,
+      );
+
+      expect(result).toEqual([
+        expect.objectContaining({
+          field: "$.contact_people_test[1].first_name",
+          htmlField: "contact_people_test[1]--first_name",
+          formatted: "First Name is required",
+          fieldListLabel: "Contact People",
+        }),
+        expect.objectContaining({
+          field: "$.contact_people_test[2].first_name",
+          htmlField: "contact_people_test[2]--first_name",
+          formatted: "First Name is required",
+          fieldListLabel: "Contact People",
+        }),
+      ]);
+    });
   });
 });
