@@ -1,4 +1,4 @@
-FROM ghcr.io/hhs/python-base-image:8db23e7@sha256:8a6fedd44b3255e975e24160e3b58335aaf71dbbae8776d130986015acd11305 AS base
+FROM ghcr.io/hhs/python-base-image:a101f89@sha256:ba4cef57b5623a4e9b34ba81178d39a453d3141761b5feb5cc09769449cd9565 AS base
 ARG RUN_UID
 ARG RUN_USER
 
@@ -34,6 +34,7 @@ COPY newrelic.ini /api/newrelic.ini
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
 RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
+    /usr/local/bin/python"${PY_MM}" -m poetry install --only main --no-root && \
     /usr/local/bin/python"${PY_MM}" -m poetry build --format wheel && \
     /api/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
     /api/.venv/bin/python -m pip install --no-cache-dir "virtualenv>=20.35.3" && \

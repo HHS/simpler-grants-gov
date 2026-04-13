@@ -1,0 +1,70 @@
+// Happy-path test data for the EPA Key Contacts form (EPA_KeyContacts_2_0).
+// Covers all four contact sections: Authorized Representative, Payee,
+// Administrative Contact, and Project Manager.
+// Keys match the fieldIdentifiers in epa-key-contacts-field-definitions.ts.
+
+export const epaKeyContactsHappyPathTestData = {
+  // ************ Authorized Representative ************
+  authorized_representative_name_prefix: "AR PREFIX.",
+  authorized_representative_name_first_name: "AR FIRST NAME",
+  authorized_representative_name_middle_name: "AR MIDDLE NAME",
+  authorized_representative_name_last_name: "AR LAST NAME",
+  authorized_representative_name_suffix: "AR SUFFIX.",
+  authorized_representative_title: "AR TITLE",
+  authorized_representative_address_street1: "AR STREET1",
+  authorized_representative_address_street2: "AR STREET2",
+  authorized_representative_address_city: "AR CITY",
+  authorized_representative_address_state: "AL: Alabama",
+  authorized_representative_address_zip_code: "123450000",
+  authorized_representative_address_country: "United States",
+  authorized_representative_phone: "1234567890",
+  authorized_representative_email: "simpler-grants-e2e-tester@navapbc.com",
+
+  // ************ Payee ************
+  payee_name_prefix: "PY PREFIX.",
+  payee_name_first_name: "PY FIRST NAME",
+  payee_name_middle_name: "PY MIDDLE NAME",
+  payee_name_last_name: "PY LAST NAME",
+  payee_name_suffix: "PY SUFFIX.",
+  payee_title: "PY TITLE",
+  payee_address_street1: "PY STREET1",
+  payee_address_street2: "PY STREET2",
+  payee_address_city: "PY CITY",
+  payee_address_state: "AL: Alabama",
+  payee_address_zip_code: "123450000",
+  payee_address_country: "United States",
+  payee_phone: "1234567890",
+  payee_email: "simpler-grants-e2e-tester@navapbc.com",
+
+  // ************ Administrative Contact ************
+  administrative_contact_name_prefix: "AC PREFIX.",
+  administrative_contact_name_first_name: "AC FIRST NAME",
+  administrative_contact_name_middle_name: "AC MIDDLE NAME",
+  administrative_contact_name_last_name: "AC LAST NAME",
+  administrative_contact_name_suffix: "AC SUFFIX.",
+  administrative_contact_title: "AC TITLE",
+  administrative_contact_address_street1: "AC STREET1",
+  administrative_contact_address_street2: "AC STREET2",
+  administrative_contact_address_city: "AC CITY",
+  administrative_contact_address_state: "AL: Alabama",
+  administrative_contact_address_zip_code: "123450000",
+  administrative_contact_address_country: "United States",
+  administrative_contact_phone: "1234567890",
+  administrative_contact_email: "simpler-grants-e2e-tester@navapbc.com",
+
+  // ************ Project Manager ************
+  project_manager_name_prefix: "PM PREFIX.",
+  project_manager_name_first_name: "PM FIRST NAME",
+  project_manager_name_middle_name: "PM MIDDLE NAME",
+  project_manager_name_last_name: "PM LAST NAME",
+  project_manager_name_suffix: "PM SUFFIX.",
+  project_manager_title: "PM TITLE",
+  project_manager_address_street1: "PM STREET1",
+  project_manager_address_street2: "PM STREET2",
+  project_manager_address_city: "PM CITY",
+  project_manager_address_state: "AL: Alabama",
+  project_manager_address_zip_code: "123450000",
+  project_manager_address_country: "United States",
+  project_manager_phone: "1234567890",
+  project_manager_email: "simpler-grants-e2e-tester@navapbc.com",
+} as const;

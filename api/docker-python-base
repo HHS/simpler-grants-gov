@@ -5,7 +5,7 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 
 ARG PYTHON_VERSION=3.14.3
 ARG PY_MM=3.14
-ARG POETRY_VERSION=2.2.1
+ARG POETRY_VERSION=2.3.3
 ARG PIP_VERSION=26.0
 
 SHELL ["/bin/bash", "-eux", "-c"]
@@ -69,7 +69,7 @@ RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"
 RUN python3 -m pip install --no-cache-dir --upgrade "filelock>=3.20.1"
 
 # Upgrade cryptography to fix GHSA-m959-cc7f-wv43
-RUN python3 -m pip install --no-cache-dir --upgrade "cryptography>=46.0.6"
+RUN python3 -m pip install --no-cache-dir --upgrade "cryptography>=46.0.7"
 
 # List package versions to make it easier to tell if fixed versions of vulnerable packages have been updated in the latest base image
 RUN python3 -m pip list -v
