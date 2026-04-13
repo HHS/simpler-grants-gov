@@ -14,7 +14,7 @@ export function getFormLink(page: Page, formName: string): Locator {
 
 /**
  * Converts a plain form name string into a flexible regex that allows
- * optional whitespace and optional hyphens (e.g. "SF-424B" → /SF-?424B/i).
+ * optional whitespace and optional hyphens (e.g. "SF-424B" -> /SF-?424B/i).
  */
 export function buildFlexibleFormNameRegex(formName: string): RegExp {
   const escaped = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

@@ -66,15 +66,15 @@ export async function verifyFormStatusOnApplication(
 
 /**
  * Verifies the post-save state on the form page (success alert or error alerts +
- * inline errors). Does NOT navigate - assumes the form page is currently active.
+ * inline errors). Does NOT navigate — assumes the form page is currently active.
  *
  * For "complete": checks success alert heading and "No errors were detected." text.
  * For "incomplete": checks the alert error list at the top and inline field errors;
- *                   expectedErrors is required in this case.
+ *                   `expectedErrors` is required in this case.
  *
  * @param page Playwright Page object
  * @param status Expected status: "complete" or "incomplete"
- * @param expectedErrors Required when status is "incomplete" - list of field errors to verify
+ * @param expectedErrors Required when status is "incomplete" — list of field errors to verify
  */
 export async function verifyFormStatusAfterSave(
   page: Page,
