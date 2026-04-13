@@ -24,6 +24,7 @@ module.exports = defineConfig([
       "**/.next/",
       "**/storybook-static",
       "next-env.d.ts",
+      "**/coverage/",
     ],
   },
   {
@@ -101,6 +102,7 @@ module.exports = defineConfig([
         "error",
         {
           argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_",
         },
       ],
@@ -113,6 +115,10 @@ module.exports = defineConfig([
           allow: ["warn", "error"],
         },
       ],
+
+      // typing a replacement function gets unnecessarily complex
+      // see https://dev.to/tipsy_dev/advanced-typescript-reinventing-lodash-get-4fhe
+      "you-dont-need-lodash-underscore/get": "off",
     },
   },
 ]);

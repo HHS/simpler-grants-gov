@@ -492,9 +492,7 @@ const getFieldListConfig = ({
 
       const {
         id: childId,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         value: _value,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         key: _key,
         ...rest
       } = childWidgetConfig.props;
