@@ -10,7 +10,6 @@ from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, get_soap_
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPInvalidEnvelope,
-    SOAPInvalidRequestOperationName,
     SOAPOperationNotSupported,
     SOAPResponse,
 )
@@ -47,7 +46,7 @@ def get_simpler_soap_response(
                 "soap_response_operation": simpler_soap_client.operation_config.response_operation_name,
             }
         )
-    except (SOAPInvalidEnvelope, SOAPInvalidRequestOperationName, SOAPOperationNotSupported) as e:
+    except (SOAPInvalidEnvelope, SOAPOperationNotSupported) as e:
         logger.info(
             f"simpler_soap_api: {e}",
             exc_info=True,

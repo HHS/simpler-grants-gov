@@ -31,10 +31,6 @@ class SOAPInvalidEnvelope(Exception):
     pass
 
 
-class SOAPInvalidRequestOperationName(Exception):
-    pass
-
-
 class SoapRequestStreamer(BaseModel):
     # Using Annotated here to keep the type hint but avoid issue where
     # BinaryIO doesn't match typing BinaryIO https://github.com/pydantic/pydantic/issues/5443

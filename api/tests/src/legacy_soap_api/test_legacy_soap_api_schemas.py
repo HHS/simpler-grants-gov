@@ -9,7 +9,6 @@ from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOpera
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     BaseSOAPSchema,
     FaultMessage,
-    SOAPInvalidRequestOperationName,
     SOAPOperationNotSupported,
     SOAPResponse,
 )
