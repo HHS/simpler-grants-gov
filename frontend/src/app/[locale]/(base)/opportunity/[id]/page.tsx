@@ -88,6 +88,7 @@ function emptySummary() {
     is_forecast: false,
     post_date: null,
     summary_description: null,
+    updated_at: "",
     version_number: null,
   };
 }

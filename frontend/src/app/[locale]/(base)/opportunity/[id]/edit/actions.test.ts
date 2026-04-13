@@ -43,6 +43,7 @@ const mockUpdateOpportunitySummaryForGrantor = jest.mocked(
 
 function buildValidFormData() {
   const formData = new FormData();
+  formData.set("opportunityId", "opp-123");
   formData.set("title", "Example opportunity");
   formData.set("awardSelectionMethod", "discretionary");
   formData.set("description", "Summary text");
@@ -73,6 +74,7 @@ describe("saveOpportunityEditAction", () => {
 
   it("returns validation errors only for API-required fields when form is empty", async () => {
     const formData = new FormData();
+    formData.set("opportunityId", "opp-123");
 
     const result = await saveOpportunityEditAction(initialState, formData);
 
@@ -121,7 +123,7 @@ describe("saveOpportunityEditAction", () => {
 
   it("returns an error when opportunityId is missing", async () => {
     const formData = buildValidFormData();
-    // opportunityId not set — summary context is missing
+    formData.delete("opportunityId"); // summary context is missing
 
     const result = await saveOpportunityEditAction(initialState, formData);
 
@@ -150,6 +152,7 @@ describe("saveOpportunityEditAction", () => {
         close_date: "2026-04-11",
         close_date_description: null,
         archive_date: null,
+        updated_at: "2026-03-11T00:00:00Z",
         expected_number_of_awards: null,
         estimated_total_program_funding: null,
         award_floor: null,
@@ -211,6 +214,7 @@ describe("saveOpportunityEditAction", () => {
         close_date: "2026-04-11",
         close_date_description: null,
         archive_date: null,
+        updated_at: "2026-03-11T00:00:00Z",
         expected_number_of_awards: null,
         estimated_total_program_funding: null,
         award_floor: null,
