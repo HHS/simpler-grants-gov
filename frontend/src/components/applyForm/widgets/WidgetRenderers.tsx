@@ -1,4 +1,3 @@
-import { omit } from "lodash";
 import {
   DefinitionPath,
   UswdsWidgetProps,
@@ -56,6 +55,6 @@ export function renderWidget<V>({
 
   // key prop can't be spread due to React internal rules
   const key = props.key as string;
-  const spreadProps = omit(props, "key") as UswdsWidgetProps;
-  return <Widget key={key} {...spreadProps} />;
+  const { key: _key, ...withoutKey } = props;
+  return <Widget key={key} {...(withoutKey as UswdsWidgetProps)} />;
 }

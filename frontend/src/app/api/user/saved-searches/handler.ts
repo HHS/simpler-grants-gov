@@ -1,4 +1,3 @@
-import { omit } from "lodash";
 import {
   ApiRequestError,
   BadRequestError,
@@ -27,9 +26,8 @@ export const saveSearchHandler = async (request: Request) => {
       throw new BadRequestError("No name supplied for saved search");
     }
 
-    const convertedParams = convertSearchParamsToProperTypes(
-      omit(savedSearchBody, "name"),
-    );
+    const { name: _name, ...withoutName } = savedSearchBody;
+    const convertedParams = convertSearchParamsToProperTypes(withoutName);
     const savedSearch = formatSearchRequestBody(convertedParams);
 
     // always save searches pointing first page of results
