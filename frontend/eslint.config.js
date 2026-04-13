@@ -28,8 +28,9 @@ module.exports = defineConfig([
   },
   {
     extends: compat.extends(
-      "nava",
+      "eslint:recommended",
       "plugin:storybook/recommended",
+      "plugin:you-dont-need-lodash-underscore/compatible",
       "prettier",
       // "next/core-web-vitals",
     ),
@@ -110,13 +111,6 @@ module.exports = defineConfig([
         "error",
         {
           allow: ["warn", "error"],
-        },
-      ],
-
-      "promise/catch-or-return": [
-        "error",
-        {
-          allowFinally: true,
         },
       ],
     },
