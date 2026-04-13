@@ -59,7 +59,14 @@ export async function createOpportunitySummaryForGrantor({
     subPath: `${opportunityId}/summaries`,
     body,
     additionalHeaders: { "X-SGG-Token": token },
+    allowedErrorStatuses: [422],
   });
 
-  return (await response.json()) as OpportunitySummaryDetailApiResponse;
+  const responseJson = await response.json();
+
+  if (response.status === 422) {
+    return { validationErrors: responseJson.errors };
+  }
+
+  return { data: responseJson.data };
 }

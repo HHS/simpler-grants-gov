@@ -10,6 +10,7 @@ import { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
 
+import { formDataToObject } from "src/components/applyForm/formDataToJson";
 import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
 
 export type OpportunityEditValidationErrors = {
@@ -38,6 +39,7 @@ export type OpportunityEditActionState = {
   successMessage?: string;
   validationErrors?: OpportunityEditValidationErrors;
   newOpportunitySummaryId?: string;
+  data?: unknown;
 };
 
 function readStringValue(value: FormDataEntryValue | null): string {
@@ -188,15 +190,14 @@ export async function saveOpportunityEditAction(
     return { errorMessage: alerts("unauthenticated") };
   }
 
-  const validatedFields = await validateOpportunityEditForm(formData);
+  // const validatedFields = await validateOpportunityEditForm(formData);
 
-  if (!validatedFields.success) {
-    return {
-      validationErrors: validatedFields.error.flatten()
-        .fieldErrors as OpportunityEditValidationErrors,
-    };
-  }
-
+  // if (!validatedFields.success) {
+  //   return {
+  //     validationErrors: validatedFields.error.flatten()
+  //       .fieldErrors as OpportunityEditValidationErrors,
+  //   };
+  // }
   try {
     if (!opportunitySummaryId) {
       const createResponse = await createOpportunitySummaryForGrantor({
@@ -208,13 +209,26 @@ export async function saveOpportunityEditAction(
         token: session.token,
       });
 
+      const data = Object.keys(createResponse.data || {}).length
+        ? createResponse.data
+        : formDataToObject(formData, {});
+
       return {
         successMessage: alerts("success"),
-        newOpportunitySummaryId: createResponse.data.opportunity_summary_id,
+        newOpportunitySummaryId: createResponse.data?.opportunity_summary_id,
+        data,
+        errors: createResponse.validationErrors,
       };
     }
+  } catch (e) {
+    console.error(e);
+    return {
+      errors: e.message,
+    };
+  }
 
-    await updateOpportunitySummaryForGrantor({
+  try {
+    const data = await updateOpportunitySummaryForGrantor({
       opportunityId,
       opportunitySummaryId,
       body: buildOpportunitySummaryUpdateRequest(formData),
@@ -223,6 +237,7 @@ export async function saveOpportunityEditAction(
 
     return {
       successMessage: alerts("success"),
+      data,
     };
   } catch (error) {
     const status =
