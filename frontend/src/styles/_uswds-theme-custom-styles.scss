@@ -1286,3 +1286,33 @@ $simpler-switch-transition-easing: ease;
     }
   }
 }
+
+.notification-preference-card--error {
+  border-inline-start: 4px solid color("red-warm-50v") !important;
+  padding-inline-start: units(2);
+}
+
+.notification-preference-card__error {
+  color: color("red-warm-50v");
+  font-weight: font-weight("bold");
+}
+
+.notification-preference-card__field {
+  position: relative;
+}
+
+.notification-preference-card__status {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-block-size: units(6);
+  pointer-events: none;
+}
+
+.notification-preference-card__loading-text {
+  color: color("gray-warm-70");
+  font-size: size("sans", "2xs");
+}

@@ -282,12 +282,12 @@ const NavLinks = ({
               text={t("settings")}
             />,
             // We can uncomment this after #8988 is implemented
-            <NavLink
-              href="/notifications"
-              key="notifications"
-              onClick={closeDropdownAndMobileNav}
-              text={t("notifications")}
-            />,
+            // <NavLink
+            //   href="/notifications"
+            //   key="notifications"
+            //   onClick={closeDropdownAndMobileNav}
+            //   text={t("notifications")}
+            // />,
             isApplicationTestUser && <TestApplicationLink />,
             <SignOutNavLink key="logout" onClick={closeDropdownAndMobileNav} />,
           ]}
