@@ -57,7 +57,7 @@ export function CreateOpportunityForm({
       router.push(
         `/opportunity/${response.data.opportunity_id}/edit?fromCreate=true`,
       );
-    } else {
+    } else if (response?.errorMessage) {
       // Scroll to top to show the error message
       window.scrollTo({
         top: 0,
