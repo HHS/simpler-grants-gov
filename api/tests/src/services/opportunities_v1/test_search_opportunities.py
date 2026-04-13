@@ -5,7 +5,11 @@ Unit tests for scoring rule logging and explain wiring in search_opportunities.
 from unittest.mock import MagicMock, patch
 
 from src.adapters.search.opensearch_response import SearchResponse
-from src.services.opportunities_v1.search_opportunities import search_opportunities
+from src.services.opportunities_v1.search_opportunities import (
+    CSV_SOURCE_INCLUDES,
+    search_opportunities,
+    search_opportunities_csv,
+)
 
 
 def _make_search_response(raw_hits: list | None = None) -> SearchResponse:
@@ -103,3 +107,72 @@ class TestSearchOpportunitiesExplain:
         search_opportunities(search_client, _base_params(query="climate"))
 
         mock_log.assert_not_called()
+
+
+class TestSearchOpportunitiesCsv:
+    def test_csv_search_uses_optimized_query(self):
+        search_client = MagicMock()
+        search_client.search.return_value = _make_search_response()
+
+        search_opportunities_csv(search_client, {"query": "climate"})
+
+        args, kwargs = search_client.search.call_args
+        search_request = args[1]
+
+        assert search_request["size"] == 5000
+        assert search_request["from"] == 0
+        assert search_request["track_total_hits"] is False
+        assert search_request["track_scores"] is False
+        assert "aggs" not in search_request
+        assert kwargs["include_scores"] is False
+        assert kwargs["includes"] == CSV_SOURCE_INCLUDES
+        assert kwargs["excludes"] == ["attachments"]
+        assert kwargs["explain"] is False
+
+    def test_csv_export_search_ignores_client_pagination(self):
+        search_client = MagicMock()
+        search_client.search.return_value = _make_search_response()
+
+        search_opportunities_csv(
+            search_client,
+            {
+                "query": "climate",
+                "pagination": {
+                    "page_offset": 100,
+                    "page_size": 5,
+                    "sort_order": [{"order_by": "opportunity_id", "sort_direction": "ascending"}],
+                },
+            },
+            apply_export_pagination=True,
+        )
+
+        args, _ = search_client.search.call_args
+        search_request = args[1]
+
+        assert search_request["size"] == 5000
+        assert search_request["from"] == 0
+        assert search_request["sort"] == [{"summary.post_date": {"order": "desc"}}]
+
+    def test_csv_search_respects_client_pagination_when_export_disabled(self):
+        search_client = MagicMock()
+        search_client.search.return_value = _make_search_response()
+
+        search_opportunities_csv(
+            search_client,
+            {
+                "query": "climate",
+                "pagination": {
+                    "page_offset": 3,
+                    "page_size": 7,
+                    "sort_order": [{"order_by": "opportunity_id", "sort_direction": "ascending"}],
+                },
+            },
+            apply_export_pagination=False,
+        )
+
+        args, _ = search_client.search.call_args
+        search_request = args[1]
+
+        assert search_request["size"] == 7
+        assert search_request["from"] == 14
+        assert search_request["sort"] == [{"opportunity_id.keyword": {"order": "asc"}}]
