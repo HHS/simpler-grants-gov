@@ -1,4 +1,4 @@
-import { ApiRequestError } from "src/errors";
+import { ForbiddenError, ValidationError } from "src/errors";
 import {
   checkRequiredPrivileges,
   UserPrivilegeRequest,
@@ -65,9 +65,7 @@ describe("checkRequiredPrivileges", () => {
   });
 
   it("calls request function; user does not have the privilege", async () => {
-    mockCheckUserPrivilege.mockRejectedValue(
-      new ApiRequestError("Forbidden", "APIRequestError", 403),
-    );
+    mockCheckUserPrivilege.mockRejectedValue(new ForbiddenError("Forbidden"));
 
     const result = await checkRequiredPrivileges(
       fakeSession.token,
@@ -81,20 +79,16 @@ describe("checkRequiredPrivileges", () => {
 
   it("calls request function with incorrect parameters", async () => {
     mockCheckUserPrivilege.mockRejectedValue(
-      new ApiRequestError("Validation Error", "APIRequestError", 422),
-    );
-    const failedRspWithErrMsg = fakeFailedResponse.map((item) => ({
-      ...item,
-      error: "Validation Error",
-    }));
-
-    const result = await checkRequiredPrivileges(
-      fakeSession.token,
-      fakeSession.userId,
-      fakePrivilegeDef,
+      new ValidationError("Validation Error"),
     );
 
+    await expect(
+      checkRequiredPrivileges(
+        fakeSession.token,
+        fakeSession.userId,
+        fakePrivilegeDef,
+      ),
+    ).rejects.toBeInstanceOf(ValidationError);
     expect(mockCheckUserPrivilege).toHaveBeenCalledTimes(1);
-    expect(result).toEqual(failedRspWithErrMsg);
   });
 });
