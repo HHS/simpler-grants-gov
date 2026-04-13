@@ -3333,6 +3333,57 @@ paths:
               $ref: '#/components/schemas/FormInstructionUploadRequestSchema'
       security:
       - ApiUserKeyAuth: []
+  /alpha/award-recommendations/{award_recommendation_id}/submissions/list:
+    post:
+      parameters:
+      - in: path
+        name: award_recommendation_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardRecommendationSubmissionListResponseSchema'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Forbidden
+      tags:
+      - Award Recommendation Alpha
+      summary: List Award Recommendation Submissions
+      description: Get paginated list of application submissions for an award recommendation.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AwardRecommendationSubmissionListRequestSchema'
+      security:
+      - ApiJwtAuth: &id020 []
+      - ApiUserKeyAuth: *id020
   /alpha/applications/{application_id}/application_form/{app_form_id}:
     get:
       parameters:
@@ -11215,6 +11266,241 @@ components:
           format: binary
       required:
       - file
+    AwardRecommendationOrganizationSchema:
+      type: object
+      properties:
+        organization_id:
+          type: string
+          format: uuid
+          description: The organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization_name:
+          type:
+          - string
+          - 'null'
+          description: The organization name
+    AwardRecommendationApplicationSchema:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          description: The application ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        competition_id:
+          type: string
+          format: uuid
+          description: The competition ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        organization:
+          description: The organization that submitted the application
+          type:
+          - object
+          - 'null'
+          anyOf:
+          - $ref: '#/components/schemas/AwardRecommendationOrganizationSchema'
+          - type: 'null'
+    AwardRecommendationApplicationSubmissionSchema:
+      type: object
+      properties:
+        application_submission_id:
+          type: string
+          format: uuid
+          description: The application submission ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_submission_number:
+          type:
+          - string
+          - 'null'
+          description: The application submission number
+          example: SUB-2026-00001
+        project_title:
+          type:
+          - string
+          - 'null'
+          description: The project title
+          example: Rural broadband expansion initiative
+        total_requested_amount:
+          type:
+          - number
+          - 'null'
+          description: The total requested funding amount
+          example: '250000.00'
+        application:
+          description: The application associated with this submission
+          type:
+          - object
+          $ref: '#/components/schemas/AwardRecommendationApplicationSchema'
+    AwardRecommendationSubmissionDetailSchema:
+      type: object
+      properties:
+        recommended_amount:
+          type:
+          - number
+          - 'null'
+          description: The recommended funding amount
+          example: '200000.00'
+        scoring_comment:
+          type:
+          - string
+          - 'null'
+          description: Comments from the scoring process
+        general_comment:
+          type:
+          - string
+          - 'null'
+          description: General comments about the submission
+        award_recommendation_type:
+          description: The recommendation type for this submission
+          enum:
+          - recommended_for_funding
+          - recommended_without_funding
+          - not_recommended
+          type:
+          - string
+          - 'null'
+          - 'null'
+        has_exception:
+          type: boolean
+          description: Whether the submission has an exception
+        exception_detail:
+          type:
+          - string
+          - 'null'
+          description: Details about the exception, if any
+    AwardRecommendationSubmissionDataSchema:
+      type: object
+      properties:
+        award_recommendation_application_submission_id:
+          type: string
+          format: uuid
+          description: The award recommendation application submission ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        application_submission:
+          description: The application submission
+          type:
+          - object
+          $ref: '#/components/schemas/AwardRecommendationApplicationSubmissionSchema'
+        submission_detail:
+          description: The recommendation details for this submission
+          type:
+          - object
+          $ref: '#/components/schemas/AwardRecommendationSubmissionDetailSchema'
+    AwardRecommendationSubmissionListResponseSchema:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id023
+          $ref: '#/components/schemas/PaginationInfoSchema'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: The list of award recommendation submissions
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/AwardRecommendationSubmissionDataSchema'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    AwardRecSubmissionTypeFilterSchema:
+      type: object
+      properties:
+        one_of:
+          type: array
+          minItems: 1
+          items:
+            enum:
+            - recommended_for_funding
+            - recommended_without_funding
+            - not_recommended
+            type:
+            - string
+    AwardRecSubmissionExceptionFilterSchema:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+    AwardRecommendationSubmissionFilterSchema:
+      type: object
+      properties:
+        award_recommendation_type:
+          type:
+          - object
+          $ref: '#/components/schemas/AwardRecSubmissionTypeFilterSchema'
+        has_exception:
+          type:
+          - object
+          $ref: '#/components/schemas/AwardRecSubmissionExceptionFilterSchema'
+    SortOrderAwardRecSubmissionPaginationSchema:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - application_submission_number
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    AwardRecSubmissionPaginationSchema:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: application_submission_number
+            sort_direction: ascending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderAwardRecSubmissionPaginationSchema'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    AwardRecommendationSubmissionListRequestSchema:
+      type: object
+      properties:
+        filters:
+          type:
+          - object
+          $ref: '#/components/schemas/AwardRecommendationSubmissionFilterSchema'
+        pagination:
+          type:
+          - object
+          $ref: '#/components/schemas/AwardRecSubmissionPaginationSchema'
+      required:
+      - pagination
     ApplicationFormGetResponseSchema:
       type: object
       properties:
