@@ -1,29 +1,41 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
-import { SimplerSwitchFieldProps } from "src/components/SimplerSwitch";
 import { NotificationPreferenceCard } from "./NotificationPreferenceCard";
 
-jest.mock("src/components/SimplerSwitch", () => ({
-  SimplerSwitchField: (props: SimplerSwitchFieldProps) => (
-    <div>
-      <button
-        data-testid="switch"
-        onClick={() => props.onCheckedChange?.(!props.checked)}
+const mockCheckbox = jest.fn();
+
+jest.mock("@trussworks/react-uswds", () => ({
+  Checkbox: (props: {
+    id: string;
+    name: string;
+    checked: boolean;
+    disabled?: boolean;
+    onChange?: (event: { target: { checked: boolean } }) => void;
+    "aria-labelledby"?: string;
+    "aria-describedby"?: string;
+  }) => {
+    mockCheckbox(props);
+
+    return (
+      <input
+        type="checkbox"
+        data-testid="notification-checkbox"
+        id={props.id}
+        name={props.name}
+        checked={props.checked}
         disabled={props.disabled}
-      >
-        toggle
-      </button>
-
-      <span data-testid="label">{props.label}</span>
-      <span data-testid="description">{props.description}</span>
-
-      {props.errorMessage !== undefined && (
-        <span data-testid="error">error</span>
-      )}
-
-      <span data-testid="aria-labelledby">{props.ariaLabelledBy || ""}</span>
-    </div>
-  ),
+        aria-labelledby={props["aria-labelledby"]}
+        aria-describedby={props["aria-describedby"]}
+        onChange={(event) => {
+          props.onChange?.({
+            target: {
+              checked: event.currentTarget.checked,
+            },
+          });
+        }}
+      />
+    );
+  },
 }));
 
 describe("NotificationPreferenceCard", () => {
@@ -41,17 +53,20 @@ describe("NotificationPreferenceCard", () => {
   it("renders label and description", () => {
     render(<NotificationPreferenceCard {...baseProps} />);
 
-    expect(screen.getByTestId("label")).toHaveTextContent("Test Label");
-    expect(screen.getByTestId("description")).toHaveTextContent(
-      "Test Description",
-    );
+    expect(screen.getByText("Test Label")).toBeInTheDocument();
+    expect(screen.getByText("Test Description")).toBeInTheDocument();
   });
 
-  it("passes checked state correctly", () => {
+  it("renders checkbox in checked state", () => {
     render(<NotificationPreferenceCard {...baseProps} isChecked={true} />);
 
-    const button = screen.getByTestId("switch");
-    expect(button).toBeInTheDocument();
+    expect(screen.getByTestId("notification-checkbox")).toBeChecked();
+  });
+
+  it("renders checkbox in unchecked state", () => {
+    render(<NotificationPreferenceCard {...baseProps} isChecked={false} />);
+
+    expect(screen.getByTestId("notification-checkbox")).not.toBeChecked();
   });
 
   it("calls onCheckedChange when toggled", () => {
@@ -64,7 +79,7 @@ describe("NotificationPreferenceCard", () => {
       />,
     );
 
-    fireEvent.click(screen.getByTestId("switch"));
+    fireEvent.click(screen.getByTestId("notification-checkbox"));
 
     expect(handleChange).toHaveBeenCalledWith(true);
   });
@@ -73,20 +88,20 @@ describe("NotificationPreferenceCard", () => {
     render(<NotificationPreferenceCard {...baseProps} />);
 
     expect(() => {
-      fireEvent.click(screen.getByTestId("switch"));
+      fireEvent.click(screen.getByTestId("notification-checkbox"));
     }).not.toThrow();
   });
 
-  it("disables switch when isDisabled is true", () => {
+  it("disables checkbox when isDisabled is true", () => {
     render(<NotificationPreferenceCard {...baseProps} isDisabled={true} />);
 
-    expect(screen.getByTestId("switch")).toBeDisabled();
+    expect(screen.getByTestId("notification-checkbox")).toBeDisabled();
   });
 
-  it("disables switch when loading", () => {
+  it("disables checkbox when loading", () => {
     render(<NotificationPreferenceCard {...baseProps} isLoading={true} />);
 
-    expect(screen.getByTestId("switch")).toBeDisabled();
+    expect(screen.getByTestId("notification-checkbox")).toBeDisabled();
   });
 
   it("shows loading text when isLoading is true", () => {
@@ -101,10 +116,25 @@ describe("NotificationPreferenceCard", () => {
     expect(screen.queryByText("Saving...")).not.toBeInTheDocument();
   });
 
-  it("passes error state to switch", () => {
-    render(<NotificationPreferenceCard {...baseProps} hasError={true} />);
+  it("passes disabled=false to Checkbox when not disabled or loading", () => {
+    render(<NotificationPreferenceCard {...baseProps} />);
 
-    expect(screen.getByTestId("error")).toBeInTheDocument();
+    expect(mockCheckbox).toHaveBeenCalledWith(
+      expect.objectContaining({
+        checked: false,
+        disabled: false,
+      }),
+    );
+  });
+
+  it("passes disabled=true to Checkbox when loading", () => {
+    render(<NotificationPreferenceCard {...baseProps} isLoading={true} />);
+
+    expect(mockCheckbox).toHaveBeenCalledWith(
+      expect.objectContaining({
+        disabled: true,
+      }),
+    );
   });
 
   it("constructs aria-labelledby with organizationHeadingId", () => {
@@ -115,25 +145,27 @@ describe("NotificationPreferenceCard", () => {
       />,
     );
 
-    const ariaLabelledBy = screen.getByTestId("aria-labelledby");
-
-    expect(ariaLabelledBy).toHaveTextContent("org-heading");
-    expect(ariaLabelledBy).toHaveTextContent("test-checkbox-label");
+    expect(screen.getByTestId("notification-checkbox")).toHaveAttribute(
+      "aria-labelledby",
+      "org-heading test-checkbox-label",
+    );
   });
 
-  it("does not set aria-labelledby when organizationHeadingId is missing", () => {
+  it("constructs aria-labelledby from field label when organizationHeadingId is missing", () => {
     render(<NotificationPreferenceCard {...baseProps} />);
 
-    const ariaLabelledBy = screen.getByTestId("aria-labelledby");
-
-    expect(ariaLabelledBy).toHaveAttribute("data-testid", "aria-labelledby");
+    expect(screen.getByTestId("notification-checkbox")).toHaveAttribute(
+      "aria-labelledby",
+      "test-checkbox-label",
+    );
   });
 
-  it("passes ariaLabel through when provided", () => {
-    render(
-      <NotificationPreferenceCard {...baseProps} ariaLabel="Custom label" />,
-    );
+  it("constructs aria-describedby from description id", () => {
+    render(<NotificationPreferenceCard {...baseProps} />);
 
-    expect(screen.getByTestId("switch")).toBeInTheDocument();
+    expect(screen.getByTestId("notification-checkbox")).toHaveAttribute(
+      "aria-describedby",
+      "test-checkbox-description",
+    );
   });
 });

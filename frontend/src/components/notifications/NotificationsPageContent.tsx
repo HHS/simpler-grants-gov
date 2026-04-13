@@ -24,6 +24,13 @@ export interface NotificationsPageContentProps {
   hasOrganizationsFetchError: boolean;
 }
 
+/**
+ * Centralized error message for failed preference updates.
+ * This should eventually come from translations when backend wiring is complete.
+ */
+const SAVE_ERROR_MESSAGE =
+  "Your notification preference was not saved. Refresh the page to try again.";
+
 export function NotificationsPageContent({
   pageHeading,
   fetchErrorMessage,
@@ -37,14 +44,38 @@ export function NotificationsPageContent({
   organizations,
   hasOrganizationsFetchError,
 }: NotificationsPageContentProps): ReactElement {
+  /**
+   * Page-level error state.
+   * Used for:
+   * - organization fetch failures
+   * - preference save failures (fallback/global message)
+   */
   const [pageLevelErrorMessage, setPageLevelErrorMessage] = useState<
     string | null
   >(null);
+
+  /**
+   * Tracks which preference is currently being saved.
+   * Used to:
+   * - disable the corresponding control
+   * - show inline loading state
+   */
   const [savingPreferenceKey, setSavingPreferenceKey] =
     useState<NotificationPreferenceKey | null>(null);
+
+  /**
+   * Tracks which preference failed to save.
+   * Used to:
+   * - render inline error message
+   * - apply error styling to the row
+   */
   const [errorPreferenceKey, setErrorPreferenceKey] =
     useState<NotificationPreferenceKey | null>(null);
 
+  /**
+   * Local UI state for organization preferences.
+   * These are currently client-only toggles (no API call yet).
+   */
   const [organizationPreferenceValues, setOrganizationPreferenceValues] =
     useState<Record<string, boolean>>(() =>
       Object.fromEntries(
@@ -55,6 +86,17 @@ export function NotificationsPageContent({
       ),
     );
 
+  /**
+   * Handles toggle for primary (non-organization) preferences.
+   *
+   * CURRENT BEHAVIOR (placeholder for future API integration):
+   * - simulates async save
+   * - always results in failure to demonstrate error states
+   *
+   * FUTURE:
+   * - replace with API call
+   * - set success/error based on response
+   */
   async function handlePreferenceToggle(
     preferenceKey: NotificationPreferenceKey,
   ): Promise<void> {
@@ -62,17 +104,28 @@ export function NotificationsPageContent({
     setErrorPreferenceKey(null);
     setSavingPreferenceKey(preferenceKey);
 
+    // Simulated network delay
     await new Promise((resolve) => {
       window.setTimeout(resolve, 1200);
     });
 
+    // Simulated failure state
     setSavingPreferenceKey(null);
     setErrorPreferenceKey(preferenceKey);
-    setPageLevelErrorMessage(
-      "Your notification preference was not saved. Refresh the page to try again.",
-    );
+    setPageLevelErrorMessage(SAVE_ERROR_MESSAGE);
   }
 
+  /**
+   * Handles toggle for organization preferences.
+   *
+   * CURRENT BEHAVIOR:
+   * - updates local UI state only
+   * - does not simulate loading or error
+   *
+   * FUTURE:
+   * - mirror behavior of handlePreferenceToggle
+   * - integrate API + loading + error handling
+   */
   function handleOrganizationPreferenceToggle(
     preferenceKey: NotificationPreferenceKey,
   ): void {
@@ -85,12 +138,22 @@ export function NotificationsPageContent({
     }));
   }
 
+  /**
+   * Determines which error message to show at the page level.
+   * Priority:
+   * 1. preference save error
+   * 2. organization fetch error
+   */
   const pageErrorMessage =
     pageLevelErrorMessage ??
     (hasOrganizationsFetchError ? fetchErrorMessage : null);
 
+  /**
+   * Derived state for primary "Saved Opportunities" preference
+   */
   const isSavingSavedOpportunities =
     savingPreferenceKey === "saved-opportunities";
+
   const hasSavedOpportunitiesError =
     errorPreferenceKey === "saved-opportunities";
 
@@ -98,6 +161,11 @@ export function NotificationsPageContent({
     <GridContainer className="padding-top-2 tablet:padding-y-6">
       <h1>{pageHeading}</h1>
 
+      {/* 
+        Page-level error region
+        - uses aria-live so screen readers announce updates
+        - animated for visual emphasis
+      */}
       <div className="margin-y-2" aria-live="polite">
         {pageErrorMessage ? (
           <div className="notifications-page-error-enter">
@@ -108,6 +176,9 @@ export function NotificationsPageContent({
         ) : null}
       </div>
 
+      {/* =====================
+          USER PREFERENCES
+      ===================== */}
       <section
         aria-labelledby="manage-your-preferences"
         className="margin-bottom-6"
@@ -118,10 +189,18 @@ export function NotificationsPageContent({
         >
           {managePreferencesTitle}
         </h2>
+
         <p className="margin-top-0 margin-bottom-3">
           {managePreferencesDescription}
         </p>
 
+        {/*
+          Primary preference row
+
+          NOTE:
+          - currently simulates loading + failure
+          - used to validate UX patterns (loading, error, retry)
+        */}
         <NotificationPreferenceCard
           checkboxId="saved-opportunities"
           label={savedOpportunitiesLabel}
@@ -130,19 +209,26 @@ export function NotificationsPageContent({
           isDisabled={isSavingSavedOpportunities}
           isLoading={isSavingSavedOpportunities}
           hasError={hasSavedOpportunitiesError}
+          errorMessage={
+            hasSavedOpportunitiesError ? SAVE_ERROR_MESSAGE : undefined
+          }
           onCheckedChange={() => {
             handlePreferenceToggle("saved-opportunities").catch(() => {
-              // no-op
+              // no-op: placeholder async error path is handled inside the component state
             });
           }}
         />
       </section>
 
+      {/* =====================
+          ORGANIZATION PREFERENCES
+      ===================== */}
       {organizations.length > 0 ? (
         <section aria-labelledby="organization-preferences">
           <h2 id="organization-preferences" className="margin-bottom-1">
             {organizationPreferencesTitle}
           </h2>
+
           <p className="margin-top-0 margin-bottom-3">
             {organizationPreferencesDescription}
           </p>
@@ -150,8 +236,10 @@ export function NotificationsPageContent({
           <div className="display-grid gap-4">
             {organizations.map((organization) => {
               const preferenceKey = `organization-${organization.organizationId}-saved-opportunities`;
+
               const isSavingThisPreference =
                 savingPreferenceKey === preferenceKey;
+
               const hasErrorThisPreference =
                 errorPreferenceKey === preferenceKey;
 
@@ -167,6 +255,9 @@ export function NotificationsPageContent({
                   isDisabled={isSavingThisPreference}
                   isLoading={isSavingThisPreference}
                   hasError={hasErrorThisPreference}
+                  errorMessage={
+                    hasErrorThisPreference ? SAVE_ERROR_MESSAGE : undefined
+                  }
                   onCheckedChange={() => {
                     handleOrganizationPreferenceToggle(preferenceKey);
                   }}

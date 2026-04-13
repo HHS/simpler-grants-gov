@@ -17,9 +17,5 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 }
 
 export default function NotificationsLayout({ children }: LayoutProps) {
-  return (
-    <>
-      <AuthenticationGate>{children}</AuthenticationGate>
-    </>
-  );
+  return <AuthenticationGate>{children}</AuthenticationGate>;
 }

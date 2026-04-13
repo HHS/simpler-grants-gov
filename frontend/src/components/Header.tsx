@@ -281,6 +281,7 @@ const NavLinks = ({
               onClick={closeDropdownAndMobileNav}
               text={t("settings")}
             />,
+            // We can uncomment this after #8988 is implemented
             <NavLink
               href="/notifications"
               key="notifications"

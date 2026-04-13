@@ -12,6 +12,7 @@ interface OrganizationPreferenceSectionProps {
   isDisabled?: boolean;
   isLoading?: boolean;
   hasError?: boolean;
+  errorMessage?: string;
   onCheckedChange?: (checked: boolean) => void;
 }
 
@@ -23,20 +24,15 @@ export function OrganizationPreferenceSection({
   isDisabled = false,
   isLoading = false,
   hasError = false,
+  errorMessage,
   onCheckedChange,
 }: OrganizationPreferenceSectionProps): ReactElement {
   const t = useTranslations("Notifications");
   const organizationHeadingId = `organization-${organization.organizationId}`;
 
   return (
-    <section
-      aria-labelledby={`organization-${organization.organizationId}`}
-      className="margin-top-5"
-    >
-      <h3
-        id={`organization-${organization.organizationId}`}
-        className="margin-bottom-2"
-      >
+    <section aria-labelledby={organizationHeadingId} className="margin-top-5">
+      <h3 id={organizationHeadingId} className="margin-bottom-2">
         {organization.organizationName}
         <span className="usa-sr-only">
           {t("organizationPreferencesSuffix")}
@@ -51,9 +47,9 @@ export function OrganizationPreferenceSection({
         isDisabled={isDisabled}
         isLoading={isLoading}
         hasError={hasError}
+        errorMessage={errorMessage}
         organizationHeadingId={organizationHeadingId}
         onCheckedChange={onCheckedChange}
-        ariaLabel={`${organization.organizationName} preferences, ${label}`}
       />
     </section>
   );

@@ -1,19 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
+import { NotificationPreferenceCardProps } from "./NotificationPreferenceCard";
 import { OrganizationPreferenceSection } from "./OrganizationPreferenceSection";
-
-type NotificationPreferenceCardProps = {
-  isChecked?: boolean;
-  onCheckedChange?: (checked: boolean) => void;
-  ariaLabel?: string;
-  organizationHeadingId?: string;
-};
 
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => {
     if (key === "organizationPreferencesSuffix") {
       return "preferences";
     }
+
     return key;
   },
 }));
@@ -32,8 +27,6 @@ jest.mock("./NotificationPreferenceCard", () => ({
         >
           toggle
         </button>
-        <span data-testid="aria-label">{props.ariaLabel}</span>
-        <span data-testid="heading-id">{props.organizationHeadingId}</span>
       </div>
     );
   },
@@ -72,7 +65,7 @@ describe("OrganizationPreferenceSection", () => {
     render(<OrganizationPreferenceSection {...baseProps} />);
 
     const section = screen.getByRole("region", {
-      name: /Test Org/i,
+      name: /test org/i,
     });
 
     expect(section).toHaveAttribute("aria-labelledby", "organization-123");
