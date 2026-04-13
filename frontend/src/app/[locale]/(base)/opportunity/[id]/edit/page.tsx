@@ -157,7 +157,10 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
     awardSelectionMethodExplanation: opportunityData.category_explanation || "",
   };
   const rawLastUpdated =
-    opportunityData.summary?.post_date || opportunityData.updated_at || "";
+    [opportunityData.updated_at, activeSummary?.updated_at]
+      .filter(Boolean)
+      .sort()
+      .at(-1) || "";
   const lastUpdated = rawLastUpdated
     ? new Date(rawLastUpdated).toLocaleDateString(locale, {
         month: "2-digit",

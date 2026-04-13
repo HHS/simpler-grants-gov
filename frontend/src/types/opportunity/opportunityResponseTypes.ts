@@ -49,6 +49,7 @@ export interface Summary extends MinimalSummary {
   funding_instruments: string[] | null;
   is_cost_sharing: boolean | null;
   summary_description: string | null;
+  updated_at: string;
   version_number: number | null;
 }
 
