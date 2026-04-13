@@ -119,6 +119,7 @@
       "next": "^16.0.0"
     },
     "flatted": "3.4.2",
+    "axios": "^1.15.0",
     "devEngines": {
       "packageManager": {
         "name": "npm"
