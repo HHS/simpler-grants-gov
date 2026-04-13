@@ -255,6 +255,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
 
 export default withFeatureFlag<PageProps, never>(
   OpportunityEditPage,
-  "opportunityOff",
+  "opportunitiesListOff",
   () => redirect("/maintenance"),
 );
