@@ -27,7 +27,7 @@ from tests.src.db.models.factories import (
     WorkflowEventHistoryFactory,
     WorkflowFactory,
 )
-from tests.workflow.state_machine.test_state_machines import BasicState
+from tests.src.workflow.state_machine.test_state_machines import BasicState
 
 ####################################
 # Fixtures

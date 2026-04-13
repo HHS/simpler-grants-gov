@@ -461,7 +461,7 @@ and a few utilities we've built.
 from src.constants.lookup_constants import WorkflowEntityType, WorkflowEventType, WorkflowType, ApprovalResponseType
 from tests.src.db.models.factories import OpportunityFactory, UserFactory, WorkflowFactory
 
-from tests.workflow.workflow_test_util import (
+from tests.src.workflow.workflow_test_util import (
     build_start_workflow_event,
     send_process_event,
 )

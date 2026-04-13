@@ -13,8 +13,8 @@ from tests.src.db.models.factories import (
     WorkflowApprovalFactory,
     WorkflowFactory,
 )
-from tests.workflow.state_machine.test_state_machines import BasicState
-from tests.workflow.workflow_test_util import send_process_event, validate_approvals
+from tests.src.workflow.state_machine.test_state_machines import BasicState
+from tests.src.workflow.workflow_test_util import send_process_event, validate_approvals
 
 
 def test_agency_approval_approved_simple(db_session, agency, budget_officer, opportunity):

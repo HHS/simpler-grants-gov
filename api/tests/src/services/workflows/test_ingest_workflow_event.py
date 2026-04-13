@@ -15,7 +15,7 @@ from src.services.workflows.ingest_workflow_event import ingest_workflow_event
 from src.workflow.event.workflow_event import WorkflowEvent
 from tests.lib.internal_user_test_utils import create_internal_user
 from tests.src.db.models.factories import ApplicationFactory, OpportunityFactory, WorkflowFactory
-from tests.workflow.state_machine.test_state_machines import BasicState
+from tests.src.workflow.state_machine.test_state_machines import BasicState
 
 
 @pytest.fixture

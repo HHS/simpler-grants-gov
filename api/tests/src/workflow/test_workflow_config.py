@@ -3,7 +3,7 @@ import pytest
 from src.constants.lookup_constants import ApprovalType, Privilege, WorkflowEntityType, WorkflowType
 from src.workflow.state_persistence.opportunity_persistence_model import OpportunityPersistenceModel
 from src.workflow.workflow_config import ApprovalConfig, WorkflowConfig
-from tests.workflow.state_machine.test_state_machines import BasicState
+from tests.src.workflow.state_machine.test_state_machines import BasicState
 
 
 def test_workflow_config_cannot_have_duplicate_approval_states():
