@@ -33,9 +33,7 @@ logger = logging.getLogger(__name__)
 )
 @award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
-def award_recommendation_create(
-    db_session: db.Session, json_data: dict
-) -> response.ApiResponse:
+def award_recommendation_create(db_session: db.Session, json_data: dict) -> response.ApiResponse:
     add_extra_data_to_current_request_logs({"opportunity_id": json_data.get("opportunity_id")})
     logger.info("POST /alpha/award-recommendations")
 

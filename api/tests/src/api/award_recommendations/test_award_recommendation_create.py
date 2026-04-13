@@ -34,9 +34,7 @@ def opportunity(agency) -> Opportunity:
 
 class TestCreateAwardRecommendation200:
 
-    def test_create_award_recommendation_200(
-        self, client, db_session, agency, opportunity
-    ):
+    def test_create_award_recommendation_200(self, client, db_session, agency, opportunity):
         competition_1 = CompetitionFactory.create(opportunity=opportunity)
         competition_2 = CompetitionFactory.create(opportunity=opportunity)
         first_application = ApplicationFactory.create(competition=competition_1)
@@ -83,7 +81,9 @@ class TestCreateAwardRecommendation200:
         assert len(data["award_recommendation_number"]) == len(agency.agency_code) + 10
 
         assert len(data["award_recommendation_reviews"]) == len(AwardRecommendationReviewType)
-        assert all(review["is_reviewed"] is False for review in data["award_recommendation_reviews"])
+        assert all(
+            review["is_reviewed"] is False for review in data["award_recommendation_reviews"]
+        )
 
 
 class TestCreateAwardRecommendation400:

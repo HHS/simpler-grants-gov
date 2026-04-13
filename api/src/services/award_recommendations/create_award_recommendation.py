@@ -24,7 +24,7 @@ from src.db.models.award_recommendation_models import (
     AwardRecommendationSubmissionDetail,
 )
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
-from src.db.models.opportunity_models import Opportunity, CurrentOpportunitySummary
+from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
 from src.db.models.user_models import User
 
 
@@ -43,9 +43,7 @@ def _get_opportunity(db_session: db.Session, opportunity_id: uuid.UUID) -> Oppor
     return db_session.execute(stmt).scalar_one_or_none()
 
 
-def _generate_award_recommendation_number(
-    db_session: db.Session, agency_code: str
-) -> str:
+def _generate_award_recommendation_number(db_session: db.Session, agency_code: str) -> str:
     if not agency_code:
         raise_flask_error(403, message="Forbidden")
 
@@ -79,9 +77,7 @@ def create_award_recommendation(
     opportunity = _get_opportunity(db_session, opportunity_id)
 
     if opportunity is None:
-        raise_flask_error(
-            404, message=f"Could not find Opportunity with ID {opportunity_id}"
-        )
+        raise_flask_error(404, message=f"Could not find Opportunity with ID {opportunity_id}")
 
     agency = opportunity.agency_record
     if agency is None:
