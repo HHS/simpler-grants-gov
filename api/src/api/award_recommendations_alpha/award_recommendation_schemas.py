@@ -1,13 +1,16 @@
 from src.api.schemas.extension import Schema, fields
-from src.api.schemas.response_schema import AbstractResponseSchema
+from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
+from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     AwardRecommendationAttachmentType,
     AwardRecommendationReviewType,
     AwardRecommendationStatus,
+    AwardRecommendationType,
     AwardSelectionMethod,
     OpportunityStatus,
 )
+from src.pagination.pagination_schema import generate_pagination_schema
 
 
 class AwardRecommendationCreateRequestSchema(Schema):
@@ -187,4 +190,156 @@ class AwardRecommendationGetResponseSchema(AbstractResponseSchema):
     data = fields.Nested(
         AwardRecommendationDataSchema,
         metadata={"description": "The award recommendation details"},
+    )
+
+
+####################################
+# List Award Recommendation Submissions
+####################################
+
+
+class AwardRecommendationSubmissionFilterSchema(Schema):
+    """Schema for the award recommendation submission filters"""
+
+    award_recommendation_type = fields.Nested(
+        StrSearchSchemaBuilder("AwardRecSubmissionTypeFilterSchema")
+        .with_one_of(allowed_values=AwardRecommendationType)
+        .build()
+    )
+    has_exception = fields.Nested(
+        BoolSearchSchemaBuilder("AwardRecSubmissionExceptionFilterSchema").with_one_of().build()
+    )
+
+
+class AwardRecommendationSubmissionListRequestSchema(Schema):
+    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/submissions/list request"""
+
+    filters = fields.Nested(AwardRecommendationSubmissionFilterSchema(), required=False)
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "AwardRecSubmissionPaginationSchema",
+            ["application_submission_number"],
+            default_sort_order=[
+                {"order_by": "application_submission_number", "sort_direction": "ascending"}
+            ],
+        ),
+        required=True,
+    )
+
+
+class AwardRecommendationOrganizationSchema(Schema):
+    """Schema for the award recommendation submission organization"""
+
+    organization_id = fields.UUID(metadata={"description": "The organization ID"})
+    organization_name = fields.String(
+        allow_none=True,
+        metadata={"description": "The organization name"},
+    )
+
+
+class AwardRecommendationApplicationSchema(Schema):
+    """Schema for the award recommendation submission application"""
+
+    application_id = fields.UUID(metadata={"description": "The application ID"})
+    competition_id = fields.UUID(metadata={"description": "The competition ID"})
+    organization = fields.Nested(
+        AwardRecommendationOrganizationSchema,
+        allow_none=True,
+        metadata={"description": "The organization that submitted the application"},
+    )
+
+
+class AwardRecommendationApplicationSubmissionSchema(Schema):
+    """Schema for the award recommendation application submission"""
+
+    application_submission_id = fields.UUID(
+        metadata={"description": "The application submission ID"}
+    )
+    application_submission_number = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The application submission number",
+            "example": "SUB-2026-00001",
+        },
+    )
+    project_title = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "The project title",
+            "example": "Rural broadband expansion initiative",
+        },
+    )
+    total_requested_amount = fields.Decimal(
+        allow_none=True,
+        as_string=True,
+        metadata={
+            "description": "The total requested funding amount",
+            "example": "250000.00",
+        },
+    )
+    application = fields.Nested(
+        AwardRecommendationApplicationSchema,
+        metadata={"description": "The application associated with this submission"},
+    )
+
+
+class AwardRecommendationSubmissionDetailSchema(Schema):
+    """Schema for the award recommendation submission detail"""
+
+    recommended_amount = fields.Decimal(
+        allow_none=True,
+        as_string=True,
+        metadata={
+            "description": "The recommended funding amount",
+            "example": "200000.00",
+        },
+    )
+    scoring_comment = fields.String(
+        allow_none=True,
+        metadata={"description": "Comments from the scoring process"},
+    )
+    general_comment = fields.String(
+        allow_none=True,
+        metadata={"description": "General comments about the submission"},
+    )
+    award_recommendation_type = fields.Enum(
+        AwardRecommendationType,
+        allow_none=True,
+        metadata={"description": "The recommendation type for this submission"},
+    )
+    has_exception = fields.Boolean(
+        metadata={"description": "Whether the submission has an exception"},
+    )
+    exception_detail = fields.String(
+        allow_none=True,
+        metadata={"description": "Details about the exception, if any"},
+    )
+
+
+class AwardRecommendationSubmissionDataSchema(Schema):
+    """Schema for the award recommendation submission data"""
+
+    award_recommendation_application_submission_id = fields.UUID(
+        metadata={"description": "The award recommendation application submission ID"}
+    )
+    application_submission = fields.Nested(
+        AwardRecommendationApplicationSubmissionSchema,
+        metadata={"description": "The application submission"},
+    )
+    submission_detail = fields.Nested(
+        AwardRecommendationSubmissionDetailSchema,
+        attribute="award_recommendation_submission_detail",
+        metadata={"description": "The recommendation details for this submission"},
+    )
+
+
+class AwardRecommendationSubmissionListResponseSchema(
+    AbstractResponseSchema, PaginationMixinSchema
+):
+    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/submissions/list response"""
+
+    data = fields.List(
+        fields.Nested(AwardRecommendationSubmissionDataSchema),
+        metadata={"description": "The list of award recommendation submissions"},
     )

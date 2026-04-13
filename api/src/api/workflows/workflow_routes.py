@@ -14,7 +14,10 @@ from src.api.workflows.workflow_schemas import (
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
-from src.services.workflows.get_workflow import get_workflow_and_verify_access
+from src.services.workflows.get_workflow import (
+    get_workflow_and_verify_access,
+    get_workflow_by_event_id_and_verify_access,
+)
 from src.services.workflows.get_workflow_audits import get_workflow_audits
 from src.services.workflows.ingest_workflow_event import ingest_workflow_event
 
@@ -63,6 +66,28 @@ def workflow_get(db_session: db.Session, workflow_id: uuid.UUID) -> response.Api
         db_session.add(user)
 
         workflow = get_workflow_and_verify_access(db_session, user, workflow_id)
+
+    return response.ApiResponse(message="Success", data=workflow)
+
+
+@workflow_blueprint.get("/events/<uuid:event_id>")
+@workflow_blueprint.output(WorkflowGetResponseSchema)
+@workflow_blueprint.doc(
+    summary="Get Workflow by Event ID",
+    description="Retrieve detailed information about a workflow associated with a specific event. Access is controlled by entity-based privileges (VIEW_OPPORTUNITY or VIEW_APPLICATION).",
+    responses=[200, 401, 403, 404],
+)
+@workflow_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def workflow_get_by_event_id(db_session: db.Session, event_id: uuid.UUID) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"event_id": str(event_id)})
+    logger.info("GET /v1/workflows/events/:event_id")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        workflow = get_workflow_by_event_id_and_verify_access(db_session, user, event_id)
 
     return response.ApiResponse(message="Success", data=workflow)
 

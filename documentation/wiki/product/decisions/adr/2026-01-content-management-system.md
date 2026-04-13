@@ -5,7 +5,7 @@ description: Content Management System (CMS) selection for Simpler.Grants.gov
 # Content management system (CMS)
 
 * **Status:** Active
-* **Last Modified:** 2026-03-25
+* **Last Modified:** 2026-04-10
 * **Related Issue:** [#6559](https://github.com/HHS/simpler-grants-gov/issues/6559)
 * **Deciders:** Julius, Jay (contributors: Doug, Andy, Matt, Yan-Yin)&#x20;
 * **Tags:** cms, storyblok, drupal, content&#x20;
@@ -46,9 +46,12 @@ A self-hosted Drupal instance is by far the least expensive option. Nava has a g
 #### Advantages of self-hosting Drupal
 
 1. **Stack:** A "headless" configuration allows Drupal to serve content via API to our Next.js frontend. Flexible architecture for future needs.&#x20;
-2. **Experience:** Full control of configurable workflows and how changes are rolled out through environments.&#x20;
+2. **Experience:** Full control of configurable workflows and how changes are rolled out through environments. Drupal can be set up to:&#x20;
+   1. Have any number of states, conditions, or requirements in a custom "Preview ⇒ Approve ⇒ Publish" workflow.
+   2. Support phased rollouts of draft content that's visible in lower environments before being published to production.&#x20;
+   3. Support zero-downtime deployments (via CI/CD, blue-green deployment strategies, or container orchestration) to keep the CMS live during code and database updates.&#x20;
 3. **Security:**&#x20;
-   1. Enterprise-grade security and compliance that's trusted across government .&#x20;
+   1. Enterprise-grade security and compliance that's trusted across government.&#x20;
    2. Provides full compliance control through AWS GovCloud or similar FedRAMP infrastructure.&#x20;
    3. Rapid patch response from a dedicated security team and public vulnerability disclosure process that ensure swift mitigation of threats.&#x20;
    4. Natively supports federal mandates: Section 508, FISMA, and FedRAMP-compliant implementations are standard practice.&#x20;

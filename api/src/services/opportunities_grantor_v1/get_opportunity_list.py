@@ -70,7 +70,13 @@ def list_opportunities_with_filters(
             selectinload(Opportunity.opportunity_attachments),
             selectinload(Opportunity.competitions),
         )
-        .where(Opportunity.agency_id == agency_id)
+        # If opportunity.agency_id is null, use the opportunity.agency_code
+        .outerjoin(
+            Agency,
+            (Opportunity.agency_id == Agency.agency_id)
+            | ((Opportunity.agency_id.is_(None)) & (Opportunity.agency_code == Agency.agency_code)),
+        )
+        .where(Agency.agency_id == agency_id)
     )
 
     # Apply sorting in the database query

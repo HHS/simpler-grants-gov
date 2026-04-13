@@ -204,7 +204,7 @@ class TestGetAwardRecommendation401:
         resp = client.get(f"{API_URL}/{uuid.uuid4()}")
 
         assert resp.status_code == 401
-        assert resp.json["message"] == "Unable to process token"
+        assert resp.json["message"] == "Unauthorized"
 
     def test_get_award_recommendation_invalid_token_401(self, client, enable_factory_create):
         resp = client.get(f"{API_URL}/{uuid.uuid4()}", headers={"X-SGG-Token": "invalid-token"})
