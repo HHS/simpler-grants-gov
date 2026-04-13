@@ -50,7 +50,7 @@
     "json-schema-merge-allof": "^0.8.1",
     "lodash": "^4.18.1",
     "newrelic": "^12.7.0",
-    "next": "^16.1.6",
+    "next": "~16.1.7",
     "next-intl": "^4.8.1",
     "next-navigation-guard": "^0.2.0",
     "pino": "^9.6.0",
