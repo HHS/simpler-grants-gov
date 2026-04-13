@@ -11775,12 +11775,12 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
-    ApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Token
     ApiUserKeyAuth:
       type: apiKey
       in: header
       name: X-API-Key
+    ApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Token
 
