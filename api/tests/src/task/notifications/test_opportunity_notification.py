@@ -1,5 +1,5 @@
 import logging
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
 import pytest
@@ -1278,15 +1278,17 @@ class TestOpportunityNotification:
             user=user, organization=None, email_enabled=False
         )
 
+        # Use a fixed past base so that utcnow() > v2.created_at after post-processing
+        base_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
         opp = factories.OpportunityFactory.create(no_current_summary=True)
-        v1 = factories.OpportunityVersionFactory.create(opportunity=opp)
+        factories.OpportunityVersionFactory.create(opportunity=opp, created_at=base_time)
         saved_opp = factories.UserSavedOpportunityFactory.create(
             user=user,
             opportunity=opp,
-            last_notified_at=v1.created_at + timedelta(minutes=1),
+            last_notified_at=base_time + timedelta(minutes=1),
         )
         v2 = factories.OpportunityVersionFactory.create(
-            opportunity=opp, created_at=v1.created_at + timedelta(minutes=60)
+            opportunity=opp, created_at=base_time + timedelta(minutes=60)
         )
 
         # Confirm the test setup is correct: there is a pending update to notify about
@@ -1320,15 +1322,17 @@ class TestOpportunityNotification:
             user=user, organization=None, email_enabled=False
         )
 
+        # Use a fixed past base so that utcnow() > v2.created_at after post-processing
+        base_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
         opp = factories.OpportunityFactory.create(no_current_summary=True)
-        v1 = factories.OpportunityVersionFactory.create(opportunity=opp)
+        factories.OpportunityVersionFactory.create(opportunity=opp, created_at=base_time)
         saved_opp = factories.UserSavedOpportunityFactory.create(
             user=user,
             opportunity=opp,
-            last_notified_at=v1.created_at + timedelta(minutes=1),
+            last_notified_at=base_time + timedelta(minutes=1),
         )
         factories.OpportunityVersionFactory.create(
-            opportunity=opp, created_at=v1.created_at + timedelta(minutes=60)
+            opportunity=opp, created_at=base_time + timedelta(minutes=60)
         )
 
         # First run: email disabled — no email sent, but last_notified_at advances
