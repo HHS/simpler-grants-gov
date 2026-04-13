@@ -46,32 +46,13 @@ export async function generateMetadata({
   };
 }
 
-const stageLabels: Record<string, string> = {
-  archived: "Archived",
-  closed: "Closed",
-  forecasted: "Forecasted",
-  posted: "Open for applications",
-};
-
-function formatOpportunityStage(opportunityStatus: string | null | undefined) {
-  if (!opportunityStatus) {
-    return "";
-  }
-
-  return (
-    stageLabels[opportunityStatus] ??
-    opportunityStatus
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ")
-  );
-}
 
 async function OpportunityEditPage({ params, searchParams }: PageProps) {
   const { id, locale } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const isNewlyCreated = resolvedSearchParams.fromCreate === "true";
   const t = await getTranslations({ locale, namespace: "Errors" });
+  const tEdit = await getTranslations({ locale, namespace: "OpportunityEdit" });
 
   const session = await getSession();
   if (!session || !session.token) {
@@ -143,16 +124,27 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
     ...opportunityData,
     summary: activeSummary,
   });
-  const pageTitle = `Opportunity #: ${opportunityData.opportunity_number}`;
+  const stageLabels: Record<string, string> = {
+    archived: tEdit("header.stageArchived"),
+    closed: tEdit("header.stageClosed"),
+    forecasted: tEdit("header.stageForecasted"),
+    posted: tEdit("header.stagePosted"),
+  };
+  const opportunityStage = opportunityData.is_draft
+    ? tEdit("header.stageDraft")
+    : (stageLabels[opportunityData.opportunity_status ?? ""] ??
+      opportunityData.opportunity_status ??
+      "");
+  const pageTitle = tEdit("header.pageTitle", {
+    number: opportunityData.opportunity_number ?? "",
+  });
   const opportunityKeyInformation = {
     title: opportunityData.opportunity_title || "",
     agency: opportunityData.agency_name || opportunityData.agency_code || "",
     assistanceListings:
       primaryAssistanceListing?.assistance_listing_number || "",
     opportunityNumber: opportunityData.opportunity_number || "",
-    opportunityStage: opportunityData.is_draft
-      ? "Draft"
-      : formatOpportunityStage(opportunityData.opportunity_status),
+    opportunityStage,
     awardSelectionMethod: opportunityData.category || "",
     awardSelectionMethodExplanation: opportunityData.category_explanation || "",
   };
@@ -169,11 +161,11 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
       })
     : "";
   const navigationItems = [
-    { text: "Key information", href: "key-information" },
-    { text: "Funding details", href: "funding-details" },
-    { text: "Eligibility", href: "eligibility" },
-    { text: "Additional information", href: "additional-information" },
-    { text: "Attachments", href: "attachments" },
+    { text: tEdit("sections.keyInformation"), href: "key-information" },
+    { text: tEdit("sections.fundingDetails"), href: "funding-details" },
+    { text: tEdit("sections.eligibility"), href: "eligibility" },
+    { text: tEdit("sections.additionalInformation"), href: "additional-information" },
+    { text: tEdit("sections.attachments"), href: "attachments" },
   ];
   return (
     <div className="bg-white">
@@ -192,11 +184,12 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
             <div className="display-flex flex-column width-full desktop:display-flex desktop:flex-row desktop:flex-justify desktop:flex-align-end">
               <div className="display-flex flex-column maxw-mobile-lg">
                 <div className="font-sans-md line-height-sans-5 margin-bottom-2">
-                  <span className="text-bold">Last updated:</span> {lastUpdated}
+                  <span className="text-bold">{tEdit("header.lastUpdated")}</span>{" "}
+                  {lastUpdated}
                 </div>
                 <div className="display-flex flex-align-center">
                   <span className="text-bold font-sans-md line-height-sans-5 margin-right-1">
-                    Status:
+                    {tEdit("header.status")}
                   </span>
                   <span className="display-inline-flex flex-align-center bg-accent-warm text-ink padding-y-05 padding-x-1 radius-sm">
                     <USWDSIcon
@@ -214,20 +207,20 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
                   outline
                   className="height-auto margin-0 margin-bottom-1 margin-right-105 font-sans-sm text-bold line-height-sans-1"
                 >
-                  Save
+                  {tEdit("header.saveButton")}
                 </Button>
                 <Button
                   type="button"
                   outline
                   className="height-auto margin-0 margin-bottom-1 margin-right-105 font-sans-sm text-bold line-height-sans-1"
                 >
-                  Preview
+                  {tEdit("header.previewButton")}
                 </Button>
                 <Button
                   type="button"
                   className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
                 >
-                  Submit for review
+                  {tEdit("header.submitButton")}
                 </Button>
               </div>
             </div>
@@ -237,7 +230,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
 
       <div className="grid-container padding-bottom-4">
         <div className="usa-in-page-nav-container">
-          <ApplyFormNav title="On this page" fields={navigationItems} />
+          <ApplyFormNav title={tEdit("header.navTitle")} fields={navigationItems} />
 
           <section className="order-2 width-full maxw-tablet-xl padding-top-4">
             <OpportunityEditForm

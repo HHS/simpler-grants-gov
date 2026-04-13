@@ -277,11 +277,26 @@ export const messages = {
     pageTitle: "Edit opportunity",
     metaDescription:
       "Edit draft opportunity information and non-forecast summary fields.",
+    header: {
+      pageTitle: "Opportunity #: {number}",
+      lastUpdated: "Last updated:",
+      status: "Status:",
+      stageDraft: "Draft",
+      stageArchived: "Archived",
+      stageClosed: "Closed",
+      stageForecasted: "Forecasted",
+      stagePosted: "Open for applications",
+      saveButton: "Save",
+      previewButton: "Preview",
+      submitButton: "Submit for review",
+      navTitle: "On this page",
+    },
     sections: {
       keyInformation: "Key information",
       fundingDetails: "Funding details",
       eligibility: "Eligibility",
       additionalInformation: "Additional information",
+      attachments: "Attachments",
     },
     labels: {
       title: "Title",
