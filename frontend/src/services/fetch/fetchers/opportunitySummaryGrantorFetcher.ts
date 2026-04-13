@@ -1,16 +1,15 @@
 import {
-  createGrantorOpportunitySummaryEndpoint,
-  getGrantorOpportunityEndpoint,
-  updateGrantorOpportunitySummaryEndpoint,
-} from "src/services/fetch/endpointConfigs";
-import {
   GrantorOpportunityApiResponse,
   OpportunitySummaryCreateRequest,
   OpportunitySummaryDetailApiResponse,
   OpportunitySummaryUpdateRequest,
 } from "src/types/opportunity/opportunityResponseTypes";
 
-import { requesterForEndpoint } from "./fetchers";
+import {
+  createGrantorOpportunitySummaryRequest,
+  getGrantorOpportunityRequest,
+  updateGrantorOpportunitySummaryRequest,
+} from "./fetchers";
 
 type UpdateOpportunitySummaryForGrantorParams = {
   opportunityId: string;
@@ -24,18 +23,6 @@ type CreateOpportunitySummaryForGrantorParams = {
   body: OpportunitySummaryCreateRequest;
   token: string;
 };
-
-const getGrantorOpportunityRequest = requesterForEndpoint(
-  getGrantorOpportunityEndpoint,
-);
-
-const updateOpportunitySummaryRequest = requesterForEndpoint(
-  updateGrantorOpportunitySummaryEndpoint,
-);
-
-const createOpportunitySummaryRequest = requesterForEndpoint(
-  createGrantorOpportunitySummaryEndpoint,
-);
 
 export async function getOpportunityForGrantor(
   opportunityId: string,
@@ -54,7 +41,7 @@ export async function updateOpportunitySummaryForGrantor({
   body,
   token,
 }: UpdateOpportunitySummaryForGrantorParams): Promise<OpportunitySummaryDetailApiResponse> {
-  const response = await updateOpportunitySummaryRequest({
+  const response = await updateGrantorOpportunitySummaryRequest({
     subPath: `${opportunityId}/summaries/${opportunitySummaryId}`,
     body,
     additionalHeaders: { "X-SGG-Token": token },
@@ -68,7 +55,7 @@ export async function createOpportunitySummaryForGrantor({
   body,
   token,
 }: CreateOpportunitySummaryForGrantorParams): Promise<OpportunitySummaryDetailApiResponse> {
-  const response = await createOpportunitySummaryRequest({
+  const response = await createGrantorOpportunitySummaryRequest({
     subPath: `${opportunityId}/summaries`,
     body,
     additionalHeaders: { "X-SGG-Token": token },
