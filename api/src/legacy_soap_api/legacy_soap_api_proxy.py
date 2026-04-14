@@ -60,11 +60,6 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
 
     soap_auth = soap_request.auth
     use_soap_cert = soap_request.headers.get(USE_SOAP_CERT_HEADER_KEY) == "1"
-    if not use_soap_cert:
-        logger.info(
-            "soap_client_certificate: Using the soap jwt",
-            extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_JWT},
-        )
     should_log_response = soap_request.headers.get(LOG_LOCAL_RESPONSE_HEADER_KEY) == "1"
     is_valid_soap_certificate = soap_auth and soap_auth.certificate.legacy_certificate
     proxy_headers = get_proxy_headers(soap_request, config, soap_auth, use_soap_cert)
