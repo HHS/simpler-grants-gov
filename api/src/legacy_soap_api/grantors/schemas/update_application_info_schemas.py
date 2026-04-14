@@ -22,22 +22,22 @@ class UpdateApplicationInfoRequest(GrantsGovTrackingNumberRequiredSchema):
 
 
 class SaveAgencyNotesResult(BaseSOAPSchema):
-    success: str | None = Field(default=None, alias="Success")
-    error_message: str | None = Field(default=None, alias="ErrorMessage")
+    success: str | None = Field(default=None, alias="ns9:Success")
+    error_message: str | None = Field(default=None, alias="ns9:ErrorMessage")
 
 
 class AssignAgencyTrackingNumberResult(BaseSOAPSchema):
-    success: str | None = Field(default=None, alias="Success")
-    error_message: str | None = Field(default=None, alias="ErrorMessage")
+    success: str | None = Field(default=None, alias="ns9:Success")
+    error_message: str | None = Field(default=None, alias="ns9:ErrorMessage")
 
 
 class UpdateApplicationInfoResponse(GrantsGovTrackingNumberRequiredSchema):
-    success: str | None = Field(default=None, alias="Success")
+    success: str | None = Field(default=None, alias="ns2:Success")
     assign_agency_tracking_number_result: AssignAgencyTrackingNumberResult | None = Field(
-        default=None, alias="AssignAgencyTrackingNumberResult"
+        default=None, alias="ns9:AssignAgencyTrackingNumberResult"
     )
     save_agency_notes_result: SaveAgencyNotesResult | None = Field(
-        default=None, alias="SaveAgencyNotesResult"
+        default=None, alias="ns9:SaveAgencyNotesResult"
     )
 
 

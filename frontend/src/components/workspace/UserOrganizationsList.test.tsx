@@ -90,8 +90,11 @@ describe("UserOrganizationsList", () => {
       // check it has both buttons
       const links = within(firstItem).getAllByRole("link");
       expect(links).toHaveLength(2);
-      expect(links[0]).toHaveAttribute("href", "/organizations/1/manage-users");
-      expect(links[1]).toHaveAttribute("href", "/organizations/1");
+      expect(links[0]).toHaveAttribute(
+        "href",
+        "/workspace/organizations/1/manage-users",
+      );
+      expect(links[1]).toHaveAttribute("href", "/workspace/organizations/1");
     });
 
     it("second org is member, should only have view details button", () => {
@@ -115,7 +118,7 @@ describe("UserOrganizationsList", () => {
       // check it has only the view details buttons
       const links = within(secondItem).getAllByRole("link");
       expect(links).toHaveLength(1);
-      expect(links[0]).toHaveAttribute("href", "/organizations/4");
+      expect(links[0]).toHaveAttribute("href", "/workspace/organizations/4");
     });
   });
 });

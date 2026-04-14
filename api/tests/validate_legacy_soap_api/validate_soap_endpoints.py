@@ -130,10 +130,26 @@ def get_grantors_get_confirm_application_delivery_body() -> bytes:
     """.encode()
 
 
+def get_update_application_info_body() -> bytes:
+    return """
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:agen1="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:UpdateApplicationInfoRequest>
+        <gran:GrantsGovTrackingNumber>GRANT80000000</gran:GrantsGovTrackingNumber>
+        <agen1:AssignAgencyTrackingNumber>TEST1234</agen1:AssignAgencyTrackingNumber>
+        <agen1:SaveAgencyNotes>Test Note</agen1:SaveAgencyNotes>
+        </agen:UpdateApplicationInfoRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """.encode()
+
+
 REQUEST_BODY = {
     "GetSubmissionListExpandedRequest": get_grantors_get_submission_list_expanded_request_body(),
     "GetApplicationZipRequest": get_grantors_get_application_zip_request_body(),
     "ConfirmApplicationDeliveryRequest": get_grantors_get_confirm_application_delivery_body(),
+    "UpdateApplicationInfoRequest": get_update_application_info_body(),
 }
 
 
@@ -259,6 +275,16 @@ def validate_confirm_application_delivery_request(
     print("Validation: ConfirmApplicationDelivery is validated")
 
 
+def validate_update_application_info_request(
+    soap_context: ValidateSoapContext,
+) -> None:
+    resp = get_response(soap_context, "UpdateApplicationInfoRequest")
+    assert resp.status_code == 200
+    fixed_bytes = clean_xml_namespaces(resp.content)
+    validate_response_xml(fixed_bytes, "UpdateApplicationInfoResponse", soap_context)
+    print("Validation: UpdateApplicationInfo is validated")
+
+
 def get_credentials(stack: ExitStack) -> tuple:
     cert_data_encoded = _config.cert_data
     key_data_encoded = _config.key_data
@@ -285,6 +311,7 @@ VALIDATIONS = [
     validate_grantors_get_application_zip_request,
     validate_grantors_get_submission_list_expanded_request,
     validate_confirm_application_delivery_request,
+    validate_update_application_info_request,
 ]
 
 

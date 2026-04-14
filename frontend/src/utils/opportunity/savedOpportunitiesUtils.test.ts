@@ -14,7 +14,7 @@ describe("getScopeFromUrlParams", () => {
     expect(getScopeFromUrlParams()).toEqual(DEFAULT_SAVED_OPPORTUNITY_SCOPE);
   });
 
-  it("returns the correct scope based on valid params", () => {
+  it("returns the correct scope based on valid legacy params", () => {
     const cases: Array<[string | undefined, string | undefined, object]> = [
       ["individual", undefined, { scope: "individual" }],
       ["all", undefined, { scope: "all" }],
@@ -22,8 +22,38 @@ describe("getScopeFromUrlParams", () => {
       ["organization", "1", { scope: "organization", organizationIds: ["1"] }],
     ];
 
-    cases.forEach(([scope, orgId, expected]) => {
-      expect(getScopeFromUrlParams(scope, orgId)).toEqual(expected);
+    cases.forEach(([scope, organizationId, expected]) => {
+      expect(getScopeFromUrlParams(scope, organizationId)).toEqual(expected);
+    });
+  });
+
+  it("returns the correct scope based on savedBy", () => {
+    expect(getScopeFromUrlParams(undefined, undefined, "all")).toEqual(
+      DEFAULT_SAVED_OPPORTUNITY_SCOPE,
+    );
+
+    expect(getScopeFromUrlParams(undefined, undefined, "individual")).toEqual(
+      INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
+    );
+
+    expect(
+      getScopeFromUrlParams(undefined, undefined, "organization:1"),
+    ).toEqual({
+      scope: "organization",
+      organizationIds: ["1"],
+    });
+  });
+
+  it("gives savedBy precedence over legacy params", () => {
+    expect(getScopeFromUrlParams("all", undefined, "individual")).toEqual(
+      INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
+    );
+
+    expect(
+      getScopeFromUrlParams("individual", undefined, "organization:1"),
+    ).toEqual({
+      scope: "organization",
+      organizationIds: ["1"],
     });
   });
 
@@ -33,19 +63,25 @@ describe("getScopeFromUrlParams", () => {
         DEFAULT_SAVED_OPPORTUNITY_SCOPE,
       );
     });
+
+    expect(
+      getScopeFromUrlParams(undefined, undefined, "not-a-real-filter"),
+    ).toEqual(DEFAULT_SAVED_OPPORTUNITY_SCOPE);
   });
 });
 
 describe("getSavedOpportunitiesScopeOrganizationIds", () => {
-  it("should return the appropriate organization_ids.one_of API filter value", () => {
+  it("returns the appropriate organization_ids.one_of API filter value", () => {
     expect(
       getSavedOpportunitiesScopeOrganizationIds(
         INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
       ),
     ).toEqual([]);
+
     expect(
       getSavedOpportunitiesScopeOrganizationIds(ALL_SAVED_OPPORTUNITY_SCOPE),
     ).toEqual(null);
+
     expect(
       getSavedOpportunitiesScopeOrganizationIds({
         scope: "organization",

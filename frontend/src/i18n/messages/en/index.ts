@@ -6,15 +6,15 @@ export const messages = {
     githubLink: "Follow on GitHub",
     sections: {
       experimental: {
-        title: "New Features, simpler experience",
+        title: "New features, simpler experience",
         canDoHeader: "Tell us what's working (and what's not)",
         canDoSubHeader: "What you can do now",
         canDoParagraph:
           "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
         tryLink: "Use the new simpler search",
-        cantDoHeader: "What you can't do quite yet",
+        cantDoHeader: "What we're working on",
         cantDoParagraph:
-          "For now, you need to visit Grants.gov to access more advanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
+          "We're currently working with agencies on a simpler application process. You may need to visit <grantsLink>Grants.gov</grantsLink> to apply for most opportunities. In the meantime, follow our <roadmapLink>roadmap</roadmapLink> to stay updated on our progress.",
         iconSections: [
           {
             description:
@@ -35,17 +35,18 @@ export const messages = {
         ],
       },
       building: {
-        title: "Building <span>with</span> you, not <span>for</span> you",
-        paragraphs: [
+        title: "Community-prioritized improvements & open source",
+        paragraph1:
           "Transparency is the foundation of good government. That's why we're committed to sharing our process and working in the open.",
-          "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
-        ],
+        paragraph2:
+          "All of <code>our code is open-source</code> and <roadmap>our roadmap</roadmap> is public. We welcome everyone to collaborate with us on <vision>the vision</vision> and details of every feature we build.",
       },
       involved: {
         title: "More ways to get involved",
         technicalTitle: "Contribute your technical expertise",
         technicalDescription:
           "We're always excited to welcome new open source developers to our community.",
+        fiderLink: "Vote for the feature you want to see implemented next",
         technicalLink: "Learn how to contribute code",
         participateTitle: "Participate in user research",
         participateDescription:
@@ -540,6 +541,7 @@ export const messages = {
           "Our research has helped us understand the needs of all types of Grants.gov users—from first-time visitors to experienced applicants managing multiple grants. These insights drive our efforts to create a simpler, more accessible system for everyone.",
         linkText1: "Read more about the research on our public wiki",
         linkText2: "Sign up to participate in future user studies",
+        linkText3: "Vote for the feature you want to see implemented next",
       },
     },
   },
@@ -547,9 +549,9 @@ export const messages = {
     pageTitle: "Newsletter | Simpler.Grants.gov",
     metaDescription:
       "Sign up for email updates from the Simpler.Grants.gov team.",
-    title: "Simpler Grants Newsletter",
+    title: "Simpler.Grants.gov newsletter",
     paragraph1:
-      "Sign up to get project updates delivered to your inbox every few weeks.",
+      "Sign up to get project updates delivered to your inbox every month.",
     paragraph2:
       "You'll be the first to hear about feature launches, upcoming events, user research, and more.",
     formLabel: "Subscribe to our newsletter",
@@ -736,6 +738,7 @@ export const messages = {
       workspace: "Workspace",
       workspaceDashboard: "Workspace dashboard",
       settings: "Settings",
+      notifications: "Notifications",
       testApplication: "Test application",
     },
     title: "Simpler.Grants.gov",
@@ -877,7 +880,7 @@ export const messages = {
       loading: "Loading filters",
     },
     callToAction: {
-      shareWithOthers: "Share with others",
+      sharingOptions: "Sharing Options",
     },
     opportunitySaved: "Saved",
     resultsHeader: {
@@ -958,7 +961,7 @@ export const messages = {
       },
     },
     shareWithYourList: "Shared with:",
-    shareWithOthers: "Share with others",
+    sharingOptions: "Sharing Options",
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
@@ -1033,6 +1036,11 @@ export const messages = {
       label: "Filter by status",
     },
     title: "Saved opportunities | Simpler.Grants.gov",
+    ownershipFilter: {
+      label: "Filter by organization",
+      showAll: "Show all",
+      individual: "Individual",
+    },
   },
   Roadmap: {
     pageTitle: "Roadmap | Simpler.Grants.gov",
@@ -1046,7 +1054,7 @@ export const messages = {
           {
             title: "Piloting smarter, easier budget forms",
             content:
-              "<p>In collaboration with users from the Simpler Grants Co-Design Group, we're prototyping a smarter, easier-to-use budget form to directly address the most common challenges applicants face. The redesigned form will incorporate clearer instructions, simplified user flow, and auto-calculation of fields to reduce confusion and errors.</p><p><linkGithub7832>Follow #7832 on GitHub</linkGithub7832></p>",
+              "<p>In collaboration with users from the Simpler.Grants.gov Co-Design Group, we're prototyping a smarter, easier-to-use budget form to directly address the most common challenges applicants face. The redesigned form will incorporate clearer instructions, simplified user flow, and auto-calculation of fields to reduce confusion and errors.</p><p><linkGithub7832>Follow #7832 on GitHub</linkGithub7832></p>",
           },
           {
             title:
@@ -1251,7 +1259,7 @@ export const messages = {
           },
           {
             date: "2027",
-            title: "Simpler Grants replaces legacy Grants.gov",
+            title: "Simpler.Grants.gov replaces legacy Grants.gov",
             content:
               "<p>The Simpler.Grants.gov experience becomes the default experience of Grants.gov, providing a modern, consistent experience for all users.</p>",
           },
@@ -2029,5 +2037,25 @@ export const messages = {
         "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
       successMessage: "Opportunity started. Continuing shortly...",
     },
+  },
+  Notifications: {
+    pageTitle: "Notifications | Simpler.Grants.gov",
+    pageHeading: "Notifications",
+    metaDescription:
+      "Manage which email notifications you receive about saved opportunities and your organizations.",
+    managePreferencesTitle: "Manage your preferences",
+    managePreferencesDescription:
+      "Choose which notifications you'd like to receive about your activity.",
+    organizationPreferencesTitle: "Organization preferences",
+    organizationPreferencesDescription:
+      "Choose which notifications you'd like to receive for organizations you're part of.",
+    savedOpportunitiesLabel: "Subscribe to saved opportunities",
+    savedOpportunitiesDescription:
+      "Get email updates about opportunities you have saved.",
+    organizationSavedOpportunitiesDescription:
+      "Get email updates for opportunities saved by you or your organization.",
+    fetchError:
+      "Your notification preferences could not be loaded. Refresh the page to try again.",
+    organizationPreferencesSuffix: "Preferences",
   },
 };
