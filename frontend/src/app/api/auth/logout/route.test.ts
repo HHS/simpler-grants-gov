@@ -17,10 +17,6 @@ jest.mock("src/services/auth/sessionUtils", () => ({
   deleteSession: (): unknown => deleteSessionMock(),
 }));
 
-// jest.mock("src/services/fetch/fetchers/userFetcher", () => ({
-//   postLogout: (token: string): unknown => postLogoutMock(token),
-// }));
-
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   postUserLogout: () => postLogoutMock() as unknown,
 }));
