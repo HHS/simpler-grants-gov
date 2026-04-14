@@ -153,7 +153,10 @@ export async function fillField(
       field.type === "radiobutton" &&
       (field.testId || field.selector || field.getByText || field.useDataAsText)
     ) {
-      if (shouldActivateField(data)) {
+      // If getByText is specified, the field definition already encodes which
+      // specific radio option to click (eg - "No"), so always activate it
+      // regardless of the data value. Otherwise, rely on shouldActivateField.
+      if (field.getByText !== undefined || shouldActivateField(data)) {
         let locator = field.getByText
           ? page.getByText(field.getByText, {
               exact: field.textExact ?? false,
