@@ -10,7 +10,7 @@ This [Next.js](https://nextjs.org) application can be run natively (or locally)
 
 Running a local server requires the version of Node specified in [the .nvmrc file](https://github.com/HHS/simpler-grants-gov/blob/main/.nvmrc) to be installed.
 
-This project supports the use of NVM for node version management, so it is suggested you intall and use NVM. More infomrmation can be found in [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/).
+This project supports the use of NVM for node version management, so it is suggested you install and use NVM. More information can be found in [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/).
 
 * **For Mac** - Run `npm install && npm run local` to install and start the application.
 * **For Windows** - First follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows). Then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx next dev` afterwards to start the application.
@@ -231,7 +231,7 @@ The `/api/auth/callback` route handler receives a JSON web token as query parame
 
 #### Mock Oauth2 Server
 
-When clicking "Sign in" or other buttons that simulate the login flow locally, shoule be redirected to the mock Oauth2 server at `http://localhost:5001`. Enter any text string in the screen provided to continue the login flow.
+When clicking "Sign in" or other buttons that simulate the login flow locally, you should be redirected to the mock Oauth2 server at `http://localhost:5001`. Enter any text string in the screen provided to continue the login flow.
 
 ### New Relic and Sendy (email)
 

@@ -45,6 +45,12 @@ function SearchAnalytics({
         // only pass on valid query params to NR
         if ((expectedQueryParamKeys as readonly string[]).includes(key)) {
           setNewRelicCustomAttribute(key, value || "");
+
+          // New relic does not support certain functionalities such as  calculating string
+          // lengths. This conditional is needed to log and gain insights into search query length.
+          if (key === "query") {
+            setNewRelicCustomAttribute("query_length", value?.length ?? 0);
+          }
         }
       });
     }
@@ -55,7 +61,6 @@ function SearchAnalytics({
     };
   }, [params, newRelicEnabled, newRelicInitialized]);
 
-  //
   useEffect(() => {
     // send list of filters defined in page query params on each page load
     sendGAEvent("event", "search_attempt", {
