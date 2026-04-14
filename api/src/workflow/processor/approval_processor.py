@@ -6,14 +6,13 @@ from src.db.models.user_models import User
 from src.db.models.workflow_models import WorkflowApproval
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_metric_context import WorkflowMetricContext
-from src.workflow.service.approval_service import get_approvals_for_workflow
+from src.workflow.service.approval_service import (
+    get_approvals_for_workflow,
+    validate_approval_response_type,
+)
 from src.workflow.workflow_config import ApprovalConfig
 from src.workflow.workflow_constants import WorkflowConstants
-from src.workflow.workflow_errors import (
-    DisallowedApprovalResponseTypeError,
-    DuplicateApprovalError,
-    ImplementationMissingError,
-)
+from src.workflow.workflow_errors import DuplicateApprovalError, ImplementationMissingError
 
 logger = logging.getLogger(__name__)
 
@@ -76,21 +75,11 @@ class ApprovalProcessor:
 
         approval_config = self._get_approval_config()
 
-        # Validate that the approval response type is allowed for this approval config
-        if approval_response_type not in approval_config.allowed_approval_response_types:
-            logger.warning(
-                "Approval response type not allowed for this approval config",
-                extra=log_extra
-                | {
-                    "allowed_types": [
-                        t.value for t in approval_config.allowed_approval_response_types
-                    ]
-                },
-            )
-            raise DisallowedApprovalResponseTypeError(
-                f"Approval response type '{approval_response_type}' is not allowed for this approval configuration. "
-                f"Allowed types: {', '.join([t.value for t in approval_config.allowed_approval_response_types])}"
-            )
+        validate_approval_response_type(
+            approval_response_type=approval_response_type,
+            approval_config=approval_config,
+            log_extra=log_extra,
+        )
 
         if self._has_already_approved(user, approval_config.approval_type):
             logger.info(

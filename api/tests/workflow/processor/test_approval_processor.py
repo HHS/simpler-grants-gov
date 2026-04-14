@@ -496,7 +496,7 @@ def test_limited_approval_response_disallowed_type_program_officer(
     # DECLINED is not allowed for program officer approval, will raise an error
     with pytest.raises(
         DisallowedApprovalResponseTypeError,
-        match="Approval response type 'declined' is not allowed for this approval configuration",
+        match="Approval response type is not allowed for this approval configuration",
     ):
         send_process_event(
             db_session=db_session,
@@ -558,7 +558,7 @@ def test_limited_approval_response_budget_officer_disallowed_requires_modificati
     # REQUIRES_MODIFICATION is not allowed for budget officer approval
     with pytest.raises(
         DisallowedApprovalResponseTypeError,
-        match="Approval response type 'requires_modification' is not allowed for this approval configuration",
+        match="Approval response type is not allowed for this approval configuration",
     ):
         send_process_event(
             db_session=db_session,
@@ -586,7 +586,7 @@ def test_limited_approval_response_budget_officer_disallowed_declined(
     # DECLINED is not allowed for budget officer approval
     with pytest.raises(
         DisallowedApprovalResponseTypeError,
-        match="Approval response type 'declined' is not allowed for this approval configuration",
+        match="Approval response type is not allowed for this approval configuration",
     ):
         send_process_event(
             db_session=db_session,
