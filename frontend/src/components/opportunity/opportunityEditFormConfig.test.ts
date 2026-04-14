@@ -56,33 +56,18 @@ describe("buildOpportunitySummaryUpdateRequest", () => {
   });
 
   describe("getMultiValueField fields", () => {
-    it("returns values from the primary field", () => {
+    it("returns values from the funding-category-values field", () => {
       const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ fundingCategories: ["education", "health"] }),
+        makeFormData({ "funding-category-values": ["education", "health"] }),
       );
       expect(result.funding_categories).toEqual(["education", "health"]);
     });
 
-    it("falls back to the fallback field when primary is empty", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ "funding-category-values": ["arts", "energy"] }),
-      );
-      expect(result.funding_categories).toEqual(["arts", "energy"]);
-    });
-
-    it("prefers primary field over fallback when both are present", () => {
+    it("returns values from the funding-type-values field", () => {
       const result = buildOpportunitySummaryUpdateRequest(
         makeFormData({
-          fundingCategories: ["education"],
-          "funding-category-values": ["arts"],
+          "funding-type-values": ["grant", "cooperative_agreement"],
         }),
-      );
-      expect(result.funding_categories).toEqual(["education"]);
-    });
-
-    it("filters out blank values", () => {
-      const result = buildOpportunitySummaryUpdateRequest(
-        makeFormData({ fundingType: ["grant", "  ", "cooperative_agreement"] }),
       );
       expect(result.funding_instruments).toEqual([
         "grant",
@@ -90,9 +75,33 @@ describe("buildOpportunitySummaryUpdateRequest", () => {
       ]);
     });
 
-    it("returns an empty array when both primary and fallback are absent", () => {
+    it("filters out blank values", () => {
+      const result = buildOpportunitySummaryUpdateRequest(
+        makeFormData({
+          "funding-type-values": ["grant", "  ", "cooperative_agreement"],
+        }),
+      );
+      expect(result.funding_instruments).toEqual([
+        "grant",
+        "cooperative_agreement",
+      ]);
+    });
+
+    it("returns an empty array when field is absent", () => {
       const result = buildOpportunitySummaryUpdateRequest(new FormData());
       expect(result.funding_categories).toEqual([]);
+    });
+
+    it("supports multiple eligible applicants via eligibleApplicants field", () => {
+      const result = buildOpportunitySummaryUpdateRequest(
+        makeFormData({
+          eligibleApplicants: ["individuals", "state_governments"],
+        }),
+      );
+      expect(result.applicant_types).toEqual([
+        "individuals",
+        "state_governments",
+      ]);
     });
   });
 

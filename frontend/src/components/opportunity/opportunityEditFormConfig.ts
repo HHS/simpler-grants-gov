@@ -174,17 +174,11 @@ export function buildOpportunitySummaryUpdateRequest(
     additional_info_url_description: emptyToNull(
       formData.get("additionalInfoUrlText"),
     ),
-    funding_categories: getMultiValueField(
-      formData,
-      "funding-category-values",
-    ),
+    funding_categories: getMultiValueField(formData, "funding-category-values"),
     funding_category_description: emptyToNull(
       formData.get("fundingCategoryExplanation"),
     ),
-    funding_instruments: getMultiValueField(
-      formData,
-      "funding-type-values",
-    ),
+    funding_instruments: getMultiValueField(formData, "funding-type-values"),
     applicant_types: getMultiValueField(
       formData,
       "eligibleApplicants",

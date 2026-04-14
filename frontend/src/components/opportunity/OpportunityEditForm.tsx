@@ -1,5 +1,34 @@
 "use client";
 
+import {
+  saveOpportunityEditAction,
+  type OpportunityEditValidationErrors,
+} from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
+
+import { useTranslations } from "next-intl";
+import { startTransition, useActionState, useEffect, useState } from "react";
+import {
+  Alert,
+  Checkbox,
+  DatePicker,
+  ErrorMessage,
+  Fieldset,
+  FormGroup,
+  Radio,
+  Select,
+  Textarea,
+  TextInput,
+} from "@trussworks/react-uswds";
+
+import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
+import {
+  ELIGIBILITY_OPTIONS,
+  FUNDING_CATEGORY_OPTIONS,
+  FUNDING_INSTRUMENT_OPTIONS,
+  OPPORTUNITY_CATEGORY_OPTIONS,
+  OpportunityEditFormValues,
+} from "./opportunityEditFormConfig";
+
 function formatNumber(value: string): string {
   const raw = value.replace(/,/g, "");
   if (!raw || isNaN(Number(raw))) return value;
@@ -49,35 +78,6 @@ function EligibilityCheckboxGroup({
   );
 }
 
-import {
-  saveOpportunityEditAction,
-  type OpportunityEditValidationErrors,
-} from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
-
-import { useTranslations } from "next-intl";
-import { startTransition, useActionState, useEffect, useState } from "react";
-import {
-  Alert,
-  Checkbox,
-  DatePicker,
-  ErrorMessage,
-  Fieldset,
-  FormGroup,
-  Radio,
-  Select,
-  Textarea,
-  TextInput,
-} from "@trussworks/react-uswds";
-
-import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
-import {
-  ELIGIBILITY_OPTIONS,
-  FUNDING_CATEGORY_OPTIONS,
-  FUNDING_INSTRUMENT_OPTIONS,
-  OPPORTUNITY_CATEGORY_OPTIONS,
-  OpportunityEditFormValues,
-} from "./opportunityEditFormConfig";
-
 type OpportunityEditFormProps = {
   opportunityId: string;
   opportunitySummaryId: string;
@@ -123,10 +123,7 @@ export default function OpportunityEditForm({
     setValues((currentValues) => ({ ...currentValues, [key]: value }));
   }
 
-  function toggleArrayValue(
-    key: "eligibleApplicants",
-    value: string,
-  ) {
+  function toggleArrayValue(key: "eligibleApplicants", value: string) {
     setValues((currentValues) => {
       const currentFieldValues = currentValues[key];
       const nextFieldValues = currentFieldValues.includes(value)
