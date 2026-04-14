@@ -16,7 +16,6 @@ export async function getSavedOpportunityHandler(
       throw new UnauthorizedError("No active session to get saved opportunity");
     }
     const savedOpportunities = await getUserSavedOpportunity(
-      session.token,
       session.user_id,
       opportunityId,
     );
