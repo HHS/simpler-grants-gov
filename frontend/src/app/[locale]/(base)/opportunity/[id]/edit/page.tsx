@@ -45,7 +45,6 @@ export async function generateMetadata({
   };
 }
 
-
 async function OpportunityEditPage({ params, searchParams }: PageProps) {
   const { id, locale } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
@@ -152,7 +151,10 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
     { text: tEdit("sections.keyInformation"), href: "key-information" },
     { text: tEdit("sections.fundingDetails"), href: "funding-details" },
     { text: tEdit("sections.eligibility"), href: "eligibility" },
-    { text: tEdit("sections.additionalInformation"), href: "additional-information" },
+    {
+      text: tEdit("sections.additionalInformation"),
+      href: "additional-information",
+    },
     { text: tEdit("sections.attachments"), href: "attachments" },
   ];
   return (
@@ -166,7 +168,9 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
             <div className="display-flex flex-column width-full desktop:display-flex desktop:flex-row desktop:flex-justify desktop:flex-align-end">
               <div className="display-flex flex-column maxw-mobile-lg">
                 <div className="font-sans-md line-height-sans-5 margin-bottom-2">
-                  <span className="text-bold">{tEdit("header.lastUpdated")}</span>{" "}
+                  <span className="text-bold">
+                    {tEdit("header.lastUpdated")}
+                  </span>{" "}
                   {lastUpdated}
                 </div>
                 <div className="display-flex flex-align-center">
@@ -212,7 +216,10 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
 
       <div className="grid-container padding-bottom-4">
         <div className="usa-in-page-nav-container">
-          <ApplyFormNav title={tEdit("header.navTitle")} fields={navigationItems} />
+          <ApplyFormNav
+            title={tEdit("header.navTitle")}
+            fields={navigationItems}
+          />
 
           <section className="order-2 width-full maxw-tablet-xl padding-top-4">
             <OpportunityEditForm
