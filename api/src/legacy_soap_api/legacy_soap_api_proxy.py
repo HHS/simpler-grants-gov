@@ -55,7 +55,7 @@ def get_proxy_headers(
     }
 
 
-def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) -> SOAPResponse:
+def get_legacy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) -> SOAPResponse:
     config = get_soap_config()
 
     soap_auth = soap_request.auth

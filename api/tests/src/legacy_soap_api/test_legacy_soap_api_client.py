@@ -83,7 +83,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         cascade_delete_from_db_table(db_session, Competition)
         cascade_delete_from_db_table(db_session, Opportunity)
 
-    @patch("src.legacy_soap_api.legacy_soap_api_proxy.get_proxy_response")
+    @patch("src.legacy_soap_api.legacy_soap_api_proxy.get_legacy_response")
     def test_get_opportunity_list_response(self, mock_proxy_request, db_session):
         mock_proxy_request_response = MagicMock()
         mock_proxy_request.return_value = mock_proxy_request_response
@@ -99,7 +99,7 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         simpler_soap_response = client.get_simpler_soap_response(mock_proxy_request_response)
         assert isinstance(simpler_soap_response, SOAPResponse)
 
-    @patch("src.legacy_soap_api.legacy_soap_api_proxy.get_proxy_response")
+    @patch("src.legacy_soap_api.legacy_soap_api_proxy.get_legacy_response")
     def test_get_opportunity_list_response_by_package_id(
         self, mock_proxy_request, db_session, enable_factory_create
     ):

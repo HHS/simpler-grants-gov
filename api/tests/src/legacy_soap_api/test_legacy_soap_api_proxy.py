@@ -14,7 +14,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
 from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig, get_soap_config
 from src.legacy_soap_api.legacy_soap_api_proxy import (
     get_cert_file,
-    get_proxy_response,
+    get_legacy_response,
     get_soap_jwt_auth_jwt,
 )
 from tests.lib.data_factories import create_soap_request
@@ -45,21 +45,21 @@ def test_get_cert_file_returns_cert_data_from_soap_request(enable_factory_create
         assert f.read() == f"{cert_str}\n\n{soap_request.auth.certificate.cert}"
 
 
-def test_get_proxy_response(enable_factory_create, monkeypatch, db_session):
+def test_get_legacy_response(enable_factory_create, monkeypatch, db_session):
     soap_request = create_soap_request(SOAP_PAYLOAD, use_soap_cert=True)
     legacy_certificate = soap_request.auth.certificate.legacy_certificate
     with db_session.begin():
         legacy_certificate.legacy_certificate_id = "e57e1c7f-cf2e-455e-9db5-3e03650174a7"
         db_session.add(legacy_certificate)
     with patch("src.legacy_soap_api.legacy_soap_api_proxy.Session.send") as mock_send:
-        get_proxy_response(soap_request)
+        get_legacy_response(soap_request)
         args, kwargs = mock_send.call_args
         cert_path = kwargs.get("cert")
         assert os.path.exists(cert_path) is False
         mock_send.assert_called_once_with(ANY, stream=True, cert=cert_path, timeout=3600)
 
 
-def test_get_proxy_response_logs_soap_client_lookup_error_and_returns_proxy_response(
+def test_get_legacy_response_logs_soap_client_lookup_error_and_returns_proxy_response(
     caplog, enable_factory_create
 ):
     caplog.set_level(logging.INFO)
@@ -68,12 +68,12 @@ def test_get_proxy_response_logs_soap_client_lookup_error_and_returns_proxy_resp
         "src.legacy_soap_api.legacy_soap_api_proxy.get_cert_file"
     ) as mock_cert_file:
         mock_cert_file.side_effect = SOAPClientCertificateLookupError()
-        get_proxy_response(soap_request)
+        get_legacy_response(soap_request)
         assert "soap_client_certificate: Unknown or invalid client certificate" in caplog.messages
         mock_send.assert_called_once_with(ANY, stream=True, cert="", timeout=3600)
 
 
-def test_get_proxy_response_logs_soap_client_certificate_not_configured_error_and_returns_error_response(
+def test_get_legacy_response_logs_soap_client_certificate_not_configured_error_and_returns_error_response(
     caplog, enable_factory_create
 ):
     caplog.set_level(logging.INFO)
@@ -84,7 +84,7 @@ def test_get_proxy_response_logs_soap_client_certificate_not_configured_error_an
         "src.legacy_soap_api.legacy_soap_api_proxy.get_cert_file"
     ) as mock_cert_file:
         mock_cert_file.side_effect = SOAPClientCertificateNotConfigured()
-        get_proxy_response(soap_request)
+        get_legacy_response(soap_request)
         assert (
             "soap_client_certificate: Certificate validated but not configured" in caplog.messages
         )
@@ -126,7 +126,7 @@ def test_get_soap_jwt_auth_request_when_use_soap_cert_is_not_on_headers(
     with patch(
         "src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response"
     ) as mock_get_soap_response:
-        get_proxy_response(soap_request)
+        get_legacy_response(soap_request)
         encoded = mock_get_soap_response.call_args_list[0][0][0].headers.get(
             "S2S_PARTNER_CERTID_JWT_B64"
         )
@@ -150,7 +150,7 @@ def test_request_without_use_soap_cert_header_gets_correct_proxy_url(enable_fact
     with patch(
         "src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response"
     ) as mock_get_soap_response:
-        get_proxy_response(soap_request)
+        get_legacy_response(soap_request)
         config = get_soap_config()
         expected = f"{config.soap_partner_gateway_uri}/grantsws-agency-partner/services/v2/AgencyWebServicesSoapPort"
         assert mock_get_soap_response.call_args_list[0][0][0].url == expected
@@ -163,7 +163,7 @@ def test_request_without_use_soap_cert_header_does_not_log_locally_if_log_local_
     with patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response") as _, patch(
         "src.legacy_soap_api.legacy_soap_api_proxy.log_local"
     ) as mock_log_local:
-        get_proxy_response(soap_request)
+        get_legacy_response(soap_request)
         mock_log_local.assert_not_called()
 
 
@@ -179,5 +179,5 @@ def test_request_logs_locally_when_use_soap_cert_header_is_disabled(enable_facto
     )
     with patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response") as mock_get_response:
         mock_get_response.return_value.to_bytes.return_value = response_bytes
-        get_proxy_response(soap_request)
+        get_legacy_response(soap_request)
         assert f"\nsoap jwt proxy response:\n{response_bytes.decode('utf-8')}" in caplog.messages
