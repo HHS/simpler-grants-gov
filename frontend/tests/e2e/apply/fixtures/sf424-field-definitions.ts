@@ -3,7 +3,7 @@ import { FormFillFieldDefinitions } from "tests/e2e/utils/forms/general-forms-fi
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 export const SF424_FORM_MATCHER =
-  "SF\\s*[-‑–—]?\\s*424|Application\\s+for\\s+Federal\\s+Assistance";
+  "SF\\s*[-‑–—]?\\s*424(?![A-Za-z0-9])|Application\\s+for\\s+Federal\\s+Assistance";
 
 export const fieldDefinitionsSF424: FormFillFieldDefinitions = {
   submission_type: {
