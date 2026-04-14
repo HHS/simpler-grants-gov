@@ -1,5 +1,6 @@
 import { numberToTwoDecimalString } from "tests/e2e/utils/forms/form-number-utils";
 import { type FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
+import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 // Uses regex matcher tolerant of hyphen/dash variants for SF-424A,
 // to be compatible with both local and staging environments.
@@ -393,3 +394,24 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
     },
   },
 };
+
+// Top alert validation errors for SF-424A blank-save behavior.
+export const SF424A_ALERT_ERRORS: FieldError[] = [
+  {
+    fieldId: "activity_line_items",
+    message: "[] should be non-empty",
+  },
+  {
+    fieldId: "confirmation",
+    message: "'confirmation' is a required property",
+  },
+];
+
+// Inline errors validated through the shared failure-path helper.
+// Restrict this list to field IDs that map to stable inline error elements.
+export const SF424A_REQUIRED_FIELD_ERRORS: FieldError[] = [
+  {
+    fieldId: "confirmation",
+    message: "'confirmation' is a required property",
+  },
+];
