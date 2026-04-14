@@ -33,14 +33,14 @@ class TestSimplerSoapApi:
             api_name=SimplerSoapAPI.APPLICANTS,
             operation_name="GetOpportunityListRequest",
         )
-        soap_proxy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
+        soap_legacy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
         with patch(
             "src.legacy_soap_api.legacy_soap_api_client.SimplerApplicantsS2SClient.get_simpler_soap_response"
         ) as mock_get_simpler_soap_response:
             mock_get_simpler_soap_response.return_value = SOAPResponse(
                 data=b"simpler", status_code=500, headers={}
             )
-            response = get_simpler_soap_response(soap_request, soap_proxy_response, db_session)
+            response = get_simpler_soap_response(soap_request, soap_legacy_response, db_session)
             assert response.data == b"simpler"
 
     def test_get_simpler_response_when_use_simpler_can_be_overrided_by_header_is_true_returns_simpler_response(
@@ -68,17 +68,17 @@ class TestSimplerSoapApi:
             api_name=SimplerSoapAPI.APPLICANTS,
             operation_name="GetOpportunityListRequest",
         )
-        soap_proxy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
+        soap_legacy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
         with patch(
             "src.legacy_soap_api.legacy_soap_api_client.SimplerApplicantsS2SClient.get_simpler_soap_response"
         ) as mock_get_simpler_soap_response:
             mock_get_simpler_soap_response.return_value = SOAPResponse(
                 data=b"simpler", status_code=500, headers={}
             )
-            response = get_simpler_soap_response(soap_request, soap_proxy_response, db_session)
+            response = get_simpler_soap_response(soap_request, soap_legacy_response, db_session)
             assert response.data == b"simpler"
 
-    def test_get_simpler_response_when_use_simpler_is_false_returns_proxy_response(
+    def test_get_simpler_response_when_use_simpler_is_false_returns_legacy_response(
         self, monkeypatch, db_session
     ):
         soap_api_config.get_soap_config.cache_clear()
@@ -103,14 +103,14 @@ class TestSimplerSoapApi:
             api_name=SimplerSoapAPI.APPLICANTS,
             operation_name="GetOpportunityListRequest",
         )
-        soap_proxy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
+        soap_legacy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
         with patch(
             "src.legacy_soap_api.legacy_soap_api_client.SimplerApplicantsS2SClient.get_simpler_soap_response"
         ) as mock_get_simpler_soap_response:
             mock_get_simpler_soap_response.return_value = SOAPResponse(
                 data=b"simpler", status_code=500, headers={}
             )
-            response = get_simpler_soap_response(soap_request, soap_proxy_response, db_session)
+            response = get_simpler_soap_response(soap_request, soap_legacy_response, db_session)
             assert response.data == b"proxy"
 
     def test_calls_get_simpler_soap_response_when_always_call_simpler_is_true_and_use_simpler_is_true(
@@ -136,11 +136,11 @@ class TestSimplerSoapApi:
             api_name=SimplerSoapAPI.APPLICANTS,
             operation_name="GetOpportunityListRequest",
         )
-        soap_proxy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
+        soap_legacy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
         with patch(
             "src.legacy_soap_api.legacy_soap_api_client.SimplerApplicantsS2SClient.get_simpler_soap_response"
         ) as mock_get_simpler_soap_response:
-            get_simpler_soap_response(soap_request, soap_proxy_response, db_session)
+            get_simpler_soap_response(soap_request, soap_legacy_response, db_session)
             mock_get_simpler_soap_response.assert_called_once()
 
     def test_calls_get_simpler_soap_response_when_always_call_simpler_is_true_and_use_simpler_is_false(
@@ -168,11 +168,11 @@ class TestSimplerSoapApi:
             api_name=SimplerSoapAPI.APPLICANTS,
             operation_name="GetOpportunityListRequest",
         )
-        soap_proxy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
+        soap_legacy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
         with patch(
             "src.legacy_soap_api.legacy_soap_api_client.SimplerApplicantsS2SClient.get_simpler_soap_response"
         ) as mock_get_simpler_soap_response:
-            get_simpler_soap_response(soap_request, soap_proxy_response, db_session)
+            get_simpler_soap_response(soap_request, soap_legacy_response, db_session)
             mock_get_simpler_soap_response.assert_called_once()
 
     def test_calls_get_simpler_soap_response_when_always_call_simpler_is_false_and_use_simpler_is_true(
@@ -200,11 +200,11 @@ class TestSimplerSoapApi:
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
         )
-        soap_proxy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
+        soap_legacy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
         with patch(
             "src.legacy_soap_api.legacy_soap_api_client.SimplerGrantorsS2SClient.get_simpler_soap_response"
         ) as mock_get_simpler_soap_response:
-            get_simpler_soap_response(soap_request, soap_proxy_response, db_session)
+            get_simpler_soap_response(soap_request, soap_legacy_response, db_session)
             mock_get_simpler_soap_response.assert_called_once()
 
     def test_calls_get_simpler_soap_response_when_always_call_simpler_is_false_and_use_simpler_is_false(
@@ -232,9 +232,9 @@ class TestSimplerSoapApi:
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
         )
-        soap_proxy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
+        soap_legacy_response = SOAPResponse(data=b"proxy", status_code=200, headers={})
         with patch(
             "src.legacy_soap_api.legacy_soap_api_client.SimplerGrantorsS2SClient.get_simpler_soap_response"
         ) as mock_get_simpler_soap_response:
-            get_simpler_soap_response(soap_request, soap_proxy_response, db_session)
+            get_simpler_soap_response(soap_request, soap_legacy_response, db_session)
             mock_get_simpler_soap_response.assert_not_called()

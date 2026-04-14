@@ -5,7 +5,7 @@ This module tests the assertion that both S2S and Simpler responses
 are properly normalized through the existing pipeline (Pydantic validation) and
 do not require additional comparison-level normalization.
 
-Key insight: Both get_proxy_soap_response_dict and get_soap_response_dict use
+Key insight: Both get_legacy_soap_response_dict and get_soap_response_dict use
 the same Pydantic schema (GetOpportunityListResponse), so they should produce
 identical results for equivalent empty responses.
 """
@@ -22,7 +22,7 @@ class TestPipelineNormalization:
 
     def test_grants_gov_empty_xml_through_pipeline(self):
         """Test that Grants.gov empty XML produces correct result through pipeline"""
-        # This simulates the get_proxy_soap_response_dict pipeline
+        # This simulates the get_legacy_soap_response_dict pipeline
         grants_gov_xml = """<?xml version="1.0" encoding="UTF-8"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
@@ -81,15 +81,15 @@ class TestPipelineNormalization:
             force_list_attributes=["OpportunityDetails"],
         )
         body_dict = get_envelope_dict(payload.to_dict(), "GetOpportunityListResponse")
-        proxy_response = GetOpportunityListResponse(**body_dict)
-        proxy_envelope = proxy_response.to_soap_envelope_dict("GetOpportunityListResponse")
+        legacy_response = GetOpportunityListResponse(**body_dict)
+        legacy_envelope = legacy_response.to_soap_envelope_dict("GetOpportunityListResponse")
 
         # Simpler pipeline
         simpler_response = GetOpportunityListResponse()
         simpler_envelope = simpler_response.to_soap_envelope_dict("GetOpportunityListResponse")
 
         # Both pipelines should produce identical results
-        assert proxy_envelope == simpler_envelope
+        assert legacy_envelope == simpler_envelope
 
     def test_different_xml_formats_same_pipeline_result(self):
         """Test that different XML formats for empty responses produce same result"""
@@ -152,7 +152,7 @@ class TestIssue5858AcceptanceCriteria:
     </soap:Body>
 </soap:Envelope>"""
 
-        # Simulate get_proxy_soap_response_dict
+        # Simulate get_legacy_soap_response_dict
         payload = SOAPPayload(
             s2s_xml,
             operation_name="GetOpportunityListResponse",

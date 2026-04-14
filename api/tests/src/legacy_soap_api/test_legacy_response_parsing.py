@@ -1,5 +1,5 @@
 """
-Integration test to verify that proxy responses with grants.gov date format
+Integration test to verify that legacy responses with grants.gov date format
 are parsed correctly, addressing issue #5744.
 """
 
@@ -12,21 +12,21 @@ from src.legacy_soap_api.applicants.schemas.get_opportunity_list_schemas import 
 from src.legacy_soap_api.soap_payload_handler import SOAPPayload, get_envelope_dict
 
 
-class TestProxyResponseParsing:
+class TestLegacyResponseParsing:
     """
-    Test that proxy responses with grants.gov date formats parse correctly.
+    Test that legacy responses with grants.gov date formats parse correctly.
 
     This addresses issue #5744 where dates like "2025-09-16-04:00" were causing
     validation errors with the error type "date_from_datetime_parsing".
     """
 
-    def test_proxy_response_with_grants_gov_date_format(self):
+    def test_legacy_response_with_grants_gov_date_format(self):
         """
-        Test that a proxy response with grants.gov formatted dates can be parsed
+        Test that a legacy response with grants.gov formatted dates can be parsed
         without validation errors.
         """
         # This simulates the actual XML response from grants.gov training environment
-        proxy_response_xml = """<?xml version="1.0" encoding="UTF-8"?>
+        legacy_response_xml = """<?xml version="1.0" encoding="UTF-8"?>
         <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
             <soap:Body>
                 <app:GetOpportunityListResponse
@@ -49,7 +49,7 @@ class TestProxyResponseParsing:
 
         # Parse the XML into a dictionary (simulating what happens in the proxy handler)
         soap_payload = SOAPPayload(
-            proxy_response_xml,
+            legacy_response_xml,
             operation_name="GetOpportunityListResponse",
             force_list_attributes=["OpportunityDetails"],
         )
@@ -73,11 +73,11 @@ class TestProxyResponseParsing:
         assert opportunity.opening_date == date(2025, 8, 15)
         assert opportunity.closing_date == date(2025, 9, 16)
 
-    def test_proxy_response_with_positive_timezone_offset(self):
+    def test_legacy_response_with_positive_timezone_offset(self):
         """
         Test parsing with positive timezone offset format.
         """
-        proxy_response_xml = """<?xml version="1.0" encoding="UTF-8"?>
+        legacy_response_xml = """<?xml version="1.0" encoding="UTF-8"?>
         <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
             <soap:Body>
                 <app:GetOpportunityListResponse
@@ -94,7 +94,7 @@ class TestProxyResponseParsing:
         </soap:Envelope>"""
 
         soap_payload = SOAPPayload(
-            proxy_response_xml,
+            legacy_response_xml,
             operation_name="GetOpportunityListResponse",
             force_list_attributes=["OpportunityDetails"],
         )
@@ -107,11 +107,11 @@ class TestProxyResponseParsing:
         assert opportunity.opening_date == date(2025, 8, 15)
         assert opportunity.closing_date == date(2025, 9, 16)
 
-    def test_proxy_response_mixed_date_formats(self):
+    def test_legacy_response_mixed_date_formats(self):
         """
         Test that we can handle mixed date formats in the same response.
         """
-        proxy_response_xml = """<?xml version="1.0" encoding="UTF-8"?>
+        legacy_response_xml = """<?xml version="1.0" encoding="UTF-8"?>
         <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
             <soap:Body>
                 <app:GetOpportunityListResponse
@@ -133,7 +133,7 @@ class TestProxyResponseParsing:
         </soap:Envelope>"""
 
         soap_payload = SOAPPayload(
-            proxy_response_xml,
+            legacy_response_xml,
             operation_name="GetOpportunityListResponse",
             force_list_attributes=["OpportunityDetails"],
         )
@@ -161,7 +161,7 @@ class TestProxyResponseParsing:
         Before our fix, this would have raised a ValidationError with
         error type "date_from_datetime_parsing" for the fields with timezone suffixes.
         """
-        # Create the exact data structure that would come from the proxy response
+        # Create the exact data structure that would come from the legacy response
         opportunity_data = {
             "FundingOpportunityNumber": "O-BJA-2025-202930-STG",
             "OpeningDate": "2025-08-15-04:00",  # This format caused the original issue

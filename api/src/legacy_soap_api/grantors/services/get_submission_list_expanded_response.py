@@ -244,7 +244,7 @@ def get_submission_list_expanded(
 
 def get_submission_list_expanded_response(
     simpler_submissions: list[schemas.SubmissionInfo],
-    proxy_response: SOAPResponse,
+    legacy_response: SOAPResponse,
 ) -> schemas.GetSubmissionListExpandedResponse:
     """Build the SOAP response envelope from Simpler and proxy data.
 
@@ -253,7 +253,7 @@ def get_submission_list_expanded_response(
     """
     info: list[schemas.SubmissionInfo] = []
     try:
-        info.extend(parse_submissions_from_proxy(proxy_response))
+        info.extend(parse_submissions_from_legacy(legacy_response))
     except Exception:
         logger.exception("Failed to parse submission list expanded XML response")
     info.extend(simpler_submissions)
@@ -266,8 +266,8 @@ def get_submission_list_expanded_response(
     )
 
 
-def parse_submissions_from_proxy(proxy_response: SOAPResponse) -> list[schemas.SubmissionInfo]:
-    xml_bytes = b"".join(clean_mtom_generator(proxy_response.stream()))
+def parse_submissions_from_legacy(legacy_response: SOAPResponse) -> list[schemas.SubmissionInfo]:
+    xml_bytes = b"".join(clean_mtom_generator(legacy_response.stream()))
     info = []
     if xml_bytes:
         parser = etree.XMLParser(recover=True)

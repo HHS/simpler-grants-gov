@@ -53,7 +53,7 @@ class BaseSOAPClient:
             self.soap_request.data.head().decode(), self.operation_config.request_operation_name
         )
 
-    def get_soap_response_dict(self, proxy_response: SOAPResponse | None = None) -> dict:
+    def get_soap_response_dict(self, legacy_response: SOAPResponse | None = None) -> dict:
         """Get Simpler SOAP response dict
 
         This method will return the validated pydantic schema returned from the
@@ -66,11 +66,11 @@ class BaseSOAPClient:
         operation_method = getattr(
             self, to_snake_case(self.operation_config.request_operation_name)
         )
-        return operation_method(proxy_response).to_soap_envelope_dict(
+        return operation_method(legacy_response).to_soap_envelope_dict(
             self.operation_config.response_operation_name
         )
 
-    def get_proxy_soap_response_dict(self, proxy_response: SOAPResponse) -> dict:
+    def get_legacy_soap_response_dict(self, legacy_response: SOAPResponse) -> dict:
         """
         This method does the following:
 
@@ -85,7 +85,7 @@ class BaseSOAPClient:
         Note: Ignoring type checking in return statement since we already check
         that the schema is not None prior to statement.
         """
-        proxy_response_schema_data = wrap_envelope_dict(
+        legacy_response_schema_data = wrap_envelope_dict(
             {}, self.operation_config.response_operation_name
         )
 
@@ -98,30 +98,30 @@ class BaseSOAPClient:
                     "response_operation_name": self.operation_config.response_operation_name,
                 },
             )
-            return proxy_response_schema_data
+            return legacy_response_schema_data
 
         try:
-            proxy_response_payload = SOAPPayload(
-                proxy_response.to_bytes().decode(errors="replace"),
+            legacy_response_payload = SOAPPayload(
+                legacy_response.to_bytes().decode(errors="replace"),
                 operation_name=self.operation_config.response_operation_name,
                 force_list_attributes=self.operation_config.force_list_attributes,
             )
 
             # The XML dict that includes namespaces and other attributes prior to normalization and schema validation.
-            proxy_response_dict = proxy_response_payload.to_dict()
+            legacy_response_dict = legacy_response_payload.to_dict()
             log_local(
                 msg="proxy response dict pre-validation",
-                data=proxy_response_dict,
+                data=legacy_response_dict,
                 formatter=json_formatter,
             )
 
             # Validated/normalized dict from pydantic schema.
-            proxy_response_schema_dict = self._get_simpler_soap_response_schema()(
+            legacy_response_schema_dict = self._get_simpler_soap_response_schema()(
                 **get_envelope_dict(
-                    proxy_response_dict, self.operation_config.response_operation_name
+                    legacy_response_dict, self.operation_config.response_operation_name
                 )
             )  # type: ignore[misc]
-            return proxy_response_schema_dict.to_soap_envelope_dict(
+            return legacy_response_schema_dict.to_soap_envelope_dict(
                 self.operation_config.response_operation_name
             )
         except ValidationError as e:
@@ -139,16 +139,16 @@ class BaseSOAPClient:
                 exc_info=True,
                 extra={"soap_api_event": LegacySoapApiEvent.UNPARSEABLE_SOAP_PROXY_RESPONSE},
             )
-        return proxy_response_schema_data
+        return legacy_response_schema_data
 
-    def log_diffs(self, proxy_response_soap_dict: dict, simpler_response_soap_dict: dict) -> None:
+    def log_diffs(self, legacy_response_soap_dict: dict, simpler_response_soap_dict: dict) -> None:
         try:
             diff_results = diff_soap_dicts(
                 sgg_dict=get_envelope_dict(
                     simpler_response_soap_dict, self.operation_config.response_operation_name
                 ),
                 gg_dict=get_envelope_dict(
-                    proxy_response_soap_dict, self.operation_config.response_operation_name
+                    legacy_response_soap_dict, self.operation_config.response_operation_name
                 ),
                 key_indexes=self.operation_config.key_indexes,
                 keys_only=True,
@@ -167,7 +167,7 @@ class BaseSOAPClient:
                 },
             )
 
-    def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
+    def get_simpler_soap_response(self, legacy_response: SOAPResponse) -> SOAPResponse:
         """
         This method is responsible getting the simpler soap xml payload.
 
@@ -190,17 +190,17 @@ class BaseSOAPClient:
         )
         log_local(msg="simpler response XML", data=simpler_response_xml, formatter=xml_formatter)
         if self.operation_config.compare_endpoints:
-            proxy_response_soap_dict = self.get_proxy_soap_response_dict(proxy_response)
+            legacy_response_soap_dict = self.get_legacy_soap_response_dict(legacy_response)
             log_local(
                 msg="proxy response validated dict",
-                data=proxy_response_soap_dict,
+                data=legacy_response_soap_dict,
                 formatter=json_formatter,
             )
             # We will only run diffs for responses that do not match.
-            if proxy_response_soap_dict == simpler_response_soap_dict:
+            if legacy_response_soap_dict == simpler_response_soap_dict:
                 logger.info("soap_api_diff responses match", extra={"soap_responses_match": True})
             else:
-                self.log_diffs(proxy_response_soap_dict, simpler_response_soap_dict)
+                self.log_diffs(legacy_response_soap_dict, simpler_response_soap_dict)
 
         return get_soap_response(data=simpler_response_xml)
 
@@ -219,7 +219,7 @@ class SimplerApplicantsS2SClient(BaseSOAPClient):
     """
 
     def get_opportunity_list_request(
-        self, proxy_response: SOAPResponse | None = None
+        self, legacy_response: SOAPResponse | None = None
     ) -> applicants_schemas.GetOpportunityListResponse:
         return get_opportunity_list_response(
             db_session=self.db_session,
@@ -237,7 +237,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
     """
 
     def get_application_zip_request(
-        self, proxy_response: SOAPResponse | None = None
+        self, legacy_response: SOAPResponse | None = None
     ) -> grantors_schemas.GetApplicationZipResponseSOAPEnvelope:
         return get_application_zip_response(
             db_session=self.db_session,
@@ -249,7 +249,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         )
 
     def confirm_application_delivery_request(
-        self, proxy_response: SOAPResponse | None = None
+        self, legacy_response: SOAPResponse | None = None
     ) -> grantors_schemas.ConfirmApplicationDeliveryResponseSOAPEnvelope:
         request = grantors_schemas.ConfirmApplicationDeliveryRequest(**self.get_soap_request_dict())
         tracking_number = confirm_application_delivery(
@@ -263,7 +263,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         )
 
     def get_submission_list_expanded_request(
-        self, proxy_response: SOAPResponse
+        self, legacy_response: SOAPResponse
     ) -> grantors_schemas.GetSubmissionListExpandedResponse:
         soap_request_dict = self.get_soap_request_dict() or {}
         simpler_submissions = get_submission_list_expanded(
@@ -274,11 +274,11 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         )
         return get_submission_list_expanded_response(
             simpler_submissions=simpler_submissions,
-            proxy_response=proxy_response,
+            legacy_response=legacy_response,
         )
 
     def update_application_info_request(
-        self, proxy_response: SOAPResponse | None = None
+        self, legacy_response: SOAPResponse | None = None
     ) -> grantors_schemas.UpdateApplicationInfoResponseSOAPEnvelope:
         tracking_number, assign_result, notes_result = update_application_info(
             db_session=self.db_session,
@@ -310,7 +310,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             mtom_file_stream.close()
         yield b"\n" + boundary.encode("utf-8") + b"--"
 
-    def get_simpler_soap_response(self, proxy_response: SOAPResponse) -> SOAPResponse:
+    def get_simpler_soap_response(self, legacy_response: SOAPResponse) -> SOAPResponse:
         # MTOM message is assembled here
         # 1. --uuid: {boundary_uuid}\n
         # 2. headers:
@@ -321,7 +321,7 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
         # 4. --uuid: {boundary_uuid}
         # 5. the file bytes from the file being attached
         # 6. --uuid: {boundary_uuid}--
-        simpler_response_soap_dict = self.get_soap_response_dict(proxy_response)
+        simpler_response_soap_dict = self.get_soap_response_dict(legacy_response)
         mtom_file_stream = simpler_response_soap_dict.pop("_mtom_file_stream", None)
         log_local(
             msg="simpler response dict", data=simpler_response_soap_dict, formatter=json_formatter
@@ -351,4 +351,4 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
                 data=self._gen_response_data(mime_message, boundary, mtom_file_stream),
                 headers=update_headers,
             )
-        return proxy_response
+        return legacy_response

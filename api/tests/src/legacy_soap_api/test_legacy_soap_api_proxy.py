@@ -59,7 +59,7 @@ def test_get_legacy_response(enable_factory_create, monkeypatch, db_session):
         mock_send.assert_called_once_with(ANY, stream=True, cert=cert_path, timeout=3600)
 
 
-def test_get_legacy_response_logs_soap_client_lookup_error_and_returns_proxy_response(
+def test_get_legacy_response_logs_soap_client_lookup_error_and_returns_legacy_response(
     caplog, enable_factory_create
 ):
     caplog.set_level(logging.INFO)

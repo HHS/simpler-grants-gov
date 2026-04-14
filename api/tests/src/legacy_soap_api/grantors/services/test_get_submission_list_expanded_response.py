@@ -119,7 +119,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         )
         result = get_submission_list_expanded_response(
             simpler_submissions=simpler_submissions,
-            proxy_response=SOAPResponse(data="", status_code=200, headers={}),
+            legacy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
         assert result.success is True
         assert result.available_application_number == 1
@@ -146,7 +146,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         )
         result = get_submission_list_expanded_response(
             simpler_submissions=simpler_submissions,
-            proxy_response=SOAPResponse(data="", status_code=200, headers={}),
+            legacy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
         assert result.success is True
         assert setup_data["tracking_number"] not in [
@@ -173,7 +173,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         )
         result = get_submission_list_expanded_response(
             simpler_submissions=simpler_submissions,
-            proxy_response=SOAPResponse(data="", status_code=200, headers={}),
+            legacy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
         assert result.success is True
         assert result.available_application_number == 3
@@ -200,7 +200,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         )
         result = get_submission_list_expanded_response(
             simpler_submissions=simpler_submissions,
-            proxy_response=SOAPResponse(data="", status_code=200, headers={}),
+            legacy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
         assert result.success is True
         assert result.available_application_number == 3
@@ -225,7 +225,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         )
         result = get_submission_list_expanded_response(
             simpler_submissions=simpler_submissions,
-            proxy_response=SOAPResponse(data="", status_code=200, headers={}),
+            legacy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
         assert result.success is True
         assert result.available_application_number == 1
@@ -250,7 +250,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         )
         result = get_submission_list_expanded_response(
             simpler_submissions=simpler_submissions,
-            proxy_response=SOAPResponse(data="", status_code=200, headers={}),
+            legacy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
         assert result.success is True
         assert result.available_application_number == 5
@@ -276,7 +276,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         )
         result = get_submission_list_expanded_response(
             simpler_submissions=simpler_submissions,
-            proxy_response=SOAPResponse(data="", status_code=200, headers={}),
+            legacy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
         assert result.success is True
         assert result.available_application_number == 1

@@ -84,9 +84,9 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         cascade_delete_from_db_table(db_session, Opportunity)
 
     @patch("src.legacy_soap_api.legacy_soap_api_proxy.get_legacy_response")
-    def test_get_opportunity_list_response(self, mock_proxy_request, db_session):
-        mock_proxy_request_response = MagicMock()
-        mock_proxy_request.return_value = mock_proxy_request_response
+    def test_get_opportunity_list_response(self, mock_legacy_request, db_session):
+        mock_legacy_request_response = MagicMock()
+        mock_legacy_request.return_value = mock_legacy_request_response
         client = get_simpler_applicants_soap_client(
             mock_requests.get_opportunity_list_by_opportunity_number_request(
                 opportunity_number="HDTRA1-25-S-0001"
@@ -96,20 +96,20 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         assert client.operation_config.request_operation_name == "GetOpportunityListRequest"
         assert client.operation_config.response_operation_name == "GetOpportunityListResponse"
         assert client.get_opportunity_list_request() is not None
-        simpler_soap_response = client.get_simpler_soap_response(mock_proxy_request_response)
+        simpler_soap_response = client.get_simpler_soap_response(mock_legacy_request_response)
         assert isinstance(simpler_soap_response, SOAPResponse)
 
     @patch("src.legacy_soap_api.legacy_soap_api_proxy.get_legacy_response")
     def test_get_opportunity_list_response_by_package_id(
-        self, mock_proxy_request, db_session, enable_factory_create
+        self, mock_legacy_request, db_session, enable_factory_create
     ):
         # Create an opportunity with a competition
         package_id = "PKG-SOAPCLIENT11"
         CompetitionFactory.create(
             opportunity=OpportunityFactory.create(), legacy_package_id=package_id
         )
-        mock_proxy_request_response = MagicMock()
-        mock_proxy_request.return_value = mock_proxy_request_response
+        mock_legacy_request_response = MagicMock()
+        mock_legacy_request.return_value = mock_legacy_request_response
         client = get_simpler_applicants_soap_client(
             mock_requests.get_opportunity_list_by_package_id_request(package_id).encode(),
             db_session=db_session,
@@ -271,8 +271,8 @@ class TestSimplerSOAPApplicantsClientGetOpportunityList:
         )
 
         # This is only testing the simpler soap response so we can leave proxy response empty.
-        mock_proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        simpler_response = simpler_soap_client.get_simpler_soap_response(mock_proxy_response)
+        mock_legacy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_response = simpler_soap_client.get_simpler_soap_response(mock_legacy_response)
 
         assert simpler_response.data == expected_simpler_soap_response_xml.encode()
         assert (
@@ -290,7 +290,7 @@ class TestSimplerBaseSOAPClient:
         yield (b"<ns5:OpeningDate>2025-07-20-04:00</ns5:OpeningDate>")
         yield b"</OpportunityDetails></GetOpportunityListResponse></Body></soap:Envelope>"
 
-    def test_get_proxy_soap_response_dict_handles_data_that_is_generator(self, db_session):
+    def test_get_legacy_soap_response_dict_handles_data_that_is_generator(self, db_session):
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(
                 stream=io.BytesIO(
@@ -304,8 +304,8 @@ class TestSimplerBaseSOAPClient:
             operation_name="GetOpportunityListRequest",
         )
         client = BaseSOAPClient(soap_request, db_session)
-        proxy_response = SOAPResponse(data=self.xml_streamer(), status_code=200, headers={})
-        proxy_soap_response_dict = client.get_proxy_soap_response_dict(proxy_response)
+        legacy_response = SOAPResponse(data=self.xml_streamer(), status_code=200, headers={})
+        legacy_soap_response_dict = client.get_legacy_soap_response_dict(legacy_response)
         expected = {
             "Envelope": {
                 "Body": {
@@ -315,7 +315,7 @@ class TestSimplerBaseSOAPClient:
                 }
             }
         }
-        assert proxy_soap_response_dict == expected
+        assert legacy_soap_response_dict == expected
 
     def test_client_get_soap_request_dict_handles_streaming_data(self, db_session):
         request_data = (
@@ -353,19 +353,19 @@ class TestSimplerBaseSOAPClient:
             operation_name="GetOpportunityListRequest",
         )
         client = BaseSOAPClient(soap_request, db_session)
-        proxy_response = SOAPResponse(data=self.xml_streamer(), status_code=200, headers={})
+        legacy_response = SOAPResponse(data=self.xml_streamer(), status_code=200, headers={})
         with patch(
             "src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient.get_soap_response_dict"
         ) as mock_soap_response_dict:
             caplog.set_level(logging.DEBUG)
             mock_soap_response_dict.return_value = {}
             with patch(
-                "src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient.get_proxy_soap_response_dict"
-            ) as mock_get_proxy_soap_response_dict:
-                client.get_simpler_soap_response(proxy_response)
+                "src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient.get_legacy_soap_response_dict"
+            ) as mock_get_legacy_soap_response_dict:
+                client.get_simpler_soap_response(legacy_response)
                 assert len(caplog.records) == 1
                 assert caplog.records[0].message == "soap_api_diff complete"
-                mock_get_proxy_soap_response_dict.assert_called_once_with(proxy_response)
+                mock_get_legacy_soap_response_dict.assert_called_once_with(legacy_response)
 
     def test_get_simpler_soap_response_when_operation_is_not_get_opportunity_list_request_does_not_compare_responses(
         self, db_session, caplog
@@ -400,17 +400,19 @@ class TestSimplerBaseSOAPClient:
                 "src.legacy_soap_api.legacy_soap_api_client.build_xml_from_dict"
             ) as mock_build_xml_from_dict:
                 mock_build_xml_from_dict.return_value = b""
-                proxy_response = SOAPResponse(data=self.xml_streamer(), status_code=200, headers={})
+                legacy_response = SOAPResponse(
+                    data=self.xml_streamer(), status_code=200, headers={}
+                )
                 with patch(
                     "src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient.get_soap_response_dict"
                 ) as mock_soap_response_dict:
                     caplog.set_level(logging.DEBUG)
                     mock_soap_response_dict.return_value = {}
                     with patch(
-                        "src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient.get_proxy_soap_response_dict"
-                    ) as mock_get_proxy_soap_response_dict:
-                        mock_get_proxy_soap_response_dict.assert_not_called()
-                    client.get_simpler_soap_response(proxy_response)
+                        "src.legacy_soap_api.legacy_soap_api_client.BaseSOAPClient.get_legacy_soap_response_dict"
+                    ) as mock_get_legacy_soap_response_dict:
+                        mock_get_legacy_soap_response_dict.assert_not_called()
+                    client.get_simpler_soap_response(legacy_response)
                     assert len(caplog.records) == 0
 
 
@@ -451,11 +453,11 @@ class TestSimplerSOAPGetApplicationZip:
             operation_name="GetApplicationZipRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        mock_legacy_response = SOAPResponse(data=b"", status_code=500, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
             mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
-            result = client.get_simpler_soap_response(mock_proxy_response)
+            result = client.get_simpler_soap_response(mock_legacy_response)
             expected = (
                 '--uuid:cccccccc-1111-2222-3333-dddddddddddd\nContent-Type: application/xop+xml; charset=UTF-8; type="text/xml"\nContent-Transfer-Encoding: binary\nContent-ID: <root.message@cxf.apache.org'
                 '>\n\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><ns2:GetApplicationZipResponse xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns11="htt'
@@ -508,12 +510,12 @@ class TestSimplerSOAPGetApplicationZip:
             operation_name="GetApplicationZipRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        mock_legacy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
         with patch.object(uuid, "uuid4") as mock_uuid4:
             mock_uuid4.side_effect = [CID_UUID, ADDITIONAL_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
-            result = client.get_simpler_soap_response(mock_proxy_response)
+            result = client.get_simpler_soap_response(mock_legacy_response)
             assert result.status_code == 200
 
     def test_get_simpler_soap_response_cannot_access_endpoint_if_certificate_user_does_not_have_privileges(
@@ -549,10 +551,10 @@ class TestSimplerSOAPGetApplicationZip:
             operation_name="GetApplicationZipRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        mock_legacy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
         with pytest.raises(SOAPClientUserDoesNotHavePermission):
-            client.get_simpler_soap_response(mock_proxy_response)
+            client.get_simpler_soap_response(mock_legacy_response)
 
     def test_get_simpler_soap_response_logging_if_downloading_the_file_from_s3_fails(
         self, db_session, enable_factory_create, caplog
@@ -589,18 +591,18 @@ class TestSimplerSOAPGetApplicationZip:
             operation_name="GetApplicationZipRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        mock_proxy_response = SOAPResponse(data=b"soap", status_code=500, headers={})
+        mock_legacy_response = SOAPResponse(data=b"soap", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
         with patch("src.util.file_util.smart_open.open") as mock_smart_open:
             mock_smart_open.side_effect = ClientError(
                 {"Error": {"Code": "NoSuchKey", "Message": "The specified key does not exist."}},
                 "GetObject",
             )
-            response = client.get_simpler_soap_response(mock_proxy_response)
+            response = client.get_simpler_soap_response(mock_legacy_response)
             msg = f"Unable to retrieve file legacy_tracking_number {submission.legacy_tracking_number} from s3 file location."
             assert msg in caplog.messages
-            assert response.data == mock_proxy_response.data
-            assert response.status_code == mock_proxy_response.status_code
+            assert response.data == mock_legacy_response.data
+            assert response.status_code == mock_legacy_response.status_code
 
     def test_get_simpler_soap_response_logging_if_submission_not_found(
         self, db_session, enable_factory_create, caplog
@@ -627,14 +629,14 @@ class TestSimplerSOAPGetApplicationZip:
             api_name=SimplerSoapAPI.GRANTORS,
             operation_name="GetApplicationZipRequest",
         )
-        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        mock_legacy_response = SOAPResponse(data=b"", status_code=500, headers={})
         client = SimplerGrantorsS2SClient(soap_request, db_session)
-        response = client.get_simpler_soap_response(mock_proxy_response)
+        response = client.get_simpler_soap_response(mock_legacy_response)
         grants_gov_tracking_number = FAKE_GRANTS_GOV_TRACKING_NUMBER
         msg = f"Unable to find submission legacy_tracking_number {grants_gov_tracking_number}."
         assert msg in caplog.messages
-        assert response.data == mock_proxy_response.data
-        assert response.status_code == mock_proxy_response.status_code
+        assert response.data == mock_legacy_response.data
+        assert response.status_code == mock_legacy_response.status_code
 
 
 class TestSimplerSOAPGetSubmissionListExpanded:
@@ -704,11 +706,11 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             operation_name="GetSubmissionListExpandedRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        mock_legacy_response = SOAPResponse(data=b"", status_code=500, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
             mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
-            result = client.get_simpler_soap_response(mock_proxy_response)
+            result = client.get_simpler_soap_response(mock_legacy_response)
             expected = (
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
                 "\nContent-Type: application/xop+xml; charset=UTF-8; type"
@@ -786,11 +788,11 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             operation_name="GetSubmissionListExpandedRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        mock_proxy_response = SOAPResponse(data=b"", status_code=500, headers={})
+        mock_legacy_response = SOAPResponse(data=b"", status_code=500, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
             mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
-            result = client.get_simpler_soap_response(mock_proxy_response)
+            result = client.get_simpler_soap_response(mock_legacy_response)
             expected = (
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\n"
                 'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
@@ -886,7 +888,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             operation_name="GetSubmissionListExpandedRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        proxy_data = (
+        legacy_data = (
             "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca"
             'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"'
             "Content-Transfer-Encoding: binary"
@@ -927,11 +929,11 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soap:Envelope>"
             "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca--"
         )
-        mock_proxy_response = SOAPResponse(data=proxy_data, status_code=200, headers={})
+        mock_legacy_response = SOAPResponse(data=legacy_data, status_code=200, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
             mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
-            result = client.get_simpler_soap_response(mock_proxy_response)
+            result = client.get_simpler_soap_response(mock_legacy_response)
             expected = (
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\n"
                 'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
@@ -1023,7 +1025,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             operation_name="GetSubmissionListExpandedRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        proxy_data = (
+        legacy_data = (
             "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca"
             'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"'
             "Content-Transfer-Encoding: binary"
@@ -1064,11 +1066,11 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soap:Envelope>"
             "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca--"
         )
-        mock_proxy_response = SOAPResponse(data=proxy_data, status_code=200, headers={})
+        mock_legacy_response = SOAPResponse(data=legacy_data, status_code=200, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
             mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
-            result = client.get_simpler_soap_response(mock_proxy_response)
+            result = client.get_simpler_soap_response(mock_legacy_response)
             expected = (
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb\n"
                 'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\n'
@@ -1139,13 +1141,13 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             operation_name="GetSubmissionListExpandedRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        mock_proxy_response = SOAPResponse(
+        mock_legacy_response = SOAPResponse(
             data=b"<somegarbage>1235</somegarbage>", status_code=200, headers={}
         )
         with patch.object(uuid, "uuid4") as mock_uuid4:
             mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
-            result = client.get_simpler_soap_response(mock_proxy_response)
+            result = client.get_simpler_soap_response(mock_legacy_response)
             expected = (
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
                 "\nContent-Type: application/xop+xml; charset=UTF-8; type"
@@ -1211,17 +1213,17 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             operation_name="GetSubmissionListExpandedRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        mock_proxy_response = SOAPResponse(
+        mock_legacy_response = SOAPResponse(
             data=b"<somegarbage>1235</somegarbage>", status_code=200, headers={}
         )
         with patch.object(uuid, "uuid4") as mock_uuid4:
             mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
             with patch(
-                "src.legacy_soap_api.grantors.services.get_submission_list_expanded_response.parse_submissions_from_proxy"
+                "src.legacy_soap_api.grantors.services.get_submission_list_expanded_response.parse_submissions_from_legacy"
             ) as mock_parse:
                 mock_parse.side_effect = Exception()
-                result = client.get_simpler_soap_response(mock_proxy_response)
+                result = client.get_simpler_soap_response(mock_legacy_response)
             expected = (
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
                 "\nContent-Type: application/xop+xml; charset=UTF-8; type"
@@ -1260,7 +1262,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             assert result.data == expected
             assert "Failed to parse submission list expanded XML response" in caplog.messages
 
-    def test_get_simpler_soap_response_returns_valid_submission_info_from_proxy_and_skips_invalid(
+    def test_get_simpler_soap_response_returns_valid_submission_info_from_legacy_and_skips_invalid(
         self, db_session, enable_factory_create, mock_s3_bucket, caplog
     ):
         agency = AgencyFactory.create()
@@ -1288,7 +1290,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             operation_name="GetSubmissionListExpandedRequest",
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
-        proxy_data = (
+        legacy_data = (
             "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca"
             'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"'
             "Content-Transfer-Encoding: binary"
@@ -1332,11 +1334,11 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "</soap:Envelope>"
             "--uuid:0c77147e-7650-436c-baa1-553f2df8d6ca--"
         )
-        mock_proxy_response = SOAPResponse(data=proxy_data, status_code=200, headers={})
+        mock_legacy_response = SOAPResponse(data=legacy_data, status_code=200, headers={})
         with patch.object(uuid, "uuid4") as mock_uuid4:
             mock_uuid4.side_effect = [CID_UUID, BOUNDARY_UUID]
             client = SimplerGrantorsS2SClient(soap_request, db_session)
-            result = client.get_simpler_soap_response(mock_proxy_response)
+            result = client.get_simpler_soap_response(mock_legacy_response)
             expected = (
                 "--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"
                 "\nContent-Type: application/xop+xml; charset=UTF-8; type"
