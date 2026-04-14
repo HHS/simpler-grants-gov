@@ -10,7 +10,6 @@ import { notFound, redirect } from "next/navigation";
 import { Alert, Button, GridContainer } from "@trussworks/react-uswds";
 
 import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
-import Breadcrumbs, { Breadcrumb } from "src/components/Breadcrumbs";
 import OpportunityEditForm from "src/components/opportunity/OpportunityEditForm";
 import { buildOpportunityEditInitialValues } from "src/components/opportunity/opportunityEditFormConfig";
 import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
@@ -100,22 +99,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
 
   const primaryAssistanceListing =
     opportunityData.opportunity_assistance_listings[0];
-  const breadcrumbs: Breadcrumb[] = [
-    {
-      title: "Home",
-      path: "/",
-    },
-    {
-      title: "Opportunities",
-      path: "/opportunities",
-    },
-    ...(isNewlyCreated
-      ? [{ title: "Create opportunity", path: "/opportunities/create" }]
-      : []),
-    {
-      title: "Opportunity details",
-    },
-  ];
   const activeSummary =
     opportunityData.forecast_summary ??
     opportunityData.non_forecast_summary ??
@@ -132,9 +115,14 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
   };
   const opportunityStage = opportunityData.is_draft
     ? tEdit("header.stageDraft")
-    : (stageLabels[opportunityData.opportunity_status ?? ""] ??
-      opportunityData.opportunity_status ??
-      "");
+    : (() => {
+        const status = opportunityData.opportunity_status ?? "";
+        const label = stageLabels[status];
+        if (!label) {
+          throw new Error(`Unexpected opportunity status: ${status}`);
+        }
+        return label;
+      })();
   const pageTitle = tEdit("header.pageTitle", {
     number: opportunityData.opportunity_number ?? "",
   });
@@ -171,12 +159,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
     <div className="bg-white">
       <section className="bg-base-lightest border-bottom border-base-lightest padding-y-6">
         <div className="grid-container">
-          <div className="padding-y-2">
-            <Breadcrumbs
-              breadcrumbList={breadcrumbs}
-              className="bg-transparent"
-            />
-          </div>
           <div className="display-flex flex-column width-full">
             <div className="maxw-tablet-lg margin-bottom-2">
               <h1 className="margin-0 font-heading-2xl">{pageTitle}</h1>

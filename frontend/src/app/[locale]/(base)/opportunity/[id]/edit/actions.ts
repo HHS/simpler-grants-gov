@@ -44,11 +44,6 @@ function readStringValue(value: FormDataEntryValue | null): string {
   return typeof value === "string" ? value : "";
 }
 
-async function getOpportunityEditTranslations() {
-  const alerts = await getTranslations("OpportunityEdit.content.alerts");
-  return { alerts };
-}
-
 async function validateOpportunityEditForm(formData: FormData) {
   const validationErrors = await getTranslations(
     "OpportunityEdit.validationErrors",
@@ -137,13 +132,8 @@ async function validateOpportunityEditForm(formData: FormData) {
     contactEmailText: readStringValue(formData.get("contactEmailText")),
     awardMinimum: readStringValue(formData.get("awardMinimum")),
     awardMaximum: readStringValue(formData.get("awardMaximum")),
-    fundingType: readStringValue(
-      formData.get("fundingType") ?? formData.get("funding-type-values"),
-    ),
-    fundingCategory: readStringValue(
-      formData.get("fundingCategory") ??
-        formData.get("funding-category-values"),
-    ),
+    fundingType: readStringValue(formData.get("funding-type-values")),
+    fundingCategory: readStringValue(formData.get("funding-category-values")),
     expectedNumberOfAwards: readStringValue(
       formData.get("expectedNumberOfAwards"),
     ),
@@ -168,7 +158,7 @@ export async function saveOpportunityEditAction(
   _prevState: OpportunityEditActionState,
   formData: FormData,
 ): Promise<OpportunityEditActionState> {
-  const { alerts } = await getOpportunityEditTranslations();
+  const alerts = await getTranslations("OpportunityEdit.content.alerts");
 
   const opportunityId = readStringValue(formData.get("opportunityId")).trim();
   const opportunitySummaryId = readStringValue(

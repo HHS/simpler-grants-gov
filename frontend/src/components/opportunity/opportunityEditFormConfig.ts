@@ -14,12 +14,12 @@ export type OpportunityEditFormValues = {
   awardSelectionMethod: string;
   awardSelectionMethodExplanation: string;
   description: string;
-  fundingType: string[];
+  fundingType: string;
   costSharing: boolean | null;
   publishDate: string;
   closeDate: string;
   closeDateExplanation: string;
-  fundingCategories: string[];
+  fundingCategories: string;
   fundingCategoryExplanation: string;
   expectedNumberOfAwards: string;
   estimatedTotalProgramFunding: string;
@@ -46,9 +46,7 @@ const emptyString = (value: string | null | undefined) => value ?? "";
 const numberToString = (value: number | null | undefined) =>
   value === null || value === undefined ? "" : String(value);
 
-export const ELIGIBILITY_OPTIONS: CheckboxOption[] = eligibilityTypes.map(
-  ({ label, value }) => ({ label, value }),
-);
+export const ELIGIBILITY_OPTIONS: CheckboxOption[] = eligibilityTypes;
 
 export const OPPORTUNITY_CATEGORY_OPTIONS: SelectOption[] = [
   { label: "Discretionary", value: "discretionary" },
@@ -62,9 +60,7 @@ export const FUNDING_INSTRUMENT_OPTIONS: CheckboxOption[] = fundingOptions.map(
   ({ label, value }) => ({ label: label.trim(), value }),
 );
 
-export const FUNDING_CATEGORY_OPTIONS: CheckboxOption[] = categoryOptions.map(
-  ({ label, value }) => ({ label, value }),
-);
+export const FUNDING_CATEGORY_OPTIONS: CheckboxOption[] = categoryOptions;
 
 export const buildOpportunityEditInitialValues = (
   opportunity: OpportunityDetail,
@@ -79,12 +75,12 @@ export const buildOpportunityEditInitialValues = (
       opportunity.category_explanation,
     ),
     description: emptyString(summary?.summary_description),
-    fundingType: summary?.funding_instruments ?? [],
+    fundingType: summary?.funding_instruments?.[0] ?? "",
     costSharing: summary?.is_cost_sharing ?? true,
     publishDate: emptyString(summary?.post_date),
     closeDate: emptyString(summary?.close_date),
     closeDateExplanation: emptyString(summary?.close_date_description),
-    fundingCategories: summary?.funding_categories ?? [],
+    fundingCategories: summary?.funding_categories?.[0] ?? "",
     fundingCategoryExplanation: emptyString(
       summary?.funding_category_description,
     ),
@@ -180,7 +176,6 @@ export function buildOpportunitySummaryUpdateRequest(
     ),
     funding_categories: getMultiValueField(
       formData,
-      "fundingCategories",
       "funding-category-values",
     ),
     funding_category_description: emptyToNull(
@@ -188,7 +183,6 @@ export function buildOpportunitySummaryUpdateRequest(
     ),
     funding_instruments: getMultiValueField(
       formData,
-      "fundingType",
       "funding-type-values",
     ),
     applicant_types: getMultiValueField(

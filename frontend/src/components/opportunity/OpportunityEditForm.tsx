@@ -1,5 +1,54 @@
 "use client";
 
+function formatNumber(value: string): string {
+  const raw = value.replace(/,/g, "");
+  if (!raw || isNaN(Number(raw))) return value;
+  return Number(raw).toLocaleString("en-US");
+}
+
+const eligibilityDisplayLabels: Record<string, string> = Object.fromEntries(
+  ELIGIBILITY_OPTIONS.map(({ value, label }) => [value, label]),
+);
+
+type EligibilityCheckboxGroupProps = {
+  title: string;
+  options: typeof ELIGIBILITY_OPTIONS;
+  baseId: string;
+  selectedValues: string[];
+  onToggle: (value: string) => void;
+  disabled: boolean;
+};
+
+function EligibilityCheckboxGroup({
+  title,
+  options,
+  baseId,
+  selectedValues,
+  onToggle,
+  disabled,
+}: EligibilityCheckboxGroupProps) {
+  return (
+    <Fieldset className="margin-top-0 margin-bottom-4">
+      <div className="font-sans-sm text-bold margin-bottom-1">{title}</div>
+      <div className="display-flex flex-column">
+        {options.map((option, index) => (
+          <div key={option.value} className="padding-top-05">
+            <Checkbox
+              id={`${baseId}-${index}`}
+              name="eligibleApplicants"
+              value={option.value}
+              label={eligibilityDisplayLabels[option.value] ?? option.label}
+              checked={selectedValues.includes(option.value)}
+              onChange={() => onToggle(option.value)}
+              disabled={disabled}
+            />
+          </div>
+        ))}
+      </div>
+    </Fieldset>
+  );
+}
+
 import {
   saveOpportunityEditAction,
   type OpportunityEditValidationErrors,
@@ -75,7 +124,7 @@ export default function OpportunityEditForm({
   }
 
   function toggleArrayValue(
-    key: "fundingType" | "fundingCategories" | "eligibleApplicants",
+    key: "eligibleApplicants",
     value: string,
   ) {
     setValues((currentValues) => {
@@ -86,12 +135,6 @@ export default function OpportunityEditForm({
 
       return { ...currentValues, [key]: nextFieldValues };
     });
-  }
-
-  function formatNumber(value: string): string {
-    const raw = value.replace(/,/g, "");
-    if (!raw || isNaN(Number(raw))) return value;
-    return Number(raw).toLocaleString("en-US");
   }
 
   function getFieldError(
@@ -192,39 +235,6 @@ export default function OpportunityEditForm({
       ["individuals", "other", "unrestricted"].includes(option.value),
     ),
   };
-  const eligibilityDisplayLabels: Record<string, string> = Object.fromEntries(
-    ELIGIBILITY_OPTIONS.map(({ value, label }) => [value, label]),
-  );
-
-  function renderEligibilityCheckboxGroup(
-    title: string,
-    options: typeof ELIGIBILITY_OPTIONS,
-    baseId: string,
-  ) {
-    return (
-      <Fieldset className="margin-top-0 margin-bottom-4">
-        <div className="font-sans-sm text-bold margin-bottom-1">{title}</div>
-        <div className="display-flex flex-column">
-          {options.map((option, index) => (
-            <div key={option.value} className="padding-top-05">
-              <Checkbox
-                id={`${baseId}-${index}`}
-                name="eligibleApplicants"
-                value={option.value}
-                label={eligibilityDisplayLabels[option.value] ?? option.label}
-                checked={values.eligibleApplicants.includes(option.value)}
-                onChange={() =>
-                  toggleArrayValue("eligibleApplicants", option.value)
-                }
-                disabled={!isDraft}
-              />
-            </div>
-          ))}
-        </div>
-      </Fieldset>
-    );
-  }
-
   return (
     <form
       id="opportunity-edit-form"
@@ -388,12 +398,9 @@ export default function OpportunityEditForm({
                 <Select
                   id="funding-type-values"
                   name="funding-type-values"
-                  value={values.fundingType[0] ?? ""}
+                  value={values.fundingType}
                   onChange={(event) =>
-                    updateField(
-                      "fundingType",
-                      event.target.value ? [event.target.value] : [],
-                    )
+                    updateField("fundingType", event.target.value)
                   }
                   className="width-full"
                   disabled={!isDraft}
@@ -459,12 +466,9 @@ export default function OpportunityEditForm({
                 <Select
                   id="funding-category-values"
                   name="funding-category-values"
-                  value={values.fundingCategories[0] ?? ""}
+                  value={values.fundingCategories}
                   onChange={(event) =>
-                    updateField(
-                      "fundingCategories",
-                      event.target.value ? [event.target.value] : [],
-                    )
+                    updateField("fundingCategories", event.target.value)
                   }
                   className="width-full"
                   disabled={!isDraft}
@@ -480,7 +484,7 @@ export default function OpportunityEditForm({
             </div>
           </div>
 
-          {values.fundingCategories[0] === "other" && (
+          {values.fundingCategories === "other" && (
             <div className="width-full">
               <FormGroup>
                 <DynamicFieldLabel
@@ -723,35 +727,60 @@ export default function OpportunityEditForm({
           <div className="grid-row grid-gap-xl margin-top-4">
             <div className="tablet:grid-col-6">
               <div>
-                {renderEligibilityCheckboxGroup(
-                  t("labels.eligibilityBusiness"),
-                  eligibilityGroups.business,
-                  "eligible-business",
-                )}
-                {renderEligibilityCheckboxGroup(
-                  t("labels.eligibilityEducation"),
-                  eligibilityGroups.education,
-                  "eligible-education",
-                )}
-                {renderEligibilityCheckboxGroup(
-                  t("labels.eligibilityGovernment"),
-                  eligibilityGroups.government,
-                  "eligible-government",
-                )}
+                <EligibilityCheckboxGroup
+                  title={t("labels.eligibilityBusiness")}
+                  options={eligibilityGroups.business}
+                  baseId="eligible-business"
+                  selectedValues={values.eligibleApplicants}
+                  onToggle={(value) =>
+                    toggleArrayValue("eligibleApplicants", value)
+                  }
+                  disabled={!isDraft}
+                />
+                <EligibilityCheckboxGroup
+                  title={t("labels.eligibilityEducation")}
+                  options={eligibilityGroups.education}
+                  baseId="eligible-education"
+                  selectedValues={values.eligibleApplicants}
+                  onToggle={(value) =>
+                    toggleArrayValue("eligibleApplicants", value)
+                  }
+                  disabled={!isDraft}
+                />
+                <EligibilityCheckboxGroup
+                  title={t("labels.eligibilityGovernment")}
+                  options={eligibilityGroups.government}
+                  baseId="eligible-government"
+                  selectedValues={values.eligibleApplicants}
+                  onToggle={(value) =>
+                    toggleArrayValue("eligibleApplicants", value)
+                  }
+                  disabled={!isDraft}
+                />
               </div>
             </div>
             <div className="tablet:grid-col-6">
               <div>
-                {renderEligibilityCheckboxGroup(
-                  t("labels.eligibilityNonprofit"),
-                  eligibilityGroups.nonprofit,
-                  "eligible-nonprofit",
-                )}
-                {renderEligibilityCheckboxGroup(
-                  t("labels.eligibilityMiscellaneous"),
-                  eligibilityGroups.misc,
-                  "eligible-misc",
-                )}
+                <EligibilityCheckboxGroup
+                  title={t("labels.eligibilityNonprofit")}
+                  options={eligibilityGroups.nonprofit}
+                  baseId="eligible-nonprofit"
+                  selectedValues={values.eligibleApplicants}
+                  onToggle={(value) =>
+                    toggleArrayValue("eligibleApplicants", value)
+                  }
+                  disabled={!isDraft}
+                />
+                <EligibilityCheckboxGroup
+                  title={t("labels.eligibilityMiscellaneous")}
+                  options={eligibilityGroups.misc}
+                  baseId="eligible-misc"
+                  selectedValues={values.eligibleApplicants}
+                  onToggle={(value) =>
+                    toggleArrayValue("eligibleApplicants", value)
+                  }
+                  disabled={!isDraft}
+                />
               </div>
             </div>
           </div>
