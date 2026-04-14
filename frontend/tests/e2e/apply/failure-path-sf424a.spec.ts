@@ -81,7 +81,7 @@ test(
     await verifyFormStatusOnApplication(
       page,
       "incomplete",
-      "Budget Information for Non-Construction Programs (SF-424A)",
+      SF424A_FORM_MATCHER,
       applicationUrl,
     );
   },
