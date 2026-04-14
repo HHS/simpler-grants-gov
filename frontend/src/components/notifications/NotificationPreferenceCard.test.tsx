@@ -13,7 +13,6 @@ jest.mock("@trussworks/react-uswds", () => ({
     onChange?: (event: { target: { checked: boolean } }) => void;
     "aria-labelledby"?: string;
     "aria-describedby"?: string;
-    label?: string | undefined;
   }) => {
     mockCheckbox(props);
 
