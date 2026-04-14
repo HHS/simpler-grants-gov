@@ -379,32 +379,87 @@ export const SF424_REQUIRED_FIELD_ERRORS: FieldError[] = [
   { fieldId: "submission_type", message: "Submission Type is required" },
   { fieldId: "application_type", message: "Application Type is required" },
   { fieldId: "organization_name", message: "Legal Name is required" },
-  { fieldId: "employer_taxpayer_identification_number", message: "EIN/TIN is required" },
+  {
+    fieldId: "employer_taxpayer_identification_number",
+    message: "EIN/TIN is required",
+  },
   { fieldId: "applicant--street1", message: "Applicant Street 1 is required" },
   { fieldId: "applicant--city", message: "Applicant City is required" },
   { fieldId: "applicant--country", message: "Applicant Country is required" },
-  { fieldId: "contact_person--first_name", message: "Contact Person First Name is required" },
-  { fieldId: "contact_person--last_name", message: "Contact Person Last Name is required" },
+  {
+    fieldId: "contact_person--first_name",
+    message: "Contact Person First Name is required",
+  },
+  {
+    fieldId: "contact_person--last_name",
+    message: "Contact Person Last Name is required",
+  },
   { fieldId: "phone_number", message: "Telephone Number is required" },
   { fieldId: "email", message: "Email is required" },
   { fieldId: "applicant_type_code", message: "Type of Applicant is required" },
   { fieldId: "project_title", message: "Project Title is required" },
-  { fieldId: "congressional_district_applicant", message: "Applicant District is required" },
-  { fieldId: "congressional_district_program_project", message: "Program District is required" },
+  {
+    fieldId: "congressional_district_applicant",
+    message: "Applicant District is required",
+  },
+  {
+    fieldId: "congressional_district_program_project",
+    message: "Program District is required",
+  },
   { fieldId: "project_start_date", message: "Project Start Date is required" },
   { fieldId: "project_end_date", message: "Project End Date is required" },
-  { fieldId: "federal_estimated_funding", message: "Federal Estimated Funding is required" },
-  { fieldId: "applicant_estimated_funding", message: "Applicant Estimated Funding is required" },
-  { fieldId: "state_estimated_funding", message: "State Estimated Funding is required" },
-  { fieldId: "local_estimated_funding", message: "Local Estimated Funding is required" },
-  { fieldId: "other_estimated_funding", message: "Other Estimated Funding is required" },
-  { fieldId: "program_income_estimated_funding", message: "Program Income Estimated Funding is required" },
-  { fieldId: "state_review", message: "Is Application Subject to Review By State Under Executive Order 12372 Process is required" },
-  { fieldId: "delinquent_federal_debt", message: "Applicant Delinquent on Federal Debt is required" },
-  { fieldId: "certification_agree", message: "Certification Agree is required" },
-  { fieldId: "authorized_representative--first_name", message: "Authorized Representative First Name is required" },
-  { fieldId: "authorized_representative--last_name", message: "Authorized Representative Last Name is required" },
+  {
+    fieldId: "federal_estimated_funding",
+    message: "Federal Estimated Funding is required",
+  },
+  {
+    fieldId: "applicant_estimated_funding",
+    message: "Applicant Estimated Funding is required",
+  },
+  {
+    fieldId: "state_estimated_funding",
+    message: "State Estimated Funding is required",
+  },
+  {
+    fieldId: "local_estimated_funding",
+    message: "Local Estimated Funding is required",
+  },
+  {
+    fieldId: "other_estimated_funding",
+    message: "Other Estimated Funding is required",
+  },
+  {
+    fieldId: "program_income_estimated_funding",
+    message: "Program Income Estimated Funding is required",
+  },
+  {
+    fieldId: "state_review",
+    message:
+      "Is Application Subject to Review By State Under Executive Order 12372 Process is required",
+  },
+  {
+    fieldId: "delinquent_federal_debt",
+    message: "Applicant Delinquent on Federal Debt is required",
+  },
+  {
+    fieldId: "certification_agree",
+    message: "Certification Agree is required",
+  },
+  {
+    fieldId: "authorized_representative--first_name",
+    message: "Authorized Representative First Name is required",
+  },
+  {
+    fieldId: "authorized_representative--last_name",
+    message: "Authorized Representative Last Name is required",
+  },
   { fieldId: "authorized_representative_title", message: "Title is required" },
-  { fieldId: "authorized_representative_phone_number", message: "AOR Telephone Number is required" },
-  { fieldId: "authorized_representative_email", message: "AOR email is required" },
+  {
+    fieldId: "authorized_representative_phone_number",
+    message: "AOR Telephone Number is required",
+  },
+  {
+    fieldId: "authorized_representative_email",
+    message: "AOR email is required",
+  },
 ];
