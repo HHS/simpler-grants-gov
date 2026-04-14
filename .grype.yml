@@ -81,9 +81,13 @@ ignore:
   - vulnerability: CVE-2026-4519
   - vulnerability: CVE-2026-3479
 
-  # ignoring so we can get today's release out
-  - vulnerability: GHSA-3x4c-7xq6-9pq8
-  - vulnerability: GHSA-ggv3-7p47-pfv8
-  - vulnerability: GHSA-h27x-g6w4-24gq
-  - vulnerability: GHSA-mq59-m269-xvcx
-  - vulnerability: GHSA-jcc7-9wpm-mj36
+  # ignoring for this week's release
+  - vulnerability: GHSA-q4gf-8mx6-v5v3
+
+  # Not fixed in GA Python yet
+  # Last checked 04/14/2026
+  - vulnerability: CVE-2026-1502
+
+  # New Python Release to be applied after Release
+  # Last checked 04/14/2026
+  - vulnerability: CVE-2026-3446

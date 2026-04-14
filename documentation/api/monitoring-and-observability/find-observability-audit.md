@@ -375,82 +375,75 @@ OpenSearch has its own metrics (index health, query performance, shard stats) th
 
 ---
 
-## 9. Find Metrics Dashboard — NRQL Query Reference
+## 9. Find Metrics Dashboard — Panel Reference
 
-This section documents the NRQL queries used in each page of the **Find Metrics** dashboard. All queries target `environment = 'prod'` and the `Log` event type unless otherwise noted. Attributes are logged via `add_extra_data_to_current_request_logs` in the API layer and forwarded to New Relic Logs via the FluentBit sidecar.
+This section documents the panels on each page of the **Find Metrics** dashboard: what they measure, which NR attributes they use, and any caveats. Attributes on `Log` events are logged via `add_extra_data_to_current_request_logs` in the API layer and forwarded to New Relic Logs via the FluentBit sidecar.
 
 ---
 
 ### 9.1 OpenSearch Health Page
 
-Implemented in [#9167](https://github.com/HHS/simpler-grants-gov/issues/9167). Requires instrumentation from [#9147](https://github.com/HHS/simpler-grants-gov/issues/9147), [#9149](https://github.com/HHS/simpler-grants-gov/issues/9149), and [#9150](https://github.com/HHS/simpler-grants-gov/issues/9150).
+Implemented in [#9167](https://github.com/HHS/simpler-grants-gov/issues/9167) and [#9393](https://github.com/HHS/simpler-grants-gov/issues/9393). Requires instrumentation from [#9147](https://github.com/HHS/simpler-grants-gov/issues/9147), [#9149](https://github.com/HHS/simpler-grants-gov/issues/9149), and [#9150](https://github.com/HHS/simpler-grants-gov/issues/9150).
 
-**Data source:** `Log` events where `request.url_rule = '/v1/opportunities/search'`
+Most panels use `Log` events where `request.url_rule = '/v1/opportunities/search'`. Panels 8–9 use `SearchResultExplanation` custom APM events emitted by [`opensearch_explain.py`](../../../api/src/adapters/search/opensearch_explain.py) when `OPENSEARCH_EXPLAIN_ENABLED=true`. Custom events do not carry an `environment` attribute and NR does not support template variable interpolation inside string literals, so these panels are hardcoded to `appName = 'api-prod'`.
 
 **Attributes used:**
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `search.took_ms` | int | Time OpenSearch spent executing the query (ms) |
-| `search.timed_out` | bool | Whether OpenSearch returned a partial result due to timeout |
-| `search.shards_failed` | int | Number of shards that failed during the query |
-| `search.max_score` | float | Relevancy score of the top result; `0` for browse-mode (no query text) |
-| `search.scoring_rule` | string | Active scoring profile: `default`, `expanded`, or `agency` |
+| Attribute | Event type | Description |
+|-----------|------------|-------------|
+| `search.took_ms` | `Log` | Time OpenSearch spent executing the query (ms) |
+| `search.timed_out` | `Log` | Whether OpenSearch returned a partial result due to timeout |
+| `search.shards_failed` | `Log` | Number of shards that failed during the query |
+| `search.max_score` | `Log` | Relevancy score of the top result; `0` for browse-mode (no query text) |
+| `search.scoring_rule` | `Log` | Active scoring profile: `default`, `expanded`, or `agency` |
+| `search.total_relation` | `Log` | `'eq'` = exact count; `'gte'` = lower bound (hit count exceeds 10k) |
+| `search.agg_overflow.agency` | `Log` | `sum_other_doc_count` for the agency aggregation; non-zero means >1000 unique agencies were truncated |
+| `field_score.<field>` | `SearchResultExplanation` | BM25 score contribution from a specific field (e.g. `field_score.agency_code`, `field_score.opportunity_title`) |
+| `position` | `SearchResultExplanation` | 1-based rank of this hit in the result set (1–10) |
+| `scoring_rule` | `SearchResultExplanation` | Active scoring profile: `default`, `expanded`, or `agency` |
 
 **Panel: Search Latency — p50 / p95 / p99**
-```sql
-SELECT percentile(search.took_ms, 50, 95, 99)
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
-TIMESERIES AUTO
-SINCE 7 days ago
-```
+
+Time OpenSearch spent executing each query (the `took` field from the response, in milliseconds). Useful for distinguishing whether API latency originates in OpenSearch or in application code.
 
 **Panel: Timeout Rate**
-```sql
-SELECT percentage(count(*), WHERE search.timed_out IS TRUE) AS 'Timeout Rate %'
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
-TIMESERIES AUTO
-SINCE 7 days ago
-```
+
+Percentage of searches where OpenSearch returned a partial result due to hitting its internal query timeout. Any non-zero value means users may be seeing incomplete results.
 
 **Panel: Shard Failure Rate**
-```sql
-SELECT percentage(count(*), WHERE search.shards_failed > 0) AS 'Shard Failure Rate %'
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
-TIMESERIES AUTO
-SINCE 7 days ago
-```
+
+Percentage of searches where one or more shards failed to respond. Shard failures indicate infrastructure-level problems and may silently reduce result quality.
 
 **Panel: Max Score Trend**
-```sql
-SELECT average(search.max_score), percentile(search.max_score, 50, 95)
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
-  AND search.max_score > 0
-TIMESERIES AUTO
-SINCE 7 days ago
-```
+
+The relevancy score of the top result over time. A declining trend may indicate index or scoring degradation. Browse-mode searches (no query text) are excluded since they produce no relevancy scores.
 
 > `search.max_score = 0` for browse-mode searches (no query text). The `> 0` filter excludes these so the chart reflects only scored result sets.
 
 **Panel: Max Score by Scoring Rule**
-```sql
-SELECT average(search.max_score)
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
-  AND search.max_score > 0
-FACET search.scoring_rule
-TIMESERIES AUTO
-SINCE 7 days ago
-```
+
+Max score trend broken out by active scoring profile. Useful for comparing how aggressively each rule scores its top result.
+
+**Panel: Total Relation Accuracy**
+
+Flags searches where OpenSearch returned an approximate hit count (`gte`) rather than an exact one (`eq`). A non-zero rate indicates the result count shown to users is a lower bound, not exact.
+
+> In practice this should always be 0% — the search query sets `track_total_hits: true` explicitly. Any non-zero value is worth investigating.
+
+**Panel: Agency Aggregation Truncation**
+
+Tracks searches where the agency facet aggregation was silently truncated. The agency aggregation uses `size=1000`; if more than 1000 unique agency codes match the query, some agencies will be missing from the filter counts shown to users.
+
+**Panel: Top Contributing Fields by Position**
+
+Average BM25 score contribution per field at each result position (1–10), using `SearchResultExplanation` events. Helps identify whether high-ranked results are being driven by the expected fields. `.keyword` variant scores are summed with their base field (e.g. `field_score.agency_code + field_score.agency_code.keyword`). Chart type: **bar** with `FACET position`.
+
+> `field_score.*` attributes are only present when `OPENSEARCH_EXPLAIN_ENABLED=true` and the request included a non-empty query string. Browse-mode searches produce no `SearchResultExplanation` events.
+
+**Panel: Average Field Score Contribution by Scoring Rule**
+
+Compares average field score contributions across the three scoring rules (`default`, `expanded`, `agency`). Useful for verifying that each rule emphasises the expected fields. Chart type: **bar** with `FACET scoring_rule`.
+
 
 ---
 

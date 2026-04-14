@@ -4,11 +4,7 @@ from unittest import mock
 from lxml import etree
 
 from src.constants.lookup_constants import Privilege
-from src.legacy_soap_api.legacy_soap_api_auth import (
-    USE_SOAP_CERT_HEADER_KEY,
-    SOAPAuth,
-    SOAPClientCertificate,
-)
+from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientCertificate
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
@@ -57,35 +53,6 @@ def test_successful_request(client, fixture_from_file, caplog) -> None:
     )
     assert req_message.soap_api == "applicants"
     assert req_message.soap_request_operation_name == "GetOpportunityListRequest"
-
-
-def test_use_soap_jwt_path_is_logged(client, fixture_from_file, caplog) -> None:
-    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
-    fixture_path = (
-        "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
-    )
-    mock_data = fixture_from_file(fixture_path)
-    response = client.post(full_path, data=mock_data, headers={})
-    assert response.status_code == 200
-    assert "soap_client_certificate: Using the soap jwt" in caplog.messages
-
-
-def test_soap_jwt_is_not_logged_when_use_soap_cert_is_enabled(
-    client, fixture_from_file, caplog
-) -> None:
-    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
-    fixture_path = (
-        "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
-    )
-    mock_data = fixture_from_file(fixture_path)
-    response = client.post(full_path, data=mock_data, headers={f"{USE_SOAP_CERT_HEADER_KEY}": "1"})
-    assert response.status_code == 200
-    post_message = [
-        record
-        for record in caplog.records
-        if record.message == "soap_client_certificate: Using the soap jwt"
-    ]
-    assert len(post_message) == 0
 
 
 def test_invalid_service_name_not_found(client) -> None:
@@ -269,7 +236,7 @@ def test_simpler_getapplicationzip_operation_raising_httperror_due_to_privileges
         serial_number="1235",
         legacy_certificate=soap_client_certificate.legacy_certificate,
     )
-    with mock.patch("src.legacy_soap_api.legacy_soap_api_routes.get_soap_auth") as mock_get_auth:
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         response = client.post(
             full_path, data=etree.tostring(envelope), headers={"Use-Simpler-Override": "true"}
