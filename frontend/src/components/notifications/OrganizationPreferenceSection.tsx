@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import { NotificationPreferenceCard } from "./NotificationPreferenceCard";
 import { NotificationOrganization } from "./NotificationTypes";
 
-interface OrganizationPreferenceSectionProps {
+export interface OrganizationPreferenceSectionProps {
   organization: NotificationOrganization;
   label: string;
   description: string;

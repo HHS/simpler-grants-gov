@@ -3,6 +3,20 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { NotificationPreferenceCardProps } from "./NotificationPreferenceCard";
 import { OrganizationPreferenceSection } from "./OrganizationPreferenceSection";
 
+type MockNotificationPreferenceCardProps = Pick<
+  NotificationPreferenceCardProps,
+  | "checkboxId"
+  | "label"
+  | "description"
+  | "isChecked"
+  | "organizationHeadingId"
+  | "isDisabled"
+  | "isLoading"
+  | "hasError"
+  | "errorMessage"
+  | "onCheckedChange"
+>;
+
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => {
     if (key === "organizationPreferencesSuffix") {
@@ -16,7 +30,7 @@ jest.mock("next-intl", () => ({
 const mockCard = jest.fn();
 
 jest.mock("./NotificationPreferenceCard", () => ({
-  NotificationPreferenceCard: (props: NotificationPreferenceCardProps) => {
+  NotificationPreferenceCard: (props: MockNotificationPreferenceCardProps) => {
     mockCard(props);
 
     return (
