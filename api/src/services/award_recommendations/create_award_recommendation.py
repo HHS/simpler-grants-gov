@@ -67,7 +67,7 @@ def _get_application_submissions_for_opportunity(
         .where(Competition.opportunity_id == opportunity_id)
     )
 
-    return db_session.execute(stmt).scalars().all()
+    return list(db_session.execute(stmt).scalars().all())
 
 
 def create_award_recommendation(
