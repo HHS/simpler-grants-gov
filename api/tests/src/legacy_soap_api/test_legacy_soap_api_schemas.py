@@ -9,7 +9,6 @@ from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOpera
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     BaseSOAPSchema,
     FaultMessage,
-    SOAPInvalidRequestOperationName,
     SOAPOperationNotSupported,
     SOAPResponse,
 )
@@ -136,30 +135,9 @@ def test_get_soap_operation_config_gets_operation_name_correctly_from_request_da
         headers={},
         method="POST",
         api_name=SimplerSoapAPI.GRANTORS,
-        operation_name="",
+        operation_name="GetApplicationZipRequest",
     ).get_soap_request_operation_config()
     assert operation_config.request_operation_name == "GetApplicationZipRequest"
-
-
-def test_get_soap_operation_config_gets_operation_name_fails_correctly_if_invalid_request_data() -> (
-    None
-):
-    request_xml_bytes = (
-        '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
-        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
-        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
-        "<soapenv:Header/>"
-        "<soapenv:Body>"
-    ).encode("utf-8")
-    with pytest.raises(SOAPInvalidRequestOperationName):
-        SOAPRequest(
-            data=SoapRequestStreamer(stream=io.BytesIO(request_xml_bytes)),
-            full_path="x",
-            headers={},
-            method="POST",
-            api_name=SimplerSoapAPI.GRANTORS,
-            operation_name="",
-        ).get_soap_request_operation_config()
 
 
 def test_legacy_soap_api_response_schema_missing_required_fields() -> None:

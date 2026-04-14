@@ -10,7 +10,6 @@ from src.legacy_soap_api.legacy_soap_api_config import (
     SOAPOperationConfig,
     get_soap_operation_config,
 )
-from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
 
 TERMINATOR_TAGS = [b"</soapenv:Envelope>", b"</env:Envelope>"]
 CHUNK_SIZE = 2000
@@ -29,10 +28,6 @@ class SOAPOperationNotSupported(Exception):
 
 
 class SOAPInvalidEnvelope(Exception):
-    pass
-
-
-class SOAPInvalidRequestOperationName(Exception):
     pass
 
 
@@ -95,7 +90,7 @@ class SOAPRequest(BaseModel):
     method: str
     api_name: SimplerSoapAPI
     auth: SOAPAuth | None = None
-    operation_name: str = ""
+    operation_name: str
 
     def get_soap_request_operation_config(self) -> SOAPOperationConfig:
         """Get operation config
@@ -110,25 +105,15 @@ class SOAPRequest(BaseModel):
 
         These configs store data for processing SOAP XML data within simpler.
         """
-        operation_name = (
-            get_soap_operation_name(self.data.head())
-            if not self.operation_name
-            else self.operation_name
-        )
-        if not operation_name:
-            raise SOAPInvalidRequestOperationName(
-                f"Could not get SOAP operation name for {self.api_name.value}"
-            )
-
-        operation_config = get_soap_operation_config(self.api_name, operation_name)
+        operation_config = get_soap_operation_config(self.api_name, self.operation_name)
         if not operation_config:
             raise SOAPOperationNotSupported(
-                f"Simpler {self.api_name.value} SOAP API does not support {operation_name}"
+                f"Simpler {self.api_name.value} SOAP API does not support {self.operation_name}"
             )
 
         if operation_config.privileges is None:
             raise SOAPOperationNotSupported(
-                f"Simpler {self.api_name.value} SOAP API has no privileges set for {operation_name}"
+                f"Simpler {self.api_name.value} SOAP API has no privileges set for {self.operation_name}"
             )
 
         return operation_config
