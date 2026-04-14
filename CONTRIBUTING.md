@@ -1,4 +1,3 @@
-<!--- # NOTE: Modify sections marked with `TODO` and then rename the file.-->
 
 # How to Contribute as an External Contributor
 
