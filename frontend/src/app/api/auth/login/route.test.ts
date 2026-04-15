@@ -5,6 +5,8 @@ import { GET } from "src/app/api/auth/login/route";
 import { environment } from "src/constants/environments";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
+import { NextRequest } from "next/server";
+
 jest.mock("src/constants/environments", () => ({
   environment: { AUTH_LOGIN_URL: "http://simpler.grants.gov/login" },
 }));
@@ -16,7 +18,7 @@ describe("/api/auth/login GET handler", () => {
     const error = await wrapForExpectedError<{
       digest: string;
       message: string;
-    }>(() => GET());
+    }>(() => GET(new NextRequest("https://simpler.grants.gov/")));
 
     expect(error.message).toEqual("NEXT_REDIRECT");
     expect(error.digest).toContain(";http://simpler.grants.gov/login;");
@@ -25,7 +27,7 @@ describe("/api/auth/login GET handler", () => {
   it("errors correctly", () => {
     jest.replaceProperty(environment, "AUTH_LOGIN_URL", "");
 
-    const response = GET();
+    const response = GET(new NextRequest("https://simpler.grants.gov/"));
 
     expect(response.headers.get("location")).toBe(null);
     expect(response.status).toBe(500);
