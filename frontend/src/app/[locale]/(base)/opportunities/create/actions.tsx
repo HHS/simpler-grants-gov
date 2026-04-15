@@ -1,5 +1,9 @@
 "use server";
 
+import {
+  checkRequiredPrivileges,
+  UserPrivilegeRequest,
+} from "src/utils/userPrivileges";
 import { getSession } from "src/services/auth/session";
 import { createOpportunity } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { CreateOpportunityResponse } from "src/types/grantor/createOpportunityTypes";
@@ -49,4 +53,58 @@ export const createOpportunityAction = async (
       data: rawFormData,
     };
   }
+};
+
+export async function validateAgencyAccessAction(agencyId: string) {
+  const session = await getSession();
+  
+  if (!session?.token || !session?.user_id) {
+    return { error: "Session error" };
+  }
+  
+  try {
+    
+    const userPrivilegeResult = await checkRequiredPrivileges(
+      session.token,
+      session.user_id,
+      getUserPrivilegeDefinition(agencyId)
+    );
+    
+    let canCreate = false;
+    
+    if (userPrivilegeResult.length > 0) {
+      userPrivilegeResult.forEach((result) => {
+        if (
+          result.privilege === "create_opportunity" &&
+          result.authorized
+        ) {
+          canCreate = true;
+        }
+      });
+    }
+    
+    if (canCreate) {
+      return { success: true };
+    } else {
+      return { 
+        error: "You do not have access to create opportunities for this agency." 
+      };
+    }
+  } catch (error) {
+    return { 
+      error: "You do not have access to create opportunities for this agency." 
+    };
+  }
+}
+
+const getUserPrivilegeDefinition = (
+  agencyId: string,
+): UserPrivilegeRequest[] => {
+  return [
+    {
+      resourceId: agencyId,
+      resourceType: "agency",
+      privilege: "create_opportunity",
+    },
+  ];
 };

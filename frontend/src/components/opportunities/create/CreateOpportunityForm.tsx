@@ -1,6 +1,7 @@
 "use client";
 
 import { createOpportunityAction } from "src/app/[locale]/(base)/opportunities/create/actions";
+import { validateAgencyAccessAction } from "src/app/[locale]/(base)/opportunities/create/actions";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -39,6 +40,7 @@ export function CreateOpportunityForm({
   const [categoryExplanation, setExplain] = useState<string>("");
   const [assistanceListingNumber, setAssistanceListingNumber] =
     useState<string>("");
+  const [agencyAccessError, setAgencyAccessError] = useState<string>("");
   const [showExplain, setShowExplain] = useState<boolean>(false);
   const [disableSave, setDisableSave] = useState<boolean>(true);
 
@@ -83,6 +85,7 @@ export function CreateOpportunityForm({
         opportunityTitle.trim() !== "" &&
         assistanceListingNumber.trim() !== "" &&
         selectedAgencyId.trim() !== "" &&
+        !agencyAccessError && // Disable Save and Continue if there's an agency access error
         ((selectedCategoryId.trim() !== "" &&
           selectedCategoryId.trim() !== "other") ||
           (selectedCategoryId.trim() === "other" &&
@@ -96,8 +99,33 @@ export function CreateOpportunityForm({
       selectedCategoryId,
       categoryExplanation,
       assistanceListingNumber,
+      agencyAccessError,
     ],
   );
+
+  // Validate the user's agency access on drop down selection
+  useEffect(() => {
+    if (defaultAgencyId) {
+      validateAgencyAccess(defaultAgencyId);
+    }
+  }, []);
+
+  // Update validateAgencyAccess function
+  const validateAgencyAccess = async (agencyId: string) => {
+    if (!agencyId) return;
+    
+    setAgencyAccessError("");
+    
+    try {
+      const result = await validateAgencyAccessAction(agencyId);
+      
+      if (result.error) {
+        setAgencyAccessError(result.error);
+      }
+    } catch (error) {
+      setAgencyAccessError(t("CreateOpportunityForm.agencyAccessError"));
+    }
+  };
 
   // Update state on change
   const onOppNbrChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -108,6 +136,7 @@ export function CreateOpportunityForm({
   };
   const onAgencySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setAgencyId(e.target.value);
+    validateAgencyAccess(e.target.value);
   };
   const onCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCategory(e.target.value);
@@ -130,6 +159,12 @@ export function CreateOpportunityForm({
       {response?.success && (
         <Alert heading={t("successHeading")} headingLevel="h2" type="success">
           {t("CreateOpportunityForm.successMessage")}
+        </Alert>
+      )}
+
+      {agencyAccessError && (
+        <Alert heading={t("errorHeading")} headingLevel="h2" type="error">
+          {agencyAccessError}
         </Alert>
       )}
 
