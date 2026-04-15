@@ -8,7 +8,7 @@ from tests.src.db.models.factories import (
     UserFactory,
     WorkflowFactory,
 )
-from tests.workflow.state_machine.test_state_machines import (
+from tests.src.workflow.state_machine.test_state_machines import (
     BasicTestStateMachine,
     basic_test_workflow_config,
 )
