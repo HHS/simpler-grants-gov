@@ -68,3 +68,15 @@ export const epaKeyContactsHappyPathTestData = {
   project_manager_phone: "1234567890",
   project_manager_email: "simpler-grants-e2e-tester@navapbc.com",
 } as const;
+
+/**
+ * Failure-path test data: only the prefix field for each section.
+ * Filling just the prefix triggers validation errors for all other
+ * required fields (First Name, Last Name, Address, Phone, etc.).
+ */
+export const epaKeyContactsFailurePathTestData = {
+  authorized_representative_name_prefix: "AR PREFIX",
+  payee_name_prefix: "PY PREFIX",
+  administrative_contact_name_prefix: "AC PREFIX",
+  project_manager_name_prefix: "PM PREFIX",
+} as const;
