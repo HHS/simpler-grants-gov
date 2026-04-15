@@ -13,7 +13,7 @@ from tests.src.db.models.factories import (
     UserFactory,
     WorkflowFactory,
 )
-from tests.workflow.workflow_test_util import build_start_workflow_event, send_process_event
+from tests.src.workflow.workflow_test_util import build_start_workflow_event, send_process_event
 
 
 @pytest.fixture(scope="module", autouse=True)

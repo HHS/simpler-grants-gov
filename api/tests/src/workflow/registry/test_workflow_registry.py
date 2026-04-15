@@ -7,7 +7,7 @@ from src.workflow.state_machine.initial_prototype_state_machine import (
     initial_prototype_state_machine_config,
 )
 from src.workflow.workflow_errors import InvalidWorkflowTypeError
-from tests.workflow.state_machine.test_state_machines import (
+from tests.src.workflow.state_machine.test_state_machines import (
     BasicTestStateMachine,
     basic_test_workflow_config,
 )

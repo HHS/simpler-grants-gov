@@ -14,8 +14,8 @@ from tests.src.db.models.factories import (
     UserFactory,
     WorkflowFactory,
 )
-from tests.workflow.state_machine.test_state_machines import BasicState
-from tests.workflow.workflow_test_util import send_process_event
+from tests.src.workflow.state_machine.test_state_machines import BasicState
+from tests.src.workflow.workflow_test_util import send_process_event
 
 
 @pytest.fixture(autouse=True)
