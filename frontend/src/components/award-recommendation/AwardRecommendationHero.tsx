@@ -37,7 +37,14 @@ export default async function AwardRecommendationHero({
   buttons,
 }: AwardRecommendationHeroProps) {
   const t = await getTranslations("AwardRecommendation");
-  const { recordNumber, datePrepared, status } = awardRecommendationDetails;
+
+  const number = awardRecommendationDetails.award_recommendation_number;
+
+  const preparedDate = awardRecommendationDetails.created_at
+    ? new Date(awardRecommendationDetails.created_at).toLocaleDateString()
+    : new Date().toLocaleDateString();
+
+  const statusValue = awardRecommendationDetails.award_recommendation_status;
 
   return (
     <div
@@ -55,14 +62,14 @@ export default async function AwardRecommendationHero({
                 path: "/",
               },
               {
-                title: `${t("heroTitle")}: ${recordNumber}`,
+                title: `${t("heroTitle")}: ${number}`,
                 path: `/`,
               },
             ]}
           />
           <Grid className="padding-bottom-4 mobile-lg:padding-y-4 tablet:padding-y-3">
             <h1 className="font-sans-xl tablet:font-sans-2xl">
-              {t("heroTitle")}: {recordNumber}
+              {t("heroTitle")}: {number}
             </h1>
           </Grid>
           <Grid row gap>
@@ -70,13 +77,13 @@ export default async function AwardRecommendationHero({
               <Grid>
                 <strong>{t("datePrepared")}: </strong>
                 <span className="margin-left-1 display-inline-flex flex-align-center">
-                  {datePrepared}
+                  {preparedDate}
                 </span>
               </Grid>
               <Grid className="padding-top-2 tablet:padding-top-2 display-flex flex-align-center">
                 <strong>{t("status")}:</strong>{" "}
                 <span className="margin-left-1 display-inline-flex flex-align-center">
-                  <AwardRecommendationStatusTag status={status} />
+                  <AwardRecommendationStatusTag status={statusValue} />
                 </span>
               </Grid>
             </Grid>

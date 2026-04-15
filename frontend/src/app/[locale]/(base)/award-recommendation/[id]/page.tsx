@@ -189,7 +189,7 @@ async function AwardRecommendationPageContent({
                   : t("recommendationMethod.meritReviewOther")
               }
               recommendationMethodDetails={
-                awardRecommendationDetails.funding_strategy
+                awardRecommendationDetails.selection_method_detail
               }
               otherKeyInformation={
                 awardRecommendationDetails.other_key_information

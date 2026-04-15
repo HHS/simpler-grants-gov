@@ -133,6 +133,13 @@ class AwardRecommendationDataSchema(Schema):
             "example": "Selection factors included technical merit, past performance, and cost.",
         },
     )
+    funding_strategy = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Funding strategy for award recommendations",
+            "example": "Full funding for top 10 applications, partial funding for next 15 based on available budget.",
+        },
+    )
     other_key_information = fields.String(
         allow_none=True,
         metadata={

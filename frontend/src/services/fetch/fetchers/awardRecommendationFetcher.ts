@@ -1,20 +1,22 @@
 import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
-import { mockAwardRecommendationDetails } from "src/utils/testing/fixtures";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { fetchAwardRecommendation } from "./fetchers";
 
 export const getAwardRecommendationDetails = async (
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   id: string,
 ): Promise<AwardRecommendationDetails> => {
-  // Kept async to match real fetchers; replace this with a real
-  // network request once the backend endpoint exists.
-  return await Promise.resolve(mockAwardRecommendationDetails);
+  const response = await fetchAwardRecommendation({ subPath: id });
+  const responseBody = await response.json();
+  const apiData = responseBody.data;
 
-  // TODO: Replace mock data above with this once the backend endpoint exists.
-  // const response = await fetchAwardRecommendation({ subPath: id });
-  // const responseBody = (await response.json()) as { data: AwardRecommendationDetails };
-
-  // return responseBody.data;
+  return {
+    ...apiData,
+    award_recommendation_summary: apiData.award_recommendation_summary || {
+      total_received_count: 200,
+      recommended_for_funding_count: 150,
+      recommended_without_funding_count: 25,
+      not_recommended_count: 25,
+      total_recommended_amount: 250000,
+    },
+  };
 };

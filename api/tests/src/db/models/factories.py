@@ -969,6 +969,7 @@ class AwardRecommendationFactory(BaseFactory):
     additional_info = sometimes_none(factory.Faker("paragraph"))
     award_selection_method = sometimes_none(factory.fuzzy.FuzzyChoice(AwardSelectionMethod))
     selection_method_detail = sometimes_none(factory.Faker("paragraph"))
+    funding_strategy = sometimes_none(factory.Faker("paragraph"))
     other_key_information = sometimes_none(factory.Faker("paragraph"))
 
     is_deleted = False

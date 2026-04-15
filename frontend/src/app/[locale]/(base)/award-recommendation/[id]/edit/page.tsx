@@ -215,7 +215,7 @@ async function AwardRecommendationEditPageContent({
                 awardRecommendationDetails.award_selection_method
               }
               recommendationMethodDetails={
-                awardRecommendationDetails.award_selection_method_details
+                awardRecommendationDetails.selection_method_detail
               }
               otherKeyInformation={
                 awardRecommendationDetails.other_key_information
