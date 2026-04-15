@@ -90,7 +90,7 @@ export async function validateAgencyAccessAction(agencyId: string) {
         error: "You do not have access to create opportunities for this agency." 
       };
     }
-  } catch (error) {
+  } catch (_error) {
     return { 
       error: "You do not have access to create opportunities for this agency." 
     };

@@ -1,7 +1,6 @@
 "use client";
 
-import { createOpportunityAction } from "src/app/[locale]/(base)/opportunities/create/actions";
-import { validateAgencyAccessAction } from "src/app/[locale]/(base)/opportunities/create/actions";
+import { createOpportunityAction, validateAgencyAccessAction } from "src/app/[locale]/(base)/opportunities/create/actions";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
