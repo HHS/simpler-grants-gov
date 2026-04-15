@@ -4,7 +4,7 @@ import { createOpportunityAction, validateAgencyAccessAction } from "src/app/[lo
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useCallback, useEffect, useState } from "react";
 import { Alert, Button, Link } from "@trussworks/react-uswds";
 
 import {
@@ -49,6 +49,25 @@ export function CreateOpportunityForm({
       validationErrors: {},
     },
   );
+
+  // Update validateAgencyAccess function
+  const validateAgencyAccess = useCallback(async (agencyId: string) => {
+    if (!agencyId) return;
+    
+    setAgencyAccessError("");
+    
+    try {
+      const result = await validateAgencyAccessAction(agencyId);
+      
+      if (result.error) {
+        setAgencyAccessError(result.error);
+      } else {
+        setAgencyAccessError("");
+      }
+    } catch (_error) {
+      setAgencyAccessError(t("CreateOpportunityForm.agencyAccessError"));
+    }
+  }, [t]);
 
   // Use useEffect to detect success and redirect
   const router = useRouter();
@@ -105,26 +124,9 @@ export function CreateOpportunityForm({
   // Validate the user's agency access on drop down selection
   useEffect(() => {
     if (defaultAgencyId) {
-      validateAgencyAccess(defaultAgencyId);
+      void validateAgencyAccess(defaultAgencyId);
     }
-  }, []);
-
-  // Update validateAgencyAccess function
-  const validateAgencyAccess = async (agencyId: string) => {
-    if (!agencyId) return;
-    
-    setAgencyAccessError("");
-    
-    try {
-      const result = await validateAgencyAccessAction(agencyId);
-      
-      if (result.error) {
-        setAgencyAccessError(result.error);
-      }
-    } catch (error) {
-      setAgencyAccessError(t("CreateOpportunityForm.agencyAccessError"));
-    }
-  };
+  }, [defaultAgencyId]);
 
   // Update state on change
   const onOppNbrChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -135,7 +137,7 @@ export function CreateOpportunityForm({
   };
   const onAgencySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setAgencyId(e.target.value);
-    validateAgencyAccess(e.target.value);
+    void validateAgencyAccess(e.target.value);
   };
   const onCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCategory(e.target.value);
