@@ -5,7 +5,7 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 // Uses regex matcher tolerant of hyphen/dash variants for SF-424A,
 // to be compatible with both local and staging environments.
 export const SF424A_FORM_MATCHER =
-  "SF\\s*[-\u2011\u2013\u2014]?\\s*424A|Budget\\s+Information\\s+for\\s+Non\\s*[-\u2011\u2013\u2014]?\\s*Construction\\s+Programs";
+  /^Budget Information for Non-Construction Programs \(SF-424A\)$/;
 
 // ---------------------------------------------------------------------------
 // Expected post-save computed values - derived from FORM_RULE_SCHEMA
