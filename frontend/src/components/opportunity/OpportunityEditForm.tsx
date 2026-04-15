@@ -513,7 +513,6 @@ export default function OpportunityEditForm({
                 <DynamicFieldLabel
                   idFor="expected-number-of-awards"
                   title={t("labels.expectedNumberOfAwards")}
-                  required
                   description={t("content.expectedNumberOfAwardsHint")}
                 />
                 {getFieldError("expectedNumberOfAwards") ? (
@@ -541,7 +540,6 @@ export default function OpportunityEditForm({
                 <DynamicFieldLabel
                   idFor="estimated-total-program-funding"
                   title={t("labels.estimatedTotalProgramFunding")}
-                  required
                   description={t("content.estimatedTotalProgramFundingHint")}
                 />
                 {getFieldError("estimatedTotalProgramFunding") ? (
@@ -573,7 +571,6 @@ export default function OpportunityEditForm({
                 <DynamicFieldLabel
                   idFor="award-minimum"
                   title={t("labels.awardMinimum")}
-                  required
                   description={t("content.awardMinimumHint")}
                 />
                 {getFieldError("awardMinimum") ? (
@@ -600,7 +597,6 @@ export default function OpportunityEditForm({
                 <DynamicFieldLabel
                   idFor="award-maximum"
                   title={t("labels.awardMaximum")}
-                  required
                   description={t("content.awardMaximumHint")}
                 />
                 {getFieldError("awardMaximum") ? (
@@ -832,7 +828,6 @@ export default function OpportunityEditForm({
               <DynamicFieldLabel
                 idFor="description"
                 title={t("labels.description")}
-                required
                 description={t("content.descriptionHint")}
               />
               {getFieldError("description") ? (
@@ -858,7 +853,6 @@ export default function OpportunityEditForm({
                 <DynamicFieldLabel
                   idFor="additional-info-url"
                   title={t("labels.additionalInfoUrl")}
-                  required
                   description={t("content.additionalInfoUrlHint")}
                 />
                 {getFieldError("additionalInfoUrl") ? (
@@ -884,7 +878,6 @@ export default function OpportunityEditForm({
                 <DynamicFieldLabel
                   idFor="additional-info-url-text"
                   title={t("labels.additionalInfoUrlText")}
-                  required
                   description={t("content.additionalInfoUrlTextHint")}
                 />
                 {getFieldError("additionalInfoUrlText") ? (
@@ -912,7 +905,6 @@ export default function OpportunityEditForm({
               <DynamicFieldLabel
                 idFor="grantor-contact-details"
                 title={t("labels.grantorContactDetails")}
-                required
                 description={t("content.grantorContactDetailsHint")}
               />
               {getFieldError("grantorContactDetails") ? (
@@ -940,7 +932,6 @@ export default function OpportunityEditForm({
                 <DynamicFieldLabel
                   idFor="contact-email"
                   title={t("labels.contactEmail")}
-                  required
                   description={t("content.contactEmailHint")}
                 />
                 {getFieldError("contactEmail") ? (
@@ -964,7 +955,6 @@ export default function OpportunityEditForm({
                 <DynamicFieldLabel
                   idFor="contact-email-text"
                   title={t("labels.contactEmailText")}
-                  required
                   description={t("content.contactEmailTextHint")}
                 />
                 {getFieldError("contactEmailText") ? (
