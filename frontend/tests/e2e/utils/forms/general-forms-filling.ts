@@ -153,10 +153,7 @@ export async function fillField(
       field.type === "radiobutton" &&
       (field.testId || field.selector || field.getByText || field.useDataAsText)
     ) {
-      // If getByText is specified, the field definition already encodes which
-      // specific radio option to click (eg - "No"), so always activate it
-      // regardless of the data value. Otherwise, rely on shouldActivateField.
-      if (field.getByText !== undefined || shouldActivateField(data)) {
+      if (shouldActivateField(data)) {
         let locator = field.getByText
           ? page.getByText(field.getByText, {
               exact: field.textExact ?? false,
@@ -396,9 +393,14 @@ export async function fillForm(
  */
 export async function verifyFormLinkVisible(
   page: Page,
-  formName: string,
+  formName: string | RegExp,
 ): Promise<void> {
-  await getFormLink(page, formName).waitFor({
+  const formLink =
+    formName instanceof RegExp
+      ? page.locator("a, button").filter({ hasText: formName })
+      : getFormLink(page, formName);
+
+  await formLink.waitFor({
     state: "visible",
     timeout: 60000,
   });
