@@ -228,9 +228,10 @@ def test_process_workflow_valid_event(
     assert message.process_workflow_context.event_to_send == "start_workflow"
 
 
-def test_process_workflow_program_officer_approved_approval_type_not_allowed(
+def test_process_workflow_program_officer_approved_allowed(
     db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
 ):
+    """Test that APPROVED is an allowed approval response type for program officer approval."""
     workflow = WorkflowFactory.create(
         is_active=True, workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW
     )
@@ -261,9 +262,10 @@ def test_process_workflow_program_officer_approved_approval_type_not_allowed(
     assert message.process_workflow_context.event_to_send == "receive_program_officer_approval"
 
 
-def test_process_workflow_program_officer_request_modification_approval_type_not_allowed(
+def test_process_workflow_program_officer_requires_modification_allowed(
     db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
 ):
+    """Test that REQUIRES_MODIFICATION is an allowed approval response type for program officer approval."""
     workflow = WorkflowFactory.create(
         is_active=True, workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW
     )
@@ -294,7 +296,7 @@ def test_process_workflow_program_officer_request_modification_approval_type_not
     assert message.process_workflow_context.event_to_send == "receive_program_officer_approval"
 
 
-def test_process_workflow_program_officer_declined_approval_type_not_allowed(
+def test_process_workflow_program_officer_declined_not_allowed(
     db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
 ):
     """Test that a 422 error is raised when approval response type is not allowed for the event."""
@@ -327,9 +329,10 @@ def test_process_workflow_program_officer_declined_approval_type_not_allowed(
     assert len(messages) == 0
 
 
-def test_process_workflow_budget_officer_approved_approval_type_not_allowed(
+def test_process_workflow_budget_officer_approved_allowed(
     db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
 ):
+    """Test that APPROVED is an allowed approval response type for budget officer approval."""
     workflow = WorkflowFactory.create(
         is_active=True, workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW
     )
@@ -360,7 +363,7 @@ def test_process_workflow_budget_officer_approved_approval_type_not_allowed(
     assert message.process_workflow_context.event_to_send == "receive_budget_officer_approval"
 
 
-def test_process_workflow_budget_officer_request_modification_approval_type_not_allowed(
+def test_process_workflow_budget_officer_requires_modification_not_allowed(
     db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
 ):
     """Test that a 422 error is raised when approval response type is not allowed for the event."""
@@ -393,7 +396,7 @@ def test_process_workflow_budget_officer_request_modification_approval_type_not_
     assert len(messages) == 0
 
 
-def test_process_workflow_budget_officer_declined_approval_type_not_allowed(
+def test_process_workflow_budget_officer_declined_not_allowed(
     db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
 ):
     """Test that a 422 error is raised when approval response type is not allowed for the event."""
