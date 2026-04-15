@@ -11,6 +11,6 @@ export function GET(request: NextRequest) {
   }
   const pivRequired = request.nextUrl.searchParams.get("piv_required");
   redirect(
-    `${environment.AUTH_LOGIN_URL}${pivRequired === "true" ? "piv_required=True" : ""}`,
+    `${environment.AUTH_LOGIN_URL}${pivRequired === "true" ? "?piv_required=True" : ""}`,
   );
 }
