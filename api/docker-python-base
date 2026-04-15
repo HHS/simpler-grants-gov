@@ -3,7 +3,7 @@
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 
-ARG PYTHON_VERSION=3.14.3
+ARG PYTHON_VERSION=3.14.4
 ARG PY_MM=3.14
 ARG POETRY_VERSION=2.3.3
 ARG PIP_VERSION=26.0

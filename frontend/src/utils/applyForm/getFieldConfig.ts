@@ -2,7 +2,6 @@ import { EnumOptionsType, RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { get } from "lodash";
 import { getSimpleTranslationsSync } from "src/i18n/getMessagesSync";
-
 import {
   BroadlyDefinedWidgetValue,
   FieldListChildWidgetTypes,
@@ -15,7 +14,8 @@ import {
   UiSchemaFieldList,
   UswdsWidgetProps,
   WidgetTypes,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
+
 import {
   getByPointer,
   getFieldNameForHtml,
@@ -93,6 +93,38 @@ export function buildFieldListBaseId({
 
   return `${fieldListName}[${FIELD_LIST_INDEX_TOKEN}]--${finalFieldKey}`;
 }
+
+// Assumes the FieldList field exists at the root of formSchema.properties.
+const getFieldListRequiredFields = ({
+  formSchema,
+  fieldListName,
+}: {
+  formSchema: RJSFSchema;
+  fieldListName: string;
+}): string[] => {
+  const fieldListSchema = formSchema.properties?.[fieldListName] as
+    | RJSFSchema
+    | undefined;
+
+  if (!fieldListSchema || fieldListSchema.type !== "array") {
+    return [];
+  }
+
+  const itemSchema =
+    fieldListSchema.items &&
+    !Array.isArray(fieldListSchema.items) &&
+    typeof fieldListSchema.items === "object"
+      ? (fieldListSchema.items as RJSFSchema)
+      : undefined;
+
+  if (!itemSchema?.required || !Array.isArray(itemSchema.required)) {
+    return [];
+  }
+
+  return itemSchema.required.map(
+    (requiredFieldName) => `${fieldListName}/${requiredFieldName}`,
+  );
+};
 
 type FieldWidgetConfig = {
   type: FieldListChildWidgetTypes;
@@ -436,6 +468,16 @@ const getFieldListConfig = ({
         throw new Error("fieldList children must be field nodes");
       }
 
+      if (!childNode.definition) {
+        throw new Error("fieldList child field must include a definition");
+      }
+
+      if (Array.isArray(childNode.definition)) {
+        throw new Error(
+          "fieldList child field definition must be a single path",
+        );
+      }
+
       const childWidgetConfig = getFieldConfig({
         errors,
         formSchema,
@@ -464,6 +506,7 @@ const getFieldListConfig = ({
           childId,
         }),
         generalProps: rest,
+        definition: childNode.definition,
       };
     },
   );
@@ -471,6 +514,10 @@ const getFieldListConfig = ({
     formData && typeof formData === "object" && !Array.isArray(formData)
       ? (formData as Record<string, unknown>)[uiFieldObject.name]
       : undefined;
+  const requiredFields = getFieldListRequiredFields({
+    formSchema,
+    fieldListName: uiFieldObject.name,
+  });
 
   return {
     type: "FieldList",
@@ -485,9 +532,10 @@ const getFieldListConfig = ({
       label: uiFieldObject.label,
       description: uiFieldObject.description,
       defaultSize: uiFieldObject.defaultSize,
+      name: uiFieldObject.name,
       groupDefinition,
-      rawErrors: [],
-      requiredFields: [],
+      rawErrors: errors ?? [],
+      requiredFields,
       value: fieldListValue as GeneralRecord[] | undefined,
     },
   };
