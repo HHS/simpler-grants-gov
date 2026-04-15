@@ -124,7 +124,7 @@ export function CreateOpportunityForm({
   // Validate the user's agency access on drop down selection
   useEffect(() => {
     if (defaultAgencyId) {
-      validateAgencyAccess(defaultAgencyId);
+      validateAgencyAccess(defaultAgencyId).catch(console.error);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultAgencyId]);
@@ -138,7 +138,7 @@ export function CreateOpportunityForm({
   };
   const onAgencySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setAgencyId(e.target.value);
-    validateAgencyAccess(e.target.value);
+    validateAgencyAccess(e.target.value).catch(console.error);
   };
   const onCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCategory(e.target.value);
