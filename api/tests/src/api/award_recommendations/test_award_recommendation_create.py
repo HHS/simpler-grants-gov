@@ -4,11 +4,13 @@ from decimal import Decimal
 import pytest
 
 from src.constants.lookup_constants import (
+    AwardRecommendationType,
     AwardRecommendationReviewType,
     AwardRecommendationStatus,
     AwardSelectionMethod,
     Privilege,
 )
+from src.db.models.award_recommendation_models import AwardRecommendationApplicationSubmission
 from src.db.models.opportunity_models import Opportunity
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt
 from tests.src.db.models.factories import (
@@ -84,6 +86,17 @@ class TestCreateAwardRecommendation200:
         assert all(
             review["is_reviewed"] is False for review in data["award_recommendation_reviews"]
         )
+        
+        linked = db_session.query(AwardRecommendationApplicationSubmission).filter_by(
+            award_recommendation_id=uuid.UUID(data["award_recommendation_id"])
+        ).all()
+        assert len(linked) == 2
+        
+        for link in linked:
+            detail = link.award_recommendation_submission_detail
+            assert detail.award_recommendation_type == AwardRecommendationType.NOT_RECOMMENDED
+            assert detail.recommended_amount in (Decimal("1000.00"), Decimal("2000.00"))
+            assert 1 <= int(detail.scoring_comment) <= 100
 
 
 class TestCreateAwardRecommendation422:
