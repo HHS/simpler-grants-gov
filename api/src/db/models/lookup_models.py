@@ -376,6 +376,7 @@ WORKFLOW_TYPE_CONFIG: LookupConfig[WorkflowType] = LookupConfig(
         LookupStr(WorkflowType.INITIAL_PROTOTYPE, 3),
         LookupStr(WorkflowType.BASIC_TEST_WORKFLOW, 4),
         LookupStr(WorkflowType.NO_CONCURRENT_TEST_WORKFLOW, 5),
+        LookupStr(WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW, 6),
     ]
 )
 

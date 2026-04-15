@@ -391,6 +391,7 @@ class WorkflowType(StrEnum):
     # reserved for testing.
     BASIC_TEST_WORKFLOW = "basic_test_workflow"
     NO_CONCURRENT_TEST_WORKFLOW = "no_concurrent_test_workflow"
+    LIMITED_APPROVAL_TEST_WORKFLOW = "limited_approval_test_workflow"
 
     def get_human_friendly_text(self) -> str:
         return self.value.replace("_", " ").title()

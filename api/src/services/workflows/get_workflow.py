@@ -267,6 +267,9 @@ def build_workflow_approval_config(
         approval_config_dict[event_name] = {
             "approval_type": approval_config.approval_type,
             "required_privileges": approval_config.required_privileges,
+            "allowed_approval_response_types": list(
+                approval_config.allowed_approval_response_types
+            ),
             "possible_users": possible_users,
         }
 
