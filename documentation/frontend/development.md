@@ -25,9 +25,13 @@ npx next telemetry disable
 
 Create a local environment file in the frontend directory to hold your frontend application overrides. This allows you to make specializations to your local setup without the danger of committing any secrets to GitHub.
 
-On Mac, run `touch .env.local`
+`.env.local.example` is provided in the frontend directory for a comprehensive list of all environment variables used in frontend as well as where they are referenced. It contains all default values for a quick setup as well as a starting point to configure the development environment. 
 
-On Windows, run `ni .env.local` in PowerShell.
+On Mac, run `cp frontend/.env.local.example frontend/.env.local`
+
+On Windows, run `cp .env.local.example .env.local` in PowerShell.
+
+`.env.local.example` is tracked and sensitive information **SHOULD NOT** be enteredin the file itself. 
 
 For more information about environments, take a look at [environments.md](./environments.md).
 
