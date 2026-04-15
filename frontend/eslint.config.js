@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
+import nextVitals from "eslint-config-next/core-web-vitals";
 import pluginJest from "eslint-plugin-jest";
 import jestDomPlugin from "eslint-plugin-jest-dom";
 import testingLibraryPlugin from "eslint-plugin-testing-library";
@@ -18,6 +19,7 @@ const compat = new FlatCompat({
 });
 
 export default defineConfig([
+  ...nextVitals,
   {
     // ignoring linting errors on storybook for now, will turn back on when we resume
     // active storybook development
