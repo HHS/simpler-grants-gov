@@ -1,12 +1,15 @@
-const { defineConfig } = require("eslint/config");
+import path from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+import js from "@eslint/js";
+import typescriptEslint from "@typescript-eslint/eslint-plugin";
+import pluginJest from "eslint-plugin-jest";
+import jestDomPlugin from "eslint-plugin-jest-dom";
+import testingLibraryPlugin from "eslint-plugin-testing-library";
+import { defineConfig } from "eslint/config";
 
-const pluginJest = require("eslint-plugin-jest");
-const testingLibrary = require("eslint-plugin-testing-library");
-const typescriptEslint = require("@typescript-eslint/eslint-plugin");
-const js = require("@eslint/js");
-const jestDomPlugin = require("eslint-plugin-jest-dom");
-
-const { FlatCompat } = require("@eslint/eslintrc");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
@@ -14,7 +17,7 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 });
 
-module.exports = defineConfig([
+export default defineConfig([
   {
     // ignoring linting errors on storybook for now, will turn back on when we resume
     // active storybook development
@@ -31,7 +34,7 @@ module.exports = defineConfig([
       "nava",
       "plugin:storybook/recommended",
       "prettier",
-      // "next/core-web-vitals",
+      // \\"next/core-web-vitals",
     ),
 
     rules: {
@@ -61,7 +64,7 @@ module.exports = defineConfig([
     files: ["**/*.test.tsx"],
     plugins: {
       jest: pluginJest,
-      "testing-library": testingLibrary,
+      "testing-library": testingLibraryPlugin,
       "jest-dom": jestDomPlugin,
     },
     languageOptions: {
@@ -69,7 +72,7 @@ module.exports = defineConfig([
     },
     rules: {
       ...pluginJest.configs.recommended.rules,
-      ...testingLibrary.configs["flat/react"].rules,
+      ...testingLibraryPlugin.configs["flat/react"].rules,
       ...jestDomPlugin.configs["flat/recommended"].rules,
     },
   },
