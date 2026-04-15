@@ -48,6 +48,7 @@ module.exports = defineConfig([
           ],
         },
       ],
+      "react/react-in-jsx-scope": "off",
     },
 
     settings: {
