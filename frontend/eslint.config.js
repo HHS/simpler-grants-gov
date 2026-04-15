@@ -31,7 +31,7 @@ module.exports = defineConfig([
       "nava",
       "plugin:storybook/recommended",
       "prettier",
-      "next/core-web-vitals",
+      // "next/core-web-vitals",
     ),
 
     rules: {
