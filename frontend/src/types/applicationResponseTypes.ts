@@ -1,6 +1,6 @@
 import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
+import { FormValidationWarning } from "src/types/applyForm/types";
 
-import { FormValidationWarning } from "src/components/applyForm/types";
 import { ApplicationSubmission } from "./application/applicationSubmissionTypes";
 import { Attachment } from "./attachmentTypes";
 import { Competition } from "./competitionsResponseTypes";

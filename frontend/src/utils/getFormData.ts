@@ -6,13 +6,10 @@ import {
   ApplicationFormDetail,
   ApplicationResponseDetail,
 } from "src/types/applicationResponseTypes";
+import { FormValidationWarning, UiSchema } from "src/types/applyForm/types";
 import { Attachment } from "src/types/attachmentTypes";
 import { FormDetail } from "src/types/formResponseTypes";
 
-import {
-  FormValidationWarning,
-  UiSchema,
-} from "src/components/applyForm/types";
 import { processFormSchema } from "src/components/applyForm/utils";
 import { validateUiSchema } from "src/components/applyForm/validate";
 
