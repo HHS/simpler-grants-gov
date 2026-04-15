@@ -133,6 +133,8 @@ def user_logout() -> flask.Response:
 @flask_db.with_db_session()
 def user_login_callback(db_session: db.Session, query_data: dict) -> flask.Response:
     logger.info("GET /v1/users/login/callback")
+    if query_data["code"] == "logout":
+        return response.redirect_response(get_final_redirect_uri("success"))
 
     # We process this in two separate DB transactions
     # as we delete state at the end of the first handler
