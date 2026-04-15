@@ -2041,7 +2041,8 @@ export const messages = {
       assistanceListingNumberDesc:
         "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
       successMessage: "Opportunity started. Continuing shortly...",
-      agencyAccessError: "You do not have access to create opportunities for this agency.",
+      agencyAccessError:
+        "You do not have access to create opportunities for this agency.",
     },
   },
   Notifications: {

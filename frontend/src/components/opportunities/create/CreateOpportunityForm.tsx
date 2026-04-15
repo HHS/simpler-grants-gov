@@ -1,6 +1,9 @@
 "use client";
 
-import { createOpportunityAction, validateAgencyAccessAction } from "src/app/[locale]/(base)/opportunities/create/actions";
+import {
+  createOpportunityAction,
+  validateAgencyAccessAction,
+} from "src/app/[locale]/(base)/opportunities/create/actions";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -51,23 +54,26 @@ export function CreateOpportunityForm({
   );
 
   // Update validateAgencyAccess function
-  const validateAgencyAccess = useCallback(async (agencyId: string) => {
-    if (!agencyId) return;
-    
-    setAgencyAccessError("");
-    
-    try {
-      const result = await validateAgencyAccessAction(agencyId);
-      
-      if (result.error) {
-        setAgencyAccessError(result.error);
-      } else {
-        setAgencyAccessError("");
+  const validateAgencyAccess = useCallback(
+    async (agencyId: string) => {
+      if (!agencyId) return;
+
+      setAgencyAccessError("");
+
+      try {
+        const result = await validateAgencyAccessAction(agencyId);
+
+        if (result.error) {
+          setAgencyAccessError(result.error);
+        } else {
+          setAgencyAccessError("");
+        }
+      } catch (_error) {
+        setAgencyAccessError(t("CreateOpportunityForm.agencyAccessError"));
       }
-    } catch (_error) {
-      setAgencyAccessError(t("CreateOpportunityForm.agencyAccessError"));
-    }
-  }, [t]);
+    },
+    [t],
+  );
 
   // Use useEffect to detect success and redirect
   const router = useRouter();
@@ -126,7 +132,7 @@ export function CreateOpportunityForm({
     if (defaultAgencyId) {
       validateAgencyAccess(defaultAgencyId).catch(console.error);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultAgencyId]);
 
   // Update state on change

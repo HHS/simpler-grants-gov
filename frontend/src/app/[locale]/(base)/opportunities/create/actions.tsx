@@ -1,12 +1,12 @@
 "use server";
 
+import { getSession } from "src/services/auth/session";
+import { createOpportunity } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
+import { CreateOpportunityResponse } from "src/types/grantor/createOpportunityTypes";
 import {
   checkRequiredPrivileges,
   UserPrivilegeRequest,
 } from "src/utils/userPrivileges";
-import { getSession } from "src/services/auth/session";
-import { createOpportunity } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
-import { CreateOpportunityResponse } from "src/types/grantor/createOpportunityTypes";
 
 // Future: Apply any field level validations before submitting to the backend.
 //    These will be validations that have not been taken care of client-side.
@@ -57,42 +57,39 @@ export const createOpportunityAction = async (
 
 export async function validateAgencyAccessAction(agencyId: string) {
   const session = await getSession();
-  
+
   if (!session?.token || !session?.user_id) {
     return { error: "Session error" };
   }
-  
+
   try {
-    
     const userPrivilegeResult = await checkRequiredPrivileges(
       session.token,
       session.user_id,
-      getUserPrivilegeDefinition(agencyId)
+      getUserPrivilegeDefinition(agencyId),
     );
-    
+
     let canCreate = false;
-    
+
     if (userPrivilegeResult.length > 0) {
       userPrivilegeResult.forEach((result) => {
-        if (
-          result.privilege === "create_opportunity" &&
-          result.authorized
-        ) {
+        if (result.privilege === "create_opportunity" && result.authorized) {
           canCreate = true;
         }
       });
     }
-    
+
     if (canCreate) {
       return { success: true };
     } else {
-      return { 
-        error: "You do not have access to create opportunities for this agency." 
+      return {
+        error:
+          "You do not have access to create opportunities for this agency.",
       };
     }
   } catch (_error) {
-    return { 
-      error: "You do not have access to create opportunities for this agency." 
+    return {
+      error: "You do not have access to create opportunities for this agency.",
     };
   }
 }
