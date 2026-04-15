@@ -165,7 +165,7 @@ def get_login_gov_redirect_uri(
     }
     if redirect_params.piv_required:
         url_params["acr_values"] = (
-            "urn:gov:gsa:ac:classes:sp:PasswordProtectedTransport:duo http://idmanagement.gov/ns/assurance/aal/2?hspd12=true"
+            "http://idmanagement.gov/ns/assurance/aal/2?hspd12=true"
         )
 
     # We want to redirect to the authorization endpoint of login.gov
