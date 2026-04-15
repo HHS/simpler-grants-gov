@@ -124,7 +124,7 @@ export function CreateOpportunityForm({
   // Validate the user's agency access on drop down selection
   useEffect(() => {
     if (defaultAgencyId) {
-      void validateAgencyAccess(defaultAgencyId);
+      validateAgencyAccess(defaultAgencyId);
     }
   }, [defaultAgencyId]);
 
@@ -137,7 +137,7 @@ export function CreateOpportunityForm({
   };
   const onAgencySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setAgencyId(e.target.value);
-    void validateAgencyAccess(e.target.value);
+    validateAgencyAccess(e.target.value);
   };
   const onCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCategory(e.target.value);
