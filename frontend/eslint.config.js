@@ -33,7 +33,7 @@ module.exports = defineConfig([
       "plugin:storybook/recommended",
       "plugin:you-dont-need-lodash-underscore/compatible",
       "prettier",
-      // "next/core-web-vitals",
+      "next/core-web-vitals",
     ),
 
     rules: {
@@ -50,7 +50,7 @@ module.exports = defineConfig([
           ],
         },
       ],
-      "react/react-in-jsx-scope": "off",
+      // "react/react-in-jsx-scope": "off",
     },
 
     settings: {
