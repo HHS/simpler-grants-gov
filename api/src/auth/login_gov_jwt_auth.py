@@ -179,7 +179,7 @@ def get_login_gov_logout_redirect_uri(config: LoginGovConfig | None = None) -> s
     # We want to redirect to the authorization endpoint of login.gov
     # See: https://developers.login.gov/oidc/authorization/
     encoded_params = urllib.parse.urlencode(
-        {"client_id": config.client_id, "post_loguout_redirect_uri": redirect_uri}
+        {"client_id": config.client_id, "post_logout_redirect_uri": redirect_uri}
     )
 
     return f"{config.login_gov_logout_endpoint}?{encoded_params}"
