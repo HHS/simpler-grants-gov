@@ -9,7 +9,9 @@ export function GET(request: NextRequest) {
   if (!environment.AUTH_LOGIN_URL) {
     return new NextResponse("AUTH_LOGIN_URL not defined", { status: 500 });
   }
-  const pivRequired = request.nextUrl.searchParams.get("piv_required");
+  const pivRequired =
+    request.nextUrl.searchParams.get("piv_required") ||
+    request.nextUrl.searchParams.get("require_piv");
   redirect(
     `${environment.AUTH_LOGIN_URL}${pivRequired === "true" ? "?piv_required=True" : ""}`,
   );
