@@ -51,8 +51,15 @@ export const RoleOptions = ({ roles }: { roles: UserRole[] }) => {
     </option>,
   ].concat(roleOptions);
 };
+interface UserInviteButtonProps {
+  success: boolean;
+  disabled: boolean;
+}
 
-export function UserInviteButton({ success = false, disabled = false }) {
+export function UserInviteButton({
+  success = false,
+  disabled = false,
+}: UserInviteButtonProps) {
   const t = useTranslations("ManageUsers.inviteUser.button");
   if (success) {
     return (
