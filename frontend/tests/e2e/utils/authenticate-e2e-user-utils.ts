@@ -22,10 +22,40 @@ import { selectLocalTestUser } from "tests/e2e/utils/select-local-test-user-util
 
 const { baseUrl, targetEnv, testUserLabel } = playwrightEnv;
 
+const attemptStagingSpoof = async (
+  context: BrowserContext,
+): Promise<boolean> => {
+  if (!playwrightEnv.stagingTestUserApiKey) {
+    return false;
+  }
+  // get staging user token
+  try {
+    const response = await fetch(
+      `${playwrightEnv.apiUrl}/v1/internal/e2e-token`,
+      {
+        headers: { "X-API-Key": playwrightEnv.stagingTestUserApiKey },
+        method: "POST",
+      },
+    );
+    if (!response.ok) {
+      throw new Error(
+        `unable to fetch e2e staging user token: ${response.status}`,
+      );
+    }
+    const json = await response.json();
+    await createSpoofedSessionCookie(context, json.data.token);
+    return true;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};
+
 export async function authenticateE2eUser(
   page: Page,
   context: BrowserContext,
   isMobile: boolean,
+  attemptSpoof = true,
 ): Promise<void> {
   if (targetEnv === "local") {
     await createSpoofedSessionCookie(context);
@@ -37,6 +67,16 @@ export async function authenticateE2eUser(
     await selectLocalTestUser(page, testUserLabel);
     await page.waitForTimeout(2000);
   } else if (targetEnv === "staging") {
+    if (attemptSpoof) {
+      try {
+        const spoofSuccessful = await attemptStagingSpoof(context);
+        if (spoofSuccessful) {
+          return;
+        }
+      } catch (e) {
+        console.warn("unable to spoof staging login", (e as Error).message);
+      }
+    }
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
 
     // Check whether the user is already logged in before attempting MFA login.
