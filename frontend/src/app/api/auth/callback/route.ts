@@ -1,8 +1,5 @@
 import { createSession } from "src/services/auth/session";
-import {
-  loginGovLogout,
-  newExpirationDate,
-} from "src/services/auth/sessionUtils";
+import { newExpirationDate } from "src/services/auth/sessionUtils";
 
 import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
@@ -14,7 +11,7 @@ export async function GET(request: NextRequest) {
     if (
       errorMessage === "Agency users must authenticate using a PIV/CAC card"
     ) {
-      return loginGovLogout(true);
+      return redirect("/login?pivError=true");
     }
     return redirect("/unauthenticated");
   }

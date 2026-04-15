@@ -2,7 +2,7 @@
 
 import SessionStorage from "src/services/sessionStorage/sessionStorage";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
@@ -10,11 +10,15 @@ import { USWDSIcon } from "src/components/USWDSIcon";
 
 export default function Login() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const redirectURL = SessionStorage.getItem("login-redirect");
       SessionStorage.removeItem("login-redirect");
+      if (searchParams.get("pivError")) {
+        SessionStorage.setItem("showPivError", "true");
+      }
 
       if (
         redirectURL === null ||
