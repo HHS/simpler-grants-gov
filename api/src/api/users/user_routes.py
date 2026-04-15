@@ -119,11 +119,9 @@ def user_login(db_session: db.Session) -> flask.Response:
 @user_blueprint.get("/logout")
 @user_blueprint.doc(responses=[302])
 @with_login_redirect_error_handler()
-@flask_db.with_db_session()
-def user_logout(db_session: db.Session) -> flask.Response:
+def user_logout() -> flask.Response:
     logger.info("GET /v1/users/logout")
-    with db_session.begin():
-        redirect_uri = get_login_gov_logout_redirect_uri(db_session)
+    redirect_uri = get_login_gov_logout_redirect_uri()
 
     return response.redirect_response(redirect_uri)
 
