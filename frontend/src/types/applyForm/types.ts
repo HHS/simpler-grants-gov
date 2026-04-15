@@ -55,6 +55,7 @@ export type FormattedFormValidationWarning = FormValidationWarning & {
   htmlField?: string;
   formatted?: string;
   definition?: string | undefined;
+  fieldListLabel?: string;
 };
 
 export type WidgetTypes =
@@ -99,6 +100,10 @@ type PropertyPath = `/properties/${string}`;
  *   expects this to exist because other widgets rely on schema metadata
  *   such as title and description.
  *
+ * name
+ *   The FieldList field name. Used to derive the base field path
+ *   (e.g. $.fieldListName) for mapping validation warnings to the list.
+ *
  * groupDefinition
  *   Describes the fields that appear in each repeatable row.
  *
@@ -108,8 +113,13 @@ type PropertyPath = `/properties/${string}`;
  * defaultSize
  *   Initial number of rows to render when no data exists.
  *
+ * minItems / maxItems
+ *   Optional constraints for the number of rows allowed in the list.
+ *   Used for validation and future control of add/remove behavior.
+ *
  * rawErrors / requiredFields
  *   Validation information passed down from the form engine.
+ *   rawErrors may include both group-level (array) and child field warnings.
  *
  * disabled / readOnly / isFormLocked
  *   Control widget interactivity.
@@ -118,10 +128,8 @@ type PropertyPath = `/properties/${string}`;
  *   Provides access to the root schema and form data when needed.
  *
  * onChange
- *   Included for compatibility with the standard widget interface.
- *   The current FieldList implementation manages row updates internally,
- *   but this allows future versions to integrate with the normal form
- *   change pipeline.
+ *   Called when the FieldList value changes.
+ *   Receives the full array of row objects.
  */
 export type FieldListWidgetProps = {
   id: string;
@@ -133,17 +141,30 @@ export type FieldListWidgetProps = {
   label: string;
   description?: string;
   defaultSize: number;
+  name: string;
+  minItems?: number;
+  maxItems?: number;
   groupDefinition: FieldListGroupItem[];
-  rawErrors?: FormattedFormValidationWarning[] | string[];
+  rawErrors?: FormattedFormValidationWarning[];
   requiredFields?: string[];
   value?: GeneralRecord[];
-  onChange?: (value: unknown) => void;
+  onChange?: UswdsWidgetProps["onChange"];
   disabled?: boolean;
   readOnly?: boolean;
   isFormLocked?: boolean;
   formContext?: {
     rootSchema?: RJSFSchema;
     rootFormData?: unknown;
+    widgetSupport?: {
+      validationWarnings?:
+        | FormattedFormValidationWarning[]
+        | FormValidationWarning[];
+      deletedEntryIndexesByFieldListPath?: Record<string, number[]>;
+      onFieldListEntryDelete?: (
+        fieldListPath: string,
+        deletedEntryIndex: number,
+      ) => void;
+    };
   };
 };
 
@@ -153,6 +174,7 @@ export type FieldListGroupItem = {
   widget: FieldListChildWidgetTypes;
   generalProps: Omit<UswdsWidgetProps, "id" | "value" | "key">;
   baseId: string;
+  definition: string;
 };
 
 export type DefinitionPath = PropertyPath | PropertyPath[];
@@ -249,6 +271,16 @@ export interface UswdsWidgetProps<
   formContext?: {
     rootSchema?: RJSFSchema;
     rootFormData?: unknown;
+    widgetSupport?: {
+      validationWarnings?:
+        | FormattedFormValidationWarning[]
+        | FormValidationWarning[];
+      deletedEntryIndexesByFieldListPath?: Record<string, number[]>;
+      onFieldListEntryDelete?: (
+        fieldListPath: string,
+        deletedEntryIndex: number,
+      ) => void;
+    };
   };
 }
 
