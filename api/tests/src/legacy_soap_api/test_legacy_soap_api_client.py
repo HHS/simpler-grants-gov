@@ -71,6 +71,7 @@ def get_simpler_applicants_soap_client(request_data, db_session):
         data=SoapRequestStreamer(stream=io.BytesIO(request_data)),
         full_path="/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort",
         api_name=SimplerSoapAPI.APPLICANTS,
+        operation_name="GetOpportunityListRequest",
     )
     return SimplerApplicantsS2SClient(soap_request, db_session)
 
@@ -1324,7 +1325,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             "<UEI>E9T7F9N2ERR4</UEI>"
             "</ns2:SubmissionInfo>"
             "<ns2:SubmissionInfo>"
-            "<GARBAGE>E9T7F9N2ERR4</GARBAGE>"
+            "<ns2:ReceivedDateTime>NOT_A_VALID_DATETIME</ns2:ReceivedDateTime>"
             "</ns2:SubmissionInfo>"
             "</ns2:GetSubmissionListExpandedResponse>"
             "</soap:Body>"

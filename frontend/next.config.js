@@ -217,12 +217,27 @@ const nextConfig = {
       },
       {
         source: "/organization/:segments*",
-        destination: "/organizations/:segments*",
+        destination: "/workspace/organizations/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/organizations/:segments*",
+        destination: "/workspace/organizations/:segments*",
         permanent: false,
       },
       {
         source: "/workspace/applications/application/:segments*",
-        destination: "/applications/:segments*",
+        destination: "/workspace/applications/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/applications/application/:segments*",
+        destination: "/workspace/applications/:segments*",
+        permanent: false,
+      },
+      {
+        source: "/applications/:segments*",
+        destination: "/workspace/applications/:segments*",
         permanent: false,
       },
       {
@@ -233,6 +248,21 @@ const nextConfig = {
       {
         source: "/api-dashboard",
         destination: "/developers/api-dashboard",
+        permanent: false,
+      },
+      {
+        source: "/dashboard",
+        destination: "/workspace",
+        permanent: false,
+      },
+      {
+        source: "/saved-opportunities",
+        destination: "/workspace/saved-opportunities",
+        permanent: false,
+      },
+      {
+        source: "/saved-search-queries",
+        destination: "/workspace/saved-search-queries",
         permanent: false,
       },
     ];

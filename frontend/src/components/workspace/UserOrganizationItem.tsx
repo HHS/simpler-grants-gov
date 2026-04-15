@@ -17,7 +17,9 @@ const ManageUsersButton = ({
 }) => {
   const t = useTranslations("WorkspaceDashboard");
   return (
-    <Link href={`/organizations/${organization.organization_id}/manage-users`}>
+    <Link
+      href={`/workspace/organizations/${organization.organization_id}/manage-users`}
+    >
       <Button type="button">
         <USWDSIcon name="people" /> {t("organizationButtons.manage")}
       </Button>
@@ -32,7 +34,7 @@ const ViewDetailsButton = ({
 }) => {
   const t = useTranslations("WorkspaceDashboard");
   return (
-    <Link href={`/organizations/${organization.organization_id}`}>
+    <Link href={`/workspace/organizations/${organization.organization_id}`}>
       <Button type="button">
         <USWDSIcon name="visibility" />
         {t("organizationButtons.view")}

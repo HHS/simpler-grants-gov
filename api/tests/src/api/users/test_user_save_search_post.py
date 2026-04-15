@@ -95,7 +95,7 @@ def test_user_save_search_post_no_auth(client, db_session, user):
     )
 
     assert response.status_code == 401
-    assert response.json["message"] == "Unable to process token"
+    assert response.json["message"] == "Unauthorized"
 
     # Verify no search was saved
     saved_searches = (

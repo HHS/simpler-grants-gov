@@ -57,7 +57,7 @@ from src.auth.login_gov_jwt_auth import (
     get_login_gov_logout_redirect_uri,
     get_login_gov_redirect_uri,
 )
-from src.auth.multi_auth import jwt_or_api_user_key_multi_auth, jwt_or_api_user_key_security_schemes
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.users.create_api_key import create_api_key
@@ -256,8 +256,8 @@ def user_get_organizations(db_session: db.Session, user_id: UUID) -> response.Ap
 
 @user_blueprint.post("/<uuid:user_id>/agencies")
 @user_blueprint.output(UserAgenciesResponseSchema)
-@user_blueprint.doc(responses=[200, 401, 403], security=jwt_or_api_user_key_security_schemes)
-@jwt_or_api_user_key_multi_auth.login_required
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def user_get_agencies(db_session: db.Session, user_id: UUID) -> response.ApiResponse:
     logger.info("POST /v1/users/:user_id/agencies")
@@ -845,8 +845,8 @@ def user_response_org_invitation(
 
 @user_blueprint.get("/<uuid:user_id>/saved-opportunities/notifications")
 @user_blueprint.output(UserSavedOpportunityNotificationsResponseSchema)
-@user_blueprint.doc(responses=[200, 401, 403], security=jwt_or_api_user_key_security_schemes)
-@jwt_or_api_user_key_multi_auth.login_required
+@user_blueprint.doc(responses=[200, 401, 403])
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def user_get_saved_opportunity_notifications(
     db_session: db.Session, user_id: UUID
@@ -869,10 +869,8 @@ def user_get_saved_opportunity_notifications(
 @user_blueprint.post("/<uuid:user_id>/saved-opportunities/notifications")
 @user_blueprint.input(SetUserSavedOpportunityNotificationRequestSchema)
 @user_blueprint.output(SetUserSavedOpportunityNotificationResponseSchema)
-@user_blueprint.doc(
-    responses=[200, 401, 403, 404, 422], security=jwt_or_api_user_key_security_schemes
-)
-@jwt_or_api_user_key_multi_auth.login_required
+@user_blueprint.doc(responses=[200, 401, 403, 404, 422])
+@user_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def user_saved_opportunities_notifications(
     db_session: db.Session, user_id: UUID, json_data: dict

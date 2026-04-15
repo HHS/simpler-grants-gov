@@ -7,6 +7,8 @@ import {
 } from "tests/e2e/utils/forms/verify-form-errors-utils";
 import { gotoWithRetry } from "tests/e2e/utils/lifecycle-utils";
 
+import { buildFlexibleFormNameRegex } from "./form-navigation-utils";
+
 export type FormStatus = "complete" | "incomplete";
 
 /**
@@ -19,18 +21,15 @@ export type FormStatus = "complete" | "incomplete";
 export async function assertFormRowStatus(
   page: Page,
   status: FormStatus,
-  formName: string,
+  formName: string | RegExp,
 ): Promise<void> {
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await page.waitForTimeout(5000);
-
-  const escapedFormName = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const flexiblePattern = escapedFormName
-    .replace(/\s+/g, "\\s*")
-    .replace(/-/g, "-?");
+  const rowPattern =
+    formName instanceof RegExp
+      ? formName
+      : buildFlexibleFormNameRegex(formName);
   const formRow = page
     .locator("tr", {
-      hasText: new RegExp(flexiblePattern, "i"),
+      hasText: rowPattern,
     })
     .filter({
       has: page.locator('a[href*="/form/"]'),
@@ -57,7 +56,7 @@ export async function assertFormRowStatus(
 export async function verifyFormStatusOnApplication(
   page: Page,
   status: FormStatus,
-  formName: string,
+  formName: string | RegExp,
   applicationUrl: string,
 ): Promise<void> {
   await gotoWithRetry(page, applicationUrl, { waitUntil: "domcontentloaded" });
