@@ -86,7 +86,7 @@ class TestCreateAwardRecommendation200:
         )
 
 
-class TestCreateAwardRecommendation400:
+class TestCreateAwardRecommendation422:
 
     def test_create_award_recommendation_missing_required_fields_422(
         self, client, db_session, agency, opportunity
