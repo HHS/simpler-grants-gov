@@ -126,6 +126,7 @@ export function CreateOpportunityForm({
     if (defaultAgencyId) {
       validateAgencyAccess(defaultAgencyId);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultAgencyId]);
 
   // Update state on change
