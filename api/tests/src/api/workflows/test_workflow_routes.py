@@ -621,6 +621,14 @@ class TestWorkflowGet:
         assert "workflow_approval_config" in data
         assert isinstance(data["workflow_approval_config"], dict)
 
+        # Verify valid_events for MIDDLE state
+        assert "valid_events" in data
+        assert set(data["valid_events"]) == {
+            "middle_to_end",
+            "middle_to_program_officer_approval",
+            "middle_to_budget_officer_approval",
+        }
+
     def test_get_application_workflow_200(self, client, db_session, enable_factory_create, agency):
         """Test successfully fetching an application workflow."""
         # Create a user with VIEW_APPLICATION privilege
@@ -827,6 +835,30 @@ class TestWorkflowGet:
         # Config should still be present
         assert "workflow_approval_config" in data
 
+    def test_get_inactive_workflow_returns_empty_valid_events_200(
+        self, client, db_session, enable_factory_create, agency, opportunity
+    ):
+        """Test that an inactive workflow returns empty valid_events."""
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_OPPORTUNITY]
+        )
+
+        workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+            current_workflow_state=BasicState.END,
+            is_active=False,
+            opportunity=opportunity,
+        )
+
+        response = client.get(
+            f"/v1/workflows/{workflow.workflow_id}", headers={"X-SGG-Token": token}
+        )
+
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert data["is_active"] is False
+        assert data["valid_events"] == []
+
     def test_get_workflow_no_token_401(self, client):
         """Test that requests without auth token are rejected."""
         response = client.get(f"/v1/workflows/{uuid.uuid4()}")
@@ -1016,6 +1048,14 @@ class TestWorkflowGetByEventId:
         # Verify approval config exists
         assert "workflow_approval_config" in data
         assert isinstance(data["workflow_approval_config"], dict)
+
+        # Verify valid_events for MIDDLE state
+        assert "valid_events" in data
+        assert set(data["valid_events"]) == {
+            "middle_to_end",
+            "middle_to_program_officer_approval",
+            "middle_to_budget_officer_approval",
+        }
 
     def test_get_application_workflow_by_event_id_200(
         self, client, db_session, enable_factory_create, agency
