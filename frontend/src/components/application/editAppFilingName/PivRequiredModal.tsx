@@ -35,7 +35,7 @@ export const PivRequiredModal = () => {
         <div className="margin-top-3">
           <LoginLink
             className="usa-button"
-            queryParameters={{ require_piv: "true" }}
+            queryParameters={{ piv_required: "true" }}
           >
             {t("button")}
           </LoginLink>
