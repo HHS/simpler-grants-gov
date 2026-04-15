@@ -1,7 +1,52 @@
+import { FormattedFormValidationWarning } from "src/types/applyForm/types";
+
 import { useTranslations } from "next-intl";
 import { Alert } from "@trussworks/react-uswds";
 
-import { FormattedFormValidationWarning } from "./types";
+const getWarningKey = (warning: FormattedFormValidationWarning): string => {
+  return `${warning.htmlField ?? warning.field ?? warning.definition}-${warning.message}`;
+};
+
+/**
+ * Builds summary link text for validation warnings.
+ *
+ * For repeatable FieldList inputs, multiple rows can contain the same child
+ * field name (for example, multiple `first_name` fields). In those cases,
+ * the base formatted message alone is not specific enough in the summary.
+ *
+ * When the warning points to a row-specific FieldList input, we append:
+ * - the FieldList label
+ * - the 1-based entry number derived from the rendered html field id
+ *
+ * Example:
+ *   "First Name is required"
+ *
+ * becomes:
+ *   "First Name is required (Contact People, Entry 2)"
+ */
+export const getWarningLinkText = (
+  warning: FormattedFormValidationWarning,
+): string => {
+  const baseText = warning.formatted ?? warning.message;
+  const entryMatch = warning.htmlField?.match(/\[(\d+)\]--/);
+  const fieldListLabel = warning.fieldListLabel ?? "";
+
+  if (!entryMatch) {
+    return baseText;
+  }
+
+  const entryIndex = Number(entryMatch[1]);
+
+  if (Number.isNaN(entryIndex)) {
+    return baseText;
+  }
+
+  if (fieldListLabel) {
+    return `${baseText} (${fieldListLabel}, Entry ${entryIndex + 1})`;
+  }
+
+  return `${baseText} (Entry ${entryIndex + 1})`;
+};
 
 export const ApplyFormMessage = ({
   error,
@@ -21,6 +66,18 @@ export const ApplyFormMessage = ({
     ),
     p: (content) => <p>{content}</p>,
   });
+
+  const uniqueValidationWarnings = validationWarnings
+    ? Array.from(
+        new Map(
+          validationWarnings.map((warning) => [
+            getWarningKey(warning),
+            warning,
+          ]),
+        ).values(),
+      )
+    : null;
+
   if (!saved) {
     return <></>;
   } else if (error) {
@@ -34,7 +91,7 @@ export const ApplyFormMessage = ({
         {errorMessage}
       </Alert>
     );
-  } else if (validationWarnings && validationWarnings.length > 0) {
+  } else if (uniqueValidationWarnings && uniqueValidationWarnings.length > 0) {
     return (
       <Alert
         // Added data-testid to ensure success and warning alerts are detectable in tests
@@ -46,13 +103,15 @@ export const ApplyFormMessage = ({
       >
         {t("validationMessage")}
         <ul>
-          {validationWarnings.map((warning, index) => {
+          {uniqueValidationWarnings.map((warning) => {
             const link = isBudgetForm ? (
               <a href={`#${warning.field}`}>{warning.message}</a>
             ) : (
-              <a href={`#${warning.htmlField || ""}`}>{warning.formatted}</a>
+              <a href={`#${warning.htmlField || ""}`}>
+                {getWarningLinkText(warning)}
+              </a>
             );
-            return <li key={index}>{link}</li>;
+            return <li key={getWarningKey(warning)}>{link}</li>;
           })}
         </ul>
       </Alert>

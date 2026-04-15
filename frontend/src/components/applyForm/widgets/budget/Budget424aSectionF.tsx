@@ -1,13 +1,13 @@
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get, set } from "lodash";
-
-import React, { JSX } from "react";
-
 import {
   FormattedFormValidationWarning,
   FormValidationWarning,
   UswdsWidgetProps,
-} from "src/components/applyForm/types";
+} from "src/types/applyForm/types";
+
+import React, { JSX } from "react";
+
 import CheckboxWidget from "src/components/applyForm/widgets/CheckboxWidget";
 import TextAreaWidget from "src/components/applyForm/widgets/TextAreaWidget";
 import TextWidget from "src/components/applyForm/widgets/TextWidget";
