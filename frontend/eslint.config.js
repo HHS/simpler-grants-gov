@@ -5,17 +5,26 @@ const testingLibrary = require("eslint-plugin-testing-library");
 const typescriptEslint = require("@typescript-eslint/eslint-plugin");
 const js = require("@eslint/js");
 const jestDomPlugin = require("eslint-plugin-jest-dom");
+const storybookPlugin = require("eslint-plugin-storybook");
+const noLodash = require("eslint-plugin-you-dont-need-lodash-underscore");
+const pretterPlugin = require("eslint-config-prettier/flat");
+const nextPlugin = require("eslint-config-next/core-web-vitals");
 
-const { FlatCompat } = require("@eslint/eslintrc");
+// const { FlatCompat } = require("@eslint/eslintrc");
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
+// const compat = new FlatCompat({
+//   baseDirectory: __dirname,
+//   recommendedConfig: js.configs.recommended,
+//   allConfig: js.configs.all,
+// });
 
 module.exports = defineConfig([
   {
+    ...js.configs.recommended,
+    ...storybookPlugin.configs["flat/recommended"],
+    ...noLodash.configs.compatible,
+    ...pretterPlugin,
+    ...nextPlugin,
     // ignoring linting errors on storybook for now, will turn back on when we resume
     // active storybook development
     ignores: [
@@ -26,16 +35,29 @@ module.exports = defineConfig([
       "next-env.d.ts",
       "**/coverage/",
     ],
-  },
-  {
-    extends: compat.extends(
-      "eslint:recommended",
-      "plugin:storybook/recommended",
-      "plugin:you-dont-need-lodash-underscore/compatible",
-      "prettier",
-      "next/core-web-vitals",
-    ),
+    // extends: compat.extends(
+    //   "eslint:recommended",
+    //   "plugin:storybook/recommended",
+    //   "plugin:you-dont-need-lodash-underscore/compatible",
+    //   "prettier",
+    //   "next/core-web-vitals",
+    // ),
 
+    // extends: [
+    //   "eslint:recommended",
+    //   "plugin:storybook/recommended",
+    //   "plugin:you-dont-need-lodash-underscore/compatible",
+    //   "prettier",
+    //   "next/core-web-vitals",
+    // ],
+
+    // extends: [
+    //   js.configs.recommended,
+    //   storybookPlugin.configs["flat/recommended"],
+    //   noLodash.configs.compatible,
+    //   pretterPlugin,
+    //   nextPlugin,
+    // ],
     rules: {
       "@next/next/no-img-element": "off",
 
@@ -77,7 +99,9 @@ module.exports = defineConfig([
   },
   {
     files: ["**/*.+(ts|tsx)"],
-
+    ...typescriptEslint.configs.recommended,
+    ...typescriptEslint.configs.recommendedTypeChecked,
+    ...typescriptEslint.configs.stylisticTypeChecked,
     languageOptions: {
       parserOptions: {
         tsconfigRootDir: __dirname,
@@ -85,11 +109,14 @@ module.exports = defineConfig([
       },
     },
 
-    extends: compat.extends(
-      "plugin:@typescript-eslint/recommended",
-      "plugin:@typescript-eslint/eslint-recommended",
-      "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    ),
+    // extends: [
+    //   typescriptEslint.configs.recommended,
+    //   typescriptEslint.configs.recommendedTypeChecked,
+    //   typescriptEslint.configs.stylisticTypeChecked,
+    //   // "plugin:@typescript-eslint/recommended",
+    //   // "plugin:@typescript-eslint/eslint-recommended",
+    //   // "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    // ],
 
     plugins: {
       "@typescript-eslint": typescriptEslint,
