@@ -738,6 +738,7 @@ export const messages = {
       workspace: "Workspace",
       workspaceDashboard: "Workspace dashboard",
       settings: "Settings",
+      notifications: "Notifications",
       testApplication: "Test application",
     },
     title: "Simpler.Grants.gov",
@@ -1860,6 +1861,11 @@ export const messages = {
       status: "Status",
       actions: "Actions",
     },
+    actionButtons: {
+      edit: "Edit",
+      copy: "Copy",
+      delete: "Delete",
+    },
   },
   Organizations: {
     errorMessage:
@@ -2036,5 +2042,25 @@ export const messages = {
         "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
       successMessage: "Opportunity started. Continuing shortly...",
     },
+  },
+  Notifications: {
+    pageTitle: "Notifications | Simpler.Grants.gov",
+    pageHeading: "Notifications",
+    metaDescription:
+      "Manage which email notifications you receive about saved opportunities and your organizations.",
+    managePreferencesTitle: "Manage your preferences",
+    managePreferencesDescription:
+      "Choose which notifications you'd like to receive about your activity.",
+    organizationPreferencesTitle: "Organization preferences",
+    organizationPreferencesDescription:
+      "Choose which notifications you'd like to receive for organizations you're part of.",
+    savedOpportunitiesLabel: "Subscribe to saved opportunities",
+    savedOpportunitiesDescription:
+      "Get email updates about opportunities you have saved.",
+    organizationSavedOpportunitiesDescription:
+      "Get email updates for opportunities saved by you or your organization.",
+    fetchError:
+      "Your notification preferences could not be loaded. Refresh the page to try again.",
+    organizationPreferencesSuffix: "Preferences",
   },
 };

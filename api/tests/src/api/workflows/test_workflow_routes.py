@@ -27,7 +27,10 @@ from tests.src.db.models.factories import (
     WorkflowEventHistoryFactory,
     WorkflowFactory,
 )
-from tests.src.workflow.state_machine.test_state_machines import BasicState
+from tests.src.workflow.state_machine.test_state_machines import (
+    BasicState,
+    LimitedApprovalResponseState,
+)
 
 ####################################
 # Fixtures
@@ -923,6 +926,44 @@ class TestWorkflowGet:
 
         assert response.status_code == 404
         assert f"Could not find Workflow with ID {non_existent_id}" in response.json["message"]
+
+    def test_get_opportunity_workflow_allowed_approval_types_200(
+        self, client, db_session, enable_factory_create, agency, opportunity
+    ):
+        """Test successfully fetching an opportunity workflow with audits and approvals."""
+        # Create a token with VIEW_OPPORTUNITY privilege in the agency
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_OPPORTUNITY]
+        )
+
+        # Create a test workflow with limited approval types
+        workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW,
+            current_workflow_state=LimitedApprovalResponseState.MIDDLE,
+            is_active=True,
+            opportunity=opportunity,
+        )
+
+        response = client.get(
+            f"/v1/workflows/{workflow.workflow_id}", headers={"X-SGG-Token": token}
+        )
+
+        assert response.status_code == 200
+        data = response.json["data"]
+
+        allowed_approval_types_program_officer = data["workflow_approval_config"][
+            "receive_program_officer_approval"
+        ]["allowed_approval_response_types"]
+        allowed_approval_types_budget_officer = data["workflow_approval_config"][
+            "receive_budget_officer_approval"
+        ]["allowed_approval_response_types"]
+
+        assert len(allowed_approval_types_program_officer) == 2
+        assert ApprovalResponseType.APPROVED in allowed_approval_types_program_officer
+        assert ApprovalResponseType.REQUIRES_MODIFICATION in allowed_approval_types_program_officer
+
+        assert len(allowed_approval_types_budget_officer) == 1
+        assert ApprovalResponseType.APPROVED in allowed_approval_types_budget_officer
 
 
 class TestWorkflowGetByEventId:

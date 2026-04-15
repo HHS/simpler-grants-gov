@@ -6,14 +6,21 @@ from src.constants.lookup_constants import (
     Privilege,
     WorkflowType,
 )
-from src.workflow.workflow_errors import DuplicateApprovalError, InvalidWorkflowResponseTypeError
+from src.workflow.workflow_errors import (
+    DisallowedApprovalResponseTypeError,
+    DuplicateApprovalError,
+    InvalidWorkflowResponseTypeError,
+)
 from tests.lib.agency_test_utils import create_user_in_agency
 from tests.src.db.models.factories import (
     OpportunityFactory,
     WorkflowApprovalFactory,
     WorkflowFactory,
 )
-from tests.src.workflow.state_machine.test_state_machines import BasicState
+from tests.src.workflow.state_machine.test_state_machines import (
+    BasicState,
+    LimitedApprovalResponseState,
+)
 from tests.src.workflow.workflow_test_util import send_process_event, validate_approvals
 
 
@@ -407,4 +414,188 @@ def test_agency_approval_null_response_type(db_session, agency, budget_officer, 
             # no type passed in
         )
 
+    assert len(workflow.workflow_approvals) == 0
+
+
+# Tests for limited approval response types
+def test_limited_approval_response_allowed_type(db_session, agency, program_officer, opportunity):
+    """Test that an allowed approval response type works with limited approval response types"""
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW,
+        current_workflow_state=LimitedApprovalResponseState.PENDING_PROGRAM_OFFICER_APPROVAL,
+        opportunity=opportunity,
+    )
+
+    # APPROVED is allowed for program officer approval
+    state_machine = send_process_event(
+        db_session=db_session,
+        event_to_send="receive_program_officer_approval",
+        workflow_id=workflow.workflow_id,
+        user=program_officer,
+        expected_state=LimitedApprovalResponseState.END,
+        expected_is_active=False,
+        approval_response_type=ApprovalResponseType.APPROVED,
+    )
+
+    validate_approvals(
+        state_machine,
+        [
+            {
+                "approving_user_id": program_officer.user_id,
+                "approval_type": ApprovalType.PROGRAM_OFFICER_APPROVAL,
+                "is_still_valid": True,
+                "approval_response_type": ApprovalResponseType.APPROVED,
+            },
+        ],
+    )
+
+
+def test_limited_approval_response_requires_modification_allowed(
+    db_session, agency, program_officer, opportunity
+):
+    """Test that REQUIRES_MODIFICATION is allowed for program officer approval"""
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW,
+        current_workflow_state=LimitedApprovalResponseState.PENDING_PROGRAM_OFFICER_APPROVAL,
+        opportunity=opportunity,
+    )
+
+    # REQUIRES_MODIFICATION is allowed for program officer approval
+    state_machine = send_process_event(
+        db_session=db_session,
+        event_to_send="receive_program_officer_approval",
+        workflow_id=workflow.workflow_id,
+        user=program_officer,
+        expected_state=LimitedApprovalResponseState.START,
+        approval_response_type=ApprovalResponseType.REQUIRES_MODIFICATION,
+    )
+
+    validate_approvals(
+        state_machine,
+        [
+            {
+                "approving_user_id": program_officer.user_id,
+                "approval_type": ApprovalType.PROGRAM_OFFICER_APPROVAL,
+                "is_still_valid": False,
+                "approval_response_type": ApprovalResponseType.REQUIRES_MODIFICATION,
+            },
+        ],
+    )
+
+
+def test_limited_approval_response_disallowed_type_program_officer(
+    db_session, agency, program_officer, opportunity
+):
+    """Test that DECLINED is not allowed for program officer approval"""
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW,
+        current_workflow_state=LimitedApprovalResponseState.PENDING_PROGRAM_OFFICER_APPROVAL,
+        opportunity=opportunity,
+    )
+
+    # DECLINED is not allowed for program officer approval, will raise an error
+    with pytest.raises(
+        DisallowedApprovalResponseTypeError,
+        match="Approval response type is not allowed for this approval configuration",
+    ):
+        send_process_event(
+            db_session=db_session,
+            event_to_send="receive_program_officer_approval",
+            workflow_id=workflow.workflow_id,
+            user=program_officer,
+            expected_state=LimitedApprovalResponseState.PENDING_PROGRAM_OFFICER_APPROVAL,
+            approval_response_type=ApprovalResponseType.DECLINED,
+        )
+
+    # No approvals should be recorded
+    assert len(workflow.workflow_approvals) == 0
+
+
+def test_limited_approval_response_budget_officer_only_approved(
+    db_session, agency, budget_officer, opportunity
+):
+    """Test that only APPROVED is allowed for budget officer approval"""
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW,  # Reuse the same workflow type
+        current_workflow_state=LimitedApprovalResponseState.PENDING_BUDGET_OFFICER_APPROVAL,
+        opportunity=opportunity,
+    )
+
+    # APPROVED is allowed for budget officer approval
+    state_machine = send_process_event(
+        db_session=db_session,
+        event_to_send="receive_budget_officer_approval",
+        workflow_id=workflow.workflow_id,
+        user=budget_officer,
+        expected_state=LimitedApprovalResponseState.END,
+        expected_is_active=False,
+        approval_response_type=ApprovalResponseType.APPROVED,
+    )
+
+    validate_approvals(
+        state_machine,
+        [
+            {
+                "approving_user_id": budget_officer.user_id,
+                "approval_type": ApprovalType.BUDGET_OFFICER_APPROVAL,
+                "is_still_valid": True,
+                "approval_response_type": ApprovalResponseType.APPROVED,
+            },
+        ],
+    )
+
+
+def test_limited_approval_response_budget_officer_disallowed_requires_modification(
+    db_session, agency, budget_officer, opportunity
+):
+    """Test that REQUIRES_MODIFICATION is not allowed for budget officer approval"""
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW,  # Reuse the same workflow type
+        current_workflow_state=LimitedApprovalResponseState.PENDING_BUDGET_OFFICER_APPROVAL,
+        opportunity=opportunity,
+    )
+
+    # REQUIRES_MODIFICATION is not allowed for budget officer approval
+    with pytest.raises(
+        DisallowedApprovalResponseTypeError,
+        match="Approval response type is not allowed for this approval configuration",
+    ):
+        send_process_event(
+            db_session=db_session,
+            event_to_send="receive_budget_officer_approval",
+            workflow_id=workflow.workflow_id,
+            user=budget_officer,
+            expected_state=LimitedApprovalResponseState.START,
+            approval_response_type=ApprovalResponseType.REQUIRES_MODIFICATION,
+        )
+
+    # No approvals should be recorded
+    assert len(workflow.workflow_approvals) == 0
+
+
+def test_limited_approval_response_budget_officer_disallowed_declined(
+    db_session, agency, budget_officer, opportunity
+):
+    """Test that DECLINED is not allowed for budget officer approval"""
+    workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW,
+        current_workflow_state=LimitedApprovalResponseState.PENDING_BUDGET_OFFICER_APPROVAL,
+        opportunity=opportunity,
+    )
+
+    # DECLINED is not allowed for budget officer approval
+    with pytest.raises(
+        DisallowedApprovalResponseTypeError,
+        match="Approval response type is not allowed for this approval configuration",
+    ):
+        send_process_event(
+            db_session=db_session,
+            event_to_send="receive_budget_officer_approval",
+            workflow_id=workflow.workflow_id,
+            user=budget_officer,
+            expected_state=LimitedApprovalResponseState.PENDING_BUDGET_OFFICER_APPROVAL,
+            approval_response_type=ApprovalResponseType.DECLINED,
+        )
+
+    # No approvals should be recorded
     assert len(workflow.workflow_approvals) == 0
