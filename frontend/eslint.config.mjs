@@ -3,7 +3,6 @@ import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import nextVitals from "eslint-config-next/core-web-vitals";
 import pluginJest from "eslint-plugin-jest";
 import jestDomPlugin from "eslint-plugin-jest-dom";
 import testingLibraryPlugin from "eslint-plugin-testing-library";
@@ -19,7 +18,6 @@ const compat = new FlatCompat({
 });
 
 export default defineConfig([
-  ...nextVitals,
   {
     // ignoring linting errors on storybook for now, will turn back on when we resume
     // active storybook development
@@ -34,11 +32,12 @@ export default defineConfig([
   },
   {
     extends: compat.extends(
+      "plugin:promise/recommended",
       "eslint:recommended",
       "plugin:storybook/recommended",
       "plugin:you-dont-need-lodash-underscore/compatible",
       "prettier",
-      // \\"next/core-web-vitals",
+      "next/core-web-vitals",
     ),
 
     rules: {
@@ -56,6 +55,8 @@ export default defineConfig([
           ],
         },
       ],
+      // TODO #9637 remove this off and address the issues where this rule flags stuff
+      "promise/always-return": "off",
     },
 
     settings: {

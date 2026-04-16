@@ -92,6 +92,8 @@
     "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-jest": "^28",
     "eslint-plugin-jest-dom": "^5.0.1",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-storybook": "^10.2.3",
     "eslint-plugin-testing-library": "^7",
     "eslint-plugin-you-dont-need-lodash-underscore": "^6.13.0",
