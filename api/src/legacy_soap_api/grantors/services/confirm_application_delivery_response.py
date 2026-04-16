@@ -18,11 +18,10 @@ from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import (
-    AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS,
-    RECEIVED_BY_AGENCY_STATUS,
     SOAPFaultException,
     get_application_submission_by_legacy_tracking_number_extended,
 )
+from src.legacy_soap_api.grantors.statuses import AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS, RECEIVED_BY_AGENCY_STATUS
 
 logger = logging.getLogger(__name__)
 
