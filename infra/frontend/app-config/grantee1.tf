@@ -6,7 +6,7 @@ module "grantee1_config" {
   environment                     = "grantee1"
   network_name                    = "grantee1"
   domain_name                     = "grantee1.teams.simpler.grants.gov"
-  enable_https                    = false # set to true once SSL cert is provisioned
+  enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service
   enable_identity_provider        = local.enable_identity_provider

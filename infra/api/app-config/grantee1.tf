@@ -6,16 +6,16 @@ module "grantee1_config" {
   environment            = "grantee1"
   network_name           = "grantee1"
   domain_name            = "api.grantee1.teams.simpler.grants.gov"
-  secondary_domain_names = ["alb.grantee1.teams.simpler.grants.gov"]
-  # s3_cdn_domain_name              = "files.grantee1.teams.simpler.grants.gov"   # uncomment once SSL cert is provisioned
-  # mtls_domain_name                = "soap.grantee1.teams.simpler.grants.gov"    # uncomment once SSL cert and SSM params are provisioned
-  enable_https                      = false # set to true once SSL cert is provisioned
+  secondary_domain_names            = ["alb.grantee1.teams.simpler.grants.gov"]
+  s3_cdn_domain_name                = "files.grantee1.teams.simpler.grants.gov"
+  mtls_domain_name                  = "soap.grantee1.teams.simpler.grants.gov"
+  enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
   database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXwyNjY5ODkxMDczODI5NDA4MTg"
   has_incident_management_service   = local.has_incident_management_service
   enable_identity_provider          = local.enable_identity_provider
-  enable_notifications              = false # set to true once Route53 hosted zone and SSL cert are provisioned
+  enable_notifications              = local.enable_notifications
   service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyOTQ0MjI1MTY3MzU4ODU5ODY4"
   service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtOTg3MzU3MDI4MjI5NDg3MDk4"
 
