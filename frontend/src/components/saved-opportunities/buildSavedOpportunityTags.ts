@@ -35,7 +35,7 @@ export function buildSavedOpportunityTags(
       return {
         key: `organization-${organization.organization_id}`,
         label: organizationName,
-        screenReaderLabel: `Shared with ${organizationName}`,
+        screenReaderLabel: `Saved by ${organizationName}`,
         kind: "organization" as const,
       };
     });
@@ -48,7 +48,7 @@ export function buildSavedOpportunityTags(
         {
           key: "individual",
           label: "Individual",
-          screenReaderLabel: "Saved to your list",
+          screenReaderLabel: "Saved by you",
           kind: "individual",
         },
       ]

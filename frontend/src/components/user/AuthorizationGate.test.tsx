@@ -51,7 +51,6 @@ jest.mock("src/services/auth/session", () => ({
 
 jest.mock("src/services/fetch/fetchers/userFetcher", () => ({
   checkUserPrivilege: (
-    _token: string,
     _userId: string,
     privilegeDefinition: UserPrivilegeDefinition,
   ) => mockCheckUserPrivilege(privilegeDefinition) as unknown,

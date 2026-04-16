@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { isNil } from "lodash";
 import {
   BaseOpportunity,
   MinimalOpportunity,
@@ -114,7 +113,8 @@ const AgencyDisplay = ({ opportunity }: { opportunity: BaseOpportunity }) => {
       </div>
       <div className="font-sans-xs display-none tablet-lg:display-block">
         {t("expectedAwards")}:{" "}
-        {isNil(opportunity.summary.expected_number_of_awards)
+        {opportunity.summary.expected_number_of_awards === undefined ||
+        opportunity.summary.expected_number_of_awards === null
           ? "--"
           : opportunity.summary.expected_number_of_awards}
       </div>
@@ -147,15 +147,19 @@ const toSearchResultsTableRow = (
       stackOrder: 3,
     },
     {
-      cellData: isNil(result.summary.award_floor)
-        ? "$--"
-        : formatCurrency(result.summary.award_floor),
+      cellData:
+        result.summary.award_floor === undefined ||
+        result.summary.award_floor === null
+          ? "$--"
+          : formatCurrency(result.summary.award_floor),
       stackOrder: 4,
     },
     {
-      cellData: isNil(result.summary.award_ceiling)
-        ? "$--"
-        : formatCurrency(result.summary.award_ceiling),
+      cellData:
+        result.summary.award_ceiling === undefined ||
+        result.summary.award_ceiling === null
+          ? "$--"
+          : formatCurrency(result.summary.award_ceiling),
       stackOrder: 5,
     },
   ];

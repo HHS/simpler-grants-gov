@@ -82,7 +82,7 @@ describe("unsetAllNewRelicQueryAttributes", () => {
 
     unsetAllNewRelicQueryAttributes();
     expect(mockSetCustomAttribute).toHaveBeenCalledTimes(
-      validSearchQueryParamKeys.length,
+      [...validSearchQueryParamKeys, "query_length"].length,
     );
     validSearchQueryParamKeys.forEach((key) => {
       expect(mockSetCustomAttribute).toHaveBeenCalledWith(
@@ -90,5 +90,9 @@ describe("unsetAllNewRelicQueryAttributes", () => {
         "",
       );
     });
+    expect(mockSetCustomAttribute).toHaveBeenCalledWith(
+      "search_param_query_length",
+      0,
+    );
   });
 });

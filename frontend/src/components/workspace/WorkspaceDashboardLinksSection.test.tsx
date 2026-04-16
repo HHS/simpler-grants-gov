@@ -29,7 +29,7 @@ describe("WorkspaceDashboardLinksSection", () => {
 
     // Ensure links point to the expected pages
     const hrefs = links.map((link) => link.getAttribute("href"));
-    expect(hrefs).toContain("/saved-search-queries");
-    expect(hrefs).toContain("/saved-opportunities");
+    expect(hrefs).toContain("/workspace/saved-search-queries");
+    expect(hrefs).toContain("/workspace/saved-opportunities");
   });
 });

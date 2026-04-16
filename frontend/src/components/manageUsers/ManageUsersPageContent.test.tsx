@@ -109,7 +109,7 @@ describe("ManageUsersPageContent", () => {
     expect(breadcrumbsProps.breadcrumbList).toHaveLength(4);
     expect(breadcrumbsProps.breadcrumbList[2]).toEqual({
       title: "Cool Org Inc",
-      path: `/organizations/${organizationId}`,
+      path: `/workspace/organizations/${organizationId}`,
     });
 
     expect(PageHeaderMock).toHaveBeenCalledTimes(1);
@@ -136,7 +136,7 @@ describe("ManageUsersPageContent", () => {
     const breadcrumbsProps = BreadcrumbsMock.mock.calls[0][0];
     expect(breadcrumbsProps.breadcrumbList[2]).toEqual({
       title: "Organization",
-      path: `/organizations/${organizationId}`,
+      path: `/workspace/organizations/${organizationId}`,
     });
 
     expect(PageHeaderMock).toHaveBeenCalledTimes(1);

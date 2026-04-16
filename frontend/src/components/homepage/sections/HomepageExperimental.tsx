@@ -1,3 +1,4 @@
+import { ExternalRoutes } from "src/constants/routes";
 import { UswdsIconNames } from "src/types/generalTypes";
 
 import { useMessages, useTranslations } from "next-intl";
@@ -24,7 +25,21 @@ const ExperimentalContent = () => {
         {t("tryLink")}
       </Link>
       <h4>{t("cantDoHeader")}</h4>
-      <p>{t("cantDoParagraph")}</p>
+      <p>
+        {t.rich("cantDoParagraph", {
+          grantsLink: (chunks) => (
+            <a
+              href={ExternalRoutes.GRANTS_HOME}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="usa-link--external"
+            >
+              {chunks}
+            </a>
+          ),
+          roadmapLink: (chunks) => <Link href="/roadmap">{chunks}</Link>,
+        })}
+      </p>
       <Grid row className="padding-y-2" gap="md">
         {iconSections.map((iconSection, iconSectionIdx) => (
           <Grid col={6} key={`experimental-iconsection-${iconSectionIdx}`}>

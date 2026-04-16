@@ -109,6 +109,7 @@ export interface BaseOpportunity extends MinimalOpportunity {
   summary: Summary;
   top_level_agency_name: string | null;
   updated_at: string;
+  is_draft: boolean;
   saved_to_organizations?: SavedToOrganization[];
 }
 

@@ -71,6 +71,7 @@ def get_simpler_applicants_soap_client(request_data, db_session):
         data=SoapRequestStreamer(stream=io.BytesIO(request_data)),
         full_path="/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort",
         api_name=SimplerSoapAPI.APPLICANTS,
+        operation_name="GetOpportunityListRequest",
     )
     return SimplerApplicantsS2SClient(soap_request, db_session)
 
