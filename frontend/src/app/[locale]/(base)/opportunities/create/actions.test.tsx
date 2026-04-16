@@ -22,7 +22,7 @@ jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
     mockCreateOpportunity(token, createOppSchema) as unknown,
 }));
 jest.mock("src/utils/userPrivileges", () => ({
-  checkRequiredPrivileges: (
+  checkUserRequiredPrivileges: (
     token: string,
     userId: string,
     privileges: unknown,

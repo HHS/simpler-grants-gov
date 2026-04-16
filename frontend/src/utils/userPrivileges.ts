@@ -20,7 +20,7 @@ export interface UserPrivilegeResult extends UserPrivilegeRequest {
 }
 
 // Check the user's privileges
-export const checkRequiredPrivileges = async (
+export const checkUserRequiredPrivileges = async (
   token: string,
   userId: string,
   privileges: UserPrivilegeRequest[],

@@ -4,7 +4,7 @@ import { getSession } from "src/services/auth/session";
 import { createOpportunity } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { CreateOpportunityResponse } from "src/types/grantor/createOpportunityTypes";
 import {
-  checkRequiredPrivileges,
+  checkUserRequiredPrivileges,
   UserPrivilegeRequest,
 } from "src/utils/userPrivileges";
 
@@ -63,7 +63,7 @@ export async function validateAgencyAccessAction(agencyId: string) {
   }
 
   try {
-    const userPrivilegeResult = await checkRequiredPrivileges(
+    const userPrivilegeResult = await checkUserRequiredPrivileges(
       session.token,
       session.user_id,
       getUserPrivilegeDefinition(agencyId),
