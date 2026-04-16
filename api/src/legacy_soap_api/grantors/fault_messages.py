@@ -15,11 +15,6 @@ ConfirmDeliverySubmissionNotFound = FaultMessage(
     faultcode="soap:Server",
 )
 
-ConfirmDeliveryInvalidStatus = FaultMessage(
-    faultstring="Invalid application status. Expected Accepted status. Failed to confirm application delivery.",
-    faultcode="soap:Server",
-)
-
 ConfirmDeliveryAlreadyRetrieved = FaultMessage(
     faultstring="This application submission has already been retrieved. Failed to confirm application delivery.",
     faultcode="soap:Server",

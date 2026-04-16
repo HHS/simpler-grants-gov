@@ -57,7 +57,7 @@ def test_successful_request(client, fixture_from_file, caplog) -> None:
 
 
 def test_successful_confirm_application_delivery_request(
-    db_session, client, fixture_from_file, enable_factory_create, caplog
+    db_session, client, enable_factory_create
 ) -> None:
     agency = AgencyFactory.create()
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
@@ -102,6 +102,109 @@ def test_successful_confirm_application_delivery_request(
         .all()
     )
     assert len(retrieved) == 1
+
+
+def test_if_soapfaultexception_raised_return_correct_response_if_use_simpler_override_is_1(
+    db_session, client, enable_factory_create
+) -> None:
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate = setup_cert_user(agency, privileges)
+    application = ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.IN_PROGRESS
+    )
+    submission = ApplicationSubmissionFactory.create(application=application)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+    )
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        response = client.post(
+            full_path, data=mock_data, headers={"Use-Simpler-Override": "1", "Use-Soap-Cert": "1"}
+        )
+    assert response.status_code == 500
+    expected = (
+        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
+        "    <soap:Body>\n        <soap:Fault>\n"
+        "            <faultcode>soap:Server</faultcode>\n"
+        f"            <faultstring>Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Received' for GRANT{submission.legacy_tracking_number})</faultstring>\n"
+        "        </soap:Fault>\n"
+        "    </soap:Body>\n"
+        "</soap:Envelope>\n"
+    )
+    assert response.data.decode() == expected
+
+
+def test_if_soapfaultexception_raised_return_proxy_response_if_use_simpler_override_is_not_1(
+    db_session, client, enable_factory_create
+) -> None:
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate = setup_cert_user(agency, privileges)
+    application = ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.IN_PROGRESS
+    )
+    submission = ApplicationSubmissionFactory.create(application=application)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+    )
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        # Remove Use-Simpler-Override
+        response = client.post(full_path, data=mock_data, headers={"Use-Soap-Cert": "1"})
+    assert response.status_code == 500
+    expected = (
+        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
+        "    <soap:Body>\n        <soap:Fault>\n"
+        "            <faultcode>soap:Server</faultcode>\n"
+        "            <faultstring>Client certificate not configured for Simpler SOAP.</faultstring>\n"
+        "        </soap:Fault>\n"
+        "    </soap:Body>\n"
+        "</soap:Envelope>\n"
+    )
+    assert response.data.decode() == expected
 
 
 def test_invalid_service_name_not_found(client) -> None:

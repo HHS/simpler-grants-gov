@@ -11,7 +11,6 @@ from src.db.models.competition_models import ApplicationSubmissionRetrieved
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
 from src.legacy_soap_api.grantors.fault_messages import (
     ConfirmDeliveryAlreadyRetrieved,
-    ConfirmDeliveryInvalidStatus,
     ConfirmDeliverySubmissionNotFound,
 )
 from src.legacy_soap_api.legacy_soap_api_auth import (
@@ -20,6 +19,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
 )
 from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
+from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import (
     SOAPFaultException,
@@ -29,6 +29,11 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
 logger = logging.getLogger(__name__)
 
 VALID_STATUSES_FOR_DELIVERY = {ApplicationStatus.ACCEPTED}
+GRANTS_APPLICATION_STATUSES = {
+    ApplicationStatus.IN_PROGRESS: "Received",
+    ApplicationStatus.SUBMITTED: "Received",
+    ApplicationStatus.ACCEPTED: "Validated",
+}
 
 
 def confirm_application_delivery(
@@ -45,6 +50,10 @@ def confirm_application_delivery(
     Returns the grants_gov_tracking_number on success.
     Raises SOAPFaultException or SOAPClientUserDoesNotHavePermission on failure.
     """
+    certificate = validate_certificate(
+        db_session, soap_auth=soap_request.auth, api_name=soap_request.api_name
+    )
+
     legacy_tracking_number = cast(
         str, confirm_application_delivery_request.grants_gov_tracking_number
     )
@@ -67,35 +76,15 @@ def confirm_application_delivery(
         )
 
     application = application_submission.application
-
-    if application.application_status not in VALID_STATUSES_FOR_DELIVERY:
-        logger.info(
-            "Application status is not valid for confirm application delivery.",
-            extra={
-                "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
-                "application_status": application.application_status,
-                "legacy_tracking_number": legacy_tracking_number,
-                "response_operation_name": "ConfirmApplicationDeliveryResponse",
-            },
-        )
-        raise SOAPFaultException(
-            "Application status is not valid for confirm application delivery",
-            fault=ConfirmDeliveryInvalidStatus,
-        )
-
-    certificate = validate_certificate(
-        db_session, soap_auth=soap_request.auth, api_name=soap_request.api_name
-    )
-
-    if soap_config.privileges is None:
-        raise ValueError("Privileges must be configured for ConfirmApplicationDelivery")
-
     try:
-        verify_access(
-            certificate.user,
-            soap_config.privileges,
-            application.competition.opportunity.agency_record,
-        )
+        if soap_config.privileges:
+            verify_access(
+                certificate.user,
+                soap_config.privileges,
+                application.competition.opportunity.agency_record,
+            )
+        else:
+            raise ValueError("Privileges must be configured for ConfirmApplicationDelivery")
     except HTTPError as e:
         logger.info(
             "User did not have permission to confirm application delivery",
@@ -108,6 +97,24 @@ def confirm_application_delivery(
         raise SOAPClientUserDoesNotHavePermission(
             "User did not have permission to confirm application delivery"
         ) from e
+
+    if application.application_status not in VALID_STATUSES_FOR_DELIVERY:
+        msg = (
+            "Failed to confirm application delivery.(Expected an Application status of:'Validated' ,"
+            f" but found a status of '{GRANTS_APPLICATION_STATUSES.get(
+                application.application_status or ApplicationStatus.IN_PROGRESS
+            )}' for {legacy_tracking_number})"
+        )
+        logger.info(
+            msg,
+            extra={
+                "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
+                "application_status": application.application_status,
+                "legacy_tracking_number": legacy_tracking_number,
+                "response_operation_name": "ConfirmApplicationDeliveryResponse",
+            },
+        )
+        raise SOAPFaultException(msg, fault=FaultMessage(faultcode="soap:Server", faultstring=msg))
 
     # Check if this user has already retrieved this submission.
     existing_retrieval = (

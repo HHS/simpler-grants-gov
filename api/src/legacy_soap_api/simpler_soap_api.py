@@ -23,6 +23,7 @@ from src.legacy_soap_api.legacy_soap_api_schemas import (
 )
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.legacy_soap_api_utils import (
+    SOAPFaultException,
     get_alternate_proxy_response,
     get_invalid_path_response,
     get_soap_error_response,
@@ -171,7 +172,19 @@ def process_simpler_request(
                 "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
             },
         )
-        return soap_proxy_response.to_flask_response()
+    except SOAPFaultException as e:
+        use_simpler = soap_request.headers.get("Use-Simpler-Override") == "1"
+        logger.exception(
+            msg=e.fault.faultstring,
+            extra={
+                "used_simpler_response": use_simpler,
+                "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
+            },
+        )
+        if use_simpler:
+            return get_soap_error_response(
+                faultcode=e.fault.faultcode, faultstring=e.fault.faultstring
+            ).to_flask_response()
     except Exception:
         msg = "Unable to process Simpler SOAP proxy response"
         logger.exception(
@@ -181,4 +194,4 @@ def process_simpler_request(
                 "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
             },
         )
-        return soap_proxy_response.to_flask_response()
+    return soap_proxy_response.to_flask_response()
