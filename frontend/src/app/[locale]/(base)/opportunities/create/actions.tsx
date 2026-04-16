@@ -64,7 +64,6 @@ export async function validateAgencyAccessAction(agencyId: string) {
 
   try {
     const userPrivilegeResult = await checkUserRequiredPrivileges(
-      session.token,
       session.user_id,
       getUserPrivilegeDefinition(agencyId),
     );
