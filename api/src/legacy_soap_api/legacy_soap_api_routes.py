@@ -21,4 +21,5 @@ def simpler_soap_api_route(
         }
     )
     logger.info("POST /<service_name>/services/v2/<service_port_name>")
-    return process_simpler_request(db_session, service_name, service_port_name)
+    with db_session.begin():
+        return process_simpler_request(db_session, service_name, service_port_name)
