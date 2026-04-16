@@ -54,6 +54,8 @@ export default async function RootLayoutWrapper({
   // to do that in commit 46566b4c0ad but later removed. We can bring it back if it is ever useful. - DWS
   return (
     <html lang={locale} suppressHydrationWarning>
+      {/* Need to use native <head> because of New Relic client side data collector injection */}
+      {/* eslint-disable-next-line @next/next/no-head-element */}
       <head>
         <GoogleAnalytics gaId={environment.GOOGLE_TAG_MANAGER_ID} />
         <meta
