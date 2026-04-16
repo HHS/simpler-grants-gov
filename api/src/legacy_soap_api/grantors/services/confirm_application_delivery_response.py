@@ -2,17 +2,13 @@ import logging
 from typing import cast
 
 from apiflask.exceptions import HTTPError
-from sqlalchemy import select
 
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import ApplicationSubmissionRetrieved
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
-from src.legacy_soap_api.grantors.fault_messages import (
-    ConfirmDeliveryAlreadyRetrieved,
-    ConfirmDeliverySubmissionNotFound,
-)
+from src.legacy_soap_api.grantors.fault_messages import ConfirmDeliverySubmissionNotFound
 from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientUserDoesNotHavePermission,
     validate_certificate,
@@ -22,8 +18,10 @@ from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import (
+    AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS,
+    RECEIVED_BY_AGENCY_STATUS,
     SOAPFaultException,
-    get_application_submission_by_legacy_tracking_number,
+    get_application_submission_by_legacy_tracking_number_extended,
 )
 
 logger = logging.getLogger(__name__)
@@ -34,6 +32,25 @@ GRANTS_APPLICATION_STATUSES = {
     ApplicationStatus.SUBMITTED: "Received",
     ApplicationStatus.ACCEPTED: "Validated",
 }
+
+
+def get_soap_fault_exception(
+    application_status: str, status: str, legacy_tracking_number: str
+) -> SOAPFaultException:
+    msg = (
+        "Failed to confirm application delivery.(Expected an Application status of:'Validated' ,"
+        f" but found a status of '{status}' for {legacy_tracking_number})"
+    )
+    logger.info(
+        msg,
+        extra={
+            "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
+            "application_status": application_status,
+            "legacy_tracking_number": legacy_tracking_number,
+            "response_operation_name": "ConfirmApplicationDeliveryResponse",
+        },
+    )
+    return SOAPFaultException(msg, fault=FaultMessage(faultcode="soap:Server", faultstring=msg))
 
 
 def confirm_application_delivery(
@@ -58,11 +75,12 @@ def confirm_application_delivery(
         str, confirm_application_delivery_request.grants_gov_tracking_number
     )
 
-    application_submission = get_application_submission_by_legacy_tracking_number(
-        db_session, legacy_tracking_number
+    submission_extended_dict = get_application_submission_by_legacy_tracking_number_extended(
+        db_session, legacy_tracking_number, str(certificate.user_id)
     )
-
-    if not application_submission:
+    if submission_extended_dict:
+        application_submission = submission_extended_dict["submission"]
+    else:
         logger.info(
             f"Unable to find submission legacy_tracking_number {legacy_tracking_number}.",
             extra={
@@ -98,13 +116,8 @@ def confirm_application_delivery(
             "User did not have permission to confirm application delivery"
         ) from e
 
-    if application.application_status not in VALID_STATUSES_FOR_DELIVERY:
-        msg = (
-            "Failed to confirm application delivery.(Expected an Application status of:'Validated' ,"
-            f" but found a status of '{GRANTS_APPLICATION_STATUSES.get(
-                application.application_status or ApplicationStatus.IN_PROGRESS
-            )}' for {legacy_tracking_number})"
-        )
+    if not application.application_status:
+        msg = "Application has no application_status"
         logger.info(
             msg,
             extra={
@@ -116,32 +129,19 @@ def confirm_application_delivery(
         )
         raise SOAPFaultException(msg, fault=FaultMessage(faultcode="soap:Server", faultstring=msg))
 
-    # Check if this user has already retrieved this submission.
-    existing_retrieval = (
-        db_session.execute(
-            select(ApplicationSubmissionRetrieved).where(
-                ApplicationSubmissionRetrieved.application_submission_id
-                == application_submission.application_submission_id,
-                ApplicationSubmissionRetrieved.created_by_user_id == certificate.user.user_id,
-            )
+    if submission_extended_dict["has_tracking"]:
+        raise get_soap_fault_exception(
+            application.application_status,
+            AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS,
+            legacy_tracking_number,
         )
-        .scalars()
-        .first()
-    )
-
-    if existing_retrieval:
-        logger.info(
-            "Application submission has already been retrieved by this user.",
-            extra={
-                "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
-                "user_id": certificate.user.user_id,
-                "legacy_tracking_number": legacy_tracking_number,
-                "response_operation_name": "ConfirmApplicationDeliveryResponse",
-            },
+    elif submission_extended_dict["has_retrieval"]:
+        raise get_soap_fault_exception(
+            application.application_status, RECEIVED_BY_AGENCY_STATUS, legacy_tracking_number
         )
-        raise SOAPFaultException(
-            "Application submission has already been retrieved by this user",
-            fault=ConfirmDeliveryAlreadyRetrieved,
+    elif application.application_status not in VALID_STATUSES_FOR_DELIVERY:
+        raise get_soap_fault_exception(
+            application.application_status, "Received", legacy_tracking_number
         )
 
     retrieval = ApplicationSubmissionRetrieved(
