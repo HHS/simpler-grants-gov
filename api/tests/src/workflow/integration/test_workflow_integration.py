@@ -13,7 +13,7 @@ from src.db.models.workflow_models import Workflow, WorkflowEventHistory
 from src.workflow.manager.workflow_manager import WorkflowManager
 from tests.lib.internal_user_test_utils import create_internal_user_with_jwt
 from tests.src.db.models.factories import OpportunityFactory, WorkflowFactory
-from tests.workflow.state_machine.test_state_machines import BasicState
+from tests.src.workflow.state_machine.test_state_machines import BasicState
 
 #################################
 #

@@ -29,7 +29,7 @@ export const updateAppFilingNameAction = async (
   const applicationName = formData.get("application_name") as string;
 
   try {
-    const res = await updateApplicationFilingName(session.token, {
+    const res = await updateApplicationFilingName({
       application_id: applicationId,
       application_name: applicationName,
     });

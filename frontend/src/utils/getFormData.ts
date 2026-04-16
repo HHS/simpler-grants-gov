@@ -1,7 +1,10 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import { getApplicationFormDetails } from "src/services/fetch/fetchers/applicationFetcher";
+import {
+  getApplicationFormDetails,
+  getApplicationFormDetailsForPrint,
+} from "src/services/fetch/fetchers/applicationFetcher";
 import {
   ApplicationFormDetail,
   ApplicationResponseDetail,
@@ -49,28 +52,23 @@ export default async function getFormData({
   let applicationFormData = {} as ApplicationFormDetail;
   let formValidationWarnings: FormValidationWarning[] | null;
   let formData: FormDetail | null;
-  const useInternalToken = !!internalToken;
-  let sessionToken = "";
 
   // API can take either internal token or session token to auth
-  if (internalToken) sessionToken = internalToken;
-  else {
+  if (!internalToken) {
     const session = await getSession();
 
     if (!session || !session.token) {
       console.error("No active session to access form");
       return { error: "UnauthorizedError" };
     }
-    sessionToken = session.token;
   }
 
+  const formDetailsPromise = internalToken
+    ? getApplicationFormDetailsForPrint(internalToken, applicationId, appFormId)
+    : getApplicationFormDetails(applicationId, appFormId);
+
   try {
-    const response = await getApplicationFormDetails(
-      sessionToken,
-      applicationId,
-      appFormId,
-      useInternalToken,
-    );
+    const response = await formDetailsPromise;
 
     if (response.status_code !== 200) {
       console.error(
