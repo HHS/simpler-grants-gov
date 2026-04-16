@@ -43,6 +43,7 @@ export default defineConfig([
 
     rules: {
       "@next/next/no-img-element": "off",
+      "react/react-in-jsx-scope": "off",
 
       "no-restricted-imports": [
         "error",
