@@ -2,6 +2,7 @@ import {
   findFirstWhitespace,
   formatTimestamp,
   getModifiedTimeDisplay,
+  isBasicallyAnObject,
   isCurrentPath,
   queryParamsToQueryString,
   splitMarkup,
@@ -218,5 +219,37 @@ describe("getModifiedTimeDisplay", () => {
     const result = getModifiedTimeDisplay(updated, created, "--");
     expect(result).not.toEqual("--");
     expect(result).toContain("January 23, 2026");
+  });
+});
+
+describe("isBasicallyAnObject", () => {
+  it("returns false for a boolean", () => {
+    expect(isBasicallyAnObject(true)).toEqual(false);
+    expect(isBasicallyAnObject(false)).toEqual(false);
+  });
+  it("returns false for a string", () => {
+    expect(isBasicallyAnObject("")).toEqual(false);
+    expect(isBasicallyAnObject("a string")).toEqual(false);
+    expect(isBasicallyAnObject(`a template string`)).toEqual(false);
+  });
+  it("returns false for an array", () => {
+    expect(isBasicallyAnObject([])).toEqual(false);
+    expect(isBasicallyAnObject(["a string"])).toEqual(false);
+    expect(isBasicallyAnObject([`a template string`, 1, {}])).toEqual(false);
+  });
+  it("returns false for falsey values", () => {
+    expect(isBasicallyAnObject(null)).toEqual(false);
+    expect(isBasicallyAnObject(undefined)).toEqual(false);
+    expect(isBasicallyAnObject(NaN)).toEqual(false);
+  });
+  it("returns false for a number", () => {
+    expect(isBasicallyAnObject(0)).toEqual(false);
+    expect(isBasicallyAnObject(1)).toEqual(false);
+  });
+  it("returns true for a non array object", () => {
+    expect(isBasicallyAnObject({})).toEqual(true);
+    expect(isBasicallyAnObject(new Set())).toEqual(true);
+    expect(isBasicallyAnObject({ a: "value" })).toEqual(true);
+    expect(isBasicallyAnObject(new Date())).toEqual(true);
   });
 });
