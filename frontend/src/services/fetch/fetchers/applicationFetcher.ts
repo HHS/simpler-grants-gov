@@ -20,16 +20,10 @@ import {
 export const handleStartApplication = async (
   applicationName: string,
   competitionID: string,
-  token: string,
   organization?: string,
 ): Promise<ApplicationStartApiResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `start`,
-    additionalHeaders: ssgToken,
     body: {
       competition_id: competitionID,
       application_name: applicationName,
@@ -46,15 +40,9 @@ export const handleStartApplication = async (
 
 export const handleSubmitApplication = async (
   applicationId: string,
-  token: string,
 ): Promise<ApplicationSubmitApiResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `${applicationId}/submit`,
-    additionalHeaders: ssgToken,
     // want to allow responses with failed validations through so we can properly handle displaying validation errors
     allowedErrorStatuses: [422],
   });
@@ -64,22 +52,16 @@ export const handleSubmitApplication = async (
 
 export const getApplicationSubmissions = async (
   applicationId: string,
-  token: string,
   body: ApplicationSubmissionsRequestBody,
 ): Promise<ApplicationSubmissionsApiResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const response = await fetchApplicationWithMethod("POST")({
     body: { ...body },
     subPath: `${applicationId}/submissions`,
-    additionalHeaders: ssgToken,
   });
   return (await response.json()) as ApplicationSubmissionsApiResponse;
 };
 
 export const getLatestApplicationSubmission = async (
-  token: string,
   applicationId: string,
   applicationStatus: ApplicationStatus,
 ): Promise<ApplicationSubmission | null> => {
@@ -97,11 +79,7 @@ export const getLatestApplicationSubmission = async (
 
   let submissionsResponse: ApplicationSubmissionsApiResponse | null = null;
   try {
-    submissionsResponse = await getApplicationSubmissions(
-      applicationId,
-      token,
-      body,
-    );
+    submissionsResponse = await getApplicationSubmissions(applicationId, body);
     if (submissionsResponse.data.length !== 1) {
       console.error(
         `Expected 1 application submission but received ${submissionsResponse.data.length}`,
@@ -123,14 +101,9 @@ export const getLatestApplicationSubmission = async (
 
 export const getApplicationDetails = async (
   applicationId: string,
-  token: string,
 ): Promise<ApplicationDetailApiResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const response = await fetchApplicationWithMethod("GET")({
     subPath: applicationId,
-    additionalHeaders: ssgToken,
     nextOptions: {
       tags: [`application-${applicationId}`, "application-details"],
     },
@@ -141,14 +114,9 @@ export const getApplicationDetails = async (
 
 export const getApplicationHistory = async (
   applicationId: string,
-  token: string,
 ): Promise<ApplicationHistoryApiResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const response = await fetchApplicationWithMethod("POST")({
     subPath: `${applicationId}/audit_history`,
-    additionalHeaders: ssgToken,
     body: {
       pagination: {
         page_offset: 1,
@@ -184,21 +152,14 @@ export const getApplicationHistory = async (
   return (await response.json()) as ApplicationHistoryApiResponse;
 };
 
-export const updateApplicationFilingName = async (
-  token: string,
-  data: {
-    application_id: string;
-    application_name: string;
-  },
-): Promise<ApplicationDetailApiResponse> => {
+export const updateApplicationFilingName = async (data: {
+  application_id: string;
+  application_name: string;
+}): Promise<ApplicationDetailApiResponse> => {
   const applicationId = data.application_id;
   const applicationName = data.application_name;
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const response = await fetchApplicationWithMethod("PUT")({
     subPath: applicationId,
-    additionalHeaders: ssgToken,
     body: { application_name: applicationName },
   });
 
@@ -209,22 +170,28 @@ export const updateApplicationFilingName = async (
  * Application Forms
  */
 
-export const getApplicationFormDetails = async (
-  token: string,
+export const getApplicationFormDetailsForPrint = async (
+  internalToken: string,
   applicationId: string,
   applicationFormId: string,
-  internalToken = false,
 ): Promise<ApplicationFormDetailApiResponse> => {
-  const tokenHeaderName = internalToken
-    ? "X-SGG-Internal-Token"
-    : "X-SGG-Token";
-  const additionalHeaders: Record<string, string> = {
-    [tokenHeaderName]: token,
+  const additionalHeaders = {
+    "X-SGG-Internal-Token": internalToken,
   };
-
   const response = await fetchApplicationWithMethod("GET")({
     subPath: `${applicationId}/application_form/${applicationFormId}`,
     additionalHeaders,
+  });
+
+  return (await response.json()) as ApplicationFormDetailApiResponse;
+};
+
+export const getApplicationFormDetails = async (
+  applicationId: string,
+  applicationFormId: string,
+): Promise<ApplicationFormDetailApiResponse> => {
+  const response = await fetchApplicationWithMethod("GET")({
+    subPath: `${applicationId}/application_form/${applicationFormId}`,
   });
 
   return (await response.json()) as ApplicationFormDetailApiResponse;
@@ -234,15 +201,10 @@ export const handleUpdateApplicationForm = async (
   values: ApplicationResponseDetail,
   applicationId: string,
   applicationFormId: string,
-  token: string,
 ): Promise<ApplicationStartApiResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const response = await fetchApplicationWithMethod("PUT")({
     subPath: `${applicationId}/forms/${applicationFormId}`,
     body: { application_response: values },
-    additionalHeaders: ssgToken,
   });
 
   return (await response.json()) as ApplicationStartApiResponse;
@@ -252,16 +214,10 @@ export const handleUpdateApplicationFormIncludeInSubmission = async (
   applicationId: string,
   formId: string,
   is_included_in_submission: boolean,
-  token: string,
 ): Promise<ApplicationFormDetailApiResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-
   const response = await fetchApplicationWithMethod("PUT")({
     subPath: `${applicationId}/forms/${formId}/inclusion`,
     body: { is_included_in_submission },
-    additionalHeaders: ssgToken,
   });
 
   return (await response.json()) as ApplicationFormDetailApiResponse;
@@ -274,14 +230,9 @@ export const handleUpdateApplicationFormIncludeInSubmission = async (
 export const deleteAttachment = async (
   applicationId: string,
   application_attachment_id: string,
-  token: string,
 ): Promise<ApplicationDetailApiResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const response = await fetchApplicationWithMethod("DELETE")({
     subPath: `${applicationId}/attachments/${application_attachment_id}`,
-    additionalHeaders: ssgToken,
   });
 
   return (await response.json()) as ApplicationDetailApiResponse;
@@ -289,11 +240,9 @@ export const deleteAttachment = async (
 
 export const uploadAttachment = async (
   applicationId: string,
-  token: string,
   file: FormData,
 ): Promise<ApplicationAttachmentUploadResponse> => {
   const additionalHeaders = {
-    "X-SGG-Token": token,
     Accept: "application/json",
   };
 
