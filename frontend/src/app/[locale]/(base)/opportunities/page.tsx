@@ -363,7 +363,6 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   );
   try {
     userPrivilegeResult = await checkRequiredPrivileges(
-      userSession.token,
       userSession.user_id,
       userPrivilegeDef,
     );
