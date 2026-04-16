@@ -112,9 +112,7 @@ const ApplyForm = ({
 
   useNavigationGuard({
     enabled: formChanged || attachmentsChanged,
-    confirm: () =>
-      // eslint-disable-next-line no-alert
-      window.confirm(translate("unsavedChangesWarning")),
+    confirm: () => window.confirm(translate("unsavedChangesWarning")),
   });
 
   const { error, saved } = formState;

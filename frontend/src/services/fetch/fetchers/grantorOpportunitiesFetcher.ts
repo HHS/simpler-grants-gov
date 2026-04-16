@@ -1,6 +1,5 @@
 "server-only";
 
-import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import { fetchGrantorWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { CreateOpportunityRecord } from "src/types/grantor/createOpportunityTypes";
 import {
@@ -34,14 +33,14 @@ export const searchOpportunitiesByAgency = async (
 
 export const createOpportunity = async (
   token: string,
-  createOppSchema: JSONRequestBody,
+  createOppSchema: Record<string, string>,
 ): Promise<CreateOpportunityRecord> => {
   const ssgToken = {
     "X-SGG-Token": token,
   };
 
   const response = await fetchGrantorWithMethod("POST")({
-    subPath: `opportunities`,
+    subPath: "opportunities",
     additionalHeaders: ssgToken,
     body: createOppSchema,
   });

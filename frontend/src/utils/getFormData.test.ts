@@ -4,12 +4,16 @@ const mockGetSession = jest.fn();
 const mockGetApplicationFormDetails = jest.fn();
 const mockProcessFormSchema = jest.fn();
 const mockValidateUISchema = jest.fn();
+const mockGetApplicationFormDetailsForPrint = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: () => mockGetSession() as unknown,
 }));
 jest.mock("src/services/fetch/fetchers/applicationFetcher", () => ({
-  getApplicationFormDetails: () => mockGetApplicationFormDetails() as unknown,
+  getApplicationFormDetails: (...args: unknown[]) =>
+    mockGetApplicationFormDetails(...args) as unknown,
+  getApplicationFormDetailsForPrint: (...args: unknown[]) =>
+    mockGetApplicationFormDetailsForPrint(...args) as unknown,
 }));
 jest.mock("src/components/applyForm/utils", () => ({
   processFormSchema: () => mockProcessFormSchema() as unknown,
@@ -112,6 +116,54 @@ describe("getFormData", () => {
       applicationId: "app1",
       appFormId: "form1",
     });
+    expect(mockGetApplicationFormDetailsForPrint).not.toHaveBeenCalled();
+    expect(mockGetApplicationFormDetails).toHaveBeenCalledWith("app1", "form1");
+    expect(result).toEqual({
+      data: {
+        applicationResponse: { foo: "bar" },
+        applicationName: "cool application",
+        applicationAttachments: ["fake attachment"],
+        formId: "form1",
+        formName: "Test",
+        formSchema: {},
+        formUiSchema: {},
+        formValidationWarnings: [],
+      },
+    });
+  });
+  it("calls print version of function when internal token is present", async () => {
+    mockGetSession.mockResolvedValue({ token: "session-token" });
+    mockProcessFormSchema.mockReturnValue({
+      formSchema: {},
+      conditionalValidationRules: {},
+    });
+    mockGetApplicationFormDetailsForPrint.mockResolvedValue({
+      status_code: 200,
+      data: {
+        form: {
+          form_id: "form1",
+          form_name: "Test",
+          form_json_schema: {},
+          form_ui_schema: {},
+        },
+        application_form_id: "form1",
+        application_response: { foo: "bar" },
+        application_name: "cool application",
+        application_attachments: ["fake attachment"],
+      },
+      warnings: [],
+    });
+    const result = await getFormData({
+      applicationId: "app1",
+      appFormId: "form1",
+      internalToken: "internal-token",
+    });
+    expect(mockGetApplicationFormDetails).not.toHaveBeenCalled();
+    expect(mockGetApplicationFormDetailsForPrint).toHaveBeenCalledWith(
+      "internal-token",
+      "app1",
+      "form1",
+    );
     expect(result).toEqual({
       data: {
         applicationResponse: { foo: "bar" },

@@ -10,7 +10,7 @@ from src.workflow.state_machine.initial_prototype_state_machine import (
 )
 from src.workflow.workflow_errors import InvalidEventError
 from tests.src.db.models.factories import UserFactory, WorkflowFactory
-from tests.workflow.workflow_test_util import (
+from tests.src.workflow.workflow_test_util import (
     build_start_workflow_event,
     send_process_event,
     validate_approvals,

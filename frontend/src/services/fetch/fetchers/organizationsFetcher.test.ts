@@ -78,9 +78,6 @@ describe("getOrganizationDetails", () => {
     expect(fetchOrganizationWithMethodMock).toHaveBeenCalledWith("GET");
     expect(fetchOrganizationMock).toHaveBeenCalledWith({
       subPath: "org-123",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
     });
   });
 
@@ -104,15 +101,12 @@ describe("getUserOrganizations", () => {
     });
     fetchUserWithMethodMock.mockReturnValue(fetchUserMock);
 
-    const result = await getUserOrganizations("faketoken", "user-1");
+    const result = await getUserOrganizations("user-1");
 
     expect(result).toEqual([{ fake: "org" }]);
     expect(fetchUserWithMethodMock).toHaveBeenCalledWith("GET");
     expect(fetchUserMock).toHaveBeenCalledWith({
       subPath: "user-1/organizations",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
     });
   });
 });
@@ -135,9 +129,6 @@ describe("getOrganizationUsers", () => {
     expect(fetchOrganizationWithMethodMock).toHaveBeenCalledWith("POST");
     expect(fetchOrganizationMock).toHaveBeenCalledWith({
       subPath: "org-123/users",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
       body: {
         pagination: {
           page_offset: 1,
@@ -181,9 +172,6 @@ describe("getOrganizationRoles", () => {
     expect(fetchOrganizationWithMethodMock).toHaveBeenCalledWith("POST");
     expect(fetchOrganizationMock).toHaveBeenCalledWith({
       subPath: "org-123/roles/list",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
     });
   });
 
@@ -207,7 +195,7 @@ describe("inviteUserToOrganization", () => {
     });
     fetchOrganizationWithMethodMock.mockReturnValue(fetchOrganizationMock);
 
-    const result = await inviteUserToOrganization("faketoken", {
+    const result = await inviteUserToOrganization({
       organizationId: "org-123",
       roleId: ["role-1", "role-2"],
       email: "test@example.com",
@@ -217,9 +205,6 @@ describe("inviteUserToOrganization", () => {
     expect(fetchOrganizationWithMethodMock).toHaveBeenCalledWith("POST");
     expect(fetchOrganizationMock).toHaveBeenCalledWith({
       subPath: "org-123/invitations",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
       body: {
         invitee_email: "test@example.com",
         role_ids: ["role-1", "role-2"],
@@ -246,9 +231,6 @@ describe("getOrganizationPendingInvitations", () => {
     expect(fetchOrganizationWithMethodMock).toHaveBeenCalledWith("POST");
     expect(fetchOrganizationMock).toHaveBeenCalledWith({
       subPath: "org-123/invitations/list",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
       body: {
         filters: {
           status: {
@@ -314,9 +296,6 @@ describe("updateOrganizationUserRoles", () => {
     expect(fetchOrganizationWithMethodMock).toHaveBeenCalledWith("PUT");
     expect(fetchOrganizationMock).toHaveBeenCalledWith({
       subPath: "org-123/users/user-1",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
       body: {
         role_ids: ["role-1", "role-2"],
       },
@@ -418,9 +397,6 @@ describe("getOrganizationLegacyUsers", () => {
     expect(fetchOrganizationWithMethodMock).toHaveBeenCalledWith("POST");
     expect(fetchOrganizationMock).toHaveBeenCalledWith({
       subPath: "org-123/legacy-users",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
       body: {
         filters: {
           status: {

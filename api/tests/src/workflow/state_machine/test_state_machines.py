@@ -10,7 +10,13 @@ from enum import StrEnum
 from statemachine import Event
 from statemachine.states import States
 
-from src.constants.lookup_constants import ApprovalType, Privilege, WorkflowEntityType, WorkflowType
+from src.constants.lookup_constants import (
+    ApprovalResponseType,
+    ApprovalType,
+    Privilege,
+    WorkflowEntityType,
+    WorkflowType,
+)
 from src.workflow.base_state_machine import BaseStateMachine
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.registry.workflow_registry import WorkflowRegistry
@@ -206,6 +212,159 @@ class NoConcurrentTestStateMachine(BaseStateMachine):
         super().__init__(model=model, **kwargs)
         self.opportunity = model.opportunity
         self.db_session = model.db_session
+        self.transition_history: list[StateMachineEvent] = []
+
+    def on_transition(self, state_machine_event: StateMachineEvent) -> None:
+        self.transition_history.append(state_machine_event)
+
+
+#########################
+# Limited Approval Response Types State Machine
+#########################
+# For testing restricted approval response types
+
+
+class LimitedApprovalResponseState(StrEnum):
+    START = "start"
+    MIDDLE = "middle"
+
+    # Only allows APPROVED and REQUIRES_MODIFICATION
+    PENDING_PROGRAM_OFFICER_APPROVAL = "pending_program_officer_approval"
+
+    # Only allows APPROVED
+    PENDING_BUDGET_OFFICER_APPROVAL = "pending_budget_officer_approval"
+
+    DECLINED = "declined"
+    END = "end"
+
+
+# Create a config with limited approval response types
+limited_approval_test_workflow_config = WorkflowConfig(
+    workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW,
+    persistence_model_cls=OpportunityPersistenceModel,
+    entity_type=WorkflowEntityType.OPPORTUNITY,
+    approval_mapping={
+        # Program Officer Approvals - only allow APPROVED and REQUIRES_MODIFICATION
+        "receive_program_officer_approval": ApprovalConfig(
+            approval_type=ApprovalType.PROGRAM_OFFICER_APPROVAL,
+            approval_state=LimitedApprovalResponseState.PENDING_PROGRAM_OFFICER_APPROVAL,
+            required_privileges=[Privilege.PROGRAM_OFFICER_APPROVAL],
+            minimum_approvals_required=1,
+            allowed_approval_response_types={
+                ApprovalResponseType.APPROVED,
+                ApprovalResponseType.REQUIRES_MODIFICATION,
+            },
+        ),
+        # Budget Officer Approvals - only allow APPROVED
+        "receive_budget_officer_approval": ApprovalConfig(
+            approval_type=ApprovalType.BUDGET_OFFICER_APPROVAL,
+            approval_state=LimitedApprovalResponseState.PENDING_BUDGET_OFFICER_APPROVAL,
+            required_privileges=[Privilege.BUDGET_OFFICER_APPROVAL],
+            allowed_approval_response_types={ApprovalResponseType.APPROVED},
+        ),
+    },
+)
+
+
+@WorkflowRegistry.register_workflow(limited_approval_test_workflow_config)
+class LimitedApprovalResponseStateMachine(BaseStateMachine):
+
+    states = States.from_enum(
+        LimitedApprovalResponseState,
+        initial=LimitedApprovalResponseState.START,
+        final=[LimitedApprovalResponseState.END, LimitedApprovalResponseState.DECLINED],
+    )
+
+    ### Events + transitions
+    start_workflow = Event(
+        states.START.to(states.MIDDLE),
+    )
+
+    middle_to_end = Event(
+        states.MIDDLE.to(states.END),
+    )
+
+    # These exist so we can test logic on entering approval states
+    middle_to_program_officer_approval = Event(
+        states.MIDDLE.to(states.PENDING_PROGRAM_OFFICER_APPROVAL),
+    )
+
+    middle_to_budget_officer_approval = Event(
+        states.MIDDLE.to(states.PENDING_BUDGET_OFFICER_APPROVAL),
+    )
+
+    ## Program officer approvals
+    receive_program_officer_approval = Event(
+        # If Approved -> Add approval event and then check if enough approvals have occurred to determine next state
+        states.PENDING_PROGRAM_OFFICER_APPROVAL.to.itself(
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_APPROVED,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_APPROVED,
+            after="check_program_officer_approval",
+        )
+        |
+        # Declined is not allowed for program officer approval, will raise an error
+        states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
+            states.DECLINED,
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_DECLINED,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_DECLINED,
+        )
+        |
+        # If Requires Modification -> Add approval event and move back to Start
+        states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
+            states.START,
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_REQUIRES_MODIFICATION,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_REQUIRES_MODIFICATION,
+        )
+    )
+
+    check_program_officer_approval = Event(
+        # If it has enough approvals, go to the End state
+        states.PENDING_PROGRAM_OFFICER_APPROVAL.to(
+            states.END, cond=WorkflowConstants.HAS_ENOUGH_APPROVALS
+        )
+        # If not, stay in this state
+        | states.PENDING_PROGRAM_OFFICER_APPROVAL.to.itself(),
+    )
+
+    ## Budget officer approvals
+    receive_budget_officer_approval = Event(
+        # If Approved -> Add approval event and then check if enough approvals have occurred to determine next state
+        states.PENDING_BUDGET_OFFICER_APPROVAL.to.itself(
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_APPROVED,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_APPROVED,
+            after="check_budget_officer_approval",
+        )
+        |
+        # Declined is not allowed for budget officer approval, will raise an error
+        states.PENDING_BUDGET_OFFICER_APPROVAL.to(
+            states.DECLINED,
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_DECLINED,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_DECLINED,
+        )
+        |
+        # Request modification is not allowed for budget officer approval, will raise an error
+        states.PENDING_BUDGET_OFFICER_APPROVAL.to(
+            states.START,
+            cond=WorkflowConstants.IS_APPROVAL_EVENT_REQUIRES_MODIFICATION,
+            on=WorkflowConstants.ON_AGENCY_APPROVAL_REQUIRES_MODIFICATION,
+        )
+    )
+
+    check_budget_officer_approval = Event(
+        # If it has enough approvals, go to the End state
+        states.PENDING_BUDGET_OFFICER_APPROVAL.to(
+            states.END, cond=WorkflowConstants.HAS_ENOUGH_APPROVALS
+        )
+        # If not, stay in this state
+        | states.PENDING_BUDGET_OFFICER_APPROVAL.to.itself(),
+    )
+
+    def __init__(self, model: OpportunityPersistenceModel, **kwargs):
+        super().__init__(model=model, **kwargs)
+        self.opportunity = model.opportunity
+        self.db_session = model.db_session
+
+        # For testing purposes, store the transition events.
         self.transition_history: list[StateMachineEvent] = []
 
     def on_transition(self, state_machine_event: StateMachineEvent) -> None:

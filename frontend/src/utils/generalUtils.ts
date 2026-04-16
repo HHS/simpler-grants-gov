@@ -5,7 +5,7 @@
 // * the character count is zero indexed
 // * the split will happen on the first whitespace AFTER the supplied split point
 
-import { difference, isArray, isNumber, isString } from "lodash";
+import { difference, isNumber } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 
 // Refer to tests to see how this works in practice
@@ -136,8 +136,8 @@ export const isBasicallyAnObject = (mightBeAnObject: unknown): boolean => {
   }
   return (
     !!mightBeAnObject &&
-    !isArray(mightBeAnObject) &&
-    !isString(mightBeAnObject) &&
+    !Array.isArray(mightBeAnObject) &&
+    typeof mightBeAnObject.valueOf() !== "string" &&
     !isNumber(mightBeAnObject)
   );
 };

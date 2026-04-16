@@ -16,9 +16,6 @@ export const updateOrganizationInvitation = async (
       const requestBody = (await request.json()) as { accepted: boolean };
       const invitationResponse = await fetchUserWithMethod("POST")({
         subPath: `${currentSession.user_id}/invitations/${organizationInvitationId}/organizations`,
-        additionalHeaders: {
-          "X-SGG-TOKEN": currentSession.token,
-        },
         body: {
           status: requestBody.accepted ? "accepted" : "rejected",
         },

@@ -39,15 +39,9 @@ async function WorkspaceDashboard() {
   let userRoles;
   let userOrganizations;
   let userInvitations: OrganizationInvitation[] = [];
-  const userRolesPromise = getUserPrivileges(session.token, session.user_id);
-  const userOrganizationsPromise = getUserOrganizations(
-    session.token,
-    session.user_id,
-  );
-  const userInvitationsPromise = getUserInvitations(
-    session.token,
-    session.user_id,
-  );
+  const userRolesPromise = getUserPrivileges(session.user_id);
+  const userOrganizationsPromise = getUserOrganizations(session.user_id);
+  const userInvitationsPromise = getUserInvitations(session.user_id);
   try {
     [userRoles, userOrganizations, userInvitations] = await Promise.all([
       userRolesPromise,
