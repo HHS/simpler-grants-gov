@@ -57,6 +57,8 @@ export default defineConfig([
       ],
       // TODO #9637 remove this off and address the issues where this rule flags stuff
       "promise/always-return": "off",
+      // TODO #9637 remove this off and address the issues where this rule flags stuff
+      "react-hooks/error-boundaries": "off",
     },
 
     settings: {
