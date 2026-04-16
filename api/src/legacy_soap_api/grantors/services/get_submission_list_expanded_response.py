@@ -32,7 +32,7 @@ GRANTS_APPLICATION_STATUSES = {
 }
 STATUS_TRANSFORM = {
     "Receiving": None,
-    "Received": ApplicationStatus.SUBMITTED,
+    "Received": None,
     "Processing": ApplicationStatus.SUBMITTED,
     "Validated": ApplicationStatus.ACCEPTED,
     "Rejected with Errors": None,

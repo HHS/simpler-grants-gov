@@ -26,11 +26,6 @@ from src.legacy_soap_api.grantors.statuses import AGENCY_TRACKING_NUMBER_ASSIGNE
 logger = logging.getLogger(__name__)
 
 VALID_STATUSES_FOR_DELIVERY = {ApplicationStatus.ACCEPTED}
-GRANTS_APPLICATION_STATUSES = {
-    ApplicationStatus.IN_PROGRESS: "Received",
-    ApplicationStatus.SUBMITTED: "Received",
-    ApplicationStatus.ACCEPTED: "Validated",
-}
 
 
 def get_soap_fault_exception(
