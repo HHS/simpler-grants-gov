@@ -178,6 +178,8 @@ const ApplyForm = ({
   );
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDeletedEntryIndexesByFieldListPath({});
   }, [savedFormData, validationWarnings]);
 
