@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
+import vitalsPlugin from "eslint-config-next/core-web-vitals";
 import pluginJest from "eslint-plugin-jest";
 import jestDomPlugin from "eslint-plugin-jest-dom";
 import testingLibraryPlugin from "eslint-plugin-testing-library";
@@ -17,7 +18,7 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 });
 
-export default defineConfig([
+export default defineConfig(...vitalsPlugin, [
   {
     // ignoring linting errors on storybook for now, will turn back on when we resume
     // active storybook development
@@ -37,7 +38,6 @@ export default defineConfig([
       "plugin:storybook/recommended",
       "plugin:you-dont-need-lodash-underscore/compatible",
       "prettier",
-      "next/core-web-vitals",
     ),
 
     rules: {
