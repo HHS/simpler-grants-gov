@@ -49,17 +49,10 @@ describe("apiKeyFetcher", () => {
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
-      const result = await handleCreateApiKey(
-        "test-token",
-        "test-user-id",
-        "Test API Key",
-      );
+      const result = await handleCreateApiKey("test-user-id", "Test API Key");
 
       expect(mockFetchUserWithMethod).toHaveBeenCalledWith({
         subPath: "test-user-id/api-keys",
-        additionalHeaders: {
-          "X-SGG-Token": "test-token",
-        },
         body: { key_name: "Test API Key" },
       });
 
@@ -78,7 +71,7 @@ describe("apiKeyFetcher", () => {
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
-      const result = await handleCreateApiKey("test-token", "test-user-id", "");
+      const result = await handleCreateApiKey("test-user-id", "");
 
       expect(result.status_code).toBe(400);
       expect(result.message).toBe("Invalid key name");
@@ -88,7 +81,7 @@ describe("apiKeyFetcher", () => {
       mockFetchUserWithMethod.mockRejectedValue(new Error("Network error"));
 
       await expect(
-        handleCreateApiKey("test-token", "test-user-id", "Test API Key"),
+        handleCreateApiKey("test-user-id", "Test API Key"),
       ).rejects.toThrow("Network error");
     });
   });
@@ -106,13 +99,10 @@ describe("apiKeyFetcher", () => {
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
-      const result = await handleListApiKeys("test-token", "test-user-id");
+      const result = await handleListApiKeys("test-user-id");
 
       expect(mockFetchUserWithMethod).toHaveBeenCalledWith({
         subPath: "test-user-id/api-keys/list",
-        additionalHeaders: {
-          "X-SGG-Token": "test-token",
-        },
         body: {
           pagination: {
             page_offset: 1,
@@ -143,7 +133,7 @@ describe("apiKeyFetcher", () => {
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
-      const result = await handleListApiKeys("test-token", "test-user-id");
+      const result = await handleListApiKeys("test-user-id");
 
       expect(result.status_code).toBe(200);
       expect(result.data).toEqual([]);
@@ -160,7 +150,7 @@ describe("apiKeyFetcher", () => {
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
-      const result = await handleListApiKeys("invalid-token", "test-user-id");
+      const result = await handleListApiKeys("test-user-id");
 
       expect(result.status_code).toBe(401);
       expect(result.message).toBe("Unauthorized");
@@ -169,9 +159,9 @@ describe("apiKeyFetcher", () => {
     it("handles network errors", async () => {
       mockFetchUserWithMethod.mockRejectedValue(new Error("Network error"));
 
-      await expect(
-        handleListApiKeys("test-token", "test-user-id"),
-      ).rejects.toThrow("Network error");
+      await expect(handleListApiKeys("test-user-id")).rejects.toThrow(
+        "Network error",
+      );
     });
   });
 
@@ -190,7 +180,6 @@ describe("apiKeyFetcher", () => {
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
       const result = await handleRenameApiKey(
-        "test-token",
         "test-user-id",
         "test-key-id",
         "Renamed API Key",
@@ -198,9 +187,6 @@ describe("apiKeyFetcher", () => {
 
       expect(mockFetchUserWithMethod).toHaveBeenCalledWith({
         subPath: "test-user-id/api-keys/test-key-id",
-        additionalHeaders: {
-          "X-SGG-Token": "test-token",
-        },
         body: { key_name: "Renamed API Key" },
       });
 
@@ -220,7 +206,6 @@ describe("apiKeyFetcher", () => {
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
       const result = await handleRenameApiKey(
-        "test-token",
         "test-user-id",
         "invalid-key-id",
         "New Name",
@@ -242,7 +227,6 @@ describe("apiKeyFetcher", () => {
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
       const result = await handleRenameApiKey(
-        "test-token",
         "test-user-id",
         "test-key-id",
         "",
@@ -256,12 +240,7 @@ describe("apiKeyFetcher", () => {
       mockFetchUserWithMethod.mockRejectedValue(new Error("Network error"));
 
       await expect(
-        handleRenameApiKey(
-          "test-token",
-          "test-user-id",
-          "test-key-id",
-          "New Name",
-        ),
+        handleRenameApiKey("test-user-id", "test-key-id", "New Name"),
       ).rejects.toThrow("Network error");
     });
   });
@@ -278,17 +257,10 @@ describe("apiKeyFetcher", () => {
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
-      const result = await handleDeleteApiKey(
-        "test-token",
-        "test-user-id",
-        "test-key-id",
-      );
+      const result = await handleDeleteApiKey("test-user-id", "test-key-id");
 
       expect(mockFetchUserWithMethod).toHaveBeenCalledWith({
         subPath: "test-user-id/api-keys/test-key-id",
-        additionalHeaders: {
-          "X-SGG-Token": "test-token",
-        },
       });
 
       expect(result.status_code).toBe(200);
@@ -306,11 +278,7 @@ describe("apiKeyFetcher", () => {
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
-      const result = await handleDeleteApiKey(
-        "test-token",
-        "test-user-id",
-        "test-key-id",
-      );
+      const result = await handleDeleteApiKey("test-user-id", "test-key-id");
 
       expect(result.status_code).toBe(404);
       expect(result.message).toBe("API key not found");
@@ -320,7 +288,7 @@ describe("apiKeyFetcher", () => {
       mockFetchUserWithMethod.mockRejectedValue(new Error("Network error"));
 
       await expect(
-        handleDeleteApiKey("test-token", "test-user-id", "test-key-id"),
+        handleDeleteApiKey("test-user-id", "test-key-id"),
       ).rejects.toThrow("Network error");
     });
 
@@ -335,14 +303,11 @@ describe("apiKeyFetcher", () => {
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
-      await handleDeleteApiKey("test-token", "test-user-id", "test-key-id");
+      await handleDeleteApiKey("test-user-id", "test-key-id");
 
       expect(mockFetchUserWithMethod).toHaveBeenCalledTimes(1);
       expect(mockFetchUserWithMethod).toHaveBeenCalledWith({
         subPath: "test-user-id/api-keys/test-key-id",
-        additionalHeaders: {
-          "X-SGG-Token": "test-token",
-        },
       });
     });
 
@@ -353,11 +318,7 @@ describe("apiKeyFetcher", () => {
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
-      const result = await handleDeleteApiKey(
-        "test-token",
-        "test-user-id",
-        "test-key-id",
-      );
+      const result = await handleDeleteApiKey("test-user-id", "test-key-id");
 
       expect(result).toBeNull();
     });
@@ -369,11 +330,7 @@ describe("apiKeyFetcher", () => {
 
       mockFetchUserWithMethod.mockResolvedValue(mockResponse);
 
-      const result = await handleDeleteApiKey(
-        "test-token",
-        "test-user-id",
-        "test-key-id",
-      );
+      const result = await handleDeleteApiKey("test-user-id", "test-key-id");
 
       expect(result).toEqual({ invalid: "format" });
     });

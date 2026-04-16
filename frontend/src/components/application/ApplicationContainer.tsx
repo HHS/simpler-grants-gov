@@ -8,6 +8,7 @@ import {
   ApplicationHistory,
   ApplicationStatus,
 } from "src/types/applicationResponseTypes";
+import { FormValidationWarning } from "src/types/applyForm/types";
 import { OpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
 
 import { useTranslations } from "next-intl";
@@ -21,14 +22,13 @@ import {
   SummaryBoxHeading,
 } from "@trussworks/react-uswds";
 
-import { FormValidationWarning } from "src/components/applyForm/types";
 import { ApplicationFormsTable } from "./ApplicationFormsTable";
 import { ApplicationHistoryTable } from "./ApplicationHistoryTable";
 import ApplicationValidationAlert from "./ApplicationValidationAlert";
 import { InformationCard } from "./InformationCard";
 import { OpportunityCard } from "./OpportunityCard";
 
-const MY_APPLICATIONS_LINK = "/applications";
+const MY_APPLICATIONS_LINK = "/workspace/applications";
 
 const ApplicationContainer = ({
   applicationDetails,

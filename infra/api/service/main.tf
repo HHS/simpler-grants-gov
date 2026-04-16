@@ -116,6 +116,7 @@ data "aws_acm_certificate" "cert" {
   count       = local.service_config.enable_https ? 1 : 0
   domain      = local.service_config.domain_name
   most_recent = true
+  key_types   = ["RSA_2048", "RSA_4096"]
 }
 
 data "aws_acm_certificate" "secondary_certs" {

@@ -1,7 +1,6 @@
 "use client";
 
 import { sendGAEvent } from "@next/third-parties/google";
-import { omit } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { expectedQueryParamKeys } from "src/types/search/searchQueryTypes";
 import {
@@ -13,7 +12,8 @@ import {
 import { useEffect, useState } from "react";
 
 const getCurrentFilters = (params: OptionalStringDict): string => {
-  return JSON.stringify(omit(params, "query", "page"));
+  const { query: _query, page: _page, ...withoutQueryAndPage } = params;
+  return JSON.stringify(withoutQueryAndPage);
 };
 
 // send custom New Relic and GA data for search pages
@@ -45,6 +45,12 @@ function SearchAnalytics({
         // only pass on valid query params to NR
         if ((expectedQueryParamKeys as readonly string[]).includes(key)) {
           setNewRelicCustomAttribute(key, value || "");
+
+          // New relic does not support certain functionalities such as  calculating string
+          // lengths. This conditional is needed to log and gain insights into search query length.
+          if (key === "query") {
+            setNewRelicCustomAttribute("query_length", value?.length ?? 0);
+          }
         }
       });
     }
@@ -55,7 +61,6 @@ function SearchAnalytics({
     };
   }, [params, newRelicEnabled, newRelicInitialized]);
 
-  //
   useEffect(() => {
     // send list of filters defined in page query params on each page load
     sendGAEvent("event", "search_attempt", {

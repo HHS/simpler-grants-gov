@@ -1,5 +1,5 @@
 import logging
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
 import pytest
@@ -1262,3 +1262,94 @@ class TestOpportunityNotification:
         # Assert correct user saved opportunity is returned
         assert len(results) == 1
         assert results[0][0].user_id == user.user_id
+
+    def test_email_disabled_skips_email_and_advances_last_notified_at(
+        self,
+        db_session,
+        user,
+        set_env_var_for_email_notification_config,
+        notification_task,
+    ):
+        """Users with email_enabled=False should not receive emails, but last_notified_at
+        must still be advanced so they don't accumulate a backlog."""
+        # Explicitly disable email notifications for this user's personal saved opportunities
+        # (the user_with_email autouse fixture already gives `user` a linked email address)
+        factories.UserSavedOpportunityNotificationFactory.create(
+            user=user, organization=None, email_enabled=False
+        )
+
+        # Use a fixed past base so that utcnow() > v2.created_at after post-processing
+        base_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+        opp = factories.OpportunityFactory.create(no_current_summary=True)
+        factories.OpportunityVersionFactory.create(opportunity=opp, created_at=base_time)
+        saved_opp = factories.UserSavedOpportunityFactory.create(
+            user=user,
+            opportunity=opp,
+            last_notified_at=base_time + timedelta(minutes=1),
+        )
+        v2 = factories.OpportunityVersionFactory.create(
+            opportunity=opp, created_at=base_time + timedelta(minutes=60)
+        )
+
+        # Confirm the test setup is correct: there is a pending update to notify about
+        assert saved_opp.last_notified_at < v2.created_at
+
+        results = notification_task.collect_email_notifications()
+
+        # No email should be queued for the disabled user
+        assert len(results) == 0
+        assert notification_task.metrics[Metrics.NOTIFICATIONS_SKIPPED_EMAIL_DISABLED] == 1
+
+        # Run post-process with empty notification list (no emails were sent)
+        notification_task.post_notifications_process([])
+
+        db_session.refresh(saved_opp)
+        # last_notified_at must have advanced past v2 to prevent a future backlog
+        assert saved_opp.last_notified_at >= v2.created_at
+
+    def test_no_backlog_when_notifications_reenabled(
+        self,
+        db_session,
+        user,
+        set_env_var_for_email_notification_config,
+        notification_task,
+    ):
+        """When a user re-enables notifications after a period of being disabled,
+        they should not receive emails for changes that occurred while disabled."""
+
+        # Create a preference row with email disabled
+        notification_pref = factories.UserSavedOpportunityNotificationFactory.create(
+            user=user, organization=None, email_enabled=False
+        )
+
+        # Use a fixed past base so that utcnow() > v2.created_at after post-processing
+        base_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+        opp = factories.OpportunityFactory.create(no_current_summary=True)
+        factories.OpportunityVersionFactory.create(opportunity=opp, created_at=base_time)
+        saved_opp = factories.UserSavedOpportunityFactory.create(
+            user=user,
+            opportunity=opp,
+            last_notified_at=base_time + timedelta(minutes=1),
+        )
+        factories.OpportunityVersionFactory.create(
+            opportunity=opp, created_at=base_time + timedelta(minutes=60)
+        )
+
+        # First run: email disabled — no email sent, but last_notified_at advances
+        results = notification_task.collect_email_notifications()
+        assert len(results) == 0
+        notification_task.post_notifications_process([])
+        db_session.refresh(saved_opp)
+        last_notified_after_disabled_run = saved_opp.last_notified_at
+
+        # User re-enables notifications
+        notification_pref.email_enabled = True
+        db_session.flush()
+
+        # Second run: no new versions since the disabled run, so nothing to notify
+        results = notification_task.collect_email_notifications()
+        assert len(results) == 0
+
+        # last_notified_at should remain at least as recent as after the first run
+        db_session.refresh(saved_opp)
+        assert saved_opp.last_notified_at >= last_notified_after_disabled_run

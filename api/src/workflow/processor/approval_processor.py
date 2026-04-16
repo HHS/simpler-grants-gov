@@ -6,7 +6,10 @@ from src.db.models.user_models import User
 from src.db.models.workflow_models import WorkflowApproval
 from src.workflow.event.state_machine_event import StateMachineEvent
 from src.workflow.event.workflow_metric_context import WorkflowMetricContext
-from src.workflow.service.approval_service import get_approvals_for_workflow
+from src.workflow.service.approval_service import (
+    get_approvals_for_workflow,
+    validate_approval_response_type,
+)
 from src.workflow.workflow_config import ApprovalConfig
 from src.workflow.workflow_constants import WorkflowConstants
 from src.workflow.workflow_errors import DuplicateApprovalError, ImplementationMissingError
@@ -60,6 +63,7 @@ class ApprovalProcessor:
         Handles:
         * Checking against the approval config for the current workflow state
         * Validating that the user doesn't already have an active approval
+        * Validating that the approval response type is allowed for this approval config
         * Creating a record in the workflow approval table
         """
         log_extra = self.state_machine_event.get_log_extra() | {
@@ -70,6 +74,12 @@ class ApprovalProcessor:
         user = self.state_machine_event.acting_user
 
         approval_config = self._get_approval_config()
+
+        validate_approval_response_type(
+            approval_response_type=approval_response_type,
+            approval_config=approval_config,
+            log_extra=log_extra,
+        )
 
         if self._has_already_approved(user, approval_config.approval_type):
             logger.info(

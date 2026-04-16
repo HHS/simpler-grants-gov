@@ -131,8 +131,9 @@ data "aws_ssm_parameter" "incident_management_service_integration_url" {
 }
 
 module "service" {
-  source       = "../../modules/service"
-  service_name = local.service_name
+  source           = "../../modules/service"
+  service_name     = local.service_name
+  environment_name = var.environment_name
 
   image_repository_arn = local.build_repository_config.repository_arn
   image_repository_url = local.build_repository_config.repository_url

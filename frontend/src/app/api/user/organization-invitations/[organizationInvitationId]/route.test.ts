@@ -40,9 +40,6 @@ describe("user/organization-invitations POST requests", () => {
     });
     expect(mockUpdateOrganizationInvitation).toHaveBeenCalledWith({
       subPath: "1/invitations/2/organizations",
-      additionalHeaders: {
-        "X-SGG-TOKEN": "a token",
-      },
       body: {
         status: "accepted",
       },
@@ -55,9 +52,6 @@ describe("user/organization-invitations POST requests", () => {
     });
     expect(mockUpdateOrganizationInvitation).toHaveBeenCalledWith({
       subPath: "1/invitations/2/organizations",
-      additionalHeaders: {
-        "X-SGG-TOKEN": "a token",
-      },
       body: {
         status: "rejected",
       },
