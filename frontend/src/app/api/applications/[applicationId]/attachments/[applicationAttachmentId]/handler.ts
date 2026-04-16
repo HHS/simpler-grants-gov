@@ -23,7 +23,6 @@ export const deleteAttachmentHandler = async (
     const response = await deleteAttachment(
       applicationId,
       applicationAttachmentId,
-      session.token,
     );
     const status = response.status_code;
 

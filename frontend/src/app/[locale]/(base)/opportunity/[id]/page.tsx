@@ -117,7 +117,6 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
     const session = await getSession();
     if (session?.user_id && session.token) {
       const savedOpportunity = await getUserSavedOpportunity(
-        session.token,
         session.user_id,
         id,
       );

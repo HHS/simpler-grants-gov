@@ -1,4 +1,3 @@
-import { omit } from "lodash";
 import { extricateConditionalValidationRules } from "src/utils/applyForm/formSchemaProcessors";
 
 const simpleProperties = {
@@ -326,10 +325,11 @@ describe("extricateConditionalValidationRules", () => {
     });
   });
   it("handles removing and returning complex validation rules", () => {
+    const { allOf: _allOf, ...withoutAllOf } = withIfThenAllOf.application_info;
     expect(extricateConditionalValidationRules(withIfThenAllOf)).toEqual({
       propertiesWithoutComplexConditionals: {
         ...withIfThenAllOf,
-        application_info: omit(withIfThenAllOf.application_info, "allOf"),
+        application_info: withoutAllOf,
       },
       conditionalValidationRules: {
         application_info: [
@@ -352,6 +352,8 @@ describe("extricateConditionalValidationRules", () => {
     });
   });
   it("handles removing and returning nested complex validation rules", () => {
+    const { allOf: _allOf, ...applicationInfoWithoutAllOf } =
+      withNestedIfThenAllOf.person_name.properties.application_info;
     expect(extricateConditionalValidationRules(withNestedIfThenAllOf)).toEqual({
       propertiesWithoutComplexConditionals: {
         ...withNestedIfThenAllOf,
@@ -359,10 +361,7 @@ describe("extricateConditionalValidationRules", () => {
           ...withNestedIfThenAllOf.person_name,
           properties: {
             ...withNestedIfThenAllOf.person_name.properties,
-            application_info: omit(
-              withNestedIfThenAllOf.person_name.properties.application_info,
-              "allOf",
-            ),
+            application_info: applicationInfoWithoutAllOf,
           },
         },
       },
@@ -388,11 +387,11 @@ describe("extricateConditionalValidationRules", () => {
   });
   it("handles removing and returning complex validation rules nested in arrays", () => {
     const result = extricateConditionalValidationRules(withAllOfInArray);
+    const { allOf: _allOf, ...propertiesWithoutAllOf } =
+      withAllOfInArray.property_with_reference.allOf[0];
     expect(result.propertiesWithoutComplexConditionals).toEqual({
       property_with_reference: {
-        allOf: [
-          omit(withAllOfInArray.property_with_reference.allOf[0], "allOf"),
-        ],
+        allOf: [propertiesWithoutAllOf],
       },
     });
     expect(result.conditionalValidationRules).toEqual({
@@ -422,30 +421,33 @@ describe("extricateConditionalValidationRules", () => {
       ...withIfThenAllOf,
       ...complexGuy,
     });
+    const { allOf: _allOf, ...infoWithoutAllOf } =
+      withIfThenAllOf.application_info;
+    const { allOf: __allOf, ...nameInfoWithoutAllOf } =
+      withNestedIfThenAllOf.person_name.properties.application_info;
+    const { allOf: ___allOf, ...propertyWithReferenceWithoutAllOf } =
+      withAllOfInArray.property_with_reference.allOf[0];
+    const { allOf: ____allOf, ...complexWithoutAllOf } =
+      complexGuy.another_array_with_a_nested_allof.allOf[0];
+    const { allOf: _____allOf, ...secondComplexWithoutAllOf } =
+      complexGuy.second_nested_allOf;
     expect(result.propertiesWithoutComplexConditionals).toEqual({
       ...simpleProperties,
-      application_info: omit(withIfThenAllOf.application_info, "allOf"),
+      application_info: infoWithoutAllOf,
       person_name: {
         ...withNestedIfThenAllOf.person_name,
         properties: {
           ...withNestedIfThenAllOf.person_name.properties,
-          application_info: omit(
-            withNestedIfThenAllOf.person_name.properties.application_info,
-            "allOf",
-          ),
+          application_info: nameInfoWithoutAllOf,
         },
       },
       property_with_reference: {
-        allOf: [
-          omit(withAllOfInArray.property_with_reference.allOf[0], "allOf"),
-        ],
+        allOf: [propertyWithReferenceWithoutAllOf],
       },
       another_array_with_a_nested_allof: {
-        allOf: [
-          omit(complexGuy.another_array_with_a_nested_allof.allOf[0], "allOf"),
-        ],
+        allOf: [complexWithoutAllOf],
       },
-      second_nested_allOf: omit(complexGuy.second_nested_allOf, "allOf"),
+      second_nested_allOf: secondComplexWithoutAllOf,
     });
     expect(result.conditionalValidationRules).toEqual({
       application_info: [
