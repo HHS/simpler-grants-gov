@@ -193,6 +193,22 @@ class AwardRecommendationGetResponseSchema(AbstractResponseSchema):
     )
 
 
+class AwardRecommendationReviewUpdateRequestSchema(Schema):
+    """Schema for PUT /alpha/award-recommendations/:id/reviews/:review_id request"""
+
+    is_reviewed = fields.Boolean(
+        required=True,
+        metadata={"description": "Whether the review has been completed"},
+    )
+
+
+class AwardRecommendationReviewUpdateResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(
+        AwardRecommendationReviewSchema,
+        metadata={"description": "The updated review"},
+    )
+
+
 ####################################
 # List Award Recommendation Submissions
 ####################################
