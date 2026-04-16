@@ -7,7 +7,7 @@ import { UserPrivilegeResult } from "src/utils/userPrivileges";
 
 const getSessionMock = jest.fn();
 const mockCreateOpportunity = jest.fn();
-const mockCheckRequiredPrivileges = jest.fn();
+const mockCheckUserRequiredPrivileges = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
@@ -22,12 +22,8 @@ jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
     mockCreateOpportunity(token, createOppSchema) as unknown,
 }));
 jest.mock("src/utils/userPrivileges", () => ({
-  checkUserRequiredPrivileges: (
-    token: string,
-    userId: string,
-    privileges: unknown,
-  ) =>
-    mockCheckRequiredPrivileges(token, userId, privileges) as Promise<
+  checkUserRequiredPrivileges: (userId: string, privileges: unknown) =>
+    mockCheckUserRequiredPrivileges(userId, privileges) as Promise<
       UserPrivilegeResult[]
     >,
 }));
@@ -122,7 +118,7 @@ describe("validateAgencyAccessAction", () => {
       token: "test-token",
       user_id: "user-1",
     });
-    mockCheckRequiredPrivileges.mockResolvedValue([
+    mockCheckUserRequiredPrivileges.mockResolvedValue([
       {
         resourceId: "agency-1",
         resourceType: "agency",
@@ -134,14 +130,13 @@ describe("validateAgencyAccessAction", () => {
     const result = await validateAgencyAccessAction("agency-1");
 
     expect(result).toEqual({ success: true });
-    expect(mockCheckRequiredPrivileges).toHaveBeenCalledWith(
-      "test-token",
+    expect(mockCheckUserRequiredPrivileges).toHaveBeenCalledWith(
       "user-1",
       expect.arrayContaining([
         expect.objectContaining({
           resourceId: "agency-1",
-          resourceType: "agency",
           privilege: "create_opportunity",
+          resourceType: "agency",
         }),
       ]),
     );
@@ -152,7 +147,7 @@ describe("validateAgencyAccessAction", () => {
       token: "test-token",
       user_id: "user-1",
     });
-    mockCheckRequiredPrivileges.mockResolvedValue([
+    mockCheckUserRequiredPrivileges.mockResolvedValue([
       {
         resourceId: "agency-1",
         resourceType: "agency",
@@ -173,7 +168,7 @@ describe("validateAgencyAccessAction", () => {
       token: "test-token",
       user_id: "user-1",
     });
-    mockCheckRequiredPrivileges.mockResolvedValue([]);
+    mockCheckUserRequiredPrivileges.mockResolvedValue([]);
 
     const result = await validateAgencyAccessAction("agency-1");
 
@@ -187,7 +182,7 @@ describe("validateAgencyAccessAction", () => {
       token: "test-token",
       user_id: "user-1",
     });
-    mockCheckRequiredPrivileges.mockRejectedValue(new Error("API error"));
+    mockCheckUserRequiredPrivileges.mockRejectedValue(new Error("API error"));
 
     const result = await validateAgencyAccessAction("agency-1");
 
