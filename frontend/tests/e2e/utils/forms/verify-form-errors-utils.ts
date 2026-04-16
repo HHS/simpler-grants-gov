@@ -52,7 +52,9 @@ export async function verifyAlertErrors(
           .filter(Boolean),
       )
     ).sort();
-    const expectedFieldIds = expectedErrors.map(({ fieldId }) => fieldId).sort();
+    const expectedFieldIds = expectedErrors
+      .map(({ fieldId }) => fieldId)
+      .sort();
     expect(actualLinkedFieldIds).toEqual(expectedFieldIds);
   }
 
