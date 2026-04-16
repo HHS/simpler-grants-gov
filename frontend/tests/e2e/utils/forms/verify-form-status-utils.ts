@@ -27,12 +27,17 @@ export async function assertFormRowStatus(
     formName instanceof RegExp
       ? formName
       : buildFlexibleFormNameRegex(formName);
+  const formsTable = page.locator(".simpler-application-forms-table");
+  await formsTable.first().waitFor({ state: "visible", timeout: 10000 });
+
   const formRow = page
-    .locator("tr", {
-      hasText: rowPattern,
-    })
+    .locator(".simpler-application-forms-table tbody tr")
     .filter({
-      has: page.locator('a[href*="/form/"]'),
+      has: page
+        .locator(
+          '[data-testid="application-form-link"], a[href*="/form/"], button',
+        )
+        .filter({ hasText: rowPattern }),
     });
 
   await expect(formRow).toBeVisible({ timeout: 10000 });
