@@ -13,6 +13,32 @@ from src.constants.lookup_constants import (
 from src.pagination.pagination_schema import generate_pagination_schema
 
 
+class AwardRecommendationCreateRequestSchema(Schema):
+    """Schema for POST /alpha/award-recommendations request"""
+
+    opportunity_id = fields.UUID(
+        required=True,
+        metadata={"description": "The opportunity ID for the award recommendation"},
+    )
+    award_selection_method = fields.Enum(
+        AwardSelectionMethod,
+        required=True,
+        metadata={"description": "The method used to select the award"},
+    )
+    additional_info = fields.String(
+        allow_none=True,
+        metadata={"description": "Additional info about the award recommendation"},
+    )
+    funding_strategy = fields.String(
+        allow_none=True,
+        metadata={"description": "Funding strategy information for the award recommendation"},
+    )
+    other_key_information = fields.String(
+        allow_none=True,
+        metadata={"description": "Other key information for the award recommendation"},
+    )
+
+
 class AwardRecommendationOpportunitySummarySchema(Schema):
     """Schema for the award recommendation opportunity summary"""
 

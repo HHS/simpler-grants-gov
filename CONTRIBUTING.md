@@ -1,4 +1,3 @@
-<!--- # NOTE: Modify sections marked with `TODO` and then rename the file.-->
 
 # How to Contribute as an External Contributor
 
@@ -44,7 +43,11 @@ To contribute to documentation you find in this repository, feel free to use the
 
 ### Contribute to community discussions
 
-> 🚧 Tools and expanding avenues for community engagement are coming soon.
+👉 Join or visit our [forum](https://forum.simpler.grants.gov/).
+
+👉 Visit our [wiki](https://wiki.simpler.grants.gov/).
+
+📧 Reach out for support directly using [simpler@grants.gov](mailto:simpler@grants.gov)
 
 ### Sharing your story
 

@@ -1,4 +1,4 @@
-import { difference, uniq } from "lodash";
+import { difference } from "lodash";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
@@ -90,9 +90,9 @@ export const AllOptionCheckbox = ({
   };
 
   const checkOptions = () => {
-    const newSelectedOptions = uniq(
-      childOptionValues.concat(currentSelectionValues),
-    );
+    const newSelectedOptions = [
+      ...new Set(childOptionValues.concat(currentSelectionValues)),
+    ];
     setQueryParam(queryParamKey, newSelectedOptions.join(","));
   };
 

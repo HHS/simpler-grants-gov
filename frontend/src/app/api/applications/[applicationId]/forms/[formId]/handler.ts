@@ -23,7 +23,6 @@ export const updateApplicationIncludeFormInSubmissionHandler = async (
       applicationId,
       formId,
       is_included_in_submission,
-      session.token,
     );
     const status = response.status_code;
     if (!response || status !== 200) {

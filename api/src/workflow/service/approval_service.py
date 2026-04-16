@@ -10,9 +10,10 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
 from src.db.models.workflow_models import Workflow, WorkflowApproval
 from src.workflow.event.state_machine_event import StateMachineEvent
-from src.workflow.workflow_config import WorkflowConfig
+from src.workflow.workflow_config import ApprovalConfig, WorkflowConfig
 from src.workflow.workflow_constants import WorkflowConstants
 from src.workflow.workflow_errors import (
+    DisallowedApprovalResponseTypeError,
     ImplementationMissingError,
     InvalidWorkflowResponseTypeError,
     OpportunityWithoutAgencyError,
@@ -67,6 +68,33 @@ def get_approval_response_type_from_metadata(
     except ValueError as e:
         logger.warning("Approval response type is not a valid value")
         raise InvalidWorkflowResponseTypeError("Approval response type is not a valid value") from e
+
+
+def validate_approval_response_type(
+    approval_response_type: ApprovalResponseType,
+    approval_config: ApprovalConfig,
+    log_extra: dict | None = None,
+) -> None:
+    """Validate an approval response type against the approval config."""
+    if log_extra is None:
+        log_extra = {}
+
+    if approval_response_type in approval_config.allowed_approval_response_types:
+        return
+
+    logger.warning(
+        "Approval response type not allowed for this approval config",
+        extra=log_extra
+        | {
+            "allowed_types": ", ".join(
+                [t.value for t in approval_config.allowed_approval_response_types]
+            )
+        },
+    )
+    raise DisallowedApprovalResponseTypeError(
+        "Approval response type is not allowed for this approval configuration.",
+        allowed_approval_response_types=approval_config.allowed_approval_response_types,
+    )
 
 
 def get_approval_response_type(state_machine_event: StateMachineEvent) -> ApprovalResponseType:
