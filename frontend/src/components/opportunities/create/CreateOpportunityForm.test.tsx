@@ -66,6 +66,7 @@ describe("createOpportunityForm", () => {
     mockUseActionState.mockReturnValue([
       {
         data: {
+          opportunity_id: "opp-001",
           agency_id: "123-ABC",
           opportunity_number: "MY-TEST-001",
           opportunity_title: "Test Opportunity 001",

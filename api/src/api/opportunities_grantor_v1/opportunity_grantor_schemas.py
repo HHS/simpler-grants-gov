@@ -114,7 +114,7 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
     )
 
     forecast_summary = fields.Nested(
-        OpportunitySummaryV1Schema(),
+        lambda: OpportunitySummaryDetailSchema(),
         allow_none=True,
         attribute="forecast_summary",
         metadata={
@@ -123,7 +123,7 @@ class OpportunityGrantorSchema(OpportunityV1Schema):
     )
 
     non_forecast_summary = fields.Nested(
-        OpportunitySummaryV1Schema(),
+        lambda: OpportunitySummaryDetailSchema(),
         allow_none=True,
         attribute="non_forecast_summary",
         metadata={
