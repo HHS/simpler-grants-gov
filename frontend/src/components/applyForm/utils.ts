@@ -2,7 +2,7 @@ import { RJSFSchema } from "@rjsf/utils";
 import { get as getSchemaObjectFromPointer } from "json-pointer";
 import { JSONSchema7 } from "json-schema";
 import mergeAllOf from "json-schema-merge-allof";
-import { isArray, isObject } from "lodash";
+import { isObject } from "lodash";
 import {
   FormattedFormValidationWarning,
   FormValidationWarning,
@@ -666,7 +666,7 @@ export const condenseFormSchemaProperties = (schema: object): object => {
           ...condenseFormSchemaProperties(value as object),
         };
       }
-      if (isObject(value) && !isArray(value)) {
+      if (isObject(value) && !Array.isArray(value)) {
         condensed[key] = { ...condenseFormSchemaProperties(value) };
         return condensed;
       }
