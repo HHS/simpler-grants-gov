@@ -1,11 +1,11 @@
 module "grantee1_config" {
-  source                 = "./env-config"
-  project_name           = local.project_name
-  app_name               = local.app_name
-  default_region         = module.project_config.default_region
-  environment            = "grantee1"
-  network_name           = "grantee1"
-  domain_name            = "api.grantee1.teams.simpler.grants.gov"
+  source                            = "./env-config"
+  project_name                      = local.project_name
+  app_name                          = local.app_name
+  default_region                    = module.project_config.default_region
+  environment                       = "grantee1"
+  network_name                      = "grantee1"
+  domain_name                       = "api.grantee1.teams.simpler.grants.gov"
   secondary_domain_names            = ["alb.grantee1.teams.simpler.grants.gov"]
   s3_cdn_domain_name                = "files.grantee1.teams.simpler.grants.gov"
   mtls_domain_name                  = "soap.grantee1.teams.simpler.grants.gov"
