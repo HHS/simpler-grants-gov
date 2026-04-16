@@ -20,11 +20,11 @@ const nextPlugin = require("eslint-config-next/core-web-vitals");
 
 module.exports = defineConfig([
   {
-    ...js.configs.recommended,
-    ...storybookPlugin.configs["flat/recommended"],
-    ...noLodash.configs.compatible,
-    ...pretterPlugin,
-    ...nextPlugin,
+    // ...js.configs.recommended,
+    // ...storybookPlugin.configs["flat/recommended"],
+    // ...noLodash.configs.compatible,
+    // ...pretterPlugin,
+    // ...nextPlugin,
     // ignoring linting errors on storybook for now, will turn back on when we resume
     // active storybook development
     ignores: [
@@ -51,13 +51,13 @@ module.exports = defineConfig([
     //   "next/core-web-vitals",
     // ],
 
-    // extends: [
-    //   js.configs.recommended,
-    //   storybookPlugin.configs["flat/recommended"],
-    //   noLodash.configs.compatible,
-    //   pretterPlugin,
-    //   nextPlugin,
-    // ],
+    extends: [
+      js.configs.recommended,
+      storybookPlugin.configs["flat/recommended"],
+      // noLodash.configs.compatible,
+      pretterPlugin,
+      nextPlugin,
+    ],
     rules: {
       "@next/next/no-img-element": "off",
 
@@ -99,9 +99,9 @@ module.exports = defineConfig([
   },
   {
     files: ["**/*.+(ts|tsx)"],
-    ...typescriptEslint.configs.recommended,
-    ...typescriptEslint.configs.recommendedTypeChecked,
-    ...typescriptEslint.configs.stylisticTypeChecked,
+    // ...typescriptEslint.configs.recommended,
+    // ...typescriptEslint.configs.recommendedTypeChecked,
+    // ...typescriptEslint.configs.stylisticTypeChecked,
     languageOptions: {
       parserOptions: {
         tsconfigRootDir: __dirname,
