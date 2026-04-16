@@ -15,15 +15,10 @@ import {
 import { UserPrivilegeRequest } from "src/utils/userPrivileges";
 
 export const getUserDetails = async (
-  token: string,
   userId: string,
 ): Promise<UserDetailWithProfile> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const resp = await fetchUserWithMethod("GET")({
     subPath: userId,
-    additionalHeaders: ssgToken,
   });
   const json = (await resp.json()) as { data: UserDetailWithProfile };
   return json.data;

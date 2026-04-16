@@ -13,8 +13,8 @@ jest.mock("next-intl/server", () => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
-  createOpportunity: (token: unknown, createOppSchema: unknown) =>
-    mockCreateOpportunity(token, createOppSchema) as unknown,
+  createOpportunity: (createOppSchema: unknown) =>
+    mockCreateOpportunity(createOppSchema) as unknown,
 }));
 
 describe("create opportunity form action", () => {
@@ -29,7 +29,7 @@ describe("create opportunity form action", () => {
   });
   it("returns result of create success", async () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
-    mockCreateOpportunity.mockImplementation((_token, data) => {
+    mockCreateOpportunity.mockImplementation((data) => {
       return data as unknown;
     });
 
@@ -52,7 +52,7 @@ describe("create opportunity form action", () => {
   });
   it("returns result of create success with category explanation", async () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
-    mockCreateOpportunity.mockImplementation((_token, data) => {
+    mockCreateOpportunity.mockImplementation((data) => {
       return data as unknown;
     });
 

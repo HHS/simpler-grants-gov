@@ -33,10 +33,7 @@ export const createOpportunityAction = async (
 
   let createOpportunityResponse;
   try {
-    createOpportunityResponse = await createOpportunity(
-      session.token,
-      rawFormData,
-    );
+    createOpportunityResponse = await createOpportunity(rawFormData);
     return { data: createOpportunityResponse, success: true };
   } catch (e) {
     // General try failure catch error
