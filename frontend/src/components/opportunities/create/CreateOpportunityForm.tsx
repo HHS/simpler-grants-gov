@@ -70,7 +70,7 @@ export function CreateOpportunityForm({
         setExplain(""); // need to manually set this for checks below to work correctly
       }
     }
-  }, [response, router]);
+  }, [response, router, selectedCategoryId]);
 
   // Use useEffect to check fields when inputs change
   useEffect(
