@@ -330,7 +330,7 @@ export async function fillFormPartial(
  * saves the form, and optionally returns to the application page.
  * Does NOT perform assertions - those are done in the test.
  * Assumes the current page is already an application page
- * where the form link ('formName') is visible and clickable.
+ * where the form link (`formName`) is visible and clickable.
  */
 export async function fillForm(
   testInfo: TestInfo,
