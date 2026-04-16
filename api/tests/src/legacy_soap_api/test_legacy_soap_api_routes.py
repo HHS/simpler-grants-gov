@@ -9,11 +9,11 @@ from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientCertifi
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
-    ApplicationSubmissionRetrievedFactory,
-    ApplicationSubmissionTrackingNumberFactory,
     AgencyFactory,
     ApplicationFactory,
     ApplicationSubmissionFactory,
+    ApplicationSubmissionRetrievedFactory,
+    ApplicationSubmissionTrackingNumberFactory,
     CompetitionFactory,
     OpportunityFactory,
 )
@@ -120,7 +120,9 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
         competition=competition, application_status=ApplicationStatus.ACCEPTED
     )
     submission = ApplicationSubmissionFactory.create(application=application)
-    ApplicationSubmissionRetrievedFactory.create(application_submission=submission, created_by_user=user)
+    ApplicationSubmissionRetrievedFactory.create(
+        application_submission=submission, created_by_user=user
+    )
     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
     mock_data = (
         "<soapenv:Envelope "
@@ -173,7 +175,9 @@ def test_successful_confirm_application_delivery_request_when_in_tracking_number
         competition=competition, application_status=ApplicationStatus.ACCEPTED
     )
     submission = ApplicationSubmissionFactory.create(application=application)
-    ApplicationSubmissionTrackingNumberFactory.create(application_submission=submission, created_by_user=user)
+    ApplicationSubmissionTrackingNumberFactory.create(
+        application_submission=submission, created_by_user=user
+    )
     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
     mock_data = (
         "<soapenv:Envelope "
@@ -222,9 +226,7 @@ def test_confirm_application_delivery_when_application_has_no_status(
     )
     privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
     user, role, soap_client_certificate = setup_cert_user(agency, privileges)
-    application = ApplicationFactory.create(
-        competition=competition, application_status=None
-    )
+    application = ApplicationFactory.create(competition=competition, application_status=None)
     submission = ApplicationSubmissionFactory.create(application=application)
     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
     mock_data = (

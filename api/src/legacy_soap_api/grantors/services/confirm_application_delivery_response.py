@@ -9,6 +9,10 @@ from src.constants.lookup_constants import ApplicationStatus
 from src.db.models.competition_models import ApplicationSubmissionRetrieved
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
 from src.legacy_soap_api.grantors.fault_messages import ConfirmDeliverySubmissionNotFound
+from src.legacy_soap_api.grantors.statuses import (
+    AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS,
+    RECEIVED_BY_AGENCY_STATUS,
+)
 from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientUserDoesNotHavePermission,
     validate_certificate,
@@ -21,7 +25,6 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     SOAPFaultException,
     get_application_submission_by_legacy_tracking_number_extended,
 )
-from src.legacy_soap_api.grantors.statuses import AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS, RECEIVED_BY_AGENCY_STATUS
 
 logger = logging.getLogger(__name__)
 

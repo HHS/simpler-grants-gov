@@ -15,13 +15,16 @@ from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.legacy_soap_api.grantors import schemas
+from src.legacy_soap_api.grantors.statuses import (
+    AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS,
+    RECEIVED_BY_AGENCY_STATUS,
+)
 from src.legacy_soap_api.legacy_soap_api_auth import validate_certificate, verify_certificate_access
 from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import convert_bool_to_yes_no
 from src.util.datetime_util import adjust_timezone
-from src.legacy_soap_api.grantors.statuses import AGENCY_TRACKING_NUMBER_ASSIGNED_STATUS, RECEIVED_BY_AGENCY_STATUS
 
 logger = logging.getLogger(__name__)
 GRANTS_APPLICATION_STATUSES = {
