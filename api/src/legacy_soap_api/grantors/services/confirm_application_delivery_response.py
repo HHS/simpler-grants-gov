@@ -34,12 +34,9 @@ VALID_STATUSES_FOR_DELIVERY = {ApplicationStatus.ACCEPTED}
 def get_soap_fault_exception(
     application_status: str, status: str, legacy_tracking_number: str
 ) -> SOAPFaultException:
-    msg = (
-        "Failed to confirm application delivery.(Expected an Application status of:'Validated' ,"
-        f" but found a status of '{status}' for {legacy_tracking_number})"
-    )
+    log_msg = "Application status is not valid for confirm application delivery."
     logger.info(
-        msg,
+        log_msg,
         extra={
             "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
             "application_status": application_status,
@@ -47,7 +44,13 @@ def get_soap_fault_exception(
             "response_operation_name": "ConfirmApplicationDeliveryResponse",
         },
     )
-    return SOAPFaultException(msg, fault=FaultMessage(faultcode="soap:Server", faultstring=msg))
+    faultstring = (
+        "Failed to confirm application delivery.(Expected an Application status of:'Validated' ,"
+        f" but found a status of '{status}' for {legacy_tracking_number})"
+    )
+    return SOAPFaultException(
+        log_msg, fault=FaultMessage(faultcode="soap:Server", faultstring=faultstring)
+    )
 
 
 def confirm_application_delivery(
@@ -79,10 +82,11 @@ def confirm_application_delivery(
         application_submission = submission_extended_dict["submission"]
     else:
         logger.info(
-            f"Unable to find submission legacy_tracking_number {legacy_tracking_number}.",
+            "Submission not found for confirm application delivery",
             extra={
                 "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
                 "response_operation_name": "ConfirmApplicationDeliveryResponse",
+                "legacy_tracking_number": legacy_tracking_number,
             },
         )
         raise SOAPFaultException(
