@@ -562,3 +562,9 @@ class OpportunitySummaryUpdateRequestV1Schema(OpportunitySummaryBaseRequestSchem
 
 class OpportunitySummaryUpdateResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunitySummaryDetailSchema())
+
+
+class DeleteAttachmentResponseV1Schema(AbstractResponseSchema):
+    message = fields.String(required=True)
+    status_code = fields.Integer(required=True, dump_default=200)
+    errors = fields.List(fields.String(), required=False)
