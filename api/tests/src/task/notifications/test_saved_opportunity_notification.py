@@ -50,7 +50,6 @@ Manage which updates you receive in your
 </body>
 </html>
 """.strip()
-
     assert html == expected_html
 
 
@@ -167,4 +166,5 @@ Manage which updates you receive in your
 </body>
 </html>
 """.strip()
+
     assert html == expected_html

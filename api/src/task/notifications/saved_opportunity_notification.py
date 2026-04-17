@@ -1,3 +1,4 @@
+import html
 from collections.abc import Sequence
 
 from src.db.models.entity_models import Organization
@@ -12,8 +13,7 @@ def build_notification_content(
 ) -> tuple[str, str]:
 
     count = len(org_saved_opportunities)
-    org_name = organization.organization_name
-
+    org_name = html.escape(organization.organization_name or "")
     if count == 1:
         subject = f"{org_name} has a new opportunity to review"
         intro = "A new opportunity has been saved for your organization."
@@ -25,7 +25,7 @@ def build_notification_content(
 
     # Build list items (no bullets)
     items = [
-        f"""<li style="list-style-type:none; margin:0; padding:0;"><a href="{config.frontend_base_url}/opportunity/{opp.opportunity_id}" target="_blank">{opp.opportunity_title}</a></li>"""
+        f'<li style="list-style-type:none; margin:0; padding:0;"><a href="{config.frontend_base_url}/opportunity/{opp.opportunity_id}" target="_blank">{html.escape(opp.opportunity_title or "")}</a></li>'
         for opp in org_saved_opportunities[:3]
     ]
 
