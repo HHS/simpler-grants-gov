@@ -25,7 +25,7 @@ describe("AwardRecommendationStatusTag", () => {
   it("renders in review status tag", () => {
     render(<AwardRecommendationStatusTag status="in_review" />);
 
-    const tag = screen.getByTestId("award-recommendation-status-in-review");
+    const tag = screen.getByTestId("award-recommendation-status-in-progress");
     expect(tag).toBeInTheDocument();
   });
 
