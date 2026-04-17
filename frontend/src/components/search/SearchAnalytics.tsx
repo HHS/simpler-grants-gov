@@ -1,7 +1,6 @@
 "use client";
 
 import { sendGAEvent } from "@next/third-parties/google";
-import { omit } from "lodash";
 import { OptionalStringDict } from "src/types/generalTypes";
 import { expectedQueryParamKeys } from "src/types/search/searchQueryTypes";
 import {
@@ -13,7 +12,8 @@ import {
 import { useEffect, useState } from "react";
 
 const getCurrentFilters = (params: OptionalStringDict): string => {
-  return JSON.stringify(omit(params, "query", "page"));
+  const { query: _query, page: _page, ...withoutQueryAndPage } = params;
+  return JSON.stringify(withoutQueryAndPage);
 };
 
 // send custom New Relic and GA data for search pages

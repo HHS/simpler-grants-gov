@@ -16,8 +16,8 @@ from src.workflow.workflow_errors import (
     WorkflowDoesNotExistError,
 )
 from tests.src.db.models.factories import ApplicationFactory, OpportunityFactory, WorkflowFactory
-from tests.workflow.state_machine.test_state_machines import BasicTestStateMachine
-from tests.workflow.workflow_test_util import build_workflow_config
+from tests.src.workflow.state_machine.test_state_machines import BasicTestStateMachine
+from tests.src.workflow.workflow_test_util import build_workflow_config
 
 
 def test_get_workflow_entity_opportunity(db_session, enable_factory_create):

@@ -24,14 +24,16 @@ module.exports = defineConfig([
       "**/.next/",
       "**/storybook-static",
       "next-env.d.ts",
+      "**/coverage/",
     ],
   },
   {
     extends: compat.extends(
-      "nava",
+      "eslint:recommended",
       "plugin:storybook/recommended",
+      "plugin:you-dont-need-lodash-underscore/compatible",
       "prettier",
-      // "next/core-web-vitals",
+      "next/core-web-vitals",
     ),
 
     rules: {
@@ -48,7 +50,6 @@ module.exports = defineConfig([
           ],
         },
       ],
-      "react/react-in-jsx-scope": "off",
     },
 
     settings: {
@@ -100,6 +101,7 @@ module.exports = defineConfig([
         "error",
         {
           argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_",
         },
       ],
@@ -113,12 +115,9 @@ module.exports = defineConfig([
         },
       ],
 
-      "promise/catch-or-return": [
-        "error",
-        {
-          allowFinally: true,
-        },
-      ],
+      // typing a replacement function gets unnecessarily complex
+      // see https://dev.to/tipsy_dev/advanced-typescript-reinventing-lodash-get-4fhe
+      "you-dont-need-lodash-underscore/get": "off",
     },
   },
 ]);

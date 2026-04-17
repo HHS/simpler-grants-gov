@@ -1,4 +1,3 @@
-import { uniq } from "lodash";
 import {
   SEARCH_NO_STATUS_VALUE,
   STATUS_FILTER_DEFAULT_VALUES,
@@ -122,5 +121,5 @@ export const getStatusValueForAgencySearch = (statuses?: string[]) => {
     return statusOptions.map(({ value }) => value);
   }
   // always include posted and forecasted
-  return uniq(statuses.concat(STATUS_FILTER_DEFAULT_VALUES));
+  return [...new Set(statuses.concat(STATUS_FILTER_DEFAULT_VALUES))];
 };
