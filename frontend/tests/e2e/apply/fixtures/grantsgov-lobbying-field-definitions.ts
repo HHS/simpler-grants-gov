@@ -2,8 +2,9 @@ import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import { FormFillFieldDefinitions } from "tests/e2e/utils/forms/general-forms-filling";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
-// Regex matcher for the Grants.gov Lobbying Form link in the forms table.
-export const GRANTSGOV_LOBBYING_FORM_MATCHER = "Grants\\.gov Lobbying Form";
+// Plain string matcher for the Grants.gov Lobbying Form link in the forms table.
+// buildFlexibleFormNameRegex will escape the dot — do NOT pre-escape here.
+export const GRANTSGOV_LOBBYING_FORM_MATCHER = "Grants.gov Lobbying Form";
 
 export const fieldDefinitionsGrantsGovLobbying: FormFillFieldDefinitions = {
   organization_name: {
