@@ -1,3 +1,4 @@
+import { APIResponse } from "src/types/apiResponseTypes";
 import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 
 import { fetchAwardRecommendation } from "./fetchers";
@@ -6,8 +7,8 @@ export const getAwardRecommendationDetails = async (
   id: string,
 ): Promise<AwardRecommendationDetails> => {
   const response = await fetchAwardRecommendation({ subPath: id });
-  const responseBody = await response.json();
-  const apiData = responseBody.data;
+  const responseBody = (await response.json()) as APIResponse;
+  const apiData = responseBody.data as Partial<AwardRecommendationDetails>;
 
   return {
     ...apiData,
@@ -18,5 +19,5 @@ export const getAwardRecommendationDetails = async (
       not_recommended_count: 25,
       total_recommended_amount: 250000,
     },
-  };
+  } as AwardRecommendationDetails;
 };
