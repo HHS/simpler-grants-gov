@@ -33,11 +33,7 @@ export const postAttachmentHandler = async (
   const fileFormData = createFormData(file.name, buffer, file.type);
 
   try {
-    const res = await uploadAttachment(
-      applicationId,
-      session.token,
-      fileFormData,
-    );
+    const res = await uploadAttachment(applicationId, fileFormData);
 
     return NextResponse.json({
       application_attachment_id: res.data?.application_attachment_id,

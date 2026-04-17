@@ -36,6 +36,8 @@ describe("FieldListWidget", () => {
           {
             widget: "Text",
             baseId: "contacts[~~index~~]--first_name",
+            definition:
+              "/properties/contact_people_test/items/properties/first_name",
             generalProps: {
               schema: { type: "string", title: "First Name" },
               rawErrors: [],
@@ -45,6 +47,7 @@ describe("FieldListWidget", () => {
         ]}
         rawErrors={[]}
         requiredFields={[]}
+        name={""}
       />,
     );
 
@@ -68,6 +71,7 @@ describe("FieldListWidget", () => {
           {
             widget: "Text",
             baseId: "contacts[~~index~~]--first_name",
+            definition: "",
             generalProps: {
               schema: { type: "string", title: "First Name" },
               rawErrors: [],
@@ -77,6 +81,7 @@ describe("FieldListWidget", () => {
         ]}
         rawErrors={[]}
         requiredFields={[]}
+        name={""}
       />,
     );
 
@@ -100,6 +105,7 @@ describe("FieldListWidget", () => {
           {
             widget: "Text",
             baseId: "contacts[~~index~~]--first_name",
+            definition: "",
             generalProps: {
               schema: { type: "string", title: "First Name" },
               rawErrors: [],
@@ -109,6 +115,7 @@ describe("FieldListWidget", () => {
         ]}
         rawErrors={[]}
         requiredFields={[]}
+        name={""}
       />,
     );
 

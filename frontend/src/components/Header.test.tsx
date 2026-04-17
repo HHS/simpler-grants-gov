@@ -193,7 +193,6 @@ describe("Header", () => {
       name: "workspace",
     });
     expect(workspaceButton).toHaveAttribute("aria-expanded", "false");
-
     // the submenu assertions are not strictly necessary, but I could not get the timing to work right
     // to get tests to pass correctly without them, so leaving them in
     const subMenu = workspaceButton.nextSibling;

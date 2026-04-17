@@ -15,7 +15,7 @@ env APP_NAME=fluentbit make release-publish
 After you publish a new version of fluentbit, store it in the `fluent-bit-commit` [SSM parameter](https://us-east-1.console.aws.amazon.com/systems-manager/parameters/fluent-bit-commit/). You can do so via
 
 ```bash
-aws ssm put-parameter --name fluent-bit-commit --value <IMAGE HASH JUST PUSHED UP VIA release-publish> --overwrite
+aws ssm put-parameter --name fluent-bit-commit --overwrite --value <IMAGE HASH JUST PUSHED UP VIA release-publish>
 ```
 
 The next full deploy (not re-deploy) of any given server will then pick up that commit.
@@ -29,7 +29,7 @@ Getting setup for testing the first time is a multi-stage process
 3. `gem install fluentd`
 4. 2 terminals
 
-  - `docker run -p 24224:24224 -e licenseKey=key -e log_group_name=my-log-group -e aws_region=us-east-1 docker.io/library/simpler-grants-gov-fluentbit:latest`
-  - `echo '{"cat": "hat"}' | fluent-cat -`
+- `docker run -p 24224:24224 -e licenseKey=key -e log_group_name=my-log-group -e aws_region=us-east-1 docker.io/library/simpler-grants-gov-fluentbit:latest`
+- `echo '{"cat": "hat"}' | fluent-cat -`
 
 5. You should see your json echo'ed into terminal 1

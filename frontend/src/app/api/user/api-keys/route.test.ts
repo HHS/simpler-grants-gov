@@ -67,7 +67,6 @@ describe("POST /api/user/api-keys", () => {
     expect(data.message).toBe("API key created successfully");
     expect(data.data).toEqual(mockApiKeyResponse);
     expect(mockHandleCreateApiKey).toHaveBeenCalledWith(
-      "test-token",
       "test-user-id",
       "Test API Key",
     );
