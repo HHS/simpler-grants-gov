@@ -163,6 +163,7 @@ const nextConfig = {
   // https://nextjs.org/docs/app/api-reference/next-config-js/output
   output: "standalone",
   sassOptions: {
+    silenceDeprecations: ["if-function", "import", "global-builtin"],
     loadPaths: [
       "./node_modules/@uswds",
       "./node_modules/@uswds/uswds/packages",
