@@ -68,15 +68,13 @@ export async function validateAgencyAccessAction(agencyId: string) {
       getUserPrivilegeDefinition(agencyId),
     );
 
-    let canCreate = false;
-
-    if (userPrivilegeResult.length > 0) {
-      userPrivilegeResult.forEach((result) => {
-        if (result.privilege === "create_opportunity" && result.authorized) {
-          canCreate = true;
-        }
-      });
-    }
+    const canCreate = userPrivilegeResult.length
+      ? userPrivilegeResult.reduce(
+          (permissionFound, result) =>
+            result.privilege === "create_opportunity" && result.authorized,
+          false,
+        )
+      : false;
 
     if (canCreate) {
       return { success: true };
