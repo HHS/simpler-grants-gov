@@ -317,16 +317,16 @@ export default function OpportunityEditForm({
             heading={t("content.alerts.validationWarningHeading")}
             headingLevel="h3"
           >
-            <p className="margin-top-1 margin-bottom-1">
+            <span className="display-block margin-top-1 margin-bottom-1">
               {t("content.alerts.validationWarningBody")}
-            </p>
-            <ul className="margin-top-1">
-              {Object.values(formState.validationErrors)
-                .flat()
-                .map((error, i) => (
-                  <li key={i}>{error}</li>
-                ))}
-            </ul>
+            </span>
+            {Object.values(formState.validationErrors)
+              .flat()
+              .map((error, i) => (
+                <span key={i} className="display-block">
+                  {error}
+                </span>
+              ))}
           </Alert>
         </div>
       ) : null}
