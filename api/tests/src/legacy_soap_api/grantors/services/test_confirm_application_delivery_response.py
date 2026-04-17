@@ -80,7 +80,7 @@ class TestConfirmApplicationDeliveryResponse:
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.ConfirmApplicationDeliveryRequest(
-            GrantsGovTrackingNumber=tracking_number,
+            grants_gov_tracking_number=tracking_number,
         )
 
         returned_tracking_number = confirm_application_delivery(
@@ -120,7 +120,7 @@ class TestConfirmApplicationDeliveryResponse:
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.ConfirmApplicationDeliveryRequest(
-            GrantsGovTrackingNumber=tracking_number,
+            grants_gov_tracking_number=tracking_number,
         )
 
         with pytest.raises(SOAPFaultException) as exc:
@@ -155,7 +155,7 @@ class TestConfirmApplicationDeliveryResponse:
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.ConfirmApplicationDeliveryRequest(
-            GrantsGovTrackingNumber=tracking_number,
+            grants_gov_tracking_number=tracking_number,
         )
 
         with pytest.raises(SOAPFaultException) as exc:
@@ -203,7 +203,7 @@ class TestConfirmApplicationDeliveryResponse:
         soap_request = _make_soap_request(second_soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.ConfirmApplicationDeliveryRequest(
-            GrantsGovTrackingNumber=tracking_number,
+            grants_gov_tracking_number=tracking_number,
         )
 
         tracking_number_result = confirm_application_delivery(
@@ -240,7 +240,7 @@ class TestConfirmApplicationDeliveryResponse:
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.ConfirmApplicationDeliveryRequest(
-            GrantsGovTrackingNumber=tracking_number,
+            grants_gov_tracking_number=tracking_number,
         )
 
         with pytest.raises(SOAPFaultException) as exc:
@@ -273,7 +273,7 @@ class TestConfirmApplicationDeliveryResponse:
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.ConfirmApplicationDeliveryRequest(
-            GrantsGovTrackingNumber=tracking_number,
+            grants_gov_tracking_number=tracking_number,
         )
 
         with pytest.raises(SOAPFaultException) as exc:
@@ -285,7 +285,7 @@ class TestConfirmApplicationDeliveryResponse:
             )
         assert (
             exc.value.fault.faultstring
-            == "Unable to find application from tracking number. Failed to confirm application delivery."
+            == "Failed to confirm application delivery.(Authorization Failure)"
         )
 
     def test_user_without_privileges_raises_permission_error(
@@ -304,7 +304,7 @@ class TestConfirmApplicationDeliveryResponse:
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.ConfirmApplicationDeliveryRequest(
-            GrantsGovTrackingNumber=tracking_number,
+            grants_gov_tracking_number=tracking_number,
         )
 
         with pytest.raises(SOAPClientUserDoesNotHavePermission) as exc:
