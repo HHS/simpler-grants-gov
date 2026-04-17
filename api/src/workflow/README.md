@@ -407,14 +407,6 @@ on the table. This constraint makes it so exactly 1 of the entities is set.
 We have a [get_workflow_entity](./service/workflow_service.py) function that finds the workflow entity for new workflows.
 Add logic to this to find the table from its primary key in the same pattern.
 
-### Adjust entity load and authorization logic
-In [get_workflow.py](../services/workflows/get_workflow.py),
-- update `_verify_workflow_access_and_build_config()` to map entity type to required privilege
-- update `_workflow_load_options()` to eagerly load all of the entity data
-
-### Adjust the logic to get agency for the workflow
-In [approval_service.py](./service/approval_service.py), update the `get_agency_for_workflow()` to get agency record from the entity opportunity field.
-
 ### Add a persistence handler
 Like our [opportunity_persistence_model](./state_persistence/opportunity_persistence_model.py)
 add a class that handles persistence for that particular type, following the same pattern.
@@ -469,7 +461,7 @@ and a few utilities we've built.
 from src.constants.lookup_constants import WorkflowEntityType, WorkflowEventType, WorkflowType, ApprovalResponseType
 from tests.src.db.models.factories import OpportunityFactory, UserFactory, WorkflowFactory
 
-from tests.src.workflow.workflow_test_util import (
+from tests.workflow.workflow_test_util import (
     build_start_workflow_event,
     send_process_event,
 )
@@ -510,22 +502,3 @@ def test_example(db_session, enable_factory_create):
 We have several different utilities for testing in the workflow_test_util
 that you should look at that can help simplify the setup and validation
 of tests.
-
-## Setting up the system user for an environment
-We have a system user for our workflow service for running any internal steps
-of a workflow process. To create this user you'll need access to the RDS DB
-to run the following SQL. Replace UUID with a UUID you generate, it'll be the user's ID.
-
-```sql
-insert into api.user(user_id, user_type_id)
-VALUES ('UUID', 4);
-
-insert into api.user_profile(user_profile_id, user_id, first_name, last_name)
-    VALUES (gen_random_uuid(), 'UUID', 'System', 'User');
-
-insert into api.internal_user_role(user_id, role_id)
-VALUES ('UUID', '18258804-a281-41cd-9afb-06061fa7593c');
-```
-
-You'll also need to set this to the `WORKFLOW_SERVICE_INTERNAL_USER_ID`
-environment variable in our terraform for the given environment.
