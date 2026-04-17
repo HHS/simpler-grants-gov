@@ -6,6 +6,7 @@ from lxml import etree
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models.competition_models import ApplicationSubmissionRetrieved
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientCertificate
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
@@ -250,9 +251,17 @@ def test_confirm_application_delivery_when_application_has_no_status(
     )
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
-        response = client.post(
-            full_path, data=mock_data, headers={"Use-Simpler-Override": "1", "Use-Soap-Cert": "1"}
-        )
+        with mock.patch(
+            "src.legacy_soap_api.simpler_soap_api.get_proxy_response"
+        ) as mock_proxy_response:
+            mock_proxy_response.return_value = SOAPResponse(
+                data=b"test response", status_code=500, headers={}
+            )
+            response = client.post(
+                full_path,
+                data=mock_data,
+                headers={"Use-Simpler-Override": "1", "Use-Soap-Cert": "1"},
+            )
     assert response.status_code == 500
     expected = (
         '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
@@ -266,7 +275,7 @@ def test_confirm_application_delivery_when_application_has_no_status(
     assert response.data.decode() == expected
 
 
-def test_if_soap_fault_exception_raised_return_correct_response_if_use_simpler_override_is_1(
+def test_if_soap_fault_exception_raised_return_correct_response_if_proxy_response_is_500(
     db_session, client, enable_factory_create
 ) -> None:
     agency = AgencyFactory.create()
@@ -318,7 +327,7 @@ def test_if_soap_fault_exception_raised_return_correct_response_if_use_simpler_o
     assert response.data.decode() == expected
 
 
-def test_if_soap_fault_exception_raised_return_proxy_response_if_use_simpler_override_is_not_1(
+def test_if_soap_fault_exception_raised_return_proxy_response_if_proxy_response_status_code_is_not_500(
     db_session, client, enable_factory_create
 ) -> None:
     agency = AgencyFactory.create()
@@ -331,7 +340,9 @@ def test_if_soap_fault_exception_raised_return_proxy_response_if_use_simpler_ove
     application = ApplicationFactory.create(
         competition=competition, application_status=ApplicationStatus.IN_PROGRESS
     )
-    submission = ApplicationSubmissionFactory.create(application=application)
+    submission = ApplicationSubmissionFactory.create(
+        application=application, legacy_tracking_number="00837443"
+    )
     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
     mock_data = (
         "<soapenv:Envelope "
@@ -354,18 +365,15 @@ def test_if_soap_fault_exception_raised_return_proxy_response_if_use_simpler_ove
     )
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
-        # Remove Use-Simpler-Override
-        response = client.post(full_path, data=mock_data, headers={"Use-Soap-Cert": "1"})
-    assert response.status_code == 500
-    expected = (
-        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
-        "    <soap:Body>\n        <soap:Fault>\n"
-        "            <faultcode>soap:Server</faultcode>\n"
-        "            <faultstring>Client certificate not configured for Simpler SOAP.</faultstring>\n"
-        "        </soap:Fault>\n"
-        "    </soap:Body>\n"
-        "</soap:Envelope>\n"
-    )
+        with mock.patch(
+            "src.legacy_soap_api.simpler_soap_api.get_proxy_response"
+        ) as mock_proxy_response:
+            mock_proxy_response.return_value = SOAPResponse(
+                data=b"test response", status_code=200, headers={}
+            )
+            response = client.post(full_path, data=mock_data, headers={"Use-Soap-Cert": "1"})
+    assert response.status_code == 200
+    expected = "test response"
     assert response.data.decode() == expected
 
 
