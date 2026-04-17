@@ -3,7 +3,8 @@ from unittest import mock
 
 from lxml import etree
 
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import ApplicationStatus, Privilege
+from src.db.models.competition_models import ApplicationSubmissionRetrieved
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientCertificate
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
 from tests.lib.data_factories import setup_cert_user
@@ -53,6 +54,54 @@ def test_successful_request(client, fixture_from_file, caplog) -> None:
     )
     assert req_message.soap_api == "applicants"
     assert req_message.soap_request_operation_name == "GetOpportunityListRequest"
+
+
+def test_successful_confirm_application_delivery_request(
+    db_session, client, fixture_from_file, enable_factory_create, caplog
+) -> None:
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
+    )
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate = setup_cert_user(agency, privileges)
+    application = ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.ACCEPTED
+    )
+    submission = ApplicationSubmissionFactory.create(application=application)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+    )
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        response = client.post(
+            full_path, data=mock_data, headers={"Use-Simpler-Override": "1", "Use-Soap-Cert": "1"}
+        )
+    assert response.status_code == 200
+    retrieved = (
+        db_session.query(ApplicationSubmissionRetrieved)
+        .filter_by(application_submission_id=submission.application_submission_id)
+        .all()
+    )
+    assert len(retrieved) == 1
 
 
 def test_invalid_service_name_not_found(client) -> None:
@@ -239,7 +288,7 @@ def test_simpler_getapplicationzip_operation_raising_httperror_due_to_privileges
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         response = client.post(
-            full_path, data=etree.tostring(envelope), headers={"Use-Simpler-Override": "true"}
+            full_path, data=etree.tostring(envelope), headers={"Use-Simpler-Override": "1"}
         )
     assert response.status_code == 500
     info_messages = [

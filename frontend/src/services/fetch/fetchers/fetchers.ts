@@ -2,11 +2,13 @@ import "server-only";
 
 import { ApiRequestError } from "src/errors";
 import {
+  createGrantorOpportunitySummaryEndpoint,
   EndpointConfig,
   fetchAwardRecommendationEndpoint,
   fetchCompetitionEndpoint,
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
+  getGrantorOpportunityEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
   searchAgenciesEndpoint,
@@ -14,6 +16,7 @@ import {
   toDynamicGrantorsEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
+  updateGrantorOpportunitySummaryEndpoint,
   userLogoutEndpoint,
   userRefreshEndpoint,
 } from "src/services/fetch/endpointConfigs";
@@ -155,3 +158,15 @@ export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);
 
 export const fetchGrantorWithMethod = (type: "POST") =>
   requesterForEndpoint(toDynamicGrantorsEndpoint(type));
+
+export const getGrantorOpportunityRequest = requesterForEndpoint(
+  getGrantorOpportunityEndpoint,
+);
+
+export const updateGrantorOpportunitySummaryRequest = requesterForEndpoint(
+  updateGrantorOpportunitySummaryEndpoint,
+);
+
+export const createGrantorOpportunitySummaryRequest = requesterForEndpoint(
+  createGrantorOpportunitySummaryEndpoint,
+);
