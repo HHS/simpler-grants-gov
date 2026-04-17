@@ -11,8 +11,8 @@ const mockFetchAwardRecommendation = jest.fn().mockResolvedValue({
 });
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
-  fetchAwardRecommendation: (params: unknown) =>
-    mockFetchAwardRecommendation(params),
+  fetchAwardRecommendation: (params: unknown): Promise<Response> =>
+    mockFetchAwardRecommendation(params) as Promise<Response>,
 }));
 
 describe("getAwardRecommendationDetails", () => {

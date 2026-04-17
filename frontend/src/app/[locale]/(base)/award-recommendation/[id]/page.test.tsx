@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import AwardRecommendationPage from "src/app/[locale]/(base)/award-recommendation/[id]/page";
-import * as awardRecommendationFetcher from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
@@ -58,8 +58,12 @@ const mockGetAwardRecommendationDetails = jest
   .mockResolvedValue(mockAwardRecommendationDetails);
 
 jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
-  getAwardRecommendationDetails: (id: string) =>
-    mockGetAwardRecommendationDetails(id),
+  getAwardRecommendationDetails: (
+    id: string,
+  ): Promise<AwardRecommendationDetails> =>
+    mockGetAwardRecommendationDetails(
+      id,
+    ) as Promise<AwardRecommendationDetails>,
 }));
 
 jest.mock("src/services/auth/session", () => ({
