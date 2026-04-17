@@ -53,7 +53,10 @@ export default async function Layout({ children, locale }: Props) {
             }
             testUsers={testUsers}
           />
-          <main id="main-content" className="border-top-0">
+          <main
+            id="main-content"
+            className="border-top-0 simpler-page-anchor-offset"
+          >
             {children}
           </main>
         </LoginModalProvider>
