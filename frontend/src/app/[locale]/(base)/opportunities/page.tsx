@@ -143,13 +143,18 @@ const transformTableRowData = (
     const status = opportunity.is_draft
       ? "Draft"
       : opportunity.opportunity_status;
+    const opportunityTitleUrl = opportunity.is_draft
+      ? canUpdate
+        ? `/opportunity/${opportunity.opportunity_id}/edit`
+        : ``
+      : `/opportunity/${opportunity.opportunity_id}`;
     return [
       { cellData: opportunity.agency_name },
       {
-        cellData: (
-          <a href={`/opportunity/${opportunity.opportunity_id}`}>
-            {opportunity.opportunity_title}
-          </a>
+        cellData: opportunityTitleUrl ? (
+          <a href={opportunityTitleUrl}>{opportunity.opportunity_title}</a>
+        ) : (
+          <span>{opportunity.opportunity_title}</span>
         ),
       },
       {
