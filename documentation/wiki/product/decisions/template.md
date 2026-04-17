@@ -1,6 +1,6 @@
 # ADR Template
 
-* **Status:** {Active | deprecation reason, e.g. "Superseded By [xxx](../../decisions/yyyymmdd-xxx.md)"}
+* **Status:** {Active | deprecation reason}
 * **Last Modified:** {YYYY-MM-DD when the decision was last updated}
 * **Related Issue:** \[#{issue number}]\(https://github.com/HHS/simpler-grants-gov/issues/{issue number})
 * **Deciders:** {list everyone involved in the decision}

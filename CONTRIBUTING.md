@@ -98,8 +98,6 @@ Current designated maintainers:
 - @mdragon
 - @KevinJBoyer
 
-**For internal team members:**
-Internal PRs (opened from repo branches, or from forks by [allowlisted contributors](/.github/internal-contributors.yml)) are not auto-assigned. The PR author is responsible for manually requesting reviews from the appropriate colleagues. If no reviewer is assigned within one hour, a reminder will be posted on the PR.
 
 ## Policies
 

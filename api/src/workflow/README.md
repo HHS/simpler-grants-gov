@@ -4,7 +4,7 @@ workflows via state machines, as well as defining the
 state machines.
 
 For details on the architecture of the workflow system
-see [these docs](/documentation/api/workflow-service.md).
+see [these docs](../../../documentation/api/workflow-service.md).
 
 ## General Structure
 The workflow service has 3 layers:
@@ -254,7 +254,7 @@ To add an approval to a workflow, first determine the following:
 
 Let's assume we want to support an "Example Approval" which requires the
 `example_approval` privilege. After that privilege is added to the privilege
-enum + configured to work with the lookup table (see [lookup-values](/documentation/api/lookup-values.md))
+enum + configured to work with the lookup table (see [lookup-values](../../../documentation/api/lookup-values.md))
 and we add whatever approvals to the `ApprovalType` enum in the same manner,
 you'll want to do the following.
 

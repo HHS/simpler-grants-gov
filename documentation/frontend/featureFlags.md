@@ -11,7 +11,7 @@ This means that any codebase/deployment level behavior that isn't meant for user
 
 # Current Feature Flags
 
-You can find and update the feature flags currently in use by the application in the [feature flags typescript file](/frontend/src/constants/featureFlags.ts).
+You can find and update the feature flags currently in use by the application in the [feature flags typescript file](../../frontend/src/constants/defaultFeatureFlags.ts).
 
 # Usage
 

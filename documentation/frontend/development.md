@@ -67,7 +67,7 @@ From the `/frontend` directory:
 
 ### 🚀 Production version
 
-The `make dev` command runs the `docker-compose.yml` which runs the `dev` target in the [Dockerfile](./Dockerfile). To run a production version in docker, run `docker compose up -d -f docker-compose-realease.yml` which targest the `release` stage in the docker build. This runs the production version, while still creating a network connection to the local API.
+The `make dev` command runs the `docker-compose.yml` which runs the `dev` target in the [Dockerfile](../../frontend/Dockerfile). To run a production version in docker, run `docker compose up -d -f docker-compose-realease.yml` which targest the `release` stage in the docker build. This runs the production version, while still creating a network connection to the local API.
 
 ### Testing Release Target Locally
 
@@ -207,7 +207,7 @@ From the `frontend/` directory:
 - Place breakpoints in VSCode
 - Visit the relevant routes in the browser and confirm you can hit these breakpoints
 
-**Note** that debugging the server-side or full-stack here doesn't debug the API. [See the API readme for more information](../documentation/api/development.md)
+**Note** that debugging the server-side or full-stack here doesn't debug the API. [See the API readme for more information](../api/development.md)
 
 ## Feature setup and development
 
@@ -249,6 +249,6 @@ If you need to access this functionality locally, contact an engineer on the tea
 
 ## Other topics
 
-- [Internationalization](../documentation/frontend/internationalization.md)
-- [Feature Flags](../documentation/frontend/featureFlags.md)
-- Refer to the [architecture decision records](../documentation/decisions) for more context on technical decisions.
+- [Internationalization](./internationalization.md)
+- [Feature Flags](./featureFlags.md)
+- Refer to the [architecture decision records](../wiki/product/decisions) for more context on technical decisions.

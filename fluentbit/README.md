@@ -5,7 +5,7 @@ Fluent Bit is a log processor and forwarder designed for collecting, parsing, an
 ## Deployment
 
 We have a custom build of fluentbit, that can be from built like so, from the top level directory (eg. not this one, the one above it).
-Before running below, [make sure you have set up your AWS CLI and are logged in](../documentation/infra/set-up-infrastructure-tools.md#create-a-profile-named-grants).
+Before running below, [make sure you have set up your AWS CLI and are logged in](../documentation/infra/set-up-infrastructure-tools.md#create-a-profile-named-grants-one-time-set-up).
 
 ```bash
 env APP_NAME=fluentbit make release-build
