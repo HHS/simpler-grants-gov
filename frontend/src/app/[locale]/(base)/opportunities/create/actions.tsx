@@ -84,7 +84,9 @@ export async function validateAgencyAccessAction(agencyId: string) {
     return {
       error: "You do not have access to create opportunities for this agency.",
     };
-  } catch (_error) {
+  } catch (e) {
+    const error = e as Error;
+    console.error(`Error validating agency access: ${error.message}`);
     return {
       error: "You do not have access to create opportunities for this agency.",
     };
