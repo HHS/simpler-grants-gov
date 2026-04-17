@@ -35,7 +35,7 @@ import {
 } from "src/types/userTypes";
 
 export const mockAwardRecommendationStatus: AwardRecommendationStatus =
-  "inProgress";
+  "in_review";
 
 export const mockAwardRecommendationDetails: AwardRecommendationDetails = {
   award_recommendation_id: "63588df8-f2d1-44ed-a201-5804abba696a",

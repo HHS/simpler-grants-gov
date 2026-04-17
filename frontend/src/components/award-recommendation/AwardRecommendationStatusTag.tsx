@@ -27,10 +27,10 @@ const AwardRecommendationStatusTag = ({ status }: Props) => {
         return (
           <div
             className="usa-tag bg-error-dark text-white radius-2 font-sans-sm text-no-uppercase display-flex flex-align-center"
-            data-testid="award-recommendation-status-pending-review"
+            data-testid="award-recommendation-status-in-review"
           >
             <USWDSIcon name="visibility" className="margin-right-05" />
-            {t("pendingReview")}
+            {t("in_review")}
           </div>
         );
       case "approved":

@@ -2045,8 +2045,7 @@ export const messages = {
     status: "Status",
     statusTag: {
       draft: "Draft",
-      inProgress: "In progress",
-      pendingReview: "Pending review",
+      in_review: "In progress",
       approved: "Approved",
     },
     heroButtons: {
