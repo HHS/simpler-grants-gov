@@ -564,7 +564,39 @@ class OpportunitySummaryUpdateResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunitySummaryDetailSchema())
 
 
-class DeleteAttachmentResponseV1Schema(AbstractResponseSchema):
+# class OpportunityUploadAttachmentRequestV1Schema(Schema):
+#     file_attachment = fields.List(fields.Raw(), required=True)
+
+
+class OpportunityUploadAttachmentRequestV1Schema(Schema):
+    file_attachment = fields.List(
+        fields.File(
+            required=True,
+            allow_none=False,
+            metadata={"description": "The file attachment to upload"},
+        ),
+        required=True,
+        metadata={"description": "List of file attachments to upload"},
+    )
+
+
+class OpportunityAttachmentResponseV1Schema(Schema):
+    opportunity_attachment_id = fields.List(fields.String(), required=True)
+
+
+class ResponseWithErrorsSchema(Schema):
     message = fields.String(required=True)
     status_code = fields.Integer(required=True, dump_default=200)
     errors = fields.List(fields.String(), required=False)
+
+
+class OpportunityUploadAttachmentResponseV1Schema(ResponseWithErrorsSchema):
+    """Response Schema for Upload Attachments Endpoint"""
+
+    data = fields.Nested(OpportunityAttachmentResponseV1Schema())
+
+
+class DeleteAttachmentResponseV1Schema(ResponseWithErrorsSchema):
+    """Response Schema for Delete Attachment Endpoint"""
+
+    pass
