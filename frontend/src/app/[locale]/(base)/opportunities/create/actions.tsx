@@ -80,12 +80,10 @@ export async function validateAgencyAccessAction(agencyId: string) {
 
     if (canCreate) {
       return { success: true };
-    } else {
-      return {
-        error:
-          "You do not have access to create opportunities for this agency.",
-      };
     }
+    return {
+      error: "You do not have access to create opportunities for this agency.",
+    };
   } catch (_error) {
     return {
       error: "You do not have access to create opportunities for this agency.",
