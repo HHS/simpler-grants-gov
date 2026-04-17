@@ -1,8 +1,4 @@
-export type AwardRecommendationStatus =
-  | "draft"
-  | "inProgress"
-  | "pendingReview"
-  | "approved";
+export type AwardRecommendationStatus = "draft" | "in_review" | "approved";
 
 export type AwardSelectionMethod = "merit-review-only" | "merit-review-other";
 

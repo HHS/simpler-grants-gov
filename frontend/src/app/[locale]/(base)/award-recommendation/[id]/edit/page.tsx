@@ -173,9 +173,26 @@ async function AwardRecommendationEditPageContent({
       );
     } catch (error) {
       console.error("Failed to fetch award recommendation details", error);
-      if (parseErrorStatus(error as ApiRequestError) === 404) {
+      const errorStatus = parseErrorStatus(error as ApiRequestError);
+
+      if (errorStatus === 404) {
         awardRecommendationDetails = null;
       }
+
+      // Handle authentication errors specifically
+      if (errorStatus === 401 || errorStatus === 403) {
+        return (
+          <Alert
+            heading={t("errorHeadingAuthentication")}
+            headingLevel="h2"
+            type="error"
+            validation
+          >
+            {t("authenticationError")}
+          </Alert>
+        );
+      }
+
       return (
         <Alert
           heading={t("errorHeadingAwardRecommendation")}

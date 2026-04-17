@@ -28,6 +28,7 @@ export const fetchAwardRecommendationEndpoint = {
   version: "alpha",
   namespace: "award-recommendations",
   method: "GET" as ApiMethod,
+  requiresAuth: true,
 };
 
 export const toDynamicApplicationsEndpoint = (

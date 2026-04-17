@@ -1943,6 +1943,9 @@ export const messages = {
     },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
+    errorHeadingAuthentication: "Authentication Error",
+    authenticationError:
+      "You are not authenticated. Please sign in to view award recommendations.",
     awardRecommendationFetchError:
       "Error fetching award recommendation data. Please try refreshing the page.",
     recommendations: {
@@ -1965,6 +1968,7 @@ export const messages = {
         heading: "Funding strategy",
         description:
           "Explain how you plan to provide funding over time. For example, will the agency award all funding in a single award or in multiple budget periods across a longer period of performance.",
+        noFundingStrategyProvided: "No funding strategy provided.",
       },
     },
   },

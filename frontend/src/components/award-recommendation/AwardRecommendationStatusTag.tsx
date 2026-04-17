@@ -23,17 +23,7 @@ const AwardRecommendationStatusTag = ({ status }: Props) => {
             {t("draft")}
           </div>
         );
-      case "inProgress":
-        return (
-          <div
-            className="usa-tag bg-accent-warm-light text-ink radius-2 font-sans-sm text-no-uppercase display-flex flex-align-center"
-            data-testid="award-recommendation-status-in-progress"
-          >
-            <USWDSIcon name="schedule" className="margin-right-05" />
-            {t("inProgress")}
-          </div>
-        );
-      case "pendingReview":
+      case "in_review":
         return (
           <div
             className="usa-tag bg-error-dark text-white radius-2 font-sans-sm text-no-uppercase display-flex flex-align-center"
