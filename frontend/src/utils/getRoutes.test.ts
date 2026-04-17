@@ -24,6 +24,7 @@ describe("getNextRoutes", () => {
       "/(base)/notifications",
       "/(base)/opportunities/create",
       "/(base)/opportunities",
+      "/(base)/opportunity/1/edit",
       "/(base)/opportunity/1",
       "/(base)",
       "/(base)/research-participant-guide",

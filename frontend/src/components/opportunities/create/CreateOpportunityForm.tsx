@@ -78,15 +78,17 @@ export function CreateOpportunityForm({
   // Use useEffect to detect success and redirect
   const router = useRouter();
   useEffect(() => {
-    // Scroll to top for the error or success message
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-    // If success, redirect to Opportunity List page
-    if (response?.success) {
-      router.push("/opportunities");
-    } else {
+    // If success, redirect to the edit page (Part 2 of create)
+    if (response?.success && response.data?.opportunity_id) {
+      router.push(
+        `/opportunity/${response.data.opportunity_id}/edit?fromCreate=true`,
+      );
+    } else if (response?.errorMessage) {
+      // Scroll to top to show the error message
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
       setDisableSave(true);
       if (selectedCategoryId.trim() !== "other") {
         setExplain(""); // need to manually set this for checks below to work correctly
