@@ -39,6 +39,28 @@ class AwardRecommendationCreateRequestSchema(Schema):
     )
 
 
+class AwardRecommendationUpdateRequestSchema(Schema):
+    """Schema for PUT /alpha/award-recommendations/:award_recommendation_id request"""
+
+    award_selection_method = fields.Enum(
+        AwardSelectionMethod,
+        required=True,
+        metadata={"description": "The method used to select the award"},
+    )
+    additional_info = fields.String(
+        allow_none=True,
+        metadata={"description": "Additional info about the award recommendation"},
+    )
+    funding_strategy = fields.String(
+        allow_none=True,
+        metadata={"description": "Funding strategy information for the award recommendation"},
+    )
+    other_key_information = fields.String(
+        allow_none=True,
+        metadata={"description": "Other key information for the award recommendation"},
+    )
+
+
 class AwardRecommendationOpportunitySummarySchema(Schema):
     """Schema for the award recommendation opportunity summary"""
 
