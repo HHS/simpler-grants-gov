@@ -48,7 +48,13 @@ cd api/
 make init
 ```
 
-3. Start watch logs (API will be available at [`localhost:3000`](http://localhost:8080/))
+3. Fill up the database with local data
+
+```bash
+make setup-api-data
+```
+
+4. Start API with logs (API will be available at [`localhost:3000`](http://localhost:8080/))
 
 ```bash
 make run-logs
