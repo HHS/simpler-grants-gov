@@ -14,7 +14,6 @@ import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { openForm } from "tests/e2e/utils/forms/form-navigation-utils";
 import { saveForm } from "tests/e2e/utils/forms/save-form-utils";
-import { verifyAlertErrors } from "tests/e2e/utils/forms/verify-form-errors-utils";
 import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
@@ -70,12 +69,11 @@ test(
 
     await saveForm(page, true);
 
-    await verifyAlertErrors(page, SF424A_ALERT_ERRORS);
-
     await verifyFormStatusAfterSave(
       page,
       "incomplete",
       SF424A_REQUIRED_FIELD_ERRORS,
+      SF424A_ALERT_ERRORS,
     );
 
     await verifyFormStatusOnApplication(
