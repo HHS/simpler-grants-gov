@@ -3,6 +3,8 @@ import Cookies from "js-cookie";
 import { identity } from "lodash";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 
+import { JSX } from "react";
+
 let enableFeature = false;
 
 jest.mock("src/services/featureFlags/FeatureFlagManager", () => {
@@ -60,7 +62,7 @@ describe("WithFeatureFlag", () => {
     const OriginalComponent = jest.fn();
     const onEnabled = jest.fn();
     const searchParams = { any: "param" };
-    const WrappedComponent = withFeatureFlag(
+    const WrappedComponent = withFeatureFlag<object, JSX.Element>(
       OriginalComponent,
       "applyFormPrototypeOff",
       onEnabled,
@@ -79,7 +81,7 @@ describe("WithFeatureFlag", () => {
     const OriginalComponent = jest.fn();
     const onEnabled = jest.fn();
     const searchParams = { any: "param" };
-    const WrappedComponent = withFeatureFlag(
+    const WrappedComponent = withFeatureFlag<object, JSX.Element>(
       OriginalComponent,
       "applyFormPrototypeOff",
       onEnabled,
@@ -99,8 +101,7 @@ describe("WithFeatureFlag", () => {
     enableFeature = true;
     const OriginalComponent = jest.fn();
     const onEnabled = jest.fn();
-    // const searchParams = { any: "param" };
-    const WrappedComponent = withFeatureFlag(
+    const WrappedComponent = withFeatureFlag<object, JSX.Element>(
       OriginalComponent,
       "applyFormPrototypeOff",
       onEnabled,
