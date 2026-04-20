@@ -97,7 +97,7 @@ jobs:
       # if we successfully pulled a cached image, then import it into docker, otherwise we can skip this step as it won't work
       # if we cache miss, we'll build the docker image in the make commands below
       - name: Load cached Docker image
-        if: steps.restore-docker-image-cached.outputs.cache-hit == true
+        if: steps.restore-docker-image-cached.outputs.cache-hit == 'true'
         run: |
           docker load < /tmp/docker-image.tar
 
