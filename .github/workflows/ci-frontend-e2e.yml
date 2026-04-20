@@ -54,19 +54,20 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ github.ref }}
           fetch-depth: 1000
       - name: Get commit hash
         id: get-api-commit-hash
         run: |
           cd ..
-          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{inputs.ref}} api)
-          COMMIT_HASH=$(git rev-parse ${{ inputs.ref }})
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{ github.ref }} api)
+          COMMIT_HASH=$(git rev-parse ${{ github.ref }})
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
           echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
 
   e2e-tests-local:
     name: Run Local E2E Tests
+    needs: [get-api-commit-hash]
     runs-on: ubuntu-22.04
 
     strategy:
