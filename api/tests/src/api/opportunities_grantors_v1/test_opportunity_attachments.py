@@ -48,7 +48,9 @@ def existing_attachment(db_session, existing_opportunity, enable_factory_create,
     return attachment
 
 
-def test_upload_attachment_success(client, grantor_auth_data, existing_opportunity, mock_s3_bucket):
+def test_upload_attachment_success(
+    client, grantor_auth_data, existing_opportunity, mock_s3_bucket, other_mock_s3_bucket
+):
     """Test successful upload of an attachment"""
     _, _, token, _ = grantor_auth_data
 
@@ -75,7 +77,7 @@ def test_upload_attachment_success(client, grantor_auth_data, existing_opportuni
 
 
 def test_upload_multiple_attachments(
-    client, grantor_auth_data, existing_opportunity, mock_s3_bucket
+    client, grantor_auth_data, existing_opportunity, mock_s3_bucket, other_mock_s3_bucket
 ):
     """Test uploading multiple attachments at once"""
     _, _, token, _ = grantor_auth_data

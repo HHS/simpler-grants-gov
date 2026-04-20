@@ -5,6 +5,7 @@ from sqlalchemy import select
 from werkzeug.datastructures import FileStorage
 
 import src.adapters.db as db
+from src.adapters.aws import S3Config
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
@@ -12,6 +13,11 @@ from src.db.models.opportunity_models import OpportunityAttachment
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
 from src.services.opportunities_grantor_v1.opportunity_utils import validate_opportunity_is_draft
+from src.services.opportunity_attachments.attachment_util import (
+    adjust_legacy_file_name,
+    get_s3_attachment_path,
+)
+from src.util import file_util
 
 logger = logging.getLogger(__name__)
 
@@ -39,18 +45,27 @@ def upload_opportunity_attachments(
             attachment_id = uuid.uuid4()
 
             # Extract file metadata
-            file_name = file_data.filename
+            if not file_data.filename:
+                raise_flask_error(422, "File must have a filename")
+
+            file_name = adjust_legacy_file_name(file_data.filename)
             file_content = file_data.read()
             mime_type = file_data.mimetype or "application/octet-stream"
             file_description = ""
             file_size_bytes = len(file_content)
 
             # Create S3 path for the file
-            file_path = f"s3://local-mock-public-bucket/opportunities/{opportunity_id}/attachments/{attachment_id}/{file_name}"
+            s3_config = S3Config()
+            file_path = get_s3_attachment_path(
+                file_name=file_name,
+                opportunity_attachment_id=attachment_id,
+                opportunity=opportunity,
+                s3_config=s3_config,
+            )
 
             # Write the file to S3
-            # with file_util.open_stream(file_path, "wb", content_type=mime_type) as f:
-            #    f.write(file_content)
+            with file_util.open_stream(file_path, "wb", content_type=mime_type) as f:
+                f.write(file_content)
 
             attachment = OpportunityAttachment(
                 attachment_id=attachment_id,
