@@ -570,10 +570,16 @@ class OpportunityUploadAttachmentRequestV1Schema(Schema):
         allow_none=False,
         metadata={"description": "The file attachment to upload"},
     )
+    file_description = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={"description": "Description of the file attachment"},
+    )
 
 
 class OpportunityAttachmentResponseV1Schema(Schema):
     opportunity_attachment_id = fields.String(required=True)
+    file_description = fields.String(required=False, allow_none=True)
 
 
 class ResponseWithErrorsSchema(Schema):

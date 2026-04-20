@@ -65,7 +65,10 @@ def test_upload_attachment_success(
     resp = client.post(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/attachments",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": (BytesIO(file_content), "test_file.pdf", "application/pdf")},
+        data={
+            "file_attachment": (BytesIO(file_content), "test_file.pdf", "application/pdf"),
+            "file_description": "Test file description",
+        },
     )
 
     assert resp.status_code == 200
@@ -74,6 +77,9 @@ def test_upload_attachment_success(
 
     assert "data" in response_json
     assert "opportunity_attachment_id" in response_json["data"]
+    assert "file_description" in response_json["data"]
+    assert response_json["data"]["file_description"] == "Test file description"
+
     attachment_id = response_json["data"]["opportunity_attachment_id"]
     assert isinstance(attachment_id, str)
 

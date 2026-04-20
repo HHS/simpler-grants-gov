@@ -201,13 +201,15 @@ def opportunity_upload_attachments(
         user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
+        file_description = files_data.get("file_description", "")
+
         attachment_id = upload_opportunity_attachment(
-            db_session, user, opportunity_id, files_data["file_attachment"]
+            db_session, user, opportunity_id, files_data["file_attachment"], file_description
         )
 
     return response.ApiResponse(
         message="Attachment uploaded successfully",
-        data={"opportunity_attachment_id": attachment_id},
+        data={"opportunity_attachment_id": attachment_id, "file_description": file_description},
     )
 
 

@@ -27,6 +27,7 @@ def upload_opportunity_attachment(
     user: User,
     opportunity_id: uuid.UUID,
     file_data: FileStorage,
+    file_description: str = "",
 ) -> str:
     """Upload an attachment to an opportunity"""
     # Get the opportunity and verify it exists
@@ -46,7 +47,6 @@ def upload_opportunity_attachment(
 
     file_name = adjust_legacy_file_name(file_data.filename)
     mime_type = file_data.mimetype or "application/octet-stream"
-    file_description = ""
 
     # Create S3 path for the file
     s3_config = S3Config()
@@ -84,6 +84,7 @@ def upload_opportunity_attachment(
             "attachment_id": attachment_id,
             "file_size": file_size_bytes,
             "file_name": file_name,
+            "file_description": file_description,
         },
     )
 
