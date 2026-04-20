@@ -13,8 +13,8 @@ jest.mock("next-intl/server", () => ({
 }));
 
 jest.mock("src/services/fetch/fetchers/userFetcher", () => ({
-  updateUserDetails: (token: unknown, id: unknown, data: unknown) =>
-    mockUpdateUserDetails(token, id, data) as unknown,
+  updateUserDetails: (id: unknown, data: unknown) =>
+    mockUpdateUserDetails(id, data) as unknown,
 }));
 
 describe("user profile form action", () => {
@@ -47,7 +47,7 @@ describe("user profile form action", () => {
   });
   it("returns result of update on success", async () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
-    mockUpdateUserDetails.mockImplementation((_token, _id, data) => {
+    mockUpdateUserDetails.mockImplementation((_id, data) => {
       return data as unknown;
     });
 

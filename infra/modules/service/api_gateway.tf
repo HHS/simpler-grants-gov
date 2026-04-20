@@ -72,6 +72,7 @@ locals {
       "grantsws-agency/services/v2"         = [],
       "grantsws-applicant/services/v2"      = [],
       "v1/users/login"                      = [{ "method" : "GET" }],
+      "v1/users/logout"                     = [{ "method" : "GET" }],
       "v1/users/token"                      = [],
   }][var.enable_api_gateway ? 1 : 0]
 

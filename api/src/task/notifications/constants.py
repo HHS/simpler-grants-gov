@@ -20,6 +20,7 @@ class Metrics(StrEnum):
     FAILED_TO_SEND = "failed_to_send"
     NOTIFICATIONS_RESET = "notifications_reset"
     SUPPRESSED_DESTINATION_COUNT = "suppressed_destination_count"
+    NOTIFICATIONS_SKIPPED_EMAIL_DISABLED = "notifications_skipped_email_disabled"
 
 
 @dataclass

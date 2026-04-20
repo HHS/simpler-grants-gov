@@ -1,7 +1,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { APIResponse } from "src/types/apiResponseTypes";
+import { UiSchema } from "src/types/applyForm/types";
 
-import { UiSchema } from "src/components/applyForm/types";
 import { iso8601Date, RegexMatchedString } from "./generalTypes";
 
 export type FormInstruction = {

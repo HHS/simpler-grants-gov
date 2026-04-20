@@ -252,6 +252,13 @@ class WorkflowApprovalConfigItemSchema(Schema):
             "example": [Privilege.PROGRAM_OFFICER_APPROVAL],
         },
     )
+    allowed_approval_response_types = fields.List(
+        fields.Enum(ApprovalResponseType),
+        metadata={
+            "description": "List of approval response types allowed for this approval",
+            "example": [ApprovalResponseType.APPROVED, ApprovalResponseType.REQUIRES_MODIFICATION],
+        },
+    )
     possible_users = fields.List(
         fields.Nested(WorkflowUserSchema),
         metadata={
@@ -303,6 +310,13 @@ class WorkflowGetResponseDataSchema(Schema):
                     "possible_users": [],
                 }
             },
+        },
+    )
+    valid_events = fields.List(
+        fields.String(),
+        metadata={
+            "description": "List of events that can be sent for the current workflow state. Empty if the workflow is no longer active.",
+            "example": ["receive_program_officer_approval"],
         },
     )
     opportunity_id = fields.UUID(

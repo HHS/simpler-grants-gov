@@ -2,6 +2,7 @@ import {
   ApplicationDetail,
   ApplicationFormDetail,
 } from "src/types/applicationResponseTypes";
+import { FormValidationWarning } from "src/types/applyForm/types";
 import { CompetitionForms } from "src/types/competitionsResponseTypes";
 import { getModifiedTimeDisplay } from "src/utils/generalUtils";
 
@@ -9,7 +10,6 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Table } from "@trussworks/react-uswds";
 
-import { FormValidationWarning } from "src/components/applyForm/types";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { IncludeFormInSubmissionRadio } from "./IncludeFormInSubmissionRadio";
 
@@ -320,7 +320,7 @@ const FormLink = ({
           // Enables Playwright to select the correct link regardless of text or layout changes.
           data-testid="application-form-link"
           data-form-id={formId}
-          href={`/applications/${applicationId}/form/${appFormId}`}
+          href={`/workspace/applications/${applicationId}/form/${appFormId}`}
         >
           {formName}
         </Link>

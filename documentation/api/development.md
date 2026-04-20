@@ -145,19 +145,41 @@ Running in the native/local approach may require additional packages to be insta
 
 4. This still requires Docker as the database and services all still run within Docker.
 5. Certain environment variables require different paths when running outside of Docker.
-   You can handle this by setting these into your `override.env` file.
+   You can handle this by setting these environment variables yourself via you `.bashrc`
+   or `.zshrc` file. Another approach is to have an `.envrc` in the api directory and
+   use [direnv](https://direnv.net/) to have a directory-based shell file.
 
-```dotenv
-DB_HOST=localhost
-S3_ENDPOINT_URL=http://localhost:9090
-LOGIN_GOV_JWK_ENDPOINT=http://localhost:5001/issuer1/jwks
+```shell
+#!/bin/bash
+# This file can be used by direnv to load the local.env file
+# into your current terminal session.
+# Steps:
+# * Install direnv: https://direnv.net/
+# * Configure direnv: https://direnv.net/docs/hook.html
+# * In this folder, run "direnv allow ."
 
-SEARCH_ENDPOINT=localhost
-OPENSEARCH_HOST=localhost
+set -o allexport
+source local.env
+set +o allexport
 
-# This needs to be set explicitly as "export PY_RUN_APPROACH=local"
-# in your shell, or via some other mechanism - setting it here won't work.
-PY_RUN_APPROACH=local
+set -o allexport
+source override.env
+set +o allexport
+
+
+# If you are running outside of the Docker container, the DB can
+# be found on localhost:5432. Inside the container it's referenced via
+# the name of the docker container.
+#
+export DB_HOST=localhost
+export S3_ENDPOINT_URL=http://localhost:9090
+export SQS_ENDPOINT_URL=http://localhost:9324
+export LOGIN_GOV_JWK_ENDPOINT=http://localhost:5001/issuer1/jwks
+
+export SEARCH_ENDPOINT=localhost
+export OPENSEARCH_HOST=localhost
+
+export PY_RUN_APPROACH=local
 ```
 
 **Note:** All the following commands should be run from the `/api` directory.
@@ -209,7 +231,7 @@ If you want to connect to SQS with the AWS CLI, you can do:
 `aws --endpoint-url http://localhost:9324 sqs list-queues` which in this case would list the queues.
 
 SQS queues are automatically created based on the configuration that we specify in the
-[custom.conf](/api/mock-sqs/custom.conf) file which gets passed to the elasticmq docker image during
+[custom.conf](../../api/mock-sqs/custom.conf) file which gets passed to the elasticmq docker image during
 startup.
 
 The SQS queues **DO NOT** maintain state if you stop and restart the container. If you stop the SQS

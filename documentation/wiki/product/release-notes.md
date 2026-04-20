@@ -1,6 +1,6 @@
 # Release Notes
 
-## [Simpler.Grants.Gov](release-notes.md#simpler.grants.gov-hosted-a-public-demonstration) Release Notes - April 3, 2026
+## [Simpler.Grants.Gov](release-notes.md#simplergrantsgov-hosted-a-public-demonstration) Release Notes - April 3, 2026
 
 April 3rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.04.01-1):&#x20;
 
