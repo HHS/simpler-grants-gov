@@ -103,7 +103,8 @@ def create_award_recommendation_risk(
     )
 
     agency = award_recommendation.opportunity.agency_record
-    assert agency is not None  # Guaranteed by _get_award_recommendation_for_update
+    if agency is None:
+        raise Exception("Agency not found for award recommendation")
     agency_code = agency.agency_code
 
     submission_ids = request_data["award_recommendation_application_submission_ids"]
