@@ -3,6 +3,7 @@ import uuid
 import pytest
 
 from src.constants.lookup_constants import (
+    AwardRecommendationAuditEvent,
     AwardRecommendationStatus,
     AwardSelectionMethod,
     Privilege,
@@ -81,7 +82,7 @@ class TestUpdateAwardRecommendation200:
         assert resp.status_code == 200
         data = resp.json["data"]
 
-        # Assert that fields were updated correctly
+        # Assert that fields were updated correctly in response
         assert data["award_recommendation_id"] == str(award_recommendation.award_recommendation_id)
         assert data["award_recommendation_status"] == AwardRecommendationStatus.IN_REVIEW
         assert data["award_selection_method"] == AwardSelectionMethod.FORMULA
@@ -89,6 +90,22 @@ class TestUpdateAwardRecommendation200:
         assert data["selection_method_detail"] == "Updated selection method details"
         assert data["funding_strategy"] == "Updated funding strategy"
         assert data["other_key_information"] == "Updated key information"
+        
+        # Verify database was actually updated
+        db_session.refresh(award_recommendation)
+        assert award_recommendation.award_selection_method == AwardSelectionMethod.FORMULA
+        assert award_recommendation.additional_info == "Updated additional information"
+        assert award_recommendation.selection_method_detail == "Updated selection method details"
+        assert award_recommendation.funding_strategy == "Updated funding strategy"
+        assert award_recommendation.other_key_information == "Updated key information"
+        
+        # Verify an audit record was created for the update
+        audit_records = [event for event in award_recommendation.award_recommendation_audit_events 
+                         if event.award_recommendation_audit_event == AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_UPDATED
+                         and event.user_id == user.user_id]
+        
+        assert len(audit_records) > 0, "No audit record was created for the update"
+        assert audit_records[-1].created_at is not None, "Audit record timestamp is missing"
 
     def test_update_award_recommendation_null_fields_200(
         self, client, db_session, agency, award_recommendation
@@ -116,13 +133,29 @@ class TestUpdateAwardRecommendation200:
         assert resp.status_code == 200
         data = resp.json["data"]
 
-        # Assert that fields were updated correctly with null values
+        # Assert that fields were updated correctly with null values in response
         assert data["award_recommendation_id"] == str(award_recommendation.award_recommendation_id)
         assert data["award_selection_method"] == AwardSelectionMethod.FORMULA
         assert data["additional_info"] is None
         assert data["selection_method_detail"] is None
         assert data["funding_strategy"] is None
         assert data["other_key_information"] is None
+        
+        # Verify database was actually updated with null values
+        db_session.refresh(award_recommendation)
+        assert award_recommendation.award_selection_method == AwardSelectionMethod.FORMULA
+        assert award_recommendation.additional_info is None
+        assert award_recommendation.selection_method_detail is None
+        assert award_recommendation.funding_strategy is None
+        assert award_recommendation.other_key_information is None
+        
+        # Verify an audit record was created for the update
+        audit_records = [event for event in award_recommendation.award_recommendation_audit_events 
+                         if event.award_recommendation_audit_event == AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_UPDATED
+                         and event.user_id == user.user_id]
+        
+        assert len(audit_records) > 0, "No audit record was created for the update"
+        assert audit_records[-1].created_at is not None, "Audit record timestamp is missing"
 
 
 ####################################
