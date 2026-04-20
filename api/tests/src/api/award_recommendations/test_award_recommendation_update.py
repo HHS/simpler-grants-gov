@@ -90,7 +90,7 @@ class TestUpdateAwardRecommendation200:
         assert data["selection_method_detail"] == "Updated selection method details"
         assert data["funding_strategy"] == "Updated funding strategy"
         assert data["other_key_information"] == "Updated key information"
-        
+
         # Verify database was actually updated
         db_session.refresh(award_recommendation)
         assert award_recommendation.award_selection_method == AwardSelectionMethod.FORMULA
@@ -98,12 +98,16 @@ class TestUpdateAwardRecommendation200:
         assert award_recommendation.selection_method_detail == "Updated selection method details"
         assert award_recommendation.funding_strategy == "Updated funding strategy"
         assert award_recommendation.other_key_information == "Updated key information"
-        
+
         # Verify an audit record was created for the update
-        audit_records = [event for event in award_recommendation.award_recommendation_audit_events 
-                         if event.award_recommendation_audit_event == AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_UPDATED
-                         and event.user_id == user.user_id]
-        
+        audit_records = [
+            event
+            for event in award_recommendation.award_recommendation_audit_events
+            if event.award_recommendation_audit_event
+            == AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_UPDATED
+            and event.user_id == user.user_id
+        ]
+
         assert len(audit_records) > 0, "No audit record was created for the update"
         assert audit_records[-1].created_at is not None, "Audit record timestamp is missing"
 
@@ -140,7 +144,7 @@ class TestUpdateAwardRecommendation200:
         assert data["selection_method_detail"] is None
         assert data["funding_strategy"] is None
         assert data["other_key_information"] is None
-        
+
         # Verify database was actually updated with null values
         db_session.refresh(award_recommendation)
         assert award_recommendation.award_selection_method == AwardSelectionMethod.FORMULA
@@ -148,12 +152,16 @@ class TestUpdateAwardRecommendation200:
         assert award_recommendation.selection_method_detail is None
         assert award_recommendation.funding_strategy is None
         assert award_recommendation.other_key_information is None
-        
+
         # Verify an audit record was created for the update
-        audit_records = [event for event in award_recommendation.award_recommendation_audit_events 
-                         if event.award_recommendation_audit_event == AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_UPDATED
-                         and event.user_id == user.user_id]
-        
+        audit_records = [
+            event
+            for event in award_recommendation.award_recommendation_audit_events
+            if event.award_recommendation_audit_event
+            == AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_UPDATED
+            and event.user_id == user.user_id
+        ]
+
         assert len(audit_records) > 0, "No audit record was created for the update"
         assert audit_records[-1].created_at is not None, "Audit record timestamp is missing"
 
