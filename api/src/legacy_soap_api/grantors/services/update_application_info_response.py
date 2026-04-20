@@ -115,7 +115,7 @@ def update_application_info(
     tracking number / note records as side effects.
 
     Returns a tuple of (grants_gov_tracking_number, assign_result, notes_result).
-    Raises SOAPFaultException or SOAPClientUserDoesNotHavePermission on failure.
+    In event of failure, the <ErrorMessage> field is populated.
     """
 
     certificate = validate_certificate(
