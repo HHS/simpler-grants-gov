@@ -4,10 +4,7 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import {
-  testdata_local_environment,
-  testdata_staging_environment,
-} from "tests/e2e/opportunity-id-data";
+import { getOpportunityId } from "tests/e2e/get-opportunityId-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
@@ -20,19 +17,13 @@ import {
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
 import {
-  SF424A_ALERT_ERRORS,
-  SF424A_FORM_MATCHER,
-  SF424A_REQUIRED_FIELD_ERRORS,
-} from "./fixtures/sf424a-field-definitions";
+  SF424D_FORM_MATCHER,
+  SF424D_REQUIRED_FIELD_ERRORS,
+} from "./fixtures/sf424d-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
-
 const { testOrgLabel, targetEnv } = playwrightEnv;
-const OPPORTUNITY_ID =
-  targetEnv === "staging"
-    ? testdata_staging_environment.opportunityID
-    : testdata_local_environment.opportunityID;
-const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
+const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
@@ -45,7 +36,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 });
 
 test(
-  "SF-424A error validation - required fields and inline errors",
+  "SF-424D - error validation on empty save",
   { tag: [APPLY, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
@@ -60,26 +51,30 @@ test(
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
-    const openedSf424aForValidation = await openForm(page, SF424A_FORM_MATCHER);
-    if (!openedSf424aForValidation) {
+    const opened = await openForm(page, SF424D_FORM_MATCHER);
+    if (!opened) {
       throw new Error(
-        "Could not find or open SF-424A form link on the application forms page",
+        "Could not find or open SF-424D form link on the application forms page",
       );
     }
 
-    await saveForm(page, true);
+    // Save without entering any field values
+    await saveForm(page, true); // expect validation errors
 
+    // Verifies top alert and inline errors:
+    // Title is required
+    // Applicant Organization is required
     await verifyFormStatusAfterSave(
       page,
       "incomplete",
-      SF424A_REQUIRED_FIELD_ERRORS,
-      SF424A_ALERT_ERRORS,
+      SF424D_REQUIRED_FIELD_ERRORS,
     );
 
+    // Return to application and verify form row shows "Some issues found"
     await verifyFormStatusOnApplication(
       page,
       "incomplete",
-      SF424A_FORM_MATCHER,
+      SF424D_FORM_MATCHER,
       applicationUrl,
     );
   },

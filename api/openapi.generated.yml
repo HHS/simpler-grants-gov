@@ -4638,17 +4638,17 @@ components:
         funding_instruments:
           type: array
           items:
-            enum: &id033
+            enum: &id027
             - cooperative_agreement
             - grant
             - procurement_contract
             - other
-            type: &id034
+            type: &id028
             - string
         funding_categories:
           type: array
           items:
-            enum: &id035
+            enum: &id029
             - recovery_act
             - agriculture
             - arts
@@ -4676,12 +4676,12 @@ components:
             - affordable_care_act
             - other
             - energy_infrastructure_and_critical_mineral_and_materials
-            type: &id036
+            type: &id030
             - string
         applicant_types:
           type: array
           items:
-            enum: &id037
+            enum: &id031
             - state_governments
             - county_governments
             - city_or_township_governments
@@ -4699,7 +4699,7 @@ components:
             - small_businesses
             - other
             - unrestricted
-            type: &id038
+            type: &id032
             - string
         created_at:
           type: string
@@ -4761,7 +4761,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: &id027
+          enum: &id033
           - discretionary
           - mandatory
           - continuation
@@ -4780,23 +4780,23 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: &id028
+            type: &id034
             - object
             $ref: '#/components/schemas/OpportunityAssistanceListingV1Schema'
         summary:
-          type: &id029
+          type: &id035
           - object
           $ref: '#/components/schemas/OpportunitySummaryV1Schema'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: &id030
+          enum: &id036
           - forecasted
           - posted
           - closed
           - archived
-          type: &id031
+          type: &id037
           - string
         top_level_agency_code:
           type:
@@ -5428,6 +5428,195 @@ components:
           example: true
       required:
       - competition_id
+    OpportunitySummaryDetailSchema:
+      type: object
+      properties:
+        summary_description:
+          type:
+          - string
+          - 'null'
+          description: The summary of the opportunity
+          example: This opportunity aims to unravel the mysteries of the universe.
+        is_cost_sharing:
+          type:
+          - boolean
+          - 'null'
+          description: Whether or not the opportunity has a cost sharing/matching
+            requirement
+        is_forecast:
+          type: boolean
+          description: Whether the opportunity is forecasted, that is, the information
+            is only an estimate and not yet official
+          example: false
+        close_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: The date that the opportunity will close - only set if is_forecast=False
+        close_date_description:
+          type:
+          - string
+          - 'null'
+          description: Optional details regarding the close date
+          example: Proposals are due earlier than usual.
+        post_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: The date the opportunity was posted
+        archive_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: When the opportunity will be archived
+        expected_number_of_awards:
+          type:
+          - integer
+          - 'null'
+          description: The number of awards the opportunity is expected to award
+          example: 10
+        estimated_total_program_funding:
+          type:
+          - integer
+          - 'null'
+          description: The total program funding of the opportunity in US Dollars
+          example: 10000000
+        award_floor:
+          type:
+          - integer
+          - 'null'
+          description: The minimum amount an opportunity would award
+          example: 10000
+        award_ceiling:
+          type:
+          - integer
+          - 'null'
+          description: The maximum amount an opportunity would award
+          example: 100000
+        additional_info_url:
+          type:
+          - string
+          - 'null'
+          description: A URL to a website that can provide additional information
+            about the opportunity
+          example: grants.gov
+        additional_info_url_description:
+          type:
+          - string
+          - 'null'
+          description: The text to display for the additional_info_url link
+          example: Click me for more info
+        forecasted_post_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the opportunity is expected
+            to be posted, and transition out of being a forecast
+        forecasted_close_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the opportunity is expected
+            to be close once posted.
+        forecasted_close_date_description:
+          type:
+          - string
+          - 'null'
+          description: Forecasted opportunity only. Optional details regarding the
+            forecasted closed date.
+          example: Proposals will probably be due on this date
+        forecasted_award_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the grantor plans to
+            award the opportunity.
+        forecasted_project_start_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Forecasted opportunity only. The date the grantor expects the
+            award recipient should start their project
+        fiscal_year:
+          type:
+          - integer
+          - 'null'
+          description: Forecasted opportunity only. The fiscal year the project is
+            expected to be funded and launched
+        funding_category_description:
+          type:
+          - string
+          - 'null'
+          description: Additional information about the funding category
+          example: Economic Support
+        applicant_eligibility_description:
+          type:
+          - string
+          - 'null'
+          description: Additional information about the types of applicants that are
+            eligible
+          example: All types of domestic applicants are eligible to apply
+        agency_contact_description:
+          type:
+          - string
+          - 'null'
+          description: Information regarding contacting the agency who owns the opportunity
+          example: For more information, reach out to Jane Smith at agency US-ABC
+        agency_email_address:
+          type:
+          - string
+          - 'null'
+          description: The contact email of the agency who owns the opportunity
+          example: fake_email@grants.gov
+        agency_email_address_description:
+          type:
+          - string
+          - 'null'
+          description: The text for the link to the agency email address
+          example: Click me to email the agency
+        version_number:
+          type:
+          - integer
+          - 'null'
+          description: The version number of the opportunity summary
+          example: 1
+        funding_instruments:
+          type: array
+          items:
+            enum: *id027
+            type: *id028
+        funding_categories:
+          type: array
+          items:
+            enum: *id029
+            type: *id030
+        applicant_types:
+          type: array
+          items:
+            enum: *id031
+            type: *id032
+        created_at:
+          type: string
+          format: date-time
+          description: When the opportunity summary was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the opportunity summary was last updated
+        opportunity_summary_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the opportunity summary
+          example: 123e4567-e89b-12d3-a456-426614174000
+      required:
+      - opportunity_summary_id
     OpportunityAttachmentV1Schema:
       type: object
       properties:
@@ -5785,7 +5974,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id027
+          enum: *id033
           type:
           - string
           - 'null'
@@ -5799,17 +5988,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id028
+            type: *id034
             $ref: '#/components/schemas/OpportunityAssistanceListingV1Schema'
         summary:
-          type: *id029
+          type: *id035
           $ref: '#/components/schemas/OpportunitySummaryV1Schema'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id030
-          type: *id031
+          enum: *id036
+          type: *id037
         top_level_agency_code:
           type:
           - string
@@ -5833,7 +6022,7 @@ components:
           - object
           - 'null'
           anyOf:
-          - $ref: '#/components/schemas/OpportunitySummaryV1Schema'
+          - $ref: '#/components/schemas/OpportunitySummaryDetailSchema'
           - type: 'null'
         non_forecast_summary:
           description: The non-forecast summary of the opportunity (if available)
@@ -5841,7 +6030,7 @@ components:
           - object
           - 'null'
           anyOf:
-          - $ref: '#/components/schemas/OpportunitySummaryV1Schema'
+          - $ref: '#/components/schemas/OpportunitySummaryDetailSchema'
           - type: 'null'
         attachments:
           type: array
@@ -5938,7 +6127,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: &id032
+            type: &id038
             - object
             $ref: '#/components/schemas/ValidationIssueSchema'
     FormUpdateResponseSchema:
@@ -7414,6 +7603,14 @@ components:
             type:
             - object
             $ref: '#/components/schemas/WorkflowApprovalConfigItemSchema'
+        valid_events:
+          type: array
+          description: List of events that can be sent for the current workflow state.
+            Empty if the workflow is no longer active.
+          example:
+          - receive_program_officer_approval
+          items:
+            type: string
         opportunity_id:
           type:
           - string
@@ -8477,7 +8674,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id027
+          enum: *id033
           type:
           - string
           - 'null'
@@ -8491,17 +8688,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id028
+            type: *id034
             $ref: '#/components/schemas/OpportunityAssistanceListingV1Schema'
         summary:
-          type: *id029
+          type: *id035
           $ref: '#/components/schemas/OpportunitySummaryV1Schema'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id030
-          type: *id031
+          enum: *id036
+          type: *id037
         top_level_agency_code:
           type:
           - string
@@ -9028,7 +9225,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id032
+            type: *id038
             $ref: '#/components/schemas/ValidationIssueSchema'
         message:
           type: string
@@ -10560,195 +10757,6 @@ components:
           type:
           - object
           $ref: '#/components/schemas/OrganizationInvitationListPaginationSchema'
-    OpportunitySummaryDetailSchema:
-      type: object
-      properties:
-        summary_description:
-          type:
-          - string
-          - 'null'
-          description: The summary of the opportunity
-          example: This opportunity aims to unravel the mysteries of the universe.
-        is_cost_sharing:
-          type:
-          - boolean
-          - 'null'
-          description: Whether or not the opportunity has a cost sharing/matching
-            requirement
-        is_forecast:
-          type: boolean
-          description: Whether the opportunity is forecasted, that is, the information
-            is only an estimate and not yet official
-          example: false
-        close_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: The date that the opportunity will close - only set if is_forecast=False
-        close_date_description:
-          type:
-          - string
-          - 'null'
-          description: Optional details regarding the close date
-          example: Proposals are due earlier than usual.
-        post_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: The date the opportunity was posted
-        archive_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: When the opportunity will be archived
-        expected_number_of_awards:
-          type:
-          - integer
-          - 'null'
-          description: The number of awards the opportunity is expected to award
-          example: 10
-        estimated_total_program_funding:
-          type:
-          - integer
-          - 'null'
-          description: The total program funding of the opportunity in US Dollars
-          example: 10000000
-        award_floor:
-          type:
-          - integer
-          - 'null'
-          description: The minimum amount an opportunity would award
-          example: 10000
-        award_ceiling:
-          type:
-          - integer
-          - 'null'
-          description: The maximum amount an opportunity would award
-          example: 100000
-        additional_info_url:
-          type:
-          - string
-          - 'null'
-          description: A URL to a website that can provide additional information
-            about the opportunity
-          example: grants.gov
-        additional_info_url_description:
-          type:
-          - string
-          - 'null'
-          description: The text to display for the additional_info_url link
-          example: Click me for more info
-        forecasted_post_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: Forecasted opportunity only. The date the opportunity is expected
-            to be posted, and transition out of being a forecast
-        forecasted_close_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: Forecasted opportunity only. The date the opportunity is expected
-            to be close once posted.
-        forecasted_close_date_description:
-          type:
-          - string
-          - 'null'
-          description: Forecasted opportunity only. Optional details regarding the
-            forecasted closed date.
-          example: Proposals will probably be due on this date
-        forecasted_award_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: Forecasted opportunity only. The date the grantor plans to
-            award the opportunity.
-        forecasted_project_start_date:
-          type:
-          - string
-          - 'null'
-          format: date
-          description: Forecasted opportunity only. The date the grantor expects the
-            award recipient should start their project
-        fiscal_year:
-          type:
-          - integer
-          - 'null'
-          description: Forecasted opportunity only. The fiscal year the project is
-            expected to be funded and launched
-        funding_category_description:
-          type:
-          - string
-          - 'null'
-          description: Additional information about the funding category
-          example: Economic Support
-        applicant_eligibility_description:
-          type:
-          - string
-          - 'null'
-          description: Additional information about the types of applicants that are
-            eligible
-          example: All types of domestic applicants are eligible to apply
-        agency_contact_description:
-          type:
-          - string
-          - 'null'
-          description: Information regarding contacting the agency who owns the opportunity
-          example: For more information, reach out to Jane Smith at agency US-ABC
-        agency_email_address:
-          type:
-          - string
-          - 'null'
-          description: The contact email of the agency who owns the opportunity
-          example: fake_email@grants.gov
-        agency_email_address_description:
-          type:
-          - string
-          - 'null'
-          description: The text for the link to the agency email address
-          example: Click me to email the agency
-        version_number:
-          type:
-          - integer
-          - 'null'
-          description: The version number of the opportunity summary
-          example: 1
-        funding_instruments:
-          type: array
-          items:
-            enum: *id033
-            type: *id034
-        funding_categories:
-          type: array
-          items:
-            enum: *id035
-            type: *id036
-        applicant_types:
-          type: array
-          items:
-            enum: *id037
-            type: *id038
-        created_at:
-          type: string
-          format: date-time
-          description: When the opportunity summary was created
-        updated_at:
-          type: string
-          format: date-time
-          description: When the opportunity summary was last updated
-        opportunity_summary_id:
-          type: string
-          format: uuid
-          description: Unique identifier for the opportunity summary
-          example: 123e4567-e89b-12d3-a456-426614174000
-      required:
-      - opportunity_summary_id
     OpportunitySummaryCreateResponseV1Schema:
       type: object
       properties:
@@ -11239,7 +11247,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id032
+            type: *id038
             $ref: '#/components/schemas/ValidationIssueSchema'
         message:
           type: string
@@ -11656,7 +11664,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id032
+            type: *id038
             $ref: '#/components/schemas/ValidationIssueSchema'
         message:
           type: string

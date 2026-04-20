@@ -4,10 +4,6 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import {
-  testdata_local_environment,
-  testdata_staging_environment,
-} from "tests/e2e/opportunity-id-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
@@ -20,18 +16,20 @@ import {
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
 import {
-  SF424A_ALERT_ERRORS,
-  SF424A_FORM_MATCHER,
-  SF424A_REQUIRED_FIELD_ERRORS,
-} from "./fixtures/sf424a-field-definitions";
+  GRANTSGOV_LOBBYING_FORM_MATCHER,
+  GRANTSGOV_LOBBYING_REQUIRED_FIELD_ERRORS,
+} from "./fixtures/grantsgov-lobbying-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
-
 const { testOrgLabel, targetEnv } = playwrightEnv;
+
+// Environment-specific opportunity IDs
+// Staging: 39cf0a5c-5fed-40b4-8f46-5374101ae419
+// Local:   c3c59562-a54f-4203-b0f6-98f2f0383481
 const OPPORTUNITY_ID =
   targetEnv === "staging"
-    ? testdata_staging_environment.opportunityID
-    : testdata_local_environment.opportunityID;
+    ? "39cf0a5c-5fed-40b4-8f46-5374101ae419"
+    : "c3c59562-a54f-4203-b0f6-98f2f0383481";
 const OPPORTUNITY_URL = `/opportunity/${OPPORTUNITY_ID}`;
 
 // Skip non-Chrome browsers in staging
@@ -45,7 +43,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 });
 
 test(
-  "SF-424A error validation - required fields and inline errors",
+  "Grants.gov Lobbying Form - error validation with no data entered",
   { tag: [APPLY, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
@@ -60,26 +58,28 @@ test(
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
-    const openedSf424aForValidation = await openForm(page, SF424A_FORM_MATCHER);
-    if (!openedSf424aForValidation) {
+    const opened = await openForm(page, GRANTSGOV_LOBBYING_FORM_MATCHER);
+    if (!opened) {
       throw new Error(
-        "Could not find or open SF-424A form link on the application forms page",
+        "Could not find or open Grants.gov Lobbying Form link on the application forms page",
       );
     }
 
-    await saveForm(page, true);
+    // Do not enter anything and click save — all required fields should error
+    await saveForm(page, true); // expect validation errors
 
+    // Checks error alert list at top of form page and inline field errors
     await verifyFormStatusAfterSave(
       page,
       "incomplete",
-      SF424A_REQUIRED_FIELD_ERRORS,
-      SF424A_ALERT_ERRORS,
+      GRANTSGOV_LOBBYING_REQUIRED_FIELD_ERRORS,
     );
 
+    // Return to application and verify form row shows "Some issues found"
     await verifyFormStatusOnApplication(
       page,
       "incomplete",
-      SF424A_FORM_MATCHER,
+      GRANTSGOV_LOBBYING_FORM_MATCHER,
       applicationUrl,
     );
   },
