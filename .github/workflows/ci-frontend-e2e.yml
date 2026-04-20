@@ -46,6 +46,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  get-api-commit-hash:
+    name: Get commit hash
+    runs-on: ubuntu-22.04
+    outputs:
+      commit_hash: ${{ steps.get-api-commit-hash.outputs.commit_hash }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 1000
+      - name: Get commit hash
+        id: get-api-commit-hash
+        run: |
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{inputs.ref}} api)
+          COMMIT_HASH=$(git rev-parse ${{ inputs.ref }})
+          echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
+          echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
+
   e2e-tests-local:
     name: Run Local E2E Tests
     runs-on: ubuntu-22.04
@@ -67,6 +85,23 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
+      - name: Check Docker image cached
+        id: check-docker-image-cached
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/docker-image.tar
+          lookup-only: true
+          key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+          restore-keys: api-docker-img- # get any recent API container from cache if we can't find our specific one
+
+      - name: Load cached Docker image
+        run: |
+          docker load < /tmp/docker-image.tar
+
+      - name: Docker images before Start API
+        run: |
+          docker image ls
+
       - name: Start API Server for e2e tests
         run: |
           cd ../api
@@ -84,6 +119,10 @@ jobs:
           chmod +x ../api/bin/wait-for-api.sh
           ../api/bin/wait-for-api.sh
         shell: bash
+
+      - name: Docker images after Start API
+        run: |
+          docker image ls
 
       - name: Install dependencies and Playwright
         run: |
