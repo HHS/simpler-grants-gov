@@ -6,6 +6,7 @@ from werkzeug.datastructures import FileStorage
 
 from src.constants.lookup_constants import Privilege
 from src.db.models import opportunity_models
+from src.util import file_util
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.src.db.models.factories import OpportunityAttachmentFactory, OpportunityFactory
 
@@ -49,7 +50,12 @@ def existing_attachment(db_session, existing_opportunity, enable_factory_create,
 
 
 def test_upload_attachment_success(
-    client, grantor_auth_data, existing_opportunity, mock_s3_bucket, other_mock_s3_bucket
+    client,
+    grantor_auth_data,
+    existing_opportunity,
+    mock_s3_bucket,
+    other_mock_s3_bucket,
+    db_session,
 ):
     """Test successful upload of an attachment"""
     _, _, token, _ = grantor_auth_data
@@ -72,7 +78,18 @@ def test_upload_attachment_success(
 
     assert "data" in response_json
     assert "opportunity_attachment_id" in response_json["data"]
-    assert isinstance(response_json["data"]["opportunity_attachment_id"], str)
+    attachment_id = response_json["data"]["opportunity_attachment_id"]
+    assert isinstance(attachment_id, str)
+
+    # Fetch the attachment from the database
+    opportunity_attachment = (
+        db_session.query(opportunity_models.OpportunityAttachment)
+        .filter_by(attachment_id=attachment_id)
+        .first()
+    )
+
+    assert opportunity_attachment is not None
+    assert file_util.file_exists(opportunity_attachment.file_location) is True
 
 
 def test_upload_attachment_unauthorized(client, db_session, existing_opportunity):

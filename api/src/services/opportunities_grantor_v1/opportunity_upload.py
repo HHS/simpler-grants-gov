@@ -83,7 +83,7 @@ def upload_opportunity_attachment(
             "opportunity_id": opportunity_id,
             "attachment_id": attachment_id,
             "file_size": file_size_bytes,
-            "file_name": file_name
+            "file_name": file_name,
         },
     )
 
