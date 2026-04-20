@@ -22,7 +22,7 @@ from src.services.opportunities_grantor_v1.opportunity_summaries import (
 from src.services.opportunities_grantor_v1.opportunity_update import update_opportunity
 from src.services.opportunities_grantor_v1.opportunity_upload import (
     delete_opportunity_attachment,
-    upload_opportunity_attachments,
+    upload_opportunity_attachment,
 )
 
 logger = logging.getLogger(__name__)
@@ -193,7 +193,7 @@ def opportunity_summary_update(
 def opportunity_upload_attachments(
     db_session: db.Session, opportunity_id: UUID, files_data: dict
 ) -> response.ApiResponse:
-    """Upload attachments to an opportunity"""
+    """Upload an attachment to an opportunity"""
     add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
     logger.info("POST /v1/grantors/opportunities/:opportunity_id/attachments")
 
@@ -201,13 +201,13 @@ def opportunity_upload_attachments(
         user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
-        attachment_ids = upload_opportunity_attachments(
+        attachment_id = upload_opportunity_attachment(
             db_session, user, opportunity_id, files_data["file_attachment"]
         )
 
     return response.ApiResponse(
-        message="Attachments uploaded successfully",
-        data={"opportunity_attachment_id": attachment_ids},
+        message="Attachment uploaded successfully",
+        data={"opportunity_attachment_id": attachment_id},
     )
 
 

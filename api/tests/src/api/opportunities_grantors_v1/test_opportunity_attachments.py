@@ -68,45 +68,11 @@ def test_upload_attachment_success(
 
     assert resp.status_code == 200
     response_json = resp.get_json()
-    assert response_json["message"] == "Attachments uploaded successfully"
+    assert response_json["message"] == "Attachment uploaded successfully"
 
     assert "data" in response_json
     assert "opportunity_attachment_id" in response_json["data"]
-    assert isinstance(response_json["data"]["opportunity_attachment_id"], list)
-    assert len(response_json["data"]["opportunity_attachment_id"]) == 1
-
-
-def test_upload_multiple_attachments(
-    client, grantor_auth_data, existing_opportunity, mock_s3_bucket, other_mock_s3_bucket
-):
-    """Test uploading multiple attachments at once"""
-    _, _, token, _ = grantor_auth_data
-
-    # Create test file data for two different files
-    file_content1 = b"This is the first test file content"
-    file_data1 = FileStorage(
-        stream=io.BytesIO(file_content1), filename="test_file1.pdf", content_type="application/pdf"
-    )
-
-    file_content2 = b"This is the second test file content"
-    file_data2 = FileStorage(
-        stream=io.BytesIO(file_content2), filename="test_file2.txt", content_type="text/plain"
-    )
-
-    resp = client.post(
-        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/attachments",
-        headers={"X-SGG-Token": token},
-        data={"file_attachment": [file_data1, file_data2]},
-    )
-
-    assert resp.status_code == 200
-    response_json = resp.get_json()
-    assert response_json["message"] == "Attachments uploaded successfully"
-
-    assert "data" in response_json
-    assert "opportunity_attachment_id" in response_json["data"]
-    assert isinstance(response_json["data"]["opportunity_attachment_id"], list)
-    assert len(response_json["data"]["opportunity_attachment_id"]) == 2
+    assert isinstance(response_json["data"]["opportunity_attachment_id"], str)
 
 
 def test_upload_attachment_unauthorized(client, db_session, existing_opportunity):

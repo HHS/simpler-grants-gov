@@ -565,19 +565,15 @@ class OpportunitySummaryUpdateResponseV1Schema(AbstractResponseSchema):
 
 
 class OpportunityUploadAttachmentRequestV1Schema(Schema):
-    file_attachment = fields.List(
-        fields.File(
-            required=True,
-            allow_none=False,
-            metadata={"description": "The file attachment to upload"},
-        ),
+    file_attachment = fields.File(
         required=True,
-        metadata={"description": "List of file attachments to upload"},
+        allow_none=False,
+        metadata={"description": "The file attachment to upload"},
     )
 
 
 class OpportunityAttachmentResponseV1Schema(Schema):
-    opportunity_attachment_id = fields.List(fields.String(), required=True)
+    opportunity_attachment_id = fields.String(required=True)
 
 
 class ResponseWithErrorsSchema(Schema):
