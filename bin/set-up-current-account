@@ -82,7 +82,7 @@ if [[ -z "${github_arn}" ]]; then
 fi
 
 # Create the infrastructure for the terraform backend such as the S3 bucket
-# for storing tfstate files and the DynamoDB table for tfstate locks.
+# for storing tfstate files (state locking is handled natively by S3).
 # -reconfigure is used in case this isn't the first account being set up
 # and there is already a .terraform directory
 terraform init \

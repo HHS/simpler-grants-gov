@@ -74,12 +74,16 @@ export async function verifyFormStatusOnApplication(
  *
  * @param page Playwright Page object
  * @param status Expected status: "complete" or "incomplete"
- * @param expectedErrors Required when status is "incomplete" — list of field errors to verify
+ * @param expectedErrors Required when status is "incomplete" — list of field errors to verify inline
+ * @param alertErrors Optional override for the alert banner error list. Defaults to expectedErrors.
+ *   Use when a form's alert-level errors differ from its inline field errors (e.g. array-level
+ *   validation errors that appear in the alert but have no corresponding inline element).
  */
 export async function verifyFormStatusAfterSave(
   page: Page,
   status: FormStatus,
   expectedErrors?: FieldError[],
+  alertErrors?: FieldError[],
 ): Promise<void> {
   if (status === "complete") {
     const alert = page.getByTestId("alert");
@@ -100,7 +104,7 @@ export async function verifyFormStatusAfterSave(
         "expectedErrors must be provided when status is 'incomplete'",
       );
     }
-    await verifyAlertErrors(page, expectedErrors);
+    await verifyAlertErrors(page, alertErrors ?? expectedErrors);
     await verifyInlineErrors(page, expectedErrors);
   }
 }
