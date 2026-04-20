@@ -392,6 +392,23 @@ export const InformationCard = ({
   );
 
   return detailsRender(shouldBlockSubmitForTransferOwnership);
+  // return (
+  //   <>
+  //     {shouldBlockSubmitForTransferOwnership ? (
+  //       <NeedsTransferOwnershipCta />
+  //     ) : null}
+  //     <GridContainer
+  //       data-testid="information-card"
+  //       className="border radius-md border-base-lighter padding-x-2 margin-y-4"
+  //     >
+  //       <Grid row gap>
+  //         <InformationCardDetails
+  //           applicationSubmitHandler={applicationSubmitHandler}
+  //         />
+  //       </Grid>
+  //     </GridContainer>
+  //   </>
+  // );
 };
 
 export const SubmitApplicationButton = ({
