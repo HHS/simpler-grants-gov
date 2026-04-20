@@ -274,6 +274,162 @@ export const messages = {
       close: "Close",
     },
   },
+  OpportunityEdit: {
+    pageTitle: "Edit opportunity",
+    metaDescription:
+      "Edit draft opportunity information and non-forecast summary fields.",
+    header: {
+      pageTitle: "Opportunity #: {number}",
+      lastUpdated: "Last updated:",
+      status: "Status:",
+      stageDraft: "Draft",
+      stageArchived: "Archived",
+      stageClosed: "Closed",
+      stageForecasted: "Forecasted",
+      stagePosted: "Open for applications",
+      saveButton: "Save",
+      previewButton: "Preview",
+      submitButton: "Submit for review",
+      navTitle: "On this page",
+    },
+    sections: {
+      keyInformation: "Key information",
+      fundingDetails: "Funding details",
+      eligibility: "Eligibility",
+      additionalInformation: "Additional information",
+      attachments: "Attachments",
+    },
+    labels: {
+      title: "Title",
+      agency: "Agency",
+      assistanceListings: "Assistance listings:",
+      opportunityNumber: "Opportunity number",
+      opportunityStage: "Opportunity stage",
+      awardSelectionMethod: "Award selection method",
+      awardSelectionMethodExplanation: "Award selection method explanation",
+      fundingType: "Funding type",
+      costSharing: "Cost sharing or matching requirements?",
+      category: "Category",
+      expectedNumberOfAwards: "Expected number of awards",
+      estimatedTotalProgramFunding: "Estimated total program funding",
+      awardMinimum: "Award minimum",
+      awardMaximum: "Award maximum",
+      publishDate: "Publish date",
+      closeDate: "Close date",
+      closeDateExplanation: "Close date explanation",
+      eligibleApplicants: "Eligible applicants",
+      additionalEligibilityInfo: "Additional information on eligibility",
+      fundingCategoryExplanation: "Category explanation",
+      description: "Description",
+      additionalInfoUrl: "Link to additional information",
+      additionalInfoUrlText: "Link display text",
+      grantorContactDetails: "Grantor contact details",
+      contactEmail: "Contact email",
+      contactEmailText: "Email display text",
+      yes: "Yes",
+      no: "No",
+      eligibilityBusiness: "Business",
+      eligibilityEducation: "Education",
+      eligibilityGovernment: "Government entities",
+      eligibilityNonprofit: "Nonprofit",
+      eligibilityMiscellaneous: "Miscellaneous",
+    },
+    content: {
+      keyInformationIntro:
+        "Below is a summary of the key information for this opportunity. You can edit specific fields directly in this section.",
+      fundingDetailsIntro:
+        "Provide the financial structure of this opportunity. This includes the total funding available, expected number of awards, and critical dates for the application window.",
+      eligibilityIntro:
+        "Define who is eligible to apply for these funds. Select all applicable applicant types and provide any specific requirements or restrictions regarding organizational status or geographic location.",
+      additionalInformationIntro:
+        "Use this section to provide supplementary context, such as a summary of the program's goals, agency-specific links, and contact information for programmatic or technical inquiries.",
+      draftOnlyWarning:
+        "Only draft opportunities should be editable from this page.",
+      notAvailable: "Not available",
+      fundingTypeHint:
+        "Select the legal relationship between the agency and the recipient",
+      costSharingHint:
+        "Indicate if the applicant is required to provide a specific percentage of non-federal funds.",
+      categoryHint: "Choose the primary functional area this funding supports",
+      fundingCategoryExplanationHint: "If category is Other",
+      expectedNumberOfAwardsHint:
+        "Enter the estimated number of individual awards the agency intends to fund.",
+      estimatedTotalProgramFundingHint:
+        "Enter the total amount of funding available for all awards under this opportunity.",
+      awardMinimumHint:
+        "Enter the smallest dollar amount that can be awarded to a single recipient.",
+      awardMaximumHint:
+        "Enter the largest dollar amount that can be awarded to a single recipient.",
+      publishDateHint:
+        "The date this opportunity will be visible to the public",
+      closeDateHint: "The final deadline for all applications to be submitted",
+      closeDateExplanationHint:
+        "Provide a reason if a specific close date is not set, such as continuous review or a rolling deadline.",
+      select: "Select",
+      selectFundingCategory: "Select funding category",
+      eligibleApplicantsHint:
+        "Select all categories of organizations or individuals that may apply for this grant.",
+      additionalEligibilityInfoHint:
+        "If eligible applicant is Other, provide further clarification on specific requirements",
+      descriptionHint:
+        "Provide a high-level summary of the funding purpose and the problems it intends to solve.",
+      additionalInfoUrlHint:
+        "Enter the full web address for more program details.",
+      additionalInfoUrlTextHint:
+        "Enter the text that will appear as the clickable link.",
+      grantorContactDetailsHint:
+        "Provide the name or department and phone number for the primary contact.",
+      contactEmailHint: "Enter a valid email address.",
+      contactEmailTextHint:
+        "Enter the text that will be shown as the email link.",
+      reviewButton: {
+        idle: "Review required fields",
+        pending: "Reviewing...",
+      },
+      alerts: {
+        success: "Saved successfully",
+        successBody: "Your changes have been saved.",
+        newOpportunityHeading: "Opportunity draft started",
+        newOpportunityBody:
+          "Your initial information has been saved. Complete the sections below to finish your opportunity details",
+        genericError: "Unable to save draft opportunity details.",
+        missingSummaryContext: "Missing opportunity summary context for save.",
+        unauthenticated: "You must be signed in to update this opportunity.",
+        forbidden: "You do not have permission to update this opportunity.",
+        notFound: "The opportunity summary could not be found.",
+        draftOnly: "Only draft opportunity summaries can be updated.",
+        validationHeading: "Please fix the highlighted fields.",
+        validationWarningHeading: "Progress saved",
+        validationWarningBody:
+          "Your progress has been saved. However, this opportunity cannot be submitted/published until the following required fields are completed:",
+      },
+    },
+    validationErrors: {
+      title: "Enter a title.",
+      awardSelectionMethod: "Select an award selection method.",
+      description: "Enter a description.",
+      publishDate: "Enter a publish date.",
+      closeDate: "Enter a close date.",
+      contactEmailRequired: "Enter a contact email.",
+      contactEmailInvalid: "Enter a valid contact email.",
+      contactEmailText: "Enter email display text.",
+      closeDateOrder: "Close date must be on or after publish date.",
+      awardMinimum: "Enter an award minimum.",
+      awardMaximum: "Enter an award maximum.",
+      awardMaximumOrder:
+        "Award maximum must be greater than or equal to award minimum.",
+      fundingType: "Select a funding type.",
+      fundingCategory: "Select a funding category.",
+      expectedNumberOfAwards: "Enter the expected number of awards.",
+      estimatedTotalProgramFunding:
+        "Enter the estimated total program funding.",
+      eligibleApplicants: "Select at least one eligible applicant type.",
+      additionalEligibilityInfo: "Enter additional eligibility information.",
+      additionalInfoUrl: "Enter an additional information URL.",
+      additionalInfoUrlText: "Enter additional information URL text.",
+      grantorContactDetails: "Enter grantor contact details.",
+    },
+  },
   Application: {
     title: "Application",
     breadcrumbWorkspace: "Workspace",
@@ -1888,9 +2044,8 @@ export const messages = {
     datePrepared: "Date prepared",
     status: "Status",
     statusTag: {
-      draft: "Draft",
-      inProgress: "In progress",
-      pendingReview: "Pending review",
+      draft: "In Progress",
+      in_review: "Pending Review",
       approved: "Approved",
     },
     heroButtons: {
@@ -1943,6 +2098,9 @@ export const messages = {
     },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
+    errorHeadingAuthentication: "Authentication Error",
+    authenticationError:
+      "You are not authenticated. Please sign in to view award recommendations.",
     awardRecommendationFetchError:
       "Error fetching award recommendation data. Please try refreshing the page.",
     recommendations: {
@@ -1965,6 +2123,7 @@ export const messages = {
         heading: "Funding strategy",
         description:
           "Explain how you plan to provide funding over time. For example, will the agency award all funding in a single award or in multiple budget periods across a longer period of performance.",
+        noFundingStrategyProvided: "No funding strategy provided.",
       },
     },
   },
