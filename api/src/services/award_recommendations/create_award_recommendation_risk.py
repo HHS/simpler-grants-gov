@@ -53,7 +53,7 @@ def _get_award_recommendation_for_update(
 
 def _generate_risk_number(db_session: db.Session, agency_code: str) -> str:
     if not agency_code:
-        raise_flask_error(403, message="Forbidden")
+        raise Exception("agency_code is required to generate a risk number")
 
     alphabet = string.ascii_uppercase + string.digits
     while True:
