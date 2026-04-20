@@ -351,7 +351,10 @@ class AwardRecommendationRiskCreateRequestSchema(Schema):
 
     comment = fields.String(
         required=True,
-        metadata={"description": "Summary of the risk", "example": "Applicant has unresolved audit findings"},
+        metadata={
+            "description": "Summary of the risk",
+            "example": "Applicant has unresolved audit findings",
+        },
     )
     award_recommendation_risk_type = fields.Enum(
         AwardRecommendationRiskType,
@@ -374,7 +377,10 @@ class AwardRecommendationRiskCreateResponseDataSchema(Schema):
         metadata={"description": "The award recommendation risk ID"}
     )
     comment = fields.String(
-        metadata={"description": "Summary of the risk", "example": "Applicant has unresolved audit findings"},
+        metadata={
+            "description": "Summary of the risk",
+            "example": "Applicant has unresolved audit findings",
+        },
     )
     award_recommendation_risk_number = fields.String(
         metadata={"description": "The generated risk number", "example": "HHS-00012345"},
