@@ -8,6 +8,8 @@ from src.api.award_recommendations_alpha.award_recommendation_blueprint import (
     award_recommendation_blueprint,
 )
 from src.api.award_recommendations_alpha.award_recommendation_schemas import (
+    AwardRecommendationAuditRequestSchema,
+    AwardRecommendationAuditResponseSchema,
     AwardRecommendationCreateRequestSchema,
     AwardRecommendationGetResponseSchema,
     AwardRecommendationReviewUpdateRequestSchema,
@@ -27,6 +29,9 @@ from src.services.award_recommendations.create_award_recommendation_risk import 
 )
 from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_and_verify_access,
+)
+from src.services.award_recommendations.list_award_recommendation_audit import (
+    list_award_recommendation_audit,
 )
 from src.services.award_recommendations.list_award_recommendation_submissions import (
     list_award_recommendation_submissions,
@@ -196,3 +201,42 @@ def award_recommendation_risk_create(
         )
 
     return response.ApiResponse(message="Success", data=risk)
+
+
+@award_recommendation_blueprint.post(
+    "/award-recommendations/<uuid:award_recommendation_id>/audit_history"
+)
+@award_recommendation_blueprint.input(AwardRecommendationAuditRequestSchema(), location="json")
+@award_recommendation_blueprint.output(AwardRecommendationAuditResponseSchema())
+@award_recommendation_blueprint.doc(
+    summary="List Award Recommendation Audit History",
+    description="Get paginated audit history for an award recommendation.",
+    responses=[200, 401, 403, 404, 422],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_audit_list(
+    db_session: db.Session, award_recommendation_id: uuid.UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"award_recommendation_id": award_recommendation_id})
+    logger.info("POST /alpha/award-recommendations/:award_recommendation_id/audit_history")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        audit_events, pagination_info = list_award_recommendation_audit(
+            db_session, user, award_recommendation_id, json_data
+        )
+
+    add_extra_data_to_current_request_logs(
+        {
+            "response.pagination.total_pages": pagination_info.total_pages,
+            "response.pagination.total_records": pagination_info.total_records,
+        }
+    )
+    logger.info("Successfully fetched award recommendation audit history")
+
+    return response.ApiResponse(
+        message="Success", data=audit_events, pagination_info=pagination_info
+    )
