@@ -191,13 +191,19 @@ class TestCreateAwardRecommendationRisk404:
             db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
         )
 
+        missing_id = uuid.uuid4()
         resp = client.post(
             f"{API_URL}/{award_recommendation.award_recommendation_id}/risks",
             headers={"X-SGG-Token": token},
-            json=_build_request([uuid.uuid4()]),
+            json=_build_request([missing_id]),
         )
 
         assert resp.status_code == 404
+        resp_json = resp.get_json()
+        assert len(resp_json["errors"]) == 1
+        assert resp_json["errors"][0]["type"] == "application_submission_not_found"
+        assert resp_json["errors"][0]["field"] == "award_recommendation_application_submission_ids"
+        assert resp_json["errors"][0]["value"] == str(missing_id)
 
     def test_create_risk_submission_from_different_ar_404(
         self, client, db_session, agency, opportunity, award_recommendation
@@ -224,6 +230,9 @@ class TestCreateAwardRecommendationRisk404:
         )
 
         assert resp.status_code == 404
+        resp_json = resp.get_json()
+        assert len(resp_json["errors"]) == 1
+        assert resp_json["errors"][0]["type"] == "application_submission_not_found"
 
 
 ####################################
