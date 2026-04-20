@@ -10,10 +10,14 @@ from typing import Any
 import requests
 from defusedxml import minidom
 from lxml import etree
-from sqlalchemy import select
+from sqlalchemy import exists, select
 
 import src.adapters.db as db
-from src.db.models.competition_models import ApplicationSubmission
+from src.db.models.competition_models import (
+    ApplicationSubmission,
+    ApplicationSubmissionRetrieved,
+    ApplicationSubmissionTrackingNumber,
+)
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
@@ -351,6 +355,34 @@ def get_application_submission_by_legacy_tracking_number(
             ApplicationSubmission.legacy_tracking_number == int(legacy_tracking_number),
         )
     ).scalar_one_or_none()
+
+
+def get_application_submission_by_legacy_tracking_number_extended(
+    db_session: db.Session, legacy_tracking_number: str, user_id: str
+) -> dict | None:
+    if legacy_tracking_number.startswith("GRANT"):
+        legacy_tracking_number = legacy_tracking_number.split("GRANT")[1]
+    combined_stmt = select(
+        ApplicationSubmission,
+        exists()
+        .where(
+            ApplicationSubmissionTrackingNumber.created_by_user_id == user_id,
+            ApplicationSubmissionTrackingNumber.application_submission_id
+            == ApplicationSubmission.application_submission_id,
+        )
+        .label("has_tracking"),
+        exists()
+        .where(
+            ApplicationSubmissionRetrieved.created_by_user_id == user_id,
+            ApplicationSubmissionRetrieved.application_submission_id
+            == ApplicationSubmission.application_submission_id,
+        )
+        .label("has_retrieval"),
+    ).where(ApplicationSubmission.legacy_tracking_number == int(legacy_tracking_number))
+    result = db_session.execute(combined_stmt).tuples().first()
+    if result:
+        return dict(submission=result[0], has_tracking=result[1], has_retrieval=result[2])
+    return None
 
 
 def convert_bool_to_yes_no(value: bool | None) -> str:
