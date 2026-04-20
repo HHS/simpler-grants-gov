@@ -159,6 +159,13 @@ class AwardRecommendationDataSchema(Schema):
             "example": "Selection factors included technical merit, past performance, and cost.",
         },
     )
+    funding_strategy = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Funding strategy for award recommendations",
+            "example": "Full funding for top 10 applications, partial funding for next 15 based on available budget.",
+        },
+    )
     other_key_information = fields.String(
         allow_none=True,
         metadata={
@@ -190,6 +197,22 @@ class AwardRecommendationGetResponseSchema(AbstractResponseSchema):
     data = fields.Nested(
         AwardRecommendationDataSchema,
         metadata={"description": "The award recommendation details"},
+    )
+
+
+class AwardRecommendationReviewUpdateRequestSchema(Schema):
+    """Schema for PUT /alpha/award-recommendations/:id/reviews/:review_id request"""
+
+    is_reviewed = fields.Boolean(
+        required=True,
+        metadata={"description": "Whether the review has been completed"},
+    )
+
+
+class AwardRecommendationReviewUpdateResponseSchema(AbstractResponseSchema):
+    data = fields.Nested(
+        AwardRecommendationReviewSchema,
+        metadata={"description": "The updated review"},
     )
 
 
