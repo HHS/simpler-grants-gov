@@ -12,10 +12,10 @@ See [goals.md](./goals.md) for more information about the vision and goals for t
 
 ## Deliverables
 
-The [deliverables](./deliverables) directory contains information about our deliverables for the modernization project.
+The [deliverables](./wiki/product/deliverables) directory contains information about our deliverables for the modernization project.
 
-[The product roadmap](https://github.com/orgs/HHS/projects/12) contains brief descriptions of upcoming deliverables. The [individual deliverables](./deliverables/individual_deliverables) directory contains detailed descriptions of the project deliverables.
+[The product roadmap](https://github.com/orgs/HHS/projects/12) contains brief descriptions of upcoming deliverables.
 
 ## Decisions
 
-Important technical and programmatic decisions are contained in the [decisions](./decisions/) directory, captured using the [architectural decision record format](https://adr.github.io) and written in markdown.
+Important technical and programmatic decisions are contained in the [decisions](./wiki/product/decisions) directory, captured using the [architectural decision record format](https://adr.github.io) and written in markdown.

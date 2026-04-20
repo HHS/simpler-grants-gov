@@ -417,9 +417,14 @@ export async function fillForm(
  */
 export async function verifyFormLinkVisible(
   page: Page,
-  formName: string,
+  formName: string | RegExp,
 ): Promise<void> {
-  await getFormLink(page, formName).waitFor({
+  const formLink =
+    formName instanceof RegExp
+      ? page.locator("a, button").filter({ hasText: formName })
+      : getFormLink(page, formName);
+
+  await formLink.waitFor({
     state: "visible",
     timeout: 60000,
   });
