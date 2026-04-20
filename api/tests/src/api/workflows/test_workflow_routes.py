@@ -859,6 +859,32 @@ class TestWorkflowGet:
         assert data["is_active"] is False
         assert data["valid_events"] == []
 
+    def test_get_workflow_valid_events_for_approval_state_200(
+        self, client, db_session, enable_factory_create, agency, opportunity
+    ):
+        """Test that valid_events returns correct events for an approval state."""
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_OPPORTUNITY]
+        )
+
+        workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+            current_workflow_state=BasicState.PENDING_PROGRAM_OFFICER_APPROVAL,
+            is_active=True,
+            opportunity=opportunity,
+        )
+
+        response = client.get(
+            f"/v1/workflows/{workflow.workflow_id}", headers={"X-SGG-Token": token}
+        )
+
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert set(data["valid_events"]) == {
+            "receive_program_officer_approval",
+            "check_program_officer_approval",
+        }
+
     def test_get_workflow_no_token_401(self, client):
         """Test that requests without auth token are rejected."""
         response = client.get(f"/v1/workflows/{uuid.uuid4()}")
