@@ -2,6 +2,7 @@ import logging
 import uuid
 
 from sqlalchemy import select
+from werkzeug.datastructures import FileStorage
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
@@ -19,7 +20,7 @@ def upload_opportunity_attachments(
     db_session: db.Session,
     user: User,
     opportunity_id: uuid.UUID,
-    files: list[dict],
+    files: list[FileStorage],
 ) -> list[str]:
     """Upload attachments to an opportunity"""
     # Get the opportunity and verify it exists
@@ -41,7 +42,7 @@ def upload_opportunity_attachments(
             file_name = file_data.filename
             file_content = file_data.read()
             mime_type = file_data.mimetype or "application/octet-stream"
-            file_description = ""  # Optional metadata
+            file_description = ""
             file_size_bytes = len(file_content)
 
             # Create S3 path for the file
@@ -51,7 +52,6 @@ def upload_opportunity_attachments(
             # with file_util.open_stream(file_path, "wb", content_type=mime_type) as f:
             #    f.write(file_content)
 
-            # Create attachment record in database
             attachment = OpportunityAttachment(
                 attachment_id=attachment_id,
                 opportunity_id=opportunity_id,

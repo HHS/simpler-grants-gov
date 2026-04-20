@@ -1,6 +1,8 @@
+import io
 import uuid
 
 import pytest
+from werkzeug.datastructures import FileStorage
 
 from src.constants.lookup_constants import Privilege
 from src.db.models import opportunity_models
@@ -44,6 +46,160 @@ def existing_attachment(db_session, existing_opportunity, enable_factory_create,
     db_session.commit()
 
     return attachment
+
+
+def test_upload_attachment_success(client, grantor_auth_data, existing_opportunity, mock_s3_bucket):
+    """Test successful upload of an attachment"""
+    _, _, token, _ = grantor_auth_data
+
+    # Create test file data
+    file_content = b"This is a test file content"
+    file_data = FileStorage(
+        stream=io.BytesIO(file_content), filename="test_file.pdf", content_type="application/pdf"
+    )
+
+    resp = client.post(
+        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/attachments",
+        headers={"X-SGG-Token": token},
+        data={"file_attachment": file_data},
+    )
+
+    assert resp.status_code == 200
+    response_json = resp.get_json()
+    assert response_json["message"] == "Attachments uploaded successfully"
+
+    assert "data" in response_json
+    assert "opportunity_attachment_id" in response_json["data"]
+    assert isinstance(response_json["data"]["opportunity_attachment_id"], list)
+    assert len(response_json["data"]["opportunity_attachment_id"]) == 1
+
+
+def test_upload_multiple_attachments(
+    client, grantor_auth_data, existing_opportunity, mock_s3_bucket
+):
+    """Test uploading multiple attachments at once"""
+    _, _, token, _ = grantor_auth_data
+
+    # Create test file data for two different files
+    file_content1 = b"This is the first test file content"
+    file_data1 = FileStorage(
+        stream=io.BytesIO(file_content1), filename="test_file1.pdf", content_type="application/pdf"
+    )
+
+    file_content2 = b"This is the second test file content"
+    file_data2 = FileStorage(
+        stream=io.BytesIO(file_content2), filename="test_file2.txt", content_type="text/plain"
+    )
+
+    resp = client.post(
+        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/attachments",
+        headers={"X-SGG-Token": token},
+        data={"file_attachment": [file_data1, file_data2]},
+    )
+
+    assert resp.status_code == 200
+    response_json = resp.get_json()
+    assert response_json["message"] == "Attachments uploaded successfully"
+
+    assert "data" in response_json
+    assert "opportunity_attachment_id" in response_json["data"]
+    assert isinstance(response_json["data"]["opportunity_attachment_id"], list)
+    assert len(response_json["data"]["opportunity_attachment_id"]) == 2
+
+
+def test_upload_attachment_unauthorized(client, db_session, existing_opportunity):
+    """Test upload without proper authorization"""
+    # Create a user without UPDATE_OPPORTUNITY privilege
+    user, agency, token, _ = create_user_in_agency_with_jwt_and_api_key(
+        db_session=db_session,
+        privileges=[Privilege.VIEW_OPPORTUNITY],
+    )
+
+    file_content = b"This is a test file content"
+    file_data = FileStorage(
+        stream=io.BytesIO(file_content), filename="test_file.pdf", content_type="application/pdf"
+    )
+
+    resp = client.post(
+        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/attachments",
+        headers={"X-SGG-Token": token},
+        data={"file_attachment": file_data},
+    )
+
+    assert resp.status_code == 403
+    response_json = resp.get_json()
+    assert response_json["message"] == "Forbidden"
+
+
+def test_upload_attachment_nonexistent_opportunity(client, grantor_auth_data):
+    """Test upload with non-existent opportunity ID"""
+    _, _, token, _ = grantor_auth_data
+
+    non_existent_opportunity_id = uuid.uuid4()
+
+    # Create test file data
+    file_content = b"This is a test file content"
+    file_data = FileStorage(
+        stream=io.BytesIO(file_content), filename="test_file.pdf", content_type="application/pdf"
+    )
+
+    resp = client.post(
+        f"/v1/grantors/opportunities/{non_existent_opportunity_id}/attachments",
+        headers={"X-SGG-Token": token},
+        data={"file_attachment": file_data},
+    )
+
+    assert resp.status_code == 404
+    response_json = resp.get_json()
+    assert (
+        response_json["message"]
+        == f"Could not find Opportunity with ID {non_existent_opportunity_id}"
+    )
+
+
+def test_upload_attachment_published_opportunity(
+    client, db_session, grantor_auth_data, enable_factory_create
+):
+    """Test upload to a published (non-draft) opportunity"""
+    _, agency, token, _ = grantor_auth_data
+
+    # Create a published opportunity
+    published_opportunity = OpportunityFactory.create(
+        agency_code=agency.agency_code, is_draft=False
+    )
+
+    file_content = b"This is a test file content"
+    file_data = FileStorage(
+        stream=io.BytesIO(file_content), filename="test_file.pdf", content_type="application/pdf"
+    )
+
+    resp = client.post(
+        f"/v1/grantors/opportunities/{published_opportunity.opportunity_id}/attachments",
+        headers={"X-SGG-Token": token},
+        data={"file_attachment": file_data},
+    )
+
+    assert resp.status_code == 422
+    response_json = resp.get_json()
+    assert response_json["message"] == "Only draft opportunities can be updated"
+
+
+def test_upload_attachment_invalid_file(client, grantor_auth_data, existing_opportunity):
+    """Test upload with invalid file data"""
+    _, _, token, _ = grantor_auth_data
+
+    # Create an invalid "file" (just a string, not a file storage object)
+    invalid_file = "This is not a valid file"
+
+    resp = client.post(
+        f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/attachments",
+        headers={"X-SGG-Token": token},
+        data={"file_attachment": invalid_file},
+    )
+
+    assert resp.status_code == 422
+    response_json = resp.get_json()
+    assert response_json["message"] == "Validation error"
 
 
 def test_delete_attachment_success(
