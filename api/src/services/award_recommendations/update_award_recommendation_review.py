@@ -1,6 +1,8 @@
 import logging
 import uuid
 
+from sqlalchemy import select
+
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
@@ -33,12 +35,13 @@ def update_award_recommendation_review(
     agency = award_recommendation.opportunity.agency_record
     verify_access(user, {Privilege.UPDATE_AWARD_RECOMMENDATION}, agency)
 
-    # Find the review on this award recommendation
-    review: AwardRecommendationReview | None = None
-    for r in award_recommendation.award_recommendation_reviews:
-        if r.award_recommendation_review_id == award_recommendation_review_id:
-            review = r
-            break
+    review = db_session.execute(
+        select(AwardRecommendationReview).where(
+            AwardRecommendationReview.award_recommendation_review_id
+            == award_recommendation_review_id,
+            AwardRecommendationReview.award_recommendation_id == award_recommendation_id,
+        )
+    ).scalar_one_or_none()
 
     if review is None:
         raise_flask_error(
