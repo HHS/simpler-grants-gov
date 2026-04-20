@@ -1,10 +1,7 @@
 import { environment } from "src/constants/environments";
 import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManager";
-import { OptionalStringDict } from "src/types/generalTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 
-import { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
-import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies } from "next/headers";
 import React, { FunctionComponent, ReactNode } from "react";
 
@@ -25,11 +22,16 @@ const withFeatureFlag = <P, R extends ReactNode>(
     return WrappedComponent;
   }
 
-  function wrapComponent(
-    resolvedCookies: RequestCookies | ReadonlyRequestCookies,
-    searchParams: OptionalStringDict,
+  // top level component to grab search params from the top level page props
+  const ComponentWithFeatureFlagAndSearchParams = async (
     props: P & WithFeatureFlagProps,
-  ) {
+  ) => {
+    // note that it's not necessary to pass search params (as when wrapping a non page level component)
+    // but if middleware doesn't run you will potentially miss out on any flags set via params
+    const searchParams = props.searchParams
+      ? (await props.searchParams) || {}
+      : {};
+    const resolvedCookies = await cookies();
     const ComponentWithFeatureFlag = (props: P & WithFeatureFlagProps) => {
       if (
         featureFlagsManager.isFeatureEnabled(
@@ -46,20 +48,6 @@ const withFeatureFlag = <P, R extends ReactNode>(
     return (
       <ComponentWithFeatureFlag {...props} searchParams={props.searchParams} />
     );
-  }
-
-  // top level component to grab search params from the top level page props
-  const ComponentWithFeatureFlagAndSearchParams = async (
-    props: P & WithFeatureFlagProps,
-  ) => {
-    // note that it's not necessary to pass search params (as when wrapping a non page level component)
-    // but if middleware doesn't run you will potentially miss out on any flags set via params
-    const searchParams = props.searchParams
-      ? (await props.searchParams) || {}
-      : {};
-    const resolvedCookies = await cookies();
-
-    return wrapComponent(resolvedCookies, searchParams, props);
   };
 
   return ComponentWithFeatureFlagAndSearchParams;

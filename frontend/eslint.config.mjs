@@ -55,12 +55,14 @@ export default defineConfig(...vitalsPlugin, [
           ],
         },
       ],
-      // TODO #9637 remove this off line and address the issues where this rule flags stuff
-      "promise/catch-or-return": "off",
-      // TODO #9637 remove this off line and address the issues where this rule flags stuff
-      "promise/always-return": "off",
-      // TODO #9637 remove this off line and address the issues where this rule flags stuff
-      "react-hooks/error-boundaries": "off",
+      // TODO #9637 remove this warn line after addressing the issues where this rule flags stuff
+      "promise/catch-or-return": "warn",
+      // TODO #9637 remove this warn line after addressing the issues where this rule flags stuff
+      "promise/always-return": "warn",
+      // TODO #9637 remove this warn line after addressing the issues where this rule flags stuff
+      "react-hooks/error-boundaries": "warn",
+      // TODO evaluate the right way to fix this later
+      "react-hooks/static-components": "warn",
     },
 
     settings: {
