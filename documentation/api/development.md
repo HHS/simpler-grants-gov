@@ -231,7 +231,7 @@ If you want to connect to SQS with the AWS CLI, you can do:
 `aws --endpoint-url http://localhost:9324 sqs list-queues` which in this case would list the queues.
 
 SQS queues are automatically created based on the configuration that we specify in the
-[custom.conf](/api/mock-sqs/custom.conf) file which gets passed to the elasticmq docker image during
+[custom.conf](../../api/mock-sqs/custom.conf) file which gets passed to the elasticmq docker image during
 startup.
 
 The SQS queues **DO NOT** maintain state if you stop and restart the container. If you stop the SQS

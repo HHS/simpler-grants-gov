@@ -26,7 +26,7 @@ for further details.
 We frequently use "script" and "ECS task" interchangeably as terms.
 When we want to run one of our scripts, we tell ECS to spin
 up a task with a particular command to run. Our common ECS tasks are
-scheduled to run in [scheduled_jobs.tf](/infra/api/app-config/env-config/scheduled_jobs.tf)
+scheduled to run in [scheduled_jobs.tf](../../infra/api/app-config/env-config/scheduled_jobs.tf)
 
 [Foreign Data Wrappers (fdw)](https://www.postgresql.org/docs/current/postgres-fdw.html) / [Oracle fdw](https://github.com/laurenz/oracle_fdw)
 are a way of setting up tables within your database that are actually backed by tables
@@ -164,9 +164,9 @@ For anything else, consult the [oracle_fdw](https://github.com/laurenz/oracle_fd
 
 # Create Foreign Data Wrappers Script
 * Running locally: `make cmd args="data-migration setup-foreign-tables"`
-* Running in ECS: See [Running setup-foreign-tables in ECS](/documentation/api/legacy-transforms.md#running-setup-foreign-tables-in-ecs)
+* Running in ECS: See [Running setup-foreign-tables in ECS](legacy-transforms.md#running-setup-foreign-tables-in-ecs)
 
-[setup_foreign_tables.py](/api/src/data_migration/setup_foreign_tables.py) is a script that
+[setup_foreign_tables.py](../../api/src/data_migration/setup_foreign_tables.py) is a script that
 will go through each table that is derived from the `ForeignBase` class and automatically generate
 a command to create the table.
 
@@ -201,9 +201,9 @@ Run the following make target:
 make release-run-setup-foreign-tables APP_NAME=api ENVIRONMENT=<environment>
 ```
 
-This uses [bin/run-setup-foreign-tables](/bin/run-setup-foreign-tables) which retrieves the migrator role ARN
+This uses [bin/run-setup-foreign-tables](../../bin/run-setup-foreign-tables) which retrieves the migrator role ARN
 from terraform and passes it to `run-command`, following the same pattern as
-[bin/run-database-migrations](/bin/run-database-migrations).
+[bin/run-database-migrations](../../bin/run-database-migrations).
 
 # Load-transform job
 * Running locally: `make cmd args="data-migration load-transform --no-load --no-transform --no-set-current --no-store-version"`
@@ -234,7 +234,7 @@ There are more configuration options present as environment variables that will 
 in the relevant part of the job.
 
 ## LoadOracleData
-[LoadOracleData](/api/src/data_migration/load/load_oracle_data_task.py) handles
+[LoadOracleData](../../api/src/data_migration/load/load_oracle_data_task.py) handles
 getting data from the Oracle database into our equivalent staging table for every
 table we have configured.
 
@@ -266,7 +266,7 @@ Passing in the `--tables-to-process <whatever table>` parameter will
 limit the job to just processing the chosen table.
 
 ## TransformOracleData
-[TransformOracleData](/api/src/data_migration/transformation/transform_oracle_data_task.py)
+[TransformOracleData](../..//api/src/data_migration/transformation/transform_oracle_data_task.py)
 is actually made up of several separate `SubTask` classes that each handle
 the transformation of a single table.
 
@@ -319,7 +319,7 @@ and tell SQLAlchemy to [merge](https://docs.sqlalchemy.org/en/20/orm/session_sta
 which effectively makes it copy anything we did to the new record into the target record, but all at once.
 
 ## SetCurrentOpportunities
-[SetCurrentOpportunities](/api/src/task/opportunities/set_current_opportunities_task.py)
+[SetCurrentOpportunities](../../api/src/task/opportunities/set_current_opportunities_task.py)
 isn't strictly a part of transformations, but makes sense to run immediately after transformations complete.
 
 This job runs on every opportunity and does the following:
@@ -361,7 +361,7 @@ The job is setup to be very efficient and won't even do updates if the values wo
 While it seems inefficient to reprocess 80k+ opportunities hourly, this takes less than 2 minutes right now.
 
 ## StoreOpportunityVersion
-[StoreOpportunityVersionTask](/api/src/task/opportunities/store_opportunity_version_task.py) iterates
+[StoreOpportunityVersionTask](../../api/src/task/opportunities/store_opportunity_version_task.py) iterates
 over all opportunities and populates the `opportunity_version` table. It adds records
 if the opportunity info stored in the version table differs from whatever already exists.
 
@@ -373,7 +373,7 @@ if the opportunity info stored in the version table differs from whatever alread
 2. Using the existing schema, [follow the steps](#staging--foreign-table-setup) for setting up a foreign table.
 3. Create a destination table in our API schema.
 4. Build the transform class for processing the table from the staging table to our destination API table.
-5. Run the `setup-foreign-tables` script to generate the Oracle foreign data wrapper table to the Oracle DB (required in all envs - manually run). See [Running setup-foreign-tables in ECS](/documentation/api/legacy-transforms.md#running-setup-foreign-tables-in-ecs) for how to run this with the migrator role.
+5. Run the `setup-foreign-tables` script to generate the Oracle foreign data wrapper table to the Oracle DB (required in all envs - manually run). See [Running setup-foreign-tables in ECS](legacy-transforms.md#running-setup-foreign-tables-in-ecs) for how to run this with the migrator role.
 6. Manually test loading the table by running the job with load oracle data job with the following command `["poetry", "run", "flask", "data-migration", "load-transform", "--load", "--no-transform", "--no-set-current", "--no-store-version", "-t", "<TABLE_NAME>"]`
 7. Manually test transforming the table by enabling the transformation task (env var based - see the config) and running `["poetry", "run", "flask", "data-migration", "load-transform", "--no-load", "--transform", "--no-set-current", "--no-store-version"]`
 8. Enable the jobs to run automatically by adding updating the [LoadOracleDataTask config](https://github.com/HHS/simpler-grants-gov/blob/main/api/src/data_migration/load/load_oracle_data_task.py#L21) to include the job and the [TransformOracleDataTaskConfig](https://github.com/HHS/simpler-grants-gov/blob/main/api/src/data_migration/transformation/transform_oracle_data_task.py) to enable the transformation

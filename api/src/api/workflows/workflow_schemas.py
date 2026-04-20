@@ -312,6 +312,13 @@ class WorkflowGetResponseDataSchema(Schema):
             },
         },
     )
+    valid_events = fields.List(
+        fields.String(),
+        metadata={
+            "description": "List of events that can be sent for the current workflow state. Empty if the workflow is no longer active.",
+            "example": ["receive_program_officer_approval"],
+        },
+    )
     opportunity_id = fields.UUID(
         allow_none=True,
         metadata={"description": "The opportunity ID if this is an opportunity workflow"},
