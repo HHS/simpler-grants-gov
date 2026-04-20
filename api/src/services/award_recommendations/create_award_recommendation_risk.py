@@ -97,7 +97,7 @@ def create_award_recommendation_risk(
     user: User,
     award_recommendation_id: uuid.UUID,
     request_data: dict,
-) -> dict:
+) -> AwardRecommendationRisk:
     award_recommendation = _get_award_recommendation_for_update(
         db_session, user, award_recommendation_id
     )
@@ -126,13 +126,4 @@ def create_award_recommendation_risk(
     db_session.add(risk)
     db_session.flush()
 
-    return {
-        "award_recommendation_risk_id": risk.award_recommendation_risk_id,
-        "comment": risk.comment,
-        "award_recommendation_risk_number": risk.award_recommendation_risk_number,
-        "award_recommendation_risk_type": risk.award_recommendation_risk_type,
-        "award_recommendation_application_submission_ids": [
-            rs.award_recommendation_application_submission_id
-            for rs in risk.award_recommendation_risk_submissions
-        ],
-    }
+    return risk

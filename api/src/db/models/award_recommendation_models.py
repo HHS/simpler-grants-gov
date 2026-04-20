@@ -201,6 +201,13 @@ class AwardRecommendationRisk(ApiSchemaTable, TimestampMixin):
         )
     )
 
+    @property
+    def award_recommendation_application_submission_ids(self) -> list[uuid.UUID]:
+        return [
+            rs.award_recommendation_application_submission_id
+            for rs in self.award_recommendation_risk_submissions
+        ]
+
 
 class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
     __tablename__ = "award_recommendation_application_submission"
