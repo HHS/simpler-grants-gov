@@ -55,8 +55,9 @@ def _generate_risk_number(db_session: db.Session, agency_code: str) -> str:
     if not agency_code:
         raise Exception("agency_code is required to generate a risk number")
 
+    max_attempts = 5
     alphabet = string.ascii_uppercase + string.digits
-    while True:
+    for _ in range(max_attempts):
         candidate = agency_code + "".join(secrets.choice(alphabet) for _ in range(10))
         already_exists = db_session.execute(
             select(
@@ -67,6 +68,10 @@ def _generate_risk_number(db_session: db.Session, agency_code: str) -> str:
         ).scalar()
         if not already_exists:
             return candidate
+
+    raise Exception(
+        f"Failed to generate a unique risk number after {max_attempts} attempts"
+    )
 
 
 def _get_validated_submissions(
