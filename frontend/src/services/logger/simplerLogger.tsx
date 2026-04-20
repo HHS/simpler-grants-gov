@@ -9,32 +9,67 @@
 
 */
 
+import { CallTracker } from "node:assert";
+import Cookies from "js-cookie";
 import pino from "pino";
 import { environment } from "src/constants/environments";
 
 import { NextRequest, NextResponse } from "next/server";
 
+// use the human readable label for log level instead of number (which is pino's default behavior)
 const levelFormatter = (label: string) => ({ level: label });
 
-const serverNodeRuntimeConfig = {
+const pinoConfig: pino.LoggerOptions = {
   formatters: { level: levelFormatter },
   redact: { paths: ["pid", "hostname"], remove: true },
-};
-
-const defaultPinoConfig = {
   browser: {
-    write: (log: unknown) => {
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(log));
+    asObject: true,
+    write: {
+      info: (log: unknown) => {
+        // console.log("HIIIII");
+        // doesn't work because session cookies are only http readable
+        // const sessionCookieValue = Cookies.get();
+        // console.log({ caller: caller });
+        // console.log(JSON.stringify({ ...log, sessionCookieValue }));
+        console.log(JSON.stringify(log));
+      },
+      debug: (log: unknown) => {
+        // eslint-disable-next-line no-console
+        console.log(JSON.stringify(log));
+      },
+      error: (log: unknown) => {
+        console.error(JSON.stringify(log));
+      },
     },
-    formatters: { level: levelFormatter },
+    reportCaller: true,
   },
 };
 
-const pinoConfig =
-  environment.NEXT_RUNTIME !== "edge"
-    ? serverNodeRuntimeConfig
-    : defaultPinoConfig;
+// const defaultPinoConfig = {
+//   browser: {
+//     write: {
+//       info: (log: unknown, caller: string) => {
+//         // eslint-disable-next-line no-console
+//         console.log("HIIIII");
+//         // console.log(JSON.stringify({ message: log, caller }));
+//       },
+//       debug: (log: unknown) => {
+//         // eslint-disable-next-line no-console
+//         console.log(JSON.stringify(log));
+//       },
+//       error: (log: unknown) => {
+//         console.error(JSON.stringify(log));
+//       },
+//     },
+//     formatters: { level: levelFormatter },
+//     reportCaller: true,
+//   },
+// };
+
+// const pinoConfig =
+//   environment.NEXT_RUNTIME !== "edge"
+//     ? serverNodeRuntimeConfig
+//     : defaultPinoConfig;
 
 export const logger = pino(pinoConfig);
 

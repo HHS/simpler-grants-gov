@@ -6,6 +6,7 @@ import { applicationTestUserId, LOGIN_URL } from "src/constants/auth";
 import { ExternalRoutes } from "src/constants/routes";
 import { useSnackbar } from "src/hooks/useSnackbar";
 import { useUser } from "src/services/auth/useUser";
+import { logger } from "src/services/logger/simplerLogger";
 import { IndexType } from "src/types/generalTypes";
 import { TestUser } from "src/types/userTypes";
 import { isCurrentPath, isExternalLink } from "src/utils/generalUtils";
@@ -49,6 +50,7 @@ const NavLink = ({
   onClick: () => void;
   text: string;
 }) => {
+  logger.info(`Logging the header nav item ${text}`);
   let iconBtnClass, linkTarget;
 
   if (isExternalLink(href)) {
