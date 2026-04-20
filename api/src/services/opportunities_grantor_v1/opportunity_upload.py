@@ -45,10 +45,8 @@ def upload_opportunity_attachment(
         raise_flask_error(422, "File must have a filename")
 
     file_name = adjust_legacy_file_name(file_data.filename)
-    file_content = file_data.read()
     mime_type = file_data.mimetype or "application/octet-stream"
     file_description = ""
-    file_size_bytes = len(file_content)
 
     # Create S3 path for the file
     s3_config = S3Config()
@@ -62,6 +60,9 @@ def upload_opportunity_attachment(
     # Write the file to S3
     with file_util.open_stream(file_path, "wb", content_type=mime_type) as f:
         file_data.save(f)
+
+    # Get the file size from S3
+    file_size_bytes = file_util.get_file_length_bytes(file_path)
 
     attachment = OpportunityAttachment(
         attachment_id=attachment_id,
