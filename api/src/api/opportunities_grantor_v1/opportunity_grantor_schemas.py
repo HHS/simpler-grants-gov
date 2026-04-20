@@ -564,10 +564,6 @@ class OpportunitySummaryUpdateResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunitySummaryDetailSchema())
 
 
-# class OpportunityUploadAttachmentRequestV1Schema(Schema):
-#     file_attachment = fields.List(fields.Raw(), required=True)
-
-
 class OpportunityUploadAttachmentRequestV1Schema(Schema):
     file_attachment = fields.List(
         fields.File(
