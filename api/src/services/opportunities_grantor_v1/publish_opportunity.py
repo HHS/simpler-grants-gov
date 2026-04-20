@@ -43,19 +43,7 @@ def publish_opportunity(
     # Not Needed?
     # opportunity.is_draft = False
 
-    # Queue the opportunity for the publish workflow
-    workflow_event = WorkflowEvent(
-        event_id=uuid.uuid4(),
-        acting_user_id=user.user_id,
-        event_type=WorkflowEventType.START_WORKFLOW,
-        start_workflow_context=StartWorkflowEventContext(
-            workflow_type=WorkflowType.OPPORTUNITY_PUBLISH,
-            entity_type=WorkflowEntityType.OPPORTUNITY,
-            entity_id=opportunity_id,
-        ),
-    )
-
-    send_workflow_event_to_queue(workflow_event)
+    # TODO Logic for queueing Opportunity to be published goes here.
 
     logger.info(
         "Published opportunity",
