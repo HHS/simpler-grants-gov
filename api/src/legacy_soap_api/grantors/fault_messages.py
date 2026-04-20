@@ -11,12 +11,7 @@ MissingGrantsGovTrackingNumber = FaultMessage(
 )
 
 ConfirmDeliverySubmissionNotFound = FaultMessage(
-    faultstring="Unable to find application from tracking number. Failed to confirm application delivery.",
-    faultcode="soap:Server",
-)
-
-ConfirmDeliveryInvalidStatus = FaultMessage(
-    faultstring="Invalid application status. Expected Accepted status. Failed to confirm application delivery.",
+    faultstring="Failed to confirm application delivery.(Authorization Failure)",
     faultcode="soap:Server",
 )
 
