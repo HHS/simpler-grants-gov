@@ -107,7 +107,7 @@ const checkRequiredPrivileges = async (
 ): Promise<UserPrivilegeResult[]> => {
   const privilegeCheckResults = await Promise.all(
     privileges.map((privilege) => {
-      return checkUserPrivilege(token, userId, privilege)
+      return checkUserPrivilege(userId, privilege)
         .then(() => {
           return { ...privilege, authorized: true };
         })

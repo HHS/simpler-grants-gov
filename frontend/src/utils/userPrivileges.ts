@@ -21,13 +21,12 @@ export interface UserPrivilegeResult extends UserPrivilegeRequest {
 
 // Check the user's privileges
 export const checkRequiredPrivileges = async (
-  token: string,
   userId: string,
   privileges: UserPrivilegeRequest[],
 ): Promise<UserPrivilegeResult[]> => {
   const privilegeCheckResults = await Promise.all(
     privileges.map((privilege) => {
-      return checkUserPrivilege(token, userId, privilege)
+      return checkUserPrivilege(userId, privilege)
         .then(() => {
           return { ...privilege, authorized: true };
         })

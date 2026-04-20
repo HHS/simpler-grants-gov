@@ -13,11 +13,8 @@ jest.mock("src/services/auth/session", () => ({
 const mockPostSavedOpp = jest.fn((params: unknown): unknown => params);
 
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher", () => ({
-  getUserSavedOpportunity: (
-    _token: string,
-    _userId: number,
-    opportunityId: number,
-  ) => mockPostSavedOpp(opportunityId ? { opportunity_id: 1 } : null),
+  getUserSavedOpportunity: (_userId: number, opportunityId: number) =>
+    mockPostSavedOpp(opportunityId ? { opportunity_id: 1 } : null),
 }));
 
 describe("GET request", () => {

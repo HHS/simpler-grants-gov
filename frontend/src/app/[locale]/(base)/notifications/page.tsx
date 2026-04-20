@@ -22,7 +22,6 @@ async function Notifications(): Promise<ReactElement | undefined> {
 
   try {
     const fetchedOrganizations: Organization[] = await getUserOrganizations(
-      session.token,
       session.user_id,
     );
 

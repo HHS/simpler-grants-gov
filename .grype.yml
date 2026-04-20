@@ -21,44 +21,13 @@ ignore:
 
   # Not fixed in GA Python yet
   # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
-  - vulnerability: CVE-2026-0865
-
-  # Not fixed in GA Python yet
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
-  - vulnerability: CVE-2025-15282
-
-  # Not fixed in GA Python yet
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
-  - vulnerability: CVE-2026-0672
-
-  # Not fixed in GA Python yet
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
+  # Last checked: 04/15/26
   - vulnerability: CVE-2025-15366
 
   # Not fixed in GA Python yet
   # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
+  # Last checked: 04/15/2026
   - vulnerability: CVE-2025-15367
-
-  # Not fixed in GA Python yet
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
-  - vulnerability: CVE-2025-12781
-
-  # Not fixed in GA Python yet
-  # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 01/23/26
-  - vulnerability: CVE-2025-11468
-
-  # Not fixed in GA Python yet
-  # Vulnerability in a very specific part of the python email
-  # package which we don't use.
-  # Last checked: 02/04/26
-  - vulnerability: CVE-2026-1299
 
   # ignoring so we can get today's release out
   - vulnerability: GHSA-2g4f-4pwh-qvx6
@@ -66,28 +35,9 @@ ignore:
   # serialize-javascript subdependency via terser-webpack-plugin. The vuln is patched in serialize-javascript but terser-webpack-plugin has not bumped to the next major version for serialize-javascript to remediate the vuln coming down from webpack. Dev only webpack issue, safe to ignore for now
   - vulnerability: GHSA-5c6j-r48x-rmvq
 
-  # Not fixed in GA Python yet
-  # Last checked 3/6/2026
-  - vulnerability: CVE-2026-2297
-
-  # Not fixed in GA Python yet
-  # Last checked 3/18/2026
-  - vulnerability: CVE-2026-4224
-  - vulnerability: CVE-2025-13462
-  - vulnerability: CVE-2026-3644
-
-  # Not fixed in GA Python yet
-  # Last checked 3/25/2026
-  - vulnerability: CVE-2026-4519
-  - vulnerability: CVE-2026-3479
-
   # ignoring for this week's release
   - vulnerability: GHSA-q4gf-8mx6-v5v3
 
   # Not fixed in GA Python yet
   # Last checked 04/14/2026
   - vulnerability: CVE-2026-1502
-
-  # New Python Release to be applied after Release
-  # Last checked 04/14/2026
-  - vulnerability: CVE-2026-3446

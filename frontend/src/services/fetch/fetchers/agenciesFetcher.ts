@@ -2,7 +2,6 @@
 
 import { ApiRequestError, UnauthorizedError } from "src/errors";
 import { getSession } from "src/services/auth/session";
-import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import {
   fetchUserWithMethod,
   searchAgencies,
@@ -18,7 +17,7 @@ export const performAgencySearch = async ({
   keyword?: string;
   selectedStatuses?: string[];
 } = {}): Promise<RelevantAgencyRecord[]> => {
-  const requestBody: JSONRequestBody = {
+  const requestBody: Record<string, unknown> = {
     pagination: {
       page_offset: 1,
       page_size: 1500, // 969 agencies in prod as of 3/7/25
@@ -83,17 +82,11 @@ export const searchAndFlattenAgencies = async (
 // Fetch user's agencies
 // ------------------------------------------------------
 export const getUserAgencies = async (
-  token: string,
   userId: string,
 ): Promise<RelevantAgencyRecord[]> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-
   const subPath = `${userId}/agencies`;
   const resp = await fetchUserWithMethod("POST")({
     subPath,
-    additionalHeaders: ssgToken,
   });
   const json = (await resp.json()) as { data: [] };
   return json.data;
@@ -106,7 +99,7 @@ export const fetchUserAgencies = async (): Promise<RelevantAgencyRecord[]> => {
       // we shouldn't get there because the page should be checking authentication
       throw new UnauthorizedError("No active session");
     }
-    const agencies = await getUserAgencies(session.token, session.user_id);
+    const agencies = await getUserAgencies(session.user_id);
     return agencies;
   } catch (e) {
     console.error("Error fetching user agencies");
