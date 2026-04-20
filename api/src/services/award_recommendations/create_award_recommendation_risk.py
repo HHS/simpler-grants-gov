@@ -77,7 +77,7 @@ def _generate_risk_number(db_session: db.Session, agency_code: str) -> str:
 def _get_validated_submissions(
     db_session: db.Session,
     award_recommendation_id: uuid.UUID,
-    submission_ids: list[uuid.UUID],
+    submission_ids: set[uuid.UUID],
 ) -> list[AwardRecommendationApplicationSubmission]:
     stmt = select(AwardRecommendationApplicationSubmission).where(
         AwardRecommendationApplicationSubmission.award_recommendation_application_submission_id.in_(
@@ -127,7 +127,7 @@ def create_award_recommendation_risk(
         raise Exception("Agency not found for award recommendation")
     agency_code = agency.agency_code
 
-    submission_ids = list(set(request_data["award_recommendation_application_submission_ids"]))
+    submission_ids = set(request_data["award_recommendation_application_submission_ids"])
     submissions = _get_validated_submissions(db_session, award_recommendation_id, submission_ids)
 
     risk = AwardRecommendationRisk(
