@@ -69,9 +69,7 @@ def _generate_risk_number(db_session: db.Session, agency_code: str) -> str:
         if not already_exists:
             return candidate
 
-    raise Exception(
-        f"Failed to generate a unique risk number after {max_attempts} attempts"
-    )
+    raise Exception(f"Failed to generate a unique risk number after {max_attempts} attempts")
 
 
 def _get_validated_submissions(
