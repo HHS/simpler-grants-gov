@@ -1,8 +1,7 @@
-import io
 import uuid
+from io import BytesIO
 
 import pytest
-from werkzeug.datastructures import FileStorage
 
 from src.constants.lookup_constants import Privilege
 from src.db.models import opportunity_models
@@ -62,14 +61,11 @@ def test_upload_attachment_success(
 
     # Create test file data
     file_content = b"This is a test file content"
-    file_data = FileStorage(
-        stream=io.BytesIO(file_content), filename="test_file.pdf", content_type="application/pdf"
-    )
 
     resp = client.post(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/attachments",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": file_data},
+        data={"file_attachment": (BytesIO(file_content), "test_file.pdf", "application/pdf")},
     )
 
     assert resp.status_code == 200
@@ -101,14 +97,11 @@ def test_upload_attachment_unauthorized(client, db_session, existing_opportunity
     )
 
     file_content = b"This is a test file content"
-    file_data = FileStorage(
-        stream=io.BytesIO(file_content), filename="test_file.pdf", content_type="application/pdf"
-    )
 
     resp = client.post(
         f"/v1/grantors/opportunities/{existing_opportunity.opportunity_id}/attachments",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": file_data},
+        data={"file_attachment": (BytesIO(file_content), "test_file.pdf", "application/pdf")},
     )
 
     assert resp.status_code == 403
@@ -124,14 +117,11 @@ def test_upload_attachment_nonexistent_opportunity(client, grantor_auth_data):
 
     # Create test file data
     file_content = b"This is a test file content"
-    file_data = FileStorage(
-        stream=io.BytesIO(file_content), filename="test_file.pdf", content_type="application/pdf"
-    )
 
     resp = client.post(
         f"/v1/grantors/opportunities/{non_existent_opportunity_id}/attachments",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": file_data},
+        data={"file_attachment": (BytesIO(file_content), "test_file.pdf", "application/pdf")},
     )
 
     assert resp.status_code == 404
@@ -154,14 +144,11 @@ def test_upload_attachment_published_opportunity(
     )
 
     file_content = b"This is a test file content"
-    file_data = FileStorage(
-        stream=io.BytesIO(file_content), filename="test_file.pdf", content_type="application/pdf"
-    )
 
     resp = client.post(
         f"/v1/grantors/opportunities/{published_opportunity.opportunity_id}/attachments",
         headers={"X-SGG-Token": token},
-        data={"file_attachment": file_data},
+        data={"file_attachment": (BytesIO(file_content), "test_file.pdf", "application/pdf")},
     )
 
     assert resp.status_code == 422
