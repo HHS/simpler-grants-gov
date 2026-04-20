@@ -7603,6 +7603,14 @@ components:
             type:
             - object
             $ref: '#/components/schemas/WorkflowApprovalConfigItemSchema'
+        valid_events:
+          type: array
+          description: List of events that can be sent for the current workflow state.
+            Empty if the workflow is no longer active.
+          example:
+          - receive_program_officer_approval
+          items:
+            type: string
         opportunity_id:
           type:
           - string
