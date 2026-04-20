@@ -162,7 +162,7 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
     assert response.data.decode() == expected
 
 
-def test_successful_confirm_application_delivery_request_when_in_tracking_number_assiged_status(
+def test_successful_confirm_application_delivery_request_when_in_tracking_number_assigned_status(
     db_session, client, enable_factory_create
 ) -> None:
     agency = AgencyFactory.create()
@@ -371,7 +371,11 @@ def test_if_soap_fault_exception_raised_return_proxy_response_if_proxy_response_
             mock_proxy_response.return_value = SOAPResponse(
                 data=b"test response", status_code=200, headers={}
             )
-            response = client.post(full_path, data=mock_data, headers={"Use-Soap-Cert": "1"})
+            response = client.post(
+                full_path,
+                data=mock_data,
+                headers={"Use-Soap-Cert": "1", "Use-Simpler-Override": "1"},
+            )
     assert response.status_code == 200
     expected = "test response"
     assert response.data.decode() == expected

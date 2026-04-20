@@ -173,8 +173,9 @@ def process_simpler_request(
             },
         )
     except SOAPFaultException as e:
-        logger.exception(
+        logger.info(
             msg=e.fault.faultstring,
+            exc_info=True,
             extra={
                 "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
             },
