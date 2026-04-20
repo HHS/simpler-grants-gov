@@ -122,7 +122,7 @@ def create_award_recommendation_risk(
         raise Exception("Agency not found for award recommendation")
     agency_code = agency.agency_code
 
-    submission_ids = request_data["award_recommendation_application_submission_ids"]
+    submission_ids = list(set(request_data["award_recommendation_application_submission_ids"]))
     submissions = _get_validated_submissions(db_session, award_recommendation_id, submission_ids)
 
     risk = AwardRecommendationRisk(
