@@ -5,6 +5,9 @@ import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import (
     Privilege,
+    WorkflowEntityType,
+    WorkflowEventType,
+    WorkflowType,
 )
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
@@ -12,6 +15,8 @@ from src.services.opportunities_grantor_v1.get_opportunity import get_opportunit
 from src.services.opportunities_grantor_v1.opportunity_utils import (
     validate_opportunity_created_in_simpler_grants,
 )
+from src.services.workflows.send_workflow_event import send_workflow_event_to_queue
+from src.workflow.event.workflow_event import StartWorkflowEventContext, WorkflowEvent
 
 logger = logging.getLogger(__name__)
 
@@ -35,10 +40,20 @@ def publish_opportunity(
 
         raise_flask_error(422, message="Opportunity is already published")
 
-    # Not Needed?
-    # opportunity.is_draft = False
-
-    # TODO Logic for queueing Opportunity to be published goes here.
+    # Queue the opportunity for the publish workflow
+    event_id = uuid.uuid4()
+    send_workflow_event_to_queue(
+        WorkflowEvent(
+            event_id=event_id,
+            acting_user_id=user.user_id,
+            event_type=WorkflowEventType.START_WORKFLOW,
+            start_workflow_context=StartWorkflowEventContext(
+                workflow_type=WorkflowType.OPPORTUNITY_PUBLISH,
+                entity_type=WorkflowEntityType.OPPORTUNITY,
+                entity_id=opportunity.opportunity_id,
+            ),
+        )
+    )
 
     logger.info(
         "Published opportunity",
