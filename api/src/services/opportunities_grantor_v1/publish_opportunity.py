@@ -5,9 +5,6 @@ import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import (
     Privilege,
-    WorkflowEntityType,
-    WorkflowEventType,
-    WorkflowType,
 )
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
@@ -15,8 +12,6 @@ from src.services.opportunities_grantor_v1.get_opportunity import get_opportunit
 from src.services.opportunities_grantor_v1.opportunity_utils import (
     validate_opportunity_created_in_simpler_grants,
 )
-from src.services.workflows.send_workflow_event import send_workflow_event_to_queue
-from src.workflow.event.workflow_event import StartWorkflowEventContext, WorkflowEvent
 
 logger = logging.getLogger(__name__)
 
