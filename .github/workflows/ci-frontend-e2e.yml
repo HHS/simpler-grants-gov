@@ -59,6 +59,7 @@ jobs:
       - name: Get commit hash
         id: get-api-commit-hash
         run: |
+          cd ..
           APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{inputs.ref}} api)
           COMMIT_HASH=$(git rev-parse ${{ inputs.ref }})
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
