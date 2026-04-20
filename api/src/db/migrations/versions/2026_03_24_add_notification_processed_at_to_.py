@@ -1,7 +1,7 @@
 """add_notification_processed_at_to_organization_saved_opportunity
 
 Revision ID: b1c2d3e4f5a6
-Revises: 04fddd68f52e
+Revises: f07517d3bf39
 Create Date: 2026-03-24 00:00:00.000000
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "b1c2d3e4f5a6"
-down_revision = "04fddd68f52e"
+down_revision = "f07517d3bf39"
 branch_labels = None
 depends_on = None
 
