@@ -42,15 +42,14 @@ export const OrganizationDetail = ({
         breadcrumbList={[
           {
             title: t("breadcrumbWorkspace"),
-            path: `/dashboard`,
+            path: `/workspace`,
           },
           {
             title: t("breadcrumbOrganizations"),
-            path: `/organizations`,
+            path: `/workspace/organizations`,
           },
           {
             title: sam_gov_entity.legal_business_name,
-            path: `/organizations`, // not used, can be whatever
           },
         ]}
       />

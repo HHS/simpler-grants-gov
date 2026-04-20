@@ -5,12 +5,12 @@ import { CharacterCount, Grid, Radio } from "@trussworks/react-uswds";
 
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 
-interface RecommendationSectionProps {
+type RecommendationSectionProps = {
   mode: "view" | "edit";
   recommendationMethod?: string;
   recommendationMethodDetails?: string;
   otherKeyInformation?: string;
-}
+};
 
 export const RecommendationSection = ({
   mode,
@@ -30,50 +30,43 @@ export const RecommendationSection = ({
               <div>
                 <div className="margin-bottom-3">
                   <p className="text-bold margin-bottom-2">
-                    {t("recommendationMethod.label", {
-                      defaultValue: "Recommendation method",
-                    })}
+                    {t("recommendationMethod.label")}
                   </p>
                   <p className="text-base margin-top-1 margin-bottom-2">
-                    {t("recommendationMethod.description", {
-                      defaultValue: "Choose the method you'll use to rate",
-                    })}
+                    {t("recommendationMethod.description")}
                   </p>
                   <Radio
                     id="merit_review_only"
                     name="award_selection_method"
-                    label={t("recommendationMethod.meritReviewOnly", {
-                      defaultValue: "Merit review ranking only",
-                    })}
+                    label={t("recommendationMethod.meritReviewOnly")}
                     value="merit-review-only"
+                    defaultChecked={
+                      recommendationMethod === "merit-review-only"
+                    }
                   />
                   <Radio
                     id="merit_review_other"
                     name="award_selection_method"
-                    label={t("recommendationMethod.meritReviewOther", {
-                      defaultValue: "Merit review ranking with other factors",
-                    })}
+                    label={t("recommendationMethod.meritReviewOther")}
                     value="merit-review-other"
+                    defaultChecked={
+                      recommendationMethod === "merit-review-other"
+                    }
                   />
                 </div>
                 <div className="margin-bottom-3">
                   <p className="text-bold margin-bottom-2">
-                    {t("recommendationMethodDetails.label", {
-                      defaultValue: "Recommendation method details",
-                    })}
+                    {t("recommendationMethodDetails.label")}
                   </p>
                   <p className="text-base margin-top-1 margin-bottom-2">
-                    {t("recommendationMethodDetails.description", {
-                      defaultValue:
-                        "Add any additional information - including the selection factors used in the NOFO",
-                    })}
+                    {t("recommendationMethodDetails.description")}
                   </p>
                   <CharacterCount
                     id="award_selection_details"
                     name="award_selection_details"
                     maxLength={500}
                     isTextArea
-                    defaultValue=""
+                    defaultValue={recommendationMethodDetails || ""}
                     rows={6}
                     className="maxw-full"
                     data-testid="award-selection-details-textarea"
@@ -82,22 +75,17 @@ export const RecommendationSection = ({
                 <div className="border-top border-base-lighter margin-top-4 margin-bottom-4" />
                 <div className="margin-bottom-3">
                   <p className="text-bold margin-bottom-1 font-sans-sm">
-                    {t("otherKeyInformation.label", {
-                      defaultValue: "Other key information",
-                    })}
+                    {t("otherKeyInformation.label")}
                   </p>
                   <p className="text-base margin-top-1 margin-bottom-2">
-                    {t("otherKeyInformation.description", {
-                      defaultValue:
-                        "Add any relevant information related to this reviewer and decision-maker for this opportunity",
-                    })}
+                    {t("otherKeyInformation.description")}
                   </p>
                   <CharacterCount
                     id="other_key_information"
                     name="other_key_information"
                     maxLength={500}
                     isTextArea
-                    defaultValue=""
+                    defaultValue={otherKeyInformation || ""}
                     rows={6}
                     className="maxw-full"
                     data-testid="other-key-information-textarea"
@@ -120,26 +108,22 @@ export const RecommendationSection = ({
             <div className="border radius-md border-base-lighter padding-3 bg-white">
               <div className="margin-bottom-3">
                 <p className="text-bold margin-bottom-2">
-                  {t("recommendationMethod.label", {
-                    defaultValue: "Recommendation method",
-                  })}
+                  {t("recommendationMethod.label")}
                 </p>
                 {recommendationMethod || ""}
               </div>
               <div className="margin-bottom-3">
                 <p className="text-bold margin-bottom-2">
-                  {t("recommendationMethodDetails.label", {
-                    defaultValue: "Recommendation method details",
-                  })}
+                  {t("recommendationMethodDetails.label")}
                 </p>
-                {recommendationMethodDetails || ""}
+                <SummaryDescriptionDisplay
+                  summaryDescription={recommendationMethodDetails || ""}
+                />
               </div>
               <div className="border-top border-base-lighter margin-top-2 margin-bottom-2" />
               <div className="margin-bottom-3">
                 <p className="text-bold margin-bottom-2">
-                  {t("otherKeyInformation.label", {
-                    defaultValue: "Other key information",
-                  })}
+                  {t("otherKeyInformation.label")}
                 </p>
                 <SummaryDescriptionDisplay
                   summaryDescription={otherKeyInformation || ""}

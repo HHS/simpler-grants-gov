@@ -5,8 +5,11 @@ from collections.abc import Sequence
 from pydantic import BaseModel, Field
 
 import src.adapters.search as search
+from src.adapters.search.opensearch_config import get_opensearch_config
+from src.adapters.search.opensearch_explain import log_search_result_explanations
 from src.adapters.search.opensearch_response import SearchResponse
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema, SearchQueryOperator
+from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortDirection
 from src.search.search_config import get_search_config
 from src.search.search_models import (
@@ -21,6 +24,7 @@ from src.services.opportunities_v1.experimental_constant import (
     EXPANDED,
     ScoringRule,
 )
+from src.services.opportunities_v1.opportunity_to_csv import CSV_FIELDS
 from src.services.service_utils import _add_search_filters, _adjust_field_name
 
 logger = logging.getLogger(__name__)
@@ -71,6 +75,47 @@ STATIC_PAGINATION = {
         ],
     }
 }
+
+CSV_EXPORT_RESULT_CAP = 5000
+CSV_EXPORT_PAGINATION = {
+    "page_offset": 1,
+    "page_size": CSV_EXPORT_RESULT_CAP,
+    "sort_order": [
+        {
+            "order_by": "post_date",
+            "sort_direction": "descending",
+        }
+    ],
+}
+
+_CSV_TOP_LEVEL_FIELDS = {
+    "opportunity_id",
+    "opportunity_number",
+    "opportunity_title",
+    "opportunity_status",
+    "agency_code",
+    "category",
+    "category_explanation",
+    "agency_name",
+    "top_level_agency_name",
+    "created_at",
+    "updated_at",
+}
+CSV_SOURCE_INCLUDES = list(
+    dict.fromkeys(
+        list(_CSV_TOP_LEVEL_FIELDS)
+        + [
+            f"summary.{field}"
+            for field in CSV_FIELDS
+            if field not in _CSV_TOP_LEVEL_FIELDS
+            and field not in {"url", "opportunity_assistance_listings"}
+        ]
+        + [
+            "opportunity_assistance_listings.assistance_listing_number",
+            "opportunity_assistance_listings.program_title",
+        ]
+    )
+)
 
 STATIC_DATE_RANGES: list = [
     {"from": "now", "to": "now+7d/d", "key": "7"},
@@ -218,11 +263,17 @@ def _normalize_aln(filters: OpportunityFilters | None) -> None:
         filters.assistance_listing_number.one_of = [v.upper() for v in one_of]
 
 
-def _get_search_request(params: SearchOpportunityParams, aggregation: bool = True) -> dict:
+def _get_search_request(
+    params: SearchOpportunityParams,
+    aggregation: bool = True,
+    track_total_hits: bool = True,
+    track_scores: bool = True,
+) -> dict:
     builder = search.SearchQueryBuilder()
 
     # Make sure total hit count gets counted for more than 10k records
-    builder.track_total_hits(True)
+    builder.track_total_hits(track_total_hits)
+    builder.track_scores(track_scores)
 
     # Pagination
     builder.pagination(
@@ -256,14 +307,33 @@ def _search_opportunities(
     search_client: search.SearchClient,
     search_params: SearchOpportunityParams,
     includes: list | None = None,
+    aggregation: bool = True,
+    include_scores: bool = True,
+    track_total_hits: bool = True,
+    track_scores: bool = True,
+    explain: bool = False,
 ) -> SearchResponse:
-    search_request = _get_search_request(search_params)
+    search_request = _get_search_request(
+        search_params,
+        aggregation=aggregation,
+        track_total_hits=track_total_hits,
+        track_scores=track_scores,
+    )
     index_alias = get_search_config().opportunity_search_index_alias
     logger.info(
         "Querying search index alias %s", index_alias, extra={"search_index_alias": index_alias}
     )
     response = search_client.search(
-        index_alias, search_request, includes=includes, excludes=["attachments"]
+        index_alias,
+        search_request,
+        include_scores=include_scores,
+        includes=includes,
+        excludes=["attachments"],
+        explain=explain,
+    )
+
+    add_extra_data_to_current_request_logs(
+        {"search.scoring_rule": search_params.experimental.scoring_rule.value}
     )
 
     return response
@@ -275,7 +345,15 @@ def search_opportunities(
 
     search_params = SearchOpportunityParams.model_validate(raw_search_params)
 
-    response = _search_opportunities(search_client, search_params)
+    explain_enabled = get_opensearch_config().opensearch_explain_enabled
+    response = _search_opportunities(search_client, search_params, explain=explain_enabled)
+
+    if explain_enabled and search_params.query:
+        log_search_result_explanations(
+            raw_hits=response.raw_hits,
+            query=search_params.query,
+            scoring_rule=search_params.experimental.scoring_rule.value,
+        )
 
     pagination_info = PaginationInfo.from_search_response(search_params.pagination, response)
 
@@ -287,6 +365,40 @@ def search_opportunities(
     records = SCHEMA.load(response.records, many=True)
 
     return records, response.aggregations, pagination_info
+
+
+def search_opportunities_csv(
+    search_client: search.SearchClient,
+    raw_search_params: dict,
+    *,
+    apply_export_pagination: bool = True,
+) -> Sequence[dict]:
+    """Run the CSV-optimized OpenSearch query (no aggs/scores, CSV field includes).
+
+    When ``apply_export_pagination`` is True (default), pagination is replaced with
+    ``CSV_EXPORT_PAGINATION`` — used by ``POST /v1/opportunities/search/csv`` for bulk export.
+
+    When False, the caller's ``pagination`` from ``raw_search_params`` is used — used by
+    ``POST /v1/opportunities/search`` with ``format=csv`` so ordering and page windows match JSON.
+    """
+    merged_params = (
+        raw_search_params | {"pagination": CSV_EXPORT_PAGINATION}
+        if apply_export_pagination
+        else raw_search_params
+    )
+    csv_search_params = SearchOpportunityParams.model_validate(merged_params)
+    response = _search_opportunities(
+        search_client,
+        csv_search_params,
+        includes=CSV_SOURCE_INCLUDES,
+        aggregation=False,
+        include_scores=False,
+        track_total_hits=False,
+        track_scores=False,
+        explain=False,
+    )
+
+    return SCHEMA.load(response.records, many=True)
 
 
 def search_opportunities_id(

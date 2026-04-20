@@ -20,15 +20,19 @@ from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.approval_service import (
     can_user_do_agency_approval,
     get_approval_response_type_from_metadata,
+    validate_approval_response_type,
 )
 from src.workflow.service.workflow_service import (
     get_and_validate_workflow,
     get_workflow_entity,
     is_event_valid_for_workflow,
+    validate_no_concurrent_workflow,
 )
 from src.workflow.workflow_config import WorkflowConfig
 from src.workflow.workflow_constants import WorkflowConstants
 from src.workflow.workflow_errors import (
+    ConcurrentWorkflowError,
+    DisallowedApprovalResponseTypeError,
     EntityNotFound,
     InactiveWorkflowError,
     InvalidEntityForWorkflow,
@@ -117,6 +121,12 @@ def ingest_workflow_event(
     except InvalidWorkflowResponseTypeError as e:
         logger.info("Invalid or missing approval response type", extra={"error": str(e)})
         raise_flask_error(422, str(e))
+    except DisallowedApprovalResponseTypeError as e:
+        logger.info("Disallowed approval response type", extra={"error": str(e)})
+        raise_flask_error(422, str(e))
+    except ConcurrentWorkflowError as e:
+        logger.info("Concurrent workflow already exists for entity", extra={"error": str(e)})
+        raise_flask_error(422, "An active workflow of this type already exists for this entity")
 
     logger.info("Successfully validated workflow event")
     send_workflow_event_to_queue(workflow_event)
@@ -142,10 +152,20 @@ def _validate_start_workflow_event(
         event_to_send=WorkflowConstants.START_WORKFLOW,
     )
 
+    # Validate the entity type in the request matches the workflow's expected entity type
+    if start_context.entity_type != config.entity_type:
+        raise_flask_error(422, "The provided entity is not valid for this workflow type")
+
     # Validate entity exists and matches the workflow's allowed entity type
     get_workflow_entity(
         db_session,
-        entity_type=start_context.entity_type,
+        entity_id=start_context.entity_id,
+        config=config,
+    )
+
+    # Validate no active concurrent workflow exists for this entity
+    validate_no_concurrent_workflow(
+        db_session,
         entity_id=start_context.entity_id,
         config=config,
     )
@@ -180,7 +200,8 @@ def _validate_process_workflow_event(
         )
         raise_flask_error(422, "The specified event is not valid for this workflow")
 
-    # If this is an approval event, validate required metadata
+    # If this is an approval event, validate required metadata and allowed response types
     approval_config = config.approval_mapping.get(process_context.event_to_send)
     if approval_config is not None:
-        get_approval_response_type_from_metadata(workflow_event.metadata)
+        approval_response_type = get_approval_response_type_from_metadata(workflow_event.metadata)
+        validate_approval_response_type(approval_response_type, approval_config)

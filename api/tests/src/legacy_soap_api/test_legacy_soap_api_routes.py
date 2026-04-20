@@ -3,12 +3,9 @@ from unittest import mock
 
 from lxml import etree
 
-from src.constants.lookup_constants import Privilege
-from src.legacy_soap_api.legacy_soap_api_auth import (
-    USE_SOAP_JWT_HEADER_KEY,
-    SOAPAuth,
-    SOAPClientCertificate,
-)
+from src.constants.lookup_constants import ApplicationStatus, Privilege
+from src.db.models.competition_models import ApplicationSubmissionRetrieved
+from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientCertificate
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
@@ -59,51 +56,52 @@ def test_successful_request(client, fixture_from_file, caplog) -> None:
     assert req_message.soap_request_operation_name == "GetOpportunityListRequest"
 
 
-def test_soap_jwt_flag_is_enabled_is_logged(client, fixture_from_file, caplog) -> None:
-    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
-    fixture_path = (
-        "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
-    )
-    mock_data = fixture_from_file(fixture_path)
-    response = client.post(full_path, data=mock_data, headers={f"{USE_SOAP_JWT_HEADER_KEY}": "1"})
-    assert response.status_code == 200
-    assert "soap_client_certificate: Use-Soap-Jwt flag is enabled" in caplog.messages
-
-
-def test_soap_jwt_flag_is_disabled_is_not_logged(client, fixture_from_file, caplog) -> None:
-    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
-    fixture_path = (
-        "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
-    )
-    mock_data = fixture_from_file(fixture_path)
-    response = client.post(full_path, data=mock_data, headers={f"{USE_SOAP_JWT_HEADER_KEY}": "0"})
-    assert response.status_code == 200
-    post_message = [
-        record
-        for record in caplog.records
-        if record.message == "soap_client_certificate: Use-Soap-Jwt flag is enabled"
-    ]
-    assert len(post_message) == 0
-
-
-def test_soap_jwt_flag_is_not_included_is_treated_as_if_it_is_disabled(
-    client, fixture_from_file, caplog
+def test_successful_confirm_application_delivery_request(
+    db_session, client, fixture_from_file, enable_factory_create, caplog
 ) -> None:
-    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
-    fixture_path = (
-        "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
+    agency = AgencyFactory.create()
+    opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
+    competition = CompetitionFactory(
+        opportunity=opportunity,
     )
-    mock_data = fixture_from_file(fixture_path)
-    response = client.post(full_path, data=mock_data)
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate = setup_cert_user(agency, privileges)
+    application = ApplicationFactory.create(
+        competition=competition, application_status=ApplicationStatus.ACCEPTED
+    )
+    submission = ApplicationSubmissionFactory.create(application=application)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        f"<gran:GrantsGovTrackingNumber>GRANT{submission.legacy_tracking_number}</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    mock_client_cert = SOAPClientCertificate(
+        cert=MOCK_CERT_STR,
+        fingerprint=MOCK_FINGERPRINT,
+        serial_number="1235",
+        legacy_certificate=soap_client_certificate.legacy_certificate,
+    )
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
+        mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
+        response = client.post(
+            full_path, data=mock_data, headers={"Use-Simpler-Override": "1", "Use-Soap-Cert": "1"}
+        )
     assert response.status_code == 200
-
-    # Verify that certain logs are present with expected extra values
-    post_message = [
-        record
-        for record in caplog.records
-        if record.message == "soap_client_certificate: use_soap_jwt flag is enabled"
-    ]
-    assert len(post_message) == 0
+    retrieved = (
+        db_session.query(ApplicationSubmissionRetrieved)
+        .filter_by(application_submission_id=submission.application_submission_id)
+        .all()
+    )
+    assert len(retrieved) == 1
 
 
 def test_invalid_service_name_not_found(client) -> None:
@@ -287,10 +285,10 @@ def test_simpler_getapplicationzip_operation_raising_httperror_due_to_privileges
         serial_number="1235",
         legacy_certificate=soap_client_certificate.legacy_certificate,
     )
-    with mock.patch("src.legacy_soap_api.legacy_soap_api_routes.get_soap_auth") as mock_get_auth:
+    with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         response = client.post(
-            full_path, data=etree.tostring(envelope), headers={"Use-Simpler-Override": "true"}
+            full_path, data=etree.tostring(envelope), headers={"Use-Simpler-Override": "1"}
         )
     assert response.status_code == 500
     info_messages = [

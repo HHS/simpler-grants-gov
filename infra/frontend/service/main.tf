@@ -122,8 +122,9 @@ data "aws_acm_certificate" "certificate" {
 # }
 
 module "service" {
-  source       = "../../modules/service"
-  service_name = local.service_name
+  source           = "../../modules/service"
+  service_name     = local.service_name
+  environment_name = var.environment_name
 
   image_repository_arn = local.build_repository_config.repository_arn
   image_repository_url = local.build_repository_config.repository_url
@@ -206,6 +207,8 @@ module "service" {
   ]
 
   ephemeral_write_volumes = local.service_config.ephemeral_write_volumes
+
+  newrelic_entity_guid = local.service_config.newrelic_entity_guid
 
   is_temporary = local.is_temporary
 }

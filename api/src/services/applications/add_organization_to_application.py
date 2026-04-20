@@ -119,7 +119,7 @@ def add_organization_to_application(
     )
 
     # Update application with organization
-    application.organization_id = organization_id
+    application.organization = organization
 
     # Re-run pre-population logic on all application forms
     for application_form in application.application_forms:

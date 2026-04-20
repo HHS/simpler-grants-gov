@@ -6,11 +6,12 @@ from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models.competition_models import ApplicationSubmissionRetrieved
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
 from src.legacy_soap_api.grantors.services.confirm_application_delivery_response import (
-    confirm_application_delivery_response,
+    confirm_application_delivery,
+    get_confirm_application_delivery_response,
 )
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientUserDoesNotHavePermission
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
-from src.legacy_soap_api.legacy_soap_api_schemas import SOAPRequest, SoapRequestStreamer
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
@@ -82,13 +83,18 @@ class TestConfirmApplicationDeliveryResponse:
             GrantsGovTrackingNumber=tracking_number,
         )
 
-        result = confirm_application_delivery_response(
+        returned_tracking_number = confirm_application_delivery(
             db_session=db_session,
             soap_request=soap_request,
             confirm_application_delivery_request=request_schema,
             soap_config=_make_operation_config(),
         )
 
+        result = get_confirm_application_delivery_response(
+            grants_gov_tracking_number=tracking_number,
+        )
+
+        assert returned_tracking_number == tracking_number
         assert result.response_message == "Success"
         assert result.grants_gov_tracking_number == tracking_number
 
@@ -118,7 +124,7 @@ class TestConfirmApplicationDeliveryResponse:
         )
 
         with pytest.raises(SOAPFaultException):
-            confirm_application_delivery_response(
+            confirm_application_delivery(
                 db_session=db_session,
                 soap_request=soap_request,
                 confirm_application_delivery_request=request_schema,
@@ -149,7 +155,7 @@ class TestConfirmApplicationDeliveryResponse:
         )
 
         with pytest.raises(SOAPFaultException):
-            confirm_application_delivery_response(
+            confirm_application_delivery(
                 db_session=db_session,
                 soap_request=soap_request,
                 confirm_application_delivery_request=request_schema,
@@ -192,13 +198,18 @@ class TestConfirmApplicationDeliveryResponse:
             GrantsGovTrackingNumber=tracking_number,
         )
 
-        result = confirm_application_delivery_response(
+        tracking_number_result = confirm_application_delivery(
             db_session=db_session,
             soap_request=soap_request,
             confirm_application_delivery_request=request_schema,
             soap_config=_make_operation_config(),
         )
 
+        result = get_confirm_application_delivery_response(
+            grants_gov_tracking_number=tracking_number,
+        )
+
+        assert tracking_number_result == tracking_number
         assert result.response_message == "Success"
 
         # Verify there are now 2 retrieval records
@@ -225,7 +236,7 @@ class TestConfirmApplicationDeliveryResponse:
         )
 
         with pytest.raises(SOAPFaultException):
-            confirm_application_delivery_response(
+            confirm_application_delivery(
                 db_session=db_session,
                 soap_request=soap_request,
                 confirm_application_delivery_request=request_schema,
@@ -254,7 +265,7 @@ class TestConfirmApplicationDeliveryResponse:
         )
 
         with pytest.raises(SOAPFaultException):
-            confirm_application_delivery_response(
+            confirm_application_delivery(
                 db_session=db_session,
                 soap_request=soap_request,
                 confirm_application_delivery_request=request_schema,
@@ -281,33 +292,18 @@ class TestConfirmApplicationDeliveryResponse:
         )
 
         with pytest.raises(SOAPClientUserDoesNotHavePermission):
-            confirm_application_delivery_response(
+            confirm_application_delivery(
                 db_session=db_session,
                 soap_request=soap_request,
                 confirm_application_delivery_request=request_schema,
                 soap_config=_make_operation_config(),
             )
 
-    def test_response_envelope_dict_structure(self, db_session, enable_factory_create):
-        agency = AgencyFactory.create()
-        submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
-        tracking_number = f"GRANT{submission.legacy_tracking_number}"
-        db_session.commit()
+    def test_response_envelope_dict_structure(self):
+        tracking_number = "GRANT12345678"
 
-        _, _, soap_client_certificate = setup_cert_user(
-            agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
-        )
-        soap_request = _make_soap_request(soap_client_certificate, tracking_number)
-
-        request_schema = grantor_schemas.ConfirmApplicationDeliveryRequest(
-            GrantsGovTrackingNumber=tracking_number,
-        )
-
-        result = confirm_application_delivery_response(
-            db_session=db_session,
-            soap_request=soap_request,
-            confirm_application_delivery_request=request_schema,
-            soap_config=_make_operation_config(),
+        result = get_confirm_application_delivery_response(
+            grants_gov_tracking_number=tracking_number,
         )
 
         envelope_dict = result.to_soap_envelope_dict("ConfirmApplicationDeliveryResponse")

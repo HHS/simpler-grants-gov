@@ -3,6 +3,7 @@ import { ApiKey } from "src/types/apiKeyTypes";
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { ApplicationSubmission } from "src/types/application/applicationSubmissionTypes";
 import { Organization } from "src/types/applicationResponseTypes";
+import { FormattedFormValidationWarning } from "src/types/applyForm/types";
 import { UserProfile } from "src/types/authTypes";
 import {
   AwardRecommendationDetails,
@@ -33,12 +34,40 @@ import {
   UserRole,
 } from "src/types/userTypes";
 
-import { FormattedFormValidationWarning } from "src/components/applyForm/types";
-
 export const mockAwardRecommendationStatus: AwardRecommendationStatus =
   "inProgress";
 
 export const mockAwardRecommendationDetails: AwardRecommendationDetails = {
+  award_recommendation_id: "63588df8-f2d1-44ed-a201-5804abba696a",
+  award_recommendation_number: "AR-26-0001",
+  award_recommendation_status: mockAwardRecommendationStatus,
+  award_selection_method: "merit-review-other",
+  award_selection_method_details:
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute ...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna",
+  funding_strategy:
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute ...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna",
+  other_key_information:
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna",
+  additional_info:
+    "Additional contextual information about the award recommendation",
+  review_workflow_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  award_recommendation_summary: {
+    total_received_count: 200,
+    recommended_for_funding_count: 150,
+    recommended_without_funding_count: 25,
+    not_recommended_count: 25,
+    total_recommended_amount: 250000,
+  },
+  opportunity: {
+    opportunity_id: "6a483cd8-9169-418a-8dfb-60fa6e6f51e5",
+    opportunity_number: "OPP-2024-001",
+    opportunity_title: "Test Funding Opportunity",
+    summary: {
+      opportunity_status: "posted",
+      summary_description:
+        "This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.",
+    },
+  },
   recordNumber: "AR-26-0001",
   datePrepared: "01/01/2026",
   status: mockAwardRecommendationStatus,
@@ -59,6 +88,19 @@ export const mockOpportunity: BaseOpportunity = {
   },
   opportunity_number: "OPP-12345",
 } as BaseOpportunity;
+
+export const createMockOpportunity = (
+  overrides: Partial<BaseOpportunity> = {},
+): BaseOpportunity => ({
+  ...mockOpportunity,
+  // ensure required nested objects are safe to override
+  summary: {
+    ...mockOpportunity.summary,
+    ...(overrides.summary ?? {}),
+  },
+  saved_to_organizations: [],
+  ...overrides,
+});
 
 export const searchFetcherParams: QueryParamData = {
   page: 1,

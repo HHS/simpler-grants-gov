@@ -3,13 +3,6 @@ on:
   push:
     branches:
       - "main"
-    paths:
-      - "api/**"
-      - "frontend/**"
-      - "infra/api/**"
-      - "infra/frontend/**"
-      - "infra/modules/**"
-      - ".github/workflows/ci-frontend-e2e.yml"
   workflow_dispatch:
     inputs:
       api_logs:
@@ -17,7 +10,7 @@ on:
         default: false
         type: boolean
       playwright_tags:
-        description: "pipe separated list of @tags denoting groups of tests to run"
+        description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
         required: false
         type: string
   workflow_call:
@@ -27,13 +20,16 @@ on:
         default: false
         type: boolean
       playwright_tags:
-        description: "pipe separated list of @tags denoting groups of tests to run"
+        description: "pipe separated list of @tags denoting groups of tests to run (e.g. @smoke|@core-regression). Leave blank to run all tests"
         required: false
         type: string
   pull_request:
     paths:
-      - frontend/**
-      - .github/workflows/ci-frontend-e2e.yml
+      - "api/**"
+      - "frontend/**"
+      - ".github/workflows/ci-frontend-e2e.yml"
+      - ".github/workflows/e2e-create-report.yml"
+      - ".github/actions/e2e/action.yml"
 
 defaults:
   run:
@@ -46,7 +42,7 @@ env:
   NODE_OPTIONS: --dns-result-order=ipv4first
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-local-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -105,6 +101,17 @@ jobs:
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build
 
+      - name: Determine test groups to run
+        shell: bash
+        run: |
+          if [[ $GITHUB_EVENT_NAME = "pull_request" ]]; then
+            echo "test_group_tags=@smoke" >> "$GITHUB_ENV"
+          elif [[ $GITHUB_EVENT_NAME = "push" ]]; then
+            echo "test_group_tags=@smoke|@core-regression" >> "$GITHUB_ENV"
+          else
+            echo "test_group_tags=${{ inputs.playwright_tags }}" >> "$GITHUB_ENV"
+          fi
+
       - name: Run E2E tests
         uses: ./.github/actions/e2e
         with:
@@ -114,7 +121,7 @@ jobs:
           total_shards: ${{ matrix.total_shards }}
           current_shard: ${{ matrix.shard }}
           api_logs: ${{ inputs.api_logs && 'true' || 'false' }}
-          playwright_tags: ${{ inputs.playwright_tags }}
+          playwright_tags: ${{ env.test_group_tags }}
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
@@ -127,3 +134,4 @@ jobs:
     secrets: inherit
     with:
       run_id: ${{ github.run_id }}
+      target: local

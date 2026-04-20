@@ -19,8 +19,12 @@ module "staging_config" {
   # With a minimum of 2, so CPU doesn't spike to infinity on deploys.
   instance_desired_instance_count = 2
   instance_scaling_min_capacity   = 2
+  instance_memory                 = 2048
+  instance_cpu                    = 1024
   # instance_scaling_max_capacity is 5x the instance_scaling_min_capacity
   instance_scaling_max_capacity = 10
+
+  service_newrelic_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtMzk5MDMyNzAyMjU0NzE5MzQ4Mw"
 
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

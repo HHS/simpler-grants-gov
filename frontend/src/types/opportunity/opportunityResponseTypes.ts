@@ -49,11 +49,44 @@ export interface Summary extends MinimalSummary {
   funding_instruments: string[] | null;
   is_cost_sharing: boolean | null;
   summary_description: string | null;
+  updated_at: string;
   version_number: number | null;
 }
 
+export interface OpportunitySummaryDetail extends Summary {
+  opportunity_summary_id: string;
+}
+
+export type OpportunitySummaryUpdateRequest = {
+  is_cost_sharing: boolean | null;
+  summary_description: string | null;
+  post_date: string | null;
+  close_date: string | null;
+  close_date_description: string | null;
+  expected_number_of_awards: number | null;
+  estimated_total_program_funding: number | null;
+  award_floor: number | null;
+  award_ceiling: number | null;
+  additional_info_url: string | null;
+  additional_info_url_description: string | null;
+  funding_categories: string[];
+  funding_category_description: string | null;
+  funding_instruments: string[];
+  applicant_types: string[];
+  applicant_eligibility_description: string | null;
+  agency_contact_description: string | null;
+  agency_email_address: string | null;
+  agency_email_address_description: string | null;
+};
+
+export type OpportunitySummaryCreateRequest =
+  OpportunitySummaryUpdateRequest & {
+    is_forecast: boolean;
+  };
+
 export interface SavedToOrganization {
   organization_id: string;
+  organization_name: string | null;
 }
 
 export type MinimalOpportunity = {
@@ -76,6 +109,7 @@ export interface BaseOpportunity extends MinimalOpportunity {
   summary: Summary;
   top_level_agency_name: string | null;
   updated_at: string;
+  is_draft: boolean;
   saved_to_organizations?: SavedToOrganization[];
 }
 
@@ -86,6 +120,20 @@ export interface OpportunityDetail extends BaseOpportunity {
 
 export interface OpportunityApiResponse extends APIResponse {
   data: OpportunityDetail;
+}
+
+export interface OpportunitySummaryDetailApiResponse extends APIResponse {
+  data: OpportunitySummaryDetail;
+}
+
+export interface GrantorOpportunityDetail extends OpportunityDetail {
+  is_draft: boolean;
+  forecast_summary?: OpportunitySummaryDetail;
+  non_forecast_summary?: OpportunitySummaryDetail;
+}
+
+export interface GrantorOpportunityApiResponse extends APIResponse {
+  data: GrantorOpportunityDetail;
 }
 
 export interface PossiblySavedBaseOpportunity extends BaseOpportunity {

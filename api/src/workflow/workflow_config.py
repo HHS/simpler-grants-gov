@@ -1,6 +1,12 @@
 import dataclasses
 
-from src.constants.lookup_constants import ApprovalType, Privilege, WorkflowEntityType, WorkflowType
+from src.constants.lookup_constants import (
+    ApprovalResponseType,
+    ApprovalType,
+    Privilege,
+    WorkflowEntityType,
+    WorkflowType,
+)
 from src.workflow.state_persistence.base_state_persistence_model import BaseStatePersistenceModel
 
 
@@ -10,6 +16,9 @@ class ApprovalConfig:
     approval_state: str
     required_privileges: list[Privilege]
     minimum_approvals_required: int = 1
+    allowed_approval_response_types: set[ApprovalResponseType] = dataclasses.field(
+        default_factory=lambda: set(ApprovalResponseType)
+    )
 
 
 @dataclasses.dataclass
@@ -20,6 +29,10 @@ class WorkflowConfig:
     persistence_model_cls: type[BaseStatePersistenceModel]
 
     entity_type: WorkflowEntityType
+
+    # Whether to allow multiple active workflows of this type for the same entity.
+    # When False, starting a new workflow will error if one already exists and is active.
+    allow_concurrent_workflow_for_entity: bool = True
 
     # A mapping of events to approval configs
     approval_mapping: dict[str, ApprovalConfig] = dataclasses.field(default_factory=dict)

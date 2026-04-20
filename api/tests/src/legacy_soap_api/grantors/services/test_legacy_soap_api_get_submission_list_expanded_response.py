@@ -8,6 +8,7 @@ import pytz
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.legacy_soap_api.grantors import schemas
 from src.legacy_soap_api.grantors.services.get_submission_list_expanded_response import (
+    get_submission_list_expanded,
     get_submission_list_expanded_response,
 )
 from src.legacy_soap_api.legacy_soap_api_auth import (
@@ -17,13 +18,10 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientUserDoesNotHavePermission,
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
-from src.legacy_soap_api.legacy_soap_api_schemas import (
-    SOAPInvalidEnvelope,
-    SOAPRequest,
-    SoapRequestStreamer,
-    SOAPResponse,
-)
+from src.legacy_soap_api.legacy_soap_api_schemas import SOAPInvalidEnvelope, SOAPResponse
+from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_dict
+from src.util.datetime_util import make_timezone_aware
 from tests.lib.data_factories import setup_cert_user
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -40,6 +38,7 @@ from tests.src.db.models.factories import (
 TZ_EST = pytz.timezone("America/New_York")
 DT_NAIVE = datetime(2025, 9, 9, 8, 15, 17)
 DT_EST_AWARE = TZ_EST.localize(DT_NAIVE)
+DT_EST_AWARE_EARLIER = make_timezone_aware(datetime(2025, 8, 1, 8, 15, 17), "America/New_York")
 
 
 def setup_application_submission(
@@ -50,6 +49,7 @@ def setup_application_submission(
     opportunity_assistance_listing=True,
     has_organization=True,
     legacy_competition_id=1,
+    submitted_at=DT_EST_AWARE,
 ):
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
     competition = CompetitionFactory(
@@ -65,7 +65,7 @@ def setup_application_submission(
     application_kwargs = dict(
         competition=competition,
         application_status=application_status,
-        submitted_at=DT_EST_AWARE,
+        submitted_at=submitted_at,
     )
     if has_organization:
         application_kwargs = application_kwargs | {
@@ -122,12 +122,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_request_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_request_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -201,14 +204,12 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
-        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         with pytest.raises(SOAPClientUserDoesNotHavePermission):
-            get_submission_list_expanded_response(
-                db_session,
-                get_submission_list_expanded_request_schema,
-                soap_request,
-                proxy_response,
-                soap_config,
+            get_submission_list_expanded(
+                db_session=db_session,
+                request=get_submission_list_expanded_request_schema,
+                soap_request=soap_request,
+                soap_config=soap_config,
             )
 
     def test_get_submission_list_expanded_response_fails_if_privileges_are_not_set_on_config(
@@ -255,14 +256,12 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
-        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         with pytest.raises(SOAPClientUserDoesNotHavePermission):
-            get_submission_list_expanded_response(
-                db_session,
-                get_submission_list_expanded_request_schema,
-                soap_request,
-                proxy_response,
-                soap_config,
+            get_submission_list_expanded(
+                db_session=db_session,
+                request=get_submission_list_expanded_request_schema,
+                soap_request=soap_request,
+                soap_config=soap_config,
             )
         records = [r for r in caplog.records if "Soap Config privileges not set" in r.message]
         assert len(records) == 1
@@ -316,14 +315,12 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
-        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
         with pytest.raises(SOAPClientCertificateLookupError):
-            get_submission_list_expanded_response(
-                db_session,
-                get_submission_list_expanded_request_schema,
-                soap_request,
-                proxy_response,
-                soap_config,
+            get_submission_list_expanded(
+                db_session=db_session,
+                request=get_submission_list_expanded_request_schema,
+                soap_request=soap_request,
+                soap_config=soap_config,
             )
         records = [r for r in caplog.records if "certificate does not have agency" in r.message]
         assert len(records) == 1
@@ -352,6 +349,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_package_id="PKG00000005",
             sam_gov_entity=sam_gov_entity_2,
             application_status=ApplicationStatus.SUBMITTED,
+            submitted_at=DT_EST_AWARE_EARLIER,
         )
         other_submission = setup_application_submission(
             other_agency,
@@ -392,12 +390,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_request_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_request_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected_1 = {
@@ -420,7 +421,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "GrantsGovApplicationStatus": "Received",
             "SubmissionTitle": submission_2.application.application_name,
             "PackageID": submission_2.application.competition.legacy_package_id,
-            "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
+            "ns2:ReceivedDateTime": "2025-08-01T08:15:17.000-04:00",
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
             "ActiveExclusions": "No",
@@ -434,8 +435,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "ns2:GetSubmissionListExpandedResponse"
         ]["ns2:SubmissionInfo"]
         assert len(expanded_application_info) == 2
-        assert expected_1 in expanded_application_info
-        assert expected_2 in expanded_application_info
+        assert expanded_application_info == [expected_1, expected_2]
         # Ensure unrelated agency submission is excluded
         assert all(
             item["PackageID"] != other_submission.application.competition.legacy_package_id
@@ -463,6 +463,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_package_id="PKG00000005",
             sam_gov_entity=sam_gov_entity_2,
             application_status=ApplicationStatus.SUBMITTED,
+            submitted_at=DT_EST_AWARE_EARLIER,
         )
         user, role, soap_client_certificate = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
@@ -497,12 +498,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_request_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_request_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected_1 = {
@@ -525,7 +529,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "GrantsGovApplicationStatus": "Received",
             "SubmissionTitle": submission_2.application.application_name,
             "PackageID": submission_2.application.competition.legacy_package_id,
-            "ns2:ReceivedDateTime": "2025-09-09T08:15:17.000-04:00",
+            "ns2:ReceivedDateTime": "2025-08-01T08:15:17.000-04:00",
             "SubmissionMethod": "web",
             "DelinquentFederalDebt": "No",
             "ActiveExclusions": "No",
@@ -539,8 +543,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             "ns2:GetSubmissionListExpandedResponse"
         ]["ns2:SubmissionInfo"]
         assert len(expanded_application_info) == 2
-        assert expected_1 in expanded_application_info
-        assert expected_2 in expanded_application_info
+        assert expanded_application_info == [expected_1, expected_2]
 
     def test_get_submission_list_expanded_response_no_filter_cannot_have_empty_expandedapplicationfilter(
         self, db_session, enable_factory_create
@@ -616,12 +619,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -703,12 +709,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -792,12 +801,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -880,12 +892,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -971,12 +986,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1062,12 +1080,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1153,12 +1174,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1252,12 +1276,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1372,12 +1399,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1448,12 +1478,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_request_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_request_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1540,12 +1573,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1615,12 +1651,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_request_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_request_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1693,12 +1732,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1784,12 +1826,15 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             **value
         )
         proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
+        simpler_submissions = get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
+        )
         result = get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
         )
         soap_envelope_dict = result.to_soap_envelope_dict("GetSubmissionListExpandedResponse")
         expected = {
@@ -1867,13 +1912,11 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
-        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+        get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_rquest_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
         )
         record = next(
             (
@@ -1938,13 +1981,11 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
-        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_request_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+        get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_request_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
         )
         record = next(
             (
@@ -2004,16 +2045,14 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             auth=SOAPAuth(certificate=soap_client_certificate),
         )
         value = get_soap_operation_dict(request_xml, "GetSubmissionListExpandedRequest")
-        proxy_response = SOAPResponse(data=b"", status_code=200, headers={})
-        get_submission_list_expanded_rquest_schema = schemas.GetSubmissionListExpandedRequest(
+        get_submission_list_expanded_request_schema = schemas.GetSubmissionListExpandedRequest(
             **value
         )
-        get_submission_list_expanded_response(
-            db_session,
-            get_submission_list_expanded_rquest_schema,
-            soap_request,
-            proxy_response,
-            soap_config,
+        get_submission_list_expanded(
+            db_session=db_session,
+            request=get_submission_list_expanded_request_schema,
+            soap_request=soap_request,
+            soap_config=soap_config,
         )
         record = next(
             (

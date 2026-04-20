@@ -116,6 +116,7 @@ data "aws_acm_certificate" "cert" {
   count       = local.service_config.enable_https ? 1 : 0
   domain      = local.service_config.domain_name
   most_recent = true
+  key_types   = ["RSA_2048", "RSA_4096"]
 }
 
 data "aws_acm_certificate" "secondary_certs" {
@@ -262,6 +263,9 @@ module "service" {
 
   # OpenSearch ingest policy for migrator role (scheduled data loading jobs)
   opensearch_ingest_policy_arn = local.search_config != null ? data.aws_iam_policy.opensearch_ingest[0].arn : null
+
+  newrelic_entity_guid      = local.service_config.newrelic_entity_guid
+  newrelic_mtls_entity_guid = local.service_config.newrelic_mtls_entity_guid
 
   is_temporary = local.is_temporary
 }

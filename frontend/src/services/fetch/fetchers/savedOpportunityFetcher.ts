@@ -3,16 +3,17 @@
 import { getSession } from "src/services/auth/session";
 import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { MinimalOpportunity } from "src/types/opportunity/opportunityResponseTypes";
+import { SavedOpportunitiesScope } from "src/types/opportunity/savedOpportunitiesTypes";
+import {
+  getSavedOpportunitiesScopeOrganizationIds,
+  INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
+} from "src/utils/opportunity/savedOpportunitiesUtils";
 
 export const handleSavedOpportunity = async (
   type: "DELETE" | "POST",
-  token: string,
   userId: string,
   opportunityId: string,
 ) => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const subPath =
     type === "POST"
       ? `${userId}/saved-opportunities`
@@ -26,27 +27,29 @@ export const handleSavedOpportunity = async (
       : {};
   return fetchUserWithMethod(type)({
     subPath,
-    additionalHeaders: ssgToken,
     body,
   });
 };
 
 export const getSavedOpportunities = async (
-  token: string,
   userId: string,
+  scope: SavedOpportunitiesScope,
   statusFilter?: string,
+  organizationIdsFilter?: string[] | null,
 ): Promise<MinimalOpportunity[]> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
+  const organizationIds =
+    organizationIdsFilter === undefined
+      ? getSavedOpportunitiesScopeOrganizationIds(scope)
+      : organizationIdsFilter;
   const body: {
     pagination: {
       page_offset: number;
       page_size: number;
       sort_order: { order_by: string; sort_direction: string }[];
     };
-    filters?: {
-      opportunity_status: { one_of: string[] };
+    filters: {
+      opportunity_status?: { one_of: string[] };
+      organization_ids: { one_of: string[] | null };
     };
   } = {
     pagination: {
@@ -59,33 +62,37 @@ export const getSavedOpportunities = async (
         },
       ],
     },
+    filters: {
+      organization_ids: {
+        one_of: organizationIds,
+      },
+    },
   };
 
   // Add status filter if provided
   if (statusFilter) {
-    body.filters = {
-      opportunity_status: {
-        one_of: [statusFilter],
-      },
+    body.filters.opportunity_status = {
+      one_of: [statusFilter],
     };
   }
 
   const subPath = `${userId}/saved-opportunities/list`;
-  const resp = await fetchUserWithMethod("POST")({
+  const response = await fetchUserWithMethod("POST")({
     subPath,
-    additionalHeaders: ssgToken,
     body,
   });
-  const json = (await resp.json()) as { data: [] };
+  const json = (await response.json()) as { data: MinimalOpportunity[] };
   return json.data;
 };
 
-export const getSavedOpportunity = async (
-  token: string,
+export const getUserSavedOpportunity = async (
   userId: string,
   opportunityId: string,
 ): Promise<MinimalOpportunity | null> => {
-  const savedOpportunities = await getSavedOpportunities(token, userId);
+  const savedOpportunities = await getSavedOpportunities(
+    userId,
+    INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
+  );
   const savedOpportunity = savedOpportunities.find(
     (savedOpportunity: { opportunity_id: string }) =>
       savedOpportunity.opportunity_id === opportunityId,
@@ -94,7 +101,9 @@ export const getSavedOpportunity = async (
 };
 
 export const fetchSavedOpportunities = async (
+  scope: SavedOpportunitiesScope,
   statusFilter?: string,
+  organizationIdsFilter?: string[] | null,
 ): Promise<MinimalOpportunity[]> => {
   try {
     const session = await getSession();
@@ -102,13 +111,14 @@ export const fetchSavedOpportunities = async (
       return [];
     }
     const savedOpportunities = await getSavedOpportunities(
-      session.token,
       session.user_id,
+      scope,
       statusFilter,
+      organizationIdsFilter,
     );
     return savedOpportunities;
-  } catch (e) {
-    console.error("Error fetching saved opportunities:", e);
+  } catch (error: unknown) {
+    console.error("Error fetching saved opportunities:", error);
     return [];
   }
 };
