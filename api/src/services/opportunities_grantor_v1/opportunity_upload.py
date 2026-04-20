@@ -72,7 +72,7 @@ def upload_opportunity_attachment(
         file_name=file_name,
         file_description=file_description,
         file_size_bytes=file_size_bytes,
-        legacy_attachment_id=0,
+        legacy_attachment_id=None,
     )
 
     db_session.add(attachment)
