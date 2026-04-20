@@ -92,28 +92,6 @@ def list_award_recommendation_audit(
 def _transform_audit_events(audit_events: Sequence[AwardRecommendationAudit]) -> list[dict]:
     results = []
     for audit_event in audit_events:
-        # Transform the application submission if present
-        if app_sub := audit_event.award_recommendation_application_submission:
-            submission = app_sub.application_submission
-            transformed_app_sub = {
-                "award_recommendation_application_submission_id": app_sub.award_recommendation_application_submission_id,
-                "application_submission_id": submission.application_submission_id,
-                "application_submission_number": submission.application_submission_number,
-            }
-        else:
-            transformed_app_sub = None
-
-        # Transform the workflow approval if present
-        if approval := audit_event.workflow_approval:
-            transformed_approval = {
-                "workflow_approval_id": approval.workflow_approval_id,
-                "workflow_id": approval.workflow_id,
-                "approval_type": approval.approval_type,
-                "approval_response_type": approval.approval_response_type,
-            }
-        else:
-            transformed_approval = None
-
         results.append(
             {
                 "award_recommendation_audit_id": audit_event.award_recommendation_audit_id,
@@ -122,8 +100,8 @@ def _transform_audit_events(audit_events: Sequence[AwardRecommendationAudit]) ->
                 "award_recommendation_risk": audit_event.award_recommendation_risk,
                 "award_recommendation_attachment": audit_event.award_recommendation_attachment,
                 "award_recommendation_review": audit_event.award_recommendation_review,
-                "award_recommendation_application_submission": transformed_app_sub,
-                "workflow_approval": transformed_approval,
+                "award_recommendation_application_submission": audit_event.award_recommendation_application_submission,
+                "workflow_approval": audit_event.workflow_approval,
                 "audit_metadata": audit_event.audit_metadata,
                 "created_at": audit_event.created_at,
             }
