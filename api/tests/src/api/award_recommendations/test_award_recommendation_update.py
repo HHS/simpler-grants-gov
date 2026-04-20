@@ -55,15 +55,20 @@ def award_recommendation(opportunity):
 
 class TestUpdateAwardRecommendation200:
 
-    def test_update_award_recommendation_200(self, client, db_session, agency, award_recommendation):
+    def test_update_award_recommendation_200(
+        self, client, db_session, agency, award_recommendation
+    ):
         user, _, token = create_user_in_agency_with_jwt(
-            db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
+            db_session,
+            agency=agency,
+            privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION, Privilege.VIEW_AWARD_RECOMMENDATION],
         )
 
         update_data = {
-            "award_selection_method": AwardSelectionMethod.MERIT_REVIEW_FORMULA_BASED.value,
+            "award_selection_method": AwardSelectionMethod.FORMULA.value,
             "additional_info": "Updated additional information",
             "funding_strategy": "Updated funding strategy",
+            "selection_method_detail": "Updated selection method details",
             "other_key_information": "Updated key information",
         }
 
@@ -79,20 +84,26 @@ class TestUpdateAwardRecommendation200:
         # Assert that fields were updated correctly
         assert data["award_recommendation_id"] == str(award_recommendation.award_recommendation_id)
         assert data["award_recommendation_status"] == AwardRecommendationStatus.IN_REVIEW
-        assert data["award_selection_method"] == AwardSelectionMethod.MERIT_REVIEW_FORMULA_BASED
+        assert data["award_selection_method"] == AwardSelectionMethod.FORMULA
         assert data["additional_info"] == "Updated additional information"
-        assert data["selection_method_detail"] == "Updated funding strategy"
+        assert data["selection_method_detail"] == "Updated selection method details"
+        assert data["funding_strategy"] == "Updated funding strategy"
         assert data["other_key_information"] == "Updated key information"
 
-    def test_update_award_recommendation_null_fields_200(self, client, db_session, agency, award_recommendation):
+    def test_update_award_recommendation_null_fields_200(
+        self, client, db_session, agency, award_recommendation
+    ):
         user, _, token = create_user_in_agency_with_jwt(
-            db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
+            db_session,
+            agency=agency,
+            privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION, Privilege.VIEW_AWARD_RECOMMENDATION],
         )
 
         update_data = {
-            "award_selection_method": AwardSelectionMethod.MERIT_REVIEW_FORMULA_BASED.value,
+            "award_selection_method": AwardSelectionMethod.FORMULA.value,
             "additional_info": None,
             "funding_strategy": None,
+            "selection_method_detail": None,
             "other_key_information": None,
         }
 
@@ -107,9 +118,10 @@ class TestUpdateAwardRecommendation200:
 
         # Assert that fields were updated correctly with null values
         assert data["award_recommendation_id"] == str(award_recommendation.award_recommendation_id)
-        assert data["award_selection_method"] == AwardSelectionMethod.MERIT_REVIEW_FORMULA_BASED
+        assert data["award_selection_method"] == AwardSelectionMethod.FORMULA
         assert data["additional_info"] is None
         assert data["selection_method_detail"] is None
+        assert data["funding_strategy"] is None
         assert data["other_key_information"] is None
 
 
@@ -131,6 +143,7 @@ class TestUpdateAwardRecommendation422:
         update_data = {
             "additional_info": "Updated additional information",
             "funding_strategy": "Updated funding strategy",
+            "selection_method_detail": "Updated selection method details",
             "other_key_information": "Updated key information",
         }
 
@@ -150,18 +163,19 @@ class TestUpdateAwardRecommendation422:
 
 class TestUpdateAwardRecommendation404:
 
-    def test_update_award_recommendation_not_found_404(
-        self, client, db_session, agency
-    ):
+    def test_update_award_recommendation_not_found_404(self, client, db_session, agency):
         user, _, token = create_user_in_agency_with_jwt(
-            db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
+            db_session,
+            agency=agency,
+            privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION, Privilege.VIEW_AWARD_RECOMMENDATION],
         )
 
         non_existent_id = uuid.uuid4()
         update_data = {
-            "award_selection_method": AwardSelectionMethod.MERIT_REVIEW_FORMULA_BASED.value,
+            "award_selection_method": AwardSelectionMethod.FORMULA.value,
             "additional_info": "Updated additional information",
             "funding_strategy": "Updated funding strategy",
+            "selection_method_detail": "Updated selection method details",
             "other_key_information": "Updated key information",
         }
 
@@ -172,7 +186,9 @@ class TestUpdateAwardRecommendation404:
         )
 
         assert resp.status_code == 404
-        assert f"Could not find Award Recommendation with ID {non_existent_id}" in resp.json["message"]
+        assert (
+            f"Could not find Award Recommendation with ID {non_existent_id}" in resp.json["message"]
+        )
 
     def test_update_deleted_award_recommendation_404(self, client, db_session, agency, opportunity):
         ar = AwardRecommendationFactory.create(
@@ -183,13 +199,16 @@ class TestUpdateAwardRecommendation404:
         )
 
         user, _, token = create_user_in_agency_with_jwt(
-            db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
+            db_session,
+            agency=agency,
+            privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION, Privilege.VIEW_AWARD_RECOMMENDATION],
         )
 
         update_data = {
-            "award_selection_method": AwardSelectionMethod.MERIT_REVIEW_FORMULA_BASED.value,
+            "award_selection_method": AwardSelectionMethod.FORMULA.value,
             "additional_info": "Updated additional information",
             "funding_strategy": "Updated funding strategy",
+            "selection_method_detail": "Updated selection method details",
             "other_key_information": "Updated key information",
         }
 
@@ -214,11 +233,13 @@ class TestUpdateAwardRecommendation403:
     ):
         other_agency = AgencyFactory.create()
         user, _, token = create_user_in_agency_with_jwt(
-            db_session, agency=other_agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
+            db_session,
+            agency=other_agency,
+            privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION, Privilege.VIEW_AWARD_RECOMMENDATION],
         )
 
         update_data = {
-            "award_selection_method": AwardSelectionMethod.MERIT_REVIEW_FORMULA_BASED.value,
+            "award_selection_method": AwardSelectionMethod.FORMULA.value,
         }
 
         resp = client.put(
@@ -233,12 +254,13 @@ class TestUpdateAwardRecommendation403:
     def test_update_award_recommendation_wrong_privilege_403(
         self, client, db_session, agency, award_recommendation
     ):
+        # Only provide VIEW privilege, but not UPDATE privilege
         user, _, token = create_user_in_agency_with_jwt(
             db_session, agency=agency, privileges=[Privilege.VIEW_AWARD_RECOMMENDATION]
         )
 
         update_data = {
-            "award_selection_method": AwardSelectionMethod.MERIT_REVIEW_FORMULA_BASED.value,
+            "award_selection_method": AwardSelectionMethod.FORMULA.value,
         }
 
         resp = client.put(
@@ -260,7 +282,7 @@ class TestUpdateAwardRecommendation401:
 
     def test_update_award_recommendation_no_token_401(self, client, award_recommendation):
         update_data = {
-            "award_selection_method": AwardSelectionMethod.MERIT_REVIEW_FORMULA_BASED.value,
+            "award_selection_method": AwardSelectionMethod.FORMULA.value,
         }
 
         resp = client.put(
@@ -273,7 +295,7 @@ class TestUpdateAwardRecommendation401:
 
     def test_update_award_recommendation_invalid_token_401(self, client, award_recommendation):
         update_data = {
-            "award_selection_method": AwardSelectionMethod.MERIT_REVIEW_FORMULA_BASED.value,
+            "award_selection_method": AwardSelectionMethod.FORMULA.value,
         }
 
         resp = client.put(

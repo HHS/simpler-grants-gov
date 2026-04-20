@@ -33,6 +33,10 @@ class AwardRecommendationCreateRequestSchema(Schema):
         allow_none=True,
         metadata={"description": "Funding strategy information for the award recommendation"},
     )
+    selection_method_detail = fields.String(
+        allow_none=True,
+        metadata={"description": "Additional details about the selection method"},
+    )
     other_key_information = fields.String(
         allow_none=True,
         metadata={"description": "Other key information for the award recommendation"},
@@ -54,6 +58,10 @@ class AwardRecommendationUpdateRequestSchema(Schema):
     funding_strategy = fields.String(
         allow_none=True,
         metadata={"description": "Funding strategy information for the award recommendation"},
+    )
+    selection_method_detail = fields.String(
+        allow_none=True,
+        metadata={"description": "Additional details about the selection method"},
     )
     other_key_information = fields.String(
         allow_none=True,

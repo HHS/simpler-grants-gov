@@ -93,7 +93,8 @@ def create_award_recommendation(
         award_recommendation_status=AwardRecommendationStatus.IN_REVIEW,
         award_selection_method=award_recommendation_data["award_selection_method"],
         additional_info=award_recommendation_data.get("additional_info"),
-        selection_method_detail=award_recommendation_data.get("funding_strategy"),
+        selection_method_detail=award_recommendation_data.get("selection_method_detail"),
+        funding_strategy=award_recommendation_data.get("funding_strategy"),
         other_key_information=award_recommendation_data.get("other_key_information"),
     )
 
