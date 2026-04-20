@@ -126,6 +126,7 @@ def create_award_recommendation_risk(
     submissions = _get_validated_submissions(db_session, award_recommendation_id, submission_ids)
 
     risk = AwardRecommendationRisk(
+        award_recommendation_risk_id=uuid.uuid4(),
         award_recommendation=award_recommendation,
         award_recommendation_risk_number=_generate_risk_number(db_session, agency_code),
         award_recommendation_risk_type=request_data["award_recommendation_risk_type"],
@@ -140,6 +141,5 @@ def create_award_recommendation_risk(
         )
 
     db_session.add(risk)
-    db_session.flush()
 
     return risk
