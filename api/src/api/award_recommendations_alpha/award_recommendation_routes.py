@@ -10,6 +10,8 @@ from src.api.award_recommendations_alpha.award_recommendation_blueprint import (
 from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationCreateRequestSchema,
     AwardRecommendationGetResponseSchema,
+    AwardRecommendationReviewUpdateRequestSchema,
+    AwardRecommendationReviewUpdateResponseSchema,
     AwardRecommendationRiskCreateRequestSchema,
     AwardRecommendationRiskCreateResponseSchema,
     AwardRecommendationSubmissionListRequestSchema,
@@ -28,6 +30,9 @@ from src.services.award_recommendations.get_award_recommendation import (
 )
 from src.services.award_recommendations.list_award_recommendation_submissions import (
     list_award_recommendation_submissions,
+)
+from src.services.award_recommendations.update_award_recommendation_review import (
+    update_award_recommendation_review,
 )
 
 logger = logging.getLogger(__name__)
@@ -121,6 +126,49 @@ def award_recommendation_submission_list(
     return response.ApiResponse(
         message="Success", data=submissions, pagination_info=pagination_info
     )
+
+
+@award_recommendation_blueprint.put(
+    "/award-recommendations/<uuid:award_recommendation_id>/reviews/<uuid:award_recommendation_review_id>"
+)
+@award_recommendation_blueprint.input(AwardRecommendationReviewUpdateRequestSchema, location="json")
+@award_recommendation_blueprint.output(AwardRecommendationReviewUpdateResponseSchema)
+@award_recommendation_blueprint.doc(
+    summary="Update Award Recommendation Review",
+    description="Update a review on an award recommendation.",
+    responses=[200, 401, 403, 404, 422],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_review_update(
+    db_session: db.Session,
+    award_recommendation_id: uuid.UUID,
+    award_recommendation_review_id: uuid.UUID,
+    json_data: dict,
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {
+            "award_recommendation_id": award_recommendation_id,
+            "award_recommendation_review_id": award_recommendation_review_id,
+        }
+    )
+    logger.info(
+        "PUT /alpha/award-recommendations/:award_recommendation_id/reviews/:award_recommendation_review_id"
+    )
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        review = update_award_recommendation_review(
+            db_session,
+            user,
+            award_recommendation_id,
+            award_recommendation_review_id,
+            json_data,
+        )
+
+    return response.ApiResponse(message="Success", data=review)
 
 
 @award_recommendation_blueprint.post("/award-recommendations/<uuid:award_recommendation_id>/risks")
