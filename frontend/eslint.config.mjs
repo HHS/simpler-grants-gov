@@ -61,8 +61,6 @@ export default defineConfig(...vitalsPlugin, [
       "promise/always-return": "warn",
       // TODO #9637 remove this warn line after addressing the issues where this rule flags stuff
       "react-hooks/error-boundaries": "warn",
-      // TODO evaluate the right way to fix this later
-      "react-hooks/static-components": "warn",
     },
 
     settings: {
