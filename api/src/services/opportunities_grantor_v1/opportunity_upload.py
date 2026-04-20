@@ -61,7 +61,7 @@ def upload_opportunity_attachment(
 
     # Write the file to S3
     with file_util.open_stream(file_path, "wb", content_type=mime_type) as f:
-        f.write(file_content)
+        file_data.save(f)
 
     attachment = OpportunityAttachment(
         attachment_id=attachment_id,
