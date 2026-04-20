@@ -78,11 +78,12 @@ def upload_opportunity_attachment(
         db_session.add(attachment)
 
         logger.info(
-            f"Added attachment {file_name} to opportunity",
+            "Added attachment to opportunity",
             extra={
                 "opportunity_id": opportunity_id,
                 "attachment_id": attachment_id,
                 "file_size": file_size_bytes,
+                "file_name": file_name
             },
         )
 
