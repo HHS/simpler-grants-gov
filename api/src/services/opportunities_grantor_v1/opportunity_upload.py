@@ -38,61 +38,55 @@ def upload_opportunity_attachment(
     # Verify opportunity is in draft state
     validate_opportunity_is_draft(opportunity)
 
-    try:
-        attachment_id = uuid.uuid4()
+    attachment_id = uuid.uuid4()
 
-        # Extract file metadata
-        if not file_data.filename:
-            raise_flask_error(422, "File must have a filename")
+    # Extract file metadata
+    if not file_data.filename:
+        raise_flask_error(422, "File must have a filename")
 
-        file_name = adjust_legacy_file_name(file_data.filename)
-        file_content = file_data.read()
-        mime_type = file_data.mimetype or "application/octet-stream"
-        file_description = ""
-        file_size_bytes = len(file_content)
+    file_name = adjust_legacy_file_name(file_data.filename)
+    file_content = file_data.read()
+    mime_type = file_data.mimetype or "application/octet-stream"
+    file_description = ""
+    file_size_bytes = len(file_content)
 
-        # Create S3 path for the file
-        s3_config = S3Config()
-        file_path = get_s3_attachment_path(
-            file_name=file_name,
-            opportunity_attachment_id=attachment_id,
-            opportunity=opportunity,
-            s3_config=s3_config,
-        )
+    # Create S3 path for the file
+    s3_config = S3Config()
+    file_path = get_s3_attachment_path(
+        file_name=file_name,
+        opportunity_attachment_id=attachment_id,
+        opportunity=opportunity,
+        s3_config=s3_config,
+    )
 
-        # Write the file to S3
-        with file_util.open_stream(file_path, "wb", content_type=mime_type) as f:
-            f.write(file_content)
+    # Write the file to S3
+    with file_util.open_stream(file_path, "wb", content_type=mime_type) as f:
+        f.write(file_content)
 
-        attachment = OpportunityAttachment(
-            attachment_id=attachment_id,
-            opportunity_id=opportunity_id,
-            file_location=file_path,
-            mime_type=mime_type,
-            file_name=file_name,
-            file_description=file_description,
-            file_size_bytes=file_size_bytes,
-            legacy_attachment_id=0,
-        )
+    attachment = OpportunityAttachment(
+        attachment_id=attachment_id,
+        opportunity_id=opportunity_id,
+        file_location=file_path,
+        mime_type=mime_type,
+        file_name=file_name,
+        file_description=file_description,
+        file_size_bytes=file_size_bytes,
+        legacy_attachment_id=0,
+    )
 
-        db_session.add(attachment)
+    db_session.add(attachment)
 
-        logger.info(
-            "Added attachment to opportunity",
-            extra={
-                "opportunity_id": opportunity_id,
-                "attachment_id": attachment_id,
-                "file_size": file_size_bytes,
-                "file_name": file_name
-            },
-        )
+    logger.info(
+        "Added attachment to opportunity",
+        extra={
+            "opportunity_id": opportunity_id,
+            "attachment_id": attachment_id,
+            "file_size": file_size_bytes,
+            "file_name": file_name
+        },
+    )
 
-        return str(attachment_id)
-
-    except Exception as e:
-        logger.error(f"Error uploading attachment: {str(e)}")
-        db_session.rollback()
-        raise
+    return str(attachment_id)
 
 
 def delete_opportunity_attachment(
