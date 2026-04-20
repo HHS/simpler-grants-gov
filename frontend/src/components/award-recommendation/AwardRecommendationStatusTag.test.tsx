@@ -15,17 +15,25 @@ jest.mock("next-intl", () => ({
 }));
 
 describe("AwardRecommendationStatusTag", () => {
+  it("renders the correct wrapper with data-testid", () => {
+    render(<AwardRecommendationStatusTag status="draft" />);
+
+    const wrapper = screen.getByTestId("award-recommendation-status-tag");
+    expect(wrapper).toBeInTheDocument();
+  });
   it("renders draft status tag", () => {
     render(<AwardRecommendationStatusTag status="draft" />);
 
-    const tag = screen.getByTestId("award-recommendation-status-draft");
+    const tag = screen.getByTestId("award-recommendation-status-in-progress");
     expect(tag).toBeInTheDocument();
   });
 
   it("renders in review status tag", () => {
     render(<AwardRecommendationStatusTag status="in_review" />);
 
-    const tag = screen.getByTestId("award-recommendation-status-in-progress");
+    const tag = screen.getByTestId(
+      "award-recommendation-status-pending-review",
+    );
     expect(tag).toBeInTheDocument();
   });
 

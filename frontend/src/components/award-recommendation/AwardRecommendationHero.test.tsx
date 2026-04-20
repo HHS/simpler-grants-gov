@@ -38,7 +38,7 @@ describe("AwardRecommendationHero", () => {
     expect(screen.getByText(formattedDate)).toBeInTheDocument();
 
     expect(
-      screen.getByTestId("award-recommendation-status-in-progress"),
+      screen.getByTestId("award-recommendation-status-pending-review"),
     ).toBeInTheDocument();
   });
 

@@ -16,18 +16,18 @@ const AwardRecommendationStatusTag = ({ status }: Props) => {
       case "draft":
         return (
           <div
-            className="usa-tag bg-base-dark text-white radius-2 border-base-lightest font-sans-sm text-no-uppercase display-flex flex-align-center"
-            data-testid="award-recommendation-status-draft"
+            className="usa-tag bg-accent-warm-light text-ink radius-2 font-sans-sm text-no-uppercase display-flex flex-align-center"
+            data-testid="award-recommendation-status-in-progress"
           >
-            <USWDSIcon name="edit" className="margin-right-05" />
-            {t("draft")}
+            <USWDSIcon name="schedule" className="margin-right-05" />
+            {t("inProgress")}
           </div>
         );
       case "in_review":
         return (
           <div
             className="usa-tag bg-error-dark text-white radius-2 font-sans-sm text-no-uppercase display-flex flex-align-center"
-            data-testid="award-recommendation-status-in-progress"
+            data-testid="award-recommendation-status-pending-review"
           >
             <USWDSIcon name="visibility" className="margin-right-05" />
             {t("in_review")}
