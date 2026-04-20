@@ -373,7 +373,7 @@ export const InformationCard = ({
     );
   };
 
-  const detailsRender = (shouldBlockSubmitForTransferOwnership: boolean) => (
+  return (
     <>
       {shouldBlockSubmitForTransferOwnership ? (
         <NeedsTransferOwnershipCta />
@@ -390,8 +390,6 @@ export const InformationCard = ({
       </GridContainer>
     </>
   );
-
-  return detailsRender(shouldBlockSubmitForTransferOwnership);
 };
 
 export const SubmitApplicationButton = ({
