@@ -85,12 +85,11 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
-      - name: Check Docker image cached
-        id: check-docker-image-cached
+      - name: Restore Docker image cached
+        id: restore-docker-image-cached
         uses: actions/cache/restore@v4
         with:
           path: /tmp/docker-image.tar
-          lookup-only: true
           key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
           restore-keys: api-docker-img- # get any recent API container from cache if we can't find our specific one
 
