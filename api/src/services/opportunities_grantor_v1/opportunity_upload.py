@@ -119,6 +119,7 @@ def delete_opportunity_attachment(
         raise_flask_error(404, "Attachment not found")
 
     db_session.delete(attachment)
+    file_util.delete_file(attachment.file_location)
 
     logger.info(
         "Deleted opportunity attachment",
