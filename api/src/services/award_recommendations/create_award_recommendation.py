@@ -159,7 +159,6 @@ def create_award_recommendation(
             "selection_method_detail": award_recommendation.selection_method_detail,
             "funding_strategy": award_recommendation.funding_strategy,
             "other_key_information": award_recommendation.other_key_information,
-            "user_id": user.user_id,
             "application_submission_count": len(application_submissions),
         },
     )
