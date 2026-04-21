@@ -1,8 +1,8 @@
-"""<Make legacy_attachment_id nullable>
+"""<Make legacy attachment id nullable in opportunity_attachment>
 
-Revision ID: 2af4d2b051f6
-Revises: f07517d3bf39
-Create Date: 2026-04-20 18:38:43.621174
+Revision ID: f87a711a47cb
+Revises: 31c3125a932e
+Create Date: 2026-04-21 16:51:41.740305
 
 """
 
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "2af4d2b051f6"
-down_revision = "f07517d3bf39"
+revision = "f87a711a47cb"
+down_revision = "31c3125a932e"
 branch_labels = None
 depends_on = None
 
