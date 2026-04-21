@@ -10,6 +10,30 @@ from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_k
 from tests.src.db.models.factories import OpportunityFactory
 
 
+@pytest.fixture(scope="module")
+def publish_index(search_client):
+    # create a random index name just to make sure it won't ever conflict
+    # with an actual one, similar to how we create schemas for database tests
+    index_name = f"test-opportunity-index-{uuid.uuid4().int}"
+
+    search_client.create_index(index_name)
+
+    try:
+        yield index_name
+    finally:
+        # Try to clean up the index at the end
+        # Use a prefix which will delete the above (if it exists)
+        # and any that might not have been cleaned up due to issues
+        # in prior runs
+        search_client.delete_index("test-opportunity-index-*")
+
+
+@pytest.fixture(scope="module", autouse=True)
+def setup_index(search_client, publish_index, opportunity_index_alias):
+    """Setup the index - making sure the alias is set"""
+    search_client.swap_alias_index(publish_index, opportunity_index_alias)
+
+
 @pytest.fixture
 def grantor_auth_data(db_session, enable_factory_create):
     """Create a user with PUBLISH_OPPORTUNITY permission and return auth data"""
@@ -29,38 +53,6 @@ def existing_opportunity(grantor_auth_data, enable_factory_create):
         is_draft=True,
         is_simpler_grants_opportunity=True,
     )
-
-
-@pytest.fixture
-def workflow_user(db_session, enable_factory_create, monkeypatch):
-    """Get the workflow user, setting them up with expected params"""
-    from src.constants.lookup_constants import RoleType
-    from tests.src.db.models.factories import (
-        InternalUserRoleFactory,
-        RoleFactory,
-        UserFactory,
-        UserProfileFactory,
-    )
-
-    user = UserFactory.create()
-    UserProfileFactory.create(user=user, first_name="System", last_name="User")
-
-    role = RoleFactory.create(
-        privileges=[Privilege.INTERNAL_WORKFLOW_ACCESS], role_types=[RoleType.INTERNAL]
-    )
-    InternalUserRoleFactory.create(user=user, role=role)
-
-    monkeypatch.setenv("WORKFLOW_SERVICE_INTERNAL_USER_ID", str(user.user_id))
-
-    return user
-
-
-@pytest.fixture(scope="session")
-def workflow_client_registry(search_client):
-    """Initialize the workflow client registry"""
-    from src.workflow.registry.workflow_client_registry import init_workflow_client_registry
-
-    return init_workflow_client_registry(search_client=search_client)
 
 
 def test_opportunity_publish_success(

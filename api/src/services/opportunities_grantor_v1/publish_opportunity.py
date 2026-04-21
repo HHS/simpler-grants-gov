@@ -2,6 +2,7 @@ import logging
 import uuid
 
 import src.adapters.db as db
+from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import (
     Privilege,
@@ -36,8 +37,6 @@ def publish_opportunity(
 
     # Check if the opportunity is already published
     if not opportunity.is_draft:
-        from src.api.route_utils import raise_flask_error
-
         raise_flask_error(422, message="Opportunity is already published")
 
     # Queue the opportunity for the publish workflow
