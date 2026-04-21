@@ -1,3 +1,4 @@
+import logging
 import random
 import secrets
 import string
@@ -5,6 +6,8 @@ import uuid
 
 from sqlalchemy import exists, select
 from sqlalchemy.orm import selectinload
+
+logger = logging.getLogger(__name__)
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
@@ -135,6 +138,17 @@ def create_award_recommendation(
     db_session.flush()
 
     award_recommendation_id = award_recommendation.award_recommendation_id
+    
+    logger.info(
+        "Created award recommendation",
+        extra={
+            "award_recommendation_id": award_recommendation_id,
+            "opportunity_id": opportunity_id,
+            "award_selection_method": award_recommendation.award_selection_method.value,
+            "user_id": user.user_id,
+            "application_submission_count": len(application_submissions),
+        },
+    )
 
     stmt = (
         select(AwardRecommendation)

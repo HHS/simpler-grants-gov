@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 import src.adapters.db as db
@@ -8,6 +9,8 @@ from src.db.models.user_models import User
 from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_and_verify_access,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def update_award_recommendation(
@@ -51,6 +54,15 @@ def update_award_recommendation(
 
     db_session.add(award_recommendation)
     db_session.flush()
+
+    logger.info(
+        "Updated award recommendation",
+        extra={
+            "award_recommendation_id": award_recommendation_id,
+            "award_selection_method": award_recommendation.award_selection_method.value,
+            "user_id": user.user_id,
+        },
+    )
 
     # Return the updated award recommendation
     return award_recommendation
