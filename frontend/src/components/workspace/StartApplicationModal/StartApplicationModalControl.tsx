@@ -55,6 +55,8 @@ export const StartApplicationModalControl = ({
 
   // see what the accepted applicant types are for this particular competition
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCompetitionLoading(true);
     fetchCompetition(`/api/competitions/${competitionId}`)
       .then((competition) => {
@@ -77,6 +79,8 @@ export const StartApplicationModalControl = ({
     if (!token) {
       return;
     }
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOrganizationsLoading(true);
     setOrganizationsError(false);
     fetchUserOrganizations("/api/user/organizations", {
