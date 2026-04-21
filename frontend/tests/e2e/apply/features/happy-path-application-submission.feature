@@ -1,6 +1,6 @@
-Feature: Happy Path – Apply Workflow
+Feature: Happy Path – Apply Submission Workflow
   As a grant applicant
-  I want to complete the full Apply workflow successfully
+  I want to complete the full Apply Submission workflow successfully
   So that I can submit a complete application without errors
 
   Background:
@@ -8,7 +8,7 @@ Feature: Happy Path – Apply Workflow
     And the system is available
 
   @Happy-Path
-  Scenario: Complete the Apply workflow for an Organization user
+  Scenario: Complete the Apply Submission workflow for an <user type> user
     
     # --- Login ---
     Given the user is logged in
@@ -19,7 +19,7 @@ Feature: Happy Path – Apply Workflow
     # --- Starting Application ---
     When the user clicks "Start Application"
     Then the "Start a new application" modal opens
-    When the user selects "Organization A" in the "Who's applying" dropdown
+    When the <user type> selects <who is applying> in the "Who's applying" dropdown
     And the user enters the application name
     And the user clicks "Create Application"
     Then a new application is created
@@ -46,44 +46,10 @@ Feature: Happy Path – Apply Workflow
     # --- Confirmation Page ---
     Then the user validates the confirmation page
 
-  @Happy-Path
-  Scenario: Complete the Apply workflow for an Individual user
-    
-    # --- Login ---
-    Given the user is logged in
-
-    # --- Search the Opportunity ---
-    When the user searches for funding opportunity
-
-    # --- Starting Application ---
-    When the user clicks "Start Application"
-    Then the "Start a new application" modal opens
-    When the user does not select anything in the "Who's applying" dropdown
-    And the user enters the application name
-    And the user clicks "Create Application"
-    Then a new application is created
-    And the Application landing page loads with navigation, header, and a list of required and optional forms
-
-    # ---- Completing Required Forms ---
-    Given the user has completed the Required forms
-
-    # ---- Completing Conditionally Required Forms ---  
-    Given the user has completed the conditionally Required forms
-
-    # --- Confirm the Optional Form for Submission ---
-    Given the user has confirmed the optional Form for Submission
-
-    # --- Validate All Required and Optional Forms ---
-    Given the user completes validation of Required and Optional Forms
-
-    # --- Complete Additional Attachments ---
-    Given the user completes the additional attachments
-
-    # --- Submitting the Application ---
-    Given the user submits the application
-
-    # --- Confirmation Page ---
-    Then the user validates the confirmation page
+   Examples:
+     | user type    | who is applying            |
+     | Organization | Organization A             |
+     | Individual   | As an individual (myself)  |
 
 # =================================================================
 # --- Shared Workflow Details ---

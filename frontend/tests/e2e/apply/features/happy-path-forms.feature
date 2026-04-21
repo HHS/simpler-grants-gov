@@ -10,15 +10,30 @@ Feature: Apply - Application Form Happy Path
   Scenario: Application form completion happy path - <form name>
 
     Given the user is logged in
-    And the user launches the URL "https://<targetEnv>/opportunity/<opportunity_id>
-    When the user creates a new application for their organization
+    And the user launches the URL "https://<targetEnv>/opportunity/<opportunity_id>"
+    When the user clicks "Start Application"
+    Then the "Start a new application" modal opens
+
+    When the <user type> selects <who is applying> in the "Who's applying" dropdown
+    And the user enters the application name
+    And the user clicks "Create Application"
+
+    Then a new application is created
     And the user verifies the <form name> form link is visible
-    And the user fills out the <form name> form with valid test data
+
+    When the user fills out the <form name> form with valid test data
     And the user clicks Save
+
     Then the form returns the message "Form was saved No errors were detected"
+    
     When the user navigates back to the application landing page
     Then under the <form name> form the status shows "No issues detected"
- 
+    
+    Examples:
+      | user type    | who is applying            |
+      | Organization | Organization A             |
+      | Individual   | As an individual (myself)  |
+      
     Examples:
 
       | form name                          |
@@ -39,6 +54,6 @@ Feature: Apply - Application Form Happy Path
       | Supplemental Cover Sheet NEH       |
       | Attachments                        |
  
-  # Expected form statuses on the application landing page:
-  # "complete"   → displays "No issues detected"
+  # Expected happy path form status on the application landing page:
+  # "complete"   -> displays "No issues detected"
  
