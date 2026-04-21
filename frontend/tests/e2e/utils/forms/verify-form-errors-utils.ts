@@ -25,7 +25,11 @@ export async function verifyAlertErrors(
   const alertItems = alertList.getByRole("listitem");
 
   // 1) Exact count check: catches unexpected extra/missing alert errors.
-  await expect(alertItems).toHaveCount(expectedErrors.length);
+  // Use a generous timeout — mobile CI runners render alert list items more
+  // slowly than desktop, and the Playwright default (5000ms) is insufficient.
+  await expect(alertItems).toHaveCount(expectedErrors.length, {
+    timeout: 10000,
+  });
 
   // 2) Set-equality check on alert messages: catches wrong messages even when
   // the count happens to match.
@@ -76,7 +80,11 @@ export async function verifyInlineErrors(
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 
   // 1) Exact count check: catches unexpected extra/missing inline errors.
-  const inlineErrors = page.locator('[id^="error-for-"]');
+  // Filter to visible elements only — hidden duplicate DOM nodes (e.g. from
+  // mobile-specific hidden sections) must not inflate the count.
+  const inlineErrors = page
+    .locator('[id^="error-for-"]')
+    .filter({ visible: true });
   await expect(inlineErrors).toHaveCount(expectedErrors.length);
 
   // 2) Set-equality check on inline field IDs: catches wrong fields even when
