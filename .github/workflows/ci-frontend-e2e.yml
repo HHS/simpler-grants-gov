@@ -188,6 +188,19 @@ jobs:
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
 
+      - name: Save Docker image
+        if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
+        run: |
+          IMAGE_TAG=$(make APP_NAME=api release-image-tag)
+          docker save simpler-grants-gov-api:$IMAGE_TAG > /tmp/docker-image.tar
+
+      - name: Cache Docker image
+        if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/docker-image.tar
+          key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
   create-report:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
