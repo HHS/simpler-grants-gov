@@ -43,10 +43,20 @@ const withFeatureFlag = <P, R extends ReactNode>(
         return onEnabled(props);
       }
 
+      // TODO #9637
+      // eslint-disable-next-line react-hooks/static-components
+
       return <WrappedComponent {...props} />;
     };
     return (
-      <ComponentWithFeatureFlag {...props} searchParams={props.searchParams} />
+      <>
+        {/* TODO #9637 */}
+        {/* eslint-disable-next-line react-hooks/static-components  */}
+        <ComponentWithFeatureFlag
+          {...props}
+          searchParams={props.searchParams}
+        />
+      </>
     );
   };
 

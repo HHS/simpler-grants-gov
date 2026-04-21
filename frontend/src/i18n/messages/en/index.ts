@@ -1992,7 +1992,7 @@ export const messages = {
       "{num, plural, =1 {1 opportunity} other {# opportunities}}",
     errorMessage:
       "We have encountered an error loading your opportunities, please try again later.",
-    metaDescription: "View your saved opportunities",
+    metaDescription: "View draft and published funding opportunities",
     noOpportunitiesMessage: {
       primary: "You have not started any opportunities yet.",
       secondary:
@@ -2004,7 +2004,8 @@ export const messages = {
       "You do not have access to this agency's opportunities.",
     noAgencies: "You are not associated with any agencies.",
     pageHeading: "Opportunities",
-    pageTitle: "Opportunities",
+    pageTitle: "Opportunities List",
+    pageApplication: "Smarter Grants Management",
     tableContents: {
       agency: "Agency: ",
       draft: "Draft",
@@ -2172,7 +2173,9 @@ export const messages = {
     ],
   },
   CreateOpportunity: {
-    pageTitle: "Create an opportunity",
+    pageTitle: "Create Opportunity",
+    pageApplication: "Smarter Grants Management",
+    metaDescription: "Create a new funding opportunity",
     errorMessage:
       "We have encountered an error loading this page, please try again later.",
     keyInfo: "Key information",

@@ -164,6 +164,8 @@ export default function OpportunityEditForm({
 
   useEffect(() => {
     if (formState.newOpportunitySummaryId) {
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentSummaryId(formState.newOpportunitySummaryId);
     }
   }, [formState.newOpportunitySummaryId]);

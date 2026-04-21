@@ -32,6 +32,7 @@ GET_APPLICATION_ZIP_PATH = f"{{{NSMAP['envelope']}}}Body/{{{NSMAP['application_r
 MOCK_FINGERPRINT = "123"
 MOCK_CERT = "456"
 MOCK_CERT_STR = "certstr"
+TEST_UUID = "00000000-aaaa-0000-bbbb-000000000000"
 
 
 def test_successful_request(client, fixture_from_file, caplog) -> None:
@@ -107,9 +108,11 @@ def test_successful_confirm_application_delivery_request(
     assert len(retrieved) == 1
 
 
+@mock.patch("uuid.uuid4")
 def test_successful_confirm_application_delivery_request_when_in_received_by_agency_status(
-    db_session, client, enable_factory_create
+    mock_uuid, db_session, client, enable_factory_create
 ) -> None:
+    mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
     competition = CompetitionFactory(
@@ -151,20 +154,34 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
         )
     assert response.status_code == 500
     expected = (
-        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
-        "    <soap:Body>\n        <soap:Fault>\n"
-        "            <faultcode>soap:Server</faultcode>\n"
-        f"            <faultstring>Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Received by Agency' for GRANT{submission.legacy_tracking_number})</faultstring>\n"
-        "        </soap:Fault>\n"
-        "    </soap:Body>\n"
-        "</soap:Envelope>\n"
+        f"--uuid:{TEST_UUID}\r\n"
+        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        "Content-Transfer-Encoding: binary\r\n"
+        "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
+        "        <soap:Body>\n"
+        "            <soap:Fault>\n"
+        "                <faultcode>soap:Server</faultcode>\n"
+        "                <faultstring>Failed to confirm application delivery."
+        "(Expected an Application status of:'Validated' , but found a status of "
+        f"'Received by Agency' for GRANT{submission.legacy_tracking_number})</faultstring>\n"
+        "            </soap:Fault>\n"
+        "        </soap:Body>\n"
+        "    </soap:Envelope>\r\n"
+        f"--uuid:{TEST_UUID}--\r\n"
     )
     assert response.data.decode() == expected
+    assert (
+        response.headers["Content-Type"]
+        == f'multipart/related; type="application/xop+xml"; boundary="uuid:{TEST_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
+    )
 
 
+@mock.patch("uuid.uuid4")
 def test_successful_confirm_application_delivery_request_when_in_tracking_number_assigned_status(
-    db_session, client, enable_factory_create
+    mock_uuid, db_session, client, enable_factory_create
 ) -> None:
+    mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
     competition = CompetitionFactory(
@@ -206,20 +223,30 @@ def test_successful_confirm_application_delivery_request_when_in_tracking_number
         )
     assert response.status_code == 500
     expected = (
-        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
-        "    <soap:Body>\n        <soap:Fault>\n"
-        "            <faultcode>soap:Server</faultcode>\n"
-        f"            <faultstring>Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Agency Tracking Number Assigned' for GRANT{submission.legacy_tracking_number})</faultstring>\n"
-        "        </soap:Fault>\n"
-        "    </soap:Body>\n"
-        "</soap:Envelope>\n"
+        f"--uuid:{TEST_UUID}\r\n"
+        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        "Content-Transfer-Encoding: binary\r\n"
+        "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
+        "        <soap:Body>\n"
+        "            <soap:Fault>\n"
+        "                <faultcode>soap:Server</faultcode>\n"
+        "                <faultstring>Failed to confirm application delivery."
+        "(Expected an Application status of:'Validated' , but found a status of "
+        f"'Agency Tracking Number Assigned' for GRANT{submission.legacy_tracking_number})</faultstring>\n"
+        "            </soap:Fault>\n"
+        "        </soap:Body>\n"
+        "    </soap:Envelope>\r\n"
+        f"--uuid:{TEST_UUID}--\r\n"
     )
     assert response.data.decode() == expected
 
 
+@mock.patch("uuid.uuid4")
 def test_confirm_application_delivery_when_application_has_no_status(
-    db_session, client, enable_factory_create
+    mock_uuid, db_session, client, enable_factory_create
 ) -> None:
+    mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
     competition = CompetitionFactory(
@@ -264,20 +291,28 @@ def test_confirm_application_delivery_when_application_has_no_status(
             )
     assert response.status_code == 500
     expected = (
-        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
-        "    <soap:Body>\n        <soap:Fault>\n"
-        "            <faultcode>soap:Server</faultcode>\n"
-        "            <faultstring>Application has no application_status</faultstring>\n"
-        "        </soap:Fault>\n"
-        "    </soap:Body>\n"
-        "</soap:Envelope>\n"
+        f"--uuid:{TEST_UUID}\r\n"
+        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        "Content-Transfer-Encoding: binary\r\n"
+        "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
+        "        <soap:Body>\n"
+        "            <soap:Fault>\n"
+        "                <faultcode>soap:Server</faultcode>\n"
+        "                <faultstring>Application has no application_status</faultstring>\n"
+        "            </soap:Fault>\n"
+        "        </soap:Body>\n"
+        "    </soap:Envelope>\r\n"
+        f"--uuid:{TEST_UUID}--\r\n"
     )
     assert response.data.decode() == expected
 
 
+@mock.patch("uuid.uuid4")
 def test_if_soap_fault_exception_raised_return_correct_response_if_proxy_response_is_500(
-    db_session, client, enable_factory_create
+    mock_uuid, db_session, client, enable_factory_create
 ) -> None:
+    mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
     opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
     competition = CompetitionFactory(
@@ -316,13 +351,19 @@ def test_if_soap_fault_exception_raised_return_correct_response_if_proxy_respons
         )
     assert response.status_code == 500
     expected = (
-        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
-        "    <soap:Body>\n        <soap:Fault>\n"
-        "            <faultcode>soap:Server</faultcode>\n"
-        f"            <faultstring>Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Received' for GRANT{submission.legacy_tracking_number})</faultstring>\n"
-        "        </soap:Fault>\n"
-        "    </soap:Body>\n"
-        "</soap:Envelope>\n"
+        f"--uuid:{TEST_UUID}\r\n"
+        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        "Content-Transfer-Encoding: binary\r\n"
+        "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
+        "        <soap:Body>\n"
+        "            <soap:Fault>\n"
+        "                <faultcode>soap:Server</faultcode>\n"
+        f"                <faultstring>Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Received' for GRANT{submission.legacy_tracking_number})</faultstring>\n"
+        "            </soap:Fault>\n"
+        "        </soap:Body>\n"
+        "    </soap:Envelope>\r\n"
+        f"--uuid:{TEST_UUID}--\r\n"
     )
     assert response.data.decode() == expected
 
