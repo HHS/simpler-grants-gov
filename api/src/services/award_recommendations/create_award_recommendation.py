@@ -138,7 +138,7 @@ def create_award_recommendation(
     db_session.flush()
 
     award_recommendation_id = award_recommendation.award_recommendation_id
-    
+
     logger.info(
         "Created award recommendation",
         extra={
