@@ -15,6 +15,11 @@ type OpportunityEditHeaderActionsProps = {
   publishLabel: string;
 };
 
+function isValidDate(str: string): boolean {
+  if (!str.trim()) return false;
+  return !isNaN(new Date(str).getTime());
+}
+
 function isPublishEnabled(values: OpportunityEditFormValues): boolean {
   return (
     values.publishDate.trim() !== "" &&
@@ -32,6 +37,9 @@ export default function OpportunityEditHeaderActions({
 }: OpportunityEditHeaderActionsProps) {
   const [publishEnabled, setPublishEnabled] = useState(
     isPublishEnabled(initialValues),
+  );
+  const [currentPublishDate, setCurrentPublishDate] = useState(
+    initialValues.publishDate,
   );
   const [isPublishing, setIsPublishing] = useState(false);
   const router = useRouter();
@@ -54,6 +62,7 @@ export default function OpportunityEditHeaderActions({
           eligibleApplicants: string[];
         }>
       ).detail;
+      setCurrentPublishDate(publishDate);
       setPublishEnabled(
         publishDate.trim() !== "" &&
           fundingType.trim() !== "" &&
@@ -81,6 +90,13 @@ export default function OpportunityEditHeaderActions({
         disabled={!publishEnabled || isPublishing}
         className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
         onClick={() => {
+          if (!isValidDate(currentPublishDate)) {
+            const form = document.getElementById(
+              "opportunity-edit-form",
+            ) as HTMLFormElement | null;
+            form?.requestSubmit();
+            return;
+          }
           setIsPublishing(true);
           publishOpportunityAction(opportunityId)
             .then((result) => {
