@@ -65,6 +65,7 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
         ForeignKey(LkAwardSelectionMethod.award_selection_method_id),
     )
     selection_method_detail: Mapped[str | None]
+    funding_strategy: Mapped[str | None]
     other_key_information: Mapped[str | None]
 
     is_deleted: Mapped[bool] = mapped_column(default=False)
@@ -200,6 +201,13 @@ class AwardRecommendationRisk(ApiSchemaTable, TimestampMixin):
             cascade="all, delete-orphan",
         )
     )
+
+    @property
+    def award_recommendation_application_submission_ids(self) -> list[uuid.UUID]:
+        return [
+            rs.award_recommendation_application_submission_id
+            for rs in self.award_recommendation_risk_submissions
+        ]
 
 
 class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
