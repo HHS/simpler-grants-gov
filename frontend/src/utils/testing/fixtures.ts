@@ -35,14 +35,14 @@ import {
 } from "src/types/userTypes";
 
 export const mockAwardRecommendationStatus: AwardRecommendationStatus =
-  "inProgress";
+  "in_review";
 
 export const mockAwardRecommendationDetails: AwardRecommendationDetails = {
   award_recommendation_id: "63588df8-f2d1-44ed-a201-5804abba696a",
   award_recommendation_number: "AR-26-0001",
   award_recommendation_status: mockAwardRecommendationStatus,
   award_selection_method: "merit-review-other",
-  award_selection_method_details:
+  selection_method_detail:
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute ...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna",
   funding_strategy:
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute ...Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna",
@@ -68,9 +68,7 @@ export const mockAwardRecommendationDetails: AwardRecommendationDetails = {
         "This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.This is a test opportunity for award recommendations. It provides funding for innovative research and development projects.",
     },
   },
-  recordNumber: "AR-26-0001",
-  datePrepared: "01/01/2026",
-  status: mockAwardRecommendationStatus,
+  created_at: "2026-01-01T00:00:00Z",
 };
 
 export const mockOpportunity: BaseOpportunity = {

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 import AwardRecommendationEditPage from "src/app/[locale]/(base)/award-recommendation/[id]/edit/page";
-import * as awardRecommendationFetcher from "src/services/fetch/fetchers/awardRecommendationFetcher";
+import { AwardRecommendationDetails } from "src/types/awardRecommendationTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
@@ -53,7 +53,22 @@ jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
       )(props) as FunctionComponent<LocalizedPageProps>,
 }));
 
-jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher");
+const mockGetAwardRecommendationDetails = jest
+  .fn()
+  .mockResolvedValue(mockAwardRecommendationDetails);
+
+jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
+  getAwardRecommendationDetails: (
+    id: string,
+  ): Promise<AwardRecommendationDetails> =>
+    mockGetAwardRecommendationDetails(
+      id,
+    ) as Promise<AwardRecommendationDetails>,
+}));
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: jest.fn().mockResolvedValue(null),
+}));
 
 jest.mock("react", () => ({
   ...jest.requireActual<typeof import("react")>("react"),
@@ -86,9 +101,9 @@ describe("AwardRecommendationEditPage", () => {
             WrappedComponent(props) as unknown,
       );
 
-      jest
-        .spyOn(awardRecommendationFetcher, "getAwardRecommendationDetails")
-        .mockResolvedValue(mockAwardRecommendationDetails);
+      mockGetAwardRecommendationDetails.mockResolvedValue(
+        mockAwardRecommendationDetails,
+      );
     });
 
     it("includes the AwardRecommendationHero component in the page", async () => {
@@ -153,18 +168,16 @@ describe("AwardRecommendationEditPage", () => {
     });
 
     it("renders 'No summary available' when opportunity has no summary description", async () => {
-      jest
-        .spyOn(awardRecommendationFetcher, "getAwardRecommendationDetails")
-        .mockResolvedValue({
-          ...mockAwardRecommendationDetails,
-          opportunity: {
-            ...mockAwardRecommendationDetails.opportunity,
-            summary: {
-              ...mockAwardRecommendationDetails.opportunity.summary,
-              summary_description: "",
-            },
+      mockGetAwardRecommendationDetails.mockResolvedValue({
+        ...mockAwardRecommendationDetails,
+        opportunity: {
+          ...mockAwardRecommendationDetails.opportunity,
+          summary: {
+            ...mockAwardRecommendationDetails.opportunity.summary,
+            summary_description: "",
           },
-        });
+        },
+      });
 
       const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
@@ -175,27 +188,25 @@ describe("AwardRecommendationEditPage", () => {
     });
 
     it("calls getAwardRecommendationDetails with expected id", async () => {
-      jest
-        .spyOn(awardRecommendationFetcher, "getAwardRecommendationDetails")
-        .mockResolvedValue(mockAwardRecommendationDetails);
+      mockGetAwardRecommendationDetails.mockResolvedValue(
+        mockAwardRecommendationDetails,
+      );
 
       await AwardRecommendationEditPage({
         params: awardRecommendationParams,
         searchParams: Promise.resolve({}),
       });
 
-      expect(
-        awardRecommendationFetcher.getAwardRecommendationDetails,
-      ).toHaveBeenCalledWith("AR-26-0001");
+      expect(mockGetAwardRecommendationDetails).toHaveBeenCalledWith(
+        "AR-26-0001",
+      );
     });
 
     it("handles 404 error gracefully when award recommendation not found", async () => {
       const consoleSpy = jest.spyOn(console, "error").mockImplementation();
-      jest
-        .spyOn(awardRecommendationFetcher, "getAwardRecommendationDetails")
-        .mockRejectedValue({
-          response: { status: 404 },
-        });
+      mockGetAwardRecommendationDetails.mockRejectedValue({
+        response: { status: 404 },
+      });
 
       const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
@@ -209,9 +220,9 @@ describe("AwardRecommendationEditPage", () => {
 
     it("handles generic error when fetching award recommendation fails", async () => {
       const consoleSpy = jest.spyOn(console, "error").mockImplementation();
-      jest
-        .spyOn(awardRecommendationFetcher, "getAwardRecommendationDetails")
-        .mockRejectedValue(new Error("Network error"));
+      mockGetAwardRecommendationDetails.mockRejectedValue(
+        new Error("Network error"),
+      );
 
       const component = await AwardRecommendationEditPage({
         params: awardRecommendationParams,
