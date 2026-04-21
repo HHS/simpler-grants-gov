@@ -137,6 +137,7 @@ def get_soap_proxy_failed_to_update_application_info(
             ' start="<root.message@cxf.apache.org>";'
             ' start-info="text/xml"'
         ),
+        "Set-Cookie": (f"{headers.get('Cookie')}; Path=/grantsws-agency; Secure; HttpOnly"),
     }
     return get_soap_response(response_data, 500, headers=response_headers)
 
