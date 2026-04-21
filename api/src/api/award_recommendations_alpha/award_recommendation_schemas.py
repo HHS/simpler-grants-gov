@@ -27,19 +27,31 @@ class AwardRecommendationCreateRequestSchema(Schema):
     )
     additional_info = fields.String(
         allow_none=True,
-        metadata={"description": "Additional info about the award recommendation"},
+        metadata={
+            "description": "Additional info about the award recommendation",
+            "example": "Program office requests expedited processing due to deadline in September.",
+        },
     )
     funding_strategy = fields.String(
         allow_none=True,
-        metadata={"description": "Funding strategy information for the award recommendation"},
+        metadata={
+            "description": "Funding strategy information for the award recommendation",
+            "example": "Full funding for top 10 applications, partial funding for next 15 based on available budget.",
+        },
     )
     selection_method_detail = fields.String(
         allow_none=True,
-        metadata={"description": "Additional details about the selection method"},
+        metadata={
+            "description": "Additional details about the selection method",
+            "example": "Top-ranked applicants based on expert panel scores",
+        },
     )
     other_key_information = fields.String(
         allow_none=True,
-        metadata={"description": "Other key information for the award recommendation"},
+        metadata={
+            "description": "Other key information for the award recommendation",
+            "example": "This opportunity aligns with the agency's rural access initiative and requires interagency coordination.",
+        },
     )
 
 
@@ -53,19 +65,31 @@ class AwardRecommendationUpdateRequestSchema(Schema):
     )
     additional_info = fields.String(
         allow_none=True,
-        metadata={"description": "Additional info about the award recommendation"},
+        metadata={
+            "description": "Additional info about the award recommendation",
+            "example": "Program office requests expedited processing due to deadline in September.",
+        },
     )
     funding_strategy = fields.String(
         allow_none=True,
-        metadata={"description": "Funding strategy information for the award recommendation"},
+        metadata={
+            "description": "Funding strategy information for the award recommendation",
+            "example": "Full funding for top 10 applications, partial funding for next 15 based on available budget.",
+        },
     )
     selection_method_detail = fields.String(
         allow_none=True,
-        metadata={"description": "Additional details about the selection method"},
+        metadata={
+            "description": "Additional details about the selection method",
+            "example": "Top-ranked applicants based on expert panel scores",
+        },
     )
     other_key_information = fields.String(
         allow_none=True,
-        metadata={"description": "Other key information for the award recommendation"},
+        metadata={
+            "description": "Other key information for the award recommendation",
+            "example": "This opportunity aligns with the agency's rural access initiative and requires interagency coordination.",
+        },
     )
 
 
