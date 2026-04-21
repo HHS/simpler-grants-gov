@@ -4,6 +4,7 @@ import {
   saveOpportunityEditAction,
   type OpportunityEditValidationErrors,
 } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
+import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
 import { useTranslations } from "next-intl";
 import { startTransition, useActionState, useEffect, useState } from "react";
@@ -21,6 +22,7 @@ import {
 } from "@trussworks/react-uswds";
 
 import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
+import { OpportunityAttachmentUploadWidget } from "src/components/opportunity/OpportunityAttachmentUploadWidget";
 import {
   ELIGIBILITY_OPTIONS,
   FUNDING_CATEGORY_OPTIONS,
@@ -85,6 +87,7 @@ type OpportunityEditFormProps = {
   initialValues: OpportunityEditFormValues;
   isDraft?: boolean;
   isNewlyCreated?: boolean;
+  initialAttachments?: OpportunityAttachment[];
   opportunityKeyInformation: {
     title: string;
     agency: string;
@@ -103,6 +106,7 @@ export default function OpportunityEditForm({
   initialValues,
   isDraft = false,
   isNewlyCreated = false,
+  initialAttachments = [],
   opportunityKeyInformation,
 }: OpportunityEditFormProps) {
   const t = useTranslations("OpportunityEdit");
@@ -979,6 +983,25 @@ export default function OpportunityEditForm({
             </div>
           </div>
         </div>
+      </section>
+
+      <section
+        id="attachments"
+        className="display-flex flex-column gap-3 margin-top-4 padding-bottom-4 simpler-page-anchor-offset"
+      >
+        <div className="display-flex flex-column gap-2">
+          <h2 className="margin-0 font-heading-xl">
+            {t("sections.attachments")}
+          </h2>
+          <p className="margin-0 font-sans-lg text-base-dark maxw-full">
+            {t("content.attachmentsIntro")}
+          </p>
+        </div>
+        <OpportunityAttachmentUploadWidget
+          opportunityId={opportunityId}
+          initialAttachments={initialAttachments}
+          isDraft={isDraft}
+        />
       </section>
     </form>
   );

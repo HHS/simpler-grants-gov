@@ -104,6 +104,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
     opportunityData.summary;
   const initialValues = buildOpportunityEditInitialValues({
     ...opportunityData,
+    attachments: [],
     summary: activeSummary,
   });
   const stageLabels: Record<string, string> = {
@@ -228,6 +229,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
               isForecast={!!opportunityData.forecast_summary}
               initialValues={initialValues}
               isDraft={!!opportunityData.is_draft}
+              initialAttachments={opportunityData.attachments ?? []}
               opportunityKeyInformation={opportunityKeyInformation}
               isNewlyCreated={isNewlyCreated}
             />
