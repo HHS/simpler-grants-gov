@@ -9,8 +9,10 @@ import { AuthenticationGate } from "src/components/user/AuthenticationGate";
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
+  const pageTitle =
+    t("Opportunities.pageTitle") + " | " + t("Opportunities.pageApplication");
   const meta: Metadata = {
-    title: t("Opportunities.pageTitle"),
+    title: pageTitle,
     description: t("Opportunities.metaDescription"),
   };
   return meta;
