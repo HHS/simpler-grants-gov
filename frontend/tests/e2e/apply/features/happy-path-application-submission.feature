@@ -13,8 +13,8 @@ Feature: Happy Path – Application Submission Workflow
     # --- Login ---
     Given the user is logged in
 
-    # --- Search the Opportunity ---
-    When the user searches for an open funding opportunity
+    # --- Navigate to Opportunity page ---
+    And the user launches the URL "https://<targetEnv>/opportunity/<opportunity_id>"
 
     # --- Starting Application ---
     When the user clicks "Start Application"
