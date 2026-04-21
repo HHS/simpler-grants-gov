@@ -41,13 +41,19 @@ export default function OpportunityEditHeaderActions({
     if (!form) return;
 
     const check = (e: Event) => {
-      const { publishDate, fundingType, fundingCategories, eligibleApplicants } =
-        (e as CustomEvent<{
+      const {
+        publishDate,
+        fundingType,
+        fundingCategories,
+        eligibleApplicants,
+      } = (
+        e as CustomEvent<{
           publishDate: string;
           fundingType: string;
           fundingCategories: string;
           eligibleApplicants: string[];
-        }>).detail;
+        }>
+      ).detail;
       setPublishEnabled(
         publishDate.trim() !== "" &&
           fundingType.trim() !== "" &&
@@ -74,18 +80,17 @@ export default function OpportunityEditHeaderActions({
         type="button"
         disabled={!publishEnabled || isPublishing}
         className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
-        onClick={async () => {
+        onClick={() => {
           setIsPublishing(true);
-          try {
-            const result = await publishOpportunityAction(opportunityId);
-            if (result?.errorMessage) {
-              setIsPublishing(false);
-            } else {
-              router.push("/opportunities");
-            }
-          } catch (e) {
-            setIsPublishing(false);
-          }
+          publishOpportunityAction(opportunityId)
+            .then((result) => {
+              if (result?.errorMessage) {
+                setIsPublishing(false);
+              } else {
+                router.push("/opportunities");
+              }
+            })
+            .catch((_e) => setIsPublishing(false));
         }}
       >
         {publishLabel}
