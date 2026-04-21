@@ -20,6 +20,7 @@ from src.services.opportunities_grantor_v1.opportunity_summaries import (
     update_opportunity_summary,
 )
 from src.services.opportunities_grantor_v1.opportunity_update import update_opportunity
+from src.services.opportunities_grantor_v1.publish_opportunity import publish_opportunity
 
 logger = logging.getLogger(__name__)
 
@@ -174,3 +175,24 @@ def opportunity_summary_update(
         )
 
     return response.ApiResponse(message="Success", data=opportunity_summary)
+
+
+@opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/publish")
+@opportunity_grantor_blueprint.output(
+    opportunity_grantor_schemas.OpportunityPublishResponseV1Schema()
+)
+@opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
+@flask_db.with_db_session()
+def opportunity_publish(db_session: db.Session, opportunity_id: UUID) -> response.ApiResponse:
+    """Publish an opportunity"""
+    add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
+    logger.info("POST /v1/grantors/opportunities/{opportunity_id}/publish")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        opportunity = publish_opportunity(db_session, user, opportunity_id)
+
+    return response.ApiResponse(message="Success", data=opportunity)
