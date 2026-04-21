@@ -59,7 +59,15 @@ def update_award_recommendation(
         "Updated award recommendation",
         extra={
             "award_recommendation_id": award_recommendation_id,
-            "award_selection_method": award_recommendation.award_selection_method.value,
+            "award_selection_method": (
+                award_recommendation.award_selection_method.value
+                if award_recommendation.award_selection_method
+                else None
+            ),
+            "additional_info": award_recommendation.additional_info,
+            "selection_method_detail": award_recommendation.selection_method_detail,
+            "funding_strategy": award_recommendation.funding_strategy,
+            "other_key_information": award_recommendation.other_key_information,
             "user_id": user.user_id,
         },
     )

@@ -144,7 +144,21 @@ def create_award_recommendation(
         extra={
             "award_recommendation_id": award_recommendation_id,
             "opportunity_id": opportunity_id,
-            "award_selection_method": award_recommendation.award_selection_method.value,
+            "award_recommendation_number": award_recommendation.award_recommendation_number,
+            "award_recommendation_status": (
+                award_recommendation.award_recommendation_status.value
+                if award_recommendation.award_recommendation_status
+                else None
+            ),
+            "award_selection_method": (
+                award_recommendation.award_selection_method.value
+                if award_recommendation.award_selection_method
+                else None
+            ),
+            "additional_info": award_recommendation.additional_info,
+            "selection_method_detail": award_recommendation.selection_method_detail,
+            "funding_strategy": award_recommendation.funding_strategy,
+            "other_key_information": award_recommendation.other_key_information,
             "user_id": user.user_id,
             "application_submission_count": len(application_submissions),
         },
