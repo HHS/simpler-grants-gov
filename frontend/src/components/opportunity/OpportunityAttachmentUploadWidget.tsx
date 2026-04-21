@@ -164,11 +164,11 @@ export function OpportunityAttachmentUploadWidget({
                 <ModalToggleButton
                   modalRef={deleteModalRef}
                   opener
-                  className="usa-nav__link font-sans-sm display-flex flex-align-center text-secondary border-0"
+                  className="usa-nav__link font-sans-2xs display-flex text-normal border-0"
                   onClick={() => setFileToDelete(file)}
                 >
                   <USWDSIcon
-                    className="usa-icon margin-right-05"
+                    className="usa-icon margin-right-05 margin-left-neg-05"
                     name="delete"
                   />
                   {t("removeButton")}
