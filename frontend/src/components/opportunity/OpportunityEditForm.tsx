@@ -116,6 +116,27 @@ export default function OpportunityEditForm({
   const validationErrors: OpportunityEditValidationErrors | undefined =
     formState.validationErrors;
 
+  useEffect(() => {
+    const form = document.getElementById("opportunity-edit-form");
+    if (!form) return;
+    form.dispatchEvent(
+      new CustomEvent("opportunity-values-change", {
+        bubbles: true,
+        detail: {
+          publishDate: values.publishDate,
+          fundingType: values.fundingType,
+          fundingCategories: values.fundingCategories,
+          eligibleApplicants: values.eligibleApplicants,
+        },
+      }),
+    );
+  }, [
+    values.publishDate,
+    values.fundingType,
+    values.fundingCategories,
+    values.eligibleApplicants,
+  ]);
+
   function updateField<K extends keyof OpportunityEditFormValues>(
     key: K,
     value: OpportunityEditFormValues[K],

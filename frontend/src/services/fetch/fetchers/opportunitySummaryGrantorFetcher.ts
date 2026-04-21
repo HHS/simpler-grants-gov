@@ -8,6 +8,7 @@ import {
 import {
   createGrantorOpportunitySummaryRequest,
   getGrantorOpportunityRequest,
+  publishGrantorOpportunityRequest,
   updateGrantorOpportunitySummaryRequest,
 } from "./fetchers";
 
@@ -62,4 +63,16 @@ export async function createOpportunitySummaryForGrantor({
   });
 
   return (await response.json()) as OpportunitySummaryDetailApiResponse;
+}
+
+export async function publishOpportunityForGrantor(
+  opportunityId: string,
+  token: string,
+): Promise<GrantorOpportunityApiResponse> {
+  const response = await publishGrantorOpportunityRequest({
+    subPath: `${opportunityId}/publish`,
+    additionalHeaders: { "X-SGG-Token": token },
+  });
+
+  return (await response.json()) as GrantorOpportunityApiResponse;
 }

@@ -1,11 +1,14 @@
 "use client";
 
+import { publishOpportunityAction } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
+
 import { useEffect, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
 import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
 
 type OpportunityEditHeaderActionsProps = {
+  opportunityId: string;
   initialValues: OpportunityEditFormValues;
   previewLabel: string;
   publishLabel: string;
@@ -21,6 +24,7 @@ function isPublishEnabled(values: OpportunityEditFormValues): boolean {
 }
 
 export default function OpportunityEditHeaderActions({
+  opportunityId,
   initialValues,
   previewLabel,
   publishLabel,
@@ -28,30 +32,30 @@ export default function OpportunityEditHeaderActions({
   const [publishEnabled, setPublishEnabled] = useState(
     isPublishEnabled(initialValues),
   );
+  const [isPublishing, setIsPublishing] = useState(false);
 
   useEffect(() => {
-    const form = document.getElementById(
-      "opportunity-edit-form",
-    ) as HTMLFormElement | null;
+    const form = document.getElementById("opportunity-edit-form");
     if (!form) return;
 
-    const check = () => {
-      const data = new FormData(form);
-      const publishDate = (data.get("publishDate") as string) ?? "";
-      const fundingType = (data.get("funding-type-values") as string) ?? "";
-      const fundingCategory =
-        (data.get("funding-category-values") as string) ?? "";
-      const eligibleApplicants = data.getAll("eligibleApplicants");
+    const check = (e: Event) => {
+      const { publishDate, fundingType, fundingCategories, eligibleApplicants } =
+        (e as CustomEvent<{
+          publishDate: string;
+          fundingType: string;
+          fundingCategories: string;
+          eligibleApplicants: string[];
+        }>).detail;
       setPublishEnabled(
         publishDate.trim() !== "" &&
           fundingType.trim() !== "" &&
-          fundingCategory.trim() !== "" &&
+          fundingCategories.trim() !== "" &&
           eligibleApplicants.length > 0,
       );
     };
 
-    form.addEventListener("change", check);
-    return () => form.removeEventListener("change", check);
+    form.addEventListener("opportunity-values-change", check);
+    return () => form.removeEventListener("opportunity-values-change", check);
   }, []);
 
   return (
@@ -66,8 +70,14 @@ export default function OpportunityEditHeaderActions({
       </Button>
       <Button
         type="button"
-        disabled={!publishEnabled}
+        disabled={!publishEnabled || isPublishing}
         className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
+        onClick={() => {
+          setIsPublishing(true);
+          publishOpportunityAction(opportunityId).catch(() =>
+            setIsPublishing(false),
+          );
+        }}
       >
         {publishLabel}
       </Button>

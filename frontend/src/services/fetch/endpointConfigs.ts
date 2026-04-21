@@ -141,6 +141,13 @@ export const createGrantorOpportunitySummaryEndpoint = {
   method: "POST" as ApiMethod,
 };
 
+export const publishGrantorOpportunityEndpoint = {
+  basePath: environment.API_URL,
+  version: "v1",
+  namespace: "grantors/opportunities",
+  method: "POST" as ApiMethod,
+};
+
 // opting out of traditional X-SGG based auth since these requests will use the
 // internal auth token instead
 export const getApplicationForPrint = {

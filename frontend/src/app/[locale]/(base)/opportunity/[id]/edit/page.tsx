@@ -197,6 +197,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
                   {tEdit("header.saveButton")}
                 </Button>
                 <OpportunityEditHeaderActions
+                  opportunityId={opportunityData.opportunity_id}
                   initialValues={initialValues}
                   previewLabel={tEdit("header.previewButton")}
                   publishLabel={tEdit("header.publishButton")}
