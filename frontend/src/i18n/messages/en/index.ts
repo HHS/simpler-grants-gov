@@ -289,7 +289,7 @@ export const messages = {
       stagePosted: "Open for applications",
       saveButton: "Save",
       previewButton: "Preview",
-      submitButton: "Submit for review",
+      publishButton: "Publish",
       navTitle: "On this page",
     },
     sections: {
