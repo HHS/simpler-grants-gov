@@ -7,8 +7,6 @@ import uuid
 from sqlalchemy import exists, select
 from sqlalchemy.orm import selectinload
 
-logger = logging.getLogger(__name__)
-
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
@@ -29,6 +27,8 @@ from src.db.models.award_recommendation_models import (
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
 from src.db.models.user_models import User
+
+logger = logging.getLogger(__name__)
 
 
 def _get_opportunity(db_session: db.Session, opportunity_id: uuid.UUID) -> Opportunity | None:
