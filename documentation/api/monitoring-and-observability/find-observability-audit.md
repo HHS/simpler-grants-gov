@@ -394,13 +394,11 @@ OpenSearch has its own metrics (index health, query performance, shard stats) th
 
 **Default time range**: Last 30 days (all "over time" panels reflect the past month)
 
-This dashboard suite provides clear, actionable visibility into the **Find** (search + opportunity discovery) experience.
+This section documents the panels on each page of the **Find Metrics** dashboard: what they measure, which NR attributes they use, and any caveats. Attributes on `Log` events are logged via `add_extra_data_to_current_request_logs` in the API layer and forwarded to New Relic Logs via the FluentBit sidecar.
 
 ---
 
 ### Consolidated Attributes Reference
-
-**Attributes used to power the dashboard**
 
 | Attribute                        | Event type                | Description |
 |----------------------------------|---------------------------|-------------|
