@@ -2,6 +2,7 @@
 
 import { publishOpportunityAction } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
@@ -33,6 +34,7 @@ export default function OpportunityEditHeaderActions({
     isPublishEnabled(initialValues),
   );
   const [isPublishing, setIsPublishing] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const form = document.getElementById("opportunity-edit-form");
@@ -72,11 +74,18 @@ export default function OpportunityEditHeaderActions({
         type="button"
         disabled={!publishEnabled || isPublishing}
         className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
-        onClick={() => {
+        onClick={async () => {
           setIsPublishing(true);
-          publishOpportunityAction(opportunityId).catch(() =>
-            setIsPublishing(false),
-          );
+          try {
+            const result = await publishOpportunityAction(opportunityId);
+            if (result?.errorMessage) {
+              setIsPublishing(false);
+            } else {
+              router.push("/opportunities");
+            }
+          } catch (e) {
+            setIsPublishing(false);
+          }
         }}
       >
         {publishLabel}

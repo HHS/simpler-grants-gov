@@ -10,7 +10,6 @@ import {
 import { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
 
 import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
 
@@ -269,5 +268,5 @@ export async function publishOpportunityAction(
     return { errorMessage: alerts("genericError") };
   }
 
-  redirect("/opportunities");
+  return { successMessage: "published" };
 }
