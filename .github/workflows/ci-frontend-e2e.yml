@@ -191,6 +191,7 @@ jobs:
       - name: Save Docker image
         if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
         run: |
+          cd ..
           IMAGE_TAG=$(make APP_NAME=api release-image-tag)
           docker save simpler-grants-gov-api:$IMAGE_TAG > /tmp/docker-image.tar
 
