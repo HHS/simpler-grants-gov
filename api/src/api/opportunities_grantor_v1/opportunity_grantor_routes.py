@@ -24,6 +24,7 @@ from src.services.opportunities_grantor_v1.opportunity_upload import (
     delete_opportunity_attachment,
     upload_opportunity_attachment,
 )
+from src.services.opportunities_grantor_v1.publish_opportunity import publish_opportunity
 
 logger = logging.getLogger(__name__)
 
@@ -186,6 +187,9 @@ def opportunity_summary_update(
 )
 @opportunity_grantor_blueprint.output(
     opportunity_grantor_schemas.OpportunityUploadAttachmentResponseV1Schema()
+@opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/publish")
+@opportunity_grantor_blueprint.output(
+    opportunity_grantor_schemas.OpportunityPublishResponseV1Schema()
 )
 @opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
@@ -232,6 +236,10 @@ def opportunity_delete_attachment(
     logger.info(
         "DELETE /v1/grantors/opportunities/:opportunity_id/attachments/:opportunity_attachment_id"
     )
+def opportunity_publish(db_session: db.Session, opportunity_id: UUID) -> response.ApiResponse:
+    """Publish an opportunity"""
+    add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
+    logger.info("POST /v1/grantors/opportunities/{opportunity_id}/publish")
 
     with db_session.begin():
         user = jwt_or_api_user_key_multi_auth.get_user()
@@ -240,3 +248,6 @@ def opportunity_delete_attachment(
         delete_opportunity_attachment(db_session, user, opportunity_id, opportunity_attachment_id)
 
     return response.ApiResponse(message="Attachment successfully deleted")
+        opportunity = publish_opportunity(db_session, user, opportunity_id)
+
+    return response.ApiResponse(message="Success", data=opportunity)

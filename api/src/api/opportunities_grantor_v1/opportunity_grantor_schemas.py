@@ -598,3 +598,5 @@ class DeleteAttachmentResponseV1Schema(ResponseWithErrorsSchema):
     """Response Schema for Delete Attachment Endpoint"""
 
     pass
+class OpportunityPublishResponseV1Schema(AbstractResponseSchema):
+    data = fields.Nested(OpportunityGrantorSchema())
