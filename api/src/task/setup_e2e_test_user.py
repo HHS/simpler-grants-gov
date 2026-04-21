@@ -32,7 +32,7 @@ class SetupE2eTestUserTask(Task):
         self.environment: str | None = os.getenv("ENVIRONMENT", None)
 
         # Stable UUID so re-runs find the same user
-        self.user_id = uuid.UUID("e2e01a01-test-e2eu-stag-e2e000000001")
+        self.user_id = uuid.UUID("e2e01a01-0e2e-4e2e-ae2e-e2e000000001")
 
     def run_task(self) -> None:
         if self.environment not in ("local", "dev", "staging", "training"):
