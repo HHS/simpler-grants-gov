@@ -39,7 +39,7 @@ export function OpportunityAttachmentUploadWidget({
 
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>(
     initialAttachments.map((a) => ({
-      id: a.opportunity_attachment_id,
+      id: a.opportunity_attachment_id || crypto.randomUUID(),
       name: a.file_name,
       deletable: !!a.opportunity_attachment_id,
     })),
@@ -156,7 +156,7 @@ export function OpportunityAttachmentUploadWidget({
         <ul className="usa-list usa-list--unstyled margin-top-2">
           {uploadedFiles.map((file) => (
             <li
-              key={file.id || file.name}
+              key={file.id}
               className="display-flex flex-align-center padding-y-1 border-bottom border-base-lighter"
             >
               <span className="flex-fill font-sans-sm">{file.name}</span>
