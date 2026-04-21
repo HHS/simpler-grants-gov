@@ -38,30 +38,6 @@ class AlternateSoapOperation(StrEnum):
     UPDATE_APPLICATION_INFO = "UpdateApplicationInfoRequest"
 
 
-def format_local_soap_response(response_data: bytes, boundary_id: str | None = None) -> bytes:
-    # This is a format string for formatting local responses from the mock
-    # soap server since it does not support manipulating the response.
-    # The grants.gov SOAP API currently includes this data.
-    # Note: /r/n is how Windows encodes a newline
-    # /r symbolizes a Carriage Return which returns to the start of the current line (holdover from typewriters)
-    # Mac just uses /n
-    # This is used to ensure the correct Content-Length
-    # see: https://en.wikipedia.org/wiki/Newline
-    response_id = boundary_id if boundary_id else str(uuid.uuid4())
-    return (
-        (
-            f"--uuid:{response_id}\r\n"
-            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
-            "Content-Transfer-Encoding: binary\r\n"
-            f"Content-ID: <root.message@cxf.apache.org>{response_data.decode()}\r\n"
-            f"--uuid:{response_id}--\r\n"
-        )
-        .replace('<?xml version="1.0" encoding="UTF-8"?>', "")
-        .strip()
-        .encode("utf-8")
-    )
-
-
 def get_soap_proxy_grant_application_not_found_response(
     grants_gov_tracking_number: str, headers: dict, is_get_application_zip: bool = True
 ) -> SOAPResponse:
@@ -91,7 +67,7 @@ def get_soap_proxy_grant_application_not_found_response(
 
 
 def get_soap_proxy_failed_to_confirm_delivery_response(
-    grants_gov_tracking_number: str, headers: dict, is_get_application_zip: bool = True
+    *args: str, headers: dict, **kwargs: dict | bool
 ) -> SOAPResponse:
     data = (
         '\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
@@ -119,7 +95,7 @@ def get_soap_proxy_failed_to_confirm_delivery_response(
 
 
 def get_soap_proxy_failed_to_update_application_info(
-    grants_gov_tracking_number: str, headers: dict, is_get_application_zip: bool = True
+    grants_gov_tracking_number: str, headers: dict, **kwargs: dict | bool
 ) -> SOAPResponse:
     data = (
         '\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
@@ -161,9 +137,40 @@ def get_soap_proxy_failed_to_update_application_info(
             ' start="<root.message@cxf.apache.org>";'
             ' start-info="text/xml"'
         ),
-        "Set-Cookie": (f"{headers.get('Cookie')}; Path=/grantsws-agency; Secure; HttpOnly"),
     }
     return get_soap_response(response_data, 500, headers=response_headers)
+
+
+DEFAULT_NOT_FOUND_RESPONSES: dict[AlternateSoapOperation, Callable] = {
+    AlternateSoapOperation.GET_APPLICATION_ZIP: get_soap_proxy_grant_application_not_found_response,
+    AlternateSoapOperation.GET_APPLICATION: get_soap_proxy_grant_application_not_found_response,
+    AlternateSoapOperation.CONFIRM_APPLICATION_DELIVERY: get_soap_proxy_failed_to_confirm_delivery_response,
+    AlternateSoapOperation.UPDATE_APPLICATION_INFO: get_soap_proxy_failed_to_update_application_info,
+}
+
+
+def format_local_soap_response(response_data: bytes, boundary_id: str | None = None) -> bytes:
+    # This is a format string for formatting local responses from the mock
+    # soap server since it does not support manipulating the response.
+    # The grants.gov SOAP API currently includes this data.
+    # Note: /r/n is how Windows encodes a newline
+    # /r symbolizes a Carriage Return which returns to the start of the current line (holdover from typewriters)
+    # Mac just uses /n
+    # This is used to ensure the correct Content-Length
+    # see: https://en.wikipedia.org/wiki/Newline
+    response_id = boundary_id if boundary_id else str(uuid.uuid4())
+    return (
+        (
+            f"--uuid:{response_id}\r\n"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+            "Content-Transfer-Encoding: binary\r\n"
+            f"Content-ID: <root.message@cxf.apache.org>{response_data.decode()}\r\n"
+            f"--uuid:{response_id}--\r\n"
+        )
+        .replace('<?xml version="1.0" encoding="UTF-8"?>', "")
+        .strip()
+        .encode("utf-8")
+    )
 
 
 def get_soap_response(
@@ -414,16 +421,10 @@ def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | No
     if soap_request.operation_name in AlternateSoapOperation:
         tracking_number = get_gov_grants_tracking_number(xml_bytes)
         is_zip = soap_request.operation_name == AlternateSoapOperation.GET_APPLICATION_ZIP
-        DEFAULT_RESPONSES = {
-            AlternateSoapOperation.GET_APPLICATION_ZIP: get_soap_proxy_grant_application_not_found_response,
-            AlternateSoapOperation.GET_APPLICATION: get_soap_proxy_grant_application_not_found_response,
-            AlternateSoapOperation.CONFIRM_APPLICATION_DELIVERY: get_soap_proxy_failed_to_confirm_delivery_response,
-            AlternateSoapOperation.UPDATE_APPLICATION_INFO: get_soap_proxy_failed_to_update_application_info,
-        }
         if tracking_number and (
             tracking_number.startswith("GRANT8") or tracking_number.startswith("GRANT9")
         ):
-            return DEFAULT_RESPONSES[AlternateSoapOperation(soap_request.operation_name)](
+            return DEFAULT_NOT_FOUND_RESPONSES[AlternateSoapOperation(soap_request.operation_name)](
                 tracking_number, headers=soap_request.headers, is_get_application_zip=is_zip
             )
     return None

@@ -524,7 +524,7 @@ def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is
 
 @mock.patch("uuid.uuid4")
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
-def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is_used_for_confirm_application_delivery(
+def test_confirm_application_delivery_returns_not_found_response_if_simpler_id_is_used(
     mock_get_soap_response, mock_uuid, client, fixture_from_file, monkeypatch
 ) -> None:
     """
@@ -570,7 +570,7 @@ def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is
 
 @mock.patch("uuid.uuid4")
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
-def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is_used_for_update_application_info(
+def test_update_application_info_returns_not_found_response_if_simpler_id_is_used(
     mock_get_soap_response, mock_uuid, client, fixture_from_file, monkeypatch
 ) -> None:
     """
