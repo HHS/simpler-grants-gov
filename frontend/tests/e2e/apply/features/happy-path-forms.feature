@@ -35,7 +35,6 @@ Feature: Apply - Application Form Happy Path
       | Individual   | As an individual (myself)  |
       
     Examples:
-
       | form name                          |
       | SF424                              |
       | SF424A                             |
