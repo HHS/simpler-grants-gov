@@ -16,5 +16,6 @@ import src.task.opportunities.generate_opportunity_sql  # noqa: F401 isort:skip
 import src.task.opportunities.build_automatic_opportunities  # noqa: F401 isort:skip
 import src.cli.xml_generation_cli  # noqa: F401 isort:skip
 import src.task.agencies.setup_lower_env_agencies  # noqa: F401 isort:skip
+import src.task.setup_e2e_test_user  # noqa: F401 isort:skip
 
 __all__ = ["task_blueprint"]
