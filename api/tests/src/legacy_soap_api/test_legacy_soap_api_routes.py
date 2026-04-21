@@ -156,7 +156,7 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
     expected = (
         f"--uuid:{TEST_UUID}\r\n"
         'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
-        "Content-Transfer-Encoding: 8bit\r\n"
+        "Content-Transfer-Encoding: binary\r\n"
         "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
         '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
         "        <soap:Body>\n"
@@ -171,6 +171,10 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
         f"--uuid:{TEST_UUID}--\r\n"
     )
     assert response.data.decode() == expected
+    assert (
+        response.headers["Content-Type"]
+        == f'multipart/related; type="application/xop+xml"; boundary="uuid:{TEST_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
+    )
 
 
 @mock.patch("uuid.uuid4")
@@ -221,7 +225,7 @@ def test_successful_confirm_application_delivery_request_when_in_tracking_number
     expected = (
         f"--uuid:{TEST_UUID}\r\n"
         'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
-        "Content-Transfer-Encoding: 8bit\r\n"
+        "Content-Transfer-Encoding: binary\r\n"
         "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
         '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
         "        <soap:Body>\n"
@@ -289,7 +293,7 @@ def test_confirm_application_delivery_when_application_has_no_status(
     expected = (
         f"--uuid:{TEST_UUID}\r\n"
         'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
-        "Content-Transfer-Encoding: 8bit\r\n"
+        "Content-Transfer-Encoding: binary\r\n"
         "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
         '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
         "        <soap:Body>\n"
@@ -349,7 +353,7 @@ def test_if_soap_fault_exception_raised_return_correct_response_if_proxy_respons
     expected = (
         f"--uuid:{TEST_UUID}\r\n"
         'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
-        "Content-Transfer-Encoding: 8bit\r\n"
+        "Content-Transfer-Encoding: binary\r\n"
         "Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
         '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n'
         "        <soap:Body>\n"

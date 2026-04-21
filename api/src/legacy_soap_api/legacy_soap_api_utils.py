@@ -155,12 +155,23 @@ def get_soap_fault_error_response(
     mtom_response = (
         f"--uuid:{boundary_id}\r\n"
         f'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
-        f"Content-Transfer-Encoding: 8bit\r\n"
+        f"Content-Transfer-Encoding: binary\r\n"
         f"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
         f"{err}\r\n"
         f"--uuid:{boundary_id}--\r\n"
     ).encode()
-    return get_soap_response(data=mtom_response, status_code=500, headers=headers)
+    response_headers = {
+        "Content-Type": (
+            "multipart/related;"
+            ' type="application/xop+xml";'
+            f' boundary="uuid:{boundary_id}";'
+            ' start="<root.message@cxf.apache.org>";'
+            ' start-info="text/xml"'
+        )
+    }
+    if headers:
+        response_headers.update(headers)
+    return get_soap_response(data=mtom_response, status_code=500, headers=response_headers)
 
 
 def get_auth_error_response() -> SOAPResponse:
