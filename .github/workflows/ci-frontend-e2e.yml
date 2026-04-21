@@ -116,7 +116,7 @@ jobs:
 
           make init-nobuild
       - name: Build API Server for e2e tests (if not cached)
-        if: steps.restore-docker-image-cached.outputs.cache-hit == 'false'
+        if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
         run: |
           cd ../api
           # Enable core dumps for debugging segfaults
