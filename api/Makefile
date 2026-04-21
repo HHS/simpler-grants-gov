@@ -108,6 +108,8 @@ run-logs: start ## Start the API and follow the logs
 
 init: setup-env-override-file build init-db init-opensearch init-s3mock init-sqsmock init-mock-soap-services ## Run all of the init tasks to set up DB, Search, s3/sqs mocks, and Mock services. To do this "from scratch" use remake-backend instead
 
+init-nobuild: setup-env-override-file init-db init-opensearch init-s3mock init-sqsmock init-mock-soap-services ## Run all of the init tasks to set up DB, Search, s3/sqs mocks, and Mock services. To do this "from scratch" use remake-backend instead
+
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
 

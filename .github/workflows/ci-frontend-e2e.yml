@@ -105,7 +105,7 @@ jobs:
         run: |
           docker image ls
 
-      - name: Start API Server for e2e tests
+      - name: Init API Server for e2e tests
         run: |
           cd ../api
           # Enable core dumps for debugging segfaults
@@ -113,7 +113,27 @@ jobs:
           mkdir -p /tmp/cores
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
           # Run init first to generate JWT keys in override.env
-          make init
+
+          make init-nobuild
+      - name: Build API Server for e2e tests (if not cached)
+        if: steps.restore-docker-image-cached.outputs.cache-hit == 'false'
+        run: |
+          cd ../api
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+
+          make build
+
+      - name: Start API Server for e2e tests
+        run: |
+          cd ../api
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
           make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
