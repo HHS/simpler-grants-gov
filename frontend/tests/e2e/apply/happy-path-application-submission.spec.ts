@@ -1,7 +1,7 @@
 /**
- * @feature Apply - Happy Path – Apply Submission Workflow
+ * @feature Apply - Happy Path – Application Submission Workflow
  * @featureFile frontend/tests/e2e/apply/features/happy-path-application-submission.feature
- * @scenario Complete the Apply Submission workflow for an <user type> user
+ * @scenario Complete the Application Submission workflow for an <user type> user
  *
  * Examples:
  * | user type     |

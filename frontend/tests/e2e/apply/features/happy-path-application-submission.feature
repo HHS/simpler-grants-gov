@@ -1,6 +1,6 @@
-Feature: Happy Path – Apply Submission Workflow
+Feature: Happy Path – Application Submission Workflow
   As a grant applicant
-  I want to complete the full Apply Submission workflow successfully
+  I want to complete the full Application Submission workflow successfully
   So that I can submit a complete application without errors
 
   Background:
@@ -8,7 +8,7 @@ Feature: Happy Path – Apply Submission Workflow
     And the system is available
 
   @Happy-Path
-  Scenario: Complete the Apply Submission workflow for an <user type> user
+  Scenario: Complete the Application Submission workflow for an <user type> user
     
     # --- Login ---
     Given the user is logged in
