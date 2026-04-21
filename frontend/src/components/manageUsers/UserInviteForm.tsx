@@ -3,7 +3,7 @@
 import {
   inviteUserAction,
   OrganizationInviteValidationErrors,
-} from "src/app/[locale]/(base)/organizations/[id]/manage-users/actions";
+} from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/actions";
 import { usePrevious } from "src/hooks/usePrevious";
 import { UserRole } from "src/types/userTypes";
 
@@ -116,6 +116,8 @@ export function UserInviteForm({
       formState.invitationCreated &&
       formState.invitationCreated !== previousInvitation
     ) {
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowSuccess(true);
       setSelectedRole(undefined);
       setTimeout(() => setShowSuccess(false), 3000);

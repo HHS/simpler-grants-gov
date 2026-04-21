@@ -6,15 +6,15 @@ export const messages = {
     githubLink: "Follow on GitHub",
     sections: {
       experimental: {
-        title: "New Features, simpler experience",
+        title: "New features, simpler experience",
         canDoHeader: "Tell us what's working (and what's not)",
         canDoSubHeader: "What you can do now",
         canDoParagraph:
           "Search real Grants.gov data here on Simpler.Grants.gov. Our search aims to deliver closer matches to your keywords and filters. We also redesigned the results and opportunity listings to make them easier to navigate and read.",
         tryLink: "Use the new simpler search",
-        cantDoHeader: "What you can't do quite yet",
+        cantDoHeader: "What we're working on",
         cantDoParagraph:
-          "For now, you need to visit Grants.gov to access more advanced features like applying. We're working to bring the application process to this website soon. In the meantime, follow our roadmap to stay updated on our progress.",
+          "We're currently working with agencies on a simpler application process. You may need to visit <grantsLink>Grants.gov</grantsLink> to apply for most opportunities. In the meantime, follow our <roadmapLink>roadmap</roadmapLink> to stay updated on our progress.",
         iconSections: [
           {
             description:
@@ -35,17 +35,18 @@ export const messages = {
         ],
       },
       building: {
-        title: "Building <span>with</span> you, not <span>for</span> you",
-        paragraphs: [
+        title: "Community-prioritized improvements & open source",
+        paragraph1:
           "Transparency is the foundation of good government. That's why we're committed to sharing our process and working in the open.",
-          "All of our code is open-source and the roadmap is public. We welcome everyone to collaborate with us on the vision and details of every feature we build.",
-        ],
+        paragraph2:
+          "All of <code>our code is open-source</code> and <roadmap>our roadmap</roadmap> is public. We welcome everyone to collaborate with us on <vision>the vision</vision> and details of every feature we build.",
       },
       involved: {
         title: "More ways to get involved",
         technicalTitle: "Contribute your technical expertise",
         technicalDescription:
           "We're always excited to welcome new open source developers to our community.",
+        fiderLink: "Vote for the feature you want to see implemented next",
         technicalLink: "Learn how to contribute code",
         participateTitle: "Participate in user research",
         participateDescription:
@@ -271,6 +272,162 @@ export const messages = {
       loadingOrganizations: "Loading organizations...",
       fallbackError: "You are not a member of any organizations.",
       close: "Close",
+    },
+  },
+  OpportunityEdit: {
+    pageTitle: "Edit opportunity",
+    metaDescription:
+      "Edit draft opportunity information and non-forecast summary fields.",
+    header: {
+      pageTitle: "Opportunity #: {number}",
+      lastUpdated: "Last updated:",
+      status: "Status:",
+      stageDraft: "Draft",
+      stageArchived: "Archived",
+      stageClosed: "Closed",
+      stageForecasted: "Forecasted",
+      stagePosted: "Open for applications",
+      saveButton: "Save",
+      previewButton: "Preview",
+      submitButton: "Submit for review",
+      navTitle: "On this page",
+    },
+    sections: {
+      keyInformation: "Key information",
+      fundingDetails: "Funding details",
+      eligibility: "Eligibility",
+      additionalInformation: "Additional information",
+      attachments: "Attachments",
+    },
+    labels: {
+      title: "Title",
+      agency: "Agency",
+      assistanceListings: "Assistance listings:",
+      opportunityNumber: "Opportunity number",
+      opportunityStage: "Opportunity stage",
+      awardSelectionMethod: "Award selection method",
+      awardSelectionMethodExplanation: "Award selection method explanation",
+      fundingType: "Funding type",
+      costSharing: "Cost sharing or matching requirements?",
+      category: "Category",
+      expectedNumberOfAwards: "Expected number of awards",
+      estimatedTotalProgramFunding: "Estimated total program funding",
+      awardMinimum: "Award minimum",
+      awardMaximum: "Award maximum",
+      publishDate: "Publish date",
+      closeDate: "Close date",
+      closeDateExplanation: "Close date explanation",
+      eligibleApplicants: "Eligible applicants",
+      additionalEligibilityInfo: "Additional information on eligibility",
+      fundingCategoryExplanation: "Category explanation",
+      description: "Description",
+      additionalInfoUrl: "Link to additional information",
+      additionalInfoUrlText: "Link display text",
+      grantorContactDetails: "Grantor contact details",
+      contactEmail: "Contact email",
+      contactEmailText: "Email display text",
+      yes: "Yes",
+      no: "No",
+      eligibilityBusiness: "Business",
+      eligibilityEducation: "Education",
+      eligibilityGovernment: "Government entities",
+      eligibilityNonprofit: "Nonprofit",
+      eligibilityMiscellaneous: "Miscellaneous",
+    },
+    content: {
+      keyInformationIntro:
+        "Below is a summary of the key information for this opportunity. You can edit specific fields directly in this section.",
+      fundingDetailsIntro:
+        "Provide the financial structure of this opportunity. This includes the total funding available, expected number of awards, and critical dates for the application window.",
+      eligibilityIntro:
+        "Define who is eligible to apply for these funds. Select all applicable applicant types and provide any specific requirements or restrictions regarding organizational status or geographic location.",
+      additionalInformationIntro:
+        "Use this section to provide supplementary context, such as a summary of the program's goals, agency-specific links, and contact information for programmatic or technical inquiries.",
+      draftOnlyWarning:
+        "Only draft opportunities should be editable from this page.",
+      notAvailable: "Not available",
+      fundingTypeHint:
+        "Select the legal relationship between the agency and the recipient",
+      costSharingHint:
+        "Indicate if the applicant is required to provide a specific percentage of non-federal funds.",
+      categoryHint: "Choose the primary functional area this funding supports",
+      fundingCategoryExplanationHint: "If category is Other",
+      expectedNumberOfAwardsHint:
+        "Enter the estimated number of individual awards the agency intends to fund.",
+      estimatedTotalProgramFundingHint:
+        "Enter the total amount of funding available for all awards under this opportunity.",
+      awardMinimumHint:
+        "Enter the smallest dollar amount that can be awarded to a single recipient.",
+      awardMaximumHint:
+        "Enter the largest dollar amount that can be awarded to a single recipient.",
+      publishDateHint:
+        "The date this opportunity will be visible to the public",
+      closeDateHint: "The final deadline for all applications to be submitted",
+      closeDateExplanationHint:
+        "Provide a reason if a specific close date is not set, such as continuous review or a rolling deadline.",
+      select: "Select",
+      selectFundingCategory: "Select funding category",
+      eligibleApplicantsHint:
+        "Select all categories of organizations or individuals that may apply for this grant.",
+      additionalEligibilityInfoHint:
+        "If eligible applicant is Other, provide further clarification on specific requirements",
+      descriptionHint:
+        "Provide a high-level summary of the funding purpose and the problems it intends to solve.",
+      additionalInfoUrlHint:
+        "Enter the full web address for more program details.",
+      additionalInfoUrlTextHint:
+        "Enter the text that will appear as the clickable link.",
+      grantorContactDetailsHint:
+        "Provide the name or department and phone number for the primary contact.",
+      contactEmailHint: "Enter a valid email address.",
+      contactEmailTextHint:
+        "Enter the text that will be shown as the email link.",
+      reviewButton: {
+        idle: "Review required fields",
+        pending: "Reviewing...",
+      },
+      alerts: {
+        success: "Saved successfully",
+        successBody: "Your changes have been saved.",
+        newOpportunityHeading: "Opportunity draft started",
+        newOpportunityBody:
+          "Your initial information has been saved. Complete the sections below to finish your opportunity details",
+        genericError: "Unable to save draft opportunity details.",
+        missingSummaryContext: "Missing opportunity summary context for save.",
+        unauthenticated: "You must be signed in to update this opportunity.",
+        forbidden: "You do not have permission to update this opportunity.",
+        notFound: "The opportunity summary could not be found.",
+        draftOnly: "Only draft opportunity summaries can be updated.",
+        validationHeading: "Please fix the highlighted fields.",
+        validationWarningHeading: "Progress saved",
+        validationWarningBody:
+          "Your progress has been saved. However, this opportunity cannot be submitted/published until the following required fields are completed:",
+      },
+    },
+    validationErrors: {
+      title: "Enter a title.",
+      awardSelectionMethod: "Select an award selection method.",
+      description: "Enter a description.",
+      publishDate: "Enter a publish date.",
+      closeDate: "Enter a close date.",
+      contactEmailRequired: "Enter a contact email.",
+      contactEmailInvalid: "Enter a valid contact email.",
+      contactEmailText: "Enter email display text.",
+      closeDateOrder: "Close date must be on or after publish date.",
+      awardMinimum: "Enter an award minimum.",
+      awardMaximum: "Enter an award maximum.",
+      awardMaximumOrder:
+        "Award maximum must be greater than or equal to award minimum.",
+      fundingType: "Select a funding type.",
+      fundingCategory: "Select a funding category.",
+      expectedNumberOfAwards: "Enter the expected number of awards.",
+      estimatedTotalProgramFunding:
+        "Enter the estimated total program funding.",
+      eligibleApplicants: "Select at least one eligible applicant type.",
+      additionalEligibilityInfo: "Enter additional eligibility information.",
+      additionalInfoUrl: "Enter an additional information URL.",
+      additionalInfoUrlText: "Enter additional information URL text.",
+      grantorContactDetails: "Enter grantor contact details.",
     },
   },
   Application: {
@@ -540,6 +697,7 @@ export const messages = {
           "Our research has helped us understand the needs of all types of Grants.gov users—from first-time visitors to experienced applicants managing multiple grants. These insights drive our efforts to create a simpler, more accessible system for everyone.",
         linkText1: "Read more about the research on our public wiki",
         linkText2: "Sign up to participate in future user studies",
+        linkText3: "Vote for the feature you want to see implemented next",
       },
     },
   },
@@ -547,9 +705,9 @@ export const messages = {
     pageTitle: "Newsletter | Simpler.Grants.gov",
     metaDescription:
       "Sign up for email updates from the Simpler.Grants.gov team.",
-    title: "Simpler Grants Newsletter",
+    title: "Simpler.Grants.gov newsletter",
     paragraph1:
-      "Sign up to get project updates delivered to your inbox every few weeks.",
+      "Sign up to get project updates delivered to your inbox every month.",
     paragraph2:
       "You'll be the first to hear about feature launches, upcoming events, user research, and more.",
     formLabel: "Subscribe to our newsletter",
@@ -736,6 +894,7 @@ export const messages = {
       workspace: "Workspace",
       workspaceDashboard: "Workspace dashboard",
       settings: "Settings",
+      notifications: "Notifications",
       testApplication: "Test application",
     },
     title: "Simpler.Grants.gov",
@@ -877,7 +1036,7 @@ export const messages = {
       loading: "Loading filters",
     },
     callToAction: {
-      shareWithOthers: "Share with others",
+      sharingOptions: "Sharing Options",
     },
     opportunitySaved: "Saved",
     resultsHeader: {
@@ -958,7 +1117,7 @@ export const messages = {
       },
     },
     shareWithYourList: "Shared with:",
-    shareWithOthers: "Share with others",
+    sharingOptions: "Sharing Options",
   },
   Maintenance: {
     heading: "Simpler.Grants.gov Is Currently Undergoing Maintenance",
@@ -1033,6 +1192,11 @@ export const messages = {
       label: "Filter by status",
     },
     title: "Saved opportunities | Simpler.Grants.gov",
+    ownershipFilter: {
+      label: "Filter by organization",
+      showAll: "Show all",
+      individual: "Individual",
+    },
   },
   Roadmap: {
     pageTitle: "Roadmap | Simpler.Grants.gov",
@@ -1046,7 +1210,7 @@ export const messages = {
           {
             title: "Piloting smarter, easier budget forms",
             content:
-              "<p>In collaboration with users from the Simpler Grants Co-Design Group, we're prototyping a smarter, easier-to-use budget form to directly address the most common challenges applicants face. The redesigned form will incorporate clearer instructions, simplified user flow, and auto-calculation of fields to reduce confusion and errors.</p><p><linkGithub7832>Follow #7832 on GitHub</linkGithub7832></p>",
+              "<p>In collaboration with users from the Simpler.Grants.gov Co-Design Group, we're prototyping a smarter, easier-to-use budget form to directly address the most common challenges applicants face. The redesigned form will incorporate clearer instructions, simplified user flow, and auto-calculation of fields to reduce confusion and errors.</p><p><linkGithub7832>Follow #7832 on GitHub</linkGithub7832></p>",
           },
           {
             title:
@@ -1251,7 +1415,7 @@ export const messages = {
           },
           {
             date: "2027",
-            title: "Simpler Grants replaces legacy Grants.gov",
+            title: "Simpler.Grants.gov replaces legacy Grants.gov",
             content:
               "<p>The Simpler.Grants.gov experience becomes the default experience of Grants.gov, providing a modern, consistent experience for all users.</p>",
           },
@@ -1828,7 +1992,7 @@ export const messages = {
       "{num, plural, =1 {1 opportunity} other {# opportunities}}",
     errorMessage:
       "We have encountered an error loading your opportunities, please try again later.",
-    metaDescription: "View your saved opportunities",
+    metaDescription: "View draft and published funding opportunities",
     noOpportunitiesMessage: {
       primary: "You have not started any opportunities yet.",
       secondary:
@@ -1840,7 +2004,8 @@ export const messages = {
       "You do not have access to this agency's opportunities.",
     noAgencies: "You are not associated with any agencies.",
     pageHeading: "Opportunities",
-    pageTitle: "Opportunities",
+    pageTitle: "Opportunities List",
+    pageApplication: "Smarter Grants Management",
     tableContents: {
       agency: "Agency: ",
       draft: "Draft",
@@ -1852,6 +2017,11 @@ export const messages = {
       title: "Title",
       status: "Status",
       actions: "Actions",
+    },
+    actionButtons: {
+      edit: "Edit",
+      copy: "Copy",
+      delete: "Delete",
     },
   },
   Organizations: {
@@ -1875,9 +2045,8 @@ export const messages = {
     datePrepared: "Date prepared",
     status: "Status",
     statusTag: {
-      draft: "Draft",
-      inProgress: "In progress",
-      pendingReview: "Pending review",
+      draft: "In Progress",
+      in_review: "Pending Review",
       approved: "Approved",
     },
     heroButtons: {
@@ -1930,6 +2099,9 @@ export const messages = {
     },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
+    errorHeadingAuthentication: "Authentication Error",
+    authenticationError:
+      "You are not authenticated. Please sign in to view award recommendations.",
     awardRecommendationFetchError:
       "Error fetching award recommendation data. Please try refreshing the page.",
     recommendations: {
@@ -1952,6 +2124,7 @@ export const messages = {
         heading: "Funding strategy",
         description:
           "Explain how you plan to provide funding over time. For example, will the agency award all funding in a single award or in multiple budget periods across a longer period of performance.",
+        noFundingStrategyProvided: "No funding strategy provided.",
       },
     },
   },
@@ -2000,7 +2173,9 @@ export const messages = {
     ],
   },
   CreateOpportunity: {
-    pageTitle: "Create an opportunity",
+    pageTitle: "Create Opportunity",
+    pageApplication: "Smarter Grants Management",
+    metaDescription: "Create a new funding opportunity",
     errorMessage:
       "We have encountered an error loading this page, please try again later.",
     keyInfo: "Key information",
@@ -2029,5 +2204,25 @@ export const messages = {
         "Enter the 5-digit code from SAM.gov that identifies the specific federal assistance program (e.g., 10.500)",
       successMessage: "Opportunity started. Continuing shortly...",
     },
+  },
+  Notifications: {
+    pageTitle: "Notifications | Simpler.Grants.gov",
+    pageHeading: "Notifications",
+    metaDescription:
+      "Manage which email notifications you receive about saved opportunities and your organizations.",
+    managePreferencesTitle: "Manage your preferences",
+    managePreferencesDescription:
+      "Choose which notifications you'd like to receive about your activity.",
+    organizationPreferencesTitle: "Organization preferences",
+    organizationPreferencesDescription:
+      "Choose which notifications you'd like to receive for organizations you're part of.",
+    savedOpportunitiesLabel: "Subscribe to saved opportunities",
+    savedOpportunitiesDescription:
+      "Get email updates about opportunities you have saved.",
+    organizationSavedOpportunitiesDescription:
+      "Get email updates for opportunities saved by you or your organization.",
+    fetchError:
+      "Your notification preferences could not be loaded. Refresh the page to try again.",
+    organizationPreferencesSuffix: "Preferences",
   },
 };

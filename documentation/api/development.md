@@ -44,7 +44,8 @@ This stands up the following services:
 * Postgres database
 * OpenSearch node
 * OpenSearch Dashboard (http://localhost:5601)
-* [localstack](https://www.localstack.cloud) for mocking s3/sqs actions locally
+* [s3Mock](https://github.com/adobe/S3Mock)
+* [elasticMq](https://github.com/softwaremill/elasticmq) - for mocking SQS locally
 * [mock oauth2 server](https://github.com/navikt/mock-oauth2-server) (http://localhost:5001)
 
 
@@ -144,19 +145,41 @@ Running in the native/local approach may require additional packages to be insta
 
 4. This still requires Docker as the database and services all still run within Docker.
 5. Certain environment variables require different paths when running outside of Docker.
-   You can handle this by setting these into your `override.env` file.
+   You can handle this by setting these environment variables yourself via you `.bashrc`
+   or `.zshrc` file. Another approach is to have an `.envrc` in the api directory and
+   use [direnv](https://direnv.net/) to have a directory-based shell file.
 
-```dotenv
-DB_HOST=localhost
-S3_ENDPOINT_URL=http://localhost:4566
-LOGIN_GOV_JWK_ENDPOINT=http://localhost:5001/issuer1/jwks
+```shell
+#!/bin/bash
+# This file can be used by direnv to load the local.env file
+# into your current terminal session.
+# Steps:
+# * Install direnv: https://direnv.net/
+# * Configure direnv: https://direnv.net/docs/hook.html
+# * In this folder, run "direnv allow ."
 
-SEARCH_ENDPOINT=localhost
-OPENSEARCH_HOST=localhost
+set -o allexport
+source local.env
+set +o allexport
 
-# This needs to be set explicitly as "export PY_RUN_APPROACH=local"
-# in your shell, or via some other mechanism - setting it here won't work.
-PY_RUN_APPROACH=local
+set -o allexport
+source override.env
+set +o allexport
+
+
+# If you are running outside of the Docker container, the DB can
+# be found on localhost:5432. Inside the container it's referenced via
+# the name of the docker container.
+#
+export DB_HOST=localhost
+export S3_ENDPOINT_URL=http://localhost:9090
+export SQS_ENDPOINT_URL=http://localhost:9324
+export LOGIN_GOV_JWK_ENDPOINT=http://localhost:5001/issuer1/jwks
+
+export SEARCH_ENDPOINT=localhost
+export OPENSEARCH_HOST=localhost
+
+export PY_RUN_APPROACH=local
 ```
 
 **Note:** All the following commands should be run from the `/api` directory.
@@ -175,10 +198,44 @@ Individual services can be run through Docker, which can be useful in concert wi
 
   If your DB or OpenSearch end up in an odd place, you can reset all the persistent storage using `make volume-recreate`.
 
-* **Localstack (local s3)**
-   * Run `make init-localstack`
+* **s3Mock**
+   * Run `make init-s3mock`
+* **elasticMq (local sqs)**
+   * Run `make init-sqsmock`
 * **Mock OAuth server**
    * Run `make init-mock-oauth2`
+
+#### S3 Mock
+
+For local development, we use [S3Mock](https://github.com/adobe/S3Mock) when running
+the API to mock out s3. The s3Mock is used based on setting the endpoint URL when
+calling AWS from our code or the CLI which is set in the `S3_ENDPOINT_URL` environment variable.
+
+If you want to connect to s3 with the AWS CLI, you can do:
+`aws --endpoint-url http://localhost:9090 s3 ls` which in this case would list the buckets.
+
+Files are stored in the `/api/locals3root` folder, although they may not match what
+you've named the files as they store metadata and other information as well. See [their docs](https://github.com/adobe/S3Mock?tab=readme-ov-file#file-system-structure)
+for more information.
+
+S3 buckets are automatically created based on the `COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS`
+environment variable which we set in the docker-compose file. These won't display in the `locals3root`
+folder until at least one file has been added to s3.
+
+#### SQS Mock
+
+For local development, we use [elasticmq](https://github.com/softwaremill/elasticmq) when running
+the API to mock out SQS.
+
+If you want to connect to SQS with the AWS CLI, you can do:
+`aws --endpoint-url http://localhost:9324 sqs list-queues` which in this case would list the queues.
+
+SQS queues are automatically created based on the configuration that we specify in the
+[custom.conf](../../api/mock-sqs/custom.conf) file which gets passed to the elasticmq docker image during
+startup.
+
+The SQS queues **DO NOT** maintain state if you stop and restart the container. If you stop the SQS
+mock container all messages in the queues will be lost.
 
 ## Next steps
 

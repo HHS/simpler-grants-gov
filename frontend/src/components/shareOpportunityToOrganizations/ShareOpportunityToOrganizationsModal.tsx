@@ -26,7 +26,6 @@ export interface ShareOpportunityToOrganizationsModalProps {
   modalRef: RefObject<ModalRef | null>;
   organizations: Organization[];
   savedToOrganizationIds: Set<string>;
-  isLoadingOrganizations: boolean;
   hasOrganizationsError: boolean;
   selectedOpportunity?: BaseOpportunity | null;
   onSavedOrganizationsChange: (organizationIds: Set<string>) => void;
@@ -36,7 +35,6 @@ export function ShareOpportunityToOrganizationsModal({
   modalRef,
   organizations,
   savedToOrganizationIds,
-  isLoadingOrganizations,
   hasOrganizationsError,
   selectedOpportunity,
   onSavedOrganizationsChange,
@@ -52,6 +50,8 @@ export function ShareOpportunityToOrganizationsModal({
   const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPendingOrganizationIds(new Set());
     setActionError(null);
   }, [opportunityId]);
@@ -126,10 +126,6 @@ export function ShareOpportunityToOrganizationsModal({
       );
     }
 
-    if (isLoadingOrganizations) {
-      return <p>{t("modal.loadingOrganizations")}</p>;
-    }
-
     if (organizations.length === 0) {
       return <p>{t("modal.fallbackError")}</p>;
     }
@@ -144,9 +140,9 @@ export function ShareOpportunityToOrganizationsModal({
 
         <Fieldset
           legend="Which organization should see this?"
-          className="display-block"
+          className="display-block saved-opportunity-fieldset"
         >
-          <ul className="padding-0 margin-0">
+          <ul className="saved-opportunity-padding-0 margin-0">
             {organizations.map((organization) => {
               const organizationId = organization.organization_id;
               const isChecked = savedToOrganizationIds.has(organizationId);
@@ -159,8 +155,8 @@ export function ShareOpportunityToOrganizationsModal({
                     "display-block",
                     "border",
                     "border-base-light",
-                    "padding-1",
-                    "radius-md",
+                    "saved-opportunity-padding-1",
+                    "saved-opportunity-radius-md",
                     "share-opportunity-checkboxes",
                     isDisabled ? "share-opportunity-item--disabled" : "",
                   ].join(" ")}
@@ -216,7 +212,7 @@ export function ShareOpportunityToOrganizationsModal({
           modalRef={modalRef}
           closer
           unstyled
-          className="padding-105 text-center"
+          className="saved-opportunity-padding-105 text-center"
         >
           {t("modal.close")}
         </ModalToggleButton>

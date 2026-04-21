@@ -18,7 +18,6 @@ jest.mock("src/components/shareOpportunityToOrganizations/actions", () => ({
 }));
 
 const modalRef: RefObject<ModalRef | null> = { current: null };
-const orgIds = new Set(["test1", "test2"]);
 const organizations: Organization[] = [
   {
     organization_id: "org-1",
@@ -39,33 +38,13 @@ describe("ShareOpportunityToOrganizationsModal", () => {
         modalRef={modalRef}
         organizations={organizations}
         savedToOrganizationIds={new Set<string>()}
-        isLoadingOrganizations={false}
         hasOrganizationsError={true}
         selectedOpportunity={null}
-        onSavedOrganizationsChange={() => {
-          console.warn(orgIds);
-        }}
+        onSavedOrganizationsChange={jest.fn()}
       />,
     );
 
     expect(screen.getByText("modal.error")).toBeInTheDocument();
-  });
-  it("renders loading state", () => {
-    render(
-      <ShareOpportunityToOrganizationsModal
-        modalRef={modalRef}
-        organizations={organizations}
-        savedToOrganizationIds={new Set<string>()}
-        isLoadingOrganizations={true}
-        hasOrganizationsError={false}
-        selectedOpportunity={null}
-        onSavedOrganizationsChange={() => {
-          console.warn(orgIds);
-        }}
-      />,
-    );
-
-    expect(screen.getByText("modal.loadingOrganizations")).toBeInTheDocument();
   });
 
   it("renders empty state when user has no organizations", () => {
@@ -74,12 +53,9 @@ describe("ShareOpportunityToOrganizationsModal", () => {
         modalRef={modalRef}
         organizations={[]}
         savedToOrganizationIds={new Set<string>()}
-        isLoadingOrganizations={false}
         hasOrganizationsError={false}
         selectedOpportunity={null}
-        onSavedOrganizationsChange={() => {
-          console.warn(orgIds);
-        }}
+        onSavedOrganizationsChange={jest.fn()}
       />,
     );
 
@@ -98,7 +74,6 @@ describe("ShareOpportunityToOrganizationsModal", () => {
         modalRef={modalRef}
         organizations={organizations}
         savedToOrganizationIds={new Set<string>()}
-        isLoadingOrganizations={false}
         hasOrganizationsError={false}
         selectedOpportunity={selectedOpportunity}
         onSavedOrganizationsChange={jest.fn()}
@@ -121,7 +96,6 @@ describe("ShareOpportunityToOrganizationsModal", () => {
         modalRef={modalRef}
         organizations={organizations}
         savedToOrganizationIds={new Set<string>()}
-        isLoadingOrganizations={false}
         hasOrganizationsError={false}
         selectedOpportunity={selectedOpportunity}
         onSavedOrganizationsChange={jest.fn()}
@@ -135,7 +109,7 @@ describe("ShareOpportunityToOrganizationsModal", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the checkbox on the modal and then checkbox as not checked", () => {
+  it("renders the checkbox as not checked when the organization is not saved", () => {
     const selectedOpportunity = {
       opportunity_id: "opportunity-3",
       opportunity_title: "A Great Opportunity3",
@@ -147,7 +121,6 @@ describe("ShareOpportunityToOrganizationsModal", () => {
         modalRef={modalRef}
         organizations={organizations}
         savedToOrganizationIds={new Set<string>()}
-        isLoadingOrganizations={false}
         hasOrganizationsError={false}
         selectedOpportunity={selectedOpportunity}
         onSavedOrganizationsChange={jest.fn()}
@@ -155,12 +128,12 @@ describe("ShareOpportunityToOrganizationsModal", () => {
     );
 
     expect(screen.getByText(/A Great Opportunity3/)).toBeInTheDocument();
-    const orgCheckBox = screen.getByRole("checkbox");
+    const organizationCheckbox = screen.getByRole("checkbox");
     expect(screen.getByTestId("checkbox")).toBeInTheDocument();
-    expect(orgCheckBox).not.toBeChecked();
+    expect(organizationCheckbox).not.toBeChecked();
   });
 
-  it("renders the checkbox on the modal and validate check box exists", () => {
+  it("renders the organization checkbox label", () => {
     const selectedOpportunity = {
       opportunity_id: "opportunity-4",
       opportunity_title: "A Great Opportunity4",
@@ -172,7 +145,6 @@ describe("ShareOpportunityToOrganizationsModal", () => {
         modalRef={modalRef}
         organizations={organizations}
         savedToOrganizationIds={new Set<string>()}
-        isLoadingOrganizations={false}
         hasOrganizationsError={false}
         selectedOpportunity={selectedOpportunity}
         onSavedOrganizationsChange={jest.fn()}
@@ -180,7 +152,6 @@ describe("ShareOpportunityToOrganizationsModal", () => {
     );
 
     expect(screen.getByText(/A Great Opportunity4/)).toBeInTheDocument();
-    const orgCheckBox = screen.getByLabelText("First Organization");
-    expect(orgCheckBox).toBeInTheDocument();
+    expect(screen.getByLabelText("First Organization")).toBeInTheDocument();
   });
 });

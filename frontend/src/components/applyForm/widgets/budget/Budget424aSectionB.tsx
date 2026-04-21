@@ -1,13 +1,13 @@
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
 import { get } from "lodash";
+import {
+  FormValidationWarning,
+  UswdsWidgetProps,
+} from "src/types/applyForm/types";
 
 import React, { JSX } from "react";
 import { Table } from "@trussworks/react-uswds";
 
-import {
-  FormValidationWarning,
-  UswdsWidgetProps,
-} from "src/components/applyForm/types";
 import {
   ACTIVITY_ITEMS,
   SECTION_B_ROW_I_KEY,

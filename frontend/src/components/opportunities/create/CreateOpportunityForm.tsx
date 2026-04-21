@@ -52,27 +52,33 @@ export function CreateOpportunityForm({
   // Use useEffect to detect success and redirect
   const router = useRouter();
   useEffect(() => {
-    // Scroll to top for the error or success message
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-    // If success, redirect to Opportunity List page
-    if (response?.success) {
-      router.push("/opportunities");
-    } else {
+    // If success, redirect to the edit page (Part 2 of create)
+    if (response?.success && response.data?.opportunity_id) {
+      router.push(
+        `/opportunity/${response.data.opportunity_id}/edit?fromCreate=true`,
+      );
+    } else if (response?.errorMessage) {
+      // Scroll to top to show the error message
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDisableSave(true);
       if (selectedCategoryId.trim() !== "other") {
         setExplain(""); // need to manually set this for checks below to work correctly
       }
     }
-  }, [response, router]);
+  }, [response, router, selectedCategoryId]);
 
   // Use useEffect to check fields when inputs change
   useEffect(
     () => {
       // Category: if Other then show the Explanation field
       if (selectedCategoryId.trim() === "other") {
+        // TODO #9633
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setShowExplain(true);
       } else {
         setShowExplain(false);
@@ -127,12 +133,6 @@ export function CreateOpportunityForm({
           {response?.errorMessage}
         </Alert>
       )}
-      {response?.success && (
-        <Alert heading={t("successHeading")} headingLevel="h2" type="success">
-          {t("CreateOpportunityForm.successMessage")}
-        </Alert>
-      )}
-
       <h2>{t("keyInfo")}</h2>
       <div className="display-flex flex-justify">
         <div>{t("basicInstructions")}</div>

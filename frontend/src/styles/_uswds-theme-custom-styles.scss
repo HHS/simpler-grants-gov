@@ -392,81 +392,9 @@ h6 {
   }
 }
 
-// we are implementing the uswds nav drop down at mobile widths, which is not ordinarily supported
-// these styles are taken from the desktop imlementation of the dropdown and applied at all breakpoints
-.usa-nav__primary {
-  .mobile-nav-dropdown-uncollapsed-override {
-    button[aria-expanded="true"]:hover {
-      background-color: color("mint-40");
-    }
-    button[aria-expanded="true"] {
-      background-color: color("mint-60");
-      a {
-        color: white;
-      }
-      a:hover {
-        background-color: color("mint-40");
-        color: white;
-      }
-      span:after {
-        mask-image:
-          url("/uswds/img/usa-icons/expand_less.svg"),
-          linear-gradient(transparent, transparent);
-        background-color: white;
-      }
-    }
-    button[aria-expanded="false"] {
-      span:after {
-        mask-image:
-          url("/uswds/img/usa-icons/expand_more.svg"),
-          linear-gradient(transparent, transparent);
-      }
-    }
-    button[aria-expanded] {
-      span:after {
-        right: 0.75rem;
-      }
-    }
-    .usa-nav__submenu-item {
-      background-color: color("mint-60");
-      &:hover {
-        background-color: color("mint-40");
-      }
-      a {
-        padding-left: 1rem;
-        padding-right: 1rem;
-        color: white;
-        line-height: 1.4;
-        display: block;
-      }
-    }
-    @include at-media("desktop") {
-      button:hover {
-        background-color: white;
-      }
-      .usa-nav__submenu {
-        right: 0;
-      }
-    }
-  }
-  .usa-accordion__button[aria-expanded="true"]::after {
-    background-color: color("mint-60");
-    border-radius: 0;
-    content: "";
-    display: block;
-    position: absolute;
-    height: 0.25rem;
-    bottom: -0.25rem;
-    left: 0;
-    right: 0;
-  }
-  // Hide the ::after border on mobile
-  @include at-media-max($theme-header-min-width) {
-    .usa-accordion__button[aria-expanded="true"]::after {
-      display: none;
-    }
-  }
+// Primay Nav Menu
 
+.usa-nav__primary {
   // Match padding of non-dropdown nav links (Home, Search, Sign In) to dropdown items on mobile (12px)
   @include at-media-max($theme-header-min-width) {
     .usa-nav__primary-item > .usa-nav__link {
@@ -474,30 +402,9 @@ h6 {
       padding-bottom: 0.75rem;
     }
   }
-  // Match the exact USWDS selector .usa-nav__primary button:hover
-  // Use the same color as .usa-nav__primary a:not(.usa-button):not(.usa-current) (#76766a)
-  @include at-media-max($theme-header-min-width) {
-    button:hover,
-    button:focus:hover,
-    button:active:hover {
-      color: #76766a;
-      background-color: transparent;
-    }
-  }
-}
 
-// revert to behavior before upgrade https://github.com/uswds/uswds/commit/2785b67e58ae19f161101f4859afff0e9664fbda
-.usa-header--basic {
-  @include at-media($theme-header-min-width) {
-    .usa-nav {
-      padding: 0 0 units(0.5) units(1);
-    }
-  }
-}
-
-// a11y bug: https://github.com/HHS/simpler-grants-gov/issues/3423
-// USWDS to implement theme settings: https://github.com/uswds/uswds/issues/6176
-.usa-nav__primary {
+  // a11y bug: https://github.com/HHS/simpler-grants-gov/issues/3423
+  // USWDS to implement theme settings: https://github.com/uswds/uswds/issues/6176
   // $nav-link-color hardcoded to "base-dark" (which we theme to "gray-warm-50")
   // &:hover is hardcoded to "primary" (which we theme to "mint-30")
   // We need a magic number of 50+ to pass WCAG 2.0 AA contrast (70+ for AAA).
@@ -507,8 +414,7 @@ h6 {
   $simpler-nav-link-color-hover: "mint-60";
 
   > .usa-nav__primary-item {
-    > a,
-    > a:not(.usa-button):not(.usa-current),
+    > a:not(.usa-current),
     button {
       color: color($simpler-nav-link-color);
 
@@ -1034,19 +940,76 @@ dl {
 
 // shared opportunity styles
 // https://www.figma.com/design/bQUTJCMj0JYbAAnJQ4p4tX/Grantee-Designs-%7C-Quad-5-%7C-Simpler-Grants-2026?node-id=2741-59715&t=1CauPpl4XzKK9eoF-4
+.share-opportunity-modal {
+  padding: 0.625rem;
+}
 .share-opportunity-modal .usa-modal__main {
   margin: 0;
+  padding: 4.375rem 5.313rem 4.375rem 5.313rem;
+}
+.share-opportunity-modal .usa-modal__main .usa-modal__heading {
+  font-size: 1.75rem;
 }
 .share-opportunity-item--disabled,
 .share-opportunity-item--disabled .usa-checkbox {
   background-color: #f0f0f0;
   opacity: 0.8;
 }
-
 .share-opportunity-checkboxes .usa-checkbox__label {
   margin-top: 0;
 }
-
+.usa-modal__close .saved-opportunity-usa-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0.125rem 0.125rem 0 0;
+}
+.saved-opportunity-fieldset {
+  border: none;
+  margin: 1.563rem 0rem 0rem 0rem;
+  padding: 0;
+}
+.saved-opportunity-fieldset .usa-legend {
+  padding-bottom: 1rem;
+}
+.saved-opportunity-padding-0 {
+  padding: 0rem 0rem 0.6rem 0rem !important;
+}
+li.saved-opportunity-padding-1 input[type="checkbox"]:checked + label {
+  padding: 0rem 0rem 0rem 2rem !important;
+  background-color: #dbf6ed;
+  color: black;
+  border: #dbf6ed 0.125rem solid !important;
+  width: 100%;
+}
+li.saved-opportunity-padding-1 input[type="checkbox"]:not(checked) + label {
+  padding: 0rem 0rem 0rem 2rem !important;
+  background-color: white;
+  color: black;
+  width: 100%;
+}
+button.usa-button.usa-button--unstyled.saved-opportunity-padding-105 {
+  padding: 0.75rem 0.75rem 0.75rem 0rem !important;
+}
+.saved-opportunity-radius-md {
+  background-color: white;
+}
+li.display-block.border.border-base-light.saved-opportunity-padding-1.saved-opportunity-radius-md.share-opportunity-checkboxes
+  input[type="checkbox"]:checked,
+.saved-opportunity-radius-md:has(input[type="checkbox"]:checked) {
+  background-color: #dbf6ed;
+  border: #5abf95 0.125rem solid !important;
+  padding: 0.4rem;
+  border-radius: 0.25rem;
+}
+li.display-block.border.border-base-light.saved-opportunity-padding-1.saved-opportunity-radius-md.share-opportunity-checkboxes
+  input[type="checkbox"]:not(checked),
+input[type="checkbox"]:not(checked) ~ .saved-opportunity-radius-md,
+.saved-opportunity-radius-md:has(input[type="checkbox"]:not(checked)) {
+  background-color: white;
+  border: #e9e9e9 0.063rem solid !important;
+  padding: 0.46rem 0.5rem 0.5rem 0.5rem;
+  border-radius: 0.25rem;
+}
 // Saved Opportunities Tags
 .saved-opportunity-tags {
   position: relative;
@@ -1085,4 +1048,273 @@ dl {
       display: none;
     }
   }
+}
+
+.notifications-page-error-enter {
+  animation: notifications-page-error-fade-in 180ms ease-out;
+}
+
+/*
+  Notifications page error message fade in animation. 
+  This is used on the notifications page when an error occurs fetching notifications,
+  to fade in the error message in a way that draws attention without being too jarring.
+*/
+
+.notification-preference-card__field {
+  position: relative;
+}
+
+.notification-preference-card__status {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-block-size: units(6);
+  pointer-events: none;
+}
+
+.notification-preference-card__loading-text {
+  color: color("gray-warm-70");
+  font-size: size("sans", "2xs");
+}
+
+.notifications-page-error-enter {
+  animation: notifications-page-error-fade-in 180ms ease-out;
+}
+
+@keyframes notifications-page-error-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notifications-page-error-enter {
+    animation: none;
+  }
+}
+
+/*
+  Custom Switch Styles
+  https://www.figma.com/design/bQUTJCMj0JYbAAnJQ4p4tX/Grantee-Designs-%7C-Quad-5-%7C-Simpler-Grants-2026?node-id=4062-16123&t=bYpGGUGR9kVzBClw-4
+*/
+
+$simpler-switch-transition-duration: 140ms;
+$simpler-switch-transition-easing: ease;
+
+.simpler-switch {
+  display: inline-flex;
+  position: relative;
+}
+
+.simpler-switch__input {
+  position: absolute;
+  opacity: 0;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.simpler-switch__visual {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: units(9);
+  min-block-size: units(6);
+  padding: units(1) units(1.5);
+  border: 2px solid color("gray-warm-20");
+  border-radius: radius("md");
+  background-color: color("white");
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color $simpler-switch-transition-duration
+      $simpler-switch-transition-easing,
+    background-color $simpler-switch-transition-duration
+      $simpler-switch-transition-easing,
+    box-shadow $simpler-switch-transition-duration
+      $simpler-switch-transition-easing;
+}
+
+.simpler-switch__track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  inline-size: units(6);
+  block-size: units(3);
+  border-radius: 999px;
+  background-color: color("gray-warm-30");
+  transition: background-color $simpler-switch-transition-duration
+    $simpler-switch-transition-easing;
+}
+
+.simpler-switch__thumb {
+  position: absolute;
+  inset-inline-start: 0.1875rem;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  border-radius: 999px;
+  background-color: color("white");
+  transition: transform $simpler-switch-transition-duration
+    $simpler-switch-transition-easing;
+}
+
+.simpler-switch__state-text {
+  font: inherit;
+  color: color("gray-warm-70");
+}
+
+.simpler-switch[data-checked="true"] .simpler-switch__visual {
+  border-color: color("mint-40");
+}
+
+.simpler-switch[data-checked="true"] .simpler-switch__track {
+  background-color: color("mint-40");
+}
+
+.simpler-switch[data-checked="true"] .simpler-switch__thumb {
+  transform: translateX(1.5rem);
+}
+
+.simpler-switch__input:focus-visible + .simpler-switch__visual {
+  outline: 3px solid color("mint-40");
+  outline-offset: 2px;
+}
+
+.simpler-switch[data-error="true"] .simpler-switch__visual {
+  border-color: color("red-warm-50v");
+}
+
+.simpler-switch[data-disabled="true"] .simpler-switch__visual {
+  border-color: color("gray-warm-10");
+  background-color: color("gray-warm-5");
+  cursor: not-allowed;
+}
+
+.simpler-switch[data-disabled="true"] .simpler-switch__track {
+  background-color: color("gray-warm-10");
+}
+
+.simpler-switch[data-disabled="true"] .simpler-switch__thumb {
+  background-color: color("white");
+}
+
+.simpler-switch-field {
+  inline-size: 100%;
+}
+
+.simpler-switch-field__content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: units(2);
+}
+
+.simpler-switch-field__text {
+  display: grid;
+  gap: units(1);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.simpler-switch-field__label {
+  cursor: pointer;
+}
+
+.simpler-switch-field__control {
+  flex: 0 0 auto;
+}
+
+.simpler-switch-field__error {
+  color: color("red-warm-50v");
+  font-weight: font-weight("bold");
+}
+
+@include at-media-max("mobile-lg") {
+  .simpler-switch-field__content {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .simpler-switch-field__control {
+    flex: 0 0 auto;
+    align-self: flex-start;
+  }
+}
+// Prevent SPA's persistent focus for mouse users
+@supports selector(:focus-visible) {
+  // Selectors need more specificity than:
+  // input:not([disabled]):focus,
+  // select:not([disabled]):focus,
+  // textarea:not([disabled]):focus,
+  // button:not([disabled]):focus,
+  // iframe:focus,
+  // [href]:focus,
+  // [tabindex]:focus,
+  // [contentEditable="true"]:focus
+
+  .usa-button:not([disabled]),
+  .usa-nav__primary-item a,
+  .usa-nav__primary-item button,
+  .usa-accordion__button:not([disabled]),
+  #main-content[tabindex],
+  .usa-logo a {
+    &:focus {
+      outline-width: 0;
+    }
+
+    &:focus-visible {
+      outline-width: units($theme-focus-width);
+    }
+  }
+
+  // Checkbox & radio focus styles are applied to pseudo elements and need their own rules
+  .usa-checkbox__input,
+  .usa-radio__input {
+    &:focus + [class*="__label"]::before {
+      outline-width: 0;
+    }
+    &:focus-visible + [class*="__label"]::before {
+      outline-width: units($theme-focus-width);
+    }
+  }
+}
+
+.notification-preference-card--error {
+  border-inline-start: 4px solid color("red-warm-50v") !important;
+  padding-inline-start: units(2);
+}
+
+.notification-preference-card__error {
+  color: color("red-warm-50v");
+  font-weight: font-weight("bold");
+}
+
+.notification-preference-card__field {
+  position: relative;
+}
+
+.notification-preference-card__status {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-block-size: units(6);
+  pointer-events: none;
+}
+
+.notification-preference-card__loading-text {
+  color: color("gray-warm-70");
+  font-size: size("sans", "2xs");
 }

@@ -271,7 +271,11 @@ class CustomProvider(BaseProvider):
 
     # This is to help with the unique agency code conflicts
     AGENCY_CODE_FORMATS = [
-        "???",
+        # We don't make anything of format ???
+        # To avoid overlap with real agencies as we
+        # saw tests just happen to match exactly
+        # and get a unique constraint issue
+        "FAKE???",
         "????",
         "???-??",
         "???-???",
@@ -931,7 +935,7 @@ class OpportunityAttachmentFactory(BaseFactory):
                 Does this location exist? If you are running in unit tests, make sure
                 `enable_factory_create` is pulled in as a fixture to your test.
 
-                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                 """
             ) from e
 
@@ -965,6 +969,7 @@ class AwardRecommendationFactory(BaseFactory):
     additional_info = sometimes_none(factory.Faker("paragraph"))
     award_selection_method = sometimes_none(factory.fuzzy.FuzzyChoice(AwardSelectionMethod))
     selection_method_detail = sometimes_none(factory.Faker("paragraph"))
+    funding_strategy = sometimes_none(factory.Faker("paragraph"))
     other_key_information = sometimes_none(factory.Faker("paragraph"))
 
     is_deleted = False
@@ -1014,7 +1019,7 @@ class AwardRecommendationAttachmentFactory(BaseFactory):
                 Does this location exist? If you are running in unit tests, make sure
                 `enable_factory_create` is pulled in as a fixture to your test.
 
-                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                 """
             ) from e
 
@@ -1063,6 +1068,20 @@ class AwardRecommendationApplicationSubmissionFactory(BaseFactory):
     award_recommendation_submission_detail_id = factory.LazyAttribute(
         lambda s: s.award_recommendation_submission_detail.award_recommendation_submission_detail_id
     )
+
+    class Params:
+        recommended_for_funding = factory.Trait(
+            award_recommendation_submission_detail__award_recommendation_type=AwardRecommendationType.RECOMMENDED_FOR_FUNDING,
+            award_recommendation_submission_detail__recommended_amount=50000,
+        )
+        recommended_without_funding = factory.Trait(
+            award_recommendation_submission_detail__award_recommendation_type=AwardRecommendationType.RECOMMENDED_WITHOUT_FUNDING,
+            award_recommendation_submission_detail__recommended_amount=0,
+        )
+        not_recommended = factory.Trait(
+            award_recommendation_submission_detail__award_recommendation_type=AwardRecommendationType.NOT_RECOMMENDED,
+            award_recommendation_submission_detail__recommended_amount=0,
+        )
 
 
 class AwardRecommendationRiskSubmissionFactory(BaseFactory):
@@ -1524,7 +1543,7 @@ class CompetitionInstructionFactory(BaseFactory):
                 Does this location exist? If you are running in unit tests, make sure
                 `enable_factory_create` is pulled in as a fixture to your test.
 
-                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                 """
             ) from e
 
@@ -1565,7 +1584,7 @@ class FormInstructionFactory(BaseFactory):
                 Does this location exist? If you are running in unit tests, make sure
                 `enable_factory_create` is pulled in as a fixture to your test.
 
-                If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                 """
             ) from e
 
@@ -1825,7 +1844,7 @@ class ApplicationAttachmentFactory(BaseFactory):
                     Does this location exist? If you are running in unit tests, make sure
                     `enable_factory_create` is pulled in as a fixture to your test.
 
-                    If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                    If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                     """
             ) from e
 
@@ -1883,7 +1902,7 @@ class ApplicationSubmissionFactory(BaseFactory):
                     Does this location exist? If you are running in unit tests, make sure
                     `enable_factory_create` is pulled in as a fixture to your test.
 
-                    If you are running locally outside of unit tests, make sure that `make init-localstack` has run.
+                    If you are running locally outside of unit tests, make sure that `make init-s3mock` has run.
                     """
             ) from e
 

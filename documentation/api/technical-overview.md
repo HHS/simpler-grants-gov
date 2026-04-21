@@ -19,7 +19,7 @@ generally preferred.
 - [OpenAPI Specification][oas-docs]
 - [API Flask][apiflask-home] ([source code][apiflask-src])
 - [SQLAlchemy][sqlalchemy-home] ([source code][sqlalchemy-src])
-- [Alembic][alembic-home] ([source code](alembic-src))
+- [Alembic][alembic-home] ([source code][alembic-src])
 - [pydantic][pydantic-home] ([source code][pydantic-src])
 - [poetry](https://python-poetry.org/docs/) - Python dependency management
 

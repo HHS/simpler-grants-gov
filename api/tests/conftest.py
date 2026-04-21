@@ -20,7 +20,9 @@ import tests.src.db.models.factories as factories
 from src.adapters import search
 from src.adapters.aws import S3Config
 from src.adapters.oauth.login_gov.mock_login_gov_oauth_client import MockLoginGovOauthClient
+from src.adapters.search import SearchClient
 from src.auth.api_jwt_auth import create_jwt_for_user
+from src.constants.lookup_constants import Privilege, RoleType
 from src.constants.schema import Schemas
 from src.constants.static_role_values import NAVA_INTERNAL_ROLE
 from src.db import models
@@ -30,14 +32,24 @@ from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
-from src.db.models.user_models import AgencyUser, UserApiKey
+from src.db.models.user_models import AgencyUser, User, UserApiKey
 from src.form_schema.forms import get_active_forms
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.util.local import load_local_env_vars
+from src.workflow.registry.workflow_client_registry import (
+    WorkflowClientRegistry,
+    init_workflow_client_registry,
+)
 from src.workflow.workflow_background_task import _init_newrelic_app
 from tests.lib import db_testing
 from tests.lib.auth_test_utils import mock_oauth_endpoint
 from tests.lib.db_testing import cascade_delete_from_db_table
+from tests.src.db.models.factories import (
+    InternalUserRoleFactory,
+    RoleFactory,
+    UserFactory,
+    UserProfileFactory,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -453,6 +465,7 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
     monkeypatch.delenv("S3_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("SQS_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("CDN_URL", raising=False)
 
 
@@ -671,3 +684,30 @@ def load_active_forms(db_session, enable_factory_create) -> None:
         copied_form = copy.deepcopy(form)
         copied_form.form_json_schema = resolve_jsonschema(form.form_json_schema)
         db_session.merge(copied_form, load=True)
+
+
+@pytest.fixture
+def workflow_user(enable_factory_create, monkeypatch) -> User:
+    """Get the workflow user, setting them up with expected params
+
+    Also sets the workflow user ID env var to the user created here.
+
+    This fixture has autouse=True so it's automatically available for all
+    workflow tests without needing to explicitly request it.
+    """
+    user = UserFactory.create()
+    UserProfileFactory.create(user=user, first_name="System", last_name="User")
+
+    role = RoleFactory.create(
+        privileges=[Privilege.INTERNAL_WORKFLOW_ACCESS], role_types=[RoleType.INTERNAL]
+    )
+    InternalUserRoleFactory.create(user=user, role=role)
+
+    monkeypatch.setenv("WORKFLOW_SERVICE_INTERNAL_USER_ID", str(user.user_id))
+
+    return user
+
+
+@pytest.fixture(scope="session")
+def workflow_client_registry(search_client: SearchClient) -> WorkflowClientRegistry:
+    return init_workflow_client_registry(search_client=search_client)
