@@ -562,3 +562,7 @@ class OpportunitySummaryUpdateRequestV1Schema(OpportunitySummaryBaseRequestSchem
 
 class OpportunitySummaryUpdateResponseV1Schema(AbstractResponseSchema):
     data = fields.Nested(OpportunitySummaryDetailSchema())
+
+
+class OpportunityPublishResponseV1Schema(AbstractResponseSchema):
+    data = fields.Nested(OpportunityGrantorSchema())
