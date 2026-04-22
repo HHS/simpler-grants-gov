@@ -65,9 +65,47 @@ jobs:
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
           echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
 
+  restore-or-build-api:
+    name: Restore or build API
+    needs: [get-api-commit-hash]
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Restore Docker image cached
+        id: restore-docker-image-cached
+        uses: actions/cache/restore@v5
+        with:
+          path: /tmp/docker-image.tar
+          lookup-only: true
+          key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
+      - name: Build API Server for e2e tests (if not cached)
+        if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
+        run: |
+          cd ../api
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+
+          make build
+
+      - name: Save Docker image
+        if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
+        run: |
+          cd ..
+          docker save api-grants-api > /tmp/docker-image.tar
+
+      - name: Cache Docker image
+        if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/docker-image.tar
+          key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
   e2e-tests-local:
     name: Run Local E2E Tests
-    needs: [get-api-commit-hash]
+    needs: [get-api-commit-hash, restore-or-build-api]
     runs-on: ubuntu-22.04
 
     strategy:
@@ -92,12 +130,12 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: /tmp/docker-image.tar
+          fail-on-cache-miss: true
           key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
       # if we successfully pulled a cached image, then import it into docker, otherwise we can skip this step as it won't work
       # if we cache miss, we'll build the docker image in the make commands below
       - name: Load cached Docker image
-        if: steps.restore-docker-image-cached.outputs.cache-hit == 'true'
         run: |
           docker load < /tmp/docker-image.tar
 
@@ -115,16 +153,6 @@ jobs:
           # Run init first to generate JWT keys in override.env
 
           make init-nobuild
-      - name: Build API Server for e2e tests (if not cached)
-        if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
-        run: |
-          cd ../api
-          # Enable core dumps for debugging segfaults
-          ulimit -c unlimited
-          mkdir -p /tmp/cores
-          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
-
-          make build
 
       - name: Start API Server for e2e tests
         run: |
@@ -187,19 +215,6 @@ jobs:
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
-
-      - name: Save Docker image
-        if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
-        run: |
-          cd ..
-          docker save api-grants-api > /tmp/docker-image.tar
-
-      - name: Cache Docker image
-        if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: /tmp/docker-image.tar
-          key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
   create-report:
     name: Create Merged Test Report
