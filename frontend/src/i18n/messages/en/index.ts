@@ -289,7 +289,7 @@ export const messages = {
       stagePosted: "Open for applications",
       saveButton: "Save",
       previewButton: "Preview",
-      submitButton: "Submit for review",
+      publishButton: "Publish",
       navTitle: "On this page",
     },
     sections: {
@@ -2233,5 +2233,9 @@ export const messages = {
     fetchError:
       "Your notification preferences could not be loaded. Refresh the page to try again.",
     organizationPreferencesSuffix: "Preferences",
+    expiredSession: "Session has expired",
+    preferencesNotSavedError:
+      "Your notification preference was not saved. Refresh the page to try again.",
+    srPendingSave: "Saving notification preference...",
   },
 };

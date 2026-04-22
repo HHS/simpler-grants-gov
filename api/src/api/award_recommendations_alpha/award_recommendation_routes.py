@@ -16,6 +16,7 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationRiskCreateResponseSchema,
     AwardRecommendationSubmissionListRequestSchema,
     AwardRecommendationSubmissionListResponseSchema,
+    AwardRecommendationUpdateRequestSchema,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
@@ -30,6 +31,9 @@ from src.services.award_recommendations.get_award_recommendation import (
 )
 from src.services.award_recommendations.list_award_recommendation_submissions import (
     list_award_recommendation_submissions,
+)
+from src.services.award_recommendations.update_award_recommendation import (
+    update_award_recommendation,
 )
 from src.services.award_recommendations.update_award_recommendation_review import (
     update_award_recommendation_review,
@@ -126,6 +130,33 @@ def award_recommendation_submission_list(
     return response.ApiResponse(
         message="Success", data=submissions, pagination_info=pagination_info
     )
+
+
+@award_recommendation_blueprint.put("/award-recommendations/<uuid:award_recommendation_id>")
+@award_recommendation_blueprint.input(AwardRecommendationUpdateRequestSchema, location="json")
+@award_recommendation_blueprint.output(AwardRecommendationGetResponseSchema)
+@award_recommendation_blueprint.doc(
+    summary="Update Award Recommendation",
+    description="Update an existing award recommendation with new values for fields.",
+    responses=[200, 401, 403, 404, 422],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_update(
+    db_session: db.Session, award_recommendation_id: uuid.UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"award_recommendation_id": award_recommendation_id})
+    logger.info("PUT /alpha/award-recommendations/:award_recommendation_id")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        updated_award_recommendation = update_award_recommendation(
+            db_session, user, award_recommendation_id, json_data
+        )
+
+    return response.ApiResponse(message="Success", data=updated_award_recommendation)
 
 
 @award_recommendation_blueprint.put(

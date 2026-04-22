@@ -1,237 +1,183 @@
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
-import { NotificationPreferenceCardProps } from "./NotificationPreferenceCard";
-import { NotificationsPageContent } from "./NotificationsPageContent";
-import { OrganizationPreferenceSectionProps } from "./OrganizationPreferenceSection";
+import { NotificationPreferenceCard } from "./NotificationPreferenceCard";
 
-type MockNotificationPreferenceCardProps = Pick<
-  NotificationPreferenceCardProps,
-  | "checkboxId"
-  | "label"
-  | "isDisabled"
-  | "isLoading"
-  | "hasError"
-  | "errorMessage"
-  | "onCheckedChange"
->;
+const mockCheckbox = jest.fn();
 
-jest.mock("./NotificationPreferenceCard", () => ({
-  NotificationPreferenceCard: ({
-    checkboxId,
-    label,
-    isDisabled,
-    isLoading,
-    hasError,
-    errorMessage,
-    onCheckedChange,
-  }: MockNotificationPreferenceCardProps) => (
-    <div data-testid={`card-${checkboxId}`}>
-      <span>{label}</span>
+jest.mock("@trussworks/react-uswds", () => ({
+  Checkbox: (props: {
+    id: string;
+    name: string;
+    checked: boolean;
+    disabled?: boolean;
+    onChange?: (event: {
+      target: { checked: boolean };
+      currentTarget: { checked: boolean };
+    }) => void;
+    "aria-labelledby"?: string;
+    "aria-describedby"?: string;
+  }) => {
+    mockCheckbox(props);
 
-      <button
-        type="button"
-        onClick={() => onCheckedChange?.(true)}
-        disabled={isDisabled}
-        data-testid={`toggle-${checkboxId}`}
-      >
-        toggle
-      </button>
-
-      {isLoading ? <span>Saving...</span> : null}
-      {hasError ? <span>{errorMessage}</span> : null}
-    </div>
-  ),
+    return (
+      <input
+        type="checkbox"
+        data-testid="notification-checkbox"
+        id={props.id}
+        name={props.name}
+        checked={props.checked}
+        disabled={props.disabled}
+        aria-labelledby={props["aria-labelledby"]}
+        aria-describedby={props["aria-describedby"]}
+        onChange={(event) => {
+          props.onChange?.({
+            target: {
+              checked: event.currentTarget.checked,
+            },
+            currentTarget: {
+              checked: event.currentTarget.checked,
+            },
+          });
+        }}
+      />
+    );
+  },
 }));
 
-type MockOrganizationPreferenceSectionProps = Pick<
-  OrganizationPreferenceSectionProps,
-  | "organization"
-  | "isChecked"
-  | "isLoading"
-  | "hasError"
-  | "errorMessage"
-  | "onCheckedChange"
->;
-
-jest.mock("./OrganizationPreferenceSection", () => ({
-  OrganizationPreferenceSection: ({
-    organization,
-    isChecked,
-    isLoading,
-    hasError,
-    errorMessage,
-    onCheckedChange,
-  }: MockOrganizationPreferenceSectionProps) => (
-    <div data-testid={`org-section-${organization.organizationId}`}>
-      <span>{organization.organizationName}</span>
-      <span>{isChecked ? "checked" : "unchecked"}</span>
-
-      <button
-        type="button"
-        onClick={() => onCheckedChange?.(true)}
-        disabled={isLoading}
-        data-testid={`org-toggle-${organization.organizationId}`}
-      >
-        toggle
-      </button>
-
-      {isLoading ? <span>Saving...</span> : null}
-      {hasError ? <span>{errorMessage}</span> : null}
-    </div>
-  ),
+jest.mock("src/components/Spinner", () => ({
+  __esModule: true,
+  default: () => <span role="progressbar" aria-label="Loading!" />,
 }));
 
-describe("NotificationsPageContent", () => {
+describe("NotificationPreferenceCard", () => {
   const baseProps = {
-    pageHeading: "Notifications",
-    fetchErrorMessage: "Failed to load organizations",
-    managePreferencesTitle: "Manage Preferences",
-    managePreferencesDescription: "Control your notifications",
-    organizationPreferencesTitle: "Organization Preferences",
-    organizationPreferencesDescription: "Manage org notifications",
-    savedOpportunitiesLabel: "Saved Opportunities",
-    savedOpportunitiesDescription: "Get notified about saved items",
-    organizationSavedOpportunitiesDescription: "Org-specific setting",
-    organizations: [
-      { organizationId: "1", organizationName: "Org One" },
-      { organizationId: "2", organizationName: "Org Two" },
-    ],
-    hasOrganizationsFetchError: false,
+    checkboxId: "test-checkbox",
+    label: "Test Label",
+    description: "Test Description",
+    isChecked: false,
   };
-
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.useRealTimers();
   });
 
-  it("renders the page heading", () => {
-    render(<NotificationsPageContent {...baseProps} />);
+  it("renders label and description", () => {
+    render(<NotificationPreferenceCard {...baseProps} />);
 
-    expect(
-      screen.getByRole("heading", { name: "Notifications" }),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Test Label")).toBeInTheDocument();
+    expect(screen.getByText("Test Description")).toBeInTheDocument();
   });
 
-  it("does not render organization section when there are no organizations", () => {
-    render(<NotificationsPageContent {...baseProps} organizations={[]} />);
+  it("renders checkbox in checked state", () => {
+    render(<NotificationPreferenceCard {...baseProps} isChecked={true} />);
 
-    expect(
-      screen.queryByText("Organization Preferences"),
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("notification-checkbox")).toBeChecked();
   });
 
-  it("renders fetch error when organization fetch fails", () => {
+  it("renders checkbox in unchecked state", () => {
+    render(<NotificationPreferenceCard {...baseProps} isChecked={false} />);
+
+    expect(screen.getByTestId("notification-checkbox")).not.toBeChecked();
+  });
+
+  it("calls onCheckedChange when toggled", () => {
+    const handleChange = jest.fn();
+
     render(
-      <NotificationsPageContent
+      <NotificationPreferenceCard
         {...baseProps}
-        hasOrganizationsFetchError={true}
+        onCheckedChange={handleChange}
       />,
     );
 
-    expect(
-      screen.getByText("Failed to load organizations"),
-    ).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("notification-checkbox"));
+
+    expect(handleChange).toHaveBeenCalledWith(true);
   });
 
-  it("shows loading and then both page-level and inline errors for the saved opportunities preference", async () => {
-    render(<NotificationsPageContent {...baseProps} organizations={[]} />);
+  it("uses noop when onCheckedChange is not provided", () => {
+    render(<NotificationPreferenceCard {...baseProps} />);
 
-    fireEvent.click(screen.getByTestId("toggle-saved-opportunities"));
-
-    expect(screen.getByText("Saving...")).toBeInTheDocument();
-
-    act(() => {
-      jest.advanceTimersByTime(1200);
-    });
-
-    await waitFor(() => {
-      expect(
-        screen.getAllByText(
-          "Your notification preference was not saved. Refresh the page to try again.",
-        ),
-      ).toHaveLength(2);
-    });
-
-    expect(screen.queryByText("Saving...")).not.toBeInTheDocument();
+    expect(() => {
+      fireEvent.click(screen.getByTestId("notification-checkbox"));
+    }).not.toThrow();
   });
 
-  it("clears previous save errors when saved opportunities is toggled again", async () => {
-    render(<NotificationsPageContent {...baseProps} organizations={[]} />);
+  it("disables checkbox when isDisabled is true", () => {
+    render(<NotificationPreferenceCard {...baseProps} isDisabled={true} />);
 
-    fireEvent.click(screen.getByTestId("toggle-saved-opportunities"));
+    expect(screen.getByTestId("notification-checkbox")).toBeDisabled();
+  });
 
-    act(() => {
-      jest.advanceTimersByTime(1200);
-    });
+  it("disables checkbox when loading", () => {
+    render(<NotificationPreferenceCard {...baseProps} isLoading={true} />);
 
-    await screen.findAllByText(
-      "Your notification preference was not saved. Refresh the page to try again.",
+    expect(screen.getByTestId("notification-checkbox")).toBeDisabled();
+  });
+
+  it("shows loading indicator when isLoading is true", () => {
+    render(<NotificationPreferenceCard {...baseProps} isLoading={true} />);
+
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    expect(screen.getByText("srPendingSave")).toBeInTheDocument();
+  });
+
+  it("does not show loading indicator when not loading", () => {
+    render(<NotificationPreferenceCard {...baseProps} />);
+
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
+
+  it("passes disabled=false to Checkbox when not disabled or loading", () => {
+    render(<NotificationPreferenceCard {...baseProps} />);
+
+    expect(mockCheckbox).toHaveBeenCalledWith(
+      expect.objectContaining({
+        checked: false,
+        disabled: false,
+      }),
+    );
+  });
+
+  it("passes disabled=true to Checkbox when loading", () => {
+    render(<NotificationPreferenceCard {...baseProps} isLoading={true} />);
+
+    expect(mockCheckbox).toHaveBeenCalledWith(
+      expect.objectContaining({
+        disabled: true,
+      }),
+    );
+  });
+
+  it("constructs aria-labelledby with organizationHeadingId", () => {
+    render(
+      <NotificationPreferenceCard
+        {...baseProps}
+        organizationHeadingId="org-heading"
+      />,
     );
 
-    fireEvent.click(screen.getByTestId("toggle-saved-opportunities"));
-
-    expect(
-      screen.queryAllByText(
-        "Your notification preference was not saved. Refresh the page to try again.",
-      ),
-    ).toHaveLength(0);
-  });
-
-  it("renders one organization section per organization", () => {
-    render(<NotificationsPageContent {...baseProps} />);
-
-    expect(screen.getByTestId("org-section-1")).toBeInTheDocument();
-    expect(screen.getByTestId("org-section-2")).toBeInTheDocument();
-    expect(screen.getByText("Org One")).toBeInTheDocument();
-    expect(screen.getByText("Org Two")).toBeInTheDocument();
-  });
-
-  it("toggles organization preferences locally without showing save error", () => {
-    render(<NotificationsPageContent {...baseProps} />);
-
-    expect(screen.getAllByText("unchecked")).toHaveLength(2);
-
-    fireEvent.click(screen.getByTestId("org-toggle-1"));
-
-    expect(screen.getByTestId("org-section-1")).toHaveTextContent("checked");
-    expect(screen.getByTestId("org-section-2")).toHaveTextContent("unchecked");
-
-    expect(
-      screen.queryAllByText(
-        "Your notification preference was not saved. Refresh the page to try again.",
-      ),
-    ).toHaveLength(0);
-  });
-
-  it("clears existing page-level and inline save errors when organization preference is toggled", async () => {
-    render(<NotificationsPageContent {...baseProps} />);
-
-    fireEvent.click(screen.getByTestId("toggle-saved-opportunities"));
-
-    act(() => {
-      jest.advanceTimersByTime(1200);
-    });
-
-    await screen.findAllByText(
-      "Your notification preference was not saved. Refresh the page to try again.",
+    expect(screen.getByTestId("notification-checkbox")).toHaveAttribute(
+      "aria-labelledby",
+      "org-heading test-checkbox-label",
     );
+  });
 
-    fireEvent.click(screen.getByTestId("org-toggle-1"));
+  it("constructs aria-labelledby from field label when organizationHeadingId is missing", () => {
+    render(<NotificationPreferenceCard {...baseProps} />);
 
-    expect(
-      screen.queryAllByText(
-        "Your notification preference was not saved. Refresh the page to try again.",
-      ),
-    ).toHaveLength(0);
+    expect(screen.getByTestId("notification-checkbox")).toHaveAttribute(
+      "aria-labelledby",
+      "test-checkbox-label",
+    );
+  });
+
+  it("constructs aria-describedby from description id", () => {
+    render(<NotificationPreferenceCard {...baseProps} />);
+
+    expect(screen.getByTestId("notification-checkbox")).toHaveAttribute(
+      "aria-describedby",
+      "test-checkbox-description",
+    );
   });
 });

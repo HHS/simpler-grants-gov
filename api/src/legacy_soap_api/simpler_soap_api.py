@@ -27,6 +27,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_alternate_proxy_response,
     get_invalid_path_response,
     get_soap_error_response,
+    get_soap_fault_error_response,
 )
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
@@ -147,6 +148,9 @@ def process_simpler_request(
             extra={"soap_request_headers": soap_request.headers.keys()},
         )
         if alternate_proxy_response := get_alternate_proxy_response(soap_request):
+            logger.info(
+                "simpler_soap_api: skipping legacy call",
+            )
             soap_proxy_response = alternate_proxy_response
         else:
             soap_proxy_response = get_proxy_response(soap_request)
@@ -174,14 +178,15 @@ def process_simpler_request(
         )
     except SOAPFaultException as e:
         logger.info(
-            msg=e.fault.faultstring,
+            msg="Soap Fault Exception raised",
             exc_info=True,
             extra={
                 "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
+                "faultstring": e.fault.faultstring,
             },
         )
         if soap_proxy_response.status_code == 500:
-            return get_soap_error_response(
+            return get_soap_fault_error_response(
                 faultcode=e.fault.faultcode, faultstring=e.fault.faultstring
             ).to_flask_response()
     except Exception:
