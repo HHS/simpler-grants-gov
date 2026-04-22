@@ -88,8 +88,14 @@ jobs:
         with:
           path: |
             ~/.cache/ms-playwright
-            node_modules
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - uses: actions/cache@v5
+        id: npm-cache
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
       - run: npm ci
         if: steps.playwright-cache.outputs.cache-hit != 'true'
@@ -162,6 +168,20 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
+      - uses: actions/cache@v5
+        id: npm-cache
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
       - name: Restore Docker image cached
         id: restore-docker-image-cached
         uses: actions/cache/restore@v5
@@ -215,9 +235,14 @@ jobs:
         run: |
           docker image ls
 
-      - name: Install dependencies and Playwright
+      - name: npm ci
+        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: |
           npm ci
+
+      - name: Install dependencies and Playwright
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: |
           npx playwright install --with-deps
 
       - name: Build a prod version of the site
