@@ -178,10 +178,11 @@ def process_simpler_request(
         )
     except SOAPFaultException as e:
         logger.info(
-            msg=e.fault.faultstring,
+            msg="Soap Fault Exception raised",
             exc_info=True,
             extra={
                 "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
+                "faultstring": e.fault.faultstring,
             },
         )
         if soap_proxy_response.status_code == 500:
