@@ -97,8 +97,14 @@ jobs:
             node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
-      - run: npm ci
+      - id: id-install-npm-packages
         if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+          pwd
+          ls . -l
+          ls node_modules -l
+
       - run: npx playwright install --with-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
       - run: npx playwright install-deps
@@ -123,7 +129,7 @@ jobs:
           restore-keys: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
       - name: Build API Server for e2e tests (if not cached)
-        if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key != ''
         run: |
           cd ../api
           # Enable core dumps for debugging segfaults
