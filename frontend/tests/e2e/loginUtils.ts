@@ -21,20 +21,6 @@ let clientJwtKey: Uint8Array;
 const encodeText = (valueToEncode: string) =>
   new TextEncoder().encode(valueToEncode);
 
-const fetchTokenForStagingUser = async (apiKey: string): Promise<string> => {
-  const response = await fetch(
-    `${playwrightEnv.apiUrl}/v1/internal/e2e-token`,
-    {
-      method: "POST",
-      headers: {
-        "X-API-Key": apiKey,
-      },
-    },
-  );
-  const json = await response.json();
-  return json.data?.token;
-};
-
 export const initializePlaywrightSessionSecrets = () => {
   if (!playwrightEnv.clientSessionSecret) {
     // eslint-disable-next-line
@@ -43,17 +29,7 @@ export const initializePlaywrightSessionSecrets = () => {
   }
   // eslint-disable-next-line
   console.debug("Initializing TESTING Session Secrets");
-  if (playwrightEnv.targetEnv === "local") {
-    clientJwtKey = encodeText(playwrightEnv.clientSessionSecret);
-  } else if (playwrightEnv.targetEnv === "staging") {
-    fetchTokenForStagingUser(playwrightEnv.stagingTestUserApiKey)
-      .then((authToken) => {
-        clientJwtKey = encodeText(authToken);
-      })
-      .catch((e) => {
-        console.warn("error fetching token for test staging user", e);
-      });
-  }
+  clientJwtKey = encodeText(playwrightEnv.clientSessionSecret);
 };
 
 // 12 hour expiration for test tokens to avoid expiration issues

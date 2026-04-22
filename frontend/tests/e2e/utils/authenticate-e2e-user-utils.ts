@@ -2,8 +2,10 @@
  * authenticateE2eUser is a high-level helper for E2E test authentication.
  *
  * - Local: spoofs a session using loginUtils.ts with a fake JWT cookie.
- * - Staging (standalone run): performs a real login with credentials and MFA
- *   using perform-login-utils.ts.
+ * - Staging (standalone run): spoofs a session using loginUtils.ts with a
+ *   fake JWT cookie or if spoofing is turned off (in the case where we want
+ *   to specifically test the login process, for example, performs a real login
+ *   with credentials and MFA using perform-login-utils.ts.
  * - Staging (full suite / CI run): if the user is already logged in (session
  *   persisted from the previous test because --workers=1 reuses the browser,
  *   or storageState was injected via playwright.config.ts), the full MFA login
@@ -22,13 +24,17 @@ import { selectLocalTestUser } from "tests/e2e/utils/select-local-test-user-util
 
 const { baseUrl, targetEnv, testUserLabel } = playwrightEnv;
 
+// used to simulate a staging login without performing any login actions
+// calls dedicated API endpoint to fetch session token for a test user
+// and creates a frontend session based on the token from the response
+// requires STAGING_TEST_USER_API_KEY to be set in env vars
 const attemptStagingSpoof = async (
   context: BrowserContext,
 ): Promise<boolean> => {
   if (!playwrightEnv.stagingTestUserApiKey) {
     return false;
   }
-  // get staging user token
+  // get server side staging user JWT token
   try {
     const response = await fetch(
       `${playwrightEnv.apiUrl}/v1/internal/e2e-token`,
@@ -42,7 +48,8 @@ const attemptStagingSpoof = async (
         `unable to fetch e2e staging user token: ${response.status}`,
       );
     }
-    const json = await response.json();
+    const json = (await response.json()) as { data: { token: string } };
+    // encode it as a client JWT and set it on cookies
     await createSpoofedSessionCookie(context, json.data.token);
     return true;
   } catch (e) {
@@ -71,6 +78,7 @@ export async function authenticateE2eUser(
       try {
         const spoofSuccessful = await attemptStagingSpoof(context);
         if (spoofSuccessful) {
+          await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
           return;
         }
       } catch (e) {
