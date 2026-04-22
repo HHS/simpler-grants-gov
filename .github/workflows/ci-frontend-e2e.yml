@@ -213,6 +213,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Cache API/FE shared secret
+        id: cache-api-fe-shared-secret
+        uses: actions/cache/restore@v5
+        with:
+          path: api/override.env
+          key: api-fe-shared-secret-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
       - name: Next build cache
         id: next-build-cache
         uses: actions/cache/restore@v5
