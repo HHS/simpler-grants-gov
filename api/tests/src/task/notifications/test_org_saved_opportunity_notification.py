@@ -366,6 +366,69 @@ class TestOrgSavedOpportunityNotification:
 
         assert len(_get_mock_responses()) == 0
 
+    def test_truncation_more_than_max_opportunities(
+        self,
+        db_session,
+        enable_factory_create,
+        user_with_email,
+        org_with_user,
+        configuration,
+    ):
+        """Test that opportunities beyond MAX_OPPORTUNITIES_DISPLAYED are truncated in the email."""
+        # Create 7 opportunities (more than MAX_OPPORTUNITIES_DISPLAYED = 5)
+        for _ in range(7):
+            opp = factories.OpportunityFactory.create()
+            factories.OrganizationSavedOpportunityFactory.create(
+                organization=org_with_user,
+                opportunity=opp,
+            )
+
+        _clear_mock_responses()
+        task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
+        task.run()
+
+        mock_responses = _get_mock_responses()
+        assert len(mock_responses) == 1
+
+        request, _ = mock_responses[0]
+        email_html = request["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
+            "SimpleEmail"
+        ]["HtmlPart"]["Data"]
+
+        # Should show "And 2 more opportunities..." for the 2 truncated items
+        assert "And 2 more opportunities..." in email_html
+
+    def test_html_content_includes_opportunity_details(
+        self,
+        db_session,
+        enable_factory_create,
+        user_with_email,
+        org_with_user,
+        configuration,
+    ):
+        """Test that the email HTML contains the opportunity title and link."""
+        opportunity = factories.OpportunityFactory.create(opportunity_title="Test Grant Opportunity")
+        factories.OrganizationSavedOpportunityFactory.create(
+            organization=org_with_user,
+            opportunity=opportunity,
+        )
+
+        _clear_mock_responses()
+        task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
+        task.run()
+
+        mock_responses = _get_mock_responses()
+        assert len(mock_responses) == 1
+
+        request, _ = mock_responses[0]
+        email_html = request["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
+            "SimpleEmail"
+        ]["HtmlPart"]["Data"]
+
+        assert "Test Grant Opportunity" in email_html
+        assert f"/opportunity/{opportunity.opportunity_id}" in email_html
+        assert "/notifications" in email_html
+
     def test_notification_processed_at_set_after_run(
         self,
         db_session,

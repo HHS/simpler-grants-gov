@@ -1,5 +1,6 @@
 import html
 import logging
+from dataclasses import dataclass
 from uuid import UUID
 
 from sqlalchemy import and_, exists, select, update
@@ -26,15 +27,13 @@ UTM_TAG = "?utm_source=notification&utm_medium=email&utm_campaign=org_saved_oppo
 # Maximum number of opportunities to show per organization in the email
 MAX_OPPORTUNITIES_DISPLAYED = 5
 
-# NOTE: closing_date_notification.py has an identical copy; not deduplicated because
-# opportunity_notifcation.py defines a different CONTACT_INFO with no shared canonical version.
-CONTACT_INFO = (
-    "If you encounter technical issues while applying on Grants.gov, please reach out to the Contact Center:\n"
-    '<a href="mailto:support@grants.gov">support@grants.gov</a>\n'
-    "1-800-518-4726\n"
-    "24 hours a day, 7 days a week\n"
-    "Closed on federal holidays"
-)
+
+@dataclass
+class OrgOpportunityGroup:
+    organization: Organization
+    opportunities: list[Opportunity]
+    displayed: list[Opportunity]
+    remaining: int
 
 
 class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
@@ -42,7 +41,7 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
     def __init__(
         self,
         db_session: db.Session,
-        notification_config: EmailNotificationConfig | None = None,
+        notification_config: EmailNotificationConfig,
     ):
         super().__init__(db_session, notification_config)
 
@@ -63,6 +62,8 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
         stmt = (
             select(OrganizationSavedOpportunity)
             .options(
+                # Load organization and its sam_gov_entity in a single chained eager load so both
+                # are available without additional queries when building email content
                 selectinload(OrganizationSavedOpportunity.organization).selectinload(
                     Organization.sam_gov_entity
                 ),
@@ -81,13 +82,15 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
         for row in unprocessed_rows:
             org_to_rows.setdefault(row.organization_id, []).append(row)
 
-        # user_id -> list of (organization, list of opportunities)
-        user_org_opportunities: dict[UUID, list[tuple[Organization, list[Opportunity]]]] = {}
+        # user_id -> list of OrgOpportunityGroup
+        user_org_opportunities: dict[UUID, list[OrgOpportunityGroup]] = {}
         user_emails: dict[UUID, str] = {}
 
         for org_id, org_rows in org_to_rows.items():
             organization = org_rows[0].organization
             opportunities = [row.opportunity for row in org_rows]
+            displayed = opportunities[:MAX_OPPORTUNITIES_DISPLAYED]
+            remaining = len(opportunities) - len(displayed)
 
             # Mark all unprocessed rows for this org as processed
             self.db_session.execute(
@@ -113,6 +116,13 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
                 },
             )
 
+            org_group = OrgOpportunityGroup(
+                organization=organization,
+                opportunities=opportunities,
+                displayed=displayed,
+                remaining=remaining,
+            )
+
             for org_user in eligible_members:
                 user = org_user.user
                 email = user.email
@@ -121,9 +131,7 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
                     continue
 
                 user_emails[org_user.user_id] = email
-                user_org_opportunities.setdefault(org_user.user_id, []).append(
-                    (organization, opportunities)
-                )
+                user_org_opportunities.setdefault(org_user.user_id, []).append(org_group)
 
         if not user_org_opportunities:
             logger.info("No eligible members found for org saved opportunity notifications")
@@ -133,7 +141,9 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
         notifications: list[UserEmailNotification] = []
         for user_id, org_opp_list in user_org_opportunities.items():
             email = user_emails[user_id]
-            all_opportunity_ids = [opp.opportunity_id for _, opps in org_opp_list for opp in opps]
+            all_opportunity_ids = [
+                opp.opportunity_id for group in org_opp_list for opp in group.opportunities
+            ]
             content = self._build_notification_message(org_opp_list)
             org_count = len(org_opp_list)
             subject = (
@@ -198,58 +208,84 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
         )
         return list(self.db_session.execute(stmt).scalars().all())
 
-    def _build_notification_message(
-        self, org_opp_list: list[tuple[Organization, list[Opportunity]]]
-    ) -> str:
+    def _build_notification_message(self, org_opp_list: list[OrgOpportunityGroup]) -> str:
         has_multiple_orgs = len(org_opp_list) > 1
 
         if has_multiple_orgs:
-            message = "New funding opportunities have been saved to your organizations:\n\n"
+            intro = "New funding opportunities have been saved to your organizations."
         else:
-            org_name = html.escape(org_opp_list[0][0].organization_name or "your organization")
-            message = f"New funding opportunities have been saved to {org_name}:\n\n"
+            org_name = html.escape(
+                org_opp_list[0].organization.organization_name or "your organization"
+            )
+            intro = f"New funding opportunities have been saved to {org_name}."
+        intro += " See what fits your team's goals and align on next steps."
 
-        for organization, opportunities in org_opp_list:
-            org_name = html.escape(organization.organization_name or "Unknown Organization")
+        notification_prefs_url = (
+            f"{self.notification_config.frontend_base_url}/notifications{UTM_TAG}"
+        )
 
-            if has_multiple_orgs:
-                message += f"<b>{org_name}</b>\n"
+        org_sections = []
+        for group in org_opp_list:
+            org_name = html.escape(
+                group.organization.organization_name or "Unknown Organization"
+            )
+            items = []
 
-            displayed = opportunities[:MAX_OPPORTUNITIES_DISPLAYED]
-            remaining = len(opportunities) - len(displayed)
-
-            for opportunity in displayed:
+            for opportunity in group.displayed:
                 opp_url = (
                     f"{self.notification_config.frontend_base_url}"
                     f"/opportunity/{opportunity.opportunity_id}{UTM_TAG}"
                 )
                 opp_title = html.escape(opportunity.opportunity_title or "")
-                message += f"• <a href='{opp_url}' target='_blank'>{opp_title}</a>\n"
+                items.append(
+                    f'<li style="list-style-type:none; margin:0; padding:0;">'
+                    f'<a href="{opp_url}" target="_blank">{opp_title}</a>'
+                    f"</li>"
+                )
 
-            if remaining > 0:
+            if group.remaining > 0:
                 saved_opps_url = (
                     f"{self.notification_config.frontend_base_url}/saved-opportunities{UTM_TAG}"
                 )
-                message += (
-                    f"• <a href='{saved_opps_url}' target='_blank'>"
-                    f"And {remaining} more opportunity{'s' if remaining > 1 else ''}...</a>\n"
+                items.append(
+                    f'<li style="list-style-type:none; margin:0; padding:0;">'
+                    f'<a href="{saved_opps_url}" target="_blank">'
+                    f"And {group.remaining} more opportunit"
+                    f"{'ies' if group.remaining > 1 else 'y'}..."
+                    f"</a>"
+                    f"</li>"
                 )
 
-            message += "\n"
+            items_html = "\n".join(items)
+            section = (
+                f'<ul style="list-style-type:none; margin:0; padding-left:16px;">\n'
+                f"{items_html}\n"
+                f"</ul>"
+            )
 
-        notification_prefs_url = (
-            f"{self.notification_config.frontend_base_url}/notification-preferences{UTM_TAG}"
-        )
-        message += (
-            f"<a href='{notification_prefs_url}' target='_blank'>"
-            "Manage your notification preferences</a>\n\n"
-            "<b>Questions?</b>\n"
-            "If you have questions about an opportunity, please contact the grantor using "
-            "the contact information on the listing page.\n\n"
-        )
-        message += CONTACT_INFO
+            if has_multiple_orgs:
+                section = f"<p><strong>{org_name}</strong></p>\n{section}"
 
-        return message.replace("\n", "<br/>")
+            org_sections.append(section)
+
+        body_content = "\n\n".join(org_sections)
+
+        return f"""<html>
+<body>
+
+<p>
+{intro}
+</p>
+
+{body_content}
+
+<p>
+Manage which updates you receive in your
+<a href="{notification_prefs_url}">notification preferences</a>.
+</p>
+
+</body>
+</html>"""
 
     def post_notifications_process(self, notifications: list[UserEmailNotification]) -> None:
         for notification in notifications:
