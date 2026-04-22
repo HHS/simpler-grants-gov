@@ -18,11 +18,6 @@ type OpportunityEditHeaderActionsProps = {
   publishLabel: string;
 };
 
-function isValidDate(str: string): boolean {
-  if (!str.trim()) return false;
-  return !isNaN(new Date(str).getTime());
-}
-
 function isPublishEnabled(values: OpportunityEditFormValues): boolean {
   return (
     values.publishDate.trim() !== "" &&
@@ -40,9 +35,6 @@ export default function OpportunityEditHeaderActions({
 }: OpportunityEditHeaderActionsProps) {
   const [publishEnabled, setPublishEnabled] = useState(
     isPublishEnabled(initialValues),
-  );
-  const [currentPublishDate, setCurrentPublishDate] = useState(
-    initialValues.publishDate,
   );
   const [isPublishing, setIsPublishing] = useState(false);
   const router = useRouter();
@@ -65,7 +57,6 @@ export default function OpportunityEditHeaderActions({
           eligibleApplicants: string[];
         }>
       ).detail;
-      setCurrentPublishDate(publishDate);
       setPublishEnabled(
         publishDate.trim() !== "" &&
           fundingType.trim() !== "" &&
@@ -99,9 +90,9 @@ export default function OpportunityEditHeaderActions({
           if (form) {
             const formData = new FormData(form);
             saveOpportunityEditAction({}, formData)
-              .then(() => {
-                if (!isValidDate(currentPublishDate)) {
-                  form.requestSubmit();
+              .then((result) => {
+                if (result?.errorMessage || result?.validationErrors) {
+                  form.requestSubmit(); // routes through useActionState so errors display in the form UI
                   return;
                 }
                 setIsPublishing(true);
