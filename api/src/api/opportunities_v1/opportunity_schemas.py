@@ -308,6 +308,10 @@ class OpportunityV1Schema(Schema):
 
 
 class OpportunityAttachmentV1Schema(FileResponseSchema):
+    opportunity_attachment_id = fields.UUID(
+        attribute="attachment_id",
+        metadata={"description": "The unique ID of the attachment"},
+    )
     mime_type = fields.String(
         metadata={"description": "The MIME type of the attachment", "example": "application/pdf"}
     )
