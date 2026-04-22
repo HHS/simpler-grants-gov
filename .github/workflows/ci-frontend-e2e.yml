@@ -186,13 +186,13 @@ jobs:
           make build
 
       - name: Save Docker image
-        if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
         run: |
           cd ..
           docker save api-grants-api > /tmp/docker-image.tar
 
       - name: Cache Docker image
-        if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
         uses: actions/cache/save@v4
         with:
           path: /tmp/docker-image.tar
