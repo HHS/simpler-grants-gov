@@ -156,7 +156,7 @@ jobs:
 
   build-api-when-not-cached:
     name: Build API when not cached
-    needs: [get-api-commit-hash]
+    needs: [get-api-commit-hash, init-api-fe-shared-secret]
     runs-on: ubuntu-22.04
 
     steps:
@@ -199,7 +199,12 @@ jobs:
   build-frontend-when-not-cached:
     name: Build frontend when not cached
     needs:
-      [get-api-commit-hash, get-frontend-commit-hash, build-api-when-not-cached]
+      [
+        get-api-commit-hash,
+        get-frontend-commit-hash,
+        build-api-when-not-cached,
+        init-api-fe-shared-secret,
+      ]
     runs-on: ubuntu-22.04
 
     steps:
