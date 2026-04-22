@@ -17,7 +17,7 @@ import { SFLLL_FORM_CONFIG } from "./fixtures/sfLLL-fill-data";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 
-const { testOrgLabel, targetEnv, baseUrl } = playwrightEnv;
+const { testOrgLabel, targetEnv } = playwrightEnv;
 
 const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
 
