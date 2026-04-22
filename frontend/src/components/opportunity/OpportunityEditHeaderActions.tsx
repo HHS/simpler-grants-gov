@@ -1,6 +1,9 @@
 "use client";
 
-import { publishOpportunityAction } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
+import {
+  publishOpportunityAction,
+  saveOpportunityEditAction,
+} from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -93,20 +96,28 @@ export default function OpportunityEditHeaderActions({
           const form = document.getElementById(
             "opportunity-edit-form",
           ) as HTMLFormElement | null;
-          form?.requestSubmit();
-          if (!isValidDate(currentPublishDate)) {
-            return;
-          }
-          setIsPublishing(true);
-          publishOpportunityAction(opportunityId)
-            .then((result) => {
-              if (result?.errorMessage) {
+          if (form) {
+            const formData = new FormData(form);
+            saveOpportunityEditAction({}, formData)
+              .then(() => {
+                if (!isValidDate(currentPublishDate)) {
+                  return;
+                }
+                setIsPublishing(true);
+                publishOpportunityAction(opportunityId)
+                  .then((result) => {
+                    if (result?.errorMessage) {
+                      setIsPublishing(false);
+                    } else {
+                      router.push("/opportunities");
+                    }
+                  })
+                  .catch((_e) => setIsPublishing(false));
+              })
+              .catch((_e) => {
                 setIsPublishing(false);
-              } else {
-                router.push("/opportunities");
-              }
-            })
-            .catch((_e) => setIsPublishing(false));
+              });
+          }
         }}
       >
         {publishLabel}
