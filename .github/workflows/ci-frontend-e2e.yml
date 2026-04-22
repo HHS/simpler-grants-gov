@@ -186,7 +186,7 @@ jobs:
           mkdir -p /tmp/cores
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
 
-          make build
+          make build db-seed-local-with-agencies
 
       - name: Save Docker image
         if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
