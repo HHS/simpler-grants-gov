@@ -67,6 +67,27 @@ jobs:
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
           echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
 
+  get-frontend-commit-hash:
+    name: Get commit hash
+    runs-on: ubuntu-22.04
+    outputs:
+      commit_hash: ${{ steps.get-frontend-commit-hash.outputs.commit_hash }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+          fetch-depth: 1000
+      - name: Get commit hash
+        id: get-frontend-commit-hash
+        env:
+          CLEAN_REF: ${{ github.head_ref || github.ref }}
+        run: |
+          cd ..
+          COMMIT_HASH=$(git rev-parse "$CLEAN_REF")
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 "$CLEAN_REF" -- frontend)
+          echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
+          echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
+
   playwright-cache:
     # based on this https://justin.poehnelt.com/posts/caching-playwright-in-github-actions/
     name: Playwright caching
@@ -110,8 +131,31 @@ jobs:
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
-  restore-or-build-api:
-    name: Restore or build API
+  init-api-fe-shared-secret:
+    name: API/FE shared secret generation
+    needs: [get-api-commit-hash]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Cache API/FE shared secret
+        id: cache-api-fe-shared-secret
+        uses: actions/cache/restore@v5
+        with:
+          path: api/override.env
+          key: api-fe-shared-secret-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
+      - name: Init API Server for e2e tests
+        run: |
+          cd ../api
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+          # Run init first to generate JWT keys in override.env
+
+          make setup-env-override-file
+
+  build-api-when-not-cached:
+    name: Build API when not cached
     needs: [get-api-commit-hash]
     runs-on: ubuntu-22.04
 
@@ -152,9 +196,45 @@ jobs:
           path: /tmp/docker-image.tar
           key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
+  build-frontend-when-not-cached:
+    name: Build frontend when not cached
+    needs:
+      [get-api-commit-hash, get-frontend-commit-hash, build-api-when-not-cached]
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Next build cache
+        id: next-build-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: frontend/dist
+          key: frontend-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
+
+      - name: Build a prod version of the frontend (if not cached)
+        if: steps.next-build-cache.outputs.cache-matched-key == ''
+        run: |
+          {
+            cat .env.development
+            sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
+            cat ../api/e2e_token.tmp
+          } >> .env.local
+          # Use the 127.0.0.1 url for tests (IPv4 only)
+          sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
+          npm run build
+
   e2e-tests-local:
     name: Run Local E2E Tests
-    needs: [get-api-commit-hash, restore-or-build-api, playwright-cache]
+    needs:
+      [
+        get-api-commit-hash,
+        get-frontend-commit-hash,
+        build-api-when-not-cached,
+        build-frontend-when-not-cached,
+        playwright-cache,
+      ]
     runs-on: ubuntu-22.04
 
     strategy:
@@ -188,6 +268,13 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
 
+      - uses: actions/cache@v5
+        id: next-build-cache
+        with:
+          path: |
+            frontend/dist
+          key: ${{ runner.os }}-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
+
       - name: Restore Docker image cached
         id: restore-docker-image-cached
         uses: actions/cache/restore@v5
@@ -218,7 +305,7 @@ jobs:
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
           # Run init first to generate JWT keys in override.env
 
-          make init-nobuild
+          make init-ci-cd
 
       - name: Start API Server for e2e tests
         run: |
@@ -250,17 +337,6 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: |
           npx playwright install --with-deps
-
-      - name: Build a prod version of the site
-        run: |
-          {
-            cat .env.development
-            sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
-            cat ../api/e2e_token.tmp
-          } >> .env.local
-          # Use the 127.0.0.1 url for tests (IPv4 only)
-          sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
-          npm run build
 
       - name: Determine test groups to run
         shell: bash
