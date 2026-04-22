@@ -32,13 +32,12 @@ export function NotificationPreferenceCard({
   onCheckedChange,
 }: NotificationPreferenceCardProps): ReactElement {
   const t = useTranslations("Notifications");
+
   const ariaLabelledBy = organizationHeadingId
     ? `${organizationHeadingId} ${checkboxId}-label`
     : `${checkboxId}-label`;
 
-  const ariaDescribedBy = hasError
-    ? `${checkboxId}-description ${checkboxId}-error`
-    : `${checkboxId}-description`;
+  const descriptionId = `${checkboxId}-description`;
 
   const cardClassName = [
     "notification-preference-card",
@@ -64,21 +63,17 @@ export function NotificationPreferenceCard({
               {label}
             </label>
 
-            <p
-              id={`${checkboxId}-description`}
-              className="margin-top-05 margin-bottom-0 text-base text-base-dark"
-            >
-              {description}
-            </p>
-
-            {hasError && errorMessage ? (
-              <p
-                id={`${checkboxId}-error`}
-                className="notification-preference-card__error margin-top-1 margin-bottom-0"
-              >
-                {errorMessage}
+            <div id={descriptionId}>
+              <p className="margin-top-05 margin-bottom-0 text-base text-base-dark">
+                {description}
               </p>
-            ) : null}
+
+              {hasError && errorMessage ? (
+                <p className="notification-preference-card__error margin-top-1 margin-bottom-0">
+                  {errorMessage}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <div className="notification-preference-card__control flex-shrink-0">
@@ -91,7 +86,7 @@ export function NotificationPreferenceCard({
                 onCheckedChange?.(event.currentTarget.checked);
               }}
               aria-labelledby={ariaLabelledBy}
-              aria-describedby={ariaDescribedBy}
+              aria-describedby={descriptionId}
               label={undefined}
             />
 
@@ -101,7 +96,7 @@ export function NotificationPreferenceCard({
             >
               {isLoading ? (
                 <span className="notification-preference-card__loading display-inline-flex flex-align-center">
-                  <Spinner />
+                  <Spinner className="width-3 height-3 margin-top-1 margin-right-1" />
                   <span className="usa-sr-only">{t("srPendingSave")}</span>
                 </span>
               ) : null}

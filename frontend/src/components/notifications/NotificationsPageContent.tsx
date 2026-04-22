@@ -137,13 +137,17 @@ export function NotificationsPageContent({
       <h1>{pageHeading}</h1>
 
       <div className="margin-y-2" aria-live="polite">
-        {pageErrorMessage ? (
-          <div className="notifications-page-error-enter">
+        {pageErrorMessage && (
+          <div
+            className="margin-y-2 notifications-page-error-enter"
+            role="alert"
+            aria-atomic="true"
+          >
             <Alert slim={true} headingLevel="h6" noIcon={true} type="error">
               {pageErrorMessage}
             </Alert>
           </div>
-        ) : null}
+        )}
       </div>
 
       <section
