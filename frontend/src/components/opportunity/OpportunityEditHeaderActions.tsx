@@ -89,7 +89,7 @@ export default function OpportunityEditHeaderActions({
         type="button"
         disabled={!publishEnabled || isPublishing}
         className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
-        onClick={(e) => {
+        onClick={() => {
           const form = document.getElementById(
             "opportunity-edit-form",
           ) as HTMLFormElement | null;
