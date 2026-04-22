@@ -296,15 +296,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Cache API/FE shared secret
-        id: cache-api-fe-shared-secret
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            api/override.env
-            api/e2e_token.tmp
-          key: api-fe-shared-secret-${{ needs.get-api-commit-hash.outputs.commit_hash }}
-
       # Don't try to cache this until we figure out injecting E2E token to existing next build
       # - name: Next build cache
       #   id: next-build-cache
@@ -317,11 +308,13 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: api-fe-shared-key
+          path: api/
 
       - name: Download e2e token
         uses: actions/download-artifact@v5
         with:
           name: api-fe-shared-e2e-token
+          path: api/
 
       - name: Build a prod version of the frontend (if not cached)
         #always build for now until we can sort out getting e2e key
@@ -390,16 +383,27 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: api-fe-shared-key
+          path: api/
 
       - name: Download shared e2e token
         uses: actions/download-artifact@v5
         with:
           name: api-fe-shared-e2e-token
+          path: api/
 
       - name: Download next build
         uses: actions/download-artifact@v5
         with:
           name: next-build
+          path: frontend/.next/standalone
+
+      - name: ls frontend
+        run: |
+          ls -la frontend
+          echo *****
+          ls -la frontend/.next
+          echo *****
+          ls -la frontend/.next/standalone
 
       - name: npm ci
         if: steps.npm-cache.outputs.cache-hit != 'true'
