@@ -3,6 +3,7 @@
  * @featureFile frontend/tests/e2e/apply/features/happy-path-forms.feature
  * @scenario Application form completion happy path - EPA Key Contacts
  */
+
 import {
   test,
   type BrowserContext,

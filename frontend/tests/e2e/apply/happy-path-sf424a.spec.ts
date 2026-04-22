@@ -3,6 +3,7 @@
  * @featureFile frontend/tests/e2e/apply/features/happy-path-forms.feature
  * @scenario Application form completion happy path - SF424A
  */
+
 import {
   test,
   type BrowserContext,
