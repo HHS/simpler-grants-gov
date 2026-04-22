@@ -1,8 +1,7 @@
 "use client";
 
-import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
-
 import { useClientFetch } from "src/hooks/useClientFetch";
+import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
@@ -108,9 +107,7 @@ export function OpportunityAttachmentUploadInput({
         `/api/opportunities/${opportunityId}/attachments/${fileToDelete.id}`,
         { method: "DELETE" },
       );
-      setUploadedFiles((prev) =>
-        prev.filter((f) => f.id !== fileToDelete.id),
-      );
+      setUploadedFiles((prev) => prev.filter((f) => f.id !== fileToDelete.id));
       setFileToDelete(null);
     } catch (err) {
       console.error("Attachment delete failed", err);
