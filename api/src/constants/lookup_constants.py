@@ -98,7 +98,7 @@ class FundingCategory(StrEnum):
     ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS = (
         "energy_infrastructure_and_critical_mineral_and_materials"  # EIC
     )
-    RECREATION_AND_TOURISM = "recreation_and_tourism"  # EIC
+    RECREATION_AND_TOURISM = "recreation_and_tourism"  # RT
 
 
 class FundingInstrument(StrEnum):
