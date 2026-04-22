@@ -101,6 +101,7 @@ export default function OpportunityEditHeaderActions({
             saveOpportunityEditAction({}, formData)
               .then(() => {
                 if (!isValidDate(currentPublishDate)) {
+                  form.requestSubmit();
                   return;
                 }
                 setIsPublishing(true);
