@@ -186,7 +186,7 @@ jobs:
           mkdir -p /tmp/cores
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
 
-          make build db-seed-local-with-agencies
+          make build
 
       - name: Save Docker image
         if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
@@ -200,13 +200,6 @@ jobs:
         with:
           path: /tmp/docker-image.tar
           key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
-
-      - name: Save shared e2e token
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-fe-shared-e2e-token
-          path: |
-            api/e2e_token.tmp
 
   build-frontend-when-not-cached:
     name: Build frontend when not cached
@@ -261,8 +254,8 @@ jobs:
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build
 
-  e2e-tests-local:
-    name: Run Local E2E Tests
+  setup-e2e-tests-local:
+    name: Setup Local E2E Tests
     needs:
       [
         get-api-commit-hash,
@@ -271,6 +264,80 @@ jobs:
         build-frontend-when-not-cached,
         playwright-cache,
       ]
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Restore Docker image cached
+        id: restore-docker-image-cached
+        uses: actions/cache/restore@v5
+        with:
+          path: /tmp/docker-image.tar
+          key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+          restore-keys: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
+      - name: Failed to load cache, exit
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
+        run: |
+          exit 1
+
+      - name: Load cached Docker image
+        run: |
+          docker load < /tmp/docker-image.tar
+
+      - name: Docker images before Start API
+        run: |
+          docker image ls
+
+      - name: Init API Server for e2e tests
+        run: |
+          cd ../api
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+          # Run init first to generate JWT keys in override.env
+
+          make init-ci-cd
+
+      - name: Download shared key
+        uses: actions/download-artifact@v5
+        with:
+          name: api-fe-shared-key
+
+      - name: Start API Server for e2e tests
+        run: |
+          cd ../api
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+
+          # Now run the seeding and populate commands
+          echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
+          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          cd ../frontend
+          # Ensure the API wait script is executable
+          chmod +x ../api/bin/wait-for-api.sh
+          ../api/bin/wait-for-api.sh
+        shell: bash
+
+      - name: Save shared e2e token
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-fe-shared-e2e-token
+          path: |
+            api/e2e_token.tmp
+
+      - name: Docker images after Start API
+        run: |
+          docker image ls
+
+  run-e2e-tests-local:
+    name: Run Local E2E Tests
+    needs: [setup-e2e-tests-local]
     runs-on: ubuntu-22.04
 
     strategy:
@@ -311,68 +378,15 @@ jobs:
             frontend/dist
           key: ${{ runner.os }}-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
 
-      - name: Restore Docker image cached
-        id: restore-docker-image-cached
-        uses: actions/cache/restore@v5
-        with:
-          path: /tmp/docker-image.tar
-          key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
-          restore-keys: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
-
-      - name: Failed to load cache, exit
-        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
-        run: |
-          exit 1
-
-      - name: Load cached Docker image
-        run: |
-          docker load < /tmp/docker-image.tar
-
-      - name: Docker images before Start API
-        run: |
-          docker image ls
-
-      - name: Init API Server for e2e tests
-        run: |
-          cd ../api
-          # Enable core dumps for debugging segfaults
-          ulimit -c unlimited
-          mkdir -p /tmp/cores
-          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
-          # Run init first to generate JWT keys in override.env
-
-          make init-ci-cd
-
       - name: Download shared key
         uses: actions/download-artifact@v5
         with:
           name: api-fe-shared-key
 
-      - name: Download e2e token
+      - name: Download shared e2e token
         uses: actions/download-artifact@v5
         with:
           name: api-fe-shared-e2e-token
-
-      - name: Start API Server for e2e tests
-        run: |
-          cd ../api
-          # Enable core dumps for debugging segfaults
-          ulimit -c unlimited
-          mkdir -p /tmp/cores
-          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
-
-          # Now run the seeding and populate commands
-          echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          make populate-search-opportunities populate-search-agencies start
-          cd ../frontend
-          # Ensure the API wait script is executable
-          chmod +x ../api/bin/wait-for-api.sh
-          ../api/bin/wait-for-api.sh
-        shell: bash
-
-      - name: Docker images after Start API
-        run: |
-          docker image ls
 
       - name: npm ci
         if: steps.npm-cache.outputs.cache-hit != 'true'
