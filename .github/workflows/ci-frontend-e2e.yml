@@ -136,6 +136,8 @@ jobs:
     needs: [get-api-commit-hash]
     runs-on: ubuntu-22.04
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
       - name: Cache API/FE shared secret
         id: cache-api-fe-shared-secret
         uses: actions/cache/restore@v5
