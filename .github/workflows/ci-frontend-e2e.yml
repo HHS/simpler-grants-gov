@@ -201,59 +201,6 @@ jobs:
           path: /tmp/docker-image.tar
           key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
-  build-frontend-when-not-cached:
-    name: Build frontend when not cached
-    needs:
-      [
-        get-api-commit-hash,
-        get-frontend-commit-hash,
-        build-api-when-not-cached,
-        init-ci-cd,
-      ]
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Cache API/FE shared secret
-        id: cache-api-fe-shared-secret
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            api/override.env
-            api/e2e_token.tmp
-          key: api-fe-shared-secret-${{ needs.get-api-commit-hash.outputs.commit_hash }}
-
-      - name: Next build cache
-        id: next-build-cache
-        uses: actions/cache/restore@v5
-        with:
-          path: frontend/dist
-          key: frontend-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
-
-      - name: Download shared key
-        uses: actions/download-artifact@v5
-        with:
-          name: api-fe-shared-key
-
-      - name: Download e2e token
-        uses: actions/download-artifact@v5
-        with:
-          name: api-fe-shared-e2e-token
-
-      - name: Build a prod version of the frontend (if not cached)
-        if: steps.next-build-cache.outputs.cache-matched-key == ''
-        run: |
-          {
-            cat .env.development
-            sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
-            cat ../api/e2e_token.tmp
-          } >> .env.local
-          # Use the 127.0.0.1 url for tests (IPv4 only)
-          sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
-          npm run build
-
   setup-e2e-tests-local:
     name: Setup Local E2E Tests
     needs:
@@ -335,9 +282,70 @@ jobs:
         run: |
           docker image ls
 
+  build-frontend-when-not-cached:
+    name: Build frontend when not cached
+    needs:
+      [
+        get-api-commit-hash,
+        get-frontend-commit-hash,
+        build-api-when-not-cached,
+        init-ci-cd,
+      ]
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Cache API/FE shared secret
+        id: cache-api-fe-shared-secret
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            api/override.env
+            api/e2e_token.tmp
+          key: api-fe-shared-secret-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
+      # Don't try to cache this until we figure out injecting E2E token to existing next build
+      # - name: Next build cache
+      #   id: next-build-cache
+      #   uses: actions/cache/restore@v5
+      #   with:
+      #     path: .next/standalone
+      #     key: frontend-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
+
+      - name: Download shared key
+        uses: actions/download-artifact@v5
+        with:
+          name: api-fe-shared-key
+
+      - name: Download e2e token
+        uses: actions/download-artifact@v5
+        with:
+          name: api-fe-shared-e2e-token
+
+      - name: Build a prod version of the frontend (if not cached)
+        #always build for now until we can sort out getting e2e key
+        # if: steps.next-build-cache.outputs.cache-matched-key == ''
+        run: |
+          {
+            cat .env.development
+            sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
+            cat ../api/e2e_token.tmp
+          } >> .env.local
+          # Use the 127.0.0.1 url for tests (IPv4 only)
+          sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
+          npm run build
+
+      - name: Save next build
+        uses: actions/upload-artifact@v5
+        with:
+          name: next-build
+          path: frontend/.next
+
   run-e2e-tests-local:
     name: Run Local E2E Tests
-    needs: [setup-e2e-tests-local]
+    needs: [setup-e2e-tests-local, build-frontend-when-not-cached]
     runs-on: ubuntu-22.04
 
     strategy:
@@ -371,12 +379,13 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
 
-      - uses: actions/cache@v5
-        id: next-build-cache
-        with:
-          path: |
-            frontend/dist
-          key: ${{ runner.os }}-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
+      # Don't try to cache this until we figure out injecting E2E token to existing next build
+      # - uses: actions/cache@v5
+      #   id: next-build-cache
+      #   with:
+      #     path: |
+      #       frontend/dist
+      #     key: ${{ runner.os }}-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
 
       - name: Download shared key
         uses: actions/download-artifact@v5
@@ -387,6 +396,11 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: api-fe-shared-e2e-token
+
+      - name: Download next build
+        uses: actions/download-artifact@v5
+        with:
+          name: next-build
 
       - name: npm ci
         if: steps.npm-cache.outputs.cache-hit != 'true'
@@ -426,7 +440,7 @@ jobs:
   create-report:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
-    needs: e2e-tests-local
+    needs: run-e2e-tests-local
     uses: ./.github/workflows/e2e-create-report.yml
     secrets: inherit
     with:
