@@ -52,13 +52,21 @@ test(
 
     const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
+    // Given the user is logged in
     await authenticateE2eUser(page, context, !!isMobile);
 
     // Call reusable create application function from utils
+    /**
+     * Covers "Starting a new application" flow in the feature file
+     * (includes modal interaction, organization selection, and application creation)
+     */
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
+    // And the Application landing page loads with the <form name> form link visible
     await verifyFormLinkVisible(page, SF424B_FORM_MATCHER);
 
+    // When the user fills out the form with valid test data
+    // And the user clicks Save
     await fillForm(
       testInfo,
       page,
@@ -68,7 +76,9 @@ test(
     );
     await page.waitForTimeout(2000);
 
-    // Verify form status after save
+    /* Covers "Form status validation" flow in the feature file,
+     * which includes verification of the status in form and application landing page after saving a completed form.
+     */
     await verifyFormStatusAfterSave(page, "complete");
   },
 );
