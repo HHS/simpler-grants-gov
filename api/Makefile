@@ -110,7 +110,7 @@ init-components: init-db init-opensearch init-s3mock init-sqsmock init-mock-soap
 
 init: setup-env-override-file build init-components ## Run all of the init tasks (including build) to set up DB, Search, s3/sqs mocks, and Mock services. To do this "from scratch" use remake-backend instead
 
-init-ci-cd: init-components ## Do not build, but do run all of the init tasks to set up DB, Search, s3/sqs mocks, and Mock services. To do this "from scratch" use remake-backend instead
+init-ci-cd: setup-env-override-file init-components ## Do not build, but do run all of the init tasks to set up DB, Search, s3/sqs mocks, and Mock services. To do this "from scratch" use remake-backend instead
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
