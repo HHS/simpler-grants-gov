@@ -88,7 +88,8 @@ export function OpportunityAttachmentUploadInput({
             deletable: true,
           },
         ]);
-      } catch (_err) {
+      } catch (err) {
+        console.error("Attachment upload failed", err);
         setErrorMessage(t("errorUploadFailed", { fileName: file.name }));
       }
     }
@@ -112,7 +113,8 @@ export function OpportunityAttachmentUploadInput({
       );
       setFileToDelete(null);
       deleteModalRef.current?.toggleModal();
-    } catch (_err) {
+    } catch (err) {
+      console.error("Attachment delete failed", err);
       setErrorMessage(
         t("errorDeleteFailed", { fileName: fileToDelete?.name ?? "" }),
       );
