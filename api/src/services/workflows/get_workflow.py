@@ -9,6 +9,7 @@ from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import get_users_with_privileges_for_agency, verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
+from src.db.models.award_recommendation_models import AwardRecommendation
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
@@ -53,6 +54,9 @@ def _workflow_load_options() -> list:
         .selectinload(ApplicationSubmission.application)
         .selectinload(Application.competition)
         .selectinload(Competition.opportunity)
+        .selectinload(Opportunity.agency_record),
+        selectinload(Workflow.award_recommendation)
+        .selectinload(AwardRecommendation.opportunity)
         .selectinload(Opportunity.agency_record),
     ]
 
@@ -130,6 +134,9 @@ def _verify_workflow_access_and_build_config(
             403,
             message="Application submission workflows are not yet accessible through this endpoint",
         )
+    elif workflow.award_recommendation_id is not None:
+        required_privilege = Privilege.VIEW_AWARD_RECOMMENDATION
+        log_extra["entity_type"] = "award_recommendation"
     else:
         logger.error("Workflow has no entity ID", extra=log_extra)
         raise_flask_error(403, message="Forbidden")
