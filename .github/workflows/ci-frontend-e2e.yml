@@ -132,7 +132,7 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
   init-ci-cd:
-    name: Iniialize for CI/CD runs
+    name: Initialize for CI/CD runs
     needs: [get-api-commit-hash]
     runs-on: ubuntu-22.04
     steps:
