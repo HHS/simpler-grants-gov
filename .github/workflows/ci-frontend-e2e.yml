@@ -71,6 +71,9 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
       - name: Restore Docker image cached
         id: restore-docker-image-cached
         uses: actions/cache/restore@v5
