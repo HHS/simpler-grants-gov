@@ -112,7 +112,6 @@ export function OpportunityAttachmentUploadInput({
         prev.filter((f) => f.id !== fileToDelete.id),
       );
       setFileToDelete(null);
-      deleteModalRef.current?.toggleModal();
     } catch (err) {
       console.error("Attachment delete failed", err);
       setErrorMessage(
@@ -120,6 +119,7 @@ export function OpportunityAttachmentUploadInput({
       );
     } finally {
       setDeletePending(false);
+      deleteModalRef.current?.toggleModal();
     }
   };
 
