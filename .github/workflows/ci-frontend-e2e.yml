@@ -142,7 +142,9 @@ jobs:
         id: cache-api-fe-shared-secret
         uses: actions/cache@v5
         with:
-          path: api/override.env
+          path: |
+            api/override.env
+            api/e2e_token.tmp
           key: api-fe-shared-secret-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
       - name: Init API Server for e2e tests
@@ -217,7 +219,9 @@ jobs:
         id: cache-api-fe-shared-secret
         uses: actions/cache/restore@v5
         with:
-          path: api/override.env
+          path: |
+            api/override.env
+            api/e2e_token.tmp
           key: api-fe-shared-secret-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
       - name: Next build cache
