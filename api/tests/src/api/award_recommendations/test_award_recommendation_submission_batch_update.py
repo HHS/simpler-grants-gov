@@ -1,4 +1,3 @@
-import pdb
 import uuid
 from decimal import Decimal
 
@@ -425,6 +424,7 @@ class TestBatchUpdateAwardRecommendationSubmissions404:
         user, _, token = create_user_in_agency_with_jwt(
             db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
         )
+        db_session.commit()
 
         non_existent_id = uuid.uuid4()
         update_data = {

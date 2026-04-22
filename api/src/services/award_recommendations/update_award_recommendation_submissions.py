@@ -1,22 +1,15 @@
 import logging
 import uuid
-from typing import Any, Dict, List
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
-from src.constants.lookup_constants import (
-    AwardRecommendationAuditEvent,
-    AwardRecommendationType,
-    Privilege,
-)
+from src.constants.lookup_constants import AwardRecommendationAuditEvent, Privilege
 from src.db.models.award_recommendation_models import (
-    AwardRecommendation,
     AwardRecommendationApplicationSubmission,
     AwardRecommendationAudit,
-    AwardRecommendationSubmissionDetail,
 )
 from src.db.models.competition_models import Application, ApplicationSubmission
 from src.db.models.entity_models import Organization
@@ -32,8 +25,8 @@ def update_award_recommendation_submissions(
     db_session: db.Session,
     user: User,
     award_recommendation_id: uuid.UUID,
-    update_data: Dict[uuid.UUID, Dict],
-) -> List[AwardRecommendationApplicationSubmission]:  # Return actual models like list endpoint
+    update_data: dict[uuid.UUID, dict],
+) -> list[AwardRecommendationApplicationSubmission]:  # Return actual models like list endpoint
     """
     Batch update award recommendation submission details with the provided data.
 
