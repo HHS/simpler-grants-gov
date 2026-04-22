@@ -67,6 +67,37 @@ jobs:
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
           echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
 
+  playwright-cache:
+    # based on this https://justin.poehnelt.com/posts/caching-playwright-in-github-actions/
+    name: Playwright caching
+    needs: [get-api-commit-hash]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            node_modules
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - run: npm ci
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - run: npx playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - run: npx playwright install-deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+
   restore-or-build-api:
     name: Restore or build API
     needs: [get-api-commit-hash]
@@ -111,7 +142,7 @@ jobs:
 
   e2e-tests-local:
     name: Run Local E2E Tests
-    needs: [get-api-commit-hash, restore-or-build-api]
+    needs: [get-api-commit-hash, restore-or-build-api, playwright-cache]
     runs-on: ubuntu-22.04
 
     strategy:
