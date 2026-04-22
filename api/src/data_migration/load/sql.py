@@ -6,9 +6,11 @@ from collections.abc import Iterable
 
 import sqlalchemy
 
+def get_created_at_column(source_table: sqlalchemy.Table):
+    return source_table.columns["created_date"]
 
 def build_select_new_rows_sql(
-    source_table: sqlalchemy.Table, destination_table: sqlalchemy.Table
+    source_table: sqlalchemy.Table, destination_table: sqlalchemy.Table, etl_batch_start_date: date_time
 ) -> sqlalchemy.Select:
     """Build a `SELECT id1, id2, ... FROM <source_table>` query that finds new rows in source_table."""
 
@@ -16,10 +18,14 @@ def build_select_new_rows_sql(
     return (
         sqlalchemy.select(*source_table.primary_key.columns)
         .where(
-            # `WHERE (id1, id2, id3, ...) NOT IN`
-            sqlalchemy.tuple_(*source_table.primary_key.columns).not_in(
-                # `(SELECT (id1, id2, id3, ...) FROM <destination_table>)`    (subquery)
-                sqlalchemy.select(*destination_table.primary_key.columns)
+            sqlalchemy.and_(
+                get_created_at_column(source_table) <= etl_batch_start_date,
+
+                # `WHERE (id1, id2, id3, ...) NOT IN`
+                sqlalchemy.tuple_(*source_table.primary_key.columns).not_in(
+                    # `(SELECT (id1, id2, id3, ...) FROM <destination_table>)`    (subquery)
+                    sqlalchemy.select(*destination_table.primary_key.columns)
+                )
             )
         )
         .order_by(*source_table.primary_key.columns)

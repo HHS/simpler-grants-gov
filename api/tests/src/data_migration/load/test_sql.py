@@ -41,11 +41,11 @@ def destination_table(sqlalchemy_metadata):
 
 
 def test_build_select_new_rows_sql(source_table, destination_table):
-    select = sql.build_select_new_rows_sql(source_table, destination_table)
+    select = sql.build_select_new_rows_sql(source_table, destination_table, "2026-01-02T03:04:05.678")
     assert str(select) == (
         "SELECT test_source_table.id1, test_source_table.id2 \n"
         "FROM test_source_table \n"
-        "WHERE ((test_source_table.id1, test_source_table.id2) "
+        "WHERE test_source_table.created_date <= :created_date_1 AND ((test_source_table.id1, test_source_table.id2) "
         "NOT IN ("
         "SELECT test_destination_table.id1, test_destination_table.id2 \n"
         "FROM test_destination_table)) "

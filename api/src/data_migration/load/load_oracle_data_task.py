@@ -134,10 +134,14 @@ class LoadOracleDataTask(src.task.task.Task):
                 extra=log_extra | {"excluded_columns": excluded_columns},
             )
 
+        etl_batch_start_date = self.db_session.execute("SELECT now() as batch_start").scalars()
+
+        logger.info("batch", extra={"batch": etl_batch_start_date})
+
         logger.info("Fetching records to be inserted", extra=log_extra)
-        select_sql = sql.build_select_new_rows_sql(foreign_table, staging_table)
+        select_sql = sql.build_select_new_rows_sql(foreign_table, staging_table, etl_batch_start_date)
         with self.db_session.begin():
-            new_ids = self.db_session.execute(select_sql).all()
+            new_ids = self.db_session.execute(select_sql, bind_arguments={"created_date_1": etl_batch_start_date}).all()
 
         t0 = time.monotonic()
         insert_chunk_count = []
