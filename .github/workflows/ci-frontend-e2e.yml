@@ -78,7 +78,7 @@ jobs:
           make init
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start-test
+          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh

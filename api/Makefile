@@ -94,11 +94,11 @@ setup-env-override-file:
 build:
 	docker compose build
 
-start: ## Start the API
-	docker compose up --detach
-
-start-test: ## Start the API for CI/CD where we don't need OpenSearch Dashboard
+start: ## Start the API for CI/CD or local Dev work where we don't need OpenSearch Dashboard
 	docker compose up grants-api --detach
+
+start-full: ## Start the API including OpenSearch Dashboard
+	docker compose up --detach
 
 start-debug:
 	docker compose -f docker-compose.yml -f docker-compose.debug.yml up --detach
