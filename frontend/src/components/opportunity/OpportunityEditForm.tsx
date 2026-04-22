@@ -116,6 +116,27 @@ export default function OpportunityEditForm({
   const validationErrors: OpportunityEditValidationErrors | undefined =
     formState.validationErrors;
 
+  useEffect(() => {
+    const form = document.getElementById("opportunity-edit-form");
+    if (!form) return;
+    form.dispatchEvent(
+      new CustomEvent("opportunity-values-change", {
+        bubbles: true,
+        detail: {
+          publishDate: values.publishDate,
+          fundingType: values.fundingType,
+          fundingCategories: values.fundingCategories,
+          eligibleApplicants: values.eligibleApplicants,
+        },
+      }),
+    );
+  }, [
+    values.publishDate,
+    values.fundingType,
+    values.fundingCategories,
+    values.eligibleApplicants,
+  ]);
+
   function updateField<K extends keyof OpportunityEditFormValues>(
     key: K,
     value: OpportunityEditFormValues[K],
@@ -143,6 +164,8 @@ export default function OpportunityEditForm({
 
   useEffect(() => {
     if (formState.newOpportunitySummaryId) {
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentSummaryId(formState.newOpportunitySummaryId);
     }
   }, [formState.newOpportunitySummaryId]);
@@ -317,16 +340,16 @@ export default function OpportunityEditForm({
             heading={t("content.alerts.validationWarningHeading")}
             headingLevel="h3"
           >
-            <p className="margin-top-1 margin-bottom-1">
+            <span className="display-block margin-top-1 margin-bottom-1">
               {t("content.alerts.validationWarningBody")}
-            </p>
-            <ul className="margin-top-1">
-              {Object.values(formState.validationErrors)
-                .flat()
-                .map((error, i) => (
-                  <li key={i}>{error}</li>
-                ))}
-            </ul>
+            </span>
+            {Object.values(formState.validationErrors)
+              .flat()
+              .map((error, i) => (
+                <span key={i} className="display-block">
+                  {error}
+                </span>
+              ))}
           </Alert>
         </div>
       ) : null}

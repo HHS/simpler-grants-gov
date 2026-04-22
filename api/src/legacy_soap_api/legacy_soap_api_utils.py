@@ -136,6 +136,44 @@ def get_soap_error_response(
     return get_soap_response(data=err, status_code=500, headers=headers)
 
 
+def get_soap_fault_error_response(
+    faultcode: str = "soap:Server",
+    faultstring: str = "Server error has occurred",
+    headers: dict | None = None,
+) -> SOAPResponse:
+    err = f"""
+    <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+        <soap:Body>
+            <soap:Fault>
+                <faultcode>{faultcode}</faultcode>
+                <faultstring>{faultstring}</faultstring>
+            </soap:Fault>
+        </soap:Body>
+    </soap:Envelope>
+    """.strip()
+    boundary_id = str(uuid.uuid4())
+    mtom_response = (
+        f"--uuid:{boundary_id}\r\n"
+        f'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        f"Content-Transfer-Encoding: binary\r\n"
+        f"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        f"{err}\r\n"
+        f"--uuid:{boundary_id}--\r\n"
+    ).encode()
+    response_headers = {
+        "Content-Type": (
+            "multipart/related;"
+            ' type="application/xop+xml";'
+            f' boundary="uuid:{boundary_id}";'
+            ' start="<root.message@cxf.apache.org>";'
+            ' start-info="text/xml"'
+        )
+    }
+    if headers:
+        response_headers.update(headers)
+    return get_soap_response(data=mtom_response, status_code=500, headers=response_headers)
+
+
 def get_auth_error_response() -> SOAPResponse:
     return get_soap_error_response(faultstring="Authorization error")
 

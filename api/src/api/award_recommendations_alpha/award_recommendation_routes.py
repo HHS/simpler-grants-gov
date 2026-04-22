@@ -12,19 +12,28 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationGetResponseSchema,
     AwardRecommendationReviewUpdateRequestSchema,
     AwardRecommendationReviewUpdateResponseSchema,
+    AwardRecommendationRiskCreateRequestSchema,
+    AwardRecommendationRiskCreateResponseSchema,
     AwardRecommendationSubmissionListRequestSchema,
     AwardRecommendationSubmissionListResponseSchema,
+    AwardRecommendationUpdateRequestSchema,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.award_recommendations.create_award_recommendation import (
     create_award_recommendation,
 )
+from src.services.award_recommendations.create_award_recommendation_risk import (
+    create_award_recommendation_risk,
+)
 from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_and_verify_access,
 )
 from src.services.award_recommendations.list_award_recommendation_submissions import (
     list_award_recommendation_submissions,
+)
+from src.services.award_recommendations.update_award_recommendation import (
+    update_award_recommendation,
 )
 from src.services.award_recommendations.update_award_recommendation_review import (
     update_award_recommendation_review,
@@ -123,6 +132,33 @@ def award_recommendation_submission_list(
     )
 
 
+@award_recommendation_blueprint.put("/award-recommendations/<uuid:award_recommendation_id>")
+@award_recommendation_blueprint.input(AwardRecommendationUpdateRequestSchema, location="json")
+@award_recommendation_blueprint.output(AwardRecommendationGetResponseSchema)
+@award_recommendation_blueprint.doc(
+    summary="Update Award Recommendation",
+    description="Update an existing award recommendation with new values for fields.",
+    responses=[200, 401, 403, 404, 422],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_update(
+    db_session: db.Session, award_recommendation_id: uuid.UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"award_recommendation_id": award_recommendation_id})
+    logger.info("PUT /alpha/award-recommendations/:award_recommendation_id")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        updated_award_recommendation = update_award_recommendation(
+            db_session, user, award_recommendation_id, json_data
+        )
+
+    return response.ApiResponse(message="Success", data=updated_award_recommendation)
+
+
 @award_recommendation_blueprint.put(
     "/award-recommendations/<uuid:award_recommendation_id>/reviews/<uuid:award_recommendation_review_id>"
 )
@@ -164,3 +200,30 @@ def award_recommendation_review_update(
         )
 
     return response.ApiResponse(message="Success", data=review)
+
+
+@award_recommendation_blueprint.post("/award-recommendations/<uuid:award_recommendation_id>/risks")
+@award_recommendation_blueprint.input(AwardRecommendationRiskCreateRequestSchema, location="json")
+@award_recommendation_blueprint.output(AwardRecommendationRiskCreateResponseSchema)
+@award_recommendation_blueprint.doc(
+    summary="Create Award Recommendation Risk",
+    description="Create a risk for an award recommendation, linking it to application submissions.",
+    responses=[200, 401, 403, 404, 422],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_risk_create(
+    db_session: db.Session, award_recommendation_id: uuid.UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"award_recommendation_id": award_recommendation_id})
+    logger.info("POST /alpha/award-recommendations/:award_recommendation_id/risks")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        risk = create_award_recommendation_risk(
+            db_session, user, award_recommendation_id, json_data
+        )
+
+    return response.ApiResponse(message="Success", data=risk)
