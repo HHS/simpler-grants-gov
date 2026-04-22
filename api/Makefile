@@ -97,6 +97,9 @@ build:
 start: ## Start the API
 	docker compose up --detach
 
+start-test: ## Start the API for CI/CD where we don't need OpenSearch Dashboard
+	docker compose up grants-api --detach
+
 start-debug:
 	docker compose -f docker-compose.yml -f docker-compose.debug.yml up --detach
 
