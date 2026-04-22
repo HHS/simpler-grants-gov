@@ -144,6 +144,8 @@ export function OpportunityAttachmentUploadInput({
         multiple
         disabled={isUploading || !isDraft}
         onChange={(e) => {
+          // Per-file upload errors are caught inside handleFileChange.
+          // This .catch() covers unexpected synchronous errors (e.g. FormData append failure).
           handleFileChange(e.currentTarget.files).catch(() =>
             setErrorMessage(t("errorUploadFailed", { fileName: "" })),
           );
