@@ -152,13 +152,12 @@ jobs:
 
           ls -a
 
-      - name: Save shared keys
+      - name: Save shared key
         uses: actions/upload-artifact@v4
         with:
           name: api-fe-shared-key
           path: |
             api/override.env
-            api/e2e_token.tmp
 
   build-api-when-not-cached:
     name: Build API when not cached
@@ -202,6 +201,13 @@ jobs:
           path: /tmp/docker-image.tar
           key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
+      - name: Save shared e2e token
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-fe-shared-e2e-token
+          path: |
+            api/e2e_token.tmp
+
   build-frontend-when-not-cached:
     name: Build frontend when not cached
     needs:
@@ -233,10 +239,15 @@ jobs:
           path: frontend/dist
           key: frontend-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
 
-      - name: Download shared keys
+      - name: Download shared key
         uses: actions/download-artifact@v5
         with:
           name: api-fe-shared-key
+
+      - name: Download e2e token
+        uses: actions/download-artifact@v5
+        with:
+          name: api-fe-shared-e2e-token
 
       - name: Build a prod version of the frontend (if not cached)
         if: steps.next-build-cache.outputs.cache-matched-key == ''
@@ -332,10 +343,15 @@ jobs:
 
           make init-ci-cd
 
-      - name: Download shared keys
+      - name: Download shared key
         uses: actions/download-artifact@v5
         with:
           name: api-fe-shared-key
+
+      - name: Download e2e token
+        uses: actions/download-artifact@v5
+        with:
+          name: api-fe-shared-e2e-token
 
       - name: Start API Server for e2e tests
         run: |
