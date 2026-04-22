@@ -450,8 +450,33 @@ class AwardRecommendationRiskCreateRequestSchema(Schema):
     )
 
 
-class AwardRecommendationRiskCreateResponseDataSchema(Schema):
-    """Schema for the created risk response data"""
+class AwardRecommendationRiskUpdateRequestSchema(Schema):
+    """Schema for PUT /alpha/award-recommendations/:award_recommendation_id/risks/:award_recommendation_risk_id request"""
+
+    comment = fields.String(
+        required=True,
+        metadata={
+            "description": "Summary of the risk",
+            "example": "Applicant has unresolved audit findings",
+        },
+    )
+    award_recommendation_risk_type = fields.Enum(
+        AwardRecommendationRiskType,
+        required=True,
+        metadata={"description": "The type of risk"},
+    )
+    award_recommendation_application_submission_ids = fields.List(
+        fields.UUID(),
+        required=True,
+        validate=[validate.Length(min=1)],
+        metadata={
+            "description": "List of award recommendation application submission IDs to link to this risk"
+        },
+    )
+
+
+class AwardRecommendationRiskResponseDataSchema(Schema):
+    """Schema for risk response data (used by create and update)"""
 
     award_recommendation_risk_id = fields.UUID(
         metadata={"description": "The award recommendation risk ID"}
@@ -477,10 +502,10 @@ class AwardRecommendationRiskCreateResponseDataSchema(Schema):
     )
 
 
-class AwardRecommendationRiskCreateResponseSchema(AbstractResponseSchema):
-    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/risks response"""
+class AwardRecommendationRiskResponseSchema(AbstractResponseSchema):
+    """Schema for risk response (used by create and update)"""
 
     data = fields.Nested(
-        AwardRecommendationRiskCreateResponseDataSchema,
-        metadata={"description": "The created award recommendation risk"},
+        AwardRecommendationRiskResponseDataSchema,
+        metadata={"description": "The award recommendation risk"},
     )
