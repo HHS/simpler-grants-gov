@@ -148,6 +148,9 @@ def process_simpler_request(
             extra={"soap_request_headers": soap_request.headers.keys()},
         )
         if alternate_proxy_response := get_alternate_proxy_response(soap_request):
+            logger.info(
+                "simpler_soap_api: skipping legacy call",
+            )
             soap_proxy_response = alternate_proxy_response
         else:
             soap_proxy_response = get_proxy_response(soap_request)

@@ -227,6 +227,7 @@ class OpportunityV1Schema(Schema):
     )
 
     legacy_opportunity_id = fields.Integer(
+        allow_none=True,
         metadata={"description": "The internal legacy ID of the opportunity", "example": 12345},
     )
 
