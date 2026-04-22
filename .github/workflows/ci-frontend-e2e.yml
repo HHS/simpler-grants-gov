@@ -156,7 +156,7 @@ jobs:
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
           # Run init first to generate JWT keys in override.env
 
-          make init-ci-cd
+          make init-ci-cd setup-api-data
 
   build-api-when-not-cached:
     name: Build API when not cached
