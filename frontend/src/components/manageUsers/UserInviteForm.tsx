@@ -116,6 +116,8 @@ export function UserInviteForm({
       formState.invitationCreated &&
       formState.invitationCreated !== previousInvitation
     ) {
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowSuccess(true);
       setSelectedRole(undefined);
       setTimeout(() => setShowSuccess(false), 3000);

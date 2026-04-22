@@ -50,6 +50,8 @@ export function ShareOpportunityToOrganizationsModal({
   const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPendingOrganizationIds(new Set());
     setActionError(null);
   }, [opportunityId]);
