@@ -22,7 +22,7 @@ import {
 } from "@trussworks/react-uswds";
 
 import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
-import { OpportunityAttachmentUploadWidget } from "src/components/opportunity/OpportunityAttachmentUploadWidget";
+import { OpportunityAttachmentUploadInput } from "src/components/opportunity/OpportunityAttachmentUploadInput";
 import {
   ELIGIBILITY_OPTIONS,
   FUNDING_CATEGORY_OPTIONS,
@@ -997,7 +997,7 @@ export default function OpportunityEditForm({
             {t("content.attachmentsIntro")}
           </p>
         </div>
-        <OpportunityAttachmentUploadWidget
+        <OpportunityAttachmentUploadInput
           opportunityId={opportunityId}
           initialAttachments={initialAttachments}
           isDraft={isDraft}

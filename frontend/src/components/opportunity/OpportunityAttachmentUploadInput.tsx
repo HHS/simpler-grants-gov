@@ -2,6 +2,8 @@
 
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
+import { useClientFetch } from "src/hooks/useClientFetch";
+
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import {
@@ -24,18 +26,25 @@ interface UploadedFile {
   deletable: boolean;
 }
 
-interface OpportunityAttachmentUploadWidgetProps {
+interface OpportunityAttachmentUploadInputProps {
   opportunityId: string;
   initialAttachments?: OpportunityAttachment[];
   isDraft?: boolean;
 }
 
-export function OpportunityAttachmentUploadWidget({
+export function OpportunityAttachmentUploadInput({
   opportunityId,
   initialAttachments = [],
   isDraft = false,
-}: OpportunityAttachmentUploadWidgetProps) {
+}: OpportunityAttachmentUploadInputProps) {
   const t = useTranslations("OpportunityEdit.attachments");
+
+  const { clientFetch: uploadFetch } = useClientFetch<{
+    opportunity_attachment_id: string;
+  }>("upload attachment");
+  const { clientFetch: deleteFetch } = useClientFetch<{
+    message: string;
+  }>("delete attachment");
 
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>(
     initialAttachments.map((a) => ({
@@ -67,25 +76,18 @@ export function OpportunityAttachmentUploadWidget({
       formData.append("file", file);
 
       try {
-        const res = await fetch(
+        const data = await uploadFetch(
           `/api/opportunities/${opportunityId}/attachments`,
           { method: "POST", body: formData },
         );
-        if (res.ok) {
-          const data = (await res.json()) as {
-            opportunity_attachment_id: string;
-          };
-          setUploadedFiles((prev) => [
-            ...prev,
-            {
-              id: data.opportunity_attachment_id,
-              name: file.name,
-              deletable: true,
-            },
-          ]);
-        } else {
-          setErrorMessage(t("errorUploadFailed", { fileName: file.name }));
-        }
+        setUploadedFiles((prev) => [
+          ...prev,
+          {
+            id: data.opportunity_attachment_id,
+            name: file.name,
+            deletable: true,
+          },
+        ]);
       } catch (_err) {
         setErrorMessage(t("errorUploadFailed", { fileName: file.name }));
       }
@@ -101,21 +103,15 @@ export function OpportunityAttachmentUploadWidget({
     setDeletePending(true);
 
     try {
-      const res = await fetch(
+      await deleteFetch(
         `/api/opportunities/${opportunityId}/attachments/${fileToDelete.id}`,
         { method: "DELETE" },
       );
-      if (res.ok) {
-        setUploadedFiles((prev) =>
-          prev.filter((f) => f.id !== fileToDelete.id),
-        );
-        setFileToDelete(null);
-        deleteModalRef.current?.toggleModal();
-      } else {
-        setErrorMessage(
-          t("errorDeleteFailed", { fileName: fileToDelete.name }),
-        );
-      }
+      setUploadedFiles((prev) =>
+        prev.filter((f) => f.id !== fileToDelete.id),
+      );
+      setFileToDelete(null);
+      deleteModalRef.current?.toggleModal();
     } catch (_err) {
       setErrorMessage(
         t("errorDeleteFailed", { fileName: fileToDelete?.name ?? "" }),
