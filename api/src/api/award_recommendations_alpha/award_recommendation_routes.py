@@ -14,6 +14,8 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationReviewUpdateResponseSchema,
     AwardRecommendationRiskCreateRequestSchema,
     AwardRecommendationRiskCreateResponseSchema,
+    AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema,
+    AwardRecommendationSubmissionDetailsBatchUpdateResponseSchema,
     AwardRecommendationSubmissionListRequestSchema,
     AwardRecommendationSubmissionListResponseSchema,
     AwardRecommendationUpdateRequestSchema,
@@ -37,6 +39,9 @@ from src.services.award_recommendations.update_award_recommendation import (
 )
 from src.services.award_recommendations.update_award_recommendation_review import (
     update_award_recommendation_review,
+)
+from src.services.award_recommendations.update_award_recommendation_submissions import (
+    update_award_recommendation_submissions,
 )
 
 logger = logging.getLogger(__name__)
@@ -227,3 +232,47 @@ def award_recommendation_risk_create(
         )
 
     return response.ApiResponse(message="Success", data=risk)
+
+
+@award_recommendation_blueprint.put(
+    "/award-recommendations/<uuid:award_recommendation_id>/submission-details"
+)
+@award_recommendation_blueprint.input(
+    AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema, location="json"
+)
+@award_recommendation_blueprint.output(
+    AwardRecommendationSubmissionDetailsBatchUpdateResponseSchema
+)
+@award_recommendation_blueprint.doc(
+    summary="Batch Update Award Recommendation Submission Details",
+    description="Update multiple submission details for an award recommendation in a single operation.",
+    responses=[200, 401, 403, 404, 422, 500],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_submissions_batch_update(
+    db_session: db.Session, award_recommendation_id: uuid.UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"award_recommendation_id": award_recommendation_id})
+    logger.info("PUT /alpha/award-recommendations/:award_recommendation_id/submission-details")
+
+    try:
+        with db_session.begin():
+            user = jwt_or_api_user_key_multi_auth.get_user()
+            db_session.add(user)
+
+            submissions = update_award_recommendation_submissions(
+                db_session,
+                user,
+                award_recommendation_id,
+                json_data.get("award_recommendation_submissions", {}),
+            )
+
+        return response.ApiResponse(message="Success", data=submissions)
+    except Exception as e:
+        logger.error(
+            f"Error in batch update endpoint: {str(e)}",
+            extra={"award_recommendation_id": str(award_recommendation_id), "error": str(e)},
+            exc_info=True,
+        )
+        raise

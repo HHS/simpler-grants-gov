@@ -277,6 +277,7 @@ class AwardRecommendationAuditEvent(StrEnum):
     RISK_UPDATED = "risk_updated"
     RISK_DELETED = "risk_deleted"
     APPLICATION_SUBMISSION_UPDATED = "application_submission_updated"
+    AWARD_RECOMMENDATION_SUBMISSION_UPDATED = "award_recommendation_submission_updated"
     REVIEW_CREATED = "review_created"
     REVIEW_UPDATED = "review_updated"
     REVIEW_DELETED = "review_deleted"
