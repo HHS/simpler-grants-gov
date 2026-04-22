@@ -54,14 +54,16 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.head_ref || github.ref }}
           fetch-depth: 1000
       - name: Get commit hash
         id: get-api-commit-hash
         run: |
           cd ..
-          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{ github.sha }} api)
-          COMMIT_HASH=$(git rev-parse ${{ github.sha }})
+          pwd
+          git log -n 1 ${{ github.head_ref || github.ref }} -- api
+          COMMIT_HASH=$(git rev-parse ${{ github.head_ref || github.ref }})
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 ${{ github.head_ref || github.ref }} -- api)
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
           echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
 
