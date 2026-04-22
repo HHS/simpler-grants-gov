@@ -47,10 +47,10 @@ export function OpportunityAttachmentUploadInput({
   }>("delete attachment");
 
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>(
-    initialAttachments.map((a) => ({
-      id: a.opportunity_attachment_id || crypto.randomUUID(),
-      name: a.file_name,
-      deletable: !!a.opportunity_attachment_id,
+    initialAttachments.map((attachment) => ({
+      id: attachment.opportunity_attachment_id || crypto.randomUUID(),
+      name: attachment.file_name,
+      deletable: !!attachment.opportunity_attachment_id,
     })),
   );
   const [isUploading, setIsUploading] = useState(false);
