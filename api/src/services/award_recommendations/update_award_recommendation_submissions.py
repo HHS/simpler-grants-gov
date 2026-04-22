@@ -105,7 +105,9 @@ def update_award_recommendation_submissions(
                 )
 
             if "has_exception" in submission_data:
-                submission_detail.has_exception = submission_data.get("has_exception")
+                has_exception_value = submission_data.get("has_exception")
+                if has_exception_value is not None:
+                    submission_detail.has_exception = bool(has_exception_value)
 
             if "exception_detail" in submission_data:
                 submission_detail.exception_detail = submission_data.get("exception_detail")
@@ -158,7 +160,7 @@ def update_award_recommendation_submissions(
                 )
             )
 
-            return db_session.execute(stmt).scalars().all()
+            return list(db_session.execute(stmt).scalars().all())
 
         return []
 
