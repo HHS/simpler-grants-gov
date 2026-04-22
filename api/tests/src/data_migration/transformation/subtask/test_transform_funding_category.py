@@ -66,7 +66,7 @@ class TestTransformFundingCategory(BaseTransformTestClass):
         syn_insert1 = setup_funding_category(
             create_existing=False,
             opportunity_summary=opportunity_summary_syn,
-            legacy_lookup_value="EIC",
+            legacy_lookup_value="RT",
         )
         syn_insert2 = setup_funding_category(
             create_existing=False,
