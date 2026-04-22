@@ -113,7 +113,7 @@ def test_successful_confirm_application_delivery_request(
 
 @mock.patch("uuid.uuid4")
 def test_successful_confirm_application_delivery_request_when_in_received_by_agency_status(
-    mock_uuid, db_session, client, enable_factory_create
+    mock_uuid, db_session, client, enable_factory_create, caplog
 ) -> None:
     mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
@@ -178,11 +178,16 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
         response.headers["Content-Type"]
         == f'multipart/related; type="application/xop+xml"; boundary="uuid:{TEST_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
     )
+    log = next(r for r in caplog.records if r.message == "Soap Fault Exception raised")
+    assert (
+        log.faultstring
+        == f"Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Received by Agency' for GRANT{submission.legacy_tracking_number})"
+    )
 
 
 @mock.patch("uuid.uuid4")
 def test_successful_confirm_application_delivery_request_when_in_tracking_number_assigned_status(
-    mock_uuid, db_session, client, enable_factory_create
+    mock_uuid, db_session, client, enable_factory_create, caplog
 ) -> None:
     mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
@@ -243,6 +248,11 @@ def test_successful_confirm_application_delivery_request_when_in_tracking_number
         f"--uuid:{TEST_UUID}--\r\n"
     )
     assert response.data.decode() == expected
+    log = next(r for r in caplog.records if r.message == "Soap Fault Exception raised")
+    assert (
+        log.faultstring
+        == f"Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Agency Tracking Number Assigned' for GRANT{submission.legacy_tracking_number})"
+    )
 
 
 @mock.patch("uuid.uuid4")
