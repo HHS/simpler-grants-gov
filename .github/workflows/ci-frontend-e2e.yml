@@ -80,8 +80,8 @@ jobs:
         with:
           path: /tmp/docker-image.tar
           lookup-only: true
-          key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
-          restore-keys: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+          key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+          restore-keys: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
       - name: Build API Server for e2e tests (if not cached)
         if: steps.restore-docker-image-cached.outputs.cache-hit != 'true'
@@ -135,8 +135,8 @@ jobs:
         with:
           path: /tmp/docker-image.tar
           fail-on-cache-miss: true
-          key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
-          restore-keys: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+          key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+          restore-keys: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
       # if we successfully pulled a cached image, then import it into docker, otherwise we can skip this step as it won't work
       # if we cache miss, we'll build the docker image in the make commands below
