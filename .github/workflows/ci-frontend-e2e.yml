@@ -131,6 +131,7 @@ jobs:
       - name: Build API Server for e2e tests (if not cached)
         if: steps.restore-docker-image-cached.outputs.cache-matched-key != ''
         run: |
+          echo **${{ steps.restore-docker-image-cached.outputs.cache-matched-key }}**${{ steps.restore-docker-image-cached.outputs.cache-hit }}**
           cd ../api
           # Enable core dumps for debugging segfaults
           ulimit -c unlimited
