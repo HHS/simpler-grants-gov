@@ -131,8 +131,8 @@ jobs:
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
-  init-api-fe-shared-secret:
-    name: API/FE shared secret generation
+  init-ci-cd:
+    name: Iniialize for CI/CD runs
     needs: [get-api-commit-hash]
     runs-on: ubuntu-22.04
     steps:
@@ -156,11 +156,11 @@ jobs:
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
           # Run init first to generate JWT keys in override.env
 
-          make setup-env-override-file
+          make init-ci-cd
 
   build-api-when-not-cached:
     name: Build API when not cached
-    needs: [get-api-commit-hash, init-api-fe-shared-secret]
+    needs: [get-api-commit-hash, init-ci-cd]
     runs-on: ubuntu-22.04
 
     steps:
@@ -207,7 +207,7 @@ jobs:
         get-api-commit-hash,
         get-frontend-commit-hash,
         build-api-when-not-cached,
-        init-api-fe-shared-secret,
+        init-ci-cd,
       ]
     runs-on: ubuntu-22.04
 
