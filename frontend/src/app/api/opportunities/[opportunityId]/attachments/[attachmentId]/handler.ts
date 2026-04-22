@@ -21,7 +21,6 @@ export const deleteOpportunityAttachmentHandler = async (
     const response = await deleteOpportunityAttachment(
       opportunityId,
       attachmentId,
-      session.token,
     );
     const status = response.status_code;
 

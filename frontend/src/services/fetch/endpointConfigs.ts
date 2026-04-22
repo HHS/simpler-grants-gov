@@ -122,6 +122,7 @@ export const toDynamicGrantorOpportunityEndpoint = (
     version: "v1",
     namespace: "grantors/opportunities",
     method: type as ApiMethod,
+    requiresAuth: true,
   };
 };
 

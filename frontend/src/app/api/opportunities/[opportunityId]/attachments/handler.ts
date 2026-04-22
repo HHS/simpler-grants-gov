@@ -31,11 +31,7 @@ export const postOpportunityAttachmentHandler = async (
   const fileFormData = createFormData(file.name, buffer, file.type);
 
   try {
-    const res = await uploadOpportunityAttachment(
-      opportunityId,
-      session.token,
-      fileFormData,
-    );
+    const res = await uploadOpportunityAttachment(opportunityId, fileFormData);
     return NextResponse.json({
       opportunity_attachment_id: res.data.opportunity_attachment_id,
     });
