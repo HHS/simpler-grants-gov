@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+role_name=$1
+
+attached_policy_arns=$(aws iam list-attached-role-policies --role-name "${role_name}" --query 'AttachedPolicies[*].PolicyArn' --output text)
+
+for attached_policy_arn in ${attached_policy_arns}; do
+  aws iam detach-role-policy --role-name "${role_name}" --policy-arn "${attached_policy_arn}"
+done
+
+inline_policy_names=$(aws iam list-role-policies --role-name "${role_name}" --query 'PolicyNames[*]' --output text)
+
+for inline_policy_name in ${inline_policy_names}; do
+  aws iam delete-role-policy --role-name "${role_name}" --policy-name "${inline_policy_name}"
+done
+
+aws iam delete-role --role-name "${role_name}"

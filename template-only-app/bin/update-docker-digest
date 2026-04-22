@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+file="$1"
+
+function get_image_digest() {
+    local image_name=$1
+    skopeo inspect --format "{{ .Digest }}" "docker://${image_name}"
+}
+
+images_used_with_digest=$(perl -lne 'print $1 if /^FROM (.*)@.*$/' "${file}")
+
+while IFS= read -r image; do
+    latest_digest=$(get_image_digest "${image}")
+    sed -ri "s|^FROM ${image}@[[:alnum:]:]+ (.*)|FROM ${image}@${latest_digest} \1|" "${file}"
+done <<< "${images_used_with_digest}"
