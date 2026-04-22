@@ -47,7 +47,7 @@ concurrency:
 
 jobs:
   get-api-commit-hash:
-    name: Get commit hash
+    name: Get API commit hash
     runs-on: ubuntu-22.04
     outputs:
       commit_hash: ${{ steps.get-api-commit-hash.outputs.commit_hash }}
@@ -68,7 +68,7 @@ jobs:
           echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
 
   get-frontend-commit-hash:
-    name: Get commit hash
+    name: Get frontend commit hash
     runs-on: ubuntu-22.04
     outputs:
       commit_hash: ${{ steps.get-frontend-commit-hash.outputs.commit_hash }}
@@ -138,14 +138,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Cache API/FE shared secret
-        id: cache-api-fe-shared-secret
-        uses: actions/cache@v5
-        with:
-          path: |
-            api/override.env
-            api/e2e_token.tmp
-          key: api-fe-shared-secret-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
       - name: Init API Server for e2e tests
         run: |
@@ -156,7 +148,17 @@ jobs:
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
           # Run init first to generate JWT keys in override.env
 
-          make init-ci-cd setup-api-data
+          make init-ci-cd
+
+          ls -a
+
+      - name: Save shared keys
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-fe-shared-key
+          path: |
+            api/override.env
+            api/e2e_token.tmp
 
   build-api-when-not-cached:
     name: Build API when not cached
@@ -230,6 +232,11 @@ jobs:
         with:
           path: frontend/dist
           key: frontend-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
+
+      - name: Download shared keys
+        uses: actions/download-artifact@v5
+        with:
+          name: api-fe-shared-key
 
       - name: Build a prod version of the frontend (if not cached)
         if: steps.next-build-cache.outputs.cache-matched-key == ''
@@ -325,6 +332,11 @@ jobs:
 
           make init-ci-cd
 
+      - name: Download shared keys
+        uses: actions/download-artifact@v5
+        with:
+          name: api-fe-shared-key
+
       - name: Start API Server for e2e tests
         run: |
           cd ../api
@@ -335,7 +347,7 @@ jobs:
 
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          make populate-search-opportunities populate-search-agencies start
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
