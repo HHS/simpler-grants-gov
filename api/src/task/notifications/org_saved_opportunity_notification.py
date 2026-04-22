@@ -226,9 +226,7 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
 
         org_sections = []
         for group in org_opp_list:
-            org_name = html.escape(
-                group.organization.organization_name or "Unknown Organization"
-            )
+            org_name = html.escape(group.organization.organization_name or "Unknown Organization")
             items = []
 
             for opportunity in group.displayed:
