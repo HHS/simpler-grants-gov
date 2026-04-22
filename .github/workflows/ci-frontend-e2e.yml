@@ -56,16 +56,14 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref }}
           fetch-depth: 1000
-        env:
-          clean_ref: ${{ github.head_ref || github.ref }}
       - name: Get commit hash
         id: get-api-commit-hash
+        env:
+          CLEAN_REF: ${{ github.head_ref || github.ref }}
         run: |
           cd ..
-          pwd
-          git log -n 1 $clean_ref -- api
-          COMMIT_HASH=$(git rev-parse $clean_ref)
-          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 $clean_ref -- api)
+          COMMIT_HASH=$(git rev-parse "$CLEAN_REF")
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 "$CLEAN_REF" -- api)
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
           echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
 
