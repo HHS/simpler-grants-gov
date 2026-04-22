@@ -164,14 +164,15 @@ describe("RecommendationSummarySection", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("does not render funding strategy in view mode when not provided", () => {
+    it("renders funding strategy section with fallback message when strategy not provided", () => {
       render(
         <RecommendationSummarySection summary={mockSummary} viewMode={true} />,
       );
 
+      expect(screen.getByText("fundingStrategy.heading")).toBeInTheDocument();
       expect(
-        screen.queryByText("fundingStrategy.heading"),
-      ).not.toBeInTheDocument();
+        screen.getByText("fundingStrategy.noFundingStrategyProvided"),
+      ).toBeInTheDocument();
       expect(screen.queryByText(mockFundingStrategy)).not.toBeInTheDocument();
     });
 

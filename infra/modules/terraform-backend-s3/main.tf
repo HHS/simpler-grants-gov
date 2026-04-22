@@ -5,43 +5,18 @@ data "aws_partition" "current" {}
 locals {
   tf_state_bucket_name = var.name
   tf_logs_bucket_name  = "${var.name}-logs"
-  tf_locks_table_name  = "${var.name}-state-locks"
 }
-
-# Create the dynamodb table required for state locking.
 
 # Options for encryption are an AWS owned key, which is not unique to your account; AWS managed; or customer managed. The latter two options are more secure, and customer managed gives
 # control over the key. This allows for ability to restrict access by key as well as policies attached to roles or users.
 # https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html
 resource "aws_kms_key" "tf_backend" {
-  description = "KMS key for DynamoDB table ${local.tf_locks_table_name}"
+  description = "KMS key for s3 backend server side encryption"
   # The waiting period, specified in number of days. After the waiting period ends, AWS KMS deletes the KMS key.
   deletion_window_in_days = "10"
   # Generates new cryptographic material every 365 days, this is used to encrypt your data. The KMS key retains the old material for decryption purposes.
   enable_key_rotation = "true"
   # checkov:skip=CKV2_AWS_64:TODO: https://github.com/HHS/simpler-grants-gov/issues/2366
-}
-
-resource "aws_dynamodb_table" "terraform_lock" {
-  name                        = local.tf_locks_table_name
-  hash_key                    = "LockID"
-  billing_mode                = "PAY_PER_REQUEST"
-  deletion_protection_enabled = true
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-
-  server_side_encryption {
-    enabled     = true
-    kms_key_arn = aws_kms_key.tf_backend.arn
-  }
-
-  point_in_time_recovery {
-    enabled = true
-  }
-
 }
 
 # Create the S3 bucket used to store terraform state remotely.

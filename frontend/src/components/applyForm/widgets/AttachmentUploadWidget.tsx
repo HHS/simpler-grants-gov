@@ -3,6 +3,7 @@
 import { useApplicationAttachments } from "src/hooks/ApplicationAttachments";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
+import { UswdsWidgetProps } from "src/types/applyForm/types";
 
 import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -16,7 +17,6 @@ import {
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
@@ -74,6 +74,8 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
 
   useEffect(() => {
     if (deleteState?.success) {
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowFile(false);
       setFileName(null);
       setAttachmentId(null);
@@ -85,6 +87,8 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
 
   useEffect(() => {
     const newAttachmentId = typeof value === "string" ? value : null;
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAttachmentId(newAttachmentId);
 
     const uploadedAttachment = attachments?.find(

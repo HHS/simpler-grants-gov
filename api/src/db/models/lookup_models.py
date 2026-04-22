@@ -108,6 +108,7 @@ FUNDING_CATEGORY_CONFIG: LookupConfig[FundingCategory] = LookupConfig(
         LookupStr(FundingCategory.AFFORDABLE_CARE_ACT, 25),
         LookupStr(FundingCategory.OTHER, 26),
         LookupStr(FundingCategory.ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS, 27),
+        LookupStr(FundingCategory.RECREATION_AND_TOURISM, 28),
     ]
 )
 
@@ -376,6 +377,7 @@ WORKFLOW_TYPE_CONFIG: LookupConfig[WorkflowType] = LookupConfig(
         LookupStr(WorkflowType.INITIAL_PROTOTYPE, 3),
         LookupStr(WorkflowType.BASIC_TEST_WORKFLOW, 4),
         LookupStr(WorkflowType.NO_CONCURRENT_TEST_WORKFLOW, 5),
+        LookupStr(WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW, 6),
     ]
 )
 

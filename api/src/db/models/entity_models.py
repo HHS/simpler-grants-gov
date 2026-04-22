@@ -260,3 +260,5 @@ class OrganizationSavedOpportunity(ApiSchemaTable, TimestampMixin):
     opportunity: Mapped[Opportunity] = relationship(
         "Opportunity", back_populates="saved_opportunities_by_organizations"
     )
+
+    notification_processed_at: Mapped[datetime | None] = mapped_column(nullable=True, default=None)

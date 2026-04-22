@@ -190,9 +190,7 @@ describe("refreshSession", () => {
   });
   it("calls refresh fetch function correctly", async () => {
     await refreshSession("a token");
-    expect(mockPostTokenRefresh).toHaveBeenCalledWith({
-      additionalHeaders: { "X-SGG-Token": "a token" },
-    });
+    expect(mockPostTokenRefresh).toHaveBeenCalledTimes(1);
   });
   it("calls cookie.set with expected values", async () => {
     encryptMock.mockReturnValue("encrypted session");

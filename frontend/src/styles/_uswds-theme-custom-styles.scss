@@ -1050,6 +1050,201 @@ input[type="checkbox"]:not(checked) ~ .saved-opportunity-radius-md,
   }
 }
 
+.notifications-page-error-enter {
+  animation: notifications-page-error-fade-in 180ms ease-out;
+}
+
+/*
+  Notifications page error message fade in animation. 
+  This is used on the notifications page when an error occurs fetching notifications,
+  to fade in the error message in a way that draws attention without being too jarring.
+*/
+
+.notification-preference-card__field {
+  position: relative;
+}
+
+.notification-preference-card__status {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-block-size: units(6);
+  pointer-events: none;
+}
+
+.notifications-page-error-enter {
+  animation: notifications-page-error-fade-in 180ms ease-out;
+}
+
+@keyframes notifications-page-error-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notifications-page-error-enter {
+    animation: none;
+  }
+}
+
+/*
+  Custom Switch Styles
+  https://www.figma.com/design/bQUTJCMj0JYbAAnJQ4p4tX/Grantee-Designs-%7C-Quad-5-%7C-Simpler-Grants-2026?node-id=4062-16123&t=bYpGGUGR9kVzBClw-4
+*/
+
+$simpler-switch-transition-duration: 140ms;
+$simpler-switch-transition-easing: ease;
+
+.simpler-switch {
+  display: inline-flex;
+  position: relative;
+}
+
+.simpler-switch__input {
+  position: absolute;
+  opacity: 0;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.simpler-switch__visual {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: units(9);
+  min-block-size: units(6);
+  padding: units(1) units(1.5);
+  border: 2px solid color("gray-warm-20");
+  border-radius: radius("md");
+  background-color: color("white");
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color $simpler-switch-transition-duration
+      $simpler-switch-transition-easing,
+    background-color $simpler-switch-transition-duration
+      $simpler-switch-transition-easing,
+    box-shadow $simpler-switch-transition-duration
+      $simpler-switch-transition-easing;
+}
+
+.simpler-switch__track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  inline-size: units(6);
+  block-size: units(3);
+  border-radius: 999px;
+  background-color: color("gray-warm-30");
+  transition: background-color $simpler-switch-transition-duration
+    $simpler-switch-transition-easing;
+}
+
+.simpler-switch__thumb {
+  position: absolute;
+  inset-inline-start: 0.1875rem;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  border-radius: 999px;
+  background-color: color("white");
+  transition: transform $simpler-switch-transition-duration
+    $simpler-switch-transition-easing;
+}
+
+.simpler-switch__state-text {
+  font: inherit;
+  color: color("gray-warm-70");
+}
+
+.simpler-switch[data-checked="true"] .simpler-switch__visual {
+  border-color: color("mint-40");
+}
+
+.simpler-switch[data-checked="true"] .simpler-switch__track {
+  background-color: color("mint-40");
+}
+
+.simpler-switch[data-checked="true"] .simpler-switch__thumb {
+  transform: translateX(1.5rem);
+}
+
+.simpler-switch__input:focus-visible + .simpler-switch__visual {
+  outline: 3px solid color("mint-40");
+  outline-offset: 2px;
+}
+
+.simpler-switch[data-error="true"] .simpler-switch__visual {
+  border-color: color("red-warm-50v");
+}
+
+.simpler-switch[data-disabled="true"] .simpler-switch__visual {
+  border-color: color("gray-warm-10");
+  background-color: color("gray-warm-5");
+  cursor: not-allowed;
+}
+
+.simpler-switch[data-disabled="true"] .simpler-switch__track {
+  background-color: color("gray-warm-10");
+}
+
+.simpler-switch[data-disabled="true"] .simpler-switch__thumb {
+  background-color: color("white");
+}
+
+.simpler-switch-field {
+  inline-size: 100%;
+}
+
+.simpler-switch-field__content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: units(2);
+}
+
+.simpler-switch-field__text {
+  display: grid;
+  gap: units(1);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.simpler-switch-field__label {
+  cursor: pointer;
+}
+
+.simpler-switch-field__control {
+  flex: 0 0 auto;
+}
+
+.simpler-switch-field__error {
+  color: color("red-warm-50v");
+  font-weight: font-weight("bold");
+}
+
+@include at-media-max("mobile-lg") {
+  .simpler-switch-field__content {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .simpler-switch-field__control {
+    flex: 0 0 auto;
+    align-self: flex-start;
+  }
+}
 // Prevent SPA's persistent focus for mouse users
 @supports selector(:focus-visible) {
   // Selectors need more specificity than:
@@ -1065,7 +1260,9 @@ input[type="checkbox"]:not(checked) ~ .saved-opportunity-radius-md,
   .usa-button:not([disabled]),
   .usa-nav__primary-item a,
   .usa-nav__primary-item button,
-  .usa-accordion__button:not([disabled]) {
+  .usa-accordion__button:not([disabled]),
+  #main-content[tabindex],
+  .usa-logo a {
     &:focus {
       outline-width: 0;
     }
@@ -1085,4 +1282,34 @@ input[type="checkbox"]:not(checked) ~ .saved-opportunity-radius-md,
       outline-width: units($theme-focus-width);
     }
   }
+}
+
+.notification-preference-card--error {
+  border-inline-start: 4px solid color("red-warm-50v") !important;
+  padding-inline-start: units(2);
+}
+
+.notification-preference-card__error {
+  color: color("red-warm-50v");
+  font-weight: font-weight("bold");
+}
+
+.notification-preference-card__field {
+  position: relative;
+}
+
+.notification-preference-card__status {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-block-size: units(6);
+  pointer-events: none;
+}
+
+.notification-preference-card__loading-text {
+  color: color("gray-warm-70");
+  font-size: size("sans", "2xs");
 }

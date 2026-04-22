@@ -153,7 +153,10 @@ export async function fillField(
       field.type === "radiobutton" &&
       (field.testId || field.selector || field.getByText || field.useDataAsText)
     ) {
-      if (shouldActivateField(data)) {
+      // If getByText is specified, the field definition already encodes which
+      // specific radio option to click (eg - "No"), so always activate it
+      // regardless of the data value. Otherwise, rely on shouldActivateField.
+      if (field.getByText !== undefined || shouldActivateField(data)) {
         let locator = field.getByText
           ? page.getByText(field.getByText, {
               exact: field.textExact ?? false,
@@ -303,8 +306,29 @@ export async function fillField(
 }
 
 /**
- * Fills a form from the application page and saves it.
- * Does NOT perform assertions - those should be done in the test.
+ * Fills a subset of fields on the current form page without navigating or saving.
+ * Use when the form is already open and only some fields should be filled
+ * (e.g. failure-path tests that intentionally leave required fields empty).
+ * Does NOT perform assertions - those are done in the test.
+ */
+export async function fillFormPartial(
+  testInfo: TestInfo,
+  page: Page,
+  fieldDefinitions: FormFillFieldDefinitions,
+  data: Record<string, string | boolean>,
+): Promise<void> {
+  for (const key of Object.keys(data)) {
+    const fieldDef = fieldDefinitions[key];
+    if (fieldDef) {
+      await fillField(testInfo, page, fieldDef, data[key]);
+    }
+  }
+}
+
+/**
+ * Navigates into a form from the application page, fills all fields listed in 'data' fixture,
+ * saves the form, and optionally returns to the application page.
+ * Does NOT perform assertions - those are done in the test.
  * Assumes the current page is already an application page
  * where the form link (`formName`) is visible and clickable.
  */
@@ -393,9 +417,14 @@ export async function fillForm(
  */
 export async function verifyFormLinkVisible(
   page: Page,
-  formName: string,
+  formName: string | RegExp,
 ): Promise<void> {
-  await getFormLink(page, formName).waitFor({
+  const formLink =
+    formName instanceof RegExp
+      ? page.locator("a, button").filter({ hasText: formName })
+      : getFormLink(page, formName);
+
+  await formLink.waitFor({
     state: "visible",
     timeout: 60000,
   });

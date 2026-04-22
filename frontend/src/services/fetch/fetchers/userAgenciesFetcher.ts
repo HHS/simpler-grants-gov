@@ -11,13 +11,11 @@ export interface UserAgency {
 }
 
 export const getUserAgencies = async (
-  token: string,
   userId: string,
 ): Promise<UserAgency[]> => {
   const subPath = `${userId}/agencies`;
   const resp = await fetchUserWithMethod("POST")({
     subPath,
-    additionalHeaders: { "X-SGG-Token": token },
     body: {},
   });
 
@@ -38,5 +36,5 @@ export const fetchUserAgencies = async (): Promise<UserAgency[]> => {
   if (!session || !session.token) {
     throw new UnauthorizedError("No active session");
   }
-  return getUserAgencies(session.token, session.user_id);
+  return getUserAgencies(session.user_id);
 };
