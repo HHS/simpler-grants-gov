@@ -14,16 +14,18 @@ Feature: Happy Path – Application Submission Workflow
     Given the user is logged in
 
     # --- Navigate to Opportunity page ---
-    And the user launches the URL "https://<targetEnv>/opportunity/<opportunity_id>"
+    And the user launches the URL for an opportunity with an open competition
 
-    # --- Starting Application ---
-    When the user clicks "Start Application"
+    # --- Starting a new Application ---
+    When the user clicks "Start Application" in the opportunity page
     Then the "Start a new application" modal opens
     When the <user type> selects <who is applying> in the "Who's applying" dropdown
     And the user enters the application name
     And the user clicks "Create Application"
     Then a new application is created
-    And the Application landing page loads with navigation, header, and a list of required and optional forms
+
+    # ---- Application Landing page validation ---
+    And the Application landing page loads with a list of required and optional forms
 
     # ---- Completing Required Forms ---
     Given the user has completed the Required forms

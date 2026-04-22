@@ -56,7 +56,7 @@ test(
     // Call reusable create application function from utils
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
-    // When the user fills out the <form name> form with valid test data
+    // When the user fills out the form with valid test data
     // And the user clicks Save
     await fillForm(
       testInfo,

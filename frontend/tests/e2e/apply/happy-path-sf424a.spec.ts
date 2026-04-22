@@ -69,10 +69,10 @@ test(
      */
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
-    // And the Application landing page loads with the <form name> form link visible
+    // And the Application landing page loads with the form link visible
     await verifyFormLinkVisible(page, SF424A_FORM_MATCHER);
 
-    // When the user fills out the <form name> form with valid test data
+    // When the user fills out the form with valid test data
     // And the user clicks Save
     await fillForm(
       testInfo,
