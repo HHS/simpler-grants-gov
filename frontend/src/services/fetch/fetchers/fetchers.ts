@@ -11,6 +11,7 @@ import {
   getGrantorOpportunityEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
+  publishGrantorOpportunityEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
   toDynamicGrantorsEndpoint,
@@ -169,4 +170,8 @@ export const updateGrantorOpportunitySummaryRequest = requesterForEndpoint(
 
 export const createGrantorOpportunitySummaryRequest = requesterForEndpoint(
   createGrantorOpportunitySummaryEndpoint,
+);
+
+export const publishGrantorOpportunityRequest = requesterForEndpoint(
+  publishGrantorOpportunityEndpoint,
 );

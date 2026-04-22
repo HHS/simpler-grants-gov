@@ -52,6 +52,8 @@ export function ActivityMonitor() {
   // when logged in status changes, remove or add handlers
   useEffect(() => {
     if (!user || !user.token) {
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       removeHandlers();
       return;
     }

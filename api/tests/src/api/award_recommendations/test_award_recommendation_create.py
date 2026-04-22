@@ -62,6 +62,7 @@ class TestCreateAwardRecommendation200:
             "award_selection_method": AwardSelectionMethod.MERIT_REVIEW_RANKING_ONLY.value,
             "additional_info": "Supporting materials reviewed",
             "funding_strategy": "Allocate across two grants",
+            "selection_method_detail": "Merit review panel scores",
             "other_key_information": "Priority funding for rural proposals",
         }
 
