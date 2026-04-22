@@ -107,18 +107,9 @@ def update_award_recommendation_submissions(
                 submission_detail.general_comment = submission_data.get("general_comment")
 
             if "award_recommendation_type" in submission_data:
-                award_type = submission_data.get("award_recommendation_type")
-                # Handle both string enum names and actual enum objects
-                if isinstance(award_type, str):
-                    try:
-                        submission_detail.award_recommendation_type = AwardRecommendationType[
-                            award_type
-                        ]
-                    except (KeyError, ValueError):
-                        # If string doesn't match enum value, try using it directly
-                        submission_detail.award_recommendation_type = award_type
-                else:
-                    submission_detail.award_recommendation_type = award_type
+                submission_detail.award_recommendation_type = submission_data.get(
+                    "award_recommendation_type"
+                )
 
             if "has_exception" in submission_data:
                 submission_detail.has_exception = submission_data.get("has_exception")
