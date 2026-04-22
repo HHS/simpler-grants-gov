@@ -12,7 +12,7 @@ import {
   NotificationPreferenceValues,
 } from "src/components/notifications/NotificationTypes";
 
-const PERSONAL_PREFERENCE_KEY = "saved-opportunities";
+const SELF_SAVED_OPPORTUNITIES_PREFERENCE_KEY = "saved-opportunities";
 
 function buildOrganizationPreferenceKey(organizationId: string): string {
   return `organization-${organizationId}-saved-opportunities`;
@@ -30,7 +30,7 @@ async function Notifications(): Promise<ReactElement | undefined> {
   let organizations: NotificationOrganization[] = [];
   let hasOrganizationsFetchError = false;
   const initialPreferenceValues: NotificationPreferenceValues = {
-    [PERSONAL_PREFERENCE_KEY]: false,
+    [SELF_SAVED_OPPORTUNITIES_PREFERENCE_KEY]: false,
   };
 
   try {
@@ -53,7 +53,7 @@ async function Notifications(): Promise<ReactElement | undefined> {
     const notificationPreferences =
       await getSavedOpportunityNotificationPreferences(session.user_id);
 
-    initialPreferenceValues[PERSONAL_PREFERENCE_KEY] =
+    initialPreferenceValues[SELF_SAVED_OPPORTUNITIES_PREFERENCE_KEY] =
       notificationPreferences.self.email_enabled;
 
     notificationPreferences.organizations.forEach((organizationPreference) => {
