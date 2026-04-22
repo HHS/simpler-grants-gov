@@ -1,11 +1,8 @@
 locals {
   network_configs = {
     dev = {
-      account_name                 = "simpler-grants-gov"
-      database_subnet_group_name   = "dev"
-      vpc_name                     = "dev"
-      second_octet                 = 0               # The second octet our the VPC CIDR block
-      grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
+      account_name = "dev"
+
       domain_config = {
         manage_dns = false
         # Placeholder value for the hosted zone
@@ -30,11 +27,7 @@ locals {
       }
     }
     staging = {
-      account_name                 = "simpler-grants-gov"
-      database_subnet_group_name   = "staging"
-      vpc_name                     = "staging"
-      second_octet                 = 1               # The second octet our the VPC CIDR block
-      grants_gov_oracle_cidr_block = "10.220.0.0/16" # MicroHealth managed CIDR block where the dev origin Oracle database for Grants.gov is located
+      account_name = "staging"
 
       domain_config = {
         manage_dns  = false
@@ -53,18 +46,8 @@ locals {
         manage_dns  = false
         hosted_zone = "training.simpler.grants.gov"
 
-        certificate_configs = {}
-      }
-    }
-    grantee1 = {
-      account_name                 = "simpler-grants-gov"
-      database_subnet_group_name   = "grantee1"
-      vpc_name                     = "grantee1"
-      second_octet                 = 30              # The second octet our the VPC CIDR block
-      grants_gov_oracle_cidr_block = "10.207.0.0/16" # MicroHealth managed CIDR block where the test1 origin Oracle database for Grants.gov is located
-      domain_config = {
-        manage_dns  = false
-        hosted_zone = "grantee1.simpler.grants.gov"
+    prod = {
+      account_name = "prod"
 
         certificate_configs = {}
       }

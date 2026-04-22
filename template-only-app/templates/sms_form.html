@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SMS Test</title>
+</head>
+<body>
+    <h1>Send Test SMS</h1>
+    <form method="post">
+        <div>
+            <label for="phone_number">Receiver Phone Number (E.164 format: +1234567890):</label><br>
+            <input type="tel" id="phone_number" name="phone_number"
+                   pattern="^\+[1-9]\d{1,14}$"
+                   placeholder="+1234567890"
+                   required><br>
+            <small>Must include country code (e.g., +1 for US)</small><br>
+            <small><strong>If using simulator phone numbers for testing:</strong><br>
+            • +14254147755 (Success Text testing)<br>
+            • +14254147167 (Text Blocked testing)</small>
+        </div>
+        <br>
+        <button type="submit">Send Test SMS</button>
+    </form>
+</body>
+</html>

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # -----------------------------------------------------------------------------
 # This script creates SSM parameter for storing integration URL for incident management
 # services. Script creates new SSM attribute or updates existing.

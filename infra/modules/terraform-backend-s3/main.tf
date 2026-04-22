@@ -6,7 +6,6 @@ locals {
   tf_state_bucket_name = var.name
   tf_logs_bucket_name  = "${var.name}-logs"
 }
-
 # Options for encryption are an AWS owned key, which is not unique to your account; AWS managed; or customer managed. The latter two options are more secure, and customer managed gives
 # control over the key. This allows for ability to restrict access by key as well as policies attached to roles or users.
 # https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html
@@ -16,7 +15,6 @@ resource "aws_kms_key" "tf_backend" {
   deletion_window_in_days = "10"
   # Generates new cryptographic material every 365 days, this is used to encrypt your data. The KMS key retains the old material for decryption purposes.
   enable_key_rotation = "true"
-  # checkov:skip=CKV2_AWS_64:TODO: https://github.com/HHS/simpler-grants-gov/issues/2366
 }
 
 # Create the S3 bucket used to store terraform state remotely.

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+tag_key=$1
+tag_value=$2
+
+role_names=$(aws iam list-roles --query 'Roles[*].RoleName' --output text)
+
+for role_name in ${role_names}; do
+  tags=$(aws iam list-role-tags --role-name "${role_name}" --query "Tags[?Key=='${tag_key}' && Value=='${tag_value}']" --output text)
+
+  if [ -n "$tags" ]; then
+    echo "${role_name}"
+  fi
+done

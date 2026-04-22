@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # -----------------------------------------------------------------------------
 # Script that invokes the database role-manager AWS Lambda function to check
 # that the Postgres users were configured properly.

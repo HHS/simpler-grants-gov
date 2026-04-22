@@ -27,6 +27,7 @@ locals {
 }
 
 # ACM certificate that will be used by the load balancer.
+# This must be in the same region as the ALB.
 resource "aws_acm_certificate" "issued" {
   for_each = local.issued_certificate_configs
 

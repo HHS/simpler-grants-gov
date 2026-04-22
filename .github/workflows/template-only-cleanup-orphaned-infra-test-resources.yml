@@ -1,0 +1,45 @@
+name: Template CI Infra Checks Cleanup
+
+on:
+  # Manual trigger only - cleanup is intentionally not automatic
+  # to avoid masking underlying test issues that should be fixed
+  workflow_dispatch:
+    inputs:
+      project_name:
+        description: 'Specific project to clean up (e.g., plt-tst-act-12345). Leave empty to find all projects.'
+        required: false
+        type: string
+      dry_run:
+        description: 'Dry run - list resources without deleting them'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  cleanup:
+    name: Cleanup Test Resources
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.TESTER_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.TESTER_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Run cleanup script
+        run: |
+          args=()
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            args+=(--dry-run)
+          fi
+
+          if [ -n "${{ inputs.project_name }}" ]; then
+            args+=("${{ inputs.project_name }}")
+          fi
+
+          ./template-only-bin/cleanup-test-resources "${args[@]}"
