@@ -246,6 +246,10 @@ class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
         )
     )
 
+    @property
+    def application_submission_number(self) -> str | None:
+        return self.application_submission.application_submission_number
+
 
 class AwardRecommendationRiskSubmission(ApiSchemaTable, TimestampMixin):
     """Links an award recommendation risk to an award recommendation application submission."""
