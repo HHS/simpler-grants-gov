@@ -2,14 +2,14 @@
  * @feature Home Page
  * @featureFile frontend/tests/e2e/home.feature
  * @scenarios
- *   - Show the page title
- *   - Clicking "Follow on GitHub" opens the repository in a new tab
- *   - Skip-to-main-content link is reachable by keyboard and scrolls past the gov banner
- *   - Mobile nav is hidden by default and opens when the menu button is clicked
- *   - Mobile nav closes when a navigation link is clicked
- *   - Mobile nav closes when the user clicks the overlay
- *   - Mobile nav closes when the viewport is resized above the breakpoint
- *   - Mobile nav closes when the Escape key is pressed
+ *   - Show the page title
+ *   - Clicking "Follow on GitHub" opens the repository in a new tab
+ *   - Skip-to-main-content link is reachable by keyboard and scrolls past the gov banner
+ *   - Mobile nav is hidden by default and opens when the menu button is clicked
+ *   - Mobile nav closes when a navigation link is clicked
+ *   - Mobile nav closes when the user clicks the overlay
+ *   - Mobile nav closes when the viewport is resized above the breakpoint
+ *   - Mobile nav closes when the Escape key is pressed
  */
 
 import { expect, test } from "@playwright/test";
