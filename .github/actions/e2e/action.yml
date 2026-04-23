@@ -46,7 +46,7 @@ inputs:
     default: ""
   force-webkit-install:
     description: "webkit dependencies aren't all cached, so we need to force it to install"
-    default: false
+    default: "false"
 outputs:
   artifact-id:
     description: "artifact ids for uploaded test reports"
@@ -85,7 +85,7 @@ runs:
         npx playwright install --with-deps
 
     - name: Install Webkit dependencies
-      if: ${{ inputs.force-webkit-install == true }}
+      if: ${{ inputs.force-webkit-install == 'true' }}
       shell: bash
       working-directory: ./frontend
       run: |
