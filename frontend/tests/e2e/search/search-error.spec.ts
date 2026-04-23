@@ -1,3 +1,9 @@
+/**
+ * @feature Search - Error Handling and Recovery
+ * @featureFile frontend/tests/e2e/search/features/search-core/search-error.feature
+ * @scenario Show an error state for invalid search params and recover by running a valid search
+ */
+
 import { expect, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
@@ -13,9 +19,11 @@ test.describe("Search error page", () => {
     "should return an error page when expected",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page }) => {
+      // Given the user navigates with an invalid status query parameter
       // trigger error by providing an invalid status value
       await page.goto("/search?status=not_a_status");
 
+      // Then an error alert is displayed
       expect(page.locator(".usa-alert--error")).toBeTruthy();
     },
   );
@@ -24,11 +32,14 @@ test.describe("Search error page", () => {
     "should allow for performing a new search from error state",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page }) => {
+      // Given the user is in an error state
       await page.goto("/search?status=not_a_status");
 
+      // When the user applies a valid filter
       await toggleFilterDrawer(page);
       await toggleCheckbox(page, "status-closed");
 
+      // Then the URL reflects the valid search state
       await page.waitForURL(/closed/, {
         timeout: SEARCH_TIMEOUT,
       });

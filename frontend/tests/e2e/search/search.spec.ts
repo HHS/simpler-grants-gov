@@ -1,3 +1,9 @@
+/**
+ * @feature Search - Core Search Behaviors
+ * @featureFile frontend/tests/e2e/search/features/search-core/search-core-behaviors.feature
+ * @scenario Validate search pagination, sorting, filter behavior, and page-boundary handling
+ */
+
 import { expect, test } from "@playwright/test";
 import {
   refreshPageWithCurrentURL,
@@ -148,6 +154,7 @@ test.describe("Search page tests", () => {
     "resets page back to 1 when choosing a filter",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page }) => {
+      // Given the user is on page 2 of results
       await page.goto("/search?status=none");
       await clickPaginationPageNumber(page, 2);
 
@@ -162,6 +169,7 @@ test.describe("Search page tests", () => {
         "status-closed": "closed",
       };
 
+      // When the user applies a filter
       await toggleFilterDrawer(page);
 
       await clickAccordionWithTitle(page, "Opportunity status");
@@ -174,6 +182,7 @@ test.describe("Search page tests", () => {
       ]);
 
       // Verify that page 1 is highlighted
+      // Then pagination resets to page 1 and URL reflects the selected filter
       currentPageButton = page
         .locator(".usa-pagination__button.usa-current")
         .first();
@@ -189,10 +198,12 @@ test.describe("Search page tests", () => {
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
+      // Given the user is on the search page
       await page.goto("/search");
 
       await waitForSearchResultsInitialLoad(page);
 
+      // When the user changes sort order from ascending to descending
       if (isMobile) {
         await toggleFilterDrawer(page);
       }
@@ -216,6 +227,7 @@ test.describe("Search page tests", () => {
 
       const lastSearchResultTitle = await getLastSearchResultTitle(page);
 
+      // Then the former first result should match the new last-page result
       expect(firstSearchResultTitle).toBe(lastSearchResultTitle);
     },
   );
@@ -224,6 +236,7 @@ test.describe("Search page tests", () => {
     "number of results is the same with none or all opportunity status checked",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }) => {
+      // Given a baseline result count with no status filters applied
       await page.goto("/search?status=none");
       const initialSearchResultsCount =
         await getNumberOfOpportunitySearchResults(page);
@@ -236,10 +249,12 @@ test.describe("Search page tests", () => {
         "status-archived": "archived",
       };
 
+      // When all opportunity status filters are selected
       await toggleFilterDrawer(page);
       await clickAccordionWithTitle(page, "Opportunity status");
       await toggleCheckboxes(page, statusCheckboxes, "status");
 
+      // Then the total result count remains the same
       const updatedSearchResultsCount =
         await getNumberOfOpportunitySearchResults(page);
 
@@ -251,10 +266,12 @@ test.describe("Search page tests", () => {
     "should redirect to the last page of results when page param is too high",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }) => {
+      // Given a page query parameter beyond the available range
       await page.goto("/search?page=1000000");
 
       await waitForAnyURLChange(page, "/search?page=1000000");
 
+      // Then the app redirects to the highest valid results page
       expect(page.url()).toMatch(/search\?page=\d{1,3}/);
     },
   );
