@@ -207,9 +207,9 @@ jobs:
       - name: Load cached Docker image
         run: |
           docker load < /tmp/docker-image.tar
-          KEY=(docker image ls -q simpler-grants-gov-api)
-          echo $KEY
-          docker tag simpler-grants-gov-api:$KEY api-grants-api:latest || true
+          IMAGE_ID=$(docker image ls -q simpler-grants-gov-api)
+          echo $IMAGE_ID
+          docker tag $IMAGE_ID api-grants-api:latest || true
 
       - name: Docker images before Start API
         run: |
