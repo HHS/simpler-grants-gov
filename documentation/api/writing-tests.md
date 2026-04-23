@@ -78,11 +78,16 @@ factories](https://factoryboy.readthedocs.io/en/stable/#using-factories), termed
   database (can think of it like `FooFactory.build()` then `db_session.add()`
   and `db_session.commit()`)
 
+**Prefer `.build()` over `.create()`.** Reach for `.create()` only when the test
+needs data that will be queried back from the database. `.build()` is faster,
+does not require a DB round-trip, and keeps tests isolated. See the
+[`api-tests` rule](/documentation/rules/api-tests.md).
+
+When you do need `.create()`, also request the `enable_factory_create` pytest
+fixture. Without it, `Factory.create()` cannot persist records.
+
 The build strategy is useful if the code under test just needs the data on the
 model and doesn't actually perform any database interactions.
-
-In order to use the create strategy, pull in the `initialize_factories_session`
-fixture.
 
 Regardless of the strategy, you can override the values for attributes on the
 generated models by passing them into the factory call, for example:
