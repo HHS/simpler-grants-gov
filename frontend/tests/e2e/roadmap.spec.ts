@@ -1,10 +1,10 @@
 /**
-* @feature Roadmap page
-* @featureFile frontend/tests/e2e/roadmap.feature
-* @scenario Show the page title
-* @scenario Return to top link works
-* @scenario View all deliverables on Github
-*/
+ * @feature Roadmap page
+ * @featureFile frontend/tests/e2e/roadmap.feature
+ * @scenario Show the page title
+ * @scenario Return to top link works
+ * @scenario View all deliverables on Github
+ */
 
 import { expect, test } from "@playwright/test";
 import { VALID_TAGS } from "tests/e2e/tags";
@@ -17,16 +17,16 @@ test.beforeEach(async ({ page }) => {
 });
 
 /**
-* @scenario Show the page title
-*/
+ * @scenario Show the page title
+ */
 test("has title", { tag: [STATIC, FULL_REGRESSION] }, async ({ page }) => {
   // Then the page title should be "Roadmap | Simpler.Grants.gov"
   await expect(page).toHaveTitle("Roadmap | Simpler.Grants.gov");
 });
 
 /**
-* @scenario Return to top link works
-*/
+ * @scenario Return to top link works
+ */
 test(
   "can return to top after scrolling to the bottom",
   { tag: [STATIC, FULL_REGRESSION] },
@@ -65,8 +65,8 @@ test(
 );
 
 /**
-* @scenario View all deliverables on Github
-*/
+ * @scenario View all deliverables on Github
+ */
 test(
   "can view the 'View all deliverables on Github'",
   { tag: [STATIC, EXTENDED] },
