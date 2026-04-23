@@ -50,10 +50,9 @@ function Search({ searchParams, params }: SearchPageProps) {
 
   const convertedSearchParams =
     convertSearchParamsToProperTypes(resolvedSearchParams);
-
-  if (!("page" in resolvedSearchParams)) {
-    resolvedSearchParams.page = "1";
-  }
+  const modifiedSearchParams = !("page" in resolvedSearchParams)
+    ? { page: "1", ...resolvedSearchParams }
+    : resolvedSearchParams;
 
   const searchResultsPromise = searchForOpportunities(convertedSearchParams);
 
@@ -81,7 +80,7 @@ function Search({ searchParams, params }: SearchPageProps) {
   return (
     <QueryProvider>
       <SearchAnalytics
-        params={resolvedSearchParams}
+        params={modifiedSearchParams}
         newRelicEnabled={environment.NEW_RELIC_ENABLED === "true"}
       />
       <ClassicSearchBanner />

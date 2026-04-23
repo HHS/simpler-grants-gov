@@ -376,13 +376,19 @@ export const InformationCard = ({
   return (
     <>
       {shouldBlockSubmitForTransferOwnership ? (
-        <NeedsTransferOwnershipCta />
+        <>
+          {/* TODO #9637 */}
+          {/* eslint-disable-next-line react-hooks/static-components  */}
+          <NeedsTransferOwnershipCta />
+        </>
       ) : null}
       <GridContainer
         data-testid="information-card"
         className="border radius-md border-base-lighter padding-x-2 margin-y-4"
       >
         <Grid row gap>
+          {/* TODO #9637 */}
+          {/* eslint-disable-next-line react-hooks/static-components  */}
           <InformationCardDetails
             applicationSubmitHandler={applicationSubmitHandler}
           />

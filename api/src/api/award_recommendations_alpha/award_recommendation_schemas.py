@@ -1,10 +1,16 @@
+from marshmallow import validate
+
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
+    ApprovalResponseType,
+    ApprovalType,
     AwardRecommendationAttachmentType,
+    AwardRecommendationAuditEvent,
     AwardRecommendationReviewType,
+    AwardRecommendationRiskType,
     AwardRecommendationStatus,
     AwardRecommendationType,
     AwardSelectionMethod,
@@ -27,15 +33,69 @@ class AwardRecommendationCreateRequestSchema(Schema):
     )
     additional_info = fields.String(
         allow_none=True,
-        metadata={"description": "Additional info about the award recommendation"},
+        metadata={
+            "description": "Additional info about the award recommendation",
+            "example": "Program office requests expedited processing due to deadline in September.",
+        },
     )
     funding_strategy = fields.String(
         allow_none=True,
-        metadata={"description": "Funding strategy information for the award recommendation"},
+        metadata={
+            "description": "Funding strategy information for the award recommendation",
+            "example": "Full funding for top 10 applications, partial funding for next 15 based on available budget.",
+        },
+    )
+    selection_method_detail = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Additional details about the selection method",
+            "example": "Top-ranked applicants based on expert panel scores",
+        },
     )
     other_key_information = fields.String(
         allow_none=True,
-        metadata={"description": "Other key information for the award recommendation"},
+        metadata={
+            "description": "Other key information for the award recommendation",
+            "example": "This opportunity aligns with the agency's rural access initiative and requires interagency coordination.",
+        },
+    )
+
+
+class AwardRecommendationUpdateRequestSchema(Schema):
+    """Schema for PUT /alpha/award-recommendations/:award_recommendation_id request"""
+
+    award_selection_method = fields.Enum(
+        AwardSelectionMethod,
+        required=True,
+        metadata={"description": "The method used to select the award"},
+    )
+    additional_info = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Additional info about the award recommendation",
+            "example": "Program office requests expedited processing due to deadline in September.",
+        },
+    )
+    funding_strategy = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Funding strategy information for the award recommendation",
+            "example": "Full funding for top 10 applications, partial funding for next 15 based on available budget.",
+        },
+    )
+    selection_method_detail = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Additional details about the selection method",
+            "example": "Top-ranked applicants based on expert panel scores",
+        },
+    )
+    other_key_information = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Other key information for the award recommendation",
+            "example": "This opportunity aligns with the agency's rural access initiative and requires interagency coordination.",
+        },
     )
 
 
@@ -366,3 +426,230 @@ class AwardRecommendationSubmissionListResponseSchema(
         fields.Nested(AwardRecommendationSubmissionDataSchema),
         metadata={"description": "The list of award recommendation submissions"},
     )
+
+
+class AwardRecommendationRiskCreateRequestSchema(Schema):
+    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/risks request"""
+
+    comment = fields.String(
+        required=True,
+        metadata={
+            "description": "Summary of the risk",
+            "example": "Applicant has unresolved audit findings",
+        },
+    )
+    award_recommendation_risk_type = fields.Enum(
+        AwardRecommendationRiskType,
+        required=True,
+        metadata={"description": "The type of risk"},
+    )
+    award_recommendation_application_submission_ids = fields.List(
+        fields.UUID(),
+        required=True,
+        validate=[validate.Length(min=1)],
+        metadata={
+            "description": "List of award recommendation application submission IDs to link to this risk"
+        },
+    )
+
+
+class AwardRecommendationRiskCreateResponseDataSchema(Schema):
+    """Schema for the created risk response data"""
+
+    award_recommendation_risk_id = fields.UUID(
+        metadata={"description": "The award recommendation risk ID"}
+    )
+    comment = fields.String(
+        metadata={
+            "description": "Summary of the risk",
+            "example": "Applicant has unresolved audit findings",
+        },
+    )
+    award_recommendation_risk_number = fields.String(
+        metadata={"description": "The generated risk number", "example": "HHS-00012345"},
+    )
+    award_recommendation_risk_type = fields.Enum(
+        AwardRecommendationRiskType,
+        metadata={"description": "The type of risk"},
+    )
+    award_recommendation_application_submission_ids = fields.List(
+        fields.UUID(),
+        metadata={
+            "description": "List of award recommendation application submission IDs linked to this risk"
+        },
+    )
+
+
+class AwardRecommendationRiskCreateResponseSchema(AbstractResponseSchema):
+    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/risks response"""
+
+    data = fields.Nested(
+        AwardRecommendationRiskCreateResponseDataSchema,
+        metadata={"description": "The created award recommendation risk"},
+    )
+
+
+####################################
+# List Award Recommendation Audit History
+####################################
+
+
+class AwardRecommendationAuditFilterSchema(Schema):
+    """Schema for the award recommendation audit history filters"""
+
+    award_recommendation_audit_event = fields.Nested(
+        StrSearchSchemaBuilder("AwardRecAuditEventFilterSchema")
+        .with_one_of(
+            allowed_values=AwardRecommendationAuditEvent,
+            example=AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_CREATED,
+        )
+        .build()
+    )
+
+
+class AwardRecommendationAuditRequestSchema(Schema):
+    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/audit_history request"""
+
+    filters = fields.Nested(AwardRecommendationAuditFilterSchema(), required=False, allow_none=True)
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "AwardRecAuditPaginationSchema",
+            ["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+        ),
+        required=True,
+    )
+
+
+class AwardRecommendationAuditRiskSchema(Schema):
+    """Schema for the risk data within an audit event"""
+
+    award_recommendation_risk_id = fields.UUID(
+        metadata={"description": "The risk's unique identifier"}
+    )
+    award_recommendation_risk_type = fields.Enum(
+        AwardRecommendationRiskType,
+        metadata={"description": "The type of risk"},
+    )
+    award_recommendation_risk_number = fields.String(
+        metadata={"description": "The risk number"},
+    )
+    is_deleted = fields.Boolean(metadata={"description": "Whether the risk has been deleted"})
+
+
+class AwardRecommendationAuditAttachmentSchema(Schema):
+    """Schema for the attachment data within an audit event"""
+
+    award_recommendation_attachment_id = fields.UUID(
+        metadata={"description": "The attachment's unique identifier"}
+    )
+    file_name = fields.String(
+        metadata={"description": "The file name of the attachment", "example": "my_example.pdf"},
+    )
+    award_recommendation_attachment_type = fields.Enum(
+        AwardRecommendationAttachmentType,
+        metadata={"description": "The type of the attachment"},
+    )
+    is_deleted = fields.Boolean(metadata={"description": "Whether the attachment has been deleted"})
+
+
+class AwardRecommendationAuditReviewSchema(Schema):
+    """Schema for the review data within an audit event"""
+
+    award_recommendation_review_id = fields.UUID(
+        metadata={"description": "The review's unique identifier"}
+    )
+    is_reviewed = fields.Boolean(metadata={"description": "Whether the review has been completed"})
+
+
+class AwardRecommendationAuditAppSubmissionSchema(Schema):
+    """Schema for the application submission data within an audit event"""
+
+    award_recommendation_application_submission_id = fields.UUID(
+        metadata={
+            "description": "The award recommendation application submission's unique identifier"
+        }
+    )
+    application_submission_id = fields.UUID(
+        metadata={"description": "The application submission ID"}
+    )
+    application_submission_number = fields.String(
+        allow_none=True,
+        metadata={"description": "The application submission number"},
+    )
+
+
+class AwardRecommendationAuditWorkflowApprovalSchema(Schema):
+    """Schema for the workflow approval data within an audit event"""
+
+    workflow_approval_id = fields.UUID(
+        metadata={"description": "The workflow approval's unique identifier"}
+    )
+    workflow_id = fields.UUID(metadata={"description": "The workflow ID"})
+    approval_type = fields.Enum(
+        ApprovalType,
+        metadata={"description": "The type of approval"},
+    )
+    approval_response_type = fields.Enum(
+        ApprovalResponseType,
+        metadata={"description": "The approval response type"},
+    )
+
+
+class AwardRecommendationAuditDataSchema(Schema):
+    """Schema for a single audit event in the response"""
+
+    award_recommendation_audit_id = fields.UUID(
+        metadata={"description": "The ID of the audit event"}
+    )
+    award_recommendation_audit_event = fields.Enum(
+        AwardRecommendationAuditEvent,
+        metadata={"description": "The type of audit event recorded"},
+    )
+
+    user = fields.Nested(
+        SimpleUserSchema(),
+        metadata={"description": "The user who performed the audited action"},
+    )
+
+    award_recommendation_risk = fields.Nested(
+        AwardRecommendationAuditRiskSchema(),
+        allow_none=True,
+        metadata={"description": "The risk affected by this event (if applicable)"},
+    )
+    award_recommendation_attachment = fields.Nested(
+        AwardRecommendationAuditAttachmentSchema(),
+        allow_none=True,
+        metadata={"description": "The attachment affected by this event (if applicable)"},
+    )
+    award_recommendation_review = fields.Nested(
+        AwardRecommendationAuditReviewSchema(),
+        allow_none=True,
+        metadata={"description": "The review affected by this event (if applicable)"},
+    )
+    award_recommendation_application_submission = fields.Nested(
+        AwardRecommendationAuditAppSubmissionSchema(),
+        allow_none=True,
+        metadata={
+            "description": "The application submission affected by this event (if applicable)"
+        },
+    )
+    workflow_approval = fields.Nested(
+        AwardRecommendationAuditWorkflowApprovalSchema(),
+        allow_none=True,
+        metadata={"description": "The workflow approval affected by this event (if applicable)"},
+    )
+
+    audit_metadata = fields.Dict(
+        allow_none=True,
+        metadata={"description": "Additional metadata about the audit event"},
+    )
+
+    created_at = fields.DateTime(metadata={"description": "When the audit event was created"})
+
+
+class AwardRecommendationAuditResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/audit_history response"""
+
+    data = fields.List(fields.Nested(AwardRecommendationAuditDataSchema()))
