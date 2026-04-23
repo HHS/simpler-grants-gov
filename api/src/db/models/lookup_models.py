@@ -293,10 +293,10 @@ AWARD_RECOMMENDATION_AUDIT_EVENT_CONFIG: LookupConfig[AwardRecommendationAuditEv
         LookupStr(AwardRecommendationAuditEvent.RISK_UPDATED, 10),
         LookupStr(AwardRecommendationAuditEvent.RISK_DELETED, 11),
         LookupStr(AwardRecommendationAuditEvent.APPLICATION_SUBMISSION_UPDATED, 12),
-        LookupStr(AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_SUBMISSION_UPDATED, 16),
         LookupStr(AwardRecommendationAuditEvent.REVIEW_CREATED, 13),
         LookupStr(AwardRecommendationAuditEvent.REVIEW_UPDATED, 14),
         LookupStr(AwardRecommendationAuditEvent.REVIEW_DELETED, 15),
+        LookupStr(AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_SUBMISSION_UPDATED, 16),
     ]
 )
 

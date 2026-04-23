@@ -256,23 +256,15 @@ def award_recommendation_submissions_batch_update(
     add_extra_data_to_current_request_logs({"award_recommendation_id": award_recommendation_id})
     logger.info("PUT /alpha/award-recommendations/:award_recommendation_id/submission-details")
 
-    try:
-        with db_session.begin():
-            user = jwt_or_api_user_key_multi_auth.get_user()
-            db_session.add(user)
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
 
-            submissions = update_award_recommendation_submissions(
-                db_session,
-                user,
-                award_recommendation_id,
-                json_data.get("award_recommendation_submissions", {}),
-            )
-
-        return response.ApiResponse(message="Success", data=submissions)
-    except Exception as e:
-        logger.error(
-            f"Error in batch update endpoint: {str(e)}",
-            extra={"award_recommendation_id": str(award_recommendation_id), "error": str(e)},
-            exc_info=True,
+        submissions = update_award_recommendation_submissions(
+            db_session,
+            user,
+            award_recommendation_id,
+            json_data.get("award_recommendation_submissions", {}),
         )
-        raise
+
+    return response.ApiResponse(message="Success", data=submissions)
