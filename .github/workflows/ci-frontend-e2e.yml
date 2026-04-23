@@ -344,6 +344,13 @@ jobs:
             frontend/.next
             frontend/public
 
+      - name: Save node_modules
+        uses: actions/upload-artifact@v5
+        with:
+          name: node-modules
+          path: |
+            frontend/node_modules
+
   run-e2e-tests-local:
     name: Run Local E2E Tests
     needs: [setup-e2e-tests-local, build-frontend-when-not-cached]
@@ -366,12 +373,13 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
-      - uses: actions/cache@v5
-        id: npm-cache
-        with:
-          path: |
-            node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+      # get this from downloading the artifact since we are passing it job to job
+      # - uses: actions/cache@v5
+      #   id: npm-cache
+      #   with:
+      #     path: |
+      #       node_modules
+      #     key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
       - uses: actions/cache@v5
         id: playwright-cache
@@ -406,13 +414,20 @@ jobs:
           name: next-build
           path: frontend/
 
+      - name: Download node_modules
+        uses: actions/download-artifact@v5
+        with:
+          name: node-modules
+          path: frontend/
+
       - name: ls frontend
         run: |
-          ls -la frontend
+          pwd
+          ls -la .
           echo *****
-          ls -la frontend/.next
+          ls -la ./.next
           echo *****
-          ls -la frontend/.next/standalone
+          ls -la ./.next/standalone
 
       - name: npm ci
         if: steps.npm-cache.outputs.cache-hit != 'true'
