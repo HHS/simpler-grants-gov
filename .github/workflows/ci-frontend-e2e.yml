@@ -118,7 +118,7 @@ jobs:
             frontend/node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
-      - id: id-install-npm-packages
+      - id: install-npm-packages
         if: steps.npm-cache.outputs.cache-hit != 'true'
         run: |
           npm ci
@@ -130,6 +130,13 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Save node_modules
+        uses: actions/upload-artifact@v7
+        with:
+          name: node-modules
+          path: |
+            frontend/node_modules
 
   init-ci-cd:
     name: Initialize for CI/CD runs
@@ -249,7 +256,7 @@ jobs:
           make init-ci-cd
 
       - name: Download shared key
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: api-fe-shared-key
 
@@ -305,13 +312,13 @@ jobs:
       #     key: frontend-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
 
       - name: Download shared key
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: api-fe-shared-key
           path: api/
 
       - name: Download e2e token
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: api-fe-shared-e2e-token
           path: api/
@@ -337,19 +344,14 @@ jobs:
           npm run build
 
       - name: Save next build
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: next-build
+          if-no-files-found: error
+          include-hidden-files: true
           path: |
-            frontend/.next
-            frontend/public
-
-      - name: Save node_modules
-        uses: actions/upload-artifact@v5
-        with:
-          name: node-modules
-          path: |
-            frontend/node_modules
+            frontend/.next/
+            frontend/public/
 
   run-e2e-tests-local:
     name: Run Local E2E Tests
@@ -397,28 +399,28 @@ jobs:
       #     key: ${{ runner.os }}-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
 
       - name: Download shared key
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: api-fe-shared-key
           path: api/
 
       - name: Download shared e2e token
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: api-fe-shared-e2e-token
           path: api/
 
       - name: Download next build
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: next-build
           path: frontend/
 
       - name: Download node_modules
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: node-modules
-          path: frontend/
+          path: frontend/node_modules
 
       - name: ls frontend
         run: |
