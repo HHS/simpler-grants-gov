@@ -1,7 +1,6 @@
 import logging
 import uuid
 
-from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
