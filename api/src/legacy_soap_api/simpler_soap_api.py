@@ -27,6 +27,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_alternate_proxy_response,
     get_invalid_path_response,
     get_soap_error_response,
+    get_soap_fault_error_response,
 )
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
@@ -181,7 +182,7 @@ def process_simpler_request(
             },
         )
         if soap_proxy_response.status_code == 500:
-            return get_soap_error_response(
+            return get_soap_fault_error_response(
                 faultcode=e.fault.faultcode, faultstring=e.fault.faultstring
             ).to_flask_response()
     except Exception:
