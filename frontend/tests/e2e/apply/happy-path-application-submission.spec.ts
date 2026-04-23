@@ -1,3 +1,14 @@
+/**
+ * @feature Apply - Happy Path – Application Submission Workflow
+ * @featureFile frontend/tests/e2e/apply/features/happy-path-application-submission.feature
+ * @scenario Complete the Application Submission workflow for an <user type> user
+ *
+ * Examples:
+ * | user type     |
+ * | Organization  |
+ * | Individual    |
+ */
+
 import {
   test,
   type BrowserContext,
@@ -52,14 +63,22 @@ test(
 
     const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
+    // Given the user is logged in
     await authenticateE2eUser(page, context, !!isMobile);
 
+    // Call reusable create application function from utils
+    /**
+     * Covers "Starting a new application" flow in the feature file
+     * (includes modal interaction, organization selection, and application creation)
+     */
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
+    // And the Application landing page loads with the form link visible
     await verifyFormLinkVisible(page, SF424B_FORM_MATCHER);
 
-    // Fill and save, stay on form page to verify save success
+    // When the user fills out the form with valid test data
+    // And the user clicks Save
     await fillForm(
       testInfo,
       page,
