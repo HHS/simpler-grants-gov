@@ -142,7 +142,7 @@ runs:
     - name: Upload Blob Report
       id: upload-blob-report
       if: always()
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: blob-report-shard-${{ inputs.target }}-${{ inputs.current_shard }}
         path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/frontend/blob-report
