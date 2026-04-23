@@ -12,8 +12,8 @@ from src.db.models.award_recommendation_models import (
 )
 from src.db.models.user_models import User
 from src.services.award_recommendations.create_award_recommendation_risk import (
-    get_validated_submissions,
     get_award_recommendation_for_update,
+    get_validated_submissions,
 )
 
 
@@ -46,7 +46,6 @@ def _get_risk_for_update(
 
 def _sync_risk_submissions(
     risk: AwardRecommendationRisk,
-    new_submission_ids: set[uuid.UUID],
     validated_submissions_by_id: dict[uuid.UUID, AwardRecommendationApplicationSubmission],
 ) -> None:
     existing_ids = {
@@ -54,19 +53,19 @@ def _sync_risk_submissions(
         for rs in risk.award_recommendation_risk_submissions
     }
 
-    ids_to_add = new_submission_ids - existing_ids
-    ids_to_remove = existing_ids - new_submission_ids
-
+    desired_ids = set(validated_submissions_by_id.keys())
     risk.award_recommendation_risk_submissions = [
         rs
         for rs in risk.award_recommendation_risk_submissions
-        if rs.award_recommendation_application_submission_id not in ids_to_remove
+        if rs.award_recommendation_application_submission_id in desired_ids
     ]
 
-    for sid in ids_to_add:
+    for sid, submission in validated_submissions_by_id.items():
+        if sid in existing_ids:
+            continue
         risk.award_recommendation_risk_submissions.append(
             AwardRecommendationRiskSubmission(
-                award_recommendation_application_submission=validated_submissions_by_id[sid],
+                award_recommendation_application_submission=submission,
             )
         )
 
@@ -93,6 +92,6 @@ def update_award_recommendation_risk(
         s.award_recommendation_application_submission_id: s for s in validated_submissions
     }
 
-    _sync_risk_submissions(risk, submission_ids, validated_by_id)
+    _sync_risk_submissions(risk, validated_by_id)
 
     return risk
