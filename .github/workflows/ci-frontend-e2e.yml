@@ -131,7 +131,7 @@ jobs:
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
-      - run: tar -cvzf node_modules.tar.gz node_modules
+      - run: tar -czf node_modules.tar.gz node_modules
 
       - name: Save node_modules
         uses: actions/upload-artifact@v7
@@ -424,11 +424,11 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: node_modules.tar.gz
-          path: frontend/node_modules.tar.gz
+          path: frontend/
 
       - name: Expand node_modules
         run: |
-          tar -xvzf node_modules.tar.gz node_modules
+          tar -xzf node_modules.tar.gz node_modules
           ls -la node_*
           rm node_modules.tar.gz
 
