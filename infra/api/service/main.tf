@@ -120,7 +120,6 @@ data "aws_acm_certificate" "cert" {
 }
 
 data "aws_acm_certificate" "secondary_certs" {
-  # Get secondary domain names only when HTTPS is enabled (certs must exist)
   for_each    = local.service_config.enable_https ? toset(lookup(local.service_config, "secondary_domain_names", [])) : toset([])
   domain      = each.value
   most_recent = true
@@ -130,6 +129,7 @@ data "aws_acm_certificate" "s3_cdn_cert" {
   count       = local.service_config.s3_cdn_domain_name != null ? 1 : 0
   domain      = local.service_config.s3_cdn_domain_name
   most_recent = true
+  key_types   = ["RSA_2048", "RSA_4096"]
 }
 
 data "aws_acm_certificate" "mtls_cert" {

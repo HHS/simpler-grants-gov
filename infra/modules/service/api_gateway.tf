@@ -287,7 +287,7 @@ resource "aws_api_gateway_integration" "root" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri = "https://${var.optional_extra_alb_domains[0]}/"
+  uri = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/"
 }
 
 resource "aws_api_gateway_resource" "root_endpoints" {
@@ -327,7 +327,7 @@ resource "aws_api_gateway_integration" "root_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -368,7 +368,7 @@ resource "aws_api_gateway_integration" "first_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -409,7 +409,7 @@ resource "aws_api_gateway_integration" "second_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -450,7 +450,7 @@ resource "aws_api_gateway_integration" "third_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -491,7 +491,7 @@ resource "aws_api_gateway_integration" "fourth_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
