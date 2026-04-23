@@ -12,9 +12,8 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationGetResponseSchema,
     AwardRecommendationReviewUpdateRequestSchema,
     AwardRecommendationReviewUpdateResponseSchema,
-    AwardRecommendationRiskCreateRequestSchema,
+    AwardRecommendationRiskRequestSchema,
     AwardRecommendationRiskResponseSchema,
-    AwardRecommendationRiskUpdateRequestSchema,
     AwardRecommendationSubmissionListRequestSchema,
     AwardRecommendationSubmissionListResponseSchema,
     AwardRecommendationUpdateRequestSchema,
@@ -207,7 +206,7 @@ def award_recommendation_review_update(
 
 
 @award_recommendation_blueprint.post("/award-recommendations/<uuid:award_recommendation_id>/risks")
-@award_recommendation_blueprint.input(AwardRecommendationRiskCreateRequestSchema, location="json")
+@award_recommendation_blueprint.input(AwardRecommendationRiskRequestSchema, location="json")
 @award_recommendation_blueprint.output(AwardRecommendationRiskResponseSchema)
 @award_recommendation_blueprint.doc(
     summary="Create Award Recommendation Risk",
@@ -236,7 +235,7 @@ def award_recommendation_risk_create(
 @award_recommendation_blueprint.put(
     "/award-recommendations/<uuid:award_recommendation_id>/risks/<uuid:award_recommendation_risk_id>"
 )
-@award_recommendation_blueprint.input(AwardRecommendationRiskUpdateRequestSchema, location="json")
+@award_recommendation_blueprint.input(AwardRecommendationRiskRequestSchema, location="json")
 @award_recommendation_blueprint.output(AwardRecommendationRiskResponseSchema)
 @award_recommendation_blueprint.doc(
     summary="Update Award Recommendation Risk",

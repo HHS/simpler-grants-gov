@@ -425,33 +425,8 @@ class AwardRecommendationSubmissionListResponseSchema(
     )
 
 
-class AwardRecommendationRiskCreateRequestSchema(Schema):
-    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/risks request"""
-
-    comment = fields.String(
-        required=True,
-        metadata={
-            "description": "Summary of the risk",
-            "example": "Applicant has unresolved audit findings",
-        },
-    )
-    award_recommendation_risk_type = fields.Enum(
-        AwardRecommendationRiskType,
-        required=True,
-        metadata={"description": "The type of risk"},
-    )
-    award_recommendation_application_submission_ids = fields.List(
-        fields.UUID(),
-        required=True,
-        validate=[validate.Length(min=1)],
-        metadata={
-            "description": "List of award recommendation application submission IDs to link to this risk"
-        },
-    )
-
-
-class AwardRecommendationRiskUpdateRequestSchema(Schema):
-    """Schema for PUT /alpha/award-recommendations/:award_recommendation_id/risks/:award_recommendation_risk_id request"""
+class AwardRecommendationRiskRequestSchema(Schema):
+    """Schema for award recommendation risk create and update requests"""
 
     comment = fields.String(
         required=True,
