@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+# https://busybox.net/downloads/BusyBox.html#nc
+# https://man.openbsd.org/nc.1
+# https://manpages.debian.org/unstable/netcat-traditional/nc.traditional.1.en.html
+
+printf 'GET /health HTTP/1.1\r\nHost: http://localhost\r\nConnection: close\r\n\r\n' | nc 127.0.0.1 "${PORT}" | grep -q '^HTTP/.* 200 OK'
