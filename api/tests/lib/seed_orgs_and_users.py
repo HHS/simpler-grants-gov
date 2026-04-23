@@ -292,6 +292,23 @@ def _build_organizations_and_users(
 
     user_scenarios.append("many_app_user - Has many applications across many orgs")
 
+    ########################################
+    # Organization admin user with profile
+    #######################################
+    (
+        UserBuilder(
+            uuid.UUID("8bbb96c4-852a-4aa1-81cd-f334396bd7e2"), db_session, "org admin user with user profile"
+        )
+        .with_oauth_login("profile_user")
+        .with_api_key("profile_user_key")
+        .with_jwt_auth()
+        .with_organization(org2, roles=[ORG_ADMIN])
+        .with_profile(first_name="AdminFirstName", middle_name="AdminMiddleName", last_name="AdminLastName")
+        .build()
+    )
+
+    user_scenarios.append("profile_user - Organization admin with a user profile")
+
     ########################
     # Legacy users for orgs
     ########################
