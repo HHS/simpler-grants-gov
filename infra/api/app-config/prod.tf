@@ -18,6 +18,7 @@ module "prod_config" {
   enable_notifications              = local.enable_notifications
   service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyNjMzMDEwMDY4MDkyNjI0MTY0"
   service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXw2ODQyNTI2NjUwMjY5NTAzNzM5"
+  api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058MTA5NDc3MTExMg"
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-prod/services/api-prod/health?region=us-east-1
