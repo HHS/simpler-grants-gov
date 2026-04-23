@@ -131,13 +131,16 @@ jobs:
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
+      - run: tar -cvf node_modules.tar node_modules
+
       - name: Save node_modules
         uses: actions/upload-artifact@v7
         with:
           include-hidden-files: true
-          name: node-modules
+          archive: false
+          name: node-modules-tar
           path: |
-            frontend/node_modules
+            frontend/node_modules.tar
 
   init-ci-cd:
     name: Initialize for CI/CD runs
@@ -420,19 +423,25 @@ jobs:
       - name: Download node_modules
         uses: actions/download-artifact@v8
         with:
-          name: node-modules
-          path: frontend/node_modules
+          name: node-modules-tar
+          path: frontend/node_modules.tar
+
+      - name: Expand node_modules
+        run: |
+          tar -cvf node_modules.tar node_modules
+          ls -la node_*
+          rm node_modules.tar
 
       - name: ls frontend
         run: |
-          chmod +x node_modules/.bin/*
           pwd
           ls -la .
-          echo *****
+          echo ====
           ls -la ./.next
-          echo *****
+          echo ======
           ls -la ./.next/standalone
-
+          echo ========
+          ls -la ./node_modules/.bin
       # we shouldn't ever need to do this
       # - name: npm ci
       #   if: steps.npm-cache.outputs.cache-hit != 'true'
