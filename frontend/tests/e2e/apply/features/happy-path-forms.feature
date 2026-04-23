@@ -5,7 +5,7 @@ Feature: Apply - Application Form Happy Path
  
   Background:
     Given the user is able to login with all roles needed
-   And the system is available
+    And the system is available
  
   Scenario: Application form completion happy path - <form name>
 
