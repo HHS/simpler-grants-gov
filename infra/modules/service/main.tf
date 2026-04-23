@@ -90,6 +90,22 @@ locals {
     ])
   )
 
+  ephemeral_write_volumes_with_name = [for container_path in var.ephemeral_write_volumes : {
+    container_path : container_path,
+    # Derive the volume name from the destination path for simplicity, though
+    # note the name does have a limit of 255 characters.
+    #
+    # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/specify-bind-mount-config.html
+    volume_name : replace(trim(container_path, "/"), "/", "_"),
+  }]
+  ephemeral_write_volume_configs = [for e in local.ephemeral_write_volumes_with_name : {
+    mount_point : {
+      "sourceVolume" : e.volume_name
+      "containerPath" : e.container_path,
+      "readOnly" : false
+    },
+    volume : { "name" : e.volume_name }
+  }]
 }
 
 #-------------------
@@ -158,15 +174,15 @@ resource "aws_ecs_task_definition" "app" {
         interval = 30,
         retries  = 3,
         timeout  = 5,
-        command  = var.healthcheck_command
-      } : null,
-      environment = concat(local.environment_variables, [
-        {
-          name  = "TMPDIR"
-          value = "/tmp"
-        }
-      ]),
-      secrets = var.secrets,
+        # If a `healthcheck` executable is available in the container's $PATH,
+        # use that, otherwise fall back the first available of: wget, curl, or
+        # bash.
+        command = ["CMD-SHELL",
+          "([ -x \"$(command -v healthcheck)\" ] && healthcheck) || ([ -x \"$(command -v wget)\" ] && wget --quiet --output-document=/dev/null http://127.0.0.1:$PORT/health) || ([ -x \"$(command -v curl)\" ] && curl --fail --silent http://localhost:$PORT/health > /dev/null) || ([ -x \"$(command -v bash)\" ] && bash -c \"exec 3<>/dev/tcp/127.0.0.1/$PORT;echo -e 'GET /health HTTP/1.1\\r\\nHost: http://localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3;grep -q '^HTTP/.* 200 OK' <&3\") || exit 1"
+        ]
+      },
+      environment = local.environment_variables,
+      secrets     = var.secrets,
       portMappings = [
         {
           containerPort = var.container_port,
@@ -224,33 +240,22 @@ resource "aws_ecs_task_definition" "app" {
           "awslogs-region"        = data.aws_region.current.name,
           "awslogs-stream-prefix" = local.log_stream_prefix
         }
-      }
-      secrets = [
-        {
-          name      = "licenseKey",
-          valueFrom = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/new-relic-license-key"
-        }
-      ]
-      environment = [
-        { name : "aws_region", value : data.aws_region.current.name },
-        { name : "container_name", value : local.container_name },
-        { name : "log_group_name", value : local.log_group_name },
-      ],
-    },
+      },
+      mountPoints    = local.ephemeral_write_volume_configs[*].mount_point
+      systemControls = []
+      volumesFrom    = []
+    }
   ])
 
-  # The CPU and memory values for the task definition need to be one of the valid combinations for Fargate tasks.
-  # The valid combinations are listed in the AWS documentation below.
-  #
-  # The input values for `var.cpu` and `var.memory` are the values for the application container,
-  # not the value for the task definition.
-  #
-  # Because `var.cpu` and `var.memory` are the values for the application container,
-  # we need to create extra room in the task definition for the application container
-  #
-  # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size
-  cpu    = var.fargate_cpu
-  memory = var.fargate_memory
+  dynamic "volume" {
+    for_each = local.ephemeral_write_volume_configs[*].volume
+    content {
+      name = volume.value["name"]
+    }
+  }
+
+  cpu    = var.cpu
+  memory = var.memory
 
   requires_compatibilities = ["FARGATE"]
 

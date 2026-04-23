@@ -69,7 +69,7 @@ resource "aws_lb_listener" "alb_listener_http" {
 resource "aws_lb_listener_rule" "http_to_https_redirect" {
   count = var.certificate_arn != null ? 1 : 0
 
-  listener_arn = aws_lb_listener.alb_listener_http[0].arn
+  listener_arn = aws_lb_listener.alb_listener_http.arn
   priority     = 50
 
   action {
@@ -91,11 +91,10 @@ resource "aws_lb_listener_rule" "http_to_https_redirect" {
 }
 
 resource "aws_lb_listener_rule" "app_http_forward" {
-  # there is no mtls for http so we don't need to do the same dance here
-  count = var.enable_load_balancer ? 1 : 0
+  count = var.certificate_arn == null ? 1 : 0
 
-  listener_arn = aws_lb_listener.alb_listener_http[0].arn
-  priority     = 111
+  listener_arn = aws_lb_listener.alb_listener_http.arn
+  priority     = 100
 
   action {
     type             = "forward"
@@ -166,34 +165,6 @@ resource "aws_lb_target_group" "app_tg" {
   # checkov:skip=CKV_AWS_378:We are using HTTPS, just not here specifically.
   count                = var.enable_load_balancer ? 1 : 0
   name_prefix          = "app-"
-  port                 = var.container_port
-  protocol             = "HTTP"
-  vpc_id               = module.network.vpc_id
-  target_type          = "ip"
-  deregistration_delay = "30"
-
-  health_check {
-    path                = var.healthcheck_path
-    port                = var.container_port
-    healthy_threshold   = 2
-    unhealthy_threshold = 10
-    interval            = 30
-    timeout             = 29
-    matcher             = "200-299"
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_lb_target_group" "mtls_tg" {
-  # you must use a prefix, to facilitate successful tg changes
-  # checkov:skip=CKV_AWS_378:We are using HTTPS, just not here specifically.
-
-  # done a slightly different way from elsewhere in the file to account for naming these from another file being easier this way
-  count                = var.enable_mtls_load_balancer ? 1 : 0
-  name_prefix          = "mtls-"
   port                 = var.container_port
   protocol             = "HTTP"
   vpc_id               = module.network.vpc_id

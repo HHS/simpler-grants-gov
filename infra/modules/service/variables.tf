@@ -1,9 +1,4 @@
-variable "aws_services_security_group_id" {
-  type        = string
-  description = "Security group ID for VPC endpoints that access AWS Services"
-}
-
-variable "image_repository_name" {
+variable "certificate_arn" {
   type        = string
   description = "The name of the container image repository"
   default     = null
@@ -15,34 +10,10 @@ variable "container_port" {
   default     = 8000
 }
 
-variable "environment_name" {
-  type        = string
-  description = "The name of the environment"
-  default     = ""
-}
-
-variable "hostname" {
-  type        = string
-  description = "The hostname to override the default AWS configuration"
-  default     = null
-}
-
-variable "s3_buckets" {
-  type = map(object({
-    env_var = string
-    public  = bool
-    paths = list(object({
-      path    = string
-      env_var = string
-    }))
-  }))
-  default = {}
-}
-
-variable "enable_drafts_bucket" {
-  description = "does the service need a private S3 bucket for draft document storage"
-  type        = bool
-  default     = false
+variable "cpu" {
+  type        = number
+  default     = 256
+  description = "Number of cpu units used by the task, expressed as an integer value, e.g 512"
 }
 
 variable "db_vars" {
@@ -259,22 +230,9 @@ variable "fluent_bit_cpu" {
   description = "Amount of cpu used by the fluent bit container"
 }
 
-variable "fargate_cpu" {
-  type        = number
-  default     = 2048
-  description = "Total CPU for all the containers in the task definiton, must be equal to or less than the total cpu allocated for the app and fluentbit container"
-}
-
-variable "fargate_memory" {
-  type        = number
-  default     = 4096
-  description = "Total memory for all the containers in the task definiton, must be equal to or less than the total memory allocated for the app and fluentbit container"
-}
-
 variable "network_name" {
   type        = string
   description = "The name of the network within which the service will run"
-
 }
 
 variable "project_name" {
@@ -329,70 +287,4 @@ variable "ephemeral_write_volumes" {
   type        = set(string)
   description = "A set of absolute paths in the container to be mounted as writable for the life of the task. These need to be declared with `VOLUME` instructions in the container build file."
   default     = []
-}
-
-variable "pinpoint_app_id" {
-  type        = string
-  description = "Pinpoint App ID"
-  default     = ""
-}
-
-variable "hosted_zone" {
-  type        = string
-  description = "The domain where SES is set up for emails"
-  default     = null
-}
-
-variable "ses_configuration_set" {
-  type        = string
-  description = "The configuration set (dashed-domain-name) where SES is set up for emails"
-  default     = null
-}
-
-variable "enable_mtls_load_balancer" {
-  type        = bool
-  description = "Stand up a second twin LB that will support mTLS client certificate auth passthrough"
-  default     = false
-}
-
-variable "mtls_domain_name" {
-  type        = string
-  description = "The fully qualified domain name for the mTLS-enabled load balancer"
-  default     = null
-}
-
-variable "mtls_certificate_arn" {
-  description = "The ARN of the certificate to use for the mTLS LB for the API"
-  type        = string
-  default     = null
-}
-
-variable "optional_extra_alb_certs" {
-  description = "Optional: Stores the ARN for extra certs to attach to the ALB"
-  type        = list(string)
-  default     = []
-}
-
-variable "optional_extra_alb_domains" {
-  description = "Optional: Other domains the ALB is configured to accept traffic to. Requires optional_extra_alb_certs to be set"
-  type        = list(string)
-  default     = []
-}
-
-variable "opensearch_ingest_policy_arn" {
-  description = "The ARN of the IAM policy for OpenSearch ingest operations. When provided, attaches to the migrator role for scheduled data loading jobs."
-  type        = string
-  default     = null
-}
-
-variable "newrelic_entity_guid" {
-  type        = string
-  description = "New Relic entity GUID for the primary ALB, used to correlate logs with the infrastructure entity in New Relic."
-  default     = null
-}
-
-variable "newrelic_mtls_entity_guid" {
-  type        = string
-  description = "New Relic entity GUID for the mTLS ALB, used to correlate logs with the infrastructure entity in New Relic."
-  default     = null
 }

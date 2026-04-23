@@ -1,4 +1,4 @@
-# Configures AWS SES to send additional logging to AWS Cloudwatch.
+# Configures AWS SES to send additional logging to AWS CloudWatch.
 # See https://docs.aws.amazon.com/ses/latest/dg/event-destinations-manage.html
 resource "aws_ses_event_destination" "logs" {
   name                   = "${local.dash_domain}-email-identity-logs"

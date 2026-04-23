@@ -30,46 +30,7 @@ output "migrator_role_arn" {
   value       = length(aws_iam_role.migrator_task) > 0 ? aws_iam_role.migrator_task[0].arn : null
 }
 
-output "opensearch_write_role_arn" {
-  description = "ARN for role to use for OpenSearch write operations"
-  value       = length(aws_iam_role.opensearch_write) > 0 ? aws_iam_role.opensearch_write[0].arn : null
-}
-
-output "cluster_arn" {
-  value = aws_ecs_cluster.cluster.arn
-}
-
-output "task_definition_arn" {
-  value = aws_ecs_task_definition.app.arn
-}
-
-output "app_service_arn" {
-  value = aws_iam_role.app_service.arn
-}
-
-output "task_role_arn" {
-  value = aws_iam_role.task_executor.arn
-}
-
-output "app_security_group_id" {
-  value = aws_security_group.app.id
-}
-
-output "service_logs_arn" {
-  value = aws_cloudwatch_log_group.service_logs.arn
-}
-
-output "image_url" {
-  description = "image url for the app container"
-  value       = local.image_url
-}
-
-output "fluent_bit_image_url" {
-  description = "image url for the Fluent Bit sidecar"
-  value       = local.fluent_bit_image_url
-}
-
-output "environment_variables" {
-  description = "environment variable for the app container"
-  value       = local.environment_variables
+output "public_endpoint" {
+  description = "The public endpoint for the service."
+  value       = "${var.certificate_arn != null ? "https" : "http"}://${local.domain_name != null ? local.domain_name : aws_lb.alb.dns_name}"
 }

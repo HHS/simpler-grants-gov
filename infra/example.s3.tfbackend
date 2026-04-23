@@ -1,4 +1,4 @@
-bucket       = "<TF_STATE_BUCKET_NAME>"
-key          = "<TF_STATE_KEY>"
-region       = "<REGION>"
-use_lockfile = true
+bucket         = "<TF_STATE_BUCKET_NAME>"
+key            = "<TF_STATE_KEY>"
+region         = "<REGION>"
+use_lockfile   = true
