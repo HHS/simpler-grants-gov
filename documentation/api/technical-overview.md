@@ -39,7 +39,7 @@ generally preferred.
 
 ## Request operations
 
-- TODO - redo this
+Requests are handled via APIFlask blueprints. Each endpoint defines its request/response schemas, authentication, and route configuration in [api/src/api](../../api/src/api). See [API Details](./api-details.md) for how to define schemas and endpoints.
 
 ## Authentication
 
@@ -53,7 +53,9 @@ In the `api_key` security scheme, the `X-Auth` points to the
 function that is run to do the authentication.
 
 ## Authorization
-n/a - Specific user authorization is not yet implemented for this API.
+
+The API has an active authorization layer implemented under [api/src/auth/](../../api/src/auth/). For details on how authentication and user logic works, see [authentication.md](./authentication.md) and [api/src/auth/README.md](../../api/src/auth/README.md).
 
 ### Database diagram
-n/a - Database diagrams are not yet available for this application.
+
+ERD diagrams are auto-generated from our SQLAlchemy models and can be found in [documentation/api/database/erds/README.md](./database/erds/README.md).
