@@ -134,6 +134,7 @@ jobs:
       - name: Save node_modules
         uses: actions/upload-artifact@v7
         with:
+          include-hidden-files: true
           name: node-modules
           path: |
             frontend/node_modules
