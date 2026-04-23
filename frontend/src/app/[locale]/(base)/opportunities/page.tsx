@@ -396,7 +396,6 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
     };
     try {
       userOpportunities = await searchOpportunitiesByAgency(
-        userSession.token,
         selectedAgency.agency_id,
         pageRequest,
       );

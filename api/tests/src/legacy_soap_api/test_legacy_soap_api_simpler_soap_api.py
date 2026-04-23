@@ -28,7 +28,7 @@ class TestSimplerSoapApi:
         soap_request = SOAPRequest(
             data=SoapRequestStreamer(stream=io.BytesIO(envelope)),
             full_path="x",
-            headers={},
+            headers={"Use-Simpler-Override": "1"},
             method="POST",
             api_name=SimplerSoapAPI.APPLICANTS,
             operation_name="GetOpportunityListRequest",

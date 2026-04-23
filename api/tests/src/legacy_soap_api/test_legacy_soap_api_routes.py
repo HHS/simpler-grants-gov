@@ -5,6 +5,7 @@ from lxml import etree
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models.competition_models import ApplicationSubmissionRetrieved
+from src.legacy_soap_api import legacy_soap_api_config as soap_api_config
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientCertificate
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
@@ -29,6 +30,8 @@ SIMPLER_TRACKING_NUMBER = "GRANT80000008"
 LEGACY_TRACKING_NUMBER = "GRANT00000008"
 GET_APPLICATION_PATH = f"{{{NSMAP['envelope']}}}Body/{{{NSMAP['application_request']}}}GetApplicationRequest/{{{NSMAP['tracking_number']}}}GrantsGovTrackingNumber"
 GET_APPLICATION_ZIP_PATH = f"{{{NSMAP['envelope']}}}Body/{{{NSMAP['application_request']}}}GetApplicationZipRequest/{{{NSMAP['tracking_number']}}}GrantsGovTrackingNumber"
+CONFIRM_APPLICATION_DELIVERY_PATH = f"{{{NSMAP['envelope']}}}Body/{{{NSMAP['application_request']}}}ConfirmApplicationDeliveryRequest/{{{NSMAP['tracking_number']}}}GrantsGovTrackingNumber"
+UPDATE_APPLICATION_INFO = f"{{{NSMAP['envelope']}}}Body/{{{NSMAP['application_request']}}}UpdateApplicationInfoRequest/{{{NSMAP['tracking_number']}}}GrantsGovTrackingNumber"
 MOCK_FINGERPRINT = "123"
 MOCK_CERT = "456"
 MOCK_CERT_STR = "certstr"
@@ -110,7 +113,7 @@ def test_successful_confirm_application_delivery_request(
 
 @mock.patch("uuid.uuid4")
 def test_successful_confirm_application_delivery_request_when_in_received_by_agency_status(
-    mock_uuid, db_session, client, enable_factory_create
+    mock_uuid, db_session, client, enable_factory_create, caplog
 ) -> None:
     mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
@@ -175,11 +178,16 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
         response.headers["Content-Type"]
         == f'multipart/related; type="application/xop+xml"; boundary="uuid:{TEST_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
     )
+    log = next(r for r in caplog.records if r.message == "Soap Fault Exception raised")
+    assert (
+        log.faultstring
+        == f"Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Received by Agency' for GRANT{submission.legacy_tracking_number})"
+    )
 
 
 @mock.patch("uuid.uuid4")
 def test_successful_confirm_application_delivery_request_when_in_tracking_number_assigned_status(
-    mock_uuid, db_session, client, enable_factory_create
+    mock_uuid, db_session, client, enable_factory_create, caplog
 ) -> None:
     mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
@@ -240,6 +248,11 @@ def test_successful_confirm_application_delivery_request_when_in_tracking_number
         f"--uuid:{TEST_UUID}--\r\n"
     )
     assert response.data.decode() == expected
+    log = next(r for r in caplog.records if r.message == "Soap Fault Exception raised")
+    assert (
+        log.faultstring
+        == f"Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Agency Tracking Number Assigned' for GRANT{submission.legacy_tracking_number})"
+    )
 
 
 @mock.patch("uuid.uuid4")
@@ -558,6 +571,130 @@ def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is
         response.headers["Content-Type"]
         == f'multipart/related; type="application/xop+xml"; boundary="uuid:{test_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
     )
+
+
+@mock.patch("uuid.uuid4")
+@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+def test_confirm_application_delivery_returns_not_found_response_if_simpler_id_is_used(
+    mock_get_soap_response, mock_uuid, client, fixture_from_file, monkeypatch
+) -> None:
+    """
+    Force the response to be the legacy response and show that we do not actually call the legacy request method
+    """
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("USE_SIMPLER", "false")
+    test_uuid = "00000000-aaaa-0000-bbbb-000000000000"
+    mock_uuid.return_value = test_uuid
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = """
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+       <soapenv:Header/>
+       <soapenv:Body>
+          <agen:ConfirmApplicationDeliveryRequest>
+             <gran:GrantsGovTrackingNumber>GRANT80837443</gran:GrantsGovTrackingNumber>
+          </agen:ConfirmApplicationDeliveryRequest>
+       </soapenv:Body>
+    </soapenv:Envelope>
+    """
+    envelope = etree.fromstring(mock_data)
+    tracking_number = envelope.find(CONFIRM_APPLICATION_DELIVERY_PATH)
+    tracking_number.text = SIMPLER_TRACKING_NUMBER
+    response = client.post(full_path, data=etree.tostring(envelope))
+    expected = (
+        f"--uuid:{test_uuid}\r\n"
+        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: binary\r\nContent-ID: <root.message@cxf.apache.org>\r\n'
+        '\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault><faultcode>soap:Server</faultcode><faultstring>Failed to confirm application delivery.(Authorization Failure)</faultstring></soap:Fault>"
+        "</soap:Body></soap:Envelope>\r\n"
+        f"--uuid:{test_uuid}--"
+    ).encode("utf-8")
+    mock_get_soap_response.assert_not_called()
+    assert response.status_code == 500
+    assert response.headers["Content-Length"] == "496"
+    assert expected == response.data
+    assert (
+        response.headers["Content-Type"]
+        == f'multipart/related; type="application/xop+xml"; boundary="uuid:{test_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
+    )
+    assert response.headers["Set-Cookie"] == "None; Path=/grantsws-agency; Secure; HttpOnly"
+
+
+@mock.patch("uuid.uuid4")
+@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+def test_update_application_info_returns_not_found_response_if_simpler_id_is_used(
+    mock_get_soap_response, mock_uuid, client, fixture_from_file, monkeypatch
+) -> None:
+    """
+    Force the response to be the legacy response and show that we do not actually call the legacy request method
+    """
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("USE_SIMPLER", "false")
+    test_uuid = "00000000-aaaa-0000-bbbb-000000000000"
+    mock_uuid.return_value = test_uuid
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = f"""
+        <soapenv:Envelope
+        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+        xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0"
+        xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0"
+        xmlns:agen1="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:UpdateApplicationInfoRequest>
+        <gran:GrantsGovTrackingNumber>{SIMPLER_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>
+        <agen1:AssignAgencyTrackingNumber>1</agen1:AssignAgencyTrackingNumber>
+        <agen1:SaveAgencyNotes>test 1</agen1:SaveAgencyNotes>
+        </agen:UpdateApplicationInfoRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """
+    envelope = etree.fromstring(mock_data)
+    tracking_number = envelope.find(UPDATE_APPLICATION_INFO)
+    tracking_number.text = SIMPLER_TRACKING_NUMBER
+    response = client.post(full_path, data=etree.tostring(envelope))
+    expected = (
+        f"--uuid:{test_uuid}\r\n"
+        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: binary\r\nContent-ID: <root.message@cxf.apache.org>\r\n'
+        '\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<ns2:UpdateApplicationInfoResponse "
+        'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
+        'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
+        'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
+        'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
+        'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" '
+        'xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
+        'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
+        'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
+        'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
+        'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
+        'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        f"<GrantsGovTrackingNumber>{SIMPLER_TRACKING_NUMBER}</GrantsGovTrackingNumber>"
+        "<ns2:Success>true</ns2:Success>"
+        "<ns9:AssignAgencyTrackingNumberResult>"
+        "<ns9:Success>false</ns9:Success>"
+        "<ns9:ErrorMessage>Exception caught assigning agency tracking number.(Authorization Failure)</ns9:ErrorMessage>"
+        "</ns9:AssignAgencyTrackingNumberResult>"
+        "<ns9:SaveAgencyNotesResult>"
+        "<ns9:Success>false</ns9:Success>"
+        "<ns9:ErrorMessage>Exception caught saving agency notes.(Authorization Failure)</ns9:ErrorMessage>"
+        "</ns9:SaveAgencyNotesResult>"
+        "</ns2:UpdateApplicationInfoResponse>"
+        "</soap:Body>"
+        "</soap:Envelope>\r\n"
+        f"--uuid:{test_uuid}--"
+    ).encode("utf-8")
+    mock_get_soap_response.assert_not_called()
+    assert response.status_code == 500
+    assert response.headers["Content-Length"] == "1694"
+    assert expected == response.data
+    assert (
+        response.headers["Content-Type"]
+        == f'multipart/related; type="application/xop+xml"; boundary="uuid:{test_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
+    )
+    assert response.headers["Set-Cookie"] == "None; Path=/grantsws-agency; Secure; HttpOnly"
 
 
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")

@@ -1,6 +1,9 @@
 "use client";
 
-import { publishOpportunityAction } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
+import {
+  publishOpportunityAction,
+  saveOpportunityEditAction,
+} from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,11 +17,6 @@ type OpportunityEditHeaderActionsProps = {
   previewLabel: string;
   publishLabel: string;
 };
-
-function isValidDate(str: string): boolean {
-  if (!str.trim()) return false;
-  return !isNaN(new Date(str).getTime());
-}
 
 function isPublishEnabled(values: OpportunityEditFormValues): boolean {
   return (
@@ -37,9 +35,6 @@ export default function OpportunityEditHeaderActions({
 }: OpportunityEditHeaderActionsProps) {
   const [publishEnabled, setPublishEnabled] = useState(
     isPublishEnabled(initialValues),
-  );
-  const [currentPublishDate, setCurrentPublishDate] = useState(
-    initialValues.publishDate,
   );
   const [isPublishing, setIsPublishing] = useState(false);
   const router = useRouter();
@@ -62,7 +57,6 @@ export default function OpportunityEditHeaderActions({
           eligibleApplicants: string[];
         }>
       ).detail;
-      setCurrentPublishDate(publishDate);
       setPublishEnabled(
         publishDate.trim() !== "" &&
           fundingType.trim() !== "" &&
@@ -90,23 +84,32 @@ export default function OpportunityEditHeaderActions({
         disabled={!publishEnabled || isPublishing}
         className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
         onClick={() => {
-          if (!isValidDate(currentPublishDate)) {
-            const form = document.getElementById(
-              "opportunity-edit-form",
-            ) as HTMLFormElement | null;
-            form?.requestSubmit();
-            return;
-          }
-          setIsPublishing(true);
-          publishOpportunityAction(opportunityId)
-            .then((result) => {
-              if (result?.errorMessage) {
+          const form = document.getElementById(
+            "opportunity-edit-form",
+          ) as HTMLFormElement | null;
+          if (form) {
+            const formData = new FormData(form);
+            saveOpportunityEditAction({}, formData)
+              .then((result) => {
+                if (result?.errorMessage || result?.validationErrors) {
+                  form.requestSubmit(); // routes through useActionState so errors display in the form UI
+                  return;
+                }
+                setIsPublishing(true);
+                publishOpportunityAction(opportunityId)
+                  .then((result) => {
+                    if (result?.errorMessage) {
+                      setIsPublishing(false);
+                    } else {
+                      router.push("/opportunities");
+                    }
+                  })
+                  .catch((_e) => setIsPublishing(false));
+              })
+              .catch((_e) => {
                 setIsPublishing(false);
-              } else {
-                router.push("/opportunities");
-              }
-            })
-            .catch((_e) => setIsPublishing(false));
+              });
+          }
         }}
       >
         {publishLabel}
