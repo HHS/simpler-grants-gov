@@ -334,6 +334,8 @@ jobs:
         #always build for now until we can sort out getting e2e key
         # if: steps.next-build-cache.outputs.cache-matched-key == ''
         run: |
+          # webkit installs itself outside the cache folder maybe?
+          npx playwright install-deps webkit
           {
             cat .env.development
             sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
@@ -431,15 +433,17 @@ jobs:
           echo *****
           ls -la ./.next/standalone
 
-      - name: npm ci
-        if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: |
-          npm ci
+      # we shouldn't ever need to do this
+      # - name: npm ci
+      #   if: steps.npm-cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     npm ci
 
-      - name: Install dependencies and Playwright
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: |
-          npx playwright install --with-deps
+      # we shouldn't ever need to do this
+      # - name: Install dependencies and Playwright
+      #   if: steps.playwright-cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     npx playwright install --with-deps
 
       - name: Determine test groups to run
         shell: bash
