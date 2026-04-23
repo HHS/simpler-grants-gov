@@ -472,7 +472,10 @@ def test_build_notification_content_single_opportunity(monkeypatch, enable_facto
     monkeypatch.setenv("FRONTEND_BASE_URL", "http://localhost:3000")
 
     from src.task.notifications.config import EmailNotificationConfig
-    from src.task.notifications.org_saved_opportunity_notification import build_notification_content
+    from src.task.notifications.org_saved_opportunity_notification import (
+        OrgOpportunityGroup,
+        build_notification_content,
+    )
     from tests.src.db.models.factories import (
         OpportunityFactory,
         OrganizationSavedOpportunityFactory,
@@ -485,11 +488,13 @@ def test_build_notification_content_single_opportunity(monkeypatch, enable_facto
     opp = OpportunityFactory.create(opportunity_title="Research Grant")
     OrganizationSavedOpportunityFactory.create(opportunity=opp, organization=sam_gov.organization)
 
-    subject, html = build_notification_content(
-        config=config,
+    group = OrgOpportunityGroup(
         organization=sam_gov.organization,
-        org_saved_opportunities=[opp],
+        opportunities=[opp],
+        displayed=[opp],
+        remaining=0,
     )
+    subject, html = build_notification_content(config=config, org_opp_list=[group])
 
     assert subject == f"{sam_gov.organization.organization_name} has a new opportunity to review"
 
@@ -522,7 +527,10 @@ def test_build_notification_content_three_opportunities(monkeypatch, enable_fact
     monkeypatch.setenv("FRONTEND_BASE_URL", "http://localhost:3000")
 
     from src.task.notifications.config import EmailNotificationConfig
-    from src.task.notifications.org_saved_opportunity_notification import build_notification_content
+    from src.task.notifications.org_saved_opportunity_notification import (
+        OrgOpportunityGroup,
+        build_notification_content,
+    )
     from tests.src.db.models.factories import (
         OpportunityFactory,
         OrganizationSavedOpportunityFactory,
@@ -542,11 +550,13 @@ def test_build_notification_content_three_opportunities(monkeypatch, enable_fact
             opportunity=opp, organization=sam_gov.organization
         )
 
-    subject, html = build_notification_content(
-        config=config,
+    group = OrgOpportunityGroup(
         organization=sam_gov.organization,
-        org_saved_opportunities=opps,
+        opportunities=opps,
+        displayed=opps,
+        remaining=0,
     )
+    subject, html = build_notification_content(config=config, org_opp_list=[group])
 
     assert subject == f"{sam_gov.organization.organization_name} has new opportunities to review"
 
@@ -581,7 +591,10 @@ def test_build_notification_content_more_than_max_opportunities(monkeypatch, ena
     monkeypatch.setenv("FRONTEND_BASE_URL", "http://localhost:3000")
 
     from src.task.notifications.config import EmailNotificationConfig
-    from src.task.notifications.org_saved_opportunity_notification import build_notification_content
+    from src.task.notifications.org_saved_opportunity_notification import (
+        OrgOpportunityGroup,
+        build_notification_content,
+    )
     from tests.src.db.models.factories import (
         OpportunityFactory,
         OrganizationSavedOpportunityFactory,
@@ -598,11 +611,13 @@ def test_build_notification_content_more_than_max_opportunities(monkeypatch, ena
             opportunity=opp, organization=sam_gov.organization
         )
 
-    subject, html = build_notification_content(
-        config=config,
+    group = OrgOpportunityGroup(
         organization=sam_gov.organization,
-        org_saved_opportunities=opps,
+        opportunities=opps,
+        displayed=opps[:5],
+        remaining=2,
     )
+    subject, html = build_notification_content(config=config, org_opp_list=[group])
 
     assert subject == f"{sam_gov.organization.organization_name} has new opportunities to review"
 

@@ -1,6 +1,5 @@
 import html
 import logging
-from collections.abc import Sequence
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -39,43 +38,58 @@ class OrgOpportunityGroup:
 
 def build_notification_content(
     config: EmailNotificationConfig,
-    organization: Organization,
-    org_saved_opportunities: Sequence[Opportunity],
+    org_opp_list: list[OrgOpportunityGroup],
 ) -> tuple[str, str]:
-    count = len(org_saved_opportunities)
-    org_name = html.escape(organization.organization_name or "")
-    if count == 1:
-        subject = f"{org_name} has a new opportunity to review"
-        intro = "A new opportunity has been saved for your organization."
+    has_multiple_orgs = len(org_opp_list) > 1
+
+    if not has_multiple_orgs:
+        group = org_opp_list[0]
+        total = len(group.opportunities)
+        org_name_esc = html.escape(group.organization.organization_name or "")
+        if total == 1:
+            subject = f"{org_name_esc} has a new opportunity to review"
+            intro = "A new opportunity has been saved for your organization."
+        else:
+            subject = f"{org_name_esc} has new opportunities to review"
+            intro = "New opportunities have been saved for your organization."
     else:
-        subject = f"{org_name} has new opportunities to review"
-        intro = "New opportunities have been saved for your organization."
+        subject = "New funding opportunities have been saved to your organizations"
+        intro = "New funding opportunities have been saved to your organizations."
 
     intro += " See what fits your team's goals and align on next steps."
 
-    displayed = org_saved_opportunities[:MAX_OPPORTUNITIES_DISPLAYED]
-    remaining = count - len(displayed)
-
-    items = [
-        f'<li style="list-style-type:none; margin:0; padding:0;"><a href="{config.frontend_base_url}/opportunity/{opp.opportunity_id}" target="_blank">{html.escape(opp.opportunity_title or "")}</a></li>'
-        for opp in displayed
-    ]
-
-    if remaining > 0:
-        items.append(
-            f"<li style=\"list-style-type:none; margin:0; padding:0;\">+ {remaining} more opportunit{'ies' if remaining > 1 else 'y'}</li>"
-        )
-    items_html = "\n".join(items)
-    titles_html = f"""<ul style="list-style-type:none; margin:0; padding-left:16px;">
-{items_html}
-</ul>""".strip()
-
-    view_all_opps_url = (
-        f"{config.frontend_base_url}/workspace/saved-opportunities"
-        f"?savedBy=organization:{organization.organization_id}"
-    )
-
     notification_prefs_url = f"{config.frontend_base_url}/notifications"
+
+    org_sections = []
+    for group in org_opp_list:
+        org_name_esc = html.escape(group.organization.organization_name or "Unknown Organization")
+
+        items = [
+            f'<li style="list-style-type:none; margin:0; padding:0;"><a href="{config.frontend_base_url}/opportunity/{opp.opportunity_id}" target="_blank">{html.escape(opp.opportunity_title or "")}</a></li>'
+            for opp in group.displayed
+        ]
+        if group.remaining > 0:
+            items.append(
+                f"<li style=\"list-style-type:none; margin:0; padding:0;\">+ {group.remaining} more opportunit{'ies' if group.remaining > 1 else 'y'}</li>"
+            )
+
+        items_html = "\n".join(items)
+        titles_html = (
+            f'<ul style="list-style-type:none; margin:0; padding-left:16px;">\n{items_html}\n</ul>'
+        )
+        view_all_url = (
+            f"{config.frontend_base_url}/workspace/saved-opportunities"
+            f"?savedBy=organization:{group.organization.organization_id}"
+        )
+        view_all_link = f'<p>\n<a href="{view_all_url}" style="text-decoration: none;">View all opportunities</a>\n</p>'
+
+        section_parts = []
+        if has_multiple_orgs:
+            section_parts.append(f"<p><strong>{org_name_esc}</strong></p>")
+        section_parts.extend([titles_html, view_all_link])
+        org_sections.append("\n\n".join(section_parts))
+
+    body_content = "\n\n".join(org_sections)
 
     content = f"""<html>
 <body>
@@ -84,11 +98,7 @@ def build_notification_content(
 {intro}
 </p>
 
-{titles_html}
-
-<p>
-<a href="{view_all_opps_url}" style="text-decoration: none;">View all opportunities</a>
-</p>
+{body_content}
 
 <p>
 Manage which updates you receive in your
@@ -209,13 +219,8 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
             all_opportunity_ids = [
                 opp.opportunity_id for group in org_opp_list for opp in group.opportunities
             ]
-            content = self._build_notification_message(org_opp_list)
+            subject, content = build_notification_content(self.notification_config, org_opp_list)
             org_count = len(org_opp_list)
-            subject = (
-                "New funding opportunities have been saved to your organization"
-                if org_count == 1
-                else "New funding opportunities have been saved to your organizations"
-            )
 
             logger.info(
                 "Created org saved opportunity email notification",
@@ -272,81 +277,6 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
             )
         )
         return list(self.db_session.execute(stmt).scalars().all())
-
-    def _build_notification_message(self, org_opp_list: list[OrgOpportunityGroup]) -> str:
-        if len(org_opp_list) == 1:
-            group = org_opp_list[0]
-            _, content = build_notification_content(
-                self.notification_config, group.organization, group.opportunities
-            )
-            return content
-
-        # Multi-org: build a combined email with a section per organization
-        intro = (
-            "New funding opportunities have been saved to your organizations."
-            " See what fits your team's goals and align on next steps."
-        )
-        notification_prefs_url = (
-            f"{self.notification_config.frontend_base_url}/notifications{UTM_TAG}"
-        )
-
-        org_sections = []
-        for group in org_opp_list:
-            org_name = html.escape(group.organization.organization_name or "Unknown Organization")
-            items = []
-
-            for opportunity in group.displayed:
-                opp_url = (
-                    f"{self.notification_config.frontend_base_url}"
-                    f"/opportunity/{opportunity.opportunity_id}{UTM_TAG}"
-                )
-                opp_title = html.escape(opportunity.opportunity_title or "")
-                items.append(
-                    f'<li style="list-style-type:none; margin:0; padding:0;">'
-                    f'<a href="{opp_url}" target="_blank">{opp_title}</a>'
-                    f"</li>"
-                )
-
-            if group.remaining > 0:
-                items.append(
-                    f'<li style="list-style-type:none; margin:0; padding:0;">'
-                    f"+ {group.remaining} more opportunit"
-                    f"{'ies' if group.remaining > 1 else 'y'}"
-                    f"</li>"
-                )
-
-            items_html = "\n".join(items)
-            view_all_url = (
-                f"{self.notification_config.frontend_base_url}/workspace/saved-opportunities"
-                f"?savedBy=organization:{group.organization.organization_id}"
-                f"&utm_source=notification&utm_medium=email&utm_campaign=org_saved_opportunity"
-            )
-            org_sections.append(
-                f"<p><strong>{org_name}</strong></p>\n"
-                f'<ul style="list-style-type:none; margin:0; padding-left:16px;">\n'
-                f"{items_html}\n"
-                f"</ul>\n"
-                f'<p>\n<a href="{view_all_url}" style="text-decoration: none;">View all opportunities</a>\n</p>'
-            )
-
-        body_content = "\n\n".join(org_sections)
-
-        return f"""<html>
-<body>
-
-<p>
-{intro}
-</p>
-
-{body_content}
-
-<p>
-Manage which updates you receive in your
-<a href="{notification_prefs_url}">notification preferences</a>.
-</p>
-
-</body>
-</html>"""
 
     def post_notifications_process(self, notifications: list[UserEmailNotification]) -> None:
         for notification in notifications:
