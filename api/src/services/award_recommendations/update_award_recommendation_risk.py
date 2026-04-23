@@ -12,8 +12,8 @@ from src.db.models.award_recommendation_models import (
 )
 from src.db.models.user_models import User
 from src.services.award_recommendations.create_award_recommendation_risk import (
-    _get_award_recommendation_for_update,
-    _get_validated_submissions,
+    get_validated_submissions,
+    get_award_recommendation_for_update,
 )
 
 
@@ -78,7 +78,7 @@ def update_award_recommendation_risk(
     award_recommendation_risk_id: uuid.UUID,
     request_data: dict,
 ) -> AwardRecommendationRisk:
-    _get_award_recommendation_for_update(db_session, user, award_recommendation_id)
+    get_award_recommendation_for_update(db_session, user, award_recommendation_id)
 
     risk = _get_risk_for_update(db_session, award_recommendation_id, award_recommendation_risk_id)
 
@@ -86,7 +86,7 @@ def update_award_recommendation_risk(
     risk.award_recommendation_risk_type = request_data["award_recommendation_risk_type"]
 
     submission_ids = set(request_data["award_recommendation_application_submission_ids"])
-    validated_submissions = _get_validated_submissions(
+    validated_submissions = get_validated_submissions(
         db_session, award_recommendation_id, submission_ids
     )
     validated_by_id = {
