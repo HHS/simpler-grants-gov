@@ -395,8 +395,8 @@ class TestOrgSavedOpportunityNotification:
             "SimpleEmail"
         ]["HtmlPart"]["Data"]
 
-        # Should show "And 2 more opportunities..." for the 2 truncated items
-        assert "And 2 more opportunities..." in email_html
+        # Should show "+ 2 more opportunities" for the 2 truncated items
+        assert "+ 2 more opportunities" in email_html
 
     def test_html_content_includes_opportunity_details(
         self,
@@ -407,7 +407,9 @@ class TestOrgSavedOpportunityNotification:
         configuration,
     ):
         """Test that the email HTML contains the opportunity title and link."""
-        opportunity = factories.OpportunityFactory.create(opportunity_title="Test Grant Opportunity")
+        opportunity = factories.OpportunityFactory.create(
+            opportunity_title="Test Grant Opportunity"
+        )
         factories.OrganizationSavedOpportunityFactory.create(
             organization=org_with_user,
             opportunity=opportunity,
@@ -459,3 +461,176 @@ class TestOrgSavedOpportunityNotification:
             .all()
         )
         assert all(opp.notification_processed_at is not None for opp in org_saved_opps)
+
+
+# ---------------------------------------------------------------------------
+# Unit tests for build_notification_content (moved from test_saved_opportunity_notification.py)
+# ---------------------------------------------------------------------------
+
+
+def test_build_notification_content_single_opportunity(monkeypatch, enable_factory_create):
+    monkeypatch.setenv("FRONTEND_BASE_URL", "http://localhost:3000")
+
+    from src.task.notifications.config import EmailNotificationConfig
+    from src.task.notifications.org_saved_opportunity_notification import build_notification_content
+    from tests.src.db.models.factories import (
+        OpportunityFactory,
+        OrganizationSavedOpportunityFactory,
+        SamGovEntityFactory,
+    )
+
+    config = EmailNotificationConfig()
+
+    sam_gov = SamGovEntityFactory.create(has_organization=True)
+    opp = OpportunityFactory.create(opportunity_title="Research Grant")
+    OrganizationSavedOpportunityFactory.create(opportunity=opp, organization=sam_gov.organization)
+
+    subject, html = build_notification_content(
+        config=config,
+        organization=sam_gov.organization,
+        org_saved_opportunities=[opp],
+    )
+
+    assert subject == f"{sam_gov.organization.organization_name} has a new opportunity to review"
+
+    expected_html = f"""<html>
+<body>
+
+<p>
+A new opportunity has been saved for your organization. See what fits your team's goals and align on next steps.
+</p>
+
+<ul style="list-style-type:none; margin:0; padding-left:16px;">
+<li style="list-style-type:none; margin:0; padding:0;"><a href="http://localhost:3000/opportunity/{opp.opportunity_id}" target="_blank">Research Grant</a></li>
+</ul>
+
+<p>
+<a href="http://localhost:3000/workspace/saved-opportunities?savedBy=organization:{sam_gov.organization.organization_id}" style="text-decoration: none;">View all opportunities</a>
+</p>
+
+<p>
+Manage which updates you receive in your
+<a href="http://localhost:3000/notifications">notification preferences</a>.
+</p>
+
+</body>
+</html>"""
+    assert html == expected_html
+
+
+def test_build_notification_content_three_opportunities(monkeypatch, enable_factory_create):
+    monkeypatch.setenv("FRONTEND_BASE_URL", "http://localhost:3000")
+
+    from src.task.notifications.config import EmailNotificationConfig
+    from src.task.notifications.org_saved_opportunity_notification import build_notification_content
+    from tests.src.db.models.factories import (
+        OpportunityFactory,
+        OrganizationSavedOpportunityFactory,
+        SamGovEntityFactory,
+    )
+
+    config = EmailNotificationConfig()
+
+    sam_gov = SamGovEntityFactory.create(has_organization=True)
+    opps = [
+        OpportunityFactory.create(opportunity_title="Opp 1"),
+        OpportunityFactory.create(opportunity_title="Opp 2"),
+        OpportunityFactory.create(opportunity_title="Opp 3"),
+    ]
+    for opp in opps:
+        OrganizationSavedOpportunityFactory.create(
+            opportunity=opp, organization=sam_gov.organization
+        )
+
+    subject, html = build_notification_content(
+        config=config,
+        organization=sam_gov.organization,
+        org_saved_opportunities=opps,
+    )
+
+    assert subject == f"{sam_gov.organization.organization_name} has new opportunities to review"
+
+    expected_html = f"""<html>
+<body>
+
+<p>
+New opportunities have been saved for your organization. See what fits your team's goals and align on next steps.
+</p>
+
+<ul style="list-style-type:none; margin:0; padding-left:16px;">
+<li style="list-style-type:none; margin:0; padding:0;"><a href="http://localhost:3000/opportunity/{opps[0].opportunity_id}" target="_blank">Opp 1</a></li>
+<li style="list-style-type:none; margin:0; padding:0;"><a href="http://localhost:3000/opportunity/{opps[1].opportunity_id}" target="_blank">Opp 2</a></li>
+<li style="list-style-type:none; margin:0; padding:0;"><a href="http://localhost:3000/opportunity/{opps[2].opportunity_id}" target="_blank">Opp 3</a></li>
+</ul>
+
+<p>
+<a href="http://localhost:3000/workspace/saved-opportunities?savedBy=organization:{sam_gov.organization.organization_id}" style="text-decoration: none;">View all opportunities</a>
+</p>
+
+<p>
+Manage which updates you receive in your
+<a href="http://localhost:3000/notifications">notification preferences</a>.
+</p>
+
+</body>
+</html>"""
+    assert html == expected_html
+
+
+def test_build_notification_content_more_than_max_opportunities(monkeypatch, enable_factory_create):
+    monkeypatch.setenv("FRONTEND_BASE_URL", "http://localhost:3000")
+
+    from src.task.notifications.config import EmailNotificationConfig
+    from src.task.notifications.org_saved_opportunity_notification import build_notification_content
+    from tests.src.db.models.factories import (
+        OpportunityFactory,
+        OrganizationSavedOpportunityFactory,
+        SamGovEntityFactory,
+    )
+
+    config = EmailNotificationConfig()
+
+    sam_gov = SamGovEntityFactory.create(has_organization=True)
+    # 7 opportunities — shows 5 (MAX_OPPORTUNITIES_DISPLAYED), truncates 2
+    opps = [OpportunityFactory.create(opportunity_title=f"Opp {i}") for i in range(1, 8)]
+    for opp in opps:
+        OrganizationSavedOpportunityFactory.create(
+            opportunity=opp, organization=sam_gov.organization
+        )
+
+    subject, html = build_notification_content(
+        config=config,
+        organization=sam_gov.organization,
+        org_saved_opportunities=opps,
+    )
+
+    assert subject == f"{sam_gov.organization.organization_name} has new opportunities to review"
+
+    expected_html = f"""<html>
+<body>
+
+<p>
+New opportunities have been saved for your organization. See what fits your team's goals and align on next steps.
+</p>
+
+<ul style="list-style-type:none; margin:0; padding-left:16px;">
+<li style="list-style-type:none; margin:0; padding:0;"><a href="http://localhost:3000/opportunity/{opps[0].opportunity_id}" target="_blank">Opp 1</a></li>
+<li style="list-style-type:none; margin:0; padding:0;"><a href="http://localhost:3000/opportunity/{opps[1].opportunity_id}" target="_blank">Opp 2</a></li>
+<li style="list-style-type:none; margin:0; padding:0;"><a href="http://localhost:3000/opportunity/{opps[2].opportunity_id}" target="_blank">Opp 3</a></li>
+<li style="list-style-type:none; margin:0; padding:0;"><a href="http://localhost:3000/opportunity/{opps[3].opportunity_id}" target="_blank">Opp 4</a></li>
+<li style="list-style-type:none; margin:0; padding:0;"><a href="http://localhost:3000/opportunity/{opps[4].opportunity_id}" target="_blank">Opp 5</a></li>
+<li style="list-style-type:none; margin:0; padding:0;">+ 2 more opportunities</li>
+</ul>
+
+<p>
+<a href="http://localhost:3000/workspace/saved-opportunities?savedBy=organization:{sam_gov.organization.organization_id}" style="text-decoration: none;">View all opportunities</a>
+</p>
+
+<p>
+Manage which updates you receive in your
+<a href="http://localhost:3000/notifications">notification preferences</a>.
+</p>
+
+</body>
+</html>"""
+    assert html == expected_html
