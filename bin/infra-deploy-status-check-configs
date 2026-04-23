@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # -----------------------------------------------------------------------------
 # This script is used by the GitHub Action workflow check-infra-deploy-status.yml
 # to generate the matrix strategy for all the jobs in that workflow.

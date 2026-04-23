@@ -2,9 +2,8 @@ PROJECT_ROOT ?= $(notdir $(PWD))
 
 # Use `=` instead of `:=` so that we only execute `./bin/current-account-alias` when needed
 # See https://www.gnu.org/software/make/manual/html_node/Flavors.html#Flavors
-CURRENT_ACCOUNT_ALIAS = `./bin/current-account-alias`
-
-CURRENT_ACCOUNT_ID = $(./bin/current-account-id)
+CURRENT_ACCOUNT_ALIAS = $(shell ./bin/current-account-alias)
+CURRENT_ACCOUNT_ID = $(shell ./bin/current-account-id)
 
 # Get the list of reusable terraform modules by getting out all the modules
 # in infra/modules and then stripping out the "infra/modules/" prefix
@@ -29,13 +28,19 @@ __check_defined = \
 .PHONY : \
 	e2e-build \
 	e2e-clean-report \
-	e2e-delete-image \
+	e2e-format \
+	e2e-format-check \
+	e2e-format-check-native \
+	e2e-format-native \
 	e2e-merge-reports \
+	e2e-setup \
 	e2e-setup-ci \
-	e2e-setup-native \
 	e2e-show-report \
 	e2e-test \
 	e2e-test-native \
+	e2e-test-native-ui \
+	e2e-type-check \
+	e2e-type-check-native \
 	help \
 	infra-check-app-database-roles \
 	infra-check-compliance-checkov \
@@ -55,7 +60,7 @@ __check_defined = \
 	infra-lint-scripts \
 	infra-lint-terraform \
 	infra-lint-workflows \
-	infra-module-database-role-manager \
+	infra-module-database-role-manager-archive \
 	infra-set-up-account \
 	infra-test-service \
 	infra-update-app-build-repository \
@@ -85,22 +90,31 @@ e2e-clean-report: ## Remove the local ./e2e/playwright-report and ./e2e/test-res
 	rm -rf ./e2e/blob-report
 	rm -rf ./e2e/test-results
 
-e2e-delete-image: ## Delete the Docker image for e2e tests
-	@docker rmi -f playwright-e2e 2>/dev/null || echo "Docker image playwright-e2e does not exist, skipping."
+e2e-format: ## Format code with autofix inside Docker
+e2e-format: e2e-build
+	docker run --rm -v $(CURDIR)/e2e:/e2e $(E2E_IMAGE_NAME) npm run format
 
-e2e-merge-reports: ## Merge Playwright blob reports from multiple shards into an HTML report
-	@cd e2e && npx playwright merge-reports --reporter html blob-report
+e2e-format-check: ## Format check without autofix inside Docker
+e2e-format-check: e2e-build
+	docker run --rm -v $(CURDIR)/e2e:/e2e $(E2E_IMAGE_NAME) npm run format:check
+
+e2e-format-check-native: ## Format check without autofix natively
+	cd e2e && npm run format:check
+
+e2e-format-native: ## Format code with autofix natively
+	cd e2e && npm run format
+
+e2e-merge-reports: ## Merge E2E blob reports from multiple shards into an HTML report
+	cd e2e && npm run merge-reports
+
+e2e-setup: ## Setup end-to-end tests
+	cd e2e && npm install
 
 e2e-setup-ci: ## Setup end-to-end tests for CI
-	@cd e2e && npm ci
-	@cd e2e && npx playwright install --with-deps
+	cd e2e && npm ci
 
-e2e-setup-native: ## Setup end-to-end tests
-	@cd e2e && npm install
-	@cd e2e && npx playwright install --with-deps
-
-e2e-show-report: ## Show the ./e2e/playwright-report
-	@cd e2e && npx playwright show-report
+e2e-show-report: ## Show the E2E report
+	cd e2e && npm run show-report
 
 e2e-test: ## Run E2E Playwright tests in a Docker container and copy the report locally
 e2e-test: e2e-build
@@ -113,15 +127,28 @@ e2e-test: e2e-build
 		-e CURRENT_SHARD=$(CURRENT_SHARD) \
 		-e TOTAL_SHARDS=$(TOTAL_SHARDS) \
 		-e CI=$(CI) \
-		-v $(PWD)/e2e/playwright-report:/e2e/playwright-report \
-		-v $(PWD)/e2e/blob-report:/e2e/blob-report \
-		playwright-e2e
+		-v $(CURDIR)/e2e/playwright-report:/e2e/playwright-report \
+		-v $(CURDIR)/e2e/blob-report:/e2e/blob-report \
+		$(E2E_IMAGE_NAME) \
+		npm test -- $(E2E_ARGS)
+	@echo "Run 'make e2e-show-report' to view the test report"
 
 e2e-test-native: ## Run end-to-end tests
 	@:$(call check_defined, APP_NAME, You must pass in a specific APP_NAME)
 	@:$(call check_defined, BASE_URL, You must pass in a BASE_URL)
 	@echo "Running e2e tests with CI=${CI}, APP_NAME=${APP_NAME}, BASE_URL=${BASE_URL}"
-	@cd e2e/$(APP_NAME) && APP_NAME=$(APP_NAME) BASE_URL=$(BASE_URL) npx playwright test $(E2E_ARGS)
+	cd e2e && APP_NAME=$(APP_NAME) BASE_URL=$(BASE_URL) npm test -- $(E2E_ARGS)
+
+e2e-test-native-ui: ## Run end-to-end tests natively in UI mode
+	@:$(call check_defined, APP_NAME, You must pass in a specific APP_NAME)
+	@echo "Running e2e UI tests natively with APP_NAME=$(APP_NAME), BASE_URL=$(BASE_URL)"
+	cd e2e && APP_NAME=$(APP_NAME) BASE_URL=$(BASE_URL) npm run test:ui -- $(E2E_ARGS)
+
+e2e-type-check: ## Run TypeScript type checking in Docker
+	docker run --rm -v $(CURDIR)/e2e:/e2e $(E2E_IMAGE_NAME) npm run type-check -- $(TYPE_CHECK_ARGS)
+
+e2e-type-check-native: ## Run TypeScript type checking natively
+	cd e2e && npm run type-check -- $(TYPE_CHECK_ARGS)
 
 ###########
 ## Infra ##
@@ -156,7 +183,7 @@ infra-configure-app-service: ## Configure infra/$APP_NAME/service module's tfbac
 	./bin/create-tfbackend "infra/$(APP_NAME)/service" "$(ENVIRONMENT)"
 
 infra-update-current-account: ## Update infra resources for current AWS profile
-	./bin/terraform-init-and-apply infra/accounts `./bin/current-account-config-name`
+	./bin/terraform-init-and-apply infra/accounts $$(./bin/current-account-config-name)
 
 infra-update-network: ## Update network
 	@:$(call check_defined, NETWORK_NAME, the name of the network in /infra/networks)
@@ -174,8 +201,9 @@ infra-update-app-database: ## Create or update $APP_NAME's database module for $
 	terraform -chdir="infra/$(APP_NAME)/database" apply -var="environment_name=$(ENVIRONMENT)"
 
 infra-module-database-role-manager-archive: ## Build/rebuild role manager code package for Lambda deploys
-	pip3 install -r infra/modules/database/role_manager/requirements.txt -t infra/modules/database/role_manager/vendor --upgrade
-	zip -r infra/modules/database/role_manager.zip infra/modules/database/role_manager
+	rm -f infra/modules/database/resources/role_manager.zip
+	pip3 install -r infra/modules/database/resources/role_manager/requirements.txt -t infra/modules/database/resources/role_manager/vendor --upgrade
+	cd infra/modules/database/resources/role_manager/ && zip -r ../role_manager.zip *
 
 infra-update-app-database-roles: ## Create or update database roles and schemas for $APP_NAME's database in $ENVIRONMENT
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
@@ -257,7 +285,8 @@ infra-format: ## Format infra code
 	terraform fmt -recursive infra
 
 infra-test-service: ## Run service layer infra test suite
-	cd infra/test && go test -run TestService -v -timeout 30m
+	@:$(call check_defined, APP_NAME, "the name of subdirectory of /infra that holds the application's infrastructure code")
+	cd infra/test && APP_NAME=$(APP_NAME) IMAGE_TAG=$(IMAGE_TAG) go test -run TestService -v -timeout 30m
 
 #############
 ## Linting ##
@@ -273,6 +302,10 @@ lint-markdown: ## Lint Markdown docs for broken links
 # Include project name in image name so that image name
 # does not conflict with other images during local development
 IMAGE_NAME := $(PROJECT_ROOT)-$(APP_NAME)
+
+# Generate an informational tag so we can see where every image comes from.
+DATE := $(shell date -u '+%Y%m%d.%H%M%S')
+INFO_TAG := $(DATE).$(USER)
 
 GIT_REPO_AVAILABLE := $(shell git rev-parse --is-inside-work-tree 2>/dev/null)
 
@@ -298,15 +331,10 @@ else
 	endif
 endif
 
-
-# Generate an informational tag so we can see where every image comes from.
-DATE := $(shell date -u '+%Y%m%d.%H%M%S')
-INFO_TAG := $(DATE).$(USER)
-
 release-build: ## Build release for $APP_NAME and tag it with current git hash
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)
 	cd $(APP_NAME) && $(MAKE) release-build \
-		OPTS="--tag $(IMAGE_NAME):latest --tag $(IMAGE_NAME):$(IMAGE_TAG) --load -t $(IMAGE_NAME):$(IMAGE_TAG) $(OPTIONAL_BUILD_FLAGS)"
+		OPTS="--tag $(IMAGE_NAME):latest --tag $(IMAGE_NAME):$(IMAGE_TAG) $(OPTS)"
 
 release-publish: ## Publish release to $APP_NAME's build repository
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)

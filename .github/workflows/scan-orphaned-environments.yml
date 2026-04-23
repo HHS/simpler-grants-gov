@@ -1,0 +1,77 @@
+# This workflow scans for temporary environments that were not properly cleaned up
+# This can happen if the PR environment destroy workflow failed or didn't run
+# or if the temporary environments created by the infra service tests were not cleaned up
+name: Scan orphaned environments
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run every day at 07:30 UTC (3:30am ET, 12:30am PT) after engineers are likely done with work
+    - cron: "30 7 * * *"
+
+jobs:
+  get-app-names:
+    name: Get app names
+    runs-on: ubuntu-latest
+
+    outputs:
+      app_names: ${{ steps.get-app-names.outputs.app_names }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get app names
+        id: get-app-names
+        run: |
+          source bin/util.sh
+          app_names="$(get_app_names)"
+          # turn app_names into a json list using jq
+          app_names="$(echo "${app_names}" | jq -R -s -c 'split("\n")[:-1]')"
+          echo "App names retrieved: ${app_names}"
+          echo "app_names=${app_names}" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+  scan:
+    name: Scan
+    runs-on: ubuntu-latest
+    needs: get-app-names
+
+    strategy:
+      fail-fast: false
+      matrix:
+        app_name: ${{ fromJson(needs.get-app-names.outputs.app_names) }}
+        scan_script: [orphaned-pr-environments, stale-test-environments]
+
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: ${{ matrix.app_name }}
+          environment: dev
+
+      - name: List PR workspaces
+        run: |
+          ./bin/${{ matrix.scan_script }} ${{ matrix.app_name }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TF_IN_AUTOMATION: "true"
+
+  notify:
+    name: " " # GitHub UI is noisy when calling reusable workflows, so use whitespace for name to reduce noise
+    needs: scan
+    if: failure()
+    uses: ./.github/workflows/send-system-notification.yml
+    with:
+      channel: "workflow-failures"
+      message: "🧹 [Orphaned PR environments for ${{ github.repository }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+    secrets: inherit

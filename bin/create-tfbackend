@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # -----------------------------------------------------------------------------
 # This script creates a terraform backend config file for a terraform module.
 # It is not meant to be used directly. Instead, it is called by other scripts
@@ -22,7 +22,7 @@ tf_state_key="${3:-${module_dir}/${backend_config_name}.tfstate}"
 # The local tfbackend config file that will store the terraform backend config
 backend_config_file="${module_dir}/${backend_config_name}.s3.tfbackend"
 
-# Get the name of the S3 bucket that was created to store the tf state.
+# Get the name of the S3 bucket that was created to store the tf state
 # This will be used to configure the S3 backends in all the application
 # modules
 tf_state_bucket_name=$(terraform -chdir="infra/accounts" output --raw tf_state_bucket_name)

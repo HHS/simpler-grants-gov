@@ -1,0 +1,59 @@
+name: Template Scan Orphaned Infra Test Resources
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run every day at 08:00 UTC (4:00am ET, 1:00am PT)
+    - cron: "0 8 * * *"
+
+jobs:
+  scan:
+    name: Scan for orphaned test resources
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.TESTER_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.TESTER_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Scan for orphaned resources
+        id: scan
+        shell: bash
+        run: |
+          # Run in dry-run mode to see what would be deleted
+          # Write to temp file to avoid broken pipe errors from piping large output
+          tmpfile=$(mktemp)
+          ./template-only-bin/cleanup-test-resources --dry-run > "$tmpfile" 2>&1 || true
+
+          # Print full output for debugging
+          cat "$tmpfile"
+
+          # Check if any resources were found (look for "Found X resources" in output)
+          if grep -q "Found [1-9][0-9]* resources" "$tmpfile"; then
+            # Extract resource count and project names for notification
+            resource_info=$(grep -E "(Found [0-9]+ resources|Cleaning up project:|Would delete)" "$tmpfile" | head -30 || true)
+
+            {
+              echo "found=true"
+              echo "resource_info<<EOF"
+              echo "$resource_info"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            rm -f "$tmpfile"
+            exit 1
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo ""
+            echo "=== Summary ==="
+            echo "No orphaned resources found that need cleanup."
+            # Show how many projects were checked
+            project_count=$(grep -c "^=== Cleaning up project:" "$tmpfile" || echo "0")
+            echo "Checked ${project_count} projects."
+            rm -f "$tmpfile"
+          fi

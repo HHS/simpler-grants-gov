@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Print the config name for the current AWS account
 # Do this by getting the current account and searching for a file in
 # infra/accounts that matches "<account name>.<account id>.s3.tfbackend".
