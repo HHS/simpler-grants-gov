@@ -335,15 +335,14 @@ jobs:
           # Use the 127.0.0.1 url for tests (IPv4 only)
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build
-          ls -al .
-          ls -al dist
-          ls -al .next
 
       - name: Save next build
         uses: actions/upload-artifact@v5
         with:
           name: next-build
-          path: frontend/.next
+          path: |
+            frontend/.next
+            frontend/public
 
   run-e2e-tests-local:
     name: Run Local E2E Tests
@@ -405,7 +404,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: next-build
-          path: frontend/.next/standalone
+          path: frontend/
 
       - name: ls frontend
         run: |
