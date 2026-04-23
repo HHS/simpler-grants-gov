@@ -128,9 +128,6 @@ def update_award_recommendation_submissions(
                 "submission_count": len(updated_submissions),
             },
         )
-
-        # Return the already updated submissions with all relationships eagerly loaded
-        # No need for a second query since we used selectinload in the initial query
         return updated_submissions
 
     return []
