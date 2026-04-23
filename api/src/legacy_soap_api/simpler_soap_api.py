@@ -103,7 +103,7 @@ def get_simpler_soap_response(
         return simpler_soap_response
 
     logger.info(
-        "simpler_soap_api: Successfully processed request and returning SOAP proxy response",
+        "simpler_soap_api: Successfully processed request and returning SOAP legacy response",
         extra={
             "soap_api_event": LegacySoapApiEvent.RETURNING_LEGACY_SOAP_RESPONSE,
             "used_simpler_response": use_simpler,
@@ -158,7 +158,7 @@ def process_simpler_request(
             soap_legacy_response = get_legacy_response(soap_request)
     except Exception:
         logger.exception(
-            msg="Error getting soap proxy response",
+            msg="Error getting soap legacy response",
             extra={
                 "used_simpler_response": False,
                 "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_LEGACY_SOAP,
@@ -192,7 +192,7 @@ def process_simpler_request(
                 faultcode=e.fault.faultcode, faultstring=e.fault.faultstring
             ).to_flask_response()
     except Exception:
-        msg = "Unable to process Simpler SOAP proxy response"
+        msg = "Unable to process Simpler SOAP legacy response"
         logger.exception(
             msg=msg,
             extra={
