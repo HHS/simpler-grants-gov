@@ -142,6 +142,18 @@ jobs:
           path: |
             frontend/node_modules.tar.gz
 
+  pre-pull-images:
+    name: Pre-pull images we'll need for Docker compose
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Init API Server for e2e tests
+        run: |
+          cd ../api
+          docker compose pull -q
+
   init-ci-cd:
     name: Initialize for CI/CD runs
     needs: [get-api-commit-hash]
@@ -243,6 +255,7 @@ jobs:
       - name: Load cached Docker image
         run: |
           docker load < /tmp/docker-image.tar
+          docker tag simpler-grants-gov-api api-grants-api || true
 
       - name: Docker images before Start API
         run: |
