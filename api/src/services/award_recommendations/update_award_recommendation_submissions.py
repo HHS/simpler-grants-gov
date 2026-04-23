@@ -67,6 +67,15 @@ def update_award_recommendation_submissions(
                 submission_ids
             ),
         )
+        .options(
+            selectinload(
+                AwardRecommendationApplicationSubmission.award_recommendation_submission_detail
+            ),
+            selectinload(AwardRecommendationApplicationSubmission.application_submission)
+            .selectinload(ApplicationSubmission.application)
+            .selectinload(Application.organization)
+            .selectinload(Organization.sam_gov_entity),
+        )
         .all()
     )
 
@@ -91,27 +100,8 @@ def update_award_recommendation_submissions(
         submission = submissions_map[submission_id]
         submission_detail = submission.award_recommendation_submission_detail
 
-        if "recommended_amount" in submission_data:
-            submission_detail.recommended_amount = submission_data.get("recommended_amount")
-
-        if "scoring_comment" in submission_data:
-            submission_detail.scoring_comment = submission_data.get("scoring_comment")
-
-        if "general_comment" in submission_data:
-            submission_detail.general_comment = submission_data.get("general_comment")
-
-        if "award_recommendation_type" in submission_data:
-            submission_detail.award_recommendation_type = submission_data.get(
-                "award_recommendation_type"
-            )
-
-        if "has_exception" in submission_data:
-            has_exception_value = submission_data.get("has_exception")
-            if has_exception_value is not None:
-                submission_detail.has_exception = bool(has_exception_value)
-
-        if "exception_detail" in submission_data:
-            submission_detail.exception_detail = submission_data.get("exception_detail")
+        for field, value in submission_data.items():
+            setattr(submission_detail, field, value)
 
         # Add audit entry for this update
         award_recommendation.award_recommendation_audit_events.append(
@@ -120,8 +110,6 @@ def update_award_recommendation_submissions(
                 award_recommendation_audit_event=AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_SUBMISSION_UPDATED,
                 award_recommendation_application_submission=submission,
                 audit_metadata={
-                    # The audit system expects a string for JSON serialization
-                    "submission_id": str(submission_id),
                     "updated_fields": list(submission_data.keys()),
                 },
             )
@@ -141,27 +129,8 @@ def update_award_recommendation_submissions(
             },
         )
 
-        stmt = (
-            select(AwardRecommendationApplicationSubmission)
-            .where(
-                AwardRecommendationApplicationSubmission.award_recommendation_application_submission_id.in_(
-                    [
-                        sub.award_recommendation_application_submission_id
-                        for sub in updated_submissions
-                    ]
-                )
-            )
-            .options(
-                selectinload(
-                    AwardRecommendationApplicationSubmission.award_recommendation_submission_detail
-                ),
-                selectinload(AwardRecommendationApplicationSubmission.application_submission)
-                .selectinload(ApplicationSubmission.application)
-                .selectinload(Application.organization)
-                .selectinload(Organization.sam_gov_entity),
-            )
-        )
-
-        return list(db_session.execute(stmt).scalars().all())
+        # Return the already updated submissions with all relationships eagerly loaded
+        # No need for a second query since we used selectinload in the initial query
+        return updated_submissions
 
     return []

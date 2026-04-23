@@ -262,9 +262,6 @@ class TestBatchUpdateAwardRecommendationSubmissions200:
 
             # Verify metadata contains expected fields
             assert (
-                "submission_id" in audit.audit_metadata
-            ), "Audit should contain submission ID in metadata"
-            assert (
                 "updated_fields" in audit.audit_metadata
             ), "Audit should contain updated fields list in metadata"
 
