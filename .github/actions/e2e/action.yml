@@ -44,6 +44,9 @@ inputs:
   workers:
     description: "number of workers to use for test run"
     default: ""
+  force-webkit-install:
+    description: "webkit dependencies aren't all cached, so we need to force it to install"
+    default: false
 outputs:
   artifact-id:
     description: "artifact ids for uploaded test reports"
@@ -80,6 +83,13 @@ runs:
       run: |
         npm install @playwright/test
         npx playwright install --with-deps
+
+    - name: Install Webkit dependencies
+      if: ${{ inputs.force-webkit-install == true }}
+      shell: bash
+      working-directory: ./frontend
+      run: |
+        npx playwright install-deps webkit
 
     - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
       if: ${{ inputs.playwright_tags == '' }}

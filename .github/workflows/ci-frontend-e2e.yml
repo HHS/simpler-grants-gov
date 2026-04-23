@@ -443,11 +443,6 @@ jobs:
       #   run: |
       #     npx playwright install --with-deps
 
-      # webkit installs itself outside the cache folder maybe?
-      - name: Install Webkit dependencies
-        run: |
-          npx playwright install-deps webkit
-
       - name: Determine test groups to run
         shell: bash
         run: |
@@ -472,6 +467,7 @@ jobs:
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
+          force-webkit-install: true
 
   create-report:
     name: Create Merged Test Report
