@@ -335,6 +335,7 @@ jobs:
         #always build for now until we can sort out getting e2e key
         # if: steps.next-build-cache.outputs.cache-matched-key == ''
         run: |
+          chmod +x node_modules/.bin/*
           {
             cat .env.development
             sed -En '/API_JWT_PUBLIC_KEY/,/-----END PUBLIC KEY-----/p' ../api/override.env
