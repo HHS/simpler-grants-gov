@@ -297,13 +297,15 @@ def _build_organizations_and_users(
     #######################################
     (
         UserBuilder(
-            uuid.UUID("8bbb96c4-852a-4aa1-81cd-f334396bd7e2"), db_session, "org admin user with user profile"
+            uuid.UUID("8bbb96c4-852a-4aa1-81cd-f334396bd7e2"),
+            db_session,
+            "org admin user with user profile",
         )
         .with_oauth_login("profile_user")
         .with_api_key("profile_user_key")
         .with_jwt_auth()
         .with_organization(org2, roles=[ORG_ADMIN])
-        .with_profile(first_name="AdminFirstName", middle_name="AdminMiddleName", last_name="AdminLastName")
+        .with_profile(first_name="AdminFirstName", last_name="AdminLastName")
         .build()
     )
 

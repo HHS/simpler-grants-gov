@@ -20,6 +20,7 @@ from tests.src.db.models.factories import (
     LinkExternalUserFactory,
     RoleFactory,
     UserFactory,
+    UserProfileFactory,
 )
 
 # Simple JSON schema used for tests below
@@ -232,6 +233,20 @@ def test_submit_application_organization_required_but_missing(enable_factory_cre
 
 
 def test_submit_application_signature_post_processing(enable_factory_create, db_session):
+    """
+    This test case tests a submitted application by 3 different users with different attributes
+    that influence the submissions POST_PROCESSING signature value.
+
+    The 3 user attributes test cases are as follows:
+    1. User with first name and last - this is the primary signature case.
+    2. User with no name but an email - this is the secondary signature case if no name exist.
+    3. User with no name and no email - this will be the default case and result in the UNKNOWN_VALUE.
+
+    NOTE: The same application form is submitted multiple times and is reset after each case described above. There
+    is currently no existing workflow of resetting an application submission status from SUBMITTED or ACCEPTED back to
+    IN_PROGRESS, but may be supported in the future.
+    """
+    # Setup competition and form
     today = get_now_us_eastern_date()
     competition = CompetitionFactory.create(
         closing_date=today + timedelta(days=1),
@@ -250,55 +265,71 @@ def test_submit_application_signature_post_processing(enable_factory_create, db_
     )
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
+    # User with no email or name
+    submitting_user_with_unknown_signature = UserFactory.create()
+
+    # User with first and last name
+    submitting_user_with_name = UserFactory.create()
+    UserProfileFactory.create(
+        user=submitting_user_with_name,
+        first_name="submitter_first_name",
+        last_name="submitter_last_name",
+    )
+
+    # User with email and no name
+    user_email = "a@b.com"
+    submitting_user_with_email = UserFactory.create()
+    LinkExternalUserFactory.create(user=submitting_user_with_email, email=user_email)
+
     # Test for submitting user with an email
-    application1 = ApplicationFactory.create(
+    application = ApplicationFactory.create(
         application_status=ApplicationStatus.IN_PROGRESS,
         competition=competition,
     )
     ApplicationFormFactory.create(
-        application=application1,
+        application=application,
         competition_form=competition_form,
         application_response={},
     )
 
-    user_email = "a@b.com"
-    submitting_user_with_email = UserFactory.create()
-    LinkExternalUserFactory.create(email=user_email, user=submitting_user_with_email)
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(
-            user=submitting_user_with_email, application=application1
-        ),
-        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
-    )
+    for mock_user in [
+        submitting_user_with_unknown_signature,
+        submitting_user_with_name,
+        submitting_user_with_email,
+    ]:
+        ApplicationUserRoleFactory.create(
+            application_user=ApplicationUserFactory.create(user=mock_user, application=application),
+            role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
+        )
 
-    submitted_application1 = submit_application(
-        db_session, application1.application_id, submitting_user_with_email
+    # First name and last name signature expected submission
+    submitted_application = submit_application(
+        db_session, application.application_id, submitting_user_with_name
     )
-    assert submitted_application1.submitted_by_user.user_id == submitting_user_with_email.user_id
-    assert submitted_application1.application_forms[0].application_response == {
+    assert submitted_application.submitted_by_user.user_id == submitting_user_with_name.user_id
+    assert submitted_application.application_forms[0].application_response == {
+        "signature": f"{submitting_user_with_name.first_name} {submitting_user_with_name.last_name}"
+    }
+
+    # Email expected signature expected submission
+    application.application_status = ApplicationStatus.IN_PROGRESS
+    submitted_application = submit_application(
+        db_session, application.application_id, submitting_user_with_email
+    )
+    assert submitted_application.submitted_by_user.user_id == submitting_user_with_email.user_id
+    assert submitted_application.application_forms[0].application_response == {
         "signature": user_email
     }
 
-    # Test for submitting user without an email
-    application2 = ApplicationFactory.create(
-        application_status=ApplicationStatus.IN_PROGRESS,
-        competition=competition,
+    # Unknown expected signature expected submission
+    application.application_status = ApplicationStatus.IN_PROGRESS
+    submitted_application = submit_application(
+        db_session, application.application_id, submitting_user_with_unknown_signature
     )
-    ApplicationFormFactory.create(
-        application=application2, competition_form=competition_form, application_response={}
+    assert (
+        submitted_application.submitted_by_user.user_id
+        == submitting_user_with_unknown_signature.user_id
     )
-    submitting_user_without_email = UserFactory.create()
-    ApplicationUserRoleFactory.create(
-        application_user=ApplicationUserFactory.create(
-            user=submitting_user_without_email, application=application2
-        ),
-        role=RoleFactory.create(privileges=[Privilege.SUBMIT_APPLICATION]),
-    )
-
-    submitted_application2 = submit_application(
-        db_session, application2.application_id, submitting_user_without_email
-    )
-    assert submitted_application2.submitted_by_user.user_id == submitting_user_without_email.user_id
-    assert submitted_application2.application_forms[0].application_response == {
+    assert submitted_application.application_forms[0].application_response == {
         "signature": UNKNOWN_VALUE
     }

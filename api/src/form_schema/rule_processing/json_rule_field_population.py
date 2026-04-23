@@ -133,12 +133,17 @@ def get_signature(context: JsonRuleContext, json_rule: JsonRule) -> str | None:
 
     Signatures occur during the POST_PROCESSING of application submissions.
 
-    If the submitting user has an associated email, we will sign with that, otherwise
-    log that we signed with the unknown value.
+    The signature will be populated by the following values in order if they exist:
+    1. Submitter first name + last name
+    2. Submitter email
+    3. unknown
     """
     application = context.application_form.application
-    if application.submitted_by_user and application.submitted_by_user.email:
-        return application.submitted_by_user.email
+    if application.submitted_by_user:
+        if application.submitted_by_user.first_name and application.submitted_by_user.last_name:
+            return f"{application.submitted_by_user.first_name} {application.submitted_by_user.last_name}"
+        if application.submitted_by_user.email:
+            return application.submitted_by_user.email
     return UNKNOWN_VALUE
 
 
