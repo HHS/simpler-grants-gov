@@ -55,7 +55,6 @@ def update_award_recommendation_submissions(
     # Get all submission IDs to update
     submission_ids = list(update_data.keys())
     if not submission_ids:
-        # If no submissions provided, return empty list
         return []
 
     # Query all submission records that match the IDs and are part of this award recommendation
@@ -71,9 +70,8 @@ def update_award_recommendation_submissions(
         .all()
     )
 
-    # Build a mapping of submission ID to submission object for quick lookup
     submissions_map = {
-        str(sub.award_recommendation_application_submission_id): sub for sub in submissions_query
+        sub.award_recommendation_application_submission_id: sub for sub in submissions_query
     }
 
     # Check if all requested submission IDs were found
@@ -83,18 +81,16 @@ def update_award_recommendation_submissions(
             for submission_id in submission_ids
             if submission_id not in submissions_map
         ]
+        missing_id_strs = [str(mid) for mid in missing_ids]
         raise_flask_error(
-            404, message=f"Could not find submission(s) with ID(s): {', '.join(missing_ids)}"
+            404, message=f"Could not find submission(s) with ID(s): {', '.join(missing_id_strs)}"
         )
 
-    # Process updates for each submission in the request
     updated_submissions = []
-    for submission_id_str, submission_data in update_data.items():
-        submission_id = uuid.UUID(str(submission_id_str))
-        submission = submissions_map[str(submission_id)]
+    for submission_id, submission_data in update_data.items():
+        submission = submissions_map[submission_id]
         submission_detail = submission.award_recommendation_submission_detail
 
-        # Update all fields in the submission detail
         if "recommended_amount" in submission_data:
             submission_detail.recommended_amount = submission_data.get("recommended_amount")
 
@@ -124,6 +120,7 @@ def update_award_recommendation_submissions(
                 award_recommendation_audit_event=AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_SUBMISSION_UPDATED,
                 award_recommendation_application_submission=submission,
                 audit_metadata={
+                    # The audit system expects a string for JSON serialization
                     "submission_id": str(submission_id),
                     "updated_fields": list(submission_data.keys()),
                 },
