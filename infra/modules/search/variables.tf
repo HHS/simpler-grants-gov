@@ -80,9 +80,3 @@ variable "sso_admin_role_arn" {
   type        = string
   default     = null
 }
-
-variable "enable_log_publishing" {
-  description = "Whether to enable log publishing to CloudWatch. Disable for environments where the account-level CloudWatch log resource policy cannot grant OpenSearch sufficient permissions."
-  type        = bool
-  default     = true
-}
