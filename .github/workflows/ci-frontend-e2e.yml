@@ -149,7 +149,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Init API Server for e2e tests
+      - name: Have docker pre-pull the images
         run: |
           cd ../api
           docker compose pull -q
@@ -161,6 +161,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Docker images
+        run: |
+          docker image ls
 
       - name: Init API Server for e2e tests
         run: |
@@ -174,6 +178,10 @@ jobs:
           make init-ci-cd
 
           ls -a
+
+      - name: Docker images
+        run: |
+          docker image ls
 
       - name: Save shared key
         uses: actions/upload-artifact@v7
@@ -207,11 +215,12 @@ jobs:
       - name: Load cached Docker image
         run: |
           docker load < /tmp/docker-image.tar
+          # alias the live docker container name simpler-grants-gov-api to the locally build name api-grants-api so that we don't rebuild it in later steps.
           IMAGE_ID=$(docker image ls -q simpler-grants-gov-api)
           echo $IMAGE_ID
           docker tag $IMAGE_ID api-grants-api:latest || true
 
-      - name: Docker images before Start API
+      - name: Docker images
         run: |
           docker image ls
 
