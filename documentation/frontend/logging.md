@@ -53,4 +53,4 @@ export const handlerFunction = (request, response) => {
 
 ## Ad hoc logs
 
-We will use Pino for all logs across the application at somet point TBD
+We will use Pino for all logs across the application at some point TBD
