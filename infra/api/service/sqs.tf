@@ -20,8 +20,8 @@ data "aws_iam_policy_document" "sqs_queue_policy" {
     sid    = "AllowAPIServiceAccess"
     effect = "Allow"
     principals {
-      type        = "AWS"
-      identifiers = [module.service.app_service_arn]
+      type = "AWS"
+      identifiers = [for arn in [module.service.app_service_arn, module.service.workflow_service_role_arn] : arn if arn != null]
     }
     actions = [
       "sqs:SendMessage",
@@ -45,8 +45,8 @@ data "aws_iam_policy_document" "sqs_dlq_policy" {
     sid    = "AllowAPIServiceAccess"
     effect = "Allow"
     principals {
-      type        = "AWS"
-      identifiers = [module.service.app_service_arn]
+      type = "AWS"
+      identifiers = [for arn in [module.service.app_service_arn, module.service.workflow_service_role_arn] : arn if arn != null]
     }
     actions = [
       "sqs:ReceiveMessage",
