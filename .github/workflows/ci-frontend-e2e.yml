@@ -131,17 +131,6 @@ jobs:
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
-      - run: tar -czf node_modules.tar.gz node_modules
-
-      - name: Save node_modules
-        uses: actions/upload-artifact@v7
-        with:
-          include-hidden-files: true
-          archive: false
-          name: node-modules-tar-gz
-          path: |
-            frontend/node_modules.tar.gz
-
   run-e2e-tests-local:
     name: Prepare infra and run E2E tests
     needs: [get-api-commit-hash, get-frontend-commit-hash, playwright-cache]
@@ -164,13 +153,12 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
-      # get this from downloading the artifact since we are passing it job to job
-      # - uses: actions/cache@v5
-      #   id: npm-cache
-      #   with:
-      #     path: |
-      #       node_modules
-      #     key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/cache@v5
+        id: npm-cache
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
       - uses: actions/cache@v5
         id: playwright-cache
@@ -178,18 +166,6 @@ jobs:
           path: |
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Download node_modules
-        uses: actions/download-artifact@v8
-        with:
-          name: node_modules.tar.gz
-          path: frontend/
-
-      - name: Expand node_modules
-        run: |
-          tar -xzf node_modules.tar.gz node_modules
-          ls -la node_*
-          rm node_modules.tar.gz
 
       - name: Docker images
         run: |
@@ -229,6 +205,7 @@ jobs:
           make build
 
       - name: Save Docker image to file
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
         run: |
           docker save api-grants-api > /tmp/docker-image.tar
 
@@ -261,13 +238,6 @@ jobs:
           chmod +x ../api/bin/wait-for-api.sh
           ../api/bin/wait-for-api.sh
         shell: bash
-
-      - uses: actions/cache@v5
-        id: npm-cache
-        with:
-          path: |
-            frontend/node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
       - name: Build a prod version of the frontend
         run: |
