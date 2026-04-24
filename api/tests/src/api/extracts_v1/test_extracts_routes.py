@@ -10,7 +10,7 @@ from tests.src.db.models.factories import ExtractMetadataFactory
 
 ##################################################################################
 # As of the 4/24/2026 update for SGG-7655, these test cases have been modified
-# to cover both User API Key and JWT authentication (toggled one after the other).
+# to cover both API User Key and JWT authentication (toggled one after the other).
 ##################################################################################
 
 
