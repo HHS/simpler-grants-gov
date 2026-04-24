@@ -1,20 +1,28 @@
 # Testing
 
-## E2E testing
+## End to End (E2E) testing
+
+E2E tests are run using Playwright. See [development.md](/DEVELOPMENT.md) for more general info!
 
 ### Spoofing logins
 
-There are situations where we want to be able to test a "logged in" experience without having to script the test through the full login flow. In order to support this we have built a system to spoof the user login by placing a session cookie into the browser context.
+There are situations where we want to be able to test a "logged in" experience without having to script the test through the full login flow. In order to support this we have built a system to spoof the user login by placing a session cookie into the browser context. This system works by creating a client side cookie on the browser context within Playwright that will function the same as the session cookie. produced as the output of the real login process.
 
-This system is based on a `createSpoofedSessionCookie` which will create a client side cookie on the browser context that will effectively log in a fake user with the API.
-
-Using this function, tests should work automatically in CI, but they will require a bit of manual setup to work locally.
+The system is defined in [Login Utils](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/loginUtils.ts)
 
 #### Local setup
 
+Local spoofed logins depend on an auth token for a test user that is generated each time the local database is seeded. During seed a file is created containing the key, which you can then reference in the Playwright process. Steps to implement:
+
 - run `make db-seed-local` in the /api directory. This will create the necessary DB records for the spoofed user and spit out an API auth token in a file at /api/e2e_token.tmp.
-- copy the token variable declaration from the e2e_token.tmp file into your frontend .env.local file
-- that's it! Running e2e tests using the functionality mentioned above should now work locally
+- copy the token variable declaration from the e2e_token.tmp file into the `E2E_USER_AUTH_TOKEN` env var declaration in your frontend .env.local file
+- that's it! Running e2e tests using spoofing should now work. [This process is encapsulated in our CI process here](https://github.com/HHS/simpler-grants-gov/blob/c5f29978c45d658329f2466d652da743d83d6a73/.github/workflows/ci-frontend-e2e.yml#L97).
+
+#### Staging setup
+
+Since staging tests run on a deployed server that does not expose a testing token directly, to spoof a login is a bit more involved, but only requires proper env vars to be set in order to work. A test user is set up in staging that can be spoofed. In order to obtain a session token for this user, Playwright needs to request it from a staging-only internal endpoint.
+
+To run spoofed logins (locally or in CI), you will too have the SESSION_SECRET and STAGING_TEST_USER_API_KEY env vars are correctly set in .env.local. Values can be found 1password, or ask a team member.
 
 ### Test groups
 
@@ -42,6 +50,8 @@ Current testing cadences are defined as:
 - We expect engineers to write unit tests for any changes they make in the same PR that contains the code changes
 - We use data fixtures when relevant (see https://github.com/HHS/simpler-grants-gov/blob/main/frontend/src/utils/testing/fixtures.ts)
 - We strive to include axe tests on all components
+
+See [development.md](/DEVELOPMENT.md) for more general info!
 
 ### Debugging
 

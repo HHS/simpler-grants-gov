@@ -14,6 +14,13 @@ const BASE_URLS: Record<string, string> = {
   staging: process.env.STAGING_BASE_URL || "https://staging.simpler.grants.gov",
 };
 
+// API URLs for each environment, read from .env.local if present, else fallback to defaults
+const API_URLS: Record<string, string> = {
+  local: process.env.LOCAL_BASE_URL || "http://127.0.0.1:8080",
+  staging:
+    process.env.STAGING_BASE_URL || "https://api.staging.simpler.grants.gov",
+};
+
 // Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
 const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
@@ -23,7 +30,15 @@ if (!Object.prototype.hasOwnProperty.call(BASE_URLS, targetEnv)) {
   );
 }
 
+if (!Object.prototype.hasOwnProperty.call(API_URLS, targetEnv)) {
+  throw new Error(
+    `Unsupported PLAYWRIGHT_TARGET_ENV: ${targetEnv}. Allowed values: ${Object.keys(BASE_URLS).join(", ")}`,
+  );
+}
+
 const baseUrl = BASE_URLS[targetEnv];
+
+const apiUrl = API_URLS[targetEnv];
 
 // Label used to select the test user from the local dev quick-login dropdown.
 // Must match the OAuth login name defined in seed_orgs_and_users.py.
@@ -53,6 +68,7 @@ const webServerEnv: Record<string, string> = Object.fromEntries(
 const playwrightEnv = {
   webServerEnv,
   baseUrl,
+  apiUrl,
   targetEnv,
   testUserLabel,
   testOrgLabel,
@@ -64,6 +80,7 @@ const playwrightEnv = {
   testUserEmail: process.env.STAGING_TEST_USER_EMAIL || "",
   testUserPassword: process.env.STAGING_TEST_USER_PASSWORD || "",
   testUserAuthKey: process.env.STAGING_TEST_USER_MFA_KEY || "",
+  stagingTestUserApiKey: process.env.STAGING_TEST_USER_API_KEY || "",
 };
 
 export default playwrightEnv;

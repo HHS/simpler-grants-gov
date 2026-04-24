@@ -39,16 +39,20 @@ export const newExpirationDate = () =>
 /*
   encrypts an API token passed as an env var into a fake client token
 */
-export const generateSpoofedSession = async (): Promise<string> => {
+export const generateSpoofedSession = async (
+  manualToken?: string,
+): Promise<string> => {
   if (!clientJwtKey) {
     throw new Error("Unable to spoof login, missing auth key");
   }
 
-  if (!playwrightEnv.fakeServerToken) {
+  if (!playwrightEnv.fakeServerToken && !manualToken) {
     throw new Error("Unable to spoof login, missing server token");
   }
 
-  const fakeToken = await new SignJWT({ token: playwrightEnv.fakeServerToken })
+  const fakeToken = await new SignJWT({
+    token: manualToken || playwrightEnv.fakeServerToken,
+  })
     .setProtectedHeader({ alg: CLIENT_JWT_ENCRYPTION_ALGORITHM })
     .setIssuedAt()
     .setExpirationTime(newExpirationDate())
@@ -60,8 +64,11 @@ export const generateSpoofedSession = async (): Promise<string> => {
 // For bypassing login in LOCAL test runs
 // sets a spoofed login token on the cookie in order to allow for logging in without
 // clicking through the login process
-export const createSpoofedSessionCookie = async (context: BrowserContext) => {
-  const token = await generateSpoofedSession();
+export const createSpoofedSessionCookie = async (
+  context: BrowserContext,
+  manualToken?: string,
+) => {
+  const token = await generateSpoofedSession(manualToken);
   await context.addCookies([
     {
       name: "session",
@@ -71,6 +78,6 @@ export const createSpoofedSessionCookie = async (context: BrowserContext) => {
   ]);
 };
 
-if (playwrightEnv.targetEnv === "local") {
-  initializePlaywrightSessionSecrets();
-}
+// if (playwrightEnv.targetEnv === "local") {
+initializePlaywrightSessionSecrets();
+// })
