@@ -27,7 +27,9 @@ Feature: Apply - Application Form Happy Path
     And the Application landing page loads with the <form name> form link visible
 
     # ---- Completing Form ---
-    When the user fills out the <form name> form with valid test data
+    When the user clicks on a form link
+    Then the form opens
+    And the user fills out the <form name> form with valid test data
 
     # ---- Saving the Form ---
     And the user clicks Save
