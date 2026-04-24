@@ -107,6 +107,7 @@ jobs:
       - uses: actions/cache@v5
         id: playwright-cache
         with:
+          lookup-only: true
           path: |
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
@@ -114,6 +115,7 @@ jobs:
       - uses: actions/cache@v5
         id: npm-cache
         with:
+          lookup-only: true
           path: |
             frontend/node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
@@ -156,6 +158,7 @@ jobs:
       - uses: actions/cache@v5
         id: npm-cache
         with:
+          fail-on-cache-miss: true
           path: |
             node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
@@ -163,6 +166,7 @@ jobs:
       - uses: actions/cache@v5
         id: playwright-cache
         with:
+          fail-on-cache-miss: true
           path: |
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
@@ -239,6 +243,18 @@ jobs:
           ../api/bin/wait-for-api.sh
         shell: bash
 
+      # we shouldn't ever need to do this
+      # - name: npm ci
+      #   if: steps.npm-cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     npm ci
+
+      # we shouldn't ever need to do this
+      # - name: Install dependencies and Playwright
+      #   if: steps.playwright-cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     npx playwright install --with-deps
+
       - name: Build a prod version of the frontend
         run: |
           {
@@ -260,18 +276,6 @@ jobs:
           ls -la ./.next/standalone
           echo ========
           ls -la ./node_modules/.bin
-
-      # we shouldn't ever need to do this
-      # - name: npm ci
-      #   if: steps.npm-cache.outputs.cache-hit != 'true'
-      #   run: |
-      #     npm ci
-
-      # we shouldn't ever need to do this
-      # - name: Install dependencies and Playwright
-      #   if: steps.playwright-cache.outputs.cache-hit != 'true'
-      #   run: |
-      #     npx playwright install --with-deps
 
       - name: Docker images
         run: |
