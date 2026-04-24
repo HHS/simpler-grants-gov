@@ -78,6 +78,4 @@ export const createSpoofedSessionCookie = async (
   ]);
 };
 
-// if (playwrightEnv.targetEnv === "local") {
 initializePlaywrightSessionSecrets();
-// })
