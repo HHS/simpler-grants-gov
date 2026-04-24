@@ -489,6 +489,28 @@ class AwardRecommendationRiskResponseSchema(AbstractResponseSchema):
     )
 
 
+class AwardRecommendationRiskListRequestSchema(Schema):
+    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/risks/list request"""
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "AwardRecRiskPaginationSchema",
+            ["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "ascending"}],
+        ),
+        required=True,
+    )
+
+
+class AwardRecommendationRiskListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/risks/list response"""
+
+    data = fields.List(
+        fields.Nested(AwardRecommendationRiskResponseDataSchema),
+        metadata={"description": "The list of award recommendation risks"},
+    )
+
+
 ####################################
 # List Award Recommendation Audit History
 ####################################
