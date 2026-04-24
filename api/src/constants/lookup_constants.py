@@ -415,6 +415,7 @@ class ApprovalResponseType(StrEnum):
 class WorkflowEntityType(StrEnum):
     OPPORTUNITY = "opportunity"
     APPLICATION = "application"
+    AWARD_RECOMMENDATION = "award_recommendation"
 
 
 class WorkflowEventType(StrEnum):
