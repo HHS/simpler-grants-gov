@@ -3533,6 +3533,14 @@ class WorkflowFactory(BaseFactory):
             opportunity=None,
         )
 
+        has_award_recommendation = factory.Trait(
+            award_recommendation=factory.SubFactory(AwardRecommendationFactory),
+            award_recommendation_id=factory.LazyAttribute(
+                lambda e: e.award_recommendation.award_recommendation_id
+            ),
+            opportunity=None,
+        )
+
 
 class WorkflowEventHistoryFactory(BaseFactory):
     class Meta:
