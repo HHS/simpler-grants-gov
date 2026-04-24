@@ -1,8 +1,10 @@
+# Environments
+
 The Simpler Grants Next application is deployed and used in a number of environments. Here is how those environments, and the data required by each environment, are managed.
 
 ## General Things
 
-Note that Next applications follow a set heirarchy for evaluating environment variable precedence, as noted [in documentation here](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables#environment-variable-load-order).
+Note that Next applications follow a set hierarchy for evaluating environment variable precedence, as noted [in documentation here](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables#environment-variable-load-order).
 
 Secret environment variables, and others that should be controlled specifically based on deployed environment, are specified in terraform, which pulls them from SSM and sets them on the service definition, which passes them from the ECS task definition to the Next container. See [code referenced here](https://github.com/HHS/simpler-grants-gov/blob/main/infra/frontend/app-config/env-config/environment-variables.tf).
 
@@ -35,7 +37,7 @@ Unit testing by Jest is always done in the "test" environment by default. See [J
 
 E2E tests are run against a running Next server, so the environment used there is determined by the environment used on by whatever type of Next server is running.
 
-In CI E2E tests use `npx playwright test`, which will run `next start` pointing at a production build of the application. To work aroudn this our CI code copies .env.development values into a .env.local file that will take precedence over .env.production. Note that NODE_ENV will still be set to "production".
+In CI E2E tests use `npx playwright test`, which will run `next start` pointing at a production build of the application. To work around this our CI code copies .env.development values into a .env.local file that will take precedence over .env.production. Note that NODE_ENV will still be set to "production".
 
 See [our CI code](https://github.com/HHS/simpler-grants-gov/blob/1b85220c7369d40ab2f690050ece41be91c91b7f/.github/workflows/ci-frontend-e2e.yml#L58) for more details.
 
