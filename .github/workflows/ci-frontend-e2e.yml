@@ -143,8 +143,8 @@ jobs:
             frontend/node_modules.tar.gz
 
   run-e2e-tests-local:
-    name: Initialize for CI/CD runs
-    needs: [get-api-commit-hash]
+    name: Prepare infra and run E2E tests
+    needs: [get-api-commit-hash, get-frontend-commit-hash, playwright-cache]
     runs-on: ubuntu-22.04
 
     strategy:
