@@ -241,7 +241,6 @@ jobs:
           make build
 
       - name: Save Docker image to file
-        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
         run: |
           docker save api-grants-api > /tmp/docker-image.tar
           tar -czf /tmp/api-docker-image.tar.gz /tmp/docker-image.tar
@@ -253,7 +252,7 @@ jobs:
           path: /tmp/docker-image.tar
           key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
-      - name: Upload Docker image artifact
+      - name: Upload API Docker image artifact
         uses: actions/upload-artifact@v7
         with:
           if-no-files-found: error
