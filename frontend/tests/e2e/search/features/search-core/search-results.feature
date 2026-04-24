@@ -1,4 +1,4 @@
-# @specFile frontend/tests/e2e/search/search-results.spec.ts
+# @specFile search-results.spec.ts
 # @featureArea Search
 # @debugNote Confirms visible positive-results states for valid keyword search
 

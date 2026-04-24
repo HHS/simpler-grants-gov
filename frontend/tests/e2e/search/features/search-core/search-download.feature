@@ -1,4 +1,4 @@
-# @specFile frontend/tests/e2e/search/search-download.spec.ts
+# @specFile search-download.spec.ts
 # @featureArea Search
 # @debugNote Validates CSV export trigger and filename pattern
 

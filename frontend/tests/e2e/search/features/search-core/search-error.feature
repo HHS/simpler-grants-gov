@@ -1,4 +1,4 @@
-# @specFile frontend/tests/e2e/search/search-error.spec.ts
+# @specFile search-error.spec.ts
 # @featureArea Search
 # @debugNote Covers invalid query error state and recovery path
 

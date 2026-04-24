@@ -1,6 +1,6 @@
 /**
  * @feature Search - Core Search Behaviors
- * @featureFile search-core-behaviors.feature
+ * @featureFile search.feature
  * @scenario Validate search pagination, sorting, filter behavior, and page-boundary handling
  */
 
