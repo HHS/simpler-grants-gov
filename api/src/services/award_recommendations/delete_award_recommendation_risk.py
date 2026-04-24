@@ -35,7 +35,7 @@ def _get_award_recommendation_risk_for_update(
     if risk is None:
         raise_flask_error(
             404,
-            message=f"Could not find Award Recommendation Risk with ID {award_recommendation_risk_id}",
+            message=f"Could not find Award Recommendation Risk with ID {award_recommendation_risk_id} and Award Recommendation ID {award_recommendation_id}",
         )
 
     agency = risk.award_recommendation.opportunity.agency_record
