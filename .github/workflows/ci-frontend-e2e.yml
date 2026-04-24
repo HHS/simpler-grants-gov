@@ -154,6 +154,25 @@ jobs:
         run: |
           docker image ls
 
+      - name: Download API docker image
+        uses: actions/download-artifact@v8
+        with:
+          name: api-docker-image.tar.gz
+          path: /tmp
+
+      - name: Expand API Docker image
+        run: |
+          tar -xzf /tmp/api-docker-image.tar.gz /tmp
+          ls /tmp
+
+      - name: Load API Docker image
+        run: |
+          docker load < /tmp/docker-image.tar
+
+      - name: Docker images
+        run: |
+          docker image ls
+
       - name: Init API Server for e2e tests
         run: |
           cd ../api
@@ -200,7 +219,7 @@ jobs:
         run: |
           exit 1
 
-      - name: Load cached Docker image
+      - name: Load cached Docker image (alias it if needed)
         run: |
           docker load < /tmp/docker-image.tar
           # alias the live docker container name simpler-grants-gov-api to the locally build name api-grants-api so that we don't rebuild it in later steps.
@@ -223,11 +242,11 @@ jobs:
 
           make build
 
-      - name: Save Docker image
+      - name: Save Docker image to file
         if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
         run: |
-          cd ..
           docker save api-grants-api > /tmp/docker-image.tar
+          tar -czf /tmp/api-docker-image.tar.gz /tmp/docker-image.tar
 
       - name: Cache Docker image
         if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
@@ -235,6 +254,15 @@ jobs:
         with:
           path: /tmp/docker-image.tar
           key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v7
+        with:
+          if-no-files-found: error
+          include-hidden-files: true
+          archive: false
+          path: |
+            /tmp/api-docker-image.tar.gz
 
   setup-e2e-tests-local:
     name: Setup Local E2E Tests
@@ -266,6 +294,29 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: api-fe-shared-key
+
+      - name: Docker images
+        run: |
+          docker image ls
+
+      - name: Download API docker image
+        uses: actions/download-artifact@v8
+        with:
+          name: api-docker-image.tar.gz
+          path: /tmp
+
+      - name: Expand API Docker image
+        run: |
+          tar -xzf /tmp/api-docker-image.tar.gz /tmp
+          ls /tmp
+
+      - name: Load API Docker image
+        run: |
+          docker load < /tmp/docker-image.tar
+
+      - name: Docker images
+        run: |
+          docker image ls
 
       - name: Start API Server for e2e tests
         run: |
