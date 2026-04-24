@@ -28,6 +28,14 @@ resource "aws_iam_role" "opensearch_write" {
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
 }
 
+# Dedicated role for the workflow service
+resource "aws_iam_role" "workflow_service" {
+  count = var.opensearch_ingest_policy_arn != null ? 1 : 0
+
+  name               = "${var.service_name}-workflow"
+  assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role_policy.json
+}
+
 data "aws_iam_policy_document" "ecs_tasks_assume_role_policy" {
   statement {
     sid = "ECSTasksAssumeRole"

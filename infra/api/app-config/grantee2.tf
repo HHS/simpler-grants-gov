@@ -1,22 +1,22 @@
-module "grantee1_config" {
+module "grantee2_config" {
   source                            = "./env-config"
   project_name                      = local.project_name
   app_name                          = local.app_name
   default_region                    = module.project_config.default_region
-  environment                       = "grantee1"
-  network_name                      = "grantee1"
-  domain_name                       = "api.grantee1.teams.simpler.grants.gov"
+  environment                       = "grantee2"
+  network_name                      = "grantee2"
+  domain_name                       = "api.grantee2.teams.simpler.grants.gov"
   secondary_domain_names            = []
-  s3_cdn_domain_name                = "files.grantee1.teams.simpler.grants.gov"
+  s3_cdn_domain_name                = "files.grantee2.teams.simpler.grants.gov"
   mtls_domain_name                  = null
   enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
-  database_newrelic_entity_guid     = "NTI0OTgwOXxJTkZSQXxOQXwyNjY5ODkxMDczODI5NDA4MTg"
+  database_newrelic_entity_guid     = ""
   has_incident_management_service   = local.has_incident_management_service
   enable_identity_provider          = local.enable_identity_provider
   enable_notifications              = local.enable_notifications
-  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyOTQ0MjI1MTY3MzU4ODU5ODY4"
+  service_newrelic_entity_guid      = ""
   service_newrelic_mtls_entity_guid = null
   api_host_newrelic_entity_guid     = "<PLACEHOLDER>"
 
@@ -51,7 +51,7 @@ module "grantee1_config" {
     RESET_EMAILS_WITHOUT_SENDING = "false"
 
     # PDF Generation - Staging overrides
-    FRONTEND_URL             = "https://grantee1.teams.simpler.grants.gov"
+    FRONTEND_URL             = "https://grantee2.teams.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
   }

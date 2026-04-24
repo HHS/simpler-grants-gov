@@ -428,8 +428,8 @@ class AwardRecommendationSubmissionListResponseSchema(
     )
 
 
-class AwardRecommendationRiskCreateRequestSchema(Schema):
-    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/risks request"""
+class AwardRecommendationRiskRequestSchema(Schema):
+    """Schema for award recommendation risk create and update requests"""
 
     comment = fields.String(
         required=True,
@@ -453,8 +453,8 @@ class AwardRecommendationRiskCreateRequestSchema(Schema):
     )
 
 
-class AwardRecommendationRiskCreateResponseDataSchema(Schema):
-    """Schema for the created risk response data"""
+class AwardRecommendationRiskResponseDataSchema(Schema):
+    """Schema for risk response data (used by create and update)"""
 
     award_recommendation_risk_id = fields.UUID(
         metadata={"description": "The award recommendation risk ID"}
@@ -480,12 +480,12 @@ class AwardRecommendationRiskCreateResponseDataSchema(Schema):
     )
 
 
-class AwardRecommendationRiskCreateResponseSchema(AbstractResponseSchema):
-    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/risks response"""
+class AwardRecommendationRiskResponseSchema(AbstractResponseSchema):
+    """Schema for risk response (used by create and update)"""
 
     data = fields.Nested(
-        AwardRecommendationRiskCreateResponseDataSchema,
-        metadata={"description": "The created award recommendation risk"},
+        AwardRecommendationRiskResponseDataSchema,
+        metadata={"description": "The award recommendation risk"},
     )
 
 

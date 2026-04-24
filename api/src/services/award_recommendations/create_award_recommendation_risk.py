@@ -22,7 +22,7 @@ from src.services.award_recommendations.utils import get_validated_submissions
 from src.validation.validation_constants import ValidationErrorType
 
 
-def _get_award_recommendation_for_update(
+def get_award_recommendation_for_update(
     db_session: db.Session, user: User, award_recommendation_id: uuid.UUID
 ) -> AwardRecommendation:
     stmt = (
@@ -72,17 +72,13 @@ def _generate_risk_number(db_session: db.Session, agency_code: str) -> str:
 
     raise Exception(f"Failed to generate a unique risk number after {max_attempts} attempts")
 
-
-# _get_validated_submissions is now provided by shared utility function
-
-
 def create_award_recommendation_risk(
     db_session: db.Session,
     user: User,
     award_recommendation_id: uuid.UUID,
     request_data: dict,
 ) -> AwardRecommendationRisk:
-    award_recommendation = _get_award_recommendation_for_update(
+    award_recommendation = get_award_recommendation_for_update(
         db_session, user, award_recommendation_id
     )
 
