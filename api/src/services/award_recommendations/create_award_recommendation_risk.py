@@ -11,12 +11,13 @@ from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.award_recommendation_models import (
     AwardRecommendation,
+    AwardRecommendationApplicationSubmission,
     AwardRecommendationRisk,
     AwardRecommendationRiskSubmission,
 )
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
-from src.services.award_recommendations.utils import get_validated_submissions
+from src.services.award_recommendations.utils import validate_all_submissions_exist
 
 
 def get_award_recommendation_for_update(
@@ -86,7 +87,16 @@ def create_award_recommendation_risk(
     agency_code = agency.agency_code
 
     submission_ids = set(request_data["award_recommendation_application_submission_ids"])
-    submissions = get_validated_submissions(db_session, award_recommendation_id, submission_ids)
+
+    stmt = select(AwardRecommendationApplicationSubmission).where(
+        AwardRecommendationApplicationSubmission.award_recommendation_id == award_recommendation_id,
+        AwardRecommendationApplicationSubmission.award_recommendation_application_submission_id.in_(
+            submission_ids
+        ),
+    )
+    submissions = list(db_session.execute(stmt).scalars().all())
+
+    validate_all_submissions_exist(submission_ids, submissions)
 
     risk = AwardRecommendationRisk(
         award_recommendation_risk_id=uuid.uuid4(),

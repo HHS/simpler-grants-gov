@@ -1,6 +1,8 @@
 import logging
 import uuid
-from typing import cast
+
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
@@ -9,11 +11,13 @@ from src.db.models.award_recommendation_models import (
     AwardRecommendationApplicationSubmission,
     AwardRecommendationAudit,
 )
+from src.db.models.competition_models import Application, ApplicationSubmission
+from src.db.models.entity_models import Organization
 from src.db.models.user_models import User
 from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_and_verify_access,
 )
-from src.services.award_recommendations.utils import get_validated_submissions
+from src.services.award_recommendations.utils import validate_all_submissions_exist
 
 logger = logging.getLogger(__name__)
 
@@ -39,31 +43,44 @@ def update_award_recommendation_submissions(
     Returns:
         List of updated award recommendation application submissions
     """
-    # Get and verify access to the award recommendation
     award_recommendation = get_award_recommendation_and_verify_access(
         db_session, user, award_recommendation_id
     )
 
-    # Verify update permission
     agency = award_recommendation.opportunity.agency_record
     verify_access(user, {Privilege.UPDATE_AWARD_RECOMMENDATION}, agency)
 
-    # Get all submission IDs to update
     submission_ids = list(update_data.keys())
     if not submission_ids:
         return []
 
-    # Get validated submissions with eager loading, returning a dictionary for easier lookups
-    submissions_map = cast(
-        dict[uuid.UUID, AwardRecommendationApplicationSubmission],
-        get_validated_submissions(
-            db_session,
-            award_recommendation_id,
-            submission_ids,
-            eager_load=True,
-            return_dict=True,
-        ),
+    stmt = (
+        select(AwardRecommendationApplicationSubmission)
+        .where(
+            AwardRecommendationApplicationSubmission.award_recommendation_id
+            == award_recommendation_id,
+            AwardRecommendationApplicationSubmission.award_recommendation_application_submission_id.in_(
+                submission_ids
+            ),
+        )
+        .options(
+            selectinload(
+                AwardRecommendationApplicationSubmission.award_recommendation_submission_detail
+            ),
+            selectinload(AwardRecommendationApplicationSubmission.application_submission)
+            .selectinload(ApplicationSubmission.application)
+            .selectinload(Application.organization)
+            .selectinload(Organization.sam_gov_entity),
+        )
     )
+    submissions = list(db_session.execute(stmt).scalars().all())
+
+    validate_all_submissions_exist(submission_ids, submissions)
+
+    submissions_map = {
+        submission.award_recommendation_application_submission_id: submission
+        for submission in submissions
+    }
 
     updated_submissions = []
     for submission_id, submission_data in update_data.items():
