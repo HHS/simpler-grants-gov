@@ -334,7 +334,7 @@ class OpportunitySummary(ApiSchemaTable, TimestampMixin):
 class AssistanceListing(ApiSchemaTable, TimestampMixin):
     __tablename__ = "assistance_listing"
 
-    assistance_listing_record_id: Mapped[uuid.UUID] = mapped_column(
+    assistance_listing_id: Mapped[uuid.UUID] = mapped_column(
         UUID, primary_key=True, default=uuid.uuid4
     )
 
@@ -360,8 +360,8 @@ class OpportunityAssistanceListing(ApiSchemaTable, TimestampMixin):
     assistance_listing_number: Mapped[str | None]
     program_title: Mapped[str | None]
 
-    assistance_listing_record_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID, ForeignKey(AssistanceListing.assistance_listing_record_id), index=True
+    assistance_listing_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID, ForeignKey(AssistanceListing.assistance_listing_id), index=True
     )
     assistance_listing: Mapped[AssistanceListing | None] = relationship(AssistanceListing)
 
