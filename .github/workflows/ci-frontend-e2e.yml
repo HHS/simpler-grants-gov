@@ -162,8 +162,10 @@ jobs:
 
       - name: Expand API Docker image
         run: |
-          tar -xzf /tmp/api-docker-image.tar.gz /tmp
-          ls /tmp
+          pushd /tmp
+          ls -la .
+          tar -xzf /tmp/api-docker-image.tar.gz
+          ls -la .
 
       - name: Load API Docker image
         run: |
@@ -303,8 +305,10 @@ jobs:
 
       - name: Expand API Docker image
         run: |
-          tar -xzf /tmp/api-docker-image.tar.gz /tmp
-          ls /tmp
+          pushd /tmp
+          ls -la .
+          tar -xzf /tmp/api-docker-image.tar.gz
+          ls -la .
 
       - name: Load API Docker image
         run: |
