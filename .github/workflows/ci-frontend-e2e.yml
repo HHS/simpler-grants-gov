@@ -142,69 +142,59 @@ jobs:
           path: |
             frontend/node_modules.tar.gz
 
-  init-ci-cd:
+  run-e2e-tests-local:
     name: Initialize for CI/CD runs
-    needs: [get-api-commit-hash, build-api-when-not-cached]
+    needs: [get-api-commit-hash]
     runs-on: ubuntu-22.04
+
+    strategy:
+      fail-fast: true
+      matrix:
+        shard: [1, 2, 3, 4]
+        total_shards: [4]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Docker images
-        run: |
-          docker image ls
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
-      - name: Download API docker image
+      # get this from downloading the artifact since we are passing it job to job
+      # - uses: actions/cache@v5
+      #   id: npm-cache
+      #   with:
+      #     path: |
+      #       node_modules
+      #     key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Download node_modules
         uses: actions/download-artifact@v8
         with:
-          name: api-docker-image.tar.gz
-          path: /tmp
+          name: node_modules.tar.gz
+          path: frontend/
 
-      - name: Expand API Docker image
+      - name: Expand node_modules
         run: |
-          pushd /tmp
-          ls -la .
-          tar -xzf /tmp/api-docker-image.tar.gz
-          ls -la .
-
-      - name: Load API Docker image
-        run: |
-          docker load < /tmp/docker-image.tar
+          tar -xzf node_modules.tar.gz node_modules
+          ls -la node_*
+          rm node_modules.tar.gz
 
       - name: Docker images
         run: |
           docker image ls
 
-      - name: Init API Server for e2e tests
-        run: |
-          cd ../api
-          # Enable core dumps for debugging segfaults
-          ulimit -c unlimited
-          mkdir -p /tmp/cores
-          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
-          # Run init first to generate JWT keys in override.env
-
-          make init-ci-cd
-
-          ls -a
-
-      - name: Docker images
-        run: |
-          docker image ls
-
-      - name: Save shared key
-        uses: actions/upload-artifact@v7
-        with:
-          name: api-fe-shared-key
-          path: |
-            api/override.env
-
-  build-api-when-not-cached:
-    name: Build API when not cached
-    needs: [get-api-commit-hash]
-    runs-on: ubuntu-22.04
-
-    steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
@@ -262,21 +252,6 @@ jobs:
           path: |
             /tmp/api-docker-image.tar.gz
 
-  setup-e2e-tests-local:
-    name: Setup Local E2E Tests
-    needs:
-      [
-        get-api-commit-hash,
-        get-frontend-commit-hash,
-        build-api-when-not-cached,
-        playwright-cache,
-      ]
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
       - name: Init API Server for e2e tests
         run: |
           cd ../api
@@ -288,35 +263,7 @@ jobs:
 
           make init-ci-cd
 
-      - name: Download shared key
-        uses: actions/download-artifact@v8
-        with:
-          name: api-fe-shared-key
-
-      - name: Docker images
-        run: |
-          docker image ls
-
-      - name: Download API docker image
-        uses: actions/download-artifact@v8
-        with:
-          name: api-docker-image.tar.gz
-          path: /tmp
-
-      - name: Expand API Docker image
-        run: |
-          pushd /tmp
-          ls -la .
-          tar -xzf /tmp/api-docker-image.tar.gz
-          ls -la .
-
-      - name: Load API Docker image
-        run: |
-          docker load < /tmp/docker-image.tar
-
-      - name: Docker images
-        run: |
-          docker image ls
+          ls -a
 
       - name: Start API Server for e2e tests
         run: |
@@ -328,58 +275,12 @@ jobs:
 
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          make init-ci-cd db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
           ../api/bin/wait-for-api.sh
         shell: bash
-
-      - name: Save shared e2e token
-        uses: actions/upload-artifact@v7
-        with:
-          name: api-fe-shared-e2e-token
-          path: |
-            api/e2e_token.tmp
-
-      - name: Docker images after Start API
-        run: |
-          docker image ls
-
-  build-frontend-when-not-cached:
-    name: Build frontend when not cached
-    needs:
-      [
-        get-api-commit-hash,
-        get-frontend-commit-hash,
-        setup-e2e-tests-local,
-        init-ci-cd,
-      ]
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      # Don't try to cache this until we figure out injecting E2E token to existing next build
-      # - name: Next build cache
-      #   id: next-build-cache
-      #   uses: actions/cache/restore@v5
-      #   with:
-      #     path: .next/standalone
-      #     key: frontend-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
-
-      - name: Download shared key
-        uses: actions/download-artifact@v8
-        with:
-          name: api-fe-shared-key
-          path: api/
-
-      - name: Download e2e token
-        uses: actions/download-artifact@v8
-        with:
-          name: api-fe-shared-e2e-token
-          path: api/
 
       - uses: actions/cache@v5
         id: npm-cache
@@ -388,9 +289,7 @@ jobs:
             frontend/node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Build a prod version of the frontend (if not cached)
-        #always build for now until we can sort out getting e2e key
-        # if: steps.next-build-cache.outputs.cache-matched-key == ''
+      - name: Build a prod version of the frontend
         run: |
           {
             cat .env.development
@@ -400,91 +299,6 @@ jobs:
           # Use the 127.0.0.1 url for tests (IPv4 only)
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build
-
-      - name: Save next build
-        uses: actions/upload-artifact@v7
-        with:
-          name: next-build
-          if-no-files-found: error
-          include-hidden-files: true
-          path: |
-            frontend/.next/
-            frontend/public/
-
-  run-e2e-tests-local:
-    name: Run Local E2E Tests
-    needs: [setup-e2e-tests-local, build-frontend-when-not-cached]
-    runs-on: ubuntu-22.04
-
-    strategy:
-      fail-fast: true
-      matrix:
-        shard: [1, 2, 3, 4]
-        total_shards: [4]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: ${{ env.PACKAGE_MANAGER }}
-          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
-
-      # get this from downloading the artifact since we are passing it job to job
-      # - uses: actions/cache@v5
-      #   id: npm-cache
-      #   with:
-      #     path: |
-      #       node_modules
-      #     key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-
-      - uses: actions/cache@v5
-        id: playwright-cache
-        with:
-          path: |
-            ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-
-      # Don't try to cache this until we figure out injecting E2E token to existing next build
-      # - uses: actions/cache@v5
-      #   id: next-build-cache
-      #   with:
-      #     path: |
-      #       frontend/dist
-      #     key: ${{ runner.os }}-next-build-${{ needs.get-frontend-commit-hash.outputs.commit_hash }}
-
-      - name: Download shared key
-        uses: actions/download-artifact@v8
-        with:
-          name: api-fe-shared-key
-          path: api/
-
-      - name: Download shared e2e token
-        uses: actions/download-artifact@v8
-        with:
-          name: api-fe-shared-e2e-token
-          path: api/
-
-      - name: Download next build
-        uses: actions/download-artifact@v8
-        with:
-          name: next-build
-          path: frontend/
-
-      - name: Download node_modules
-        uses: actions/download-artifact@v8
-        with:
-          name: node_modules.tar.gz
-          path: frontend/
-
-      - name: Expand node_modules
-        run: |
-          tar -xzf node_modules.tar.gz node_modules
-          ls -la node_*
-          rm node_modules.tar.gz
 
       - name: ls frontend
         run: |
@@ -496,6 +310,7 @@ jobs:
           ls -la ./.next/standalone
           echo ========
           ls -la ./node_modules/.bin
+
       # we shouldn't ever need to do this
       # - name: npm ci
       #   if: steps.npm-cache.outputs.cache-hit != 'true'
