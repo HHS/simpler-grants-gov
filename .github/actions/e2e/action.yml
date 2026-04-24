@@ -44,6 +44,12 @@ inputs:
   workers:
     description: "number of workers to use for test run"
     default: ""
+  staging_test_user_api_key:
+    description: "test user API key used in spoofing staging user logins"
+    default: ""
+  staging_client_session_secret:
+    description: "encode key for client side JWTs, used in spoofing staging user logins"
+    default: ""
 outputs:
   artifact-id:
     description: "artifact ids for uploaded test reports"

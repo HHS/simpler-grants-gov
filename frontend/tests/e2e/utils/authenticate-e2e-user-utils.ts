@@ -6,10 +6,6 @@
  *   fake JWT cookie or if spoofing is turned off (in the case where we want
  *   to specifically test the login process, for example, performs a real login
  *   with credentials and MFA using perform-login-utils.ts.
- * - Staging (full suite / CI run): if the user is already logged in (session
- *   persisted from the previous test because --workers=1 reuses the browser,
- *   or storageState was injected via playwright.config.ts), the full MFA login
- *   flow is skipped automatically.
  *
  * This means tests can be run individually or as part of the full suite
  * without any changes — authentication is handled correctly in both cases.
@@ -53,7 +49,7 @@ const attemptStagingSpoof = async (
     await createSpoofedSessionCookie(context, json.data.token);
     return true;
   } catch (e) {
-    console.error(e);
+    console.error(`unable to spoof session cookie: ${(e as Error).message}`);
     throw e;
   }
 };
