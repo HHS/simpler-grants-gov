@@ -214,12 +214,8 @@ jobs:
           key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
           restore-keys: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
-      - name: Failed to load cache, exit
-        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
-        run: |
-          exit 1
-
       - name: Load cached Docker image (alias it if needed)
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key != ''
         run: |
           docker load < /tmp/docker-image.tar
           # alias the live docker container name simpler-grants-gov-api to the locally build name api-grants-api so that we don't rebuild it in later steps.
