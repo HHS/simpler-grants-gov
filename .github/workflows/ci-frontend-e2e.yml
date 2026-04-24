@@ -195,9 +195,6 @@ jobs:
         run: |
           docker image ls
 
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
       - name: Restore Docker image cached
         id: restore-docker-image-cached
         uses: actions/cache@v5
