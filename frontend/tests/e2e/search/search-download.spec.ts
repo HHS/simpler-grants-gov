@@ -1,6 +1,6 @@
 /**
- * @feature Search - Export Search Results
- * @featureFile frontend/tests/e2e/search/features/search-core/search-download.feature
+ * @feature Search Results CSV Download
+ * @featureFile search-download.feature
  * @scenario Export current search results to CSV from the search page
  */
 
@@ -14,24 +14,25 @@ test.describe("Search results export", () => {
     "should download a csv file when requested",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page }, { project }) => {
-      // Given unsupported browsers or viewports are excluded for this scenario
+      // Unsupported browsers or viewports are excluded for this scenario
       // downloads work manually in safari, but can't get the test to work
       // export button not available in mobile
       if (project.name.match(/webkit/) || project.name.match(/[Mm]obile/)) {
         return;
       }
 
-      // Given the user is on the search page
+      // Given I am on the Search Funding Opportunity page
       const downloadPromise = page.waitForEvent("download");
       await page.goto("/search");
 
-      // When the user requests a CSV export
+      // When I click the search results export button
       await page
         .locator('div[data-testid="search-download-button-container"] > button')
         .click();
       const download = await downloadPromise;
 
-      // Then a CSV file with the expected naming format is downloaded
+      // Then a CSV file should download
+      // And the filename should match "grants-search-<timestamp>.csv"
       expect(download.suggestedFilename()).toMatch(/grants-search-\d+\.csv/);
     },
   );

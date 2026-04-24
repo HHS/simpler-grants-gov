@@ -1,6 +1,6 @@
 /**
- * @feature Search - Error Handling and Recovery
- * @featureFile frontend/tests/e2e/search/features/search-core/search-error.feature
+ * @feature Search Error Handling and Recovery
+ * @featureFile search-error.feature
  * @scenario Show an error state for invalid search params and recover by running a valid search
  */
 
@@ -19,11 +19,10 @@ test.describe("Search error page", () => {
     "should return an error page when expected",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page }) => {
-      // Given the user navigates with an invalid status query parameter
-      // trigger error by providing an invalid status value
+      // Given I navigate to "/search?status=not_a_status"
       await page.goto("/search?status=not_a_status");
 
-      // Then an error alert is displayed
+      // Then I should see an error alert on the page
       expect(page.locator(".usa-alert--error")).toBeTruthy();
     },
   );
@@ -32,14 +31,16 @@ test.describe("Search error page", () => {
     "should allow for performing a new search from error state",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page }) => {
-      // Given the user is in an error state
+      // Given I navigate to "/search?status=not_a_status"
       await page.goto("/search?status=not_a_status");
 
-      // When the user applies a valid filter
+      // When I open the filters
       await toggleFilterDrawer(page);
+
+      // And I select the "Closed" opportunity status filter
       await toggleCheckbox(page, "status-closed");
 
-      // Then the URL reflects the valid search state
+      // Then the URL should include "status=closed"
       await page.waitForURL(/closed/, {
         timeout: SEARCH_TIMEOUT,
       });
