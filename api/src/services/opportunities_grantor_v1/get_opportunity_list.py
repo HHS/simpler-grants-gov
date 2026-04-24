@@ -102,8 +102,10 @@ def list_opportunities_with_filters(
                 Opportunity.current_opportunity_summary.has(
                     CurrentOpportunitySummary.opportunity_status == OpportunityStatus.POSTED
                 ),
-                Opportunity.is_simpler_grants_opportunity,
-                Opportunity.competitions.any(Competition.application_submissions.any()),
+                Opportunity.is_simpler_grants_opportunity.is_(True),
+                Opportunity.competitions.any(
+                    Competition.application_submissions.any()
+                ),
                 ~Opportunity.award_recommendations.any(),
             )
 
