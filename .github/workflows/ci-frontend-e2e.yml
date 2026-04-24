@@ -217,6 +217,7 @@ jobs:
 
       - name: Docker images
         run: |
+          echo |${{ steps.restore-docker-image-cached.outputs.cache-matched-key }}|
           docker image ls
 
       - name: Build API Server for e2e tests (if not cached)
