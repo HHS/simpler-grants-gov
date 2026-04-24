@@ -260,6 +260,7 @@ variable "service_newrelic_mtls_entity_guid" {
 
 variable "api_host_newrelic_entity_guid" {
   type        = string
-  description = "New Relic entity GUID for the ECS service, used to correlate container logs with the infrastructure entity in New Relic."
+  description = "New Relic entity GUID for the ECS service host, used to correlate container logs with the infrastructure entity in New Relic."
   default     = null
 }
+

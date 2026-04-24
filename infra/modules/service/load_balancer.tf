@@ -109,7 +109,7 @@ resource "aws_lb_listener_rule" "app_http_forward" {
 }
 
 resource "aws_lb_listener" "alb_listener_https" {
-  count = var.enable_load_balancer ? var.enable_mtls_load_balancer ? 2 : 1 : 0
+  count = var.enable_load_balancer && var.certificate_arn != null ? var.enable_mtls_load_balancer ? 2 : 1 : 0
 
   load_balancer_arn = aws_lb.alb[count.index].arn
   port              = 443
@@ -144,7 +144,7 @@ resource "aws_lb_listener_certificate" "alb_listener_https_optional_extra_certs"
 resource "aws_lb_listener_rule" "app_https_forward" {
   # we need an identical https forward, with mtls enabled
   # so we piggy back off existing and just spin up two when the api sets this true
-  count = var.enable_load_balancer ? var.enable_mtls_load_balancer ? 2 : 1 : 0
+  count = var.enable_load_balancer && var.certificate_arn != null ? var.enable_mtls_load_balancer ? 2 : 1 : 0
 
   listener_arn = aws_lb_listener.alb_listener_https[count.index].arn
   priority     = 91

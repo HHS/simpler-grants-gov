@@ -31,7 +31,7 @@ async function Settings() {
   }
   let userDetails;
   try {
-    userDetails = await getUserDetails(session.token, session.user_id);
+    userDetails = await getUserDetails(session.user_id);
   } catch (e) {
     console.error("Unable to fetch user details", e);
   }

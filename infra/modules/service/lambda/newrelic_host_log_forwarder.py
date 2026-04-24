@@ -55,12 +55,15 @@ def handler(event, context):
             "attributes": {
                 "aws.logGroup": log_group,
                 "aws.logStream": log_stream,
+                "aws.logEventId": log_event.get("id", ""),
             },
         }
         entries.append(entry)
 
     if not entries:
         return {"statusCode": 200, "body": "No log entries to forward."}
+
+    print(f"Forwarding {len(entries)} log events from {log_group}")
 
     common_attributes = {
         "logtype": "ecs-application",
@@ -105,7 +108,7 @@ def handler(event, context):
         with urllib.request.urlopen(request, timeout=10) as response:
             status = response.status
             body = response.read().decode("utf-8")
-        print(f"New Relic response: {status}")
+        print(f"New Relic response: status={status} body={body}")
         return {"statusCode": status, "body": body}
     except urllib.error.HTTPError as e:
         print(f"New Relic HTTP error: {e.code} {e.reason}")

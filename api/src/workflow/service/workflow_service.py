@@ -6,6 +6,7 @@ from sqlalchemy import select
 
 from src.adapters import db
 from src.constants.lookup_constants import WorkflowEntityType
+from src.db.models.award_recommendation_models import AwardRecommendation
 from src.db.models.base import ApiSchemaTable
 from src.db.models.competition_models import Application
 from src.db.models.opportunity_models import Opportunity
@@ -64,6 +65,18 @@ def get_workflow_entity(
 
         return {"application": application}
 
+    elif entity_type == WorkflowEntityType.AWARD_RECOMMENDATION:
+        award_recommendation = db_session.scalar(
+            select(AwardRecommendation).where(
+                AwardRecommendation.award_recommendation_id == entity_id
+            )
+        )
+        if award_recommendation is None:
+            logger.warning("Award recommendation not found for entity", extra=log_extra)
+            raise EntityNotFound("Award recommendation not found")
+
+        return {"award_recommendation": award_recommendation}
+
     else:  # Any unconfigured entity types will result in an error
         logger.warning("Entity type is not supported for workflow", extra=log_extra)  # type: ignore[unreachable]
         raise ImplementationMissingError("Entity type is not supported for workflow")
@@ -108,6 +121,7 @@ def get_and_validate_workflow(
 ENTITY_TYPE_TO_COLUMN = {
     WorkflowEntityType.OPPORTUNITY: Workflow.opportunity_id,
     WorkflowEntityType.APPLICATION: Workflow.application_id,
+    WorkflowEntityType.AWARD_RECOMMENDATION: Workflow.award_recommendation_id,
 }
 
 
