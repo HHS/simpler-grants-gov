@@ -1,10 +1,11 @@
 """Utility functions for award recommendation services."""
 
 import uuid
+
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-import src.adapters.db as db
+from src.adapters import db
 from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.db.models.award_recommendation_models import AwardRecommendationApplicationSubmission
@@ -19,7 +20,10 @@ def get_validated_submissions(
     submission_ids: list[uuid.UUID] | set[uuid.UUID],
     eager_load: bool = False,
     return_dict: bool = False,
-) -> list[AwardRecommendationApplicationSubmission] | dict[uuid.UUID, AwardRecommendationApplicationSubmission]:
+) -> (
+    list[AwardRecommendationApplicationSubmission]
+    | dict[uuid.UUID, AwardRecommendationApplicationSubmission]
+):
     """
     Validate that all requested submission IDs exist and belong to the award recommendation.
 

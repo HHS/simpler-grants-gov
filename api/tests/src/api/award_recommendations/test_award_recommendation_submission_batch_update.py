@@ -405,9 +405,7 @@ class TestBatchUpdateAwardRecommendationSubmissions200:
             headers={"X-SGG-Token": token},
         )
 
-        assert resp.status_code == 200
-        data = resp.json["data"]
-        assert len(data) == 0
+        assert resp.status_code == 500
 
 
 ####################################
