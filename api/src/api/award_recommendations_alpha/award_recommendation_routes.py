@@ -240,6 +240,7 @@ def award_recommendation_risk_create(
 
     return response.ApiResponse(message="Success", data=risk)
 
+
 @award_recommendation_blueprint.post(
     "/award-recommendations/<uuid:award_recommendation_id>/audit_history"
 )
@@ -278,8 +279,9 @@ def award_recommendation_audit_list(
         message="Success", data=audit_events, pagination_info=pagination_info
     )
 
+
 @award_recommendation_blueprint.delete(
-"/award-recommendations/<uuid:award_recommendation_id>/risks/<uuid:award_recommendation_risk_id>"
+    "/award-recommendations/<uuid:award_recommendation_id>/risks/<uuid:award_recommendation_risk_id>"
 )
 @award_recommendation_blueprint.output(AbstractResponseSchema)
 @award_recommendation_blueprint.doc(
