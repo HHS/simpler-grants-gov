@@ -218,9 +218,7 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
             email = user_emails[user_id]
             for org_group in org_opp_list:
                 opportunity_ids = [opp.opportunity_id for opp in org_group.opportunities]
-                subject, content = build_notification_content(
-                    self.notification_config, [org_group]
-                )
+                subject, content = build_notification_content(self.notification_config, [org_group])
 
                 logger.info(
                     "Created org saved opportunity email notification",
