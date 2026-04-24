@@ -35,7 +35,7 @@ test(
     // this is dumb but webkit has an issue with trying to fill in the input too quickly
     // if the expect in here fails, we give it another shot after 5 seconds
     // this way we avoid an arbitrary timeout, and do not slow down the other tests
-    
+
     // Given I search for "education grants"
     try {
       await fillSearchInputAndSubmit("education grants", page);

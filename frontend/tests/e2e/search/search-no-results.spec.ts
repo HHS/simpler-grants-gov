@@ -23,7 +23,6 @@ test.describe("Search page no results tests", () => {
     "should return 0 results when searching for obscure term",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page }) => {
-
       const searchTerm = generateRandomString([10]);
 
       // Given I am on the Search Funding Opportunity page

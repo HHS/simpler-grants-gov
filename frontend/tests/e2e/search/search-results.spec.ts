@@ -16,7 +16,6 @@ import {
 const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE, CORE_REGRESSION } = VALID_TAGS;
 
 test.beforeEach(async ({ page }) => {
-
   const searchTerm = "grants";
   // Given I am on the Search Funding Opportunity page
   await page.goto("/search");
