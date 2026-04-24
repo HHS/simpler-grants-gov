@@ -142,21 +142,9 @@ jobs:
           path: |
             frontend/node_modules.tar.gz
 
-  pre-pull-images:
-    name: Pre-pull images we'll need for Docker compose
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Have docker pre-pull the images
-        run: |
-          cd ../api
-          docker compose pull -q
-
   init-ci-cd:
     name: Initialize for CI/CD runs
-    needs: [get-api-commit-hash, pre-pull-images, build-api-when-not-cached]
+    needs: [get-api-commit-hash, build-api-when-not-cached]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
@@ -468,6 +456,10 @@ jobs:
       #   if: steps.playwright-cache.outputs.cache-hit != 'true'
       #   run: |
       #     npx playwright install --with-deps
+
+      - name: Docker images
+        run: |
+          docker image ls
 
       - name: Determine test groups to run
         shell: bash
