@@ -212,36 +212,36 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
             logger.info("No eligible members found for org saved opportunity notifications")
             return []
 
-        # Build one email per user covering all their organizations' new opportunities
+        # Build one email per user per organization
         notifications: list[UserEmailNotification] = []
         for user_id, org_opp_list in user_org_opportunities.items():
             email = user_emails[user_id]
-            all_opportunity_ids = [
-                opp.opportunity_id for group in org_opp_list for opp in group.opportunities
-            ]
-            subject, content = build_notification_content(self.notification_config, org_opp_list)
-            org_count = len(org_opp_list)
-
-            logger.info(
-                "Created org saved opportunity email notification",
-                extra={
-                    "user_id": user_id,
-                    "org_count": org_count,
-                    "opportunity_count": len(all_opportunity_ids),
-                },
-            )
-
-            notifications.append(
-                UserEmailNotification(
-                    user_id=user_id,
-                    user_email=email,
-                    subject=subject,
-                    content=content,
-                    notification_reason=NotificationReason.ORG_SAVED_OPPORTUNITY,
-                    notified_object_ids=all_opportunity_ids,
-                    is_notified=False,
+            for org_group in org_opp_list:
+                opportunity_ids = [opp.opportunity_id for opp in org_group.opportunities]
+                subject, content = build_notification_content(
+                    self.notification_config, [org_group]
                 )
-            )
+
+                logger.info(
+                    "Created org saved opportunity email notification",
+                    extra={
+                        "user_id": user_id,
+                        "organization_id": org_group.organization.organization_id,
+                        "opportunity_count": len(opportunity_ids),
+                    },
+                )
+
+                notifications.append(
+                    UserEmailNotification(
+                        user_id=user_id,
+                        user_email=email,
+                        subject=subject,
+                        content=content,
+                        notification_reason=NotificationReason.ORG_SAVED_OPPORTUNITY,
+                        notified_object_ids=opportunity_ids,
+                        is_notified=False,
+                    )
+                )
 
         logger.info(
             "Collected org saved opportunity notifications",

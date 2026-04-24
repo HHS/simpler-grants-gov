@@ -258,14 +258,14 @@ class TestOrgSavedOpportunityNotification:
         )
         assert len(notification_logs) == 1
 
-    def test_user_in_multiple_orgs_receives_single_email(
+    def test_user_in_multiple_orgs_receives_email_per_org(
         self,
         db_session,
         enable_factory_create,
         user_with_email,
         configuration,
     ):
-        """Test that a user in multiple orgs with new opportunities gets one email."""
+        """Test that a user in multiple orgs with new opportunities gets one email per org."""
         org1 = factories.OrganizationFactory.create()
         org2 = factories.OrganizationFactory.create()
 
@@ -288,9 +288,9 @@ class TestOrgSavedOpportunityNotification:
         task = OrgSavedOpportunityNotificationTask(db_session, self.notification_config)
         task.run()
 
-        # One user -> one email containing opportunities from both orgs
+        # One user in two orgs -> two emails, one per org
         mock_responses = _get_mock_responses()
-        assert len(mock_responses) == 1
+        assert len(mock_responses) == 2
 
     def test_one_user_notified_other_not_in_same_org(
         self,
