@@ -30,10 +30,10 @@ Note that since Next responses that return a page are handled internally to Next
 
 route.ts
 
-```
+```typescript
 import { getHandlerFunction } from "./handler"
 
-export const GET = respondWithTraceAndLogs< your resopnse type >(
+export const GET = respondWithTraceAndLogs< your response type >(
   getHandlerFunction
 );
 
@@ -41,7 +41,7 @@ export const GET = respondWithTraceAndLogs< your resopnse type >(
 
 handler.ts
 
-```
+```typescript
 
 export const handlerFunction = (request, response) => {
 	...your handler business logic, returning a response
@@ -53,4 +53,4 @@ export const handlerFunction = (request, response) => {
 
 ## Ad hoc logs
 
-We will use Pino for all logs across the application at somet point TBD
+Pino is the production logger today; see frontend/src/services/logger/simplerLogger.tsx for implementation details.
