@@ -1,8 +1,6 @@
 """Utility functions for award recommendation services."""
 
 import uuid
-from typing import Dict, List, Set, Union
-
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -18,13 +16,10 @@ from src.validation.validation_constants import ValidationErrorType
 def get_validated_submissions(
     db_session: db.Session,
     award_recommendation_id: uuid.UUID,
-    submission_ids: Union[List[uuid.UUID], Set[uuid.UUID]],
+    submission_ids: list[uuid.UUID] | set[uuid.UUID],
     eager_load: bool = False,
     return_dict: bool = False,
-) -> Union[
-    List[AwardRecommendationApplicationSubmission],
-    Dict[uuid.UUID, AwardRecommendationApplicationSubmission],
-]:
+) -> list[AwardRecommendationApplicationSubmission] | dict[uuid.UUID, AwardRecommendationApplicationSubmission]:
     """
     Validate that all requested submission IDs exist and belong to the award recommendation.
 

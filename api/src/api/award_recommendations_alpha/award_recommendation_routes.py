@@ -14,8 +14,6 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationGetResponseSchema,
     AwardRecommendationReviewUpdateRequestSchema,
     AwardRecommendationReviewUpdateResponseSchema,
-    AwardRecommendationRiskCreateRequestSchema,
-    AwardRecommendationRiskCreateResponseSchema,
     AwardRecommendationRiskRequestSchema,
     AwardRecommendationRiskResponseSchema,
     AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema,

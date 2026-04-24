@@ -6,20 +6,17 @@ from sqlalchemy import exists, select
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
-from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.award_recommendation_models import (
     AwardRecommendation,
-    AwardRecommendationApplicationSubmission,
     AwardRecommendationRisk,
     AwardRecommendationRiskSubmission,
 )
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
 from src.services.award_recommendations.utils import get_validated_submissions
-from src.validation.validation_constants import ValidationErrorType
 
 
 def get_award_recommendation_for_update(
