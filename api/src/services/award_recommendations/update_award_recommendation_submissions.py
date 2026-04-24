@@ -119,14 +119,11 @@ def update_award_recommendation_submissions(
 
     db_session.flush()
 
-    if updated_submissions:
-        logger.info(
-            "Successfully updated award recommendation submissions",
-            extra={
-                "award_recommendation_id": str(award_recommendation_id),
-                "submission_count": len(updated_submissions),
-            },
-        )
-        return updated_submissions
-
-    return []
+      logger.info(
+          "Successfully updated award recommendation submissions",
+          extra={
+              "award_recommendation_id": award_recommendation_id,
+              "submission_count": len(updated_submissions),
+          },
+      )
+      return updated_submissions
