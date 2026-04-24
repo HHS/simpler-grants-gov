@@ -493,8 +493,8 @@ paths:
                     - order_by: opportunity_id
                       sort_direction: ascending
       security:
-      - ApiUserKeyAuth: &id004 []
-      - ApiKeyAuth: *id004
+      - ApiJwtAuth: &id004 []
+      - ApiUserKeyAuth: *id004
   /v1/users/{user_id}:
     get:
       parameters:
@@ -751,8 +751,8 @@ paths:
                       - forecasted
                       - posted
       security:
-      - ApiUserKeyAuth: &id006 []
-      - ApiKeyAuth: *id006
+      - ApiJwtAuth: &id006 []
+      - ApiUserKeyAuth: *id006
   /alpha/award-recommendations:
     post:
       parameters: []
@@ -12937,12 +12937,12 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
-    ApiUserKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
     ApiJwtAuth:
       type: apiKey
       in: header
       name: X-SGG-Token
+    ApiUserKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
 
