@@ -9,11 +9,7 @@ import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import OpportunityStatus, Privilege
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import (
-    Competition,
-    CompetitionForm,
-    Form,
-)
+from src.db.models.competition_models import Competition, CompetitionForm, Form
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
