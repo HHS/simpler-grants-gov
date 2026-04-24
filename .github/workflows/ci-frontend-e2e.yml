@@ -243,7 +243,8 @@ jobs:
       - name: Save Docker image to file
         run: |
           docker save api-grants-api > /tmp/docker-image.tar
-          tar -czf /tmp/api-docker-image.tar.gz /tmp/docker-image.tar
+          cd /tmp
+          tar -czf api-docker-image.tar.gz docker-image.tar
 
       - name: Cache Docker image
         if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
