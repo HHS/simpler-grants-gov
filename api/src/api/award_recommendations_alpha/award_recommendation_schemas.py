@@ -1,4 +1,4 @@
-from marshmallow import validate, validators
+from marshmallow import validate
 
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
@@ -538,7 +538,7 @@ class AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema(Schema):
         keys=fields.UUID(),
         values=fields.Nested(AwardRecommendationSubmissionDetailUpdateSchema),
         required=True,
-        validate=validators.Length(min=1),
+        validate=validate.Length(min=1),
         metadata={
             "description": "Dictionary of submission IDs to update details, where keys are award_recommendation_application_submission_id"
         },
