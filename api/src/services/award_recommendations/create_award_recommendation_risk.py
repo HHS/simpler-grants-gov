@@ -72,6 +72,7 @@ def _generate_risk_number(db_session: db.Session, agency_code: str) -> str:
 
     raise Exception(f"Failed to generate a unique risk number after {max_attempts} attempts")
 
+
 def create_award_recommendation_risk(
     db_session: db.Session,
     user: User,
