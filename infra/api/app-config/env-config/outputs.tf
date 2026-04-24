@@ -39,6 +39,7 @@ output "service_config" {
     enable_command_execution        = var.enable_command_execution
     newrelic_entity_guid            = var.service_newrelic_entity_guid
     newrelic_mtls_entity_guid       = var.service_newrelic_mtls_entity_guid
+    newrelic_host_entity_guid       = var.api_host_newrelic_entity_guid
 
     extra_environment_variables = merge(
       local.default_extra_environment_variables,

@@ -114,6 +114,18 @@ export const toDynamicGrantorsEndpoint = (type: "POST") => {
   };
 };
 
+export const toDynamicGrantorOpportunityEndpoint = (
+  type: "POST" | "DELETE" | "GET",
+) => {
+  return {
+    basePath: environment.API_URL,
+    version: "v1",
+    namespace: "grantors/opportunities",
+    method: type as ApiMethod,
+    requiresAuth: true,
+  };
+};
+
 export const getLocalUsersEndpoint = {
   basePath: environment.API_URL,
   version: "",
