@@ -128,5 +128,7 @@ class BaseNotificationTask(Task):
         """Override to define the task logic"""
         with self.db_session.begin():
             notifications = self.collect_email_notifications()
-            self.send_notifications(notifications)
+        # Commit marks before sending so a crash mid-send doesn't retry and duplicate emails
+        self.send_notifications(notifications)
+        with self.db_session.begin():
             self.post_notifications_process(notifications)
