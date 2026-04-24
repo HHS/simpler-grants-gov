@@ -114,6 +114,8 @@ def get_agency_for_workflow(workflow: Workflow) -> Agency:
         opportunity = workflow.application.competition.opportunity
     elif workflow.application_submission is not None:
         opportunity = workflow.application_submission.application.competition.opportunity
+    elif workflow.award_recommendation is not None:
+        opportunity = workflow.award_recommendation.opportunity
 
     if opportunity is None:
         raise ImplementationMissingError("No approach implemented to find agency for workflow")
