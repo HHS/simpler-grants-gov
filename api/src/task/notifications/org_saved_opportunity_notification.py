@@ -282,8 +282,8 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
         with self.db_session.begin():
             notifications = self.collect_email_notifications()
         # Commit marks before sending so a crash mid-send doesn't retry and duplicate emails
-        self.send_notifications(notifications)
         with self.db_session.begin():
+            self.send_notifications(notifications)
             self.post_notifications_process(notifications)
 
     def post_notifications_process(self, notifications: list[UserEmailNotification]) -> None:
