@@ -473,6 +473,67 @@ class TestBatchUpdateAwardRecommendationSubmissions404:
 
         assert resp.status_code == 404
 
+    def test_batch_update_submissions_not_found_404(
+        self, client, db_session, agency, award_recommendation
+    ):
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session,
+            agency=agency,
+            privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION, Privilege.VIEW_AWARD_RECOMMENDATION],
+        )
+
+        # Generate a non-existent submission ID
+        non_existent_id = str(uuid.uuid4())
+        update_data = {
+            "award_recommendation_submissions": {
+                non_existent_id: {
+                    "recommended_amount": "100000.00",
+                }
+            }
+        }
+
+        resp = client.put(
+            f"{API_URL}/{award_recommendation.award_recommendation_id}/submission-details",
+            json=update_data,
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == 404
+        assert "Could not find" in resp.json["message"]
+
+    def test_batch_update_partial_submissions_not_found_404(
+        self, client, db_session, agency, award_recommendation, award_recommendation_submissions
+    ):
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session,
+            agency=agency,
+            privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION, Privilege.VIEW_AWARD_RECOMMENDATION],
+        )
+
+        # Use one existing and one non-existent submission ID
+        submission1, _ = award_recommendation_submissions
+        non_existent_id = str(uuid.uuid4())
+
+        update_data = {
+            "award_recommendation_submissions": {
+                str(submission1.award_recommendation_application_submission_id): {
+                    "recommended_amount": "150000.00",
+                },
+                non_existent_id: {
+                    "recommended_amount": "100000.00",
+                },
+            }
+        }
+
+        resp = client.put(
+            f"{API_URL}/{award_recommendation.award_recommendation_id}/submission-details",
+            json=update_data,
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == 404
+        assert "Could not find" in resp.json["message"]
+
 
 ####################################
 # 422 Tests

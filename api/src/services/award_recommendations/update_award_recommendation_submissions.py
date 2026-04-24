@@ -1,22 +1,18 @@
 import logging
 import uuid
 
-from sqlalchemy.orm import selectinload
-
 import src.adapters.db as db
-from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import AwardRecommendationAuditEvent, Privilege
 from src.db.models.award_recommendation_models import (
     AwardRecommendationApplicationSubmission,
     AwardRecommendationAudit,
 )
-from src.db.models.competition_models import Application, ApplicationSubmission
-from src.db.models.entity_models import Organization
 from src.db.models.user_models import User
 from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_and_verify_access,
 )
+from src.services.award_recommendations.utils import get_validated_submissions
 
 logger = logging.getLogger(__name__)
 
@@ -56,43 +52,14 @@ def update_award_recommendation_submissions(
     if not submission_ids:
         return []
 
-    # Query all submission records that match the IDs and are part of this award recommendation
-    submissions_query = (
-        db_session.query(AwardRecommendationApplicationSubmission)
-        .filter(
-            AwardRecommendationApplicationSubmission.award_recommendation_id
-            == award_recommendation_id,
-            AwardRecommendationApplicationSubmission.award_recommendation_application_submission_id.in_(
-                submission_ids
-            ),
-        )
-        .options(
-            selectinload(
-                AwardRecommendationApplicationSubmission.award_recommendation_submission_detail
-            ),
-            selectinload(AwardRecommendationApplicationSubmission.application_submission)
-            .selectinload(ApplicationSubmission.application)
-            .selectinload(Application.organization)
-            .selectinload(Organization.sam_gov_entity),
-        )
-        .all()
+    # Get validated submissions with eager loading, returning a dictionary for easier lookups
+    submissions_map = get_validated_submissions(
+        db_session,
+        award_recommendation_id,
+        submission_ids,
+        eager_load=True,
+        return_dict=True,
     )
-
-    submissions_map = {
-        sub.award_recommendation_application_submission_id: sub for sub in submissions_query
-    }
-
-    # Check if all requested submission IDs were found
-    if len(submissions_map) != len(submission_ids):
-        missing_ids = [
-            submission_id
-            for submission_id in submission_ids
-            if submission_id not in submissions_map
-        ]
-        missing_id_strs = [str(mid) for mid in missing_ids]
-        raise_flask_error(
-            404, message=f"Could not find submission(s) with ID(s): {', '.join(missing_id_strs)}"
-        )
 
     updated_submissions = []
     for submission_id, submission_data in update_data.items():
