@@ -3,8 +3,9 @@ locals {
 
   # Default role ARNs based on service naming convention. The default roles are created in the service module.
   # The opensearch-write role is used for OpenSearch sync jobs, separate from the migrator role which is only for DB migrations
-  ingest_role_arn = var.ingest_role_arn != null ? var.ingest_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-opensearch-write"
-  query_role_arn  = var.query_role_arn != null ? var.query_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-app"
+  ingest_role_arn   = var.ingest_role_arn != null ? var.ingest_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-opensearch-write"
+  query_role_arn    = var.query_role_arn != null ? var.query_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-app"
+  workflow_role_arn = var.workflow_role_arn != null ? var.workflow_role_arn : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.service_name}-workflow"
 }
 
 # Master user credentials for the OpenSearch domain
@@ -183,6 +184,27 @@ data "aws_iam_policy_document" "iam_access_control" {
       "es:ESHttpGet",  # Read documents, index settings
       "es:ESHttpPost", # Search queries via POST _search
       "es:ESHttpHead", # Check existence
+    ]
+    resources = [
+      "${aws_opensearch_domain.opensearch.arn}",
+      "${aws_opensearch_domain.opensearch.arn}/*"
+    ]
+  }
+
+  # Workflow service role - read and write access for workflow processing
+  statement {
+    sid    = "WorkflowRoleAccess"
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = [local.workflow_role_arn]
+    }
+    actions = [
+      "es:ESHttpPost",
+      "es:ESHttpPut",
+      "es:ESHttpDelete",
+      "es:ESHttpGet",
+      "es:ESHttpHead",
     ]
     resources = [
       "${aws_opensearch_domain.opensearch.arn}",

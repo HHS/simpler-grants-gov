@@ -31,11 +31,13 @@ def handler(event, context):
     ingest_role_arn = event['ingest_role_arn']
     query_role_arn = event['query_role_arn']
     sso_admin_role_arn = event['sso_admin_role_arn']
+    workflow_role_arn = event['workflow_role_arn']
 
     logger.info(f"OpenSearch endpoint: {endpoint}")
     logger.info(f"Ingest role ARN: {ingest_role_arn}")
     logger.info(f"Query role ARN: {query_role_arn}")
     logger.info(f"SSO Admin role ARN: {sso_admin_role_arn}")
+    logger.info(f"Workflow role ARN: {workflow_role_arn}")
 
     basic_auth = base64.b64encode(f"{username}:{password}".encode()).decode()
     logger.info(f"Using master user: {username}")
@@ -43,10 +45,10 @@ def handler(event, context):
     results = {}
     success = True
 
-    # Map ingest role and SSO admin to all_access (full write permissions)
-    logger.info("Configuring 'all_access' role mapping for ingest and SSO admin roles...")
+    # Map ingest role, workflow role, and SSO admin to all_access (full write permissions)
+    logger.info("Configuring 'all_access' role mapping for ingest, workflow, and SSO admin roles...")
     all_access_mapping = {
-        "backend_roles": [ingest_role_arn, sso_admin_role_arn]
+        "backend_roles": [ingest_role_arn, workflow_role_arn, sso_admin_role_arn]
     }
     results['all_access'] = put_role_mapping(
         endpoint, 'all_access', all_access_mapping, basic_auth
