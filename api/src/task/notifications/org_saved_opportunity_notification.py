@@ -278,6 +278,14 @@ class OrgSavedOpportunityNotificationTask(BaseNotificationTask):
         )
         return list(self.db_session.execute(stmt).scalars().all())
 
+    def run_task(self) -> None:
+        with self.db_session.begin():
+            notifications = self.collect_email_notifications()
+        # Commit marks before sending so a crash mid-send doesn't retry and duplicate emails
+        self.send_notifications(notifications)
+        with self.db_session.begin():
+            self.post_notifications_process(notifications)
+
     def post_notifications_process(self, notifications: list[UserEmailNotification]) -> None:
         for notification in notifications:
             if notification.is_notified:
