@@ -244,14 +244,14 @@ class OpportunityListRequestSchema(Schema):
             "description": "Pagination parameters for opportunity list (default sort: created_at descending)"
         },
     )
-    
+
     filters = fields.Dict(
         metadata={
             "description": "Optional filters for opportunity list",
             "examples": {
                 "draft_status": "Boolean value to filter by draft status. If not provided, shows all opportunities.",
-                "award_recommendation_ready": "Boolean value to filter for opportunities ready for award recommendations."
-            }
+                "award_recommendation_ready": "Boolean value to filter for opportunities ready for award recommendations.",
+            },
         }
     )
 
