@@ -130,6 +130,10 @@ class TestListAwardRecommendationRisks200:
             str(risk2.award_recommendation_risk_id),
         ]
 
+        expected_sub_ids = [str(sub.award_recommendation_application_submission_id)]
+        for risk_data in resp.json["data"]:
+            assert risk_data["award_recommendation_application_submission_ids"] == expected_sub_ids
+
         resp2 = client.post(
             f"{API_URL}/{award_recommendation.award_recommendation_id}/risks/list",
             headers={"X-SGG-Token": token},
@@ -140,6 +144,10 @@ class TestListAwardRecommendationRisks200:
         assert len(resp2.json["data"]) == 1
         assert resp2.json["data"][0]["award_recommendation_risk_id"] == str(
             risk3.award_recommendation_risk_id
+        )
+        assert (
+            resp2.json["data"][0]["award_recommendation_application_submission_ids"]
+            == expected_sub_ids
         )
 
     def test_list_risks_200_desc_sort(self, client, db_session, agency, award_recommendation):
@@ -180,6 +188,10 @@ class TestListAwardRecommendationRisks200:
             str(risk2.award_recommendation_risk_id),
             str(risk1.award_recommendation_risk_id),
         ]
+
+        expected_sub_ids = [str(sub.award_recommendation_application_submission_id)]
+        for risk_data in resp.json["data"]:
+            assert risk_data["award_recommendation_application_submission_ids"] == expected_sub_ids
 
 
 ####################################
