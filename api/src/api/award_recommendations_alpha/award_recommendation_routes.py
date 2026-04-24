@@ -7,6 +7,7 @@ from src.api import response
 from src.api.award_recommendations_alpha.award_recommendation_blueprint import (
     award_recommendation_blueprint,
 )
+from src.api.schemas.response_schema import AbstractResponseSchema
 from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationCreateRequestSchema,
     AwardRecommendationGetResponseSchema,
@@ -227,3 +228,37 @@ def award_recommendation_risk_create(
         )
 
     return response.ApiResponse(message="Success", data=risk)
+
+@award_recommendation_blueprint.delete(
+    "/award-recommendations/<uuid:award_recommendation_id>/risks/<uuid:award_recommendation_risk_id>"
+)
+@award_recommendation_blueprint.output(AbstractResponseSchema)
+@award_recommendation_blueprint.doc(
+    summary="Delete Award Recommendation Risk",
+    description="Soft delete a risk for an award recommendation.",
+    responses=[200, 401, 403, 404],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_risk_delete(
+    db_session: db.Session,
+    award_recommendation_id: uuid.UUID,
+    award_recommendation_risk_id: uuid.UUID,
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {
+            "award_recommendation_id": award_recommendation_id,
+            "award_recommendation_risk_id": award_recommendation_risk_id,
+        }
+    )
+    logger.info("DELETE /alpha/award-recommendations/:award_recommendation_id/risks/:award_recommendation_risk_id")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        delete_award_recommendation_risk(
+            db_session, user, award_recommendation_id, award_recommendation_risk_id
+        )
+
+    return response.ApiResponse(message="Success", data=None)
