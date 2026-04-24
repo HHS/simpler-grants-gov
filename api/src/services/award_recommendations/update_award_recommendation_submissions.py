@@ -1,5 +1,6 @@
 import logging
 import uuid
+from typing import cast
 
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
@@ -53,12 +54,15 @@ def update_award_recommendation_submissions(
         return []
 
     # Get validated submissions with eager loading, returning a dictionary for easier lookups
-    submissions_map = get_validated_submissions(
-        db_session,
-        award_recommendation_id,
-        submission_ids,
-        eager_load=True,
-        return_dict=True,
+    submissions_map = cast(
+        dict[uuid.UUID, AwardRecommendationApplicationSubmission],
+        get_validated_submissions(
+            db_session,
+            award_recommendation_id,
+            submission_ids,
+            eager_load=True,
+            return_dict=True,
+        ),
     )
 
     updated_submissions = []

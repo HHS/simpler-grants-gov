@@ -1,4 +1,5 @@
 import uuid
+from typing import cast
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -85,10 +86,11 @@ def update_award_recommendation_risk(
     risk.award_recommendation_risk_type = request_data["award_recommendation_risk_type"]
 
     submission_ids = set(request_data["award_recommendation_application_submission_ids"])
-    validated_submissions = get_validated_submissions(
-        db_session, award_recommendation_id, submission_ids
+    validated_submissions = cast(
+        list[AwardRecommendationApplicationSubmission],
+        get_validated_submissions(db_session, award_recommendation_id, submission_ids),
     )
-    validated_by_id = {
+    validated_by_id: dict[uuid.UUID, AwardRecommendationApplicationSubmission] = {
         s.award_recommendation_application_submission_id: s for s in validated_submissions
     }
 
