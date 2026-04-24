@@ -12,19 +12,14 @@ type PaginationBody = {
 };
 
 export const searchOpportunitiesByAgency = async (
-  token: string,
   agencyId: string,
   pageInputs: PaginationRequestBody,
 ) => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const pagination = pageInputs;
   const pageBody: PaginationBody = { pagination };
 
   const response = await fetchGrantorWithMethod("POST")({
     subPath: `agencies/` + agencyId + `/opportunities`,
-    additionalHeaders: ssgToken,
     body: pageBody,
   });
   const json = (await response.json()) as SearchAPIResponse;
@@ -32,16 +27,10 @@ export const searchOpportunitiesByAgency = async (
 };
 
 export const createOpportunity = async (
-  token: string,
   createOppSchema: Record<string, string>,
 ): Promise<CreateOpportunityRecord> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-
   const response = await fetchGrantorWithMethod("POST")({
     subPath: "opportunities",
-    additionalHeaders: ssgToken,
     body: createOppSchema,
   });
   const json = (await response.json()) as { data: CreateOpportunityRecord };

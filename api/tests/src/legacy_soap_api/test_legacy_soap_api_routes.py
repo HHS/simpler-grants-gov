@@ -113,7 +113,7 @@ def test_successful_confirm_application_delivery_request(
 
 @mock.patch("uuid.uuid4")
 def test_successful_confirm_application_delivery_request_when_in_received_by_agency_status(
-    mock_uuid, db_session, client, enable_factory_create
+    mock_uuid, db_session, client, enable_factory_create, caplog
 ) -> None:
     mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
@@ -178,11 +178,16 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
         response.headers["Content-Type"]
         == f'multipart/related; type="application/xop+xml"; boundary="uuid:{TEST_UUID}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
     )
+    log = next(r for r in caplog.records if r.message == "Soap Fault Exception raised")
+    assert (
+        log.faultstring
+        == f"Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Received by Agency' for GRANT{submission.legacy_tracking_number})"
+    )
 
 
 @mock.patch("uuid.uuid4")
 def test_successful_confirm_application_delivery_request_when_in_tracking_number_assigned_status(
-    mock_uuid, db_session, client, enable_factory_create
+    mock_uuid, db_session, client, enable_factory_create, caplog
 ) -> None:
     mock_uuid.return_value = TEST_UUID
     agency = AgencyFactory.create()
@@ -243,6 +248,11 @@ def test_successful_confirm_application_delivery_request_when_in_tracking_number
         f"--uuid:{TEST_UUID}--\r\n"
     )
     assert response.data.decode() == expected
+    log = next(r for r in caplog.records if r.message == "Soap Fault Exception raised")
+    assert (
+        log.faultstring
+        == f"Failed to confirm application delivery.(Expected an Application status of:'Validated' , but found a status of 'Agency Tracking Number Assigned' for GRANT{submission.legacy_tracking_number})"
+    )
 
 
 @mock.patch("uuid.uuid4")
@@ -282,9 +292,9 @@ def test_confirm_application_delivery_when_application_has_no_status(
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         with mock.patch(
-            "src.legacy_soap_api.simpler_soap_api.get_proxy_response"
-        ) as mock_proxy_response:
-            mock_proxy_response.return_value = SOAPResponse(
+            "src.legacy_soap_api.simpler_soap_api.get_legacy_response"
+        ) as mock_legacy_response:
+            mock_legacy_response.return_value = SOAPResponse(
                 data=b"test response", status_code=500, headers={}
             )
             response = client.post(
@@ -410,9 +420,9 @@ def test_if_soap_fault_exception_raised_return_proxy_response_if_proxy_response_
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         with mock.patch(
-            "src.legacy_soap_api.simpler_soap_api.get_proxy_response"
-        ) as mock_proxy_response:
-            mock_proxy_response.return_value = SOAPResponse(
+            "src.legacy_soap_api.simpler_soap_api.get_legacy_response"
+        ) as mock_legacy_response:
+            mock_legacy_response.return_value = SOAPResponse(
                 data=b"test response", status_code=200, headers={}
             )
             response = client.post(

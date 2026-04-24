@@ -14,6 +14,24 @@ from tests.src.db.models.factories import OpportunityFactory, UserApiKeyFactory
         ("GET", "/v1/opportunities/1", None),
     ],
 )
+def test_opportunity_unauthorized_401_jwt(client, method, url, body):
+    """Test opportunity endpoints with invalid JWT token (X-SGG-Token header)"""
+    response = client.open(
+        url, method=method, json=body, headers={"X-SGG-Token": "invalid-jwt-token"}
+    )
+
+    assert response.status_code == 401
+    assert response.get_json()["message"] == "Unable to process token"
+
+
+@pytest.mark.parametrize(
+    "method,url,body",
+    [
+        ("POST", "/v1/opportunities/search", get_search_request()),
+        ("POST", "/v1/opportunities/search/csv", {}),
+        ("GET", "/v1/opportunities/1", None),
+    ],
+)
 def test_opportunity_unauthorized_401_api_user_key(client, method, url, body):
     """Test opportunity endpoints with invalid API user key (X-API-Key header)"""
     response = client.open(url, method=method, json=body, headers={"X-API-Key": "invalid-api-key"})

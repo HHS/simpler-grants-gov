@@ -26,12 +26,6 @@ def get_local_users(db_session: db.Session) -> list[dict]:
         .all()
     )
 
-    # This is an extra check to make certain we aren't running
-    # in any other environment. At the time of writing this (Oct 2025)
-    # we have nearly 8000 users in prod, so this would always fail.
-    if len(users) > 500:
-        raise Exception(f"Too many users ({len(users)}), this isn't local, is it?")
-
     user_dicts = []
 
     for user in users:
