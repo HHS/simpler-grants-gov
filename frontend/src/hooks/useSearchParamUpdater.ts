@@ -106,9 +106,9 @@ export function useSearchParamUpdater() {
     }
     // note that this default case will never be hit due to the early return
     // but ts isn't quite smart enough to realize, so adding the [] to satisfy the compiler
-		const paramValues = paramToEdit
-			? paramToEdit.split(",")
-			: [...(defaultValues || [])];
+    const paramValues = paramToEdit
+      ? paramToEdit.split(",")
+      : [...(defaultValues || [])];
     const indexOfValueToRemove = paramValues.indexOf(queryParamValue);
     paramValues.splice(indexOfValueToRemove, 1);
     if (!paramValues.length && defaultValues) {
