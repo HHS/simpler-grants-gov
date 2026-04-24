@@ -77,7 +77,9 @@ test(
     // And the Application landing page loads with the form link visible
     await verifyFormLinkVisible(page, SF424B_FORM_MATCHER);
 
-    // When the user fills out the form with valid test data
+    // When the user clicks on a form link
+    // Then the form opens
+    // And the user fills out the form with valid test data
     // And the user clicks Save
     await fillForm(
       testInfo,
@@ -90,7 +92,7 @@ test(
     // Verify save success alert on form page
     await verifyFormStatusAfterSave(page, "complete");
 
-    // On application page — verify form row shows "No issues detected"
+    // On application page - verify form row shows "No issues detected"
     await verifyFormStatusOnApplication(
       page,
       "complete",

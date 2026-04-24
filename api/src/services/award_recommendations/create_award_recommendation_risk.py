@@ -21,7 +21,7 @@ from src.db.models.user_models import User
 from src.validation.validation_constants import ValidationErrorType
 
 
-def _get_award_recommendation_for_update(
+def get_award_recommendation_for_update(
     db_session: db.Session, user: User, award_recommendation_id: uuid.UUID
 ) -> AwardRecommendation:
     stmt = (
@@ -72,7 +72,7 @@ def _generate_risk_number(db_session: db.Session, agency_code: str) -> str:
     raise Exception(f"Failed to generate a unique risk number after {max_attempts} attempts")
 
 
-def _get_validated_submissions(
+def get_validated_submissions(
     db_session: db.Session,
     award_recommendation_id: uuid.UUID,
     submission_ids: set[uuid.UUID],
@@ -116,7 +116,7 @@ def create_award_recommendation_risk(
     award_recommendation_id: uuid.UUID,
     request_data: dict,
 ) -> AwardRecommendationRisk:
-    award_recommendation = _get_award_recommendation_for_update(
+    award_recommendation = get_award_recommendation_for_update(
         db_session, user, award_recommendation_id
     )
 
@@ -126,7 +126,7 @@ def create_award_recommendation_risk(
     agency_code = agency.agency_code
 
     submission_ids = set(request_data["award_recommendation_application_submission_ids"])
-    submissions = _get_validated_submissions(db_session, award_recommendation_id, submission_ids)
+    submissions = get_validated_submissions(db_session, award_recommendation_id, submission_ids)
 
     risk = AwardRecommendationRisk(
         award_recommendation_risk_id=uuid.uuid4(),
