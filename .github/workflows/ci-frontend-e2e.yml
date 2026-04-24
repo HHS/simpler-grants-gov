@@ -200,7 +200,7 @@ jobs:
 
       - name: Restore Docker image cached
         id: restore-docker-image-cached
-        uses: actions/cache/restore@v5
+        uses: actions/cache@v5
         with:
           path: /tmp/docker-image.tar
           key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
@@ -233,24 +233,6 @@ jobs:
       - name: Save Docker image to file
         run: |
           docker save api-grants-api > /tmp/docker-image.tar
-          cd /tmp
-          tar -czf api-docker-image.tar.gz docker-image.tar
-
-      - name: Cache Docker image
-        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
-        uses: actions/cache/save@v4
-        with:
-          path: /tmp/docker-image.tar
-          key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
-
-      - name: Upload API Docker image artifact
-        uses: actions/upload-artifact@v7
-        with:
-          if-no-files-found: error
-          include-hidden-files: true
-          archive: false
-          path: |
-            /tmp/api-docker-image.tar.gz
 
       - name: Init API Server for e2e tests
         run: |
