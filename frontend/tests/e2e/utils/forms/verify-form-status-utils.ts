@@ -19,18 +19,19 @@ export type FormStatus = "complete" | "incomplete";
 export async function assertFormRowStatus(
   page: Page,
   status: FormStatus,
-  formName: string,
+  formName: string | RegExp,
 ): Promise<void> {
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await page.waitForTimeout(5000);
-
-  const escapedFormName = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const flexiblePattern = escapedFormName
-    .replace(/\s+/g, "\\s*")
-    .replace(/-/g, "-?");
+  let rowPattern: RegExp;
+  if (formName instanceof RegExp) {
+    rowPattern = formName;
+  } else {
+    const escaped = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const flexible = escaped.replace(/\s+/g, "\\s*").replace(/-/g, "-?");
+    rowPattern = new RegExp(flexible, "i");
+  }
   const formRow = page
     .locator("tr", {
-      hasText: new RegExp(flexiblePattern, "i"),
+      hasText: rowPattern,
     })
     .filter({
       has: page.locator('a[href*="/form/"]'),
@@ -57,7 +58,7 @@ export async function assertFormRowStatus(
 export async function verifyFormStatusOnApplication(
   page: Page,
   status: FormStatus,
-  formName: string,
+  formName: string | RegExp,
   applicationUrl: string,
 ): Promise<void> {
   await gotoWithRetry(page, applicationUrl, { waitUntil: "domcontentloaded" });
@@ -82,12 +83,16 @@ export async function verifyFormStatusOnApplication(
  *
  * @param page Playwright Page object
  * @param status Expected status: "complete" or "incomplete"
- * @param expectedErrors Required when status is "incomplete" — list of field errors to verify
+ * @param expectedErrors Required when status is "incomplete" — list of field errors to verify inline
+ * @param alertErrors Optional override for the alert banner error list. Defaults to expectedErrors.
+ *   Use when a form's alert-level errors differ from its inline field errors (e.g. array-level
+ *   validation errors that appear in the alert but have no corresponding inline element).
  */
 export async function verifyFormStatusAfterSave(
   page: Page,
   status: FormStatus,
   expectedErrors?: FieldError[],
+  alertErrors?: FieldError[],
 ): Promise<void> {
   if (status === "complete") {
     const alert = page.getByTestId("alert");
@@ -109,7 +114,7 @@ export async function verifyFormStatusAfterSave(
         "expectedErrors must be provided when status is 'incomplete'",
       );
     }
-    await verifyAlertErrors(page, expectedErrors);
+    await verifyAlertErrors(page, alertErrors ?? expectedErrors);
     await verifyInlineErrors(page, expectedErrors);
   }
 }
