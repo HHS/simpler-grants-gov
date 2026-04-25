@@ -22,7 +22,7 @@ export const fieldDefinitionsSF424B: FormFillFieldDefinitions = {
 
 export const SF424B_FORM_CONFIG = {
   ...FORM_DEFAULTS,
-  formName: new RegExp(SF424B_FORM_MATCHER, "i"),
+  formName: SF424B_FORM_MATCHER,
   fields: fieldDefinitionsSF424B,
 } as const;
 

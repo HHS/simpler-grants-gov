@@ -336,6 +336,6 @@ const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
 
 export const SFLLL_FORM_CONFIG = {
   ...FORM_DEFAULTS,
-  formName: new RegExp(SFLLL_FORM_MATCHER, "i"),
+  formName: SFLLL_FORM_MATCHER,
   fields: fieldDefinitionsSFLLL,
 } as const;
