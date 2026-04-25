@@ -356,7 +356,10 @@ export async function fillForm(
   // Derive a regex matcher for openForm. For plain strings (e.g. "SF-424 (Form)"),
   // use buildFlexibleFormNameRegex so special chars like () are properly escaped
   // and hyphens/spaces become flexible. For RegExp formNames, pass through directly.
-  const formMatcher = formName instanceof RegExp ? formName : buildFlexibleFormNameRegex(formName);
+  const formMatcher =
+    formName instanceof RegExp
+      ? formName
+      : buildFlexibleFormNameRegex(formName);
 
   try {
     // ── Navigation ──────────────────────────────────────────────────────────
@@ -374,7 +377,9 @@ export async function fillForm(
     // Use buildFlexibleFormNameRegex for plain strings so special chars (parens,
     // hyphens) are properly escaped rather than treated as regex syntax.
     const formReadyMatcher =
-      formName instanceof RegExp ? formName : buildFlexibleFormNameRegex(formName);
+      formName instanceof RegExp
+        ? formName
+        : buildFlexibleFormNameRegex(formName);
     await page
       .getByText(formReadyMatcher)
       .first()
