@@ -67,7 +67,6 @@ test(
       sf424BHappyPathTestData(testOrgLabel),
       false,
     );
-    await page.waitForTimeout(2000);
 
     /* Covers "Form status validation" flow in the feature file,
      * which includes verification of the status in form and application landing page after saving a completed form.
