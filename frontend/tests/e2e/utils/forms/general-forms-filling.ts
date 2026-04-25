@@ -1,7 +1,7 @@
 import { Page, TestInfo } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
 
-import { openForm } from "./form-navigation-utils";
+import { buildFlexibleFormNameRegex, openForm } from "./form-navigation-utils";
 import { clickSaveButton } from "./save-form-utils";
 
 export interface FillFieldDefinition {
@@ -353,10 +353,10 @@ export async function fillForm(
     contentType: "text/plain",
   });
 
-  // Derive a string matcher for openForm: if formName is already a string use
-  // it directly; if it is a RegExp, use its source pattern so openForm can
-  // construct the case-insensitive regex it expects.
-  const formMatcher = formName instanceof RegExp ? formName.source : formName;
+  // Derive a regex matcher for openForm. For plain strings (e.g. "SF-424 (Form)"),
+  // use buildFlexibleFormNameRegex so special chars like () are properly escaped
+  // and hyphens/spaces become flexible. For RegExp formNames, pass through directly.
+  const formMatcher = formName instanceof RegExp ? formName : buildFlexibleFormNameRegex(formName);
 
   try {
     // ── Navigation ──────────────────────────────────────────────────────────
@@ -371,10 +371,10 @@ export async function fillForm(
 
     // ── Form ready check ───────────────────────────────────────────────────
     // Confirm the form heading is visible before filling any fields.
-    // Convert string formName to RegExp so getByText does a regex match rather
-    // than a literal text search (important when formName is a regex pattern string).
+    // Use buildFlexibleFormNameRegex for plain strings so special chars (parens,
+    // hyphens) are properly escaped rather than treated as regex syntax.
     const formReadyMatcher =
-      formName instanceof RegExp ? formName : new RegExp(formName, "i");
+      formName instanceof RegExp ? formName : buildFlexibleFormNameRegex(formName);
     await page
       .getByText(formReadyMatcher)
       .first()
