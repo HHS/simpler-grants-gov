@@ -371,8 +371,12 @@ export async function fillForm(
 
     // ── Form ready check ───────────────────────────────────────────────────
     // Confirm the form heading is visible before filling any fields.
+    // Convert string formName to RegExp so getByText does a regex match rather
+    // than a literal text search (important when formName is a regex pattern string).
+    const formReadyMatcher =
+      formName instanceof RegExp ? formName : new RegExp(formName, "i");
     await page
-      .getByText(formName)
+      .getByText(formReadyMatcher)
       .first()
       .waitFor({ state: "visible", timeout: 35000 });
 
