@@ -1,8 +1,8 @@
 import { expect, Page } from "@playwright/test";
-import playwrightEnv from "tests/e2e/playwright-env";
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 
-const SAVE_TIMEOUT = playwrightEnv.targetEnv === "staging" ? 30000 : 10000;
+// 30s accommodates both staging (slow under load) and Mobile Chrome in CI (slow rendering).
+const SAVE_TIMEOUT = 30000;
 
 /**
  * Waits for the save button to be visible and clicks it.

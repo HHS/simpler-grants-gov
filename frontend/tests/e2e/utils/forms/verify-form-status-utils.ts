@@ -7,8 +7,6 @@ import {
 } from "tests/e2e/utils/forms/verify-form-errors-utils";
 import { gotoWithRetry } from "tests/e2e/utils/lifecycle-utils";
 
-import { buildFlexibleFormNameRegex } from "./form-navigation-utils";
-
 export type FormStatus = "complete" | "incomplete";
 
 /**
@@ -21,15 +19,18 @@ export type FormStatus = "complete" | "incomplete";
 export async function assertFormRowStatus(
   page: Page,
   status: FormStatus,
-  formName: string | RegExp,
+  formName: string,
 ): Promise<void> {
-  const rowPattern =
-    formName instanceof RegExp
-      ? formName
-      : buildFlexibleFormNameRegex(formName);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(5000);
+
+  const escapedFormName = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const flexiblePattern = escapedFormName
+    .replace(/\s+/g, "\\s*")
+    .replace(/-/g, "-?");
   const formRow = page
     .locator("tr", {
-      hasText: rowPattern,
+      hasText: new RegExp(flexiblePattern, "i"),
     })
     .filter({
       has: page.locator('a[href*="/form/"]'),
@@ -56,11 +57,18 @@ export async function assertFormRowStatus(
 export async function verifyFormStatusOnApplication(
   page: Page,
   status: FormStatus,
-  formName: string | RegExp,
+  formName: string,
   applicationUrl: string,
 ): Promise<void> {
   await gotoWithRetry(page, applicationUrl, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(10000);
+  // Wait for the forms table to be populated before asserting row status.
+  // domcontentloaded fires before async data is fetched; this replaces the
+  // old static 10s wait with a dynamic wait that is both faster on fast
+  // machines and more reliable on slow ones (e.g. Mobile Chrome in CI).
+  await page
+    .locator('a[href*="/form/"]')
+    .first()
+    .waitFor({ state: "visible", timeout: 30000 });
   await assertFormRowStatus(page, status, formName);
 }
 
@@ -74,16 +82,12 @@ export async function verifyFormStatusOnApplication(
  *
  * @param page Playwright Page object
  * @param status Expected status: "complete" or "incomplete"
- * @param expectedErrors Required when status is "incomplete" — list of field errors to verify inline
- * @param alertErrors Optional override for the alert banner error list. Defaults to expectedErrors.
- *   Use when a form's alert-level errors differ from its inline field errors (e.g. array-level
- *   validation errors that appear in the alert but have no corresponding inline element).
+ * @param expectedErrors Required when status is "incomplete" — list of field errors to verify
  */
 export async function verifyFormStatusAfterSave(
   page: Page,
   status: FormStatus,
   expectedErrors?: FieldError[],
-  alertErrors?: FieldError[],
 ): Promise<void> {
   if (status === "complete") {
     const alert = page.getByTestId("alert");
@@ -105,7 +109,7 @@ export async function verifyFormStatusAfterSave(
         "expectedErrors must be provided when status is 'incomplete'",
       );
     }
-    await verifyAlertErrors(page, alertErrors ?? expectedErrors);
+    await verifyAlertErrors(page, expectedErrors);
     await verifyInlineErrors(page, expectedErrors);
   }
 }
