@@ -2,6 +2,7 @@ import { Page, TestInfo } from "@playwright/test";
 import { selectDropdownByValueOrLabel } from "tests/e2e/utils/select-dropdown-utils";
 
 import { openForm } from "./form-navigation-utils";
+import { clickSaveButton } from "./save-form-utils";
 
 export interface FillFieldDefinition {
   testId?: string;
@@ -343,7 +344,6 @@ export async function fillForm(
   data: Record<string, string | boolean>,
   returnToApplication = true,
 ): Promise<void> {
-  const SAVE_BUTTON_TIMEOUT_MS = 30000;
   const { formName, fields, saveButtonTestId } = config;
 
   const applicationURL = page.url();
@@ -359,7 +359,7 @@ export async function fillForm(
   const formMatcher = formName instanceof RegExp ? formName.source : formName;
 
   try {
-    // *********** Navigation ***********
+    // ── Navigation ──────────────────────────────────────────────────────────
     // Delegate to openForm, which owns all navigation reliability:
     // table-scoped row lookup, scroll-to-reveal, testId/href/button/global
     // fallback selectors, trial-click check, force-click retry, direct href
@@ -369,14 +369,14 @@ export async function fillForm(
       throw new Error(`Could not find or open form: ${formMatcher}`);
     }
 
-    // *********** Form ready check ***********
+    // ── Form ready check ───────────────────────────────────────────────────
     // Confirm the form heading is visible before filling any fields.
     await page
       .getByText(formName)
       .first()
       .waitFor({ state: "visible", timeout: 35000 });
 
-    // *********** Fill fields ***********
+    // ── Fill fields ────────────────────────────────────────────────────────
 
     for (const fieldDefinition of Object.entries(fields)) {
       const [fieldIdentifier, fieldConfig] = fieldDefinition;
@@ -400,13 +400,7 @@ export async function fillForm(
       await config.beforeSave(page);
     }
 
-    await page.waitForTimeout(500);
-    const saveButton = page.getByTestId(saveButtonTestId);
-    await saveButton.waitFor({
-      state: "visible",
-      timeout: SAVE_BUTTON_TIMEOUT_MS,
-    });
-    await saveButton.click({ timeout: SAVE_BUTTON_TIMEOUT_MS });
+    await clickSaveButton(page, saveButtonTestId);
 
     if (returnToApplication) {
       await page.goto(applicationURL);
