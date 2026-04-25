@@ -21,8 +21,15 @@ export function RadioButtonFilter({
 }: SearchFilterProps) {
   const { setQueryParam } = useSearchParamUpdater();
 
-  const toggleRadioSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setQueryParam(queryParamKey, event.target.value);
+  const toggleRadioSelection = (event: React.MouseEvent<HTMLInputElement>) => {
+    const value = event.currentTarget.value;
+
+    if (query.has(value)) {
+      setQueryParam(queryParamKey, "");
+      event.currentTarget.checked = false;
+    } else {
+      setQueryParam(queryParamKey, value);
+    }
   };
 
   const isNoneSelected = useMemo(() => query.size === 0, [query]);
@@ -44,7 +51,7 @@ export function RadioButtonFilter({
                 id={`${title}-any-radio`}
                 name={`Any ${title}`}
                 label={`Any ${title.toLowerCase()}`}
-                onChange={toggleRadioSelection}
+                onClick={toggleRadioSelection}
                 value={undefined}
                 facetCount={undefined}
                 checked={isNoneSelected}
@@ -57,7 +64,7 @@ export function RadioButtonFilter({
                 id={option.id}
                 name={option.label}
                 label={option.label}
-                onChange={toggleRadioSelection}
+                onClick={toggleRadioSelection}
                 value={option.value}
                 facetCount={facetCounts && (facetCounts?.[option.value] || 0)}
                 checked={query.has(option.value)}
