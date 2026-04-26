@@ -3,7 +3,7 @@ import { FormFillFieldDefinitions } from "tests/e2e/utils/forms/general-forms-fi
 
 // Regex matcher for SF-LLL: matches both "SF-LLL" and "Disclosure of Lobbying Activities"
 export const SFLLL_FORM_MATCHER =
-  "SF\\s*[-‑–—]?\\s*LLL|Disclosure\\s+of\\s+Lobbying\\s+Activities";
+  /SF\s*[-‑–—]?\s*LLL|Disclosure\s+of\s+Lobbying\s+Activities/i;
 
 const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
   federalAction_type: {
