@@ -52,8 +52,8 @@ test(
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
-    const openedSf424ForValidation = await openForm(page, SF424_FORM_MATCHER);
-    if (!openedSf424ForValidation) {
+    const opened = await openForm(page, SF424_FORM_MATCHER);
+    if (!opened) {
       throw new Error(
         "Could not find or open SF-424 form link on the application forms page",
       );
@@ -70,7 +70,7 @@ test(
     await verifyFormStatusOnApplication(
       page,
       "incomplete",
-      "Application for Federal Assistance (SF-424)",
+      SF424_FORM_MATCHER,
       applicationUrl,
     );
   },

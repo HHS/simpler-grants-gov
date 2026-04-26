@@ -2,7 +2,7 @@ import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import { FormFillFieldDefinitions } from "tests/e2e/utils/forms/general-forms-filling";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
-export const EPA4700_4_FORM_MATCHER = "^EPA\\s+Form\\s+4700-4(?:\\s+.*)?$";
+export const EPA4700_4_FORM_MATCHER = /EPA\s+Form\s+4700-4/i;
 
 export const fieldDefinitionsEPA47004: FormFillFieldDefinitions = {
   applicant_name: {

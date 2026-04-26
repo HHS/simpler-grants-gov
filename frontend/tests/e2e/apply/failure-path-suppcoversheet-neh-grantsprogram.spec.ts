@@ -79,7 +79,7 @@ test(
     await verifyFormStatusOnApplication(
       page,
       "incomplete",
-      "Supplementary Cover Sheet",
+      SUPP_COVER_SHEET_NEH_FORM_MATCHER,
       applicationUrl,
     );
   },
