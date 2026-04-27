@@ -89,7 +89,8 @@ module "prod_config" {
     SAM_GOV_BASE_URL = "https://api.sam.gov"
 
     # Email notification
-    RESET_EMAILS_WITHOUT_SENDING = "false"
+    RESET_EMAILS_WITHOUT_SENDING               = "false"
+    ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation - Production overrides
     FRONTEND_URL             = "https://simpler.grants.gov"
