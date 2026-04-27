@@ -193,7 +193,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: node_modules.tar.gz
-          path: /tmp/node_modules.tar.gz
+          path: /tmp
 
       - name: Expand node_modules
         if: steps.npm-cache.outputs.cache-hit != 'true'
@@ -218,7 +218,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: playwright.tar.gz
-          path: /tmp/playwright.tar.gz
+          path: /tmp
 
       - name: Expand Playwright
         if: steps.playwright-cache.outputs.cache-hit != 'true'
