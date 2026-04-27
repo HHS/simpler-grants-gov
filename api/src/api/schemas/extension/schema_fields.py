@@ -2,7 +2,7 @@ import copy
 import enum
 import typing
 
-from apiflask import fields as original_fields
+from apiflask import fields as original_fields  # noqa: TID251
 from marshmallow import ValidationError
 
 from src.api.schemas.extension.field_validators import URL as CustomURL
