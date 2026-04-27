@@ -17,7 +17,6 @@ function ControlledNavDropdown() {
       isCurrent={false}
       linkText="Menu"
       menuItems={[
-         
         <a href="/a" key="a">
           Link A
         </a>,

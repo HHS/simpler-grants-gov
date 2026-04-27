@@ -44,7 +44,6 @@ const withFeatureFlag = <P, R extends ReactNode>(
       }
 
       // TODO #9637
-       
 
       return <WrappedComponent {...props} />;
     };
