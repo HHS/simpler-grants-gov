@@ -128,6 +128,62 @@ class TestDeleteAwardRecommendationRisk404:
 
         assert resp.status_code == 404
 
+    def test_delete_already_deleted_risk_404(
+        self, client, db_session, agency, award_recommendation
+    ):
+        deleted_risk = AwardRecommendationRiskFactory.create(
+            award_recommendation=award_recommendation,
+            is_deleted=True,
+        )
+
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
+        )
+
+        resp = client.delete(
+            f"{API_URL}/{award_recommendation.award_recommendation_id}/risks/"
+            f"{deleted_risk.award_recommendation_risk_id}",
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == 404
+
+    def test_delete_risk_deleted_award_recommendation_404(
+        self, client, db_session, agency, opportunity
+    ):
+        deleted_award_recommendation = AwardRecommendationFactory.create(
+            opportunity=opportunity,
+            award_recommendation_status=AwardRecommendationStatus.DRAFT,
+            is_deleted=True,
+            review_workflow=None,
+            review_workflow_id=None,
+        )
+        risk = AwardRecommendationRiskFactory.create(
+            award_recommendation=deleted_award_recommendation,
+            is_deleted=False,
+        )
+
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
+        )
+
+        resp = client.delete(
+            f"{API_URL}/{deleted_award_recommendation.award_recommendation_id}/risks/"
+            f"{risk.award_recommendation_risk_id}",
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == 404
+
+        db_session.expire_all()
+        unchanged_risk = db_session.execute(
+            select(AwardRecommendationRisk).where(
+                AwardRecommendationRisk.award_recommendation_risk_id
+                == risk.award_recommendation_risk_id
+            )
+        ).scalar_one()
+        assert unchanged_risk.is_deleted is False
+
 
 ####################################
 # 401 Tests

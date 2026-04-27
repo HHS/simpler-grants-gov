@@ -14,6 +14,7 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationGetResponseSchema,
     AwardRecommendationReviewUpdateRequestSchema,
     AwardRecommendationReviewUpdateResponseSchema,
+    AwardRecommendationRiskDeleteResponseSchema,
     AwardRecommendationRiskListRequestSchema,
     AwardRecommendationRiskListResponseSchema,
     AwardRecommendationRiskRequestSchema,
@@ -364,7 +365,7 @@ def award_recommendation_audit_list(
 @award_recommendation_blueprint.delete(
     "/award-recommendations/<uuid:award_recommendation_id>/risks/<uuid:award_recommendation_risk_id>"
 )
-@award_recommendation_blueprint.output(AbstractResponseSchema)
+@award_recommendation_blueprint.output(AwardRecommendationRiskDeleteResponseSchema)
 @award_recommendation_blueprint.doc(
     summary="Delete Award Recommendation Risk",
     description="Soft delete a risk for an award recommendation.",
