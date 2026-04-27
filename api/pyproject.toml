@@ -109,7 +109,7 @@ target-version = "py314"
 
 [tool.ruff.lint]
 # See: https://docs.astral.sh/ruff/rules/ for all possible rules
-select = ["B", "C", "E", "F", "W", "B9", "UP", "RUF", "PT"]
+select = ["B", "C", "E", "F", "W", "B9", "UP", "RUF", "PT", "TID251"]
 ignore = [
     # too many leading '#' for block comment, we can format our comments however we want
     "E266",
@@ -187,6 +187,11 @@ allowed-confusables = [
     "PT018"
 ]
 
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+# For these libraries, we do use them, but have our own derived versions we want
+# to use instead as we've rewritten fundamental components like error messaging.
+"marshmallow.validate".msg = "Do not import marshmallow.validate directly - instead use src.api.schemas.extension.validators as we've rewritten the error messaging"
+"apiflask.Schema".msg = "Do not import apiflask.Schema directly - instead use src.api.schemas.extension"
 
 [tool.mypy]
 # https://mypy.readthedocs.io/en/stable/config_file.html
