@@ -3444,6 +3444,57 @@ paths:
       summary: User Delete Saved Opportunity
       security:
       - ApiJwtAuth: []
+  /alpha/award-recommendations/{award_recommendation_id}/risks/list:
+    post:
+      parameters:
+      - in: path
+        name: award_recommendation_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardRecommendationRiskListResponseSchema'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Forbidden
+      tags:
+      - Award Recommendation Alpha
+      summary: List Award Recommendation Risks
+      description: Get paginated list of risks for an award recommendation.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AwardRecommendationRiskListRequestSchema'
+      security:
+      - ApiJwtAuth: &id027 []
+      - ApiUserKeyAuth: *id027
   /v1/users/{user_id}/invitations/{invitation_id}/organizations:
     post:
       parameters:
@@ -3680,8 +3731,8 @@ paths:
             schema:
               $ref: '#/components/schemas/AwardRecommendationAuditRequestSchema'
       security:
-      - ApiJwtAuth: &id027 []
-      - ApiUserKeyAuth: *id027
+      - ApiJwtAuth: &id028 []
+      - ApiUserKeyAuth: *id028
   /alpha/award-recommendations/{award_recommendation_id}/submissions/list:
     post:
       parameters:
@@ -3731,8 +3782,8 @@ paths:
             schema:
               $ref: '#/components/schemas/AwardRecommendationSubmissionListRequestSchema'
       security:
-      - ApiJwtAuth: &id028 []
-      - ApiUserKeyAuth: *id028
+      - ApiJwtAuth: &id029 []
+      - ApiUserKeyAuth: *id029
   /alpha/applications/{application_id}/application_form/{app_form_id}:
     get:
       parameters:
@@ -3769,8 +3820,8 @@ paths:
       - Application Alpha
       summary: Get an application form by ID
       security:
-      - ApiJwtAuth: &id029 []
-      - InternalApiJwtAuth: *id029
+      - ApiJwtAuth: &id030 []
+      - InternalApiJwtAuth: *id030
   /alpha/applications/{application_id}/organizations/{organization_id}:
     put:
       parameters:
@@ -4048,8 +4099,8 @@ paths:
             schema:
               $ref: '#/components/schemas/OpportunitySummaryUpdateRequestV1Schema'
       security:
-      - ApiJwtAuth: &id030 []
-      - ApiUserKeyAuth: *id030
+      - ApiJwtAuth: &id031 []
+      - ApiUserKeyAuth: *id031
   /v1/grantors/opportunities/{opportunity_id}/attachments/{opportunity_attachment_id}:
     delete:
       parameters:
@@ -4104,8 +4155,8 @@ paths:
       - Opportunity v1 - for Grantors
       summary: Delete an attachment from an opportunity
       security:
-      - ApiJwtAuth: &id031 []
-      - ApiUserKeyAuth: *id031
+      - ApiJwtAuth: &id032 []
+      - ApiUserKeyAuth: *id032
   /alpha/award-recommendations/{award_recommendation_id}/risks/{award_recommendation_risk_id}:
     put:
       parameters:
@@ -4160,50 +4211,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AwardRecommendationRiskRequestSchema'
-      security:
-      - ApiJwtAuth: &id032 []
-      - ApiUserKeyAuth: *id032
-    delete:
-      parameters:
-      - in: path
-        name: award_recommendation_id
-        schema:
-          type: string
-        required: true
-      - in: path
-        name: award_recommendation_risk_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AbstractResponseSchema'
-          description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Not found
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Forbidden
-      tags:
-      - Award Recommendation Alpha
-      summary: Delete Award Recommendation Risk
-      description: Soft delete a risk for an award recommendation.
       security:
       - ApiJwtAuth: &id033 []
       - ApiUserKeyAuth: *id033
@@ -11971,6 +11978,84 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    AwardRecommendationRiskListResponseSchema:
+      type: object
+      properties:
+        pagination_info:
+          description: The pagination information for paginated endpoints
+          type: *id035
+          $ref: '#/components/schemas/PaginationInfoSchema'
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: The list of award recommendation risks
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/AwardRecommendationRiskResponseDataSchema'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    SortOrderAwardRecRiskPaginationSchema:
+      type: object
+      properties:
+        order_by:
+          type: string
+          enum:
+          - created_at
+          description: The field to sort the response by
+        sort_direction:
+          description: Whether to sort the response ascending or descending
+          enum:
+          - ascending
+          - descending
+          type:
+          - string
+      required:
+      - order_by
+      - sort_direction
+    AwardRecRiskPaginationSchema:
+      type: object
+      properties:
+        sort_order:
+          type: array
+          default:
+          - order_by: created_at
+            sort_direction: ascending
+          minItems: 1
+          maxItems: 5
+          description: The list of sorting rules
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/SortOrderAwardRecRiskPaginationSchema'
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 5000
+          description: The size of the page to fetch
+          example: 25
+        page_offset:
+          type: integer
+          minimum: 1
+          description: The page number to fetch, starts counting from 1
+          example: 1
+      required:
+      - page_offset
+      - page_size
+    AwardRecommendationRiskListRequestSchema:
+      type: object
+      properties:
+        pagination:
+          type:
+          - object
+          $ref: '#/components/schemas/AwardRecRiskPaginationSchema'
+      required:
+      - pagination
     OrganizationSchema1:
       type: object
       properties:
