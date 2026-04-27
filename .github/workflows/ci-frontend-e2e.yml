@@ -133,6 +133,18 @@ jobs:
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
+      - name: Expand API Docker image
+        run: |
+          cd node_modules
+          tar -czf /tmp/node_modules.tar.gz .
+          ls /tmp
+
+      - name: Upload node_modules artifact
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          path: /tmp/node_modules.tar.gz
+
   run-e2e-tests-local:
     name: Prepare infra and run E2E tests
     needs: [get-api-commit-hash, get-frontend-commit-hash, playwright-cache]
@@ -158,10 +170,27 @@ jobs:
       - uses: actions/cache@v5
         id: npm-cache
         with:
-          fail-on-cache-miss: true
+          # don't fail for now as we're backing this up with an artifact download
+          # fail-on-cache-miss: true
           path: |
             frontend/node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Download node_modules artifact
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: node_modules.tar.gz
+          path: /tmp/node_modules.tar.gz
+
+      - name: Expand API Docker image
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: |
+          ls -la .
+          ls -la ./node_modules
+          tar -xzf /tmp/api-docker-image.tar.gz ./node_modules
+          ls -la .
+          ls -la ./node_modules
 
       - uses: actions/cache@v5
         id: playwright-cache
