@@ -384,33 +384,7 @@ class TestBatchUpdateAwardRecommendationSubmissions200:
         ), "Audit should contain updated fields list in metadata"
 
 
-####################################
-# 500 Tests
-####################################
-
-
-class TestBatchUpdateAwardRecommendationSubmissions500:
-
-    def test_batch_update_empty_submissions_500(
-        self, client, db_session, agency, award_recommendation
-    ):
-        # Create user with required privileges directly in the test
-        user, _, token = create_user_in_agency_with_jwt(
-            db_session,
-            agency=agency,
-            privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION, Privilege.VIEW_AWARD_RECOMMENDATION],
-        )
-        db_session.commit()
-
-        update_data = {"award_recommendation_submissions": {}}
-
-        resp = client.put(
-            f"{API_URL}/{award_recommendation.award_recommendation_id}/submission-details",
-            json=update_data,
-            headers={"X-SGG-Token": token},
-        )
-
-        assert resp.status_code == 500
+# Note: Empty submissions now return 422 instead of 500 due to custom validator
 
 
 ####################################
@@ -559,6 +533,39 @@ class TestBatchUpdateAwardRecommendationSubmissions422:
         )
 
         assert resp.status_code == 422
+
+    def test_batch_update_empty_submissions_422(
+        self, client, db_session, agency, award_recommendation
+    ):
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
+        )
+
+        # Empty submissions dictionary
+        update_data = {"award_recommendation_submissions": {}}
+
+        resp = client.put(
+            f"{API_URL}/{award_recommendation.award_recommendation_id}/submission-details",
+            json=update_data,
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == 422
+        assert "errors" in resp.json
+        assert any(
+            error["field"] == "award_recommendation_submissions"
+            for error in resp.json.get("errors", [])
+        )
+        error = next(
+            (
+                error
+                for error in resp.json.get("errors", [])
+                if error["field"] == "award_recommendation_submissions"
+            ),
+            None,
+        )
+        assert error is not None
+        assert "min_length" in error.get("type", "")
 
 
 ####################################

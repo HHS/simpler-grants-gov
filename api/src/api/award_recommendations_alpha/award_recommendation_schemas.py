@@ -1,6 +1,7 @@
 from marshmallow import validate
 
 from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension.field_validators import Length
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import SimpleUserSchema
@@ -538,7 +539,7 @@ class AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema(Schema):
         keys=fields.UUID(),
         values=fields.Nested(AwardRecommendationSubmissionDetailUpdateSchema),
         required=True,
-        validate=validate.Length(min=1),
+        validate=Length(min=1),
         metadata={
             "description": "Dictionary of submission IDs to update details, where keys are award_recommendation_application_submission_id"
         },
