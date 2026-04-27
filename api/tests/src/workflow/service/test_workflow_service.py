@@ -15,7 +15,12 @@ from src.workflow.workflow_errors import (
     InactiveWorkflowError,
     WorkflowDoesNotExistError,
 )
-from tests.src.db.models.factories import ApplicationFactory, OpportunityFactory, WorkflowFactory
+from tests.src.db.models.factories import (
+    ApplicationFactory,
+    AwardRecommendationFactory,
+    OpportunityFactory,
+    WorkflowFactory,
+)
 from tests.src.workflow.state_machine.test_state_machines import BasicTestStateMachine
 from tests.src.workflow.workflow_test_util import build_workflow_config
 
@@ -44,6 +49,21 @@ def test_get_workflow_entity_application(db_session, enable_factory_create):
     assert result["application"].application_id == application.application_id
 
 
+def test_get_workflow_entity_award_recommendation(db_session, enable_factory_create):
+    award_recommendation = AwardRecommendationFactory.create()
+    config = build_workflow_config(entity_type=WorkflowEntityType.AWARD_RECOMMENDATION)
+    result = get_workflow_entity(
+        db_session,
+        entity_id=award_recommendation.award_recommendation_id,
+        config=config,
+    )
+
+    assert (
+        result["award_recommendation"].award_recommendation_id
+        == award_recommendation.award_recommendation_id
+    )
+
+
 def test_get_workflow_entity_opportunity_missing(db_session, enable_factory_create):
     config = build_workflow_config(entity_type=WorkflowEntityType.OPPORTUNITY)
 
@@ -59,6 +79,17 @@ def test_get_workflow_entity_application_missing(db_session, enable_factory_crea
     config = build_workflow_config(entity_type=WorkflowEntityType.APPLICATION)
 
     with pytest.raises(EntityNotFound, match="Application not found"):
+        get_workflow_entity(
+            db_session,
+            entity_id=uuid.uuid4(),
+            config=config,
+        )
+
+
+def test_get_workflow_entity_award_recommendation_missing(db_session, enable_factory_create):
+    config = build_workflow_config(entity_type=WorkflowEntityType.AWARD_RECOMMENDATION)
+
+    with pytest.raises(EntityNotFound, match="Award recommendation not found"):
         get_workflow_entity(
             db_session,
             entity_id=uuid.uuid4(),

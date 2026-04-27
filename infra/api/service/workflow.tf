@@ -41,7 +41,7 @@ resource "aws_ecs_task_definition" "workflow" {
 
   family             = local.workflow_service_name
   execution_role_arn = module.service.task_role_arn
-  task_role_arn      = module.service.app_service_arn
+  task_role_arn      = module.service.workflow_service_role_arn
 
   container_definitions = jsonencode([
     {

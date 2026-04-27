@@ -1,6 +1,5 @@
-from marshmallow import validate
-
 from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension.field_validators import Length
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import SimpleUserSchema
@@ -428,8 +427,8 @@ class AwardRecommendationSubmissionListResponseSchema(
     )
 
 
-class AwardRecommendationRiskCreateRequestSchema(Schema):
-    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/risks request"""
+class AwardRecommendationRiskRequestSchema(Schema):
+    """Schema for award recommendation risk create and update requests"""
 
     comment = fields.String(
         required=True,
@@ -446,15 +445,15 @@ class AwardRecommendationRiskCreateRequestSchema(Schema):
     award_recommendation_application_submission_ids = fields.List(
         fields.UUID(),
         required=True,
-        validate=[validate.Length(min=1)],
+        validate=[Length(min=1)],
         metadata={
             "description": "List of award recommendation application submission IDs to link to this risk"
         },
     )
 
 
-class AwardRecommendationRiskCreateResponseDataSchema(Schema):
-    """Schema for the created risk response data"""
+class AwardRecommendationRiskResponseDataSchema(Schema):
+    """Schema for risk response data (used by create and update)"""
 
     award_recommendation_risk_id = fields.UUID(
         metadata={"description": "The award recommendation risk ID"}
@@ -480,12 +479,99 @@ class AwardRecommendationRiskCreateResponseDataSchema(Schema):
     )
 
 
-class AwardRecommendationRiskCreateResponseSchema(AbstractResponseSchema):
-    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/risks response"""
+class AwardRecommendationRiskResponseSchema(AbstractResponseSchema):
+    """Schema for risk response (used by create and update)"""
 
     data = fields.Nested(
-        AwardRecommendationRiskCreateResponseDataSchema,
-        metadata={"description": "The created award recommendation risk"},
+        AwardRecommendationRiskResponseDataSchema,
+        metadata={"description": "The award recommendation risk"},
+    )
+
+
+class AwardRecommendationSubmissionDetailUpdateSchema(Schema):
+    """Schema for updating a single award recommendation submission detail"""
+
+    recommended_amount = fields.Decimal(
+        allow_none=True,
+        as_string=True,
+        metadata={
+            "description": "The recommended funding amount",
+            "example": "200000.00",
+        },
+    )
+    scoring_comment = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Comments from the scoring process",
+            "example": "Strong technical approach with clear methodology. Budget well-justified and aligned with project goals.",
+        },
+    )
+    general_comment = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "General comments about the submission",
+            "example": "Applicant has demonstrated successful implementation of similar projects in the past. Team qualifications exceed requirements.",
+        },
+    )
+    award_recommendation_type = fields.Enum(
+        AwardRecommendationType,
+        allow_none=True,
+        metadata={"description": "The recommendation type for this submission"},
+    )
+    has_exception = fields.Boolean(
+        metadata={"description": "Whether the submission has an exception"},
+    )
+    exception_detail = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Details about the exception, if any",
+            "example": "Budget exceeds guidelines by 12%. Recommend partial funding with revised scope focusing on core deliverables.",
+        },
+    )
+
+
+class AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema(Schema):
+    """Schema for PUT /alpha/award-recommendations/:award_recommendation_id/submission-details request"""
+
+    award_recommendation_submissions = fields.Dict(
+        keys=fields.UUID(),
+        values=fields.Nested(AwardRecommendationSubmissionDetailUpdateSchema),
+        required=True,
+        validate=Length(min=1),
+        metadata={
+            "description": "Dictionary of submission IDs to update details, where keys are award_recommendation_application_submission_id"
+        },
+    )
+
+
+class AwardRecommendationSubmissionDetailsBatchUpdateResponseSchema(AbstractResponseSchema):
+    """Schema for PUT /alpha/award-recommendations/:award_recommendation_id/submission-details response"""
+
+    data = fields.List(
+        fields.Nested(AwardRecommendationSubmissionDataSchema),
+        metadata={"description": "The updated award recommendation submissions"},
+    )
+
+
+class AwardRecommendationRiskListRequestSchema(Schema):
+    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/risks/list request"""
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "AwardRecRiskPaginationSchema",
+            ["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "ascending"}],
+        ),
+        required=True,
+    )
+
+
+class AwardRecommendationRiskListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    """Schema for POST /alpha/award-recommendations/:award_recommendation_id/risks/list response"""
+
+    data = fields.List(
+        fields.Nested(AwardRecommendationRiskResponseDataSchema),
+        metadata={"description": "The list of award recommendation risks"},
     )
 
 

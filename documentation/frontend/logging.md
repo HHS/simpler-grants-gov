@@ -53,4 +53,4 @@ export const handlerFunction = (request, response) => {
 
 ## Ad hoc logs
 
-Pino is the production logger today; see frontend/src/services/logger/simplerLogger.tsx for implementation details.
+Pino is the production logger used across the application. See [`frontend/src/services/logger/simplerLogger.tsx`](../../frontend/src/services/logger/simplerLogger.tsx) for the current implementation.
