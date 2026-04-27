@@ -65,8 +65,6 @@ test.describe("Application form completion happy path - SFLLL", () => {
       // And the user clicks Save
       await fillForm(testInfo, page, SFLLL_FORM_CONFIG, SFLLL_TEST_DATA, false);
 
-      await page.waitForTimeout(5000);
-
       /* Covers "Form status validation" flow in the feature file,
        * which includes verification of the status in form and application landing page after saving a completed form.
        */

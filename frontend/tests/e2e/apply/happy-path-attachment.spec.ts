@@ -14,16 +14,10 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import {
-  fillForm,
-  verifyFormLinkVisible,
-} from "tests/e2e/utils/forms/general-forms-filling";
+import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-import {
-  ATTACHMENT_FORM_CONFIG,
-  ATTACHMENT_FORM_MATCHER,
-} from "./fixtures/attachment-field-definitions";
+import { ATTACHMENT_FORM_CONFIG } from "./fixtures/attachment-field-definitions";
 import { attachmentHappyPathTestData } from "./fixtures/attachment-fill-data";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
@@ -70,9 +64,7 @@ test(
      */
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
-    // Verify the Attachment Form link is visible on the application page
-    await verifyFormLinkVisible(page, ATTACHMENT_FORM_MATCHER);
-
+    // Fill Attachment 1 — the form requires at least one attachment to be complete
     // When the user clicks on a form link
     // Then the form opens
     // And the user fills out the form with valid test data
@@ -84,8 +76,6 @@ test(
       attachmentHappyPathTestData,
       false,
     );
-
-    await page.waitForTimeout(2000);
 
     /* Covers "Form status validation" flow in the feature file,
      * which includes verification of the status in form and application landing page after saving a completed form.

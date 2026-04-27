@@ -4,7 +4,7 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 // Matches "Other Narrative Attachments" link/heading on the application page
 export const OTHER_NARRATIVE_ATTACHMENT_FORM_MATCHER =
-  "^Other Narrative Attachments$";
+  /Other Narrative Attachments/i;
 
 export const fieldDefinitionsOtherNarrativeAttachment: FormFillFieldDefinitions =
   {

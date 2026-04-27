@@ -7,8 +7,6 @@ import {
 } from "tests/e2e/utils/forms/verify-form-errors-utils";
 import { gotoWithRetry } from "tests/e2e/utils/lifecycle-utils";
 
-import { buildFlexibleFormNameRegex } from "./form-navigation-utils";
-
 export type FormStatus = "complete" | "incomplete";
 
 /**
@@ -23,10 +21,14 @@ export async function assertFormRowStatus(
   status: FormStatus,
   formName: string | RegExp,
 ): Promise<void> {
-  const rowPattern =
-    formName instanceof RegExp
-      ? formName
-      : buildFlexibleFormNameRegex(formName);
+  let rowPattern: RegExp;
+  if (formName instanceof RegExp) {
+    rowPattern = formName;
+  } else {
+    const escaped = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const flexible = escaped.replace(/\s+/g, "\\s*").replace(/-/g, "-?");
+    rowPattern = new RegExp(flexible, "i");
+  }
   const formRow = page
     .locator("tr", {
       hasText: rowPattern,
@@ -60,7 +62,14 @@ export async function verifyFormStatusOnApplication(
   applicationUrl: string,
 ): Promise<void> {
   await gotoWithRetry(page, applicationUrl, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(10000);
+  // Wait for the forms table to be populated before asserting row status.
+  // domcontentloaded fires before async data is fetched; this replaces the
+  // old static 10s wait with a dynamic wait that is both faster on fast
+  // machines and more reliable on slow ones (e.g. Mobile Chrome in CI).
+  await page
+    .locator('a[href*="/form/"]')
+    .first()
+    .waitFor({ state: "visible", timeout: 30000 });
   await assertFormRowStatus(page, status, formName);
 }
 
@@ -90,6 +99,7 @@ export async function verifyFormStatusAfterSave(
     // Use a generous timeout: Webkit renders the save-confirmation alert more
     // slowly than Chrome/Firefox, and the Playwright default (5000ms) is
     // insufficient on some CI runners.
+    await expect(alert).toBeVisible({ timeout: 30000 });
     await expect(alert.locator(".usa-alert__heading")).toContainText(
       FORM_DEFAULTS.formSavedHeading,
       { timeout: 15000 },

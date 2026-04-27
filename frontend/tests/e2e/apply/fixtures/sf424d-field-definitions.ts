@@ -20,7 +20,7 @@ export const fieldDefinitionsSF424D: FormFillFieldDefinitions = {
 
 export const SF424D_FORM_CONFIG = {
   ...FORM_DEFAULTS,
-  formName: "Assurances for Construction Programs (SF-424D)",
+  formName: SF424D_FORM_MATCHER,
   fields: fieldDefinitionsSF424D,
 } as const;
 

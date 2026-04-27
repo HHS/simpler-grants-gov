@@ -58,11 +58,11 @@ test(
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
-    const openedProjectNarrativeAttachmentForm = await openForm(
+    const opened = await openForm(
       page,
       PROJECT_NARRATIVE_ATTACHMENT_FORM_MATCHER,
     );
-    if (!openedProjectNarrativeAttachmentForm) {
+    if (!opened) {
       throw new Error(
         "Could not find or open Project Narrative Attachment Form link on the application forms page",
       );
@@ -82,7 +82,7 @@ test(
     await verifyFormStatusOnApplication(
       page,
       "incomplete",
-      "Project Narrative Attachment",
+      PROJECT_NARRATIVE_ATTACHMENT_FORM_MATCHER,
       applicationUrl,
     );
   },
