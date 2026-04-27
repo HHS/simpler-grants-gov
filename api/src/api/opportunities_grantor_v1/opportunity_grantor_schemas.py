@@ -245,6 +245,16 @@ class OpportunityListRequestSchema(Schema):
         },
     )
 
+    filters = fields.Dict(
+        metadata={
+            "description": "Optional filters for opportunity list",
+            "examples": {
+                "draft_status": "Boolean value to filter by draft status. If not provided, shows all opportunities.",
+                "award_recommendation_ready": "Boolean value to filter for opportunities ready for award recommendations.",
+            },
+        }
+    )
+
 
 class OpportunityListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
     """Schema for POST /v1/grantors/opportunities/:agency_id/opportunities response"""

@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
-from src.constants.lookup_constants import Privilege
+from src.constants.lookup_constants import OpportunityStatus, Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Competition, CompetitionForm, Form
 from src.db.models.opportunity_models import (
@@ -25,8 +25,10 @@ from src.services.service_utils import apply_sorting
 class OpportunityFilterSchema(BaseModel):
     """Optional filters for opportunity list"""
 
-    # Placeholder for any required filters
-    pass
+    award_recommendation_ready: bool | None = Field(
+        default=None,
+        description="Filter for opportunities ready for award recommendations. If True, returns only opportunities that can have award recommendations created for them.",
+    )
 
 
 class ListOpportunitiesParams(BaseModel):
@@ -86,6 +88,26 @@ def list_opportunities_with_filters(
         )
         .where(Agency.agency_id == agency_id)
     )
+
+    # Apply filters if provided
+    if params.filters:
+        # Filter by award recommendation readiness
+        if params.filters.award_recommendation_ready is True:
+            # Opportunities are ready for award recommendations if:
+            # 1. They have a current opportunity summary with status 'posted'
+            # 2. They are Simpler Grants opportunities
+            # 3. They have at least one competition with at least one submission
+            # 4. They don't have any associated award recommendations
+            stmt = stmt.where(
+                Opportunity.current_opportunity_summary.has(
+                    CurrentOpportunitySummary.opportunity_status == OpportunityStatus.POSTED
+                ),
+                Opportunity.is_simpler_grants_opportunity.is_(True),
+                Opportunity.competitions.any(
+                    Competition.application_submissions.any()
+                ),
+                ~Opportunity.award_recommendations.any(),
+            )
 
     # Apply sorting in the database query
     stmt = apply_sorting(stmt, Opportunity, params.pagination.sort_order)
