@@ -3,7 +3,7 @@ import botocore.client
 import botocore.config
 from pydantic import Field
 
-from src.adapters.aws import get_base_aws_config, get_boto_session
+from src.adapters.aws import get_aws_config, get_boto_session
 from src.util.env_config import PydanticBaseEnvConfig
 
 
@@ -50,4 +50,4 @@ def get_s3_client(
     if session is None:
         session = get_boto_session()
 
-    return session.client("s3", region_name=get_base_aws_config().aws_region, **params)
+    return session.client("s3", region_name=get_aws_config().aws_region, **params)

@@ -467,7 +467,7 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.delenv("AWS_S3_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("AWS_SQS_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("CDN_URL", raising=False)
-    monkeypatch.setattr("src.adapters.aws.aws_session._base_aws_config", None)
+    monkeypatch.setattr("src.adapters.aws.aws_session._aws_config", None)
 
 
 @pytest.fixture

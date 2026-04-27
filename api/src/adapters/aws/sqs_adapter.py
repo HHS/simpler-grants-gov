@@ -5,7 +5,7 @@ import boto3
 import botocore.client
 from pydantic import BaseModel, Field
 
-from src.adapters.aws import get_base_aws_config, get_boto_session
+from src.adapters.aws import get_aws_config, get_boto_session
 from src.util.env_config import PydanticBaseEnvConfig
 from src.util.json_util import json_encoder
 
@@ -58,7 +58,7 @@ def get_boto_sqs_client(
     if session is None:
         session = get_boto_session()
 
-    return session.client("sqs", region_name=get_base_aws_config().aws_region, **params)
+    return session.client("sqs", region_name=get_aws_config().aws_region, **params)
 
 
 class SQSClient:
