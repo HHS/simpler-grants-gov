@@ -4,6 +4,7 @@ import {
   saveOpportunityEditAction,
   type OpportunityEditValidationErrors,
 } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
+import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
 import { useTranslations } from "next-intl";
 import { startTransition, useActionState, useEffect, useState } from "react";
@@ -21,6 +22,7 @@ import {
 } from "@trussworks/react-uswds";
 
 import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
+import { OpportunityAttachmentUploadInput } from "src/components/opportunity/OpportunityAttachmentUploadInput";
 import {
   ELIGIBILITY_OPTIONS,
   FUNDING_CATEGORY_OPTIONS,
@@ -85,6 +87,7 @@ type OpportunityEditFormProps = {
   initialValues: OpportunityEditFormValues;
   isDraft?: boolean;
   isNewlyCreated?: boolean;
+  initialAttachments?: OpportunityAttachment[];
   opportunityKeyInformation: {
     title: string;
     agency: string;
@@ -103,6 +106,7 @@ export default function OpportunityEditForm({
   initialValues,
   isDraft = false,
   isNewlyCreated = false,
+  initialAttachments = [],
   opportunityKeyInformation,
 }: OpportunityEditFormProps) {
   const t = useTranslations("OpportunityEdit");
@@ -115,6 +119,27 @@ export default function OpportunityEditForm({
   });
   const validationErrors: OpportunityEditValidationErrors | undefined =
     formState.validationErrors;
+
+  useEffect(() => {
+    const form = document.getElementById("opportunity-edit-form");
+    if (!form) return;
+    form.dispatchEvent(
+      new CustomEvent("opportunity-values-change", {
+        bubbles: true,
+        detail: {
+          publishDate: values.publishDate,
+          fundingType: values.fundingType,
+          fundingCategories: values.fundingCategories,
+          eligibleApplicants: values.eligibleApplicants,
+        },
+      }),
+    );
+  }, [
+    values.publishDate,
+    values.fundingType,
+    values.fundingCategories,
+    values.eligibleApplicants,
+  ]);
 
   function updateField<K extends keyof OpportunityEditFormValues>(
     key: K,
@@ -143,6 +168,8 @@ export default function OpportunityEditForm({
 
   useEffect(() => {
     if (formState.newOpportunitySummaryId) {
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentSummaryId(formState.newOpportunitySummaryId);
     }
   }, [formState.newOpportunitySummaryId]);
@@ -317,16 +344,16 @@ export default function OpportunityEditForm({
             heading={t("content.alerts.validationWarningHeading")}
             headingLevel="h3"
           >
-            <p className="margin-top-1 margin-bottom-1">
+            <span className="display-block margin-top-1 margin-bottom-1">
               {t("content.alerts.validationWarningBody")}
-            </p>
-            <ul className="margin-top-1">
-              {Object.values(formState.validationErrors)
-                .flat()
-                .map((error, i) => (
-                  <li key={i}>{error}</li>
-                ))}
-            </ul>
+            </span>
+            {Object.values(formState.validationErrors)
+              .flat()
+              .map((error, i) => (
+                <span key={i} className="display-block">
+                  {error}
+                </span>
+              ))}
           </Alert>
         </div>
       ) : null}
@@ -977,6 +1004,25 @@ export default function OpportunityEditForm({
             </div>
           </div>
         </div>
+      </section>
+
+      <section
+        id="attachments"
+        className="display-flex flex-column gap-3 margin-top-4 padding-bottom-4 simpler-page-anchor-offset"
+      >
+        <div className="display-flex flex-column gap-2">
+          <h2 className="margin-0 font-heading-xl">
+            {t("sections.attachments")}
+          </h2>
+          <p className="margin-0 font-sans-lg text-base-dark maxw-full">
+            {t("content.attachmentsIntro")}
+          </p>
+        </div>
+        <OpportunityAttachmentUploadInput
+          opportunityId={opportunityId}
+          initialAttachments={initialAttachments}
+          isDraft={isDraft}
+        />
       </section>
     </form>
   );

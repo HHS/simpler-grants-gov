@@ -9,6 +9,7 @@ from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import get_users_with_privileges_for_agency, verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
+from src.db.models.award_recommendation_models import AwardRecommendation
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
@@ -20,7 +21,7 @@ from src.db.models.workflow_models import (
 )
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 from src.workflow.service.approval_service import get_agency_for_workflow
-from src.workflow.workflow_errors import OpportunityWithoutAgencyError
+from src.workflow.workflow_errors import InvalidEntityForWorkflow, OpportunityWithoutAgencyError
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,9 @@ def _workflow_load_options() -> list:
         .selectinload(ApplicationSubmission.application)
         .selectinload(Application.competition)
         .selectinload(Competition.opportunity)
+        .selectinload(Opportunity.agency_record),
+        selectinload(Workflow.award_recommendation)
+        .selectinload(AwardRecommendation.opportunity)
         .selectinload(Opportunity.agency_record),
     ]
 
@@ -100,7 +104,7 @@ def _verify_workflow_access_and_build_config(
         workflow: Workflow to verify access for
 
     Returns:
-        Workflow object with approval config attached
+        Workflow object with approval config and valid events attached
 
     Raises:
         403: If user doesn't have required privilege or entity type not supported
@@ -130,6 +134,9 @@ def _verify_workflow_access_and_build_config(
             403,
             message="Application submission workflows are not yet accessible through this endpoint",
         )
+    elif workflow.award_recommendation_id is not None:
+        required_privilege = Privilege.VIEW_AWARD_RECOMMENDATION
+        log_extra["entity_type"] = "award_recommendation"
     else:
         logger.error("Workflow has no entity ID", extra=log_extra)
         raise_flask_error(403, message="Forbidden")
@@ -143,6 +150,9 @@ def _verify_workflow_access_and_build_config(
 
     approval_config = build_workflow_approval_config(db_session, workflow, agency)
     workflow.workflow_approval_config = approval_config  # type: ignore[attr-defined]
+
+    valid_events = get_valid_events_for_workflow(db_session, workflow)
+    workflow.valid_events = valid_events  # type: ignore[attr-defined]
 
     return workflow
 
@@ -217,6 +227,39 @@ def get_workflow_by_event_id_and_verify_access(
     _sort_workflow_collections(event.workflow)
 
     return _verify_workflow_access_and_build_config(db_session, user, event.workflow)
+
+
+def get_valid_events_for_workflow(db_session: db.Session, workflow: Workflow) -> list[str]:
+    """
+    Get the list of valid events that can be sent for the current state of a workflow.
+
+    If the workflow is no longer active (has reached an end state), returns an empty list.
+
+    Args:
+        db_session: Database session
+        workflow: Workflow object
+
+    Returns:
+        List of event name strings valid for the current workflow state
+    """
+    if not workflow.is_active:
+        return []
+
+    config, state_machine_cls = WorkflowRegistry.get_state_machine_for_workflow_type(
+        workflow.workflow_type
+    )
+
+    try:
+        persistence_model = config.persistence_model_cls(db_session, workflow)
+        state_machine = state_machine_cls(persistence_model)
+    except InvalidEntityForWorkflow:
+        logger.warning(
+            "Could not instantiate state machine for workflow, entity type mismatch",
+            extra=workflow.get_log_extra(),
+        )
+        return []
+
+    return state_machine.get_valid_events_for_current_state()
 
 
 def build_workflow_approval_config(

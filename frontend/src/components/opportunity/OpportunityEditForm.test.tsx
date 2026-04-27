@@ -15,6 +15,12 @@ jest.mock("src/services/auth/session", () => ({
   getSession: jest.fn(),
 }));
 
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: () => ({
+    clientFetch: jest.fn(),
+  }),
+}));
+
 const initialValues: OpportunityEditFormValues = {
   opportunityNumber: "ABC-123",
   title: "Test opportunity",

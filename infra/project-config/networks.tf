@@ -64,7 +64,20 @@ locals {
       grants_gov_oracle_cidr_block = "10.207.0.0/16" # MicroHealth managed CIDR block where the test1 origin Oracle database for Grants.gov is located
       domain_config = {
         manage_dns  = false
-        hosted_zone = "grantee1.simpler.grants.gov"
+        hosted_zone = null # DNS is managed externally; set once Route53 hosted zone is created
+
+        certificate_configs = {}
+      }
+    }
+    grantee2 = {
+      account_name                 = "simpler-grants-gov"
+      database_subnet_group_name   = "grantee2"
+      vpc_name                     = "grantee2"
+      second_octet                 = 31              # The second octet our the VPC CIDR block
+      grants_gov_oracle_cidr_block = "10.207.0.0/16" # MicroHealth managed CIDR block where the test1 origin Oracle database for Grants.gov is located
+      domain_config = {
+        manage_dns  = false
+        hosted_zone = null # DNS is managed externally; set once Route53 hosted zone is created
 
         certificate_configs = {}
       }

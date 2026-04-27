@@ -98,6 +98,7 @@ class FundingCategory(StrEnum):
     ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS = (
         "energy_infrastructure_and_critical_mineral_and_materials"  # EIC
     )
+    RECREATION_AND_TOURISM = "recreation_and_tourism"  # RT
 
 
 class FundingInstrument(StrEnum):
@@ -277,6 +278,7 @@ class AwardRecommendationAuditEvent(StrEnum):
     RISK_UPDATED = "risk_updated"
     RISK_DELETED = "risk_deleted"
     APPLICATION_SUBMISSION_UPDATED = "application_submission_updated"
+    AWARD_RECOMMENDATION_SUBMISSION_UPDATED = "award_recommendation_submission_updated"
     REVIEW_CREATED = "review_created"
     REVIEW_UPDATED = "review_updated"
     REVIEW_DELETED = "review_deleted"
@@ -413,6 +415,7 @@ class ApprovalResponseType(StrEnum):
 class WorkflowEntityType(StrEnum):
     OPPORTUNITY = "opportunity"
     APPLICATION = "application"
+    AWARD_RECOMMENDATION = "award_recommendation"
 
 
 class WorkflowEventType(StrEnum):

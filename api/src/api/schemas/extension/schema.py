@@ -7,7 +7,7 @@ from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
 from src.validation.validation_constants import ValidationErrorType
 
 
-class Schema(apiflask.Schema):
+class Schema(apiflask.Schema):  # noqa: TID251
     # There's no clean way to override the error messages at the schema-level
     # as they get stored directly into the internal error store of the Schema object
     #

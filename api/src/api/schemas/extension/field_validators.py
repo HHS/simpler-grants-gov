@@ -1,9 +1,9 @@
 import copy
 import typing
 
-from apiflask import validators
+from apiflask import validators  # noqa: TID251
 from marshmallow import ValidationError
-from marshmallow.validate import _SizedT
+from marshmallow.validate import _SizedT  # noqa: TID251
 
 from src.api.schemas.extension.schema_common import MarshmallowErrorContainer
 from src.validation.validation_constants import ValidationErrorType

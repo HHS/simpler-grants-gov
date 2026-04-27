@@ -74,6 +74,8 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
 
   useEffect(() => {
     if (deleteState?.success) {
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowFile(false);
       setFileName(null);
       setAttachmentId(null);
@@ -85,6 +87,8 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
 
   useEffect(() => {
     const newAttachmentId = typeof value === "string" ? value : null;
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAttachmentId(newAttachmentId);
 
     const uploadedAttachment = attachments?.find(

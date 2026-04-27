@@ -4,6 +4,7 @@ import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import {
   createOpportunitySummaryForGrantor,
+  publishOpportunityForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { z } from "zod";
@@ -240,4 +241,32 @@ export async function saveOpportunityEditAction(
       errorMessage: alerts("genericError"),
     };
   }
+}
+
+export async function publishOpportunityAction(
+  opportunityId: string,
+): Promise<OpportunityEditActionState> {
+  const alerts = await getTranslations("OpportunityEdit.content.alerts");
+
+  const session = await getSession();
+  if (!session?.token) {
+    return { errorMessage: alerts("unauthenticated") };
+  }
+
+  try {
+    await publishOpportunityForGrantor(opportunityId, session.token);
+  } catch (error) {
+    const status =
+      error instanceof ApiRequestError ? parseErrorStatus(error) : null;
+
+    if (status === 403) {
+      return { errorMessage: alerts("forbidden") };
+    }
+    if (status === 404) {
+      return { errorMessage: alerts("notFound") };
+    }
+    return { errorMessage: alerts("genericError") };
+  }
+
+  return { successMessage: "published" };
 }
