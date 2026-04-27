@@ -84,12 +84,14 @@ module "nofos_config" {
 }
 
 module "network" {
-  source                       = "../modules/network"
-  name                         = var.network_name
-  has_database                 = local.has_database
-  has_external_non_aws_service = local.has_external_non_aws_service
-  enable_command_execution     = local.enable_command_execution
-  enable_notifications         = local.enable_notifications
+  source                                  = "../modules/network"
+  name                                    = var.network_name
+  has_database                            = local.has_database
+  database_subnet_group_name              = var.network_name
+  aws_services_security_group_name_prefix = module.project_config.aws_services_security_group_name_prefix
+  second_octet                            = module.project_config.network_configs[var.network_name].second_octet
+  has_external_non_aws_service            = local.has_external_non_aws_service
+  enable_command_execution                = local.enable_command_execution
 }
 
 module "domain" {
