@@ -1,3 +1,9 @@
+/**
+ * @feature Search No Results Feedback
+ * @featureFile search-no-results.feature
+ * @scenario Show a zero-results state and helpful no-results message for an obscure search term
+ */
+
 import { expect, test } from "@playwright/test";
 import {
   generateRandomString,
@@ -19,8 +25,8 @@ test.describe("Search page no results tests", () => {
     async ({ page }) => {
       const searchTerm = generateRandomString([10]);
 
+      // Given I am on the Search Funding Opportunity page
       await page.goto("/search");
-
       await waitForSearchResultsInitialLoad(page);
 
       // this is dumb but webkit has an issue with trying to fill in the input too quickly
@@ -31,14 +37,16 @@ test.describe("Search page no results tests", () => {
       } catch (_e) {
         await fillSearchInputAndSubmit(searchTerm, page);
       }
-
+      // When I search for an obscure random keyword
       await waitForURLContainsQueryParamValue(page, "query", searchTerm);
 
+      // Then I should see the heading "0 Opportunities"
       const resultsHeading = page.getByRole("heading", {
         name: /0 Opportunities/i,
       });
       await expect(resultsHeading).toBeVisible();
 
+      // And I should see "Your search didn't return any results."
       await expect(
         page.locator("div[data-testid='no-search-results'] h2"),
       ).toHaveText("Your search didn't return any results.");
