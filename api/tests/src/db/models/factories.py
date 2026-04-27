@@ -785,7 +785,7 @@ class AssistanceListingFactory(BaseFactory):
     class Meta:
         model = opportunity_models.AssistanceListing
 
-    assistance_listing_record_id = Generators.UuidObj
+    assistance_listing_id = Generators.UuidObj
 
     program_title = factory.Faker("company")
     assistance_listing_number = factory.Faker("assistance_listing_number")
