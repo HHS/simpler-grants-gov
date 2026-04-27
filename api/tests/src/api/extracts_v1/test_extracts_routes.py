@@ -17,7 +17,7 @@ def clear_extracts(db_session):
 
 
 def test_extract_metadata_get_default_dates(
-    client, api_auth_token, enable_factory_create, db_session
+    client, user_api_key_id, enable_factory_create, db_session
 ):
     """Test that default date range (last 7 days) is applied when no dates provided"""
 
@@ -39,7 +39,7 @@ def test_extract_metadata_get_default_dates(
             "sort_direction": "descending",
         },
     }
-    response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
+    response = client.post("/v1/extracts", headers={"X-API-Key": user_api_key_id}, json=payload)
     assert response.status_code == 200
     data = response.json["data"]
     assert len(data) == 2
@@ -47,7 +47,7 @@ def test_extract_metadata_get_default_dates(
 
 
 def test_extract_metadata_get_with_custom_dates(
-    client, api_auth_token, enable_factory_create, db_session, mock_s3_bucket
+    client, user_auth_token, enable_factory_create, db_session, mock_s3_bucket
 ):
     """Test with explicitly provided date range"""
     ExtractMetadataFactory.create_batch(
@@ -72,7 +72,7 @@ def test_extract_metadata_get_with_custom_dates(
         },
     }
 
-    response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
+    response = client.post("/v1/extracts", headers={"X-SGG-Token": user_auth_token}, json=payload)
 
     assert response.status_code == 200
     data = response.json["data"]
@@ -81,7 +81,7 @@ def test_extract_metadata_get_with_custom_dates(
 
 
 def test_extract_metadata_get_with_type_filter(
-    client, api_auth_token, enable_factory_create, db_session
+    client, user_api_key_id, enable_factory_create, db_session
 ):
     """Test filtering by extract_type"""
     ExtractMetadataFactory(extract_type=ExtractType.OPPORTUNITIES_JSON)
@@ -98,7 +98,7 @@ def test_extract_metadata_get_with_type_filter(
         },
     }
 
-    response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
+    response = client.post("/v1/extracts", headers={"X-API-Key": user_api_key_id}, json=payload)
 
     assert response.status_code == 200
     data = response.json["data"]
@@ -106,7 +106,9 @@ def test_extract_metadata_get_with_type_filter(
     assert data[0]["extract_type"] == "opportunities_json"
 
 
-def test_extract_metadata_get_pagination(client, api_auth_token, enable_factory_create, db_session):
+def test_extract_metadata_get_pagination(
+    client, user_auth_token, enable_factory_create, db_session
+):
     """Test pagination of results"""
     ExtractMetadataFactory.create_batch(2)
 
@@ -120,7 +122,7 @@ def test_extract_metadata_get_pagination(client, api_auth_token, enable_factory_
         },
     }
 
-    response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
+    response = client.post("/v1/extracts", headers={"X-SGG-Token": user_auth_token}, json=payload)
 
     assert response.status_code == 200
     data = response.json["data"]
@@ -128,14 +130,14 @@ def test_extract_metadata_get_pagination(client, api_auth_token, enable_factory_
 
     # Test second page
     payload["pagination"]["page"] = 2
-    response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
+    response = client.post("/v1/extracts", headers={"X-SGG-Token": user_auth_token}, json=payload)
     assert response.status_code == 200
     data = response.json["data"]
     assert len(data) == 1
 
 
 def test_extract_metadata_get_pagination_info(
-    client, api_auth_token, enable_factory_create, db_session
+    client, user_api_key_id, enable_factory_create, db_session
 ):
     """Test pagination information in response"""
     # Create 5 extracts to test pagination
@@ -153,7 +155,7 @@ def test_extract_metadata_get_pagination_info(
         },
     }
 
-    response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
+    response = client.post("/v1/extracts", headers={"X-API-Key": user_api_key_id}, json=payload)
 
     assert response.status_code == 200
 
@@ -168,7 +170,7 @@ def test_extract_metadata_get_pagination_info(
     assert pagination["page_size"] == 2
     # Test last page
     payload["pagination"]["page_offset"] = 3
-    response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
+    response = client.post("/v1/extracts", headers={"X-API-Key": user_api_key_id}, json=payload)
 
     assert response.status_code == 200
     data = response.json["data"]
@@ -178,7 +180,7 @@ def test_extract_metadata_get_pagination_info(
 
 
 def test_extract_metadata_presigned_url(
-    client, api_auth_token, monkeypatch, enable_factory_create, db_session, mock_s3_bucket
+    client, user_auth_token, monkeypatch, enable_factory_create, db_session, mock_s3_bucket
 ):
     """Test that pre-signed URLs are generated correctly and can be used to download files"""
 
@@ -210,7 +212,7 @@ def test_extract_metadata_presigned_url(
         },
     }
 
-    response = client.post("/v1/extracts", headers={"X-Auth": api_auth_token}, json=payload)
+    response = client.post("/v1/extracts", headers={"X-SGG-Token": user_auth_token}, json=payload)
 
     assert response.status_code == 200
     data = response.json["data"]

@@ -1,6 +1,5 @@
 # Environments
 
-
 The Simpler Grants Next application is deployed and used in a number of environments. Here is how those environments, and the data required by each environment, are managed.
 
 ## General Things

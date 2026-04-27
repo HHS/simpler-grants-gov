@@ -13,8 +13,8 @@ from src.db.models.award_recommendation_models import (
 from src.db.models.user_models import User
 from src.services.award_recommendations.create_award_recommendation_risk import (
     get_award_recommendation_for_update,
-    get_validated_submissions,
 )
+from src.services.award_recommendations.utils import validate_all_submissions_exist
 
 
 def _get_risk_for_update(
@@ -85,11 +85,19 @@ def update_award_recommendation_risk(
     risk.award_recommendation_risk_type = request_data["award_recommendation_risk_type"]
 
     submission_ids = set(request_data["award_recommendation_application_submission_ids"])
-    validated_submissions = get_validated_submissions(
-        db_session, award_recommendation_id, submission_ids
+
+    stmt = select(AwardRecommendationApplicationSubmission).where(
+        AwardRecommendationApplicationSubmission.award_recommendation_id == award_recommendation_id,
+        AwardRecommendationApplicationSubmission.award_recommendation_application_submission_id.in_(
+            submission_ids
+        ),
     )
-    validated_by_id = {
-        s.award_recommendation_application_submission_id: s for s in validated_submissions
+    submissions = list(db_session.execute(stmt).scalars().all())
+
+    validate_all_submissions_exist(submission_ids, submissions)
+
+    validated_by_id: dict[uuid.UUID, AwardRecommendationApplicationSubmission] = {
+        s.award_recommendation_application_submission_id: s for s in submissions
     }
 
     _sync_risk_submissions(risk, validated_by_id)
