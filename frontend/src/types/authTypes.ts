@@ -1,7 +1,9 @@
 import { JWTPayload } from "jose";
 import { FeatureFlags } from "src/constants/defaultFeatureFlags";
 
-import { UserPrivilegeResult } from "./userTypes";
+import { ReactNode } from "react";
+
+import { UserPrivilegeDefinition, UserPrivilegeResult } from "./userTypes";
 
 /**
  * Configure the UserProvider component.
@@ -96,3 +98,26 @@ export type AuthorizedData = {
 export type ResourcePromiseDefinitions = {
   [resourceName: string]: Promise<unknown>;
 };
+
+// requires either `requiredPrivileges` or `resourcePromises` because otherwise why are you using the gate?
+export type AuthorizationGateProps = {
+  onUnauthorized?: (
+    children: ReactNode,
+    fetchedResources?: FetchedResourceMap,
+  ) => ReactNode;
+  onUnauthenticated?: () => ReactNode;
+  onError?: (e: Error) => ReactNode;
+} & (
+  | {
+      requiredPrivileges: UserPrivilegeDefinition[];
+      resourcePromises?: ResourcePromiseDefinitions;
+    }
+  | {
+      resourcePromises: ResourcePromiseDefinitions;
+      requiredPrivileges?: UserPrivilegeDefinition[];
+    }
+  | {
+      resourcePromises: ResourcePromiseDefinitions;
+      requiredPrivileges: UserPrivilegeDefinition[];
+    }
+);
