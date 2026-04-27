@@ -200,7 +200,7 @@ jobs:
         run: |
           ls -la .
           ls -la ./node_modules
-          tar -xzf /tmp/node_modules.tar.gz ./node_modules
+          tar -xzf /tmp/node_modules.tar.gz
           ls -la .
           ls -la ./node_modules
 
@@ -224,7 +224,8 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: |
           ls -la ~
-          tar -xzf /tmp/playwright.tar.gz ~/.cache/ms-playwright
+          cd ~
+          tar -xzf /tmp/playwright.tar.gz
           ls -la ~
           ls -la ~/.cache/ms-playwright
 
