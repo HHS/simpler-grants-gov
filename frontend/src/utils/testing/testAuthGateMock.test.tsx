@@ -16,8 +16,8 @@ jest.mock("src/components/user/AuthorizationGate", () => ({
 }));
 
 jest.mock("src/components/user/UnauthorizedMessage", () => ({
-  UnauthorizedMessage: (props: unknown) => {
-    return MockUnauthorizedMessage(props) as unknown;
+  UnauthorizedMessage: () => {
+    return MockUnauthorizedMessage() as unknown;
   },
 }));
 

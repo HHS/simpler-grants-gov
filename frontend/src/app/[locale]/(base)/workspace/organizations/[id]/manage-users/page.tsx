@@ -34,9 +34,9 @@ async function ManageUsersPage({ params }: ManageUsersPageProps) {
   return (
     <AuthorizationGate
       resourcePromises={{
-        invitedUsersList: Promise.resolve('success'),
-        activeUsersList: Promise.resolve('success 2'),
-        organizationRolesList: Promise.reject(new Error('sorry'))
+        invitedUsersList: getOrganizationPendingInvitations(organizationId),
+        activeUsersList: getOrganizationUsers(organizationId),
+        organizationRolesList: getOrganizationRoles(organizationId),
       }}
       requiredPrivileges={[
         {
