@@ -411,12 +411,13 @@ describe("Header", () => {
       expect(accountButton).toBeInTheDocument();
     });
 
-    it("Account dropdown contains Settings and Sign out when opened", async () => {
+    it("Account dropdown contains Settings, Notifications, and Sign out when opened", async () => {
       mockUseUser.mockReturnValue({
         user: { token: "faketoken" },
         hasBeenLoggedOut: false,
         resetHasBeenLoggedOut: jest.fn(),
       });
+
       const user = userEvent.setup();
       render(<Header {...props} />);
 
@@ -424,10 +425,36 @@ describe("Header", () => {
       await user.click(accountButton);
 
       expect(accountButton).toHaveAttribute("aria-expanded", "true");
+
       const settingsLink = screen.getByRole("link", { name: "settings" });
       expect(settingsLink).toBeInTheDocument();
       expect(settingsLink).toHaveAttribute("href", "/settings");
+
+      const notificationsLink = screen.getByRole("link", {
+        name: "notifications",
+      });
+      expect(notificationsLink).toBeInTheDocument();
+      expect(notificationsLink).toHaveAttribute("href", "/notifications");
+
       expect(screen.getByText("logout")).toBeInTheDocument();
+    });
+
+    it("does not show Notifications link when user is unauthenticated", () => {
+      mockUseUser.mockImplementation(() => ({
+        user: {
+          token: undefined,
+        },
+        hasBeenLoggedOut: false,
+        resetHasBeenLoggedOut: jest.fn(),
+      }));
+
+      render(<Header {...props} />);
+
+      const nav = screen.getByRole("navigation");
+
+      expect(
+        within(nav).queryByRole("link", { name: "notifications" }),
+      ).not.toBeInTheDocument();
     });
 
     it("does not display test application link if not for a test application user", async () => {
