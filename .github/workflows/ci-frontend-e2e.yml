@@ -214,14 +214,14 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
 
       - name: Download Playwright artifact
-        if: steps.npm-cache.outputs.cache-hit != 'true'
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v8
         with:
           name: playwright.tar.gz
           path: /tmp/playwright.tar.gz
 
       - name: Expand Playwright
-        if: steps.npm-cache.outputs.cache-hit != 'true'
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: |
           ls -la ~
           tar -xzf /tmp/playwright.tar.gz ~/.cache/ms-playwright
