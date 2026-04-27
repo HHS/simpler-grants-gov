@@ -1,4 +1,4 @@
-FROM amazon/aws-for-fluent-bit:3.2.5 as fluentbit
+FROM amazon/aws-for-fluent-bit:3.2.6 as fluentbit
 
 FROM fluentbit AS release
 
