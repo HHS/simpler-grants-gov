@@ -4,7 +4,7 @@ Feature: Saved Opportunities Page
   So that I can quickly revisit opportunities I'm interested in
 
   Background:
-    Given the user navigates to the Simpler Grants Gov application
+    Given the user navigates to the Simpler Grants Gov
 
   Scenario: Unauthenticated user accessing Saved Opportunities via direct URL
     Given the user is not logged in
