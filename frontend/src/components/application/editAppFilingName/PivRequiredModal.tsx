@@ -3,22 +3,16 @@
 import SessionStorage from "src/services/sessionStorage/sessionStorage";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { ModalRef } from "@trussworks/react-uswds";
 
 import { LoginLink } from "src/components/LoginButton";
 import { SimplerModal } from "src/components/SimplerModal";
 
 export const PivRequiredModal = () => {
-  const [showPivError, setShowPivError] = useState<string | null>("false");
   const t = useTranslations("PivRequiredModal");
   const pivModalRef = useRef<ModalRef | null>(null);
-  // We expect this modal will only display or not when the application is first mounted
-  // There shouldn't be any cases where the modal needs to open in response to activity on the application
-  useEffect(() => {
-    setShowPivError(SessionStorage.getItem("showPivError"));
-  }, []);
-  if (showPivError === "true") {
+  if (SessionStorage.getItem("showPivError") === "true") {
     SessionStorage.removeItem("showPivError");
     return (
       <SimplerModal

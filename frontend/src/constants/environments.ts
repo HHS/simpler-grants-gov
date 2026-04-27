@@ -58,8 +58,7 @@ export const environment: { [key: string]: string } = {
   SENDY_LIST_ID: SENDY_LIST_ID || "",
   API_URL: API_URL || "",
   AUTH_LOGIN_URL: AUTH_LOGIN_URL || "",
-  AUTH_LOGOUT_URL:
-    AUTH_LOGOUT_URL || "https://api.dev.simpler.grants.gov/v1/users/logout",
+  AUTH_LOGOUT_URL: AUTH_LOGOUT_URL || "",
   API_AUTH_TOKEN: API_AUTH_TOKEN || "",
   AUTH_EXPIRATION_TIME: AUTH_EXPIRATION_TIME || "0",
   API_GW_AUTH: API_GW_AUTH || "",

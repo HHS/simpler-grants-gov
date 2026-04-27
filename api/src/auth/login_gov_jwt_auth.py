@@ -40,7 +40,7 @@ class LoginGovConfig(PydanticBaseEnvConfig):
     client_id: str = Field(alias="LOGIN_GOV_CLIENT_ID")
     acr_value: str = Field(alias="LOGIN_GOV_ACR_VALUE", default="urn:acr.login.gov:auth-only")
     scope: str = Field(alias="LOGIN_GOV_SCOPE", default="openid email x509:presented")
-    is_piv_required: bool = Field(alias="IS_PIV_REQUIRED", default=True)
+    is_piv_required: bool = Field(alias="IS_PIV_REQUIRED", default=False)
 
     # While all of these endpoints are under the same root, we define the full
     # path each time because the local mock uses a different naming convention

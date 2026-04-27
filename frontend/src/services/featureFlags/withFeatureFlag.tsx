@@ -44,7 +44,7 @@ const withFeatureFlag = <P, R extends ReactNode>(
       }
 
       // TODO #9637
-      // eslint-disable-next-line react-hooks/static-components
+       
 
       return <WrappedComponent {...props} />;
     };

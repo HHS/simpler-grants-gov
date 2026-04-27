@@ -34,7 +34,7 @@ export default function Login() {
     } else {
       console.error("window is undefined");
     }
-  }, [router]);
+  }, [router, searchParams]);
 
   return (
     <GridContainer className="margin-y-5">
