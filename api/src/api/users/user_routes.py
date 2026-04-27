@@ -52,7 +52,11 @@ from src.api.users.user_schemas import (
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
-from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
+from src.auth.login_gov_jwt_auth import (
+    get_final_redirect_uri,
+    get_login_gov_logout_redirect_uri,
+    get_login_gov_redirect_uri,
+)
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
@@ -102,12 +106,23 @@ The token you receive can then be set to the X-SGG-Token header for authenticati
 
 @user_blueprint.get("/login")
 @user_blueprint.doc(responses=[302], description=LOGIN_DESCRIPTION)
+@user_blueprint.input(user_schemas.UserLoginSchema, location="query")
 @with_login_redirect_error_handler()
 @flask_db.with_db_session()
-def user_login(db_session: db.Session) -> flask.Response:
+def user_login(db_session: db.Session, query_data: dict) -> flask.Response:
     logger.info("GET /v1/users/login")
     with db_session.begin():
-        redirect_uri = get_login_gov_redirect_uri(db_session)
+        redirect_uri = get_login_gov_redirect_uri(query_data, db_session)
+
+    return response.redirect_response(redirect_uri)
+
+
+@user_blueprint.get("/logout")
+@user_blueprint.doc(responses=[302])
+@with_login_redirect_error_handler()
+def user_logout() -> flask.Response:
+    logger.info("GET /v1/users/logout")
+    redirect_uri = get_login_gov_logout_redirect_uri()
 
     return response.redirect_response(redirect_uri)
 
@@ -132,6 +147,15 @@ def user_login_callback(db_session: db.Session, query_data: dict) -> flask.Respo
     return response.redirect_response(
         get_final_redirect_uri("success", result.token, result.is_user_new)
     )
+
+
+@user_blueprint.get("/logout/callback")
+@user_blueprint.doc(responses=[302], hide=True)
+@with_login_redirect_error_handler()
+def user_logout_callback() -> flask.Response:
+    logger.info("GET /v1/users/logout/callback")
+    # Redirect to the final location for the user
+    return response.redirect_response(get_final_redirect_uri("success"))
 
 
 @user_blueprint.get("/login/result")

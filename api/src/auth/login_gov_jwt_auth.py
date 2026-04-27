@@ -6,7 +6,7 @@ from datetime import timedelta
 
 import flask
 import jwt
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from src.adapters import db
 from src.auth.auth_errors import JwtValidationError
@@ -15,6 +15,10 @@ from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+
+
+class RedirectParams(BaseModel):
+    piv_required: bool | None = None
 
 
 class LoginGovConfig(PydanticBaseEnvConfig):
@@ -43,6 +47,10 @@ class LoginGovConfig(PydanticBaseEnvConfig):
     login_gov_endpoint: str = Field(alias="LOGIN_GOV_ENDPOINT")
     login_gov_jwk_endpoint: str = Field(alias="LOGIN_GOV_JWK_ENDPOINT")
     login_gov_auth_endpoint: str = Field(alias="LOGIN_GOV_AUTH_ENDPOINT")
+    login_gov_logout_endpoint: str = Field(
+        alias="LOGIN_GOV_LOGOUT_ENDPOINT",
+        default="https://idp.int.identitysandbox.gov/openid_connect/logout",
+    )
     login_gov_token_endpoint: str = Field(alias="LOGIN_GOV_TOKEN_ENDPOINT")
 
     # Where we send a user after they have successfully logged in
@@ -73,6 +81,7 @@ def initialize_login_gov_config() -> None:
                 "login_gov_endpoint": _config.login_gov_endpoint,
                 "login_gov_jwk_endpoint": _config.login_gov_jwk_endpoint,
                 "login_gov_auth_endpoint": _config.login_gov_auth_endpoint,
+                "login_gov_logout_endpoint": _config.login_gov_logout_endpoint,
             },
         )
 
@@ -126,12 +135,16 @@ def _refresh_keys(config: LoginGovConfig) -> None:
     config.public_key_map = public_key_map
 
 
-def get_login_gov_redirect_uri(db_session: db.Session, config: LoginGovConfig | None = None) -> str:
+def get_login_gov_redirect_uri(
+    query_data: dict, db_session: db.Session, config: LoginGovConfig | None = None
+) -> str:
     if config is None:
         config = get_config()
 
     nonce = uuid.uuid4()
     state = uuid.uuid4()
+
+    redirect_params = RedirectParams.model_validate(query_data)
 
     # Ask Flask for its own URI - specifying we want the callback route
     # .user_login_callback points to the function itself defined in user_routes.py
@@ -139,26 +152,52 @@ def get_login_gov_redirect_uri(db_session: db.Session, config: LoginGovConfig | 
         ".user_login_callback", _external=True, _scheme=config.login_gov_redirect_scheme
     )
 
+    url_params = {
+        "client_id": config.client_id,
+        "nonce": nonce,
+        "state": state,
+        "redirect_uri": redirect_uri,
+        "acr_values": config.acr_value,
+        "scope": config.scope,
+        # These are statically defined by the spec
+        "prompt": "select_account",
+        "response_type": "code",
+    }
+    if redirect_params.piv_required:
+        url_params["acr_values"] = (
+            config.acr_value + " http://idmanagement.gov/ns/assurance/aal/2?hspd12=true"
+        )
+
     # We want to redirect to the authorization endpoint of login.gov
     # See: https://developers.login.gov/oidc/authorization/
-    encoded_params = urllib.parse.urlencode(
-        {
-            "client_id": config.client_id,
-            "nonce": nonce,
-            "state": state,
-            "redirect_uri": redirect_uri,
-            "acr_values": config.acr_value,
-            "scope": config.scope,
-            # These are statically defined by the spec
-            "prompt": "select_account",
-            "response_type": "code",
-        }
-    )
+    encoded_params = urllib.parse.urlencode(url_params)
 
     # Add the state to the DB
     db_session.add(LoginGovState(login_gov_state_id=state, nonce=nonce))
 
     return f"{config.login_gov_auth_endpoint}?{encoded_params}"
+
+
+def get_login_gov_logout_redirect_uri(config: LoginGovConfig | None = None) -> str:
+    if config is None:
+        config = get_config()
+
+    # Ask Flask for its own URI - specifying we want the callback route
+    # .user_login_callback points to the function itself defined in user_routes.py
+    redirect_uri = flask.url_for(
+        ".user_logout_callback", _external=True, _scheme=config.login_gov_redirect_scheme
+    )
+
+    # We want to redirect to the authorization endpoint of login.gov
+    # See: https://developers.login.gov/oidc/authorization/
+    encoded_params = urllib.parse.urlencode(
+        {
+            "client_id": config.client_id,
+            "post_logout_redirect_uri": redirect_uri,
+        }
+    )
+
+    return f"{config.login_gov_logout_endpoint}?{encoded_params}"
 
 
 def get_login_gov_client_assertion(config: LoginGovConfig | None = None) -> str:

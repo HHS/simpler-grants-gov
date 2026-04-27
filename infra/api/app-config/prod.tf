@@ -71,10 +71,11 @@ module "prod_config" {
     LOAD_AGENCY_SEARCH_REPLICA_COUNT = 2
 
     # Login.gov OAuth
-    LOGIN_GOV_ENDPOINT       = "https://secure.login.gov/"
-    LOGIN_GOV_JWK_ENDPOINT   = "https://secure.login.gov/api/openid_connect/certs"
-    LOGIN_GOV_AUTH_ENDPOINT  = "https://secure.login.gov/openid_connect/authorize"
-    LOGIN_GOV_TOKEN_ENDPOINT = "https://secure.login.gov/api/openid_connect/token"
+    LOGIN_GOV_ENDPOINT        = "https://secure.login.gov/"
+    LOGIN_GOV_JWK_ENDPOINT    = "https://secure.login.gov/api/openid_connect/certs"
+    LOGIN_GOV_AUTH_ENDPOINT   = "https://secure.login.gov/openid_connect/authorize"
+    LOGIN_GOV_LOGOUT_ENDPOINT = "https://secure.login.gov/openid_connect/logout"
+    LOGIN_GOV_TOKEN_ENDPOINT  = "https://secure.login.gov/api/openid_connect/token"
 
 
     # CommonGrants Protocol

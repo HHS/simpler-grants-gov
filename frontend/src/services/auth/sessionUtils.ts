@@ -4,8 +4,10 @@ import { KeyObject } from "crypto";
 import { JWTPayload, jwtVerify, SignJWT } from "jose";
 import { clientTokenExpirationInterval } from "src/constants/auth";
 import { environment } from "src/constants/environments";
+import SessionStorage from "src/services/sessionStorage/sessionStorage";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const CLIENT_JWT_ENCRYPTION_ALGORITHM = "HS256";
 export const API_JWT_ENCRYPTION_ALGORITHM = "RS256";
@@ -57,4 +59,11 @@ export const encrypt = async (
 export async function deleteSession() {
   const cookie = await cookies();
   cookie.delete("session");
+}
+
+export function loginGovLogout(pivRequired = false) {
+  if (pivRequired) {
+    SessionStorage.setItem("showPivError", "true");
+  }
+  redirect(environment.AUTH_LOGOUT_URL);
 }

@@ -1,13 +1,18 @@
 import { environment } from "src/constants/environments";
 
 import { redirect } from "next/navigation";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export function GET() {
+export function GET(request: NextRequest) {
   if (!environment.AUTH_LOGIN_URL) {
     return new NextResponse("AUTH_LOGIN_URL not defined", { status: 500 });
   }
-  redirect(environment.AUTH_LOGIN_URL);
+  const pivRequired =
+    request.nextUrl.searchParams.get("piv_required") ||
+    request.nextUrl.searchParams.get("require_piv");
+  redirect(
+    `${environment.AUTH_LOGIN_URL}${pivRequired === "true" ? "?piv_required=True" : ""}`,
+  );
 }
