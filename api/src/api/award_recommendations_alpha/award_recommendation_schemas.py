@@ -1,6 +1,7 @@
 from marshmallow import validate
 
 from src.api.schemas.extension import Schema, fields
+from src.api.schemas.extension.field_validators import Length
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
 from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
 from src.api.schemas.shared_schema import SimpleUserSchema
@@ -486,6 +487,71 @@ class AwardRecommendationRiskResponseSchema(AbstractResponseSchema):
     data = fields.Nested(
         AwardRecommendationRiskResponseDataSchema,
         metadata={"description": "The award recommendation risk"},
+    )
+
+
+class AwardRecommendationSubmissionDetailUpdateSchema(Schema):
+    """Schema for updating a single award recommendation submission detail"""
+
+    recommended_amount = fields.Decimal(
+        allow_none=True,
+        as_string=True,
+        metadata={
+            "description": "The recommended funding amount",
+            "example": "200000.00",
+        },
+    )
+    scoring_comment = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Comments from the scoring process",
+            "example": "Strong technical approach with clear methodology. Budget well-justified and aligned with project goals.",
+        },
+    )
+    general_comment = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "General comments about the submission",
+            "example": "Applicant has demonstrated successful implementation of similar projects in the past. Team qualifications exceed requirements.",
+        },
+    )
+    award_recommendation_type = fields.Enum(
+        AwardRecommendationType,
+        allow_none=True,
+        metadata={"description": "The recommendation type for this submission"},
+    )
+    has_exception = fields.Boolean(
+        metadata={"description": "Whether the submission has an exception"},
+    )
+    exception_detail = fields.String(
+        allow_none=True,
+        metadata={
+            "description": "Details about the exception, if any",
+            "example": "Budget exceeds guidelines by 12%. Recommend partial funding with revised scope focusing on core deliverables.",
+        },
+    )
+
+
+class AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema(Schema):
+    """Schema for PUT /alpha/award-recommendations/:award_recommendation_id/submission-details request"""
+
+    award_recommendation_submissions = fields.Dict(
+        keys=fields.UUID(),
+        values=fields.Nested(AwardRecommendationSubmissionDetailUpdateSchema),
+        required=True,
+        validate=Length(min=1),
+        metadata={
+            "description": "Dictionary of submission IDs to update details, where keys are award_recommendation_application_submission_id"
+        },
+    )
+
+
+class AwardRecommendationSubmissionDetailsBatchUpdateResponseSchema(AbstractResponseSchema):
+    """Schema for PUT /alpha/award-recommendations/:award_recommendation_id/submission-details response"""
+
+    data = fields.List(
+        fields.Nested(AwardRecommendationSubmissionDataSchema),
+        metadata={"description": "The updated award recommendation submissions"},
     )
 
 
