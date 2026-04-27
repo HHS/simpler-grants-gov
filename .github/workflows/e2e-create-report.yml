@@ -45,15 +45,15 @@ jobs:
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
 
-      - name: npm ci
-        if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: |
-          npm ci
+      # - name: npm ci
+      #   if: steps.npm-cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     npm ci
 
-      - name: Install dependencies and Playwright
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: |
-          npx playwright install --with-deps
+      # - name: Install dependencies and Playwright
+      #   if: steps.playwright-cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     npx playwright install --with-deps
 
       - name: Download All Blob Reports
         uses: actions/download-artifact@v7

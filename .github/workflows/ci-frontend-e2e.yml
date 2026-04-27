@@ -160,7 +160,7 @@ jobs:
         with:
           fail-on-cache-miss: true
           path: |
-            node_modules
+            frontend/node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
       - uses: actions/cache@v5
