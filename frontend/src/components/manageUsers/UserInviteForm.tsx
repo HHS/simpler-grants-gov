@@ -51,15 +51,8 @@ export const RoleOptions = ({ roles }: { roles: UserRole[] }) => {
     </option>,
   ].concat(roleOptions);
 };
-interface UserInviteButtonProps {
-  success: boolean;
-  disabled: boolean;
-}
 
-export function UserInviteButton({
-  success = false,
-  disabled = false,
-}: UserInviteButtonProps) {
+export function UserInviteButton({ success = false, disabled = false }) {
   const t = useTranslations("ManageUsers.inviteUser.button");
   if (success) {
     return (
@@ -123,6 +116,8 @@ export function UserInviteForm({
       formState.invitationCreated &&
       formState.invitationCreated !== previousInvitation
     ) {
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowSuccess(true);
       setSelectedRole(undefined);
       setTimeout(() => setShowSuccess(false), 3000);

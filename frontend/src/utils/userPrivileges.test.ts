@@ -7,7 +7,6 @@ import {
 
 // Request params and responses for checkUserPrivilege
 const fakeSession = {
-  token: "test-token",
   userId: "123-ABC",
 };
 const fakePrivilegeDef: UserPrivilegeRequest[] = [
@@ -55,7 +54,6 @@ describe("checkRequiredPrivileges", () => {
     mockCheckUserPrivilege.mockResolvedValue(fakePrivilegeFound);
 
     const result = await checkRequiredPrivileges(
-      fakeSession.token,
       fakeSession.userId,
       fakePrivilegeDef,
     );
@@ -68,7 +66,6 @@ describe("checkRequiredPrivileges", () => {
     mockCheckUserPrivilege.mockRejectedValue(new ForbiddenError("Forbidden"));
 
     const result = await checkRequiredPrivileges(
-      fakeSession.token,
       fakeSession.userId,
       fakePrivilegeDef,
     );
@@ -83,11 +80,7 @@ describe("checkRequiredPrivileges", () => {
     );
 
     await expect(
-      checkRequiredPrivileges(
-        fakeSession.token,
-        fakeSession.userId,
-        fakePrivilegeDef,
-      ),
+      checkRequiredPrivileges(fakeSession.userId, fakePrivilegeDef),
     ).rejects.toBeInstanceOf(ValidationError);
     expect(mockCheckUserPrivilege).toHaveBeenCalledTimes(1);
   });

@@ -351,8 +351,8 @@ with product and confirm the behavior we want for any auto-summed fields.
 
 ## Building the XML Conversion Schema
 We have a configuration for each form to convert it to the XML format
-that grants.gov used. This is further documented in [xml_generation](/api/src/services/xml_generation/README.md)
+that grants.gov used. This is further documented in [xml_generation](../../services/xml_generation/README.md)
 
 ## Deploying a form
 We deploy forms to a given environment using a set of scripts.
-This is documented in [task/forms/README.md](/api/src/task/forms/README.md)
+This is documented in [task/forms/README.md](../../task/forms/README.md)

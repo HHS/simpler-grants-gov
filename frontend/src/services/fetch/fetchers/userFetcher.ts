@@ -1,10 +1,8 @@
 "server only";
 
-import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import {
   fetchLocalUsers,
   fetchUserWithMethod,
-  postUserLogout,
 } from "src/services/fetch/fetchers/fetchers";
 import {
   OrganizationInvitation,
@@ -16,38 +14,22 @@ import {
 } from "src/types/userTypes";
 import { UserPrivilegeRequest } from "src/utils/userPrivileges";
 
-export const postLogout = async (token: string) => {
-  const jwtAuthHeader = { "X-SGG-Token": token };
-  return postUserLogout({ additionalHeaders: jwtAuthHeader });
-};
-
 export const getUserDetails = async (
-  token: string,
   userId: string,
 ): Promise<UserDetailWithProfile> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const resp = await fetchUserWithMethod("GET")({
     subPath: userId,
-    additionalHeaders: ssgToken,
   });
   const json = (await resp.json()) as { data: UserDetailWithProfile };
   return json.data;
 };
 
 export const updateUserDetails = async (
-  token: string,
   userId: string,
-  updates: JSONRequestBody,
+  updates: Record<string, unknown>,
 ): Promise<UserDetailProfile> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-
   const response = await fetchUserWithMethod("PUT")({
     subPath: `${userId}/profile`,
-    additionalHeaders: ssgToken,
     body: updates,
   });
   const json = (await response.json()) as { data: UserDetailProfile };
@@ -55,15 +37,10 @@ export const updateUserDetails = async (
 };
 
 export const getUserPrivileges = async (
-  token: string,
   userId: string,
 ): Promise<UserPrivilegesResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const resp = await fetchUserWithMethod("POST")({
     subPath: `${userId}/privileges`,
-    additionalHeaders: ssgToken,
   });
   const json = (await resp.json()) as { data: UserPrivilegesResponse };
 
@@ -71,17 +48,12 @@ export const getUserPrivileges = async (
 };
 
 export const checkUserPrivilege = async (
-  token: string,
   userId: string,
   privilegeDefinition: UserPrivilegeDefinition | UserPrivilegeRequest,
 ): Promise<undefined> => {
   const { privilege, resourceId, resourceType } = privilegeDefinition;
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   await fetchUserWithMethod("POST")({
     subPath: `${userId}/can_access`,
-    additionalHeaders: ssgToken,
     body: {
       resource_type: resourceType,
       resource_id: resourceId,
@@ -91,15 +63,10 @@ export const checkUserPrivilege = async (
 };
 
 export const getUserInvitations = async (
-  token: string,
   userId: string,
 ): Promise<OrganizationInvitation[]> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const resp = await fetchUserWithMethod("POST")({
     subPath: `${userId}/invitations/list`,
-    additionalHeaders: ssgToken,
   });
   const json = (await resp.json()) as { data: OrganizationInvitation[] };
 

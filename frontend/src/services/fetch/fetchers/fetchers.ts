@@ -2,18 +2,22 @@ import "server-only";
 
 import { ApiRequestError } from "src/errors";
 import {
+  createGrantorOpportunitySummaryEndpoint,
   EndpointConfig,
   fetchAwardRecommendationEndpoint,
   fetchCompetitionEndpoint,
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
+  getGrantorOpportunityEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
+  publishGrantorOpportunityEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
   toDynamicGrantorsEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
+  updateGrantorOpportunitySummaryEndpoint,
   userLogoutEndpoint,
   userRefreshEndpoint,
 } from "src/services/fetch/endpointConfigs";
@@ -22,8 +26,6 @@ import {
   createRequestUrl,
   fetchErrorToNetworkError,
   getDefaultHeaders,
-  HeadersDict,
-  JSONRequestBody,
   throwError,
 } from "src/services/fetch/fetcherHelpers";
 import { APIResponse } from "src/types/apiResponseTypes";
@@ -38,12 +40,13 @@ export function requesterForEndpoint({
   basePath,
   version,
   namespace,
+  requiresAuth,
 }: EndpointConfig) {
   return async function (
     options: {
       subPath?: string;
-      body?: JSONRequestBody | FormData;
-      additionalHeaders?: HeadersDict;
+      body?: Record<string, unknown> | FormData;
+      additionalHeaders?: Record<string, string>;
       nextOptions?: NextFetchRequestConfig;
       allowedErrorStatuses?: number[];
       addContentType?: boolean;
@@ -65,8 +68,12 @@ export function requesterForEndpoint({
       subPath,
       body,
     );
-    const headers: HeadersDict = {
-      ...getDefaultHeaders(addContentType),
+    const defaultHeaders = await getDefaultHeaders({
+      addContentType,
+      requiresUserAuthToken: requiresAuth,
+    });
+    const headers = {
+      ...defaultHeaders,
       ...additionalHeaders,
     };
 
@@ -148,12 +155,23 @@ export const fetchOrganizationWithMethod = (
   type: "POST" | "DELETE" | "PUT" | "GET",
 ) => requesterForEndpoint(toDynamicOrganizationsEndpoint(type));
 
-export const fetchOrganizationBySavedOpportunities = (
-  type: "DELETE" | "POST",
-) => requesterForEndpoint(toDynamicOrganizationsEndpoint(type));
-
 export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);
 
-export const fetchGrantorWithMethod = (
-  type: "POST" | "DELETE" | "PUT" | "GET",
-) => requesterForEndpoint(toDynamicGrantorsEndpoint(type));
+export const fetchGrantorWithMethod = (type: "POST") =>
+  requesterForEndpoint(toDynamicGrantorsEndpoint(type));
+
+export const getGrantorOpportunityRequest = requesterForEndpoint(
+  getGrantorOpportunityEndpoint,
+);
+
+export const updateGrantorOpportunitySummaryRequest = requesterForEndpoint(
+  updateGrantorOpportunitySummaryEndpoint,
+);
+
+export const createGrantorOpportunitySummaryRequest = requesterForEndpoint(
+  createGrantorOpportunitySummaryEndpoint,
+);
+
+export const publishGrantorOpportunityRequest = requesterForEndpoint(
+  publishGrantorOpportunityEndpoint,
+);

@@ -969,6 +969,7 @@ class AwardRecommendationFactory(BaseFactory):
     additional_info = sometimes_none(factory.Faker("paragraph"))
     award_selection_method = sometimes_none(factory.fuzzy.FuzzyChoice(AwardSelectionMethod))
     selection_method_detail = sometimes_none(factory.Faker("paragraph"))
+    funding_strategy = sometimes_none(factory.Faker("paragraph"))
     other_key_information = sometimes_none(factory.Faker("paragraph"))
 
     is_deleted = False
@@ -3528,6 +3529,14 @@ class WorkflowFactory(BaseFactory):
             application_submission=factory.SubFactory(ApplicationSubmissionFactory),
             application_submission_id=factory.LazyAttribute(
                 lambda e: e.application_submission.application_submission_id
+            ),
+            opportunity=None,
+        )
+
+        has_award_recommendation = factory.Trait(
+            award_recommendation=factory.SubFactory(AwardRecommendationFactory),
+            award_recommendation_id=factory.LazyAttribute(
+                lambda e: e.award_recommendation.award_recommendation_id
             ),
             opportunity=None,
         )

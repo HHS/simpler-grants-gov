@@ -1,24 +1,15 @@
-import { ApiRequestError, UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
-import { fetchApplicationWithMethod } from "src/services/fetch/fetchers/fetchers";
+import { ApiRequestError } from "src/errors";
 
 import { addOrganizationToApplication } from "./addOrganizationToApplication";
 
-jest.mock("src/services/auth/session", () => ({
-  getSession: jest.fn(),
-}));
-
+const mockJsonFn = jest.fn();
+const mockResponse = { json: mockJsonFn };
+const mockFetcher = jest.fn().mockResolvedValue(mockResponse);
+const mockFetchApplicationWithMethod = jest.fn((_args: unknown) => mockFetcher);
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
-  fetchApplicationWithMethod: jest.fn(),
+  fetchApplicationWithMethod: (...args: unknown[]) =>
+    mockFetchApplicationWithMethod(...(args as [unknown])),
 }));
-
-const getSessionMock = getSession as jest.Mock;
-const fetchApplicationWithMethodMock = fetchApplicationWithMethod as jest.Mock;
-
-type FetchApplicationInvoker = (options: {
-  subPath?: string;
-  additionalHeaders?: Record<string, string>;
-}) => Promise<Response>;
 
 function createResponse({
   ok,
@@ -42,22 +33,8 @@ describe("addOrganizationToApplication", () => {
     jest.clearAllMocks();
   });
 
-  it("throws UnauthorizedError when there is no active session", async () => {
-    getSessionMock.mockResolvedValueOnce(null);
-
-    await expect(
-      addOrganizationToApplication({
-        applicationId: "app-123",
-        organizationId: "org-123",
-      }),
-    ).rejects.toBeInstanceOf(UnauthorizedError);
-  });
-
   it("calls fetchApplicationWithMethod(PUT) with expected subPath and headers", async () => {
-    getSessionMock.mockResolvedValueOnce({ token: "token-value" });
-
-    const requestInvokerMock = jest.fn<Promise<Response>, [unknown]>();
-    requestInvokerMock.mockResolvedValueOnce(
+    mockFetcher.mockResolvedValueOnce(
       createResponse({
         ok: true,
         status: 200,
@@ -65,32 +42,20 @@ describe("addOrganizationToApplication", () => {
       }),
     );
 
-    fetchApplicationWithMethodMock.mockReturnValueOnce(
-      requestInvokerMock as unknown as FetchApplicationInvoker,
-    );
-
     await addOrganizationToApplication({
       applicationId: "app-123",
       organizationId: "org-123",
     });
 
-    expect(fetchApplicationWithMethod).toHaveBeenCalledWith("PUT");
-    expect(requestInvokerMock).toHaveBeenCalledWith({
+    expect(mockFetchApplicationWithMethod).toHaveBeenCalledWith("PUT");
+    expect(mockFetcher).toHaveBeenCalledWith({
       subPath: "app-123/organizations/org-123",
-      additionalHeaders: { "X-SGG-Token": "token-value" },
     });
   });
 
   it("throws ApiRequestError when response is not ok", async () => {
-    getSessionMock.mockResolvedValueOnce({ token: "token-value" });
-
-    const requestInvokerMock = jest.fn<Promise<Response>, [unknown]>();
-    requestInvokerMock.mockResolvedValueOnce(
+    mockFetcher.mockResolvedValueOnce(
       createResponse({ ok: false, status: 404 }),
-    );
-
-    fetchApplicationWithMethodMock.mockReturnValueOnce(
-      requestInvokerMock as unknown as FetchApplicationInvoker,
     );
 
     await expect(
@@ -102,20 +67,13 @@ describe("addOrganizationToApplication", () => {
   });
 
   it("returns parsed json when response is ok", async () => {
-    getSessionMock.mockResolvedValueOnce({ token: "token-value" });
-
     const expectedBody = {
       message: "Success",
       data: { application_id: "app-123" },
     };
 
-    const requestInvokerMock = jest.fn<Promise<Response>, [unknown]>();
-    requestInvokerMock.mockResolvedValueOnce(
+    mockFetcher.mockResolvedValueOnce(
       createResponse({ ok: true, status: 200, jsonBody: expectedBody }),
-    );
-
-    fetchApplicationWithMethodMock.mockReturnValueOnce(
-      requestInvokerMock as unknown as FetchApplicationInvoker,
     );
 
     const result = await addOrganizationToApplication({

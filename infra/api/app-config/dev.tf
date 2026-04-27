@@ -48,9 +48,11 @@ module "dev_config" {
 
     ENABLE_WORKFLOW_ENDPOINTS             = 1
     ENABLE_AWARD_RECOMMENDATION_ENDPOINTS = 1
+    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
 
     # Email notification
-    RESET_EMAILS_WITHOUT_SENDING = "false"
+    RESET_EMAILS_WITHOUT_SENDING               = "false"
+    ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation - Dev overrides
     FRONTEND_URL             = "https://dev.simpler.grants.gov"

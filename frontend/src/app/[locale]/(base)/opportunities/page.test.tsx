@@ -538,6 +538,13 @@ describe("Opportunities", () => {
       expect(
         await screen.findByRole("link", { name: "createOpportunityButton" }),
       ).toBeVisible();
+
+      const editLink =
+        "/opportunity/" + basicOpportunity.opportunity_id + "/edit";
+      const oppTitlelink = screen.getByRole("link", {
+        name: "Test Opportunity",
+      });
+      expect(oppTitlelink).toHaveAttribute("href", editLink);
     });
 
     it("with read only privilege", async () => {
@@ -551,11 +558,15 @@ describe("Opportunities", () => {
       expect(await screen.findByText("Draft")).toBeVisible();
       // this is the span
       expect(screen.getByText("actionButtons.edit")).toBeInTheDocument();
-      // the href link should not be there
+      // the href link should not be displayed
       expect(
         screen.queryByRole("link", { name: "actionButtons.edit" }),
       ).not.toBeInTheDocument();
-
+      // the opportunity title should not have any links
+      expect(
+        screen.queryByRole("link", { name: "Test Opportunity" }),
+      ).not.toBeInTheDocument();
+      // the create button should not be displayed
       expect(
         screen.queryByRole("link", { name: "createOpportunityButton" }),
       ).not.toBeInTheDocument();
@@ -582,6 +593,32 @@ describe("Opportunities", () => {
       render(component);
 
       expect(await screen.findByTestId("alert")).toBeVisible();
+    });
+  });
+
+  describe("Non-draft opportunities", () => {
+    beforeEach(() => {
+      mockCheckUserPrivileges.mockResolvedValue(userPrivileges);
+      mockFetchUserAgencies.mockResolvedValue([agency1]);
+      mockSearchForOpportunities.mockResolvedValue([basicOpportunity]);
+    });
+
+    it("renders link to view opportunity details and no Actions", async () => {
+      const component = await OpportunitiesListPage({
+        params: localeParams,
+        searchParams: Promise.resolve({ agency: agency1.agency_id }),
+      });
+      render(component);
+
+      expect(await screen.findByText("posted")).toBeVisible();
+      const viewLink = "/opportunity/" + basicOpportunity.opportunity_id;
+      const oppTitlelink = screen.getByRole("link", {
+        name: "Test Opportunity",
+      });
+      expect(oppTitlelink).toHaveAttribute("href", viewLink);
+      expect(screen.queryByText("edit")).not.toBeInTheDocument();
+      expect(screen.queryByText("copy")).not.toBeInTheDocument();
+      expect(screen.queryByText("delete")).not.toBeInTheDocument();
     });
   });
 });

@@ -10,10 +10,14 @@ from typing import Any
 import requests
 from defusedxml import minidom
 from lxml import etree
-from sqlalchemy import select
+from sqlalchemy import exists, select
 
 import src.adapters.db as db
-from src.db.models.competition_models import ApplicationSubmission
+from src.db.models.competition_models import (
+    ApplicationSubmission,
+    ApplicationSubmissionRetrieved,
+    ApplicationSubmissionTrackingNumber,
+)
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
 from src.legacy_soap_api.legacy_soap_api_schemas import FaultMessage, SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
@@ -30,30 +34,8 @@ HIDDEN_VALUE = "hidden"
 class AlternateSoapOperation(StrEnum):
     GET_APPLICATION_ZIP = "GetApplicationZipRequest"
     GET_APPLICATION = "GetApplicationRequest"
-
-
-def format_local_soap_response(response_data: bytes, boundary_id: str | None = None) -> bytes:
-    # This is a format string for formatting local responses from the mock
-    # soap server since it does not support manipulating the response.
-    # The grants.gov SOAP API currently includes this data.
-    # Note: /r/n is how Windows encodes a newline
-    # /r symbolizes a Carriage Return which returns to the start of the current line (holdover from typewriters)
-    # Mac just uses /n
-    # This is used to ensure the correct Content-Length
-    # see: https://en.wikipedia.org/wiki/Newline
-    response_id = boundary_id if boundary_id else str(uuid.uuid4())
-    return (
-        (
-            f"--uuid:{response_id}\r\n"
-            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
-            "Content-Transfer-Encoding: binary\r\n"
-            f"Content-ID: <root.message@cxf.apache.org>{response_data.decode()}\r\n"
-            f"--uuid:{response_id}--\r\n"
-        )
-        .replace('<?xml version="1.0" encoding="UTF-8"?>', "")
-        .strip()
-        .encode("utf-8")
-    )
+    CONFIRM_APPLICATION_DELIVERY = "ConfirmApplicationDeliveryRequest"
+    UPDATE_APPLICATION_INFO = "UpdateApplicationInfoRequest"
 
 
 def get_soap_proxy_grant_application_not_found_response(
@@ -82,6 +64,114 @@ def get_soap_proxy_grant_application_not_found_response(
         "Set-Cookie": (f"{headers.get('Cookie')}; Path=/grantsws-agency; Secure; HttpOnly"),
     }
     return get_soap_response(response_data, 500, headers=response_headers)
+
+
+def get_soap_proxy_failed_to_confirm_delivery_response(
+    *args: str, headers: dict, **kwargs: dict | bool
+) -> SOAPResponse:
+    data = (
+        '\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<soap:Fault>"
+        "<faultcode>soap:Server</faultcode>"
+        "<faultstring>Failed to confirm application delivery.(Authorization Failure)</faultstring>"
+        "</soap:Fault>"
+        "</soap:Body>"
+        "</soap:Envelope>"
+    ).encode("utf-8")
+    boundary_id = str(uuid.uuid4())
+    response_data = format_local_soap_response(data, boundary_id=boundary_id)
+    response_headers = {
+        "Content-Type": (
+            "multipart/related;"
+            ' type="application/xop+xml";'
+            f' boundary="uuid:{boundary_id}";'
+            ' start="<root.message@cxf.apache.org>";'
+            ' start-info="text/xml"'
+        ),
+        "Set-Cookie": (f"{headers.get('Cookie')}; Path=/grantsws-agency; Secure; HttpOnly"),
+    }
+    return get_soap_response(response_data, 500, headers=response_headers)
+
+
+def get_soap_proxy_failed_to_update_application_info(
+    grants_gov_tracking_number: str, headers: dict, **kwargs: dict | bool
+) -> SOAPResponse:
+    data = (
+        '\r\n\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
+        "<soap:Body>"
+        "<ns2:UpdateApplicationInfoResponse "
+        'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
+        'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
+        'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
+        'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
+        'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" '
+        'xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
+        'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
+        'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
+        'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
+        'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
+        'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        f"<GrantsGovTrackingNumber>{grants_gov_tracking_number}</GrantsGovTrackingNumber>"
+        "<ns2:Success>true</ns2:Success>"
+        "<ns9:AssignAgencyTrackingNumberResult>"
+        "<ns9:Success>false</ns9:Success>"
+        "<ns9:ErrorMessage>Exception caught assigning agency tracking number.(Authorization Failure)</ns9:ErrorMessage>"
+        "</ns9:AssignAgencyTrackingNumberResult>"
+        "<ns9:SaveAgencyNotesResult>"
+        "<ns9:Success>false</ns9:Success>"
+        "<ns9:ErrorMessage>Exception caught saving agency notes.(Authorization Failure)</ns9:ErrorMessage>"
+        "</ns9:SaveAgencyNotesResult>"
+        "</ns2:UpdateApplicationInfoResponse>"
+        "</soap:Body>"
+        "</soap:Envelope>"
+    ).encode("utf-8")
+    boundary_id = str(uuid.uuid4())
+    response_data = format_local_soap_response(data, boundary_id=boundary_id)
+    response_headers = {
+        "Content-Type": (
+            "multipart/related;"
+            ' type="application/xop+xml";'
+            f' boundary="uuid:{boundary_id}";'
+            ' start="<root.message@cxf.apache.org>";'
+            ' start-info="text/xml"'
+        ),
+        "Set-Cookie": (f"{headers.get('Cookie')}; Path=/grantsws-agency; Secure; HttpOnly"),
+    }
+    return get_soap_response(response_data, 500, headers=response_headers)
+
+
+DEFAULT_NOT_FOUND_RESPONSES: dict[AlternateSoapOperation, Callable] = {
+    AlternateSoapOperation.GET_APPLICATION_ZIP: get_soap_proxy_grant_application_not_found_response,
+    AlternateSoapOperation.GET_APPLICATION: get_soap_proxy_grant_application_not_found_response,
+    AlternateSoapOperation.CONFIRM_APPLICATION_DELIVERY: get_soap_proxy_failed_to_confirm_delivery_response,
+    AlternateSoapOperation.UPDATE_APPLICATION_INFO: get_soap_proxy_failed_to_update_application_info,
+}
+
+
+def format_local_soap_response(response_data: bytes, boundary_id: str | None = None) -> bytes:
+    # This is a format string for formatting local responses from the mock
+    # soap server since it does not support manipulating the response.
+    # The grants.gov SOAP API currently includes this data.
+    # Note: /r/n is how Windows encodes a newline
+    # /r symbolizes a Carriage Return which returns to the start of the current line (holdover from typewriters)
+    # Mac just uses /n
+    # This is used to ensure the correct Content-Length
+    # see: https://en.wikipedia.org/wiki/Newline
+    response_id = boundary_id if boundary_id else str(uuid.uuid4())
+    return (
+        (
+            f"--uuid:{response_id}\r\n"
+            'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+            "Content-Transfer-Encoding: binary\r\n"
+            f"Content-ID: <root.message@cxf.apache.org>{response_data.decode()}\r\n"
+            f"--uuid:{response_id}--\r\n"
+        )
+        .replace('<?xml version="1.0" encoding="UTF-8"?>', "")
+        .strip()
+        .encode("utf-8")
+    )
 
 
 def get_soap_response(
@@ -130,6 +220,44 @@ def get_soap_error_response(
 </soap:Envelope>
 """.encode()
     return get_soap_response(data=err, status_code=500, headers=headers)
+
+
+def get_soap_fault_error_response(
+    faultcode: str = "soap:Server",
+    faultstring: str = "Server error has occurred",
+    headers: dict | None = None,
+) -> SOAPResponse:
+    err = f"""
+    <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+        <soap:Body>
+            <soap:Fault>
+                <faultcode>{faultcode}</faultcode>
+                <faultstring>{faultstring}</faultstring>
+            </soap:Fault>
+        </soap:Body>
+    </soap:Envelope>
+    """.strip()
+    boundary_id = str(uuid.uuid4())
+    mtom_response = (
+        f"--uuid:{boundary_id}\r\n"
+        f'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
+        f"Content-Transfer-Encoding: binary\r\n"
+        f"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        f"{err}\r\n"
+        f"--uuid:{boundary_id}--\r\n"
+    ).encode()
+    response_headers = {
+        "Content-Type": (
+            "multipart/related;"
+            ' type="application/xop+xml";'
+            f' boundary="uuid:{boundary_id}";'
+            ' start="<root.message@cxf.apache.org>";'
+            ' start-info="text/xml"'
+        )
+    }
+    if headers:
+        response_headers.update(headers)
+    return get_soap_response(data=mtom_response, status_code=500, headers=response_headers)
 
 
 def get_auth_error_response() -> SOAPResponse:
@@ -335,7 +463,7 @@ def get_alternate_proxy_response(soap_request: SOAPRequest) -> SOAPResponse | No
         if tracking_number and (
             tracking_number.startswith("GRANT8") or tracking_number.startswith("GRANT9")
         ):
-            return get_soap_proxy_grant_application_not_found_response(
+            return DEFAULT_NOT_FOUND_RESPONSES[AlternateSoapOperation(soap_request.operation_name)](
                 tracking_number, headers=soap_request.headers, is_get_application_zip=is_zip
             )
     return None
@@ -351,6 +479,34 @@ def get_application_submission_by_legacy_tracking_number(
             ApplicationSubmission.legacy_tracking_number == int(legacy_tracking_number),
         )
     ).scalar_one_or_none()
+
+
+def get_application_submission_by_legacy_tracking_number_extended(
+    db_session: db.Session, legacy_tracking_number: str, user_id: str
+) -> dict | None:
+    if legacy_tracking_number.startswith("GRANT"):
+        legacy_tracking_number = legacy_tracking_number.split("GRANT")[1]
+    combined_stmt = select(
+        ApplicationSubmission,
+        exists()
+        .where(
+            ApplicationSubmissionTrackingNumber.created_by_user_id == user_id,
+            ApplicationSubmissionTrackingNumber.application_submission_id
+            == ApplicationSubmission.application_submission_id,
+        )
+        .label("has_tracking"),
+        exists()
+        .where(
+            ApplicationSubmissionRetrieved.created_by_user_id == user_id,
+            ApplicationSubmissionRetrieved.application_submission_id
+            == ApplicationSubmission.application_submission_id,
+        )
+        .label("has_retrieval"),
+    ).where(ApplicationSubmission.legacy_tracking_number == int(legacy_tracking_number))
+    result = db_session.execute(combined_stmt).tuples().first()
+    if result:
+        return dict(submission=result[0], has_tracking=result[1], has_retrieval=result[2])
+    return None
 
 
 def convert_bool_to_yes_no(value: bool | None) -> str:

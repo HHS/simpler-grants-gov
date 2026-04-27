@@ -1,6 +1,5 @@
 "server-only";
 
-import { JSONRequestBody } from "src/services/fetch/fetcherHelpers";
 import { fetchGrantorWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { CreateOpportunityRecord } from "src/types/grantor/createOpportunityTypes";
 import {
@@ -13,19 +12,14 @@ type PaginationBody = {
 };
 
 export const searchOpportunitiesByAgency = async (
-  token: string,
   agencyId: string,
   pageInputs: PaginationRequestBody,
 ) => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const pagination = pageInputs;
   const pageBody: PaginationBody = { pagination };
 
   const response = await fetchGrantorWithMethod("POST")({
     subPath: `agencies/` + agencyId + `/opportunities`,
-    additionalHeaders: ssgToken,
     body: pageBody,
   });
   const json = (await response.json()) as SearchAPIResponse;
@@ -33,16 +27,10 @@ export const searchOpportunitiesByAgency = async (
 };
 
 export const createOpportunity = async (
-  token: string,
-  createOppSchema: JSONRequestBody,
+  createOppSchema: Record<string, string>,
 ): Promise<CreateOpportunityRecord> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-
   const response = await fetchGrantorWithMethod("POST")({
-    subPath: `opportunities`,
-    additionalHeaders: ssgToken,
+    subPath: "opportunities",
     body: createOppSchema,
   });
   const json = (await response.json()) as { data: CreateOpportunityRecord };

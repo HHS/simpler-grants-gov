@@ -12,7 +12,7 @@ values are allowed in the DB by using foreign keys.
 
 # Setting up a lookup value
 
-Lookup values are defined in [lookup_constants.py](/api/src/constants/lookup_constants.py) and are
+Lookup values are defined in [lookup_constants.py](../../api/src/constants/lookup_constants.py) and are
 just simple Python enums.
 
 For example, if we wanted to add a new lookup value, we could add:
@@ -77,7 +77,7 @@ EXAMPLE_CONFIG = LookupConfig([
 )
 ```
 
-Then we want to define the lookup table in [lookup_models.py](/api/src/db/models/lookup_models.py) as:
+Then we want to define the lookup table in [lookup_models.py](../../api/src/db/models/lookup_models.py) as:
 
 ```py
 from sqlalchemy.orm import Mapped, mapped_column
@@ -100,7 +100,7 @@ class LkExample(LookupTable, TimestampMixin):
 
 The table definition itself is pretty straightforward, and follows our usual approach to any SQLAlchemy model.
 
-The [LookupRegistry](/api/src/db/models/lookup/lookup_registry.py) is a global registry that defines the table for each lookup value. This is used in two ways:
+The [LookupRegistry](../../api/src/db/models/lookup/lookup_registry.py) is a global registry that defines the table for each lookup value. This is used in two ways:
 1. When running DB migrations, the enum values will be merged into the corresponding Lookup table automatically
 2. When defining a database table with a foreign key to these lookup values, handles converting to/from an enum.
 

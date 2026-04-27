@@ -9,6 +9,7 @@ import { TestUser } from "src/types/userTypes";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { PivRequiredModal } from "src/components/application/editAppFilingName/PivRequiredModal";
+import RouteFocusManager from "src/components/RouteFocusManager";
 import { ActivityMonitor } from "./ActivityMonitor";
 import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";
@@ -54,9 +55,15 @@ export default async function Layout({ children, locale }: Props) {
             }
             testUsers={testUsers}
           />
-          <main id="main-content" className="border-top-0">
-            {children}
-          </main>
+          <RouteFocusManager>
+            <main
+              id="main-content"
+              className="border-top-0 simpler-page-anchor-offset"
+              tabIndex={-1}
+            >
+              {children}
+            </main>
+          </RouteFocusManager>
         </LoginModalProvider>
         <PivRequiredModal />
         <Footer />
