@@ -42,12 +42,12 @@ locals {
 }
 
 terraform {
-  required_version = "~>1.10.0"
+  required_version = ">= 1.10.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~>5.6.0"
+      version = ">= 5.46.0"
     }
   }
 
@@ -84,7 +84,7 @@ module "nofos_config" {
 }
 
 module "network" {
-  source                       = "../modules/network/resources"
+  source                       = "../modules/network"
   name                         = var.network_name
   has_database                 = local.has_database
   has_external_non_aws_service = local.has_external_non_aws_service
