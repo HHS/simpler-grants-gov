@@ -2,10 +2,11 @@
 
 import { isEmpty } from "lodash";
 import { parseErrorStatus } from "src/errors";
-import { AuthorizedDataProvider } from "src/hooks/useAuthorizedData";
+// import { AuthorizedDataProvider } from "src/hooks/useAuthorizedData";
 import { getSession } from "src/services/auth/session";
 import { checkUserPrivilege } from "src/services/fetch/fetchers/userFetcher";
 import {
+  AuthorizationGateProps,
   AuthorizedData,
   FetchedResource,
   FetchedResourceMap,
@@ -21,34 +22,10 @@ import {
   JSXElementConstructor,
   PropsWithChildren,
   ReactElement,
-  ReactNode,
 } from "react";
 import { Alert } from "@trussworks/react-uswds";
 
 import { UnauthenticatedMessage } from "./UnauthenticatedMessage";
-
-// requires either `requiredPrivileges` or `resourcePromises` because otherwise why are you using the gate?
-type AuthorizationGateProps = {
-  onUnauthorized?: (
-    children: ReactNode,
-    fetchedResources?: FetchedResourceMap,
-  ) => ReactNode;
-  onUnauthenticated?: () => ReactNode;
-  onError?: (e: Error) => ReactNode;
-} & (
-  | {
-      requiredPrivileges: UserPrivilegeDefinition[];
-      resourcePromises?: ResourcePromiseDefinitions;
-    }
-  | {
-      resourcePromises: ResourcePromiseDefinitions;
-      requiredPrivileges?: UserPrivilegeDefinition[];
-    }
-  | {
-      resourcePromises: ResourcePromiseDefinitions;
-      requiredPrivileges: UserPrivilegeDefinition[];
-    }
-);
 
 // unpack the fetched resource maps to determine if any of calls
 // resulted in a 403
@@ -138,7 +115,7 @@ export async function AuthorizationGate({
   resourcePromises,
 }: PropsWithChildren<AuthorizationGateProps>) {
   let userPrivileges: UserPrivilegeResult[] = [];
-  let allResources = {};
+  let allResources: FetchedResourceMap = {};
 
   const session = await getSession();
 
@@ -206,9 +183,10 @@ export async function AuthorizationGate({
 
   // AuthorizedDataProvider allows any client component children of the gate to receive
   // fetched resources via context.
-  return (
-    <AuthorizedDataProvider value={authorizedData}>
-      {childrenWithResources}
-    </AuthorizedDataProvider>
-  );
+  // return (
+  //   <AuthorizedDataProvider value={authorizedData}>
+  //     {childrenWithResources}
+  //   </AuthorizedDataProvider>
+  // );
+  return childrenWithResources;
 }

@@ -1,18 +1,53 @@
 import { AuthorizedData } from "src/types/authTypes";
 
-import { AuthorizationGate } from "src/components/user/AuthorizationGate";
+// import { Suspense } from "react";
 
-export const AuthGateTester = ({
+import { AuthorizationGate } from "src/components/user/AuthorizationGate";
+import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
+
+const AuthOutput = ({
   authorizedData,
 }: {
   authorizedData?: AuthorizedData;
 }) => {
   return (
+    <>
+      {authorizedData &&
+      Object.keys(authorizedData?.fetchedResources).length ? (
+        <div>
+          <ul>
+            {Object.entries(authorizedData?.fetchedResources).map(
+              ([key, value]) => (
+                <li key={key}>
+                  {key}:{value.statusCode}
+                </li>
+              ),
+            )}
+          </ul>
+        </div>
+      ) : null}
+      {authorizedData?.confirmedPrivileges.length ? (
+        <div>
+          <ul>
+            {authorizedData?.confirmedPrivileges.map((privilege) => (
+              <li key={privilege.privilege}>
+                {privilege.privilege}:{privilege.authorized.toString()}{" "}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </>
+  );
+};
+
+export const AuthGateTester = () => {
+  return (
     <AuthorizationGate
       resourcePromises={{
-        invitedUsersList: Promise.resolve("success"),
-        activeUsersList: Promise.resolve("success 2"),
-        organizationRolesList: Promise.reject(new Error("sorry")),
+        invitedUsersList: Promise.resolve(),
+        activeUsersList: Promise.resolve(),
+        organizationRolesList: Promise.resolve(),
       }}
       requiredPrivileges={[
         {
@@ -21,25 +56,9 @@ export const AuthGateTester = ({
           privilege: "manage_org_members",
         },
       ]}
+      onUnauthorized={() => <UnauthorizedMessage />}
     >
-      {Object.keys(authorizedData.fetchedResources).length && (
-        <div>
-          {Object.keys(authorizedData.fetchedResources).map((key) => (
-            <ul>
-              <li>{key}</li>
-            </ul>
-          ))}
-        </div>
-      )}
-      {Object.keys(authorizedData.confirmedPrivileges).length && (
-        <div>
-          {Object.keys(authorizedData.confirmedPrivileges).map((key) => (
-            <ul>
-              <li>{key}</li>
-            </ul>
-          ))}
-        </div>
-      )}
+      <AuthOutput />
     </AuthorizationGate>
   );
 };

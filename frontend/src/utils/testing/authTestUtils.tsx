@@ -40,6 +40,10 @@ type AuthorizationGateProps = {
 );
 
 
+
+const registerMockImplementat
+
+
 // Turns this into an HOF that
 // - takes the main AuthGate props
 // - returns a function that takes promise and privilege results to force
@@ -76,8 +80,6 @@ export const MockAuthorizationGate = jest.fn().mockImplementation(
         )
       : children;
   });
-
-  MockAuthorizationGate.
 
 
 
