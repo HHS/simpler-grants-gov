@@ -51,8 +51,6 @@ def update_award_recommendation_submissions(
     verify_access(user, {Privilege.UPDATE_AWARD_RECOMMENDATION}, agency)
 
     submission_ids = list(update_data.keys())
-    if not submission_ids:
-        return []
 
     stmt = (
         select(AwardRecommendationApplicationSubmission)
