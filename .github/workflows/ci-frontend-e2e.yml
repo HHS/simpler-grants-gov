@@ -46,8 +46,119 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  e2e-tests-local:
-    name: Run Local E2E Tests
+  get-api-commit-hash:
+    name: Get API commit hash
+    runs-on: ubuntu-22.04
+    outputs:
+      commit_hash: ${{ steps.get-api-commit-hash.outputs.commit_hash }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+          fetch-depth: 1000
+      - name: Get commit hash
+        id: get-api-commit-hash
+        env:
+          CLEAN_REF: ${{ github.head_ref || github.ref }}
+        run: |
+          cd ..
+          COMMIT_HASH=$(git rev-parse "$CLEAN_REF")
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 "$CLEAN_REF" -- api)
+          echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
+          echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
+
+  get-frontend-commit-hash:
+    name: Get frontend commit hash
+    runs-on: ubuntu-22.04
+    outputs:
+      commit_hash: ${{ steps.get-frontend-commit-hash.outputs.commit_hash }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+          fetch-depth: 1000
+      - name: Get commit hash
+        id: get-frontend-commit-hash
+        env:
+          CLEAN_REF: ${{ github.head_ref || github.ref }}
+        run: |
+          cd ..
+          COMMIT_HASH=$(git rev-parse "$CLEAN_REF")
+          APP_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1 "$CLEAN_REF" -- frontend)
+          echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
+          echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
+
+  playwright-cache:
+    # based on this https://justin.poehnelt.com/posts/caching-playwright-in-github-actions/
+    name: Playwright caching
+    needs: [get-api-commit-hash]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: ${{ env.PACKAGE_MANAGER }}
+          cache-dependency-path: ${{ env.LOCKFILE_PATH }}
+
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          # lookup-only: true
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - uses: actions/cache@v5
+        id: npm-cache
+        with:
+          #lookup-only: true
+          path: |
+            frontend/node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+
+      - id: install-npm-packages
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+          pwd
+          ls . -l
+          ls node_modules -l
+
+      - run: npx playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - run: npx playwright install-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Package node_modules
+        run: |
+          tar -czf /tmp/node_modules.tar.gz ./node_modules/
+          ls /tmp
+
+      - name: Upload node_modules artifact
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          path: /tmp/node_modules.tar.gz
+
+      - name: Package Playwright artifact
+        run: |
+          cd ~/.cache/ms-playwright
+          tar -czf /tmp/playwright.tar.gz .
+          ls /tmp
+
+      - name: Upload Playwright artifact
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          path: /tmp/playwright.tar.gz
+
+  run-e2e-tests-local:
+    name: Prepare infra and run E2E tests
+    needs: [get-api-commit-hash, get-frontend-commit-hash, playwright-cache]
     runs-on: ubuntu-22.04
 
     strategy:
@@ -67,7 +178,100 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
           cache-dependency-path: ${{ env.LOCKFILE_PATH }}
 
-      - name: Start API Server for e2e tests
+      - uses: actions/cache@v5
+        id: npm-cache
+        with:
+          # don't fail for now as we're backing this up with an artifact download
+          # fail-on-cache-miss: true
+          path: |
+            frontend/node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Download node_modules artifact
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: node_modules.tar.gz
+          path: /tmp
+
+      - name: Expand node_modules
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: |
+          ls -la .
+          ls -la ./node_modules
+          tar -xzf /tmp/node_modules.tar.gz
+          ls -la .
+          ls -la ./node_modules
+
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          # don't fail for now as we're backing this up with an artifact download
+          # fail-on-cache-miss: true
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Download Playwright artifact
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: playwright.tar.gz
+          path: /tmp
+
+      - name: Expand Playwright
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: |
+          ls -la ~
+          cd ~
+          mkdir -p .cache/ms-playwright
+          tar -xzf /tmp/playwright.tar.gz -C ~/.cache/ms-playwright
+          ls -la ~
+          ls -la ~/.cache/ms-playwright
+
+      - name: Docker images
+        run: |
+          docker image ls
+
+      - name: Restore Docker image cached
+        id: restore-docker-image-cached
+        uses: actions/cache@v5
+        with:
+          path: /tmp/docker-image.tar
+          key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+          restore-keys: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
+      - name: Load cached Docker image (alias it if needed)
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key != ''
+        run: |
+          docker load < /tmp/docker-image.tar
+          # alias the live docker container name simpler-grants-gov-api to the locally build name api-grants-api so that we don't rebuild it in later steps.
+          IMAGE_ID=$(docker image ls -q simpler-grants-gov-api)
+          echo $IMAGE_ID
+          docker tag $IMAGE_ID api-grants-api:latest || true
+
+      - name: Docker images
+        run: |
+          echo |${{ steps.restore-docker-image-cached.outputs.cache-matched-key }}|
+          docker image ls
+
+      - name: Build API Server for e2e tests (if not cached)
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
+        run: |
+          cd ../api
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+
+          make build
+
+      - name: Save Docker image to file
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
+        run: |
+          docker save api-grants-api > /tmp/docker-image.tar
+
+      - name: Init API Server for e2e tests
         run: |
           cd ../api
           # Enable core dumps for debugging segfaults
@@ -75,22 +279,41 @@ jobs:
           mkdir -p /tmp/cores
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
           # Run init first to generate JWT keys in override.env
-          make init
+
+          make init-ci-cd
+
+          ls -a
+
+      - name: Start API Server for e2e tests
+        run: |
+          cd ../api
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          make init-ci-cd db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
           ../api/bin/wait-for-api.sh
         shell: bash
 
-      - name: Install dependencies and Playwright
-        run: |
-          npm ci
-          npx playwright install --with-deps
+      # we shouldn't ever need to do this
+      # - name: npm ci
+      #   if: steps.npm-cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     npm ci
 
-      - name: Build a prod version of the site
+      # we shouldn't ever need to do this
+      # - name: Install dependencies and Playwright
+      #   if: steps.playwright-cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     npx playwright install --with-deps
+
+      - name: Build a prod version of the frontend
         run: |
           {
             cat .env.development
@@ -100,6 +323,21 @@ jobs:
           # Use the 127.0.0.1 url for tests (IPv4 only)
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build
+
+      - name: ls frontend
+        run: |
+          pwd
+          ls -la .
+          echo ====
+          ls -la ./.next
+          echo ======
+          ls -la ./.next/standalone
+          echo ========
+          ls -la ./node_modules/.bin
+
+      - name: Docker images
+        run: |
+          docker image ls
 
       - name: Determine test groups to run
         shell: bash
@@ -125,11 +363,12 @@ jobs:
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
+          force-webkit-install: "true"
 
   create-report:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
-    needs: e2e-tests-local
+    needs: run-e2e-tests-local
     uses: ./.github/workflows/e2e-create-report.yml
     secrets: inherit
     with:
