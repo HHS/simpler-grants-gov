@@ -51,7 +51,7 @@ If you're using VSCode you have a couple of options for debugging tests using th
 
 Create or edit a launch.json file in frontend/.vscode to include a configuration with this definition
 
-```
+```jsonc
     {
       "type": "node",
       "request": "launch",
@@ -92,7 +92,7 @@ The easiest thing to do in these cases is to:
 - render the returned value from the component function call
 - [example usage](https://github.com/HHS/simpler-grants-gov/blob/f92baefc1b8409f12057240d98fa68d20946593b/frontend/tests/components/organization/manage-users/ActiveUsersSection.test.tsx#L44)
 
-```
+```tsx
     const component = await ActiveUsersSection({
       organizationId: "org-123",
       activeUsers,
@@ -106,7 +106,7 @@ The easiest thing to do in these cases is to:
 
 Route tests will not work correctly unless we specify that Jest should use Node rather than JSdom with this at the top of the test file
 
-```
+```js
 /**
  * @jest-environment node
  */
