@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { noop } from "lodash";
+import * as actions from "src/app/[locale]/(base)/opportunities/create/actions";
 
 import { CreateOpportunityForm } from "src/components/opportunities/create/CreateOpportunityForm";
 
@@ -13,6 +14,7 @@ jest.mock("react", () => ({
 
 jest.mock("src/app/[locale]/(base)/opportunities/create/actions", () => ({
   createOpportunityAction: noop,
+  validateAgencyAccessAction: jest.fn().mockResolvedValue({ success: true }),
 }));
 
 jest.mock("next/navigation", () => ({
@@ -27,6 +29,15 @@ jest.mock("next/navigation", () => ({
   usePathname: jest.fn(() => "/"),
   useSearchParams: jest.fn(() => new URLSearchParams()),
 }));
+
+jest.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
+Object.defineProperty(window, "scrollTo", {
+  value: jest.fn(),
+  writable: true,
+});
 
 const fakeId = "456-XYZ";
 const fakeAgencies = {
@@ -108,7 +119,7 @@ describe("createOpportunityForm", () => {
       />,
     );
 
-    const alert = screen.getByRole("heading", { name: "errorHeading" });
+    const alert = screen.getAllByRole("heading", { name: "errorHeading" })[0];
     expect(alert).toBeInTheDocument();
     expect(alert).toHaveTextContent("errorHeading");
 
@@ -124,6 +135,9 @@ describe("createOpportunityForm field change events", () => {
 
   it("the save button is enabled when required fields have values", async () => {
     mockUseActionState.mockReturnValue([{}, noop, false]);
+    jest
+      .spyOn(actions, "validateAgencyAccessAction")
+      .mockResolvedValue({ success: true });
 
     render(
       <CreateOpportunityForm
