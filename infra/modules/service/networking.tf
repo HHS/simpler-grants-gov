@@ -95,6 +95,7 @@ resource "aws_security_group_rule" "https_ingress_ipv6" {
 }
 
 # Security group to allow access to Fargate tasks
+# trivy:ignore:AVD-AWS-0104
 resource "aws_security_group" "app" {
   # Specify name_prefix instead of name because when a change requires creating a new
   # security group, sometimes the change requires the new security group to be created

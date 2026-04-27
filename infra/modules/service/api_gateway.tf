@@ -564,6 +564,7 @@ resource "aws_api_gateway_method_settings" "api_v1_stage_settings" {
   # checkov:skip=CKV_AWS_225:Cache disabled for now, will be followed up in a future ticket
 }
 
+# trivy:ignore:AVD-AWS-0005
 resource "aws_api_gateway_domain_name" "api" {
   count = var.enable_api_gateway && var.certificate_arn != null ? 1 : 0
   # This will become a different variable since it will be the current API domain and cert

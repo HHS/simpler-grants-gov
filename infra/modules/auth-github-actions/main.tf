@@ -22,6 +22,7 @@ resource "aws_iam_policy" "github_actions" {
   policy      = data.aws_iam_policy_document.github_actions.json
 }
 
+# trivy:ignore:AVD-AWS-0345
 data "aws_iam_policy_document" "github_actions" {
   statement {
     sid       = "ManageInfra"

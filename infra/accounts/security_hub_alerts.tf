@@ -3,6 +3,7 @@
 #===================================
 
 # SNS Topic for Security Hub findings
+# trivy:ignore:AVD-AWS-0095
 resource "aws_sns_topic" "security_hub_findings" {
   name = "security-hub-findings"
   # checkov:skip=CKV_AWS_26:SNS encryption for alerts is unnecessary
@@ -37,6 +38,7 @@ locals {
 #===================================
 
 # Separate SNS topic for formatted email alerts
+# trivy:ignore:AVD-AWS-0095
 resource "aws_sns_topic" "security_hub_findings_formatted" {
   name = "security-hub-findings-formatted"
   # checkov:skip=CKV_AWS_26:SNS encryption for alerts is unnecessary

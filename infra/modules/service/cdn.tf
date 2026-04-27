@@ -102,6 +102,9 @@ resource "aws_cloudfront_cache_policy" "api_no_cache" {
   }
 }
 
+# TODO(https://github.com/navapbc/template-infra/issues/165) Protect CDN with WAF
+# trivy:ignore:AVD-AWS-0011
+# trivy:ignore:AVD-AWS-0013
 resource "aws_cloudfront_distribution" "cdn" {
   count = local.enable_cdn ? 1 : 0
 
@@ -211,6 +214,8 @@ resource "aws_cloudfront_distribution" "cdn" {
   #checkov:skip=CKV_AWS_310: Configure a failover in future work
   #checkov:skip=CKV_AWS_68: Configure WAF in future work
   #checkov:skip=CKV2_AWS_47: Configure WAF in future work
+  # trivy:ignore:AVD-AWS-0011
+  # trivy:ignore:AVD-AWS-0013
   #checkov:skip=CKV2_AWS_32: Configure response headers policy in future work
   #checkov:skip=CKV_AWS_374: Ignore the geo restriction
   #checkov:skip=CKV_AWS_305: We don't need a default root object... we don't need to redirect / to index.html.

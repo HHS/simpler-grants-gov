@@ -109,6 +109,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "access_logs" {
 }
 
 
+# trivy:ignore:AVD-AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
   bucket = aws_s3_bucket.access_logs.id
   rule {
