@@ -115,7 +115,7 @@ jobs:
       - uses: actions/cache@v5
         id: npm-cache
         with:
-          lookup-only: true
+          #lookup-only: true
           path: |
             frontend/node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
@@ -133,7 +133,7 @@ jobs:
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
-      - name: Expand API Docker image
+      - name: Package node_modules
         run: |
           cd node_modules
           tar -czf /tmp/node_modules.tar.gz .
