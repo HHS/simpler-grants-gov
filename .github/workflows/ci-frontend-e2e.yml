@@ -135,8 +135,7 @@ jobs:
 
       - name: Package node_modules
         run: |
-          cd node_modules
-          tar -czf /tmp/node_modules.tar.gz .
+          tar -czf /tmp/node_modules.tar.gz ./node_modules/
           ls /tmp
 
       - name: Upload node_modules artifact
@@ -200,8 +199,7 @@ jobs:
         run: |
           ls -la .
           ls -la ./node_modules
-          mkdir -p ./node_modules
-          tar -xzf /tmp/node_modules.tar.gz -C ./node_modules
+          tar -xzf /tmp/node_modules.tar.gz
           ls -la .
           ls -la ./node_modules
 
