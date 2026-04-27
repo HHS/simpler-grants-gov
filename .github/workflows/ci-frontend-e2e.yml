@@ -145,6 +145,18 @@ jobs:
           archive: false
           path: /tmp/node_modules.tar.gz
 
+      - name: Package Playwright artifact
+        run: |
+          cd ~/.cache/ms-playwright
+          tar -czf /tmp/playwright.tar.gz .
+          ls /tmp
+
+      - name: Upload Playwright artifact
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          path: /tmp/playwright.tar.gz
+
   run-e2e-tests-local:
     name: Prepare infra and run E2E tests
     needs: [get-api-commit-hash, get-frontend-commit-hash, playwright-cache]
@@ -183,22 +195,38 @@ jobs:
           name: node_modules.tar.gz
           path: /tmp/node_modules.tar.gz
 
-      - name: Expand API Docker image
+      - name: Expand node_modules
         if: steps.npm-cache.outputs.cache-hit != 'true'
         run: |
           ls -la .
           ls -la ./node_modules
-          tar -xzf /tmp/api-docker-image.tar.gz ./node_modules
+          tar -xzf /tmp/node_modules.tar.gz ./node_modules
           ls -la .
           ls -la ./node_modules
 
       - uses: actions/cache@v5
         id: playwright-cache
         with:
-          fail-on-cache-miss: true
+          # don't fail for now as we're backing this up with an artifact download
+          # fail-on-cache-miss: true
           path: |
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Download Playwright artifact
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: playwright.tar.gz
+          path: /tmp/playwright.tar.gz
+
+      - name: Expand Playwright
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: |
+          ls -la ~
+          tar -xzf /tmp/playwright.tar.gz ~/.cache/ms-playwright
+          ls -la ~
+          ls -la ~/.cache/ms-playwright
 
       - name: Docker images
         run: |
