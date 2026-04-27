@@ -191,6 +191,8 @@ allowed-confusables = [
 # For these libraries, we do use them, but have our own derived versions we want
 # to use instead as we've rewritten fundamental components like error messaging.
 "marshmallow.validate".msg = "Do not import marshmallow.validate directly - instead use src.api.schemas.extension.validators as we've rewritten the error messaging"
+"apiflask.validators".msg = "Do not import apiflask.validators directly - instead use src.api.schemas.extension.validators as we've rewritten the error messaging"
+"apiflask.fields".msg = "Do not import apiflask.fields directly - instead use src.api.schemas.extension.fields as we've rewritten the error messaging"
 "apiflask.Schema".msg = "Do not import apiflask.Schema directly - instead use src.api.schemas.extension"
 
 [tool.mypy]
