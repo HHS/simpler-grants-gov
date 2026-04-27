@@ -1,5 +1,3 @@
-from marshmallow import validate
-
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.extension.field_validators import Length
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
@@ -447,7 +445,7 @@ class AwardRecommendationRiskRequestSchema(Schema):
     award_recommendation_application_submission_ids = fields.List(
         fields.UUID(),
         required=True,
-        validate=[validate.Length(min=1)],
+        validate=[Length(min=1)],
         metadata={
             "description": "List of award recommendation application submission IDs to link to this risk"
         },
