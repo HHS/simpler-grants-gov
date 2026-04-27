@@ -200,6 +200,7 @@ jobs:
         run: |
           ls -la .
           ls -la ./node_modules
+          mkdir -p ./node_modules
           tar -xzf /tmp/node_modules.tar.gz -C ./node_modules
           ls -la .
           ls -la ./node_modules
@@ -225,6 +226,7 @@ jobs:
         run: |
           ls -la ~
           cd ~
+          mkdir -p .cache/ms-playwright
           tar -xzf /tmp/playwright.tar.gz -C ~/.cache/ms-playwright
           ls -la ~
           ls -la ~/.cache/ms-playwright
