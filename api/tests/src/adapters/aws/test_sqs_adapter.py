@@ -43,7 +43,7 @@ class TestGetBotoSQSClient:
         get_boto_sqs_client()
         mock_get_session.assert_called_once()
         mock_session.client.assert_called_once_with(
-            "sqs", region_name="us-east-1", endpoint_url=SQSConfig().sqs_endpoint_url
+            "sqs", region_name="us-east-1", endpoint_url=SQSConfig().aws_sqs_endpoint_url
         )
 
     def test_uses_provided_session(self):
@@ -51,7 +51,7 @@ class TestGetBotoSQSClient:
         mock_session = Mock()
         get_boto_sqs_client(session=mock_session)
         mock_session.client.assert_called_once_with(
-            "sqs", region_name="us-east-1", endpoint_url=SQSConfig().sqs_endpoint_url
+            "sqs", region_name="us-east-1", endpoint_url=SQSConfig().aws_sqs_endpoint_url
         )
 
 

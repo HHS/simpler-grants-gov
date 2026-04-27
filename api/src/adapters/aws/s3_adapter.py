@@ -3,14 +3,14 @@ import botocore.client
 import botocore.config
 from pydantic import Field
 
-from src.adapters.aws import get_boto_session
+from src.adapters.aws import get_aws_config, get_boto_session
 from src.util.env_config import PydanticBaseEnvConfig
 
 
 class S3Config(PydanticBaseEnvConfig):
     # We should generally not need to set this except
     # locally to use s3mock
-    s3_endpoint_url: str | None = None
+    aws_s3_endpoint_url: str | None = Field(alias="AWS_S3_ENDPOINT_URL", default=None)
     presigned_s3_duration: int = 7200  # 2 hours in seconds
 
     # CDN URL for public files - if set, will be used instead of presigned URLs
@@ -35,8 +35,8 @@ def get_s3_client(
         s3_config = S3Config()
 
     params = {}
-    if s3_config.s3_endpoint_url is not None:
-        params["endpoint_url"] = s3_config.s3_endpoint_url
+    if s3_config.aws_s3_endpoint_url is not None:
+        params["endpoint_url"] = s3_config.aws_s3_endpoint_url
 
     if boto_config is None:
         boto_config = botocore.config.Config(
@@ -50,4 +50,4 @@ def get_s3_client(
     if session is None:
         session = get_boto_session()
 
-    return session.client("s3", **params)
+    return session.client("s3", region_name=get_aws_config().aws_region, **params)
