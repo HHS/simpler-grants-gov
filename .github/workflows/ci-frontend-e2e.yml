@@ -448,7 +448,7 @@ jobs:
 
       - name: Save DB Docker image to file
         run: |
-          docker save  > /tmp/postgres-docker-image.tar
+          docker save postgres > /tmp/postgres-docker-image.tar
 
       - name: Save API Docker image to file
         if: steps.restore-api-docker-image-and-keys-cached.outputs.cache-matched-key == ''
