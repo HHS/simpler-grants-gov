@@ -244,7 +244,7 @@ jobs:
 
       - name: Restore Docker image cached
         id: restore-docker-image-cached
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
           path: /tmp/docker-image.tar
           key: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
