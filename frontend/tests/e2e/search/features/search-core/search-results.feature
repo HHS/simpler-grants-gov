@@ -13,6 +13,4 @@ Feature: Search Results Visibility
 
   Scenario: Valid search term shows at least one result in heading
     Then the results heading should show at least 1 opportunity
-
-  Scenario: Valid search term shows at least one list item
-    Then the search results list should contain at least 1 item
+    And the search results list should contain at least 1 item
