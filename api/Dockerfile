@@ -37,7 +37,7 @@ COPY src /api/src
 COPY newrelic.ini /api/newrelic.ini
 
 ENV UV_NO_DEV=1
-RUN uv sync --locked --no-dev
+RUN uv sync --locked --no-dev --no-editable
 
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
@@ -94,6 +94,7 @@ CMD ["uv", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--po
 #==============================================
 # hadolint ignore=DL3006
 FROM base AS release
+ARG RUN_USER
 
 # Working directory already set in base stage
 # User already created in base stage
