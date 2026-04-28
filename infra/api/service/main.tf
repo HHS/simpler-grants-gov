@@ -267,6 +267,7 @@ module "service" {
   newrelic_entity_guid      = local.service_config.newrelic_entity_guid
   newrelic_mtls_entity_guid = local.service_config.newrelic_mtls_entity_guid
   newrelic_host_entity_guid = local.service_config.newrelic_host_entity_guid
+  enable_nrlogs_direct      = false
 
   is_temporary = local.is_temporary
 }
