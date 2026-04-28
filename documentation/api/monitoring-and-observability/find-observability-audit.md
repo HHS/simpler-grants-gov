@@ -399,6 +399,7 @@ This section documents the panels on each page of the **Find Metrics** dashboard
 ---
 
 ### Consolidated Attributes Reference
+### Search Attributes Reference
 
 | Attribute                        | Event type                | Description |
 |----------------------------------|---------------------------|-------------|
@@ -415,6 +416,8 @@ This section documents the panels on each page of the **Find Metrics** dashboard
 | `search.score_max`               | `Log`                     | Maximum relevancy score among returned results |
 | `search.score_mean`              | `Log`                     | Mean relevancy score among returned results |
 | `search.score_stdev`             | `Log`                     | Standard deviation of relevancy scores (only when >1 result) |
+| `search.scoring_rule`            | `Log`                     | Active scoring profile used for the search request (`default`, `expanded`, or `agency`) |
+| `saved_search_id`                | `Log`                     | Identifier for a saved search, if the query originated from one |
 | `field_score.<field>`            | `SearchResultExplanation` | BM25 score contribution from a specific field (e.g. `field_score.agency_code`, `field_score.opportunity_title`) |
 | `position`                       | `SearchResultExplanation` | 1-based rank of the result (1–10) |
 | `scoring_rule`                   | `SearchResultExplanation` | Active scoring profile used for this result (`default`, `expanded`, or `agency`) |
