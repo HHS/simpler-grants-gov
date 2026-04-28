@@ -118,6 +118,8 @@ test.skip("successful signup", async ({ /* next */ page }) => {
  * @scenario Show error when subscription fails
  */
 test.skip("error during signup", async ({ /* next */ page }) => {
+  // TODO: Determine network error simulation strategy
+  // Given the subscription service is unavailable
   // mockAPIEndpoints(next, "Error with subscribing");
 
   // When I fill "First Name (required)" with "Apple"
