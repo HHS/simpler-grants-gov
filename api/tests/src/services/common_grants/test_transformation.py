@@ -788,9 +788,7 @@ class TestTransformation:
             status=HTTPStatus.OK,
             message="ok",
             items=[cg_opportunity],
-            pagination_info=PaginatedResultsInfo(
-                page=1, page_size=1, totalItems=1, totalPages=1
-            ),
+            pagination_info=PaginatedResultsInfo(page=1, page_size=1, totalItems=1, totalPages=1),
             sort_info=SortedResultsInfo(
                 sort_by=OppSortBy.LAST_MODIFIED_AT.value,
                 sort_order="desc",

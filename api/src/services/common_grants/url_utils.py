@@ -9,7 +9,7 @@ exposes a single helper that requires both validators to accept, so divergent
 strings are dropped at the source.
 """
 
-from urllib.parse import urlunsplit, urlsplit
+from urllib.parse import urlsplit, urlunsplit
 
 from marshmallow import ValidationError as MarshmallowValidationError
 from marshmallow import fields as marshmallow_fields

@@ -39,10 +39,7 @@ from src.api.common_grants.schemas.pydantic.custom_fields import (
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
-from src.services.common_grants.url_utils import (
-    redact_url_userinfo,
-    validate_url_compatible,
-)
+from src.services.common_grants.url_utils import redact_url_userinfo, validate_url_compatible
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
