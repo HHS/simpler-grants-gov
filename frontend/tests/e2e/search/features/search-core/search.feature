@@ -47,7 +47,7 @@ Feature: Search Core Search Behaviors
     And the URL should include "status=closed"
 
   Scenario: Flipping sort order reverses first and last result positions
-    When I open the sorting
+    When I open the sort by dropdown
     And I select "Opportunity title (A to Z)" from the sort by dropdown
     Then the first result should be alphabetically first by opportunity title
     When I open the filters
@@ -65,5 +65,5 @@ Feature: Search Core Search Behaviors
     Then the total results count is same
 
   Scenario: Out-of-range page query redirects to the last valid page
-    When i navigate to "/search?page=1000000"
+    When I navigate to "/search?page=1000000"
     Then I should be redirected to the last page of results
