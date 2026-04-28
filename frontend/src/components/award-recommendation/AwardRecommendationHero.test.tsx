@@ -28,15 +28,17 @@ describe("AwardRecommendationHero", () => {
 
     const heading = screen.getByRole("heading", { level: 1 });
     expect(heading).toHaveTextContent(
-      mockAwardRecommendationDetails.recordNumber,
+      mockAwardRecommendationDetails.award_recommendation_number,
     );
 
-    expect(
-      screen.getByText(mockAwardRecommendationDetails.datePrepared),
-    ).toBeInTheDocument();
+    // Check for formatted date from created_at
+    const formattedDate = mockAwardRecommendationDetails.created_at
+      ? new Date(mockAwardRecommendationDetails.created_at).toLocaleDateString()
+      : new Date().toLocaleDateString();
+    expect(screen.getByText(formattedDate)).toBeInTheDocument();
 
     expect(
-      screen.getByTestId("award-recommendation-status-in-progress"),
+      screen.getByTestId("award-recommendation-status-pending-review"),
     ).toBeInTheDocument();
   });
 

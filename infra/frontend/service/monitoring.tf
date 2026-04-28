@@ -11,4 +11,7 @@ module "monitoring" {
   load_balancer_arn_suffix                    = module.service.load_balancer_arn_suffix
   email_alert_recipients                      = local.monitoring_config.email_alert_recipients
   incident_management_service_integration_url = local.incident_management_service_integration_url
+
+  # Ensure the log group created by the service module exists before creating metric filters
+  depends_on = [module.service]
 }

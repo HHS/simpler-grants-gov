@@ -142,6 +142,11 @@ export const categoryOptions: FilterOption[] = [
     value: "opportunity_zone_benefits",
   },
   {
+    id: "category-recreation_and_tourism",
+    label: "Recreation and Tourism",
+    value: "recreation_and_tourism",
+  },
+  {
     id: "category-regional_development",
     label: "Regional Development",
     value: "regional_development",

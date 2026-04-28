@@ -1,3 +1,4 @@
+import logging
 import random
 import secrets
 import string
@@ -26,6 +27,8 @@ from src.db.models.award_recommendation_models import (
 from src.db.models.competition_models import Application, ApplicationSubmission, Competition
 from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
 from src.db.models.user_models import User
+
+logger = logging.getLogger(__name__)
 
 
 def _get_opportunity(db_session: db.Session, opportunity_id: uuid.UUID) -> Opportunity | None:
@@ -93,7 +96,8 @@ def create_award_recommendation(
         award_recommendation_status=AwardRecommendationStatus.IN_REVIEW,
         award_selection_method=award_recommendation_data["award_selection_method"],
         additional_info=award_recommendation_data.get("additional_info"),
-        selection_method_detail=award_recommendation_data.get("funding_strategy"),
+        selection_method_detail=award_recommendation_data.get("selection_method_detail"),
+        funding_strategy=award_recommendation_data.get("funding_strategy"),
         other_key_information=award_recommendation_data.get("other_key_information"),
     )
 
@@ -134,6 +138,30 @@ def create_award_recommendation(
     db_session.flush()
 
     award_recommendation_id = award_recommendation.award_recommendation_id
+
+    logger.info(
+        "Created award recommendation",
+        extra={
+            "award_recommendation_id": award_recommendation_id,
+            "opportunity_id": opportunity_id,
+            "award_recommendation_number": award_recommendation.award_recommendation_number,
+            "award_recommendation_status": (
+                award_recommendation.award_recommendation_status.value
+                if award_recommendation.award_recommendation_status
+                else None
+            ),
+            "award_selection_method": (
+                award_recommendation.award_selection_method.value
+                if award_recommendation.award_selection_method
+                else None
+            ),
+            "additional_info": award_recommendation.additional_info,
+            "selection_method_detail": award_recommendation.selection_method_detail,
+            "funding_strategy": award_recommendation.funding_strategy,
+            "other_key_information": award_recommendation.other_key_information,
+            "application_submission_count": len(application_submissions),
+        },
+    )
 
     stmt = (
         select(AwardRecommendation)

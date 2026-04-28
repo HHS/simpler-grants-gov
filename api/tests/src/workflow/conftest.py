@@ -1,45 +1,16 @@
 import pytest
 
-from src.adapters.search import SearchClient
-from src.constants.lookup_constants import Privilege, RoleType
+from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
-from src.workflow.registry.workflow_client_registry import (
-    WorkflowClientRegistry,
-    init_workflow_client_registry,
-)
 from tests.lib.agency_test_utils import create_user_in_agency
-from tests.src.db.models.factories import (
-    AgencyFactory,
-    InternalUserRoleFactory,
-    OpportunityFactory,
-    RoleFactory,
-    UserFactory,
-    UserProfileFactory,
-)
+from tests.src.db.models.factories import AgencyFactory, OpportunityFactory
 
 
 @pytest.fixture(autouse=True)
-def workflow_user(enable_factory_create, monkeypatch) -> User:
-    """Get the workflow user, setting them up with expected params
-
-    Also sets the workflow user ID env var to the user created here.
-
-    This fixture has autouse=True so it's automatically available for all
-    workflow tests without needing to explicitly request it.
-    """
-    user = UserFactory.create()
-    UserProfileFactory.create(user=user, first_name="System", last_name="User")
-
-    role = RoleFactory.create(
-        privileges=[Privilege.INTERNAL_WORKFLOW_ACCESS], role_types=[RoleType.INTERNAL]
-    )
-    InternalUserRoleFactory.create(user=user, role=role)
-
-    monkeypatch.setenv("WORKFLOW_SERVICE_INTERNAL_USER_ID", str(user.user_id))
-
-    return user
+def workflow_user_init(workflow_user):
+    pass
 
 
 @pytest.fixture
@@ -77,8 +48,3 @@ def other_agency_program_officer(enable_factory_create) -> User:
 @pytest.fixture
 def opportunity(agency) -> Opportunity:
     return OpportunityFactory.create(agency_code=agency.agency_code)
-
-
-@pytest.fixture(scope="session")
-def workflow_client_registry(search_client: SearchClient) -> WorkflowClientRegistry:
-    return init_workflow_client_registry(search_client=search_client)

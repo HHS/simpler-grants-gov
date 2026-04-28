@@ -53,6 +53,8 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
         `Error retrieving application details for (${applicationId})`,
         response,
       );
+      // TODO #9637
+      // eslint-disable-next-line react-hooks/error-boundaries
       return <TopLevelError />;
     }
     details = response.data;
@@ -65,6 +67,8 @@ async function ApplicationLandingPage({ params }: ApplicationLandingPageProps) {
         `Error retrieving opportunity details for (${opportunityId})`,
         response,
       );
+      // TODO #9637
+      // eslint-disable-next-line react-hooks/error-boundaries
       return <TopLevelError />;
     }
     opportunity = opportunityResponse.data;
