@@ -17,19 +17,19 @@ const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE, CORE_REGRESSION } = VALID_TAGS;
 
 test.beforeEach(async ({ page }) => {
   const searchTerm = "grants";
-  // Given I am on the Search Funding Opportunity page
+  // Given I am on the "Search funding opportunity" page
   await page.goto("/search");
   await waitForSearchResultsInitialLoad(page);
 
   // this is dumb but webkit has an issue with trying to fill in the input too quickly
   // if the expect in here fails, we give it another shot after 5 seconds
   // this way we avoid an arbitrary timeout, and do not slow down the other tests
+  // When I search for "grants"
   try {
     await fillSearchInputAndSubmit(searchTerm, page);
   } catch (_e) {
     await fillSearchInputAndSubmit(searchTerm, page);
   }
-  // When I search for "grants"
   await waitForURLContainsQueryParamValue(page, "query", searchTerm);
 });
 
@@ -50,7 +50,7 @@ test.describe("Search page results tests", () => {
     "search list should have at least 1 item",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page }) => {
-      // Then the search results list should contain at least 1 item
+      // And the search results list should contain at least 1 item
       const searchList = page.locator("ul.usa-list--unstyled");
       await expect(searchList.locator("li >> nth=1")).toBeAttached();
     },
