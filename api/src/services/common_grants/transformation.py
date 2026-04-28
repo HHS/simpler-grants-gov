@@ -19,6 +19,8 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedBodyParams,
     SingleDateEvent,
 )
+from marshmallow import ValidationError as MarshmallowValidationError
+from marshmallow import fields as marshmallow_fields
 from pydantic import BaseModel, Field, HttpUrl, ValidationError
 
 import src.util.datetime_util as datetime_util
@@ -52,6 +54,15 @@ class UrlValidator(BaseModel):
     """
 
     url: HttpUrl = Field(strict=True)
+
+
+# Pydantic's HttpUrl and marshmallow's fields.URL disagree on a handful of
+# inputs (comma-separated URLs, scheme-only-host like "http://example", etc.).
+# Pydantic accepts and normalizes; marshmallow rejects. The CG response is
+# loaded through marshmallow on the way out, so any URL accepted by pydantic
+# but rejected by marshmallow blows up the entire batch (issue #9904). Run
+# both validators so divergent strings are dropped at the source.
+_marshmallow_url_field = marshmallow_fields.URL()
 
 
 def transform_status_to_cg(v1_status: OpportunityStatus) -> OppStatusOptions:
@@ -164,13 +175,13 @@ def _transform_date_to_cg(date_value: date | datetime | None) -> date | None:
 
 def validate_url(value: str | None) -> str | None:
     """
-    Validate a URL string using Pydantic's HttpUrl validation.
+    Validate a URL string using both Pydantic's HttpUrl and marshmallow's URL field.
 
-    This ensures URLs are validated with the same strict rules that Pydantic
-    uses, preventing validation errors when creating OpportunityBase objects.
-
-    We use a minimal model with the same field definition as OpportunityBase
-    to ensure we use the exact same validation rules.
+    Both validators must accept the value. Pydantic accepts inputs marshmallow
+    rejects (e.g. comma-separated URLs, scheme-only hosts), and the CG response
+    is loaded through marshmallow on the way out — so a URL accepted only by
+    pydantic blows up the entire response batch with a 500 (issue #9904).
+    Validating with both at the source drops divergent strings cleanly.
 
     Args:
         value: The string to validate
@@ -182,8 +193,10 @@ def validate_url(value: str | None) -> str | None:
         return None
     try:
         valid = UrlValidator.model_validate({"url": value})
-        return str(valid.url)
-    except ValidationError:
+        normalized = str(valid.url)
+        _marshmallow_url_field.deserialize(normalized)
+        return normalized
+    except (ValidationError, MarshmallowValidationError):
         logger.info(
             f"URL validation failed for: {value}",
             extra={

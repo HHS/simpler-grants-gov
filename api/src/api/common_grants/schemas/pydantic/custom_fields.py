@@ -7,7 +7,15 @@ populated by the populate_custom_fields function in the transformation layer.
 from datetime import datetime
 
 from common_grants_sdk.schemas.pydantic import CustomField, CustomFieldType
+from marshmallow import ValidationError as MarshmallowValidationError
+from marshmallow import fields as marshmallow_fields
 from pydantic import BaseModel, HttpUrl, ValidationError, field_validator
+
+# See note in src/services/common_grants/transformation.py:_marshmallow_url_field
+# — pydantic's HttpUrl and marshmallow's fields.URL disagree on certain inputs,
+# so the AttachmentValue.downloadUrl validator (which feeds the same marshmallow
+# response load) must check both to avoid issue #9904's 500 path.
+_marshmallow_url_field = marshmallow_fields.URL()
 
 # ===========================================================================================
 # Value Models
@@ -46,8 +54,9 @@ class AttachmentValue(BaseModel):
             return None
         try:
             _AttachmentUrlValidator.model_validate({"url": v})
+            _marshmallow_url_field.deserialize(v)
             return v
-        except ValidationError:
+        except (ValidationError, MarshmallowValidationError):
             return None
 
 
