@@ -398,7 +398,6 @@ This section documents the panels on each page of the **Find Metrics** dashboard
 
 ---
 
-### Consolidated Attributes Reference
 ### Search Attributes Reference
 
 | Attribute                        | Event type                | Description |
