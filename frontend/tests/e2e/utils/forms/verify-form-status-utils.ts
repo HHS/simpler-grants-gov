@@ -7,6 +7,8 @@ import {
 } from "tests/e2e/utils/forms/verify-form-errors-utils";
 import { gotoWithRetry } from "tests/e2e/utils/lifecycle-utils";
 
+import { buildFlexibleFormNameRegex } from "./form-navigation-utils";
+
 export type FormStatus = "complete" | "incomplete";
 
 /**
@@ -21,14 +23,10 @@ export async function assertFormRowStatus(
   status: FormStatus,
   formName: string | RegExp,
 ): Promise<void> {
-  let rowPattern: RegExp;
-  if (formName instanceof RegExp) {
-    rowPattern = formName;
-  } else {
-    const escaped = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const flexible = escaped.replace(/\s+/g, "\\s*").replace(/-/g, "-?");
-    rowPattern = new RegExp(flexible, "i");
-  }
+  const rowPattern =
+    formName instanceof RegExp
+      ? formName
+      : buildFlexibleFormNameRegex(formName);
   const formRow = page
     .locator("tr", {
       hasText: rowPattern,
