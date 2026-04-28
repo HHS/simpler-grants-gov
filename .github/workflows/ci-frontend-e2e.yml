@@ -88,8 +88,9 @@ jobs:
           echo "Commit hash: $COMMIT_HASH, App: $APP_COMMIT_HASH"
           echo "commit_hash=$APP_COMMIT_HASH" >> "$GITHUB_OUTPUT"
 
+  # do this in it's own step so that each parallel process in the matrix job below isn't having to download and install stuff
+  # based on this https://justin.poehnelt.com/posts/caching-playwright-in-github-actions/
   playwright-cache:
-    # based on this https://justin.poehnelt.com/posts/caching-playwright-in-github-actions/
     name: Playwright caching
     needs: [get-api-commit-hash]
     runs-on: ubuntu-22.04
@@ -107,6 +108,7 @@ jobs:
       - uses: actions/cache@v5
         id: playwright-cache
         with:
+          # cache is missing randomly so instead of being able to just trust the cache existing, we have to download here and push it to an artifact for the next job
           # lookup-only: true
           path: |
             ~/.cache/ms-playwright
@@ -115,6 +117,7 @@ jobs:
       - uses: actions/cache@v5
         id: npm-cache
         with:
+          # cache is missing randomly so instead of being able to just trust the cache existing, we have to download here and push it to an artifact for the next job
           #lookup-only: true
           path: |
             frontend/node_modules
@@ -133,6 +136,7 @@ jobs:
       - run: npx playwright install-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
+      # We package ourselves as tar.gz because this preserves permissions that a regular artifact upload/download does not.
       - name: Package node_modules
         run: |
           tar -czf /tmp/node_modules.tar.gz ./node_modules/
@@ -144,6 +148,7 @@ jobs:
           archive: false
           path: /tmp/node_modules.tar.gz
 
+      # We package ourselves as tar.gz because this preserves permissions that a regular artifact upload/download does not.
       - name: Package Playwright artifact
         run: |
           cd ~/.cache/ms-playwright
@@ -181,12 +186,14 @@ jobs:
       - uses: actions/cache@v5
         id: npm-cache
         with:
-          # don't fail for now as we're backing this up with an artifact download
+          # don't fail for now as we're backing this up with an artifact download since the cache hit is sketchy
           # fail-on-cache-miss: true
           path: |
             frontend/node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
+      # We download because the cache is not reliably hitting even when it exists
+      # We expand the tar.gz manually because this preserves permissions that a regular artifact upload/download does not.
       - name: Download node_modules artifact
         if: steps.npm-cache.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v8
@@ -206,12 +213,14 @@ jobs:
       - uses: actions/cache@v5
         id: playwright-cache
         with:
-          # don't fail for now as we're backing this up with an artifact download
+          # don't fail for now as we're backing this up with an artifact download because the cache hit is sketchy
           # fail-on-cache-miss: true
           path: |
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
 
+      # We download because the cache is not reliably hitting even when it exists
+      # We expand the tar.gz manually because this preserves permissions that a regular artifact upload/download does not.
       - name: Download Playwright artifact
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v8
