@@ -246,9 +246,8 @@ jobs:
         run: |
           docker load < /tmp/docker-image.tar
           # alias the live docker container name simpler-grants-gov-api to the locally build name api-grants-api so that we don't rebuild it in later steps.
-          IMAGE_ID=$(docker image ls -q simpler-grants-gov-api)
-          echo $IMAGE_ID
-          docker tag $IMAGE_ID api-grants-api:latest || true
+          IMAGE_ID="$(docker image ls -q simpler-grants-gov-api)"
+          docker tag "$IMAGE_ID" api-grants-api:latest || true
 
       - name: Docker images
         run: |
