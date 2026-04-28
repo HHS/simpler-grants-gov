@@ -21,7 +21,7 @@ test.describe("Search results export", () => {
         return;
       }
 
-      // Given I am on the Search Funding Opportunity page
+      // Given I am on the "Search funding opportunity" page
       const downloadPromise = page.waitForEvent("download");
       await page.goto("/search");
 
