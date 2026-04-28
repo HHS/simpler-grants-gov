@@ -6,6 +6,7 @@ import { getAgencyDisplayName } from "src/utils/search/filterUtils";
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { ReactElement } from "react";
 
 import { SavedOpportunityTag } from "src/components/saved-opportunities/buildSavedOpportunityTags";
 import { SavedOpportunityTags } from "src/components/saved-opportunities/SavedOpportunityTags";
@@ -21,25 +22,6 @@ interface SearchResultsListItemProps {
   savedOpportunityTags?: SavedOpportunityTag[];
 }
 
-const metadataBorderClasses = `
-  display-block
-  tablet:display-inline-block
-  tablet:border-left-1px
-  tablet:padding-x-1
-  tablet:margin-left-neg-1
-  tablet:margin-right-1
-  tablet:border-base-lighter
-  `;
-
-const resultBorderClasses = `
-  border-1px
-  border-base-lighter
-  padding-x-2
-  padding-y-105
-  margin-bottom-2
-  text-base-darker
-  `;
-
 export default function SearchResultsListItem({
   opportunity,
   saved = false,
@@ -48,7 +30,7 @@ export default function SearchResultsListItem({
   page = 1,
   onShareClick,
   savedOpportunityTags,
-}: SearchResultsListItemProps) {
+}: SearchResultsListItemProps): ReactElement {
   const t = useTranslations("Search");
   const savedOpportunityTagsToRender = saved
     ? (savedOpportunityTags ?? [])
@@ -57,95 +39,118 @@ export default function SearchResultsListItem({
   const shouldRenderSavedOpportunityTags =
     savedOpportunityTagsToRender.length > 0;
 
+  const opportunityTitleId = `search-result-title-${page}-${index + 1}`;
+  const searchResultLinkId = `search-result-link-${page}-${index + 1}`;
+  const shareButtonId = `share-opportunity-button-${opportunity.opportunity_id}`;
+  const postedOrForecastedLabel =
+    opportunity.opportunity_status === "forecasted"
+      ? t("resultsListItem.summary.forecasted")
+      : t("resultsListItem.summary.posted");
   return (
-    <div className={resultBorderClasses}>
-      <div className="grid-row grid-gap">
-        <div className="desktop:grid-col-fill">
-          <div className="grid-row flex-column">
-            <div className="grid-col tablet:order-2">
-              <h2 className="margin-y-105 line-height-sans-2">
-                <Link
-                  href={`/opportunity/${opportunity?.opportunity_id}`}
-                  className="usa-link usa-link"
-                  id={`search-result-link-${page}-${index + 1}`}
-                >
-                  {opportunity?.opportunity_title}, {opportunity?.agency_code}
-                </Link>
-              </h2>
-            </div>
-            <div className="font-sans-xs display-flex flex-wrap">
-              <SearchResultListItemStatus
-                archiveDate={opportunity?.summary?.archive_date}
-                archivedString={t("resultsListItem.status.archived")}
-                closedDate={opportunity?.summary?.close_date}
-                closedString={t("resultsListItem.status.closed")}
-                forecastedString={t("resultsListItem.status.forecasted")}
-                postedString={t("resultsListItem.status.posted")}
-                status={opportunity?.opportunity_status}
-              />
-              <span
-                className={`${metadataBorderClasses} tablet:order-0 order-2`}
-              >
-                <strong>
-                  {opportunity.opportunity_status === "forecasted"
-                    ? t("resultsListItem.summary.forecasted")
-                    : t("resultsListItem.summary.posted")}
-                </strong>
-                {opportunity?.summary?.post_date
-                  ? formatDate(opportunity?.summary?.post_date)
+    <article
+      className="saved-opportunity-card"
+      aria-labelledby={opportunityTitleId}
+    >
+      <div className="saved-opportunity-card__main">
+        <div className="saved-opportunity-card__status-row">
+          <div className="saved-opportunity-card__status">
+            <SearchResultListItemStatus
+              archiveDate={opportunity.summary?.archive_date}
+              archivedString={t("resultsListItem.status.archived")}
+              closedDate={opportunity.summary?.close_date}
+              closedString={t("resultsListItem.status.closed")}
+              forecastedString={t("resultsListItem.status.forecasted")}
+              postedString={t("resultsListItem.status.posted")}
+              status={opportunity.opportunity_status}
+            />
+          </div>
+          <dl className="saved-opportunity-card__posted-date">
+            <div className="saved-opportunity-card__posted-date-item">
+              <dt className="saved-opportunity-card__posted-date-term">
+                {postedOrForecastedLabel}
+              </dt>
+              <dd className="saved-opportunity-card__posted-date-description">
+                {opportunity.summary?.post_date
+                  ? formatDate(opportunity.summary.post_date)
                   : "--"}
-              </span>
-              <div className="width-full tablet:width-auto" />
+              </dd>
             </div>
-            <div className="grid-col tablet:order-2 overflow-hidden font-sans-xs">
-              <span className={metadataBorderClasses}>
-                <strong>{t("resultsListItem.summary.agency")}</strong>
-                {getAgencyDisplayName(opportunity)}
-              </span>
-            </div>
-            <div className="grid-col tablet:order-3 overflow-hidden font-body-xs">
-              <strong>{t("resultsListItem.opportunityNumber")}</strong>
-              {opportunity?.opportunity_number}
-            </div>
+          </dl>
+        </div>
+        <h2 id={opportunityTitleId} className="saved-opportunity-card__title">
+          <Link
+            href={`/opportunity/${opportunity.opportunity_id}`}
+            className="usa-link"
+            id={searchResultLinkId}
+          >
+            {opportunity.opportunity_title}
+          </Link>
+        </h2>
 
-            {shouldRenderSavedOpportunityTags ? (
-              <div className="tablet:order-3">
-                <SavedOpportunityTags
-                  labelId={`saved-opportunity-tags-label-${opportunity.opportunity_id}`}
-                  tags={savedOpportunityTagsToRender}
-                />
-              </div>
-            ) : null}
+        <dl className="saved-opportunity-card__metadata">
+          <div className="saved-opportunity-card__metadata-item">
+            <dt className="saved-opportunity-card__metadata-term">
+              {t("resultsListItem.summary.agency")}
+            </dt>
+            <dd className="saved-opportunity-card__metadata-description">
+              {getAgencyDisplayName(opportunity)}
+            </dd>
           </div>
-        </div>
-        <div className="desktop:grid-col-auto">
-          <div className="overflow-hidden font-sans-xs">
-            <span className="desktop:display-block text-right desktop:margin-right-0 desktop:padding-right-0">
-              <strong>{t("resultsListItem.awardCeiling")}</strong>
-              <span className="desktop:display-block desktop:font-sans-lg text-ls-neg-3 text-right">
-                ${opportunity?.summary?.award_ceiling?.toLocaleString() || "--"}
-              </span>
-            </span>
-            <span className="border-left-1px border-base-lighter margin-left-1 padding-left-1 text-right desktop:border-0 desktop:display-block desktop:margin-left-3 desktop:margin-right-0 desktop:padding-right-0">
-              <strong>{t("resultsListItem.floor")}</strong>
-              {opportunity?.summary?.award_floor?.toLocaleString() || "--"}
-            </span>
+          <div className="saved-opportunity-card__metadata-item">
+            <dt className="saved-opportunity-card__metadata-term">
+              {t("resultsListItem.opportunityNumber")}
+            </dt>
+            <dd className="saved-opportunity-card__metadata-description">
+              {opportunity.opportunity_number}
+            </dd>
           </div>
-          {showShareButton && onShareClick ? (
-            <div className="margin-top-1 text-right">
-              <button
-                id={`share-opportunity-button-${opportunity.opportunity_id}`}
-                data-testid="share-opportunity-button-id"
-                type="button"
-                className="usa-button usa-button--unstyled font-sans-2xs"
-                onClick={(event) => onShareClick(event.currentTarget)}
-              >
-                {t("callToAction.sharingOptions")}
-              </button>
-            </div>
-          ) : null}
-        </div>
+        </dl>
+
+        {shouldRenderSavedOpportunityTags ? (
+          <div className="saved-opportunity-card__tags">
+            <SavedOpportunityTags
+              labelId={`saved-opportunity-tags-label-${opportunity.opportunity_id}`}
+              tags={savedOpportunityTagsToRender}
+            />
+          </div>
+        ) : null}
       </div>
-    </div>
+      <aside
+        className="saved-opportunity-card__aside"
+        aria-label={t("resultsListItem.awardInformation")}
+      >
+        <dl className="saved-opportunity-card__award">
+          <div className="saved-opportunity-card__award-item">
+            <dt className="saved-opportunity-card__award-term">
+              {t("resultsListItem.awardCeiling")}
+            </dt>
+            <dd className="saved-opportunity-card__award-description saved-opportunity-card__award-description--maximum">
+              ${opportunity.summary?.award_ceiling?.toLocaleString() || "--"}
+            </dd>
+          </div>
+          <div className="saved-opportunity-card__award-item">
+            <dt className="saved-opportunity-card__award-term">
+              {t("resultsListItem.floor")}
+            </dt>
+            <dd className="saved-opportunity-card__award-description">
+              ${opportunity.summary?.award_floor?.toLocaleString() || "--"}
+            </dd>
+          </div>
+        </dl>
+        {showShareButton && onShareClick ? (
+          <div className="saved-opportunity-card__action">
+            <button
+              id={shareButtonId}
+              data-testid="share-opportunity-button-id"
+              type="button"
+              className="usa-button usa-button--unstyled font-sans-2xs"
+              onClick={(event) => onShareClick(event.currentTarget)}
+            >
+              {t("callToAction.sharingOptions")}
+            </button>
+          </div>
+        ) : null}
+      </aside>
+    </article>
   );
 }
