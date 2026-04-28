@@ -12,6 +12,7 @@ import { Alert, Button, GridContainer } from "@trussworks/react-uswds";
 import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
 import OpportunityEditForm from "src/components/opportunity/OpportunityEditForm";
 import { buildOpportunityEditInitialValues } from "src/components/opportunity/opportunityEditFormConfig";
+import OpportunityEditHeaderActions from "src/components/opportunity/OpportunityEditHeaderActions";
 import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
@@ -104,6 +105,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
     opportunityData.summary;
   const initialValues = buildOpportunityEditInitialValues({
     ...opportunityData,
+    attachments: [],
     summary: activeSummary,
   });
   const stageLabels: Record<string, string> = {
@@ -195,19 +197,12 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
                 >
                   {tEdit("header.saveButton")}
                 </Button>
-                <Button
-                  type="button"
-                  outline
-                  className="height-auto margin-0 margin-bottom-1 margin-right-105 font-sans-sm text-bold line-height-sans-1"
-                >
-                  {tEdit("header.previewButton")}
-                </Button>
-                <Button
-                  type="button"
-                  className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
-                >
-                  {tEdit("header.submitButton")}
-                </Button>
+                <OpportunityEditHeaderActions
+                  opportunityId={opportunityData.opportunity_id}
+                  initialValues={initialValues}
+                  previewLabel={tEdit("header.previewButton")}
+                  publishLabel={tEdit("header.publishButton")}
+                />
               </div>
             </div>
           </div>
@@ -228,6 +223,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
               isForecast={!!opportunityData.forecast_summary}
               initialValues={initialValues}
               isDraft={!!opportunityData.is_draft}
+              initialAttachments={opportunityData.attachments ?? []}
               opportunityKeyInformation={opportunityKeyInformation}
               isNewlyCreated={isNewlyCreated}
             />

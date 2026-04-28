@@ -15,18 +15,21 @@ from src.legacy_soap_api.legacy_soap_api_client import (
 )
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, get_soap_config
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
-from src.legacy_soap_api.legacy_soap_api_proxy import get_proxy_response
+from src.legacy_soap_api.legacy_soap_api_proxy import get_proxy_response as get_legacy_response
 from src.legacy_soap_api.legacy_soap_api_schemas import (
     SOAPInvalidEnvelope,
     SOAPOperationNotSupported,
     SOAPResponse,
 )
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest, SoapRequestStreamer
+from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
 from src.legacy_soap_api.legacy_soap_api_utils import (
-    SOAPFaultException,
-    get_alternate_proxy_response,
+    get_alternate_proxy_response as get_alternate_legacy_response,
+)
+from src.legacy_soap_api.legacy_soap_api_utils import (
     get_invalid_path_response,
     get_soap_error_response,
+    get_soap_fault_error_response,
 )
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
@@ -35,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_simpler_soap_response(
-    soap_request: SOAPRequest, soap_proxy_response: SOAPResponse, db_session: db.Session
+    soap_request: SOAPRequest, soap_legacy_response: SOAPResponse, db_session: db.Session
 ) -> SOAPResponse:
     simpler_soap_client_type = (
         SimplerApplicantsS2SClient
@@ -70,7 +73,7 @@ def get_simpler_soap_response(
                 "used_simpler_response": use_simpler,
             },
         )
-        return soap_proxy_response
+        return soap_legacy_response
     except Exception:
         err = "Unable to initialize Simpler SOAP client: Unknown error"
         logger.info(
@@ -81,13 +84,13 @@ def get_simpler_soap_response(
                 "used_simpler_response": use_simpler,
             },
         )
-        return soap_proxy_response
+        return soap_legacy_response
 
     if use_simpler or simpler_soap_client.operation_config.always_call_simpler:
         logger.info(
             "simpler_soap_api: getting simpler soap response",
         )
-        simpler_soap_response = simpler_soap_client.get_simpler_soap_response(soap_proxy_response)
+        simpler_soap_response = simpler_soap_client.get_simpler_soap_response(soap_legacy_response)
 
     if use_simpler and simpler_soap_response is not None:
         logger.info(
@@ -100,13 +103,13 @@ def get_simpler_soap_response(
         return simpler_soap_response
 
     logger.info(
-        "simpler_soap_api: Successfully processed request and returning SOAP proxy response",
+        "simpler_soap_api: Successfully processed request and returning SOAP legacy response",
         extra={
             "soap_api_event": LegacySoapApiEvent.RETURNING_LEGACY_SOAP_RESPONSE,
             "used_simpler_response": use_simpler,
         },
     )
-    return soap_proxy_response
+    return soap_legacy_response
 
 
 def process_simpler_request(
@@ -146,13 +149,16 @@ def process_simpler_request(
             "soap_client_certificate: header check",
             extra={"soap_request_headers": soap_request.headers.keys()},
         )
-        if alternate_proxy_response := get_alternate_proxy_response(soap_request):
-            soap_proxy_response = alternate_proxy_response
+        if alternate_legacy_response := get_alternate_legacy_response(soap_request):
+            logger.info(
+                "simpler_soap_api: skipping legacy call",
+            )
+            soap_legacy_response = alternate_legacy_response
         else:
-            soap_proxy_response = get_proxy_response(soap_request)
+            soap_legacy_response = get_legacy_response(soap_request)
     except Exception:
         logger.exception(
-            msg="Error getting soap proxy response",
+            msg="Error getting soap legacy response",
             extra={
                 "used_simpler_response": False,
                 "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_LEGACY_SOAP,
@@ -162,7 +168,7 @@ def process_simpler_request(
 
     try:
         return get_simpler_soap_response(
-            soap_request, soap_proxy_response, db_session
+            soap_request, soap_legacy_response, db_session
         ).to_flask_response()
     except SOAPClientUserDoesNotHavePermission:
         msg = "soap_client_certificate: User did not have permission to access this application"
@@ -174,18 +180,19 @@ def process_simpler_request(
         )
     except SOAPFaultException as e:
         logger.info(
-            msg=e.fault.faultstring,
+            msg="Soap Fault Exception raised",
             exc_info=True,
             extra={
                 "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
+                "faultstring": e.fault.faultstring,
             },
         )
-        if soap_proxy_response.status_code == 500:
-            return get_soap_error_response(
+        if soap_legacy_response.status_code == 500:
+            return get_soap_fault_error_response(
                 faultcode=e.fault.faultcode, faultstring=e.fault.faultstring
             ).to_flask_response()
     except Exception:
-        msg = "Unable to process Simpler SOAP proxy response"
+        msg = "Unable to process Simpler SOAP legacy response"
         logger.exception(
             msg=msg,
             extra={
@@ -193,4 +200,4 @@ def process_simpler_request(
                 "soap_api_event": LegacySoapApiEvent.ERROR_CALLING_SIMPLER,
             },
         )
-    return soap_proxy_response.to_flask_response()
+    return soap_legacy_response.to_flask_response()

@@ -29,12 +29,12 @@ from src.db.models.lookup_models import (
     LkAwardSelectionMethod,
 )
 from src.db.models.user_models import User
-from src.db.models.workflow_models import Workflow, WorkflowApproval
 from src.util.file_util import pre_sign_file_location
 
 if TYPE_CHECKING:
     from src.db.models.competition_models import ApplicationSubmission
     from src.db.models.opportunity_models import Opportunity
+    from src.db.models.workflow_models import Workflow, WorkflowApproval
 
 
 class AwardRecommendation(ApiSchemaTable, TimestampMixin):
@@ -73,7 +73,9 @@ class AwardRecommendation(ApiSchemaTable, TimestampMixin):
     review_workflow_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID, ForeignKey("api.workflow.workflow_id")
     )
-    review_workflow: Mapped[Workflow | None] = relationship(Workflow)
+    review_workflow: Mapped[Workflow | None] = relationship(
+        "Workflow", foreign_keys=[review_workflow_id]
+    )
 
     award_recommendation_application_submissions: Mapped[
         list[AwardRecommendationApplicationSubmission]
@@ -246,6 +248,10 @@ class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
         )
     )
 
+    @property
+    def application_submission_number(self) -> str | None:
+        return self.application_submission.application_submission_number
+
 
 class AwardRecommendationRiskSubmission(ApiSchemaTable, TimestampMixin):
     """Links an award recommendation risk to an award recommendation application submission."""
@@ -369,5 +375,5 @@ class AwardRecommendationAudit(ApiSchemaTable, TimestampMixin):
         UUID,
         ForeignKey("api.workflow_approval.workflow_approval_id"),
     )
-    workflow_approval: Mapped[WorkflowApproval | None] = relationship(WorkflowApproval)
+    workflow_approval: Mapped[WorkflowApproval | None] = relationship("WorkflowApproval")
     audit_metadata: Mapped[dict | None] = mapped_column(JSONB)

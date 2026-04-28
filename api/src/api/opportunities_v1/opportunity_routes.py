@@ -13,7 +13,7 @@ import src.api.opportunities_v1.opportunity_schemas as opportunity_schemas
 import src.api.response as response
 import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
-from src.auth.multi_auth import api_key_multi_auth, jwt_or_api_user_key_multi_auth
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.opportunities_v1.get_opportunity import (
     get_opportunity,
@@ -213,7 +213,7 @@ def _build_opportunities_csv_response(opportunities: Sequence[dict]) -> Response
     examples=examples,
 )
 @opportunity_blueprint.output(opportunity_schemas.OpportunitySearchResponseV1Schema())
-@opportunity_blueprint.auth_required(api_key_multi_auth)
+@opportunity_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @opportunity_blueprint.doc(
     description=SHARED_ALPHA_DESCRIPTION,
     summary="Search opportunities (JSON or CSV)",
@@ -260,7 +260,7 @@ def opportunity_search(
     arg_name="search_params",
     examples=csv_examples,
 )
-@opportunity_blueprint.auth_required(api_key_multi_auth)
+@opportunity_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @opportunity_blueprint.doc(
     description=SHARED_ALPHA_DESCRIPTION,
     responses={200: {"content": {"text/csv": {}}}},  # type: ignore

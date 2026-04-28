@@ -63,18 +63,22 @@ export function CreateOpportunityForm({
         top: 0,
         behavior: "smooth",
       });
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDisableSave(true);
       if (selectedCategoryId.trim() !== "other") {
         setExplain(""); // need to manually set this for checks below to work correctly
       }
     }
-  }, [response, router]);
+  }, [response, router, selectedCategoryId]);
 
   // Use useEffect to check fields when inputs change
   useEffect(
     () => {
       // Category: if Other then show the Explanation field
       if (selectedCategoryId.trim() === "other") {
+        // TODO #9633
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setShowExplain(true);
       } else {
         setShowExplain(false);

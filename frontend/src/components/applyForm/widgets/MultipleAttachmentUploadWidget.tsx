@@ -108,6 +108,8 @@ const MultipleAttachmentUploadWidget = ({
         };
       });
 
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUploadedFiles(hydrated);
       uploadedFilesRef.current = hydrated;
       hasHydratedRef.current = true;
@@ -117,6 +119,8 @@ const MultipleAttachmentUploadWidget = ({
   useEffect(() => {
     if (deleteState?.success && fileToDeleteIndex !== null) {
       const updated = uploadedFiles.filter((_, i) => i !== fileToDeleteIndex);
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUploadedFiles(updated);
       uploadedFilesRef.current = updated;
       onChange?.(updated.map((f) => f.id));

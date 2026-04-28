@@ -383,6 +383,8 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
    * reload, or navigation back into the form.
    */
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRows(
       normalizeFieldListRows({
         value,

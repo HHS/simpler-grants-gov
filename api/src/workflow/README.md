@@ -407,6 +407,14 @@ on the table. This constraint makes it so exactly 1 of the entities is set.
 We have a [get_workflow_entity](./service/workflow_service.py) function that finds the workflow entity for new workflows.
 Add logic to this to find the table from its primary key in the same pattern.
 
+### Adjust entity load and authorization logic
+In [get_workflow.py](../services/workflows/get_workflow.py),
+- update `_verify_workflow_access_and_build_config()` to map entity type to required privilege
+- update `_workflow_load_options()` to eagerly load all of the entity data
+
+### Adjust the logic to get agency for the workflow
+In [approval_service.py](./service/approval_service.py), update the `get_agency_for_workflow()` to get agency record from the entity opportunity field.
+
 ### Add a persistence handler
 Like our [opportunity_persistence_model](./state_persistence/opportunity_persistence_model.py)
 add a class that handles persistence for that particular type, following the same pattern.

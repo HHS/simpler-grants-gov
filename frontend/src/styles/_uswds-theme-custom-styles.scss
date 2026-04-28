@@ -1075,11 +1075,6 @@ input[type="checkbox"]:not(checked) ~ .saved-opportunity-radius-md,
   pointer-events: none;
 }
 
-.notification-preference-card__loading-text {
-  color: color("gray-warm-70");
-  font-size: size("sans", "2xs");
-}
-
 .notifications-page-error-enter {
   animation: notifications-page-error-fade-in 180ms ease-out;
 }

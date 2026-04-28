@@ -71,6 +71,8 @@ export const AllOptionCheckbox = ({
   const label = `${t("all")} ${title}`;
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setChecked(
       topLevelSelected ||
         isSubset<string>(childOptionValues, currentSelectionValues),

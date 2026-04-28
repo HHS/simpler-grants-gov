@@ -287,7 +287,7 @@ resource "aws_api_gateway_integration" "root" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri = "https://${var.optional_extra_alb_domains[0]}/"
+  uri = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/"
 }
 
 resource "aws_api_gateway_resource" "root_endpoints" {
@@ -327,7 +327,7 @@ resource "aws_api_gateway_integration" "root_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -368,7 +368,7 @@ resource "aws_api_gateway_integration" "first_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -409,7 +409,7 @@ resource "aws_api_gateway_integration" "second_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -450,7 +450,7 @@ resource "aws_api_gateway_integration" "third_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -491,7 +491,7 @@ resource "aws_api_gateway_integration" "fourth_level_endpoints" {
   passthrough_behavior = "WHEN_NO_MATCH"
   timeout_milliseconds = 29000
 
-  uri                = "https://${var.optional_extra_alb_domains[0]}/${replace(each.value.endpoint, "+", "")}"
+  uri                = "https://${length(var.optional_extra_alb_domains) > 0 ? var.optional_extra_alb_domains[0] : var.domain_name}/${replace(each.value.endpoint, "+", "")}"
   request_parameters = each.value.request_parameters
 }
 
@@ -565,7 +565,7 @@ resource "aws_api_gateway_method_settings" "api_v1_stage_settings" {
 }
 
 resource "aws_api_gateway_domain_name" "api" {
-  count = var.enable_api_gateway ? 1 : 0
+  count = var.enable_api_gateway && var.certificate_arn != null ? 1 : 0
   # This will become a different variable since it will be the current API domain and cert
   domain_name              = var.domain_name
   regional_certificate_arn = var.certificate_arn
@@ -578,7 +578,7 @@ resource "aws_api_gateway_domain_name" "api" {
 }
 
 resource "aws_api_gateway_base_path_mapping" "api_domain_name_mapping_v1" {
-  count       = var.enable_api_gateway ? 1 : 0
+  count       = var.enable_api_gateway && var.certificate_arn != null ? 1 : 0
   api_id      = aws_api_gateway_rest_api.api[0].id
   domain_name = aws_api_gateway_domain_name.api[0].domain_name
   stage_name  = aws_api_gateway_stage.api_v1_stage[0].stage_name

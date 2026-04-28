@@ -10,7 +10,10 @@ jest.mock("@trussworks/react-uswds", () => ({
     name: string;
     checked: boolean;
     disabled?: boolean;
-    onChange?: (event: { target: { checked: boolean } }) => void;
+    onChange?: (event: {
+      target: { checked: boolean };
+      currentTarget: { checked: boolean };
+    }) => void;
     "aria-labelledby"?: string;
     "aria-describedby"?: string;
   }) => {
@@ -31,11 +34,19 @@ jest.mock("@trussworks/react-uswds", () => ({
             target: {
               checked: event.currentTarget.checked,
             },
+            currentTarget: {
+              checked: event.currentTarget.checked,
+            },
           });
         }}
       />
     );
   },
+}));
+
+jest.mock("src/components/Spinner", () => ({
+  __esModule: true,
+  default: () => <span role="progressbar" aria-label="Loading!" />,
 }));
 
 describe("NotificationPreferenceCard", () => {
@@ -104,16 +115,17 @@ describe("NotificationPreferenceCard", () => {
     expect(screen.getByTestId("notification-checkbox")).toBeDisabled();
   });
 
-  it("shows loading text when isLoading is true", () => {
+  it("shows loading indicator when isLoading is true", () => {
     render(<NotificationPreferenceCard {...baseProps} isLoading={true} />);
 
-    expect(screen.getByText("Saving...")).toBeInTheDocument();
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    expect(screen.getByText("srPendingSave")).toBeInTheDocument();
   });
 
-  it("does not show loading text when not loading", () => {
+  it("does not show loading indicator when not loading", () => {
     render(<NotificationPreferenceCard {...baseProps} />);
 
-    expect(screen.queryByText("Saving...")).not.toBeInTheDocument();
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
   });
 
   it("passes disabled=false to Checkbox when not disabled or loading", () => {

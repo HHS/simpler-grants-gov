@@ -4,3 +4,5 @@ export type NotificationOrganization = {
 };
 
 export type NotificationPreferenceKey = string;
+
+export type NotificationPreferenceValues = Record<string, boolean>;

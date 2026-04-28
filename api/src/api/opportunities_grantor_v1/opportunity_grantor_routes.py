@@ -20,6 +20,10 @@ from src.services.opportunities_grantor_v1.opportunity_summaries import (
     update_opportunity_summary,
 )
 from src.services.opportunities_grantor_v1.opportunity_update import update_opportunity
+from src.services.opportunities_grantor_v1.opportunity_upload import (
+    delete_opportunity_attachment,
+    upload_opportunity_attachment,
+)
 from src.services.opportunities_grantor_v1.publish_opportunity import publish_opportunity
 
 logger = logging.getLogger(__name__)
@@ -175,6 +179,68 @@ def opportunity_summary_update(
         )
 
     return response.ApiResponse(message="Success", data=opportunity_summary)
+
+
+@opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/attachments")
+@opportunity_grantor_blueprint.input(
+    opportunity_grantor_schemas.OpportunityUploadAttachmentRequestV1Schema(), location="files"
+)
+@opportunity_grantor_blueprint.output(
+    opportunity_grantor_schemas.OpportunityUploadAttachmentResponseV1Schema()
+)
+@opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
+@flask_db.with_db_session()
+def opportunity_upload_attachments(
+    db_session: db.Session, opportunity_id: UUID, files_data: dict
+) -> response.ApiResponse:
+    """Upload an attachment to an opportunity"""
+    add_extra_data_to_current_request_logs({"opportunity_id": opportunity_id})
+    logger.info("POST /v1/grantors/opportunities/:opportunity_id/attachments")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        file_description = files_data.get("file_description", "")
+
+        attachment_id = upload_opportunity_attachment(
+            db_session, user, opportunity_id, files_data["file_attachment"], file_description
+        )
+
+    return response.ApiResponse(
+        message="Attachment uploaded successfully",
+        data={"opportunity_attachment_id": attachment_id, "file_description": file_description},
+    )
+
+
+@opportunity_grantor_blueprint.delete(
+    "/opportunities/<uuid:opportunity_id>/attachments/<uuid:opportunity_attachment_id>"
+)
+@opportunity_grantor_blueprint.output(
+    opportunity_grantor_schemas.DeleteAttachmentResponseV1Schema()
+)
+@opportunity_grantor_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@opportunity_grantor_blueprint.doc(responses=[200, 403, 404, 422, 500])
+@flask_db.with_db_session()
+def opportunity_delete_attachment(
+    db_session: db.Session, opportunity_id: UUID, opportunity_attachment_id: str
+) -> response.ApiResponse:
+    """Delete an attachment from an opportunity"""
+    add_extra_data_to_current_request_logs(
+        {"opportunity_id": opportunity_id, "opportunity_attachment_id": opportunity_attachment_id}
+    )
+    logger.info(
+        "DELETE /v1/grantors/opportunities/:opportunity_id/attachments/:opportunity_attachment_id"
+    )
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        delete_opportunity_attachment(db_session, user, opportunity_id, opportunity_attachment_id)
+
+    return response.ApiResponse(message="Attachment successfully deleted")
 
 
 @opportunity_grantor_blueprint.post("/opportunities/<uuid:opportunity_id>/publish")

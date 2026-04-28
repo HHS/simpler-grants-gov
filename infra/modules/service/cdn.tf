@@ -106,7 +106,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   count = local.enable_cdn ? 1 : 0
 
   enabled = local.enable_cdn ? true : false
-  aliases = local.cdn_domain_name == null ? null : [local.cdn_domain_name]
+  aliases = local.cdn_certificate_arn != null && local.cdn_domain_name != null ? [local.cdn_domain_name] : null
 
   dynamic "origin" {
     for_each = var.enable_alb_cdn ? [1] : []

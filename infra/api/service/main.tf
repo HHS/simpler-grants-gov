@@ -120,8 +120,7 @@ data "aws_acm_certificate" "cert" {
 }
 
 data "aws_acm_certificate" "secondary_certs" {
-  # Get secondary domain names if they exists
-  for_each    = toset(lookup(local.service_config, "secondary_domain_names", []))
+  for_each    = local.service_config.enable_https ? toset(lookup(local.service_config, "secondary_domain_names", [])) : toset([])
   domain      = each.value
   most_recent = true
 }
@@ -130,6 +129,7 @@ data "aws_acm_certificate" "s3_cdn_cert" {
   count       = local.service_config.s3_cdn_domain_name != null ? 1 : 0
   domain      = local.service_config.s3_cdn_domain_name
   most_recent = true
+  key_types   = ["RSA_2048", "RSA_4096"]
 }
 
 data "aws_acm_certificate" "mtls_cert" {
@@ -191,7 +191,7 @@ module "service" {
   hosted_zone_id = null
 
   # This is used by the API when hosting a side-by-side ALB for mTLS traffic to the API
-  enable_mtls_load_balancer = true
+  enable_mtls_load_balancer = local.service_config.mtls_domain_name != null
   mtls_domain_name          = local.service_config.mtls_domain_name
   mtls_certificate_arn      = local.service_config.mtls_domain_name != null ? data.aws_acm_certificate.mtls_cert[0].arn : null
 

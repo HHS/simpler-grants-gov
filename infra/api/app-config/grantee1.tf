@@ -5,10 +5,10 @@ module "grantee1_config" {
   default_region                    = module.project_config.default_region
   environment                       = "grantee1"
   network_name                      = "grantee1"
-  domain_name                       = "api.grantee1.simpler.grants.gov"
-  secondary_domain_names            = ["alb.grantee1.simpler.grants.gov"]
-  s3_cdn_domain_name                = "files.grantee1.simpler.grants.gov"
-  mtls_domain_name                  = "soap.grantee1.simpler.grants.gov"
+  domain_name                       = "api.grantee1.teams.simpler.grants.gov"
+  secondary_domain_names            = []
+  s3_cdn_domain_name                = "files.grantee1.teams.simpler.grants.gov"
+  mtls_domain_name                  = null
   enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
@@ -17,7 +17,8 @@ module "grantee1_config" {
   enable_identity_provider          = local.enable_identity_provider
   enable_notifications              = local.enable_notifications
   service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyOTQ0MjI1MTY3MzU4ODU5ODY4"
-  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtOTg3MzU3MDI4MjI5NDg3MDk4"
+  service_newrelic_mtls_entity_guid = null
+  api_host_newrelic_entity_guid     = "<PLACEHOLDER>"
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-staging/services/api-staging/health?region=us-east-1
@@ -50,7 +51,7 @@ module "grantee1_config" {
     RESET_EMAILS_WITHOUT_SENDING = "false"
 
     # PDF Generation - Staging overrides
-    FRONTEND_URL             = "https://grantee1.simpler.grants.gov"
+    FRONTEND_URL             = "https://grantee1.teams.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
   }

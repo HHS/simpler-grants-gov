@@ -1,12 +1,14 @@
 "use client";
 
-import { ReactElement, useState } from "react";
+import { ReactElement, startTransition, useState } from "react";
 import { Alert, GridContainer } from "@trussworks/react-uswds";
 
+import { updateSavedOpportunityNotificationPreferenceAction } from "./actions";
 import { NotificationPreferenceCard } from "./NotificationPreferenceCard";
 import {
   NotificationOrganization,
   NotificationPreferenceKey,
+  NotificationPreferenceValues,
 } from "./NotificationTypes";
 import { OrganizationPreferenceSection } from "./OrganizationPreferenceSection";
 
@@ -22,14 +24,21 @@ export interface NotificationsPageContentProps {
   organizationSavedOpportunitiesDescription: string;
   organizations: NotificationOrganization[];
   hasOrganizationsFetchError: boolean;
+  initialPreferenceValues: NotificationPreferenceValues;
 }
 
-/**
- * Centralized error message for failed preference updates.
- * This should eventually come from translations when backend wiring is complete.
- */
 const SAVE_ERROR_MESSAGE =
   "Your notification preference was not saved. Refresh the page to try again.";
+
+function buildPersonalPreferenceKey(): NotificationPreferenceKey {
+  return "saved-opportunities";
+}
+
+function buildOrganizationPreferenceKey(
+  organizationId: string,
+): NotificationPreferenceKey {
+  return `organization-${organizationId}-saved-opportunities`;
+}
 
 export function NotificationsPageContent({
   pageHeading,
@@ -43,142 +52,104 @@ export function NotificationsPageContent({
   organizationSavedOpportunitiesDescription,
   organizations,
   hasOrganizationsFetchError,
+  initialPreferenceValues,
 }: NotificationsPageContentProps): ReactElement {
   /**
-   * Page-level error state.
-   * Used for:
-   * - organization fetch failures
-   * - preference save failures (fallback/global message)
+   * Current checkbox state for personal + organization preferences.
+   * Values are hydrated from the server on initial render and updated
+   * only after successful API responses.
    */
-  const [pageLevelErrorMessage, setPageLevelErrorMessage] = useState<
-    string | null
-  >(null);
+  const [preferenceValues, setPreferenceValues] =
+    useState<NotificationPreferenceValues>(initialPreferenceValues);
 
   /**
-   * Tracks which preference is currently being saved.
-   * Used to:
-   * - disable the corresponding control
-   * - show inline loading state
+   * Tracks the row currently saving so we can disable it and show inline loading.
    */
   const [savingPreferenceKey, setSavingPreferenceKey] =
     useState<NotificationPreferenceKey | null>(null);
 
   /**
-   * Tracks which preference failed to save.
-   * Used to:
-   * - render inline error message
-   * - apply error styling to the row
+   * Tracks the row that most recently failed to save so we can render
+   * row-level error styling and inline messaging.
    */
   const [errorPreferenceKey, setErrorPreferenceKey] =
     useState<NotificationPreferenceKey | null>(null);
 
   /**
-   * Local UI state for organization preferences.
-   * These are currently client-only toggles (no API call yet).
+   * Top-level error banner message for failed save requests.
+   * Organization fetch failures still come from props and take lower priority.
    */
-  const [organizationPreferenceValues, setOrganizationPreferenceValues] =
-    useState<Record<string, boolean>>(() =>
-      Object.fromEntries(
-        organizations.map((organization) => [
-          `organization-${organization.organizationId}-saved-opportunities`,
-          false,
-        ]),
-      ),
-    );
+  const [pageLevelErrorMessage, setPageLevelErrorMessage] = useState<
+    string | null
+  >(null);
 
-  /**
-   * Handles toggle for primary (non-organization) preferences.
-   *
-   * CURRENT BEHAVIOR (placeholder for future API integration):
-   * - simulates async save
-   * - always results in failure to demonstrate error states
-   *
-   * FUTURE:
-   * - replace with API call
-   * - set success/error based on response
-   */
-  async function handlePreferenceToggle(
+  function handlePreferenceToggle(
     preferenceKey: NotificationPreferenceKey,
-  ): Promise<void> {
+    organizationId: string | null,
+  ): void {
+    const currentValue = preferenceValues[preferenceKey] ?? false;
+    const nextValue = !currentValue;
+
     setPageLevelErrorMessage(null);
     setErrorPreferenceKey(null);
     setSavingPreferenceKey(preferenceKey);
 
-    // Simulated network delay
-    await new Promise((resolve) => {
-      window.setTimeout(resolve, 1200);
+    startTransition(async () => {
+      const actionResult =
+        await updateSavedOpportunityNotificationPreferenceAction({
+          organizationId,
+          emailEnabled: nextValue,
+        });
+
+      setSavingPreferenceKey(null);
+
+      if (!actionResult?.success) {
+        setErrorPreferenceKey(preferenceKey);
+        setPageLevelErrorMessage(actionResult?.error ?? SAVE_ERROR_MESSAGE);
+        return;
+      }
+
+      setPreferenceValues((previousValues) => ({
+        ...previousValues,
+        [preferenceKey]: nextValue,
+      }));
     });
-
-    // Simulated failure state
-    setSavingPreferenceKey(null);
-    setErrorPreferenceKey(preferenceKey);
-    setPageLevelErrorMessage(SAVE_ERROR_MESSAGE);
   }
 
   /**
-   * Handles toggle for organization preferences.
-   *
-   * CURRENT BEHAVIOR:
-   * - updates local UI state only
-   * - does not simulate loading or error
-   *
-   * FUTURE:
-   * - mirror behavior of handlePreferenceToggle
-   * - integrate API + loading + error handling
-   */
-  function handleOrganizationPreferenceToggle(
-    preferenceKey: NotificationPreferenceKey,
-  ): void {
-    setPageLevelErrorMessage(null);
-    setErrorPreferenceKey(null);
-
-    setOrganizationPreferenceValues((previousValues) => ({
-      ...previousValues,
-      [preferenceKey]: !previousValues[preferenceKey],
-    }));
-  }
-
-  /**
-   * Determines which error message to show at the page level.
-   * Priority:
-   * 1. preference save error
-   * 2. organization fetch error
+   * Save failures take precedence over the initial fetch error so the user
+   * gets the most recent and relevant feedback.
    */
   const pageErrorMessage =
     pageLevelErrorMessage ??
     (hasOrganizationsFetchError ? fetchErrorMessage : null);
 
-  /**
-   * Derived state for primary "Saved Opportunities" preference
-   */
+  const personalPreferenceKey = buildPersonalPreferenceKey();
   const isSavingSavedOpportunities =
-    savingPreferenceKey === "saved-opportunities";
-
+    savingPreferenceKey === personalPreferenceKey;
   const hasSavedOpportunitiesError =
-    errorPreferenceKey === "saved-opportunities";
+    errorPreferenceKey === personalPreferenceKey;
+  const isSavedOpportunitiesChecked =
+    preferenceValues[personalPreferenceKey] ?? false;
 
   return (
     <GridContainer className="padding-top-2 tablet:padding-y-6">
       <h1>{pageHeading}</h1>
 
-      {/* 
-        Page-level error region
-        - uses aria-live so screen readers announce updates
-        - animated for visual emphasis
-      */}
       <div className="margin-y-2" aria-live="polite">
-        {pageErrorMessage ? (
-          <div className="notifications-page-error-enter">
+        {pageErrorMessage && (
+          <div
+            className="margin-y-2 notifications-page-error-enter"
+            role="alert"
+            aria-atomic="true"
+          >
             <Alert slim={true} headingLevel="h6" noIcon={true} type="error">
               {pageErrorMessage}
             </Alert>
           </div>
-        ) : null}
+        )}
       </div>
 
-      {/* =====================
-          USER PREFERENCES
-      ===================== */}
       <section
         aria-labelledby="manage-your-preferences"
         className="margin-bottom-6"
@@ -194,18 +165,11 @@ export function NotificationsPageContent({
           {managePreferencesDescription}
         </p>
 
-        {/*
-          Primary preference row
-
-          NOTE:
-          - currently simulates loading + failure
-          - used to validate UX patterns (loading, error, retry)
-        */}
         <NotificationPreferenceCard
-          checkboxId="saved-opportunities"
+          checkboxId={personalPreferenceKey}
           label={savedOpportunitiesLabel}
           description={savedOpportunitiesDescription}
-          isChecked={true}
+          isChecked={isSavedOpportunitiesChecked}
           isDisabled={isSavingSavedOpportunities}
           isLoading={isSavingSavedOpportunities}
           hasError={hasSavedOpportunitiesError}
@@ -213,16 +177,11 @@ export function NotificationsPageContent({
             hasSavedOpportunitiesError ? SAVE_ERROR_MESSAGE : undefined
           }
           onCheckedChange={() => {
-            handlePreferenceToggle("saved-opportunities").catch(() => {
-              // no-op: placeholder async error path is handled inside the component state
-            });
+            handlePreferenceToggle(personalPreferenceKey, null);
           }}
         />
       </section>
 
-      {/* =====================
-          ORGANIZATION PREFERENCES
-      ===================== */}
       {organizations.length > 0 ? (
         <section aria-labelledby="organization-preferences">
           <h2 id="organization-preferences" className="margin-bottom-1">
@@ -235,13 +194,14 @@ export function NotificationsPageContent({
 
           <div className="display-grid gap-4">
             {organizations.map((organization) => {
-              const preferenceKey = `organization-${organization.organizationId}-saved-opportunities`;
-
+              const preferenceKey = buildOrganizationPreferenceKey(
+                organization.organizationId,
+              );
               const isSavingThisPreference =
                 savingPreferenceKey === preferenceKey;
-
               const hasErrorThisPreference =
                 errorPreferenceKey === preferenceKey;
+              const isChecked = preferenceValues[preferenceKey] ?? false;
 
               return (
                 <OrganizationPreferenceSection
@@ -249,9 +209,7 @@ export function NotificationsPageContent({
                   organization={organization}
                   label={savedOpportunitiesLabel}
                   description={organizationSavedOpportunitiesDescription}
-                  isChecked={
-                    organizationPreferenceValues[preferenceKey] ?? false
-                  }
+                  isChecked={isChecked}
                   isDisabled={isSavingThisPreference}
                   isLoading={isSavingThisPreference}
                   hasError={hasErrorThisPreference}
@@ -259,7 +217,10 @@ export function NotificationsPageContent({
                     hasErrorThisPreference ? SAVE_ERROR_MESSAGE : undefined
                   }
                   onCheckedChange={() => {
-                    handleOrganizationPreferenceToggle(preferenceKey);
+                    handlePreferenceToggle(
+                      preferenceKey,
+                      organization.organizationId,
+                    );
                   }}
                 />
               );

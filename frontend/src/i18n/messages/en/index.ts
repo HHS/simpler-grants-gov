@@ -289,7 +289,7 @@ export const messages = {
       stagePosted: "Open for applications",
       saveButton: "Save",
       previewButton: "Preview",
-      submitButton: "Submit for review",
+      publishButton: "Publish",
       navTitle: "On this page",
     },
     sections: {
@@ -382,6 +382,8 @@ export const messages = {
       contactEmailHint: "Enter a valid email address.",
       contactEmailTextHint:
         "Enter the text that will be shown as the email link.",
+      attachmentsIntro:
+        "Upload the official Notice of Funding Opportunity (NOFO) and any supporting templates or guidelines that applicants need to complete their submission.",
       reviewButton: {
         idle: "Review required fields",
         pending: "Reviewing...",
@@ -428,6 +430,13 @@ export const messages = {
       additionalInfoUrl: "Enter an additional information URL.",
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
+    },
+    attachments: {
+      removeButton: "Remove",
+      errorHeading: "Upload error",
+      errorUploadFailed: "Failed to upload {fileName}.",
+      errorDeleteFailed: "Failed to delete {fileName}.",
+      errorFileTooLarge: "{fileName} exceeds the 2GB file size limit.",
     },
   },
   Application: {
@@ -1197,6 +1206,8 @@ export const messages = {
       showAll: "Show all",
       individual: "Individual",
     },
+    toNotificationsPreferences:
+      "Take a closer look at the opportunities you've saved and share any that feel like a good fit for your organization. Shared opportunities are saved for all members to view.  <link>Manage your notification preferences here.</link>",
   },
   Roadmap: {
     pageTitle: "Roadmap | Simpler.Grants.gov",
@@ -1992,7 +2003,7 @@ export const messages = {
       "{num, plural, =1 {1 opportunity} other {# opportunities}}",
     errorMessage:
       "We have encountered an error loading your opportunities, please try again later.",
-    metaDescription: "View your saved opportunities",
+    metaDescription: "View draft and published funding opportunities",
     noOpportunitiesMessage: {
       primary: "You have not started any opportunities yet.",
       secondary:
@@ -2004,7 +2015,8 @@ export const messages = {
       "You do not have access to this agency's opportunities.",
     noAgencies: "You are not associated with any agencies.",
     pageHeading: "Opportunities",
-    pageTitle: "Opportunities",
+    pageTitle: "Opportunities List",
+    pageApplication: "Smarter Grants Management",
     tableContents: {
       agency: "Agency: ",
       draft: "Draft",
@@ -2172,7 +2184,9 @@ export const messages = {
     ],
   },
   CreateOpportunity: {
-    pageTitle: "Create an opportunity",
+    pageTitle: "Create Opportunity",
+    pageApplication: "Smarter Grants Management",
+    metaDescription: "Create a new funding opportunity",
     errorMessage:
       "We have encountered an error loading this page, please try again later.",
     keyInfo: "Key information",
@@ -2221,5 +2235,9 @@ export const messages = {
     fetchError:
       "Your notification preferences could not be loaded. Refresh the page to try again.",
     organizationPreferencesSuffix: "Preferences",
+    expiredSession: "Session has expired",
+    preferencesNotSavedError:
+      "Your notification preference was not saved. Refresh the page to try again.",
+    srPendingSave: "Saving notification preference...",
   },
 };
