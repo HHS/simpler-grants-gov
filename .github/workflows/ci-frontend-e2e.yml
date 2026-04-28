@@ -353,7 +353,7 @@ jobs:
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
           # Run init first to generate JWT keys in override.env
 
-          make init-ci-cd db-seed-local-with-agencies populate-search-opportunities populate-search-agencies
+          make init-ci-cd db-seed-local-with-agencies
 
           ls -a
 
@@ -367,7 +367,7 @@ jobs:
 
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          make start
+          make populate-search-opportunities populate-search-agencies start
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
