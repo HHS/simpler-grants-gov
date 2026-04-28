@@ -8,7 +8,7 @@ Feature: Search Results Visibility
   So that I can find funding opportunities quickly
 
   Background:
-    Given I am on the Search Funding Opportunity page
+    Given I am on the "Search funding opportunity" page
     When I search for "grants"
 
   Scenario: Valid search term shows at least one result in heading
