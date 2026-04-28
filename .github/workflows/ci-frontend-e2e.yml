@@ -285,8 +285,8 @@ jobs:
         run: |
           docker image ls
 
-      - name: Restore Docker image cached
-        id: restore-docker-image-cached
+      - name: Restore API Docker image cached
+        id: restore-api-docker-image-cached
         uses: actions/cache/restore@v5
         with:
           path: /tmp/docker-image.tar
@@ -307,19 +307,45 @@ jobs:
           echo "Failing because we couldn't load the API image from cache"
           exit 1
 
-      - name: Load cached Docker image (alias it if needed)
-        if: steps.restore-docker-image-cached.outputs.cache-matched-key != ''
+      - name: Load cached API Docker image (alias it if needed)
+        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key != ''
         run: |
           docker load < /tmp/docker-image.tar
           # alias the live docker container name simpler-grants-gov-api to the locally build name api-grants-api so that we don't rebuild it in later steps.
           IMAGE_ID="$(docker image ls -q simpler-grants-gov-api)"
           docker tag "$IMAGE_ID" api-grants-api:latest || true
 
+      - name: Restore DB Docker image cached
+        id: restore-db-docker-image-cached
+        uses: actions/cache@v5
+        with:
+          path: /tmp/postgres-docker-image.tar
+          key: postgres-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
+      - name: Load cached DB Docker image (alias it if needed)
+        if: steps.restore-db-docker-image-cached.outputs.cache-hit == 'true'
+        run: |
+          docker load < /tmp/db-docker-image.tar
+
       - name: Docker images
         run: |
           docker image ls
 
+      - name: Build API Server for e2e tests (if not cached)
+        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key == ''
+        run: |
+          cd ../api
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+
+          make build
+
       - name: Init API Server for e2e tests
+        # if we don't find an existing PG DB image for this API git sha, initialize our empty DB image
+        # if we have an existing image, it's already had this run
+        if: steps.restore-db-docker-image-cached.outputs.cache-hit != 'true'
         run: |
           cd ../api
           # Enable core dumps for debugging segfaults
@@ -328,7 +354,7 @@ jobs:
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
           # Run init first to generate JWT keys in override.env
 
-          make init-ci-cd
+          make init-ci-cd db-seed-local-with-agencies populate-search-opportunities populate-search-agencies
 
           ls -a
 
@@ -342,7 +368,7 @@ jobs:
 
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          make start
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
@@ -412,6 +438,23 @@ jobs:
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
           force-webkit-install: "true"
+
+      - name: Save DB Docker image to file
+        run: |
+          docker save  > /tmp/postgres-docker-image.tar
+
+      - name: Save API Docker image to file
+        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key == ''
+        run: |
+          docker save api-grants-api > /tmp/docker-image.tar
+
+      - name: Save API Docker image cache
+        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key == ''
+        id: save-api-docker-image-cache
+        uses: actions/cache/save@v5
+        with:
+          path: /tmp/docker-image.tar
+          key: api-docker-test-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
   create-report:
     name: Create Merged Test Report
