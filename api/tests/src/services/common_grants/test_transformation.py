@@ -716,10 +716,10 @@ class TestTransformation:
         assert new_result is None, "validate_url() should reject NASA URL"
 
     def test_validate_url_rejects_urls_that_marshmallow_url_field_rejects(self):
-        """Reproduces issue #9904: validate_url() must also reject URLs that pass
-        Pydantic's HttpUrl but fail marshmallow's URL field. The CG response is loaded
-        through marshmallow on the way out; a URL that pydantic accepts but marshmallow
-        rejects 500s the entire response (one bad record kills the batch).
+        """validate_url() must also reject URLs that pass Pydantic's HttpUrl but fail
+        marshmallow's URL field. The CG response is loaded through marshmallow on the
+        way out; a URL that pydantic accepts but marshmallow rejects 500s the entire
+        response (one bad record kills the batch).
 
         Concrete divergence: comma-separated URLs — agencies sometimes paste multiple
         URLs into one field. Pydantic's HttpUrl mangles 'https://a.gov,https://b.gov'
@@ -741,7 +741,7 @@ class TestTransformation:
         )
 
     def test_search_response_marshmallow_load_does_not_500_on_problematic_url(self):
-        """End-to-end recreation of issue #9904.
+        """End-to-end recreation of the prod 500.
 
         Builds an opportunity whose summary.additional_info_url is the comma-separated
         form that triggers the prod 500. Runs the same pipeline the route uses:
@@ -798,7 +798,7 @@ class TestTransformation:
         )
         response_json = response.model_dump(by_alias=True, mode="json")
 
-        # This is the line that raises marshmallow.ValidationError in prod (issue #9904).
+        # This is the line that raises marshmallow.ValidationError in prod.
         validated = OpportunitiesSearchResponseSchema().load(response_json)
 
         assert len(validated["items"]) == 1
@@ -836,8 +836,8 @@ class TestTransformation:
         assert "secret" not in log_record.getMessage()
 
     def test_attachment_download_url_dual_validates(self):
-        """Sibling of issue #9904 for the attachment path. AttachmentValue.downloadUrl
-        in the CG response is loaded through marshmallow's fields.URL on the way out;
+        """Sibling of the additional-info-url path: AttachmentValue.downloadUrl in
+        the CG response is loaded through marshmallow's fields.URL on the way out;
         the field validator on the pydantic model must reject the same divergent
         strings (comma-URLs, scheme-only-host) that validate_url rejects, otherwise
         an attachment with a malformed download_path 500s the whole batch in the same

@@ -157,9 +157,9 @@ def validate_url(value: str | None) -> str | None:
     """Return ``value`` normalized only if both pydantic and marshmallow accept it.
 
     Delegates the dual-validation to ``validate_url_compatible``; this wrapper
-    adds the ops log on failure so we can spot data-quality issues (issue #9904).
-    Userinfo is stripped from the logged URL to avoid leaking ``user:password@``
-    if grants.gov data ever ships one through.
+    adds the ops log on failure so we can spot data-quality issues. Userinfo
+    is stripped from the logged URL to avoid leaking ``user:password@`` if
+    grants.gov data ever ships one through.
     """
     result = validate_url_compatible(value)
     if result is None and value not in (None, ""):

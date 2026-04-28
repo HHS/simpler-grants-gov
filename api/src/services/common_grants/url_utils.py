@@ -4,9 +4,11 @@ Pydantic's HttpUrl and marshmallow's fields.URL disagree on a handful of inputs
 (comma-separated URLs, scheme-only-host like "http://example", etc.). Pydantic
 accepts and normalizes; marshmallow rejects. Because the CG response is loaded
 through marshmallow on the way out, any URL accepted by pydantic but rejected
-by marshmallow blows up the entire batch with a 500 (issue #9904). This module
-exposes a single helper that requires both validators to accept, so divergent
-strings are dropped at the source.
+by marshmallow blows up the entire batch with a 500. This module exposes a
+single helper that requires both validators to accept, so divergent strings
+are dropped at the source.
+
+Background and reproduction: https://github.com/HHS/simpler-grants-gov/issues/9904
 """
 
 from urllib.parse import urlsplit, urlunsplit
@@ -34,10 +36,9 @@ def validate_url_compatible(value: str | None) -> str | None:
     marshmallow's fields.URL; otherwise None.
 
     The CG response is loaded through marshmallow on the way out, so a URL
-    accepted only by pydantic blows up the entire batch (issue #9904).
-    Returning the pydantic-normalized form means downstream callers see a
-    consistent string and that exact string is what the response load
-    re-validates.
+    accepted only by pydantic blows up the entire batch. Returning the
+    pydantic-normalized form means downstream callers see a consistent string
+    and that exact string is what the response load re-validates.
     """
     if value is None or value == "":
         return None

@@ -68,8 +68,8 @@ class TestRedactUrlUserinfo:
     def test_malformed_port_returns_sentinel_not_raise(self):
         """Reviewer-flagged regression guard: SplitResult.port raises ValueError
         on non-numeric ports. If the helper let that propagate, the redact-then-log
-        path would crash exactly the way #9904 was crashing — fail-hard on a
-        single bad URL string. Must return the sentinel, not raise.
+        path would crash on a single bad URL string — exactly the fail-hard
+        behavior this module exists to remove. Must return the sentinel, not raise.
         """
         # No exception:
         result = redact_url_userinfo("https://user:secret@host:abc/path")
