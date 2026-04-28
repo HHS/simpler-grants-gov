@@ -53,7 +53,7 @@ resource "aws_ecs_task_definition" "workflow" {
       essential              = true,
       readonlyRootFilesystem = true,
 
-      command = ["poetry", "run", "flask", "workflow", "workflow-main"],
+      command = ["uv", "run", "flask", "workflow", "workflow-main"],
 
       healthCheck = null,
 

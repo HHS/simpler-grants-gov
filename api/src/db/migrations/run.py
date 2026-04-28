@@ -1,5 +1,5 @@
 # Convenience script for running alembic migration commands through a pyscript
-# rather than the command line. This allows poetry to package and alias it for
+# rather than the command line. This allows us to package and alias it for
 # running on the production docker image from any directory.
 import logging
 import os

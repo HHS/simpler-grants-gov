@@ -25,27 +25,21 @@ WORKDIR /api
 
 COPY pyproject.toml uv.lock ./
 
-# TODO - why did we do this?
 RUN rm -rf /api/.venv || true
-
-#ENV POETRY_VIRTUALENVS_IN_PROJECT=true
-#ENV VIRTUALENV_ALWAYS_COPY=1
-#ENV VIRTUALENV_APP_DATA="/tmp"
-
 
 COPY src /api/src
 COPY newrelic.ini /api/newrelic.ini
 
+# Disable dev dependencies in UV sync
 ENV UV_NO_DEV=1
-RUN uv sync --locked --no-dev
 
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
 RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
-    #/usr/local/bin/python"${PY_MM}" -m uv sync --locked --no-dev && \
-    # uv build --wheel && \
-    # /api/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
-    # /api/.venv/bin/python -m pip install --no-cache-dir "virtualenv>=20.35.3" && \
+    uv sync --locked --no-dev && \
+    uv build --wheel && \
+    uv pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
+    uv pip install --no-cache-dir "virtualenv>=20.35.3" && \
     SITE_BASE="/api/.venv/lib/python${PY_MM}/site-packages" && \
     mkdir -p "${SITE_BASE}/src" && \
     cp "/api/newrelic.ini" "${SITE_BASE}/src/newrelic.ini" && \
@@ -65,8 +59,7 @@ RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
 FROM base AS dev
 ARG RUN_USER
 
-RUN uv venv /opt/venv
-# Use the virtual environment automatically
+# In dev, prefer external venv to avoid mutating release venv
 ENV VIRTUAL_ENV=/opt/venv
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv
 # Place entry points in the environment at the front of the path
@@ -80,17 +73,10 @@ ENV TMPDIR="/tmp"
 USER ${RUN_USER}
 WORKDIR /api
 
-# In dev, prefer external venv to avoid mutating release venv
-# ENV POETRY_VIRTUALENVS_IN_PROJECT=false
-
 COPY pyproject.toml uv.lock ./
 
-# Explicitly create a new virtualenv
-#RUN poetry config virtualenvs.in-project false && poetry env use python
-
 # Install all dependencies including dev dependencies
-# RUN poetry install --no-root --with dev
-RUN uv sync --locked --all-groups --no-install-project --
+RUN uv venv /opt/venv && uv sync --locked --all-groups --no-install-project
 
 COPY . /api
 

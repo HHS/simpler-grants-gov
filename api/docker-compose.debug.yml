@@ -3,7 +3,7 @@
 services:
   grants-api:
     command: [
-      "poetry", "run", "python", "-m", "debugpy",
+      "uv", "run", "python", "-m", "debugpy",
       "--listen", "0.0.0.0:5678",
       "--wait-for-client",  "--log-to-stderr",
       "-m", "flask", "--app", "src.app", "run",

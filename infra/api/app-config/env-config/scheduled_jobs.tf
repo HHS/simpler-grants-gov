@@ -9,7 +9,7 @@ locals {
   load-transform-args = {
     # Runs, but with everything disabled.
     dev = [
-      "poetry",
+      "uv",
       "run",
       "flask",
       "data-migration",
@@ -20,7 +20,7 @@ locals {
       "--store-version"
     ],
     staging = [
-      "poetry",
+      "uv",
       "run",
       "flask",
       "data-migration",
@@ -31,7 +31,7 @@ locals {
       "--store-version"
     ],
     training = [
-      "poetry",
+      "uv",
       "run",
       "flask",
       "data-migration",
@@ -42,7 +42,7 @@ locals {
       "--store-version"
     ],
     grantee1 = [
-      "poetry",
+      "uv",
       "run",
       "flask",
       "data-migration",
@@ -53,7 +53,7 @@ locals {
       "--store-version"
     ],
     grantee2 = [
-      "poetry",
+      "uv",
       "run",
       "flask",
       "data-migration",
@@ -64,7 +64,7 @@ locals {
       "--store-version"
     ],
     prod = [
-      "poetry",
+      "uv",
       "run",
       "flask",
       "data-migration",
@@ -98,12 +98,12 @@ locals {
   }
   sam-extract-args = {
     # In dev/staging we don't fetch extracts, but generate our own
-    dev      = ["poetry", "run", "flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
-    staging  = ["poetry", "run", "flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
-    training = ["poetry", "run", "flask", "task", "sam-extracts"]
-    grantee1 = ["poetry", "run", "flask", "task", "sam-extracts"]
-    grantee2 = ["poetry", "run", "flask", "task", "sam-extracts"]
-    prod     = ["poetry", "run", "flask", "task", "sam-extracts"]
+    dev      = ["uv", "run", "flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    staging  = ["uv", "run", "flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    training = ["uv", "run", "flask", "task", "sam-extracts"]
+    grantee1 = ["uv", "run", "flask", "task", "sam-extracts"]
+    grantee2 = ["uv", "run", "flask", "task", "sam-extracts"]
+    prod     = ["uv", "run", "flask", "task", "sam-extracts"]
   }
   setup-lower-env-agencies-state = {
     dev      = "ENABLED"

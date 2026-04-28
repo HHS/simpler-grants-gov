@@ -58,15 +58,15 @@ make test args="-x -s -vv tests/src/api/users/test_user_route_login.py"
 
 ```bash
 make run-generate-notifications
-# executes poetry run flask task generate-notifications
+# executes uv run flask task generate-notifications
 
-# more generically, you can construct poetry run flask calls with make cmd
+# more generically, you can construct uv run flask calls with make cmd
 make cmd args="data-migration setup-foreign-tables"
 make cmd args="data-migration load-transform --no-load --transform --no-set-current"
 make cmd args="task create-analytics-db-csvs"
 ```
 
-Poetry CLI commands are of the form `<task group> <task name> <any other params>`. So in the above, data-migration is the task group for the first two, but then the task name is setup-foreign-tables and load-transform
+CLI commands are of the form `<task group> <task name> <any other params>`. So in the above, data-migration is the task group for the first two, but then the task name is setup-foreign-tables and load-transform
 
 ### In AWS
 
@@ -80,7 +80,7 @@ Poetry CLI commands are of the form `<task group> <task name> <any other params>
 3. Run the job
 
    ```bash
-   bin/run-command api <env> '["poetry", "run", "flask", "task", "generate-notifications"]'
+   bin/run-command api <env> '["uv", "run", "flask", "task", "generate-notifications"]'
    ```
 
 ## Technical Information

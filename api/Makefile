@@ -31,14 +31,14 @@ ifdef CI
  MYPY_POSTPROC := | perl -pe "s/^(.+):(\d+):(\d+): error: (.*)/::warning file=$(APP_DIR)\/\1,line=\2,col=\3::\4/"
 endif
 
-# By default, all python/poetry commands will run inside of the docker container
+# By default, all python/uv commands will run inside of the docker container
 # if you wish to run this natively, add PY_RUN_APPROACH=local to your environment vars
 # You can set this by either running `export PY_RUN_APPROACH=local` in your shell or add
 # it to your ~/.zshrc file (and run `source ~/.zshrc`)
 ifeq "$(PY_RUN_APPROACH)" "local"
-PY_RUN_CMD := poetry run
+PY_RUN_CMD := uv run
 else
-PY_RUN_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
+PY_RUN_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) uv run
 endif
 
 FLASK_CMD := $(PY_RUN_CMD) flask
@@ -78,11 +78,9 @@ release-build:
 ##################################################
 
 setup-local:
-	# Configure poetry to use virtualenvs in the project directory
-	poetry config virtualenvs.in-project true
-
 	# Install dependencies
-	poetry install --no-root --all-extras --with dev
+	# TODO - verify this is the right command
+	uv sync --all-groups
 
 setup-env-override-file:
 	./bin/setup-env-override-file.sh $(args)
@@ -182,7 +180,7 @@ db-check-migrations: ## Verify the DB schema matches the DB migrations generated
 	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
 
 create-erds: # Create ERD diagrams for our DB schema
-	docker compose run --rm openapi-tools poetry run create-erds
+	docker compose run --rm openapi-tools uv run create-erds
 	mv bin/*.png ../documentation/api/database/erds
 
 setup-postgres-db: ## Does any initial setup necessary for our local database to work
@@ -298,7 +296,7 @@ cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of C
 	$(FLASK_CMD) $(args)
 
 openapi-spec: ## Generate OpenAPI spec
-	docker compose run --rm openapi-tools poetry run flask --app src.app spec --format yaml --output openapi.generated.yml
+	docker compose run --rm openapi-tools uv run flask --app src.app spec --format yaml --output openapi.generated.yml
 
 openapi-spec-common-grants:
 	$(FLASK_CMD) common_grants spec --output ./openapi-cg.generated.yml

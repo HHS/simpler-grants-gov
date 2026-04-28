@@ -108,7 +108,7 @@ If you have created a brand new form in an environment and want it easily
 attached to an opportunity, we have an ECS task that can be run (requires AWS access)
 by running this with the appropriate environment:
 ```shell
-bin/run-command api staging '["poetry", "run", "flask", "task", "build-automatic-opportunities"]'
+bin/run-command api staging '["uv", "run", "flask", "task", "build-automatic-opportunities"]'
 ```
 
 What it will do is for each form will see if an opportunity already exists and if not
