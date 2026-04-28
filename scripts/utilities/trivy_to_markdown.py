@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
 import argparse
 import json
 import os
+import sys
 from pathlib import Path
 
 # trivy_to_markdown.py \
@@ -11,9 +13,8 @@ from pathlib import Path
 # Output is markdown table for nice viewing in Github
 
 
-# For auto-linking
-def file_link(target, start_line):
-    resolved = Path(args.scan_ref) / target
+def file_link(target, start_line, scan_ref, can_link, server_url, repository, sha):
+    resolved = Path(scan_ref) / target
     resolved = resolved.resolve().relative_to(Path.cwd())
     if can_link:
         url = f"{server_url}/{repository}/blob/{sha}/{resolved}#L{start_line}"
@@ -45,9 +46,15 @@ if __name__ == "__main__":
     # If these are all defined, we can link and will add links
     can_link = all([server_url, repository, sha])
 
-    # Open the trivy file for parsing
-    with open(args.results) as f:
-        data = json.load(f)
+    try:
+        with open(args.results) as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Results file {args.results} not found", file=sys.stderr)
+        sys.exit(0)
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON in {args.results}: {e}", file=sys.stderr)
+        sys.exit(0)
 
     # Pull out just what we want to get info on
     findings = []
@@ -79,7 +86,9 @@ if __name__ == "__main__":
                 cause = m.get("CauseMetadata", {})
                 start_line = cause.get("StartLine", 0)
                 location = (
-                    file_link(target, start_line) if start_line else f"`{target}`"
+                    file_link(target, start_line, args.scan_ref, can_link, server_url, repository, sha)
+                    if start_line
+                    else f"`{target}`"
                 )
                 lines.append(
                     f"| {severity} | {rule_id} | {title} | {message} | {location} |"
