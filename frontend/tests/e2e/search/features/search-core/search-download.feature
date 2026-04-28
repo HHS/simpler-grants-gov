@@ -8,7 +8,7 @@ Feature: Search Results CSV Download
   So that I can analyze results offline
 
   Background:
-    Given I am on the Search Funding Opportunity page
+    Given I am on the "Search funding opportunity" page
 
   Scenario: Download CSV from search results
     When I click the search results export button
