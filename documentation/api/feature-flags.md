@@ -1,11 +1,13 @@
-# Overview
+# API Feature Flags
+
+## Overview
 
 Feature flags are setup in the API to allow for configuring behavior of the endpoints.
 
 The flags have a default value which can be adjusted by an environment variable per environment,
 and also allow for overriding it via headers in the API endpoints.
 
-## Naming Convention
+### Naming Convention
 
 Naming of feature flags has the following convention:
 * Environment variables are always snake-case all-caps like `ENABLE_OPPORTUNITY_LOG_MSG`
@@ -14,7 +16,7 @@ Naming of feature flags has the following convention:
 The configuration internally within the API helps setup these values and maintain consistency.
 
 
-# Adding a New Feature Flag
+## Adding a New Feature Flag
 
 Add the flag to the `FeatureFlag` enum. The value of the enum will be used
 to generate the environment variable name as well as the header field name as described above.
@@ -103,14 +105,14 @@ def opportunity_search(
       # ... the rest of the route implementation
 ```
 
-# Current Feature Flags
+## Current Feature Flags
 
 | Environment Variable       | Header Field | Description |
 |----------------------------| ------------ |-------------|
 | ENABLE_OPPORTUNITY_LOG_MSG | X-FF-Enable-Opportunity-Log-Msg | Placeholder for the implementation of the feature flag logic, just causes a small log message. |
 
 
-# Future Enhancements
+## Future Enhancements
 
 A few rough ideas for how we might expand feature flags in the future:
 * Make it possible to update the configuration of a running API (ie. loading feature flags from another configurable location periodically)

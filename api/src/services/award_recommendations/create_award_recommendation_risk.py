@@ -6,7 +6,6 @@ from sqlalchemy import exists, select
 from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
-from src.api.response import ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
@@ -18,7 +17,7 @@ from src.db.models.award_recommendation_models import (
 )
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
-from src.validation.validation_constants import ValidationErrorType
+from src.services.award_recommendations.utils import validate_all_submissions_exist
 
 
 def get_award_recommendation_for_update(
@@ -72,44 +71,6 @@ def _generate_risk_number(db_session: db.Session, agency_code: str) -> str:
     raise Exception(f"Failed to generate a unique risk number after {max_attempts} attempts")
 
 
-def get_validated_submissions(
-    db_session: db.Session,
-    award_recommendation_id: uuid.UUID,
-    submission_ids: set[uuid.UUID],
-) -> list[AwardRecommendationApplicationSubmission]:
-    stmt = select(AwardRecommendationApplicationSubmission).where(
-        AwardRecommendationApplicationSubmission.award_recommendation_application_submission_id.in_(
-            submission_ids
-        ),
-        AwardRecommendationApplicationSubmission.award_recommendation_id == award_recommendation_id,
-    )
-
-    submissions = list(db_session.execute(stmt).scalars().all())
-
-    if len(submissions) != len(submission_ids):
-        found_ids = {s.award_recommendation_application_submission_id for s in submissions}
-        missing_ids = [sid for sid in submission_ids if sid not in found_ids]
-
-        validation_errors = []
-        for missing_id in missing_ids:
-            validation_errors.append(
-                ValidationErrorDetail(
-                    type=ValidationErrorType.APPLICATION_SUBMISSION_NOT_FOUND,
-                    message=f"Could not find Award Recommendation Application Submission with ID {missing_id}",
-                    field="award_recommendation_application_submission_ids",
-                    value=str(missing_id),
-                )
-            )
-
-        raise_flask_error(
-            404,
-            message="Could not find one or more Award Recommendation Application Submissions",
-            validation_issues=validation_errors,
-        )
-
-    return submissions
-
-
 def create_award_recommendation_risk(
     db_session: db.Session,
     user: User,
@@ -126,7 +87,16 @@ def create_award_recommendation_risk(
     agency_code = agency.agency_code
 
     submission_ids = set(request_data["award_recommendation_application_submission_ids"])
-    submissions = get_validated_submissions(db_session, award_recommendation_id, submission_ids)
+
+    stmt = select(AwardRecommendationApplicationSubmission).where(
+        AwardRecommendationApplicationSubmission.award_recommendation_id == award_recommendation_id,
+        AwardRecommendationApplicationSubmission.award_recommendation_application_submission_id.in_(
+            submission_ids
+        ),
+    )
+    submissions = list(db_session.execute(stmt).scalars().all())
+
+    validate_all_submissions_exist(submission_ids, submissions)
 
     risk = AwardRecommendationRisk(
         award_recommendation_risk_id=uuid.uuid4(),

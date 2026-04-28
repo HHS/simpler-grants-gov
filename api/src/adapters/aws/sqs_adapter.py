@@ -5,7 +5,7 @@ import boto3
 import botocore.client
 from pydantic import BaseModel, Field
 
-from src.adapters.aws import get_boto_session
+from src.adapters.aws import get_aws_config, get_boto_session
 from src.util.env_config import PydanticBaseEnvConfig
 from src.util.json_util import json_encoder
 
@@ -14,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 class SQSConfig(PydanticBaseEnvConfig):
     workflow_queue_url: str = Field(alias="WORKFLOW_QUEUE_URL")
-    sqs_endpoint_url: str | None = Field(alias="SQS_ENDPOINT_URL", default=None)
-    aws_region: str = Field(alias="AWS_REGION", default="us-east-1")
+    aws_sqs_endpoint_url: str | None = Field(alias="AWS_SQS_ENDPOINT_URL", default=None)
 
 
 class SQSMessage(BaseModel):
@@ -53,13 +52,13 @@ def get_boto_sqs_client(
         sqs_config = SQSConfig()
 
     params = {}
-    if sqs_config.sqs_endpoint_url is not None:
-        params["endpoint_url"] = sqs_config.sqs_endpoint_url
+    if sqs_config.aws_sqs_endpoint_url is not None:
+        params["endpoint_url"] = sqs_config.aws_sqs_endpoint_url
 
     if session is None:
         session = get_boto_session()
 
-    return session.client("sqs", region_name=sqs_config.aws_region, **params)
+    return session.client("sqs", region_name=get_aws_config().aws_region, **params)
 
 
 class SQSClient:

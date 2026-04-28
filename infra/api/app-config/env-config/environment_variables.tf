@@ -109,6 +109,11 @@ locals {
       secret_store_name = "/api/${var.environment}/soap-partner-gateway-auth-key"
     }
 
+    USE_SIMPLER = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/use-simpler"
+    }
+
     SAM_GOV_API_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/sam-gov-api-key"
