@@ -65,11 +65,11 @@ RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
 FROM base AS dev
 ARG RUN_USER
 
-RUN uv venv /opt/venv
-# Use the virtual environment automatically
+# Override UV_NO_DEV from base so dev dependencies are installed
+ENV UV_NO_DEV=0
+# Use /opt/venv for dev to avoid mutating the release venv
 ENV VIRTUAL_ENV=/opt/venv
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv
-# Place entry points in the environment at the front of the path
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Disable Python optimization to preserve docstrings required by jsonpath_ng
@@ -80,17 +80,10 @@ ENV TMPDIR="/tmp"
 USER ${RUN_USER}
 WORKDIR /api
 
-# In dev, prefer external venv to avoid mutating release venv
-# ENV POETRY_VIRTUALENVS_IN_PROJECT=false
-
 COPY pyproject.toml uv.lock ./
 
-# Explicitly create a new virtualenv
-#RUN poetry config virtualenvs.in-project false && poetry env use python
-
-# Install all dependencies including dev dependencies
-# RUN poetry install --no-root --with dev
-RUN uv sync --locked --all-groups --no-install-project --
+# Create venv as RUN_USER (so it's writable), then install all deps including dev
+RUN uv venv /opt/venv && uv sync --locked --all-groups --no-install-project
 
 COPY . /api
 

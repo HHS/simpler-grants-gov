@@ -5,8 +5,6 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 
 ARG PYTHON_VERSION=3.14.4
 ARG PY_MM=3.14
-ARG POETRY_VERSION=2.3.3
-ARG PIP_VERSION=26.0
 
 SHELL ["/bin/bash", "-eux", "-c"]
 
@@ -54,27 +52,12 @@ RUN ./configure \
 
 WORKDIR /tmp
 RUN rm -rf "Python-${PYTHON_VERSION}" "Python-${PYTHON_VERSION}.tgz" && \
-    python3 -m pip install --no-cache-dir --upgrade "pip==${PIP_VERSION}" && \
-    ln -sf /usr/local/bin/python3 /usr/local/bin/python && \
-    ln -sf /usr/local/bin/pip3 /usr/local/bin/pip && \
-    pip3 install --no-cache-dir poetry==${POETRY_VERSION}
-
-# Ensure virtualenv embeds patched pip (25.3) for offline venv creation
-RUN python3 -m pip install --no-cache-dir --upgrade "virtualenv>=20.35.3"
-
-# Upgrade urllib3 to fix security vulnerabilities (GHSA-2xpw-w6gg-jr37, GHSA-gm62-xv2j-4w53)
-RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"
-
-# Upgrade filelock to fix GHSA-w853-jp5j-5j7f
-RUN python3 -m pip install --no-cache-dir --upgrade "filelock>=3.20.1"
-
-# Upgrade cryptography to fix GHSA-m959-cc7f-wv43
-RUN python3 -m pip install --no-cache-dir --upgrade "cryptography>=46.0.7"
+    ln -sf /usr/local/bin/python3 /usr/local/bin/python
 
 # List package versions to make it easier to tell if fixed versions of vulnerable packages have been updated in the latest base image
 RUN python3 -m pip list -v
 
-# Remove pip from runtime (keep Poetry)
+# Remove pip from runtime
 RUN rm -rf /usr/local/lib/python${PY_MM}/site-packages/pip* \
     /usr/local/lib/python${PY_MM}/site-packages/setuptools* \
     /usr/local/lib/python${PY_MM}/site-packages/_distutils_hack \
@@ -159,7 +142,6 @@ COPY --from=amazonlinux-builder /python-version.txt /python-version.txt
 COPY --from=amazonlinux-builder /usr/local/bin/python${PY_MM} /usr/local/bin/python${PY_MM}
 COPY --from=amazonlinux-builder /usr/local/bin/python3 /usr/local/bin/python3
 COPY --from=amazonlinux-builder /usr/local/bin/python /usr/local/bin/python
-COPY --from=amazonlinux-builder /usr/local/bin/poetry /usr/local/bin/poetry
 COPY --from=amazonlinux-builder /usr/local/lib/python${PY_MM}/ /usr/local/lib/python${PY_MM}/
 COPY --from=amazonlinux-builder /usr/local/lib/libpython${PY_MM}.so* /usr/local/lib/
 COPY --from=amazonlinux-builder /usr/local/include/python${PY_MM}/ /usr/local/include/python${PY_MM}/
