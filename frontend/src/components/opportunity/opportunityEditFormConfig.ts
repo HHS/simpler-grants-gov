@@ -1,8 +1,7 @@
-import { eligibilityTypes } from "src/constants/opportunity";
 import {
-  categoryOptions,
-  fundingOptions,
-} from "src/constants/searchFilterOptions";
+  eligibilityTypes,
+  OPPORTUNITY_CATEGORY_OPTIONS,
+} from "src/constants/opportunity";
 import { LabelValueOption } from "src/types/generalTypes";
 import {
   OpportunityDetail,
@@ -42,18 +41,7 @@ const numberToString = (value: number | null | undefined) =>
 
 export const ELIGIBILITY_OPTIONS: LabelValueOption[] = eligibilityTypes;
 
-export const OPPORTUNITY_CATEGORY_OPTIONS: LabelValueOption[] = [
-  { label: "Discretionary", value: "discretionary" },
-  { label: "Mandatory", value: "mandatory" },
-  { label: "Continuation", value: "continuation" },
-  { label: "Earmark", value: "earmark" },
-  { label: "Other", value: "other" },
-];
-
-export const FUNDING_INSTRUMENT_OPTIONS: LabelValueOption[] =
-  fundingOptions.map(({ label, value }) => ({ label: label.trim(), value }));
-
-export const FUNDING_CATEGORY_OPTIONS: LabelValueOption[] = categoryOptions;
+export { OPPORTUNITY_CATEGORY_OPTIONS };
 
 export const buildOpportunityEditInitialValues = (
   opportunity: OpportunityDetail,

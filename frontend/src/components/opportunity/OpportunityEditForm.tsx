@@ -5,6 +5,10 @@ import {
   type OpportunityEditValidationErrors,
 } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
 import { eligibilityTypes } from "src/constants/opportunity";
+import {
+  categoryOptions,
+  fundingOptions,
+} from "src/constants/searchFilterOptions";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
 import { useTranslations } from "next-intl";
@@ -26,8 +30,6 @@ import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicField
 import { OpportunityAttachmentUploadInput } from "src/components/opportunity/OpportunityAttachmentUploadInput";
 import {
   ELIGIBILITY_OPTIONS,
-  FUNDING_CATEGORY_OPTIONS,
-  FUNDING_INSTRUMENT_OPTIONS,
   OPPORTUNITY_CATEGORY_OPTIONS,
   OpportunityEditFormValues,
 } from "./opportunityEditFormConfig";
@@ -404,7 +406,7 @@ export default function OpportunityEditForm({
                   disabled={!isDraft}
                 >
                   <option value="">{t("content.select")}</option>
-                  {FUNDING_INSTRUMENT_OPTIONS.map((option) => (
+                  {fundingOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -472,7 +474,7 @@ export default function OpportunityEditForm({
                   disabled={!isDraft}
                 >
                   <option value="">{t("content.selectFundingCategory")}</option>
-                  {FUNDING_CATEGORY_OPTIONS.map((option) => (
+                  {categoryOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>

@@ -50,7 +50,7 @@ export const fundingOptions: FilterOption[] = [
   },
   {
     id: "funding-instrument-procurement_contract",
-    label: "Procurement Contract ",
+    label: "Procurement Contract",
     value: "procurement_contract",
     tooltip:
       "Allows the government to purchase goods and services for its benefit, while grants provide financial support to advance a public purpose.",

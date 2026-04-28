@@ -103,6 +103,14 @@ export const eligibilityTypes = [
   },
 ];
 
+export const OPPORTUNITY_CATEGORY_OPTIONS = [
+  { label: "Discretionary", value: "discretionary" },
+  { label: "Mandatory", value: "mandatory" },
+  { label: "Continuation", value: "continuation" },
+  { label: "Earmark", value: "earmark" },
+  { label: "Other", value: "other" },
+];
+
 // these are used to more easily format a UI based on eligibility values
 
 // represents a map of { value: group }
