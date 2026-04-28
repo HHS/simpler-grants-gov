@@ -154,7 +154,7 @@ def _transform_date_to_cg(date_value: date | datetime | None) -> date | None:
 
 
 def validate_url(value: str | None) -> str | None:
-    """Return ``value`` normalized iff both pydantic and marshmallow accept it.
+    """Return ``value`` normalized only if both pydantic and marshmallow accept it.
 
     Delegates the dual-validation to ``validate_url_compatible``; this wrapper
     adds the ops log on failure so we can spot data-quality issues (issue #9904).
