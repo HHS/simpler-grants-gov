@@ -430,32 +430,34 @@ describe("Header", () => {
       expect(settingsLink).toBeInTheDocument();
       expect(settingsLink).toHaveAttribute("href", "/settings");
 
-      const notificationsLink = screen.getByRole("link", {
-        name: "notifications",
-      });
-      expect(notificationsLink).toBeInTheDocument();
-      expect(notificationsLink).toHaveAttribute("href", "/notifications");
+      // can uncomment once configs are in
+      // const notificationsLink = screen.getByRole("link", {
+      //   name: "notifications",
+      // });
+      // expect(notificationsLink).toBeInTheDocument();
+      // expect(notificationsLink).toHaveAttribute("href", "/notifications");
 
       expect(screen.getByText("logout")).toBeInTheDocument();
     });
 
-    it("does not show Notifications link when user is unauthenticated", () => {
-      mockUseUser.mockImplementation(() => ({
-        user: {
-          token: undefined,
-        },
-        hasBeenLoggedOut: false,
-        resetHasBeenLoggedOut: jest.fn(),
-      }));
+    // can uncomment once configs are in
+    // it("does not show Notifications link when user is unauthenticated", () => {
+    //   mockUseUser.mockImplementation(() => ({
+    //     user: {
+    //       token: undefined,
+    //     },
+    //     hasBeenLoggedOut: false,
+    //     resetHasBeenLoggedOut: jest.fn(),
+    //   }));
 
-      render(<Header {...props} />);
+    //   render(<Header {...props} />);
 
-      const nav = screen.getByRole("navigation");
+    //   const nav = screen.getByRole("navigation");
 
-      expect(
-        within(nav).queryByRole("link", { name: "notifications" }),
-      ).not.toBeInTheDocument();
-    });
+    //   expect(
+    //     within(nav).queryByRole("link", { name: "notifications" }),
+    //   ).not.toBeInTheDocument();
+    // });
 
     it("does not display test application link if not for a test application user", async () => {
       mockUseUser.mockReturnValue({

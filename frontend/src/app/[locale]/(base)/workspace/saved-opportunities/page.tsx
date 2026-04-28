@@ -134,11 +134,13 @@ export default async function SavedOpportunities({
           ]}
         />
         <h1 className="margin-top-0">{t("SavedOpportunities.heading")}</h1>
+        {/*
+        can uncomment once configs are in
         <p>
           {t.rich("SavedOpportunities.toNotificationsPreferences", {
             link: (chunks) => <Link href="/notifications">{chunks}</Link>,
           })}
-        </p>
+        </p> */}
       </GridContainer>
       <div className="grid-container padding-y-5">
         {hasAnySavedOpportunities ? (

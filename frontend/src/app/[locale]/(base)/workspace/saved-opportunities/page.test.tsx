@@ -209,20 +209,21 @@ describe("Saved Opportunities page", () => {
     });
   });
 
-  it("renders a link to notification preferences", async () => {
-    const component = await SavedOpportunities({
-      params: localeParams,
-      searchParams: defaultSearchParams,
-    });
-    render(component);
+  // cab can uncomment once configs are in
+  // it("renders a link to notification preferences", async () => {
+  //   const component = await SavedOpportunities({
+  //     params: localeParams,
+  //     searchParams: defaultSearchParams,
+  //   });
+  //   render(component);
 
-    const notificationsLink = screen.getByRole("link", {
-      name: "Manage your notification preferences here.",
-    });
+  //   const notificationsLink = screen.getByRole("link", {
+  //     name: "Manage your notification preferences here.",
+  //   });
 
-    expect(notificationsLink).toBeInTheDocument();
-    expect(notificationsLink).toHaveAttribute("href", "/notifications");
-  });
+  //   expect(notificationsLink).toBeInTheDocument();
+  //   expect(notificationsLink).toHaveAttribute("href", "/notifications");
+  // });
 
   it("does not render status filter when there are no saved opportunities", async () => {
     const component = await SavedOpportunities({
