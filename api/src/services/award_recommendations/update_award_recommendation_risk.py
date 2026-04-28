@@ -17,7 +17,7 @@ from src.services.award_recommendations.create_award_recommendation_risk import 
 from src.services.award_recommendations.utils import validate_all_submissions_exist
 
 
-def _get_risk_for_update(
+def get_risk_for_update(
     db_session: db.Session,
     award_recommendation_id: uuid.UUID,
     award_recommendation_risk_id: uuid.UUID,
@@ -79,7 +79,7 @@ def update_award_recommendation_risk(
 ) -> AwardRecommendationRisk:
     get_award_recommendation_for_update(db_session, user, award_recommendation_id)
 
-    risk = _get_risk_for_update(db_session, award_recommendation_id, award_recommendation_risk_id)
+    risk = get_risk_for_update(db_session, award_recommendation_id, award_recommendation_risk_id)
 
     risk.comment = request_data["comment"]
     risk.award_recommendation_risk_type = request_data["award_recommendation_risk_type"]
