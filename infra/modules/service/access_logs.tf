@@ -42,7 +42,7 @@ data "aws_iam_policy_document" "access_logs_put_access" {
 
     principals {
       type        = "Service"
-      identifiers = ["elasticloadbalancing.amazonaws.com"]
+      identifiers = ["logdelivery.elasticloadbalancing.amazonaws.com"]
     }
 
     condition {
