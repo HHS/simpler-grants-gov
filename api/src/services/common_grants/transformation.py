@@ -153,22 +153,36 @@ def _transform_date_to_cg(date_value: date | datetime | None) -> date | None:
     return date_value
 
 
-def validate_url(value: str | None) -> str | None:
+def validate_url(
+    value: str | None,
+    *,
+    field: str | None = None,
+    opportunity_id: object = None,
+) -> str | None:
     """Return ``value`` normalized only if both pydantic and marshmallow accept it.
 
-    Delegates the dual-validation to ``validate_url_compatible``; this wrapper
-    adds the ops log on failure so we can spot data-quality issues. Userinfo
-    is stripped from the logged URL to avoid leaking ``user:password@`` if
-    grants.gov data ever ships one through.
+    Delegates the dual-validation to ``validate_url_compatible``. When the URL
+    fails validation the function returns ``None`` and emits a WARNING — the
+    field will be omitted from the CG response, so callers passing ``field``
+    and ``opportunity_id`` give operators enough context to answer "why is
+    this field missing for opportunity X?" without paging the original record.
+
+    Userinfo is stripped from the logged URL via ``redact_url_userinfo`` to
+    avoid leaking ``user:password@`` if grants.gov data ever ships one through.
     """
     result = validate_url_compatible(value)
     if result is None and value not in (None, ""):
-        logger.info(
-            "URL validation failed",
-            extra={
-                "cg_event": CommonGrantsEvent.URL_VALIDATION_ERROR,
-                "url": redact_url_userinfo(value),
-            },
+        log_extra: dict[str, object] = {
+            "cg_event": CommonGrantsEvent.URL_VALIDATION_ERROR,
+            "url": redact_url_userinfo(value),
+        }
+        if field is not None:
+            log_extra["field"] = field
+        if opportunity_id is not None:
+            log_extra["opportunity_id"] = opportunity_id
+        logger.warning(
+            "Dropping URL field from CG response: failed dual validation",
+            extra=log_extra,
         )
     return result
 
@@ -321,7 +335,11 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
                 maxAwardAmount=max_award_money,
                 minAwardAmount=min_award_money,
             ),
-            source=validate_url(summary.get("additional_info_url")),
+            source=validate_url(
+                summary.get("additional_info_url"),
+                field="source",
+                opportunity_id=opportunity_id,
+            ),
             customFields=populate_custom_fields(opp_data),
             createdAt=summary.get("created_at") or datetime_util.utcnow(),
             lastModifiedAt=summary.get("updated_at") or datetime_util.utcnow(),
@@ -385,8 +403,18 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
     if attachments:
         valid_attachment_values = []
         for attachment in attachments:
+            # Pre-validate the download URL with field/opportunity context so a
+            # drop is observable in logs. The pydantic field validator on
+            # AttachmentValue.downloadUrl is still a defensive backstop for
+            # direct model construction; passing the already-validated value
+            # here means it runs the dual-check on a string we already cleared.
+            download_url = validate_url(
+                attachment.get("download_path"),
+                field="customFields.attachments[].downloadUrl",
+                opportunity_id=opportunity_id,
+            )
             attachment_data = {
-                "downloadUrl": attachment.get("download_path"),
+                "downloadUrl": download_url,
                 "name": attachment.get("file_name"),
                 "description": attachment.get("file_description"),
                 "sizeInBytes": attachment.get("file_size_bytes"),
@@ -488,7 +516,11 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
             if field:
                 custom_fields["contactInfo"] = field
 
-        additional_info_url = validate_url(summary.get("additional_info_url"))
+        additional_info_url = validate_url(
+            summary.get("additional_info_url"),
+            field="customFields.additionalInfo.url",
+            opportunity_id=opportunity_id,
+        )
         additional_info_url_description = summary.get("additional_info_url_description")
         if additional_info_url is not None:
             field = validate_custom_field(

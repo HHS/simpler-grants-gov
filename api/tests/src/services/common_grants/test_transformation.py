@@ -817,15 +817,15 @@ class TestTransformation:
         """
         import logging
 
-        caplog.set_level(logging.INFO)
+        caplog.set_level(logging.WARNING)
 
         # Comma-URL with embedded credentials. Pydantic accepts (mangled), marshmallow
-        # rejects, validate_url returns None, INFO log fires.
+        # rejects, validate_url returns None, WARNING log fires.
         bad_url = "https://user:secret@a.gov,https://b.gov"
         assert validate_url(bad_url) is None
 
         log_record = next(
-            (r for r in caplog.records if r.message == "URL validation failed"),
+            (r for r in caplog.records if "Dropping URL field" in r.message),
             None,
         )
         assert log_record is not None
@@ -863,6 +863,60 @@ class TestTransformation:
                 f"AttachmentValue.downloadUrl must drop {divergent!r}; pydantic accepts it "
                 "but marshmallow's fields.URL — which loads the response — rejects it"
             )
+
+    def test_dropped_url_log_includes_field_path_and_opportunity_id(self, caplog):
+        """When a URL is dropped during transformation, the WARNING log must carry
+        enough context for an operator to answer 'why is this field missing for
+        opportunity X?' That means: which field path was dropped (so the op can
+        tell whether `source`, `customFields.additionalInfo.url`, or an
+        attachment's `downloadUrl` is missing) and which opportunity_id owns it.
+        Both validate_url callsites in transformation.py thread these through.
+        """
+        import logging
+
+        caplog.set_level(logging.WARNING)
+
+        opp_id = uuid4()
+        opp_data = {
+            "opportunity_id": opp_id,
+            "opportunity_title": "Test",
+            "opportunity_status": OpportunityStatus.POSTED,
+            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "x",
+                "additional_info_url": "https://www.grants.gov,https://b.gov",  # dual-validate fails
+                "additional_info_url_description": "two links",
+                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            },
+            "opportunity_attachments": [
+                {
+                    "download_path": "http://example",  # dual-validate fails
+                    "file_name": "x.pdf",
+                    "file_size_bytes": 1,
+                    "mime_type": "application/pdf",
+                    "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                    "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+                },
+            ],
+        }
+
+        result = transform_search_result_to_cg(opp_data)
+        assert result is not None
+
+        drop_records = [r for r in caplog.records if "Dropping URL field" in r.message]
+        # Three drops: source, customFields.additionalInfo.url, attachments[].downloadUrl
+        # (additional_info_url is consumed by both `source` and the additionalInfo custom field).
+        fields_dropped = {getattr(r, "field", None) for r in drop_records}
+        assert "source" in fields_dropped
+        assert "customFields.additionalInfo.url" in fields_dropped
+        assert "customFields.attachments[].downloadUrl" in fields_dropped
+
+        # opportunity_id is on every drop record so an operator can correlate.
+        for r in drop_records:
+            assert getattr(r, "opportunity_id", None) == opp_id
+            assert r.levelname == "WARNING"
 
     def test_transform_search_result_to_cg_with_nasa_url_bug(self):
         """Test that transformation works correctly with NASA URL that Pydantic rejects.
@@ -1067,14 +1121,14 @@ class TestTransformation:
         # message itself is now a fixed string) so credentials embedded in the
         # raw value can't leak through the message body — see redact_url_userinfo.
         assert any(
-            record.levelname == "INFO"
-            and record.message == "URL validation failed"
+            record.levelname == "WARNING"
+            and "Dropping URL field" in record.message
             and getattr(record, "url", None) == invalid_url
             for record in caplog.records
         )
 
         log_record = next(
-            (record for record in caplog.records if record.message == "URL validation failed"),
+            (record for record in caplog.records if "Dropping URL field" in record.message),
             None,
         )
         assert log_record is not None
@@ -1127,8 +1181,9 @@ class TestTransformation:
         """Test that transformation with invalid URL logs error but still succeeds."""
         import logging
 
-        # Set up logging to capture info level logs
-        caplog.set_level(logging.INFO)
+        # WARNING because dropping a field from the consumer-facing response is
+        # a data-suppression event, not a routine validation observation.
+        caplog.set_level(logging.WARNING)
 
         # Create opportunity data with an invalid URL
         invalid_url = "https://example.com/path/{invalid}"
@@ -1157,14 +1212,17 @@ class TestTransformation:
         assert result.title == "Test Opportunity"
         assert result.source is None  # URL should be None due to validation failure
 
-        # Verify URL validation error was logged with the URL in extra (not in
-        # the message body — see redact_url_userinfo / security review note).
-        assert any(
-            record.levelname == "INFO"
-            and record.message == "URL validation failed"
-            and getattr(record, "url", None) == invalid_url
-            for record in caplog.records
+        # Verify URL drop was logged with field + opportunity_id context so an
+        # operator can answer "why is `source` missing for opportunity X?"
+        log_record = next(
+            (r for r in caplog.records if "Dropping URL field" in r.message),
+            None,
         )
+        assert log_record is not None
+        assert log_record.levelname == "WARNING"
+        assert getattr(log_record, "url", None) == invalid_url
+        assert getattr(log_record, "field", None) == "source"
+        assert getattr(log_record, "opportunity_id", None) == opp_data["opportunity_id"]
 
 
 class TestPopulateCustomFields:
