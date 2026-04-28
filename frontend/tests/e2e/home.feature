@@ -31,7 +31,7 @@ Feature: Home Page
     Then the primary navigation should contain 5 items
     And all primary navigation items should not be visible
     When the user opens the mobile nav menu
-    Then the navigation element should have the class "is-visible"
+    Then the mobile navigation menu is visible
     And all primary navigation items should be visible
 
   Scenario: Mobile nav closes when a navigation link is clicked

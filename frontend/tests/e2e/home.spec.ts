@@ -91,7 +91,6 @@ test(
     // When the user presses the Enter key
     await page.keyboard.press("Enter");
 
-    // Verifies that skipping to main content means the page scrolls past the official gov site banner
     // Then the government banner should no longer be fully in the viewport
     await expect(banner).not.toBeInViewport({ ratio: 1 });
   },
@@ -126,7 +125,7 @@ test(
       // When the user opens the mobile nav menu
       await openMobileNav(page);
 
-      // Then the navigation element should have the class "is-visible"
+      // Then the mobile navigation menu is visible
       const nav = page.locator(".usa-nav");
       await expect(nav).toHaveClass(/is-visible/);
 
