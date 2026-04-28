@@ -8,7 +8,7 @@ Feature: Search Copy URL
   So that I can share or reuse the same search
 
   Background:
-    Given I am on the Search Funding Opportunity page
+    Given I am on the "Search funding opportunity" page
 
   Scenario: Copy search URL and paste into the search input
     Given I search for "<search-term>"
