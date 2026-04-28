@@ -35,13 +35,14 @@ data "aws_iam_policy_document" "access_logs_put_access" {
   statement {
     effect = "Allow"
     resources = [
+      aws_s3_bucket.access_logs.arn,
       "${aws_s3_bucket.access_logs.arn}/*"
     ]
     actions = ["s3:PutObject"]
 
     principals {
       type        = "Service"
-      identifiers = ["delivery.logs.amazonaws.com"]
+      identifiers = ["elasticloadbalancing.amazonaws.com"]
     }
 
     condition {
