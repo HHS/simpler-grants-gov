@@ -285,7 +285,7 @@ jobs:
           docker image ls
 
       - name: Restore API Docker image cached
-        id: restore-api-docker-image-cached
+        id: restore-api-docker-image-and-keys-cached
         uses: actions/cache/restore@v5
         with:
           path: /tmp/docker-image.tar
@@ -307,7 +307,7 @@ jobs:
           exit 1
 
       - name: Load cached API Docker image (alias it if needed)
-        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key != ''
+        if: steps.restore-api-docker-image-and-keys-cached.outputs.cache-matched-key != ''
         run: |
           docker load < /tmp/docker-image.tar
           # alias the live docker container name simpler-grants-gov-api to the locally build name api-grants-api so that we don't rebuild it in later steps.
@@ -331,7 +331,7 @@ jobs:
           docker image ls
 
       - name: Build API Server for e2e tests (if not cached)
-        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key == ''
+        if: steps.restore-api-docker-image-and-keys-cached.outputs.cache-matched-key == ''
         run: |
           cd ../api
           # Enable core dumps for debugging segfaults
@@ -385,6 +385,13 @@ jobs:
       #   if: steps.playwright-cache.outputs.cache-hit != 'true'
       #   run: |
       #     npx playwright install --with-deps
+
+      - name: Pull keys from image to local for FE build
+        run: |
+          cd ../api
+          # troubleshoot the file paths etc until we've sorted this out.
+          docker cp api-grants-api:api/override.env override.env || true
+          docker cp api-grants-api:api/e2e_token.tmp e2e_token.tmp || true
 
       - name: Build a prod version of the frontend
         run: |
@@ -443,16 +450,18 @@ jobs:
           docker save  > /tmp/postgres-docker-image.tar
 
       - name: Save API Docker image to file
-        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key == ''
+        if: steps.restore-api-docker-image-and-keys-cached.outputs.cache-matched-key == ''
         run: |
           docker save api-grants-api > /tmp/docker-image.tar
 
-      - name: Save API Docker image cache
-        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key == ''
-        id: save-api-docker-image-cache
+      - name: Save API Docker image and shared keys cache
+        if: steps.restore-api-docker-image-and-keys-cached.outputs.cache-matched-key == ''
+        id: save-api-docker-image-and-keys-cache
         uses: actions/cache/save@v5
         with:
-          path: /tmp/docker-image.tar
+          path: |
+            /tmp/docker-image.tar
+
           key: api-docker-test-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
   create-report:
