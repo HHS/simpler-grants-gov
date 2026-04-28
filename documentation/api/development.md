@@ -59,10 +59,6 @@ This stands up the following services:
 
 Run `make setup-api-data` to create local data in the database, search index  and make it available in the API. This basically creates everything; if you want to be selective about what data you're seeding, see the Makefile for ways you can populate selective data.
 
-### API Authentication
-
-This API uses a very simple [ApiKey authentication approach](https://apiflask.com/authentication/#use-external-authentication-library) which requires the caller to provide a static key. This is specified with the `API_AUTH_TOKEN` environment variable.
-
 ### User Authentication
 
 Run `make setup-env-override-file` to create the `override.env` file which will include the necessary JWT keys for running user authentication within the app.

@@ -8,8 +8,8 @@ into the database.
 Can be run by doing:
     make cmd args="task generate-opportunity-sql --environment=staging --opportunity-id=<opportunity_id>"
 
-Requires that you set the NON_LOCAL_API_AUTH_TOKEN environment variable to
-an API auth token capable of calling the API in a given environment.
+Requires that you set the NON_LOCAL_API_KEY environment variable to
+an API key capable of calling the API in a given environment.
 
 A few important notes about the behavior:
 * All primary key IDs are changed so that it's safe to use this as a way to copy
@@ -65,7 +65,7 @@ ENV_URL_MAP = {
 
 
 class GenerateOpportunitySqlTaskConfig(PydanticBaseEnvConfig):
-    non_local_api_auth_token: str | None = None
+    non_local_api_key: str | None = None
 
 
 @dataclasses.dataclass
@@ -380,7 +380,7 @@ class GenerateOpportunitySqlProcessor:
         return {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "X-Auth": self.config.non_local_api_auth_token,
+            "X-API-Key": self.config.non_local_api_key,
         }
 
     def fetch_opportunity(self) -> dict:
