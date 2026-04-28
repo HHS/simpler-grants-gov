@@ -36,7 +36,7 @@ test(
     // if the expect in here fails, we give it another shot after 5 seconds
     // this way we avoid an arbitrary timeout, and do not slow down the other tests
 
-    // Given I search for "education grants"
+    // Given I search for "<search-term>"
     try {
       await fillSearchInputAndSubmit("education grants", page);
     } catch (_e) {
@@ -56,7 +56,7 @@ test(
     await searchInput.fill("");
     await searchInput.press("ControlOrMeta+V");
 
-    // Then the search input should contain "/search?query=education+grants"
+    // Then the search input should contain "/search?query=<search-term>"
     await expect(searchInput).toHaveValue(
       `${baseUrl}/search?query=education+grants`,
     );
