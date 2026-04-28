@@ -17,7 +17,11 @@ from pydantic import BaseModel, Field, HttpUrl, ValidationError
 
 
 class _UrlValidator(BaseModel):
-    """Pydantic strict HttpUrl validator."""
+    """Pydantic strict HttpUrl validator.
+
+    Mirrors the HttpUrl field in OpportunityBase and other CommonGrants models.
+    TODO(@widal001): Replace this with a new field from SDK or relax strictness in SDK.
+    """
 
     url: HttpUrl = Field(strict=True)
 
@@ -55,16 +59,21 @@ def redact_url_userinfo(value: str | None) -> str:
     validation-failure logs verbatim — leaking the credentials to log
     aggregation. Strip userinfo here. Falls back to a fixed sentinel if the
     URL is unparseable so the caller always has something logger-safe.
+
+    Note: ``SplitResult.port`` lazily raises ``ValueError`` for non-numeric
+    ports (e.g. ``host:abc``), so the *entire* parse + reconstruct sequence
+    runs inside the try — re-raising here would re-introduce the fail-hard
+    behavior this module exists to remove.
     """
     if value is None:
         return "<none>"
     try:
         parts = urlsplit(value)
+        if not parts.username and not parts.password:
+            return value
+        host = parts.hostname or ""
+        if parts.port:
+            host = f"{host}:{parts.port}"
+        return urlunsplit((parts.scheme, host, parts.path, parts.query, parts.fragment))
     except ValueError:
         return "<unparseable-url>"
-    if not parts.username and not parts.password:
-        return value
-    host = parts.hostname or ""
-    if parts.port:
-        host = f"{host}:{parts.port}"
-    return urlunsplit((parts.scheme, host, parts.path, parts.query, parts.fragment))
