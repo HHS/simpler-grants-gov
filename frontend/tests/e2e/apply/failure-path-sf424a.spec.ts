@@ -60,8 +60,8 @@ test(
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
-    const openedSf424aForValidation = await openForm(page, SF424A_FORM_MATCHER);
-    if (!openedSf424aForValidation) {
+    const opened = await openForm(page, SF424A_FORM_MATCHER);
+    if (!opened) {
       throw new Error(
         "Could not find or open SF-424A form link on the application forms page",
       );
