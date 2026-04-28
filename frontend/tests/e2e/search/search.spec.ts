@@ -56,7 +56,7 @@ test.describe("Search page tests", () => {
   }) => {
     const isMobile = !!project.name.match(/[Mm]obile/);
     const agencyCheckboxes: { [key: string]: string } = {};
-    // Given I am on the Search Funding Opportunity page
+    // Given I am on the "Search funding opportunities" page
     await page.goto("/search");
 
     // And I wait for the search results to load
