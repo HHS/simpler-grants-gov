@@ -1,3 +1,8 @@
+/**
+ * @feature Search - Default Filters
+ * @featureFile frontend/tests/e2e/search/features/search-core/search-default-filters.feature
+ * @scenario Load search page with forecasted and open filters checked by default
+ */
 import { expect, test } from "@playwright/test";
 import { VALID_TAGS } from "tests/e2e/tags";
 
@@ -5,18 +10,20 @@ import { expectCheckboxIDIsChecked } from "./searchSpecUtil";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE } = VALID_TAGS;
 
+// Scenario: Load search page with forecasted and open filters checked by default
 test(
   "should load search page with forecasted and open filters checked by default",
   { tag: [GRANTEE, OPPORTUNITY_SEARCH, SMOKE] },
   async ({ page }) => {
+    // Given I am on the "Search funding opportunity" page
     await page.goto("/search");
 
-    // Verify the presence of "Search" content on the page
+    // Then I see the "Search funding opportunities" heading
     await expect(page.locator("h1")).toContainText(
       "Search funding opportunities",
     );
 
-    // Verify that the 'forecasted' and 'posted' are checked
+    // And the 'forecasted' and 'posted' filters are checked by default
     await expectCheckboxIDIsChecked(page, "status-forecasted");
     await expectCheckboxIDIsChecked(page, "status-open");
   },
