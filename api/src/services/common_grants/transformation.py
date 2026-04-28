@@ -19,9 +19,7 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedBodyParams,
     SingleDateEvent,
 )
-from marshmallow import ValidationError as MarshmallowValidationError
-from marshmallow import fields as marshmallow_fields
-from pydantic import BaseModel, Field, HttpUrl, ValidationError
+from pydantic import ValidationError
 
 import src.util.datetime_util as datetime_util
 from src.api.common_grants.schemas.pydantic.custom_fields import (
@@ -41,28 +39,13 @@ from src.api.common_grants.schemas.pydantic.custom_fields import (
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
+from src.services.common_grants.url_utils import (
+    redact_url_userinfo,
+    validate_url_compatible,
+)
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
-
-
-class UrlValidator(BaseModel):
-    """Validator for a URL string using Pydantic's HttpUrl with strict mode enabled.
-
-    Mirrors the HttpUrl field in OpportunityBase and other CommonGrants models.
-    TODO(@widal001): Replace this with a new field from SDK or relax strictness in SDK
-    """
-
-    url: HttpUrl = Field(strict=True)
-
-
-# Pydantic's HttpUrl and marshmallow's fields.URL disagree on a handful of
-# inputs (comma-separated URLs, scheme-only-host like "http://example", etc.).
-# Pydantic accepts and normalizes; marshmallow rejects. The CG response is
-# loaded through marshmallow on the way out, so any URL accepted by pydantic
-# but rejected by marshmallow blows up the entire batch (issue #9904). Run
-# both validators so divergent strings are dropped at the source.
-_marshmallow_url_field = marshmallow_fields.URL()
 
 
 def transform_status_to_cg(v1_status: OpportunityStatus) -> OppStatusOptions:
@@ -174,37 +157,23 @@ def _transform_date_to_cg(date_value: date | datetime | None) -> date | None:
 
 
 def validate_url(value: str | None) -> str | None:
+    """Return ``value`` normalized iff both pydantic and marshmallow accept it.
+
+    Delegates the dual-validation to ``validate_url_compatible``; this wrapper
+    adds the ops log on failure so we can spot data-quality issues (issue #9904).
+    Userinfo is stripped from the logged URL to avoid leaking ``user:password@``
+    if grants.gov data ever ships one through.
     """
-    Validate a URL string using both Pydantic's HttpUrl and marshmallow's URL field.
-
-    Both validators must accept the value. Pydantic accepts inputs marshmallow
-    rejects (e.g. comma-separated URLs, scheme-only hosts), and the CG response
-    is loaded through marshmallow on the way out — so a URL accepted only by
-    pydantic blows up the entire response batch with a 500 (issue #9904).
-    Validating with both at the source drops divergent strings cleanly.
-
-    Args:
-        value: The string to validate
-
-    Returns:
-        A valid URL string or None if validation fails
-    """
-    if value is None or value == "":
-        return None
-    try:
-        valid = UrlValidator.model_validate({"url": value})
-        normalized = str(valid.url)
-        _marshmallow_url_field.deserialize(normalized)
-        return normalized
-    except (ValidationError, MarshmallowValidationError):
+    result = validate_url_compatible(value)
+    if result is None and value not in (None, ""):
         logger.info(
-            f"URL validation failed for: {value}",
+            "URL validation failed",
             extra={
                 "cg_event": CommonGrantsEvent.URL_VALIDATION_ERROR,
-                "url": value,
+                "url": redact_url_userinfo(value),
             },
         )
-        return None
+    return result
 
 
 def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase | None:

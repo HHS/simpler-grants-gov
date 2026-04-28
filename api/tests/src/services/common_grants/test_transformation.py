@@ -755,8 +755,6 @@ class TestTransformation:
 
         from common_grants_sdk.schemas.pydantic import (
             OpportunitiesSearchResponse,
-            OppSortBy,
-            OppSorting,
             PaginatedResultsInfo,
             SortedResultsInfo,
         )
@@ -764,7 +762,6 @@ class TestTransformation:
         from src.api.common_grants.schemas.marshmallow.schemas import (
             OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
         )
-        from src.services.common_grants.transformation import build_filter_info
 
         problematic_url = "https://www.grants.gov,https://other.example"
         opp_data = {
@@ -814,6 +811,31 @@ class TestTransformation:
             "additionalInfo must be omitted when its url fails validation, not "
             "passed through with an invalid URL"
         )
+
+    def test_validate_url_logs_redacted_userinfo_on_failure(self, caplog):
+        """Security: a URL with user:password@ that fails validation must not leak
+        credentials to the log aggregator. validate_url() runs the value through
+        redact_url_userinfo before emitting the INFO log.
+        """
+        import logging
+
+        caplog.set_level(logging.INFO)
+
+        # Comma-URL with embedded credentials. Pydantic accepts (mangled), marshmallow
+        # rejects, validate_url returns None, INFO log fires.
+        bad_url = "https://user:secret@a.gov,https://b.gov"
+        assert validate_url(bad_url) is None
+
+        log_record = next(
+            (r for r in caplog.records if r.message == "URL validation failed"),
+            None,
+        )
+        assert log_record is not None
+        # The credential must NOT appear in the structured field …
+        assert "user:secret" not in getattr(log_record, "url", "")
+        assert "secret" not in getattr(log_record, "url", "")
+        # … nor in the rendered message
+        assert "secret" not in log_record.getMessage()
 
     def test_attachment_download_url_dual_validates(self):
         """Sibling of issue #9904 for the attachment path. AttachmentValue.downloadUrl
@@ -1043,17 +1065,18 @@ class TestTransformation:
         # Verify the URL was rejected
         assert result is None
 
-        # Verify the log was captured
+        # Verify the log was captured. The URL is in extra["url"] (and the log
+        # message itself is now a fixed string) so credentials embedded in the
+        # raw value can't leak through the message body — see redact_url_userinfo.
         assert any(
             record.levelname == "INFO"
-            and "URL validation failed for:" in record.message
-            and invalid_url in record.message
+            and record.message == "URL validation failed"
+            and getattr(record, "url", None) == invalid_url
             for record in caplog.records
         )
 
-        # Verify the extra data is present in the log record
         log_record = next(
-            (record for record in caplog.records if "URL validation failed for:" in record.message),
+            (record for record in caplog.records if record.message == "URL validation failed"),
             None,
         )
         assert log_record is not None
@@ -1136,11 +1159,12 @@ class TestTransformation:
         assert result.title == "Test Opportunity"
         assert result.source is None  # URL should be None due to validation failure
 
-        # Verify URL validation error was logged
+        # Verify URL validation error was logged with the URL in extra (not in
+        # the message body — see redact_url_userinfo / security review note).
         assert any(
             record.levelname == "INFO"
-            and "URL validation failed for:" in record.message
-            and invalid_url in record.message
+            and record.message == "URL validation failed"
+            and getattr(record, "url", None) == invalid_url
             for record in caplog.records
         )
 
