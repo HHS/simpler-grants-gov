@@ -64,7 +64,7 @@ export async function verifyPostSubmission(
  */
 export async function verifyFormFieldsAreReadonlyAfterSubmission(
   page: Page,
-  formMatcher: string,
+  formMatcher: string | RegExp,
   formName: string,
   fields: ReadonlyFieldCheck[],
 ): Promise<void> {

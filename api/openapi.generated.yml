@@ -101,8 +101,8 @@ paths:
                     page_offset: 1
                     page_size: 25
       security:
-      - ApiUserKeyAuth: &id001 []
-      - ApiKeyAuth: *id001
+      - ApiJwtAuth: &id001 []
+      - ApiUserKeyAuth: *id001
   /v1/users/login:
     get:
       parameters: []
@@ -3871,6 +3871,64 @@ paths:
       summary: Add an organization to an application
       security:
       - ApiJwtAuth: []
+  /alpha/award-recommendations/{award_recommendation_id}/submission-details:
+    put:
+      parameters:
+      - in: path
+        name: award_recommendation_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardRecommendationSubmissionDetailsBatchUpdateResponseSchema'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Forbidden
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Internal Server Error
+      tags:
+      - Award Recommendation Alpha
+      summary: Batch Update Award Recommendation Submission Details
+      description: Update multiple submission details for an award recommendation
+        in a single operation.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema'
+      security:
+      - ApiJwtAuth: &id031 []
+      - ApiUserKeyAuth: *id031
   /v1/organizations/{organization_id}/saved-opportunities/{opportunity_id}:
     delete:
       parameters:
@@ -4099,8 +4157,8 @@ paths:
             schema:
               $ref: '#/components/schemas/OpportunitySummaryUpdateRequestV1Schema'
       security:
-      - ApiJwtAuth: &id031 []
-      - ApiUserKeyAuth: *id031
+      - ApiJwtAuth: &id032 []
+      - ApiUserKeyAuth: *id032
   /v1/grantors/opportunities/{opportunity_id}/attachments/{opportunity_attachment_id}:
     delete:
       parameters:
@@ -4155,8 +4213,8 @@ paths:
       - Opportunity v1 - for Grantors
       summary: Delete an attachment from an opportunity
       security:
-      - ApiJwtAuth: &id032 []
-      - ApiUserKeyAuth: *id032
+      - ApiJwtAuth: &id033 []
+      - ApiUserKeyAuth: *id033
   /alpha/award-recommendations/{award_recommendation_id}/risks/{award_recommendation_risk_id}:
     put:
       parameters:
@@ -4211,50 +4269,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AwardRecommendationRiskRequestSchema'
-      security:
-      - ApiJwtAuth: &id033 []
-      - ApiUserKeyAuth: *id033
-    delete:
-      parameters:
-      - in: path
-        name: award_recommendation_id
-        schema:
-          type: string
-        required: true
-      - in: path
-        name: award_recommendation_risk_id
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AwardRecommendationRiskDeleteResponseSchema'
-          description: Successful response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Authentication error
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Not found
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponseSchema'
-          description: Forbidden
-      tags:
-      - Award Recommendation Alpha
-      summary: Delete Award Recommendation Risk
-      description: Soft delete a risk for an award recommendation.
       security:
       - ApiJwtAuth: &id034 []
       - ApiUserKeyAuth: *id034
@@ -12356,6 +12370,7 @@ components:
           - risk_updated
           - risk_deleted
           - application_submission_updated
+          - award_recommendation_submission_updated
           - review_created
           - review_updated
           - review_deleted
@@ -12459,6 +12474,7 @@ components:
             - risk_updated
             - risk_deleted
             - application_submission_updated
+            - award_recommendation_submission_updated
             - review_created
             - review_updated
             - review_deleted
@@ -12806,6 +12822,81 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    AwardRecommendationSubmissionDetailsBatchUpdateResponseSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: The updated award recommendation submissions
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/AwardRecommendationSubmissionDataSchema'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    AwardRecommendationSubmissionDetailUpdateSchema:
+      type: object
+      properties:
+        recommended_amount:
+          type:
+          - number
+          - 'null'
+          description: The recommended funding amount
+          example: '200000.00'
+        scoring_comment:
+          type:
+          - string
+          - 'null'
+          description: Comments from the scoring process
+          example: Strong technical approach with clear methodology. Budget well-justified
+            and aligned with project goals.
+        general_comment:
+          type:
+          - string
+          - 'null'
+          description: General comments about the submission
+          example: Applicant has demonstrated successful implementation of similar
+            projects in the past. Team qualifications exceed requirements.
+        award_recommendation_type:
+          description: The recommendation type for this submission
+          enum:
+          - recommended_for_funding
+          - recommended_without_funding
+          - not_recommended
+          type:
+          - string
+          - 'null'
+          - 'null'
+        has_exception:
+          type: boolean
+          description: Whether the submission has an exception
+        exception_detail:
+          type:
+          - string
+          - 'null'
+          description: Details about the exception, if any
+          example: Budget exceeds guidelines by 12%. Recommend partial funding with
+            revised scope focusing on core deliverables.
+    AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema:
+      type: object
+      properties:
+        award_recommendation_submissions:
+          type: object
+          minLength: 1
+          description: Dictionary of submission IDs to update details, where keys
+            are award_recommendation_application_submission_id
+          additionalProperties:
+            type:
+            - object
+            $ref: '#/components/schemas/AwardRecommendationSubmissionDetailUpdateSchema'
+      required:
+      - award_recommendation_submissions
     OrganizationDeleteSavedOpportunityResponseSchema:
       type: object
       properties:
@@ -13135,19 +13226,6 @@ components:
       required:
       - message
       - status_code
-    AwardRecommendationRiskDeleteResponseSchema:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The message to return
-          example: Success
-        data:
-          example: null
-        status_code:
-          type: integer
-          description: The HTTP status code
-          example: 200
     AwardRecommendationReviewUpdateResponseSchema:
       type: object
       properties:
@@ -13173,20 +13251,20 @@ components:
       required:
       - is_reviewed
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: X-Auth
-    ApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Token
-    ApiUserKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
     InternalApiJwtAuth:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
+    ApiUserKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    ApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Token
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Auth
 
