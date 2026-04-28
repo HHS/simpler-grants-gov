@@ -59,7 +59,49 @@ The following guidelines are for code contributions. Please see [DEVELOPMENT.md]
 
 ### Getting Started
 
-This project is monorepo with several apps. Please see the [api](./api/README.md) and [frontend](./frontend/README.md) READMEs for information on spinning up those projects locally. Also see the project [documentation](./documentation) for more info.
+This project is monorepo with several apps. Below is a simple Quickstart for running both the Frontend and API locally (Full Stack). For more information refer to the [Quickstart Guide](./QUICKSTART.md) for all setup options.
+
+1. Navigate to the API Directory
+
+```bash
+cd api/
+```
+
+2. Start the local containers
+
+```bash
+make init
+```
+
+3. Fill up the database with local data
+
+```bash
+make setup-api-data
+```
+
+4. Start API with logs (API will be available at [`localhost:3000`](http://localhost:8080/))
+
+```bash
+make run-logs
+```
+
+5. Navigate to the Frontend Directory in another shell
+
+```bash
+cd frontend/
+```
+
+6. Install Node Packages
+
+```bash
+npm install
+```
+
+7. Run the Frontend (will be available at [`localhost:3000`](http://localhost:3000/))
+
+```bash
+npm run local
+```
 
 ### Workflow and Branching
 
