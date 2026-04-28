@@ -20,6 +20,9 @@ ECS_SERVICE_NAME = os.environ.get("ECS_SERVICE_NAME", "")
 ECS_CLUSTER_NAME = os.environ.get("ECS_CLUSTER_NAME", "")
 NR_ENTITY_GUID = os.environ.get("NR_ENTITY_GUID", "")
 
+# Max log entries per New Relic Logs API request
+BATCH_SIZE = 1000
+
 # Cache the license key across warm invocations
 _nr_license_key = None
 
@@ -34,6 +37,31 @@ def get_nr_license_key():
         )
         _nr_license_key = response["Parameter"]["Value"]
     return _nr_license_key
+
+
+def send_to_newrelic(nr_payload, nr_license_key):
+    """Send a New Relic Logs API payload."""
+    request = urllib.request.Request(
+        NR_LOGS_ENDPOINT,
+        data=gzip.compress(json.dumps(nr_payload).encode("utf-8")),
+        headers={
+            "Content-Type": "application/gzip",
+            "Api-Key": nr_license_key,
+            "Content-Encoding": "gzip",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            print(f"New Relic response: {response.status}")
+    except urllib.error.HTTPError as e:
+        print(f"New Relic HTTP error: {e.code} {e.reason}")
+        if e.code >= 500:
+            raise  # Retryable — let Lambda/CloudWatch retry
+        print(f"Non-retryable error, dropping batch")
+    except urllib.error.URLError as e:
+        print(f"New Relic connection error: {e.reason}")
+        raise  # Retryable — network issue
 
 
 def handler(event, context):
@@ -82,40 +110,11 @@ def handler(event, context):
     if NR_ENTITY_GUID:
         common_attributes["entity.guid"] = NR_ENTITY_GUID
 
-    nr_payload = [
-        {
-            "common": {
-                "attributes": common_attributes,
-            },
-            "logs": entries,
-        }
-    ]
-
     nr_license_key = get_nr_license_key()
 
-    request = urllib.request.Request(
-        NR_LOGS_ENDPOINT,
-        data=gzip.compress(json.dumps(nr_payload).encode("utf-8")),
-        headers={
-            "Content-Type": "application/gzip",
-            "Api-Key": nr_license_key,
-            "Content-Encoding": "gzip",
-        },
-        method="POST",
-    )
+    for i in range(0, len(entries), BATCH_SIZE):
+        batch = entries[i : i + BATCH_SIZE]
+        nr_payload = [{"common": {"attributes": common_attributes}, "logs": batch}]
+        send_to_newrelic(nr_payload, nr_license_key)
 
-    try:
-        with urllib.request.urlopen(request, timeout=10) as response:
-            status = response.status
-            body = response.read().decode("utf-8")
-        print(f"New Relic response: status={status} body={body}")
-        return {"statusCode": status, "body": body}
-    except urllib.error.HTTPError as e:
-        print(f"New Relic HTTP error: {e.code} {e.reason}")
-        if e.code >= 500:
-            raise  # Retryable — let Lambda/CloudWatch retry
-        print(f"Non-retryable error, dropping {len(entries)} log events")
-        return {"statusCode": e.code, "body": e.reason}
-    except urllib.error.URLError as e:
-        print(f"New Relic connection error: {e.reason}")
-        raise  # Retryable — network issue
+    return {"statusCode": 200, "body": f"Forwarded {len(entries)} log entries"}
