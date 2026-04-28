@@ -14,6 +14,7 @@
 6. [Gaps Identified](#6-gaps-identified)
 7. [Recommendations](#7-recommendations)
 8. [Next Steps](#8-next-steps)
+9. [Find Metrics Dashboard](#9-find-metrics-dashboard)
 
 ---
 
