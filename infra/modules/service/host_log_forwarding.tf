@@ -89,7 +89,7 @@ resource "aws_kms_key" "nr_host_log_forwarder" {
         Resource = "*"
         Condition = {
           ArnLike = {
-            "kms:EncryptionContext:aws:logs:arn" = "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.nr_host_log_forwarder_name}"
+            "kms:EncryptionContext:aws:logs:arn" = "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.nr_host_log_forwarder_name}/logs"
           }
         }
       },
@@ -99,7 +99,7 @@ resource "aws_kms_key" "nr_host_log_forwarder" {
 
 resource "aws_cloudwatch_log_group" "nr_host_log_forwarder" {
   # checkov:skip=CKV_AWS_338:Forwarding Lambda logs don't need long retention — actual ECS logs are in New Relic
-  name              = "/aws/lambda/${local.nr_host_log_forwarder_name}"
+  name              = "/aws/lambda/${local.nr_host_log_forwarder_name}/logs"
   retention_in_days = 30
   kms_key_id        = aws_kms_key.nr_host_log_forwarder.arn
 }
