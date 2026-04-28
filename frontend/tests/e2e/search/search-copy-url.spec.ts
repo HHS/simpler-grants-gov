@@ -1,5 +1,5 @@
 /**
- * @featureFile search-copy-url.feature
+ * @featureFile frontend/tests/e2e/search/features/search-core/search-copy-url.feature
  * @feature Search Copy URL
  * @scenario Copy the current search query URL and paste it into the search input
  */
@@ -29,7 +29,7 @@ test(
       return;
     }
 
-    // Given I am on the Search Funding Opportunity page
+    // Given I am on the "Search funding opportunity" page
     await page.goto("/search");
 
     // this is dumb but webkit has an issue with trying to fill in the input too quickly
