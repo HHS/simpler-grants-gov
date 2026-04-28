@@ -2,6 +2,11 @@ FROM ghcr.io/hhs/python-base-image:3d03921@sha256:01ea5e3392e0ea9f70bb48a9df4877
 ARG RUN_UID
 ARG RUN_USER
 
+# TODO - need to remove poetry from the base image - will just ignore it at the moment
+# TODO - install uv in the base image instead of here
+# TODO - should pin to a specific SHA - even their docs recommend it
+COPY --from=ghcr.io/astral-sh/uv:0.11.8 /uv /uvx /bin/
+
 # Read Python version from the version file in the base image
 RUN mkdir -p /tmp && cat /python-version.txt > /tmp/py_version.txt
 
@@ -11,33 +16,36 @@ RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && : "${
       grep -Eq "^${RUN_USER}:" /etc/group || groupadd -g "${RUN_UID}" "${RUN_USER}"; \
       grep -Eq "^${RUN_USER}:" /etc/passwd || useradd -l -M -s /bin/bash -u "${RUN_UID}" -g "${RUN_USER}" "${RUN_USER}"; \
     fi && \
-    mkdir -p "/home/${RUN_USER}" /api /api/tmp /var/spool/mail /tmp /var/tmp /usr/tmp && \
-    chown -R "${RUN_UID}:${RUN_UID}" "/home/${RUN_USER}" /api /api/tmp && \
+    mkdir -p "/home/${RUN_USER}" /api /api/tmp /var/spool/mail /tmp /var/tmp /usr/tmp /opt/venv && \
+    chown -R "${RUN_UID}:${RUN_UID}" "/home/${RUN_USER}" /api /api/tmp /opt/venv && \
     chmod 700 /api/tmp && \
-    chmod 1777 /tmp /var/tmp /usr/tmp
+    chmod 1777 /tmp /var/tmp /usr/tmp /opt/venv
 
 WORKDIR /api
 
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml uv.lock ./
 
+# TODO - why did we do this?
 RUN rm -rf /api/.venv || true
 
-ENV POETRY_VIRTUALENVS_IN_PROJECT=true
-ENV VIRTUALENV_ALWAYS_COPY=1
-ENV VIRTUALENV_APP_DATA="/tmp"
-
+#ENV POETRY_VIRTUALENVS_IN_PROJECT=true
+#ENV VIRTUALENV_ALWAYS_COPY=1
+#ENV VIRTUALENV_APP_DATA="/tmp"
 
 
 COPY src /api/src
 COPY newrelic.ini /api/newrelic.ini
 
+ENV UV_NO_DEV=1
+RUN uv sync --locked --no-dev
+
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
 RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
-    /usr/local/bin/python"${PY_MM}" -m poetry install --only main --no-root && \
-    /usr/local/bin/python"${PY_MM}" -m poetry build --format wheel && \
-    /api/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
-    /api/.venv/bin/python -m pip install --no-cache-dir "virtualenv>=20.35.3" && \
+    #/usr/local/bin/python"${PY_MM}" -m uv sync --locked --no-dev && \
+    # uv build --wheel && \
+    # /api/.venv/bin/python -m pip install --no-cache-dir dist/simpler_grants_gov_api-0.1.0-py3-none-any.whl && \
+    # /api/.venv/bin/python -m pip install --no-cache-dir "virtualenv>=20.35.3" && \
     SITE_BASE="/api/.venv/lib/python${PY_MM}/site-packages" && \
     mkdir -p "${SITE_BASE}/src" && \
     cp "/api/newrelic.ini" "${SITE_BASE}/src/newrelic.ini" && \
@@ -57,6 +65,13 @@ RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
 FROM base AS dev
 ARG RUN_USER
 
+RUN uv venv /opt/venv
+# Use the virtual environment automatically
+ENV VIRTUAL_ENV=/opt/venv
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+# Place entry points in the environment at the front of the path
+ENV PATH="/opt/venv/bin:$PATH"
+
 # Disable Python optimization to preserve docstrings required by jsonpath_ng
 # https://github.com/h2non/jsonpath-ng?tab=readme-ov-file#special-note-about-ply-and-docstrings
 ENV PYTHONOPTIMIZE=0
@@ -66,19 +81,20 @@ USER ${RUN_USER}
 WORKDIR /api
 
 # In dev, prefer external venv to avoid mutating release venv
-ENV POETRY_VIRTUALENVS_IN_PROJECT=false
+# ENV POETRY_VIRTUALENVS_IN_PROJECT=false
 
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml uv.lock ./
 
 # Explicitly create a new virtualenv
-RUN poetry config virtualenvs.in-project false && poetry env use python
+#RUN poetry config virtualenvs.in-project false && poetry env use python
 
 # Install all dependencies including dev dependencies
-RUN poetry install --no-root --with dev
+# RUN poetry install --no-root --with dev
+RUN uv sync --locked --all-groups --no-install-project --
 
 COPY . /api
 
-CMD ["poetry", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]
+CMD ["uv", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]
 
 #==============================================
 # Stage 3: Minimal release runtime
