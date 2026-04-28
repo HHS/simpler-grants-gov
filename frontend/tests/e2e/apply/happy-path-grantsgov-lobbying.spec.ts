@@ -46,7 +46,9 @@ test(
      */
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
-    // When the user fills out the form with valid test data
+    // When the user clicks on a form link
+    // Then the form opens
+    // And the user fills out the form with valid test data
     // And the user clicks Save
     await fillForm(
       testInfo,
@@ -55,8 +57,6 @@ test(
       grantsGovLobbyingHappyPathTestData,
       false,
     );
-
-    await page.waitForTimeout(2000);
 
     /* Covers "Form status validation" flow in the feature file,
      * which includes verification of the status in form and application landing page after saving a completed form.

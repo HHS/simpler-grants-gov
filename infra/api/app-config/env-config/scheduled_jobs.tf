@@ -52,6 +52,17 @@ locals {
       "--set-current",
       "--store-version"
     ],
+    grantee2 = [
+      "poetry",
+      "run",
+      "flask",
+      "data-migration",
+      "load-transform",
+      "--load",
+      "--transform",
+      "--set-current",
+      "--store-version"
+    ],
     prod = [
       "poetry",
       "run",
@@ -91,6 +102,7 @@ locals {
     staging  = ["poetry", "run", "flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
     training = ["poetry", "run", "flask", "task", "sam-extracts"]
     grantee1 = ["poetry", "run", "flask", "task", "sam-extracts"]
+    grantee2 = ["poetry", "run", "flask", "task", "sam-extracts"]
     prod     = ["poetry", "run", "flask", "task", "sam-extracts"]
   }
   setup-lower-env-agencies-state = {
@@ -98,6 +110,7 @@ locals {
     staging  = "ENABLED"
     training = "DISABLED"
     grantee1 = "DISABLED"
+    grantee2 = "DISABLED"
     prod     = "DISABLED"
   }
   build-automatic-opportunities-state = {
@@ -105,6 +118,7 @@ locals {
     staging  = "ENABLED"
     training = "ENABLED"
     grantee1 = "DISABLED"
+    grantee2 = "DISABLED"
     prod     = "DISABLED"
   }
   load-transform-state = {
@@ -112,6 +126,7 @@ locals {
     staging  = "ENABLED"
     training = "ENABLED"
     grantee1 = "DISABLED"
+    grantee2 = "DISABLED"
     prod     = "ENABLED"
   }
   sam-extracts-state = {
@@ -119,6 +134,7 @@ locals {
     staging  = "ENABLED"
     training = "ENABLED"
     grantee1 = "DISABLED"
+    grantee2 = "DISABLED"
     prod     = "ENABLED"
   }
   create-analytics-db-csvs-state = {
@@ -126,6 +142,7 @@ locals {
     staging  = "ENABLED"
     training = "ENABLED"
     grantee1 = "DISABLED"
+    grantee2 = "DISABLED"
     prod     = "ENABLED"
   }
   email-notification-opportunity-state = {
@@ -133,6 +150,7 @@ locals {
     staging  = "ENABLED"
     training = "ENABLED"
     grantee1 = "DISABLED"
+    grantee2 = "DISABLED"
     prod     = "ENABLED"
   }
   scheduled_jobs = {

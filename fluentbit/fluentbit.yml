@@ -40,7 +40,7 @@ pipeline:
 
   outputs:
     - name: nrlogs # new relic logs
-      match: "**"
+      match: "${NR_DIRECT_LOGS_MATCH}"
       license_key: ${licenseKey}
 
     - name: cloudwatch_logs # aws cloudwatch logs

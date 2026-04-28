@@ -3,6 +3,7 @@ from src.workflow.service.approval_service import can_user_do_agency_approval
 from tests.src.db.models.factories import (
     ApplicationFactory,
     ApplicationSubmissionFactory,
+    AwardRecommendationFactory,
     CompetitionFactory,
     OpportunityFactory,
     UserFactory,
@@ -196,6 +197,63 @@ def test_can_user_do_agency_approval_application_submission(
     verify_can_do_only(
         user=other_agency_program_officer,
         workflow=application_workflow,
+        expected_allowed_events=set(),
+        all_events=all_events,
+        config=config,
+    )
+
+
+def test_can_user_do_agency_approval_award_recommendation(
+    db_session,
+    agency,
+    budget_officer,
+    program_officer,
+    other_agency_program_officer,
+    other_agency_budget_officer,
+    opportunity,
+):
+    config = basic_test_workflow_config
+
+    award_recommendation = AwardRecommendationFactory.create(opportunity=opportunity)
+
+    award_recommendation_workflow = WorkflowFactory.create(
+        workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+        award_recommendation=award_recommendation,
+        has_award_recommendation=True,
+    )
+
+    all_events = BasicTestStateMachine.get_valid_events()
+
+    # Budget Officer can only do their approval
+    verify_can_do_only(
+        user=budget_officer,
+        workflow=award_recommendation_workflow,
+        expected_allowed_events={"receive_budget_officer_approval"},
+        all_events=all_events,
+        config=config,
+    )
+
+    # Program officer can only do their approval
+    verify_can_do_only(
+        user=program_officer,
+        workflow=award_recommendation_workflow,
+        expected_allowed_events={"receive_program_officer_approval"},
+        all_events=all_events,
+        config=config,
+    )
+
+    # The users in another agency cannot do any approvals
+    verify_can_do_only(
+        user=other_agency_program_officer,
+        workflow=award_recommendation_workflow,
+        expected_allowed_events=set(),
+        all_events=all_events,
+        config=config,
+    )
+
+    verify_can_do_only(
+        user=other_agency_budget_officer,
+        workflow=award_recommendation_workflow,
         expected_allowed_events=set(),
         all_events=all_events,
         config=config,
