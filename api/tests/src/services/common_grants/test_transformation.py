@@ -810,31 +810,6 @@ class TestTransformation:
             "passed through with an invalid URL"
         )
 
-    def test_validate_url_logs_redacted_userinfo_on_failure(self, caplog):
-        """Security: a URL with user:password@ that fails validation must not leak
-        credentials to the log aggregator. validate_url() runs the value through
-        redact_url_userinfo before emitting the INFO log.
-        """
-        import logging
-
-        caplog.set_level(logging.WARNING)
-
-        # Comma-URL with embedded credentials. Pydantic accepts (mangled), marshmallow
-        # rejects, validate_url returns None, WARNING log fires.
-        bad_url = "https://user:secret@a.gov,https://b.gov"
-        assert validate_url(bad_url) is None
-
-        log_record = next(
-            (r for r in caplog.records if "Dropping URL field" in r.message),
-            None,
-        )
-        assert log_record is not None
-        # The credential must NOT appear in the structured field …
-        assert "user:secret" not in getattr(log_record, "url", "")
-        assert "secret" not in getattr(log_record, "url", "")
-        # … nor in the rendered message
-        assert "secret" not in log_record.getMessage()
-
     def test_attachment_download_url_dual_validates(self):
         """Sibling of the additional-info-url path: AttachmentValue.downloadUrl in
         the CG response is loaded through marshmallow's fields.URL on the way out;
@@ -1117,9 +1092,8 @@ class TestTransformation:
         # Verify the URL was rejected
         assert result is None
 
-        # Verify the log was captured. The URL is in extra["url"] (and the log
-        # message itself is now a fixed string) so credentials embedded in the
-        # raw value can't leak through the message body — see redact_url_userinfo.
+        # Verify the log was captured. The URL is in extra["url"] and the log
+        # message itself is a fixed string.
         assert any(
             record.levelname == "WARNING"
             and "Dropping URL field" in record.message

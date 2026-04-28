@@ -39,7 +39,7 @@ from src.api.common_grants.schemas.pydantic.custom_fields import (
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
-from src.services.common_grants.url_utils import redact_url_userinfo, validate_url_compatible
+from src.services.common_grants.url_utils import validate_url_compatible
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
@@ -166,15 +166,12 @@ def validate_url(
     field will be omitted from the CG response, so callers passing ``field``
     and ``opportunity_id`` give operators enough context to answer "why is
     this field missing for opportunity X?" without paging the original record.
-
-    Userinfo is stripped from the logged URL via ``redact_url_userinfo`` to
-    avoid leaking ``user:password@`` if grants.gov data ever ships one through.
     """
     result = validate_url_compatible(value)
     if result is None and value not in (None, ""):
         log_extra: dict[str, object] = {
             "cg_event": CommonGrantsEvent.URL_VALIDATION_ERROR,
-            "url": redact_url_userinfo(value),
+            "url": value,
         }
         if field is not None:
             log_extra["field"] = field
