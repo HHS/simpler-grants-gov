@@ -32,8 +32,8 @@ resource "aws_lambda_function" "nr_host_log_forwarder" {
   description   = "Forwards ECS application CloudWatch logs to New Relic"
   runtime       = "python3.12"
   handler       = "index.handler"
-  timeout       = 30
-  memory_size   = 128
+  timeout       = 60
+  memory_size   = 256
 
   role = aws_iam_role.nr_host_log_forwarder.arn
 
