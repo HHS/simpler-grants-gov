@@ -550,3 +550,33 @@ class TestUpdateAwardRecommendationRisk422:
         )
 
         assert resp.status_code == 422
+
+    def test_update_risk_empty_submissions_422(
+        self, client, db_session, agency, award_recommendation
+    ):
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
+        )
+
+        risk = AwardRecommendationRiskFactory.create(
+            award_recommendation=award_recommendation,
+        )
+
+        resp = client.put(
+            _build_url(
+                award_recommendation.award_recommendation_id, risk.award_recommendation_risk_id
+            ),
+            headers={"X-SGG-Token": token},
+            json={
+                "comment": "Some risk",
+                "award_recommendation_risk_type": AwardRecommendationRiskType.ADDITIONAL_MONITORING,
+                "award_recommendation_application_submission_ids": [],
+            },
+        )
+
+        assert resp.status_code == 422
+        assert "errors" in resp.json
+        assert any(
+            error["field"] == "award_recommendation_application_submission_ids"
+            for error in resp.json["errors"]
+        )
