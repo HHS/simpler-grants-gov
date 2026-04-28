@@ -11,7 +11,9 @@ Feature: Search Copy URL
     Given I am on the Search Funding Opportunity page
 
   Scenario: Copy search URL and paste into the search input
-    Given I search for "education grants"
+    Given I search for "<search-term>"
+    ...
+    Then the search input should contain "/search?query=<search-term>"
     And the Copy this search query control is visible
     When I click Copy this search query
     And I paste from clipboard into the search input
