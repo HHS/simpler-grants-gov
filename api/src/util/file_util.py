@@ -107,10 +107,10 @@ def pre_sign_file_location(file_path: str, s3_config: S3Config | None = None) ->
         Params={"Bucket": bucket, "Key": key},
         ExpiresIn=s3_config.presigned_s3_duration,
     )
-    if s3_config.s3_endpoint_url:
+    if s3_config.aws_s3_endpoint_url:
         # Only relevant when local, due to docker path issues
         pre_sign_file_loc = pre_sign_file_loc.replace(
-            s3_config.s3_endpoint_url, "http://localhost:9090"
+            s3_config.aws_s3_endpoint_url, "http://localhost:9090"
         )
 
     return pre_sign_file_loc
