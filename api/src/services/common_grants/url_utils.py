@@ -76,4 +76,8 @@ def redact_url_userinfo(value: str | None) -> str:
             host = f"{host}:{parts.port}"
         return urlunsplit((parts.scheme, host, parts.path, parts.query, parts.fragment))
     except ValueError:
-        return "<unparseable-url>"
+        # The URL could not be parsed (e.g. a non-numeric port). We can't
+        # safely strip credentials from a string we can't parse, so the
+        # original value is suppressed entirely. The sentinel is greppable
+        # in log aggregation.
+        return "<malformed-url-redaction-skipped>"

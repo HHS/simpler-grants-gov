@@ -73,7 +73,7 @@ class TestRedactUrlUserinfo:
         """
         # No exception:
         result = redact_url_userinfo("https://user:secret@host:abc/path")
-        assert result == "<unparseable-url>"
+        assert result == "<malformed-url-redaction-skipped>"
         # And of course no credential leak:
         assert "secret" not in result
 
