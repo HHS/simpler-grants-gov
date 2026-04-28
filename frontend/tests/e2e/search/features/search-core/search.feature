@@ -8,7 +8,7 @@ Feature: Search Core Search Behaviors
   So that I can reliably explore opportunities
 
   Background:
-    Given I am on the Search Funding Opportunity page
+    Given I am on the "Search funding opportunities" page
     And I wait for the search results to load
 
   Scenario: Refresh and retain filters and sort order with search term and multiple filters
