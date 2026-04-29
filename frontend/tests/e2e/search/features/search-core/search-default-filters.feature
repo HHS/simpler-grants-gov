@@ -1,4 +1,4 @@
-# @specFile frontend/tests/e2e/search/search-default-filters.spec.ts
+# @specFile e2e/search/search-default-filters.spec.ts
 # @featureArea Search
 # @debugNote Checks default filters on search page load
 
