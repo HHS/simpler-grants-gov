@@ -68,6 +68,6 @@ This is the current approach. Each project team is responsible for creating thei
 
 ## Links
 
-* [Decision to use the USWDS](../../../decisions/adr/0003-design-system.md)
+* [Decision to use the USWDS](./2023-07-20-fe-design-system.md)
 * [Kalvin and Shannon's research](https://docs.google.com/document/d/1KRWzH_wJUPKkFmBlxj6SM2yN3W7Or89Wa4TBVM3Ksog/edit)
   * [Evaluation of `react-uswds`](https://docs.google.com/document/d/1T3eG4oRofDE_NkfL7-xEqS39ORlrXlI8bFYcjGaYoWs/edit)

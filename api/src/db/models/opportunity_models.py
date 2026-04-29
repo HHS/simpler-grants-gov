@@ -481,7 +481,7 @@ class OpportunityAttachment(ApiSchemaTable, TimestampMixin):
 
     attachment_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
-    legacy_attachment_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    legacy_attachment_id: Mapped[int | None] = mapped_column(BigInteger, index=True)
 
     opportunity_id: Mapped[uuid.UUID] = mapped_column(
         UUID, ForeignKey(Opportunity.opportunity_id), index=True

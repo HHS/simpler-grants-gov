@@ -14,6 +14,7 @@
 6. [Gaps Identified](#6-gaps-identified)
 7. [Recommendations](#7-recommendations)
 8. [Next Steps](#8-next-steps)
+9. [Find Metrics Dashboard](#9-find-metrics-dashboard)
 
 ---
 
@@ -374,86 +375,6 @@ Export NR dashboard JSON periodically and store in the repository for backup and
 OpenSearch has its own metrics (index health, query performance, shard stats) that could eventually be imported into New Relic for a complete picture of search infrastructure performance. See [#8250](https://github.com/HHS/simpler-grants-gov/issues/8250) for ongoing investigation.
 
 ---
-
-## 9. Find Metrics Dashboard — NRQL Query Reference
-
-This section documents the NRQL queries used in each page of the **Find Metrics** dashboard. All queries target `environment = 'prod'` and the `Log` event type unless otherwise noted. Attributes are logged via `add_extra_data_to_current_request_logs` in the API layer and forwarded to New Relic Logs via the FluentBit sidecar.
-
----
-
-### 9.1 OpenSearch Health Page
-
-Implemented in [#9167](https://github.com/HHS/simpler-grants-gov/issues/9167). Requires instrumentation from [#9147](https://github.com/HHS/simpler-grants-gov/issues/9147), [#9149](https://github.com/HHS/simpler-grants-gov/issues/9149), and [#9150](https://github.com/HHS/simpler-grants-gov/issues/9150).
-
-**Data source:** `Log` events where `request.url_rule = '/v1/opportunities/search'`
-
-**Attributes used:**
-
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `search.took_ms` | int | Time OpenSearch spent executing the query (ms) |
-| `search.timed_out` | bool | Whether OpenSearch returned a partial result due to timeout |
-| `search.shards_failed` | int | Number of shards that failed during the query |
-| `search.max_score` | float | Relevancy score of the top result; `0` for browse-mode (no query text) |
-| `search.scoring_rule` | string | Active scoring profile: `default`, `expanded`, or `agency` |
-
-**Panel: Search Latency — p50 / p95 / p99**
-```sql
-SELECT percentile(search.took_ms, 50, 95, 99)
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
-TIMESERIES AUTO
-SINCE 7 days ago
-```
-
-**Panel: Timeout Rate**
-```sql
-SELECT percentage(count(*), WHERE search.timed_out IS TRUE) AS 'Timeout Rate %'
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
-TIMESERIES AUTO
-SINCE 7 days ago
-```
-
-**Panel: Shard Failure Rate**
-```sql
-SELECT percentage(count(*), WHERE search.shards_failed > 0) AS 'Shard Failure Rate %'
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
-TIMESERIES AUTO
-SINCE 7 days ago
-```
-
-**Panel: Max Score Trend**
-```sql
-SELECT average(search.max_score), percentile(search.max_score, 50, 95)
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
-  AND search.max_score > 0
-TIMESERIES AUTO
-SINCE 7 days ago
-```
-
-> `search.max_score = 0` for browse-mode searches (no query text). The `> 0` filter excludes these so the chart reflects only scored result sets.
-
-**Panel: Max Score by Scoring Rule**
-```sql
-SELECT average(search.max_score)
-FROM Log
-WHERE request.url_rule = '/v1/opportunities/search'
-  AND environment = 'prod'
-  AND search.max_score > 0
-FACET search.scoring_rule
-TIMESERIES AUTO
-SINCE 7 days ago
-```
-
----
-
 ## 8. Next Steps
 
 ### Existing Companion Tickets
@@ -467,3 +388,167 @@ SINCE 7 days ago
 4. **Add Find-Specific Alerts as Code** — Define and deploy NR alerts for search error rate, latency, zero-result rate, and opportunity view errors via the NR Terraform provider (alerts, unlike dashboards, are well-suited to code management).
 5. **Add Logging to Saved Opportunities/Searches Routes** — Extend `add_extra_data_to_current_request_logs` to save/unsave and saved search endpoints, following the existing pattern in `opportunity_routes.py`.
 6. **Dashboard Backups** — Script a periodic export of NR dashboard JSON to the repository for backup and diff history.
+
+## 9. Find Metrics Dashboard
+
+**[Open in New Relic](https://onenr.io/0ERP1nyBPjW)**
+
+**Default time range**: Last 30 days (all "over time" panels reflect the past month)
+
+This section documents the panels on each page of the **Find Metrics** dashboard: what they measure, which NR attributes they use, and any caveats. Attributes on `Log` events are logged via `add_extra_data_to_current_request_logs` in the API layer and forwarded to New Relic Logs via the FluentBit sidecar.
+
+---
+
+### Search Attributes Reference
+
+| Attribute                        | Event type                | Description |
+|----------------------------------|---------------------------|-------------|
+| `search.index`                   | `Log`                     | Name of the OpenSearch index being queried |
+| `search.took_ms`                 | `Log`                     | Time OpenSearch spent executing the query (the `took` field, in milliseconds) |
+| `search.timed_out`               | `Log`                     | Whether the query timed out in OpenSearch (partial results possible) |
+| `search.shards_failed`           | `Log`                     | Number of shards that failed during query execution |
+| `search.total_records`           | `Log`                     | Total number of hits returned (`total_records`) |
+| `search.is_zero_result`          | `Log`                     | Boolean flag: `true` if the search returned zero results |
+| `search.max_score`               | `Log`                     | Relevancy score of the top result (`0` for browse-mode / no query text) |
+| `search.total_relation`          | `Log`                     | Relation of the hit count: `'eq'` (exact) or `'gte'` (approximate lower bound) |
+| `search.agg_overflow.*`          | `Log`                     | Dynamic attributes for aggregation overflows (e.g. `search.agg_overflow.agency` = `sum_other_doc_count`) |
+| `search.score_min`               | `Log`                     | Minimum relevancy score among returned results |
+| `search.score_max`               | `Log`                     | Maximum relevancy score among returned results |
+| `search.score_mean`              | `Log`                     | Mean relevancy score among returned results |
+| `search.score_stdev`             | `Log`                     | Standard deviation of relevancy scores (only when >1 result) |
+| `search.scoring_rule`            | `Log`                     | Active scoring profile used for the search request (`default`, `expanded`, or `agency`) |
+| `saved_search_id`                | `Log`                     | Identifier for a saved search, if the query originated from one |
+| `field_score.<field>`            | `SearchResultExplanation` | BM25 score contribution from a specific field (e.g. `field_score.agency_code`, `field_score.opportunity_title`) |
+| `position`                       | `SearchResultExplanation` | 1-based rank of the result (1–10) |
+| `scoring_rule`                   | `SearchResultExplanation` | Active scoring profile used for this result (`default`, `expanded`, or `agency`) |
+
+## 9.1 Landing Page – High-Level Funnel Overview
+
+### Purpose & Philosophy
+
+This is the main entry point for the Find Metrics dashboard. It gives **Product, Engineering, and Leadership** a single consolidated view of Search health and funnel volume over the last 30 days.
+
+Use this page **first**, before going deeper into specialized dashboards.  
+
+It answers the high-level questions that matter most:
+
+- Is our search experience healthy and growing?
+- Is the top of the funnel (search → opportunity discovery) performing as expected?
+- Are there any early warning signs of degradation in volume, engagement, or reliability?
+
+
+### Panel-by-Panel Guidance
+
+#### 1. Key Metrics (Top Cards)
+
+**Panels**: Monthly Visitors, Monthly Search Users, Total Searches Performed
+
+These cards provide a high-level snapshot of traffic and engagement over the last 30 days. Watch for sudden drops in any metric (immediate investigation needed), Search Users growing while Total Searches stay flat or decline (possible UX or relevance issue), or Visitors growing faster than Search Users (search not capturing new traffic effectively). If something looks off, start with traffic sources (especially if Visitors drop), then check deeper quality or engagement metrics.
+
+#### 2. Volume Trends
+
+**Panels**: Search volume over time, Opportunity view volume over time, Search vs Opportunity Sessions over time (unique sessions hitting search vs opportunity pages)
+
+This section shows how volume flows through the top and middle of the funnel over the last month. Look for divergence between search volume and opportunity views/sessions. Watch for searches stable or increasing while opportunity views flatten or drop (users searching but not finding valuable results) or a large/widening gap in Search vs Opportunity Sessions (funnel leakage at discovery). If something looks off, investigate search quality or engagement metrics.
+
+#### 3. Save Activity
+
+**Panels**: User Saves Activity (Saved / Deleted / Net), Organization Saves Activity (Saved / Deleted / Net), User Saved Opportunities Trend, Organization Saved Opportunities Trend
+
+This section tracks bottom-of-funnel engagement and real user value, with saves as the strongest intent signal. Net Saves (Saved minus Deleted) is the cleanest measure of value delivered. Compare User vs Organization trends to distinguish individual from account-level behavior. Watch for rising search volume but flat/declining net saves (users look but don’t find value), high delete rate relative to saves (relevance or quality issues), or divergence between user and organization saves (possible B2B issues). If something looks off, check deeper engagement or save behavior metrics.
+
+#### 4. Health
+
+**Panels**: Zero-result search rate, Top-level error rates for search/view/save endpoints, Search p95 latency over time
+
+This section monitors technical reliability and core experience quality. Zero-result rate is a leading indicator of relevance failure (even small increases hurt trust). Error rates should stay very low, and p95 latency shows how responsive search feels. Watch for increasing zero-result rate (relevance/ranking/data issue), spiking error rates (recent deploy or dependency problem), or p95 latency trending up (performance regression). If something looks off, investigate quality, errors, or latency metrics.
+
+## 9.2 Search Quality and Relevance
+
+### Purpose & Philosophy
+
+This page assesses how relevant and useful search results are by combining click-through rates, zero-result metrics, result counts, and OpenSearch scoring signals.
+
+Use this page when CTR drops, zero-result rate rises, or users report poor/irrelevant results even when volume looks healthy.
+
+### Panel-by-Panel Guidance
+
+#### 1. Click-Through Rate
+
+**Panels**: Search Click Through Rate (Total Search Clicks, CTR %), Search Click Through Rate Trend, Top 3 CTR by Sort Order, CTR With Filters vs Without Filters, Saved Search CTR vs Manual Search CTR
+
+Measures how well results drive engagement. Higher CTR indicates better relevance. Watch for declining CTR trend, large gaps between filtered vs unfiltered searches, or lower CTR on default/manual searches. If CTR drops, investigate ranking, result relevance, or recent sorting/scoring changes.
+
+#### 2. Result Quality
+
+**Panels**: Zero-Result Rate, Result Count Distribution, Top Queries Returning Zero Results
+
+Evaluates result coverage and quality. Zero-Result Rate is a key indicator of relevance or data gaps. Watch for rising zero-result rates or frequent zero-result queries (especially common terms). If zero results increase, examine query understanding, synonyms, data freshness, or missing content.
+
+#### 3. OpenSearch Scoring
+
+**Panels**: OpenSearch Query Latency, Score Distribution Trends, Score Distribution by Scoring Rule, Top Contributing Fields by Position, Average Field Score Contribution by Scoring Rule
+
+Provides insight into scoring behavior and latency. Watch for sudden latency spikes, declining or unstable score distributions, or unexpected field dominance in results. If scoring looks off, review scoring profiles, field mappings, or enable explain mode.
+
+## 9.3 Search Engagement and Usage
+
+### Purpose & Philosophy
+
+This page shows how deeply users engage with search beyond raw volume — session intensity, feature adoption, saved search behavior, and usage patterns.
+
+Use this page when search volume is healthy but opportunity views or saves are lagging, or to evaluate adoption of filters and saved searches.
+
+### Panel-by-Panel Guidance
+
+#### 1. Session Behavior
+
+**Panels**: Search Usage per Session (Median, Avg, Max, Min), Search Usage per Session Trend, Search Sessions by Device Type
+
+Shows how many searches users perform per session and breakdown by device. Watch for declining median/average searches per session (possible frustration or reduced need) or heavy skew to one device type.
+
+#### 2. Search Tools & Terms
+
+**Panels**: Tools Usage Distribution, Most Frequent Search Terms, Sessions Using Search Filters (Last 30 Days), Saved Search Stickiness
+
+Reveals adoption of search tools, common queries, filter usage, and how often users return to saved searches. Watch for low filter adoption, dominance of short/generic queries, or low saved search stickiness.
+
+#### 3. Saved Search Metrics
+
+**Panels**: Active Saved Searches per Day, Activation Rate — Created, Saved Search Creation Volume
+
+Tracks creation and activity of saved searches. Watch for declining creation volume or drops in active saved searches per day (may indicate users see limited long-term value).
+
+#### 4. Activity Patterns
+
+**Panels**: Unique Users Saving Searches, Search Activity by Day of Week, Search Activity by Hour of Day, Sort Usage Frequency, Query Length Distribution
+
+Highlights when and how users search and save. Watch for drops in unique savers, unusual time-based spikes/drops, heavy use of specific sorts, or many very short/empty queries.
+
+## 9.4 Open Search Health
+
+### Purpose & Philosophy
+
+This page monitors the technical health and performance of OpenSearch — including latency, reliability, and scoring behavior.
+
+Use this page when investigating slow search, incomplete results, rising zero-result or error rates, or after deployments/index changes.
+
+### Panel-by-Panel Guidance
+
+#### 1. Performance
+
+**Panels**: Search Latency (ms) — p50 / p95 / p99, Timeout Rate, Shard Failure Rate
+
+Tracks OpenSearch execution time, timeouts, and shard failures. Watch for upward trends in p95/p99 latency, any non-zero timeout rate, or spikes in shard failures. If issues appear, investigate query patterns and cluster health.
+
+#### 2. Scoring
+
+**Panels**: Max Score Trend, Max Score by Scoring Rule, Total Relation Accuracy
+
+Monitors relevancy scoring over time. Watch for declining max scores or divergence between scoring rules. Total Relation Accuracy should always be 0% — any non-zero value needs immediate investigation.
+
+#### 3. Deep Dive
+
+**Panels**: Agency Aggregation Truncation, Top Contributing Fields by Position, Average Field Score Contribution by Scoring Rule
+
+Provides advanced diagnostics. Watch for non-zero agency aggregation truncation or unexpected field dominance in scoring. If anomalies appear, review aggregations, scoring profiles, or enable explain mode.

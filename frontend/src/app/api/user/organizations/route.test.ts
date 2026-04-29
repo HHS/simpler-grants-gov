@@ -30,9 +30,6 @@ describe("user/organizations GET requests", () => {
     await getUserOrganizations();
     expect(mockFetchOrganizations).toHaveBeenCalledWith({
       subPath: `1/organizations`,
-      additionalHeaders: {
-        "X-SGG-TOKEN": "a token",
-      },
     });
   });
 

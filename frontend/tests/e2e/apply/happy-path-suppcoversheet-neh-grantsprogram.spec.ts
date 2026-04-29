@@ -1,3 +1,9 @@
+/**
+ * @feature Apply - Application Form Happy Path
+ * @featureFile frontend/tests/e2e/apply/features/happy-path-forms.feature
+ * @scenario Application form completion happy path - Supplementary Cover Sheet for NEH Grant Programs
+ */
+
 import {
   test,
   type BrowserContext,
@@ -8,16 +14,10 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import {
-  fillForm,
-  verifyFormLinkVisible,
-} from "tests/e2e/utils/forms/general-forms-filling";
+import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-import {
-  SUPP_COVER_SHEET_NEH_FORM_CONFIG,
-  SUPP_COVER_SHEET_NEH_FORM_MATCHER,
-} from "./fixtures/supp-cover-sheet-neh-grantsprogram-field-definitions";
+import { SUPP_COVER_SHEET_NEH_FORM_CONFIG } from "./fixtures/supp-cover-sheet-neh-grantsprogram-field-definitions";
 import { suppCoverSheetNEHHappyPathTestData } from "./fixtures/supp-cover-sheet-neh-grantsprogram-fill-data";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
@@ -54,13 +54,20 @@ test(
 
     const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
+    // Given the user is logged in
     await authenticateE2eUser(page, context, !!isMobile);
 
-    // Create a new application for the opportunity
+    // Call reusable create application function from utils
+    /**
+     * Covers "Starting a new application" flow in the feature file
+     * (includes modal interaction, organization selection, and application creation)
+     */
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
 
-    await verifyFormLinkVisible(page, SUPP_COVER_SHEET_NEH_FORM_MATCHER);
-
+    // When the user clicks on a form link
+    // Then the form opens
+    // And the user fills out the form with valid test data
+    // And the user clicks Save
     await fillForm(
       testInfo,
       page,
@@ -69,9 +76,9 @@ test(
       false,
     );
 
-    await page.waitForTimeout(2000);
-
-    // Verify form status after save
+    /* Covers "Form status validation" flow in the feature file,
+     * which includes verification of the status in form and application landing page after saving a completed form.
+     */
     await verifyFormStatusAfterSave(page, "complete");
   },
 );

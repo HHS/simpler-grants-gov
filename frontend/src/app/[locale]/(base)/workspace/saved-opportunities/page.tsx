@@ -64,10 +64,7 @@ export default async function SavedOpportunities({
 
   if (session?.token) {
     try {
-      organizations = await getUserOrganizations(
-        session.token,
-        session.user_id,
-      );
+      organizations = await getUserOrganizations(session.user_id);
     } catch (error: unknown) {
       console.error("Unable to fetch user organizations", error);
       hasOrganizationsError = true;
@@ -137,6 +134,11 @@ export default async function SavedOpportunities({
           ]}
         />
         <h1 className="margin-top-0">{t("SavedOpportunities.heading")}</h1>
+        <p>
+          {t.rich("SavedOpportunities.toNotificationsPreferences", {
+            link: (chunks) => <Link href="/notifications">{chunks}</Link>,
+          })}
+        </p>
       </GridContainer>
       <div className="grid-container padding-y-5">
         {hasAnySavedOpportunities ? (

@@ -1,5 +1,6 @@
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
 import { FormFillFieldDefinitions } from "tests/e2e/utils/forms/general-forms-filling";
+import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 
 // Regex matcher for the EPA Key Contacts form link in the forms table.
 export const EPA_KEY_CONTACTS_FORM_MATCHER = "EPA KEY CONTACTS FORM";
@@ -368,3 +369,30 @@ export const EPA_KEY_CONTACTS_FORM_CONFIG = {
   formName: "EPA KEY CONTACTS FORM",
   fields: fieldDefinitionsEPAKeyContacts,
 } as const;
+
+// Required field validation errors for failure-path tests.
+// Each of the four sections requires: First Name, Last Name, Street 1, City, Country, Phone.
+const SECTION_REQUIRED_ERRORS = (section: string): FieldError[] => [
+  {
+    fieldId: `${section}--name--first_name`,
+    message: "First Name is required",
+  },
+  { fieldId: `${section}--name--last_name`, message: "Last Name is required" },
+  {
+    fieldId: `${section}--address--street1`,
+    message: "Address Street 1 is required",
+  },
+  { fieldId: `${section}--address--city`, message: "Address City is required" },
+  {
+    fieldId: `${section}--address--country`,
+    message: "Address Country is required",
+  },
+  { fieldId: `${section}--phone`, message: "Phone Number is required" },
+];
+
+export const EPA_KEY_CONTACTS_REQUIRED_FIELD_ERRORS: FieldError[] = [
+  ...SECTION_REQUIRED_ERRORS("authorized_representative"),
+  ...SECTION_REQUIRED_ERRORS("payee"),
+  ...SECTION_REQUIRED_ERRORS("administrative_contact"),
+  ...SECTION_REQUIRED_ERRORS("project_manager"),
+];

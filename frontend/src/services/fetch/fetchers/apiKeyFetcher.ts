@@ -5,15 +5,12 @@ import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
 import { ApiKey } from "src/types/apiKeyTypes";
 import { APIResponse } from "src/types/apiResponseTypes";
 
+// this is a duplicate - resolve with handleListApiKeys
 export const fetchApiKeys = async (): Promise<ApiKey[]> => {
   const session = await getSession();
   if (!session || !session.token) {
     return [];
   }
-
-  const ssgToken = {
-    "X-SGG-Token": session.token,
-  };
 
   const body = {
     pagination: {
@@ -31,7 +28,6 @@ export const fetchApiKeys = async (): Promise<ApiKey[]> => {
   const subPath = `${session.user_id}/api-keys/list`;
   const resp = await fetchUserWithMethod("POST")({
     subPath,
-    additionalHeaders: ssgToken,
     body,
   });
 
@@ -40,13 +36,8 @@ export const fetchApiKeys = async (): Promise<ApiKey[]> => {
 };
 
 export const handleListApiKeys = async (
-  token: string,
   userId: string,
 ): Promise<APIResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-
   const body = {
     pagination: {
       page_offset: 1,
@@ -63,7 +54,6 @@ export const handleListApiKeys = async (
   const subPath = `${userId}/api-keys/list`;
   const resp = await fetchUserWithMethod("POST")({
     subPath,
-    additionalHeaders: ssgToken,
     body,
   });
 
@@ -71,14 +61,9 @@ export const handleListApiKeys = async (
 };
 
 export const handleCreateApiKey = async (
-  token: string,
   userId: string,
   keyName: string,
 ): Promise<APIResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-
   const body = {
     key_name: keyName,
   };
@@ -86,7 +71,6 @@ export const handleCreateApiKey = async (
   const subPath = `${userId}/api-keys`;
   const resp = await fetchUserWithMethod("POST")({
     subPath,
-    additionalHeaders: ssgToken,
     body,
   });
 
@@ -94,15 +78,10 @@ export const handleCreateApiKey = async (
 };
 
 export const handleRenameApiKey = async (
-  token: string,
   userId: string,
   apiKeyId: string,
   keyName: string,
 ): Promise<APIResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-
   const body = {
     key_name: keyName,
   };
@@ -110,7 +89,6 @@ export const handleRenameApiKey = async (
   const subPath = `${userId}/api-keys/${apiKeyId}`;
   const resp = await fetchUserWithMethod("PUT")({
     subPath,
-    additionalHeaders: ssgToken,
     body,
   });
 
@@ -118,18 +96,12 @@ export const handleRenameApiKey = async (
 };
 
 export const handleDeleteApiKey = async (
-  token: string,
   userId: string,
   apiKeyId: string,
 ): Promise<APIResponse> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
-
   const subPath = `${userId}/api-keys/${apiKeyId}`;
   const resp = await fetchUserWithMethod("DELETE")({
     subPath,
-    additionalHeaders: ssgToken,
   });
 
   return (await resp.json()) as APIResponse;

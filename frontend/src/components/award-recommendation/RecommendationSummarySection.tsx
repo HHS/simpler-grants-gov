@@ -43,18 +43,22 @@ export const RecommendationSummarySection = ({
                 />
 
                 {viewMode ? (
-                  fundingStrategy && (
-                    <div className="margin-bottom-4">
-                      <div className="border radius-md border-base-lighter padding-3 bg-white">
-                        <h3 className="margin-top-0 margin-bottom-2 font-sans-md">
-                          {t("fundingStrategy.heading")}
-                        </h3>
+                  <div className="margin-bottom-4">
+                    <div className="border radius-md border-base-lighter padding-3 bg-white">
+                      <h3 className="margin-top-0 margin-bottom-2 font-sans-md">
+                        {t("fundingStrategy.heading")}
+                      </h3>
+                      {fundingStrategy ? (
                         <SummaryDescriptionDisplay
                           summaryDescription={fundingStrategy}
                         />
-                      </div>
+                      ) : (
+                        <p className="font-sans-md text-base-dark">
+                          {t("fundingStrategy.noFundingStrategyProvided")}
+                        </p>
+                      )}
                     </div>
-                  )
+                  </div>
                 ) : (
                   <div className="margin-bottom-4">
                     <div className="bg-white">

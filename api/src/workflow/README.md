@@ -4,7 +4,7 @@ workflows via state machines, as well as defining the
 state machines.
 
 For details on the architecture of the workflow system
-see [these docs](/documentation/api/workflow-service.md).
+see [these docs](../../../documentation/api/workflow-service.md).
 
 ## General Structure
 The workflow service has 3 layers:
@@ -254,7 +254,7 @@ To add an approval to a workflow, first determine the following:
 
 Let's assume we want to support an "Example Approval" which requires the
 `example_approval` privilege. After that privilege is added to the privilege
-enum + configured to work with the lookup table (see [lookup-values](/documentation/api/lookup-values.md))
+enum + configured to work with the lookup table (see [lookup-values](../../../documentation/api/lookup-values.md))
 and we add whatever approvals to the `ApprovalType` enum in the same manner,
 you'll want to do the following.
 
@@ -407,6 +407,14 @@ on the table. This constraint makes it so exactly 1 of the entities is set.
 We have a [get_workflow_entity](./service/workflow_service.py) function that finds the workflow entity for new workflows.
 Add logic to this to find the table from its primary key in the same pattern.
 
+### Adjust entity load and authorization logic
+In [get_workflow.py](../services/workflows/get_workflow.py),
+- update `_verify_workflow_access_and_build_config()` to map entity type to required privilege
+- update `_workflow_load_options()` to eagerly load all of the entity data
+
+### Adjust the logic to get agency for the workflow
+In [approval_service.py](./service/approval_service.py), update the `get_agency_for_workflow()` to get agency record from the entity opportunity field.
+
 ### Add a persistence handler
 Like our [opportunity_persistence_model](./state_persistence/opportunity_persistence_model.py)
 add a class that handles persistence for that particular type, following the same pattern.
@@ -461,7 +469,7 @@ and a few utilities we've built.
 from src.constants.lookup_constants import WorkflowEntityType, WorkflowEventType, WorkflowType, ApprovalResponseType
 from tests.src.db.models.factories import OpportunityFactory, UserFactory, WorkflowFactory
 
-from tests.workflow.workflow_test_util import (
+from tests.src.workflow.workflow_test_util import (
     build_start_workflow_event,
     send_process_event,
 )

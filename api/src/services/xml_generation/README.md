@@ -125,7 +125,7 @@ The validation tests:
 
 ### Validation Test Cases
 
-Test cases are defined in [`validation/test_cases.py`](file:///Users/mike/Documents/GitHub.nosync/simpler-grants-gov/api/src/services/xml_generation/validation/test_cases.py) and include:
+Test cases are defined in [`validation/test_cases.py`](validation/test_cases.py) and include:
 - **SF-424**: Minimal valid, revision, continuation, multiple applicant types, attachments
 - **SF-424A**: Budget sections, forecasted cash needs, complete examples  
 - **SF-LLL**: Initial filing, material change, subawardee scenarios

@@ -31,7 +31,7 @@ const Footer = () => {
       size="medium"
       returnToTop={
         <GridContainer className="usa-footer__return-to-top margin-top-5">
-          <a href="#">{t("returnToTop")}</a>
+          <a href="#main-content">{t("returnToTop")}</a>
         </GridContainer>
       }
       primary={

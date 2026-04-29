@@ -96,12 +96,12 @@ We are planning to use **GitHub issues with GitHub projects** because it is the 
 
 ### GitHub Issues + Zenhub
 
-Use [GitHub Issues](../../../decisions/adr/github-issues/) to create and manage development tickets and use Zenhub to organize those tickets into sprints.
+Use [GitHub Issues](https://docs.github.com/en/issues) to create and manage development tickets and use Zenhub to organize those tickets into sprints.
 
 * **Pros**
   * Built off of existing GitHub tickets and functionality
-  * Robust [reporting](../../../decisions/adr/zenhub-reporting/) (e.g. burndown charts, velocity, etc.) out of the box
-  * Supports key planning features like [story points](../../../decisions/adr/zenhub-story-points/) and [epics](../../../decisions/adr/zenhub-epics/)
+  * Robust [reporting](https://www.zenhub.com/reporting) (e.g. burndown charts, velocity, etc.) out of the box
+  * Supports key planning features like [story points](https://www.zenhub.com/blog-posts/how-to-estimate-software-development-projects-with-story-points) and [epics](https://www.zenhub.com/blog-posts/working-with-epics-in-github)
   * Supports issue templates (through GitHub)
   * Chrome extension to view Zenhub attributes in GitHub
   * Team has experience working with Zenhub
@@ -116,17 +116,17 @@ Use [GitHub Issues](../../../decisions/adr/github-issues/) to create and manage 
 
 ### GitHub Issues + GitHub Projects
 
-Use [GitHub Issues](../../../decisions/adr/github-issues/) to create and manage development tickets and use GitHub projects to organize those tickets into sprints.
+Use [GitHub Issues](https://docs.github.com/en/issues) to create and manage development tickets and use GitHub projects to organize those tickets into sprints.
 
 * **Pros**
   * Keeps ticket creation and sprint planning in the same platform alongside code
   * Free for open source repositories
   * GitHub project boards can be viewed without a GitHub login
   * Supports issue templates (through GitHub)
-  * Supports multiple [views of tickets](../../../decisions/adr/github-project-views/) (e.g. tabular, kanban board, roadmap)
+  * Supports multiple [views of tickets](https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/managing-your-views) (e.g. tabular, kanban board, roadmap)
   * Supports custom fields with multiple data types (e.g. numbers, drop downs, iterations, text fields, etc.)
-  * Supports [custom reporting](../../../decisions/adr/github-insights/) based on those fields
-  * Supports [built-in workflow automation](../../../decisions/adr/github-project-automation/) and custom automation with [GitHub actions](../../../decisions/adr/github-actions/)
+  * Supports [custom reporting](https://docs.github.com/en/issues/planning-and-tracking-with-projects/viewing-insights-from-your-project/about-insights-for-projects) based on those fields
+  * Supports [built-in workflow automation](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project) and custom automation with [GitHub actions](https://github.com/features/actions)
   * Supports filters on all standard and custom fields
   * Covered under the existing Grants.gov ATO
 * **Cons**
@@ -136,15 +136,15 @@ Use [GitHub Issues](../../../decisions/adr/github-issues/) to create and manage 
 
 ### Jira
 
-Use Confluence's [Jira](../../../decisions/adr/jira/) platform for both ticket management and sprint planning.
+Use Confluence's [Jira](https://www.atlassian.com/software/jira) platform for both ticket management and sprint planning.
 
 * **Pros**
   * Industry standard tool for ticket tracking and sprint planning
-  * Robust [reporting](../../../decisions/adr/jira-reporting/) (e.g. burndown charts, velocity, etc.) out of the box
-  * Supports [custom fields](../../../decisions/adr/jira-custom-fields/) with multiple data types (e.g. numbers, drop downs, text fields, etc.)
+  * Robust [reporting](https://www.atlassian.com/software/jira/features/reports) (e.g. burndown charts, velocity, etc.) out of the box
+  * Supports [custom fields](https://support.atlassian.com/jira-cloud-administration/docs/create-a-custom-field/) with multiple data types (e.g. numbers, drop downs, text fields, etc.)
   * Supports multiple views of tickets (e.g. tabular, kanban board, roadmap)
   * Supports filters on all standard and custom fields
-  * Supports built-in [workflow automation](../../../decisions/adr/jira-automation/)
+  * Supports built-in [workflow automation](https://www.atlassian.com/software/jira/features/automation)
   * Supports custom ticket templates
   * Third-party extensions are available to support public access to Jira boards
   * Team has experience working with Jira
@@ -156,7 +156,7 @@ Use Confluence's [Jira](../../../decisions/adr/jira/) platform for both ticket m
 
 ### OpenProject
 
-Use the open source project management tool [OpenProject](../../../decisions/adr/open-project/) for both ticket management and sprint planning.
+Use the open source project management tool [OpenProject](https://www.openproject.org/) for both ticket management and sprint planning.
 
 * **Pros**
   * Open source project with self-hosting option
@@ -174,19 +174,19 @@ Use the open source project management tool [OpenProject](../../../decisions/adr
 
 ## Links
 
-* [GitHub Issues](../../../decisions/adr/github-issues/)
-* [GitHub Projects](../../../decisions/adr/github-projects/)
-  * [GitHub Projects Automation](../../../decisions/adr/github-project-automation/)
-  * [GitHub Projects Actions](../../../decisions/adr/github-actions/)
-  * [GitHub Projects Reporting](../../../decisions/adr/github-insights/)
-  * [GitHub Projects Custom Views](../../../decisions/adr/github-project-views/)
-  * [GitHub Projects Custom Fields](../../../decisions/adr/github-project-fields/)
-* [Zenhub](../../../decisions/adr/zenhub/)
-  * [Zenhub Epics](../../../decisions/adr/zenhub-epics/)
-  * [Zenhub Story Points](../../../decisions/adr/zenhub-story-points/)
-  * [Zenhub Reporting](../../../decisions/adr/zenhub-reporting/)
-* [Jira](../../../decisions/adr/jira/)
-  * [Jira Reporting](../../../decisions/adr/jira-reporting/)
-  * [Jira Automation](../../../decisions/adr/jira-automation/)
-  * [Jira Custom Fields](../../../decisions/adr/jira-custom-fields/)
-* [Open Project](../../../decisions/adr/open-project/)
+* [GitHub Issues](https://docs.github.com/en/issues)
+* [GitHub Projects](https://docs.github.com/en/issues/planning-and-tracking-with-projects)
+  * [GitHub Projects Automation](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project)
+  * [GitHub Projects Actions](https://github.com/features/actions)
+  * [GitHub Projects Reporting](https://docs.github.com/en/issues/planning-and-tracking-with-projects/viewing-insights-from-your-project)
+  * [GitHub Projects Custom Views](https://www.google.com/search?q=https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-your-project-views)
+  * [GitHub Projects Custom Fields](https://docs.github.com/en/issues/planning-and-tracking-with-projects/understanding-fields)
+* [Zenhub](https://www.zenhub.com/)
+  * [Zenhub Epics](https://www.zenhub.com/blog-posts/working-with-epics-in-github)
+  * [Zenhub Story Points](https://www.zenhub.com/blog-posts/how-to-estimate-software-development-projects-with-story-points)
+  * [Zenhub Reporting](https://www.zenhub.com/reporting)
+* [Jira](https://www.atlassian.com/software/jira)
+  * [Jira Reporting](https://www.atlassian.com/software/jira/features/reports)
+  * [Jira Automation](https://www.atlassian.com/software/jira/features/automation)
+  * [Jira Custom Fields](https://support.atlassian.com/jira-cloud-administration/docs/create-a-custom-field/)
+* [Open Project](https://www.openproject.org/)

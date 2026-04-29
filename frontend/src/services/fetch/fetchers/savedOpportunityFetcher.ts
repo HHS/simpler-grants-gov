@@ -11,13 +11,9 @@ import {
 
 export const handleSavedOpportunity = async (
   type: "DELETE" | "POST",
-  token: string,
   userId: string,
   opportunityId: string,
 ) => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const subPath =
     type === "POST"
       ? `${userId}/saved-opportunities`
@@ -31,26 +27,20 @@ export const handleSavedOpportunity = async (
       : {};
   return fetchUserWithMethod(type)({
     subPath,
-    additionalHeaders: ssgToken,
     body,
   });
 };
 
 export const getSavedOpportunities = async (
-  token: string,
   userId: string,
   scope: SavedOpportunitiesScope,
   statusFilter?: string,
   organizationIdsFilter?: string[] | null,
 ): Promise<MinimalOpportunity[]> => {
-  const ssgToken = {
-    "X-SGG-Token": token,
-  };
   const organizationIds =
     organizationIdsFilter === undefined
       ? getSavedOpportunitiesScopeOrganizationIds(scope)
       : organizationIdsFilter;
-
   const body: {
     pagination: {
       page_offset: number;
@@ -89,7 +79,6 @@ export const getSavedOpportunities = async (
   const subPath = `${userId}/saved-opportunities/list`;
   const response = await fetchUserWithMethod("POST")({
     subPath,
-    additionalHeaders: ssgToken,
     body,
   });
   const json = (await response.json()) as { data: MinimalOpportunity[] };
@@ -97,12 +86,10 @@ export const getSavedOpportunities = async (
 };
 
 export const getUserSavedOpportunity = async (
-  token: string,
   userId: string,
   opportunityId: string,
 ): Promise<MinimalOpportunity | null> => {
   const savedOpportunities = await getSavedOpportunities(
-    token,
     userId,
     INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
   );
@@ -124,7 +111,6 @@ export const fetchSavedOpportunities = async (
       return [];
     }
     const savedOpportunities = await getSavedOpportunities(
-      session.token,
       session.user_id,
       scope,
       statusFilter,

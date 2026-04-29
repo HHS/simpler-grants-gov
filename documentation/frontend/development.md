@@ -10,7 +10,7 @@ This [Next.js](https://nextjs.org) application can be run natively (or locally)
 
 Running a local server requires the version of Node specified in [the .nvmrc file](https://github.com/HHS/simpler-grants-gov/blob/main/.nvmrc) to be installed.
 
-This project supports the use of NVM for node version management, so it is suggested you intall and use NVM. More infomrmation can be found in [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/).
+This project supports the use of NVM for node version management, so it is suggested you install and use NVM. More information can be found in [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/).
 
 * **For Mac** - Run `npm install && npm run local` to install and start the application.
 * **For Windows** - First follow [this guide](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) for installing Node Version Manager (How to Install NVM on Windows). Then in Windows PowerShell in the \simpler-grants-gov\frontend directory, run `npm install` to install the application. Run `npx next dev` afterwards to start the application.
@@ -25,9 +25,13 @@ npx next telemetry disable
 
 Create a local environment file in the frontend directory to hold your frontend application overrides. This allows you to make specializations to your local setup without the danger of committing any secrets to GitHub.
 
-On Mac, run `touch .env.local`
+`.env.local.example` is provided in the frontend directory for a comprehensive list of all environment variables used in frontend as well as where they are referenced. It contains all default values for a quick setup as well as a starting point to configure the development environment. 
 
-On Windows, run `ni .env.local` in PowerShell.
+On Mac, run `cp frontend/.env.local.example frontend/.env.local`
+
+On Windows, run `cp .env.local.example .env.local` in PowerShell.
+
+`.env.local.example` is tracked and sensitive information **SHOULD NOT** be enteredin the file itself. 
 
 For more information about environments, take a look at [environments.md](./environments.md).
 
@@ -67,7 +71,7 @@ From the `/frontend` directory:
 
 ### 🚀 Production version
 
-The `make dev` command runs the `docker-compose.yml` which runs the `dev` target in the [Dockerfile](./Dockerfile). To run a production version in docker, run `docker compose up -d -f docker-compose-realease.yml` which targest the `release` stage in the docker build. This runs the production version, while still creating a network connection to the local API.
+The `make dev` command runs the `docker-compose.yml` which runs the `dev` target in the [Dockerfile](../../frontend/Dockerfile). To run a production version in docker, run `docker compose up -d -f docker-compose-realease.yml` which targest the `release` stage in the docker build. This runs the production version, while still creating a network connection to the local API.
 
 ### Testing Release Target Locally
 
@@ -207,7 +211,7 @@ From the `frontend/` directory:
 - Place breakpoints in VSCode
 - Visit the relevant routes in the browser and confirm you can hit these breakpoints
 
-**Note** that debugging the server-side or full-stack here doesn't debug the API. [See the API readme for more information](../documentation/api/development.md)
+**Note** that debugging the server-side or full-stack here doesn't debug the API. [See the API readme for more information](../api/development.md)
 
 ## Feature setup and development
 
@@ -231,7 +235,7 @@ The `/api/auth/callback` route handler receives a JSON web token as query parame
 
 #### Mock Oauth2 Server
 
-When clicking "Sign in" or other buttons that simulate the login flow locally, shoule be redirected to the mock Oauth2 server at `http://localhost:5001`. Enter any text string in the screen provided to continue the login flow.
+When clicking "Sign in" or other buttons that simulate the login flow locally, you should be redirected to the mock Oauth2 server at `http://localhost:5001`. Enter any text string in the screen provided to continue the login flow.
 
 ### New Relic and Sendy (email)
 
@@ -249,6 +253,6 @@ If you need to access this functionality locally, contact an engineer on the tea
 
 ## Other topics
 
-- [Internationalization](../documentation/frontend/internationalization.md)
-- [Feature Flags](../documentation/frontend/featureFlags.md)
-- Refer to the [architecture decision records](../documentation/decisions) for more context on technical decisions.
+- [Internationalization](./internationalization.md)
+- [Feature Flags](./featureFlags.md)
+- Refer to the [architecture decision records](../wiki/product/decisions) for more context on technical decisions.

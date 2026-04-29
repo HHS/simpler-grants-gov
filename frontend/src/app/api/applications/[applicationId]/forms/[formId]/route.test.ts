@@ -11,13 +11,11 @@ jest.mock("src/services/fetch/fetchers/applicationFetcher", () => ({
     applicationId: string,
     formId: string,
     is_included_in_submission: boolean,
-    token: string,
   ) =>
     mockUpdateApplicationFormIncludeInSubmission(
       applicationId,
       formId,
       is_included_in_submission,
-      token,
     ) as unknown,
 }));
 
@@ -61,7 +59,6 @@ describe("PUT request", () => {
       "app123",
       "form456",
       true,
-      "token123",
     );
 
     expect(response.status).toBe(200);

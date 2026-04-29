@@ -428,13 +428,17 @@ test.describe("Search page - state persistence after refresh", () => {
           try {
             el.click();
             if (el.checked) return true;
-          } catch {}
+          } catch (_e) {
+            console.warn("error clicking checkbox");
+          }
           // Strategy 2: Try clicking the label
           if (label) {
             try {
               (label as HTMLElement).click();
               if (el.checked) return true;
-            } catch {}
+            } catch (_e) {
+              console.warn("error clicking checkbox label");
+            }
           }
           // Strategy 3: Programmatically set checked and dispatch change event
           try {
@@ -442,7 +446,9 @@ test.describe("Search page - state persistence after refresh", () => {
             el.dispatchEvent(new Event("change", { bubbles: true }));
             el.dispatchEvent(new Event("input", { bubbles: true }));
             if (el.checked) return true;
-          } catch {}
+          } catch (_e) {
+            console.warn("error manually dispatching checkbox click event");
+          }
           return el.checked;
         }, subAgency.id);
         await page.waitForTimeout(500);

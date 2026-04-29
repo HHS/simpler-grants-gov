@@ -85,10 +85,7 @@ describe("POST /api/user/api-keys/list", () => {
     expect(response.status).toBe(200);
     expect(data.message).toBe("API keys retrieved successfully");
     expect(data.data).toEqual(mockApiKeys);
-    expect(mockHandleListApiKeys).toHaveBeenCalledWith(
-      "test-token",
-      "test-user-id",
-    );
+    expect(mockHandleListApiKeys).toHaveBeenCalledWith("test-user-id");
   });
 
   it("returns 401 when no session exists", async () => {

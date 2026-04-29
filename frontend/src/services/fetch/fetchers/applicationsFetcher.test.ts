@@ -24,15 +24,12 @@ describe("getApplications", () => {
       json: () => ({ data: [{ fake: "applications" }] }),
     });
     fetchUserWithMethodMock.mockReturnValue(fetchUserMock);
-    const result = await getApplications("faketoken", "1");
+    const result = await getApplications("1");
 
     expect(result).toEqual([{ fake: "applications" }]);
     expect(fetchUserWithMethodMock).toHaveBeenCalledWith("POST");
     expect(fetchUserMock).toHaveBeenCalledWith({
       subPath: "1/applications",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
       body: {
         pagination: {
           page_offset: 1,
@@ -64,9 +61,6 @@ describe("fetchApplications", () => {
     expect(fetchUserWithMethodMock).toHaveBeenCalledWith("POST");
     expect(fetchUserMock).toHaveBeenCalledWith({
       subPath: "1/applications",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
       body: {
         pagination: {
           page_offset: 1,
