@@ -191,12 +191,17 @@ jobs:
 
           make build
 
-      - name: Restore Docker image cached
+      - name: Save Docker image to file
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
+        run: |
+          docker save api-grants-api > /tmp/docker-image.tar
+
+      - name: save Docker image cache
         id: save-docker-image-cache
         uses: actions/cache/save@v5
         with:
           path: /tmp/docker-image.tar
-          key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+          key: api-docker-test-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
   run-e2e-tests-local:
     name: Prepare infra and run E2E tests
@@ -339,7 +344,7 @@ jobs:
 
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
-          make init-ci-cd db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
+          make db-seed-local-with-agencies populate-search-opportunities populate-search-agencies start
           cd ../frontend
           # Ensure the API wait script is executable
           chmod +x ../api/bin/wait-for-api.sh
@@ -383,18 +388,6 @@ jobs:
       - name: Docker images
         run: |
           docker image ls
-
-      - name: Save Docker image to file
-        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
-        run: |
-          docker save api-grants-api > /tmp/docker-image.tar
-
-      - name: save Docker image cache
-        id: save-docker-image-cache
-        uses: actions/cache/save@v5
-        with:
-          path: /tmp/docker-image.tar
-          key: api-docker-test-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
       - name: Determine test groups to run
         shell: bash
