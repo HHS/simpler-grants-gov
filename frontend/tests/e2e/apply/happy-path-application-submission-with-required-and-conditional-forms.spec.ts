@@ -1,6 +1,6 @@
 /**
  * @feature Apply - Happy Path – Application Submission Workflow (Required & Conditional Forms)
- * @featureFile frontend/tests/e2e/apply/features/happy-path-application-submission-with-required-and-conditional-forms.feature
+ * @featureFile frontend/tests/e2e/apply/features/happy-path-application-submission.feature
  * @scenario Complete the Application Submission workflow for an <user type> user, including required and conditional forms
  *
  * Examples:
