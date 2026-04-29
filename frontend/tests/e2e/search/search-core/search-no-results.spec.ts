@@ -1,6 +1,6 @@
 /**
  * @feature Search No Results Feedback
- * @featureFile search-no-results.feature
+ * @featureFile e2e/search/search-core/features/search-no-results.feature
  * @scenario Show a zero-results state and helpful no-results message for an obscure search term
  */
 
@@ -14,7 +14,7 @@ import { VALID_TAGS } from "tests/e2e/tags";
 import {
   fillSearchInputAndSubmit,
   waitForSearchResultsInitialLoad,
-} from "./searchSpecUtil";
+} from "../searchSpecUtil";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
 
