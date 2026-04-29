@@ -1,6 +1,7 @@
 # @specFile search-download.spec.ts
 # @featureArea Search
 # @debugNote Validates CSV export trigger and filename pattern
+# Note: The CSV download functionality is not available on mobile devices.
 
 Feature: Search Results CSV Download
   As a user on Search
