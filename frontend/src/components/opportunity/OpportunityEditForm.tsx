@@ -6,7 +6,7 @@ import {
 } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
 import {
   categoryOptions,
-  eligibilityTypes,
+  eligbilityValueToGroup,
   fundingOptions,
 } from "src/constants/opportunity";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
@@ -227,8 +227,9 @@ export default function OpportunityEditForm({
 
   const leftColumnItems = keyInformationItems.slice(0, 3);
   const rightColumnItems = keyInformationItems.slice(3);
-  const eligibilityGroups = eligibilityTypes.reduce(
-    (acc, { group, label, value }) => {
+  const eligibilityGroups = ELIGIBILITY_OPTIONS.reduce(
+    (acc, { label, value }) => {
+      const group = eligbilityValueToGroup[value];
       if (!acc[group]) acc[group] = [];
       acc[group].push({ label, value });
       return acc;
