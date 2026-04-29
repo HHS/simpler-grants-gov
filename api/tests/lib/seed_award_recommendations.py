@@ -11,6 +11,7 @@ from src.constants.lookup_constants import (
     AwardRecommendationStatus,
     AwardRecommendationType,
     AwardSelectionMethod,
+    OpportunityStatus,
 )
 from src.constants.static_role_values import (
     AWARD_RECOMMENDATION_USER,
@@ -40,6 +41,23 @@ def _build_award_recommendations(db_session: db.Session) -> None:
     logger.info("Creating award recommendations with application submissions")
 
     agency = _setup_agency_and_users(db_session)
+
+    competition_ready, applications_ready = _create_opportunity_ready_for_award_recommendation(
+        db_session, agency
+    )
+    logger.info("")
+    logger.info("=" * 80)
+    logger.info("=== OPPORTUNITY READY FOR NEW AWARD RECOMMENDATION ===")
+    logger.info(f"Opportunity Number: {competition_ready.opportunity.opportunity_number}")
+    logger.info(f"Opportunity ID: {competition_ready.opportunity.opportunity_id}")
+    logger.info(f"Applications: {len(applications_ready)} (all ACCEPTED with submissions)")
+    logger.info("Award Recommendations: NONE")
+    logger.info(
+        f"URL: http://localhost:3000/opportunity/{competition_ready.opportunity.opportunity_id}"
+    )
+    logger.info("=" * 80)
+    logger.info("")
+
     competition, applications = _create_competition_with_accepted_applications(db_session, agency)
 
     logger.info(
@@ -437,10 +455,98 @@ def _add_application_to_award_recommendation(
     factories.AwardRecommendationApplicationSubmissionFactory.create(**factory_kwargs)
 
 
+def _create_opportunity_ready_for_award_recommendation(
+    db_session: db.Session, agency: Agency
+) -> tuple[Competition, list[Application]]:
+    """Create an opportunity that is ready for starting a NEW award recommendation.
+
+    This opportunity meets all criteria for award_recommendation_ready filter:
+    - Status: POSTED
+    - is_simpler_grants_opportunity: True
+    - Has at least 1 competition with at least 1 submission
+    - NO associated award recommendations (this is the key difference)
+
+    Args:
+        db_session: Database session
+        agency: Agency to associate the opportunity with for auth.
+
+    Returns:
+        Tuple of (competition, applications list)
+    """
+    logger.info("")
+    logger.info("Creating opportunity ready for NEW award recommendation...")
+
+    opportunity = factories.OpportunityFactory.create(
+        opportunity_title="Ready for Award Recommendation - No Existing ARs",
+        agency_id=agency.agency_id,
+        agency_code=agency.agency_code,
+        is_simpler_grants_opportunity=True,
+        no_current_summary=True,
+    )
+
+    summary = factories.OpportunitySummaryFactory.create(
+        opportunity_id=opportunity.opportunity_id,
+        is_forecast=False,
+    )
+
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity,
+        opportunity_summary=summary,
+        opportunity_status=OpportunityStatus.POSTED,
+    )
+
+    competition = factories.CompetitionFactory.create(
+        opportunity=opportunity,
+    )
+
+    logger.info("Creating 5 organizations for applications")
+    organizations = []
+    for _ in range(5):
+        unique_uei = f"UEI{random.randint(10000000, 99999999):08d}"
+        org = factories.OrganizationFactory.create(sam_gov_entity__uei=unique_uei)
+        organizations.append(org)
+
+    applications = []
+    for i in range(10):
+        org = organizations[i % len(organizations)]
+        app = _add_application(
+            db_session=db_session,
+            competition=competition,
+            application_name=f"Ready Application {i + 1}",
+            app_owner=org,
+            application_status=ApplicationStatus.SUBMITTED,
+        )
+
+        factories.ApplicationSubmissionFactory(
+            application=app,
+            file_location=f"s3://test-bucket/submissions/{app.application_id}.zip",
+            file_contents="SKIP",
+        )
+        app.application_status = ApplicationStatus.ACCEPTED
+        db_session.add(app)
+        applications.append(app)
+
+    logger.info(f"✓ Created opportunity '{opportunity.opportunity_title}'")
+    logger.info(f"  Competition ID: {competition.competition_id}")
+    logger.info(f"  Opportunity ID: {opportunity.opportunity_id}")
+    logger.info("  Applications: 10 (all ACCEPTED status)")
+    logger.info("  Award Recommendations: NONE (ready for new AR)")
+    logger.info(f"  URL: http://localhost:3000/opportunity/{opportunity.opportunity_id}")
+    logger.info("")
+
+    return competition, applications
+
+
 def _create_competition_with_accepted_applications(
     db_session: db.Session, agency: Agency
 ) -> tuple[Competition, list[Application]]:
     """Create a competition with many accepted applications for comprehensive testing.
+
+    Creates an opportunity that is available for starting award recommendations:
+    - Status: POSTED
+    - is_simpler_grants_opportunity: True
+    - Has at least 1 competition with at least 1 submission
+    - No associated award recommendations (initially)
 
     Args:
         db_session: Database session
@@ -454,11 +560,30 @@ def _create_competition_with_accepted_applications(
         "Creating a competition with 25 accepted applications for award recommendation testing..."
     )
 
+    opportunity = factories.OpportunityFactory.create(
+        opportunity_title="Award Recommendation Test Opportunity",
+        agency_id=agency.agency_id,
+        agency_code=agency.agency_code,
+        is_simpler_grants_opportunity=True,
+        no_current_summary=True,
+    )
+
+    summary = factories.OpportunitySummaryFactory.create(
+        opportunity_id=opportunity.opportunity_id,
+        is_forecast=False,
+    )
+
+    factories.CurrentOpportunitySummaryFactory.create(
+        opportunity=opportunity,
+        opportunity_summary=summary,
+        opportunity_status=OpportunityStatus.POSTED,
+    )
+
     competition = factories.CompetitionFactory.create(
-        opportunity__opportunity_title="Award Recommendation Test Opportunity",
-        opportunity__agency_code=agency.agency_code,
+        opportunity=opportunity,
     )
     logger.info(f"Associating opportunity with agency: {agency.agency_code}")
+    logger.info("Opportunity status: POSTED (available for award recommendations)")
 
     logger.info("Creating 8 fresh organizations for applications")
     organizations = []
