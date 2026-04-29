@@ -3,17 +3,20 @@
 #
 
 from collections.abc import Iterable
+from datetime import datetime
 
 import sqlalchemy
 
 
 def build_select_new_rows_sql(
-    source_table: sqlalchemy.Table, destination_table: sqlalchemy.Table
+    source_table: sqlalchemy.Table,
+    destination_table: sqlalchemy.Table,
+    cutoff: datetime | None = None,
 ) -> sqlalchemy.Select:
     """Build a `SELECT id1, id2, ... FROM <source_table>` query that finds new rows in source_table."""
 
     # `SELECT id1, id2, id3, ... FROM <source_table>`    (id1, id2, ... is the multipart primary key)
-    return (
+    query = (
         sqlalchemy.select(*source_table.primary_key.columns)
         .where(
             # `WHERE (id1, id2, id3, ...) NOT IN`
@@ -22,8 +25,17 @@ def build_select_new_rows_sql(
                 sqlalchemy.select(*destination_table.primary_key.columns)
             )
         )
-        .order_by(*source_table.primary_key.columns)
     )
+
+    if cutoff is not None:
+        query = query.where(
+            sqlalchemy.or_(
+                source_table.c.created_date.is_(None),
+                source_table.c.created_date <= cutoff,
+            )
+        )
+
+    return query.order_by(*source_table.primary_key.columns)
 
 
 def build_insert_select_sql(
@@ -57,12 +69,14 @@ def build_insert_select_sql(
 
 
 def build_select_updated_rows_sql(
-    source_table: sqlalchemy.Table, destination_table: sqlalchemy.Table
+    source_table: sqlalchemy.Table,
+    destination_table: sqlalchemy.Table,
+    cutoff: datetime | None = None,
 ) -> sqlalchemy.Select:
     """Build a `SELECT id1, id2, ... FROM <source_table>` query that finds updated rows in source_table. Excluded columns are not included in the query."""
 
     # `SELECT id1, id2, id3, ... FROM <destination_table>`
-    return (
+    query = (
         sqlalchemy.select(*destination_table.primary_key.columns)
         .join(
             # `JOIN <source_table>
@@ -81,8 +95,12 @@ def build_select_updated_rows_sql(
             )
             < source_table.c.last_upd_date
         )
-        .order_by(*source_table.primary_key.columns)
     )
+
+    if cutoff is not None:
+        query = query.where(source_table.c.last_upd_date <= cutoff)
+
+    return query.order_by(*source_table.primary_key.columns)
 
 
 def build_update_sql(

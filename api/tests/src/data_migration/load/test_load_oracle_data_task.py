@@ -291,6 +291,144 @@ class TestLoadOracleData(BaseTestClass):
         # Verify excluded column was still not copied (should still be None)
         assert updated_record.oppcategory is None
 
+    @freezegun.freeze_time("2024-06-15 14:30:00")
+    def test_cutoff_is_timezone_aware_eastern(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create, caplog
+    ):
+        caplog.set_level(logging.INFO)
+
+        source_table = foreign_tables["topportunity"]
+        destination_table = staging_tables["topportunity"]
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        task = load_oracle_data_task.LoadOracleDataTask(
+            db_session, foreign_tables, staging_tables, ["topportunity"]
+        )
+        task.run()
+
+        assert task.batch_cutoff.tzinfo is not None
+        assert str(task.batch_cutoff.tzinfo) in ("EST", "EDT", "US/Eastern", "America/New_York")
+
+        cutoff_log = next(
+            record
+            for record in caplog.records
+            if record.message == "batch cutoff timestamp captured"
+        )
+        assert cutoff_log.batch_cutoff == task.batch_cutoff.isoformat()
+
+    def test_record_after_cutoff_excluded_at_or_before_included(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create
+    ):
+        source_table = foreign_tables["topportunity"]
+        destination_table = staging_tables["topportunity"]
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        # Use a fixed cutoff time in Eastern
+        cutoff_time = datetime.datetime(2024, 6, 15, 10, 0, 0)
+
+        # Record AT cutoff -- should be included
+        ForeignTopportunityFactory.create(
+            opportunity_id=1, oppnumber="AT-CUTOFF", cfdas=[],
+            created_date=cutoff_time, last_upd_date=cutoff_time,
+        )
+        # Record BEFORE cutoff -- should be included
+        ForeignTopportunityFactory.create(
+            opportunity_id=2, oppnumber="BEFORE-CUTOFF", cfdas=[],
+            created_date=cutoff_time - datetime.timedelta(hours=1),
+            last_upd_date=cutoff_time - datetime.timedelta(hours=1),
+        )
+        # Record AFTER cutoff -- should be EXCLUDED
+        ForeignTopportunityFactory.create(
+            opportunity_id=3, oppnumber="AFTER-CUTOFF", cfdas=[],
+            created_date=cutoff_time + datetime.timedelta(seconds=1),
+            last_upd_date=cutoff_time + datetime.timedelta(seconds=1),
+        )
+
+        with freezegun.freeze_time("2024-06-15 10:00:00"):
+            task = load_oracle_data_task.LoadOracleDataTask(
+                db_session, foreign_tables, staging_tables, ["topportunity"]
+            )
+            task.run()
+
+        db_session.expire_all()
+        destination_records = (
+            db_session.query(destination_table)
+            .order_by(destination_table.c.opportunity_id)
+            .all()
+        )
+
+        assert len(destination_records) == 2
+        assert destination_records[0].opportunity_id == 1
+        assert destination_records[1].opportunity_id == 2
+        assert task.metrics["count.insert.total"] == 2
+
+    def test_deferred_record_picked_up_on_next_run(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create
+    ):
+        source_table = foreign_tables["topportunity"]
+        destination_table = staging_tables["topportunity"]
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        cutoff_time = datetime.datetime(2024, 6, 15, 10, 0, 0)
+
+        # Record created 5 minutes AFTER cutoff -- will be deferred on run 1
+        ForeignTopportunityFactory.create(
+            opportunity_id=1, oppnumber="FUTURE", cfdas=[],
+            created_date=cutoff_time + datetime.timedelta(minutes=5),
+            last_upd_date=cutoff_time + datetime.timedelta(minutes=5),
+        )
+
+        # Run 1: cutoff is at 10:00, record is at 10:05 -- should be excluded
+        with freezegun.freeze_time("2024-06-15 10:00:00"):
+            task1 = load_oracle_data_task.LoadOracleDataTask(
+                db_session, foreign_tables, staging_tables, ["topportunity"]
+            )
+            task1.run()
+
+        db_session.expire_all()
+        assert db_session.query(destination_table).count() == 0
+        assert task1.metrics["count.insert.total"] == 0
+
+        # Run 2: cutoff is at 10:10, record is at 10:05 -- should be included
+        with freezegun.freeze_time("2024-06-15 10:10:00"):
+            task2 = load_oracle_data_task.LoadOracleDataTask(
+                db_session, foreign_tables, staging_tables, ["topportunity"]
+            )
+            task2.run()
+
+        db_session.expire_all()
+        assert db_session.query(destination_table).count() == 1
+        assert task2.metrics["count.insert.total"] == 1
+
+        record = db_session.query(destination_table).first()
+        assert record.opportunity_id == 1
+
+    def test_record_with_null_created_date_included(
+        self, db_session, foreign_tables, staging_tables, enable_factory_create
+    ):
+        source_table = foreign_tables["topportunity"]
+        destination_table = staging_tables["topportunity"]
+        db_session.execute(sqlalchemy.delete(source_table))
+        db_session.execute(sqlalchemy.delete(destination_table))
+
+        ForeignTopportunityFactory.create(
+            opportunity_id=1, oppnumber="NULL-CREATED", cfdas=[],
+            created_date=None, last_upd_date=None,
+        )
+
+        with freezegun.freeze_time("2024-06-15 10:00:00"):
+            task = load_oracle_data_task.LoadOracleDataTask(
+                db_session, foreign_tables, staging_tables, ["topportunity"]
+            )
+            task.run()
+
+        db_session.expire_all()
+        assert db_session.query(destination_table).count() == 1
+        assert task.metrics["count.insert.total"] == 1
+
     def test_load_data_excludes_tcertificates_column_is_selfsigned_by_default(
         self, db_session, foreign_tables, staging_tables, enable_factory_create
     ):

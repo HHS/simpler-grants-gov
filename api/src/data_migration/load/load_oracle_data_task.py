@@ -72,6 +72,11 @@ class LoadOracleDataTask(src.task.task.Task):
 
     def run_task(self) -> None:
         """Main task process, called by run()."""
+        self.batch_cutoff = datetime_util.get_now_us_eastern_datetime()
+        logger.info(
+            "batch cutoff timestamp captured",
+            extra={"batch_cutoff": self.batch_cutoff.isoformat()},
+        )
         with self.db_session.begin():
             self.log_database_settings()
         self.load_data()
@@ -135,7 +140,7 @@ class LoadOracleDataTask(src.task.task.Task):
             )
 
         logger.info("Fetching records to be inserted", extra=log_extra)
-        select_sql = sql.build_select_new_rows_sql(foreign_table, staging_table)
+        select_sql = sql.build_select_new_rows_sql(foreign_table, staging_table, self.batch_cutoff)
         with self.db_session.begin():
             new_ids = self.db_session.execute(select_sql).all()
 
@@ -186,7 +191,9 @@ class LoadOracleDataTask(src.task.task.Task):
             )
 
         logger.info("Fetching records to be updated", extra=log_extra)
-        select_sql = sql.build_select_updated_rows_sql(foreign_table, staging_table)
+        select_sql = sql.build_select_updated_rows_sql(
+            foreign_table, staging_table, self.batch_cutoff
+        )
         with self.db_session.begin():
             update_ids = self.db_session.execute(select_sql).all()
 
