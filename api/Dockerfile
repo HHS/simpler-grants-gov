@@ -2,9 +2,10 @@ FROM ghcr.io/hhs/python-base-image:3d03921@sha256:01ea5e3392e0ea9f70bb48a9df4877
 ARG RUN_UID
 ARG RUN_USER
 
+ARG UV_VERSION=0.11.8
+
 # TODO - need to remove poetry from the base image - will just ignore it at the moment
 # TODO - install uv in the base image instead of here
-# TODO - should pin to a specific SHA - even their docs recommend it
 COPY --from=ghcr.io/astral-sh/uv:0.11.8 /uv /uvx /bin/
 
 # Read Python version from the version file in the base image
@@ -77,7 +78,6 @@ USER ${RUN_USER}
 WORKDIR /api
 
 COPY pyproject.toml uv.lock ./
-
 
 COPY . /api
 

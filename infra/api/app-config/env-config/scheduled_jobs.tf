@@ -1,5 +1,5 @@
 locals {
-  # The `task_command` is what you want your scheduled job to run, for example: ["poetry", "run", "flask"].
+  # The `task_command` is what you want your scheduled job to run, for example: ["flask", "example-job"].
   # Schedule expression defines the frequency at which the job should run.
   # The syntax for `schedule_expression` is explained in the following documentation:
   # https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-scheduled-rule-pattern.html
@@ -164,7 +164,7 @@ locals {
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     load-search-opportunity-data = {
-      task_command = ["poetry", "run", "flask", "load-search-data", "load-opportunity-data"]
+      task_command = ["flask", "load-search-data", "load-opportunity-data"]
       # Every hour at the half hour
       schedule_expression = "cron(30 * * * ? *)"
       state               = "ENABLED"
@@ -174,7 +174,7 @@ locals {
       role_override       = "opensearch-write"
     }
     export-opportunity-data = {
-      task_command = ["poetry", "run", "flask", "task", "export-opportunity-data"]
+      task_command = ["flask", "task", "export-opportunity-data"]
       # Every day at 4am Eastern Time during DST. 5am during non-DST.
       schedule_expression = "cron(0 9 * * ? *)"
       state               = "ENABLED"
@@ -183,7 +183,7 @@ locals {
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     create-analytics-db-csvs = {
-      task_command = ["poetry", "run", "flask", "task", "create-analytics-db-csvs"]
+      task_command = ["flask", "task", "create-analytics-db-csvs"]
       # Every day at 5am Eastern Time during DST. 6am during non-DST.
       schedule_expression = "cron(0 10 * * ? *)"
       state               = local.create-analytics-db-csvs-state[var.environment]
@@ -192,7 +192,7 @@ locals {
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     load-search-agency-data = {
-      task_command = ["poetry", "run", "flask", "load-search-data", "load-agency-data"]
+      task_command = ["flask", "load-search-data", "load-agency-data"]
       # Every 1 hour
       schedule_expression = "cron(0 * * * ? *)"
       state               = "ENABLED"
@@ -202,7 +202,7 @@ locals {
       role_override       = "opensearch-write"
     }
     email_notification_opportunity = {
-      task_command = ["poetry", "run", "flask", "task", "email-notifications"]
+      task_command = ["flask", "task", "email-notifications"]
       # Every day at 11:40am Eastern Time during DST. 12:40pm during non-DST.
       schedule_expression = "cron(40 16 * * ? *)"
       state               = local.email-notification-opportunity-state[var.environment]
@@ -220,7 +220,7 @@ locals {
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     create-application-submission = {
-      task_command = ["poetry", "run", "flask", "task", "create-application-submission"]
+      task_command = ["flask", "task", "create-application-submission"]
       # Every hour at minute 15 (offset to avoid collision with other hourly jobs)
       schedule_expression = "cron(15 * * * ? *)"
       state               = "ENABLED"
@@ -229,7 +229,7 @@ locals {
       environment_vars    = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     build-automatic-opportunities = {
-      task_command = ["poetry", "run", "flask", "task", "build-automatic-opportunities"]
+      task_command = ["flask", "task", "build-automatic-opportunities"]
       # Every day at 7:15am Eastern Time during DST. 8:15am during non-DST.
       # Runs just before the search load job that runs 30 minutes after the hour.
       schedule_expression = "cron(15 12 * * ? *)"
@@ -240,7 +240,7 @@ locals {
       environment_vars = try(local.scheduled_jobs_config[var.environment].environment_vars, null)
     }
     setup-lower-env-agencies = {
-      task_command = ["poetry", "run", "flask", "task", "setup-lower-env-agencies"]
+      task_command = ["flask", "task", "setup-lower-env-agencies"]
       # Every day at 7:45am Eastern Time during DST. 8:45am during non-DST.
       # Runs just before the agency search load job that runs at the top of the hour.
       schedule_expression = "cron(45 12 * * ? *)"
