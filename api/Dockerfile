@@ -32,6 +32,8 @@ COPY newrelic.ini /api/newrelic.ini
 
 # Disable dev dependencies in UV sync
 ENV UV_NO_DEV=1
+# Compile python to *.pyc files for performance
+ENV UV_COMPILE_BYTECODE=1
 
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
@@ -59,6 +61,7 @@ RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
 FROM base AS dev
 ARG RUN_USER
 
+ENV UV_NO_DEV=0
 # In dev, prefer external venv to avoid mutating release venv
 ENV VIRTUAL_ENV=/opt/venv
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv
@@ -75,12 +78,14 @@ WORKDIR /api
 
 COPY pyproject.toml uv.lock ./
 
-# Install all dependencies including dev dependencies
-RUN uv venv /opt/venv && uv sync --locked --all-groups --no-install-project
 
 COPY . /api
 
-CMD ["uv", "run", "flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]
+# Install all dependencies including dev dependencies
+RUN uv venv /opt/venv && uv sync --locked --all-groups
+
+
+CMD ["flask", "--app", "src.app", "run", "--host", "0.0.0.0", "--port", "8080", "--reload"]
 
 #==============================================
 # Stage 3: Minimal release runtime
@@ -119,6 +124,7 @@ RUN PY_MM=$(cat /tmp/py_version.txt) && \
       /api/.venv/bin/pip* \
       /api/.venv/bin/easy_install* \
       /root/.local/share/virtualenv \
+      /opt/venv \
       "/home/${RUN_USER}/.local/share/virtualenv" || true
 
 ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
