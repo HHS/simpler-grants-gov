@@ -1,5 +1,5 @@
-# @specFile e2e/search/search.spec.ts
 # @featureArea Search
+# @specFile e2e/search/search.spec.ts
 # @debugNote Covers pagination, sorting, filter behavior, and out-of-range page handling
 
 Feature: Search Core Search Behaviors
