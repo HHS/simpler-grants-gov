@@ -678,7 +678,7 @@ test.describe("Search page - state persistence after refresh", () => {
         "posted",
       ]);
       // Wait for the status-filtered search to finish before touching funding
-      // instrument — otherwise the completing search re-renders the filter panel
+      // instrument - otherwise the completing search re-renders the filter panel
       // from URL state (no fundingInstrument param yet) and resets any checkbox
       // we just clicked.
       await waitForSearchResultsInitialLoad(page);
@@ -689,7 +689,7 @@ test.describe("Search page - state persistence after refresh", () => {
         "grant",
       ]);
       // Let the search triggered by clicking 'grant' complete before clicking
-      // 'other' — otherwise the completing search re-syncs the panel from URL
+      // 'other' - otherwise the completing search re-syncs the panel from URL
       // (which only shows 'grant') and unchecks 'other' before it registers.
       await waitForSearchResultsInitialLoad(page);
       await toggleCheckbox(page, "funding-instrument-other");
