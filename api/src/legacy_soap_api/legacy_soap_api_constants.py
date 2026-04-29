@@ -4,6 +4,7 @@ from enum import StrEnum
 class LegacySoapApiEvent(StrEnum):
 
     NO_HEADER_CERT = "no_header_cert"
+    CERT_EXPIRED = "cert_expired"
     PARSED_CERT = "parsed_cert"
     UNPARSEABLE_CERT = "unparseable_cert"
     UNKNOWN_INVALID_CLIENT_CERT = "unknown_invalid_client_cert"

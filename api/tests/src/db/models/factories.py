@@ -3474,7 +3474,7 @@ class BaseLegacyCertificateFactory(BaseFactory):
         abstract = True
 
     legacy_certificate_id = Generators.UuidObj
-    cert_id = factory.Faker("random_int", min=1000, max=10000000)
+    cert_id = factory.LazyFunction(lambda: str(random.randint(1000, 10000000)))
     serial_number = factory.Sequence(lambda n: f"{n}")
     expiration_date = factory.Faker("future_date", end_date="+2y")
     user_id = factory.LazyAttribute(lambda s: s.user.user_id)
