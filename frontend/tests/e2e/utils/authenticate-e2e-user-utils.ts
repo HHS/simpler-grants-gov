@@ -31,27 +31,22 @@ const attemptStagingSpoof = async (
     return false;
   }
   // get server side staging user JWT token
-  try {
-    const response = await fetch(
-      `${playwrightEnv.apiUrl}/v1/internal/e2e-token`,
-      {
-        headers: { "X-API-Key": playwrightEnv.stagingTestUserApiKey },
-        method: "POST",
-      },
+  const response = await fetch(
+    `${playwrightEnv.apiUrl}/v1/internal/e2e-token`,
+    {
+      headers: { "X-API-Key": playwrightEnv.stagingTestUserApiKey },
+      method: "POST",
+    },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `unable to fetch e2e staging user token: ${response.status}`,
     );
-    if (!response.ok) {
-      throw new Error(
-        `unable to fetch e2e staging user token: ${response.status}`,
-      );
-    }
-    const json = (await response.json()) as { data: { token: string } };
-    // encode it as a client JWT and set it on cookies
-    await createSpoofedSessionCookie(context, json.data.token);
-    return true;
-  } catch (e) {
-    console.error(`unable to spoof session cookie: ${(e as Error).message}`);
-    throw e;
   }
+  const json = (await response.json()) as { data: { token: string } };
+  // encode it as a client JWT and set it on cookies
+  await createSpoofedSessionCookie(context, json.data.token);
+  return true;
 };
 
 export async function authenticateE2eUser(

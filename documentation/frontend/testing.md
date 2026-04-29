@@ -6,7 +6,7 @@ E2E tests are run using Playwright. See [development.md](/DEVELOPMENT.md) for mo
 
 ### Spoofing logins
 
-There are situations where we want to be able to test a "logged in" experience without having to script the test through the full login flow. In order to support this we have built a system to spoof the user login by placing a session cookie into the browser context. This system works by creating a client side cookie on the browser context within Playwright that will function the same as the session cookie. produced as the output of the real login process.
+There are situations where we want to be able to test a "logged in" experience without having to script the test through the full login flow. In order to support this we have built a system to spoof the user login by placing a session cookie into the browser context. This system works by creating a client side cookie on the browser context within Playwright that will function the same as the session cookie produced as the output of the real login process.
 
 The system is defined in [Login Utils](https://github.com/HHS/simpler-grants-gov/blob/main/frontend/tests/e2e/loginUtils.ts)
 
@@ -22,7 +22,7 @@ Local spoofed logins depend on an auth token for a test user that is generated e
 
 Since staging tests run on a deployed server that does not expose a testing token directly, to spoof a login is a bit more involved, but only requires proper env vars to be set in order to work. A test user is set up in staging that can be spoofed. In order to obtain a session token for this user, Playwright needs to request it from a staging-only internal endpoint.
 
-To run spoofed logins (locally or in CI), you will too have the SESSION_SECRET and STAGING_TEST_USER_API_KEY env vars are correctly set in .env.local. Values can be found 1password, or ask a team member.
+To run spoofed logins (locally or in CI), SESSION_SECRET and STAGING_TEST_USER_API_KEY env vars must be correctly set in .env.local. Values for these env vars can be found 1password, AWS SSM, or ask a team member.
 
 ### Test groups
 
