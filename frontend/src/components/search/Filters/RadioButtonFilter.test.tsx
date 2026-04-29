@@ -1,12 +1,7 @@
-import { warn } from "console";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { initial } from "lodash";
 import { initialFilterOptions } from "src/utils/testing/fixtures";
-
-import React from "react";
-import { Radio } from "@trussworks/react-uswds";
 
 import { RadioButtonFilter } from "src/components/search/Filters/RadioButtonFilter";
 
