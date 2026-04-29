@@ -64,9 +64,9 @@ Some things to consider when thinking about whether or how to implement client s
 
 ### API / Client side parity
 
-Since the code running in the client (javascript, likely a library such as zod) and the code running in the API (python, apiflask) are fundamentally different, any efforts to get 100% parity between client side and API side validation behavior will likely fail. In this context, while it is important that client side validation behavior mirrors API side behavior as closely as possible, the goal of implementing client side validation should not be 100% parity. Since the ultimate source of truth for validation is the API, any client side validation we set up should make sure to not get in the way of API side validation. What we wsant to avoid is a situation where the client sets up rules or behavior that could block submission of data that would actually be accepted by the API.
+Since the code running in the client (javascript, likely a library such as zod) and the code running in the API (python, apiflask) are fundamentally different, any efforts to get 100% parity between client side and API side validation behavior will likely fail. In this context, while it is important that client side validation behavior mirrors API side behavior as closely as possible, the goal of implementing client side validation should not be 100% parity. Since the ultimate source of truth for validation is the API, any client side validation we set up should make sure to not get in the way of API side validation. What we want to avoid is a situation where the client sets up rules or behavior that could block submission of data that would be accepted by the API.
 
-What his means in practice is:
+What this means in practice is:
 
 - make sure that client side validation behavior errs on the side of being less restrictive than the API side validation
 - don't worry if client side validation does not 100% match API side validation as long as what is being done client side is in line with the intent of API side validation, does not block submission of valid data, and is providing useful early feedback to users
@@ -83,6 +83,6 @@ If there is no immediate need to block submission of data, even if the data is d
 
 Especially when thinking about disabling or hiding buttons related to client side validation status, make sure you are considering accessibility and UX best practices.
 
-### Make validation transparent
+### Make validation seamless
 
 Users don't care where validation is happening, and introducing a situation where they might need to understand the layers of validation is something to avoid. As such, display for validation warnings or errors should be the same regardless of whether the warnings come from the frontend or backend.
