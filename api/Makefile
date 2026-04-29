@@ -79,7 +79,6 @@ release-build:
 
 setup-local:
 	# Install dependencies
-	# TODO - verify this is the right command
 	uv sync --all-groups
 
 setup-env-override-file:

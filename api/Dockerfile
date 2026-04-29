@@ -1,12 +1,6 @@
-FROM ghcr.io/hhs/python-base-image:3d03921@sha256:01ea5e3392e0ea9f70bb48a9df4877986493621e3f69165e9e3a02a60fd482b5 AS base
+FROM ghcr.io/hhs/python-base-image:3d63eb7@sha256:2f10c624ac0d59a6541b411e09f03fd8aa68c88c4fdb94624ad90a5c72135b0b AS base
 ARG RUN_UID
 ARG RUN_USER
-
-ARG UV_VERSION=0.11.8
-
-# TODO - need to remove poetry from the base image - will just ignore it at the moment
-# TODO - install uv in the base image instead of here
-COPY --from=ghcr.io/astral-sh/uv:0.11.8 /uv /uvx /bin/
 
 # Read Python version from the version file in the base image
 RUN mkdir -p /tmp && cat /python-version.txt > /tmp/py_version.txt
@@ -62,6 +56,7 @@ RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
 FROM base AS dev
 ARG RUN_USER
 
+# We want dev dependencies in the dev image
 ENV UV_NO_DEV=0
 # In dev, prefer external venv to avoid mutating release venv
 ENV VIRTUAL_ENV=/opt/venv
