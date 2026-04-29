@@ -188,17 +188,17 @@ jobs:
 
           make build
 
-      - name: Save Docker image to file
+      - name: Save API Docker image to file
         if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
         run: |
           docker save api-grants-api > /tmp/docker-image.tar
 
-      - name: save Docker image cache
+      - name: Save API Docker image cache
         id: save-docker-image-cache
         uses: actions/cache/save@v5
         with:
           path: /tmp/docker-image.tar
-          key: api-docker-test-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+          key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
   run-e2e-tests-local:
     name: Prepare infra and run E2E tests
