@@ -53,6 +53,7 @@ module "training_config" {
     # Email notification
     RESET_EMAILS_WITHOUT_SENDING               = "false"
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
+    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS       = 1
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
