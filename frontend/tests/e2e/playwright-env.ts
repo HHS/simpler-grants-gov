@@ -8,6 +8,8 @@ if (fs.existsSync(envPath)) {
   dotenv.config({ path: envPath, quiet: true });
 }
 
+const SUPPORTED_ENVS = ["local", "staging"];
+
 // Base URLs for each environment, read from .env.local if present, else fallback to defaults
 const BASE_URLS: Record<string, string> = {
   local: process.env.LOCAL_BASE_URL || "http://127.0.0.1:3000",
@@ -16,23 +18,16 @@ const BASE_URLS: Record<string, string> = {
 
 // API URLs for each environment, read from .env.local if present, else fallback to defaults
 const API_URLS: Record<string, string> = {
-  local: process.env.LOCAL_BASE_URL || "http://127.0.0.1:8080",
+  local: process.env.LOCAL_API_URL || "http://127.0.0.1:8080",
   staging:
-    process.env.STAGING_BASE_URL || "https://api.staging.simpler.grants.gov",
+    process.env.STAGING_API_URL || "https://api.staging.simpler.grants.gov",
 };
 
-// Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
 const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
-if (!Object.prototype.hasOwnProperty.call(BASE_URLS, targetEnv)) {
+if (SUPPORTED_ENVS.indexOf(targetEnv) === -1) {
   throw new Error(
-    `Unsupported PLAYWRIGHT_TARGET_ENV: ${targetEnv}. Allowed values: ${Object.keys(BASE_URLS).join(", ")}`,
-  );
-}
-
-if (!Object.prototype.hasOwnProperty.call(API_URLS, targetEnv)) {
-  throw new Error(
-    `Unsupported PLAYWRIGHT_TARGET_ENV: ${targetEnv}. Allowed values: ${Object.keys(BASE_URLS).join(", ")}`,
+    `Unsupported PLAYWRIGHT_TARGET_ENV: ${targetEnv}. Allowed values: ${SUPPORTED_ENVS.join(", ")}`,
   );
 }
 
