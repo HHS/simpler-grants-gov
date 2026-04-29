@@ -1,5 +1,5 @@
-# @specFile e2e/search/search-default-filters.spec.ts
 # @featureArea Search
+# @specFile e2e/search/search-default-filters.spec.ts
 # @debugNote Checks default filters on search page load
 
 Feature: Search - Default Filters
