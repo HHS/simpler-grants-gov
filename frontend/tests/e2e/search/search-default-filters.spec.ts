@@ -1,6 +1,6 @@
 /**
  * @feature Search - Default Filters
- * @featureFile frontend/tests/e2e/search/features/search-core/search-default-filters.feature
+ * @featureFile e2e/search/features/search-core/search-default-filters.feature
  * @scenario Load search page with forecasted and open filters checked by default
  */
 import { expect, test } from "@playwright/test";
