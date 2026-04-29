@@ -250,6 +250,12 @@ jobs:
           key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
           restore-keys: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
+      - name: Upload API artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: api-docker.tar
+          path: /tmp/docker-image.tar
+
       - name: Load cached Docker image (alias it if needed)
         if: steps.restore-docker-image-cached.outputs.cache-matched-key != ''
         run: |
