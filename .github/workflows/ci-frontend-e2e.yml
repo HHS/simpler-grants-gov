@@ -108,8 +108,8 @@ jobs:
       - uses: actions/cache@v5
         id: playwright-cache
         with:
-          # cache is missing randomly so instead of being able to just trust the cache existing, we have to download here and push it to an artifact for the next job
-          # lookup-only: true
+          # if cache is missing randomly so instead of being able to just trust the cache existing, we have to download here and push it to an artifact for the next job, by commenting the lookup-only out
+          lookup-only: true
           path: |
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
@@ -117,8 +117,8 @@ jobs:
       - uses: actions/cache@v5
         id: npm-cache
         with:
-          # cache is missing randomly so instead of being able to just trust the cache existing, we have to download here and push it to an artifact for the next job
-          #lookup-only: true
+          # if cache is missing randomly so instead of being able to just trust the cache existing, we have to download here and push it to an artifact for the next job, by commenting the lookup-only out
+          lookup-only: true
           path: |
             frontend/node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
@@ -127,9 +127,6 @@ jobs:
         if: steps.npm-cache.outputs.cache-hit != 'true'
         run: |
           npm ci
-          pwd
-          ls . -l
-          ls node_modules -l
 
       - run: npx playwright install --with-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
@@ -137,29 +134,29 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
       # We package ourselves as tar.gz because this preserves permissions that a regular artifact upload/download does not.
-      - name: Package node_modules
-        run: |
-          tar -czf /tmp/node_modules.tar.gz ./node_modules/
-          ls /tmp
+      # - name: Package node_modules
+      #   run: |
+      #     tar -czf /tmp/node_modules.tar.gz ./node_modules/
+      #     ls /tmp
 
-      - name: Upload node_modules artifact
-        uses: actions/upload-artifact@v7
-        with:
-          archive: false
-          path: /tmp/node_modules.tar.gz
+      # - name: Upload node_modules artifact
+      #   uses: actions/upload-artifact@v7
+      #   with:
+      #     archive: false
+      #     path: /tmp/node_modules.tar.gz
 
       # We package ourselves as tar.gz because this preserves permissions that a regular artifact upload/download does not.
-      - name: Package Playwright artifact
-        run: |
-          cd ~/.cache/ms-playwright
-          tar -czf /tmp/playwright.tar.gz .
-          ls /tmp
+      # - name: Package Playwright artifact
+      #   run: |
+      #     cd ~/.cache/ms-playwright
+      #     tar -czf /tmp/playwright.tar.gz .
+      #     ls /tmp
 
-      - name: Upload Playwright artifact
-        uses: actions/upload-artifact@v7
-        with:
-          archive: false
-          path: /tmp/playwright.tar.gz
+      # - name: Upload Playwright artifact
+      #   uses: actions/upload-artifact@v7
+      #   with:
+      #     archive: false
+      #     path: /tmp/playwright.tar.gz
 
   build-api-if-not-cached:
     name: Build API if not cached
@@ -170,7 +167,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Restore Docker image cached
+      - name: Restore API Docker image cached
         id: restore-docker-image-cached
         uses: actions/cache/restore@v5
         with:
