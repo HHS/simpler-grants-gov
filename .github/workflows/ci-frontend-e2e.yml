@@ -194,6 +194,7 @@ jobs:
           docker save api-grants-api > /tmp/docker-image.tar
 
       - name: Save API Docker image cache
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
         id: save-docker-image-cache
         uses: actions/cache/save@v5
         with:
