@@ -1,5 +1,5 @@
-# @specFile e2e/search/search-error.spec.ts
 # @featureArea Search
+# @specFile e2e/search/search-error.spec.ts
 # @debugNote Covers invalid query error state and recovery path
 
 Feature: Search Error Handling and Recovery
