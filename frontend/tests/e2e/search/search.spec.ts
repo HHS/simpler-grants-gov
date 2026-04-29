@@ -1,13 +1,9 @@
 import { expect, test } from "@playwright/test";
-import {
-  refreshPageWithCurrentURL,
-  waitForAnyURLChange,
-} from "tests/e2e/playwrightUtils";
+import { waitForAnyURLChange } from "tests/e2e/playwrightUtils";
 import {
   clickAccordionWithTitle,
   clickLastPaginationPage,
   clickPaginationPageNumber,
-  expectSortBy,
   getFirstSearchResultTitle,
   getLastSearchResultTitle,
   getNumberOfOpportunitySearchResults,
@@ -21,9 +17,6 @@ import { VALID_TAGS } from "tests/e2e/tags";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION, CORE_REGRESSION } =
   VALID_TAGS;
-const statusCheckboxes = {
-  "status-closed": "closed",
-};
 
 test.describe("Search page tests", () => {
   test(
