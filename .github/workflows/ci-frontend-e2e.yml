@@ -286,7 +286,7 @@ jobs:
           docker image ls
 
       - name: Restore API Docker image cached
-        id: restore-api-docker-image-and-keys-cached
+        id: restore-api-docker-image-cached
         uses: actions/cache/restore@v5
         with:
           path: /tmp/docker-image.tar
@@ -302,13 +302,13 @@ jobs:
       #     path: /tmp/docker-image.tar
 
       - name: Fail if cache miss on API
-        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
+        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key == ''
         run: |
           echo "Failing because we couldn't load the API image from cache"
           exit 1
 
       - name: Load cached API Docker image (alias it if needed)
-        if: steps.restore-api-docker-image-and-keys-cached.outputs.cache-matched-key != ''
+        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key != ''
         run: |
           docker load < /tmp/docker-image.tar
           # alias the live docker container name simpler-grants-gov-api to the locally build name api-grants-api so that we don't rebuild it in later steps.
@@ -332,7 +332,7 @@ jobs:
           docker image ls
 
       - name: Build API Server for e2e tests (if not cached)
-        if: steps.restore-api-docker-image-and-keys-cached.outputs.cache-matched-key == ''
+        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key == ''
         run: |
           cd ../api
           # Enable core dumps for debugging segfaults
@@ -451,12 +451,12 @@ jobs:
           docker save postgres > /tmp/postgres-docker-image.tar
 
       - name: Save API Docker image to file
-        if: steps.restore-api-docker-image-and-keys-cached.outputs.cache-matched-key == ''
+        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key == ''
         run: |
           docker save api-grants-api > /tmp/docker-image.tar
 
       - name: Save API Docker image and shared keys cache
-        if: steps.restore-api-docker-image-and-keys-cached.outputs.cache-matched-key == ''
+        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key == ''
         id: save-api-docker-image-and-keys-cache
         uses: actions/cache/save@v5
         with:
