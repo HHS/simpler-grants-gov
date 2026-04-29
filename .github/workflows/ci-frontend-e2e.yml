@@ -358,6 +358,17 @@ jobs:
 
           ls -a
 
+      - name: Save DB Docker image to file
+        run: |
+          docker save postgres > /tmp/postgres-docker-image.tar
+
+      - name: Save DB Docker image cached
+        id: save-db-docker-image-cached
+        uses: actions/cache@v5
+        with:
+          path: /tmp/postgres-docker-image.tar
+          key: postgres-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
       - name: Start API Server for e2e tests
         run: |
           cd ../api
@@ -445,25 +456,6 @@ jobs:
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
           force-webkit-install: "true"
-
-      - name: Save DB Docker image to file
-        run: |
-          docker save postgres > /tmp/postgres-docker-image.tar
-
-      - name: Save API Docker image to file
-        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key == ''
-        run: |
-          docker save api-grants-api > /tmp/docker-image.tar
-
-      - name: Save API Docker image and shared keys cache
-        if: steps.restore-api-docker-image-cached.outputs.cache-matched-key == ''
-        id: save-api-docker-image-and-keys-cache
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            /tmp/docker-image.tar
-
-          key: api-docker-test-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
   create-report:
     name: Create Merged Test Report
