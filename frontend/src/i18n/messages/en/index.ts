@@ -1061,7 +1061,7 @@ export const messages = {
       },
       summary: {
         forecasted: "Forecast posted date: ",
-        posted: "Posted date: ",
+        posted: "Posted: ",
         agency: "Agency: ",
       },
       opportunityNumber: "Opportunity Number: ",
