@@ -48,6 +48,8 @@ For example:
 }
 ```
 
+In all relevant API interactions, these warnings should be processed by the frontend and displayed to the user rather than swallowed. Even if client side validation is in place, these warnings should be handled in order to make sure that the user receives proper validation messages even when client side validation does not fully validate the data or does not validate the data correctly.
+
 ### Make sure client side validation is run in the browser
 
 The project includes a javascript form validation library called [zod](https://zod.dev/). This library can be used on the browser or in the NextJS server. Note, however, that implementing validation in server actions or in a NextJS API handler function, will still require submitting data to the server, so, while this in theory adds a layer of security, assuming that zod validations mirror the validations being done on the API side, this will not add too much value to the user beyond what we get from using only API side validation.
@@ -81,7 +83,13 @@ If there is no immediate need to block submission of data, even if the data is d
 
 ### Accessibility and UX best practices
 
-Especially when thinking about disabling or hiding buttons related to client side validation status, make sure you are considering accessibility and UX best practices.
+Validation should ensure a predictable, accessible experience to guide users instead of blocking them. A general rule of thumb: Don't prevent clicks; use them to provide better instructions.
+
+Be mindful when using design patterns that stray from established norms:
+
+- Disabled buttons are a red flag. They're often a dead end that forces users to hunt for errors without guidance. It’s a sign to reevaluate whether your validation flow is clear enough.
+- Avoid conditionally hiding buttons. This accessibility anti-pattern causes layout shifts for sighted users and creates confusion for screen reader users who expect predictable page structure.
+- It's almost always better to keep buttons interactive. If the form is incomplete, consider letting the user interact with the button to trigger helpful validation messages that point exactly to what needs fixing.
 
 ### Make validation seamless
 
