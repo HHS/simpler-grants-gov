@@ -73,7 +73,10 @@ export async function authenticateE2eUser(
           return;
         }
       } catch (e) {
-        console.warn("unable to spoof staging login", (e as Error).message);
+        console.error(
+          "Unable to spoof staging login, falling back to manual login flow:",
+          (e as Error).message,
+        );
       }
     }
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
