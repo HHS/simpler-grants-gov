@@ -1,4 +1,4 @@
-# @specFile search.spec.ts
+# @specFile e2e/search/search.spec.ts
 # @featureArea Search
 # @debugNote Covers pagination, sorting, filter behavior, and out-of-range page handling
 
