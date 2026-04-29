@@ -396,3 +396,15 @@ variable "newrelic_mtls_entity_guid" {
   description = "New Relic entity GUID for the mTLS ALB, used to correlate logs with the infrastructure entity in New Relic."
   default     = null
 }
+
+variable "newrelic_host_entity_guid" {
+  type        = string
+  description = "New Relic entity GUID for the ECS service, used to correlate container logs with the infrastructure entity in New Relic."
+  default     = null
+}
+
+variable "enable_nrlogs_direct" {
+  type        = bool
+  description = "Whether to enable direct Fluent Bit to New Relic log forwarding. Set to false when a CloudWatch subscription filter already forwards logs to New Relic to avoid duplicates."
+  default     = true
+}

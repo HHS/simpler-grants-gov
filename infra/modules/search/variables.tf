@@ -80,3 +80,9 @@ variable "sso_admin_role_arn" {
   type        = string
   default     = null
 }
+
+variable "workflow_role_arn" {
+  description = "The ARN of the IAM role used by the workflow service. Defaults to {service_name}-workflow role."
+  type        = string
+  default     = null
+}

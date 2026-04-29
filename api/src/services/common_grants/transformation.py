@@ -19,7 +19,7 @@ from common_grants_sdk.schemas.pydantic import (
     PaginatedBodyParams,
     SingleDateEvent,
 )
-from pydantic import BaseModel, Field, HttpUrl, ValidationError
+from pydantic import ValidationError
 
 import src.util.datetime_util as datetime_util
 from src.api.common_grants.schemas.pydantic.custom_fields import (
@@ -39,19 +39,10 @@ from src.api.common_grants.schemas.pydantic.custom_fields import (
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import CommonGrantsEvent, OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
+from src.services.common_grants.url_utils import validate_url_compatible
 from src.validation.validation_constants import ValidationErrorType
 
 logger = logging.getLogger(__name__)
-
-
-class UrlValidator(BaseModel):
-    """Validator for a URL string using Pydantic's HttpUrl with strict mode enabled.
-
-    Mirrors the HttpUrl field in OpportunityBase and other CommonGrants models.
-    TODO(@widal001): Replace this with a new field from SDK or relax strictness in SDK
-    """
-
-    url: HttpUrl = Field(strict=True)
 
 
 def transform_status_to_cg(v1_status: OpportunityStatus) -> OppStatusOptions:
@@ -162,36 +153,35 @@ def _transform_date_to_cg(date_value: date | datetime | None) -> date | None:
     return date_value
 
 
-def validate_url(value: str | None) -> str | None:
+def validate_url(
+    value: str | None,
+    *,
+    field: str | None = None,
+    opportunity_id: object = None,
+) -> str | None:
+    """Return ``value`` normalized only if both pydantic and marshmallow accept it.
+
+    Delegates the dual-validation to ``validate_url_compatible``. When the URL
+    fails validation the function returns ``None`` and emits a WARNING — the
+    field will be omitted from the CG response, so callers passing ``field``
+    and ``opportunity_id`` give operators enough context to answer "why is
+    this field missing for opportunity X?" without paging the original record.
     """
-    Validate a URL string using Pydantic's HttpUrl validation.
-
-    This ensures URLs are validated with the same strict rules that Pydantic
-    uses, preventing validation errors when creating OpportunityBase objects.
-
-    We use a minimal model with the same field definition as OpportunityBase
-    to ensure we use the exact same validation rules.
-
-    Args:
-        value: The string to validate
-
-    Returns:
-        A valid URL string or None if validation fails
-    """
-    if value is None or value == "":
-        return None
-    try:
-        valid = UrlValidator.model_validate({"url": value})
-        return str(valid.url)
-    except ValidationError:
-        logger.info(
-            f"URL validation failed for: {value}",
-            extra={
-                "cg_event": CommonGrantsEvent.URL_VALIDATION_ERROR,
-                "url": value,
-            },
+    result = validate_url_compatible(value)
+    if result is None and value not in (None, ""):
+        log_extra: dict[str, object] = {
+            "cg_event": CommonGrantsEvent.URL_VALIDATION_ERROR,
+            "url": value,
+        }
+        if field is not None:
+            log_extra["field"] = field
+        if opportunity_id is not None:
+            log_extra["opportunity_id"] = opportunity_id
+        logger.warning(
+            "Dropping URL field from CG response: failed dual validation",
+            extra=log_extra,
         )
-        return None
+    return result
 
 
 def transform_opportunity_to_cg(v1_opportunity: Opportunity) -> OpportunityBase | None:
@@ -342,7 +332,11 @@ def transform_search_result_to_cg(opp_data: dict) -> OpportunityBase | None:
                 maxAwardAmount=max_award_money,
                 minAwardAmount=min_award_money,
             ),
-            source=validate_url(summary.get("additional_info_url")),
+            source=validate_url(
+                summary.get("additional_info_url"),
+                field="source",
+                opportunity_id=opportunity_id,
+            ),
             customFields=populate_custom_fields(opp_data),
             createdAt=summary.get("created_at") or datetime_util.utcnow(),
             lastModifiedAt=summary.get("updated_at") or datetime_util.utcnow(),
@@ -406,8 +400,18 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
     if attachments:
         valid_attachment_values = []
         for attachment in attachments:
+            # Pre-validate the download URL with field/opportunity context so a
+            # drop is observable in logs. The pydantic field validator on
+            # AttachmentValue.downloadUrl is still a defensive backstop for
+            # direct model construction; passing the already-validated value
+            # here means it runs the dual-check on a string we already cleared.
+            download_url = validate_url(
+                attachment.get("download_path"),
+                field="customFields.attachments[].downloadUrl",
+                opportunity_id=opportunity_id,
+            )
             attachment_data = {
-                "downloadUrl": attachment.get("download_path"),
+                "downloadUrl": download_url,
                 "name": attachment.get("file_name"),
                 "description": attachment.get("file_description"),
                 "sizeInBytes": attachment.get("file_size_bytes"),
@@ -509,7 +513,11 @@ def populate_custom_fields(opp_data: dict) -> dict[str, CustomField] | None:
             if field:
                 custom_fields["contactInfo"] = field
 
-        additional_info_url = validate_url(summary.get("additional_info_url"))
+        additional_info_url = validate_url(
+            summary.get("additional_info_url"),
+            field="customFields.additionalInfo.url",
+            opportunity_id=opportunity_id,
+        )
         additional_info_url_description = summary.get("additional_info_url_description")
         if additional_info_url is not None:
             field = validate_custom_field(

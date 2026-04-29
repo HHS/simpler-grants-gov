@@ -382,6 +382,8 @@ export const messages = {
       contactEmailHint: "Enter a valid email address.",
       contactEmailTextHint:
         "Enter the text that will be shown as the email link.",
+      attachmentsIntro:
+        "Upload the official Notice of Funding Opportunity (NOFO) and any supporting templates or guidelines that applicants need to complete their submission.",
       reviewButton: {
         idle: "Review required fields",
         pending: "Reviewing...",
@@ -428,6 +430,13 @@ export const messages = {
       additionalInfoUrl: "Enter an additional information URL.",
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
+    },
+    attachments: {
+      removeButton: "Remove",
+      errorHeading: "Upload error",
+      errorUploadFailed: "Failed to upload {fileName}.",
+      errorDeleteFailed: "Failed to delete {fileName}.",
+      errorFileTooLarge: "{fileName} exceeds the 2GB file size limit.",
     },
   },
   Application: {
@@ -1197,6 +1206,8 @@ export const messages = {
       showAll: "Show all",
       individual: "Individual",
     },
+    toNotificationsPreferences:
+      "Take a closer look at the opportunities you've saved and share any that feel like a good fit for your organization. Shared opportunities are saved for all members to view.  <link>Manage your notification preferences here.</link>",
   },
   Roadmap: {
     pageTitle: "Roadmap | Simpler.Grants.gov",

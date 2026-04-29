@@ -82,7 +82,7 @@ test(
     await verifyFormStatusOnApplication(
       page,
       "incomplete",
-      "Budget Narrative Attachment",
+      BUDGET_NARRATIVE_ATTACHMENT_FORM_MATCHER,
       applicationUrl,
     );
   },

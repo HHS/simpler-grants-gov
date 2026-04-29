@@ -35,7 +35,6 @@ describe("searchOpportunitiesByAgency", () => {
     jest.clearAllMocks();
   });
   it("calls request function with correct parameters", async () => {
-    const token = "test-token";
     const agencyId = "123-ABC-456-DEF";
     const fakeResponse = {
       status: 200,
@@ -43,24 +42,18 @@ describe("searchOpportunitiesByAgency", () => {
     };
     mockFetcher.mockResolvedValue(fakeResponse);
 
-    const result = await searchOpportunitiesByAgency(
-      token,
-      agencyId,
-      pageRequest,
-    );
+    const result = await searchOpportunitiesByAgency(agencyId, pageRequest);
 
     expect(result).toEqual(fakeAgencyResponseData);
     expect(mockFetchGrantorWithMethod).toHaveBeenCalledTimes(1);
     expect(mockFetchGrantorWithMethod).toHaveBeenCalledWith("POST");
     expect(mockFetcher).toHaveBeenCalledWith({
       subPath: "agencies/123-ABC-456-DEF/opportunities",
-      additionalHeaders: { "X-SGG-Token": token },
       body: pageBody,
     });
   });
 
   it("should return validation error response with 422 status", async () => {
-    const token = "test-token";
     const agencyId = "123-ABC-456-DEF";
     const errMsg = { errors: { field: "invalid" } };
     const expectedResponse = {
@@ -70,11 +63,7 @@ describe("searchOpportunitiesByAgency", () => {
     };
     mockFetcher.mockResolvedValue(expectedResponse);
 
-    const result = await searchOpportunitiesByAgency(
-      token,
-      agencyId,
-      pageRequest,
-    );
+    const result = await searchOpportunitiesByAgency(agencyId, pageRequest);
 
     expect(result).toEqual(errMsg);
     expect(mockFetchGrantorWithMethod).toHaveBeenCalledTimes(1);
@@ -90,7 +79,6 @@ describe("createOpportunity", () => {
     jest.clearAllMocks();
   });
   it("calls request function with correct parameters", async () => {
-    const token = "test-token";
     const createOppSchema = {
       agency_id: "123-ABC-456-DEF",
       opportunity_number: "TEST-OPP-001",
@@ -104,20 +92,18 @@ describe("createOpportunity", () => {
     };
     mockFetcher.mockResolvedValue(expectedResponse);
 
-    const result = await createOpportunity(token, createOppSchema);
+    const result = await createOpportunity(createOppSchema);
 
     expect(result).toEqual(createOppSchema);
     expect(mockFetchGrantorWithMethod).toHaveBeenCalledTimes(1);
     expect(mockFetchGrantorWithMethod).toHaveBeenCalledWith("POST");
     expect(mockFetcher).toHaveBeenCalledWith({
       subPath: "opportunities",
-      additionalHeaders: { "X-SGG-Token": token },
       body: createOppSchema,
     });
   });
 
   it("should return validation error response with 422 status", async () => {
-    const token = "test-token";
     const createOppSchema = {
       agency_id: "123-ABC-456-DEF",
       opportunity_number: "TEST-OPP-001",
@@ -133,7 +119,7 @@ describe("createOpportunity", () => {
     };
     mockFetcher.mockResolvedValue(expectedResponse);
 
-    const result = await createOpportunity(token, createOppSchema);
+    const result = await createOpportunity(createOppSchema);
 
     expect(result).toEqual(errMsg);
     expect(mockFetchGrantorWithMethod).toHaveBeenCalledTimes(1);

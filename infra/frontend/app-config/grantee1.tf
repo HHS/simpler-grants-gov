@@ -5,7 +5,7 @@ module "grantee1_config" {
   default_region                  = module.project_config.default_region
   environment                     = "grantee1"
   network_name                    = "grantee1"
-  domain_name                     = "staging.grantee1.grants.gov"
+  domain_name                     = "grantee1.teams.simpler.grants.gov"
   enable_https                    = true
   has_database                    = local.has_database
   has_incident_management_service = local.has_incident_management_service

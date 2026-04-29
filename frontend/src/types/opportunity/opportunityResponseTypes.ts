@@ -1,5 +1,6 @@
 import { APIResponse } from "src/types/apiResponseTypes";
 import { Competition } from "src/types/competitionsResponseTypes";
+import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
 export type OpportunityStatus = "archived" | "closed" | "posted" | "forecasted";
 
@@ -126,10 +127,12 @@ export interface OpportunitySummaryDetailApiResponse extends APIResponse {
   data: OpportunitySummaryDetail;
 }
 
-export interface GrantorOpportunityDetail extends OpportunityDetail {
+export interface GrantorOpportunityDetail
+  extends Omit<OpportunityDetail, "attachments"> {
   is_draft: boolean;
   forecast_summary?: OpportunitySummaryDetail;
   non_forecast_summary?: OpportunitySummaryDetail;
+  attachments?: OpportunityAttachment[];
 }
 
 export interface GrantorOpportunityApiResponse extends APIResponse {
