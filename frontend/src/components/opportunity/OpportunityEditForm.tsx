@@ -4,11 +4,11 @@ import {
   saveOpportunityEditAction,
   type OpportunityEditValidationErrors,
 } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
-import { eligibilityTypes } from "src/constants/opportunity";
 import {
   categoryOptions,
+  eligibilityTypes,
   fundingOptions,
-} from "src/constants/searchFilterOptions";
+} from "src/constants/opportunity";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
 import { useTranslations } from "next-intl";
