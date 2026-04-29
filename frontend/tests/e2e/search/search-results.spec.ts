@@ -1,6 +1,6 @@
 /**
  * @feature Search Results Visibility
- * @featureFile search-results.feature
+ * @featureFile e2e/search/features/search-core/search-results.feature
  * @scenario Search with a valid term and verify results count and list visibility
  */
 
