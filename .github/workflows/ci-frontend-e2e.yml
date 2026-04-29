@@ -161,9 +161,49 @@ jobs:
           archive: false
           path: /tmp/playwright.tar.gz
 
+  build-api-if-not-cached:
+    name: Build API if not cached
+    needs: [get-api-commit-hash]
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Restore Docker image cached
+        id: restore-docker-image-cached
+        uses: actions/cache/restore@v5
+        with:
+          path: /tmp/docker-image.tar
+          lookup-only: true
+          key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+          # disable this for now as it seems like we can't actually use the live images, flask not found?
+          #restore-keys: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
+      - name: Build API Server for e2e tests (if not cached)
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
+        run: |
+          cd ../api
+          # Enable core dumps for debugging segfaults
+          ulimit -c unlimited
+          mkdir -p /tmp/cores
+          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+
+          make build
+
+      - name: Restore Docker image cached
+        id: save-docker-image-cache
+        uses: actions/cache/save@v5
+        with:
+          path: /tmp/docker-image.tar
+          key: api-test-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
+
   run-e2e-tests-local:
     name: Prepare infra and run E2E tests
-    needs: [get-api-commit-hash, get-frontend-commit-hash, playwright-cache]
+    needs:
+      [
+        get-api-commit-hash,
+        get-frontend-commit-hash,
+        playwright-cache,
+        build-api-if-not-cached,
+      ]
     runs-on: ubuntu-22.04
 
     strategy:
@@ -231,12 +271,9 @@ jobs:
       - name: Expand Playwright
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: |
-          ls -la ~
           cd ~
           mkdir -p .cache/ms-playwright
           tar -xzf /tmp/playwright.tar.gz -C ~/.cache/ms-playwright
-          ls -la ~
-          ls -la ~/.cache/ms-playwright
 
       - name: Docker images
         run: |
@@ -251,11 +288,18 @@ jobs:
           # disable this for now as it seems like we can't actually use the live images, flask not found?
           #restore-keys: api-docker-img-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
-      - name: Upload API artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: api-docker.tar
-          path: /tmp/docker-image.tar
+      # leaving this for troubleshooting why images don't work in the future (you can't download a cache item)
+      # - name: Upload API artifact
+      #   uses: actions/upload-artifact@v7
+      #   with:
+      #     name: api-docker.tar
+      #     path: /tmp/docker-image.tar
+
+      - name: Fail if cache miss on API
+        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
+        run: |
+          echo "Failing because we couldn't load the API image from cache"
+          exit 1
 
       - name: Load cached Docker image (alias it if needed)
         if: steps.restore-docker-image-cached.outputs.cache-matched-key != ''
@@ -268,17 +312,6 @@ jobs:
       - name: Docker images
         run: |
           docker image ls
-
-      - name: Build API Server for e2e tests (if not cached)
-        if: steps.restore-docker-image-cached.outputs.cache-matched-key == ''
-        run: |
-          cd ../api
-          # Enable core dumps for debugging segfaults
-          ulimit -c unlimited
-          mkdir -p /tmp/cores
-          echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
-
-          make build
 
       - name: Init API Server for e2e tests
         run: |
