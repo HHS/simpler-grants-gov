@@ -150,7 +150,10 @@ def setup_cert_user(
 
 
 def create_soap_request(
-    soap_payload: bytes, use_soap_cert: bool = False, log_local: bool = False
+    soap_payload: bytes,
+    use_soap_cert: bool = False,
+    log_local: bool = False,
+    operation_name: str = "GetApplicationZipRequest",
 ) -> SOAPRequest:
     _, _, soap_certificate = setup_cert_user(
         AgencyFactory.create(), [Privilege.LEGACY_AGENCY_VIEWER]
@@ -169,4 +172,5 @@ def create_soap_request(
         full_path="/grantors/x",
         method="POST",
         auth=SOAPAuth(certificate=soap_certificate),
+        operation_name=operation_name,
     )

@@ -98,6 +98,7 @@ class FundingCategory(StrEnum):
     ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS = (
         "energy_infrastructure_and_critical_mineral_and_materials"  # EIC
     )
+    RECREATION_AND_TOURISM = "recreation_and_tourism"  # RT
 
 
 class FundingInstrument(StrEnum):
@@ -277,6 +278,7 @@ class AwardRecommendationAuditEvent(StrEnum):
     RISK_UPDATED = "risk_updated"
     RISK_DELETED = "risk_deleted"
     APPLICATION_SUBMISSION_UPDATED = "application_submission_updated"
+    AWARD_RECOMMENDATION_SUBMISSION_UPDATED = "award_recommendation_submission_updated"
     REVIEW_CREATED = "review_created"
     REVIEW_UPDATED = "review_updated"
     REVIEW_DELETED = "review_deleted"
@@ -316,6 +318,8 @@ class Privilege(StrEnum):
     # These privileges are associated with workflow approvals
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
+
+    INTERNAL_S3_SCAN = "internal_s3_scan"
 
 
 class RoleType(StrEnum):
@@ -391,6 +395,7 @@ class WorkflowType(StrEnum):
     # reserved for testing.
     BASIC_TEST_WORKFLOW = "basic_test_workflow"
     NO_CONCURRENT_TEST_WORKFLOW = "no_concurrent_test_workflow"
+    LIMITED_APPROVAL_TEST_WORKFLOW = "limited_approval_test_workflow"
 
     def get_human_friendly_text(self) -> str:
         return self.value.replace("_", " ").title()
@@ -412,6 +417,7 @@ class ApprovalResponseType(StrEnum):
 class WorkflowEntityType(StrEnum):
     OPPORTUNITY = "opportunity"
     APPLICATION = "application"
+    AWARD_RECOMMENDATION = "award_recommendation"
 
 
 class WorkflowEventType(StrEnum):

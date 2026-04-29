@@ -58,7 +58,7 @@ describe("getUserAgencies", () => {
     });
     fetchUserWithMethodMock.mockReturnValue(fetchUserMock);
 
-    const result = await getUserAgencies("faketoken", "user-1");
+    const result = await getUserAgencies("user-1");
 
     expect(result).toEqual([
       {
@@ -70,7 +70,6 @@ describe("getUserAgencies", () => {
     expect(fetchUserWithMethodMock).toHaveBeenCalledWith("POST");
     expect(fetchUserMock).toHaveBeenCalledWith({
       subPath: "user-1/agencies",
-      additionalHeaders: { "X-SGG-Token": "faketoken" },
       body: {},
     });
   });
@@ -83,7 +82,7 @@ describe("getUserAgencies", () => {
     });
     fetchUserWithMethodMock.mockReturnValue(fetchUserMock);
 
-    await expect(getUserAgencies("faketoken", "user-1")).rejects.toEqual(
+    await expect(getUserAgencies("user-1")).rejects.toEqual(
       expect.objectContaining({
         message: "Unauthorized",
       }),
@@ -98,7 +97,7 @@ describe("getUserAgencies", () => {
     });
     fetchUserWithMethodMock.mockReturnValue(fetchUserMock);
 
-    await expect(getUserAgencies("faketoken", "user-1")).rejects.toThrow(
+    await expect(getUserAgencies("user-1")).rejects.toThrow(
       "Failed to fetch user agencies: 500",
     );
   });

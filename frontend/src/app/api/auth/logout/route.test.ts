@@ -17,8 +17,8 @@ jest.mock("src/services/auth/sessionUtils", () => ({
   deleteSession: (): unknown => deleteSessionMock(),
 }));
 
-jest.mock("src/services/fetch/fetchers/userFetcher", () => ({
-  postLogout: (token: string): unknown => postLogoutMock(token),
+jest.mock("src/services/fetch/fetchers/fetchers", () => ({
+  postUserLogout: () => postLogoutMock() as unknown,
 }));
 
 // note that all calls to the GET endpoint need to be caught here since the behavior of the Next redirect
@@ -45,7 +45,6 @@ describe("/api/auth/logout POST handler", () => {
     await logoutUser();
 
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
-    expect(postLogoutMock).toHaveBeenCalledWith("fakeToken");
   });
   it("errors if API logout call errors", async () => {
     getSessionMock.mockImplementation(() => ({
@@ -57,7 +56,6 @@ describe("/api/auth/logout POST handler", () => {
     const response = await logoutUser();
 
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
-    expect(postLogoutMock).toHaveBeenCalledWith("fakeToken");
     expect(response.status).toEqual(500);
     const json = (await response.json()) as { message: string };
     expect(json.message).toEqual("Error logging out: the API threw this error");
@@ -70,7 +68,6 @@ describe("/api/auth/logout POST handler", () => {
     const response = await logoutUser();
 
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
-    expect(postLogoutMock).toHaveBeenCalledWith("fakeToken");
     expect(response.status).toEqual(400);
     const json = (await response.json()) as { message: string };
     // const message = JSON.parse(json) as FrontendErrorDetails;
@@ -97,7 +94,6 @@ describe("/api/auth/logout POST handler", () => {
     const response = await logoutUser();
 
     expect(postLogoutMock).toHaveBeenCalledTimes(1);
-    expect(postLogoutMock).toHaveBeenCalledWith("fakeToken");
     expect(response.status).toEqual(401);
     expect(deleteSessionMock).toHaveBeenCalledTimes(1);
     const json = (await response.json()) as { message: string };

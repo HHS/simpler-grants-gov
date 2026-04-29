@@ -13,6 +13,16 @@ export function getFormLink(page: Page, formName: string): Locator {
 }
 
 /**
+ * Converts a plain form name string into a flexible regex that allows
+ * optional whitespace and optional hyphens (e.g. "SF-424B" -> /SF-?424B/i).
+ */
+export function buildFlexibleFormNameRegex(formName: string): RegExp {
+  const escaped = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const flexible = escaped.replace(/\s+/g, "\\s*").replace(/-/g, "-?");
+  return new RegExp(flexible, "i");
+}
+
+/**
  * Opens a form from the application forms table.
  * @param page Playwright Page object
  * @param formMatcher Form name or regex-style matcher used to find the form link
@@ -20,9 +30,10 @@ export function getFormLink(page: Page, formName: string): Locator {
  */
 export async function openForm(
   page: Page,
-  formMatcher: string,
+  formMatcher: string | RegExp,
 ): Promise<boolean> {
-  const formNameRegex = new RegExp(formMatcher, "i");
+  const formNameRegex =
+    formMatcher instanceof RegExp ? formMatcher : new RegExp(formMatcher, "i");
   const formsTable = page.locator(".simpler-application-forms-table").first();
   await formsTable.waitFor({ state: "visible", timeout: 60000 });
 

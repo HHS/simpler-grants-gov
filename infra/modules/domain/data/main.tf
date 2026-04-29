@@ -3,8 +3,9 @@ locals {
 }
 
 data "aws_acm_certificate" "certificate" {
-  count  = var.enable_https ? 1 : 0
-  domain = var.domain_name
+  count     = var.enable_https ? 1 : 0
+  domain    = var.domain_name
+  key_types = ["RSA_4096", "RSA_2048"]
 }
 
 data "aws_route53_zone" "zone" {

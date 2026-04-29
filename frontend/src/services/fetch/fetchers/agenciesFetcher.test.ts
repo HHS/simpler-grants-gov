@@ -122,7 +122,7 @@ describe("getUserAgencies", () => {
     };
     mockJsonFn.mockResolvedValue(expectedResponse);
 
-    const result = await getUserAgencies("test-token", "123-ABC");
+    const result = await getUserAgencies("123-ABC");
 
     expect(fetchUserWithMethod).toHaveBeenCalledWith("POST");
     expect(result).toEqual(fakeAgencyResponseData);

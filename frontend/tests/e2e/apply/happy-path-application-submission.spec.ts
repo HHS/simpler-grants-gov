@@ -1,3 +1,14 @@
+/**
+ * @feature Apply - Happy Path – Application Submission Workflow
+ * @featureFile frontend/tests/e2e/apply/features/happy-path-application-submission.feature
+ * @scenario Complete the Application Submission workflow for an <user type> user
+ *
+ * Examples:
+ * | user type     |
+ * | Organization  |
+ * | Individual    |
+ */
+
 import {
   test,
   type BrowserContext,
@@ -8,10 +19,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
-import {
-  fillForm,
-  verifyFormLinkVisible,
-} from "tests/e2e/utils/forms/general-forms-filling";
+import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
 import {
   verifyFormStatusAfterSave,
@@ -19,10 +27,7 @@ import {
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
 
-import {
-  SF424B_FORM_CONFIG,
-  SF424B_FORM_MATCHER,
-} from "./fixtures/sf424b-field-definitions";
+import { SF424B_FORM_CONFIG } from "./fixtures/sf424b-field-definitions";
 import { sf424BHappyPathTestData } from "./fixtures/sf424b-fill-data";
 
 const { APPLY, SMOKE, GRANTEE } = VALID_TAGS;
@@ -52,14 +57,21 @@ test(
 
     const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
+    // Given the user is logged in
     await authenticateE2eUser(page, context, !!isMobile);
 
+    // Call reusable create application function from utils
+    /**
+     * Covers "Starting a new application" flow in the feature file
+     * (includes modal interaction, organization selection, and application creation)
+     */
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
-    await verifyFormLinkVisible(page, SF424B_FORM_MATCHER);
-
-    // Fill and save, stay on form page to verify save success
+    // When the user clicks on a form link
+    // Then the form opens
+    // And the user fills out the form with valid test data
+    // And the user clicks Save
     await fillForm(
       testInfo,
       page,
@@ -71,7 +83,7 @@ test(
     // Verify save success alert on form page
     await verifyFormStatusAfterSave(page, "complete");
 
-    // On application page — verify form row shows "No issues detected"
+    // On application page - verify form row shows "No issues detected"
     await verifyFormStatusOnApplication(
       page,
       "complete",

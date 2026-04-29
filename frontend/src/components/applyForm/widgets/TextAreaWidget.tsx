@@ -1,12 +1,12 @@
 // file adapted from https://github.com/rjsf-team/react-jsonschema-form/blob/main/packages/core/src/components/widgets/TextareaWidget.tsx
 // changes made to include USWDS and allow to functional as non-reactive form field
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
+import { UswdsWidgetProps } from "src/types/applyForm/types";
 
 import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { FormGroup, Textarea } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { UswdsWidgetProps } from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 

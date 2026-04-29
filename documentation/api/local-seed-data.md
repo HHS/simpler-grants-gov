@@ -1,5 +1,5 @@
 # Overview
-We have a [local seed script](/api/tests/lib/seed_local_db.py) which loads data into our database for local development.
+We have a [local seed script](../../api/tests/lib/seed_local_db.py) which loads data into our database for local development.
 
 If you want to run the script and load all possible data, simply running `make db-seed-local`
 will load all data into the database.
@@ -19,7 +19,7 @@ but remember if you want them viewable in search to run `make populate-search-op
 afterward.
 
 # Agencies
-We setup a subset of real agencies locally which are defined in [seed_agencies.py](/api/tests/lib/seed_agencies.py).
+We setup a subset of real agencies locally which are defined in [seed_agencies.py](../../api/tests/lib/seed_agencies.py).
 
 These agencies have top-level and child agencies.
 

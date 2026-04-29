@@ -329,3 +329,41 @@ def test_get_opportunity_list_pagination(client, db_session, grantor_auth_data):
 
     # Verify first and second pages have different opportunities
     assert not first_page_ids.intersection(second_page_ids)
+
+
+def test_get_opportunity_list_with_null_agency_id(client, db_session, grantor_auth_data):
+    """Test that opportunities with null agency_id but matching agency_code are included in results"""
+    user, agency, token, _ = grantor_auth_data
+
+    # Create regular opportunities with agency_id set
+    regular_opportunities = OpportunityFactory.create_batch(
+        size=2,
+        agency_id=agency.agency_id,
+        agency_code=agency.agency_code,
+    )
+
+    # Create opportunities with null agency_id but matching agency_code
+    null_agency_id_opportunities = OpportunityFactory.create_batch(
+        size=2,
+        agency_id=None,
+        agency_code=agency.agency_code,
+    )
+
+    request_json = build_opportunity_list_request_body()
+    response = client.post(
+        f"/v1/grantors/agencies/{agency.agency_id}/opportunities",
+        headers={"X-SGG-Token": token},
+        json=request_json,
+    )
+
+    # Verify response
+    assert response.status_code == 200
+    response_json = response.get_json()
+    assert response_json["message"] == "Success"
+
+    # Verify that all opportunities are included
+    returned_ids = {opp["opportunity_id"] for opp in response_json["data"]}
+    assert len(returned_ids) == 4
+    regular_ids = {str(opp.opportunity_id) for opp in regular_opportunities}
+    null_agency_ids = {str(opp.opportunity_id) for opp in null_agency_id_opportunities}
+    assert returned_ids == regular_ids.union(null_agency_ids)

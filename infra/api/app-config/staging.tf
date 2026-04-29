@@ -18,6 +18,7 @@ module "staging_config" {
   enable_notifications              = local.enable_notifications
   service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwzMDI2MDE0OTk3ODY3NDMwMjA3"
   service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXwtMzgzNjIwODA5MTQ5MzcxNTc5OA"
+  api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058OTc2Mzk2OTQ1"
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-staging/services/api-staging/health?region=us-east-1
@@ -49,9 +50,11 @@ module "staging_config" {
   service_override_extra_environment_variables = {
     ENABLE_WORKFLOW_ENDPOINTS             = 1
     ENABLE_AWARD_RECOMMENDATION_ENDPOINTS = 1
+    ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS  = 1
 
     # Email notification
-    RESET_EMAILS_WITHOUT_SENDING = "false"
+    RESET_EMAILS_WITHOUT_SENDING               = "false"
+    ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
 
     # PDF Generation - Staging overrides
     FRONTEND_URL             = "https://staging.simpler.grants.gov"

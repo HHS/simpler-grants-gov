@@ -3,6 +3,11 @@
 import { useApplicationAttachments } from "src/hooks/ApplicationAttachments";
 import { useAttachmentDelete } from "src/hooks/useAttachmentDelete";
 import { useAttachmentUpload } from "src/hooks/useAttachmentUpload";
+import {
+  SchemaWithLabelOption,
+  UploadedFile,
+  UswdsWidgetProps,
+} from "src/types/applyForm/types";
 
 import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -15,11 +20,6 @@ import {
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import {
-  SchemaWithLabelOption,
-  UploadedFile,
-  UswdsWidgetProps,
-} from "src/components/applyForm/types";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 import { MultipleAttachmentUploadList } from "./MultiAttachmentUploadList";
@@ -108,6 +108,8 @@ const MultipleAttachmentUploadWidget = ({
         };
       });
 
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUploadedFiles(hydrated);
       uploadedFilesRef.current = hydrated;
       hasHydratedRef.current = true;
@@ -117,6 +119,8 @@ const MultipleAttachmentUploadWidget = ({
   useEffect(() => {
     if (deleteState?.success && fileToDeleteIndex !== null) {
       const updated = uploadedFiles.filter((_, i) => i !== fileToDeleteIndex);
+      // TODO #9633
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUploadedFiles(updated);
       uploadedFilesRef.current = updated;
       onChange?.(updated.map((f) => f.id));

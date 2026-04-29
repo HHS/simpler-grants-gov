@@ -54,7 +54,6 @@ export async function handleFormAction(
     applicationFormData,
     applicationId,
     formId,
-    session.token,
   );
   if (saveSuccess) {
     return {
@@ -79,14 +78,12 @@ const handleSave = async (
   applicationFormData: ApplicationResponseDetail,
   applicationId: string,
   formId: string,
-  sessionToken: string,
 ) => {
   try {
     const resp = await handleUpdateApplicationForm(
       applicationFormData,
       applicationId,
       formId,
-      sessionToken,
     );
     if (resp.status_code === 200) {
       return true;

@@ -11,6 +11,8 @@ import { fakeSearchParamDict } from "src/utils/testing/fixtures";
 
 import { NextRequest } from "next/server";
 
+// note that this testing implementation is dependent on the order of arguments
+// if argument order or arity changes this will break
 const mockAPIFetchImplementation =
   (paramIndexToWatch: number) =>
   (...params: unknown[]): unknown => {
@@ -25,9 +27,9 @@ const mockAPIFetchImplementation =
 
 const getSessionMock = jest.fn();
 
-const mockHandleSavedSearch = jest.fn(mockAPIFetchImplementation(3));
-const mockHandleDeleteSavedSearch = jest.fn(mockAPIFetchImplementation(2));
-const mockHandleUpdateSavedSearch = jest.fn(mockAPIFetchImplementation(3));
+const mockHandleSavedSearch = jest.fn(mockAPIFetchImplementation(2));
+const mockHandleDeleteSavedSearch = jest.fn(mockAPIFetchImplementation(1));
+const mockHandleUpdateSavedSearch = jest.fn(mockAPIFetchImplementation(2));
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),

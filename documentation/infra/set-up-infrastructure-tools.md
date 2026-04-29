@@ -36,7 +36,7 @@ The [Go programming language](https://go.dev/dl/) is required to run [Terratest]
 
 ### Install GitHub CLI
 
-The [GitHub CLI](https://cli.github.com/) is useful for automating certain operations for GitHub such as with GitHub actions. This is needed to run [check-github-actions-auth.sh](/bin/check-github-actions-auth.sh)
+The [GitHub CLI](https://cli.github.com/) is useful for automating certain operations for GitHub such as with GitHub actions. This is needed to run [check-github-actions-auth.sh](../../bin/check-github-actions-auth)
 
 ```bash
 brew install gh

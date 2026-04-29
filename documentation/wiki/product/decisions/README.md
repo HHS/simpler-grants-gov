@@ -48,7 +48,7 @@ When an architectural decision needs to be recorded, please use the following st
 
 * Use the `{YYYY-MM-DD}-{description}.md` naming convention and copy the [template](template.md) into the [adr](adr/) directory (name the file with the date it was created, which may differ from the date the decision was made, PR was merged, or file was last modified)
 * The ADR should use the status "Active"
-* If this decision deprecates an ADR, update its status to indicate the reason (e.g. `"Superseded By [xxx](yyyymmdd-xxx.md)"`), and move it to the [deprecated](../../decisions/deprecated/) directory
+* If this decision deprecates an ADR, update its status to indicate the reason (e.g. `"Superseded By [xxx](yyyymmdd-xxx.md)"`), and move it to the [deprecated](./deprecated/) directory
 
 4. Invite the approvers to review the PR and provide feedback or approve the decision
 5. Once the approvers have signed off on the decision, merge the PR into the `main` branch
@@ -56,6 +56,6 @@ When an architectural decision needs to be recorded, please use the following st
 
 ## Acknowledgements and Further Reading
 
-* [ADR GitHub Organization](adr/)
-* [Joel Parker Henderson's ADR repo](../../decisions/joel/)
-* [GitHub Blog - Why Write ADRs](../../decisions/github/)
+* [ADR GitHub Organization](https://adr.github.io/)
+* [Joel Parker Henderson's ADR repo](https://github.com/joelparkerhenderson/architecture-decision-record)
+* [GitHub Blog - Why Write ADRs](https://github.blog/engineering/architecture-optimization/why-write-adrs/)

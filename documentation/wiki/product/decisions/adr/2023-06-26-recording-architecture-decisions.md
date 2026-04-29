@@ -29,7 +29,7 @@ _What is the best way to document key architectural decisions made within the pr
 
 ## Decision Outcome
 
-Decisions will be documented using Architecture Decision Records (ADRs) as described by [Joel Parker Henderson](../../../decisions/adr/joel/) and the [ADR GitHub organization](https://adr.github.io/). The template for this project's ADRs will be adapted from the [MADR template](../../../decisions/adr/adrs/).
+Decisions will be documented using Architecture Decision Records (ADRs) as described by [Joel Parker Henderson](https://github.com/joelparkerhenderson/architecture-decision-record) and the [ADR GitHub organization](https://adr.github.io/). The template for this project's ADRs will be adapted from the [MADR template](../template.md).
 
 **NOTE:** We may want to revisit this decision to reconsider storing them in the Project Wiki once that wiki is established. Ideally ADRs could be drafted/edited and visible in the wiki but also synced with the repo -- some wiki solutions provide this option.
 
@@ -72,6 +72,6 @@ Documenting decisions in the Wiki tab on the project repository in GitHub.
 
 ## Links
 
-* [ADR GitHub Organization](../../../decisions/adr/adr/)
-* [Joel Parker Henderson's ADR repo](../../../decisions/adr/joel/)
-* [GitHub Blog - Why Write ADRs](../../../decisions/adr/github/)
+* [ADR GitHub Organization](https://adr.github.io/)
+* [Joel Parker Henderson's ADR repo](https://github.com/joelparkerhenderson/architecture-decision-record)
+* [GitHub Blog - Why Write ADRs](https://github.blog/2020-08-13-why-write-adrs/)

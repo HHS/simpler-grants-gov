@@ -3,6 +3,8 @@
 #---------------
 
 # ALB for an app running in ECS
+# TODO(https://github.com/navapbc/template-infra/issues/165) Protect ALB with WAF
+# trivy:ignore:AVD-AWS-0053
 resource "aws_lb" "alb" {
   # checkov:skip=CKV2_AWS_76:No Java in our stack, with the intro of the mTLS and the SOAP it supports we likely won't put this behind a WAF ever
 
@@ -43,8 +45,9 @@ resource "aws_lb" "alb" {
 # NOTE: for the demo we expose private http endpoint
 # due to the complexity of acquiring a valid TLS/SSL cert.
 # In a production system we would provision an https listener
+# TODO(https://github.com/navapbc/template-infra/issues/163) Use HTTPS protocol
+# trivy:ignore:AVD-AWS-0054
 resource "aws_lb_listener" "alb_listener_http" {
-  # TODO(https://github.com/navapbc/template-infra/issues/163) Use HTTPS protocol
   # checkov:skip=CKV_AWS_2:Implement HTTPS in issue #163
   # checkov:skip=CKV_AWS_103:Require TLS 1.2 as part of implementing HTTPS support
 
@@ -109,7 +112,7 @@ resource "aws_lb_listener_rule" "app_http_forward" {
 }
 
 resource "aws_lb_listener" "alb_listener_https" {
-  count = var.enable_load_balancer ? var.enable_mtls_load_balancer ? 2 : 1 : 0
+  count = var.enable_load_balancer && var.certificate_arn != null ? var.enable_mtls_load_balancer ? 2 : 1 : 0
 
   load_balancer_arn = aws_lb.alb[count.index].arn
   port              = 443
@@ -144,7 +147,7 @@ resource "aws_lb_listener_certificate" "alb_listener_https_optional_extra_certs"
 resource "aws_lb_listener_rule" "app_https_forward" {
   # we need an identical https forward, with mtls enabled
   # so we piggy back off existing and just spin up two when the api sets this true
-  count = var.enable_load_balancer ? var.enable_mtls_load_balancer ? 2 : 1 : 0
+  count = var.enable_load_balancer && var.certificate_arn != null ? var.enable_mtls_load_balancer ? 2 : 1 : 0
 
   listener_arn = aws_lb_listener.alb_listener_https[count.index].arn
   priority     = 91

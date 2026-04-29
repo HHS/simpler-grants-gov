@@ -27,7 +27,10 @@ from tests.src.db.models.factories import (
     WorkflowEventHistoryFactory,
     WorkflowFactory,
 )
-from tests.workflow.state_machine.test_state_machines import BasicState
+from tests.src.workflow.state_machine.test_state_machines import (
+    BasicState,
+    LimitedApprovalResponseState,
+)
 
 ####################################
 # Fixtures
@@ -618,6 +621,14 @@ class TestWorkflowGet:
         assert "workflow_approval_config" in data
         assert isinstance(data["workflow_approval_config"], dict)
 
+        # Verify valid_events for MIDDLE state
+        assert "valid_events" in data
+        assert set(data["valid_events"]) == {
+            "middle_to_end",
+            "middle_to_program_officer_approval",
+            "middle_to_budget_officer_approval",
+        }
+
     def test_get_application_workflow_200(self, client, db_session, enable_factory_create, agency):
         """Test successfully fetching an application workflow."""
         # Create a user with VIEW_APPLICATION privilege
@@ -824,6 +835,56 @@ class TestWorkflowGet:
         # Config should still be present
         assert "workflow_approval_config" in data
 
+    def test_get_inactive_workflow_returns_empty_valid_events_200(
+        self, client, db_session, enable_factory_create, agency, opportunity
+    ):
+        """Test that an inactive workflow returns empty valid_events."""
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_OPPORTUNITY]
+        )
+
+        workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+            current_workflow_state=BasicState.END,
+            is_active=False,
+            opportunity=opportunity,
+        )
+
+        response = client.get(
+            f"/v1/workflows/{workflow.workflow_id}", headers={"X-SGG-Token": token}
+        )
+
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert data["is_active"] is False
+        assert data["valid_events"] == []
+
+    def test_get_workflow_valid_events_for_approval_state_200(
+        self, client, db_session, enable_factory_create, agency, opportunity
+    ):
+        """Test that valid_events returns correct events for an approval state."""
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_OPPORTUNITY]
+        )
+
+        workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+            current_workflow_state=BasicState.PENDING_PROGRAM_OFFICER_APPROVAL,
+            is_active=True,
+            opportunity=opportunity,
+        )
+
+        response = client.get(
+            f"/v1/workflows/{workflow.workflow_id}", headers={"X-SGG-Token": token}
+        )
+
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert set(data["valid_events"]) == {
+            "receive_program_officer_approval",
+            "check_program_officer_approval",
+        }
+
     def test_get_workflow_no_token_401(self, client):
         """Test that requests without auth token are rejected."""
         response = client.get(f"/v1/workflows/{uuid.uuid4()}")
@@ -923,3 +984,206 @@ class TestWorkflowGet:
 
         assert response.status_code == 404
         assert f"Could not find Workflow with ID {non_existent_id}" in response.json["message"]
+
+    def test_get_opportunity_workflow_allowed_approval_types_200(
+        self, client, db_session, enable_factory_create, agency, opportunity
+    ):
+        """Test successfully fetching an opportunity workflow with audits and approvals."""
+        # Create a token with VIEW_OPPORTUNITY privilege in the agency
+        _, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_OPPORTUNITY]
+        )
+
+        # Create a test workflow with limited approval types
+        workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW,
+            current_workflow_state=LimitedApprovalResponseState.MIDDLE,
+            is_active=True,
+            opportunity=opportunity,
+        )
+
+        response = client.get(
+            f"/v1/workflows/{workflow.workflow_id}", headers={"X-SGG-Token": token}
+        )
+
+        assert response.status_code == 200
+        data = response.json["data"]
+
+        allowed_approval_types_program_officer = data["workflow_approval_config"][
+            "receive_program_officer_approval"
+        ]["allowed_approval_response_types"]
+        allowed_approval_types_budget_officer = data["workflow_approval_config"][
+            "receive_budget_officer_approval"
+        ]["allowed_approval_response_types"]
+
+        assert len(allowed_approval_types_program_officer) == 2
+        assert ApprovalResponseType.APPROVED in allowed_approval_types_program_officer
+        assert ApprovalResponseType.REQUIRES_MODIFICATION in allowed_approval_types_program_officer
+
+        assert len(allowed_approval_types_budget_officer) == 1
+        assert ApprovalResponseType.APPROVED in allowed_approval_types_budget_officer
+
+
+class TestWorkflowGetByEventId:
+    """Tests for GET /v1/workflows/events/:event_id endpoint."""
+
+    def test_get_workflow_by_event_id_200(
+        self, client, db_session, enable_factory_create, agency, opportunity
+    ):
+        """Test successfully fetching a workflow by event ID."""
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_OPPORTUNITY]
+        )
+
+        workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+            current_workflow_state=BasicState.MIDDLE,
+            is_active=True,
+            opportunity=opportunity,
+        )
+
+        event = WorkflowEventHistoryFactory.create(workflow=workflow)
+
+        audit = WorkflowAuditFactory.create(
+            workflow=workflow,
+            acting_user=user,
+            transition_event="start_workflow",
+            source_state=BasicState.START,
+            target_state=BasicState.MIDDLE,
+            event_id=event.event_id,
+        )
+
+        response = client.get(
+            f"/v1/workflows/events/{event.event_id}", headers={"X-SGG-Token": token}
+        )
+
+        assert response.status_code == 200
+        data = response.json["data"]
+
+        # Verify workflow fields match what GET /v1/workflows/:workflow_id returns
+        assert data["workflow_id"] == str(workflow.workflow_id)
+        assert data["workflow_type"] == WorkflowType.BASIC_TEST_WORKFLOW
+        assert data["current_workflow_state"] == BasicState.MIDDLE
+        assert data["is_active"] is True
+        assert data["opportunity_id"] == str(opportunity.opportunity_id)
+
+        # Verify audit events are included
+        assert len(data["workflow_audit_events"]) == 1
+        assert data["workflow_audit_events"][0]["workflow_audit_id"] == str(audit.workflow_audit_id)
+
+        # Verify approval config exists
+        assert "workflow_approval_config" in data
+        assert isinstance(data["workflow_approval_config"], dict)
+
+        # Verify valid_events for MIDDLE state
+        assert "valid_events" in data
+        assert set(data["valid_events"]) == {
+            "middle_to_end",
+            "middle_to_program_officer_approval",
+            "middle_to_budget_officer_approval",
+        }
+
+    def test_get_application_workflow_by_event_id_200(
+        self, client, db_session, enable_factory_create, agency
+    ):
+        """Test successfully fetching an application workflow by event ID."""
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_APPLICATION]
+        )
+
+        application = ApplicationFactory.create()
+        application.competition.opportunity.agency_code = agency.agency_code
+        db_session.flush()
+
+        workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.BASIC_TEST_WORKFLOW,
+            current_workflow_state=BasicState.START,
+            is_active=True,
+            application=application,
+            opportunity=None,
+        )
+
+        event = WorkflowEventHistoryFactory.create(workflow=workflow)
+
+        response = client.get(
+            f"/v1/workflows/events/{event.event_id}", headers={"X-SGG-Token": token}
+        )
+
+        assert response.status_code == 200
+        data = response.json["data"]
+        assert data["application_id"] == str(application.application_id)
+        assert data["opportunity_id"] is None
+
+    def test_get_workflow_by_event_id_no_token_401(self, client):
+        """Test that requests without auth token are rejected."""
+        response = client.get(f"/v1/workflows/events/{uuid.uuid4()}")
+
+        assert response.status_code == 401
+        assert response.json["message"] == "Unauthorized"
+
+    def test_get_workflow_by_event_id_invalid_token_401(self, client):
+        """Test that requests with invalid JWT are rejected."""
+        response = client.get(
+            f"/v1/workflows/events/{uuid.uuid4()}", headers={"X-SGG-Token": "invalid-token"}
+        )
+
+        assert response.status_code == 401
+        assert response.json["message"] == "Unable to process token"
+
+    def test_get_workflow_by_event_id_wrong_agency_403(
+        self, client, db_session, enable_factory_create, opportunity
+    ):
+        """Test that users from different agency cannot access workflow."""
+        other_agency = AgencyFactory.create()
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=other_agency, privileges=[Privilege.VIEW_OPPORTUNITY]
+        )
+
+        workflow = WorkflowFactory.create(
+            workflow_type=WorkflowType.BASIC_TEST_WORKFLOW, opportunity=opportunity
+        )
+        event = WorkflowEventHistoryFactory.create(workflow=workflow)
+
+        response = client.get(
+            f"/v1/workflows/events/{event.event_id}", headers={"X-SGG-Token": token}
+        )
+
+        assert response.status_code == 403
+        assert response.json["message"] == "Forbidden"
+
+    def test_get_workflow_by_event_id_not_found_404(
+        self, client, db_session, enable_factory_create, agency
+    ):
+        """Test that non-existent event ID returns 404."""
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_OPPORTUNITY]
+        )
+
+        non_existent_id = uuid.uuid4()
+        response = client.get(
+            f"/v1/workflows/events/{non_existent_id}", headers={"X-SGG-Token": token}
+        )
+
+        assert response.status_code == 404
+        assert f"Could not find Event with ID {non_existent_id}" in response.json["message"]
+
+    def test_get_workflow_by_event_id_no_workflow_404(
+        self, client, db_session, enable_factory_create, agency
+    ):
+        """Test that event with no associated workflow returns 404."""
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.VIEW_OPPORTUNITY]
+        )
+
+        # Create event with no workflow (workflow_id=None)
+        event = WorkflowEventHistoryFactory.create(workflow=None)
+
+        response = client.get(
+            f"/v1/workflows/events/{event.event_id}", headers={"X-SGG-Token": token}
+        )
+
+        assert response.status_code == 404
+        assert (
+            f"Could not find Workflow for Event with ID {event.event_id}"
+            in response.json["message"]
+        )

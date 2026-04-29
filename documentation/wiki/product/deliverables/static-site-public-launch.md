@@ -6,7 +6,7 @@ description: Deploy a static site with information about the Simpler.Grants.gov 
 
 ## Summary details
 
-<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Done</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/692">Issue 692</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="static-site-public-launch.md#overview">Overview</a></p><ul><li><a href="static-site-public-launch.md#business-value">Business value</a></li><li><a href="static-site-public-launch.md#user-stories">User stories</a></li></ul></li><li><p><a href="static-site-public-launch.md#technical-description">Technical description</a></p><ul><li><a href="static-site-public-launch.md#definition-of-done">Definition of done</a></li><li><a href="static-site-public-launch.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="static-site-public-launch.md#assumptions-and-dependencies">Dependencies and assumptions</a></li><li><p><a href="static-site-public-launch.md#logs">Logs</a></p><ul><li><a href="static-site-public-launch.md#change-log">Change log</a></li><li><a href="static-site-public-launch.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
+<table><thead><tr><th width="253">Field</th><th>Value</th></tr></thead><tbody><tr><td><strong>Deliverable status</strong></td><td>Done</td></tr><tr><td><strong>Link to GitHub issue</strong></td><td><a href="https://github.com/HHS/simpler-grants-gov/issues/692">Issue 692</a></td></tr><tr><td><strong>Key sections</strong></td><td><ul><li><p><a href="static-site-public-launch.md#overview">Overview</a></p><ul><li><a href="static-site-public-launch.md#business-value">Business value</a></li><li><a href="static-site-public-launch.md#user-stories">User stories</a></li></ul></li><li><p><a href="static-site-public-launch.md#technical-description">Technical description</a></p><ul><li><a href="static-site-public-launch.md#definition-of-done">Definition of done</a></li><li><a href="static-site-public-launch.md#proposed-metrics">Proposed metrics</a></li></ul></li><li><a href="static-site-public-launch.md#assumptions--dependencies">Dependencies and assumptions</a></li><li><p><a href="static-site-public-launch.md#logs">Logs</a></p><ul><li><a href="static-site-public-launch.md#change-log">Change log</a></li><li><a href="static-site-public-launch.md#implementation-log">Implementation log</a></li></ul></li></ul></td></tr></tbody></table>
 
 ## Overview
 
@@ -155,7 +155,6 @@ Following sections describe the conditions that must be met to consider this del
 * Total number of visits per page
 * Total number of visits to outbound links to external resources
 * Site availability
-* [Lighthouse score](../../../deliverables/individual_deliverables/lighthouse) for the site
 * Deployment build time
 * Deployment/hosting costs
 * Number of visitors who subscribe to the mailing list

@@ -11,7 +11,12 @@ from src.adapters import db
 from src.api.opportunities_v1.opportunity_schemas import OpportunityVersionV1Schema
 from src.constants.lookup_constants import FundingCategory, OpportunityCategory, OpportunityStatus
 from src.db.models.opportunity_models import OpportunityVersion
-from src.db.models.user_models import LinkExternalUser, SuppressedEmail, UserSavedOpportunity
+from src.db.models.user_models import (
+    LinkExternalUser,
+    SuppressedEmail,
+    UserSavedOpportunity,
+    UserSavedOpportunityNotification,
+)
 from src.task.notifications.base_notification import BaseNotificationTask
 from src.task.notifications.config import EmailNotificationConfig
 from src.task.notifications.constants import (
@@ -138,12 +143,46 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
         self.increment(self.Metrics.VERSIONLESS_OPPORTUNITY_COUNT, len(versionless_opportunities))
 
-        # Grab last notified versions.
-        prior_notified_versions = self._get_last_notified_versions(user_opportunity_pairs)
+        # Reset the tracking dict for users whose email is disabled (used in post_notifications_process)
+        self._email_disabled_opportunities: dict[UUID, list[UUID]] = {}
+
+        if not changed_saved_opportunities:
+            return []
+
+        # Determine which users have explicitly disabled email notifications for their own saved opportunities.
+        # Default is email_enabled=True when no preference row exists.
+        all_user_ids = [cso.user_id for cso in changed_saved_opportunities]
+        email_disabled_user_ids = self._get_users_with_email_disabled(all_user_ids)
+
+        # Track disabled users' pending opportunity IDs so post_notifications_process can
+        # advance their last_notified_at, preventing a backlog if they re-enable later.
+        for cso in changed_saved_opportunities:
+            if cso.user_id in email_disabled_user_ids:
+                self._email_disabled_opportunities[cso.user_id] = [
+                    opp.opportunity_id for opp in cso.opportunities
+                ]
+                logger.info(
+                    "Skipping email notification for user with email disabled",
+                    extra={"user_id": cso.user_id},
+                )
+                self.increment(self.Metrics.NOTIFICATIONS_SKIPPED_EMAIL_DISABLED)
+
+        # Only look up prior versions for users who will actually receive email
+        enabled_user_opportunity_pairs = [
+            pair for pair in user_opportunity_pairs if pair[0] not in email_disabled_user_ids
+        ]
+
+        # Get last notified versions.
+        prior_notified_versions = self._get_last_notified_versions(enabled_user_opportunity_pairs)
 
         users_email_notifications: list[UserEmailNotification] = []
         for user_changed_opp in changed_saved_opportunities:
             user_id = user_changed_opp.user_id
+
+            # Skip users who have disabled email notifications
+            if user_id in email_disabled_user_ids:
+                continue
+
             user_email = user_changed_opp.email
             if not user_email:
                 logger.warning("No email found for user", extra={"user_id": user_id})
@@ -203,6 +242,18 @@ class OpportunityNotificationTask(BaseNotificationTask):
         )
 
         return users_email_notifications
+
+    def _get_users_with_email_disabled(self, user_ids: list[UUID]) -> set[UUID]:
+        """Return user IDs that have explicitly disabled email notifications for their own saved opportunities."""
+
+        if not user_ids:
+            return set()
+        stmt = select(UserSavedOpportunityNotification.user_id).where(
+            UserSavedOpportunityNotification.user_id.in_(user_ids),
+            UserSavedOpportunityNotification.organization_id.is_(None),
+            UserSavedOpportunityNotification.email_enabled.is_(False),
+        )
+        return set(self.db_session.execute(stmt).scalars().all())
 
     def _get_latest_opportunity_versions(self) -> Sequence:
         """
@@ -647,3 +698,19 @@ class OpportunityNotificationTask(BaseNotificationTask):
                 self.increment(
                     self.Metrics.OPPORTUNITIES_TRACKED, len(user_notification.notified_object_ids)
                 )
+
+        # Advance last_notified_at for users with email disabled so they don't receive a
+        # backlog of notifications if they re-enable in the future.
+        for user_id, opportunity_ids in getattr(self, "_email_disabled_opportunities", {}).items():
+            self.db_session.execute(
+                update(UserSavedOpportunity)
+                .where(
+                    UserSavedOpportunity.user_id == user_id,
+                    UserSavedOpportunity.opportunity_id.in_(opportunity_ids),
+                )
+                .values(last_notified_at=datetime_util.utcnow())
+            )
+            logger.info(
+                "Marked opportunities as processed for user with email notifications disabled",
+                extra={"user_id": user_id, "opportunity_ids": opportunity_ids},
+            )

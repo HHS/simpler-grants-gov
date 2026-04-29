@@ -1,4 +1,4 @@
-import { difference, uniq } from "lodash";
+import { difference } from "lodash";
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 import { ValidSearchQueryParam } from "src/types/search/searchQueryTypes";
@@ -71,6 +71,8 @@ export const AllOptionCheckbox = ({
   const label = `${t("all")} ${title}`;
 
   useEffect(() => {
+    // TODO #9633
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setChecked(
       topLevelSelected ||
         isSubset<string>(childOptionValues, currentSelectionValues),
@@ -90,9 +92,9 @@ export const AllOptionCheckbox = ({
   };
 
   const checkOptions = () => {
-    const newSelectedOptions = uniq(
-      childOptionValues.concat(currentSelectionValues),
-    );
+    const newSelectedOptions = [
+      ...new Set(childOptionValues.concat(currentSelectionValues)),
+    ];
     setQueryParam(queryParamKey, newSelectedOptions.join(","));
   };
 

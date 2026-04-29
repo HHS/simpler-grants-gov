@@ -35,6 +35,11 @@ output "opensearch_write_role_arn" {
   value       = length(aws_iam_role.opensearch_write) > 0 ? aws_iam_role.opensearch_write[0].arn : null
 }
 
+output "workflow_service_role_arn" {
+  description = "ARN for role to use for the workflow service"
+  value       = length(aws_iam_role.workflow_service) > 0 ? aws_iam_role.workflow_service[0].arn : null
+}
+
 output "cluster_arn" {
   value = aws_ecs_cluster.cluster.arn
 }

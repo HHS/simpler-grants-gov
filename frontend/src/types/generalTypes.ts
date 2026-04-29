@@ -281,3 +281,5 @@ export interface ParsedError {
   type?: string;
   details?: FrontendErrorDetails;
 }
+
+export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";

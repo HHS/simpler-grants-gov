@@ -108,6 +108,7 @@ FUNDING_CATEGORY_CONFIG: LookupConfig[FundingCategory] = LookupConfig(
         LookupStr(FundingCategory.AFFORDABLE_CARE_ACT, 25),
         LookupStr(FundingCategory.OTHER, 26),
         LookupStr(FundingCategory.ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS, 27),
+        LookupStr(FundingCategory.RECREATION_AND_TOURISM, 28),
     ]
 )
 
@@ -295,6 +296,7 @@ AWARD_RECOMMENDATION_AUDIT_EVENT_CONFIG: LookupConfig[AwardRecommendationAuditEv
         LookupStr(AwardRecommendationAuditEvent.REVIEW_CREATED, 13),
         LookupStr(AwardRecommendationAuditEvent.REVIEW_UPDATED, 14),
         LookupStr(AwardRecommendationAuditEvent.REVIEW_DELETED, 15),
+        LookupStr(AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_SUBMISSION_UPDATED, 16),
     ]
 )
 
@@ -331,6 +333,7 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.CREATE_AWARD_RECOMMENDATION, 29),
         LookupStr(Privilege.UPDATE_AWARD_RECOMMENDATION, 30),
         LookupStr(Privilege.SUBMIT_AWARD_RECOMMENDATION, 31),
+        LookupStr(Privilege.INTERNAL_S3_SCAN, 32),
     ]
 )
 
@@ -376,6 +379,7 @@ WORKFLOW_TYPE_CONFIG: LookupConfig[WorkflowType] = LookupConfig(
         LookupStr(WorkflowType.INITIAL_PROTOTYPE, 3),
         LookupStr(WorkflowType.BASIC_TEST_WORKFLOW, 4),
         LookupStr(WorkflowType.NO_CONCURRENT_TEST_WORKFLOW, 5),
+        LookupStr(WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW, 6),
     ]
 )
 

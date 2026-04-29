@@ -18,7 +18,6 @@ export const startApplicationHandler = async (request: Request) => {
     const response = await handleStartApplication(
       applicationName,
       competitionId,
-      session.token,
       organization,
     );
 

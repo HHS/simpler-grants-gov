@@ -48,8 +48,6 @@ For this project specifically:
 - Under `tests/`, the organization mirrors the source code structure
   - The tests for [`analytics/src/analytics/datasets/`](../../analytics/src/analytics/datasets/)
     are found at [`analytics/tests/datasets/`](../../analytics/tests/datasets/)
-  - The tests for [`analytics/src/analytics/metrics/`](../../analytics/src/analytics/metrics/)
-    are found at [`analytics/tests/metrics/`](../../analytics/tests/metrics/)
 - Integration tests have their own dedicated `tests/integrations/` testing sub-directory
 - Create `__init__.py` files for each directory. This helps [avoid name conflicts
   when pytest is resolving tests](https://docs.pytest.org/en/stable/goodpractices.html#tests-outside-application-code).

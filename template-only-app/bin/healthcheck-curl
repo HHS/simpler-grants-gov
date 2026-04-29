@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# https://curl.se/docs/manpage.html
+
+curl --fail --silent http://localhost:"${PORT}"/health > /dev/null

@@ -54,7 +54,6 @@ export const userProfileAction = async (
   let userDetailsUpdateResponse;
   try {
     userDetailsUpdateResponse = await updateUserDetails(
-      session.token,
       session.user_id,
       rawFormData,
     );
