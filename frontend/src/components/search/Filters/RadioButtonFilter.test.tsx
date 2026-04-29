@@ -172,13 +172,13 @@ describe("RadioButtonFilter", () => {
 
     let anyOption = screen.getByRole("radio", {
       name: "Any test accordion",
-    }) as HTMLInputElement;
+    });
 
     expect(anyOption).toBeChecked();
 
     let cooperativeAgreementOption = screen.getByRole("radio", {
       name: "Cooperative Agreement",
-    }) as HTMLInputElement;
+    });
 
     expect(cooperativeAgreementOption).not.toBeChecked();
 
