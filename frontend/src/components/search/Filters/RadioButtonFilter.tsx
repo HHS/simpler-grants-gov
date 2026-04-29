@@ -22,20 +22,21 @@ export function RadioButtonFilter({
   const { setQueryParam } = useSearchParamUpdater();
 
   const toggleRadioSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
-		  const value = event.target.value;
-		  if(!query.has(value)){
-				  setQueryParam(queryParamKey, event.target.value);
-		  }
+    const value = event.target.value;
+    if (!query.has(value)) {
+      setQueryParam(queryParamKey, event.target.value);
+    }
   };
 
-  const handleRadioClickedTwice = (event: React.MouseEvent<HTMLInputElement>) => {
-		const value = event.currentTarget.value; 
-		if((event.currentTarget as HTMLInputElement).checked && query.has(value)){
-				setQueryParam(queryParamKey, "");
-				event.currentTarget.checked = false;
-		}
-
-  }
+  const handleRadioClickedTwice = (
+    event: React.MouseEvent<HTMLInputElement>,
+  ) => {
+    const value = event.currentTarget.value;
+    if ((event.currentTarget as HTMLInputElement).checked && query.has(value)) {
+      setQueryParam(queryParamKey, "");
+      event.currentTarget.checked = false;
+    }
+  };
 
   const isNoneSelected = useMemo(() => query.size === 0, [query]);
 
@@ -70,7 +71,7 @@ export function RadioButtonFilter({
                 name={option.label}
                 label={option.label}
                 onChange={toggleRadioSelection}
-				onClick={handleRadioClickedTwice}
+                onClick={handleRadioClickedTwice}
                 value={option.value}
                 facetCount={facetCounts && (facetCounts?.[option.value] || 0)}
                 checked={query.has(option.value)}
