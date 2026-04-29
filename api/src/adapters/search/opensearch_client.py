@@ -240,7 +240,6 @@ class SearchClient:
                 **response.score_stats,
             }
         )
-        logger.info(">>>>>>>>>>score stats", response.score_stats)
 
         return response
 
