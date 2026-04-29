@@ -1,0 +1,26 @@
+#!/bin/sh
+# This is a minimal migration script for the infra template's example app.
+# It demonstrates the environment variables that the infrastructure provides
+# that can be used to authenticate with the database using IAM authentication
+#
+# In practice, a real project would use a migration framework like Alembic
+# (for Python projects) or Flyway (for Java projects)
+
+set -euo pipefail
+
+export PGPASSWORD=$(aws rds generate-db-auth-token --hostname=$DB_HOST --port=$DB_PORT --username=$DB_USER)
+echo "Running migrations"
+echo "  DB_HOST=$DB_HOST"
+echo "  DB_PORT=$DB_PORT"
+echo "  DB_USER=$DB_USER"
+echo "  DB_NAME=$DB_NAME"
+echo "  DB_SCHEMA=$DB_SCHEMA"
+psql \
+  --host=$DB_HOST \
+  --port=$DB_PORT \
+  --username=$DB_USER \
+  --dbname=$DB_NAME \
+  --set=SEARCH_PATH=$DB_SCHEMA \
+  --set=ON_ERROR_STOP=1 \
+  --echo-all \
+  --file=migrations.sql
