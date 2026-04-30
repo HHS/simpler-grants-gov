@@ -328,7 +328,7 @@ jobs:
         if: steps.restore-db-docker-image-cached.outputs.cache-hit == 'true'
         run: |
           # docker load < /tmp/postgres-docker-image.tar
-          docker run --rm -v api_grantsdbdata:/data -v /tmp:/backup busybox tar xvf /backup/mysql_data_backup.tar -C /
+          docker run --rm -v api_grantsdbdata:/data -v /tmp:/backup busybox tar xvf /backup/postgres-data-backup.tar.gz -C /
 
       - name: Docker images
         run: |
