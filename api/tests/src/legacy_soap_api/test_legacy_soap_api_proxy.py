@@ -3,9 +3,14 @@ import logging
 from unittest.mock import ANY, patch
 
 import jwt
+import pytest
 from freezegun import freeze_time
 
 import tests.src.db.models.factories as factories
+from src.legacy_soap_api.legacy_soap_api_auth import (
+    SOAPClientCertificate,
+    SOAPClientMissingCertificate,
+)
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
 from src.legacy_soap_api.legacy_soap_api_proxy import get_proxy_response, get_soap_jwt_auth_jwt
 from tests.lib.data_factories import create_soap_request
@@ -40,9 +45,17 @@ def test_get_soap_jwt_auth_jwt(enable_factory_create, caplog):
     caplog.set_level(logging.INFO)
     legacy_certificate = factories.LegacyAgencyCertificateFactory.create()
     config = get_soap_config()
+    soap_client_certificate = SOAPClientCertificate(
+        cert="x",
+        fingerprint="1234",
+        issuer="issuer_string",
+        serial_number=legacy_certificate.serial_number,
+        legacy_certificate=legacy_certificate,
+        cert_id=legacy_certificate.cert_id,
+    )
     s2s_partner_certid_jwt_b64 = get_soap_jwt_auth_jwt(
         config,
-        legacy_certificate,
+        soap_client_certificate,
     )
     decoded_base64 = base64.b64decode(s2s_partner_certid_jwt_b64).decode("utf-8")
     original_claims = jwt.decode(
@@ -56,6 +69,27 @@ def test_get_soap_jwt_auth_jwt(enable_factory_create, caplog):
     }
     assert original_claims == expected
     assert "soap_client_certificate: created SOAP JWT" in caplog.messages
+
+
+@freeze_time("2024-04-03 12:00:00", tz_offset=0)
+def test_get_soap_jwt_auth_jwt_throws_exception_when_no_cert_id(enable_factory_create, caplog):
+    caplog.set_level(logging.INFO)
+    legacy_certificate = factories.LegacyAgencyCertificateFactory.create()
+    config = get_soap_config()
+    soap_client_certificate = SOAPClientCertificate(
+        cert="x",
+        fingerprint="1234",
+        issuer="issuer_string",
+        serial_number=legacy_certificate.serial_number,
+        legacy_certificate=legacy_certificate,
+        cert_id=None,
+    )
+    with pytest.raises(SOAPClientMissingCertificate):
+        get_soap_jwt_auth_jwt(
+            config,
+            soap_client_certificate,
+        )
+    assert "soap_client_certificate: No cert_id" in caplog.messages
 
 
 def test_request_gets_correct_proxy_url_when_no_auth(enable_factory_create):

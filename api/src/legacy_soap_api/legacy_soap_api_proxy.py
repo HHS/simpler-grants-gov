@@ -13,6 +13,7 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SessionResumptionAdapter,
     SOAPAuth,
     SOAPClientCertificate,
+    SOAPClientMissingCertificate,
     generate_soap_jwt,
 )
 from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig, get_soap_config
@@ -121,5 +122,6 @@ def get_soap_jwt_auth_jwt(
         return base64.b64encode(jwt_string.encode("utf-8")).decode("utf-8")
     logger.info(
         "soap_client_certificate: No cert_id",
+        extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITHOUT_CERT},
     )
-    return ""
+    raise SOAPClientMissingCertificate("soap_client_certificate: no cert_id")
