@@ -106,7 +106,7 @@ export const eligibilityTypes = [
   },
 ];
 
-export const OPPORTUNITY_CATEGORY_OPTIONS = [
+export const OPPORTUNITY_CATEGORY_OPTIONS: LabelValueOption[] = [
   { label: "Discretionary", value: "discretionary" },
   { label: "Mandatory", value: "mandatory" },
   { label: "Continuation", value: "continuation" },
