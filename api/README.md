@@ -80,7 +80,7 @@ CLI commands are of the form `<task group> <task name> <any other params>`. So i
 3. Run the job
 
    ```bash
-   bin/run-command api <env> '["uv", "run", "flask", "task", "generate-notifications"]'
+   bin/run-command api <env> '["flask", "task", "generate-notifications"]'
    ```
 
 ## Technical Information

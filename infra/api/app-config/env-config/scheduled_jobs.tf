@@ -9,8 +9,7 @@ locals {
   load-transform-args = {
     # Runs, but with everything disabled.
     dev = [
-      "uv",
-      "run",
+
       "flask",
       "data-migration",
       "load-transform",
@@ -20,8 +19,7 @@ locals {
       "--store-version"
     ],
     staging = [
-      "uv",
-      "run",
+
       "flask",
       "data-migration",
       "load-transform",
@@ -31,8 +29,7 @@ locals {
       "--store-version"
     ],
     training = [
-      "uv",
-      "run",
+
       "flask",
       "data-migration",
       "load-transform",
@@ -42,8 +39,7 @@ locals {
       "--store-version"
     ],
     grantee1 = [
-      "uv",
-      "run",
+
       "flask",
       "data-migration",
       "load-transform",
@@ -53,8 +49,7 @@ locals {
       "--store-version"
     ],
     grantee2 = [
-      "uv",
-      "run",
+
       "flask",
       "data-migration",
       "load-transform",
@@ -64,8 +59,7 @@ locals {
       "--store-version"
     ],
     prod = [
-      "uv",
-      "run",
+
       "flask",
       "data-migration",
       "load-transform",
@@ -98,12 +92,12 @@ locals {
   }
   sam-extract-args = {
     # In dev/staging we don't fetch extracts, but generate our own
-    dev      = ["uv", "run", "flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
-    staging  = ["uv", "run", "flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
-    training = ["uv", "run", "flask", "task", "sam-extracts"]
-    grantee1 = ["uv", "run", "flask", "task", "sam-extracts"]
-    grantee2 = ["uv", "run", "flask", "task", "sam-extracts"]
-    prod     = ["uv", "run", "flask", "task", "sam-extracts"]
+    dev      = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    staging  = ["flask", "task", "sam-extracts", "--no-fetch-extracts", "--setup-lower-env"]
+    training = ["flask", "task", "sam-extracts"]
+    grantee1 = ["flask", "task", "sam-extracts"]
+    grantee2 = ["flask", "task", "sam-extracts"]
+    prod     = ["flask", "task", "sam-extracts"]
   }
   setup-lower-env-agencies-state = {
     dev      = "ENABLED"
