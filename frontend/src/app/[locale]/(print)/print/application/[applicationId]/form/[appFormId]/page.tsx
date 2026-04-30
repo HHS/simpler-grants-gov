@@ -3,7 +3,7 @@ import TopLevelError from "src/app/[locale]/(base)/error/page";
 import getFormData from "src/utils/getFormData";
 
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import PrintForm from "src/components/applyForm/PrintForm";
 import { addPrintWidgetToFields } from "src/components/applyForm/utils";
@@ -20,17 +20,15 @@ export async function generateMetadata({
   const headersList = await headers();
   const internalToken = headersList.get("X-SGG-Internal-Token") ?? undefined;
 
-  if (internalToken) {
-    const { data } = await getFormData({
-      applicationId,
-      appFormId,
-      internalToken,
-    });
+  const { data } = await getFormData({
+    applicationId,
+    appFormId,
+    internalToken,
+  });
 
-    if (data) {
-      const { formName } = data;
-      title = formName;
-    }
+  if (data) {
+    const { formName } = data;
+    title = formName;
   }
 
   const meta: Metadata = {
@@ -53,17 +51,14 @@ interface FormPageProps {
   by Docraptor. Docraptor will not be able to log in as a user to access application information.
   Instead, requests from Docraptor will contain an "internal token" header ("X-SGG-Internal-Token")
   containing an alternate authorization token that can be used to fetch the form data without logging in.
+  Authenticated application owners can also access this page directly without an internal token,
+  using their session JWT for authentication instead.
 */
 
 export default async function FormPage({ params }: FormPageProps) {
   const { applicationId, appFormId, setAttachmentsChanged } = await params;
   const headersList = await headers();
   const internalToken = headersList.get("X-SGG-Internal-Token") ?? undefined;
-
-  if (internalToken === undefined) {
-    console.error("Internal token not supplied");
-    return <TopLevelError />;
-  }
 
   const { data, error } = await getFormData({
     applicationId,
@@ -72,6 +67,7 @@ export default async function FormPage({ params }: FormPageProps) {
   });
 
   if (error || !data) {
+    if (error === "UnauthorizedError") redirect("/unauthenticated");
     if (error === "NotFound") notFound();
     return <TopLevelError />;
   }
