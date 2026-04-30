@@ -9,6 +9,7 @@ import {
   eligbilityValueToGroup,
   ELIGIBILITY_OPTIONS,
   fundingOptions,
+  OPPORTUNITY_CATEGORY_OPTIONS,
 } from "src/constants/opportunity";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
@@ -29,10 +30,7 @@ import {
 
 import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
 import { OpportunityAttachmentUploadInput } from "src/components/opportunity/OpportunityAttachmentUploadInput";
-import {
-  OPPORTUNITY_CATEGORY_OPTIONS,
-  OpportunityEditFormValues,
-} from "./opportunityEditFormConfig";
+import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
 
 function formatNumber(value: string): string {
   const raw = value.replace(/,/g, "");

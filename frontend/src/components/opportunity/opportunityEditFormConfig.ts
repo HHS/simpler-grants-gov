@@ -1,4 +1,3 @@
-import { OPPORTUNITY_CATEGORY_OPTIONS } from "src/constants/opportunity";
 import {
   OpportunityDetail,
   OpportunitySummaryUpdateRequest,
@@ -34,8 +33,6 @@ const emptyString = (value: string | null | undefined) => value ?? "";
 
 const numberToString = (value: number | null | undefined) =>
   value === null || value === undefined ? "" : String(value);
-
-export { OPPORTUNITY_CATEGORY_OPTIONS };
 
 export const buildOpportunityEditInitialValues = (
   opportunity: OpportunityDetail,
