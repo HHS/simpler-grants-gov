@@ -286,6 +286,8 @@ jobs:
           docker image ls
           docker volume ls
 
+          du -d 1 ../api
+
       - name: Restore API Docker image cached
         id: restore-api-docker-image-cached
         uses: actions/cache/restore@v5
@@ -317,7 +319,7 @@ jobs:
           docker tag "$IMAGE_ID" api-grants-api:latest || true
 
       - name: Restore DB Docker image cached
-        id: restore-db-docker-image-cached
+        id: restore-db-data-cached
         uses: actions/cache@v5
         with:
           path: |
@@ -325,7 +327,7 @@ jobs:
           key: postgres-test-data-${{ needs.get-api-commit-hash.outputs.commit_hash }}
 
       - name: Load cached DB Docker image (alias it if needed)
-        if: steps.restore-db-docker-image-cached.outputs.cache-hit == 'true'
+        if: steps.restore-db-data-cached.outputs.cache-hit == 'true'
         run: |
           # docker load < /tmp/postgres-docker-image.tar
           docker run --rm -v api_grantsdbdata:/data -v /tmp:/backup busybox tar xvf /backup/postgres-data-backup.tar.gz -C /
@@ -338,7 +340,7 @@ jobs:
       - name: Init API Server for e2e tests
         # if we don't find an existing PG DB image for this API git sha, initialize our empty DB image
         # if we have an existing image, it's already had this run
-        if: steps.restore-db-docker-image-cached.outputs.cache-hit != 'true'
+        if: steps.restore-db-data-cached.outputs.cache-hit != 'true'
         run: |
           cd ../api
           # Enable core dumps for debugging segfaults
@@ -351,15 +353,17 @@ jobs:
 
           ls -a
 
-      - name: Save DB Docker image to file
+      - name: Save DB data to file
+        if: steps.restore-db-data-cached.outputs.cache-hit != 'true'
         run: |
           # docker save postgres > /tmp/postgres-docker-image.tar
           docker stop grants-db
           docker run --rm -v api_grantsdbdata:/data -v /tmp:/backup busybox tar czf /backup/postgres-data-backup.tar.gz /data
           docker start grants-db
 
-      - name: Save DB Docker image cached
-        id: save-db-docker-image-cached
+      - name: Save DB data cached
+        if: steps.restore-db-data-cached.outputs.cache-hit != 'true'
+        id: save-db-image-cached
         uses: actions/cache@v5
         with:
           path: |
