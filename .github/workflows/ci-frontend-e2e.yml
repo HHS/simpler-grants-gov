@@ -375,9 +375,13 @@ jobs:
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
 
           docker compose up api-grants
+
+          curl --fail http://localhost:9200/_cluster/health
           # Ensure the OpenSearch wait script is executable
           chmod +x ../api/bin/wait-for-opensearch.sh
           ../api/bin/wait-for-opensearch.sh
+
+          curl --fail http://localhost:9200/_cluster/health
 
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
