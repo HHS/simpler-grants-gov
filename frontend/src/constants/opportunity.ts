@@ -1,3 +1,4 @@
+import { LabelValueOption } from "src/types/generalTypes";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 
 export const eligibilityTypes = [
@@ -253,3 +254,5 @@ export const categoryOptions: FilterOption[] = [
   },
   { id: "category-other", label: "Other", value: "other" },
 ];
+
+export const ELIGIBILITY_OPTIONS: LabelValueOption[] = eligibilityTypes;

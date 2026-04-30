@@ -5,8 +5,6 @@ import {
 } from "src/constants/opportunity";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 
-export { categoryOptions, fundingOptions };
-
 // Note that these labels are not translated currently
 // To translate them we would want to list the translation key in the label
 // And have the translation system consume that key wherever the value is needed

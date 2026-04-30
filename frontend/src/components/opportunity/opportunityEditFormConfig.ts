@@ -1,8 +1,4 @@
-import {
-  eligibilityTypes,
-  OPPORTUNITY_CATEGORY_OPTIONS,
-} from "src/constants/opportunity";
-import { LabelValueOption } from "src/types/generalTypes";
+import { OPPORTUNITY_CATEGORY_OPTIONS } from "src/constants/opportunity";
 import {
   OpportunityDetail,
   OpportunitySummaryUpdateRequest,
@@ -38,8 +34,6 @@ const emptyString = (value: string | null | undefined) => value ?? "";
 
 const numberToString = (value: number | null | undefined) =>
   value === null || value === undefined ? "" : String(value);
-
-export const ELIGIBILITY_OPTIONS: LabelValueOption[] = eligibilityTypes;
 
 export { OPPORTUNITY_CATEGORY_OPTIONS };
 

@@ -7,6 +7,7 @@ import {
 import {
   categoryOptions,
   eligbilityValueToGroup,
+  ELIGIBILITY_OPTIONS,
   fundingOptions,
 } from "src/constants/opportunity";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
@@ -29,7 +30,6 @@ import {
 import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
 import { OpportunityAttachmentUploadInput } from "src/components/opportunity/OpportunityAttachmentUploadInput";
 import {
-  ELIGIBILITY_OPTIONS,
   OPPORTUNITY_CATEGORY_OPTIONS,
   OpportunityEditFormValues,
 } from "./opportunityEditFormConfig";
