@@ -250,11 +250,7 @@ jobs:
       - name: Expand node_modules
         if: steps.npm-cache.outputs.cache-hit != 'true'
         run: |
-          ls -la .
-          ls -la ./node_modules
           tar -xzf /tmp/node_modules.tar.gz
-          ls -la .
-          ls -la ./node_modules
 
       - uses: actions/cache@v5
         id: playwright-cache
@@ -318,7 +314,7 @@ jobs:
           IMAGE_ID="$(docker image ls -q simpler-grants-gov-api)"
           docker tag "$IMAGE_ID" api-grants-api:latest || true
 
-      - name: Restore DB Docker image cached
+      - name: Restore DB data cached
         id: restore-db-data-cached
         uses: actions/cache@v5
         with:
@@ -377,6 +373,11 @@ jobs:
           ulimit -c unlimited
           mkdir -p /tmp/cores
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
+
+          docker compose up api-grants
+          # Ensure the OpenSearch wait script is executable
+          chmod +x ../api/bin/wait-for-opensearch.sh
+          ../api/bin/wait-for-opensearch.sh
 
           # Now run the seeding and populate commands
           echo "LOGIN_FINAL_DESTINATION=http://localhost:3000/api/auth/callback" >> override.env
