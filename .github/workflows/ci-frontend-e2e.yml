@@ -325,7 +325,7 @@ jobs:
       - name: Load cached DB Docker image (alias it if needed)
         if: steps.restore-db-docker-image-cached.outputs.cache-hit == 'true'
         run: |
-          docker load < /tmp/db-docker-image.tar
+          docker load < /tmp/postgres-docker-image.tar
 
       - name: Docker images
         run: |
