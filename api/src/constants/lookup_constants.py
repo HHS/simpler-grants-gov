@@ -319,6 +319,8 @@ class Privilege(StrEnum):
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
 
+    INTERNAL_S3_SCAN = "internal_s3_scan"
+
 
 class RoleType(StrEnum):
     ORGANIZATION = "organization"

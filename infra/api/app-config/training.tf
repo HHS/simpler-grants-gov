@@ -54,9 +54,15 @@ module "training_config" {
     RESET_EMAILS_WITHOUT_SENDING               = "false"
     ENABLE_ORG_SAVED_OPPORTUNITY_NOTIFICATIONS = "true"
     ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS       = 1
+
+    # Workflow
+    WORKFLOW_SERVICE_INTERNAL_USER_ID = "00bcaf8e-dd04-4fd1-9fb3-ea872a93178d"
+    ENABLE_WORKFLOW_ENDPOINTS         = 1
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
+
+  enable_workflow_service = true
 }
