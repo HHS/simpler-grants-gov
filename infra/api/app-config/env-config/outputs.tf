@@ -31,6 +31,7 @@ output "service_config" {
     secondary_domain_names          = var.secondary_domain_names
     s3_cdn_domain_name              = var.s3_cdn_domain_name
     mtls_domain_name                = var.mtls_domain_name
+    enable_mtls_acm_ssl             = var.enable_mtls_acm_ssl
     enable_https                    = var.enable_https
     region                          = var.default_region
     cpu                             = var.instance_cpu

@@ -35,6 +35,12 @@ variable "mtls_domain_name" {
   description = "The domain name for the mTLS side-by-side ALB for the API"
   default     = null
 }
+
+variable "enable_mtls_acm_ssl" {
+  type        = bool
+  description = "Whether to look up and attach an ACM certificate to the mTLS load balancer. Set to false when the mTLS ALB should be created without HTTPS (e.g. when no cert has been provisioned yet)."
+  default     = true
+}
 variable "enable_command_execution" {
   type        = bool
   description = "Enables the ability to manually execute commands on running service containers using AWS ECS Exec"

@@ -8,7 +8,8 @@ module "grantee1_config" {
   domain_name                       = "api.grantee1.teams.simpler.grants.gov"
   secondary_domain_names            = ["alb.grantee1.teams.simpler.grants.gov"]
   s3_cdn_domain_name                = "files.grantee1.teams.simpler.grants.gov"
-  mtls_domain_name                  = null
+  mtls_domain_name                  = "soap.grantee1.teams.simpler.grants.gov"
+  enable_mtls_acm_ssl               = false
   enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
@@ -59,4 +60,6 @@ module "grantee1_config" {
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html
   # Defaults to `false`. Uncomment the next line to enable.
   # enable_command_execution = true
+
+  enable_workflow_service = true
 }

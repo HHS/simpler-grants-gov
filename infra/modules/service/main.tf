@@ -126,8 +126,10 @@ resource "aws_ecs_service" "app" {
   }
 
   # add a connection to the mtls target group since these same containers power both
+  # only register when a listener actually exists (mtls_certificate_arn != null), otherwise ECS
+  # rejects the target group as having no associated load balancer
   dynamic "load_balancer" {
-    for_each = var.enable_mtls_load_balancer ? [1] : []
+    for_each = var.enable_mtls_load_balancer && var.mtls_certificate_arn != null ? [1] : []
     content {
       target_group_arn = aws_lb_target_group.mtls_tg[0].arn
       container_name   = var.service_name
