@@ -18,8 +18,8 @@ module "grantee1_config" {
   enable_identity_provider          = local.enable_identity_provider
   enable_notifications              = local.enable_notifications
   service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXwyOTQ0MjI1MTY3MzU4ODU5ODY4"
-  service_newrelic_mtls_entity_guid = null
-  api_host_newrelic_entity_guid     = null
+  service_newrelic_mtls_entity_guid = ""
+  api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058MTAyMjczNjg5MA"
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-staging/services/api-staging/health?region=us-east-1
