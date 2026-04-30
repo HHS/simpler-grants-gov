@@ -3,7 +3,7 @@
 import { subscribeEmail } from "src/app/[locale]/(base)/newsletter/actions";
 
 import { useTranslations } from "next-intl";
-import React, { useActionState } from "react";
+import React, { useActionState, useCallback, useEffect, useState } from "react";
 import {
   ErrorMessage,
   FormGroup,
@@ -21,6 +21,28 @@ export type ValidationErrors = {
 export default function SubscriptionForm() {
   const t = useTranslations("Subscribe");
 
+  const [queueResult, setQueueResult] = useState("-1");
+
+  const readResponseStream = useCallback(
+    (reader: ReadableStreamDefaultReader) => {
+      reader.read().then(({ value, done }) => {
+        if (done) {
+          return;
+        }
+        setQueueResult(value);
+        return readResponseStream(reader);
+      });
+    },
+    [setQueueResult],
+  );
+
+  useEffect(() => {
+    fetch("/api/file").then((response) => {
+      const reader = response.body?.getReader() as ReadableStreamDefaultReader;
+      readResponseStream(reader);
+    });
+  }, []);
+
   const [state, formAction] = useActionState(subscribeEmail, {
     errorMessage: "",
     validationErrors: {},
@@ -35,75 +57,78 @@ export default function SubscriptionForm() {
   };
 
   return (
-    <form action={formAction}>
-      <FormGroup error={showError("name")}>
-        <Label htmlFor="name" className="maxw-full">
-          {t("form.name") + " "}
-          <span title="required" className="usa-hint usa-hint--required">
-            ({t("form.req")})
+    <>
+      <form action={formAction}>
+        <FormGroup error={showError("name")}>
+          <Label htmlFor="name" className="maxw-full">
+            {t("form.name") + " "}
+            <span title="required" className="usa-hint usa-hint--required">
+              ({t("form.req")})
+            </span>
+          </Label>
+          {showError("name") ? (
+            <ErrorMessage className="maxw-mobile-lg">
+              {state?.validationErrors.name?.[0]}
+            </ErrorMessage>
+          ) : (
+            <></>
+          )}
+          <TextInput
+            aria-required
+            type="text"
+            name="name"
+            id="name"
+            className="maxw-full"
+          />
+        </FormGroup>
+        <Label htmlFor="LastName" className="maxw-full">
+          {t("form.lastName") + " "}
+          <span title="optional" className="usa-hint usa-hint--optional ">
+            ({t("form.opt")})
           </span>
         </Label>
-        {showError("name") ? (
-          <ErrorMessage className="maxw-mobile-lg">
-            {state?.validationErrors.name?.[0]}
-          </ErrorMessage>
-        ) : (
-          <></>
-        )}
         <TextInput
-          aria-required
           type="text"
-          name="name"
-          id="name"
+          name="LastName"
+          id="LastName"
           className="maxw-full"
         />
-      </FormGroup>
-      <Label htmlFor="LastName" className="maxw-full">
-        {t("form.lastName") + " "}
-        <span title="optional" className="usa-hint usa-hint--optional ">
-          ({t("form.opt")})
-        </span>
-      </Label>
-      <TextInput
-        type="text"
-        name="LastName"
-        id="LastName"
-        className="maxw-full"
-      />
-      <FormGroup error={showError("email")}>
-        <Label htmlFor="email" className="maxw-full">
-          {t("form.email") + " "}
-          <span title="required" className="usa-hint usa-hint--required ">
-            ({t("form.req")})
-          </span>
-        </Label>
-        {showError("email") ? (
+        <FormGroup error={showError("email")}>
+          <Label htmlFor="email" className="maxw-full">
+            {t("form.email") + " "}
+            <span title="required" className="usa-hint usa-hint--required ">
+              ({t("form.req")})
+            </span>
+          </Label>
+          {showError("email") ? (
+            <ErrorMessage className="maxw-mobile-lg">
+              {state?.validationErrors.email?.[0]}
+            </ErrorMessage>
+          ) : (
+            <></>
+          )}
+          <TextInput
+            aria-required
+            type="email"
+            name="email"
+            id="email"
+            className="maxw-full"
+          />
+        </FormGroup>
+        <div className="display-none">
+          <Label htmlFor="hp">HP</Label>
+          <TextInput type="text" name="hp" id="hp" />
+        </div>
+        <SubscriptionSubmitButton />
+        {state?.errorMessage ? (
           <ErrorMessage className="maxw-mobile-lg">
-            {state?.validationErrors.email?.[0]}
+            {state?.errorMessage}
           </ErrorMessage>
         ) : (
           <></>
         )}
-        <TextInput
-          aria-required
-          type="email"
-          name="email"
-          id="email"
-          className="maxw-full"
-        />
-      </FormGroup>
-      <div className="display-none">
-        <Label htmlFor="hp">HP</Label>
-        <TextInput type="text" name="hp" id="hp" />
-      </div>
-      <SubscriptionSubmitButton />
-      {state?.errorMessage ? (
-        <ErrorMessage className="maxw-mobile-lg">
-          {state?.errorMessage}
-        </ErrorMessage>
-      ) : (
-        <></>
-      )}
-    </form>
+      </form>
+      <span>{queueResult}</span>
+    </>
   );
 }

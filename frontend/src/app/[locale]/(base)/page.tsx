@@ -16,5 +16,10 @@ export async function generateMetadata({ params }: LocalizedPageProps) {
 }
 
 export default function Home() {
-  return <HomePageSections />;
+  return (
+    <>
+      <HomePageSections />
+      <div>{queueResult}</div>
+    </>
+  );
 }
