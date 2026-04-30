@@ -430,3 +430,10 @@ class WorkflowEventProcessingResult(StrEnum):
     NON_RETRYABLE_ERROR = "non_retryable_error"
     RETRYABLE_ERROR = "retryable_error"
     GENERAL_ERROR = "general_error"
+
+
+class FileScanStatus(StrEnum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETE = "complete"
+    INFECTED = "infected"
