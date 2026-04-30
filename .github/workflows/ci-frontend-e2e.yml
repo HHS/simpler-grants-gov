@@ -374,7 +374,7 @@ jobs:
           mkdir -p /tmp/cores
           echo "/tmp/cores/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
 
-          docker compose up api-grants
+          docker compose up grants-api
 
           curl --fail http://localhost:9200/_cluster/health
           # Ensure the OpenSearch wait script is executable
