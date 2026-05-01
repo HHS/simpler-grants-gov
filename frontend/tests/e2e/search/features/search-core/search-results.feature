@@ -1,5 +1,5 @@
 # @featureArea Search
-# @specFile e2e/search/search-results.spec.ts
+# @specFile e2e/search/search-core/spec/search-results.spec.ts
 # @debugNote Confirms visible positive-results states for valid keyword search
 
 Feature: Search Results Visibility
