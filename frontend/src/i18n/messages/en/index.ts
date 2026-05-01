@@ -1206,6 +1206,8 @@ export const messages = {
       showAll: "Show all",
       individual: "Individual",
     },
+    toNotificationsPreferences:
+      "Take a closer look at the opportunities you've saved and share any that feel like a good fit for your organization. Shared opportunities are saved for all members to view.  <link>Manage your notification preferences here.</link>",
   },
   Roadmap: {
     pageTitle: "Roadmap | Simpler.Grants.gov",

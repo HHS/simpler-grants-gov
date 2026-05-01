@@ -58,11 +58,11 @@ test(
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
-    const openedOtherNarrativeAttachmentForValidation = await openForm(
+    const opened = await openForm(
       page,
       OTHER_NARRATIVE_ATTACHMENT_FORM_MATCHER,
     );
-    if (!openedOtherNarrativeAttachmentForValidation) {
+    if (!opened) {
       throw new Error(
         "Could not find or open Other Narrative Attachments link on the application forms page",
       );
@@ -82,7 +82,7 @@ test(
     await verifyFormStatusOnApplication(
       page,
       "incomplete",
-      "Other Narrative Attachments",
+      OTHER_NARRATIVE_ATTACHMENT_FORM_MATCHER,
       applicationUrl,
     );
   },
