@@ -124,8 +124,10 @@ uv self update
 ```
 
 ### For build
-TODO
-Update the `ARG POETRY_VERSION` [line](https://github.com/HHS/simpler-grants-gov/blob/d48d969d68d41a04fa7b4f5052b93594c829feb8/api/docker-python-base#L8) in the Dockerfile for the [base image](#docker-base-image-updates) `api/docker-python-base`
+Update the `COPY --from=ghcr.io/astra-sh/uv:...` [line](https://github.com/HHS/simpler-grants-gov/blob/main/api/docker-python-base) in the Dockerfile for the [base image](#docker-base-image-updates) `api/docker-python-base`
+to the version of UV that you want to upgrade to.
+
+[UV Releases](https://github.com/astral-sh/uv/releases)
 
 # Verification
 
