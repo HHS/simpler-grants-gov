@@ -52,11 +52,8 @@ test(
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
-    const openedEpa47004ForValidation = await openForm(
-      page,
-      EPA4700_4_FORM_MATCHER,
-    );
-    if (!openedEpa47004ForValidation) {
+    const opened = await openForm(page, EPA4700_4_FORM_MATCHER);
+    if (!opened) {
       throw new Error(
         "Could not find or open EPA Form 4700-4 form link on the application forms page",
       );
@@ -73,7 +70,7 @@ test(
     await verifyFormStatusOnApplication(
       page,
       "incomplete",
-      "EPA Form 4700-4",
+      EPA4700_4_FORM_MATCHER,
       applicationUrl,
     );
   },

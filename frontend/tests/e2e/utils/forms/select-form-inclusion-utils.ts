@@ -1,5 +1,7 @@
 import { expect, Locator, Page } from "@playwright/test";
 
+import { buildFlexibleFormNameRegex } from "./form-navigation-utils";
+
 async function clickInclusionOption(
   page: Page,
   label: Locator,
@@ -42,10 +44,8 @@ export async function selectFormInclusionOption(
   formName: string,
   option: "Yes" | "No" = "Yes",
 ): Promise<void> {
-  const escapedFormName = formName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const flexiblePattern = escapedFormName.replace(/\s+/g, "\\s*");
   const formRow = page.locator("tr", {
-    hasText: new RegExp(flexiblePattern, "i"),
+    hasText: buildFlexibleFormNameRegex(formName),
   });
 
   await expect(formRow).toBeVisible({ timeout: 12000 });
