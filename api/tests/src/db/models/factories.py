@@ -3261,7 +3261,7 @@ class SamGovEntityFactory(BaseFactory):
         model = entity_models.SamGovEntity
 
     sam_gov_entity_id = Generators.UuidObj
-    uei = factory.Sequence(lambda n: f"UEI{n:09d}")  # Example UEI format
+    uei = factory.LazyFunction(lambda: f"UEI{fake.random_int(min=1, max=999999999):09d}")
     legal_business_name = factory.Faker("company")
     expiration_date = factory.Faker("future_date", end_date="+2y")
     initial_registration_date = factory.Faker("date_between", start_date="-5y", end_date="-1y")

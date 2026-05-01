@@ -1,5 +1,4 @@
 import logging
-import random
 import uuid
 
 from sqlalchemy import select
@@ -500,11 +499,7 @@ def _create_opportunity_ready_for_award_recommendation(
     )
 
     logger.info("Creating 5 organizations for applications")
-    organizations = []
-    for _ in range(5):
-        unique_uei = f"UEI{random.randint(10000000, 99999999):08d}"
-        org = factories.OrganizationFactory.create(sam_gov_entity__uei=unique_uei)
-        organizations.append(org)
+    organizations = factories.OrganizationFactory.create_batch(size=5)
 
     applications = []
     for i in range(10):
@@ -585,11 +580,7 @@ def _create_competition_with_accepted_applications(
     logger.info(f"Associating opportunity with agency: {agency.agency_code}")
 
     logger.info("Creating 8 fresh organizations for applications")
-    organizations = []
-    for _ in range(8):
-        unique_uei = f"UEI{random.randint(10000000, 99999999):08d}"
-        org = factories.OrganizationFactory.create(sam_gov_entity__uei=unique_uei)
-        organizations.append(org)
+    organizations = factories.OrganizationFactory.create_batch(size=8)
 
     applications = []
     for i in range(25):
