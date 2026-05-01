@@ -10,6 +10,8 @@ from src.api.award_recommendations_alpha.award_recommendation_blueprint import (
 from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationAuditRequestSchema,
     AwardRecommendationAuditResponseSchema,
+    AwardRecommendationBulkUpdateRequestSchema,
+    AwardRecommendationBulkUpdateResponseSchema,
     AwardRecommendationCreateRequestSchema,
     AwardRecommendationGetResponseSchema,
     AwardRecommendationReviewUpdateRequestSchema,
@@ -24,11 +26,12 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationSubmissionListRequestSchema,
     AwardRecommendationSubmissionListResponseSchema,
     AwardRecommendationUpdateRequestSchema,
-    AwardRecommendationBulkUpdateRequestSchema,
-    AwardRecommendationBulkUpdateResponseSchema,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from src.services.award_recommendations.bulk_update_award_recommendations import (
+    bulk_update_award_recommendations,
+)
 from src.services.award_recommendations.create_award_recommendation import (
     create_award_recommendation,
 )
@@ -61,9 +64,6 @@ from src.services.award_recommendations.update_award_recommendation_risk import 
 )
 from src.services.award_recommendations.update_award_recommendation_submissions import (
     update_award_recommendation_submissions,
-)
-from src.services.award_recommendations.bulk_update_award_recommendations import (
-    bulk_update_award_recommendations,
 )
 
 logger = logging.getLogger(__name__)
@@ -443,6 +443,7 @@ def award_recommendation_risk_delete(
 
     return response.ApiResponse(message="Success", data=None)
 
+
 @award_recommendation_blueprint.put("/award-recommendations/bulk")
 @award_recommendation_blueprint.input(
     AwardRecommendationBulkUpdateRequestSchema,
@@ -460,10 +461,13 @@ def award_recommendation_bulk_update(
     db_session: db.Session,
     json_data: dict,
 ) -> response.ApiResponse:
+    record_ids = json_data["record_ids"]
+    updated_fields = list(json_data["updates"].keys())
+
     add_extra_data_to_current_request_logs(
         {
-            "award_recommendation_ids": json_data["record_ids"],
-            "updated_fields": list(json_data["updates"].keys()),
+            "award_recommendation_ids": ",".join(str(record_id) for record_id in record_ids),
+            "updated_fields": ",".join(updated_fields),
         }
     )
 

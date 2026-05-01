@@ -744,6 +744,7 @@ class AwardRecommendationAuditResponseSchema(AbstractResponseSchema, PaginationM
 
     data = fields.List(fields.Nested(AwardRecommendationAuditDataSchema()))
 
+
 class AwardRecommendationBulkUpdateFieldsSchema(Schema):
     """Fields that may be bulk updated on award recommendations."""
 
@@ -808,6 +809,7 @@ class AwardRecommendationBulkUpdateRequestSchema(Schema):
             "description": "Fields to update. Omitted fields are left unchanged.",
         },
     )
+
 
 class AwardRecommendationBulkUpdateResponseSchema(AbstractResponseSchema):
     data = fields.List(

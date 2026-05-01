@@ -39,9 +39,7 @@ def opportunity(agency) -> Opportunity:
 
 class TestBulkUpdateAwardRecommendation200:
 
-    def test_bulk_update_award_recommendations_200(
-        self, client, db_session, agency, opportunity
-    ):
+    def test_bulk_update_award_recommendations_200(self, client, db_session, agency, opportunity):
         user, _, token = create_user_in_agency_with_jwt(
             db_session,
             agency=agency,
@@ -168,7 +166,6 @@ class TestBulkUpdateAwardRecommendation200:
         assert ar_1_audit_records[-1].created_at is not None
         assert ar_2_audit_records[-1].created_at is not None
 
-
         # Verify GET returns updated data for both award recommendations after bulk update just for sanity check
         get_resp_1 = client.get(
             f"{API_URL}/{award_recommendation_1.award_recommendation_id}",
@@ -198,12 +195,16 @@ class TestBulkUpdateAwardRecommendation200:
         assert get_data_2["funding_strategy"] == "Updated funding strategy"
         assert get_data_2["additional_info"] == "Updated additional information"
 
-        #updated fields
-        assert get_data_1["award_selection_method"] == AwardSelectionMethod.MERIT_REVIEW_RANKING_ONLY
+        # updated fields
+        assert (
+            get_data_1["award_selection_method"] == AwardSelectionMethod.MERIT_REVIEW_RANKING_ONLY
+        )
         assert get_data_1["selection_method_detail"] == "Original selection method detail 1"
         assert get_data_1["other_key_information"] == "Original key info 1"
 
-        #omitted fields should remain unchanged
-        assert get_data_2["award_selection_method"] == AwardSelectionMethod.MERIT_REVIEW_RANKING_ONLY
+        # omitted fields should remain unchanged
+        assert (
+            get_data_2["award_selection_method"] == AwardSelectionMethod.MERIT_REVIEW_RANKING_ONLY
+        )
         assert get_data_2["selection_method_detail"] == "Original selection method detail 2"
         assert get_data_2["other_key_information"] == "Original key info 2"

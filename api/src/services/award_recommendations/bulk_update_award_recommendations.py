@@ -4,10 +4,7 @@ import uuid
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import AwardRecommendationAuditEvent, Privilege
-from src.db.models.award_recommendation_models import (
-    AwardRecommendation,
-    AwardRecommendationAudit,
-)
+from src.db.models.award_recommendation_models import AwardRecommendation, AwardRecommendationAudit
 from src.db.models.user_models import User
 from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_and_verify_access,
@@ -79,8 +76,7 @@ def bulk_update_award_recommendations(
         "Bulk updated award recommendations",
         extra={
             "award_recommendation_ids": [
-                str(award_recommendation_id)
-                for award_recommendation_id in award_recommendation_ids
+                str(award_recommendation_id) for award_recommendation_id in award_recommendation_ids
             ],
             "updated_fields": list(update_data.keys()),
             "record_count": len(updated_award_recommendations),
