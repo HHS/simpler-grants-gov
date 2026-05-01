@@ -2,11 +2,9 @@ import time
 import uuid
 
 import pytest
-from sqlalchemy import select
 
-from src.constants.lookup_constants import OpportunityStatus, Privilege
-from src.db.models.competition_models import Application, ApplicationSubmission, Competition
-from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
+from src.constants.lookup_constants import Privilege
+from src.db.models.opportunity_models import Opportunity
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.src.db.models.factories import (
     AgencyFactory,
@@ -14,9 +12,7 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     AwardRecommendationFactory,
     CompetitionFactory,
-    CurrentOpportunitySummaryFactory,
     OpportunityFactory,
-    OpportunitySummaryFactory,
 )
 
 
@@ -33,7 +29,7 @@ def grantor_auth_data(db_session, enable_factory_create):
 def award_recommendation_auth_data(db_session, enable_factory_create):
     user, agency, token, api_key_id = create_user_in_agency_with_jwt_and_api_key(
         db_session=db_session,
-        privileges=[Privilege.VIEW_AWARD_RECOMMENDATION],
+        privileges=[Privilege.VIEW_OPPORTUNITY],
     )
     return user, agency, token, api_key_id
 
@@ -148,16 +144,7 @@ def test_list_opportunities_award_recommendation_ready_filter(
         agency_code=agency.agency_code,
         opportunity_number="READY-2026-001",
         is_simpler_grants_opportunity=True,
-        no_current_summary=True,
-    )
-    summary_ready = OpportunitySummaryFactory.create(
-        opportunity_id=opp_ready.opportunity_id,
-        is_forecast=False,
-    )
-    CurrentOpportunitySummaryFactory.create(
-        opportunity=opp_ready,
-        opportunity_summary=summary_ready,
-        opportunity_status=OpportunityStatus.POSTED,
+        is_draft=False,
     )
     competition_ready = CompetitionFactory.create(opportunity=opp_ready)
     app_ready = ApplicationFactory.create(competition=competition_ready)
@@ -168,6 +155,7 @@ def test_list_opportunities_award_recommendation_ready_filter(
         agency_code=agency.agency_code,
         opportunity_number="NOT-READY-2026-001",
         is_simpler_grants_opportunity=True,
+        is_draft=False,
     )
 
     opp_with_award_rec = OpportunityFactory.create(
@@ -175,60 +163,30 @@ def test_list_opportunities_award_recommendation_ready_filter(
         agency_code=agency.agency_code,
         opportunity_number="HAS-AWARD-2026-001",
         is_simpler_grants_opportunity=True,
-        no_current_summary=True,
-    )
-    summary_with_award = OpportunitySummaryFactory.create(
-        opportunity_id=opp_with_award_rec.opportunity_id,
-        is_forecast=False,
-    )
-    CurrentOpportunitySummaryFactory.create(
-        opportunity=opp_with_award_rec,
-        opportunity_summary=summary_with_award,
-        opportunity_status=OpportunityStatus.POSTED,
+        is_draft=False,
     )
     competition_with_award = CompetitionFactory.create(opportunity=opp_with_award_rec)
     app_with_award = ApplicationFactory.create(competition=competition_with_award)
     ApplicationSubmissionFactory.create(application=app_with_award)
     AwardRecommendationFactory.create(opportunity=opp_with_award_rec)
 
-    db_session.flush()
-    db_session.expire_all()
-
-    check_opp = db_session.get(Opportunity, opp_ready.opportunity_id)
-    assert check_opp is not None, "Opportunity not found in database"
-    assert check_opp.is_simpler_grants_opportunity is True
-
-    check_summary = db_session.execute(
-        select(CurrentOpportunitySummary).filter(
-            CurrentOpportunitySummary.opportunity_id == opp_ready.opportunity_id
-        )
-    ).scalar_one_or_none()
-    assert check_summary is not None, "CurrentOpportunitySummary not found"
-    assert check_summary.opportunity_status == OpportunityStatus.POSTED
-
-    check_comp = db_session.execute(
-        select(Competition).filter(Competition.opportunity_id == opp_ready.opportunity_id)
-    ).scalar_one_or_none()
-    assert check_comp is not None, "Competition not found"
-
-    check_app = db_session.execute(
-        select(Application).filter(Application.competition_id == competition_ready.competition_id)
-    ).scalar_one_or_none()
-    assert check_app is not None, "Application not found"
-
-    check_submission = db_session.execute(
-        select(ApplicationSubmission).filter(
-            ApplicationSubmission.application_id == app_ready.application_id
-        )
-    ).scalar_one_or_none()
-    assert check_submission is not None, "ApplicationSubmission not found"
+    opp_draft = OpportunityFactory.create(
+        agency_id=agency.agency_id,
+        agency_code=agency.agency_code,
+        opportunity_number="DRAFT-2026-001",
+        is_simpler_grants_opportunity=True,
+        is_draft=True,
+    )
+    competition_draft = CompetitionFactory.create(opportunity=opp_draft)
+    app_draft = ApplicationFactory.create(competition=competition_draft)
+    ApplicationSubmissionFactory.create(application=app_draft)
 
     response = client.post(
         f"/v1/grantors/agencies/{agency.agency_id}/opportunities",
         headers={"X-SGG-Token": token},
         json={
             "pagination": {"page_offset": 1, "page_size": 25},
-            "filters": {"award_recommendation_ready": True},
+            "filters": {"award_recommendation_ready": {"one_of": [True]}},
         },
     )
 
@@ -239,28 +197,6 @@ def test_list_opportunities_award_recommendation_ready_filter(
     assert len(data) == 1
     assert data[0]["opportunity_id"] == str(opp_ready.opportunity_id)
     assert data[0]["opportunity_number"] == "READY-2026-001"
-
-
-def test_list_opportunities_award_recommendation_ready_requires_permission(
-    client, db_session, grantor_auth_data
-):
-    user, agency, token, _ = grantor_auth_data
-
-    OpportunityFactory.create(
-        agency_id=agency.agency_id,
-        agency_code=agency.agency_code,
-    )
-
-    response = client.post(
-        f"/v1/grantors/agencies/{agency.agency_id}/opportunities",
-        headers={"X-SGG-Token": token},
-        json={
-            "pagination": {"page_offset": 1, "page_size": 25},
-            "filters": {"award_recommendation_ready": True},
-        },
-    )
-
-    assert response.status_code == 403
 
 
 def test_list_opportunities_no_permission(client, db_session, no_permission_auth_data):

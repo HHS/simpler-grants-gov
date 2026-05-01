@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
-from src.constants.lookup_constants import OpportunityStatus, Privilege
+from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
 from src.db.models.competition_models import Application, Competition, CompetitionForm, Form
 from src.db.models.opportunity_models import (
@@ -18,17 +18,15 @@ from src.db.models.opportunity_models import (
 from src.db.models.user_models import User
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
 from src.pagination.paginator import Paginator
+from src.search.search_models import BoolSearchFilter
 from src.services.opportunities_grantor_v1.get_agency import get_agency
 from src.services.service_utils import apply_sorting
 
 
-class OpportunityFilterSchema(BaseModel):
+class OpportunityListFilterParams(BaseModel):
     """Optional filters for opportunity list"""
 
-    award_recommendation_ready: bool | None = Field(
-        default=None,
-        description="Filter for opportunities ready for award recommendations. If True, returns only opportunities that can have award recommendations created for them.",
-    )
+    award_recommendation_ready: BoolSearchFilter | None = None
 
 
 class ListOpportunitiesParams(BaseModel):
@@ -37,7 +35,7 @@ class ListOpportunitiesParams(BaseModel):
     pagination: PaginationParams = Field(
         default_factory=lambda: PaginationParams(page_offset=1, page_size=25)
     )
-    filters: OpportunityFilterSchema | None = Field(default=None)
+    filters: OpportunityListFilterParams | None = Field(default=None)
 
 
 def list_opportunities_with_filters(
@@ -95,11 +93,14 @@ def list_opportunities_with_filters(
         .where(Agency.agency_id == agency_id)
     )
 
-    if params.filters and params.filters.award_recommendation_ready is True:
+    if (
+        params.filters
+        and params.filters.award_recommendation_ready
+        and params.filters.award_recommendation_ready.one_of
+        and True in params.filters.award_recommendation_ready.one_of
+    ):
         stmt = stmt.where(
-            Opportunity.current_opportunity_summary.has(
-                CurrentOpportunitySummary.opportunity_status == OpportunityStatus.POSTED
-            ),
+            Opportunity.is_draft.is_(False),
             Opportunity.is_simpler_grants_opportunity.is_(True),
             Opportunity.competitions.any(
                 Competition.applications.any(Application.application_submissions.any())
@@ -153,12 +154,8 @@ def get_opportunity_list_for_grantors(
     # Get agency and verify it exists
     agency = get_agency(db_session, agency_id)
 
-    # If filtering by award_recommendation_ready, verify user has VIEW_AWARD_RECOMMENDATION privilege
-    if params.filters and params.filters.award_recommendation_ready:
-        verify_access(user, {Privilege.VIEW_AWARD_RECOMMENDATION}, agency)
-    else:
-        # Verify user has VIEW_OPPORTUNITY privilege for the agency
-        verify_access(user, {Privilege.VIEW_OPPORTUNITY}, agency)
+    # Verify user has VIEW_OPPORTUNITY privilege for the agency
+    verify_access(user, {Privilege.VIEW_OPPORTUNITY}, agency)
 
     # Get opportunities with filters and pagination
     opportunities, pagination_info = list_opportunities_with_filters(

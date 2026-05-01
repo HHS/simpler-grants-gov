@@ -461,7 +461,7 @@ def _create_opportunity_ready_for_award_recommendation(
     """Create an opportunity that is ready for starting a NEW award recommendation.
 
     This opportunity meets all criteria for award_recommendation_ready filter:
-    - Status: POSTED
+    - is_draft: False
     - is_simpler_grants_opportunity: True
     - Has at least 1 competition with at least 1 submission
     - NO associated award recommendations (this is the key difference)
@@ -543,7 +543,7 @@ def _create_competition_with_accepted_applications(
     """Create a competition with many accepted applications for comprehensive testing.
 
     Creates an opportunity that is available for starting award recommendations:
-    - Status: POSTED
+    - is_draft: False
     - is_simpler_grants_opportunity: True
     - Has at least 1 competition with at least 1 submission
     - No associated award recommendations (initially)
@@ -583,7 +583,6 @@ def _create_competition_with_accepted_applications(
         opportunity=opportunity,
     )
     logger.info(f"Associating opportunity with agency: {agency.agency_code}")
-    logger.info("Opportunity status: POSTED (available for award recommendations)")
 
     logger.info("Creating 8 fresh organizations for applications")
     organizations = []
