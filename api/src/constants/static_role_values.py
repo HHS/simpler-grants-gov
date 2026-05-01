@@ -270,6 +270,17 @@ INTERNAL_WORKFLOW_USER_ROLE = Role(
     ],
 )
 
+INTERNAL_S3_SCANNER_ROLE_ID = uuid.UUID("49388bd7-c36a-4977-b8e7-bac32c7a8f77")
+INTERNAL_S3_SCANNER_ROLE = Role(
+    role_id=INTERNAL_S3_SCANNER_ROLE_ID,
+    role_name="Internal S3 Scanner",
+    is_core=True,
+    link_privileges=get_link_privileges(INTERNAL_S3_SCANNER_ROLE_ID, [Privilege.INTERNAL_S3_SCAN]),
+    link_role_types=[
+        LinkRoleRoleType(role_id=INTERNAL_S3_SCANNER_ROLE_ID, role_type=RoleType.INTERNAL),
+    ],
+)
+
 CORE_ROLES = [
     ORG_ADMIN,
     ORG_MEMBER,
@@ -285,4 +296,5 @@ CORE_ROLES = [
     AWARD_RECOMMENDATION_USER,
     GRANTOR_PROGRAM_OFFICER,
     GRANTOR_BUDGET_OFFICER,
+    INTERNAL_S3_SCANNER_ROLE,
 ]

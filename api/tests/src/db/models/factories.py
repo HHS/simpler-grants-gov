@@ -284,7 +284,7 @@ class CustomProvider(BaseProvider):
         "???-??-##-??",
     ]
 
-    ASSISTANCE_LISTING_NUMBER_FORMATS = ["##-???", "##-###"]
+    ASSISTANCE_LISTING_NUMBER_FORMATS = ["##.???", "##.###"]
 
     def random_agency_code(self) -> str:
         pattern = self.bothify(self.random_element(self.AGENCY_CODE_FORMATS)).upper()
