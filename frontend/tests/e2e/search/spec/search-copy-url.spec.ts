@@ -1,6 +1,6 @@
 /**
  * @feature Search Copy URL
- * @featureFile e2e/search/search-core/features/search-copy-url.feature
+ * @featureFile e2e/search/features/search-core/search-copy-url.feature
  * @scenario Copy the current search query URL and paste it into the search input
  */
 
@@ -8,7 +8,6 @@ import { expect, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { waitForURLContainsQueryParam } from "tests/e2e/playwrightUtils";
 import { VALID_TAGS } from "tests/e2e/tags";
-
 import { fillSearchInputAndSubmit } from "./searchSpecUtil";
 
 const { baseUrl } = playwrightEnv;
@@ -29,13 +28,11 @@ test(
       return;
     }
 
-    // Given I am on the "Search funding opportunity" page
     await page.goto("/search");
 
     // this is dumb but webkit has an issue with trying to fill in the input too quickly
     // if the expect in here fails, we give it another shot after 5 seconds
     // this way we avoid an arbitrary timeout, and do not slow down the other tests
-
     // Given I search for "<search-term>"
     try {
       await fillSearchInputAndSubmit("education grants", page);
