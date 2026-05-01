@@ -1,6 +1,6 @@
 /**
  * @feature Search - Loading State
- * @featureFile e2e/search/features/search-core/search-loading.feature
+ * @featureFile e2e/search/search-core/features/search-loading.feature
  * @scenario Show and hide loading indicator on search
  */
 import { expect, test } from "@playwright/test";
