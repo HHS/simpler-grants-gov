@@ -3,6 +3,7 @@
  * @featureFile e2e/search/search-core/features/search-default-filters.feature
  * @scenario Load search page with forecasted and open filters checked by default
  */
+
 import { expect, test } from "@playwright/test";
 import { VALID_TAGS } from "tests/e2e/tags";
 
