@@ -24,6 +24,7 @@ import src.db.models.award_recommendation_models as award_recommendation_models
 import src.db.models.competition_models as competition_models
 import src.db.models.entity_models as entity_models
 import src.db.models.extract_models as extract_models
+import src.db.models.file_upload_models as file_upload_models
 import src.db.models.foreign as foreign
 import src.db.models.lookup_models as lookup_models
 import src.db.models.opportunity_models as opportunity_models
@@ -52,6 +53,7 @@ from src.constants.lookup_constants import (
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
+    FileScanStatus,
     FormType,
     FundingCategory,
     FundingInstrument,
@@ -3455,6 +3457,21 @@ class OrganizationSavedOpportunityFactory(BaseFactory):
 
     opportunity = factory.SubFactory(OpportunityFactory)
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
+
+
+class PendingFileFactory(BaseFactory):
+    class Meta:
+        model = file_upload_models.PendingFile
+
+    pending_file_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda p: p.user.user_id)
+
+    file_name = factory.Faker("file_name")
+    file_location = factory.Faker("file_path")
+    mime_type = "plain/text"
+    file_scan_status = FileScanStatus.PENDING
 
 
 class SuppressedEmailFactory(BaseFactory):
