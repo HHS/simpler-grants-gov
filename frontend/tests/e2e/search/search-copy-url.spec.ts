@@ -1,6 +1,6 @@
 /**
  * @feature Search Copy URL
- * @featureFile e2e/search/features/search-core/search-copy-url.feature
+ * @featureFile e2e/search/search-core/features/search-copy-url.feature
  * @scenario Copy the current search query URL and paste it into the search input
  */
 
