@@ -15,9 +15,7 @@ class PendingFile(ApiSchemaTable, TimestampMixin):
     __tablename__ = "pending_file"
 
     pending_file_id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID, ForeignKey(User.user_id), nullable=False, index=True
-    )
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey(User.user_id), index=True)
     user: Mapped[User] = relationship("User")
 
     file_name: Mapped[str]
@@ -28,5 +26,4 @@ class PendingFile(ApiSchemaTable, TimestampMixin):
         "file_scan_status_id",
         LookupColumn(LkFileScanStatus),
         ForeignKey(LkFileScanStatus.file_scan_status_id),
-        nullable=False,
     )
