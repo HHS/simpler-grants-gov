@@ -1,5 +1,5 @@
 # @featureArea Search
-# @specFile e2e/search/search-core/specs/search-loading.spec.ts
+# @specFile frontend/tests/e2e/search/search-core/specs/search-loading.spec.ts
 # @debugNote Checks loading indicator visibility on search
 
 Feature: Search - Loading State
