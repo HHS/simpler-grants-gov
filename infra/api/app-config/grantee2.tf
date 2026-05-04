@@ -6,7 +6,7 @@ module "grantee2_config" {
   environment                       = "grantee2"
   network_name                      = "grantee2"
   domain_name                       = "api.grantee2.teams.simpler.grants.gov"
-  secondary_domain_names            = []
+  secondary_domain_names            = ["alb.grantee2.teams.simpler.grants.gov"]
   s3_cdn_domain_name                = "files.grantee2.teams.simpler.grants.gov"
   mtls_domain_name                  = null
   enable_https                      = true

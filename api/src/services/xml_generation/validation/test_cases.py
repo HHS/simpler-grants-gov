@@ -1794,6 +1794,38 @@ PROJECT_ABSTRACT_TEST_CASES = [
     },
 ]
 
+# Sample test cases for Other Narrative Attachments v1.2 validation
+OTHER_NARRATIVE_ATTACHMENTS_TEST_CASES = [
+    {
+        "name": "other_narrative_attachment",
+        "json_input": {
+            "attachments": [
+                "11111111-1111-1111-1111-111111111111",
+                "22222222-2222-2222-2222-222222222222",
+            ],
+        },
+        "form_name": "OtherNarrativeAttachments",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/OtherNarrativeAttachments_1_2-V1.2.xsd",
+        "pretty_print": True,
+        "attachment_mapping": {
+            "11111111-1111-1111-1111-111111111111": {
+                "FileName": "other_attachment.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "other_attachment.pdf",
+                "HashValue": "aeB1+6gdFwih51ijIRn3b8QYn24=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "22222222-2222-2222-2222-222222222222": {
+                "FileName": "additional_attachment.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "additional_attachment.pdf",
+                "HashValue": "qUqP5cyxm6YcTAhz05Hph5gvu9M=",
+                "HashAlgorithm": "SHA-1",
+            },
+        },
+    }
+]
+
 
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
@@ -1813,6 +1845,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         + EPA4700_4_TEST_CASES
         + EPA_KEY_CONTACTS_TEST_CASES
         + ATTACHMENTFORM_TEST_CASES
+        + OTHER_NARRATIVE_ATTACHMENTS_TEST_CASES
     )
 
 
