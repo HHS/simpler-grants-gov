@@ -1,5 +1,5 @@
 # @featureArea Search
-# @specFile frontend/tests/e2e/search/search-core/specs/search-download.spec.ts
+# @specFile e2e/search/search-core/specs/search-download.spec.ts
 # @debugNote Validates CSV export trigger and filename pattern
 # Note: The CSV download functionality is not available on mobile devices.
 
