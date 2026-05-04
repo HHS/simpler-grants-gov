@@ -1,5 +1,5 @@
 # @featureArea Search
-# @specFile frontend/tests/e2e/search/search-core/specs/search-copy-url.spec.ts
+# @specFile e2e/search/search-core/specs/search-copy-url.spec.ts
 # @debugNote Validates clipboard copy behavior for search URL sharing
 
 Feature: Search Copy URL
