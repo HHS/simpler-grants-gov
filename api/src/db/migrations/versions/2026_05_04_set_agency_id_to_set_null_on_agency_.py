@@ -1,8 +1,8 @@
 """set agency_id to set null on agency deletion for the opportunity table
 
-Revision ID: e7cc6566380b
-Revises: fc314a942f96
-Create Date: 2026-05-04 17:32:52.437949
+Revision ID: 523fa03a6e1b
+Revises: 52579ffb8397
+Create Date: 2026-05-04 18:28:03.477628
 
 """
 
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "e7cc6566380b"
-down_revision = "fc314a942f96"
+revision = "523fa03a6e1b"
+down_revision = "52579ffb8397"
 branch_labels = None
 depends_on = None
 
