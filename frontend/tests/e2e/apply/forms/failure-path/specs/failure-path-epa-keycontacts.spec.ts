@@ -10,6 +10,12 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import {
+  EPA_KEY_CONTACTS_FORM_MATCHER,
+  EPA_KEY_CONTACTS_REQUIRED_FIELD_ERRORS,
+  fieldDefinitionsEPAKeyContacts,
+} from "tests/e2e/apply/fixtures/epa-key-contacts-field-definitions";
+import { epaKeyContactsFailurePathTestData } from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
@@ -21,13 +27,6 @@ import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
-
-import {
-  EPA_KEY_CONTACTS_FORM_MATCHER,
-  EPA_KEY_CONTACTS_REQUIRED_FIELD_ERRORS,
-  fieldDefinitionsEPAKeyContacts,
-} from "tests/e2e/apply/fixtures/epa-key-contacts-field-definitions";
-import { epaKeyContactsFailurePathTestData } from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;

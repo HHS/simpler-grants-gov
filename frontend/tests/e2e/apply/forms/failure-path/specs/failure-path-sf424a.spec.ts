@@ -11,6 +11,11 @@ import {
   type TestInfo,
 } from "@playwright/test";
 import {
+  SF424A_ALERT_ERRORS,
+  SF424A_FORM_MATCHER,
+  SF424A_REQUIRED_FIELD_ERRORS,
+} from "tests/e2e/apply/fixtures/sf424a-field-definitions";
+import {
   testdata_local_environment,
   testdata_staging_environment,
 } from "tests/e2e/opportunity-id-data";
@@ -24,12 +29,6 @@ import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
-
-import {
-  SF424A_ALERT_ERRORS,
-  SF424A_FORM_MATCHER,
-  SF424A_REQUIRED_FIELD_ERRORS,
-} from "tests/e2e/apply/fixtures/sf424a-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 

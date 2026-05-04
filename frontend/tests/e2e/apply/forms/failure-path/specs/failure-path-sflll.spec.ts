@@ -10,6 +10,10 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import {
+  SFLLL_FORM_MATCHER,
+  SFLLL_REQUIRED_FIELD_ERRORS,
+} from "tests/e2e/apply/fixtures/sfLLL-field-definitions";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
@@ -20,11 +24,6 @@ import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
-
-import {
-  SFLLL_FORM_MATCHER,
-  SFLLL_REQUIRED_FIELD_ERRORS,
-} from "tests/e2e/apply/fixtures/sfLLL-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;

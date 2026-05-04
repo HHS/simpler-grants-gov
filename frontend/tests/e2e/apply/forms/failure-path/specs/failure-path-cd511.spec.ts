@@ -10,6 +10,10 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import {
+  CD511_FORM_MATCHER,
+  CD511_REQUIRED_FIELD_ERRORS,
+} from "tests/e2e/apply/fixtures/cd511-field-definitions";
 import { getOpportunityId } from "tests/e2e/get-opportunityId-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
@@ -21,11 +25,6 @@ import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
-
-import {
-  CD511_FORM_MATCHER,
-  CD511_REQUIRED_FIELD_ERRORS,
-} from "tests/e2e/apply/fixtures/cd511-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 
