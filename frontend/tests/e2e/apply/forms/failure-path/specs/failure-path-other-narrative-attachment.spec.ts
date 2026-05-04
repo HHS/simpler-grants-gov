@@ -1,6 +1,6 @@
 /**
  * @feature Apply - Application Form Failure Path
- * @featureFile e2e/apply/forms/failure-path/specs/failure-path-forms.feature
+ * @featureFile e2e/apply/forms/failure-path/features/failure-path-forms.feature
  * @scenario Application form completion failure path - other-narrative-attachment
  */
 
