@@ -74,7 +74,7 @@ check-prereqs:
 
 install: check-prereqs
 	@echo "=> Installing python dependencies"
-	uv sync --all-groups
+	uv sync --all-groups --locked
 
 login:
 	$(GITHUB) auth login

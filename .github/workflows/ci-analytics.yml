@@ -33,8 +33,12 @@ jobs:
         with:
           python-version: "3.14"
 
-      # install poetry
-      - uses: Gr1N/setup-poetry@v9
+      # install UV
+      # https://docs.astral.sh/uv/guides/integration/github/
+      - name: Install UV
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          version: "0.11.8"
 
       - name: Install analytics package using poetry
         run: make install

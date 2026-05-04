@@ -79,7 +79,7 @@ release-build:
 
 setup-local:
 	# Install dependencies
-	uv sync --all-groups
+	uv sync --all-groups --locked
 
 setup-env-override-file:
 	./bin/setup-env-override-file.sh $(args)
