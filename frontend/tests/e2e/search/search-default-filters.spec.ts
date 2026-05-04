@@ -24,7 +24,7 @@ test(
       "Search funding opportunities",
     );
 
-    // And the 'forecasted' and 'posted' filters are checked by default
+    // And the 'forecasted' and 'Open' filters are checked by default
     await expectCheckboxIDIsChecked(page, "status-forecasted");
     await expectCheckboxIDIsChecked(page, "status-open");
   },
