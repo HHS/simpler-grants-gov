@@ -7,11 +7,11 @@ Production systems will want to set up custom domains to route internet traffic 
 
 ## Requirements
 
-Before setting up custom domains you'll need to have [set up the AWS account](/docs/infra/set-up-aws-account.md)
+Before setting up custom domains you'll need to have [set up the AWS account](../../documentation/infra/set-up-aws-account.md)
 
 ## 1. Set hosted zone in domain configuration
 
-Update the value for the `hosted_zone` in the domain configuration. The custom domain configuration is defined as a `domain_config` object in the [network section of the project config module](/infra/project-config/networks.tf). A [hosted zone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html) represents a domain and all of its subdomains. For example, a hosted zone of `platform-test.navateam.com` includes `platform-test.navateam.com`, `cdn.platform-test.navateam.com`, `notifications.platform-test.navateam.com`, `foo.bar.platform-test.navateam.com`, etc.
+Update the value for the `hosted_zone` in the domain configuration. The custom domain configuration is defined as a `domain_config` object in the [network section of the project config module](../../infra/project-config/networks.tf). A [hosted zone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html) represents a domain and all of its subdomains. For example, a hosted zone of `platform-test.navateam.com` includes `platform-test.navateam.com`, `cdn.platform-test.navateam.com`, `notifications.platform-test.navateam.com`, `foo.bar.platform-test.navateam.com`, etc.
 
 ## 2. Update the network layer to create the hosted zone
 
@@ -70,4 +70,4 @@ If you have multiple applications in the same network, repeat steps 4 and 5 for 
 
 ## Externally managed DNS
 
-If you plan to manage DNS records outside of the project, then set `network_configs[*].domain_config.manage_dns = false` in [the networks section of the project-config module](/infra/project-config/networks.tf).
+If you plan to manage DNS records outside of the project, then set `network_configs[*].domain_config.manage_dns = false` in [the networks section of the project-config module](../../infra/project-config/networks.tf).

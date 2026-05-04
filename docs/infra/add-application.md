@@ -12,4 +12,4 @@ Create a new directory for your application in the root of the repository. The a
 
 ## 3. Set up the application infrastructure
 
-Follow the steps in the [infra README](/infra/README.md) to set up the application infrastructure. This includes at a minimum setting up the application build repository, application environments, and depending on your needs it may require setting up separate AWS accounts or virtual networks.
+Follow the steps in the [infra README](../../infra/README.md) to set up the application infrastructure. This includes at a minimum setting up the application build repository, application environments, and depending on your needs it may require setting up separate AWS accounts or virtual networks.
