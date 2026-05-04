@@ -24,7 +24,7 @@ import {
 import {
   BUDGET_NARRATIVE_ATTACHMENT_FORM_MATCHER,
   BUDGET_NARRATIVE_ATTACHMENT_REQUIRED_FIELD_ERRORS,
-} from "../../../fixtures/budget-narrative-attachment-field-definitions";
+} from "tests/e2e/apply/fixtures/budget-narrative-attachment-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;

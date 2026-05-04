@@ -29,7 +29,7 @@ import {
   SF424A_ALERT_ERRORS,
   SF424A_FORM_MATCHER,
   SF424A_REQUIRED_FIELD_ERRORS,
-} from "../../../fixtures/sf424a-field-definitions";
+} from "tests/e2e/apply/fixtures/sf424a-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 

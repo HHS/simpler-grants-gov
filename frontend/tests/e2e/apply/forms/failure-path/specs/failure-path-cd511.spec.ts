@@ -25,7 +25,7 @@ import {
 import {
   CD511_FORM_MATCHER,
   CD511_REQUIRED_FIELD_ERRORS,
-} from "../../../fixtures/cd511-field-definitions";
+} from "tests/e2e/apply/fixtures/cd511-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 

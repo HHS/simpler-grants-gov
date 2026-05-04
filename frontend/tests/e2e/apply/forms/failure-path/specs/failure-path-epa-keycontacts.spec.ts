@@ -26,8 +26,8 @@ import {
   EPA_KEY_CONTACTS_FORM_MATCHER,
   EPA_KEY_CONTACTS_REQUIRED_FIELD_ERRORS,
   fieldDefinitionsEPAKeyContacts,
-} from "../../../fixtures/epa-key-contacts-field-definitions";
-import { epaKeyContactsFailurePathTestData } from "../../../fixtures/epa-key-contacts-fill-data";
+} from "tests/e2e/apply/fixtures/epa-key-contacts-field-definitions";
+import { epaKeyContactsFailurePathTestData } from "tests/e2e/apply/fixtures/epa-key-contacts-fill-data";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;

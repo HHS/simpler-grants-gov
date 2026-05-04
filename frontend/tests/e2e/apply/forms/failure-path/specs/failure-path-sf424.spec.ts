@@ -25,7 +25,7 @@ import {
 import {
   SF424_FORM_MATCHER,
   SF424_REQUIRED_FIELD_ERRORS,
-} from "../../../fixtures/sf424-field-definitions";
+} from "tests/e2e/apply/fixtures/sf424-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 

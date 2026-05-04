@@ -24,7 +24,7 @@ import {
 import {
   PROJECT_NARRATIVE_ATTACHMENT_FORM_MATCHER,
   PROJECT_NARRATIVE_ATTACHMENT_REQUIRED_FIELD_ERRORS,
-} from "../../../fixtures/project-narrative-attachment-field-definitions";
+} from "tests/e2e/apply/fixtures/project-narrative-attachment-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;

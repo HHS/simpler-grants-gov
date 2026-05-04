@@ -25,7 +25,7 @@ import {
 import {
   PROJECT_ABSTRACT_SUMMARY_FORM_MATCHER,
   PROJECT_ABSTRACT_SUMMARY_REQUIRED_FIELD_ERRORS,
-} from "../../../fixtures/project-abstract-summary-field-definitions";
+} from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;

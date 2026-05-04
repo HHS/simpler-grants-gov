@@ -25,7 +25,7 @@ import {
 import {
   SF424D_FORM_MATCHER,
   SF424D_REQUIRED_FIELD_ERRORS,
-} from "../../../fixtures/sf424d-field-definitions";
+} from "tests/e2e/apply/fixtures/sf424d-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;

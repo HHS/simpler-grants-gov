@@ -24,7 +24,7 @@ import {
 import {
   SFLLL_FORM_MATCHER,
   SFLLL_REQUIRED_FIELD_ERRORS,
-} from "../../../fixtures/sfLLL-field-definitions";
+} from "tests/e2e/apply/fixtures/sfLLL-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;

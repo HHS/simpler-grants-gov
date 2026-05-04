@@ -24,7 +24,7 @@ import {
 import {
   GRANTSGOV_LOBBYING_FORM_MATCHER,
   GRANTSGOV_LOBBYING_REQUIRED_FIELD_ERRORS,
-} from "../../../fixtures/grantsgov-lobbying-field-definitions";
+} from "tests/e2e/apply/fixtures/grantsgov-lobbying-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 const { testOrgLabel, targetEnv } = playwrightEnv;

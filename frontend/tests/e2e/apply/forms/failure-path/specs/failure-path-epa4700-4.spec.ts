@@ -25,7 +25,7 @@ import {
 import {
   EPA4700_4_FORM_MATCHER,
   EPA4700_4_REQUIRED_FIELD_ERRORS,
-} from "../../../fixtures/epa4700-4-field-definitions";
+} from "tests/e2e/apply/fixtures/epa4700-4-field-definitions";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 
