@@ -7,5 +7,11 @@ if _spec is None or _spec.loader is None:
     raise RuntimeError(f"Could not load form module from {_path}")
 _module = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_module)
-globals().update({k: v for k, v in vars(_module).items() if not k.startswith("_")})
+
+FORM_JSON_SCHEMA = _module.FORM_JSON_SCHEMA
+FORM_UI_SCHEMA = _module.FORM_UI_SCHEMA
+FORM_RULE_SCHEMA = _module.FORM_RULE_SCHEMA
+FORM_XML_TRANSFORM_RULES = _module.FORM_XML_TRANSFORM_RULES
+SupplementaryNEHCoverSheet_v3_0 = _module.SupplementaryNEHCoverSheet_v3_0
+
 del _path, _spec, _module
