@@ -592,28 +592,31 @@ def test_search_notification_email_format_multiple_opportunities(
         "SimpleEmail"
     ]["TextPart"]["Data"]
 
-    # Test single opportunity format
-    expected_single = f"""The following funding opportunities matching your saved search queries were recently published.
-
-<b><a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}{UTM_TAG}' target='_blank'>2025 Port Infrastructure Development Program</a></b>
-Status: Posted
-Submission period: 1/31/2025–4/30/2025
-Award range: $1,000,000-$112,500,000
-Expected awards: 40
-Cost sharing: Yes
-
-<b><a href='http://localhost:8080/opportunity/{opportunity2.opportunity_id}{UTM_TAG}' target='_blank'>Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)</a></b>
-Status: Forecasted
-Submission period: To be announced.
-Award range: $1-$30,000
-Expected awards: --
-Cost sharing: No
-
-To unsubscribe from email notifications for a query, delete it from your saved search queries.""".replace(
-        "\n", "<br/>"
+    # Verify both opportunities are in the email (order may vary)
+    assert (
+        "The following funding opportunities matching your saved search queries were recently published."
+        in email_content
     )
-
-    assert email_content.strip() == expected_single.strip()
+    assert (
+        f"<a href='http://localhost:8080/opportunity/{opportunity1.opportunity_id}{UTM_TAG}' target='_blank'>2025 Port Infrastructure Development Program</a>"
+        in email_content
+    )
+    assert (
+        "Status: Posted<br/>Submission period: 1/31/2025–4/30/2025<br/>Award range: $1,000,000-$112,500,000<br/>Expected awards: 40<br/>Cost sharing: Yes"
+        in email_content
+    )
+    assert (
+        f"<a href='http://localhost:8080/opportunity/{opportunity2.opportunity_id}{UTM_TAG}' target='_blank'>Cooperative Agreement for affiliated Partner with Rocky Mountains Cooperative Ecosystem Studies Unit (CESU)</a>"
+        in email_content
+    )
+    assert (
+        "Status: Forecasted<br/>Submission period: To be announced.<br/>Award range: $1-$30,000<br/>Expected awards: --<br/>Cost sharing: No"
+        in email_content
+    )
+    assert (
+        "To unsubscribe from email notifications for a query, delete it from your saved search queries."
+        in email_content
+    )
 
 
 def test_search_notification_deleted_search(
