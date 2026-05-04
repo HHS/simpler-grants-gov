@@ -29,7 +29,7 @@ enable_waf = true
 
 ## 2. Deploy the WAF in the network layer
 
-The WAF must be created in the network layer before it can be associated with load balancers in the service layer. Note that the WAF may already have been deployed as part of the [network setup process](/docs/infra/set-up-network.md). If not, run the following command to deploy the WAF:
+The WAF must be created in the network layer before it can be associated with load balancers in the service layer. Note that the WAF may already have been deployed as part of the [network setup process](../../documentation/infra/set-up-network.md). If not, run the following command to deploy the WAF:
 
 ```bash
 make infra-update-network NETWORK_NAME=<NETWORK_NAME>
