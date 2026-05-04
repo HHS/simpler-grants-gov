@@ -1,6 +1,6 @@
 /**
  * @feature Search Results CSV Download
- * @featureFile frontend/tests/e2e/search/search-core/features/search-download.feature
+ * @featureFile e2e/search/search-core/features/search-download.feature
  * @scenario Export current search results to CSV from the search page
  */
 
