@@ -51,106 +51,99 @@ export default function SearchResultsListItem({
       className="saved-opportunity-card"
       aria-labelledby={opportunityTitleId}
     >
-      <div className="saved-opportunity-card__main">
-        <div className="saved-opportunity-card__status-row">
-          <div className="saved-opportunity-card__status">
-            <SearchResultListItemStatus
-              archiveDate={opportunity.summary?.archive_date}
-              archivedString={t("resultsListItem.status.archived")}
-              closedDate={opportunity.summary?.close_date}
-              closedString={t("resultsListItem.status.closed")}
-              forecastedString={t("resultsListItem.status.forecasted")}
-              postedString={t("resultsListItem.status.posted")}
-              status={opportunity.opportunity_status}
-            />
-          </div>
-          <dl className="saved-opportunity-card__posted-date">
-            <div className="saved-opportunity-card__posted-date-item">
-              <dt className="saved-opportunity-card__posted-date-term">
-                {postedOrForecastedLabel}
-              </dt>
-              <dd className="saved-opportunity-card__posted-date-description">
-                {opportunity.summary?.post_date
-                  ? formatDate(opportunity.summary.post_date)
-                  : "--"}
-              </dd>
-            </div>
-          </dl>
-        </div>
-        <h2 id={opportunityTitleId} className="saved-opportunity-card__title">
-          <Link
-            href={`/opportunity/${opportunity.opportunity_id}`}
-            className="usa-link"
-            id={searchResultLinkId}
-          >
-            {opportunity.opportunity_title}
-          </Link>
-        </h2>
-
-        <dl className="saved-opportunity-card__metadata">
-          <div className="saved-opportunity-card__metadata-item">
-            <dt className="saved-opportunity-card__metadata-term">
-              {t("resultsListItem.summary.agency")}
+      <h2 id={opportunityTitleId} className="saved-opportunity-card__title">
+        <Link
+          href={`/opportunity/${opportunity.opportunity_id}`}
+          className="usa-link"
+          id={searchResultLinkId}
+        >
+          {opportunity.opportunity_title}
+        </Link>
+      </h2>
+      <div className="saved-opportunity-card__status-row">
+        <dl className="search-result-status">
+          <SearchResultListItemStatus
+            archiveDate={opportunity.summary?.archive_date}
+            archivedString={t("resultsListItem.status.archived")}
+            closedDate={opportunity.summary?.close_date}
+            closedString={t("resultsListItem.status.closed")}
+            forecastedString={t("resultsListItem.status.forecasted")}
+            postedString={t("resultsListItem.status.posted")}
+            status={opportunity.opportunity_status}
+          />
+          <div className="saved-opportunity-card__posted-date">
+            <dt className="saved-opportunity-card__posted-date-term">
+              {postedOrForecastedLabel}
             </dt>
-            <dd className="saved-opportunity-card__metadata-description">
-              {getAgencyDisplayName(opportunity)}
-            </dd>
-          </div>
-          <div className="saved-opportunity-card__metadata-item">
-            <dt className="saved-opportunity-card__metadata-term">
-              {t("resultsListItem.opportunityNumber")}
-            </dt>
-            <dd className="saved-opportunity-card__metadata-description">
-              {opportunity.opportunity_number}
+            <dd className="saved-opportunity-card__posted-date-description">
+              {opportunity.summary?.post_date
+                ? formatDate(opportunity.summary.post_date)
+                : "--"}
             </dd>
           </div>
         </dl>
-
-        {shouldRenderSavedOpportunityTags ? (
-          <div className="saved-opportunity-card__tags">
-            <SavedOpportunityTags
-              labelId={`saved-opportunity-tags-label-${opportunity.opportunity_id}`}
-              tags={savedOpportunityTagsToRender}
-            />
-          </div>
-        ) : null}
       </div>
-      <aside
-        className="saved-opportunity-card__aside"
+
+      <dl className="saved-opportunity-card__metadata">
+        <div className="saved-opportunity-card__metadata-item">
+          <dt className="saved-opportunity-card__metadata-term">
+            {t("resultsListItem.summary.agency")}
+          </dt>
+          <dd className="saved-opportunity-card__metadata-description">
+            {getAgencyDisplayName(opportunity)}
+          </dd>
+        </div>
+        <div className="saved-opportunity-card__metadata-item">
+          <dt className="saved-opportunity-card__metadata-term">
+            {t("resultsListItem.opportunityNumber")}
+          </dt>
+          <dd className="saved-opportunity-card__metadata-description">
+            {opportunity.opportunity_number}
+          </dd>
+        </div>
+      </dl>
+      <dl
+        className="saved-opportunity-card__award"
         aria-label={t("resultsListItem.awardInformation")}
       >
-        <dl className="saved-opportunity-card__award">
-          <div className="saved-opportunity-card__award-item">
-            <dt className="saved-opportunity-card__award-term">
-              {t("resultsListItem.awardCeiling")}
-            </dt>
-            <dd className="saved-opportunity-card__award-description saved-opportunity-card__award-description--maximum">
-              ${opportunity.summary?.award_ceiling?.toLocaleString() || "--"}
-            </dd>
-          </div>
-          <div className="saved-opportunity-card__award-item">
-            <dt className="saved-opportunity-card__award-term">
-              {t("resultsListItem.floor")}
-            </dt>
-            <dd className="saved-opportunity-card__award-description">
-              ${opportunity.summary?.award_floor?.toLocaleString() || "--"}
-            </dd>
-          </div>
-        </dl>
-        {showShareButton && onShareClick ? (
-          <div className="saved-opportunity-card__action">
-            <button
-              id={shareButtonId}
-              data-testid="share-opportunity-button-id"
-              type="button"
-              className="usa-button usa-button--unstyled font-sans-2xs"
-              onClick={(event) => onShareClick(event.currentTarget)}
-            >
-              {t("callToAction.sharingOptions")}
-            </button>
-          </div>
-        ) : null}
-      </aside>
+        <div className="saved-opportunity-card__award-item">
+          <dt className="saved-opportunity-card__award-term">
+            {t("resultsListItem.awardCeiling")}
+          </dt>
+          <dd className="saved-opportunity-card__award-description saved-opportunity-card__award-description--maximum">
+            ${opportunity.summary?.award_ceiling?.toLocaleString() || "--"}
+          </dd>
+        </div>
+        <div className="saved-opportunity-card__award-item">
+          <dt className="saved-opportunity-card__award-term">
+            {t("resultsListItem.floor")}
+          </dt>
+          <dd className="saved-opportunity-card__award-description">
+            ${opportunity.summary?.award_floor?.toLocaleString() || "--"}
+          </dd>
+        </div>
+      </dl>
+      {shouldRenderSavedOpportunityTags ? (
+        <div className="saved-opportunity-card__tags">
+          <SavedOpportunityTags
+            labelId={`saved-opportunity-tags-label-${opportunity.opportunity_id}`}
+            tags={savedOpportunityTagsToRender}
+          />
+        </div>
+      ) : null}
+      {showShareButton && onShareClick ? (
+        <div className="saved-opportunity-card__action border-top border-base-lighter padding-top-1 tablet:border-top-0">
+          <button
+            id={shareButtonId}
+            data-testid="share-opportunity-button-id"
+            type="button"
+            className="usa-button usa-button--unstyled font-sans-2xs"
+            onClick={(event) => onShareClick(event.currentTarget)}
+          >
+            {t("callToAction.sharingOptions")}
+          </button>
+        </div>
+      ) : null}
     </article>
   );
 }
