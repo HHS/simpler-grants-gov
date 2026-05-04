@@ -1,6 +1,6 @@
 /**
  * @feature Search - Core Search Behaviors
- * @featureFile frontend/tests/e2e/search/search-core/features/search.feature
+ * @featureFile e2e/search/search-core/features/search.feature
  * @scenario Validate search pagination, sorting, filter behavior, and page-boundary handling
  */
 
