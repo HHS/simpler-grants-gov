@@ -1,4 +1,4 @@
-"""Loads configuration variables from settings files"""
+"""Loads configuration variables from settings files."""
 
 import os
 
@@ -8,13 +8,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # reads environment variables from .env files defaulting to "local.env"
 class PydanticBaseEnvConfig(BaseSettings):
+    """Base settings class for env vars."""
+
     model_config = SettingsConfigDict(
-        env_file="%s.env" % os.getenv("ENVIRONMENT", "local"),
+        env_file=f"{os.getenv("ENVIRONMENT", "local")}.env",
         extra="allow",
     )
 
 
 class DBSettings(PydanticBaseEnvConfig):
+    """Settings container for the DB and additional connections."""
+
     db_host: str = Field(alias="DB_HOST")
     name: str = Field(alias="DB_NAME")
     port: int = Field(5432, alias="DB_PORT")
@@ -26,8 +30,9 @@ class DBSettings(PydanticBaseEnvConfig):
     github_token: str = Field(alias="GH_TOKEN")
     reporting_channel_id: str = Field(alias="ANALYTICS_REPORTING_CHANNEL_ID")
     aws_region: str | None = Field(None, alias="AWS_REGION")
-    local_env: bool = True if os.getenv("ENVIRONMENT", "local") == "local" else False
+    local_env: bool = os.getenv("ENVIRONMENT", None) == "local"
 
 
 def get_db_settings() -> DBSettings:
+    """Get the DBSettings object."""
     return DBSettings()

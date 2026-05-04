@@ -14,15 +14,13 @@ from collections.abc import Callable
 from datetime import UTC, date, datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Any, TypeVar
+from typing import Any
 from uuid import UUID
 
 from analytics.logs import decodelog
 
-T = TypeVar("T")
 
-
-def identity(obj: T) -> T:
+def identity[T](obj: T) -> T:
     """Return an unmodified object."""
     return obj
 

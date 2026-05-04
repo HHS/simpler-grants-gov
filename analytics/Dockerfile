@@ -29,7 +29,6 @@ RUN rm -rf /analytics/.venv || true
 COPY src /analytics/src
 COPY newrelic.ini /analytics/newrelic.ini
 COPY README.md /analytics/README.md
-COPY config.py /analytics/config.py
 
 # Disable dev dependencies in UV sync
 ENV UV_NO_DEV=1
