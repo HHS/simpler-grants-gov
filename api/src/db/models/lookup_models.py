@@ -18,6 +18,7 @@ from src.constants.lookup_constants import (
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
+    FileScanStatus,
     FormFamily,
     FormType,
     FundingCategory,
@@ -333,6 +334,7 @@ PRIVILEGE_CONFIG: LookupConfig[Privilege] = LookupConfig(
         LookupStr(Privilege.CREATE_AWARD_RECOMMENDATION, 29),
         LookupStr(Privilege.UPDATE_AWARD_RECOMMENDATION, 30),
         LookupStr(Privilege.SUBMIT_AWARD_RECOMMENDATION, 31),
+        LookupStr(Privilege.INTERNAL_S3_SCAN, 32),
     ]
 )
 
@@ -403,6 +405,15 @@ ORGANIZATION_AUDIT_EVENT_CONFIG: LookupConfig[OrganizationAuditEvent] = LookupCo
         LookupStr(OrganizationAuditEvent.USER_ADDED, 1),
         LookupStr(OrganizationAuditEvent.USER_UPDATED, 2),
         LookupStr(OrganizationAuditEvent.USER_REMOVED, 3),
+    ]
+)
+
+FILE_SCAN_STATUS_CONFIG: LookupConfig[FileScanStatus] = LookupConfig(
+    [
+        LookupStr(FileScanStatus.PENDING, 1),
+        LookupStr(FileScanStatus.IN_PROGRESS, 2),
+        LookupStr(FileScanStatus.COMPLETE, 3),
+        LookupStr(FileScanStatus.INFECTED, 4),
     ]
 )
 
@@ -847,4 +858,18 @@ class LkApprovalResponseType(LookupTable, TimestampMixin):
     def from_lookup(cls, lookup: Lookup) -> LkApprovalResponseType:
         return LkApprovalResponseType(
             approval_response_type_id=lookup.lookup_val, description=lookup.get_description()
+        )
+
+
+@LookupRegistry.register_lookup(FILE_SCAN_STATUS_CONFIG)
+class LkFileScanStatus(LookupTable, TimestampMixin):
+    __tablename__ = "lk_file_scan_status"
+
+    file_scan_status_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkFileScanStatus:
+        return LkFileScanStatus(
+            file_scan_status_id=lookup.lookup_val, description=lookup.get_description()
         )
