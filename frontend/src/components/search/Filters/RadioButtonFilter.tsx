@@ -31,7 +31,8 @@ export function RadioButtonFilter({
   const handleRadioClickedTwice = (
     event: React.MouseEvent<HTMLInputElement>,
   ) => {
-    if ((event.currentTarget as HTMLInputElement).checked) { // focused only on checking the radio button to see if its checked.
+    if ((event.currentTarget as HTMLInputElement).checked) {
+      // focused only on checking the radio button to see if its checked.
       setQueryParam(queryParamKey, "");
       event.currentTarget.checked = false;
     }
