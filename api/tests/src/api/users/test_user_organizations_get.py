@@ -63,11 +63,15 @@ class TestUserOrganizationsGet:
         assert data["message"] == "Success"
         assert len(data["data"]) == 2
 
-        # Sort by UEI for consistent testing
-        organizations = sorted(data["data"], key=lambda x: x["sam_gov_entity"]["uei"])
+        # Find organizations by their organization_id
+        org_data_1 = next(
+            org for org in data["data"] if org["organization_id"] == str(org_1.organization_id)
+        )
+        org_data_2 = next(
+            org for org in data["data"] if org["organization_id"] == str(org_2.organization_id)
+        )
 
-        # Check first organization (org_1 - user is owner: True)
-        org_data_1 = organizations[0]
+        # Check first organization
         assert org_data_1["organization_id"] == str(org_1.organization_id)
         assert org_data_1["sam_gov_entity"]["uei"] == sam_gov_entity_1.uei
         assert org_data_1["sam_gov_entity"]["legal_business_name"] == "Test Organization LLC"
@@ -76,8 +80,7 @@ class TestUserOrganizationsGet:
         assert org_data_1["sam_gov_entity"]["ebiz_poc_first_name"] == "Jane"
         assert org_data_1["sam_gov_entity"]["ebiz_poc_last_name"] == "Doe"
 
-        # Check second organization (org_2 - user is owner: False)
-        org_data_2 = organizations[1]
+        # Check second organization
         assert org_data_2["organization_id"] == str(org_2.organization_id)
         assert org_data_2["sam_gov_entity"]["uei"] == sam_gov_entity_2.uei
         assert org_data_2["sam_gov_entity"]["legal_business_name"] == "Another Test Org Inc"
