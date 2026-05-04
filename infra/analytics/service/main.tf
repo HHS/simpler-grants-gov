@@ -121,8 +121,10 @@ data "aws_security_groups" "aws_services" {
 }
 
 data "aws_acm_certificate" "certificate" {
-  count  = local.service_config.enable_https ? 1 : 0
-  domain = local.service_config.domain_name
+  count       = local.service_config.enable_https ? 1 : 0
+  domain      = local.service_config.domain_name
+  key_types   = ["RSA_4096", "RSA_2048"]
+  most_recent = true
 }
 
 data "aws_ssm_parameter" "incident_management_service_integration_url" {
