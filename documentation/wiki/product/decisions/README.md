@@ -19,7 +19,7 @@ Almost all of engineering and code development involves making choices, so how d
 
 > An Architectural Decision (AD) is a software design choice that addresses a functional or non-functional requirement that is architecturally significant.
 >
-> Source: [ADR GitHub Organization](adr/)
+> Source: [ADR GitHub Organization](https://adr.github.io/)
 
 Another way to recognize when making a decision related to your project constitutes an architecture decision is to ask yourself three questions about that decision:
 
