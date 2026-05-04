@@ -30,6 +30,8 @@ jobs:
       # set up python
       - uses: actions/checkout@v4
 
+      # Initialize the DB a bit before we run the migrations
+      # to give the DB time to fully initialize
       - name: Initialize DB
         run: make db-init
 
