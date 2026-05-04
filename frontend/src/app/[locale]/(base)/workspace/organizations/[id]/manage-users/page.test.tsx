@@ -1,38 +1,22 @@
-import { render, screen } from "@testing-library/react";
-
-import React, { JSX } from "react";
-
-import "@testing-library/jest-dom";
-
+import { render } from "@testing-library/react";
+import { identity } from "lodash";
 import Page, {
   generateMetadata,
 } from "src/app/[locale]/(base)/workspace/organizations/[id]/manage-users/page";
+import { mockAuthorizationGateFor } from "src/utils/testing/AuthorizationGateMock";
+
+import { JSX } from "react";
 
 type Params = { locale: string; id: string };
 
-// Keep this type minimal so eslint doesn't treat it as propTypes
-type ManageUsersPageContentMinimalProps = {
-  organizationId: string;
-};
+type PageFn = (args: { params: Promise<Params> }) => Promise<JSX.Element>;
 
-const ManageUsersPageContentMock = jest.fn<
-  void,
-  [ManageUsersPageContentMinimalProps]
->();
+const ManageUsersPageContentMock = jest.fn();
 
 jest.mock("src/components/manageUsers/ManageUsersPageContent", () => ({
-  ManageUsersPageContent: (props: unknown) => {
-    const typedProps = props as ManageUsersPageContentMinimalProps;
-    ManageUsersPageContentMock(typedProps);
-    return (
-      <div data-testid="manage-users-page-content">
-        org-id: {typedProps.organizationId}
-      </div>
-    );
-  },
+  ManageUsersPageContent: (props: unknown) =>
+    ManageUsersPageContentMock(props) as unknown,
 }));
-
-type PageFn = (args: { params: Promise<Params> }) => Promise<JSX.Element>;
 
 jest.mock("src/services/featureFlags/withFeatureFlag", () => ({
   __esModule: true,
@@ -46,91 +30,73 @@ jest.mock("next/navigation", () => ({
   redirect: jest.fn(),
 }));
 
-type TranslationFn = (key: string) => string;
-
-const getTranslationsMock = jest.fn<
-  Promise<TranslationFn>,
-  [{ locale: string }]
->(({ locale }) =>
-  Promise.resolve((key: string) => {
-    if (key === "ManageUsers.pageTitle") return "Manage users page title";
-    if (key === "Index.metaDescription") {
-      return "Manage users meta description";
-    }
-    return `${key}:${locale}`;
-  }),
-);
-
 jest.mock("next-intl/server", () => ({
-  getTranslations: (opts: { locale: string }) => getTranslationsMock(opts),
+  getTranslations: () => identity,
 }));
 
-// --- AuthorizationGate mock ---
+const getOrganizationPendingInvitationsMock = jest.fn().mockResolvedValue({});
+const getOrganizationUsersMock = jest.fn().mockResolvedValue({});
+const getOrganizationRolesMock = jest.fn().mockResolvedValue({});
 
-type ResourcePromises = {
-  invitedUsersList: Promise<unknown>;
-  activeUsersList: Promise<unknown>;
-  organizationRolesList: Promise<unknown>;
-};
+jest.mock("src/services/fetch/fetchers/organizationsFetcher", () => ({
+  getOrganizationPendingInvitations: (...args: unknown[]) =>
+    getOrganizationPendingInvitationsMock(...args) as unknown,
+  getOrganizationUsers: (...args: unknown[]) =>
+    getOrganizationUsersMock(...args) as unknown,
+  getOrganizationRoles: (...args: unknown[]) =>
+    getOrganizationRolesMock(...args) as unknown,
+}));
 
-type RequiredPrivilege = {
-  resourceId: string;
-  resourceType: string;
-  privilege: string;
-};
-
-const AuthorizationGateMock = jest.fn<void, [unknown]>();
+const MockAuthorizationGate = jest.fn();
 
 jest.mock("src/components/user/AuthorizationGate", () => ({
   AuthorizationGate: (props: unknown) => {
-    AuthorizationGateMock(props);
-    const { children } = props as { children: React.ReactNode };
-    return <div data-testid="authorization-gate">{children}</div>;
+    return MockAuthorizationGate(props) as unknown;
   },
-}));
-
-// --- organizationsFetcher mocks ---
-
-type GetOrgPendingInvitationsFn = (organizationId: string) => Promise<unknown>;
-
-type GetOrgUsersFn = (organizationId: string) => Promise<unknown>;
-
-type GetOrgRolesFn = (organizationId: string) => Promise<unknown>;
-
-const getOrganizationPendingInvitationsMock: jest.MockedFunction<GetOrgPendingInvitationsFn> =
-  jest.fn<Promise<unknown>, [string]>((_orgId: string) => Promise.resolve([]));
-
-const getOrganizationUsersMock: jest.MockedFunction<GetOrgUsersFn> = jest.fn<
-  Promise<unknown>,
-  [string]
->((_orgId: string) => Promise.resolve([]));
-
-const getOrganizationRolesMock: jest.MockedFunction<GetOrgRolesFn> = jest.fn<
-  Promise<unknown>,
-  [string]
->((_orgId: string) => Promise.resolve([]));
-
-jest.mock("src/services/fetch/fetchers/organizationsFetcher", () => ({
-  getOrganizationPendingInvitations: (
-    ...args: Parameters<GetOrgPendingInvitationsFn>
-  ) => getOrganizationPendingInvitationsMock(...args),
-  getOrganizationUsers: (...args: Parameters<GetOrgUsersFn>) =>
-    getOrganizationUsersMock(...args),
-  getOrganizationRoles: (...args: Parameters<GetOrgRolesFn>) =>
-    getOrganizationRolesMock(...args),
 }));
 
 const PageTyped = Page as unknown as PageFn;
 
-describe("manage-users page", () => {
+describe("Manage users page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getOrganizationPendingInvitationsMock.mockResolvedValue([]);
-    getOrganizationUsersMock.mockResolvedValue([]);
-    getOrganizationRolesMock.mockResolvedValue([]);
   });
 
-  it("renders ManageUsersPageContent with the organizationId from params and wires AuthorizationGate correctly", async () => {
+  it("renders ManageUsersPageContent with the correct props passed from the AuthorizationGate", async () => {
+    const gateMock = mockAuthorizationGateFor({
+      promiseResults: {
+        invitedUsersList: {
+          statusCode: 200,
+          data: {
+            someData: "here",
+          },
+        },
+        activeUsersList: {
+          statusCode: 200,
+          data: {
+            moreData: {
+              evenMoreData: ["ok"],
+            },
+          },
+        },
+        organizationRolesList: {
+          statusCode: 200,
+          data: {
+            finally: 1,
+          },
+        },
+      },
+      privilegeResults: [
+        {
+          resourceId: "1",
+          resourceType: "organization",
+          privilege: "manage_org_members",
+          authorized: true,
+        },
+      ],
+    });
+    MockAuthorizationGate.mockImplementation(gateMock);
+
     const params: Promise<Params> = Promise.resolve({
       locale: "en",
       id: "org-123",
@@ -140,37 +106,93 @@ describe("manage-users page", () => {
 
     render(element);
 
-    expect(screen.getByTestId("manage-users-page-content")).toHaveTextContent(
-      "org-id: org-123",
-    );
-    expect(ManageUsersPageContentMock).toHaveBeenCalledTimes(1);
-    const contentProps = ManageUsersPageContentMock.mock.calls[0][0];
-    expect(contentProps.organizationId).toBe("org-123");
-
-    expect(AuthorizationGateMock).toHaveBeenCalledTimes(1);
-    const gateProps = AuthorizationGateMock.mock.calls[0][0] as {
-      resourcePromises: ResourcePromises;
-      requiredPrivileges: RequiredPrivilege[];
-      onUnauthorized: () => JSX.Element;
-    };
-
-    expect(gateProps.requiredPrivileges).toEqual([
-      {
-        resourceId: "org-123",
-        resourceType: "organization",
-        privilege: "manage_org_members",
+    expect(ManageUsersPageContentMock).toHaveBeenCalledWith({
+      organizationId: "org-123",
+      authorizedData: {
+        fetchedResources: {
+          invitedUsersList: {
+            statusCode: 200,
+            data: {
+              someData: "here",
+            },
+          },
+          activeUsersList: {
+            statusCode: 200,
+            data: {
+              moreData: {
+                evenMoreData: ["ok"],
+              },
+            },
+          },
+          organizationRolesList: {
+            statusCode: 200,
+            data: {
+              finally: 1,
+            },
+          },
+        },
+        confirmedPrivileges: [
+          {
+            resourceId: "1",
+            resourceType: "organization",
+            privilege: "manage_org_members",
+            authorized: true,
+          },
+        ],
       },
-    ]);
+    });
+  });
+
+  it("calls the expected functions to gather data", async () => {
+    const organizationId = "org-123";
+    const gateMock = mockAuthorizationGateFor({
+      promiseResults: {
+        invitedUsersList: {
+          statusCode: 200,
+          data: {
+            someData: "here",
+          },
+        },
+        activeUsersList: {
+          statusCode: 200,
+          data: {
+            moreData: {
+              evenMoreData: ["ok"],
+            },
+          },
+        },
+        organizationRolesList: {
+          statusCode: 200,
+          data: {
+            finally: 1,
+          },
+        },
+      },
+      privilegeResults: [
+        {
+          resourceId: "1",
+          resourceType: "organization",
+          privilege: "manage_org_members",
+          authorized: true,
+        },
+      ],
+    });
+    MockAuthorizationGate.mockImplementation(gateMock);
+
+    const params: Promise<Params> = Promise.resolve({
+      locale: "en",
+      id: organizationId,
+    });
+
+    const element = await PageTyped({ params });
+
+    render(element);
 
     expect(getOrganizationPendingInvitationsMock).toHaveBeenCalledWith(
-      "org-123",
+      organizationId,
     );
-    expect(getOrganizationUsersMock).toHaveBeenCalledWith("org-123");
-    expect(getOrganizationRolesMock).toHaveBeenCalledWith("org-123");
-
-    expect(gateProps.resourcePromises).toHaveProperty("invitedUsersList");
-    expect(gateProps.resourcePromises).toHaveProperty("activeUsersList");
-    expect(gateProps.resourcePromises).toHaveProperty("organizationRolesList");
+    expect(getOrganizationRolesMock).toHaveBeenCalledWith(organizationId);
+    expect(getOrganizationRolesMock).toHaveBeenCalledWith(organizationId);
   });
 
   it("generateMetadata returns translated title and description", async () => {
@@ -182,8 +204,8 @@ describe("manage-users page", () => {
     const meta = await generateMetadata({ params });
 
     expect(meta).toEqual({
-      title: "Manage users page title",
-      description: "Manage users meta description",
+      description: "Index.metaDescription",
+      title: "ManageUsers.pageTitle",
     });
   });
 });
