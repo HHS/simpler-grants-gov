@@ -1618,6 +1618,11 @@ wheels = [
 ]
 
 [[package]]
+name = "shared-sgg"
+version = "0.1.1"
+source = { editable = "../backend/shared" }
+
+[[package]]
 name = "simpler-grants-gov-api"
 version = "0.1.0"
 source = { editable = "." }
@@ -1652,6 +1657,7 @@ dependencies = [
     { name = "python-statemachine" },
     { name = "pytz" },
     { name = "pyyaml" },
+    { name = "shared-sgg" },
     { name = "smart-open" },
     { name = "sqlalchemy", extra = ["mypy"] },
     { name = "tenacity" },
@@ -1718,6 +1724,7 @@ requires-dist = [
     { name = "python-statemachine", specifier = ">=3.0.0,<4" },
     { name = "pytz", specifier = ">=2023.3.post1,<2024" },
     { name = "pyyaml", specifier = ">=6.0.3,<7" },
+    { name = "shared-sgg", editable = "../backend/shared" },
     { name = "smart-open", specifier = ">=7.0.0,<8" },
     { name = "sqlalchemy", extras = ["mypy"], specifier = ">=2.0.21,<3" },
     { name = "tenacity", specifier = ">=8.0,<9" },

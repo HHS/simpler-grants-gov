@@ -9,6 +9,15 @@ from src.util import file_util
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
 from tests.src.db.models.factories import OpportunityAttachmentFactory, OpportunityFactory
 
+import shared_sgg
+
+def test_thing():
+    print(shared_sgg)
+    print(shared_sgg.__dict__)
+    print("------")
+    print(shared_sgg.__dict__)
+    shared_sgg.thing()
+    shared_sgg.example_function()
 
 @pytest.fixture
 def grantor_auth_data(db_session, enable_factory_create):
