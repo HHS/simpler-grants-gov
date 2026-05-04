@@ -1,6 +1,6 @@
 /**
  * @feature Search Error Handling and Recovery
- * @featureFile e2e/search/search-core/features/search-error.feature
+ * @featureFile frontend/tests/e2e/search/search-core/features/search-error.feature
  * @scenario Show an error state for invalid search params and recover by running a valid search
  */
 
