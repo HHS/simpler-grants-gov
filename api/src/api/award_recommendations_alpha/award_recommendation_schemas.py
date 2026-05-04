@@ -1,7 +1,11 @@
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.extension.field_validators import Length
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
+from src.api.schemas.search_schema import (
+    BoolSearchSchemaBuilder,
+    StrSearchSchemaBuilder,
+    UuidSearchSchemaBuilder,
+)
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApprovalResponseType,
@@ -576,6 +580,50 @@ class AwardRecommendationRiskListResponseSchema(AbstractResponseSchema, Paginati
     data = fields.List(
         fields.Nested(AwardRecommendationRiskResponseDataSchema),
         metadata={"description": "The list of award recommendation risks"},
+    )
+
+
+####################################
+# List Award Recommendations
+####################################
+
+
+class AwardRecommendationListFilterSchema(Schema):
+    """Schema for the award recommendation list filters"""
+
+    agency_id = fields.Nested(
+        UuidSearchSchemaBuilder("AwardRecommendationListAgencyIdFilterSchema")
+        .with_one_of()
+        .build(),
+        required=True,
+        metadata={
+            "description": "Filter award recommendations by agency. The user must have the "
+            "view_award_recommendation privilege in each agency listed."
+        },
+    )
+
+
+class AwardRecommendationListRequestSchema(Schema):
+    """Schema for POST /alpha/award-recommendations/list request"""
+
+    filters = fields.Nested(AwardRecommendationListFilterSchema(), required=True)
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "AwardRecommendationListPaginationSchema",
+            ["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "ascending"}],
+        ),
+        required=True,
+    )
+
+
+class AwardRecommendationListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    """Schema for POST /alpha/award-recommendations/list response"""
+
+    data = fields.List(
+        fields.Nested(AwardRecommendationDataSchema),
+        metadata={"description": "The list of award recommendations"},
     )
 
 
