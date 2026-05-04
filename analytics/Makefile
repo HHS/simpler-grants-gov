@@ -29,15 +29,15 @@ else
  DOCKER_EXEC_ARGS := -e GH_TOKEN
 endif
 
-# By default, all python/poetry commands will run inside of the docker container
+# By default, all python/uv commands will run inside of the docker container
 # if you wish to run this natively, add PY_RUN_APPROACH=local to your environment vars
 # You can set this by either running `export PY_RUN_APPROACH=local` in your shell or add
 # it to your ~/.zshrc file (and run `source ~/.zshrc`)
 ifeq "$(PY_RUN_APPROACH)" "local"
-POETRY := poetry run
+PY_RUN_CMD := uv run
 GITHUB := gh
 else
-POETRY := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
+PY_RUN_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME)
 GITHUB := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) gh
 endif
 
@@ -68,13 +68,13 @@ export RUN_UID
 
 check-prereqs:
 	@echo "=> Checking for pre-requisites"
-	@if ! poetry --version; then echo "=> Poetry isn't installed"; fi
+	@if ! uv --version; then echo "=> UV isn't installed"; fi
 	@if ! gh --version; then echo "=> GitHub CLI isn't installed" && exit 1; fi
-	@echo "=> Poetry and GitHub CLI installed"
+	@echo "=> UV and GitHub CLI installed"
 
 install: check-prereqs
 	@echo "=> Installing python dependencies"
-	poetry install
+	uv sync --all-groups
 
 login:
 	$(GITHUB) auth login
@@ -100,17 +100,17 @@ release-build:
 unit-test:
 	@echo "=> Running unit tests"
 	@echo "============================="
-	$(POETRY) pytest --cov=src ${args}
+	$(PY_RUN_CMD) pytest --cov=src ${args}
 
 e2e-test:
 	@echo "=> Running end-to-end tests"
 	@echo "============================="
-	$(POETRY) pytest tests/integrations --cov=src --cov-append
+	$(PY_RUN_CMD) pytest tests/integrations --cov=src --cov-append
 
 test-audit: unit-test e2e-test
 	@echo "=> Running test coverage report"
 	@echo "============================="
-	$(POETRY) coverage report --show-missing --fail-under=$(MIN_TEST_COVERAGE)
+	$(PY_RUN_CMD) coverage report --show-missing --fail-under=$(MIN_TEST_COVERAGE)
 
 ##########################
 # Formatting and Linting #
@@ -119,24 +119,24 @@ test-audit: unit-test e2e-test
 format: ## runs code formatting
 	@echo "=> Running code formatting"
 	@echo "============================="
-	$(POETRY) black src tests
-	$(POETRY) ruff check --fix src tests
+	$(PY_RUN_CMD) black src tests
+	$(PY_RUN_CMD) ruff check --fix src tests
 	@echo "============================="
 	@echo "=> Code formatting complete"
 
 format-check: ## runs code formatting checks
 	@echo "=> Running code formatting checks"
 	@echo "============================="
-	$(POETRY) black --check src tests
-	$(POETRY) ruff check src tests
+	$(PY_RUN_CMD) black --check src tests
+	$(PY_RUN_CMD) ruff check src tests
 	@echo "============================="
 	@echo "=> All checks succeeded"
 
 lint: ## runs code quality checks
 	@echo "=> Running code quality checks"
 	@echo "============================="
-	$(POETRY) pylint src tests
-	$(POETRY) mypy src
+	$(PY_RUN_CMD) pylint src tests
+	$(PY_RUN_CMD) mypy src
 	@echo "============================="
 	@echo "=> All checks succeeded"
 
@@ -147,19 +147,19 @@ lint: ## runs code quality checks
 db-migrate:
 	@echo "=> Migrating the database schema"
 	@echo "====================================================="
-	$(POETRY) analytics etl db_migrate
+	$(PY_RUN_CMD) analytics etl db_migrate
 	@echo "====================================================="
 
 opportunity-load:
 	@echo "=> Ingesting opportunity data into the database"
 	@echo "====================================================="
-	$(POETRY) analytics etl opportunity-load
+	$(PY_RUN_CMD) analytics etl opportunity-load
 	@echo "====================================================="
 
 gh-extract-transform-and-load:
 	@echo "=> Extract, transform and load GitHub data into analytics warebase"
 	@echo "====================================================="
-	$(POETRY) analytics etl extract_transform_and_load \
+	$(PY_RUN_CMD) analytics etl extract_transform_and_load \
 	--config-file $(PROJECT_CONFIG_FILE) \
 	--effective-date $(EFFECTIVE_DATE)
 	@echo "====================================================="
@@ -167,7 +167,7 @@ gh-extract-transform-and-load:
 gh-transform-and-load:
 	@echo "=> Transforming and loading GitHub data into the database"
 	@echo "====================================================="
-	$(POETRY) analytics etl transform_and_load \
+	$(PY_RUN_CMD) analytics etl transform_and_load \
 	--issue-file $(ISSUE_FILE) \
 	--effective-date $(EFFECTIVE_DATE)
 	@echo "====================================================="
@@ -175,7 +175,7 @@ gh-transform-and-load:
 gh-data-export:
 	@echo "=> Exporting GitHub issue and sprint data for delivery metrics"
 	@echo "====================================================="
-	$(POETRY)  analytics export gh_delivery_data \
+	$(PY_RUN_CMD)  analytics export gh_delivery_data \
 	--config-file $(PROJECT_CONFIG_FILE) \
 	--output-file $(ISSUE_FILE) \
 	--temp-dir $(OUTPUT_DIR)
@@ -183,5 +183,5 @@ gh-data-export:
 mb-backup:
 	@echo "=> Backing up Metabase queries to disk"
 	@echo "====================================================="
-	$(POETRY) analytics metabase backup
+	$(PY_RUN_CMD) analytics metabase backup
 	@echo "====================================================="
