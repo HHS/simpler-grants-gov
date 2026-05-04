@@ -10,4 +10,4 @@ Feature: Search - Default Filters
   Scenario: Load search page with forecasted and open filters checked by default
     Given I am on the "Search funding opportunity" page
     Then I see the "Search funding opportunities" heading
-    And the 'forecasted' and 'posted' filters are checked by default
+    And the 'forecasted' and 'Open' filters are checked by default
