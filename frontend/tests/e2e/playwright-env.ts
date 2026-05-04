@@ -8,22 +8,32 @@ if (fs.existsSync(envPath)) {
   dotenv.config({ path: envPath, quiet: true });
 }
 
+const SUPPORTED_ENVS = ["local", "staging"];
+
 // Base URLs for each environment, read from .env.local if present, else fallback to defaults
 const BASE_URLS: Record<string, string> = {
   local: process.env.LOCAL_BASE_URL || "http://127.0.0.1:3000",
   staging: process.env.STAGING_BASE_URL || "https://staging.simpler.grants.gov",
 };
 
-// Determine environment: can be overridden via PLAYWRIGHT_TARGET_ENV
+// API URLs for each environment, read from .env.local if present, else fallback to defaults
+const API_URLS: Record<string, string> = {
+  local: process.env.LOCAL_API_URL || "http://127.0.0.1:8080",
+  staging:
+    process.env.STAGING_API_URL || "https://api.staging.simpler.grants.gov",
+};
+
 const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
 
-if (!Object.prototype.hasOwnProperty.call(BASE_URLS, targetEnv)) {
+if (SUPPORTED_ENVS.indexOf(targetEnv) === -1) {
   throw new Error(
-    `Unsupported PLAYWRIGHT_TARGET_ENV: ${targetEnv}. Allowed values: ${Object.keys(BASE_URLS).join(", ")}`,
+    `Unsupported PLAYWRIGHT_TARGET_ENV: ${targetEnv}. Allowed values: ${SUPPORTED_ENVS.join(", ")}`,
   );
 }
 
 const baseUrl = BASE_URLS[targetEnv];
+
+const apiUrl = API_URLS[targetEnv];
 
 // Label used to select the test user from the local dev quick-login dropdown.
 // Must match the OAuth login name defined in seed_orgs_and_users.py.
@@ -53,6 +63,7 @@ const webServerEnv: Record<string, string> = Object.fromEntries(
 const playwrightEnv = {
   webServerEnv,
   baseUrl,
+  apiUrl,
   targetEnv,
   testUserLabel,
   testOrgLabel,
@@ -60,10 +71,12 @@ const playwrightEnv = {
   totalShards: process.env.TOTAL_SHARDS,
   currentShard: process.env.CURRENT_SHARD,
   fakeServerToken: process.env.E2E_USER_AUTH_TOKEN,
-  clientSessionSecret: process.env.SESSION_SECRET,
+  clientSessionSecret:
+    process.env.SESSION_SECRET_OVERRIDE || process.env.SESSION_SECRET,
   testUserEmail: process.env.STAGING_TEST_USER_EMAIL || "",
   testUserPassword: process.env.STAGING_TEST_USER_PASSWORD || "",
   testUserAuthKey: process.env.STAGING_TEST_USER_MFA_KEY || "",
+  stagingTestUserApiKey: process.env.STAGING_TEST_USER_API_KEY || "",
 };
 
 export default playwrightEnv;
