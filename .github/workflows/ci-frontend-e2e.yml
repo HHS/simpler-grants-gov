@@ -56,12 +56,12 @@ jobs:
         working-directory: ./
         run: |
           echo "${{ github.event.pull_request.head.sha}}|${{ github.head_ref }}|${{github.ref }}"
-          echo "${{ github.event.pull_request.repository }}"
+          echo "${{ github.event.repository.full_name }}"
 
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
-          repository: ${{ github.event.pull_request.repository }}
+          repository: ${{ github.event.repository.full_name }}
           fetch-depth: 1000
       - name: Get commit hash
         id: get-api-commit-hash
