@@ -172,6 +172,7 @@ AWARD_RECOMMENDATION_USER = Role(
     link_privileges=get_link_privileges(
         AWARD_RECOMMENDATION_USER_ID,
         [
+            Privilege.VIEW_OPPORTUNITY,
             Privilege.VIEW_AWARD_RECOMMENDATION,
             Privilege.CREATE_AWARD_RECOMMENDATION,
             Privilege.UPDATE_AWARD_RECOMMENDATION,

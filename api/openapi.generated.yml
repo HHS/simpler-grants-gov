@@ -6694,7 +6694,7 @@ components:
           type: string
           maxLength: 6
           description: The Assistance Listing Number
-          example: 12-ABC
+          example: 12.ABC
       required:
       - agency_id
       - assistance_listing_number
@@ -8125,6 +8125,7 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - internal_s3_scan
             type:
             - string
         allowed_approval_response_types:
@@ -8404,6 +8405,7 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - internal_s3_scan
             type:
             - string
     UserOrganization:
@@ -8581,6 +8583,7 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - internal_s3_scan
             type:
             - string
     SortedResultsInfo:
@@ -9527,6 +9530,7 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - internal_s3_scan
             type:
             - string
     UserInvitationItemSchema:
@@ -10036,6 +10040,7 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - internal_s3_scan
             type:
             - string
     OrganizationUserSchema:
@@ -13308,10 +13313,6 @@ components:
       required:
       - is_reviewed
   securitySchemes:
-    InternalApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Internal-Token
     ApiUserKeyAuth:
       type: apiKey
       in: header
@@ -13320,6 +13321,10 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Token
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
     ApiKeyAuth:
       type: apiKey
       in: header

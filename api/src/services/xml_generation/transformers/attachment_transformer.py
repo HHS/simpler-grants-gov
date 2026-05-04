@@ -196,6 +196,11 @@ class AttachmentTransformer:
             # No wrapper needed - populate content directly on parent
             self._populate_attachment_content(parent, attachment_data, nsmap)
 
+    def _get_namespace(self, tag: str) -> str | None:
+        if tag.startswith("{"):
+            return tag.split("}")[0][1:]
+        return None
+
     def _add_multiple_attachment_element(
         self,
         parent: lxml_etree._Element,
@@ -211,7 +216,13 @@ class AttachmentTransformer:
             attachment_data: Attachment group data dictionary
             nsmap: Namespace map
         """
-        group_elem = lxml_etree.SubElement(parent, element_name)
+
+        form_ns = self._get_namespace(parent.tag)
+
+        if form_ns:
+            group_elem = lxml_etree.SubElement(parent, f"{{{form_ns}}}{element_name}")
+        else:
+            group_elem = lxml_etree.SubElement(parent, element_name)
 
         # Normalize to list of file data
         files_to_add: list[Any] = []
@@ -231,7 +242,10 @@ class AttachmentTransformer:
         file_data: Any,
         nsmap: dict[str, str],
     ) -> None:
-        file_elem = lxml_etree.SubElement(parent, "AttachedFile")
+
+        att_ns = nsmap.get("att", self.attachment_namespace)
+
+        file_elem = lxml_etree.SubElement(parent, f"{{{att_ns}}}AttachedFile")
         self._populate_attachment_content(file_elem, file_data, nsmap)
 
     def _populate_attachment_content(
