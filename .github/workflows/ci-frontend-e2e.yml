@@ -54,8 +54,10 @@ jobs:
     steps:
       - name: Troubleshoot shas and refs
         working-directory: ./
+        env:
+          CLEAN_HEAD_REF: ${{ github.head_ref }}
         run: |
-          echo "${{ github.event.pull_request.head.sha}}|${{ github.head_ref }}|${{github.ref }}"
+          echo "${{ github.event.pull_request.head.sha}}|$CLEAN_HEAD_REF|${{github.ref }}"
           echo "${{ github.event.repository.full_name }}"
 
       - uses: actions/checkout@v6
