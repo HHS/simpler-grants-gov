@@ -144,6 +144,9 @@ lint: ## runs code quality checks
 # Data Commands #
 #################
 
+db-init:
+	docker compose up --detach grants-analytics-db
+
 db-migrate:
 	@echo "=> Migrating the database schema"
 	@echo "====================================================="

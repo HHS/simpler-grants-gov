@@ -29,19 +29,9 @@ jobs:
     steps:
       # set up python
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.14"
 
-      # install UV
-      # https://docs.astral.sh/uv/guides/integration/github/
-      - name: Install UV
-        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
-        with:
-          version: "0.11.8"
-
-      - name: Install analytics package using uv
-        run: make install
+      - name: Initialize DB
+        run: make db-init
 
       - name: Check formatters
         run: make format-check
@@ -50,7 +40,7 @@ jobs:
         run: make lint
 
       - name: Run database migrations
-        run: docker compose down --volumes && make db-migrate
+        run: make db-migrate
 
       - name: Run tests
         run: make test-audit
