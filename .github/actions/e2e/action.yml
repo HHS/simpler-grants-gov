@@ -47,6 +47,13 @@ inputs:
   force-webkit-install:
     description: "webkit dependencies aren't all cached, so we need to force it to install"
     default: "false"
+  staging_test_user_api_key:
+    description: "test user API key used in spoofing staging user logins"
+    default: ""
+  staging_client_session_secret:
+    description: "encode key for client side JWTs, used in spoofing staging user logins"
+    default: ""
+
 outputs:
   artifact-id:
     description: "artifact ids for uploaded test reports"
@@ -103,6 +110,9 @@ runs:
         STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
         STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
+        STAGING_TEST_USER_API_KEY: ${{ inputs.staging_test_user_api_key }}
+        SESSION_SECRET_OVERRIDE: ${{ inputs.staging_client_session_secret }}
+
       run: |
         npm run test:e2e
       shell: bash
@@ -119,6 +129,9 @@ runs:
         STAGING_TEST_USER_EMAIL: ${{ inputs.staging_test_user_email }}
         STAGING_TEST_USER_PASSWORD: ${{ inputs.staging_test_user_password }}
         STAGING_TEST_USER_MFA_KEY: ${{ inputs.staging_test_user_mfa_key }}
+        STAGING_TEST_USER_API_KEY: ${{ inputs.staging_test_user_api_key }}
+        SESSION_SECRET_OVERRIDE: ${{ inputs.staging_client_session_secret }}
+
       run: |
         npm run test:e2e -- --grep "${{ inputs.playwright_tags }}"
       shell: bash

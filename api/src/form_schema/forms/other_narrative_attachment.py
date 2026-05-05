@@ -46,8 +46,8 @@ FORM_XML_TRANSFORM_RULES = {
         "namespaces": {
             "default": "http://apply.grants.gov/forms/OtherNarrativeAttachments_1_2-V1.2",
             "att": "http://apply.grants.gov/system/Attachments-V1.0",
-            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
             "glob": "http://apply.grants.gov/system/Global-V1.0",
+            "globLib": "http://apply.grants.gov/system/GlobalLibrary-V2.0",
         },
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/OtherNarrativeAttachments_1_2-V1.2.xsd",
         "xml_structure": {
