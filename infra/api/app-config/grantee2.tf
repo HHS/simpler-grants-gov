@@ -6,7 +6,7 @@ module "grantee2_config" {
   environment                       = "grantee2"
   network_name                      = "grantee2"
   domain_name                       = "api.grantee2.teams.simpler.grants.gov"
-  secondary_domain_names            = []
+  secondary_domain_names            = ["alb.grantee2.teams.simpler.grants.gov"]
   s3_cdn_domain_name                = "files.grantee2.teams.simpler.grants.gov"
   mtls_domain_name                  = null
   enable_https                      = true
@@ -18,7 +18,7 @@ module "grantee2_config" {
   enable_notifications              = local.enable_notifications
   service_newrelic_entity_guid      = ""
   service_newrelic_mtls_entity_guid = null
-  api_host_newrelic_entity_guid     = "<PLACEHOLDER>"
+  api_host_newrelic_entity_guid     = null
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
   # https://us-east-1.console.aws.amazon.com/ecs/v2/clusters/api-staging/services/api-staging/health?region=us-east-1

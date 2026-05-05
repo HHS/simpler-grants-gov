@@ -13,11 +13,18 @@ import {
   INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE,
 } from "src/utils/opportunity/savedOpportunitiesUtils";
 import { mockOpportunity } from "src/utils/testing/fixtures";
-import {
-  localeParams,
-  mockUseTranslations,
-  useTranslationsMock,
-} from "src/utils/testing/intlMocks";
+import { localeParams, useTranslationsMock } from "src/utils/testing/intlMocks";
+
+import { ReactNode } from "react";
+
+type MockRichTranslationValues = {
+  link: (chunks: string) => ReactNode;
+};
+
+type MockTranslationFunction = {
+  (key: string): string;
+  rich: (key: string, values: MockRichTranslationValues) => ReactNode;
+};
 
 const getSessionMock = jest.fn<
   Promise<{ token: string; user_id: string; email: string } | null>,
@@ -28,6 +35,7 @@ const getUserOrganizationsMock = jest.fn<
   Promise<Organization[]>,
   [string, string]
 >();
+
 jest.mock("src/services/auth/session", () => ({
   getSession: () => getSessionMock(),
 }));
@@ -42,7 +50,23 @@ jest.mock("next-intl", () => ({
 }));
 
 jest.mock("next-intl/server", () => ({
-  getTranslations: () => mockUseTranslations,
+  getTranslations: () => {
+    const translationFunction = ((key: string) =>
+      key) as MockTranslationFunction;
+
+    translationFunction.rich = (
+      key: string,
+      values: MockRichTranslationValues,
+    ) => {
+      if (key === "SavedOpportunities.toNotificationsPreferences") {
+        return values.link("Manage your notification preferences here.");
+      }
+
+      return key;
+    };
+
+    return translationFunction;
+  },
 }));
 
 const savedOpportunitiesMock = jest.fn();
@@ -109,7 +133,8 @@ function mockSavedOpportunitiesByScope({
       if (scope === INDIVIDUAL_SAVED_OPPORTUNITIES_SCOPE) {
         return Promise.resolve(individuallySavedOpportunities);
       }
-      // The page now fetches DEFAULT scope separately to determine whether the
+
+      // The page fetches DEFAULT scope separately to determine whether the
       // user has any saved opportunities at all, so always return the combined
       // list for that unfiltered request.
       if (
@@ -182,6 +207,21 @@ describe("Saved Opportunities page", () => {
         },
       ],
     });
+  });
+
+  it("renders a link to notification preferences", async () => {
+    const component = await SavedOpportunities({
+      params: localeParams,
+      searchParams: defaultSearchParams,
+    });
+    render(component);
+
+    const notificationsLink = screen.getByRole("link", {
+      name: "Manage your notification preferences here.",
+    });
+
+    expect(notificationsLink).toBeInTheDocument();
+    expect(notificationsLink).toHaveAttribute("href", "/notifications");
   });
 
   it("does not render status filter when there are no saved opportunities", async () => {
@@ -517,6 +557,7 @@ describe("Saved Opportunities page", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText("statusFilter.label")).toBeInTheDocument();
   });
+
   it("keeps filters visible and shows filtered empty state when the selected organization has no saved opportunities", async () => {
     savedOpportunitiesMock.mockImplementation(
       (
