@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy import update
 
 from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.agency_models import Agency
@@ -14,7 +15,10 @@ from tests.src.db.models.factories import (
 
 
 @pytest.fixture(autouse=True)
-def clear_data(db_session):
+def clear_data(db_session, test_api_schema):
+    # Set all opportunity agency_id to NULL before deleting agencies
+    db_session.execute(update(Opportunity).values(agency_id=None))
+    db_session.commit()
     cascade_delete_from_db_table(db_session, Agency)
     cascade_delete_from_db_table(db_session, Opportunity)
 
