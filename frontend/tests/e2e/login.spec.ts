@@ -98,7 +98,7 @@ test.describe("Login Page Redirect", () => {
     { tag: [AUTH, FULL_REGRESSION] },
     async ({ page }) => {
       await page.evaluate(() => {
-        sessionStorage.setItem("login-redirect", "/opportunities");
+        sessionStorage.setItem("login-redirect", "/grantor/opportunities");
       });
 
       await page.goto("/login", { waitUntil: "domcontentloaded" });
@@ -108,12 +108,14 @@ test.describe("Login Page Redirect", () => {
           .waitFor({ state: "visible", timeout: 2000 })
           .then(() => "message"),
         page
-          .waitForURL("/opportunities", { timeout: 15000 })
+          .waitForURL("/grantor/opportunities", { timeout: 15000 })
           .then(() => "redirect"),
       ]);
 
       if (redirectResult === "message") {
-        await expect(page).toHaveURL("/opportunities", { timeout: 15000 });
+        await expect(page).toHaveURL("/grantor/opportunities", {
+          timeout: 15000,
+        });
       }
     },
   );

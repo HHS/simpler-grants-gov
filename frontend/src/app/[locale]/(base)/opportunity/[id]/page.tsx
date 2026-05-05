@@ -109,7 +109,7 @@ async function OpportunityListing({ params }: OpportunityListingProps) {
   }
   if (id !== opportunityData.opportunity_id) {
     redirect(
-      `/opportunity/${opportunityData.opportunity_id}`,
+      `/grantor/opportunity/${opportunityData.opportunity_id}`,
       RedirectType.push,
     );
   }

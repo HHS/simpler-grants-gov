@@ -125,7 +125,7 @@ const EditAction = ({
   const t = useTranslations("Opportunities");
   return canUpdate ? (
     <span>
-      <a href={`/opportunity/${opportunityId}/edit`}>
+      <a href={`/grantor/opportunity/${opportunityId}/edit`}>
         {t("actionButtons.edit")}
       </a>
     </span>
@@ -145,7 +145,7 @@ const transformTableRowData = (
       : opportunity.opportunity_status;
     const opportunityTitleUrl = opportunity.is_draft
       ? canUpdate
-        ? `/opportunity/${opportunity.opportunity_id}/edit`
+        ? `/grantor/opportunity/${opportunity.opportunity_id}/edit`
         : ``
       : `/opportunity/${opportunity.opportunity_id}`;
     return [
@@ -218,7 +218,7 @@ const OpportunitiesHeader = ({
         </div>
         {canCreate && (
           <Link
-            href={`/opportunities/create?agency=${currentAgencyId}`}
+            href={`/grantor/opportunities/create?agency=${currentAgencyId}`}
             className="usa-button margin-left-auto"
           >
             {t("createOpportunityButton")}
