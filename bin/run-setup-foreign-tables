@@ -26,6 +26,6 @@ migrator_role_arn=$(terraform -chdir="infra/${app_name}/service" output -raw mig
 echo "Using migrator role: ${migrator_role_arn}"
 echo
 
-command='["uv", "run", "flask", "data-migration", "setup-foreign-tables"]'
+command='["flask", "data-migration", "setup-foreign-tables"]'
 
 ./bin/run-command --task-role-arn "${migrator_role_arn}" "${app_name}" "${environment}" "${command}"

@@ -29,7 +29,7 @@ SOAP_URI =
 For cert and key use awk command to replace newlines
 `awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;} bps_grantors.crt`
 `awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;} bps_grantors.key`
-May need to run `uv install` to update command
+May need to run `uv sync` to update command
 To run use: `make validate-simpler-endpoints``
 """
 

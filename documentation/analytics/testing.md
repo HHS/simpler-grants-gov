@@ -14,8 +14,8 @@ Run `make unit-test` from the root of the `analytics/` sub-directory to run all 
 
 To have greater control over which tests are run, you'll need to use `uv run pytest` to access the pytest command line. The following commands show you how to invoke progressively smaller subsets of tests:
 
-- `yv run pytest` Runs all tests automatically collected in [test discovery](https://docs.pytest.org/en/stable/goodpractices.html#conventions-for-python-test-discovery)
-- `yv run pytest tests/datasets/` Runs all collected tests in the
+- `uv run pytest` Runs all tests automatically collected in [test discovery](https://docs.pytest.org/en/stable/goodpractices.html#conventions-for-python-test-discovery)
+- `uv run pytest tests/datasets/` Runs all collected tests in the
   `analytics/tests/datasets/` sub-directory
 - `uv run pytest tests/dataset/test_base.py` Runs all collected the tests in
   the `analytics/tests/datasets/test_base.py` file
