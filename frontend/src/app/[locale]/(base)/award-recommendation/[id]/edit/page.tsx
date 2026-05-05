@@ -66,74 +66,62 @@ const OpportunitySection = ({
   const hasSummary = !!summaryDescription;
 
   return (
-    <div>
-      <Grid row className="grid-gap">
-        <Grid col={9} tablet={{ col: 9 }}>
-          <div className="margin-top-3 margin-bottom-3">
-            <div className="margin-bottom-3">
-              <h2 className="margin-top-0 margin-bottom-0">
-                {t("opportunity")}
-              </h2>
-            </div>
-            <div>
-              <div className="margin-bottom-4 display-flex gap-3">
-                <div className="flex-1">
-                  <p className="text-bold margin-bottom-1 font-sans-sm">
-                    {t("fundingOppName")}
-                  </p>
-                  <Link
-                    href={`/opportunity/${opportunityData.opportunity_id}`}
-                    className="text-decoration-none"
-                  >
-                    <p className="text-primary-darker hover:text-primary">
-                      {fundingOppName}
-                    </p>
-                  </Link>
-                </div>
-                <div className="flex-0">
-                  <p className="text-bold margin-bottom-1 font-sans-sm">
-                    {t("fundingOppNumber")}
-                  </p>
-                  {fundingOppNumber}
-                </div>
-              </div>
-              <p className="text-bold margin-bottom-2">
-                {t("opportunitySummary")}
+    <div className="margin-top-3 margin-bottom-3">
+      <div className="margin-bottom-3">
+        <h2 className="margin-top-0 margin-bottom-0">{t("opportunity")}</h2>
+      </div>
+      <div>
+        <div className="margin-bottom-4 display-flex gap-3">
+          <div className="flex-1">
+            <p className="text-bold margin-bottom-1 font-sans-sm">
+              {t("fundingOppName")}
+            </p>
+            <Link
+              href={`/opportunity/${opportunityData.opportunity_id}`}
+              className="text-decoration-none"
+            >
+              <p className="text-primary-darker hover:text-primary">
+                {fundingOppName}
               </p>
-              <div className="margin-bottom-3">
-                {hasSummary ? (
-                  <SummaryDescriptionDisplay
-                    summaryDescription={summaryDescription || ""}
-                  />
-                ) : (
-                  <div>{t("noSummaryAvailable")}</div>
-                )}
-              </div>
-              <div className="border-top border-base-lighter margin-top-2 margin-bottom-2" />
-              <div className="margin-bottom-3">
-                <p className="text-bold margin-bottom-1 font-sans-sm">
-                  {t("otherOpportunityInfo.label")}
-                </p>
-                <p className="text-base margin-top-1 margin-bottom-2">
-                  {t("otherOpportunityInfo.description")}
-                </p>
-                <CharacterCount
-                  id="additional_info"
-                  name="additional_info"
-                  maxLength={1000}
-                  isTextArea
-                  defaultValue={
-                    awardRecommendationDetails.additional_info || ""
-                  }
-                  rows={6}
-                  className="maxw-full"
-                  data-testid="additional-info-textarea"
-                />
-              </div>
-            </div>
+            </Link>
           </div>
-        </Grid>
-      </Grid>
+          <div className="flex-0">
+            <p className="text-bold margin-bottom-1 font-sans-sm">
+              {t("fundingOppNumber")}
+            </p>
+            {fundingOppNumber}
+          </div>
+        </div>
+        <p className="text-bold margin-bottom-2">{t("opportunitySummary")}</p>
+        <div className="margin-bottom-3">
+          {hasSummary ? (
+            <SummaryDescriptionDisplay
+              summaryDescription={summaryDescription || ""}
+            />
+          ) : (
+            <div>{t("noSummaryAvailable")}</div>
+          )}
+        </div>
+        <div className="border-top border-base-lighter margin-top-2 margin-bottom-2" />
+        <div className="margin-bottom-3">
+          <p className="text-bold margin-bottom-1 font-sans-sm">
+            {t("otherOpportunityInfo.label")}
+          </p>
+          <p className="text-base margin-top-1 margin-bottom-2">
+            {t("otherOpportunityInfo.description")}
+          </p>
+          <CharacterCount
+            id="additional_info"
+            name="additional_info"
+            maxLength={1000}
+            isTextArea
+            defaultValue={awardRecommendationDetails.additional_info || ""}
+            rows={6}
+            className="maxw-full"
+            data-testid="additional-info-textarea"
+          />
+        </div>
+      </div>
     </div>
   );
 };
