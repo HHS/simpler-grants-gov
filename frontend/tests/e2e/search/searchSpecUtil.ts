@@ -312,16 +312,16 @@ export async function clickLastPaginationPage(page: Page) {
 
 export async function getFirstSearchResultTitle(page: Page) {
   const firstResultSelector = page.locator(
-    ".simpler-responsive-table tr:first-child a",
+    ".simpler-responsive-table tr:first-child a[id^='search-result-link-']",
   );
-  return await firstResultSelector.textContent();
+  return (await firstResultSelector.textContent())?.trim() ?? null;
 }
 
 export async function getLastSearchResultTitle(page: Page) {
   const lastResultSelector = page.locator(
-    ".simpler-responsive-table tr:last-child a",
+    ".simpler-responsive-table tr:last-child a[id^='search-result-link-']",
   );
-  return await lastResultSelector.textContent();
+  return (await lastResultSelector.textContent())?.trim() ?? null;
 }
 
 // If descending, select the ascending variant
