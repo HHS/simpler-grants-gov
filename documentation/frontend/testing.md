@@ -2,7 +2,7 @@
 
 ## End to End (E2E) testing
 
-E2E tests are run using Playwright. See [development.md](../../documentation/frontend/development.md) for more general info!
+E2E tests are run using Playwright. See [development.md](../../DEVELOPMENT.md) for more general info!
 
 ### Spoofing logins
 
@@ -51,7 +51,7 @@ Current testing cadences are defined as:
 - We use data fixtures when relevant (see https://github.com/HHS/simpler-grants-gov/blob/main/frontend/src/utils/testing/fixtures.ts)
 - We strive to include axe tests on all components
 
-See [development.md](../../documentation/frontend/development.md) for more general info!
+See [development.md](../../DEVELOPMENT.md) for more general info!
 
 ### Debugging
 
