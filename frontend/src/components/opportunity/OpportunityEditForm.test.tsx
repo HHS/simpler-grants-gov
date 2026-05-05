@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { axe } from "jest-axe";
 
 import OpportunityEditForm from "./OpportunityEditForm";
 import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
@@ -133,5 +134,21 @@ describe("OpportunityEditForm", () => {
     renderOpportunityEditForm({ isDraft: false });
 
     expect(screen.getByText("content.draftOnlyWarning")).toBeInTheDocument();
+  });
+
+  it("pre-checks eligibility checkboxes from initialValues", () => {
+    renderOpportunityEditForm();
+
+    // initialValues.eligibleApplicants includes "individuals" - verify it renders checked
+    const individualsCheckbox = screen.getByRole("checkbox", {
+      name: /individuals/i,
+    });
+    expect(individualsCheckbox).toBeChecked();
+  });
+
+  it("has no accessibility violations", async () => {
+    const { container } = renderOpportunityEditForm();
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });
