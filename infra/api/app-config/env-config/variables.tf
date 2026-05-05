@@ -264,3 +264,8 @@ variable "api_host_newrelic_entity_guid" {
   default     = null
 }
 
+variable "file_scan_cache_enable_pitr" {
+  description = "Enable point-in-time recovery for the file scan cache DynamoDB table"
+  type        = bool
+  default     = true
+}

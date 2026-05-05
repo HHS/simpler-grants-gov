@@ -243,6 +243,7 @@ module "service" {
     # local.identity_provider_environment_variables,
     local.notifications_environment_variables,
     local.sqs_environment_variables,
+    local.file_scan_cache_environment_variables,
     local.service_config.extra_environment_variables,
   )
 
