@@ -377,5 +377,8 @@ class UuidSearchSchemaBuilder(BaseSearchSchemaBuilder):
     def with_one_of(
         self,
     ) -> UuidSearchSchemaBuilder:
-        self.schema_fields["one_of"] = fields.List(fields.UUID(), allow_none=True)
+        # Note that the list requires at least one value (sending us just [] will raise a validation error)
+        self.schema_fields["one_of"] = fields.List(
+            fields.UUID(), allow_none=True, validate=[validators.Length(min=1)]
+        )
         return self

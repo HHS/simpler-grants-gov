@@ -76,11 +76,6 @@ def list_award_recommendations(
     params = AwardRecommendationListRequest.model_validate(request)
 
     agency_ids = set(params.filters.agency_id.one_of or [])
-    if not agency_ids:
-        raise_flask_error(
-            422,
-            message="filters.agency_id.one_of must contain at least one agency_id",
-        )
 
     agencies = verify_agencies_access(db_session, user, agency_ids)
     agency_codes = [a.agency_code for a in agencies]
