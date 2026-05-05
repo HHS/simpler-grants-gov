@@ -26,3 +26,6 @@ include_verbatim = true
 
 # Check anchor fragments (#heading-links) in markdown files
 include_fragments = true
+
+# Root directory declaration
+root_dir = "."
