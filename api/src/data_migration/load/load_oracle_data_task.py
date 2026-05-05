@@ -69,13 +69,13 @@ class LoadOracleDataTask(src.task.task.Task):
         self.foreign_tables = foreign_tables
         self.staging_tables = staging_tables
         self.insert_chunk_size = insert_chunk_size
+        self.batch_cutoff = datetime_util.get_now_us_eastern_datetime()
 
     def run_task(self) -> None:
         """Main task process, called by run()."""
-        self.batch_cutoff = datetime_util.get_now_us_eastern_datetime()
         logger.info(
             "batch cutoff timestamp captured",
-            extra={"batch_cutoff": self.batch_cutoff.isoformat()},
+            extra={"batch_cutoff": self.batch_cutoff},
         )
         with self.db_session.begin():
             self.log_database_settings()

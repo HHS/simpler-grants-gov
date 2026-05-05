@@ -327,7 +327,7 @@ class TestLoadOracleData(BaseTestClass):
             for record in caplog.records
             if record.message == "batch cutoff timestamp captured"
         )
-        assert cutoff_log.batch_cutoff == task.batch_cutoff.isoformat()
+        assert cutoff_log.batch_cutoff == task.batch_cutoff
 
     def test_record_after_cutoff_excluded_at_or_before_included(
         self, db_session, foreign_tables, staging_tables, enable_factory_create
