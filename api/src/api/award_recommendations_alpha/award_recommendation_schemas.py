@@ -612,7 +612,7 @@ class AwardRecommendationListRequestSchema(Schema):
         generate_pagination_schema(
             "AwardRecommendationListPaginationSchema",
             ["created_at"],
-            default_sort_order=[{"order_by": "created_at", "sort_direction": "ascending"}],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
         ),
         required=True,
     )
