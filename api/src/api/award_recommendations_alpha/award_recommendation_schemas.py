@@ -743,3 +743,76 @@ class AwardRecommendationAuditResponseSchema(AbstractResponseSchema, PaginationM
     """Schema for POST /alpha/award-recommendations/:award_recommendation_id/audit_history response"""
 
     data = fields.List(fields.Nested(AwardRecommendationAuditDataSchema()))
+
+
+class AwardRecommendationBulkUpdateFieldsSchema(Schema):
+    """Fields that may be bulk updated on award recommendations."""
+
+    award_selection_method = fields.Enum(
+        AwardSelectionMethod,
+        required=False,
+        metadata={"description": "The method used to select the award"},
+    )
+
+    additional_info = fields.String(
+        allow_none=True,
+        required=False,
+        metadata={
+            "description": "Additional info about the award recommendation",
+            "example": "Program office requests expedited processing due to deadline in September.",
+        },
+    )
+
+    funding_strategy = fields.String(
+        allow_none=True,
+        required=False,
+        metadata={
+            "description": "Funding strategy information for the award recommendation",
+            "example": "Full funding for top 10 applications.",
+        },
+    )
+
+    selection_method_detail = fields.String(
+        allow_none=True,
+        required=False,
+        metadata={
+            "description": "Additional details about the selection method",
+            "example": "Top-ranked applicants based on expert panel scores.",
+        },
+    )
+
+    other_key_information = fields.String(
+        allow_none=True,
+        required=False,
+        metadata={
+            "description": "Other key information for the award recommendation",
+            "example": "Requires interagency coordination.",
+        },
+    )
+
+
+class AwardRecommendationBulkUpdateRequestSchema(Schema):
+    """Schema for PUT /alpha/award-recommendations/bulk request."""
+
+    record_ids = fields.List(
+        fields.UUID(),
+        required=True,
+        metadata={
+            "description": "Award recommendation IDs to update.",
+        },
+    )
+
+    updates = fields.Nested(
+        AwardRecommendationBulkUpdateFieldsSchema,
+        required=True,
+        metadata={
+            "description": "Fields to update. Omitted fields are left unchanged.",
+        },
+    )
+
+
+class AwardRecommendationBulkUpdateResponseSchema(AbstractResponseSchema):
+    data = fields.List(
+        fields.Nested(AwardRecommendationDataSchema),
+        metadata={"description": "The updated award recommendations"},
+    )

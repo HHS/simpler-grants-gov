@@ -10,6 +10,8 @@ from src.api.award_recommendations_alpha.award_recommendation_blueprint import (
 from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationAuditRequestSchema,
     AwardRecommendationAuditResponseSchema,
+    AwardRecommendationBulkUpdateRequestSchema,
+    AwardRecommendationBulkUpdateResponseSchema,
     AwardRecommendationCreateRequestSchema,
     AwardRecommendationGetResponseSchema,
     AwardRecommendationReviewUpdateRequestSchema,
@@ -27,6 +29,9 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from src.services.award_recommendations.bulk_update_award_recommendations import (
+    bulk_update_award_recommendations,
+)
 from src.services.award_recommendations.create_award_recommendation import (
     create_award_recommendation,
 )
@@ -437,3 +442,49 @@ def award_recommendation_risk_delete(
         )
 
     return response.ApiResponse(message="Success", data=None)
+
+
+@award_recommendation_blueprint.put("/award-recommendations/bulk")
+@award_recommendation_blueprint.input(
+    AwardRecommendationBulkUpdateRequestSchema,
+    location="json",
+)
+@award_recommendation_blueprint.output(AwardRecommendationBulkUpdateResponseSchema)
+@award_recommendation_blueprint.doc(
+    summary="Bulk Update Award Recommendations",
+    description="Update multiple award recommendations with the same field values.",
+    responses=[200, 401, 403, 404, 422],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_bulk_update(
+    db_session: db.Session,
+    json_data: dict,
+) -> response.ApiResponse:
+    record_ids = json_data["record_ids"]
+    updated_fields = list(json_data["updates"].keys())
+
+    add_extra_data_to_current_request_logs(
+        {
+            "award_recommendation_ids": ",".join(str(record_id) for record_id in record_ids),
+            "updated_fields": ",".join(updated_fields),
+        }
+    )
+
+    logger.info("PUT /alpha/award-recommendations/bulk")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        updated_award_recommendations = bulk_update_award_recommendations(
+            db_session=db_session,
+            user=user,
+            award_recommendation_ids=json_data["record_ids"],
+            update_data=json_data["updates"],
+        )
+
+    return response.ApiResponse(
+        message="Success",
+        data=updated_award_recommendations,
+    )
