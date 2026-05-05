@@ -360,9 +360,9 @@ class TestLoadOracleData(BaseTestClass):
             task.run()
 
         db_session.expire_all()
-        destination_records = (
-            db_session.query(destination_table).order_by(destination_table.c.opportunity_id).all()
-        )
+        destination_records = db_session.execute(
+            sqlalchemy.select(destination_table).order_by(destination_table.c.opportunity_id)
+        ).all()
 
         assert len(destination_records) == 2
         assert destination_records[0].opportunity_id == 1
@@ -396,7 +396,12 @@ class TestLoadOracleData(BaseTestClass):
             task1.run()
 
         db_session.expire_all()
-        assert db_session.query(destination_table).count() == 0
+        assert (
+            db_session.scalar(
+                sqlalchemy.select(sqlalchemy.func.count()).select_from(destination_table)
+            )
+            == 0
+        )
         assert task1.metrics["count.insert.total"] == 0
 
         # Run 2: cutoff is at 10:10, record is at 10:05 -- should be included
@@ -407,10 +412,15 @@ class TestLoadOracleData(BaseTestClass):
             task2.run()
 
         db_session.expire_all()
-        assert db_session.query(destination_table).count() == 1
+        assert (
+            db_session.scalar(
+                sqlalchemy.select(sqlalchemy.func.count()).select_from(destination_table)
+            )
+            == 1
+        )
         assert task2.metrics["count.insert.total"] == 1
 
-        record = db_session.query(destination_table).first()
+        record = db_session.execute(sqlalchemy.select(destination_table)).first()
         assert record.opportunity_id == 1
 
     def test_record_with_null_created_date_included(
@@ -436,7 +446,12 @@ class TestLoadOracleData(BaseTestClass):
             task.run()
 
         db_session.expire_all()
-        assert db_session.query(destination_table).count() == 1
+        assert (
+            db_session.scalar(
+                sqlalchemy.select(sqlalchemy.func.count()).select_from(destination_table)
+            )
+            == 1
+        )
         assert task.metrics["count.insert.total"] == 1
 
     def test_load_data_excludes_tcertificates_column_is_selfsigned_by_default(
