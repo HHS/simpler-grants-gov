@@ -7,9 +7,11 @@ Feature: Search - Loading State
   I want to see a loading message when searching
   So that I know the system is working
 
-  Scenario: Show and hide loading indicator on search
+  Scenario: Loading indicator appears and disappears for each search in a session
     Given I am on the "Search funding opportunity" page
-    When I submit a <search term>
-    Then the loading indicator should be visible, then hidden
-    When I submit another <search term>
-    Then the loading indicator should be visible, then hidden again
+    When I search for "<search term-1>"
+    Then the loading indicator should appear
+    And the loading indicator should disappear after results load
+    When I search for another "<search term-2>"
+    Then the loading indicator should appear
+    And the loading indicator should disappear after results load
