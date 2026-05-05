@@ -350,7 +350,7 @@ class TestCD511XSDValidation:
 
         # Extract CD511 form element
         cd511_ns = "{http://apply.grants.gov/forms/CD511-V1.1}"
-        forms_element = root.find(".//Forms")
+        forms_element = root.find(".//{http://apply.grants.gov/system/MetaGrantApplication}Forms")
         assert forms_element is not None, "Forms element not found in submission XML"
 
         cd511_elements = forms_element.findall(f".//{cd511_ns}CD511")
@@ -440,7 +440,7 @@ class TestCD511XSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         cd511_ns = "{http://apply.grants.gov/forms/CD511-V1.1}"
-        forms_element = root.find(".//Forms")
+        forms_element = root.find(".//{http://apply.grants.gov/system/MetaGrantApplication}Forms")
         cd511_elements = forms_element.findall(f".//{cd511_ns}CD511")
         assert len(cd511_elements) == 1
 
