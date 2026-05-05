@@ -21,6 +21,7 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
+import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
@@ -206,6 +207,11 @@ async function AwardRecommendationEditPageContent({
     }
   }
 
+  const navigationItems = [
+    { text: t("opportunity"), href: "opportunity" },
+    { text: t("recommendations.heading"), href: "recommendations" },
+  ];
+
   return (
     <form>
       {awardRecommendationDetails && (
@@ -222,27 +228,41 @@ async function AwardRecommendationEditPageContent({
       )}
       <GridContainer>
         {awardRecommendationDetails && (
-          <>
-            <OpportunitySection
-              awardRecommendationDetails={awardRecommendationDetails}
-            />
-            <RecommendationSection
-              mode="edit"
-              recommendationMethod={
-                awardRecommendationDetails.award_selection_method
-              }
-              recommendationMethodDetails={
-                awardRecommendationDetails.selection_method_detail
-              }
-              otherKeyInformation={
-                awardRecommendationDetails.other_key_information
-              }
-            />
-            <RecommendationSummarySection
-              summary={awardRecommendationDetails.award_recommendation_summary}
-              fundingStrategy={awardRecommendationDetails.funding_strategy}
-            />
-          </>
+          <Grid row className="grid-gap">
+            <Grid col={3} tablet={{ col: 3 }}>
+              <ApplyFormNav
+                title={t("pageTitleEdit")}
+                fields={navigationItems}
+              />
+            </Grid>
+            <Grid col={9} tablet={{ col: 9 }}>
+              <div id="opportunity">
+                <OpportunitySection
+                  awardRecommendationDetails={awardRecommendationDetails}
+                />
+              </div>
+              <div id="recommendations">
+                <RecommendationSection
+                  mode="edit"
+                  recommendationMethod={
+                    awardRecommendationDetails.award_selection_method
+                  }
+                  recommendationMethodDetails={
+                    awardRecommendationDetails.selection_method_detail
+                  }
+                  otherKeyInformation={
+                    awardRecommendationDetails.other_key_information
+                  }
+                />
+                <RecommendationSummarySection
+                  summary={
+                    awardRecommendationDetails.award_recommendation_summary
+                  }
+                  fundingStrategy={awardRecommendationDetails.funding_strategy}
+                />
+              </div>
+            </Grid>
+          </Grid>
         )}
       </GridContainer>
     </form>

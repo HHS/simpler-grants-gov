@@ -121,7 +121,36 @@ describe("AwardRecommendationEditPage", () => {
         params: awardRecommendationParams,
       });
       render(component);
-      expect(await screen.findByText("opportunity")).toBeVisible();
+      const opportunityElements = await screen.findAllByText("opportunity");
+      expect(opportunityElements.length).toBeGreaterThan(0);
+      expect(opportunityElements[0]).toBeVisible();
+    });
+
+    it("renders the navigation component with correct title", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+      expect(await screen.findByText("pageTitleEdit")).toBeVisible();
+      expect(screen.getByTestId("InPageNavigation")).toBeInTheDocument();
+    });
+
+    it("renders navigation links for sections", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      const navLinks = screen.getAllByRole("link");
+      const opportunityLink = navLinks.find(
+        (link) => link.getAttribute("href") === "#opportunity",
+      );
+      const recommendationsLink = navLinks.find(
+        (link) => link.getAttribute("href") === "#recommendations",
+      );
+
+      expect(opportunityLink).toBeInTheDocument();
+      expect(recommendationsLink).toBeInTheDocument();
     });
 
     it("renders opportunity details on the page", async () => {

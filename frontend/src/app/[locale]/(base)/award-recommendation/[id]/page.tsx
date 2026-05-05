@@ -12,6 +12,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
+import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
@@ -177,6 +178,11 @@ async function AwardRecommendationPageContent({
     }
   }
 
+  const navigationItems = [
+    { text: t("opportunity"), href: "opportunity" },
+    { text: t("recommendations.heading"), href: "recommendations" },
+  ];
+
   return (
     <form>
       {awardRecommendationDetails && (
@@ -193,31 +199,42 @@ async function AwardRecommendationPageContent({
       )}
       <GridContainer>
         {awardRecommendationDetails && (
-          <>
-            <OpportunitySection
-              awardRecommendationDetails={awardRecommendationDetails}
-            />
-            <RecommendationSection
-              mode="view"
-              recommendationMethod={
-                awardRecommendationDetails.award_selection_method ===
-                "merit-review-only"
-                  ? t("recommendationMethod.meritReviewOnly")
-                  : t("recommendationMethod.meritReviewOther")
-              }
-              recommendationMethodDetails={
-                awardRecommendationDetails.selection_method_detail
-              }
-              otherKeyInformation={
-                awardRecommendationDetails.other_key_information
-              }
-            />
-            <RecommendationSummarySection
-              summary={awardRecommendationDetails.award_recommendation_summary}
-              fundingStrategy={awardRecommendationDetails.funding_strategy}
-              viewMode={true}
-            />
-          </>
+          <Grid row className="grid-gap">
+            <Grid col={3} tablet={{ col: 3 }}>
+              <ApplyFormNav title={t("pageTitle")} fields={navigationItems} />
+            </Grid>
+            <Grid col={9} tablet={{ col: 9 }}>
+              <div id="opportunity">
+                <OpportunitySection
+                  awardRecommendationDetails={awardRecommendationDetails}
+                />
+              </div>
+              <div id="recommendations">
+                <RecommendationSection
+                  mode="view"
+                  recommendationMethod={
+                    awardRecommendationDetails.award_selection_method ===
+                    "merit-review-only"
+                      ? t("recommendationMethod.meritReviewOnly")
+                      : t("recommendationMethod.meritReviewOther")
+                  }
+                  recommendationMethodDetails={
+                    awardRecommendationDetails.selection_method_detail
+                  }
+                  otherKeyInformation={
+                    awardRecommendationDetails.other_key_information
+                  }
+                />
+                <RecommendationSummarySection
+                  summary={
+                    awardRecommendationDetails.award_recommendation_summary
+                  }
+                  fundingStrategy={awardRecommendationDetails.funding_strategy}
+                  viewMode={true}
+                />
+              </div>
+            </Grid>
+          </Grid>
         )}
       </GridContainer>
     </form>
