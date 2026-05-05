@@ -29,7 +29,7 @@ _What is the best way to document key architectural decisions made within the pr
 
 ## Decision Outcome
 
-Decisions will be documented using Architecture Decision Records (ADRs) as described by [Joel Parker Henderson](https://github.com/joelparkerhenderson/architecture-decision-record) and the [ADR GitHub organization](https://adr.github.io/). The template for this project's ADRs will be adapted from the [MADR template](../template.md).
+Decisions will be documented using Architecture Decision Records (ADRs) as described by [Joel Parker Henderson](https://github.com/joelparkerhenderson/architecture-decision-record) and the [ADR GitHub organization](https://adr.github.io/). The template for this project's ADRs will be adapted from the [MADR template](/documentation/wiki/product/decisions/template.md).
 
 **NOTE:** We may want to revisit this decision to reconsider storing them in the Project Wiki once that wiki is established. Ideally ADRs could be drafted/edited and visible in the wiki but also synced with the repo -- some wiki solutions provide this option.
 

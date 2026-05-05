@@ -20,7 +20,7 @@ These principles guide our data, product, and process decisions, architecture, a
 - Data (and data science) is as important as software and process. We build open data sets where possible.
 - We strive for transparency for algorithms and places we might be introducing bias.
 
-All community members are expected to adhere to our [Code of Conduct](CODE_OF_CONDUCT.md).
+All community members are expected to adhere to our [Code of Conduct](/CODE_OF_CONDUCT.md).
 
 ## Community Guidelines
 

@@ -1,5 +1,5 @@
 # Overview
-We have a [local seed script](../../api/tests/lib/seed_local_db.py) which loads data into our database for local development.
+We have a [local seed script](/api/tests/lib/seed_local_db.py) which loads data into our database for local development.
 
 If you want to run the script and load all possible data, simply running `make db-seed-local`
 will load all data into the database.
@@ -19,7 +19,7 @@ but remember if you want them viewable in search to run `make populate-search-op
 afterward.
 
 # Agencies
-We setup a subset of real agencies locally which are defined in [seed_agencies.py](../../api/tests/lib/seed_agencies.py).
+We setup a subset of real agencies locally which are defined in [seed_agencies.py](/api/tests/lib/seed_agencies.py).
 
 These agencies have top-level and child agencies.
 
@@ -100,7 +100,7 @@ Our local mock OAuth server will pass whatever you put in the "login" screen
 as the external ID that we store in our DB and use to fetch a user during login.
 
 For example, if we pass in `no_org_user` then we'll be logged in as that user.
-![Local Mock OAuth](./images/local-mock-oauth.png)
+![Local Mock OAuth](/documentation/api/images/local-mock-oauth.png)
 
 If what you put into that box doesn't correspond to a user we have, our system
 will make a brand new user. Logging out and relogging in with that same text will

@@ -23,5 +23,5 @@
 > 💡 **Pro Tip**: Treat your API key like a password. Don't share it publicly or commit it to version control!
 
 {% hint style="warning" %}
-Something not working as expected? Check out [common issues & solutions](common-issues-and-solutions.md).&#x20;
+Something not working as expected? Check out [common issues & solutions](/documentation/wiki/product/api/simpler-grants-api-tutorial/common-issues-and-solutions.md).&#x20;
 {% endhint %}

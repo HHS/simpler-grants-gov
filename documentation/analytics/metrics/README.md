@@ -4,5 +4,5 @@ This section of the documentation contains descriptions of the metrics we calcul
 
 ## List of metrics
 
-1. [Burndown](burndown.md)
-2. [Percent complete](percent-complete.md)
+1. [Burndown](/documentation/analytics/metrics/burndown.md)
+2. [Percent complete](/documentation/analytics/metrics/percent-complete.md)

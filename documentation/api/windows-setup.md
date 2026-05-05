@@ -417,16 +417,16 @@ The project files are shared between Windows and WSL, so you can:
 
 ## Next Steps
 
-- Read the [API README](../../api/README.md) for more information about the application structure
-- Check [Development Documentation](./development.md) for development workflows
-- Review [API Technical Overview](./technical-overview.md) for architecture details
+- Read the [API README](/api/README.md) for more information about the application structure
+- Check [Development Documentation](/documentation/api/development.md) for development workflows
+- Review [API Technical Overview](/documentation/api/technical-overview.md) for architecture details
 
 ## Getting Help
 
 If you encounter issues not covered here:
 
-1. Check the [main development documentation](./development.md)
+1. Check the [main development documentation](/documentation/api/development.md)
 2. Review Docker logs: `docker compose logs`
 3. Check the [troubleshooting section](#troubleshooting) above
-4. Review the project's [CONTRIBUTING.md](../../CONTRIBUTING.md) for community guidelines
+4. Review the project's [CONTRIBUTING.md](/CONTRIBUTING.md) for community guidelines
 

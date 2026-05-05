@@ -10,7 +10,7 @@ Search for grant opportunities using various filters and criteria.
 
 ### Caveats
 
-* Search will only return a maximum of 10,000 opportunities. Any opportunties past that will be culled for performance. If you are receiving the maximum amount of opportunities as a response there is a good chance that you are not getting all possible results returned. In that case it is recommended to add more filters to get a smaller subset of opportunities. If you want to get an export of all opportunities see the [extracts endpoint. ](extracts.md)
+* Search will only return a maximum of 10,000 opportunities. Any opportunties past that will be culled for performance. If you are receiving the maximum amount of opportunities as a response there is a good chance that you are not getting all possible results returned. In that case it is recommended to add more filters to get a smaller subset of opportunities. If you want to get an export of all opportunities see the [extracts endpoint. ](/documentation/wiki/product/api/extracts.md)
 * Search should return the same data as GET opportunity, except attachments are not included and the data is cached in search hourly.&#x20;
 
 ### **Get Opportunity Details**

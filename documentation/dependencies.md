@@ -6,7 +6,7 @@ This document tracks the dependencies amongst deliverables in our [product roadm
 
 The diagram is generated using a [Python script](https://github.com/HHS/simpler-grants-gov/tree/main/.github/linters/deps_mapping) that fetches the issues from the GitHub project and generates a diagram of the dependencies between them.
 
-That script is triggered by a [GitHub Action](../.github/workflows/deps-mapping-repo.yml) that is scheduled to run every Monday at midnight UTC, with an option to trigger it manually.
+That script is triggered by a [GitHub Action](/.github/workflows/deps-mapping-repo.yml) that is scheduled to run every Monday at midnight UTC, with an option to trigger it manually.
 
 ## Dependency diagram
 

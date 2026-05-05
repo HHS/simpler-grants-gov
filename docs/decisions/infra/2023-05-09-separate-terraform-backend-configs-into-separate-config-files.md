@@ -33,4 +33,4 @@ Another alternative is to go back to the old way of bootstrapping an account i.e
 
 ## Links
 
-- Refined by [ADR-2023-09-07](./2023-09-07-consolidate-infra-config-from-tfvars-files-into-config-module.md)
+- Refined by [ADR-2023-09-07](/docs/decisions/infra/2023-09-07-consolidate-infra-config-from-tfvars-files-into-config-module.md)

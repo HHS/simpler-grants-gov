@@ -56,9 +56,9 @@ git clone https://github.com/<your-github-username>/<repository-name>.git
 
 Instruction on setting up the local development environment can be found in the README of the repository.&#x20;
 
-API Development Instructions [API Development Instructions](../../api/development.md)
+API Development Instructions [API Development Instructions](/documentation/api/development.md)
 
-Front End Development Instructions [Front End Development Instructions](../../../frontend/)
+Front End Development Instructions [Front End Development Instructions](/frontend/)
 
 {% hint style="info" %}
 **Need help with your local development environment?**\

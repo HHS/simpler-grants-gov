@@ -5,7 +5,7 @@
 
 We're so thankful you're considering contributing to an [open source project of the U.S. government](https://code.gov/)! If you're unsure about anything, just ask -- or submit the issue or pull request anyway. The worst that can happen is you'll be politely asked to change something. We appreciate all friendly contributions.
 
-We encourage you to read this project's CONTRIBUTING-EXTERNAL policy (you are here), its [LICENSE](LICENSE.md), and its [README](README.md).
+We encourage you to read this project's CONTRIBUTING-EXTERNAL policy (you are here), its [LICENSE](/LICENSE.md), and its [README](/README.md).
 
 > :information_source: This project initiated in third quarter of 2023, and is just ramping up efforts to include code contributors as well as contributors from many other disciplines in many different capacities.
 
@@ -55,21 +55,21 @@ Sharing how you or your organization have used the Simpler Grants project is an 
 
 ## Code Contributions
 
-The following guidelines are for code contributions. Please see [DEVELOPMENT.md](./DEVELOPMENT.md) for more information about the software development lifecycle on the project.
+The following guidelines are for code contributions. Please see [DEVELOPMENT.md](/DEVELOPMENT.md) for more information about the software development lifecycle on the project.
 
 ### Getting Started
 
-This project is monorepo with several apps. Please see the [api](./api/README.md) and [frontend](./frontend/README.md) READMEs for information on spinning up those projects locally. Also see the project [documentation](./documentation) for more info.
+This project is monorepo with several apps. Please see the [api](/api/README.md) and [frontend](/frontend/README.md) READMEs for information on spinning up those projects locally. Also see the project [documentation](/documentation) for more info.
 
 ### Workflow and Branching
 
-This project follows [trunk-based development](./DEVELOPMENT.md#branching-model), so all contributions are directed toward the `main` branch.
+This project follows [trunk-based development](/DEVELOPMENT.md#branching-model), so all contributions are directed toward the `main` branch.
 
 1.  Fork the project
 1.  Check out the `main` branch
-1.  Create a feature branch using [the naming convention mentioned here](./DEVELOPMENT.md#branch-naming-convention)
+1.  Create a feature branch using [the naming convention mentioned here](/DEVELOPMENT.md#branch-naming-convention)
 1.  Write code and tests for your change
-1.  From your branch, make a pull request against `hhs/simpler-grants-gov/main` using [the naming convention mentioned here](./DEVELOPMENT.md#pull-request-title)
+1.  From your branch, make a pull request against `hhs/simpler-grants-gov/main` using [the naming convention mentioned here](/DEVELOPMENT.md#pull-request-title)
 1.  Work with repo maintainers to get your change reviewed
 1.  Wait for your change to be pulled into `hhs/simpler-grants-gov/main`
 
@@ -83,7 +83,7 @@ External contributors should use the _Bug Report_ or _Feature Request_ [issue te
 
 ### Pull Requests
 
-Pull requests should follow the conventions in [DEVELOPMENT.md](./DEVELOPMENT.md) with the following changes:
+Pull requests should follow the conventions in [DEVELOPMENT.md](/DEVELOPMENT.md) with the following changes:
 
 1. Pull requests should be titled with `[Issue N] Description`. However if there is no issue, use `[External] Description` format.
 1. External contributors can't merge their own PRs, so an internal team member will pull in after changes are satisfactory.

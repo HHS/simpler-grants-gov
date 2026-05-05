@@ -1,15 +1,15 @@
 # API Details
 
-See [Technical Overview](./technical-overview.md) for details on the technologies used.
+See [Technical Overview](/documentation/api/technical-overview.md) for details on the technologies used.
 
 Each endpoint is defined as a function using an APIFlask blueprint where we define the schema of the
 request and response objects, attach authentication, and otherwise configure the endpoint based on
 several decorators attached to the endpoint function.
 
-An OpenAPI file is generated from this which can be found at [openapi.generated.yml](../../api/openapi.generated.yml).
+An OpenAPI file is generated from this which can be found at [openapi.generated.yml](/api/openapi.generated.yml).
 
 # Routes
-Routes and Marshmallow schema are defined in the [api/src/api](../../api/src/api) folder.
+Routes and Marshmallow schema are defined in the [api/src/api](/api/src/api) folder.
 
 A route should only contain what is necessary to configure the inputs/outputs, and setup the DB session.
 A route should generally:
@@ -23,7 +23,7 @@ A route should generally:
 ## Defining a schema
 
 We define schemas using [Marshmallow](https://marshmallow.readthedocs.io/en/stable/), but use our own derived version
-of the schemas, fields, and validators to be able to produce errors in the format we want. See [error-handling.md](./error-handling.md) for more details.
+of the schemas, fields, and validators to be able to produce errors in the format we want. See [error-handling.md](/documentation/api/error-handling.md) for more details.
 
 These schemas will be used to generate  the OpenAPI schema, setup validations that will run, and make it possible to have a Swagger endpoint available for use
 
@@ -82,7 +82,7 @@ but it's recommended you try to populate the following:
 You can specify validators that will be run when the request is being serialized by APIFlask
 
 Defining a response works the exact same way however field validation does not occur on response, only formatting.
-To keep our response schema following a consistent pattern, we have a few base schema classes like [AbstractResponseSchema](../../api/src/api/schemas/response_schema.py)
+To keep our response schema following a consistent pattern, we have a few base schema classes like [AbstractResponseSchema](/api/src/api/schemas/response_schema.py)
 that you can derive from for shared values like the message.
 
 ### Schema tips
@@ -131,17 +131,17 @@ The API itself is defined first, including any route parameters. We then specify
 the input and output of the request. Finally we define any authentication + specifically specify the auth used
 so that OpenAPI will give you an authentication pop-up to fill out for specific endpoints.
 
-When you define a blueprint like this, it needs to be registered with the APIFlask app, which we do in [app.py](../../api/src/app.py)
+When you define a blueprint like this, it needs to be registered with the APIFlask app, which we do in [app.py](/api/src/app.py)
 by calling `app.register_blueprints(example_blueprint)`.
 
 # Swagger
 
 The Swagger UI  can be reached locally at [http://localhost:8080/docs](http://localhost:8080/docs) when running the API.
-![Swagger UI](./images/swagger-ui.png)
+![Swagger UI](/documentation/api/images/swagger-ui.png)
 
 The actual openapi spec generated that backs this swagger UI can be seen at [http://localhost:8080/openapi.json](http://localhost:8080/openapi.json)
 
 Each of the endpoints you've described in API blueprints will appear here, organized based on their defined tags. For any endpoints with authentication added, you can add your authentication information by selecting `Authorize` in the top right.
-![Swagger Auth](./images/swagger-auth.png)
+![Swagger Auth](/documentation/api/images/swagger-auth.png)
 
 All model schemas defined can be found at the bottom of the UI.

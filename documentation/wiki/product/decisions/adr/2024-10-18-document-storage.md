@@ -19,9 +19,9 @@ Opportunities include supporting documents that help define the opportunity, pro
 
 ## Options Considered
 
-* [AWS Simple Storage Service (S3)](2024-10-18-document-storage.md#aws-simple-storage-service-s3-buckets) bucket(s)
-* [Store files in PostgreSQL](2024-10-18-document-storage.md#store-files-in-postgresql)
-* [Other off-the-shelf or homegrown storage solution](2024-10-18-document-storage.md#other-off-the-shelf-or-homegrown-storage-solution)
+* [AWS Simple Storage Service (S3)](/documentation/wiki/product/decisions/adr/2024-10-18-document-storage.md#aws-simple-storage-service-s3-buckets) bucket(s)
+* [Store files in PostgreSQL](/documentation/wiki/product/decisions/adr/2024-10-18-document-storage.md#store-files-in-postgresql)
+* [Other off-the-shelf or homegrown storage solution](/documentation/wiki/product/decisions/adr/2024-10-18-document-storage.md#other-off-the-shelf-or-homegrown-storage-solution)
 
 ## Decision Outcome
 
