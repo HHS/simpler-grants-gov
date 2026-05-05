@@ -123,6 +123,7 @@ data "aws_acm_certificate" "secondary_certs" {
   for_each    = local.service_config.enable_https ? toset(lookup(local.service_config, "secondary_domain_names", [])) : toset([])
   domain      = each.value
   most_recent = true
+  key_types   = ["RSA_2048", "RSA_4096"]
 }
 
 data "aws_acm_certificate" "s3_cdn_cert" {
@@ -266,6 +267,8 @@ module "service" {
 
   newrelic_entity_guid      = local.service_config.newrelic_entity_guid
   newrelic_mtls_entity_guid = local.service_config.newrelic_mtls_entity_guid
+  newrelic_host_entity_guid = local.service_config.newrelic_host_entity_guid
+  enable_nrlogs_direct      = false
 
   is_temporary = local.is_temporary
 }

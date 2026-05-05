@@ -101,8 +101,8 @@ paths:
                     page_offset: 1
                     page_size: 25
       security:
-      - ApiUserKeyAuth: &id001 []
-      - ApiKeyAuth: *id001
+      - ApiJwtAuth: &id001 []
+      - ApiUserKeyAuth: *id001
   /v1/users/login:
     get:
       parameters: []
@@ -3871,6 +3871,64 @@ paths:
       summary: Add an organization to an application
       security:
       - ApiJwtAuth: []
+  /alpha/award-recommendations/{award_recommendation_id}/submission-details:
+    put:
+      parameters:
+      - in: path
+        name: award_recommendation_id
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardRecommendationSubmissionDetailsBatchUpdateResponseSchema'
+          description: Successful response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Validation error
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Authentication error
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Not found
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Forbidden
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Internal Server Error
+      tags:
+      - Award Recommendation Alpha
+      summary: Batch Update Award Recommendation Submission Details
+      description: Update multiple submission details for an award recommendation
+        in a single operation.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema'
+      security:
+      - ApiJwtAuth: &id031 []
+      - ApiUserKeyAuth: *id031
   /v1/organizations/{organization_id}/saved-opportunities/{opportunity_id}:
     delete:
       parameters:
@@ -4099,8 +4157,8 @@ paths:
             schema:
               $ref: '#/components/schemas/OpportunitySummaryUpdateRequestV1Schema'
       security:
-      - ApiJwtAuth: &id031 []
-      - ApiUserKeyAuth: *id031
+      - ApiJwtAuth: &id032 []
+      - ApiUserKeyAuth: *id032
   /v1/grantors/opportunities/{opportunity_id}/attachments/{opportunity_attachment_id}:
     delete:
       parameters:
@@ -4155,8 +4213,8 @@ paths:
       - Opportunity v1 - for Grantors
       summary: Delete an attachment from an opportunity
       security:
-      - ApiJwtAuth: &id032 []
-      - ApiUserKeyAuth: *id032
+      - ApiJwtAuth: &id033 []
+      - ApiUserKeyAuth: *id033
   /alpha/award-recommendations/{award_recommendation_id}/risks/{award_recommendation_risk_id}:
     put:
       parameters:
@@ -4212,8 +4270,8 @@ paths:
             schema:
               $ref: '#/components/schemas/AwardRecommendationRiskRequestSchema'
       security:
-      - ApiJwtAuth: &id033 []
-      - ApiUserKeyAuth: *id033
+      - ApiJwtAuth: &id034 []
+      - ApiUserKeyAuth: *id034
     delete:
       parameters:
       - in: path
@@ -4256,8 +4314,8 @@ paths:
       summary: Delete Award Recommendation Risk
       description: Soft delete a risk for an award recommendation.
       security:
-      - ApiJwtAuth: &id034 []
-      - ApiUserKeyAuth: *id034
+      - ApiJwtAuth: &id035 []
+      - ApiUserKeyAuth: *id035
   /alpha/award-recommendations/{award_recommendation_id}/reviews/{award_recommendation_review_id}:
     put:
       parameters:
@@ -4312,8 +4370,8 @@ paths:
             schema:
               $ref: '#/components/schemas/AwardRecommendationReviewUpdateRequestSchema'
       security:
-      - ApiJwtAuth: &id035 []
-      - ApiUserKeyAuth: *id035
+      - ApiJwtAuth: &id036 []
+      - ApiUserKeyAuth: *id036
 openapi: 3.1.0
 components:
   schemas:
@@ -4472,7 +4530,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: &id036
+          type: &id037
           - object
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
@@ -4718,7 +4776,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id036
+          type: *id037
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
@@ -5163,17 +5221,17 @@ components:
         funding_instruments:
           type: array
           items:
-            enum: &id037
+            enum: &id038
             - cooperative_agreement
             - grant
             - procurement_contract
             - other
-            type: &id038
+            type: &id039
             - string
         funding_categories:
           type: array
           items:
-            enum: &id039
+            enum: &id040
             - recovery_act
             - agriculture
             - arts
@@ -5202,12 +5260,12 @@ components:
             - other
             - energy_infrastructure_and_critical_mineral_and_materials
             - recreation_and_tourism
-            type: &id040
+            type: &id041
             - string
         applicant_types:
           type: array
           items:
-            enum: &id041
+            enum: &id042
             - state_governments
             - county_governments
             - city_or_township_governments
@@ -5225,7 +5283,7 @@ components:
             - small_businesses
             - other
             - unrestricted
-            type: &id042
+            type: &id043
             - string
         created_at:
           type: string
@@ -5289,7 +5347,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: &id043
+          enum: &id044
           - discretionary
           - mandatory
           - continuation
@@ -5308,23 +5366,23 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: &id044
+            type: &id045
             - object
             $ref: '#/components/schemas/OpportunityAssistanceListingV1Schema'
         summary:
-          type: &id045
+          type: &id046
           - object
           $ref: '#/components/schemas/OpportunitySummaryV1Schema'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: &id046
+          enum: &id047
           - forecasted
           - posted
           - closed
           - archived
-          type: &id047
+          type: &id048
           - string
         top_level_agency_code:
           type:
@@ -5408,7 +5466,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id036
+          type: *id037
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
@@ -6119,18 +6177,18 @@ components:
         funding_instruments:
           type: array
           items:
-            enum: *id037
-            type: *id038
+            enum: *id038
+            type: *id039
         funding_categories:
           type: array
           items:
-            enum: *id039
-            type: *id040
+            enum: *id040
+            type: *id041
         applicant_types:
           type: array
           items:
-            enum: *id041
-            type: *id042
+            enum: *id042
+            type: *id043
         created_at:
           type: string
           format: date-time
@@ -6510,7 +6568,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id043
+          enum: *id044
           type:
           - string
           - 'null'
@@ -6524,17 +6582,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id044
+            type: *id045
             $ref: '#/components/schemas/OpportunityAssistanceListingV1Schema'
         summary:
-          type: *id045
+          type: *id046
           $ref: '#/components/schemas/OpportunitySummaryV1Schema'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id046
-          type: *id047
+          enum: *id047
+          type: *id048
         top_level_agency_code:
           type:
           - string
@@ -6636,7 +6694,7 @@ components:
           type: string
           maxLength: 6
           description: The Assistance Listing Number
-          example: 12-ABC
+          example: 12.ABC
       required:
       - agency_id
       - assistance_listing_number
@@ -6663,7 +6721,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: &id048
+            type: &id049
             - object
             $ref: '#/components/schemas/ValidationIssueSchema'
     FormUpdateResponseSchema:
@@ -8067,6 +8125,7 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - internal_s3_scan
             type:
             - string
         allowed_approval_response_types:
@@ -8346,6 +8405,7 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - internal_s3_scan
             type:
             - string
     UserOrganization:
@@ -8523,6 +8583,7 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - internal_s3_scan
             type:
             - string
     SortedResultsInfo:
@@ -9104,7 +9165,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id036
+          type: *id037
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
@@ -9231,7 +9292,7 @@ components:
           description: The opportunity category
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityCategory
           - discretionary
-          enum: *id043
+          enum: *id044
           type:
           - string
           - 'null'
@@ -9245,17 +9306,17 @@ components:
         opportunity_assistance_listings:
           type: array
           items:
-            type: *id044
+            type: *id045
             $ref: '#/components/schemas/OpportunityAssistanceListingV1Schema'
         summary:
-          type: *id045
+          type: *id046
           $ref: '#/components/schemas/OpportunitySummaryV1Schema'
         opportunity_status:
           description: The current status of the opportunity
           example: !!python/object/apply:src.constants.lookup_constants.OpportunityStatus
           - posted
-          enum: *id046
-          type: *id047
+          enum: *id047
+          type: *id048
         top_level_agency_code:
           type:
           - string
@@ -9469,6 +9530,7 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - internal_s3_scan
             type:
             - string
     UserInvitationItemSchema:
@@ -9782,7 +9844,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id048
+            type: *id049
             $ref: '#/components/schemas/ValidationIssueSchema'
         message:
           type: string
@@ -9978,6 +10040,7 @@ components:
             - submit_award_recommendation
             - program_officer_approval
             - budget_officer_approval
+            - internal_s3_scan
             type:
             - string
     OrganizationUserSchema:
@@ -10023,7 +10086,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id036
+          type: *id037
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
@@ -10460,7 +10523,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id036
+          type: *id037
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
@@ -10526,6 +10589,26 @@ components:
           minimum: 1
           description: The page number to fetch, starts counting from 1
           example: 1
+    AwardRecommendationReadySchema:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
+    OpportunityListFilterSchema:
+      type: object
+      properties:
+        award_recommendation_ready:
+          description: Filter for opportunities ready for award recommendations. Returns
+            only non-draft Simpler Grants opportunities with application submissions
+            and no existing award recommendations.
+          type:
+          - object
+          $ref: '#/components/schemas/AwardRecommendationReadySchema'
     OpportunityListRequestSchema:
       type: object
       properties:
@@ -10535,6 +10618,11 @@ components:
           type:
           - object
           $ref: '#/components/schemas/OpportunityListPaginationSchema'
+        filters:
+          description: Optional filters for opportunity list
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityListFilterSchema'
       required:
       - pagination
     OrganizationInvitationResponseSchema:
@@ -10647,7 +10735,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id036
+          type: *id037
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
@@ -10815,7 +10903,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id036
+          type: *id037
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
@@ -10978,7 +11066,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id036
+          type: *id037
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
@@ -11221,7 +11309,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id036
+          type: *id037
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
@@ -11479,11 +11567,11 @@ components:
           type: array
           minItems: 1
           description: Categories of funding for this opportunity
-          example: &id049
+          example: &id050
           - education
           - health
           items:
-            enum: &id050
+            enum: &id051
             - recovery_act
             - agriculture
             - arts
@@ -11512,7 +11600,7 @@ components:
             - other
             - energy_infrastructure_and_critical_mineral_and_materials
             - recreation_and_tourism
-            type: &id051
+            type: &id052
             - string
         funding_category_description:
           type:
@@ -11525,26 +11613,26 @@ components:
           type: array
           minItems: 1
           description: Types of funding instruments used for this opportunity
-          example: &id052
+          example: &id053
           - cooperative_agreement
           - grant
           items:
-            enum: &id053
+            enum: &id054
             - cooperative_agreement
             - grant
             - procurement_contract
             - other
-            type: &id054
+            type: &id055
             - string
         applicant_types:
           type: array
           minItems: 1
           description: Types of applicants eligible for this opportunity
-          example: &id055
+          example: &id056
           - state_governments
           - county_governments
           items:
-            enum: &id056
+            enum: &id057
             - state_governments
             - county_governments
             - city_or_township_governments
@@ -11562,7 +11650,7 @@ components:
             - small_businesses
             - other
             - unrestricted
-            type: &id057
+            type: &id058
             - string
         applicant_eligibility_description:
           type:
@@ -11906,7 +11994,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id048
+            type: *id049
             $ref: '#/components/schemas/ValidationIssueSchema'
         message:
           type: string
@@ -12027,7 +12115,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id036
+          type: *id037
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
@@ -12356,6 +12444,7 @@ components:
           - risk_updated
           - risk_deleted
           - application_submission_updated
+          - award_recommendation_submission_updated
           - review_created
           - review_updated
           - review_deleted
@@ -12421,7 +12510,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id036
+          type: *id037
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
@@ -12459,6 +12548,7 @@ components:
             - risk_updated
             - risk_deleted
             - application_submission_updated
+            - award_recommendation_submission_updated
             - review_created
             - review_updated
             - review_deleted
@@ -12659,7 +12749,7 @@ components:
       properties:
         pagination_info:
           description: The pagination information for paginated endpoints
-          type: *id036
+          type: *id037
           $ref: '#/components/schemas/PaginationInfoSchema'
         message:
           type: string
@@ -12777,7 +12867,7 @@ components:
           description: A list of warnings - indicating something you may want to be
             aware of, but did not prevent handling of the request
           items:
-            type: *id048
+            type: *id049
             $ref: '#/components/schemas/ValidationIssueSchema'
         message:
           type: string
@@ -12806,6 +12896,81 @@ components:
           type: integer
           description: The HTTP status code
           example: 200
+    AwardRecommendationSubmissionDetailsBatchUpdateResponseSchema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message to return
+          example: Success
+        data:
+          type: array
+          description: The updated award recommendation submissions
+          items:
+            type:
+            - object
+            $ref: '#/components/schemas/AwardRecommendationSubmissionDataSchema'
+        status_code:
+          type: integer
+          description: The HTTP status code
+          example: 200
+    AwardRecommendationSubmissionDetailUpdateSchema:
+      type: object
+      properties:
+        recommended_amount:
+          type:
+          - number
+          - 'null'
+          description: The recommended funding amount
+          example: '200000.00'
+        scoring_comment:
+          type:
+          - string
+          - 'null'
+          description: Comments from the scoring process
+          example: Strong technical approach with clear methodology. Budget well-justified
+            and aligned with project goals.
+        general_comment:
+          type:
+          - string
+          - 'null'
+          description: General comments about the submission
+          example: Applicant has demonstrated successful implementation of similar
+            projects in the past. Team qualifications exceed requirements.
+        award_recommendation_type:
+          description: The recommendation type for this submission
+          enum:
+          - recommended_for_funding
+          - recommended_without_funding
+          - not_recommended
+          type:
+          - string
+          - 'null'
+          - 'null'
+        has_exception:
+          type: boolean
+          description: Whether the submission has an exception
+        exception_detail:
+          type:
+          - string
+          - 'null'
+          description: Details about the exception, if any
+          example: Budget exceeds guidelines by 12%. Recommend partial funding with
+            revised scope focusing on core deliverables.
+    AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema:
+      type: object
+      properties:
+        award_recommendation_submissions:
+          type: object
+          minLength: 1
+          description: Dictionary of submission IDs to update details, where keys
+            are award_recommendation_application_submission_id
+          additionalProperties:
+            type:
+            - object
+            $ref: '#/components/schemas/AwardRecommendationSubmissionDetailUpdateSchema'
+      required:
+      - award_recommendation_submissions
     OrganizationDeleteSavedOpportunityResponseSchema:
       type: object
       properties:
@@ -13053,10 +13218,10 @@ components:
           type: array
           minItems: 1
           description: Categories of funding for this opportunity
-          example: *id049
+          example: *id050
           items:
-            enum: *id050
-            type: *id051
+            enum: *id051
+            type: *id052
         funding_category_description:
           type:
           - string
@@ -13068,18 +13233,18 @@ components:
           type: array
           minItems: 1
           description: Types of funding instruments used for this opportunity
-          example: *id052
+          example: *id053
           items:
-            enum: *id053
-            type: *id054
+            enum: *id054
+            type: *id055
         applicant_types:
           type: array
           minItems: 1
           description: Types of applicants eligible for this opportunity
-          example: *id055
+          example: *id056
           items:
-            enum: *id056
-            type: *id057
+            enum: *id057
+            type: *id058
         applicant_eligibility_description:
           type:
           - string
@@ -13173,20 +13338,20 @@ components:
       required:
       - is_reviewed
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: X-Auth
-    ApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Token
     ApiUserKeyAuth:
       type: apiKey
       in: header
       name: X-API-Key
+    ApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Token
     InternalApiJwtAuth:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Auth
 
