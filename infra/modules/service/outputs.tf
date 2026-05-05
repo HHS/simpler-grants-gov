@@ -72,6 +72,7 @@ output "image_url" {
 output "fluent_bit_image_url" {
   description = "image url for the Fluent Bit sidecar"
   value       = local.fluent_bit_image_url
+  sensitive   = true
 }
 
 output "environment_variables" {

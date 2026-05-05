@@ -60,6 +60,17 @@ jobs:
           terraform_wrapper: false
       - name: Validate
         run: make infra-validate-modules
+  unit-test-terraform-modules:
+    name: Unit test Terraform modules
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.3
+          terraform_wrapper: false
+      - name: Run module unit tests
+        run: make infra-test-modules
   check-compliance-with-checkov:
     name: Check compliance with checkov
     runs-on: ubuntu-22.04
