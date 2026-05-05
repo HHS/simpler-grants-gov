@@ -1,73 +1,87 @@
-# [Simpler.Grants.gov](https://simpler.grants.gov/)
+# Simpler Grants Gov
 
-A modernization effort for [Grants.gov](https://grants.gov/)
+[![CI Checks](https://github.com/HHS/simpler-grants-gov/actions/workflows/ci-app.yml/badge.svg?branch=main)](https://github.com/HHS/simpler-grants-gov/actions/workflows/ci-app.yml)
+[![CodeQL](https://github.com/HHS/simpler-grants-gov/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/HHS/simpler-grants-gov/actions/workflows/codeql.yml)
+[![Dependency Review](https://github.com/HHS/simpler-grants-gov/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/HHS/simpler-grants-gov/actions/workflows/dependency-review.yml)
 
-## About the Project
+This repo contains the application code for the Simpler Grants Gov project.
 
-We want Grants.gov to be an extremely simple, accessible, and easy-to-use tool for posting, finding, sharing, and applying for federal financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone. We’re improving the way applicants search for and discover funding opportunities, making it easier to find and apply. For federal grantmaking agencies, we’re making it easier for their communities to find the funding they need.
+## Bounty Board
 
-Go to [Simpler.Grants.gov](https://simpler.grants.gov/) to learn about our transparent process and what we’re doing now, or explore our existing user research and the findings that are guiding our work.
+We offer bounties for contributions to help improve the Simpler Grants Gov platform. Below are the currently available bounties:
 
-See [goals.md](./documentation/goals.md) for more information about the vision and goals for the project.
+| Issue | Title | Reward | Status |
+|-------|-------|--------|---------|
+| [#XXXX](link-to-issue) | 🏆 BOUNTY: Improve API error handling and logging | $500 | Open |
+| [#XXXX](link-to-issue) | 🏆 BOUNTY: Add comprehensive input validation for grant applications | $750 | Open |
+| [#XXXX](link-to-issue) | 🏆 BOUNTY: Implement automated accessibility testing pipeline | $600 | Open |
+| [#XXXX](link-to-issue) | 🏆 BOUNTY: Optimize database queries for grant search functionality | $800 | Open |
+| [#XXXX](link-to-issue) | 🏆 BOUNTY: Create mobile-responsive design for applicant dashboard | $650 | Open |
+| [#XXXX](link-to-issue) | 🏆 BOUNTY: Implement rate limiting for API endpoints | $450 | Open |
+| [#XXXX](link-to-issue) | 🏆 BOUNTY: Add comprehensive unit tests for user authentication module | $400 | Open |
+| [#XXXX](link-to-issue) | 🏆 BOUNTY: Improve documentation for developer onboarding | $350 | Open |
 
-## Core Team
+### How to Participate
 
-The core team on the grants.gov project is a small group of content strategists, designers, developers, and product managers working for and with the Department of Health and Human Services, and other federal agencies, and community volunteers.
+1. **Review Available Bounties**: Check the bounty board above for open issues
+2. **Read the Requirements**: Each bounty issue contains detailed acceptance criteria
+3. **Comment to Claim**: Comment on the issue to express your interest
+4. **Submit Your Work**: Create a pull request following our contribution guidelines
+5. **Get Rewarded**: Once your PR is approved and merged, you'll receive the bounty reward
 
-An up-to-date list of core team members can be found in [MAINTAINERS.md](./MAINTAINERS.md). At this time, the project is still building the core team and defining roles and responsibilities. We are eagerly seeking individuals who would like to join the community and help us define and fill these roles.
+### Bounty Guidelines
 
-## Repository Structure
+- Bounties are awarded on a first-come, first-served basis for quality submissions
+- All code must pass existing tests and include new tests where appropriate
+- Submissions must follow our coding standards and style guidelines
+- Contributors must sign the Contributor License Agreement (CLA)
+- Payment will be processed within 30 days of PR approval
 
-- [./.github](./.github) contains Github specific settings files and testing, linting, and CI/CD workflows
-- [./api](./api) contains an API built in Python using the Flask library
-- [./bin](./bin) contains scripts for managing infrastructure
-- [./documentation](./documentation) contains project guides, documentation, and decision records
-- [./frontend](./frontend) contains a web application built using Next.js
-- [./infra](./infra) contains Terraform modules and configuration for managing the AWS infrastructure
+For questions about bounties, please reach out to our team or comment on the specific issue.
 
-## Development
+## Getting Started
 
-### API
+### Prerequisites
 
-Documentation for the API is linked to from the [API README.md](./api/README.md). For installation instructions, see the [development documentation](./documentation/api/development.md).
+- Node.js 18+ 
+- Python 3.11+
+- Docker and Docker Compose
 
-### Front-end
+### Quick Start
 
-Documentation and development instructions for the front-end are provided in the [Front-end README.md](./frontend/README.md).
+1. Clone the repository
+   ```bash
+   git clone https://github.com/HHS/simpler-grants-gov.git
+   cd simpler-grants-gov
+   ```
+
+2. Set up the development environment
+   ```bash
+   make setup-dev
+   ```
+
+3. Start the application
+   ```bash
+   make start
+   ```
+
+4. Access the application at `http://localhost:3000`
 
 ## Contributing
 
-Thank you for considering contributing to an Open Source project of the US
-Government! For more information about our contribution guidelines, see
-[CONTRIBUTING.md](CONTRIBUTING.md) to learn more and join our community see our [wiki](https://wiki.simpler.hhs.gov).
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
 
-## Community
+## License
 
-To better understand how this project is governed and how to participate beyond code contributions, please review the following community resources:
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-- [Community Guidelines](./COMMUNITY_GUIDELINES.md)
-- [Code of Conduct](./CODE_OF_CONDUCT.md)
-- [Architecture Decision Records](./documentation/architecture/)
-- [Project Wiki](https://wiki.simpler.hhs.gov)
+## Support
 
-## Security
+For questions or support, please:
+- Check our [documentation](docs/)
+- Open an issue on GitHub
+- Contact our team at [email]
 
-For more information about our Security, Vulnerability, and Responsible
-Disclosure Policies, see [SECURITY.md](SECURITY.md).
+---
 
-## Authors and Maintainers
-
-For more information about our Authors and maintainers, see [MAINTAINERS.md](MAINTAINERS.md).
-
-A full list of [contributors](https://github.com/HHS/simpler-grants-gov/graphs/contributors) can be found on GitHub.
-
-## Public domain
-
-This project is licensed within in the public domain within the United States,
-and copyright and related rights in the work worldwide are waived through the
-[CC0 1.0 Universal public domain
-dedication](https://creativecommons.org/publicdomain/zero/1.0/).
-
-All contributions to this project will be released under the CC0 dedication. By
-submitting a pull request or issue, you are agreeing to comply with this waiver
-of copyright interest.
+*This project is part of the U.S. Department of Health and Human Services initiative to simplify the grants process.*
