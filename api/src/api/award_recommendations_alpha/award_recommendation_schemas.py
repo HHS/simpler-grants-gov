@@ -187,8 +187,8 @@ class AwardRecommendationReviewSchema(Schema):
     is_reviewed = fields.Boolean(metadata={"description": "Whether the review has been completed"})
 
 
-class AwardRecommendationDataSchema(Schema):
-    """Schema for the award recommendation details"""
+class AwardRecommendationBaseSchema(Schema):
+    """Base schema for award recommendations (excludes attachments)."""
 
     award_recommendation_id = fields.UUID(
         metadata={"description": "The award recommendation's unique identifier"}
@@ -244,11 +244,6 @@ class AwardRecommendationDataSchema(Schema):
         AwardRecommendationOpportunitySchema,
         metadata={"description": "The associated opportunity"},
     )
-    award_recommendation_attachments = fields.List(
-        fields.Nested(AwardRecommendationAttachmentSchema),
-        dump_default=[],
-        metadata={"description": "Attachments associated with the award recommendation"},
-    )
     award_recommendation_reviews = fields.List(
         fields.Nested(AwardRecommendationReviewSchema),
         dump_default=[],
@@ -256,9 +251,19 @@ class AwardRecommendationDataSchema(Schema):
     )
 
 
+class AwardRecommendationWithAttachmentsSchema(AwardRecommendationBaseSchema):
+    """Schema for the award recommendation details (includes attachments)."""
+
+    award_recommendation_attachments = fields.List(
+        fields.Nested(AwardRecommendationAttachmentSchema),
+        dump_default=[],
+        metadata={"description": "Attachments associated with the award recommendation"},
+    )
+
+
 class AwardRecommendationGetResponseSchema(AbstractResponseSchema):
     data = fields.Nested(
-        AwardRecommendationDataSchema,
+        AwardRecommendationWithAttachmentsSchema,
         metadata={"description": "The award recommendation details"},
     )
 
@@ -622,7 +627,7 @@ class AwardRecommendationListResponseSchema(AbstractResponseSchema, PaginationMi
     """Schema for POST /alpha/award-recommendations/list response"""
 
     data = fields.List(
-        fields.Nested(AwardRecommendationDataSchema),
+        fields.Nested(AwardRecommendationBaseSchema),
         metadata={"description": "The list of award recommendations"},
     )
 
