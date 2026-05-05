@@ -101,7 +101,7 @@ export default function OpportunityEditHeaderActions({
                     if (result?.errorMessage) {
                       setIsPublishing(false);
                     } else {
-                      router.push(`/grantor/opportunities?agency=${""}`);
+                      router.push("/grantor/opportunities");
                     }
                   })
                   .catch((_e) => setIsPublishing(false));
