@@ -115,10 +115,12 @@ class TestArrayDecompositionIntegration:
                         "total_amount": "5000.00",
                     },
                     "non_federal_resources": {
+                        "grant_program": "Activity 1 NF",
                         "applicant_amount": "500.00",
                         "total_amount": "1500.00",
                     },
                     "federal_fund_estimates": {
+                        "grant_program": "Activity 1 FF",
                         "first_year_amount": "5000.00",
                     },
                 },
@@ -133,10 +135,12 @@ class TestArrayDecompositionIntegration:
                         "total_amount": "8000.00",
                     },
                     "non_federal_resources": {
+                        "grant_program": "Activity 2 NF",
                         "applicant_amount": "1000.00",
                         "total_amount": "3000.00",
                     },
                     "federal_fund_estimates": {
+                        "grant_program": "Activity 2 FF",
                         "first_year_amount": "8000.00",
                     },
                 },
@@ -187,19 +191,22 @@ class TestArrayDecompositionIntegration:
         # Get the XML data for detailed assertions
         xml_data = response.xml_data
 
-        # Verify activityTitle appears as an attribute on line items (XSD-compliant name and namespace)
+        # BudgetSummary/BudgetCategories still use activity_title from the parent item
         assert 'SF424A:activityTitle="Activity 1"' in xml_data
         assert 'SF424A:activityTitle="Activity 2"' in xml_data
 
+        # Section C (NonFederalResources) uses grant_program from within non_federal_resources
+        assert 'SF424A:activityTitle="Activity 1 NF"' in xml_data
+        assert 'SF424A:activityTitle="Activity 2 NF"' in xml_data
+
+        # Section E (FederalFundsNeeded) uses grant_program from within federal_fund_estimates
+        assert 'SF424A:activityTitle="Activity 1 FF"' in xml_data
+        assert 'SF424A:activityTitle="Activity 2 FF"' in xml_data
+
         # Verify NonFederalResources section structure matches XSD expectations
-        # The XSD expects this specific structure for the NonFederalResources section
         assert "NonFederalResources>" in xml_data
         assert "ResourceLineItem" in xml_data  # Line items
         assert "ResourceTotals>" in xml_data  # Totals use different wrapper
-
-        # Verify the activityTitle is an attribute on line items (not in totals) - XSD-compliant name and namespace
-        assert "ResourceLineItem" in xml_data and 'SF424A:activityTitle="Activity 1"' in xml_data
-        assert "ResourceLineItem" in xml_data and 'SF424A:activityTitle="Activity 2"' in xml_data
 
         # Verify totals don't have activityTitle attribute using XML parsing
         parser = lxml_etree.XMLParser(remove_blank_text=True)
@@ -209,9 +216,8 @@ class TestArrayDecompositionIntegration:
         totals_elements = root.xpath(".//*[local-name()='ResourceTotals']")
         assert len(totals_elements) == 1, "Should have exactly one ResourceTotals element"
 
-        # Verify ResourceTotals has no activityTitle attribute (XSD-compliant name)
+        # Verify ResourceTotals has no activityTitle attribute
         totals_element = totals_elements[0]
-        # Check if any attribute name ends with 'activityTitle' (to handle namespaced attributes)
         totals_has_activity_title = any(
             attr_name.endswith("activityTitle") for attr_name in totals_element.attrib.keys()
         )
@@ -223,13 +229,12 @@ class TestArrayDecompositionIntegration:
         line_item_elements = root.xpath(".//*[local-name()='ResourceLineItem']")
         assert len(line_item_elements) == 2, "Should have exactly two ResourceLineItem elements"
 
-        # Verify each line item HAS activityTitle attribute (XSD-compliant name)
+        # Verify each ResourceLineItem HAS activityTitle from grant_program
         for line_item in line_item_elements:
-            # Check if any attribute name ends with 'activityTitle' (to handle namespaced attributes)
             has_activity_title = any(
                 attr_name.endswith("activityTitle") for attr_name in line_item.attrib.keys()
             )
-            assert has_activity_title, "ResourceLineItem should have activityTitle attribute"
+            assert has_activity_title, "ResourceLineItem should have activityTitle attribute from grant_program"
 
     def test_sf424a_budget_sections_with_minimal_data(self):
         """Test array decomposition with minimal budget data."""
