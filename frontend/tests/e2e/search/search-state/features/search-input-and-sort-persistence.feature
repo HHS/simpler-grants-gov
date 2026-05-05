@@ -15,7 +15,6 @@ Background:
   Given I am on the search page
   And the search results have loaded
  
-@grantee @opportunity_search @core_regression
 Scenario: Retain search input and sort after refresh
   When I enter "<search-term>" in the search input and submit
   And I open the filter drawer
