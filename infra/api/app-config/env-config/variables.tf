@@ -263,9 +263,3 @@ variable "api_host_newrelic_entity_guid" {
   description = "New Relic entity GUID for the ECS service host, used to correlate container logs with the infrastructure entity in New Relic."
   default     = null
 }
-
-variable "file_scan_cache_enable_pitr" {
-  description = "Enable point-in-time recovery for the file scan cache DynamoDB table"
-  type        = bool
-  default     = true
-}

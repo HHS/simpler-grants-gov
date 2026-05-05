@@ -8,6 +8,5 @@ locals {
 module "file_scan_cache" {
   source = "../../modules/file-scan-cache"
 
-  name                          = "${local.prefix}${local.file_scan_cache_config.table_name}"
-  enable_point_in_time_recovery = local.file_scan_cache_config.enable_point_in_time_recovery
+  name = "${local.prefix}${local.file_scan_cache_config.table_name}"
 }
