@@ -9,7 +9,6 @@ module "grantee2_config" {
   secondary_domain_names            = ["alb.grantee2.teams.simpler.grants.gov"]
   s3_cdn_domain_name                = "files.grantee2.teams.simpler.grants.gov"
   mtls_domain_name                  = "soap.grantee2.teams.simpler.grants.gov"
-  enable_mtls_acm_ssl               = false
   enable_https                      = true
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
