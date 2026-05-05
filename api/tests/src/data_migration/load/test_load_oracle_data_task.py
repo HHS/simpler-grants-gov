@@ -128,12 +128,20 @@ class TestLoadOracleData(BaseTestClass):
         # this prevents some weirdness with the value comparison we'll do
         db_session.expire_all()
 
-        assert db_session.query(source_table).count() == 5
-        assert db_session.query(destination_table).count() == 6
-
-        destination_records = (
-            db_session.query(destination_table).order_by(destination_table.c.opportunity_id).all()
+        assert (
+            db_session.scalar(sqlalchemy.select(sqlalchemy.func.count()).select_from(source_table))
+            == 5
         )
+        assert (
+            db_session.scalar(
+                sqlalchemy.select(sqlalchemy.func.count()).select_from(destination_table)
+            )
+            == 6
+        )
+
+        destination_records = db_session.execute(
+            sqlalchemy.select(destination_table).order_by(destination_table.c.opportunity_id)
+        ).all()
 
         validate_copied_value(source_table, source_record1, destination_records[0])
         validate_copied_value(source_table, source_record2, destination_records[1])
@@ -179,8 +187,16 @@ class TestLoadOracleData(BaseTestClass):
         )
         task.run()
 
-        assert db_session.query(source_table).count() == 100
-        assert db_session.query(destination_table).count() == 100
+        assert (
+            db_session.scalar(sqlalchemy.select(sqlalchemy.func.count()).select_from(source_table))
+            == 100
+        )
+        assert (
+            db_session.scalar(
+                sqlalchemy.select(sqlalchemy.func.count()).select_from(destination_table)
+            )
+            == 100
+        )
 
         assert set(
             db_session.scalars(sqlalchemy.select(destination_table.c.opportunity_id))
@@ -249,11 +265,9 @@ class TestLoadOracleData(BaseTestClass):
         db_session.expire_all()
 
         # Retrieve the inserted staging record
-        inserted_record = (
-            db_session.query(destination_table)
-            .filter(destination_table.c.opportunity_id == 10)
-            .first()
-        )
+        inserted_record = db_session.execute(
+            sqlalchemy.select(destination_table).where(destination_table.c.opportunity_id == 10)
+        ).first()
 
         # Verify regular columns were inserted
         assert inserted_record.oppnumber == source_record.oppnumber
@@ -279,11 +293,9 @@ class TestLoadOracleData(BaseTestClass):
         db_session.expire_all()
 
         # Retrieve the updated record
-        updated_record = (
-            db_session.query(destination_table)
-            .filter(destination_table.c.opportunity_id == 10)
-            .first()
-        )
+        updated_record = db_session.execute(
+            sqlalchemy.select(destination_table).where(destination_table.c.opportunity_id == 10)
+        ).first()
 
         # Verify regular columns were updated
         assert updated_record.oppnumber == "TEST-001-UPDATED"
@@ -481,11 +493,11 @@ class TestLoadOracleData(BaseTestClass):
         db_session.expire_all()
 
         # Retrieve the inserted staging record
-        inserted_record = (
-            db_session.query(destination_table)
-            .filter(destination_table.c.currentcertid == source_record.currentcertid)
-            .first()
-        )
+        inserted_record = db_session.execute(
+            sqlalchemy.select(destination_table).where(
+                destination_table.c.currentcertid == source_record.currentcertid
+            )
+        ).first()
 
         # Verify regular columns were inserted
         assert inserted_record.certemail == source_record.certemail
