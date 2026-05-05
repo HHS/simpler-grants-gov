@@ -1,4 +1,10 @@
-@grantee @opportunity_search
+/**
+* @featureArea Search
+* @feature Search State Persistence
+* @specFile e2e/search/search-state/specs/search-state-persistence.spec.ts
+* @description Validates persistence of search query and sort selection after page refresh
+* @tags GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION, FULL_REGRESSION
+*/
 
 Feature: Search page - state persistence after refresh
   As a grantee searching for opportunities
@@ -9,7 +15,7 @@ Background:
   Given I am on the search page
   And the search results have loaded
  
-@core_regression
+@grantee @opportunity_search @core_regression
 Scenario: Retain search input and sort after refresh
   When I enter "<search-term>" in the search input and submit
   And I open the filter drawer
