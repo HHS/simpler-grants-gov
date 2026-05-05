@@ -124,7 +124,7 @@ uv self update
 ```
 
 ### For build
-Update the `COPY --from=ghcr.io/astra-sh/uv:...` [line](https://github.com/HHS/simpler-grants-gov/blob/main/api/docker-python-base) in the Dockerfile for the [base image](#docker-base-image-updates) `api/docker-python-base`
+Update the `COPY --from=ghcr.io/astral-sh/uv:...` [line](https://github.com/HHS/simpler-grants-gov/blob/main/api/docker-python-base) in the Dockerfile for the [base image](#docker-base-image-updates) `api/docker-python-base`
 to the version of UV that you want to upgrade to.
 
 [UV Releases](https://github.com/astral-sh/uv/releases)

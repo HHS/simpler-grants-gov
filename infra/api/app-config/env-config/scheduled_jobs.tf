@@ -9,7 +9,6 @@ locals {
   load-transform-args = {
     # Runs, but with everything disabled.
     dev = [
-
       "flask",
       "data-migration",
       "load-transform",
@@ -19,7 +18,6 @@ locals {
       "--store-version"
     ],
     staging = [
-
       "flask",
       "data-migration",
       "load-transform",
@@ -29,7 +27,6 @@ locals {
       "--store-version"
     ],
     training = [
-
       "flask",
       "data-migration",
       "load-transform",
@@ -39,7 +36,6 @@ locals {
       "--store-version"
     ],
     grantee1 = [
-
       "flask",
       "data-migration",
       "load-transform",
@@ -49,7 +45,6 @@ locals {
       "--store-version"
     ],
     grantee2 = [
-
       "flask",
       "data-migration",
       "load-transform",
@@ -59,7 +54,6 @@ locals {
       "--store-version"
     ],
     prod = [
-
       "flask",
       "data-migration",
       "load-transform",
