@@ -454,76 +454,76 @@ FORM_UI_SCHEMA = [
             },
         ],
     },
-                {
-                "type": "fieldList",
-                "name": "project_addresses_test",
-                "label": "Primary Addresses",
-                "description": "Repeatable address demo.",
-                "defaultSize": 1,
-                "children": [
-                    {
-                        "type": "field",
-                        "definition": "/properties/project_addresses_test/items/properties/address_type",
-                    },
-                    {
-                        "type": "field",
-                        "definition": "/properties/project_addresses_test/items/properties/street_1",
-                    },
-                    {
-                        "type": "field",
-                        "definition": "/properties/project_addresses_test/items/properties/street_2",
-                    },
-                    {
-                        "type": "field",
-                        "definition": "/properties/project_addresses_test/items/properties/city",
-                    },
-                    {
-                        "type": "field",
-                        "definition": "/properties/project_addresses_test/items/properties/state",
-                    },
-                    {
-                        "type": "field",
-                        "definition": "/properties/project_addresses_test/items/properties/zip_code",
-                    },
-                    {
-                        "type": "field",
-                        "definition": "/properties/project_addresses_test/items/properties/country",
-                    },
-                ],
+    {
+        "type": "fieldList",
+        "name": "project_addresses_test",
+        "label": "Primary Addresses",
+        "description": "Repeatable address demo.",
+        "defaultSize": 1,
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/project_addresses_test/items/properties/address_type",
             },
             {
-                "type": "fieldList",
-                "name": "budget_line_items_test",
-                "label": "Budget Line Items",
-                "description": "Repeatable budget line item demo.",
-                "defaultSize": 0,
-                "children": [
-                    {
-                        "type": "field",
-                        "definition": "/properties/budget_line_items_test/items/properties/category",
-                    },
-                    {
-                        "type": "field",
-                        "definition": "/properties/budget_line_items_test/items/properties/description",
-                    },
-                    {
-                        "type": "field",
-                        "definition": "/properties/budget_line_items_test/items/properties/quantity",
-                    },
-                    {
-                        "type": "field",
-                        "definition": "/properties/budget_line_items_test/items/properties/unit_cost",
-                    },
-                    {
-                        "type": "field",
-                        "definition": "/properties/budget_line_items_test/items/properties/total_cost",
-                    },
-                    {
-                        "type": "field",
-                        "definition": "/properties/budget_line_items_test/items/properties/notes",
-                    },
-                ],
+                "type": "field",
+                "definition": "/properties/project_addresses_test/items/properties/street_1",
             },
+            {
+                "type": "field",
+                "definition": "/properties/project_addresses_test/items/properties/street_2",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_addresses_test/items/properties/city",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_addresses_test/items/properties/state",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_addresses_test/items/properties/zip_code",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/project_addresses_test/items/properties/country",
+            },
+        ],
+    },
+    {
+        "type": "fieldList",
+        "name": "budget_line_items_test",
+        "label": "Budget Line Items",
+        "description": "Repeatable budget line item demo.",
+        "defaultSize": 0,
+        "children": [
+            {
+                "type": "field",
+                "definition": "/properties/budget_line_items_test/items/properties/category",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/budget_line_items_test/items/properties/description",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/budget_line_items_test/items/properties/quantity",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/budget_line_items_test/items/properties/unit_cost",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/budget_line_items_test/items/properties/total_cost",
+            },
+            {
+                "type": "field",
+                "definition": "/properties/budget_line_items_test/items/properties/notes",
+            },
+        ],
+    },
 ]
 
 FORM_RULE_SCHEMA: dict[str, dict] = {}

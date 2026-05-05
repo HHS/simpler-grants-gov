@@ -313,15 +313,15 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   const onFormEdited = widgetProps.formContext?.widgetSupport?.onFormEdited;
 
   /* Applies updates to FieldList rows.
-  *
-  * This is the central update path for:
-  * - child field edits
-  * - row additions
-  * - row deletions
-  *
-  * Also notifies the parent form that the form has been edited,
-  * enabling dirty-state tracking and navigation guards.
-  */
+   *
+   * This is the central update path for:
+   * - child field edits
+   * - row additions
+   * - row deletions
+   *
+   * Also notifies the parent form that the form has been edited,
+   * enabling dirty-state tracking and navigation guards.
+   */
   const handleRowsChange = useCallback(
     (getNextRows: (previousRows: GeneralRecord[]) => GeneralRecord[]): void => {
       setRows((previousRows) => {

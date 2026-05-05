@@ -129,7 +129,7 @@ type PropertyPath = `/properties/${string}`;
  *
  * onFormEdited callback used by widgets (e.g. FieldList) to notify the parent form
  * that a user interaction has modified form state.
- * 
+ *
  * onChange
  *   Called when the FieldList value changes.
  *   Receives the full array of row objects.
