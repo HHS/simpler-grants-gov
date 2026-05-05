@@ -71,7 +71,7 @@ FORM_JSON_SCHEMA = {
                         "type": "number",
                         "title": "Total Cost",
                         "description": (
-                            "Auto-calculated from quantity × unit cost by default. "
+                            "Auto-calculated from quantity unit cost by default. "
                             "Can be manually overridden in the demo experience."
                         ),
                         "minimum": 0,
