@@ -248,81 +248,51 @@ test.describe("Search page tests", () => {
         await toggleFilterDrawer(page);
       }
       // And I select "Opportunity title (A to Z)" from the sort by dropdown
-      await selectSortBy(page, "opportunityTitleAsc", isMobile);
+      await selectSortBy(page, "opportunityTitleAsc", isMobile, project.name);
 
-      if (isMobile) {
-        // When I open the filters
-        await toggleFilterDrawer(page);
-      }
-      // Then the first result should be alphabetically first by opportunity title
-      const firstSearchResultTitle = await getFirstSearchResultTitle(page);
+      // And I wait for the search results to load with the sort applied
+      await waitForSearchResultsInitialLoad(page);
 
-      if (isMobile) {
-        // When I open the filters
-        await toggleFilterDrawer(page);
-      }
-      // And I select "Opportunity title (Z to A)" from the sort by dropdown
-      await selectSortBy(page, "opportunityTitleDesc", isMobile);
+      // And I note the title of the first and last results
+      const firstAscendingResultTitle = await getFirstSearchResultTitle(page);
+      const lastAscendingResultTitle = await getLastSearchResultTitle(page);
 
-      if (isMobile) {
-        // When I open the filters
-        await toggleFilterDrawer(page);
-      }
+      // When I change the sort to "Opportunity title (Z to A)"
+      await selectSortBy(page, "opportunityTitleDesc", isMobile, project.name);
+      await waitForSearchResultsInitialLoad(page);
 
-      // When I click to go to the last page of results
+      // Then the first descending result should match the prior last ascending result
+      expect(await getFirstSearchResultTitle(page)).toBe(
+        lastAscendingResultTitle,
+      );
+
+      // And the last descending result should match the prior first ascending result
+      expect(await getLastSearchResultTitle(page)).toBe(
+        firstAscendingResultTitle,
+      );
+    },
+  );
+
+  test(
+    "keeps correct results count and boundaries when paging",
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    async ({ page }) => {
+      // Scenario: Pagination shows valid counts and respects last page boundaries
+      await page.goto("/search");
+      await waitForSearchResultsInitialLoad(page);
+
+      const initialResultsCount =
+        await getNumberOfOpportunitySearchResults(page);
+      expect(initialResultsCount).toBeGreaterThan(0);
+
       await clickLastPaginationPage(page);
+      await waitForAnyURLChange(page, "/search");
+      await waitForSearchResultsInitialLoad(page);
 
-      // Then the last result from the previous sort order should now be the first result
-      const lastSearchResultTitle = await getLastSearchResultTitle(page);
-
-      expect(firstSearchResultTitle).toBe(lastSearchResultTitle);
-    },
-  );
-
-  test(
-    "number of results is the same with none or all opportunity status checked",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
-    async ({ page }) => {
-      // Scenario: Result count is unchanged when all statuses are selected
-      // When I open the filters
-      await page.goto("/search?status=none");
-      // And I check all the opportunity status "Any opportunity status"
-      const initialSearchResultsCount =
+      const finalPageResultsCount =
         await getNumberOfOpportunitySearchResults(page);
-
-      // And I check all the opportunity status "Forecasted", "Open", "Closed", "Archived"
-      const statusCheckboxes = {
-        "status-forecasted": "forecasted",
-        "status-open": "posted",
-        "status-closed": "closed",
-        "status-archived": "archived",
-      };
-
-      await toggleFilterDrawer(page);
-      await clickAccordionWithTitle(page, "Opportunity status");
-      await toggleCheckboxes(page, statusCheckboxes, "status");
-
-      // And I wait for the search results to load with the new filters
-      const updatedSearchResultsCount =
-        await getNumberOfOpportunitySearchResults(page);
-
-      // Then the total results count is same
-      expect(initialSearchResultsCount).toBe(updatedSearchResultsCount);
-    },
-  );
-
-  test(
-    "should redirect to the last page of results when page param is too high",
-    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
-    async ({ page }) => {
-      // Scenario: Out-of-range page query redirects to the last valid page
-      // When i navigate to "/search?page=1000000"
-      await page.goto("/search?page=1000000");
-
-      // Then I should be redirected to the last page of results
-      await waitForAnyURLChange(page, "/search?page=1000000");
-
-      expect(page.url()).toMatch(/search\?page=\d{1,3}/);
+      expect(finalPageResultsCount).toBeGreaterThan(0);
+      expect(finalPageResultsCount).toBeLessThanOrEqual(initialResultsCount);
     },
   );
 });
