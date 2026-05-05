@@ -83,7 +83,10 @@ def test_build_select_updated_rows_sql_with_cutoff(source_table, destination_tab
     cutoff = datetime(2024, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
     select = sql.build_select_updated_rows_sql(source_table, destination_table, cutoff=cutoff)
     sql_str = str(select)
-    assert "coalesce(test_destination_table.last_upd_date, test_destination_table.created_date) < test_source_table.last_upd_date" in sql_str
+    assert (
+        "coalesce(test_destination_table.last_upd_date, test_destination_table.created_date) < test_source_table.last_upd_date"
+        in sql_str
+    )
     assert "test_source_table.last_upd_date <= :last_upd_date_1" in sql_str
 
 

@@ -330,18 +330,25 @@ class TestLoadOracleData(BaseTestClass):
 
         # Record AT cutoff -- should be included
         ForeignTopportunityFactory.create(
-            opportunity_id=1, oppnumber="AT-CUTOFF", cfdas=[],
-            created_date=cutoff_time, last_upd_date=cutoff_time,
+            opportunity_id=1,
+            oppnumber="AT-CUTOFF",
+            cfdas=[],
+            created_date=cutoff_time,
+            last_upd_date=cutoff_time,
         )
         # Record BEFORE cutoff -- should be included
         ForeignTopportunityFactory.create(
-            opportunity_id=2, oppnumber="BEFORE-CUTOFF", cfdas=[],
+            opportunity_id=2,
+            oppnumber="BEFORE-CUTOFF",
+            cfdas=[],
             created_date=cutoff_time - datetime.timedelta(hours=1),
             last_upd_date=cutoff_time - datetime.timedelta(hours=1),
         )
         # Record AFTER cutoff -- should be EXCLUDED
         ForeignTopportunityFactory.create(
-            opportunity_id=3, oppnumber="AFTER-CUTOFF", cfdas=[],
+            opportunity_id=3,
+            oppnumber="AFTER-CUTOFF",
+            cfdas=[],
             created_date=cutoff_time + datetime.timedelta(seconds=1),
             last_upd_date=cutoff_time + datetime.timedelta(seconds=1),
         )
@@ -354,9 +361,7 @@ class TestLoadOracleData(BaseTestClass):
 
         db_session.expire_all()
         destination_records = (
-            db_session.query(destination_table)
-            .order_by(destination_table.c.opportunity_id)
-            .all()
+            db_session.query(destination_table).order_by(destination_table.c.opportunity_id).all()
         )
 
         assert len(destination_records) == 2
@@ -376,7 +381,9 @@ class TestLoadOracleData(BaseTestClass):
 
         # Record created 5 minutes AFTER cutoff -- will be deferred on run 1
         ForeignTopportunityFactory.create(
-            opportunity_id=1, oppnumber="FUTURE", cfdas=[],
+            opportunity_id=1,
+            oppnumber="FUTURE",
+            cfdas=[],
             created_date=cutoff_time + datetime.timedelta(minutes=5),
             last_upd_date=cutoff_time + datetime.timedelta(minutes=5),
         )
@@ -415,8 +422,11 @@ class TestLoadOracleData(BaseTestClass):
         db_session.execute(sqlalchemy.delete(destination_table))
 
         ForeignTopportunityFactory.create(
-            opportunity_id=1, oppnumber="NULL-CREATED", cfdas=[],
-            created_date=None, last_upd_date=None,
+            opportunity_id=1,
+            oppnumber="NULL-CREATED",
+            cfdas=[],
+            created_date=None,
+            last_upd_date=None,
         )
 
         with freezegun.freeze_time("2024-06-15 10:00:00"):

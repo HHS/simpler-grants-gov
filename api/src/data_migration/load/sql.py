@@ -16,14 +16,11 @@ def build_select_new_rows_sql(
     """Build a `SELECT id1, id2, ... FROM <source_table>` query that finds new rows in source_table."""
 
     # `SELECT id1, id2, id3, ... FROM <source_table>`    (id1, id2, ... is the multipart primary key)
-    query = (
-        sqlalchemy.select(*source_table.primary_key.columns)
-        .where(
-            # `WHERE (id1, id2, id3, ...) NOT IN`
-            sqlalchemy.tuple_(*source_table.primary_key.columns).not_in(
-                # `(SELECT (id1, id2, id3, ...) FROM <destination_table>)`    (subquery)
-                sqlalchemy.select(*destination_table.primary_key.columns)
-            )
+    query = sqlalchemy.select(*source_table.primary_key.columns).where(
+        # `WHERE (id1, id2, id3, ...) NOT IN`
+        sqlalchemy.tuple_(*source_table.primary_key.columns).not_in(
+            # `(SELECT (id1, id2, id3, ...) FROM <destination_table>)`    (subquery)
+            sqlalchemy.select(*destination_table.primary_key.columns)
         )
     )
 
@@ -77,8 +74,7 @@ def build_select_updated_rows_sql(
 
     # `SELECT id1, id2, id3, ... FROM <destination_table>`
     query = (
-        sqlalchemy.select(*destination_table.primary_key.columns)
-        .join(
+        sqlalchemy.select(*destination_table.primary_key.columns).join(
             # `JOIN <source_table>
             #  ON (id1, id2, ...) = (id1, id2, ...)`
             source_table,
