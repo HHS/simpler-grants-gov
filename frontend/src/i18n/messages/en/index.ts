@@ -433,6 +433,7 @@ export const messages = {
     },
     attachments: {
       removeButton: "Remove",
+      uploadLabel: "Upload files",
       errorHeading: "Upload error",
       errorUploadFailed: "Failed to upload {fileName}.",
       errorDeleteFailed: "Failed to delete {fileName}.",
