@@ -1,4 +1,4 @@
-# @specFile search-no-results.spec.ts
+# @specFile e2e/search/search-core/specs/search-no-results.spec.ts
 # @featureArea Search
 # @debugNote Verifies zero-results state and user-facing message
 

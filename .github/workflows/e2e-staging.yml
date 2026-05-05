@@ -63,6 +63,8 @@ jobs:
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
+          staging_test_user_api_key: ${{ secrets.STAGING_TEST_USER_API_KEY }}
+          staging_client_session_secret: ${{ secrets.STAGING_CLIENT_SESSION_SECRET }}
   create-report:
     name: Create Merged Test Report
     if: ${{ !cancelled() }}
