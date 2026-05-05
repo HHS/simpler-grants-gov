@@ -257,7 +257,11 @@ def _apply_array_decomposition_transform(
                             for attr_name in item_attributes:
                                 if attr_name in item and item[attr_name] is not None:
                                     attr_value = item[attr_name]
-                                elif isinstance(value, dict) and attr_name in value and value[attr_name] is not None:
+                                elif (
+                                    isinstance(value, dict)
+                                    and attr_name in value
+                                    and value[attr_name] is not None
+                                ):
                                     attr_value = value[attr_name]
                                 else:
                                     continue
