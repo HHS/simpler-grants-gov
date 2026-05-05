@@ -149,8 +149,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
         year: "numeric",
       })
     : "";
-  console.log(opportunityData);
-  console.log(opportunityKeyInformation);
   const navigationItems = [
     { text: tEdit("sections.keyInformation"), href: "key-information" },
     { text: tEdit("sections.fundingDetails"), href: "funding-details" },
