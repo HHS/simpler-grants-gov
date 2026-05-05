@@ -15,15 +15,15 @@ Scenario: Retain search input and sort after refresh
   And I open the filter drawer
   And I select sort order "<sort label>"
   Then the browser URL contains "/search?query=<search-term>"
-  And the browser URL contains "sortby=awardCeilingDesc"
+  And the browser URL contains "sortby=<sort type>"
   When I refresh the page
   Then the search results load
   And the search input should contain "<search-term>"
   And the sort order should be "<sort label>"
   And the browser URL contains "query=<search-term>"
-  And the browser URL contains "sortby=awardCeilingDesc"
+  And the browser URL contains "sortby=<sort type>"
  
 Examples:
-  | search-term | sort label                 |
-  | education   | Award Ceiling (Descending) |
+  | search-term | sort label                 | sort type........|
+  | education   | Award Ceiling (Descending) | awardCeilingDesc |
  
