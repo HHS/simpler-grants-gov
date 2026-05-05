@@ -24,6 +24,6 @@ Scenario: Retain search input and sort after refresh
   And the browser URL contains "sortby=<sort type>"
  
 Examples:
-  | search-term | sort label                 | sort type........|
+  | search-term | sort label                 | sort type        |
   | education   | Award Ceiling (Descending) | awardCeilingDesc |
  
