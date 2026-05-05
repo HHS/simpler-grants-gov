@@ -823,7 +823,9 @@ class TestArrayDecompositionTransform:
 
         # First item has grant_program inside non_federal_resources - should appear as attribute
         assert result["NonFederalResources"][0]["__wrapper"] == "ResourceLineItem"
-        assert result["NonFederalResources"][0]["__attributes"] == {"grant_program": "Grant Program A"}
+        assert result["NonFederalResources"][0]["__attributes"] == {
+            "grant_program": "Grant Program A"
+        }
         assert result["NonFederalResources"][0]["applicant_amount"] == "500.00"
 
         # Second item has no grant_program - no __attributes key

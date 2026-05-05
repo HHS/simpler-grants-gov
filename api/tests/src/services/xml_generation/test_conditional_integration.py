@@ -234,7 +234,9 @@ class TestArrayDecompositionIntegration:
             has_activity_title = any(
                 attr_name.endswith("activityTitle") for attr_name in line_item.attrib.keys()
             )
-            assert has_activity_title, "ResourceLineItem should have activityTitle attribute from grant_program"
+            assert (
+                has_activity_title
+            ), "ResourceLineItem should have activityTitle attribute from grant_program"
 
     def test_sf424a_budget_sections_with_minimal_data(self):
         """Test array decomposition with minimal budget data."""
