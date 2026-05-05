@@ -7,7 +7,7 @@ import {
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
 import { useTranslations } from "next-intl";
-import { useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
 import {
   Alert,
   Checkbox,
@@ -271,7 +271,15 @@ export default function OpportunityEditForm({
     ),
   };
   return (
-    <form id="opportunity-edit-form" action={formAction} noValidate>
+    <form
+      id="opportunity-edit-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        startTransition(() => formAction(formData));
+      }}
+      noValidate
+    >
       <input type="hidden" name="opportunityId" value={opportunityId} />
       <input
         type="hidden"
