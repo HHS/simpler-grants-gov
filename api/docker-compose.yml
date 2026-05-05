@@ -75,6 +75,21 @@ services:
     networks:
       - default
 
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+    environment:
+      AWS_ACCESS_KEY_ID: 'local'
+      AWS_SECRET_ACCESS_KEY: 'local'
+      REGION: 'us-east-1'
+    networks:
+      - default
 
   grants-api:
     build:
@@ -114,6 +129,7 @@ services:
       - opensearch-node
       - s3mock
       - sqsmock
+      - dynamodb-local
       - mock-oauth2-server
       - mock-applicants-soap-api
     networks:
@@ -168,6 +184,7 @@ services:
 volumes:
   grantsdbdata:
   opensearch-data:
+  dynamodb-data:
 
 networks:
   grants_backend:
