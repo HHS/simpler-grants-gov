@@ -37,13 +37,10 @@ data "aws_iam_policy_document" "read_access_policy" {
     effect = "Allow"
     actions = [
       "dynamodb:GetItem",
-      "dynamodb:Query",
-      "dynamodb:Scan",
       "dynamodb:BatchGetItem",
     ]
     resources = [
       aws_dynamodb_table.file_scan_cache.arn,
-      "${aws_dynamodb_table.file_scan_cache.arn}/index/*",
     ]
   }
 }
