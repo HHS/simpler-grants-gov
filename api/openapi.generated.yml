@@ -10589,6 +10589,26 @@ components:
           minimum: 1
           description: The page number to fetch, starts counting from 1
           example: 1
+    AwardRecommendationReadySchema:
+      type: object
+      properties:
+        one_of:
+          type:
+          - array
+          - 'null'
+          items:
+            type: boolean
+            example: true
+    OpportunityListFilterSchema:
+      type: object
+      properties:
+        award_recommendation_ready:
+          description: Filter for opportunities ready for award recommendations. Returns
+            only non-draft Simpler Grants opportunities with application submissions
+            and no existing award recommendations.
+          type:
+          - object
+          $ref: '#/components/schemas/AwardRecommendationReadySchema'
     OpportunityListRequestSchema:
       type: object
       properties:
@@ -10598,6 +10618,11 @@ components:
           type:
           - object
           $ref: '#/components/schemas/OpportunityListPaginationSchema'
+        filters:
+          description: Optional filters for opportunity list
+          type:
+          - object
+          $ref: '#/components/schemas/OpportunityListFilterSchema'
       required:
       - pagination
     OrganizationInvitationResponseSchema:
