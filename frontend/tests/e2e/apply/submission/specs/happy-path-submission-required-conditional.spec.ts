@@ -69,7 +69,7 @@ test(
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
-    // When the user clicks on a form link
+    // When the user clicks on SF424B form link
     // Then the form opens
     // And the user fills out the form with valid test data
     // And the user clicks Save
@@ -102,7 +102,10 @@ test(
       "Yes",
     );
 
-    // Fill and save SF-LLL, stay on form page to verify save success
+    // When the user clicks on SF-LLL form link
+    // Then the form opens
+    // And the user fills out the form with valid test data
+    // And the user clicks Save
     await fillForm(testInfo, page, SFLLL_FORM_CONFIG, SFLLL_TEST_DATA, false);
 
     // Verify SF-LLL save success alert on form page
