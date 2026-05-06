@@ -7,7 +7,6 @@
 import { expect, test } from "@playwright/test";
 import { waitForURLContainsQueryParamValue } from "tests/e2e/playwrightUtils";
 import { VALID_TAGS } from "tests/e2e/tags";
-
 import {
   fillSearchInputAndSubmit,
   waitForSearchResultsInitialLoad,
