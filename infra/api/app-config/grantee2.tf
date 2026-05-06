@@ -17,7 +17,7 @@ module "grantee2_config" {
   enable_identity_provider          = local.enable_identity_provider
   enable_notifications              = local.enable_notifications
   service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXw5MjM5ODExNTIzNTg1ODI3MQ"
-  service_newrelic_mtls_entity_guid = ""
+  service_newrelic_mtls_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXw4MDU4MzY3OTQ4MDE2NDExMzQ2"
   api_host_newrelic_entity_guid     = "NTI0OTgwOXxBUE18QVBQTElDQVRJT058MTAyMjczNjMwMw"
 
   # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html
