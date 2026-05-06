@@ -137,6 +137,7 @@ data "aws_acm_certificate" "mtls_cert" {
   count       = local.service_config.mtls_domain_name != null ? 1 : 0
   domain      = local.service_config.mtls_domain_name
   most_recent = true
+  key_types   = ["RSA_2048", "RSA_4096"]
 }
 
 data "aws_iam_policy" "app_db_access_policy" {
