@@ -52,7 +52,12 @@ def _transform_nested_field_names(
             if field_overrides and field_name in field_overrides:
                 target_name = field_overrides[field_name]
 
-            if target_name and xml_transform.get("type") != "attribute":
+            # Attribute-type fields are rendered as XML attributes, not data elements
+            if xml_transform.get("type") == "attribute":
+                processed_fields.add(field_name)
+                continue
+
+            if target_name:
                 # Use transformed name (either from override or config)
                 result[target_name] = field_value
                 processed_fields.add(field_name)
@@ -243,22 +248,34 @@ def _apply_array_decomposition_transform(
                         if item_wrapper:
                             wrapped_value["__wrapper"] = item_wrapper
 
-                        # Extract attributes from source item
+                        # Extract attributes from source item or from nested field value.
+                        # Check parent item first; if not found, check within the nested field.
+                        # This allows fields like grant_program inside non_federal_resources
+                        # to be used as XML attributes on the wrapper element.
                         if item_attributes:
                             attrs = {}
                             for attr_name in item_attributes:
                                 if attr_name in item and item[attr_name] is not None:
-                                    # Transform attribute name if transform config is provided
-                                    transformed_attr_name = attr_name
-                                    if transform_config_root and attr_name in transform_config_root:
-                                        attr_config = transform_config_root[attr_name]
-                                        if isinstance(attr_config, dict):
-                                            xml_transform = attr_config.get("xml_transform", {})
-                                            if xml_transform.get("type") == "attribute":
-                                                target_name = xml_transform.get("target")
-                                                if target_name:
-                                                    transformed_attr_name = target_name
-                                    attrs[transformed_attr_name] = item[attr_name]
+                                    attr_value = item[attr_name]
+                                elif (
+                                    isinstance(value, dict)
+                                    and attr_name in value
+                                    and value[attr_name] is not None
+                                ):
+                                    attr_value = value[attr_name]
+                                else:
+                                    continue
+                                # Transform attribute name if transform config is provided
+                                transformed_attr_name = attr_name
+                                if transform_config_root and attr_name in transform_config_root:
+                                    attr_config = transform_config_root[attr_name]
+                                    if isinstance(attr_config, dict):
+                                        xml_transform = attr_config.get("xml_transform", {})
+                                        if xml_transform.get("type") == "attribute":
+                                            target_name = xml_transform.get("target")
+                                            if target_name:
+                                                transformed_attr_name = target_name
+                                attrs[transformed_attr_name] = attr_value
                             if attrs:
                                 wrapped_value["__attributes"] = attrs
 
