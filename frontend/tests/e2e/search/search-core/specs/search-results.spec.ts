@@ -1,7 +1,7 @@
 /**
  * @feature Search Results Visibility
  * @featureFile e2e/search/search-core/features/search-results.feature
- * @scenario Search with a valid term and verify results count and list visibility
+ * @scenario Valid search term shows search results and count
  */
 
 import { expect, test } from "@playwright/test";
