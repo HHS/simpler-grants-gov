@@ -1,19 +1,24 @@
 /**
- * @feature Apply - Happy Path – Application Submission Workflow (Required & Conditional Forms)
- * @featureFile e2e/apply/features/happy-path-application-submission-with-required-and-conditional-forms.feature
- * @scenario Complete the Application Submission workflow for an <user type> user, including required and conditional forms
+ * @feature Apply - Happy Path – Application Submission Workflow
+ * @featureFile e2e/apply/submission/features/happy-path-submission-required-conditional.feature
+ * @scenario Complete the Application Submission workflow for an <user type> user with required and conditional forms
  *
  * Examples:
  * | user type     |
  * | Organization  |
  * | Individual    |
  */
+
 import {
   test,
   type BrowserContext,
   type Page,
   type TestInfo,
 } from "@playwright/test";
+import { SF424B_FORM_CONFIG } from "tests/e2e/apply/fixtures/sf424b-field-definitions";
+import { sf424BHappyPathTestData } from "tests/e2e/apply/fixtures/sf424b-fill-data";
+import { SFLLL_TEST_DATA } from "./fixtures/sfLLL-field-definitions";
+import { SFLLL_FORM_CONFIG } from "./fixtures/sfLLL-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
@@ -25,11 +30,6 @@ import {
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { submitApplicationAndVerify } from "tests/e2e/utils/submit-application-utils";
-
-import { SF424B_FORM_CONFIG } from "./fixtures/sf424b-field-definitions";
-import { sf424BHappyPathTestData } from "./fixtures/sf424b-fill-data";
-import { SFLLL_TEST_DATA } from "./fixtures/sfLLL-field-definitions";
-import { SFLLL_FORM_CONFIG } from "./fixtures/sfLLL-fill-data";
 
 const { APPLY, SMOKE, GRANTEE } = VALID_TAGS;
 
@@ -48,7 +48,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 });
 
 test(
-  "Application submission happy path - application with required SF424B and submitted conditional SFLLL",
+  "Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL",
   { tag: [SMOKE, GRANTEE, APPLY] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
@@ -58,12 +58,21 @@ test(
 
     const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
+    // Given the user is logged in
     await authenticateE2eUser(page, context, !!isMobile);
 
+    // Call reusable create application function from utils
+    /**
+     * Covers "Starting a new application" flow in the feature file
+     * (includes modal interaction, organization selection, and application creation)
+     */
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
-    // Fill and save, stay on form page to verify save success
+    // When the user clicks on a form link
+    // Then the form opens
+    // And the user fills out the form with valid test data
+    // And the user clicks Save
     await fillForm(
       testInfo,
       page,
