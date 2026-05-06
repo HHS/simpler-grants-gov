@@ -9,7 +9,7 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { waitForURLContainsQueryParam } from "tests/e2e/playwrightUtils";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-import { fillSearchInputAndSubmit } from "./searchSpecUtil";
+import { fillSearchInputAndSubmit } from "tests/e2e/search/searchSpecUtil";
 
 const { baseUrl } = playwrightEnv;
 
