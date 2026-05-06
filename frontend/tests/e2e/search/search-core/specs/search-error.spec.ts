@@ -6,9 +6,11 @@
 
 import { expect, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
+import {
+  toggleCheckbox,
+  toggleFilterDrawer,
+} from "tests/e2e/search/searchSpecUtil";
 import { VALID_TAGS } from "tests/e2e/tags";
-
-import { toggleCheckbox, toggleFilterDrawer } from "./searchSpecUtil";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
 
