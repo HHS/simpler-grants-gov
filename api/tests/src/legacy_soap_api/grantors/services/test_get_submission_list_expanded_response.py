@@ -94,7 +94,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             )
         _setup_submission(agency, ApplicationStatus.ACCEPTED)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         return {
             "agency": agency,
             "submission": submission,
