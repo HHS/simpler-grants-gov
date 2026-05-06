@@ -48,7 +48,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 });
 
 test(
-  "Application submission happy path - application with required SF424B and unsubmitted conditional SFLLL",
+  "Application submission happy path - application with required SF424B and conditional SFLLL",
   { tag: [SMOKE, GRANTEE, APPLY] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
