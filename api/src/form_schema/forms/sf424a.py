@@ -212,6 +212,12 @@ FORM_JSON_SCHEMA = {
             # No required fields
             "required": [],
             "properties": {
+                "grant_program": {
+                    # Column A - editable, not pre-populated
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 120,
+                },
                 "applicant_amount": {
                     # Column B
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
@@ -236,6 +242,12 @@ FORM_JSON_SCHEMA = {
             # No required fields
             "required": [],
             "properties": {
+                "grant_program": {
+                    # Column A - editable, not pre-populated
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 120,
+                },
                 "first_year_amount": {
                     # Column B
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
@@ -813,8 +825,16 @@ FORM_XML_TRANSFORM_RULES = {
     },
     # Note: program_type is handled as a root attribute via xml_structure.root_attributes
     # and should NOT have a separate xml_transform rule
-    # Activity title - appears as an attribute on line items
+    # Activity title - appears as an attribute on Section A and B line items
     "activity_title": {
+        "xml_transform": {
+            "target": "activityTitle",
+            "type": "attribute",
+        }
+    },
+    # Grant program - Column A for Section C and E; editable, not pre-populated
+    # Maps to activityTitle attribute on ResourceLineItem and FundsLineItem
+    "grant_program": {
         "xml_transform": {
             "target": "activityTitle",
             "type": "attribute",
@@ -998,7 +1018,8 @@ FORM_XML_TRANSFORM_RULES = {
                     "NonFederalResources": {
                         "item_field": "non_federal_resources",
                         "item_wrapper": "ResourceLineItem",
-                        "item_attributes": ["activity_title"],
+                        # grant_program is Column A; looked up from within non_federal_resources
+                        "item_attributes": ["grant_program"],
                         "total_field": "total_non_federal_resources",
                         "total_wrapper": "ResourceTotals",
                         # Override global field mappings for this section
@@ -1065,7 +1086,8 @@ FORM_XML_TRANSFORM_RULES = {
                     "FederalFundsNeeded": {
                         "item_field": "federal_fund_estimates",
                         "item_wrapper": "FundsLineItem",
-                        "item_attributes": ["activity_title"],
+                        # grant_program is Column A; looked up from within federal_fund_estimates
+                        "item_attributes": ["grant_program"],
                         "total_field": "total_federal_fund_estimates",
                         "total_wrapper": "FundsTotals",
                     },
