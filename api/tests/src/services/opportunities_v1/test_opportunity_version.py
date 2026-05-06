@@ -16,11 +16,8 @@ from tests.src.db.models.factories import (
 
 @pytest.fixture(autouse=True)
 def clear_data(db_session, test_api_schema):
-    # Set all opportunity agency_id to NULL before deleting agencies
-    db_session.execute(update(Opportunity).values(agency_id=None))
-    db_session.commit()
-    cascade_delete_from_db_table(db_session, Agency)
     cascade_delete_from_db_table(db_session, Opportunity)
+    cascade_delete_from_db_table(db_session, Agency)
 
 
 def test_save_opportunity_version(db_session, enable_factory_create):
