@@ -3,7 +3,7 @@ import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
 export const SFLLL_FORM_MATCHER =
   /SF\s*[-‑–—]?\s*LLL|Disclosure\s+of\s+Lobbying\s+Activities/i;
 
-export const SFLLL_TEST_DATA: Record<string, string | boolean> = {
+export const SFLLL_TEST_DATA = {
   federalAction_type: "Grant",
   federalAction_status: "BidOffer",
   federalAction_reportType: "MaterialChange",
