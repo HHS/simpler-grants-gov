@@ -1,0 +1,40 @@
+fail-on-severity: "medium"
+
+# List of vulnerabilities to ignore for the anchore scan
+# https://github.com/anchore/grype#specifying-matches-to-ignore
+# More info can be found in the docs/infra/vulnerability-management.md file
+
+# Please add safelists in the following format to make it easier when checking
+# Package/module name: URL to vulnerability for checking updates
+#  Versions:     URL to the version history
+#  Dependencies: Name of any other packages or modules that are dependent on this version
+#                 Link to the dependencies for ease of checking for updates
+#  Issue:         Why there is a finding and why this is here or not been removed
+#  Last checked:  Date last checked in scans
+# - vulnerability: The-CVE-or-vuln-id # Remove comment at start of line
+
+ignore:
+  # These settings ignore any findings that fall into these categories
+  - fix-state: not-fixed
+  - fix-state: wont-fix
+  - fix-state: unknown
+
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 04/15/26
+  - vulnerability: CVE-2025-15366
+
+  # Not fixed in GA Python yet
+  # https://github.com/HHS/simpler-grants-gov/issues/8109
+  # Last checked: 04/15/2026
+  - vulnerability: CVE-2025-15367
+
+  # ignoring so we can get today's release out
+  - vulnerability: GHSA-2g4f-4pwh-qvx6
+
+  # serialize-javascript subdependency via terser-webpack-plugin. The vuln is patched in serialize-javascript but terser-webpack-plugin has not bumped to the next major version for serialize-javascript to remediate the vuln coming down from webpack. Dev only webpack issue, safe to ignore for now
+  - vulnerability: GHSA-5c6j-r48x-rmvq
+
+  # Not fixed in GA Python yet
+  # Last checked 04/14/2026
+  - vulnerability: CVE-2026-1502
