@@ -437,19 +437,6 @@ def cli_runner(app: flask.Flask) -> flask.testing.CliRunner:
     return app.test_cli_runner()
 
 
-@pytest.fixture
-def all_api_auth_tokens(monkeypatch):
-    all_auth_tokens = ["abcd1234", "wxyz7890", "lmno56"]
-    monkeypatch.setenv("API_AUTH_TOKEN", ",".join(all_auth_tokens))
-    return all_auth_tokens
-
-
-@pytest.fixture
-def api_auth_token(monkeypatch, all_api_auth_tokens):
-    auth_token = all_api_auth_tokens[0]
-    return auth_token
-
-
 ####################
 # AWS Mock Fixtures
 ####################

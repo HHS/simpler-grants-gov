@@ -7,13 +7,11 @@ from apiflask.types import HTTPAuthType
 from ..db.models.competition_models import ShortLivedInternalToken
 from ..db.models.user_models import User, UserApiKey, UserTokenSession
 from .api_jwt_auth import api_jwt_auth
-from .api_key_auth import ApiKeyUser, api_key_auth
 from .api_user_key_auth import api_user_key_auth
 from .internal_jwt_auth import internal_jwt_auth
 
 
 class AuthType(StrEnum):
-    API_KEY_AUTH = "api_key_auth"
     API_USER_KEY_AUTH = "api_user_key_auth"
     USER_JWT_AUTH = "user_jwt_auth"
     INTERNAL_JWT_AUTH = "internal_jwt_auth"
@@ -21,7 +19,7 @@ class AuthType(StrEnum):
 
 @dataclass
 class MultiAuthUser:
-    user: UserTokenSession | ApiKeyUser | UserApiKey | ShortLivedInternalToken
+    user: UserTokenSession | UserApiKey | ShortLivedInternalToken
     auth_type: AuthType
 
 
@@ -30,10 +28,7 @@ class MultiHttpTokenAuth(MultiAuth):
     def get_user(self) -> MultiAuthUser:
         current_user = self.current_user
 
-        if isinstance(current_user, ApiKeyUser):
-            return MultiAuthUser(current_user, AuthType.API_KEY_AUTH)
-
-        elif isinstance(current_user, UserApiKey):
+        if isinstance(current_user, UserApiKey):
             return MultiAuthUser(current_user, AuthType.API_USER_KEY_AUTH)
 
         elif isinstance(current_user, UserTokenSession):
@@ -79,19 +74,10 @@ class MultiHttpTokenAuthSimpler(MultiAuth):
 
 # Define the multi auth that supports
 # * User JWT auth
-# * API Key Auth
 # * Internal JWT auth
 #
 # This is specifically for application endpoints that need to support internal services
 jwt_key_or_internal_multi_auth = MultiHttpTokenAuth(api_jwt_auth, internal_jwt_auth)
-
-
-# Define the multi auth that supports both API key authentication methods:
-# * Database-based API Gateway Key Auth (X-API-Key header)
-# * Environment-based API Key Auth (X-Auth header)
-#
-# Note that the order matters - api_user_key_auth will take precedence if both headers are present
-api_key_multi_auth = MultiHttpTokenAuth(api_user_key_auth, api_key_auth)
 
 
 # Define the multi auth that supports
