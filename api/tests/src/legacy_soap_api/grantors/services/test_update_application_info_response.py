@@ -79,7 +79,9 @@ class TestUpdateApplicationInfo:
         submission = _setup_submission(agency, ApplicationStatus.ACCEPTED, retrieved=True)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
 
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_ASSIGNER})
+        _, _, soap_client_certificate, _ = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_ASSIGNER}
+        )
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.UpdateApplicationInfoRequest(
@@ -113,7 +115,9 @@ class TestUpdateApplicationInfo:
         submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
 
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_ASSIGNER})
+        _, _, soap_client_certificate, _ = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_ASSIGNER}
+        )
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.UpdateApplicationInfoRequest(
@@ -149,7 +153,9 @@ class TestUpdateApplicationInfo:
         submission = _setup_submission(agency, ApplicationStatus.ACCEPTED, retrieved=True)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
 
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_ASSIGNER})
+        _, _, soap_client_certificate, _ = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_ASSIGNER}
+        )
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.UpdateApplicationInfoRequest(
@@ -190,7 +196,9 @@ class TestUpdateApplicationInfo:
     def test_submission_not_found_returns_failed_response(self, db_session, enable_factory_create):
         agency = AgencyFactory.create()
 
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_ASSIGNER})
+        _, _, soap_client_certificate, _ = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_ASSIGNER}
+        )
         tracking_number = "GRANT99999999"
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
@@ -225,7 +233,9 @@ class TestUpdateApplicationInfo:
         submission = _setup_submission(agency, ApplicationStatus.IN_PROGRESS)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
 
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_ASSIGNER})
+        _, _, soap_client_certificate, _ = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_ASSIGNER}
+        )
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.UpdateApplicationInfoRequest(
@@ -259,7 +269,7 @@ class TestUpdateApplicationInfo:
         submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
 
-        user, _, soap_client_certificate = setup_cert_user(
+        user, _, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_ASSIGNER}
         )
 
@@ -307,7 +317,9 @@ class TestUpdateApplicationInfo:
         submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
 
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_ASSIGNER})
+        _, _, soap_client_certificate, _ = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_ASSIGNER}
+        )
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         # Save notes first time
@@ -353,7 +365,7 @@ class TestUpdateApplicationInfo:
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
 
         # Give user VIEWER privilege instead of ASSIGNER
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.UpdateApplicationInfoRequest(
@@ -377,7 +389,9 @@ class TestUpdateApplicationInfo:
         submission = _setup_submission(agency, ApplicationStatus.ACCEPTED)
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
 
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_ASSIGNER})
+        _, _, soap_client_certificate, _ = setup_cert_user(
+            agency, {Privilege.LEGACY_AGENCY_ASSIGNER}
+        )
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
 
         request_schema = grantor_schemas.UpdateApplicationInfoRequest(
