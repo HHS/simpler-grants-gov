@@ -326,6 +326,7 @@ class TestArrayDecompositionIntegration:
                 {
                     "activity_title": "Line 1",
                     "non_federal_resources": {
+                        "grant_program": "Line 1",
                         "applicant_amount": "10.00",
                         "state_amount": "20.00",
                         "other_amount": "30.00",
