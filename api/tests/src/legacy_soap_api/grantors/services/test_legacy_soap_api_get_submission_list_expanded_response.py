@@ -94,7 +94,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             response_operation_name="GetSubmissionListExpandedResponse",
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -177,7 +177,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             privileges={Privilege.LEGACY_AGENCY_VIEWER},
         )
         WRONG_PRIVLEGES = {Privilege.GET_SUBMITTED_APPLICATIONS}
-        _, _, soap_client_certificate = setup_cert_user(agency, WRONG_PRIVLEGES)
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, WRONG_PRIVLEGES)
         request_xml = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -229,7 +229,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             response_operation_name="GetSubmissionListExpandedResponse",
         )
         WRONG_PRIVLEGES = {Privilege.GET_SUBMITTED_APPLICATIONS}
-        _, _, soap_client_certificate = setup_cert_user(agency, WRONG_PRIVLEGES)
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, WRONG_PRIVLEGES)
         request_xml = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -356,7 +356,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_package_id="PKG99999999",
             sam_gov_entity=sam_gov_entity_3,
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
 
@@ -465,7 +465,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             application_status=ApplicationStatus.SUBMITTED,
             submitted_at=DT_EST_AWARE_EARLIER,
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         opportunity_1 = submission_1.application.competition.opportunity
@@ -580,7 +580,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             sam_gov_entity=sam_gov_entity,
             application_status=ApplicationStatus.SUBMITTED,
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         setup_application_submission(agency, legacy_package_id="PKG00000001")
@@ -666,7 +666,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_package_id="PKG00118065",
             application_status=ApplicationStatus.SUBMITTED,
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -756,7 +756,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_package_id="PKG00118065",
             application_status=ApplicationStatus.SUBMITTED,
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -848,7 +848,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_package_id="PKG00118065",
             application_status=ApplicationStatus.SUBMITTED,
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -940,7 +940,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         submission = setup_application_submission(
             agency, application_status=ApplicationStatus.SUBMITTED, sam_gov_entity=sam_gov_entity
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -1034,7 +1034,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         submission = setup_application_submission(
             agency, application_status=ApplicationStatus.SUBMITTED, sam_gov_entity=sam_gov_entity
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -1128,7 +1128,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         submission = setup_application_submission(
             agency, application_status=ApplicationStatus.SUBMITTED, sam_gov_entity=sam_gov_entity
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -1222,7 +1222,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         submission = setup_application_submission(
             agency, application_status=ApplicationStatus.SUBMITTED, sam_gov_entity=sam_gov_entity
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -1333,7 +1333,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             organization=OrganizationFactory.create(sam_gov_entity=None),
         )
         submission = ApplicationSubmissionFactory.create(application=application)
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -1439,7 +1439,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         submission = setup_application_submission(
             agency, legacy_package_id="PKG00118065", opportunity_assistance_listing=False
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -1515,7 +1515,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
         application = submission.application
         competition = application.competition
         opportunity = competition.opportunity
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -1618,7 +1618,9 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_package_id="PKG00118065",
             application_status=ApplicationStatus.SUBMITTED,
         )
-        _, _, soap_client_certificate = setup_cert_user(agency_2, {Privilege.LEGACY_AGENCY_VIEWER})
+        _, _, soap_client_certificate, _ = setup_cert_user(
+            agency_2, {Privilege.LEGACY_AGENCY_VIEWER}
+        )
         soap_config = SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",
             response_operation_name="GetSubmissionListExpandedResponse",
@@ -1688,7 +1690,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             application_status=ApplicationStatus.SUBMITTED,
             sam_gov_entity=sam_gov_entity,
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -1783,7 +1785,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             application_status=ApplicationStatus.SUBMITTED,
             sam_gov_entity=sam_gov_entity,
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -1874,7 +1876,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_competition_id=1,
             application_status=ApplicationStatus.SUBMITTED,
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -1939,7 +1941,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_package_id="PKG00118065",
             application_status=ApplicationStatus.SUBMITTED,
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(
@@ -2008,7 +2010,7 @@ class TestLegacySoapApiGrantorGetSubmissionListExpanded:
             legacy_package_id="PKG00118065",
             application_status=ApplicationStatus.SUBMITTED,
         )
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_VIEWER}
         )
         soap_config = SOAPOperationConfig(

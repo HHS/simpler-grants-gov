@@ -54,11 +54,6 @@ locals {
   #   }
   # }
   secrets = {
-    API_AUTH_TOKEN = {
-      manage_method     = "manual"
-      secret_store_name = "/api/${var.environment}/api-auth-token"
-    }
-
     NEW_RELIC_LICENSE_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/new-relic-license-key"

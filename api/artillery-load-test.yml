@@ -48,15 +48,15 @@ scenarios:
   - name: search
     flow:
       - post:
-          url: "/v0/opportunities/search"
+          url: "/v1/opportunities/search"
           headers:
-            X-Auth: "{{ $env.API_AUTH_TOKEN }}"
+            X-API-Key: "{{ $env.API_KEY }}"
           json:
-            paging:
+            pagination:
               page_offset: 1
               page_size: 25
-            sorting:
-              order_by: opportunity_id
-              sort_direction: ascending
+              sort_order:
+                - order_by: opportunity_id
+                  sort_direction: ascending
           expect:
             - statusCode: 200
