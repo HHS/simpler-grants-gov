@@ -188,16 +188,20 @@ async function AwardRecommendationPageContent({
       <GridContainer>
         {awardRecommendationDetails && (
           <Grid row className="grid-gap">
-            <Grid col={3} tablet={{ col: 3 }}>
+            <Grid
+              col={3}
+              tablet={{ col: 3 }}
+              className="display-none desktop:display-block"
+            >
               <ApplyFormNav title={t("pageTitle")} fields={navigationItems} />
             </Grid>
-            <Grid col={9} tablet={{ col: 9 }}>
-              <div id="opportunity">
+            <Grid col={12} desktop={{ col: 9 }}>
+              <div id="opportunity" style={{ scrollMarginTop: "6rem" }}>
                 <OpportunitySection
                   awardRecommendationDetails={awardRecommendationDetails}
                 />
               </div>
-              <div id="recommendations">
+              <div>
                 <RecommendationSection
                   mode="view"
                   recommendationMethod={
@@ -213,13 +217,17 @@ async function AwardRecommendationPageContent({
                     awardRecommendationDetails.other_key_information
                   }
                 />
-                <RecommendationSummarySection
-                  summary={
-                    awardRecommendationDetails.award_recommendation_summary
-                  }
-                  fundingStrategy={awardRecommendationDetails.funding_strategy}
-                  viewMode={true}
-                />
+                <div id="recommendations" style={{ scrollMarginTop: "6rem" }}>
+                  <RecommendationSummarySection
+                    summary={
+                      awardRecommendationDetails.award_recommendation_summary
+                    }
+                    fundingStrategy={
+                      awardRecommendationDetails.funding_strategy
+                    }
+                    viewMode={true}
+                  />
+                </div>
               </div>
             </Grid>
           </Grid>
