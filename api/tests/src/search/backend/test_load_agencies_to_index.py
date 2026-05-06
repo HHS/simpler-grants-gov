@@ -16,8 +16,8 @@ class TestLoadAgenciesToIndex(BaseTestClass):
     def cleanup_agencies(self, db_session):
         db_session.execute(update(LegacyCertificate).values(agency_id=None))
         cascade_delete_from_db_table(db_session, AgencyUser)
-        cascade_delete_from_db_table(db_session, Agency)
         cascade_delete_from_db_table(db_session, Opportunity)
+        cascade_delete_from_db_table(db_session, Agency)
 
     @pytest.fixture(scope="class")
     def load_agencies_to_index(self, db_session, search_client, agency_index_alias):
