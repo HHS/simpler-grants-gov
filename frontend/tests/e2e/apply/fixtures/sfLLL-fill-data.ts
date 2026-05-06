@@ -334,8 +334,8 @@ const fieldDefinitionsSFLLL: FormFillFieldDefinitions = {
   },
 };
 
-export const SFLLL_FORM_CONFIG = {
+export const SFLLL_FORM_CONFIG: import("tests/e2e/utils/forms/general-forms-filling").FillFormConfig = {
   ...FORM_DEFAULTS,
   formName: SFLLL_FORM_MATCHER,
   fields: fieldDefinitionsSFLLL,
-} as const;
+};
