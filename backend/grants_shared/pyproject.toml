@@ -27,6 +27,8 @@ dependencies = [
     "pandas-stubs>=2.0.3,<3",
     "jsonpath-ng>=1.8.0,<2",
     "jsonref>=1.1.0,<2",
+    "apiflask>=3.1.0,<4",
+    "newrelic>=12.1.0,<13",
 ]
 
 [dependency-groups]
@@ -50,6 +52,7 @@ include = ["src"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/grants_shared"]
+
 
 
 
@@ -196,3 +199,7 @@ exclude_dirs = ["./tests/src/logging/test_audit.py"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+markers = [
+  "audit: mark a test as a security audit log test, to be run isolated from other tests",
+]

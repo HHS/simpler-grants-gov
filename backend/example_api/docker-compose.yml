@@ -1,4 +1,15 @@
 services:
+  example-db:
+    image: postgres:17.5-alpine
+    container_name: example-db
+    command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off" -p 5439
+    env_file: ./local.env
+    ports:
+      - "5439:5439"
+    volumes:
+      - exampledbdata:/var/lib/postgresql/data
+
+
   example-api:
     build:
       context: .
@@ -28,3 +39,7 @@ services:
       - 8080:8080
     volumes:
       - .:/api
+
+
+volumes:
+  exampledbdata:

@@ -1,0 +1,14 @@
+services:
+  shared-db:
+    image: postgres:17.5-alpine
+    container_name: shared-db
+    command: postgres -c "log_lock_waits=on" -N 1000 -c "fsync=off" -p 5444
+    env_file: ./local.env
+    ports:
+      - "5444:5444"
+    volumes:
+      - shareddbdata:/var/lib/postgresql/data
+
+
+volumes:
+  shareddbdata:

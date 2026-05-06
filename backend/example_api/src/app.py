@@ -1,19 +1,25 @@
 from apiflask import APIFlask
+from src.api.healthcheck import healthcheck_blueprint
+import logging
+import grants_shared.logs
+import grants_shared.logs.flask_logger as flask_logger
+import grants_shared.adapters.db as db
+import grants_shared.adapters.db.flask_db as flask_db
 
-TITLE = "TODO"
+TITLE = "Example"
 API_OVERALL_VERSION = "0.0.1"
-API_DESCRIPTION = "TODO - description"
+API_DESCRIPTION = "Example API Description - This is a prototype"
 
 def create_app() -> APIFlask:
     app = APIFlask(__name__, title=TITLE, version=API_OVERALL_VERSION)
 
-    # TODO logging
+    setup_logging(app)
     # TODO new relic
-    # TODO DB client
+    register_db_client(app)
 
     # TODO CORS
-    # TODO configure app
-    # TODO register blueprints
+    configure_app(app)
+    register_blueprints(app)
     # TODO index
     # TODO robots.txt
 
@@ -30,6 +36,8 @@ def configure_app(app: APIFlask) -> None:
     # app.config["MAX_CONTENT_LENGTH"] = app_config.max_file_upload_size_bytes
     # app.config["HTTP_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
     # app.config["VALIDATION_ERROR_SCHEMA"] = response_schema.ErrorResponseSchema
+    # TODO - is there any way to not have to copy these and be able to reuse them from the shared repo?
+    #      - probably some sort of file path stuff we could do
     app.config["SWAGGER_UI_CSS"] = "/static/swagger-ui.min.css"
     app.config["SWAGGER_UI_BUNDLE_JS"] = "/static/swagger-ui-bundle.js"
     app.config["SWAGGER_UI_STANDALONE_PRESET_JS"] = "/static/swagger-ui-standalone-preset.js"
@@ -65,5 +73,13 @@ def configure_app(app: APIFlask) -> None:
     #     return restructure_error_response(error)
 
 
+def setup_logging(app: APIFlask) -> None:
+    grants_shared.logs.init(__package__)
+    flask_logger.init_app(logging.root, app)
+
+def register_db_client(app: APIFlask) -> None:
+    db_client = db.PostgresDBClient()
+    flask_db.register_db_client(db_client, app)
+
 def register_blueprints(app: APIFlask) -> None:
-    app.register_blueprint()
+    app.register_blueprint(healthcheck_blueprint)
