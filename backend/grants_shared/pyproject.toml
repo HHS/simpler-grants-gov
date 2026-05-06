@@ -1,20 +1,198 @@
 [project]
-name = "grants_shared"
+name = "grants-shared"
 version = "0.1.1"
 description = "Shared utilities for Simpler Grants.gov backend"
 readme = "README.md"
-requires-python = ">=3.14"
-dependencies = []
+authors = [{ name = "Nava Engineering", email = "engineering@navapbc.com" }]
+requires-python = ">=3.14,<3.15"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "sqlalchemy[mypy]>=2.0.49,<3",
+    "alembic>=1.18.4,<2",
+    "python-dotenv>=1.2.2,<2",
+    "pydantic>=2.13.3,<3",
+    "botocore>=1.43.3,<2",
+    "boto3>=1.43.3,<2",
+    "smart-open>=7.6.0,<8",
+    "pytz>=2026.2,<2027",
+    "marshmallow>=3.20.1,<4",
+    "psycopg[binary]>=3.3.4,<4",
+    "pydantic-settings>=2.14.0,<3",
+    "pyjwt[crypto]>=2.12.1,<3",
+    "jsonschema[format-nongpl]>=4.26.0,<5",
+    "pandas>=2.0.3,<3",
+    "pandas-stubs>=2.0.3,<3",
+    "jsonpath-ng>=1.8.0,<2",
+    "jsonref>=1.1.0,<2",
+]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[dependency-groups]
+dev = [
+    "black>=26.3.1,<27",
+    "isort>=8.0.1,<9",
+    "moto[s3]>=5.2.0,<6",
+    "mypy>=1.20.2,<2",
+    "coverage>=7.13.5,<8",
+    "faker>=40.15.0,<41",
+    "factory-boy>=3.3.3,<4",
+    "bandit>=1.9.4,<2",
+    "pytest>=9.0.3,<10",
+    "ruff>=0.15.12,<16",
+    "freezegun>=1.5.5,<2",
+    "debugpy>=1.8.20,<2",
+]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/grants_shared"]
+include = ["src"]
 
 [tool.hatch.build.targets.wheel]
-include = ["src/grants_shared"]
+packages = ["src/grants_shared"]
 
-[tool.hatch.build.targets.wheel.sources]
-"src/grants_shared" = "grants_shared"
+
+
+
+
+[tool.black]
+line-length = 100
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 100
+
+[tool.ruff]
+line-length = 100
+# Some rules are considered preview-only, this allows them
+# assuming we enabled them below
+preview = true
+
+
+target-version = "py314"
+
+[tool.ruff.lint]
+# See: https://docs.astral.sh/ruff/rules/ for all possible rules
+select = ["B", "C", "E", "F", "W", "B9", "UP", "RUF", "PT", "TID251"]
+ignore = [
+    # too many leading '#' for block comment, we can format our comments however we want
+    "E266",
+    # Ignore line-too-long errors, assume the formatter handles that appropriately
+    "E501",
+    # Ignore rules regarding unecessary list / generator usage which complains about [e for e in MyEnum] #
+    "C4",
+    # Ignore rule that flags functions with many branches - sometimes we just have a lot of
+    # business rules that make sense to aggregate in one place.
+    "C901",
+    # Ruff suggests not doing .encode("utf-8") and leaving utf-8 (the default out),
+    # but nothing wrong with being explicit and clear
+    "UP012",
+    # Ruff suggests using datetime.UTC over datetime.timezone.utc - but other timezones
+    # would need to be specified the latter way, seems odd to intentionally be inconsistent
+    "UP017",
+    # Ruff suggests using f-strings over .format - this one is a good recommendation
+    # we just have a few too many to refactor at this time.
+    "UP031",
+    # Ruff doesn't like array concatenation like [1, 2, 3] + [4, 5, 6], but it's intuitive where used.
+    "RUF005",
+    # Ruff doesn't like str() in f-strings, but instead
+    # recommends conversion flags (eg. f"{a!r}") which is less well known
+    "RUF010",
+    # Ruff thinks our SQLAlchemy models and factories have ClassVars
+    # but those classes don't use those variables in the problematic way it wants to avoid
+    "RUF012",
+    # Ruff wants __all__ sorted, not against it, but we'd want our
+    # formatter to handle that first to avoid it being tedious work
+    "RUF022",
+    # Ruff doesn't like when you use variables with _ prefixes in functions
+    # saying to avoid shadowing other params to do my_var_, but while
+    # that follows PEP8 formatting, it's not generally what I've seen
+    "RUF052",
+    # Ruff doesn't want any code in __init__ files, but some of our
+    # libraries and patterns need a very small amount of code configured
+    # in these files.
+    "RUF067",
+]
+
+# These are characters we are allowing to be confusing
+# for RUF001 which recommends not using certain characters
+# that look like each other.
+# https://docs.astral.sh/ruff/rules/ambiguous-unicode-character-string/#ambiguous-unicode-character-string-ruf001
+allowed-confusables = [
+    # endash (not a regular dash) - we need this in our email formatting
+    "–",
+    # right quotation mark (not a simple "'") - used in email formatting
+    "’"
+]
+
+[tool.ruff.lint.per-file-ignores]
+# These are rules that are excluded from just our unit tests
+# but still run for the rest of our code.
+"tests/*" = [
+    # Ruff suggests changing how iterables are merged, but it complicates test setup
+    "RUF005",
+    # Ruff wants to avoid "arg: int = None" - we shouldn't do this
+    # but our tests are only partially typed
+    "RUF013",
+    # Ruff suggests making any match statement in pytest.raises
+    # a proper regex pattern, but we just use it for finding strings in most cases
+    "RUF043",
+    # Ruff doesn't like "x, y = get_tuple()" and not using one of the values
+    # but the value might be used by a developer doing debugging
+    "RUF059",
+    # Ruff recommends the first parameter of a parametrized test be a tuple
+    # We have a lot of tests that don't do that, can circle back to this later
+    "PT006",
+    # Ruff recommends having pytest.raises() be a specific error
+    # but sometimes we just want to verify an error was raised at all
+    "PT011",
+    # Ruff recommends not doing "assert x == 1 and y == 2" in tests
+    # but the few places we do this are kept simple and help better organize complex scenarios
+    "PT018"
+]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+# For these libraries, we do use them, but have our own derived versions we want
+# to use instead as we've rewritten fundamental components like error messaging.
+"marshmallow.validate".msg = "Do not import marshmallow.validate directly - instead use src.api.schemas.extension.validators as we've rewritten the error messaging"
+"apiflask.validators".msg = "Do not import apiflask.validators directly - instead use src.api.schemas.extension.validators as we've rewritten the error messaging"
+"apiflask.fields".msg = "Do not import apiflask.fields directly - instead use src.api.schemas.extension.fields as we've rewritten the error messaging"
+"apiflask.Schema".msg = "Do not import apiflask.Schema directly - instead use src.api.schemas.extension"
+
+[tool.mypy]
+# https://mypy.readthedocs.io/en/stable/config_file.html
+color_output = true
+error_summary = true
+pretty = true
+show_error_codes = true
+show_column_numbers = true
+show_error_context = true
+
+namespace_packages = true
+ignore_missing_imports = true
+warn_unused_configs = true
+
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+strict_equality = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_ignores = true
+
+plugins = ["pydantic.mypy"]
+
+[tool.bandit]
+# Ignore audit logging test file since test audit logging requires a lot of operations that trigger bandit warnings
+exclude_dirs = ["./tests/src/logging/test_audit.py"]
+
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

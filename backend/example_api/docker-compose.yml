@@ -1,0 +1,30 @@
+services:
+  example-api:
+    build:
+      context: .
+      target: dev
+      args:
+        - RUN_UID=${RUN_UID:-4000}
+        - RUN_USER=${RUN_USER:-api}
+    command:
+      [
+        "flask",
+        "--app",
+        "src.app",
+        "run",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8080",
+        "--reload",
+      ]
+    container_name: example-api
+    env_file:
+      - path: ./local.env
+        required: true
+      - path: ./override.env
+        required: false
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/api
