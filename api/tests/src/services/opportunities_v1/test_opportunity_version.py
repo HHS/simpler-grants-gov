@@ -1,5 +1,4 @@
 import pytest
-from sqlalchemy import update
 
 from src.constants.lookup_constants import OpportunityCategory
 from src.db.models.agency_models import Agency
