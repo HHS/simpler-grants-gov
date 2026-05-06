@@ -82,8 +82,9 @@ module "service" {
   image_tag                = local.image_tag
   network_name             = local.environment_config.network_name
   project_name             = module.project_config.project_name
-  fargate_cpu              = 2048
-  fargate_memory           = 4096
+  fargate_cpu              = local.service_config.cpu
+  fargate_memory           = local.service_config.memory
+  environment_name         = var.environment_name
   container_port           = 3000
   readonly_root_filesystem = false
   drop_linux_capabilities  = false
