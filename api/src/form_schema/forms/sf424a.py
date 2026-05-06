@@ -394,21 +394,6 @@ FORM_RULE_SCHEMA = {
         # For each of these we use "@THIS." to tell it to do a relative
         # path within the same array that we're summing to.
         "gg_type": "array",
-        "budget_summary": {
-            # Section A - Budget Summary: Total amount (Column G, Rows 1-4)
-            # is the sum of Columns C-G within the same row.
-            "total_amount": {
-                "gg_pre_population": {
-                    "rule": "sum_monetary",
-                    "fields": [
-                        "@THIS.federal_estimated_unobligated_amount",
-                        "@THIS.non_federal_estimated_unobligated_amount",
-                        "@THIS.federal_new_or_revised_amount",
-                        "@THIS.non_federal_new_or_revised_amount",
-                    ],
-                }
-            },
-        },
         "budget_categories": {
             # Section B - Budget Categories: Total direct charge amount (Row 6I, Columns 1-4)
             # is the sum of Rows 6A-6H within the same column.
@@ -495,13 +480,23 @@ FORM_RULE_SCHEMA = {
                 ],
             }
         },
-        # Section A - Total Amount (Column E, Row 5)
-        # is the sum of (Column E, Rows 1-4)
+        # Section A - Total Amount (Column G, Row 5)
+        # IMPORTANT:
+        # Previously this was described as "sum of Column G, Rows 1–4",
+        # but Column G (Rows 1–4) is now user-editable and not a reliable source of truth.
+        #
+        # Therefore, Row 5 must be derived from the underlying structured budget inputs
+        # in budget_summary rather than any precomputed or user-edited totals.
         "total_amount": {
             "gg_pre_population": {
                 "rule": "sum_monetary",
-                "fields": ["activity_line_items[*].budget_summary.total_amount"],
-                # Run this in the 2nd iteration after the total_amount of the activity line items is calculated
+                "fields": [
+                    "activity_line_items[*].budget_summary.federal_estimated_unobligated_amount",
+                    "activity_line_items[*].budget_summary.non_federal_estimated_unobligated_amount",
+                    "activity_line_items[*].budget_summary.federal_new_or_revised_amount",
+                    "activity_line_items[*].budget_summary.non_federal_new_or_revised_amount",
+                ],
+                # Run after line-item budget_summary values are finalized
                 "order": 2,
             }
         },
