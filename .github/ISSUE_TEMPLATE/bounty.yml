@@ -1,0 +1,62 @@
+name: Bounty
+description: Create a new bounty issue
+title: "[BOUNTY]: "
+labels: ["bounty", "status:open"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ![Bounty Banner](https://img.shields.io/badge/Bounty-Open-green?style=for-the-badge&logo=github)
+        
+        ## 🏆 Contributor Tracking
+        | Contributor | Status | PR Link |
+        | :--- | :--- | :--- |
+        | TBD | Not Started | - |
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why is this bounty needed? What gap does it address?
+      placeholder: Describe the background and goal of this task...
+    validations:
+      required: true
+
+  - type: textarea
+    id: criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know when this is complete?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope Boundaries
+      description: What is included and explicitly excluded?
+    validations:
+      required: false
+
+  - type: textarea
+    id: starting_points
+    attributes:
+      label: Suggested Starting Points
+      description: Where should the contributor look first?
+    validations:
+      required: false
+
+  - type: textarea
+    id: claim_instructions
+    attributes:
+      label: Claim Instructions
+      description: How to claim this bounty?
+      value: |
+        1. Comment below to express interest.
+        2. Wait for maintainer assignment.
+        3. Join our support channel: [Link to Slack/Discord]
+    validations:
+      required: true
