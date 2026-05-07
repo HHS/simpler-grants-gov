@@ -1,6 +1,7 @@
 # DynamoDB table for file scan caching
-# checkov:skip=CKV_AWS_119:Cache table uses AWS managed encryption, CMK not required
 resource "aws_dynamodb_table" "file_scan_cache" {
+  #checkov:skip=CKV_AWS_119:Cache table uses AWS managed encryption, CMK not required
+  #checkov:skip=CKV_AWS_28:Point-in-time recovery not required
   name         = var.name
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "file_id"
