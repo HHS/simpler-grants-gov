@@ -12,7 +12,7 @@ Feature: Search Copy URL
 
 /* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
   Scenario: Copy search URL and paste into the search input
-    Given I search for "<search-term>"
+    When I search for "<search-term>"
     Then the browser URL contains "/search?query=<search term>"
     And the Copy this search query control is visible
     When I click Copy this search query
