@@ -6,13 +6,13 @@
 */
 
 Feature: Search page - state persistence after refresh
-  As a grantee searching for opportunities
-  I want my search filters and inputs to be preserved in the URL
-  So that I can refresh the page and return to the same search state
+ As a grantee searching for opportunities
+ I want my search filters and inputs to be preserved in the URL
+ So that I can refresh the page and return to the same search state
 
 Background:
-  Given I am on the search page
-  And the search results have loaded
+ Given I am on the search page
+ And the search results have loaded
  
 /* @tags GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION */
 Scenario: Retain status filter after refresh
