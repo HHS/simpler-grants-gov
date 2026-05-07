@@ -28,7 +28,7 @@ def setup_local_dynamodb() -> None:
         )
         dynamodb = boto3.resource(
             "dynamodb",
-            endpoint_url="http://dynamodb-local:8000",
+            endpoint_url="http://localhost:8000",
             region_name="us-east-1",
             aws_access_key_id="local",
             aws_secret_access_key="local",
