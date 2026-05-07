@@ -12,7 +12,7 @@ Feature: Search Results CSV Download
     Given I am on the "Search funding opportunity" page
 
 /* @tags GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION */
-  Scenario: Download CSV from search results
+  Scenario: Download CSV from search results on desktop devices
     When I click the search results export button
     Then a CSV file should download
     And the filename should match "grants-search-<timestamp>.csv"
