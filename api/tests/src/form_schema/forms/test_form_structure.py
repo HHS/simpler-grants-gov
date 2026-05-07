@@ -30,7 +30,8 @@ def test_config_fields(form_dir: Path) -> None:
 @pytest.mark.parametrize("form_dir", get_form_dirs(), ids=lambda d: d.name)
 def test_versioned_form_json_exists(form_dir: Path) -> None:
     versioned = [
-        p for p in form_dir.rglob("form_json.py")
+        p
+        for p in form_dir.rglob("form_json.py")
         if re.fullmatch(r"\d+", p.parent.name) and re.fullmatch(r"\d+", p.parent.parent.name)
     ]
     assert versioned, f"{form_dir.name} has no form_json.py at <major>/<minor>/form_json.py"
