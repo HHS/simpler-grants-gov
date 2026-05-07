@@ -11,6 +11,7 @@ Feature: Search Core Search Behaviors
     Given I am on the "Search funding opportunities" page
     And I wait for the search results to load
 
+/* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
   Scenario: Refresh and retain filters and sort order with search term and multiple filters
     When I enter "education" in the search input and submit
     And I select "Award maximum (Highest)" from the sort by dropdown
@@ -36,6 +37,7 @@ Feature: Search Core Search Behaviors
     And the first available agency filter with a valid ID should still be selected after the refresh
     And the "Recovery Act" and "Agriculture" category filters should still be selected after the refresh
 
+/* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
   Scenario: Page resets to 1 after filter change
     When I click to go to page 2 of the search results
     Then I should be on page 2
@@ -46,6 +48,7 @@ Feature: Search Core Search Behaviors
     Then the current page should reset to page 1
     And the URL should include "status=closed"
 
+/* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
   Scenario: Flipping sort order reverses first and last result positions
     When I open the sort by dropdown
     And I select "Opportunity title (A to Z)" from the sort by dropdown
@@ -56,6 +59,7 @@ Feature: Search Core Search Behaviors
     When I click to go to the last page of results
     Then the last result from the previous sort order should now be the first result
 
+/* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
   Scenario: Result count is unchanged when all statuses are selected
     When I open the filters
     And I check all the opportunity status "Any opportunity status"
