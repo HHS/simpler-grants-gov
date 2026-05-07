@@ -503,10 +503,10 @@ FORM_RULE_SCHEMA = {
             "gg_pre_population": {
                 "rule": "sum_monetary",
                 "fields": [
-                    "activity_line_items[*].budget_summary.federal_estimated_unobligated_amount",
-                    "activity_line_items[*].budget_summary.non_federal_estimated_unobligated_amount",
-                    "activity_line_items[*].budget_summary.federal_new_or_revised_amount",
-                    "activity_line_items[*].budget_summary.non_federal_new_or_revised_amount",
+                    "total_budget_summary.federal_estimated_unobligated_amount",
+                    "total_budget_summary.non_federal_estimated_unobligated_amount",
+                    "total_budget_summary.federal_new_or_revised_amount",
+                    "total_budget_summary.non_federal_new_or_revised_amount",
                 ],
                 # Run after line-item budget_summary values are finalized
                 "order": 2,
