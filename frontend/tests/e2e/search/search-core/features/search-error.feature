@@ -7,10 +7,12 @@ Feature: Search Error Handling and Recovery
   I want invalid query states to be handled clearly
   So that I can recover and continue searching
 
+/* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
   Scenario: Invalid status query shows error state
     Given I navigate to "/search?status=not_a_status"
     Then I should see an error alert on the page
 
+/* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
   Scenario: Recover from error state by applying a valid filter
     Given I navigate to "/search?status=not_a_status"
     When I open the filters
