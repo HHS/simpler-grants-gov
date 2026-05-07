@@ -419,7 +419,7 @@ class TestSimplerSOAPGetApplicationZip:
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
         agency = AgencyFactory.create()
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
@@ -478,7 +478,7 @@ class TestSimplerSOAPGetApplicationZip:
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
         agency = AgencyFactory.create()
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
@@ -521,7 +521,7 @@ class TestSimplerSOAPGetApplicationZip:
     ):
         agency = AgencyFactory.create()
         wrong_privileges = {Privilege.START_APPLICATION}
-        user, role, soap_client_certificate = setup_cert_user(agency, wrong_privileges)
+        user, role, soap_client_certificate, _ = setup_cert_user(agency, wrong_privileges)
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
         competition = CompetitionFactory(
             opportunity=opportunity,
@@ -559,7 +559,7 @@ class TestSimplerSOAPGetApplicationZip:
     ):
         caplog.set_level(logging.INFO)
         agency = AgencyFactory.create()
-        user, role, soap_client_certificate = setup_cert_user(
+        user, role, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
@@ -685,7 +685,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         )
         submission = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity)
         application = submission.application
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -767,7 +767,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             agency, sam_gov_entity=sam_gov_entity_2, submitted_at=DT_EST_AWARE_EARLIER
         )
         application_2 = submission_2.application
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -867,7 +867,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
             agency, sam_gov_entity=sam_gov_entity_2, submitted_at=DT_EST_AWARE_EARLIER
         )
         application_2 = submission_2.application
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -1004,7 +1004,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         self, db_session, enable_factory_create, mock_s3_bucket
     ):
         agency = AgencyFactory.create()
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -1120,7 +1120,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         )
         submission = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity)
         application = submission.application
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -1192,7 +1192,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         )
         submission = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity)
         application = submission.application
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
@@ -1269,7 +1269,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
         )
         submission = self.setup_application_submission(agency, sam_gov_entity=sam_gov_entity)
         application = submission.application
-        _, _, soap_client_certificate = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
+        _, _, soap_client_certificate, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_VIEWER})
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"

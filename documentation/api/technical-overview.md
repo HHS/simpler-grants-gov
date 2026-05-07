@@ -47,10 +47,10 @@ Authentication methods are defined in the `security_scheme` config in
 `app.py`. A particular security scheme is enabled for a route via a
 `security` block on that route.
 
-Flask runs the authentication method specified in `api_key_auth.py`
-before passing the request to the route handler. 
-In the `api_key` security scheme, the `X-Auth` points to the
-function that is run to do the authentication.
+Flask runs the authentication method configured on each route
+before passing the request to the route handler. The API supports
+JWT auth (`X-SGG-Token`), API User Key auth (`X-API-Key`),
+and Internal JWT auth (`X-SGG-Internal-Token`).
 
 ## Authorization
 

@@ -16,7 +16,7 @@ import factory
 import factory.fuzzy
 import faker
 from faker.providers import BaseProvider
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
@@ -79,6 +79,7 @@ from src.constants.static_role_values import (
     ORG_MEMBER,
 )
 from src.db.models import agency_models
+from src.db.models.agency_models import Agency
 from src.db.models.lookup.lookup_registry import LookupRegistry
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.util import file_util
@@ -365,6 +366,21 @@ def get_db_session() -> db.Session:
     return _db_session
 
 
+def lookup_seed_agency_id_by_code(agency_code: str | None) -> uuid.UUID | None:
+    if not agency_code or _db_session is None:
+        return None
+
+    session = get_db_session()
+    db_agency = session.execute(
+        select(Agency).where(Agency.agency_code == agency_code)
+    ).scalar_one_or_none()
+
+    if db_agency is None:
+        return None
+
+    return db_agency.agency_id
+
+
 # The scopefunc ensures that the session gets cleaned up after each test
 # it implicitly calls `remove()` on the session.
 # see https://docs.sqlalchemy.org/en/20/orm/contextual.html
@@ -413,6 +429,7 @@ class OpportunityFactory(BaseFactory):
     opportunity_title = factory.Faker("opportunity_title")
 
     agency_code = factory.Faker("agency_code")
+    agency_id = factory.LazyAttribute(lambda o: lookup_seed_agency_id_by_code(o.agency_code))
 
     category = factory.fuzzy.FuzzyChoice(OpportunityCategory)
     # only set the category explanation if category is Other
@@ -3491,7 +3508,7 @@ class BaseLegacyCertificateFactory(BaseFactory):
         abstract = True
 
     legacy_certificate_id = Generators.UuidObj
-    cert_id = factory.Faker("random_int", min=1000, max=10000000)
+    cert_id = factory.LazyFunction(lambda: str(random.randint(1000, 10000000)))
     serial_number = factory.Sequence(lambda n: f"{n}")
     expiration_date = factory.Faker("future_date", end_date="+2y")
     user_id = factory.LazyAttribute(lambda s: s.user.user_id)

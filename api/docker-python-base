@@ -144,7 +144,7 @@ RUN dnf install -y \
       glib2-2.82.2-767.amzn2023 \
       curl-minimal-8.11.1-4.amzn2023.0.3 \
       libcurl-minimal-8.11.1-4.amzn2023.0.3 \
-      kernel6.18-headers-6.18.15-14.217.amzn2023 \
+      kernel6.18-headers-6.18.20-41.237.amzn2023 \
       glibc-2.34-231.amzn2023.0.4 \
       glibc-common-2.34-231.amzn2023.0.4 \
       glibc-devel-2.34-231.amzn2023.0.4 \

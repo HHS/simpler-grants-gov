@@ -42,7 +42,7 @@ class SOAPValidationEnvConfig(PydanticBaseEnvConfig):
 
 _config = SOAPValidationEnvConfig()
 
-HEADERS = {"Content-Type": "application/xml", "Use-Simpler-Override": "1", "Use-Soap-Cert": "1"}
+HEADERS = {"Content-Type": "application/xml", "Use-Simpler-Override": "1"}
 
 
 @dataclass

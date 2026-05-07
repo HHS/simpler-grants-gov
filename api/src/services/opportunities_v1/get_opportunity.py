@@ -1,12 +1,17 @@
 import uuid
 
 from sqlalchemy import ColumnExpressionArgument, select
-from sqlalchemy.orm import lazyload, selectinload
+from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.db.models.agency_models import Agency
-from src.db.models.opportunity_models import Opportunity
+from src.db.models.competition_models import Competition, CompetitionForm, Form
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    Opportunity,
+    OpportunitySummary,
+)
 
 
 def _get_opportunity(
@@ -16,24 +21,30 @@ def _get_opportunity(
         select(Opportunity)
         .where(where_clause)
         .where(Opportunity.is_draft.is_(False))
-        .options(selectinload("*"))
-        # To get the top_level_agency field set properly upfront,
-        # we need to explicitly join here as the "*" approach doesn't
-        # seem to work with the way our agency relationships are setup
-        .options(selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency))
-        # Do not load the following relationships, they aren't necessary for
-        # our opportunity endpoints, and would make the query much larger/slower
-        # if we were to fetch them.
-        # This effectively undoes the `selectinload("*")` above for these relationships
-        # and makes them lazily loaded (the default for relationships) - keeping them out of the query entirely.
         .options(
-            lazyload(Opportunity.opportunity_change_audit),
-            lazyload(Opportunity.all_opportunity_summaries),
-            lazyload(Opportunity.all_opportunity_notification_logs),
-            lazyload(Opportunity.saved_opportunities_by_users),
-            lazyload(Opportunity.versions),
-            lazyload(Opportunity.saved_opportunities_by_organizations),
-            lazyload(Opportunity.workflows),
+            # Opportunity summary
+            selectinload(Opportunity.current_opportunity_summary)
+            .selectinload(CurrentOpportunitySummary.opportunity_summary)
+            .options(
+                selectinload(OpportunitySummary.link_funding_instruments),
+                selectinload(OpportunitySummary.link_funding_categories),
+                selectinload(OpportunitySummary.link_applicant_types),
+            ),
+            # Attachments
+            selectinload(Opportunity.opportunity_attachments),
+            # Competitions
+            selectinload(Opportunity.competitions).options(
+                selectinload(Competition.competition_instructions),
+                selectinload(Competition.opportunity_assistance_listing),
+                selectinload(Competition.link_competition_open_to_applicant),
+                selectinload(Competition.competition_forms)
+                .selectinload(CompetitionForm.form)
+                .selectinload(Form.form_instruction),
+            ),
+            # Assistance listing number
+            selectinload(Opportunity.opportunity_assistance_listings),
+            # Agency
+            selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency),
         )
     )
 
