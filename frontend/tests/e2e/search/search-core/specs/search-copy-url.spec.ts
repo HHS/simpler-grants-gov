@@ -29,10 +29,10 @@ test(
 
     await page.goto("/search");
 
-    // this is dumb but webkit has an issue with trying to fill in the input too quickly
+    // WebKit can occasionally type into the input before it is fully ready
     // if the expect in here fails, we give it another shot after 5 seconds
     // this way we avoid an arbitrary timeout, and do not slow down the other tests
-    // Given I search for "<search-term>"
+    // When I search for "<search-term>"
     try {
       await fillSearchInputAndSubmit("education grants", page);
     } catch (_e) {
