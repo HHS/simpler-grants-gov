@@ -68,6 +68,7 @@ Feature: Search Core Search Behaviors
     And I check all the opportunity status "Forecasted", "Open", "Closed", "Archived"
     Then the total results count is same
 
+/* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
   Scenario: Out-of-range page query redirects to the last valid page
     When I navigate to "/search?page=1000000"
     Then I should be redirected to the last page of results
