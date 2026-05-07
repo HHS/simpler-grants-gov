@@ -84,10 +84,6 @@ services:
     volumes:
       - "./docker/dynamodb:/home/dynamodblocal/data"
     working_dir: /home/dynamodblocal
-    environment:
-      AWS_ACCESS_KEY_ID: 'local'
-      AWS_SECRET_ACCESS_KEY: 'local'
-      REGION: 'us-east-1'
     networks:
       - default
 
@@ -132,6 +128,12 @@ services:
       - dynamodb-local
       - mock-oauth2-server
       - mock-applicants-soap-api
+    links:
+      - dynamodb-local
+    environment:
+      AWS_ACCESS_KEY_ID: 'local'
+      AWS_SECRET_ACCESS_KEY: 'local'
+      REGION: 'us-east-1'
     networks:
       - grants_backend
       - default
