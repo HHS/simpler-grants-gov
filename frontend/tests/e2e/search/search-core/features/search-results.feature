@@ -11,6 +11,7 @@ Feature: Search Results Visibility
     Given I am on the "Search funding opportunity" page
     When I search for "grants"
 
+/* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
   Scenario: Valid search term shows search results and count
     Then the results heading should show at least 1 opportunity
     And the search results list should contain at least 1 item
