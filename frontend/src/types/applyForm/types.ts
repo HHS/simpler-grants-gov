@@ -110,9 +110,6 @@ type PropertyPath = `/properties/${string}`;
  * value
  *   The current array of row values for the FieldList.
  *
- * defaultSize
- *   Initial number of rows to render when no data exists.
- *
  * minItems / maxItems
  *   Optional constraints for the number of rows allowed in the list.
  *   Used for validation and future control of add/remove behavior.
@@ -140,7 +137,6 @@ export type FieldListWidgetProps = {
   };
   label: string;
   description?: string;
-  defaultSize: number;
   name: string;
   minItems?: number;
   maxItems?: number;
@@ -208,7 +204,6 @@ export interface UiSchemaFieldList {
   label: string;
   name: string;
   description?: string;
-  defaultSize: number;
   children: UiSchemaField[];
 }
 

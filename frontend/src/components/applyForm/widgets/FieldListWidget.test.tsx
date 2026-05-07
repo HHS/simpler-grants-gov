@@ -22,8 +22,21 @@ jest.mock("src/components/applyForm/widgets/WidgetRenderers", () => ({
   ),
 }));
 
+const baseGroupDefinition = [
+  {
+    widget: "Text" as const,
+    baseId: "contacts[~~index~~]--first_name",
+    definition: "/properties/contact_people_test/items/properties/first_name",
+    generalProps: {
+      schema: { type: "string", title: "First Name" },
+      rawErrors: [],
+      options: {},
+    },
+  },
+];
+
 describe("FieldListWidget", () => {
-  it("renders label, description, and default row widgets", () => {
+  it("renders label, description, and minimum entry widgets", () => {
     render(
       <FieldListWidget
         id="contacts"
@@ -31,23 +44,11 @@ describe("FieldListWidget", () => {
         schema={{ type: "array", title: "Contacts" }}
         label="Contacts"
         description="Add contacts"
-        defaultSize={1}
-        groupDefinition={[
-          {
-            widget: "Text",
-            baseId: "contacts[~~index~~]--first_name",
-            definition:
-              "/properties/contact_people_test/items/properties/first_name",
-            generalProps: {
-              schema: { type: "string", title: "First Name" },
-              rawErrors: [],
-              options: {},
-            },
-          },
-        ]}
+        minItems={1}
+        groupDefinition={baseGroupDefinition}
         rawErrors={[]}
         requiredFields={[]}
-        name={""}
+        name="contacts"
       />,
     );
 
@@ -55,6 +56,25 @@ describe("FieldListWidget", () => {
     expect(screen.getByText("Add contacts")).toBeInTheDocument();
     expect(screen.getByText(/entry\s+1/i)).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
+  });
+
+  it("renders no entries when minItems is 0", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={0}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.queryByText(/entry\s+1/i)).not.toBeInTheDocument();
+    expect(screen.queryAllByTestId("mock-widget")).toHaveLength(0);
   });
 
   it("adds a row", async () => {
@@ -66,22 +86,11 @@ describe("FieldListWidget", () => {
         key="contacts"
         schema={{ type: "array", title: "Contacts" }}
         label="Contacts"
-        defaultSize={1}
-        groupDefinition={[
-          {
-            widget: "Text",
-            baseId: "contacts[~~index~~]--first_name",
-            definition: "",
-            generalProps: {
-              schema: { type: "string", title: "First Name" },
-              rawErrors: [],
-              options: {},
-            },
-          },
-        ]}
+        minItems={1}
+        groupDefinition={baseGroupDefinition}
         rawErrors={[]}
         requiredFields={[]}
-        name={""}
+        name="contacts"
       />,
     );
 
@@ -91,7 +100,7 @@ describe("FieldListWidget", () => {
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(2);
   });
 
-  it("removes a row", async () => {
+  it("removes a row without going below minItems", async () => {
     const user = userEvent.setup();
 
     render(
@@ -100,22 +109,12 @@ describe("FieldListWidget", () => {
         key="contacts"
         schema={{ type: "array", title: "Contacts" }}
         label="Contacts"
-        defaultSize={2}
-        groupDefinition={[
-          {
-            widget: "Text",
-            baseId: "contacts[~~index~~]--first_name",
-            definition: "",
-            generalProps: {
-              schema: { type: "string", title: "First Name" },
-              rawErrors: [],
-              options: {},
-            },
-          },
-        ]}
+        minItems={1}
+        value={[{}, {}]}
+        groupDefinition={baseGroupDefinition}
         rawErrors={[]}
         requiredFields={[]}
-        name={""}
+        name="contacts"
       />,
     );
 

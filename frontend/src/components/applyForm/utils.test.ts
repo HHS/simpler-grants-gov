@@ -596,7 +596,6 @@ describe("buildWarningTree", () => {
         type: "fieldList" as const,
         name: "contacts",
         label: "Contacts",
-        defaultSize: 1,
         children: [
           {
             type: "field" as const,
@@ -643,7 +642,6 @@ describe("buildWarningTree", () => {
             type: "fieldList" as const,
             name: "contacts",
             label: "Contacts",
-            defaultSize: 1,
             children: [
               {
                 type: "field" as const,
@@ -682,7 +680,6 @@ describe("buildWarningTree", () => {
         type: "fieldList",
         name: "contact_people_test",
         label: "Contact People",
-        defaultSize: 1,
         children: [
           {
             type: "field",
@@ -752,7 +749,6 @@ describe("buildWarningTree", () => {
         type: "fieldList",
         name: "contact_people_test",
         label: "Contact People",
-        defaultSize: 1,
         children: [
           {
             type: "field",
@@ -1133,7 +1129,6 @@ describe("addPrintWidgetToFields", () => {
         type: "fieldList" as const,
         name: "contacts",
         label: "Contacts",
-        defaultSize: 1,
         children: [
           {
             type: "field" as const,
@@ -1157,7 +1152,6 @@ describe("addPrintWidgetToFields", () => {
         type: "fieldList",
         name: "contacts",
         label: "Contacts",
-        defaultSize: 1,
         children: [
           {
             type: "field",
@@ -1259,7 +1253,6 @@ describe("addPrintWidgetToFields", () => {
           type: "fieldList",
           name: "contact_people_test",
           label: "Contact People",
-          defaultSize: 1,
           children: [],
         },
       ];
@@ -1284,7 +1277,6 @@ describe("addPrintWidgetToFields", () => {
               type: "fieldList",
               name: "contact_people_test",
               label: "Contact People",
-              defaultSize: 1,
               children: [],
             },
           ],
@@ -1351,7 +1343,6 @@ describe("addPrintWidgetToFields", () => {
           type: "fieldList",
           name: "contact_people_test",
           label: "Contact People",
-          defaultSize: 1,
           children: [],
         },
       ];

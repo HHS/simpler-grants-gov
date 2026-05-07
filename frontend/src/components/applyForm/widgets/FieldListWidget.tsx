@@ -44,16 +44,13 @@ const FIELD_LIST_INDEX_TOKEN = "~~index~~";
  *   { first_name: "Jane" }
  * ]
  *
- * If no value exists yet, or if the current value contains fewer rows than
- * `defaultSize`, this helper pads the result with empty row objects so the
- * widget always renders the expected minimum number of rows.
  */
 const normalizeFieldListRows = ({
   value,
-  defaultSize,
+  minItems,
 }: {
   value: GeneralRecord[] | undefined;
-  defaultSize: number;
+  minItems?: number;
 }): GeneralRecord[] => {
   const startingRows = Array.isArray(value)
     ? value.filter((entryValue): entryValue is GeneralRecord => {
@@ -61,14 +58,18 @@ const normalizeFieldListRows = ({
       })
     : [];
 
-  if (startingRows.length >= defaultSize) {
+  const minimumRowCount = minItems ?? 0;
+
+  if (startingRows.length >= minimumRowCount) {
     return startingRows;
   }
 
-  const missingRowCount = defaultSize - startingRows.length;
-  const paddedRows = Array.from({ length: missingRowCount }, () => ({}));
+  const missingRowCount = minimumRowCount - startingRows.length;
 
-  return [...startingRows, ...paddedRows];
+  return [
+    ...startingRows,
+    ...Array.from({ length: missingRowCount }, () => ({})),
+  ];
 };
 
 /**
@@ -177,6 +178,7 @@ function FieldListEntry({
   entryIndex,
   entryValue,
   isInteractionDisabled,
+  canDeleteEntry,
   handleDeleteRow,
   handleFieldChange,
   rawErrors,
@@ -188,6 +190,7 @@ function FieldListEntry({
   entryIndex: number;
   entryValue: GeneralRecord;
   isInteractionDisabled: boolean;
+  canDeleteEntry: boolean;
   handleDeleteRow: (entryIndex: number) => void;
   handleFieldChange: (params: FieldListChangeParams) => void;
   rawErrors?: FormattedFormValidationWarning[];
@@ -209,7 +212,7 @@ function FieldListEntry({
         <Button
           type="button"
           onClick={() => handleDeleteRow(entryIndex)}
-          disabled={isInteractionDisabled}
+          disabled={!canDeleteEntry}
         >
           {t("delete")}
         </Button>
@@ -276,8 +279,9 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
     id,
     label,
     description,
-    defaultSize,
     name,
+    minItems,
+    maxItems,
     groupDefinition,
     value,
     onChange,
@@ -303,13 +307,23 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   const [rows, setRows] = useState<GeneralRecord[]>(
     normalizeFieldListRows({
       value,
-      defaultSize,
+      minItems,
     }),
   );
 
   const onFieldListEntryDelete =
     widgetProps.formContext?.widgetSupport?.onFieldListEntryDelete;
 
+  const isInteractionDisabled = Boolean(disabled || readOnly || isFormLocked);
+  const minimumEntryCount = minItems ?? 0;
+  const maximumEntryCount = maxItems;
+
+  const isAtMinimumEntryCount = rows.length <= minimumEntryCount;
+  const isAtMaximumEntryCount =
+    maximumEntryCount !== undefined && rows.length >= maximumEntryCount;
+
+  const canAddEntry = !isInteractionDisabled && !isAtMaximumEntryCount;
+  const canDeleteEntry = !isInteractionDisabled && !isAtMinimumEntryCount;
   /**
    * Updates local entry state and optionally forwards the new value through
    * the widget-style `onChange` prop for compatibility with the broader form
@@ -327,16 +341,25 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   );
 
   const handleAddRow = useCallback((): void => {
+    if (maximumEntryCount !== undefined && rows.length >= maximumEntryCount) {
+      return;
+    }
+
     handleRowsChange((previousRows) =>
       addFieldListRow({
         rows: previousRows,
       }),
     );
-  }, [handleRowsChange]);
+  }, [handleRowsChange, maximumEntryCount, rows.length]);
 
   const handleDeleteRow = useCallback(
     (entryIndex: number): void => {
+      if (rows.length <= minimumEntryCount) {
+        return;
+      }
+
       onFieldListEntryDelete?.(fieldListPath, entryIndex);
+
       handleRowsChange((previousRows) =>
         removeFieldListRow({
           rows: previousRows,
@@ -344,10 +367,14 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
         }),
       );
     },
-    [fieldListPath, handleRowsChange, onFieldListEntryDelete],
+    [
+      fieldListPath,
+      handleRowsChange,
+      minimumEntryCount,
+      onFieldListEntryDelete,
+      rows.length,
+    ],
   );
-
-  const isInteractionDisabled = Boolean(disabled || readOnly || isFormLocked);
 
   /**
    * Handles updates to a single field within a specific row.
@@ -383,15 +410,13 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
    * reload, or navigation back into the form.
    */
   useEffect(() => {
-    // TODO #9633
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRows(
       normalizeFieldListRows({
         value,
-        defaultSize,
+        minItems,
       }),
     );
-  }, [value, defaultSize]);
+  }, [value, minItems]);
 
   return (
     <div id={id} className="field-list-widget">
@@ -416,6 +441,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
             entryIndex={entryIndex}
             entryValue={entryValue}
             isInteractionDisabled={isInteractionDisabled}
+            canDeleteEntry={canDeleteEntry}
             handleDeleteRow={handleDeleteRow}
             handleFieldChange={handleFieldChange}
             groupDefinition={groupDefinition}
@@ -425,13 +451,13 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
           />
         );
       })}
-
+      {isAtMaximumEntryCount ? (
+        <p className="usa-hint margin-top-1">
+          Maximum of {maximumEntryCount} entries reached.
+        </p>
+      ) : null}
       <div className="field-list-widget__controls display-flex flex-align-center flex-justify-between margin-bottom-2">
-        <Button
-          type="button"
-          onClick={handleAddRow}
-          disabled={isInteractionDisabled}
-        >
+        <Button type="button" onClick={handleAddRow} disabled={!canAddEntry}>
           + {t("add")}
         </Button>
       </div>

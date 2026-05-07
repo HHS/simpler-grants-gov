@@ -529,7 +529,6 @@ const getFieldListConfig = ({
       },
       label: uiFieldObject.label,
       description: uiFieldObject.description,
-      defaultSize: uiFieldObject.defaultSize,
       name: uiFieldObject.name,
       groupDefinition,
       rawErrors: errors ?? [],
