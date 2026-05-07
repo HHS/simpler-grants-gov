@@ -13,7 +13,7 @@ import {
 } from "src/utils/applyForm/fieldListHelpers";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
 import { isFieldRequired } from "src/components/applyForm/utils";
@@ -177,7 +177,6 @@ function FieldListEntry({
   id,
   entryIndex,
   entryValue,
-  isInteractionDisabled,
   canDeleteEntry,
   handleDeleteRow,
   handleFieldChange,
@@ -189,7 +188,6 @@ function FieldListEntry({
   id: string;
   entryIndex: number;
   entryValue: GeneralRecord;
-  isInteractionDisabled: boolean;
   canDeleteEntry: boolean;
   handleDeleteRow: (entryIndex: number) => void;
   handleFieldChange: (params: FieldListChangeParams) => void;
@@ -304,12 +302,16 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
    * The entries are rehydrated from the incoming `value` prop so the widget
    * stays aligned with saved form data after save / reload.
    */
-  const [rows, setRows] = useState<GeneralRecord[]>(
-    normalizeFieldListRows({
-      value,
-      minItems,
-    }),
+  const normalizedInitialRows = useMemo(
+    () =>
+      normalizeFieldListRows({
+        value,
+        minItems,
+      }),
+    [value, minItems],
   );
+
+  const [rows, setRows] = useState<GeneralRecord[]>(normalizedInitialRows);
 
   const onFieldListEntryDelete =
     widgetProps.formContext?.widgetSupport?.onFieldListEntryDelete;
@@ -403,21 +405,6 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
     [handleRowsChange],
   );
 
-  /**
-   * Re-sync local rows whenever the saved value changes.
-   *
-   * This is what allows FieldList entries to hydrate correctly after save,
-   * reload, or navigation back into the form.
-   */
-  useEffect(() => {
-    setRows(
-      normalizeFieldListRows({
-        value,
-        minItems,
-      }),
-    );
-  }, [value, minItems]);
-
   return (
     <div id={id} className="field-list-widget">
       {label ? <h3>{label}</h3> : null}
@@ -440,7 +427,6 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
             id={id}
             entryIndex={entryIndex}
             entryValue={entryValue}
-            isInteractionDisabled={isInteractionDisabled}
             canDeleteEntry={canDeleteEntry}
             handleDeleteRow={handleDeleteRow}
             handleFieldChange={handleFieldChange}
