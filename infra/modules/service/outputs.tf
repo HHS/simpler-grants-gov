@@ -78,3 +78,13 @@ output "environment_variables" {
   description = "environment variable for the app container"
   value       = local.environment_variables
 }
+
+output "nr_host_log_forwarder_arn" {
+  description = "ARN of the New Relic host log forwarder Lambda"
+  value       = aws_lambda_function.nr_host_log_forwarder.arn
+}
+
+output "nr_host_log_forwarder_name" {
+  description = "Name of the New Relic host log forwarder Lambda"
+  value       = aws_lambda_function.nr_host_log_forwarder.function_name
+}
