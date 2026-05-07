@@ -89,8 +89,8 @@ def create_jwt_for_user(
     logger.info(
         "Created JWT token",
         extra={
-            "auth.user_id": str(user_token_session.user_id),
-            "auth.token_id": str(user_token_session.token_id),
+            "auth.user_id": user.user_id,
+            "auth.token_id": user_token_session.token_id,
         },
     )
     return jwt_str, user_token_session

@@ -187,12 +187,14 @@ def full_valid_activity_line_item_v1_0():
             "program_income_amount": "0.00",
         },
         "non_federal_resources": {
+            "grant_program": "My full activity",
             "applicant_amount": "0.00",
             "state_amount": "0.00",
             "other_amount": "0.00",
             "total_amount": "0.00",
         },
         "federal_fund_estimates": {
+            "grant_program": "My full activity",
             "first_year_amount": "0.00",
             "second_year_amount": "0.00",
             "third_year_amount": "0.00",

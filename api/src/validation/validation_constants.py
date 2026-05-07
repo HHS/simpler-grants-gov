@@ -48,6 +48,8 @@ class ValidationErrorType(StrEnum):
 
     APPLICATION_SUBMISSION_NOT_FOUND = "application_submission_not_found"
 
+    AGENCY_NOT_FOUND = "agency_not_found"
+
     ORGANIZATION_REQUIRED = "organization_required"
     ORGANIZATION_NO_SAM_GOV_ENTITY = "organization_no_sam_gov_entity"
     ORGANIZATION_INACTIVE_IN_SAM_GOV = "organization_inactive_in_sam_gov"
