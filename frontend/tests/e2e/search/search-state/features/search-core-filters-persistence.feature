@@ -28,7 +28,7 @@ Scenario: Retain status filter after refresh
     And the browser URL contains query param "status" with values "<expected statuses>"
 
 Examples:
-    | Opportunity status | expected statuses           |
+    | Opportunity status | expected statuses          |
     | Closed             | forecasted,posted,closed   |
     | Posted             | forecasted,posted          |
 
