@@ -12,7 +12,11 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientMissingCertificate,
 )
 from src.legacy_soap_api.legacy_soap_api_config import get_soap_config
-from src.legacy_soap_api.legacy_soap_api_proxy import get_proxy_response, get_soap_jwt_auth_jwt
+from src.legacy_soap_api.legacy_soap_api_proxy import (
+    get_proxy_headers,
+    get_proxy_response,
+    get_soap_jwt_auth_jwt,
+)
 from tests.lib.data_factories import create_soap_request
 
 SOAP_PAYLOAD = (
@@ -97,10 +101,39 @@ def test_request_gets_correct_proxy_url_when_no_auth(enable_factory_create):
     soap_request.auth = None
     with patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response") as mock_request:
         get_proxy_response(soap_request)
-        expected = (
-            "https://google.com/xyz/grantsws-agency-partner/services/v2/AgencyWebServicesSoapPort"
-        )
+        expected = f"https://google.com/xyz/{soap_request.full_path.lstrip('/')}"
         assert mock_request.call_args_list[0][0][0].url == expected
+
+
+def test_request_gets_correct_proxy_url_when_request_has_auth(enable_factory_create, monkeypatch):
+    soap_request = create_soap_request(SOAP_PAYLOAD)
+    with patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response") as mock_request:
+        get_proxy_response(soap_request)
+        config = get_soap_config()
+        expected = f"{config.soap_partner_gateway_uri}/grantsws-agency-partner/services/v2/AgencyWebServicesSoapPort"
+        assert mock_request.call_args_list[0][0][0].url == expected
+
+
+def test_request_gets_correct_proxy_headers_when_no_auth(enable_factory_create):
+    soap_request = create_soap_request(SOAP_PAYLOAD)
+    soap_request.auth = None
+    soap_request.headers = {"X-Gg-S2S-Uri": "https://google.com/xyz", "x": "1"}
+    config = get_soap_config()
+    headers = get_proxy_headers(soap_request, config, soap_request.auth)
+    expected = {"x": "1"}
+    assert headers == expected
+
+
+def test_request_gets_correct_proxy_headers_when_there_is_auth(enable_factory_create):
+    soap_request = create_soap_request(SOAP_PAYLOAD)
+    config = get_soap_config()
+    with patch(
+        "src.legacy_soap_api.legacy_soap_api_proxy.generate_soap_jwt"
+    ) as mock_generate_soap_jwt:
+        mock_generate_soap_jwt.return_value = "123456"
+        headers = get_proxy_headers(soap_request, config, soap_request.auth)
+        expected = {"S2S_PARTNER_CERTID_JWT_B64": "MTIzNDU2"}
+        assert headers == expected
 
 
 def test_request_logs_locally(enable_factory_create, caplog):

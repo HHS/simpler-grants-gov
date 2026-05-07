@@ -39,7 +39,7 @@ def get_proxy_headers(
     soap_auth: SOAPAuth | None,
 ) -> dict:
     # Exclude header keys that are utilized only in simpler soap api. Not needed for proxy request.
-    if not soap_auth or not soap_auth.certificate.legacy_certificate:
+    if not soap_auth:
         return filter_headers(
             soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
         )
@@ -59,6 +59,7 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
             config.soap_partner_gateway_uri,
             soap_request.full_path.lstrip("/"),
         )
+        proxy_url = proxy_url.replace("grantsws-agency", "grantsws-agency-partner")
     else:
         logger.info(
             "soap_client_certificate: Sending soap request without client certificate",
@@ -68,7 +69,6 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
             soap_request.headers.get(config.gg_s2s_proxy_header_key, config.gg_url),
             soap_request.full_path.lstrip("/"),
         )
-
     _request = Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
 
     response = _get_soap_response(_request, timeout=timeout)

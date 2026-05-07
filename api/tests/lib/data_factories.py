@@ -212,7 +212,7 @@ def create_soap_request(
         api_name=SimplerSoapAPI.GRANTORS,
         headers=headers,
         data=SoapRequestStreamer(stream=io.BytesIO(soap_payload)),
-        full_path="/grantsws-agency-partner/services/v2/AgencyWebServicesSoapPort",
+        full_path="/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
         method="POST",
         auth=SOAPAuth(certificate=soap_certificate),
         operation_name=operation_name,
