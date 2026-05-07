@@ -23,3 +23,9 @@ def load_local_env_vars(env_file: str = "local.env") -> None:
     # Should never run if not local development
     if environment is None or environment == "local":
         load_dotenv(env_file)
+
+
+def error_if_not_local() -> None:
+    if (env := os.getenv("ENVIRONMENT")) != "local":
+        logger.error("Environment %s is not local - cannot run operation", env)
+        raise Exception("Local-only process called when environment was set to non-local")

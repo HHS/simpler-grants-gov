@@ -45,6 +45,7 @@ dev = [
     "ruff>=0.15.12,<16",
     "freezegun>=1.5.5,<2",
     "debugpy>=1.8.20,<2",
+    "types-requests>=2.33.0.20260503",
 ]
 
 [tool.hatch.build.targets.sdist]
@@ -52,11 +53,6 @@ include = ["src"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/grants_shared"]
-
-
-
-
-
 
 [tool.black]
 line-length = 100
@@ -192,8 +188,7 @@ plugins = ["pydantic.mypy"]
 
 [tool.bandit]
 # Ignore audit logging test file since test audit logging requires a lot of operations that trigger bandit warnings
-exclude_dirs = ["./tests/src/logging/test_audit.py"]
-
+exclude_dirs = ["./tests/logs/test_audit.py"]
 
 
 [tool.pytest.ini_options]

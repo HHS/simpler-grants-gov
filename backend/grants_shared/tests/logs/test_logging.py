@@ -2,10 +2,10 @@ import logging
 import re
 
 import pytest
+from lib.assertions import assert_dict_contains
 
 import grants_shared.logs
 import grants_shared.logs.formatters as formatters
-from tests.lib.assertions import assert_dict_contains
 
 
 @pytest.fixture

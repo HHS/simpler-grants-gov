@@ -8,7 +8,7 @@ from typing import Any, cast
 
 from pydantic_settings import SettingsConfigDict
 
-import grants_shared.logs.audit
+import grants_shared.logs.audit as audit
 import grants_shared.logs.formatters as formatters
 import grants_shared.logs.pii as pii
 from grants_shared.util.env_config import PydanticBaseEnvConfig
@@ -101,7 +101,7 @@ class LoggingContext(contextlib.AbstractContextManager[None]):
         logging.root.setLevel(config.level)
 
         if config.enable_audit:
-            src.logging.audit.init()
+            audit.init()
 
         # Configure loggers for third party packages
         logging.getLogger("alembic").setLevel(logging.INFO)

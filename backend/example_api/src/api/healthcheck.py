@@ -1,13 +1,15 @@
 import logging
-from apiflask import APIBlueprint
 
-import grants_shared.adapters.db.flask_db as flask_db
-import grants_shared.adapters.db as db
+from apiflask import APIBlueprint
+from grants_shared.adapters import db
+from grants_shared.adapters.db import flask_db
+from grants_shared.api.route_utils import raise_flask_error
 from sqlalchemy import text
 
 logger = logging.getLogger(__name__)
 
 healthcheck_blueprint = APIBlueprint("healthcheck", __name__, tag="Health")
+
 
 @healthcheck_blueprint.get("/health")
 @flask_db.with_db_session()

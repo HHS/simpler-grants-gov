@@ -1,10 +1,7 @@
 import inspect
 
 import pytest
-from marshmallow import ValidationError
-
-from grants_shared.api.schemas.extension import fields
-from tests.lib.schema_validation_utils import (
+from lib.schema_validation_utils import (
     DummySchema,
     EnumA,
     EnumB,
@@ -14,6 +11,9 @@ from tests.lib.schema_validation_utils import (
     get_valid_field_test_schema_req,
     validate_errors,
 )
+from marshmallow import ValidationError
+
+from grants_shared.api.schemas.extension import fields
 
 
 def test_enum_field():

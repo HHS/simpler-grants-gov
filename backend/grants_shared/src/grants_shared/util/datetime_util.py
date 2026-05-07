@@ -3,7 +3,6 @@ from datetime import date, datetime, timezone
 
 import pytz
 
-from grants_shared.util.other_util import thing
 
 def utcnow() -> datetime:
     """Current time in UTC tagged with timezone info marking it as UTC, unlike datetime.utcnow().

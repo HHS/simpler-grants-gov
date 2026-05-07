@@ -26,7 +26,7 @@ class PostgresDBConfig(PydanticBaseEnvConfig):
             prefix = self.schema_prefix_override
 
         # TODO - this wouldn't work yet as we need a way to configure the enum
-        #return {schema: f"{prefix}{schema}" for schema in Schemas}
+        # return {schema: f"{prefix}{schema}" for schema in Schemas}
         return {"api": f"{prefix}api"}
 
 

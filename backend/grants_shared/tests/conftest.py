@@ -1,10 +1,12 @@
 import uuid
 
-import pytest
 import _pytest.monkeypatch
-from grants_shared.util.local import load_local_env_vars
+import lib.db_testing as db_testing
+import pytest
+
 import grants_shared.adapters.db as db
-import tests.lib.db_testing as db_testing
+from grants_shared.util.local import load_local_env_vars
+
 
 @pytest.fixture(scope="session", autouse=True)
 def env_vars():
@@ -35,6 +37,7 @@ def env_vars():
 # Monkeypatch
 #################
 
+
 # From https://github.com/pytest-dev/pytest/issues/363
 @pytest.fixture(scope="session")
 def monkeypatch_session():
@@ -46,6 +49,7 @@ def monkeypatch_session():
     mpatch = _pytest.monkeypatch.MonkeyPatch()
     yield mpatch
     mpatch.undo()
+
 
 # From https://github.com/pytest-dev/pytest/issues/363
 @pytest.fixture(scope="class")
@@ -59,6 +63,7 @@ def monkeypatch_class():
     yield mpatch
     mpatch.undo()
 
+
 # From https://github.com/pytest-dev/pytest/issues/363
 @pytest.fixture(scope="module")
 def monkeypatch_module():
@@ -71,9 +76,11 @@ def monkeypatch_module():
 # DB
 #################
 
+
 @pytest.fixture(scope="session")
 def db_schema_prefix():
     return f"test_{uuid.uuid4().int}_"
+
 
 @pytest.fixture(scope="session")
 def db_client(monkeypatch_session, db_schema_prefix) -> db.DBClient:
@@ -89,9 +96,9 @@ def db_client(monkeypatch_session, db_schema_prefix) -> db.DBClient:
     with db_testing.create_isolated_db(monkeypatch_session, db_schema_prefix) as db_client:
         with db_client.get_connection() as conn, conn.begin():
             # TODO - not sure I need DB models really for the shared repo?
-            #models.metadata.create_all(bind=conn)
-            #staging_metadata.create_all(bind=conn)
-            #foreign_metadata.create_all(bind=conn)
+            # models.metadata.create_all(bind=conn)
+            # staging_metadata.create_all(bind=conn)
+            # foreign_metadata.create_all(bind=conn)
             pass
 
         yield db_client

@@ -1,6 +1,7 @@
+import flask
 import pytest
 from apiflask import APIFlask
-import flask
+
 import src.app as app_entry
 
 
@@ -8,8 +9,7 @@ import src.app as app_entry
 def app() -> APIFlask:
     return app_entry.create_app()
 
+
 @pytest.fixture
 def client(app: APIFlask) -> flask.testing.FlaskClient:
     return app.test_client()
-
-

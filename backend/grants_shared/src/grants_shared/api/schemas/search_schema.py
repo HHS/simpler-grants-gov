@@ -5,7 +5,12 @@ from typing import Any
 
 from marshmallow import ValidationError, validates_schema
 
-from grants_shared.api.schemas.extension import MarshmallowErrorContainer, Schema, fields, validators
+from grants_shared.api.schemas.extension import (
+    MarshmallowErrorContainer,
+    Schema,
+    fields,
+    validators,
+)
 from grants_shared.validation.validation_constants import ValidationErrorType
 
 
@@ -89,7 +94,7 @@ class StrSearchSchemaBuilder(BaseSearchSchemaBuilder):
         allowed_values: type[StrEnum] | None = None,
         pattern: str | Pattern | None = None,
         example: str | None = None,
-        minimum_length: int | None = None
+        minimum_length: int | None = None,
     ) -> StrSearchSchemaBuilder:
         if pattern is not None and allowed_values is not None:
             raise Exception("Cannot specify both a pattern and allowed_values")

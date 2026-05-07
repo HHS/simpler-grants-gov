@@ -96,7 +96,6 @@ class Base(DeclarativeBase):
         return self._dict().items()
 
 
-
 @declarative_mixin
 class IdMixin:
     """Mixin to add a UUID id primary key column to a model

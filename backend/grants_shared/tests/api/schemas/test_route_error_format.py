@@ -9,7 +9,12 @@ import dataclasses
 
 import pytest
 from apiflask import APIBlueprint, APIFlask
-from flask import Flask
+from lib.schema_validation_utils import (
+    FieldTestSchema,
+    get_expected_validation_errors,
+    get_invalid_field_test_schema_req,
+    get_valid_field_test_schema_req,
+)
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
 from werkzeug.http import HTTP_STATUS_CODES
 
@@ -19,17 +24,10 @@ from grants_shared.api.route_utils import raise_flask_error
 from grants_shared.api.schemas.extension import Schema, fields
 from grants_shared.api.schemas.response_schema import AbstractResponseSchema, WarningMixinSchema
 from grants_shared.util.dict_util import flatten_dict
-from tests.lib.schema_validation_utils import (
-    FieldTestSchema,
-    get_expected_validation_errors,
-    get_invalid_field_test_schema_req,
-    get_valid_field_test_schema_req,
-)
 
 PATH = "/test/"
 VALID_UUID = "1234a5b6-7c8d-90ef-1ab2-c3d45678e9f0"
 FULL_PATH = PATH + VALID_UUID
-
 
 
 class OutputData(Schema):
@@ -99,9 +97,7 @@ def test_exception(simple_client, monkeypatch, exception):
 
     monkeypatch.setattr(OverridenClass, "override_method", override)
 
-    resp = simple_client.patch(
-        FULL_PATH, json=get_valid_field_test_schema_req()
-    )
+    resp = simple_client.patch(FULL_PATH, json=get_valid_field_test_schema_req())
 
     assert resp.status_code == 500
     resp_json = resp.get_json()
@@ -116,9 +112,7 @@ def test_werkzeug_exceptions(simple_client, monkeypatch, exception):
 
     monkeypatch.setattr(OverridenClass, "override_method", override)
 
-    resp = simple_client.patch(
-        FULL_PATH, json=get_valid_field_test_schema_req()
-    )
+    resp = simple_client.patch(FULL_PATH, json=get_valid_field_test_schema_req())
 
     # Werkzeug errors use the proper status code, but
     # any message is replaced with a generic one they have defined
@@ -150,17 +144,13 @@ def test_werkzeug_exceptions(simple_client, monkeypatch, exception):
         (403, "bad request message", None, []),
     ],
 )
-def test_flask_error(
-    simple_client, monkeypatch, error_code, message, detail, validation_issues
-):
+def test_flask_error(simple_client, monkeypatch, error_code, message, detail, validation_issues):
     def override(self):
         raise_flask_error(error_code, message, detail=detail, validation_issues=validation_issues)
 
     monkeypatch.setattr(OverridenClass, "override_method", override)
 
-    resp = simple_client.patch(
-        FULL_PATH, json=get_valid_field_test_schema_req()
-    )
+    resp = simple_client.patch(FULL_PATH, json=get_valid_field_test_schema_req())
 
     assert resp.status_code == error_code
     resp_json = resp.get_json()
@@ -182,9 +172,7 @@ def test_flask_error(
 
 
 def test_invalid_path_param(simple_client, monkeypatch):
-    resp = simple_client.patch(
-        PATH + "not-a-uuid", json=get_valid_field_test_schema_req()
-    )
+    resp = simple_client.patch(PATH + "not-a-uuid", json=get_valid_field_test_schema_req())
 
     # This raises a Werkzeug NotFound so has those values
     assert resp.status_code == 404
@@ -192,6 +180,7 @@ def test_invalid_path_param(simple_client, monkeypatch):
     assert resp_json["data"] == {}
     assert resp_json["errors"] == []
     assert resp_json["message"] == "Not Found"
+
 
 # TODO -  I removed test_auth_error as we don't have auth yet
 
@@ -217,9 +206,7 @@ def test_added_validation_issues(simple_client, monkeypatch, issues):
 
     monkeypatch.setattr(OverridenClass, "override_method", override)
 
-    resp = simple_client.patch(
-        FULL_PATH, json=get_valid_field_test_schema_req()
-    )
+    resp = simple_client.patch(FULL_PATH, json=get_valid_field_test_schema_req())
 
     assert resp.status_code == 200
     resp_json = resp.get_json()

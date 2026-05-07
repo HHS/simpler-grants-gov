@@ -59,5 +59,4 @@ class PaginationInfo:
             ],
         )
 
-
     # TODO - I removed the from_search_response functionality to decouple this from search logic

@@ -6,9 +6,9 @@ from decimal import Decimal
 from uuid import uuid4
 
 import pytest
+from lib.assertions import assert_dict_contains
 
 import grants_shared.logs.formatters as formatters
-from tests.lib.assertions import assert_dict_contains
 
 
 def test_json_formatter(capsys: pytest.CaptureFixture):

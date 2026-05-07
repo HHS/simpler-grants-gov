@@ -4,9 +4,9 @@ import time
 
 import pytest
 from flask import Flask
+from lib.assertions import assert_dict_contains
 
 import grants_shared.logs.flask_logger as flask_logger
-from tests.lib.assertions import assert_dict_contains
 
 
 @pytest.fixture

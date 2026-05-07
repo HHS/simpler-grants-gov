@@ -1,14 +1,17 @@
-from apiflask import APIFlask
-from src.api.healthcheck import healthcheck_blueprint
 import logging
+
 import grants_shared.logs
-import grants_shared.logs.flask_logger as flask_logger
-import grants_shared.adapters.db as db
-import grants_shared.adapters.db.flask_db as flask_db
+from apiflask import APIFlask
+from grants_shared.adapters import db
+from grants_shared.adapters.db import flask_db
+from grants_shared.logs import flask_logger
+
+from src.api.healthcheck import healthcheck_blueprint
 
 TITLE = "Example"
 API_OVERALL_VERSION = "0.0.1"
 API_DESCRIPTION = "Example API Description - This is a prototype"
+
 
 def create_app() -> APIFlask:
     app = APIFlask(__name__, title=TITLE, version=API_OVERALL_VERSION)
@@ -27,6 +30,7 @@ def create_app() -> APIFlask:
     # TODO - jwt auth setup
 
     return app
+
 
 def configure_app(app: APIFlask) -> None:
     # TODO - app config
@@ -77,9 +81,11 @@ def setup_logging(app: APIFlask) -> None:
     grants_shared.logs.init(__package__)
     flask_logger.init_app(logging.root, app)
 
+
 def register_db_client(app: APIFlask) -> None:
     db_client = db.PostgresDBClient()
     flask_db.register_db_client(db_client, app)
+
 
 def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(healthcheck_blueprint)
