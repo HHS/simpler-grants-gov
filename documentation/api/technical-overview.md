@@ -21,7 +21,7 @@ generally preferred.
 - [SQLAlchemy][sqlalchemy-home] ([source code][sqlalchemy-src])
 - [Alembic][alembic-home] ([source code][alembic-src])
 - [pydantic][pydantic-home] ([source code][pydantic-src])
-- [poetry](https://python-poetry.org/docs/) - Python dependency management
+- [uv](https://docs.astral.sh/uv/) - Python dependency management
 
 [oas-docs]: http://spec.openapis.org/oas/v3.0.3
 [oas-swagger-docs]: https://swagger.io/docs/specification/about/
