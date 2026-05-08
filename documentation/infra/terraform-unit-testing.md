@@ -62,6 +62,8 @@ Module unit tests run automatically on every pull request and push to `main` tha
 
 The `make infra-test-modules` target discovers all subdirectories under `infra/modules/` automatically. Modules that currently have a `tests/` directory:
 
+[![Unit Tests](https://github.com/HHS/simpler-grants-gov/actions/workflows/ci-infra.yml/badge.svg)](https://github.com/HHS/simpler-grants-gov/actions/workflows/ci-infra.yml)
+
 - `container-image-repository`
 - `database`
 - `feature_flags`
@@ -69,6 +71,25 @@ The `make infra-test-modules` target discovers all subdirectories under `infra/m
 - `service`
 - `sqs-queue`
 - `storage`
+
+### Modules without tests
+
+| Module | Reason / status |
+|---|---|
+| `auth-github-actions` | Candidate for future tests |
+| `canary` | Candidate for future tests |
+| `dms-networking` | Candidate for future tests |
+| `domain` | Candidate for future tests |
+| `file-scan-cache` | Candidate for future tests |
+| `identity-provider` | Uses `resources/` + `data/` subdirectory layout; `terraform test` must be run from a subdirectory, not the module root |
+| `identity-provider-client` | Same subdirectory layout constraint as `identity-provider` |
+| `network` | Candidate for future tests |
+| `notifications` | Same subdirectory layout constraint as `identity-provider` |
+| `notifications-email-domain` | Same subdirectory layout constraint as `identity-provider` |
+| `search` | Candidate for future tests |
+| `secret` | Candidate for future tests |
+| `secrets` | Candidate for future tests |
+| `terraform-backend-s3` | Bootstrap module; applied once manually, low churn |
 
 Modules without a `tests/` directory are skipped silently by `terraform test`.
 
@@ -96,4 +117,49 @@ run "encryption_is_enabled" {
     error_message = "KMS key must have automatic rotation enabled"
   }
 }
+```
+
+## Troubleshooting
+
+### Test fails after a module change
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| `Error: Missing required argument` or `No value for required variable` | A new required variable was added to the module but not provided in the test's `variables {}` block | Add the new variable with a fake-but-valid value to the `variables {}` block in the test file |
+| `Error: Invalid value for variable` | A validation rule changed and an existing test value no longer passes | Update the test value to satisfy the new rule |
+| `Error: Unsupported attribute` on an `assert` condition | A resource attribute was renamed or removed | Update the attribute reference in the `assert` condition |
+| `Error: Reference to undeclared resource` in an `assert` | A resource was renamed or removed from the module | Update the resource address in the assert |
+
+### Mock provider issues
+
+**`Error: Missing required argument` inside a resource block (not a variable)** — The provider mock is missing a required field that Terraform does not auto-mock. Add a `mock_resource` or `mock_data` block inside `mock_provider "aws" {}` to stub that resource or data source with explicit values.
+
+**Data source returns null/empty values in assertions** — Mock providers return zero values for all attributes unless you supply a `mock_data` block. Add one like:
+
+```hcl
+mock_provider "aws" {
+  mock_data "aws_caller_identity" {
+    defaults = {
+      account_id = "123456789012"
+    }
+  }
+}
+```
+
+**Test passes locally but fails in CI** — Check that the Terraform version in CI (`ci-infra.yml`) matches the version you ran locally. Mock provider behavior changed between 1.6 and 1.7+.
+
+### Running a single test run block
+
+To run only one `run` block from a test file during debugging, use the `-run` flag:
+
+```bash
+terraform -chdir=infra/modules/<module-name> test -run <run_block_name>
+```
+
+### Verbose plan output
+
+Add `-verbose` to see the full plan diff for each `run` block:
+
+```bash
+terraform -chdir=infra/modules/<module-name> test -verbose
 ```
