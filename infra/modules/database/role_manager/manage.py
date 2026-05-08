@@ -17,7 +17,7 @@ def manage(config: dict):
         roles, schema_privileges = print_current_db_config(master_conn)
         roles_with_groups = get_roles_with_groups(master_conn)
 
-    configure_default_privileges()
+    configure_default_privileges(config)
 
     return {
         "roles": roles,
@@ -75,33 +75,12 @@ def get_schema_privileges(conn: Connection) -> list[tuple[str, str]]:
     ]
 
 
-def get_all_schema_names(conn: Connection, primary_schema: str) -> list[str]:
-    """Discover all application schemas in the database.
-
-    Returns the primary schema first, followed by any other non-system schemas.
-    """
-    rows = db.execute(
-        conn,
-        """
-        SELECT nspname
-        FROM pg_namespace
-        WHERE nspname NOT LIKE 'pg_%'
-        AND nspname NOT IN ('information_schema', 'public')
-        ORDER BY nspname
-        """,
-        print_query=False,
-    )
-    schemas = [row[0] for row in rows]
-    if primary_schema in schemas:
-        schemas.remove(primary_schema)
-    return [primary_schema] + schemas
-
-
 def configure_database(conn: Connection, config: dict) -> None:
     print("-- Configuring database")
     app_username = os.environ.get("APP_USER")
     migrator_username = os.environ.get("MIGRATOR_USER")
-    schema_name = os.environ.get("DB_SCHEMA")
+    schema_name = config.get("schema_name", os.environ.get("DB_SCHEMA"))
+    primary_schema = os.environ.get("DB_SCHEMA")
     database_name = os.environ.get("DB_NAME")
 
     # In Postgres 15 and higher, the CREATE privilege on the public
@@ -113,17 +92,17 @@ def configure_database(conn: Connection, config: dict) -> None:
 
     print("---- Revoking database access from public role")
     db.execute(conn, f"REVOKE ALL ON DATABASE {identifier(database_name)} FROM PUBLIC")
-    print(f"---- Setting default search path to schema {schema_name}")
-    db.execute(
-        conn,
-        f"ALTER DATABASE {identifier(database_name)} SET search_path TO {identifier(schema_name)}",
-    )
+
+    # Only set the search path for the primary schema
+    if schema_name == primary_schema:
+        print(f"---- Setting default search path to schema {schema_name}")
+        db.execute(
+            conn,
+            f"ALTER DATABASE {identifier(database_name)} SET search_path TO {identifier(schema_name)}",
+        )
 
     configure_roles(conn, [migrator_username, app_username], database_name)
-
-    for s in get_all_schema_names(conn, schema_name):
-        configure_schema(conn, s, migrator_username, app_username)
-
+    configure_schema(conn, schema_name, migrator_username, app_username)
     configure_superuser_extensions(conn, config["superuser_extensions"])
 
 
@@ -225,7 +204,7 @@ def fix_schema_object_ownership(conn: Connection, schema_name: str, migrator_use
     )
 
 
-def configure_default_privileges():
+def configure_default_privileges(config: dict):
     """
     Configure default privileges so that future tables, sequences, and routines
     created by the migrator user can be accessed by the app user.
@@ -233,23 +212,22 @@ def configure_default_privileges():
     run these SQL queries as the migrator user rather than as the master user.
     """
     migrator_username = os.environ.get("MIGRATOR_USER")
-    schema_name = os.environ.get("DB_SCHEMA")
+    schema_name = config.get("schema_name", os.environ.get("DB_SCHEMA"))
     app_username = os.environ.get("APP_USER")
     with db.connect_using_iam(migrator_username) as conn:
-        for s in get_all_schema_names(conn, schema_name):
-            print(f"------ Granting default privileges for future objects in schema {s}: grantee={app_username}")
-            db.execute(
-                conn,
-                f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(s)} GRANT ALL ON TABLES TO {identifier(app_username)}",
-            )
-            db.execute(
-                conn,
-                f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(s)} GRANT ALL ON SEQUENCES TO {identifier(app_username)}",
-            )
-            db.execute(
-                conn,
-                f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(s)} GRANT ALL ON ROUTINES TO {identifier(app_username)}",
-            )
+        print(f"------ Granting default privileges for future objects in schema {schema_name}: grantee={app_username}")
+        db.execute(
+            conn,
+            f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON TABLES TO {identifier(app_username)}",
+        )
+        db.execute(
+            conn,
+            f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON SEQUENCES TO {identifier(app_username)}",
+        )
+        db.execute(
+            conn,
+            f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON ROUTINES TO {identifier(app_username)}",
+        )
 
 
 def print_current_db_config(
