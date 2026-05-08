@@ -1052,6 +1052,7 @@ export const messages = {
       message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
     },
     resultsListItem: {
+      awardInformation: "Award information",
       status: {
         archived: "Archived: ",
         closed: "Closed: ",
@@ -1060,7 +1061,7 @@ export const messages = {
       },
       summary: {
         forecasted: "Forecast posted date: ",
-        posted: "Posted date: ",
+        posted: "Posted: ",
         agency: "Agency: ",
       },
       opportunityNumber: "Opportunity Number: ",

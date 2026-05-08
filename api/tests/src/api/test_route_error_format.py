@@ -8,7 +8,7 @@ responses is consistent and functioning as intended.
 import dataclasses
 
 import pytest
-from apiflask import APIBlueprint
+from apiflask import APIBlueprint, APIKeyHeaderAuth
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
 from werkzeug.http import HTTP_STATUS_CODES
 
@@ -18,7 +18,6 @@ from src.api.response import ApiResponse, ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.response_schema import AbstractResponseSchema, WarningMixinSchema
-from src.auth.multi_auth import api_key_multi_auth
 from src.util.dict_util import flatten_dict
 from tests.src.schemas.schema_validation_utils import (
     FieldTestSchema,
@@ -30,10 +29,24 @@ from tests.src.schemas.schema_validation_utils import (
 PATH = "/test/"
 VALID_UUID = "1234a5b6-7c8d-90ef-1ab2-c3d45678e9f0"
 FULL_PATH = PATH + VALID_UUID
+TEST_TOKEN = "test-token"
+
+# Simple test-only auth that doesn't require a database connection.
+# This file tests error response formatting, not authentication behavior.
+test_auth = APIKeyHeaderAuth("ApiKey", param_name="X-API-Key", security_scheme_name="TestAuth")
 
 
-def header(api_auth_token):
-    return {"X-Auth": api_auth_token}
+@test_auth.verify_token
+def verify_test_token(token: str):
+    if token == TEST_TOKEN:
+        return {"username": "test"}
+    raise_flask_error(
+        401, "The server could not verify that you are authorized to access the URL requested"
+    )
+
+
+def header():
+    return {"X-API-Key": TEST_TOKEN}
 
 
 class OutputData(Schema):
@@ -69,7 +82,7 @@ class OverridenClass:
 @test_blueprint.patch("/test/<uuid:test_id>")
 @test_blueprint.input(FieldTestSchema, arg_name="req")
 @test_blueprint.output(OutputSchema)
-@test_blueprint.auth_required(api_key_multi_auth)
+@test_blueprint.auth_required(test_auth)
 def api_method(test_id, req):
     resp, warnings = OverridenClass().override_method()
     return ApiResponse("Test method run successfully", data=resp, warnings=warnings)
@@ -104,15 +117,13 @@ def simple_client(simple_app):
 @pytest.mark.parametrize(
     "exception", [Exception, AttributeError, IndexError, NotImplementedError, ValueError]
 )
-def test_exception(simple_client, api_auth_token, monkeypatch, exception):
+def test_exception(simple_client, monkeypatch, exception):
     def override(self):
         raise exception("Exception message text")
 
     monkeypatch.setattr(OverridenClass, "override_method", override)
 
-    resp = simple_client.patch(
-        FULL_PATH, json=get_valid_field_test_schema_req(), headers=header(api_auth_token)
-    )
+    resp = simple_client.patch(FULL_PATH, json=get_valid_field_test_schema_req(), headers=header())
 
     assert resp.status_code == 500
     resp_json = resp.get_json()
@@ -121,15 +132,13 @@ def test_exception(simple_client, api_auth_token, monkeypatch, exception):
 
 
 @pytest.mark.parametrize("exception", [Unauthorized, NotFound, Forbidden, BadRequest])
-def test_werkzeug_exceptions(simple_client, api_auth_token, monkeypatch, exception):
+def test_werkzeug_exceptions(simple_client, monkeypatch, exception):
     def override(self):
         raise exception("Exception message text")
 
     monkeypatch.setattr(OverridenClass, "override_method", override)
 
-    resp = simple_client.patch(
-        FULL_PATH, json=get_valid_field_test_schema_req(), headers=header(api_auth_token)
-    )
+    resp = simple_client.patch(FULL_PATH, json=get_valid_field_test_schema_req(), headers=header())
 
     # Werkzeug errors use the proper status code, but
     # any message is replaced with a generic one they have defined
@@ -161,17 +170,13 @@ def test_werkzeug_exceptions(simple_client, api_auth_token, monkeypatch, excepti
         (403, "bad request message", None, []),
     ],
 )
-def test_flask_error(
-    simple_client, api_auth_token, monkeypatch, error_code, message, detail, validation_issues
-):
+def test_flask_error(simple_client, monkeypatch, error_code, message, detail, validation_issues):
     def override(self):
         raise_flask_error(error_code, message, detail=detail, validation_issues=validation_issues)
 
     monkeypatch.setattr(OverridenClass, "override_method", override)
 
-    resp = simple_client.patch(
-        FULL_PATH, json=get_valid_field_test_schema_req(), headers=header(api_auth_token)
-    )
+    resp = simple_client.patch(FULL_PATH, json=get_valid_field_test_schema_req(), headers=header())
 
     assert resp.status_code == error_code
     resp_json = resp.get_json()
@@ -192,9 +197,9 @@ def test_flask_error(
         assert resp_json["errors"] == []
 
 
-def test_invalid_path_param(simple_client, api_auth_token, monkeypatch):
+def test_invalid_path_param(simple_client, monkeypatch):
     resp = simple_client.patch(
-        PATH + "not-a-uuid", json=get_valid_field_test_schema_req(), headers=header(api_auth_token)
+        PATH + "not-a-uuid", json=get_valid_field_test_schema_req(), headers=header()
     )
 
     # This raises a Werkzeug NotFound so has those values
@@ -207,7 +212,7 @@ def test_invalid_path_param(simple_client, api_auth_token, monkeypatch):
 
 def test_auth_error(simple_client, monkeypatch):
     resp = simple_client.patch(
-        FULL_PATH, json=get_valid_field_test_schema_req(), headers=header("not_valid_jwt")
+        FULL_PATH, json=get_valid_field_test_schema_req(), headers={"X-API-Key": "not_valid_key"}
     )
 
     assert resp.status_code == 401
@@ -235,15 +240,13 @@ def test_auth_error(simple_client, monkeypatch):
         [ValidationErrorDetail(type="bad", message="field is optional technically")],
     ],
 )
-def test_added_validation_issues(simple_client, api_auth_token, monkeypatch, issues):
+def test_added_validation_issues(simple_client, monkeypatch, issues):
     def override(self):
         return {"output_val": "hello with validation issues"}, issues
 
     monkeypatch.setattr(OverridenClass, "override_method", override)
 
-    resp = simple_client.patch(
-        FULL_PATH, json=get_valid_field_test_schema_req(), headers=header(api_auth_token)
-    )
+    resp = simple_client.patch(FULL_PATH, json=get_valid_field_test_schema_req(), headers=header())
 
     assert resp.status_code == 200
     resp_json = resp.get_json()
@@ -257,14 +260,14 @@ def test_added_validation_issues(simple_client, api_auth_token, monkeypatch, iss
         assert dataclasses.asdict(issue) in warnings
 
 
-def test_marshmallow_validation(simple_client, api_auth_token, monkeypatch):
+def test_marshmallow_validation(simple_client, monkeypatch):
     """
     Validate that Marshmallow errors get transformed properly
     and attached in the expected format in an error response
     """
 
     req = get_invalid_field_test_schema_req()
-    resp = simple_client.patch(FULL_PATH, json=req, headers=header(api_auth_token))
+    resp = simple_client.patch(FULL_PATH, json=req, headers=header())
 
     assert resp.status_code == 422
     resp_json = resp.get_json()

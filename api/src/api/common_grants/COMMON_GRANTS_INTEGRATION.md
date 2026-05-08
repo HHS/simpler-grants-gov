@@ -248,7 +248,7 @@ The integration includes a custom error handler (`@with_cg_error_handler()`) tha
 
 ```bash
 # Install dependencies
-poetry install
+uv sync
 
 # Start API with data
 make init 

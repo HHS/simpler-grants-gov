@@ -4,7 +4,7 @@
 # Connects to the database then drops into a Python interactive prompt.
 #
 # Use via the `-i` flag to python, for example:
-#   poetry run python3 -i -m src.tool.console.interactive
+#   uv run python3 -i -m src.tool.console.interactive
 #
 
 from types import ModuleType
