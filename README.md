@@ -1,14 +1,30 @@
 # [Simpler.Grants.gov](https://simpler.grants.gov/)
 
+[![Get Paid to Contribute](https://img.shields.io/badge/Bounties-Get_Paid_to_Contribute-blue?style=flat-square&logo=github)](https://github.com/HHS/simpler-grants-gov/issues?q=is%3Aopen+is%3Aissue+label%3Abounty)
+
 A modernization effort for [Grants.gov](https://grants.gov/)
 
 ## About the Project
 
 We want Grants.gov to be an extremely simple, accessible, and easy-to-use tool for posting, finding, sharing, and applying for federal financial assistance. Our mission is to increase access to grants and improve the grants experience for everyone. We’re improving the way applicants search for and discover funding opportunities, making it easier to find and apply. For federal grantmaking agencies, we’re making it easier for their communities to find the funding they need.
 
+At Simpler Grants, we believe that open-source contributors are the backbone of government modernization. To accelerate our mission of making federal financial assistance accessible to all, we've launched the **Funded Open Source Contributor Program**. This pilot initiative directly rewards developers, technical writers, and researchers for solving specific, high-priority issues that improve the Grants.gov experience for everyone.
+
 Go to [Simpler.Grants.gov](https://simpler.grants.gov/) to learn about our transparent process and what we’re doing now, or explore our existing user research and the findings that are guiding our work.
 
 See [goals.md](./documentation/goals.md) for more information about the vision and goals for the project.
+
+## 💰 Open Bounties
+
+Explore our active bounty opportunities and get paid for your contributions. We categorize our bounties into tiers based on complexity and impact:
+
+| Tier | Reward (USD) | Issues |
+| :--- | :--- | :--- |
+| **Medium** | $250 | [View M-Tier Issues](https://github.com/HHS/simpler-grants-gov/issues?q=is%3Aopen+is%3Aissue+label%3A"bounty%3A+M") |
+| **Large** | $500 | [View L-Tier Issues](https://github.com/HHS/simpler-grants-gov/issues?q=is%3Aopen+is%3Aissue+label%3A"bounty%3A+L") |
+| **X-Large** | $1,000+ | [View XL-Tier Issues](https://github.com/HHS/simpler-grants-gov/issues?q=is%3Aopen+is%3Aissue+label%3A"bounty%3A+XL") |
+
+*Note: Payouts are currently restricted to US citizens and require a W-9 for payments over $600.*
 
 ## Core Team
 
@@ -48,26 +64,3 @@ To better understand how this project is governed and how to participate beyond 
 - [Community Guidelines](./COMMUNITY_GUIDELINES.md)
 - [Code of Conduct](./CODE_OF_CONDUCT.md)
 - [Architecture Decision Records](./documentation/architecture/)
-- [Project Wiki](https://wiki.simpler.hhs.gov)
-
-## Security
-
-For more information about our Security, Vulnerability, and Responsible
-Disclosure Policies, see [SECURITY.md](SECURITY.md).
-
-## Authors and Maintainers
-
-For more information about our Authors and maintainers, see [MAINTAINERS.md](MAINTAINERS.md).
-
-A full list of [contributors](https://github.com/HHS/simpler-grants-gov/graphs/contributors) can be found on GitHub.
-
-## Public domain
-
-This project is licensed within in the public domain within the United States,
-and copyright and related rights in the work worldwide are waived through the
-[CC0 1.0 Universal public domain
-dedication](https://creativecommons.org/publicdomain/zero/1.0/).
-
-All contributions to this project will be released under the CC0 dedication. By
-submitting a pull request or issue, you are agreeing to comply with this waiver
-of copyright interest.
