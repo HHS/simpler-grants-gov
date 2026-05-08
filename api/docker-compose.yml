@@ -76,15 +76,11 @@ services:
       - default
 
   dynamodb-local:
-    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
     image: "amazon/dynamodb-local:latest"
     container_name: dynamodb-local
-    user: root
     ports:
       - "8000:8000"
-    volumes:
-      - dynamodb-data:/home/dynamodblocal/data
-    working_dir: /home/dynamodblocal
     networks:
       - default
 
@@ -187,7 +183,6 @@ services:
 volumes:
   grantsdbdata:
   opensearch-data:
-  dynamodb-data:
 
 networks:
   grants_backend:
