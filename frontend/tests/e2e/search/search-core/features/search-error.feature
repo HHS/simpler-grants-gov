@@ -9,7 +9,13 @@ Feature: Search Error Handling and Recovery
 
 /* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
   Scenario: Invalid status query shows error state
-    Given I navigate to "/search?status=not_a_status"
+    Given I navigate to "/search?<param>=<invalid_value>"
+    Then the search error state is shown
+    
+    Examples:
+    | param     | invalid_value |
+    | status    | not_a_status  |
+    | category  | invalid_value |
     Then I should see an error alert on the page
 
 /* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
