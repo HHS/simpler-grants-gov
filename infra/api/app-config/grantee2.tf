@@ -48,7 +48,7 @@ module "grantee2_config" {
 
   service_override_extra_environment_variables = {
     # Email notification
-    RESET_EMAILS_WITHOUT_SENDING = "false"
+    RESET_EMAILS_WITHOUT_SENDING = "true"
 
     # PDF Generation - Staging overrides
     FRONTEND_URL             = "https://grantee2.teams.simpler.grants.gov"

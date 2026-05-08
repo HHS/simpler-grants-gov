@@ -264,4 +264,3 @@ variable "api_host_newrelic_entity_guid" {
   description = "New Relic entity GUID for the ECS service host, used to correlate container logs with the infrastructure entity in New Relic."
   default     = null
 }
-

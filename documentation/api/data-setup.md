@@ -68,5 +68,5 @@ waiting for the daily sam.gov extract task to run, OR running it yourself (requi
 **Note**: The SAM.gov extract task is automatically scheduled to run daily at 8:00am ET (9:00am during non-DST) in all environments to fetch the latest extracts from SAM.gov and keep organization data up to date.
 
 ```shell
-bin/run-command  api dev '["poetry", "run", "flask", "task", "sam-extracts", "--no-fetch-extracts", "--no-process-extracts", "--create-orgs"]'
+bin/run-command  api dev '["flask", "task", "sam-extracts", "--no-fetch-extracts", "--no-process-extracts", "--create-orgs"]'
 ```

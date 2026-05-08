@@ -85,8 +85,6 @@ services:
         - RUN_USER=${RUN_USER:-api}
     command:
       [
-        "poetry",
-        "run",
         "flask",
         "--app",
         "src.app",
