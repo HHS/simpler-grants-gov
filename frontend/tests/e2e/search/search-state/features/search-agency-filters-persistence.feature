@@ -44,3 +44,4 @@ Scenario: Retain sub-agency filter after refresh
   And sub-agency options are visible
   And the previously selected sub-agency checkbox should be checked
   And the URL should contain query param "agency" with the selected sub-agency value
+ 
