@@ -52,6 +52,7 @@ SKIP_PARAMS=(
 
 TOTAL_COPIED=0
 TOTAL_SKIPPED=0
+FAILED_PARAMS=()
 
 echo "============================================================"
 echo " Copy SSM Parameters"
@@ -60,6 +61,48 @@ echo "  Target: ${TARGET_ENV}"
 echo "  Dry run: ${DRY_RUN}"
 echo "============================================================"
 echo ""
+
+# Snapshot existing target parameters before overwriting so they can be
+# restored manually if something goes wrong. Written to the job summary only
+# (not stdout) to keep logs readable.
+if [[ "${DRY_RUN}" == "false" ]]; then
+  echo "------------------------------------------------------------"
+  echo " Backing up existing target parameters (${TARGET_ENV})"
+  echo "------------------------------------------------------------"
+
+  BACKUP_LINES=()
+  for APP in "${APP_PREFIXES[@]}"; do
+    EXISTING=$(aws ssm get-parameters-by-path \
+      --path "/${APP}/${TARGET_ENV}/" \
+      --recursive \
+      --with-decryption \
+      --query "Parameters[*].{Name:Name,Value:Value,Type:Type}" \
+      --output json 2>/dev/null || echo "[]")
+    while IFS= read -r PARAM; do
+      BACKUP_LINES+=("${PARAM}")
+    done < <(echo "${EXISTING}" | jq -c '.[]')
+  done
+
+  BACKUP_COUNT=${#BACKUP_LINES[@]}
+  echo "  Backed up ${BACKUP_COUNT} existing parameter(s) to job summary"
+  echo ""
+
+  {
+    echo "## Backup: Existing Target Parameters Before Copy"
+    echo ""
+    echo "The following **${BACKUP_COUNT}** parameter(s) existed in \`${TARGET_ENV}\` before this run."
+    echo "Use these values to restore manually if a rollback is needed."
+    echo ""
+    echo '```json'
+    if [[ ${BACKUP_COUNT} -gt 0 ]]; then
+      printf '%s\n' "${BACKUP_LINES[@]}" | jq -s '.'
+    else
+      echo '[]'
+    fi
+    echo '```'
+    echo ""
+  } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+fi
 
 for APP in "${APP_PREFIXES[@]}"; do
   SOURCE_PATH="/${APP}/${SOURCE_ENV}/"
@@ -113,13 +156,17 @@ for APP in "${APP_PREFIXES[@]}"; do
       echo "  Copying: ${NAME}"
       echo "       to: ${TARGET_NAME}  (${TYPE}, ${TIER} tier)"
 
-      aws ssm put-parameter \
+      if ! aws ssm put-parameter \
         --name "${TARGET_NAME}" \
         --value "${VALUE}" \
         --type "${TYPE}" \
         --tier "${TIER}" \
         --overwrite \
-        --no-cli-pager > /dev/null
+        --no-cli-pager > /dev/null; then
+        echo "  ERROR: Failed to copy ${TARGET_NAME}"
+        FAILED_PARAMS+=("${TARGET_NAME}")
+        continue
+      fi
 
       echo "  Done"
     fi
@@ -130,11 +177,17 @@ for APP in "${APP_PREFIXES[@]}"; do
   echo ""
 done
 
+FAILED_COUNT=${#FAILED_PARAMS[@]}
+
 echo "============================================================"
 if [[ "${DRY_RUN}" == "true" ]]; then
   echo " DRY RUN complete — ${TOTAL_COPIED} parameter(s) would be copied, ${TOTAL_SKIPPED} skipped"
 else
   echo " Copy complete — ${TOTAL_COPIED} parameter(s) copied, ${TOTAL_SKIPPED} skipped"
+  if [[ ${FAILED_COUNT} -gt 0 ]]; then
+    echo " FAILED: ${FAILED_COUNT} parameter(s) could not be copied:"
+    for P in "${FAILED_PARAMS[@]}"; do echo "   - ${P}"; done
+  fi
 fi
 echo "============================================================"
 
@@ -149,7 +202,20 @@ echo "============================================================"
   echo "| **Dry run** | ${DRY_RUN} |"
   echo "| **Parameters copied** | ${TOTAL_COPIED} |"
   echo "| **Parameters skipped** | ${TOTAL_SKIPPED} |"
+  if [[ ${FAILED_COUNT} -gt 0 ]]; then
+    echo "| **Parameters failed** | ${FAILED_COUNT} |"
+  fi
   echo ""
   echo "**Skipped parameters (environment-specific, preserved in target):**"
   for P in "${SKIP_PARAMS[@]}"; do echo "- \`${P}\`"; done
+  if [[ ${FAILED_COUNT} -gt 0 ]]; then
+    echo ""
+    echo "**Failed parameters:**"
+    for P in "${FAILED_PARAMS[@]}"; do echo "- \`${P}\`"; done
+  fi
 } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+
+if [[ ${FAILED_COUNT} -gt 0 ]]; then
+  echo "ERROR: ${FAILED_COUNT} parameter(s) failed to copy. See above for details."
+  exit 1
+fi
