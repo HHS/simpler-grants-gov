@@ -199,6 +199,8 @@ def create_soap_request(
     soap_payload: bytes,
     log_local: bool = False,
     operation_name: str = "GetApplicationZipRequest",
+    full_path="/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
+    api_name=SimplerSoapAPI.GRANTORS,
 ) -> SOAPRequest:
     _, _, soap_certificate, _ = setup_cert_user(
         AgencyFactory.create(), [Privilege.LEGACY_AGENCY_VIEWER]
@@ -209,10 +211,10 @@ def create_soap_request(
     if log_local:
         headers.update({f"{LOG_LOCAL_RESPONSE_HEADER_KEY}": "1"})
     return SOAPRequest(
-        api_name=SimplerSoapAPI.GRANTORS,
+        api_name=api_name,
         headers=headers,
         data=SoapRequestStreamer(stream=io.BytesIO(soap_payload)),
-        full_path="/grantsws-agency/services/v2/AgencyWebServicesSoapPort",
+        full_path=full_path,
         method="POST",
         auth=SOAPAuth(certificate=soap_certificate),
         operation_name=operation_name,

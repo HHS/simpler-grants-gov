@@ -104,6 +104,16 @@ locals {
       secret_store_name = "/api/${var.environment}/soap-partner-gateway-uri"
     }
 
+    SOAP_GRANTORS_PATH = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-grantors-path"
+    }
+
+    SOAP_APPLICANTS_PATH = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-applicants-path"
+    }
+
     SOAP_PARTNER_GATEWAY_AUTH_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/soap-partner-gateway-auth-key"
