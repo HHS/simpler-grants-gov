@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { identity } from "lodash";
+
 import { CreateRecommendationContent } from "./CreateRecommendationContent";
 
 const mockBack = jest.fn();
