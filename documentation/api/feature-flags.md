@@ -94,7 +94,7 @@ Because we added the post_load implementation, instead of receiving a dictionary
 )
 # many=True allows us to return a list of opportunity objects
 @opportunity_blueprint.output(opportunity_schemas.OpportunityV0Schema(many=True))
-@opportunity_blueprint.auth_required(api_key_auth)
+@opportunity_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @flask_db.with_db_session()
 def opportunity_search(
         db_session: db.Session, search_params: dict, feature_flag_config: FeatureFlagConfig

@@ -34,9 +34,6 @@ export async function getDefaultHeaders({
     headers["X-API-KEY"] = environment.API_GW_AUTH;
   }
 
-  if (environment.API_AUTH_TOKEN) {
-    headers["X-AUTH"] = environment.API_AUTH_TOKEN;
-  }
   if (addContentType) {
     headers["Content-Type"] = "application/json";
   }

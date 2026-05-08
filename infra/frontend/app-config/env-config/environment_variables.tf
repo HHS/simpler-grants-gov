@@ -53,11 +53,6 @@ locals {
       manage_method     = "manual"
       secret_store_name = "/${var.app_name}/${var.environment}/api-url"
     },
-    # Token that the frontend uses to authenticate when making Grants API fetch requests.
-    API_AUTH_TOKEN = {
-      manage_method     = "manual"
-      secret_store_name = "/${var.app_name}/${var.environment}/api-auth-token"
-    },
     # URL for the API login route.
     AUTH_LOGIN_URL = {
       manage_method     = "manual"

@@ -8,7 +8,7 @@ from tests.src.db.models.factories import LinkExternalUserFactory, UserProfileFa
 ################
 
 
-def test_get_user_200(enable_factory_create, client, db_session, api_auth_token):
+def test_get_user_200(enable_factory_create, client, db_session):
     external_user = LinkExternalUserFactory.create()
     token, _ = create_jwt_for_user(external_user.user, db_session)
     db_session.commit()
@@ -19,7 +19,7 @@ def test_get_user_200(enable_factory_create, client, db_session, api_auth_token)
     assert resp.get_json()["data"]["user_id"] == str(external_user.user_id)
 
 
-def test_get_user_401(enable_factory_create, client, db_session, api_auth_token):
+def test_get_user_401(enable_factory_create, client, db_session):
     external_user = LinkExternalUserFactory.create()
     token, _ = create_jwt_for_user(external_user.user, db_session)
     db_session.commit()
@@ -29,7 +29,7 @@ def test_get_user_401(enable_factory_create, client, db_session, api_auth_token)
     assert resp.status_code == 401
 
 
-def test_get_user_with_profile_200(enable_factory_create, client, db_session, api_auth_token):
+def test_get_user_with_profile_200(enable_factory_create, client, db_session):
     external_user = LinkExternalUserFactory.create()
     UserProfileFactory.create(user=external_user.user)
     token, _ = create_jwt_for_user(external_user.user, db_session)
