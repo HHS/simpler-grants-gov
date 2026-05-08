@@ -32,7 +32,7 @@ class TestLegacySoapGrantorGetApplicationZipSchema:
             opportunity=opportunity,
         )
         privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
-        user, role, soap_client_certificate = setup_cert_user(agency, privileges)
+        user, role, soap_client_certificate, _ = setup_cert_user(agency, privileges)
         submission = ApplicationSubmissionFactory.create(
             application__application_status=ApplicationStatus.ACCEPTED,
             application__competition=competition,

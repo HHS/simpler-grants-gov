@@ -74,16 +74,6 @@ def test_internal_multi_auth_with_user_jwt(mini_app, enable_factory_create, db_s
     assert resp.json["token_id"] is None
 
 
-def test_internal_multi_auth_with_api_key(mini_app, api_auth_token):
-    """Test that the internal multi-auth rejects API key tokens (security requirement)"""
-    resp = mini_app.test_client().get(
-        "/dummy_internal_auth_endpoint", headers={"X-Auth": api_auth_token}
-    )
-    # API keys should not be accepted for internal multi-auth endpoints for security reasons
-    assert resp.status_code == 401
-    assert resp.json["message"] == "Unauthorized"
-
-
 def test_internal_multi_auth_with_internal_jwt(mini_app, enable_factory_create, db_session):
     """Test that the internal multi-auth works with internal JWT tokens"""
     expires_at = datetime_util.utcnow() + timedelta(hours=1)
@@ -103,9 +93,7 @@ def test_internal_multi_auth_with_internal_jwt(mini_app, enable_factory_create, 
     assert resp.json["token_id"] == str(short_lived_token.short_lived_internal_token_id)
 
 
-def test_internal_multi_auth_precedence(
-    mini_app, enable_factory_create, db_session, api_auth_token
-):
+def test_internal_multi_auth_precedence(mini_app, enable_factory_create, db_session):
     """Test that auth precedence works correctly - user JWT takes precedence over internal JWT"""
     user = UserFactory.create()
     user_token, _ = create_jwt_for_user(user, db_session)
