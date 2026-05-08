@@ -232,6 +232,13 @@ warn_unused_ignores = true
 
 plugins = ["pydantic.mypy"]
 
+# form_json.py files live inside numeric directories (e.g. sf424/1/0/form_json.py)
+# that are not valid Python package names, so mypy cannot resolve their module paths.
+# They are loaded at runtime via importlib in each form package's __init__.py.
+exclude = [
+    "src/form_schema/forms/[^/]+/[0-9]+/[0-9]+/form_json\\.py",
+]
+
 [tool.bandit]
 # Ignore audit logging test file since test audit logging requires a lot of operations that trigger bandit warnings
 exclude_dirs = ["./tests/src/logging/test_audit.py"]
