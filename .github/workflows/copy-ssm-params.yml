@@ -1,0 +1,59 @@
+name: Copy SSM Parameters
+run-name: Copy SSM params from ${{ inputs.source_environment }} to ${{ inputs.target_environment }}${{ inputs.dry_run && ' (dry run)' || '' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_environment:
+        description: Environment to copy parameters FROM
+        required: true
+        type: choice
+        options:
+          - staging
+          - dev
+      target_environment:
+        description: Environment to copy parameters TO
+        required: true
+        type: choice
+        options:
+          - grantee1
+          - grantee2
+      dry_run:
+        description: "Dry run: preview what would be copied without making changes"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  copy-ssm-params:
+    name: Copy SSM Parameters
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+    environment: ${{ inputs.target_environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: api
+          environment: ${{ inputs.source_environment }}
+
+      - name: Copy SSM parameters
+        run: |
+          chmod +x .github/scripts/copy-ssm-params.sh
+          .github/scripts/copy-ssm-params.sh \
+            "${{ inputs.source_environment }}" \
+            "${{ inputs.target_environment }}" \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
+
+  send-slack-notification:
+    if: failure()
+    needs: [copy-ssm-params]
+    uses: ./.github/workflows/send-slack-notification.yml
+    secrets: inherit
