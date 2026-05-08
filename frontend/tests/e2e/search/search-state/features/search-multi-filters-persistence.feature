@@ -48,6 +48,8 @@ Scenario: Retain all filters and inputs after refresh
   And the "<eligibility>" eligibility checkbox should be checked
   And the previously selected agency checkbox should be checked
   And the "<category>" category checkbox should be checked
+
+  Then the URL should reflect the accumulated query parameters for the selected filters
  
   And the browser URL contains "query=<search-term>"
   And the browser URL contains "sortby=<sort value>"
@@ -108,7 +110,9 @@ Scenario: Retain all multi-value filters and inputs after refresh
   And the previously selected agency checkbox should be checked
   And the "<category 1>" category checkbox should be checked
   And the "<category 2>" category checkbox should be checked
- 
+
+  Then the URL should reflect the accumulated query parameters for the selected filters
+  
   And the browser URL contains "query=<search-term>"
   And the browser URL contains "sortby=<sort value>"
   And the browser URL contains query param "status" with values "<status values>"
