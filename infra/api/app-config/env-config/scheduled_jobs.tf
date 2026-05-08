@@ -137,8 +137,8 @@ locals {
     dev      = "ENABLED"
     staging  = "ENABLED"
     training = "ENABLED"
-    grantee1 = "ENABLED"
-    grantee2 = "ENABLED"
+    grantee1 = "DISABLED"
+    grantee2 = "DISABLED"
     prod     = "ENABLED"
   }
   scheduled_jobs = {
