@@ -162,6 +162,7 @@
 ## REFERENCES
 
 * [Glossary](references/terminology.md)
+* [GitHub user story workflow](github-user-story-workflow.md)
 
 ***
 
