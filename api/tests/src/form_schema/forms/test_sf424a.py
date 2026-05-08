@@ -18,6 +18,7 @@ def activity_line_item1():
             "non_federal_estimated_unobligated_amount": "2.00",
             "federal_new_or_revised_amount": "3.00",
             "non_federal_new_or_revised_amount": "4.00",
+            "total_amount": "10.00",
         },
         "budget_categories": {
             "personnel_amount": "1.00",
@@ -55,6 +56,7 @@ def activity_line_item2():
             "non_federal_estimated_unobligated_amount": "-12.00",
             "federal_new_or_revised_amount": "35.00",
             "non_federal_new_or_revised_amount": "43.00",
+            "total_amount": "76.00",
         },
         "budget_categories": {
             "personnel_amount": "100.00",
@@ -91,6 +93,7 @@ def activity_line_item3():
             "non_federal_estimated_unobligated_amount": "0.02",
             "federal_new_or_revised_amount": "0.03",
             "non_federal_new_or_revised_amount": "0.04",
+            "total_amount": "0.10",
         },
         "budget_categories": {
             "personnel_amount": "0.01",
@@ -398,7 +401,6 @@ def test_sf424a_v_1_0_auto_summation_empty_state(
 
     validate_application_form(application_form, ApplicationAction.MODIFY)
     app_json = application_form.application_response
-
     # Nearly every monetary field outside of the activity line items
     # gets pre-populated as 0.00
     assert app_json == {
@@ -496,25 +498,21 @@ def test_sf424a_v_1_0_auto_summation_full_data(
 
     # Add the expected calculated values to the activity line items
     expected_activity_line_item1 = activity_line_item1
-    expected_activity_line_item1["budget_summary"]["total_amount"] = "10.00"
     expected_activity_line_item1["budget_categories"]["total_direct_charge_amount"] = "36.00"
     expected_activity_line_item1["budget_categories"]["total_amount"] = "45.00"
     expected_activity_line_item1["non_federal_resources"]["total_amount"] = "6.00"
 
     expected_activity_line_item2 = activity_line_item2
-    expected_activity_line_item2["budget_summary"]["total_amount"] = "76.00"
     expected_activity_line_item2["budget_categories"]["total_direct_charge_amount"] = "11323.00"
     expected_activity_line_item2["budget_categories"]["total_amount"] = "11352.00"
     expected_activity_line_item2["non_federal_resources"]["total_amount"] = "1156.00"
 
     expected_activity_line_item3 = activity_line_item3
-    expected_activity_line_item3["budget_summary"]["total_amount"] = "0.10"
     expected_activity_line_item3["budget_categories"]["total_direct_charge_amount"] = "0.36"
     expected_activity_line_item3["budget_categories"]["total_amount"] = "0.45"
     expected_activity_line_item3["non_federal_resources"]["total_amount"] = "0.06"
 
     expected_activity_line_item4 = activity_line_item4
-    expected_activity_line_item4["budget_summary"]["total_amount"] = "27.03"
     expected_activity_line_item4["budget_categories"]["total_direct_charge_amount"] = "33.12"
     expected_activity_line_item4["budget_categories"]["total_amount"] = "33.12"
     expected_activity_line_item4["non_federal_resources"]["total_amount"] = "9.06"
@@ -584,3 +582,75 @@ def test_sf424a_v_1_0_auto_summation_full_data(
         },
         "confirmation": True,
     }
+
+
+def test_sf424a_v_1_0_total_budget_summary_sums_cf_not_row_g(enable_factory_create, sf424a_v1_0):
+    data = {
+        "activity_line_items": [
+            {
+                "budget_summary": {
+                    "federal_estimated_unobligated_amount": "1.00",
+                    "non_federal_estimated_unobligated_amount": "2.00",
+                    "federal_new_or_revised_amount": "3.00",
+                    "non_federal_new_or_revised_amount": "4.00",
+                    "total_amount": "999.00",  # should NOT matter
+                }
+            },
+            {
+                "budget_summary": {
+                    "federal_estimated_unobligated_amount": "10.00",
+                    "non_federal_estimated_unobligated_amount": "20.00",
+                    "federal_new_or_revised_amount": "30.00",
+                    "non_federal_new_or_revised_amount": "40.00",
+                    "total_amount": "888.00",  # should NOT matter
+                }
+            },
+        ],
+        "confirmation": True,
+    }
+
+    app = setup_application_for_form_validation(
+        data,
+        json_schema=sf424a_v1_0.form_json_schema,
+        rule_schema=sf424a_v1_0.form_rule_schema,
+    )
+
+    validate_application_form(app, ApplicationAction.MODIFY)
+    app_json = app.application_response
+
+    # G ignored everywhere
+    assert app_json["activity_line_items"][0]["budget_summary"]["total_amount"] == "999.00"
+    assert app_json["activity_line_items"][1]["budget_summary"]["total_amount"] == "888.00"
+
+    # ONLY C–F used
+    assert app_json["total_budget_summary"]["total_amount"] == "110.00"
+
+
+def test_sf424a_v_1_0_row_g_is_never_used_in_total_budget_summary(
+    enable_factory_create, sf424a_v1_0
+):
+    data = {
+        "activity_line_items": [
+            {
+                "budget_summary": {
+                    "federal_estimated_unobligated_amount": "0.00",
+                    "non_federal_estimated_unobligated_amount": "0.00",
+                    "federal_new_or_revised_amount": "0.00",
+                    "non_federal_new_or_revised_amount": "0.00",
+                    "total_amount": "999999.00",  # extreme value
+                }
+            }
+        ],
+        "confirmation": True,
+    }
+
+    app = setup_application_for_form_validation(
+        data,
+        json_schema=sf424a_v1_0.form_json_schema,
+        rule_schema=sf424a_v1_0.form_rule_schema,
+    )
+
+    validate_application_form(app, ApplicationAction.MODIFY)
+    app_json = app.application_response
+
+    assert app_json["total_budget_summary"]["total_amount"] == "0.00"

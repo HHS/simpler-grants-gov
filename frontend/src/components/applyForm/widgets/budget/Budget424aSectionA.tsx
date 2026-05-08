@@ -390,7 +390,6 @@ function Budget424aSectionA<
                       Sum of row {row + 1}
                     </div>
                     <CurrencyInput
-                      disabled
                       id={`activity_line_items[${row}]--budget_summary--total_amount`}
                       rawErrors={getErrorsA({
                         errors,
