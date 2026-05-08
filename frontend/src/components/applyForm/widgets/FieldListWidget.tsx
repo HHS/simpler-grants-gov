@@ -310,7 +310,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   const onFieldListEntryDelete =
     widgetProps.formContext?.widgetSupport?.onFieldListEntryDelete;
 
-  const onFormEdited = widgetProps.formContext?.widgetSupport?.onFormEdited;
+  const markFormDirty = widgetProps.formContext?.widgetSupport?.markFormDirty;
 
   /* Applies updates to FieldList rows.
    *
@@ -327,11 +327,11 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
       setRows((previousRows) => {
         const nextRows = getNextRows(previousRows);
         onChange?.(nextRows);
-        onFormEdited?.();
+        markFormDirty?.();
         return nextRows;
       });
     },
-    [onChange, onFormEdited],
+    [onChange, markFormDirty],
   );
 
   const handleAddRow = useCallback((): void => {

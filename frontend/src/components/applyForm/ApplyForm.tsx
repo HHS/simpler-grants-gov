@@ -48,7 +48,7 @@ interface WidgetSupport {
     fieldListPath: string,
     deletedEntryIndex: number,
   ) => void;
-  onFormEdited?: () => void;
+  markFormDirty?: () => void;
 }
 
 interface ApplyFormFormContext {
@@ -176,7 +176,7 @@ const ApplyForm = ({
         validationWarnings: displayValidationWarnings ?? [],
         deletedEntryIndexesByFieldListPath,
         onFieldListEntryDelete: handleFieldListEntryDelete,
-        onFormEdited: handleFormEdited,
+        markFormDirty: handleFormEdited,
       },
     }),
     [

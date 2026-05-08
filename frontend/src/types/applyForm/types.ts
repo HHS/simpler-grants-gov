@@ -127,7 +127,7 @@ type PropertyPath = `/properties/${string}`;
  * formContext
  *   Provides access to the root schema and form data when needed.
  *
- * onFormEdited callback used by widgets (e.g. FieldList) to notify the parent form
+ * markFormDirty callback used by widgets (e.g. FieldList) to notify the parent form
  * that a user interaction has modified form state.
  *
  * onChange
@@ -167,7 +167,7 @@ export type FieldListWidgetProps = {
         fieldListPath: string,
         deletedEntryIndex: number,
       ) => void;
-      onFormEdited?: () => void;
+      markFormDirty?: () => void;
     };
   };
 };
@@ -284,7 +284,7 @@ export interface UswdsWidgetProps<
         fieldListPath: string,
         deletedEntryIndex: number,
       ) => void;
-      onFormEdited?: () => void;
+      markFormDirty?: () => void;
     };
   };
 }

@@ -119,7 +119,7 @@ describe("FieldListWidget", () => {
 
   it("marks the form edited when a FieldList child field changes", async () => {
     const user = userEvent.setup();
-    const onFormEditedMock = jest.fn();
+    const markFormDirtyMock = jest.fn();
 
     render(
       <FieldListWidget
@@ -134,7 +134,7 @@ describe("FieldListWidget", () => {
         name="contacts"
         formContext={{
           widgetSupport: {
-            onFormEdited: onFormEditedMock,
+            markFormDirty: markFormDirtyMock,
           },
         }}
       />,
@@ -142,12 +142,12 @@ describe("FieldListWidget", () => {
 
     await user.type(screen.getByLabelText("contacts[0]--first_name"), "Jane");
 
-    expect(onFormEditedMock).toHaveBeenCalled();
+    expect(markFormDirtyMock).toHaveBeenCalled();
   });
 
   it("marks the form edited when a FieldList row is added", async () => {
     const user = userEvent.setup();
-    const onFormEditedMock = jest.fn();
+    const markFormDirtyMock = jest.fn();
 
     render(
       <FieldListWidget
@@ -162,7 +162,7 @@ describe("FieldListWidget", () => {
         name="contacts"
         formContext={{
           widgetSupport: {
-            onFormEdited: onFormEditedMock,
+            markFormDirty: markFormDirtyMock,
           },
         }}
       />,
@@ -170,12 +170,12 @@ describe("FieldListWidget", () => {
 
     await user.click(screen.getByRole("button", { name: /\+\s*add/i }));
 
-    expect(onFormEditedMock).toHaveBeenCalledTimes(1);
+    expect(markFormDirtyMock).toHaveBeenCalledTimes(1);
   });
 
   it("marks the form edited when a FieldList row is deleted", async () => {
     const user = userEvent.setup();
-    const onFormEditedMock = jest.fn();
+    const markFormDirtyMock = jest.fn();
 
     render(
       <FieldListWidget
@@ -190,7 +190,7 @@ describe("FieldListWidget", () => {
         name="contacts"
         formContext={{
           widgetSupport: {
-            onFormEdited: onFormEditedMock,
+            markFormDirty: markFormDirtyMock,
           },
         }}
       />,
@@ -199,6 +199,6 @@ describe("FieldListWidget", () => {
     const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
     await user.click(deleteButtons[0]);
 
-    expect(onFormEditedMock).toHaveBeenCalledTimes(1);
+    expect(markFormDirtyMock).toHaveBeenCalledTimes(1);
   });
 });
