@@ -111,11 +111,11 @@ Scenario: Retain all multi-value filters and inputs after refresh
  
   And the browser URL contains "query=<search-term>"
   And the browser URL contains "sortby=<sort value>"
-  And the URL should contain query param "status" with values "<status values>"
-  And the URL should contain query param "fundingInstrument" with values "<funding values>"
-  And the URL should contain query param "eligibility" with values "<eligibility values>"
-  And the URL should contain query param "agency" with the selected agency value
-  And the URL should contain query param "category" with values "<category values>"
+  And the browser URL contains query param "status" with values "<status values>"
+  And the browser URL contains query param "fundingInstrument" with values "<funding values>"
+  And the browser URL contains query param "eligibility" with values "<eligibility values>"
+  And the browser URL contains query param "agency" with the selected agency value
+  And the browser URL contains query param "category" with values "<category values>"
  
 Examples:
   | search-term  | sort label                 | sort value        | status | status values            |
