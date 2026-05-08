@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from unittest import mock
 
 from lxml import etree
@@ -6,10 +7,14 @@ from lxml import etree
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.db.models.competition_models import ApplicationSubmissionRetrieved
 from src.legacy_soap_api import legacy_soap_api_config as soap_api_config
-from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth, SOAPClientCertificate
+from src.legacy_soap_api.legacy_soap_api_auth import (
+    MTLS_CERT_HEADER_KEY,
+    SOAPAuth,
+    SOAPClientCertificate,
+)
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_utils import get_invalid_path_response
-from tests.lib.data_factories import setup_cert_user
+from tests.lib.data_factories import get_mtls_urlencoded_str_and_serial_number, setup_cert_user
 from tests.src.db.models.factories import (
     AgencyFactory,
     ApplicationFactory,
@@ -17,7 +22,9 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionRetrievedFactory,
     ApplicationSubmissionTrackingNumberFactory,
     CompetitionFactory,
+    LegacyAgencyCertificateFactory,
     OpportunityFactory,
+    StagingTcertificatesFactory,
 )
 
 NSMAP = {
@@ -38,7 +45,7 @@ MOCK_CERT_STR = "certstr"
 TEST_UUID = "00000000-aaaa-0000-bbbb-000000000000"
 
 
-def test_successful_request(client, fixture_from_file, caplog) -> None:
+def test_successful_request(client, enable_factory_create, fixture_from_file, caplog) -> None:
     full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
     fixture_path = (
         "/legacy_soap_api/applicants/get_opportunity_list_by_funding_opportunity_number_request.xml"
@@ -72,7 +79,7 @@ def test_successful_confirm_application_delivery_request(
         opportunity=opportunity,
     )
     privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
-    user, role, soap_client_certificate = setup_cert_user(agency, privileges)
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
     application = ApplicationFactory.create(
         competition=competition, application_status=ApplicationStatus.ACCEPTED
     )
@@ -96,11 +103,17 @@ def test_successful_confirm_application_delivery_request(
         fingerprint=MOCK_FINGERPRINT,
         serial_number="1235",
         legacy_certificate=soap_client_certificate.legacy_certificate,
+        cert_id=soap_client_certificate.legacy_certificate.cert_id,
     )
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         response = client.post(
-            full_path, data=mock_data, headers={"Use-Simpler-Override": "1", "Use-Soap-Cert": "1"}
+            full_path,
+            data=mock_data,
+            headers={
+                "Use-Simpler-Override": "1",
+                MTLS_CERT_HEADER_KEY: mtls_cert,
+            },
         )
     assert response.status_code == 200
     retrieved = (
@@ -122,7 +135,7 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
         opportunity=opportunity,
     )
     privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
-    user, role, soap_client_certificate = setup_cert_user(agency, privileges)
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
     application = ApplicationFactory.create(
         competition=competition, application_status=ApplicationStatus.ACCEPTED
     )
@@ -153,7 +166,12 @@ def test_successful_confirm_application_delivery_request_when_in_received_by_age
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         response = client.post(
-            full_path, data=mock_data, headers={"Use-Simpler-Override": "1", "Use-Soap-Cert": "1"}
+            full_path,
+            data=mock_data,
+            headers={
+                "Use-Simpler-Override": "1",
+                MTLS_CERT_HEADER_KEY: mtls_cert,
+            },
         )
     assert response.status_code == 500
     expected = (
@@ -196,7 +214,7 @@ def test_successful_confirm_application_delivery_request_when_in_tracking_number
         opportunity=opportunity,
     )
     privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
-    user, role, soap_client_certificate = setup_cert_user(agency, privileges)
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
     application = ApplicationFactory.create(
         competition=competition, application_status=ApplicationStatus.ACCEPTED
     )
@@ -227,7 +245,12 @@ def test_successful_confirm_application_delivery_request_when_in_tracking_number
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         response = client.post(
-            full_path, data=mock_data, headers={"Use-Simpler-Override": "1", "Use-Soap-Cert": "1"}
+            full_path,
+            data=mock_data,
+            headers={
+                "Use-Simpler-Override": "1",
+                MTLS_CERT_HEADER_KEY: mtls_cert,
+            },
         )
     assert response.status_code == 500
     expected = (
@@ -266,7 +289,7 @@ def test_confirm_application_delivery_when_application_has_no_status(
         opportunity=opportunity,
     )
     privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
-    user, role, soap_client_certificate = setup_cert_user(agency, privileges)
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
     application = ApplicationFactory.create(competition=competition, application_status=None)
     submission = ApplicationSubmissionFactory.create(application=application)
     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
@@ -300,7 +323,10 @@ def test_confirm_application_delivery_when_application_has_no_status(
             response = client.post(
                 full_path,
                 data=mock_data,
-                headers={"Use-Simpler-Override": "1", "Use-Soap-Cert": "1"},
+                headers={
+                    "Use-Simpler-Override": "1",
+                    MTLS_CERT_HEADER_KEY: mtls_cert,
+                },
             )
     assert response.status_code == 500
     expected = (
@@ -332,7 +358,7 @@ def test_if_soap_fault_exception_raised_return_correct_response_if_proxy_respons
         opportunity=opportunity,
     )
     privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
-    user, role, soap_client_certificate = setup_cert_user(agency, privileges)
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
     application = ApplicationFactory.create(
         competition=competition, application_status=ApplicationStatus.IN_PROGRESS
     )
@@ -360,7 +386,12 @@ def test_if_soap_fault_exception_raised_return_correct_response_if_proxy_respons
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         response = client.post(
-            full_path, data=mock_data, headers={"Use-Simpler-Override": "1", "Use-Soap-Cert": "1"}
+            full_path,
+            data=mock_data,
+            headers={
+                "Use-Simpler-Override": "1",
+                MTLS_CERT_HEADER_KEY: mtls_cert,
+            },
         )
     assert response.status_code == 500
     expected = (
@@ -390,7 +421,7 @@ def test_if_soap_fault_exception_raised_return_proxy_response_if_proxy_response_
         opportunity=opportunity,
     )
     privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
-    user, role, soap_client_certificate = setup_cert_user(agency, privileges)
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
     application = ApplicationFactory.create(
         competition=competition, application_status=ApplicationStatus.IN_PROGRESS
     )
@@ -428,7 +459,10 @@ def test_if_soap_fault_exception_raised_return_proxy_response_if_proxy_response_
             response = client.post(
                 full_path,
                 data=mock_data,
-                headers={"Use-Soap-Cert": "1", "Use-Simpler-Override": "1"},
+                headers={
+                    "Use-Simpler-Override": "1",
+                    MTLS_CERT_HEADER_KEY: mtls_cert,
+                },
             )
     assert response.status_code == 200
     expected = "test response"
@@ -457,7 +491,7 @@ def test_invalid_xml_server_error_500(client) -> None:
 @mock.patch("uuid.uuid4")
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
 def test_getapplication_operation_returns_not_found_response_if_simpler_id_is_used(
-    mock_get_soap_response, mock_uuid, client, fixture_from_file
+    mock_get_soap_response, mock_uuid, client, fixture_from_file, enable_factory_create
 ) -> None:
     test_uuid = "00000000-aaaa-0000-bbbb-000000000000"
     mock_uuid.return_value = test_uuid
@@ -467,8 +501,13 @@ def test_getapplication_operation_returns_not_found_response_if_simpler_id_is_us
     envelope = etree.fromstring(mock_data)
     tracking_number = envelope.find(GET_APPLICATION_PATH)
     tracking_number.text = SIMPLER_TRACKING_NUMBER
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, privileges)
     response = client.post(
-        full_path, data=etree.tostring(envelope), headers={"Connection": "close"}
+        full_path,
+        data=etree.tostring(envelope),
+        headers={"Connection": "close", MTLS_CERT_HEADER_KEY: mtls_cert},
     )
     expected = (
         f"--uuid:{test_uuid}\r\n"
@@ -495,7 +534,7 @@ def test_getapplication_operation_returns_not_found_response_if_simpler_id_is_us
 
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
 def test_getapplicationzip_operation_calls_soap_proxy_if_tracking_number_is_a_legacy_id(
-    mock_get_soap_response, client, fixture_from_file
+    mock_get_soap_response, client, fixture_from_file, enable_factory_create
 ) -> None:
     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
     fixture_path = "/legacy_soap_api/grantors/get_application_zip_request.xml"
@@ -503,13 +542,16 @@ def test_getapplicationzip_operation_calls_soap_proxy_if_tracking_number_is_a_le
     envelope = etree.fromstring(mock_data)
     tracking_number = envelope.find(GET_APPLICATION_ZIP_PATH)
     tracking_number.text = LEGACY_TRACKING_NUMBER
-    client.post(full_path, data=etree.tostring(envelope))
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    client.post(full_path, data=etree.tostring(envelope), headers={MTLS_CERT_HEADER_KEY: mtls_cert})
     mock_get_soap_response.assert_called_once()
 
 
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
 def test_getapplication_operation_calls_soap_proxy_if_tracking_number_is_a_legacy_id(
-    mock_get_soap_response, client, fixture_from_file
+    mock_get_soap_response, client, fixture_from_file, enable_factory_create
 ) -> None:
     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
     fixture_path = "/legacy_soap_api/grantors/get_application_request.xml"
@@ -517,13 +559,16 @@ def test_getapplication_operation_calls_soap_proxy_if_tracking_number_is_a_legac
     envelope = etree.fromstring(mock_data)
     tracking_number = envelope.find(GET_APPLICATION_PATH)
     tracking_number.text = LEGACY_TRACKING_NUMBER
-    client.post(full_path, data=etree.tostring(envelope))
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    client.post(full_path, data=etree.tostring(envelope), headers={MTLS_CERT_HEADER_KEY: mtls_cert})
     mock_get_soap_response.assert_called_once()
 
 
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
 def test_getapplication_operation_calls_proxy_if_xml_throws_parsing_error(
-    mock_get_soap_response, client, fixture_from_file
+    mock_get_soap_response, client, fixture_from_file, enable_factory_create
 ) -> None:
     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
     data = """
@@ -533,14 +578,17 @@ def test_getapplication_operation_calls_proxy_if_xml_throws_parsing_error(
               <agen:GetApplicationRequest>
                    <gran:GrantsGovTrackingNumber>GRAN
     """
-    client.post(full_path, data=data)
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    client.post(full_path, data=data, headers={MTLS_CERT_HEADER_KEY: mtls_cert})
     mock_get_soap_response.assert_called_once()
 
 
 @mock.patch("uuid.uuid4")
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
 def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is_used(
-    mock_get_soap_response, mock_uuid, client, fixture_from_file
+    mock_get_soap_response, mock_uuid, client, fixture_from_file, enable_factory_create
 ) -> None:
     test_uuid = "00000000-aaaa-0000-bbbb-000000000000"
     mock_uuid.return_value = test_uuid
@@ -550,7 +598,12 @@ def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is
     envelope = etree.fromstring(mock_data)
     tracking_number = envelope.find(GET_APPLICATION_ZIP_PATH)
     tracking_number.text = SIMPLER_TRACKING_NUMBER
-    response = client.post(full_path, data=etree.tostring(envelope))
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    response = client.post(
+        full_path, data=etree.tostring(envelope), headers={MTLS_CERT_HEADER_KEY: mtls_cert}
+    )
     expected = (
         f"--uuid:{test_uuid}\r\n"
         'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\n'
@@ -576,7 +629,7 @@ def test_getapplicationzip_operation_returns_not_found_response_if_simpler_id_is
 @mock.patch("uuid.uuid4")
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
 def test_confirm_application_delivery_returns_not_found_response_if_simpler_id_is_used(
-    mock_get_soap_response, mock_uuid, client, fixture_from_file, monkeypatch
+    mock_get_soap_response, mock_uuid, client, fixture_from_file, monkeypatch, enable_factory_create
 ) -> None:
     """
     Force the response to be the legacy response and show that we do not actually call the legacy request method
@@ -599,31 +652,41 @@ def test_confirm_application_delivery_returns_not_found_response_if_simpler_id_i
     envelope = etree.fromstring(mock_data)
     tracking_number = envelope.find(CONFIRM_APPLICATION_DELIVERY_PATH)
     tracking_number.text = SIMPLER_TRACKING_NUMBER
-    response = client.post(full_path, data=etree.tostring(envelope))
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    response = client.post(
+        full_path, data=etree.tostring(envelope), headers={MTLS_CERT_HEADER_KEY: mtls_cert}
+    )
     expected = (
-        f"--uuid:{test_uuid}\r\n"
-        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: binary\r\nContent-ID: <root.message@cxf.apache.org>\r\n'
-        '\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
-        "<soap:Body>"
-        "<soap:Fault><faultcode>soap:Server</faultcode><faultstring>Failed to confirm application delivery.(Authorization Failure)</faultstring></soap:Fault>"
-        "</soap:Body></soap:Envelope>\r\n"
-        f"--uuid:{test_uuid}--"
-    ).encode("utf-8")
+        b"--uuid:00000000-aaaa-0000-bbbb-000000000000\r\n"
+        b'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: binary\r\n'
+        b"Content-ID: <root.message@cxf.apache.org>\r\n\r\n"
+        b'<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n        '
+        b"<soap:Body>\n            "
+        b"<soap:Fault>\n                "
+        b"<faultcode>soap:Server</faultcode>\n                "
+        b"<faultstring>Failed to confirm application delivery.(Authorization Failure)"
+        b"</faultstring>\n            "
+        b"</soap:Fault>\n        "
+        b"</soap:Body>\n    "
+        b"</soap:Envelope>\r\n"
+        b"--uuid:00000000-aaaa-0000-bbbb-000000000000--\r\n"
+    )
     mock_get_soap_response.assert_not_called()
     assert response.status_code == 500
-    assert response.headers["Content-Length"] == "496"
+    assert response.headers["Content-Length"] == "581"
     assert expected == response.data
     assert (
         response.headers["Content-Type"]
         == f'multipart/related; type="application/xop+xml"; boundary="uuid:{test_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
     )
-    assert response.headers["Set-Cookie"] == "None; Path=/grantsws-agency; Secure; HttpOnly"
 
 
 @mock.patch("uuid.uuid4")
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
 def test_update_application_info_returns_not_found_response_if_simpler_id_is_used(
-    mock_get_soap_response, mock_uuid, client, fixture_from_file, monkeypatch
+    mock_get_soap_response, mock_uuid, client, fixture_from_file, monkeypatch, enable_factory_create
 ) -> None:
     """
     Force the response to be the legacy response and show that we do not actually call the legacy request method
@@ -652,7 +715,12 @@ def test_update_application_info_returns_not_found_response_if_simpler_id_is_use
     envelope = etree.fromstring(mock_data)
     tracking_number = envelope.find(UPDATE_APPLICATION_INFO)
     tracking_number.text = SIMPLER_TRACKING_NUMBER
-    response = client.post(full_path, data=etree.tostring(envelope))
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    response = client.post(
+        full_path, data=etree.tostring(envelope), headers={MTLS_CERT_HEADER_KEY: mtls_cert}
+    )
     expected = (
         f"--uuid:{test_uuid}\r\n"
         'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: binary\r\nContent-ID: <root.message@cxf.apache.org>\r\n'
@@ -699,7 +767,7 @@ def test_update_application_info_returns_not_found_response_if_simpler_id_is_use
 
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
 def test_simpler_getapplicationzip_operation_returns_not_found_response_includes_cookie(
-    mock_get_soap_response, client, fixture_from_file
+    mock_get_soap_response, client, fixture_from_file, enable_factory_create
 ) -> None:
     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
     fixture_path = "/legacy_soap_api/grantors/get_application_zip_request.xml"
@@ -708,7 +776,12 @@ def test_simpler_getapplicationzip_operation_returns_not_found_response_includes
     tracking_number = envelope.find(GET_APPLICATION_ZIP_PATH)
     tracking_number.text = SIMPLER_TRACKING_NUMBER
     client.set_cookie("JSESSIONID", "xyz")
-    response = client.post(full_path, data=etree.tostring(envelope))
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    response = client.post(
+        full_path, data=etree.tostring(envelope), headers={MTLS_CERT_HEADER_KEY: mtls_cert}
+    )
     mock_get_soap_response.assert_not_called()
     assert response.status_code == 500
     assert (
@@ -725,7 +798,7 @@ def test_simpler_getapplicationzip_operation_raising_httperror_due_to_privileges
         opportunity=opportunity,
     )
     WRONG_PRIVILEGES = {Privilege.READ_TEST_USER_TOKEN}
-    user, role, soap_client_certificate = setup_cert_user(agency, WRONG_PRIVILEGES)
+    user, role, soap_client_certificate, mtls_cert = setup_cert_user(agency, WRONG_PRIVILEGES)
     application = ApplicationFactory.create(competition=competition)
     submission = ApplicationSubmissionFactory.create(application=application)
     full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
@@ -743,7 +816,9 @@ def test_simpler_getapplicationzip_operation_raising_httperror_due_to_privileges
     with mock.patch("src.legacy_soap_api.simpler_soap_api.get_soap_auth") as mock_get_auth:
         mock_get_auth.return_value = SOAPAuth(certificate=mock_client_cert)
         response = client.post(
-            full_path, data=etree.tostring(envelope), headers={"Use-Simpler-Override": "1"}
+            full_path,
+            data=etree.tostring(envelope),
+            headers={"Use-Simpler-Override": "1", MTLS_CERT_HEADER_KEY: mtls_cert},
         )
     assert response.status_code == 500
     info_messages = [
@@ -755,3 +830,232 @@ def test_simpler_getapplicationzip_operation_raising_httperror_due_to_privileges
     assert len(info_messages) == 1
     error_records = [record for record in caplog.records if record.levelno >= logging.ERROR]
     assert len(error_records) == 0
+
+
+def test_request_fails_if_no_mtls_cert_is_attached(
+    db_session, client, enable_factory_create
+) -> None:
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        "<gran:GrantsGovTrackingNumber>GRANT</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    response = client.post(
+        full_path,
+        data=mock_data,
+        headers={
+            "Use-Simpler-Override": "1",
+        },
+    )
+    assert response.status_code == 500
+    expected = (
+        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n    '
+        "<soap:Body>\n        "
+        "<soap:Fault>\n            "
+        "<faultcode>soap:Server</faultcode>\n            "
+        "<faultstring>Missing certificate. (Authorization Failure)</faultstring>\n        "
+        "</soap:Fault>\n    "
+        "</soap:Body>\n"
+        "</soap:Envelope>\n"
+    )
+    assert response.data.decode() == expected
+
+
+def test_request_fails_if_no_tcertificate(db_session, client, enable_factory_create) -> None:
+    mtls_cert, serial_number = get_mtls_urlencoded_str_and_serial_number()
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        "<gran:GrantsGovTrackingNumber>GRANT</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    response = client.post(
+        full_path,
+        data=mock_data,
+        headers={"Use-Simpler-Override": "1", MTLS_CERT_HEADER_KEY: mtls_cert},
+    )
+    assert response.status_code == 500
+    expected = (
+        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n    '
+        "<soap:Body>\n        "
+        "<soap:Fault>\n            "
+        "<faultcode>soap:Server</faultcode>\n            "
+        "<faultstring>No tcertificate found. (Authorization Failure)</faultstring>\n        "
+        "</soap:Fault>\n    "
+        "</soap:Body>\n"
+        "</soap:Envelope>\n"
+    )
+    assert response.data.decode() == expected
+
+
+def test_request_fails_if_tcertificate_is_expired(
+    db_session, client, enable_factory_create
+) -> None:
+    mtls_cert, serial_number = get_mtls_urlencoded_str_and_serial_number()
+    StagingTcertificatesFactory.create(
+        serial_num=serial_number, expirationdate=datetime(2000, 1, 1).date()
+    )
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        "<gran:GrantsGovTrackingNumber>GRANT</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    response = client.post(
+        full_path,
+        data=mock_data,
+        headers={"Use-Simpler-Override": "1", MTLS_CERT_HEADER_KEY: mtls_cert},
+    )
+    assert response.status_code == 500
+    expected = (
+        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n    '
+        "<soap:Body>\n        "
+        "<soap:Fault>\n            "
+        "<faultcode>soap:Server</faultcode>\n            "
+        "<faultstring>Certificate is expired. (Authorization Failure)</faultstring>\n        "
+        "</soap:Fault>\n    "
+        "</soap:Body>\n"
+        "</soap:Envelope>\n"
+    )
+    assert response.data.decode() == expected
+
+
+def test_request_only_calls_legacy_when_only_valid_tcertificate_exists(
+    db_session, client, enable_factory_create
+) -> None:
+    mtls_cert, serial_number = get_mtls_urlencoded_str_and_serial_number()
+    StagingTcertificatesFactory.create(serial_num=serial_number)
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        f"<gran:GrantsGovTrackingNumber>{LEGACY_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    with mock.patch(
+        "src.legacy_soap_api.simpler_soap_api.get_legacy_response"
+    ) as mock_get_legacy_response:
+        with mock.patch(
+            "src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response"
+        ) as mock_get_simpler_response:
+            client.post(
+                full_path,
+                data=mock_data,
+                headers={"Use-Simpler-Override": "1", MTLS_CERT_HEADER_KEY: mtls_cert},
+            )
+            mock_get_legacy_response.assert_called_once()
+            mock_get_simpler_response.assert_not_called()
+
+
+def test_request_only_calls_simpler_and_legacy_when_there_are_both_valid_tcertificate_and_valid_legacy_certificate(
+    db_session, client, enable_factory_create
+) -> None:
+    mtls_cert, serial_number = get_mtls_urlencoded_str_and_serial_number()
+    tcertificate = StagingTcertificatesFactory.create(serial_num=serial_number)
+    LegacyAgencyCertificateFactory.create(
+        serial_number=serial_number,
+        cert_id=tcertificate.currentcertid,
+        expiration_date=tcertificate.expirationdate,
+    )
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        f"<gran:GrantsGovTrackingNumber>{LEGACY_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    with mock.patch(
+        "src.legacy_soap_api.simpler_soap_api.get_legacy_response"
+    ) as mock_get_legacy_response:
+        with mock.patch(
+            "src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response"
+        ) as mock_get_simpler_response:
+            client.post(
+                full_path,
+                data=mock_data,
+                headers={"Use-Simpler-Override": "1", MTLS_CERT_HEADER_KEY: mtls_cert},
+            )
+            mock_get_legacy_response.assert_called_once()
+            mock_get_simpler_response.assert_called_once()
+
+
+def test_request_fails_if_legacy_certificate_is_expired(
+    db_session, client, enable_factory_create
+) -> None:
+    mtls_cert, serial_number = get_mtls_urlencoded_str_and_serial_number()
+    tcertificate = StagingTcertificatesFactory.create(serial_num=serial_number)
+    LegacyAgencyCertificateFactory.create(
+        serial_number=serial_number,
+        cert_id=tcertificate.currentcertid,
+        expiration_date=datetime(2000, 1, 1).date(),
+    )
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = (
+        "<soapenv:Envelope "
+        'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" '
+        'xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
+        'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
+        "<soapenv:Header/>"
+        "<soapenv:Body>"
+        "<agen:ConfirmApplicationDeliveryRequest>"
+        "<gran:GrantsGovTrackingNumber>GRANT</gran:GrantsGovTrackingNumber>"
+        "</agen:ConfirmApplicationDeliveryRequest>"
+        "</soapenv:Body>"
+        "</soapenv:Envelope>"
+    ).encode()
+    response = client.post(
+        full_path,
+        data=mock_data,
+        headers={"Use-Simpler-Override": "1", MTLS_CERT_HEADER_KEY: mtls_cert},
+    )
+    assert response.status_code == 500
+    expected = (
+        '\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">\n    '
+        "<soap:Body>\n        "
+        "<soap:Fault>\n            "
+        "<faultcode>soap:Server</faultcode>\n            "
+        "<faultstring>Certificate is expired. (Authorization Failure)</faultstring>\n        "
+        "</soap:Fault>\n    "
+        "</soap:Body>\n"
+        "</soap:Envelope>\n"
+    )
+    assert response.data.decode() == expected
