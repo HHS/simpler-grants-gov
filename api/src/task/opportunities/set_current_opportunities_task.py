@@ -62,7 +62,7 @@ class SetCurrentOpportunitiesTask(Task):
             self._process_opportunities()
 
     def _process_opportunities(self) -> None:
-        # This selectinload significantly imrproves performance as it tells SQLAlchemy
+        # This selectinload significantly improves performance as it tells SQLAlchemy
         # to fetch all summaries+current opportunity summaries rather than lazy loading
         # them as needed.
         opportunities = self.db_session.scalars(

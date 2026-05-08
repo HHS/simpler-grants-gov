@@ -121,7 +121,7 @@ target-version = "py314"
 
 [tool.ruff.lint]
 # See: https://docs.astral.sh/ruff/rules/ for all possible rules
-select = ["B", "C", "E", "F", "W", "B9", "UP", "RUF", "PT", "TID251"]
+select = ["B", "C", "E", "F", "W", "B9", "UP", "RUF", "PT", "TID251", "T20"]
 ignore = [
     # too many leading '#' for block comment, we can format our comments however we want
     "E266",
@@ -198,6 +198,15 @@ allowed-confusables = [
     # but the few places we do this are kept simple and help better organize complex scenarios
     "PT018"
 ]
+
+# While we generally don't want print statements anywhere in our code
+# We make exceptions for some scripts that run only locally if it helps
+# us format information better.
+"tool/console/interactive.py" = ["T201"]
+"tests/lib/seed_local_soap_certificate.py" = ["T201"]
+"src/task/forms/list_forms_task.py" = ["T201"]
+"src/form_schema/dat_to_jsonschema_cli.py" = ["T201"]
+
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 # For these libraries, we do use them, but have our own derived versions we want

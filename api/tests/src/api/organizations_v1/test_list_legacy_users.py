@@ -54,8 +54,6 @@ class TestListLegacyUsers:
             inviter=user,
         )
 
-        db_session.commit()
-
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
             headers={"X-SGG-Token": token},
@@ -107,8 +105,6 @@ class TestListLegacyUsers:
             organization=organization,
         )
 
-        db_session.commit()
-
         # Filter for only available users
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
@@ -153,8 +149,6 @@ class TestListLegacyUsers:
             organization=organization,
             inviter=user,
         )
-
-        db_session.commit()
 
         # Filter for member and pending invitation (exclude available)
         resp = client.post(
@@ -221,8 +215,6 @@ class TestListLegacyUsers:
         create_legacy_user_with_status(uei, "apple@example.com")
         create_legacy_user_with_status(uei, "banana@example.com")
 
-        db_session.commit()
-
         # Call without sort_order - should use default (email ascending)
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
@@ -267,8 +259,6 @@ class TestListLegacyUsers:
             email="ignored@example.com",
         )
 
-        db_session.commit()
-
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
             headers={"X-SGG-Token": token},
@@ -306,8 +296,6 @@ class TestListLegacyUsers:
             last_name="User",
             created_date=datetime(2024, 1, 1, tzinfo=UTC),
         )
-
-        db_session.commit()
 
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
@@ -355,8 +343,6 @@ class TestListLegacyUsers:
             rejected_at=None,
         )
 
-        db_session.commit()
-
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/legacy-users",
             headers={"X-SGG-Token": token},
@@ -384,8 +370,6 @@ class TestListLegacyUsers:
         # Create 5 legacy users
         for i in range(5):
             create_legacy_user_with_status(uei, f"user{i}@example.com")
-
-        db_session.commit()
 
         # Request page 1 with page size 2
         resp = client.post(
@@ -415,8 +399,6 @@ class TestListLegacyUsers:
         # Create 5 legacy users with predictable emails for sorting
         for i in range(5):
             create_legacy_user_with_status(uei, f"user{i}@example.com")
-
-        db_session.commit()
 
         # Request page 2 with page size 2
         resp = client.post(
@@ -457,8 +439,6 @@ class TestListLegacyUsers:
             create_legacy_user_with_status(
                 uei, f"{name.lower()}@example.com", first_name=name, last_name="User"
             )
-
-        db_session.commit()
 
         # Sort by first_name ascending
         resp = client.post(

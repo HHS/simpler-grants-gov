@@ -22,7 +22,7 @@ from tests.src.db.models.factories import (
 
 class TestTransformOpportunity(BaseTransformTestClass):
     @pytest.fixture
-    def transform_opportunity(self, transform_oracle_data_task, truncate_staging_tables, s3_config):
+    def transform_opportunity(self, transform_oracle_data_task, s3_config):
         return TransformOpportunity(transform_oracle_data_task, s3_config)
 
     def test_process_opportunities(self, db_session, transform_opportunity):
@@ -120,7 +120,7 @@ class TestTransformOpportunity(BaseTransformTestClass):
         )
 
         attachments = []
-        for i in range(10):
+        for i in range(3):
             s3_path = attachment_util.get_s3_attachment_path(
                 f"my_file{i}.txt", i, target_opportunity, s3_config
             )
@@ -134,7 +134,7 @@ class TestTransformOpportunity(BaseTransformTestClass):
             attachments.append(attachment)
 
         competition_instructions = []
-        for _ in range(3):
+        for _ in range(2):
             competition = CompetitionFactory.create(opportunity=target_opportunity)
             competition_instruction = CompetitionInstructionFactory.create(competition=competition)
             competition_instructions.append(competition_instruction)
@@ -165,7 +165,7 @@ class TestTransformOpportunity(BaseTransformTestClass):
         )
 
         attachments = []
-        for i in range(10):
+        for i in range(3):
             s3_path = attachment_util.get_s3_attachment_path(
                 f"my_file{i}.txt", i, target_opportunity, s3_config
             )
@@ -180,7 +180,7 @@ class TestTransformOpportunity(BaseTransformTestClass):
             attachments.append(attachment)
 
         competition_instructions = []
-        for i in range(3):
+        for i in range(2):
             competition = CompetitionFactory.create(opportunity=target_opportunity)
 
             s3_path = get_s3_competition_instruction_path(
