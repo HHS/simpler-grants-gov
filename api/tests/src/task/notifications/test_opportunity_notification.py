@@ -1213,7 +1213,8 @@ class TestOpportunityNotification:
                 '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">Climate research in mars</div><br>'
                 "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
                 f"<a href='http://testhost:3000{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
-                "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
+                "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div><br>"
+                "<div>Manage which updates you receive in your <a href='http://testhost:3000/notifications' target='_blank' style='color:blue; text-decoration: underline;'>notification preferences</a>.</div>"
             ),
             updated_opportunity_ids=[TOPAZ.opportunity_id],
         )

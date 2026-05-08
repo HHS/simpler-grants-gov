@@ -74,6 +74,7 @@ CONTACT_INFO = (
     "24 hours a day, 7 days a week<br>"
     "Closed on federal holidays"
     "</div>"
+    "<br>"
 )
 
 
@@ -626,12 +627,22 @@ class OpportunityNotificationTask(BaseNotificationTask):
     ) -> UserOpportunityUpdateContent | None:
 
         closing_msg = (
-            "<div>"
-            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
-            f"<a href='{self.notification_config.frontend_base_url}{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
-            "</div>"
-        ) + CONTACT_INFO
-
+            (
+                "<div>"
+                "<strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
+                f"<a href='{self.notification_config.frontend_base_url}{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
+                "</div>"
+            )
+            + CONTACT_INFO
+            + (
+                "<div>"
+                "Manage which updates you receive in your "
+                f"<a href='{self.notification_config.frontend_base_url}/notifications' "
+                f"target='_blank' style='color:blue; text-decoration: underline;'>"
+                f"notification preferences</a>."
+                "</div>"
+            )
+        )
         all_sections = ""
         updated_opp_ids = []
         opp_count = 1
