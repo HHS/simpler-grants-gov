@@ -1,0 +1,85 @@
+name: Internal - User Story
+description: Describe a user-centered story with acceptance criteria and linked execution tasks
+type: Task
+labels: ["type:user-story"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template as the parent ticket for implementation, testing, demo, and bugs.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: As a ..., I want ..., so that ...
+      placeholder: |
+        As a user,
+        I want ...,
+        so that ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: business_value
+    attributes:
+      label: Business value
+      description: Why this matters now and what outcome it should produce
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Checklist of testable outcomes required to consider this story complete
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: shared_functionality
+    attributes:
+      label: Shared functionality impact
+      description: Call out any shared components or cross-product regression scope
+      placeholder: |
+        Components touched:
+        Regression products/areas:
+    validations:
+      required: true
+
+  - type: textarea
+    id: refinement_notes
+    attributes:
+      label: Refinement notes
+      description: Notes from refinement, assumptions, dependencies, and open questions
+    validations:
+      required: false
+
+  - type: textarea
+    id: child_tickets
+    attributes:
+      label: Child tickets
+      description: Add links to implementation, test, demo, and bug tickets
+      placeholder: |
+        - [ ] Tech Task: #
+        - [ ] Test Task: #
+        - [ ] Demo Task: #
+        - [ ] Bug(s): #
+    validations:
+      required: true
+
+  - type: textarea
+    id: signoff
+    attributes:
+      label: Sign-off for implementation
+      description: Capture approvals before implementation begins
+      placeholder: |
+        Product approver:
+        Test engineering approver:
+        Approved date:
+    validations:
+      required: true

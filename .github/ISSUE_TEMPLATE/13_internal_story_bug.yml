@@ -1,0 +1,67 @@
+name: Internal - Story Bug
+description: Defect linked to a user story during development or post-release
+type: Bug
+labels: ["type:bug"]
+body:
+  - type: input
+    id: parent_user_story
+    attributes:
+      label: Parent user story
+      description: Link the parent user story issue
+      placeholder: "#1234"
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Short defect description
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Clear reproduction path
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_result
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_result
+    attributes:
+      label: Actual result
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+
+  - type: textarea
+    id: fix_and_retest
+    attributes:
+      label: Fix and retest evidence
+      description: Link fix PR and retest results
+    validations:
+      required: false

@@ -1,0 +1,52 @@
+name: Internal - Demo Task
+description: Demo preparation and execution under a user story
+type: Task
+labels: ["type:demo-task"]
+body:
+  - type: input
+    id: parent_user_story
+    attributes:
+      label: Parent user story
+      description: Link the parent user story issue
+      placeholder: "#1234"
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What will be demonstrated and why it matters
+    validations:
+      required: true
+
+  - type: textarea
+    id: demo_script
+    attributes:
+      label: Demo script
+      description: Step-by-step flow for the demo
+      placeholder: |
+        1. Context and objective
+        2. Walkthrough steps
+        3. Expected outcomes
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: readiness_checklist
+    attributes:
+      label: Readiness checklist
+      options:
+        - label: Demo script reviewed with product and engineering
+        - label: Test evidence linked
+        - label: Known limitations and next steps documented
+    validations:
+      required: true
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Demo artifacts
+      description: Links to PRs, recording, slides, or notes
+    validations:
+      required: false

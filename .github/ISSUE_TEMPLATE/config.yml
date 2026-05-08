@@ -1,1 +1,5 @@
 blank_issues_enabled: false
+contact_links:
+  - name: User Story Workflow Guide
+    url: https://github.com/HHS/simpler-grants-gov/blob/main/documentation/wiki/github-user-story-workflow.md
+    about: Review required ticket hierarchy, approvals, and labeling conventions before opening issues.
