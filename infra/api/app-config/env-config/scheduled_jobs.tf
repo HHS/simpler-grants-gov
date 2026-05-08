@@ -113,24 +113,24 @@ locals {
     dev      = "ENABLED"
     staging  = "ENABLED"
     training = "ENABLED"
-    grantee1 = "DISABLED"
-    grantee2 = "DISABLED"
+    grantee1 = "ENABLED"
+    grantee2 = "ENABLED"
     prod     = "ENABLED"
   }
   sam-extracts-state = {
     dev      = "ENABLED"
     staging  = "ENABLED"
     training = "ENABLED"
-    grantee1 = "DISABLED"
-    grantee2 = "DISABLED"
+    grantee1 = "ENABLED"
+    grantee2 = "ENABLED"
     prod     = "ENABLED"
   }
   create-analytics-db-csvs-state = {
     dev      = "ENABLED"
     staging  = "ENABLED"
     training = "ENABLED"
-    grantee1 = "DISABLED"
-    grantee2 = "DISABLED"
+    grantee1 = "ENABLED"
+    grantee2 = "ENABLED"
     prod     = "ENABLED"
   }
   email-notification-opportunity-state = {
