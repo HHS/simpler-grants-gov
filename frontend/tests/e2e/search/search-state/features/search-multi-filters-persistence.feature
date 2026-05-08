@@ -58,8 +58,14 @@ Scenario: Retain all filters and inputs after refresh
   And the browser URL contains query param "category" with values "<category value>"
  
 Examples:
-  | search-term  | sort label                 | sort value        | status | status values            | funding instrument | funding value | eligibility         | eligibility value     | category     | category value |
-  | education    | Award Ceiling (Descending) | awardCeilingDesc  | Closed | forecasted,posted,closed | Grant              | grant         | County Governments  | county_governments    | Agriculture  | agriculture    |
+  | search-term  | sort label                 | sort value        |
+  | education    | Award Ceiling (Descending) | awardCeilingDesc  |
+  
+  | status | status values            | funding instrument | funding value |
+  | Closed | forecasted,posted,closed | Grant              | grant         |
+  
+  | eligibility         | eligibility value     | category     | category value |
+  | County Governments  | county_governments    | Agriculture  | agriculture    |
 
  
 /* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
@@ -110,6 +116,15 @@ Scenario: Retain all multi-value filters and inputs after refresh
   And the URL should contain query param "category" with values "<category values>"
  
 Examples:
-  | search-term  | sort label                 | status | status values            | funding instrument 1 | funding instrument 2 | funding values | eligibility 1        | eligibility 2       | eligibility values                   | category 1  | category 2     | category values             |
-  | education    | Award Ceiling (Descending) | closed | closed,forecasted,posted | grant                | other                | grant,other    | county_governments   | state_governments   | county_governments,state_governments | agriculture | recovery_act   | agriculture,recovery_act    |
+  | search-term  | sort label                 | status | status values            |
+  | education    | Award Ceiling (Descending) | closed | closed,forecasted,posted |
+
+  | funding instrument 1 | funding instrument 2 | funding values |
+  | grant                | other                | grant,other    |
+
+  | eligibility 1        | eligibility 2       | eligibility values                   |
+  | county_governments   | state_governments   | county_governments,state_governments |
+  
+  | category 1  | category 2     | category values             |
+  | agriculture | recovery_act   | agriculture,recovery_act    |
    
