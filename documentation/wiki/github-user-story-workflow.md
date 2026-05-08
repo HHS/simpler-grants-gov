@@ -83,9 +83,9 @@ This workflow standardizes outcome quality while allowing teams to adapt impleme
 
 ### Test Task
 - Create or update feature files
-- Tag tests with story reference
 - Feature review with product owner
 - Automation coverage and regression scope
+- Test automation peer review
 
 ### Demo Task
 - Demo script
