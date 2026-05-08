@@ -212,6 +212,12 @@ FORM_JSON_SCHEMA = {
             # No required fields
             "required": [],
             "properties": {
+                "grant_program": {
+                    # Column A - editable, not pre-populated
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 120,
+                },
                 "applicant_amount": {
                     # Column B
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
@@ -236,6 +242,12 @@ FORM_JSON_SCHEMA = {
             # No required fields
             "required": [],
             "properties": {
+                "grant_program": {
+                    # Column A - editable, not pre-populated
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 120,
+                },
                 "first_year_amount": {
                     # Column B
                     "allOf": [{"$ref": COMMON_SHARED_V1.field_ref("budget_monetary_amount")}],
@@ -394,21 +406,6 @@ FORM_RULE_SCHEMA = {
         # For each of these we use "@THIS." to tell it to do a relative
         # path within the same array that we're summing to.
         "gg_type": "array",
-        "budget_summary": {
-            # Section A - Budget Summary: Total amount (Column G, Rows 1-4)
-            # is the sum of Columns C-G within the same row.
-            "total_amount": {
-                "gg_pre_population": {
-                    "rule": "sum_monetary",
-                    "fields": [
-                        "@THIS.federal_estimated_unobligated_amount",
-                        "@THIS.non_federal_estimated_unobligated_amount",
-                        "@THIS.federal_new_or_revised_amount",
-                        "@THIS.non_federal_new_or_revised_amount",
-                    ],
-                }
-            },
-        },
         "budget_categories": {
             # Section B - Budget Categories: Total direct charge amount (Row 6I, Columns 1-4)
             # is the sum of Rows 6A-6H within the same column.
@@ -495,13 +492,23 @@ FORM_RULE_SCHEMA = {
                 ],
             }
         },
-        # Section A - Total Amount (Column E, Row 5)
-        # is the sum of (Column E, Rows 1-4)
+        # Section A - Total Amount (Column G, Row 5)
+        # IMPORTANT:
+        # Previously this was described as "sum of Column G, Rows 1–4",
+        # but Column G (Rows 1–4) is now user-editable and not a reliable source of truth.
+        #
+        # Therefore, Row 5 must be derived from the underlying structured budget inputs
+        # in budget_summary rather than any precomputed or user-edited totals.
         "total_amount": {
             "gg_pre_population": {
                 "rule": "sum_monetary",
-                "fields": ["activity_line_items[*].budget_summary.total_amount"],
-                # Run this in the 2nd iteration after the total_amount of the activity line items is calculated
+                "fields": [
+                    "total_budget_summary.federal_estimated_unobligated_amount",
+                    "total_budget_summary.non_federal_estimated_unobligated_amount",
+                    "total_budget_summary.federal_new_or_revised_amount",
+                    "total_budget_summary.non_federal_new_or_revised_amount",
+                ],
+                # Run after line-item budget_summary values are finalized
                 "order": 2,
             }
         },
@@ -813,8 +820,16 @@ FORM_XML_TRANSFORM_RULES = {
     },
     # Note: program_type is handled as a root attribute via xml_structure.root_attributes
     # and should NOT have a separate xml_transform rule
-    # Activity title - appears as an attribute on line items
+    # Activity title - appears as an attribute on Section A and B line items
     "activity_title": {
+        "xml_transform": {
+            "target": "activityTitle",
+            "type": "attribute",
+        }
+    },
+    # Grant program - Column A for Section C and E; editable, not pre-populated
+    # Maps to activityTitle attribute on ResourceLineItem and FundsLineItem
+    "grant_program": {
         "xml_transform": {
             "target": "activityTitle",
             "type": "attribute",
@@ -998,7 +1013,8 @@ FORM_XML_TRANSFORM_RULES = {
                     "NonFederalResources": {
                         "item_field": "non_federal_resources",
                         "item_wrapper": "ResourceLineItem",
-                        "item_attributes": ["activity_title"],
+                        # grant_program is Column A; looked up from within non_federal_resources
+                        "item_attributes": ["grant_program"],
                         "total_field": "total_non_federal_resources",
                         "total_wrapper": "ResourceTotals",
                         # Override global field mappings for this section
@@ -1065,7 +1081,8 @@ FORM_XML_TRANSFORM_RULES = {
                     "FederalFundsNeeded": {
                         "item_field": "federal_fund_estimates",
                         "item_wrapper": "FundsLineItem",
-                        "item_attributes": ["activity_title"],
+                        # grant_program is Column A; looked up from within federal_fund_estimates
+                        "item_attributes": ["grant_program"],
                         "total_field": "total_federal_fund_estimates",
                         "total_wrapper": "FundsTotals",
                     },

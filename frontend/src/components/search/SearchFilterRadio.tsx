@@ -8,6 +8,7 @@ interface FilterRadioProps {
   name?: string;
   label: ReactNode;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onClick?: (event: React.MouseEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   checked?: boolean;
   value?: string;
@@ -20,6 +21,7 @@ export const SearchFilterRadio = ({
   name,
   label,
   onChange,
+  onClick,
   disabled = false,
   checked = false,
   value,
@@ -39,6 +41,7 @@ export const SearchFilterRadio = ({
       </>
     }
     onChange={onChange}
+    onClick={onClick}
     disabled={disabled}
     checked={checked}
     value={value || ""}
