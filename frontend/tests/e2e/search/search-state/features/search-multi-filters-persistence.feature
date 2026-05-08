@@ -109,6 +109,8 @@ Scenario: Retain all multi-value filters and inputs after refresh
   And the "<category 1>" category checkbox should be checked
   And the "<category 2>" category checkbox should be checked
  
+  And the browser URL contains "query=<search-term>"
+  And the browser URL contains "sortby=<sort value>"
   And the URL should contain query param "status" with values "<status values>"
   And the URL should contain query param "fundingInstrument" with values "<funding values>"
   And the URL should contain query param "eligibility" with values "<eligibility values>"
@@ -116,8 +118,8 @@ Scenario: Retain all multi-value filters and inputs after refresh
   And the URL should contain query param "category" with values "<category values>"
  
 Examples:
-  | search-term  | sort label                 | status | status values            |
-  | education    | Award Ceiling (Descending) | closed | closed,forecasted,posted |
+  | search-term  | sort label                 | sort value        | status | status values            |
+  | education    | Award Ceiling (Descending) | awardCeilingDesc  | closed | closed,forecasted,posted |
 
   | funding instrument 1 | funding instrument 2 | funding values |
   | grant                | other                | grant,other    |
