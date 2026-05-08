@@ -196,7 +196,7 @@ async function AwardRecommendationPageContent({
               <ApplyFormNav title={t("pageTitle")} fields={navigationItems} />
             </Grid>
             <Grid col={12} desktop={{ col: 9 }}>
-              <div id="opportunity" style={{ scrollMarginTop: "6rem" }}>
+              <div id="opportunity" className="seg-scroll-margin-top--header">
                 <OpportunitySection
                   awardRecommendationDetails={awardRecommendationDetails}
                 />
@@ -217,7 +217,10 @@ async function AwardRecommendationPageContent({
                     awardRecommendationDetails.other_key_information
                   }
                 />
-                <div id="recommendations" style={{ scrollMarginTop: "6rem" }}>
+                <div
+                  id="recommendations"
+                  className="seg-scroll-margin-top--header"
+                >
                   <RecommendationSummarySection
                     summary={
                       awardRecommendationDetails.award_recommendation_summary
