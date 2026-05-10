@@ -97,7 +97,8 @@ describe("useCopyToClipboard", () => {
     // Saving the reference for restoration; we never invoke it through this binding.
     // eslint-disable-next-line @typescript-eslint/unbound-method
     const originalExecCommand = document.execCommand;
-    document.execCommand = execCommand as unknown as typeof document.execCommand;
+    document.execCommand =
+      execCommand as unknown as typeof document.execCommand;
 
     try {
       const { result } = renderHook(() => useCopyToClipboard());
