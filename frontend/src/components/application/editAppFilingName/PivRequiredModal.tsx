@@ -13,7 +13,6 @@ export const PivRequiredModal = () => {
   const t = useTranslations("PivRequiredModal");
   const pivModalRef = useRef<ModalRef | null>(null);
   if (SessionStorage.getItem("showPivError") === "true") {
-    SessionStorage.removeItem("showPivError");
     return (
       <SimplerModal
         modalId={"piv-required-modal"}
