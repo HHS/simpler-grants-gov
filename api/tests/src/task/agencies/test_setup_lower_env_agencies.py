@@ -1,11 +1,21 @@
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 
 from src.constants.static_role_values import OPPORTUNITY_PUBLISHER
 from src.db.models.user_models import AgencyUser, User, UserType
 from src.task.agencies.setup_lower_env_agencies import SetupLowerEnvAgenciesTask
 from tests.src.db.models.factories import UserFactory
+
+
+@pytest.fixture(autouse=True)
+def cleanup_users(db_session):
+    # for performance reasons - we don't want this test to actually
+    # process every user in the DB. The code is setup to only
+    # process "standard" users, so we'll make all users non-standard
+    # that already exist.
+    db_session.execute(update(User).values(user_type=UserType.LEGACY_CERTIFICATE))
+    db_session.commit()
 
 
 def test_setup_lower_env_agencies(enable_factory_create, db_session):

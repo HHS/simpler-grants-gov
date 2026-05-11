@@ -1,4 +1,4 @@
-FROM ghcr.io/hhs/python-base-image:f44d0bf@sha256:81b0aecb1ba33a4822f87bada8b220192db94ecd9fbad19d18d8976f3f2a1b16 AS base
+FROM ghcr.io/hhs/python-base-image:8ae2ecf@sha256:33d915d6da8c2c4049537fb5a5a209fb6af0a2b7009c524c3474631b57510864 AS base
 
 ARG RUN_UID
 ARG RUN_USER
@@ -112,6 +112,8 @@ COPY src /analytics/src
 ENV PATH="/analytics/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \
     TMPDIR="/tmp" \
+    UV_CACHE_DIR="/tmp/.cache/uv" \
+    UV_NO_SYNC=1 \
     SSL_CERT_FILE="/etc/pki/tls/certs/ca-bundle.crt" \
     SSL_CERT_DIR="/etc/pki/tls/certs" \
     PYTHONOPTIMIZE=0
