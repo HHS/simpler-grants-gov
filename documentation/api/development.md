@@ -26,7 +26,7 @@ match exactly what you do, it's one way of getting the tools, some have multiple
 * Install [postgres](https://www.postgresql.org/download/macosx/) - Can use brew, make sure to specify the version in our [docker-compose](../../api/docker-compose.yml) (eg. `brew install postgresql@17`)
 * Install [libpq](https://formulae.brew.sh/formula/libpq) - Postgres utils, including one used by a script to verify the DB is ready
 * Install [docker](https://docs.docker.com/engine/install/)
-* Install [poetry](https://python-poetry.org/docs/) - For managing packages
+* Install [uv](https://docs.astral.sh/uv/getting-started/installation/) - For managing packages
 
 These aren't required, but relevant:
 * Install [git](https://git-scm.com/install/mac)
@@ -58,10 +58,6 @@ This stands up the following services:
 ### Seed data
 
 Run `make setup-api-data` to create local data in the database, search index  and make it available in the API. This basically creates everything; if you want to be selective about what data you're seeding, see the Makefile for ways you can populate selective data.
-
-### API Authentication
-
-This API uses a very simple [ApiKey authentication approach](https://apiflask.com/authentication/#use-external-authentication-library) which requires the caller to provide a static key. This is specified with the `API_AUTH_TOKEN` environment variable.
 
 ### User Authentication
 
@@ -106,7 +102,7 @@ The API can be run in debug mode that allows for remote attach debugging (curren
 - Requirements:
 
   - VSCode Python extension
-  - Updated Poetry with the `debugpy` dev package in `pyproject.toml`
+  - Updated UV with the `debugpy` dev package in `pyproject.toml`
 
 - See `./vscode/launch.json` which has the debug config. (Named `API Remote Attach`)
 
@@ -137,12 +133,7 @@ Running in the native/local approach may require additional packages to be insta
 2. Ensure that `python -V` and `python3 -V` are picking up that version.
    - If not, run `pyenv init -` and/or restart your shell to ensure it was run automatically
 3. After installing and activating the right version of Python, install
-   [poetry](https://python-poetry.org/docs/#installation) and follow the instructions to add poetry to your path if necessary.
-
-   ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
-   ```
-
+   [uv](https://docs.astral.sh/uv/getting-started/installation/) and follow the instructions to add uv to your path if necessary.
 4. This still requires Docker as the database and services all still run within Docker.
 5. Certain environment variables require different paths when running outside of Docker.
    You can handle this by setting these environment variables yourself via you `.bashrc`

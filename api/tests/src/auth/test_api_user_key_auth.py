@@ -38,7 +38,6 @@ def test_validate_api_key_in_db_success(enable_factory_create, db_session):
     """Test successful API key validation"""
     user = UserFactory.create()
     api_key = UserApiKeyFactory.create(user=user, key_id="test-key-123", is_active=True)
-    db_session.commit()
 
     result = validate_api_key_in_db("test-key-123", db_session)
 
@@ -57,7 +56,6 @@ def test_validate_api_key_in_db_key_inactive(enable_factory_create, db_session):
     """Test API key validation when key is inactive"""
     user = UserFactory.create()
     UserApiKeyFactory.create(user=user, key_id="inactive-key", is_active=False)
-    db_session.commit()
 
     with pytest.raises(ApiKeyValidationError, match="API key is inactive"):
         validate_api_key_in_db("inactive-key", db_session)
@@ -70,7 +68,6 @@ def test_api_user_key_auth_happy_path(mini_app, enable_factory_create, db_sessio
     api_key = UserApiKeyFactory.create(
         user=user, key_id="valid-gateway-key", is_active=True, last_used=None
     )
-    db_session.commit()
 
     resp = mini_app.test_client().get(
         "/dummy_auth_endpoint", headers={"X-API-Key": "valid-gateway-key"}
@@ -95,7 +92,6 @@ def test_api_user_key_auth_inactive_key(mini_app, enable_factory_create, db_sess
     """Test API Gateway key authentication with inactive key"""
     user = UserFactory.create()
     UserApiKeyFactory.create(user=user, key_id="inactive-gateway-key", is_active=False)
-    db_session.commit()
 
     resp = mini_app.test_client().get(
         "/dummy_auth_endpoint", headers={"X-API-Key": "inactive-gateway-key"}
