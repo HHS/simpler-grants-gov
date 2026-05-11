@@ -7,7 +7,6 @@
 *   - e2e/search/search-state/features/search-agency-filters-persistence.feature
 *   - e2e/search/search-state/features/search-multi-filters-persistence.feature
 * @description Validates persistence of search query, sorting, filters, and agency selections after page refresh via URL sync
-* @tags GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION, FULL_REGRESSION
 */
 
 import { expect, Page, test } from "@playwright/test";
