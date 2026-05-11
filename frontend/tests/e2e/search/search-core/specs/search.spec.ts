@@ -1,10 +1,10 @@
 /**
  * @feature Search Core Search Behaviors
  * @featureFile e2e/search/search-core/features/search.feature
- * @scenario Page resets to 1 after filter change
- * @scenario Flipping sort order reverses first and last result positions
- * @scenario Result count is unchanged when all statuses are selected
- * @scenario Out-of-range page query redirects to the last valid page
+ * @Scanario: Page resets to 1 after filter change
+ * @Scenario: Flipping sort order reverses first and last result positions
+ * @Scenario: Result count is unchanged when all statuses are selected
+ * @Scenario: Out-of-range page query redirects to the last valid page
  */
 
 import { expect, test } from "@playwright/test";
@@ -28,9 +28,8 @@ const { GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION, CORE_REGRESSION } =
   VALID_TAGS;
 
 test.describe("Search page tests", () => {
-  // Scenario: Page resets to 1 after filter change
   test(
-    "resets page back to 1 when choosing a filter",
+    "Page resets to 1 after filter change",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page }) => {
       // Given I am on the "Search funding opportunities" page
@@ -74,9 +73,8 @@ test.describe("Search page tests", () => {
     },
   );
 
-  // Scenario: Flipping sort order reverses first and last result positions
   test(
-    "last result becomes first result when flipping sort order",
+    "Flipping sort order reverses first and last result positions",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }, { project }) => {
       const isMobile = !!project.name.match(/[Mm]obile/);
@@ -102,7 +100,7 @@ test.describe("Search page tests", () => {
       // Then the first result should be alphabetically first by opportunity title
       const firstSearchResultTitle = await getFirstSearchResultTitle(page);
 
-      // When I open the sort by dropdown
+      // Assumption: on mobile, sort options live in the filter drawer.
       if (isMobile) {
         await toggleFilterDrawer(page);
       }
@@ -124,9 +122,8 @@ test.describe("Search page tests", () => {
     },
   );
 
-  // Scenario: Result count is unchanged when all statuses are selected
   test(
-    "number of results is the same with none or all opportunity status checked",
+    "Result count is unchanged when all statuses are selected",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }) => {
       // Given I am on the "Search funding opportunities" page
@@ -160,9 +157,8 @@ test.describe("Search page tests", () => {
     },
   );
 
-  // Scenario: Out-of-range page query redirects to the last valid page
   test(
-    "should redirect to the last page of results when page param is too high",
+    "Out-of-range page query redirects to the last valid page",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }) => {
       // When I navigate to "/search?page=1000000"
