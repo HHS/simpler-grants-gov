@@ -29,15 +29,11 @@ jobs:
     steps:
       # set up python
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.14"
 
-      # install poetry
-      - uses: Gr1N/setup-poetry@v9
-
-      - name: Install analytics package using poetry
-        run: make install
+      # Initialize the DB a bit before we run the migrations
+      # to give the DB time to fully initialize
+      - name: Initialize DB
+        run: make db-init
 
       - name: Check formatters
         run: make format-check
@@ -46,7 +42,7 @@ jobs:
         run: make lint
 
       - name: Run database migrations
-        run: docker compose down --volumes && make db-migrate
+        run: make db-migrate
 
       - name: Run tests
         run: make test-audit

@@ -132,7 +132,7 @@ def test_add_extra_log_data_for_current_request(app: Flask, caplog: pytest.LogCa
 def test_log_response_time(app: Flask, caplog: pytest.LogCaptureFixture):
     @app.get("/sleep")
     def sleep():
-        time.sleep(0.1)  # 0.1 s = 100 ms
+        time.sleep(0.01)  # 0.01 s = 10 ms
         return "ok"
 
     app.test_client().get("/sleep")
@@ -140,7 +140,7 @@ def test_log_response_time(app: Flask, caplog: pytest.LogCaptureFixture):
     last_record = caplog.records[-1]
     assert "response.time_ms" in last_record.__dict__
     response_time_ms = last_record.__dict__["response.time_ms"]
-    expected_response_time_ms = 100  # ms
-    allowed_error = 25  # ms
+    expected_response_time_ms = 10  # ms
+    allowed_error = 5  # ms
 
     assert response_time_ms == pytest.approx(expected_response_time_ms, abs=allowed_error)

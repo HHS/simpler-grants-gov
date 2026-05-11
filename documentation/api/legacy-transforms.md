@@ -207,7 +207,7 @@ from terraform and passes it to `run-command`, following the same pattern as
 
 # Load-transform job
 * Running locally: `make cmd args="data-migration load-transform --no-load --no-transform --no-set-current --no-store-version"`
-* Running in ECS (python command portion only): `["poetry", "run", "flask", "data-migration", "load-transform", "--no-load", "--no-transform", "--no-set-current", "--no-store-version"]`
+* Running in ECS (python command portion only): `["flask", "data-migration", "load-transform", "--no-load", "--no-transform", "--no-set-current", "--no-store-version"]`
 
 Note that these example commands disable all parts of the job, running
 the above commands will just spin up the script and do nothing.
@@ -374,8 +374,8 @@ if the opportunity info stored in the version table differs from whatever alread
 3. Create a destination table in our API schema.
 4. Build the transform class for processing the table from the staging table to our destination API table.
 5. Run the `setup-foreign-tables` script to generate the Oracle foreign data wrapper table to the Oracle DB (required in all envs - manually run). See [Running setup-foreign-tables in ECS](legacy-transforms.md#running-setup-foreign-tables-in-ecs) for how to run this with the migrator role.
-6. Manually test loading the table by running the job with load oracle data job with the following command `["poetry", "run", "flask", "data-migration", "load-transform", "--load", "--no-transform", "--no-set-current", "--no-store-version", "-t", "<TABLE_NAME>"]`
-7. Manually test transforming the table by enabling the transformation task (env var based - see the config) and running `["poetry", "run", "flask", "data-migration", "load-transform", "--no-load", "--transform", "--no-set-current", "--no-store-version"]`
+6. Manually test loading the table by running the job with load oracle data job with the following command `["flask", "data-migration", "load-transform", "--load", "--no-transform", "--no-set-current", "--no-store-version", "-t", "<TABLE_NAME>"]`
+7. Manually test transforming the table by enabling the transformation task (env var based - see the config) and running `[ "flask", "data-migration", "load-transform", "--no-load", "--transform", "--no-set-current", "--no-store-version"]`
 8. Enable the jobs to run automatically by adding updating the [LoadOracleDataTask config](https://github.com/HHS/simpler-grants-gov/blob/main/api/src/data_migration/load/load_oracle_data_task.py#L21) to include the job and the [TransformOracleDataTaskConfig](https://github.com/HHS/simpler-grants-gov/blob/main/api/src/data_migration/transformation/transform_oracle_data_task.py) to enable the transformation
 
 Remember to update any relevant dashboards on New Relic.
@@ -408,7 +408,7 @@ To run the query you can do the following:
 
 Example in dev:
 ```sh
-bin/run-command --environment-variables "$(jq -c . ~/env_vars/load_attachment.json)" api dev '["poetry", "run", "flask", "<BLUEPRINT NAME>", "<TASK NAME>", "<PARAMS (optional)>"]'
+bin/run-command --environment-variables "$(jq -c . ~/env_vars/load_attachment.json)" api dev '["flask", "<BLUEPRINT NAME>", "<TASK NAME>", "<PARAMS (optional)>"]'
 ```
 If you have no environment variables you want to override, feel free to exclude that section
 of the command.

@@ -5,7 +5,15 @@ import FieldListWidget from "src/components/applyForm/widgets/FieldListWidget";
 
 jest.mock("src/components/applyForm/widgets/WidgetRenderers", () => ({
   renderWidget: jest.fn(
-    ({ props }: { props: { id: string; value?: unknown } }) => {
+    ({
+      props,
+    }: {
+      props: {
+        id: string;
+        value?: unknown;
+        onChange?: (value: unknown) => void;
+      };
+    }) => {
       const displayValue =
         typeof props.value === "string" ||
         typeof props.value === "number" ||
@@ -14,9 +22,13 @@ jest.mock("src/components/applyForm/widgets/WidgetRenderers", () => ({
           : "";
 
       return (
-        <div data-testid="mock-widget" data-widget-id={props.id}>
-          {displayValue}
-        </div>
+        <input
+          data-testid="mock-widget"
+          data-widget-id={props.id}
+          aria-label={props.id}
+          value={displayValue}
+          onChange={(event) => props.onChange?.(event.target.value)}
+        />
       );
     },
   ),
@@ -123,5 +135,87 @@ describe("FieldListWidget", () => {
 
     expect(screen.queryByText(/entry\s+2/i)).not.toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
+  });
+
+  it("marks the form edited when a FieldList child field changes", async () => {
+    const user = userEvent.setup();
+    const markFormDirtyMock = jest.fn();
+
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+        formContext={{
+          widgetSupport: {
+            markFormDirty: markFormDirtyMock,
+          },
+        }}
+      />,
+    );
+
+    await user.type(screen.getByLabelText("contacts[0]--first_name"), "Jane");
+
+    expect(markFormDirtyMock).toHaveBeenCalled();
+  });
+
+  it("marks the form edited when a FieldList row is added", async () => {
+    const user = userEvent.setup();
+    const markFormDirtyMock = jest.fn();
+
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+        formContext={{
+          widgetSupport: {
+            markFormDirty: markFormDirtyMock,
+          },
+        }}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /\+\s*add/i }));
+
+    expect(markFormDirtyMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("marks the form edited when a FieldList row is deleted", async () => {
+    const user = userEvent.setup();
+    const markFormDirtyMock = jest.fn();
+
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+        formContext={{
+          widgetSupport: {
+            markFormDirty: markFormDirtyMock,
+          },
+        }}
+      />,
+    );
+
+    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    await user.click(deleteButtons[0]);
+
+    expect(markFormDirtyMock).toHaveBeenCalledTimes(1);
   });
 });

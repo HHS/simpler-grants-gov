@@ -316,6 +316,8 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   const onFieldListEntryDelete =
     widgetProps.formContext?.widgetSupport?.onFieldListEntryDelete;
 
+  const markFormDirty = widgetProps.formContext?.widgetSupport?.markFormDirty;
+
   const isInteractionDisabled = Boolean(disabled || readOnly || isFormLocked);
   const minimumEntryCount = minItems ?? 0;
   const maximumEntryCount = maxItems;
@@ -326,20 +328,28 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
 
   const canAddEntry = !isInteractionDisabled && !isAtMaximumEntryCount;
   const canDeleteEntry = !isInteractionDisabled && !isAtMinimumEntryCount;
+
   /**
-   * Updates local entry state and optionally forwards the new value through
-   * the widget-style `onChange` prop for compatibility with the broader form
-   * rendering system.
+   * Applies updates to FieldList rows.
+   *
+   * This is the central update path for:
+   * - child field edits
+   * - entry additions
+   * - entry deletions
+   *
+   * Also marks the parent form dirty so existing unsaved-change
+   * protections apply to FieldList interactions.
    */
   const handleRowsChange = useCallback(
     (getNextRows: (previousRows: GeneralRecord[]) => GeneralRecord[]): void => {
       setRows((previousRows) => {
         const nextRows = getNextRows(previousRows);
         onChange?.(nextRows);
+        markFormDirty?.();
         return nextRows;
       });
     },
-    [onChange],
+    [onChange, markFormDirty],
   );
 
   const handleAddRow = useCallback((): void => {

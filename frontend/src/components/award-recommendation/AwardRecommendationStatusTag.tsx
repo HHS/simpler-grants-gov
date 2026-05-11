@@ -20,7 +20,7 @@ const AwardRecommendationStatusTag = ({ status }: Props) => {
             data-testid="award-recommendation-status-in-progress"
           >
             <USWDSIcon name="schedule" className="margin-right-05" />
-            {t("inProgress")}
+            {t("draft")}
           </div>
         );
       case "in_review":
