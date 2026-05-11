@@ -48,6 +48,7 @@ interface WidgetSupport {
     fieldListPath: string,
     deletedEntryIndex: number,
   ) => void;
+  markFormDirty?: () => void;
 }
 
 interface ApplyFormFormContext {
@@ -117,6 +118,16 @@ const ApplyForm = ({
 
   const { error, saved } = formState;
 
+  /**
+   * Marks the form as changed.
+   *
+   * Used by FieldList and other widgets to signal that local form state
+   * has been modified, enabling unsaved-change indicators and navigation guards.
+   */
+  const handleFormEdited = (): void => {
+    setFormChanged(true);
+  };
+
   const handleFieldListEntryDelete = (
     fieldListPath: string,
     deletedEntryIndex: number,
@@ -165,6 +176,7 @@ const ApplyForm = ({
         validationWarnings: displayValidationWarnings ?? [],
         deletedEntryIndexesByFieldListPath,
         onFieldListEntryDelete: handleFieldListEntryDelete,
+        markFormDirty: handleFormEdited,
       },
     }),
     [
