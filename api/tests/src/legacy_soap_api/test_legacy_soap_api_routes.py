@@ -1010,7 +1010,7 @@ def test_get_opportunity_list_always_calls_legacy_and_not_simpler(
 def test_get_submission_list_expanded_always_calls_legacy_and_simpler(
     mock_get_simpler_soap_response, mock_get_soap_response, client, enable_factory_create
 ) -> None:
-    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
     mock_data = """
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
         <soapenv:Header/>
