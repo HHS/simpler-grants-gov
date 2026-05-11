@@ -2056,6 +2056,7 @@ export const messages = {
     heroTitle: "Award Rec #",
     datePrepared: "Date prepared",
     status: "Status",
+    onThisPage: "On this page",
     statusTag: {
       draft: "In Progress",
       in_review: "Pending Review",
