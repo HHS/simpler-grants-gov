@@ -257,9 +257,9 @@ describe("OpportunityEditForm — alert banners", () => {
     ).toBeInTheDocument();
     // Each error appears both in the summary alert and as an inline field error
     expect(screen.getAllByText("Funding type is required")).toHaveLength(2);
-    expect(
-      screen.getAllByText("Close date must be a valid date"),
-    ).toHaveLength(2);
+    expect(screen.getAllByText("Close date must be a valid date")).toHaveLength(
+      2,
+    );
   });
 
   it("does not show validation errors alert when validationErrors is empty", () => {
@@ -754,9 +754,7 @@ describe("OpportunityEditForm — inline validation errors", () => {
     });
 
     expect(screen.getAllByText("Funding type required")).toHaveLength(2);
-    expect(
-      screen.getAllByText("Eligible applicants required"),
-    ).toHaveLength(2);
+    expect(screen.getAllByText("Eligible applicants required")).toHaveLength(2);
     expect(screen.getAllByText("Invalid email")).toHaveLength(2);
     expect(
       screen.getAllByText("Additional eligibility info required"),
