@@ -1,13 +1,13 @@
 /**
-* @featureArea Search
-* @feature Search State Persistence
-* @featureFiles
-*   - e2e/search/search-state/features/search-input-and-sort-persistence.feature
-*   - e2e/search/search-state/features/search-core-filters-persistence.feature
-*   - e2e/search/search-state/features/search-agency-filters-persistence.feature
-*   - e2e/search/search-state/features/search-multi-filters-persistence.feature
-* @description Validates persistence of search query, sorting, filters, and agency selections after page refresh via URL sync
-*/
+ * @featureArea Search
+ * @feature Search State Persistence
+ * @featureFiles
+ *   - e2e/search/search-state/features/search-input-and-sort-persistence.feature
+ *   - e2e/search/search-state/features/search-core-filters-persistence.feature
+ *   - e2e/search/search-state/features/search-agency-filters-persistence.feature
+ *   - e2e/search/search-state/features/search-multi-filters-persistence.feature
+ * @description Validates persistence of search query, sorting, filters, and agency selections after page refresh via URL sync
+ */
 
 import { expect, Page, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
@@ -146,85 +146,71 @@ test.describe("Search page - state persistence after refresh", () => {
    * Verifies that after entering a search term, selecting a sort order, and refreshing
    * the page, the search input value and sort selection are restored from the URL.
    */
-/**
 
-* @featureFile e2e/search/search-state/features/search-input-and-sort-persistence.feature
+  test(
+    "should retain search input and sort after refresh",
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+    async ({ page }, { project }) => {
+      test.setTimeout(240_000);
+      const isMobile = !!project.name.match(/[Mm]obile/);
 
-* @scenario Retain search input and sort after refresh
+      /**
+       * @background
+       * Given I am on the search page
+       * And the search results have loaded
+       */
+      await goToSearch(page);
+      await waitForSearchResultsInitialLoad(page);
 
-* Verifies that after entering a search term, selecting a sort order, and refreshing
+      // When I enter "<search-term>" in the search input and submit in "<viewport>"
+      await fillSearchInputAndSubmit(searchTerm, page, project.name);
 
-* the page, the search input value and sort selection are restored from the URL.
+      // Then the browser URL contains "/search?query=<search-term>&sortby=<sort type>"
+      await waitForURLContainsQueryParamValue(
+        page,
+        "query",
+        searchTerm,
+        120000,
+      );
 
-*/
+      // And I "<sort access action>"
+      await toggleFilterDrawer(page);
 
-test(
+      // And I select sort order "<sort label>"
+      await selectSortBy(page, "awardCeilingDesc", isMobile, project.name);
 
-  "should retain search input and sort after refresh",
+      // And the sort order should be "<sort label>"
+      await expectSortBy(page, "awardCeilingDesc", isMobile);
 
-  { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
+      // Then the browser URL contains "/search?query=<search-term>&sortby=<sort type>"
+      await waitForURLContainsQueryParamValue(
+        page,
+        "sortby",
+        "awardCeilingDesc",
+        120000,
+      );
 
-  async ({ page }, { project }) => {
+      // When I refresh the page
+      await refreshPageWithCurrentURL(page);
 
-    test.setTimeout(240_000);
+      // Then the search results load
+      await waitForSearchResultsInitialLoad(page, 180000);
 
-    const isMobile = !!project.name.match(/[Mm]obile/);
+      // And the sort order should be "<sort label>"
+      await expectSortBy(page, "awardCeilingDesc", isMobile);
 
-    /**
-     * @background
-     * Given I am on the search page
-     * And the search results have loaded
-     */
-    await goToSearch(page);
-    await waitForSearchResultsInitialLoad(page);
- 
-    // When I enter "<search-term>" in the search input and submit in "<viewport>"
-    await fillSearchInputAndSubmit(searchTerm, page, project.name);
- 
-    // Then the browser URL contains "/search?query=<search-term>&sortby=<sort type>"
-    await waitForURLContainsQueryParamValue(
-      page,
-      "query",
-      searchTerm,
-      120000,
-    );
- 
-    // And I "<sort access action>"
-    await toggleFilterDrawer(page);
- 
-    // And I select sort order "<sort label>"
-    await selectSortBy(page, "awardCeilingDesc", isMobile, project.name);
- 
-    // And the sort order should be "<sort label>"
-    await expectSortBy(page, "awardCeilingDesc", isMobile);
- 
-    // Then the browser URL contains "/search?query=<search-term>&sortby=<sort type>"
-    await waitForURLContainsQueryParamValue(
-      page,
-      "sortby",
-      "awardCeilingDesc",
-      120000,
-    );
- 
-    // When I refresh the page
-    await refreshPageWithCurrentURL(page);
- 
-    // Then the search results load
-    await waitForSearchResultsInitialLoad(page, 180000);
- 
-    // And the sort order should be "<sort label>"
-    await expectSortBy(page, "awardCeilingDesc", isMobile);
-    // And the search input should contain "<search-term>"
-    const searchInput = getSearchInput(page);
-    await expect(searchInput).toHaveValue(searchTerm, {
-      timeout: 60000,
-    });
-    // And the browser URL contains "/search?query=<search-term>&sortby=<sort type>"
-    expectURLQueryParamValue(page, "query", searchTerm);
-    expectURLQueryParamValue(page, "sortby", "awardCeilingDesc");
-  },
-);
- 
+      // And the search input should contain "<search-term>"
+      const searchInput = getSearchInput(page);
+      await expect(searchInput).toHaveValue(searchTerm, {
+        timeout: 60000,
+      });
+
+      // And the browser URL contains "/search?query=<search-term>&sortby=<sort type>"
+      expectURLQueryParamValue(page, "query", searchTerm);
+      expectURLQueryParamValue(page, "sortby", "awardCeilingDesc");
+    },
+  );
+
   /**
    * @featureFile e2e/search/search-state/features/search-core-filters-persistence.feature
    * @scenario Retain status filter after refresh
