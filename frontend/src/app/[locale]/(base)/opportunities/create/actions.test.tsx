@@ -1,8 +1,13 @@
 import { identity } from "lodash";
-import { createOpportunityAction } from "src/app/[locale]/(base)/opportunities/create/actions";
+import {
+  createOpportunityAction,
+  validateAgencyAccessAction,
+} from "src/app/[locale]/(base)/opportunities/create/actions";
+import { UserPrivilegeResult } from "src/utils/userPrivileges";
 
 const getSessionMock = jest.fn();
 const mockCreateOpportunity = jest.fn();
+const mockCheckUserRequiredPrivileges = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
@@ -15,6 +20,12 @@ jest.mock("next-intl/server", () => ({
 jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
   createOpportunity: (createOppSchema: unknown) =>
     mockCreateOpportunity(createOppSchema) as unknown,
+}));
+jest.mock("src/utils/userPrivileges", () => ({
+  checkUserRequiredPrivileges: (userId: string, privileges: unknown) =>
+    mockCheckUserRequiredPrivileges(userId, privileges) as Promise<
+      UserPrivilegeResult[]
+    >,
 }));
 
 describe("create opportunity form action", () => {
@@ -86,5 +97,97 @@ describe("create opportunity form action", () => {
 
     const result = await createOpportunityAction(null, createFormData);
     expect(result.errorMessage).toEqual("fake error");
+  });
+});
+
+describe("validateAgencyAccessAction", () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it("returns error when session is invalid", async () => {
+    getSessionMock.mockResolvedValue(null);
+
+    const result = await validateAgencyAccessAction("agency-1");
+
+    expect(result.error).toEqual("Session error");
+  });
+
+  it("returns success when user has create_opportunity privilege", async () => {
+    getSessionMock.mockResolvedValue({
+      token: "test-token",
+      user_id: "user-1",
+    });
+    mockCheckUserRequiredPrivileges.mockResolvedValue([
+      {
+        resourceId: "agency-1",
+        resourceType: "agency",
+        privilege: "create_opportunity",
+        authorized: true,
+      },
+    ]);
+
+    const result = await validateAgencyAccessAction("agency-1");
+
+    expect(result).toEqual({ success: true });
+    expect(mockCheckUserRequiredPrivileges).toHaveBeenCalledWith(
+      "user-1",
+      expect.arrayContaining([
+        expect.objectContaining({
+          resourceId: "agency-1",
+          privilege: "create_opportunity",
+          resourceType: "agency",
+        }),
+      ]),
+    );
+  });
+
+  it("returns error when user doesn't have create_opportunity privilege", async () => {
+    getSessionMock.mockResolvedValue({
+      token: "test-token",
+      user_id: "user-1",
+    });
+    mockCheckUserRequiredPrivileges.mockResolvedValue([
+      {
+        resourceId: "agency-1",
+        resourceType: "agency",
+        privilege: "create_opportunity",
+        authorized: false,
+      },
+    ]);
+
+    const result = await validateAgencyAccessAction("agency-1");
+
+    expect(result.error).toEqual(
+      "You do not have access to create opportunities for this agency.",
+    );
+  });
+
+  it("returns error when no privileges are returned", async () => {
+    getSessionMock.mockResolvedValue({
+      token: "test-token",
+      user_id: "user-1",
+    });
+    mockCheckUserRequiredPrivileges.mockResolvedValue([]);
+
+    const result = await validateAgencyAccessAction("agency-1");
+
+    expect(result.error).toEqual(
+      "You do not have access to create opportunities for this agency.",
+    );
+  });
+
+  it("returns error when checkRequiredPrivileges throws an error", async () => {
+    getSessionMock.mockResolvedValue({
+      token: "test-token",
+      user_id: "user-1",
+    });
+    mockCheckUserRequiredPrivileges.mockRejectedValue(new Error("API error"));
+
+    const result = await validateAgencyAccessAction("agency-1");
+
+    expect(result.error).toEqual(
+      "You do not have access to create opportunities for this agency.",
+    );
   });
 });

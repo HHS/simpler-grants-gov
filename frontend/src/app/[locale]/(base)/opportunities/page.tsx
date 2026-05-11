@@ -12,7 +12,7 @@ import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes"
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 import { WithFeatureFlagProps } from "src/types/uiTypes";
 import {
-  checkRequiredPrivileges,
+  checkUserRequiredPrivileges,
   UserPrivilegeRequest,
   UserPrivilegeResult,
 } from "src/utils/userPrivileges";
@@ -367,7 +367,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
     selectedAgency.agency_id,
   );
   try {
-    userPrivilegeResult = await checkRequiredPrivileges(
+    userPrivilegeResult = await checkUserRequiredPrivileges(
       userSession.user_id,
       userPrivilegeDef,
     );

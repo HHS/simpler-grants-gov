@@ -1,6 +1,6 @@
 import { ForbiddenError, ValidationError } from "src/errors";
 import {
-  checkRequiredPrivileges,
+  checkUserRequiredPrivileges,
   UserPrivilegeRequest,
   UserPrivilegeResult,
 } from "src/utils/userPrivileges";
@@ -46,14 +46,14 @@ jest.mock("src/services/fetch/fetchers/userFetcher", () => ({
   checkUserPrivilege: (arg: unknown): unknown => mockCheckUserPrivilege(arg),
 }));
 
-describe("checkRequiredPrivileges", () => {
+describe("checkUserRequiredPrivileges", () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
   it("calls request function with correct parameters", async () => {
     mockCheckUserPrivilege.mockResolvedValue(fakePrivilegeFound);
 
-    const result = await checkRequiredPrivileges(
+    const result = await checkUserRequiredPrivileges(
       fakeSession.userId,
       fakePrivilegeDef,
     );
@@ -65,7 +65,7 @@ describe("checkRequiredPrivileges", () => {
   it("calls request function; user does not have the privilege", async () => {
     mockCheckUserPrivilege.mockRejectedValue(new ForbiddenError("Forbidden"));
 
-    const result = await checkRequiredPrivileges(
+    const result = await checkUserRequiredPrivileges(
       fakeSession.userId,
       fakePrivilegeDef,
     );
@@ -80,7 +80,7 @@ describe("checkRequiredPrivileges", () => {
     );
 
     await expect(
-      checkRequiredPrivileges(fakeSession.userId, fakePrivilegeDef),
+      checkUserRequiredPrivileges(fakeSession.userId, fakePrivilegeDef),
     ).rejects.toBeInstanceOf(ValidationError);
     expect(mockCheckUserPrivilege).toHaveBeenCalledTimes(1);
   });

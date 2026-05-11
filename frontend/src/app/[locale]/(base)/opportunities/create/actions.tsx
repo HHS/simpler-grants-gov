@@ -3,6 +3,10 @@
 import { getSession } from "src/services/auth/session";
 import { createOpportunity } from "src/services/fetch/fetchers/grantorOpportunitiesFetcher";
 import { CreateOpportunityResponse } from "src/types/grantor/createOpportunityTypes";
+import {
+  checkUserRequiredPrivileges,
+  UserPrivilegeRequest,
+} from "src/utils/userPrivileges";
 
 // Future: Apply any field level validations before submitting to the backend.
 //    These will be validations that have not been taken care of client-side.
@@ -46,4 +50,52 @@ export const createOpportunityAction = async (
       data: rawFormData,
     };
   }
+};
+
+export async function validateAgencyAccessAction(agencyId: string) {
+  const session = await getSession();
+
+  if (!session?.token || !session?.user_id) {
+    return { error: "Session error" };
+  }
+
+  try {
+    const userPrivilegeResult = await checkUserRequiredPrivileges(
+      session.user_id,
+      getUserPrivilegeDefinition(agencyId),
+    );
+
+    const canCreate = userPrivilegeResult.length
+      ? userPrivilegeResult.reduce(
+          (permissionFound, result) =>
+            result.privilege === "create_opportunity" && result.authorized,
+          false,
+        )
+      : false;
+
+    if (canCreate) {
+      return { success: true };
+    }
+    return {
+      error: "You do not have access to create opportunities for this agency.",
+    };
+  } catch (e) {
+    const error = e as Error;
+    console.error(`Error validating agency access: ${error.message}`);
+    return {
+      error: "You do not have access to create opportunities for this agency.",
+    };
+  }
+}
+
+const getUserPrivilegeDefinition = (
+  agencyId: string,
+): UserPrivilegeRequest[] => {
+  return [
+    {
+      resourceId: agencyId,
+      resourceType: "agency",
+      privilege: "create_opportunity",
+    },
+  ];
 };

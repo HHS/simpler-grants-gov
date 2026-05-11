@@ -154,7 +154,7 @@ jest.mock("src/services/fetch/fetchers/userAgenciesFetcher", () => ({
 }));
 
 jest.mock("src/utils/userPrivileges", () => ({
-  checkRequiredPrivileges: () =>
+  checkUserRequiredPrivileges: () =>
     mockCheckUserPrivileges() as Promise<UserPrivilegeResult[]>,
 }));
 
