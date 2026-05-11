@@ -232,7 +232,6 @@ init-dynamodb: start-dynamodb setup-dynamodb
 
 start-dynamodb:
 	docker compose up --detach dynamodb-local
-	chmod 755 ./bin/wait-for-local-dynamodb.sh
 	./bin/wait-for-local-dynamodb.sh
 
 setup-dynamodb: ## Create local DynamoDB tables
