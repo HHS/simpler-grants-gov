@@ -13,6 +13,7 @@ import {
   expectCheckboxesChecked,
   expectSortBy,
   fillSearchInputAndSubmit,
+  getFirstNonNumericAgencyCheckboxId,
   getSearchInput,
   selectSortBy,
   toggleCheckbox,
@@ -42,6 +43,26 @@ const eligibilityCheckboxes = {
 
 const categoryCheckboxes = {
   "category-agriculture": "agriculture",
+};
+
+// Multi-value checkbox groups for comprehensive filter-persistence tests
+const statusCheckboxesMulti = {
+  "status-closed": "closed",
+};
+
+const fundingInstrumentCheckboxesMulti = {
+  "funding-instrument-grant": "grant",
+  "funding-instrument-other": "other",
+};
+
+const eligibilityCheckboxesMulti = {
+  "eligibility-county_governments": "county_governments",
+  "eligibility-state_governments": "state_governments",
+};
+
+const categoryCheckboxesMulti = {
+  "category-agriculture": "agriculture",
+  "category-recovery_act": "recovery_act",
 };
 
 const { baseUrl, targetEnv } = playwrightEnv;
@@ -516,6 +537,242 @@ test.describe("Search page - state persistence after refresh", () => {
       await expect(checkedSubAgencyByValue).toBeChecked({ timeout: 15000 });
 
       expectURLQueryParamValues(page, "agency", [subAgency.value]);
+    },
+  );
+
+  test(
+    "should retain all filters and inputs after refresh",
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    async ({ page }, { project }) => {
+      test.setTimeout(240_000);
+      const isMobile = !!project.name.match(/[Mm]obile/);
+      await goToSearch(page);
+
+      await waitForSearchResultsInitialLoad(page);
+      await fillSearchInputAndSubmit(searchTerm, page, project.name);
+      await waitForURLContainsQueryParamValue(
+        page,
+        "query",
+        searchTerm,
+        120000,
+      );
+      await ensureFilterDrawerOpen(page);
+      await selectSortBy(page, "awardCeilingDesc", isMobile, project.name);
+      await expectSortBy(page, "awardCeilingDesc", isMobile);
+      await waitForURLContainsQueryParamValue(
+        page,
+        "sortby",
+        "awardCeilingDesc",
+        120000,
+      );
+      await waitForFilterOptions(page, "agency");
+
+      await ensureAccordionExpanded(page, "Opportunity status");
+      await toggleCheckboxGroup(page, statusCheckboxes);
+      await waitForURLContainsQueryParamValues(page, "status", [
+        "forecasted",
+        "posted",
+        "closed",
+      ]);
+
+      await ensureAccordionExpanded(page, "Funding instrument");
+      await toggleCheckboxGroup(page, fundingInstrumentCheckboxes);
+      await waitForURLContainsQueryParamValues(page, "fundingInstrument", [
+        "grant",
+      ]);
+
+      await ensureAccordionExpanded(page, "Eligibility");
+      await toggleCheckboxGroup(page, eligibilityCheckboxes);
+      await waitForURLContainsQueryParamValues(page, "eligibility", [
+        "county_governments",
+      ]);
+
+      await ensureAccordionExpanded(page, "Agency");
+      const agencyId = await getFirstNonNumericAgencyCheckboxId(page);
+      expect(agencyId).toBeTruthy();
+      if (!agencyId) {
+        test.fail();
+        return;
+      }
+      const agencyCheckboxes = { [agencyId]: agencyId };
+      await toggleCheckboxGroup(page, agencyCheckboxes);
+      await waitForURLContainsQueryParamValues(page, "agency", [agencyId]);
+
+      await ensureAccordionExpanded(page, "Category");
+      await toggleCheckboxGroup(page, categoryCheckboxes);
+      await waitForURLContainsQueryParamValues(page, "category", [
+        "agriculture",
+      ]);
+
+      await refreshPageWithCurrentURL(page);
+      await waitForSearchResultsInitialLoad(page);
+
+      await ensureFilterDrawerOpen(page);
+      await expectSortBy(page, "awardCeilingDesc", isMobile);
+      const searchInput = getSearchInput(page);
+      await expect(searchInput).toHaveValue(searchTerm, { timeout: 60000 });
+
+      await ensureAccordionExpanded(page, "Opportunity status");
+      await expectCheckboxesChecked(page, statusCheckboxes);
+
+      await ensureAccordionExpanded(page, "Funding instrument");
+      await expectCheckboxesChecked(page, fundingInstrumentCheckboxes);
+
+      await ensureAccordionExpanded(page, "Eligibility");
+      await expectCheckboxesChecked(page, eligibilityCheckboxes);
+
+      await ensureAccordionExpanded(page, "Agency");
+      await expectCheckboxesChecked(page, agencyCheckboxes);
+
+      await ensureAccordionExpanded(page, "Category");
+      await expectCheckboxesChecked(page, categoryCheckboxes);
+
+      expectURLQueryParamValue(page, "query", searchTerm);
+      expectURLQueryParamValue(page, "sortby", "awardCeilingDesc");
+      expectURLQueryParamValues(page, "status", [
+        "forecasted",
+        "posted",
+        "closed",
+      ]);
+      expectURLQueryParamValues(page, "fundingInstrument", ["grant"]);
+      expectURLQueryParamValues(page, "eligibility", ["county_governments"]);
+      expectURLQueryParamValues(page, "agency", [agencyId]);
+      expectURLQueryParamValues(page, "category", ["agriculture"]);
+    },
+  );
+
+  test(
+    "should retain all multi-value filters and inputs after refresh",
+    { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
+    async ({ page }, { project }) => {
+      test.setTimeout(240_000);
+      const isMobile = !!project.name.match(/[Mm]obile/);
+
+      await goToSearch(page);
+      await waitForSearchResultsInitialLoad(page);
+
+      await fillSearchInputAndSubmit(searchTerm, page, project.name);
+      await waitForURLContainsQueryParamValue(
+        page,
+        "query",
+        searchTerm,
+        120000,
+      );
+      await ensureFilterDrawerOpen(page);
+      await selectSortBy(page, "awardCeilingDesc", isMobile, project.name);
+      await expectSortBy(page, "awardCeilingDesc", isMobile);
+      await waitForURLContainsQueryParamValue(
+        page,
+        "sortby",
+        "awardCeilingDesc",
+        120000,
+      );
+
+      await waitForFilterOptions(page, "agency");
+
+      await ensureAccordionExpanded(page, "Opportunity status");
+      await toggleCheckboxGroup(page, statusCheckboxesMulti);
+      await waitForURLContainsQueryParamValues(page, "status", [
+        "closed",
+        "forecasted",
+        "posted",
+      ]);
+      // Wait for the status-filtered search to finish before touching funding
+      // instrument - otherwise the completing search re-renders the filter panel
+      // from URL state (no fundingInstrument param yet) and resets any checkbox
+      // we just clicked.
+      await waitForSearchResultsInitialLoad(page);
+
+      await ensureAccordionExpanded(page, "Funding instrument");
+      await toggleCheckbox(page, "funding-instrument-grant");
+      await waitForURLContainsQueryParamValues(page, "fundingInstrument", [
+        "grant",
+      ]);
+      // Let the search triggered by clicking 'grant' complete before clicking
+      // 'other' - otherwise the completing search re-syncs the panel from URL
+      // (which only shows 'grant') and unchecks 'other' before it registers.
+      await waitForSearchResultsInitialLoad(page);
+      await toggleCheckbox(page, "funding-instrument-other");
+      await waitForURLContainsQueryParamValues(page, "fundingInstrument", [
+        "grant",
+        "other",
+      ]);
+      await waitForSearchResultsInitialLoad(page);
+
+      await ensureAccordionExpanded(page, "Eligibility");
+      await toggleCheckbox(page, "eligibility-county_governments");
+      await waitForURLContainsQueryParamValues(page, "eligibility", [
+        "county_governments",
+      ]);
+      await waitForSearchResultsInitialLoad(page);
+      await toggleCheckbox(page, "eligibility-state_governments");
+      await waitForURLContainsQueryParamValues(page, "eligibility", [
+        "county_governments",
+        "state_governments",
+      ]);
+      await waitForSearchResultsInitialLoad(page);
+
+      await ensureAccordionExpanded(page, "Agency");
+      const agencyId = await getFirstNonNumericAgencyCheckboxId(page);
+      expect(agencyId).toBeTruthy();
+      if (!agencyId) {
+        throw new Error("Could not find agency checkbox");
+      }
+      const agencyCheckboxes = { [agencyId]: agencyId };
+      await toggleCheckboxGroup(page, agencyCheckboxes);
+      await waitForURLContainsQueryParamValues(page, "agency", [agencyId]);
+      await waitForSearchResultsInitialLoad(page);
+
+      await ensureAccordionExpanded(page, "Category");
+      await toggleCheckbox(page, "category-agriculture");
+      await waitForURLContainsQueryParamValues(page, "category", [
+        "agriculture",
+      ]);
+      await waitForSearchResultsInitialLoad(page);
+      await toggleCheckbox(page, "category-recovery_act");
+      await waitForURLContainsQueryParamValues(page, "category", [
+        "agriculture",
+        "recovery_act",
+      ]);
+
+      await refreshPageWithCurrentURL(page);
+      await waitForSearchResultsInitialLoad(page);
+
+      await ensureFilterDrawerOpen(page);
+      await expectSortBy(page, "awardCeilingDesc", isMobile);
+      const searchInput = getSearchInput(page);
+      await expect(searchInput).toHaveValue(searchTerm, { timeout: 60000 });
+
+      await ensureAccordionExpanded(page, "Opportunity status");
+      await expectCheckboxesChecked(page, statusCheckboxesMulti);
+
+      await ensureAccordionExpanded(page, "Funding instrument");
+      await expectCheckboxesChecked(page, fundingInstrumentCheckboxesMulti);
+
+      await ensureAccordionExpanded(page, "Eligibility");
+      await expectCheckboxesChecked(page, eligibilityCheckboxesMulti);
+
+      await ensureAccordionExpanded(page, "Agency");
+      await expectCheckboxesChecked(page, agencyCheckboxes);
+
+      await ensureAccordionExpanded(page, "Category");
+      await expectCheckboxesChecked(page, categoryCheckboxesMulti);
+
+      expectURLQueryParamValues(page, "status", [
+        "closed",
+        "forecasted",
+        "posted",
+      ]);
+      expectURLQueryParamValues(page, "fundingInstrument", ["grant", "other"]);
+      expectURLQueryParamValues(page, "eligibility", [
+        "county_governments",
+        "state_governments",
+      ]);
+      expectURLQueryParamValues(page, "agency", [agencyId]);
+      expectURLQueryParamValues(page, "category", [
+        "agriculture",
+        "recovery_act",
+      ]);
     },
   );
 });

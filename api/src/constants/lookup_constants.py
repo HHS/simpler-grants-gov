@@ -278,6 +278,7 @@ class AwardRecommendationAuditEvent(StrEnum):
     RISK_UPDATED = "risk_updated"
     RISK_DELETED = "risk_deleted"
     APPLICATION_SUBMISSION_UPDATED = "application_submission_updated"
+    AWARD_RECOMMENDATION_SUBMISSION_UPDATED = "award_recommendation_submission_updated"
     REVIEW_CREATED = "review_created"
     REVIEW_UPDATED = "review_updated"
     REVIEW_DELETED = "review_deleted"
@@ -317,6 +318,8 @@ class Privilege(StrEnum):
     # These privileges are associated with workflow approvals
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
+
+    INTERNAL_S3_SCAN = "internal_s3_scan"
 
 
 class RoleType(StrEnum):
@@ -429,3 +432,10 @@ class WorkflowEventProcessingResult(StrEnum):
     NON_RETRYABLE_ERROR = "non_retryable_error"
     RETRYABLE_ERROR = "retryable_error"
     GENERAL_ERROR = "general_error"
+
+
+class FileScanStatus(StrEnum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETE = "complete"
+    INFECTED = "infected"
