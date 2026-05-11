@@ -31,7 +31,7 @@ module "existing_notifications_email_domain" {
 }
 
 # If the app has `enable_notifications` set to true, create a new email notification
-# AWS Pinpoint app for the service. A new app is created for all environments, including
+# configuration for the service. A new configuration is created for all environments, including
 # temporary environments.
 module "notifications" {
   count  = local.notifications_config != null ? 1 : 0

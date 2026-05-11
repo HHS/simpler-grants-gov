@@ -6,10 +6,10 @@ locals {
     module.existing_notifications_email_domain[0].domain_identity_arn
   ) : null
   notifications_environment_variables = local.notifications_config != null ? {
-    AWS_PINPOINT_APP_ID = module.notifications[0].app_id
+    AWS_SES_FROM_EMAIL = module.notifications[0].from_email
   } : {}
   notifications_app_name = local.notifications_config != null ? "${local.prefix}${local.notifications_config.name}" : ""
-  pinpoint_app_id        = local.notifications_config != null ? module.notifications[0].app_id : ""
+  ses_from_email         = local.notifications_config != null ? module.notifications[0].from_email : ""
   ses_configuration_set  = local.network_config.domain_config.hosted_zone != null ? replace(local.network_config.domain_config.hosted_zone, ".", "-") : null
 
 }
@@ -33,8 +33,8 @@ module "existing_notifications_email_domain" {
 }
 
 # If the app has `enable_notifications` set to true, create a new email notification
-# AWS Pinpoint app for the service. A new app is created for all environments, including
-# temporary environments.
+# configuration for the service. A new configuration is created for all environments,
+# including temporary environments.
 module "notifications" {
   count  = local.notifications_config != null ? 1 : 0
   source = "../../modules/notifications/resources"

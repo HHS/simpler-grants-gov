@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import desc, select
 
 from src.adapters import db
-from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
+from src.adapters.aws.ses_adapter import send_ses_email
 from src.api.route_utils import raise_flask_error
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import OrganizationInvitationStatus, Privilege
@@ -46,23 +46,23 @@ def _send_invitation_email(
     config = get_email_config()
     subject, content = build_invitation_email(invitation, organization, config)
 
-    # Generate a trace ID for correlating logs with Pinpoint email delivery
+    # Generate a trace ID for correlating logs with SES email delivery
     trace_id = str(uuid4())
 
     logger.info(
         "Sending invitation email",
         extra={
             "invitation_id": invitation.organization_invitation_id,
-            "pinpoint_trace_id": trace_id,
+            "ses_trace_id": trace_id,
         },
     )
 
     try:
-        send_pinpoint_email_raw(
+        send_ses_email(
             to_address=invitee_email,
             subject=subject,
             message=content,
-            app_id=config.app_id,
+            from_email=config.from_email,
             trace_id=trace_id,
         )
         logger.info(
