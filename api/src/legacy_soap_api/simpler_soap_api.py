@@ -39,6 +39,9 @@ from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 
+GET_SUBMISSION_LIST_EXPANDED_REQUEST = "GetSubmissionListExpandedRequest"
+GET_OPPORTUNITY_LIST_REQUEST = "GetOpportunityListRequest"
+
 
 def get_simpler_soap_response(
     soap_request: SOAPRequest, soap_legacy_response: SOAPResponse, db_session: db.Session
@@ -139,7 +142,7 @@ def process_simpler_request(
     logger.info("SOAP request received")
 
     is_get_opportunity_list = (
-        operation_name == "GetOpportunityListRequest" and api_name == SimplerSoapAPI.APPLICANTS
+        operation_name == GET_OPPORTUNITY_LIST_REQUEST and api_name == SimplerSoapAPI.APPLICANTS
     )
     auth = None
     # GetOpportunityListRequest does not have any auth
@@ -176,19 +179,25 @@ def process_simpler_request(
         is_legacy_only_certificate = (
             auth and auth.certificate and not auth.certificate.legacy_certificate
         )
+
         # If it is GetOpportunityList or is valid legacy certificate but not configured in Simpler
-        # call legacy
+        # call legacy and don't call simpler
         if is_get_opportunity_list or is_legacy_only_certificate:
-            soap_legacy_response = get_legacy_response(soap_request)
-        # Check if it has a Simpler GrantsGovTrackingNumber
+            return get_legacy_response(soap_request).to_flask_response()
+        # If it has a Simpler GrantsGovTrackingNumber then don't call legacy
         elif alternate_legacy_response := get_alternate_legacy_response(soap_request):
             logger.info(
                 "simpler_soap_api: skipping legacy call",
             )
             soap_legacy_response = alternate_legacy_response
-        # Fallback: get legacy response
-        else:
+        # GetSubmissionListExpanded will call both if use_simpler is true
+        # handled in the get_simpler_response
+        elif operation_name == GET_SUBMISSION_LIST_EXPANDED_REQUEST:
             soap_legacy_response = get_legacy_response(soap_request)
+        # Fallback: return legacy response and don't call simpler
+        else:
+            return get_legacy_response(soap_request).to_flask_response()
+
     except Exception:
         logger.exception(
             msg="Error getting soap legacy response",
@@ -199,7 +208,7 @@ def process_simpler_request(
         )
         return get_soap_error_response().to_flask_response()
 
-    if is_get_opportunity_list or (auth and auth.certificate.legacy_certificate):
+    if auth and auth.certificate.legacy_certificate:
         try:
             return get_simpler_soap_response(
                 soap_request, soap_legacy_response, db_session

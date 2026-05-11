@@ -683,88 +683,6 @@ def test_confirm_application_delivery_returns_not_found_response_if_simpler_id_i
     )
 
 
-@mock.patch("uuid.uuid4")
-@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
-def test_update_application_info_returns_not_found_response_if_simpler_id_is_used(
-    mock_get_soap_response, mock_uuid, client, fixture_from_file, monkeypatch, enable_factory_create
-) -> None:
-    """
-    Force the response to be the legacy response and show that we do not actually call the legacy request method
-    """
-    soap_api_config.get_soap_config.cache_clear()
-    monkeypatch.setenv("USE_SIMPLER", "false")
-    test_uuid = "00000000-aaaa-0000-bbbb-000000000000"
-    mock_uuid.return_value = test_uuid
-    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
-    mock_data = f"""
-        <soapenv:Envelope
-        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-        xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0"
-        xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0"
-        xmlns:agen1="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0">
-        <soapenv:Header/>
-        <soapenv:Body>
-        <agen:UpdateApplicationInfoRequest>
-        <gran:GrantsGovTrackingNumber>{SIMPLER_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>
-        <agen1:AssignAgencyTrackingNumber>1</agen1:AssignAgencyTrackingNumber>
-        <agen1:SaveAgencyNotes>test 1</agen1:SaveAgencyNotes>
-        </agen:UpdateApplicationInfoRequest>
-        </soapenv:Body>
-        </soapenv:Envelope>
-    """
-    envelope = etree.fromstring(mock_data)
-    tracking_number = envelope.find(UPDATE_APPLICATION_INFO)
-    tracking_number.text = SIMPLER_TRACKING_NUMBER
-    agency = AgencyFactory.create()
-    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
-    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
-    response = client.post(
-        full_path, data=etree.tostring(envelope), headers={MTLS_CERT_HEADER_KEY: mtls_cert}
-    )
-    expected = (
-        f"--uuid:{test_uuid}\r\n"
-        'Content-Type: application/xop+xml; charset=UTF-8; type="text/xml"\r\nContent-Transfer-Encoding: binary\r\nContent-ID: <root.message@cxf.apache.org>\r\n'
-        '\r\n<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
-        "<soap:Body>"
-        "<ns2:UpdateApplicationInfoResponse "
-        'xmlns:ns12="http://schemas.xmlsoap.org/wsdl/soap/" '
-        'xmlns:ns11="http://schemas.xmlsoap.org/wsdl/" '
-        'xmlns:ns10="http://apply.grants.gov/system/GrantsFundingSynopsis-V2.0" '
-        'xmlns:ns9="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0" '
-        'xmlns:ns8="http://apply.grants.gov/system/GrantsForecastSynopsis-V1.0" '
-        'xmlns:ns7="http://apply.grants.gov/system/AgencyManagePackage-V1.0" '
-        'xmlns:ns6="http://apply.grants.gov/system/GrantsPackage-V1.0" '
-        'xmlns:ns5="http://apply.grants.gov/system/GrantsOpportunity-V1.0" '
-        'xmlns:ns4="http://apply.grants.gov/system/GrantsRelatedDocument-V1.0" '
-        'xmlns:ns3="http://apply.grants.gov/system/GrantsTemplate-V1.0" '
-        'xmlns:ns2="http://apply.grants.gov/services/AgencyWebServices-V2.0" '
-        'xmlns="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
-        f"<GrantsGovTrackingNumber>{SIMPLER_TRACKING_NUMBER}</GrantsGovTrackingNumber>"
-        "<ns2:Success>true</ns2:Success>"
-        "<ns9:AssignAgencyTrackingNumberResult>"
-        "<ns9:Success>false</ns9:Success>"
-        "<ns9:ErrorMessage>Exception caught assigning agency tracking number.(Authorization Failure)</ns9:ErrorMessage>"
-        "</ns9:AssignAgencyTrackingNumberResult>"
-        "<ns9:SaveAgencyNotesResult>"
-        "<ns9:Success>false</ns9:Success>"
-        "<ns9:ErrorMessage>Exception caught saving agency notes.(Authorization Failure)</ns9:ErrorMessage>"
-        "</ns9:SaveAgencyNotesResult>"
-        "</ns2:UpdateApplicationInfoResponse>"
-        "</soap:Body>"
-        "</soap:Envelope>\r\n"
-        f"--uuid:{test_uuid}--"
-    ).encode("utf-8")
-    mock_get_soap_response.assert_not_called()
-    assert response.status_code == 500
-    assert response.headers["Content-Length"] == "1694"
-    assert expected == response.data
-    assert (
-        response.headers["Content-Type"]
-        == f'multipart/related; type="application/xop+xml"; boundary="uuid:{test_uuid}"; start="<root.message@cxf.apache.org>"; start-info="text/xml"'
-    )
-    assert response.headers["Set-Cookie"] == "None; Path=/grantsws-agency; Secure; HttpOnly"
-
-
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
 def test_simpler_getapplicationzip_operation_returns_not_found_response_includes_cookie(
     mock_get_soap_response, client, fixture_from_file, enable_factory_create
@@ -979,7 +897,7 @@ def test_request_only_calls_legacy_when_only_valid_tcertificate_exists(
             mock_get_simpler_response.assert_not_called()
 
 
-def test_request_only_calls_simpler_and_legacy_when_there_are_both_valid_tcertificate_and_valid_legacy_certificate(
+def test_request_only_calls_legacy_when_there_are_both_valid_tcertificate_and_valid_legacy_certificate(
     db_session, client, enable_factory_create
 ) -> None:
     mtls_cert, serial_number = get_mtls_urlencoded_str_and_serial_number()
@@ -1015,7 +933,7 @@ def test_request_only_calls_simpler_and_legacy_when_there_are_both_valid_tcertif
                 headers={"Use-Simpler-Override": "1", MTLS_CERT_HEADER_KEY: mtls_cert},
             )
             mock_get_legacy_response.assert_called_once()
-            mock_get_simpler_response.assert_called_once()
+            mock_get_simpler_response.assert_not_called()
 
 
 def test_request_fails_if_legacy_certificate_is_expired(
@@ -1059,3 +977,146 @@ def test_request_fails_if_legacy_certificate_is_expired(
         "</soap:Envelope>\n"
     )
     assert response.data.decode() == expected
+
+
+@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+@mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
+def test_get_opportunity_list_always_calls_legacy_and_not_simpler(
+    mock_get_simpler_soap_response, mock_get_soap_response, client, enable_factory_create
+) -> None:
+    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
+    mock_data = """
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:app="http://apply.grants.gov/services/ApplicantWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0" xmlns:app1="http://apply.grants.gov/system/ApplicantCommonElements-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <app:GetOpportunityListRequest>
+        <gran:PackageID>PKG00116771</gran:PackageID>
+        </app:GetOpportunityListRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """
+    envelope = etree.fromstring(mock_data)
+    response = client.post(
+        full_path,
+        data=etree.tostring(envelope),
+    )
+    assert response.status_code == 200
+    mock_get_soap_response.assert_called_once()
+    mock_get_simpler_soap_response.assert_not_called()
+
+
+@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+@mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
+def test_get_submission_list_expanded_always_calls_legacy_and_simpler(
+    mock_get_simpler_soap_response, mock_get_soap_response, client, enable_factory_create
+) -> None:
+    full_path = "/grantsws-applicant/services/v2/ApplicantWebServicesSoapPort"
+    mock_data = """
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:GetSubmissionListExpandedRequest>
+        </agen:GetSubmissionListExpandedRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """
+    envelope = etree.fromstring(mock_data)
+    envelope = etree.fromstring(mock_data)
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    client.post(
+        full_path,
+        data=etree.tostring(envelope),
+        headers={MTLS_CERT_HEADER_KEY: mtls_cert},
+    )
+    mock_get_soap_response.assert_called_once()
+    mock_get_simpler_soap_response.assert_called_once()
+
+
+@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+@mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
+def test_calls_legacy_if_using_legacy_tracking_number(
+    mock_get_simpler_soap_response,
+    mock_get_soap_response,
+    client,
+    monkeypatch,
+    enable_factory_create,
+) -> None:
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("USE_SIMPLER", "false")
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = f"""
+        <soapenv:Envelope
+        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+        xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0"
+        xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0"
+        xmlns:agen1="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:UpdateApplicationInfoRequest>
+        <gran:GrantsGovTrackingNumber>{LEGACY_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>
+        <agen1:AssignAgencyTrackingNumber>1</agen1:AssignAgencyTrackingNumber>
+        <agen1:SaveAgencyNotes>test 1</agen1:SaveAgencyNotes>
+        </agen:UpdateApplicationInfoRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """
+    envelope = etree.fromstring(mock_data)
+    tracking_number = envelope.find(UPDATE_APPLICATION_INFO)
+    tracking_number.text = LEGACY_TRACKING_NUMBER
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    response = client.post(
+        full_path,
+        data=etree.tostring(envelope),
+        headers={MTLS_CERT_HEADER_KEY: mtls_cert, "Use-Simpler-Override": "1"},
+    )
+    assert response.status_code == 200
+    mock_get_soap_response.assert_called_once()
+    mock_get_simpler_soap_response.assert_not_called()
+
+
+@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+@mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
+def test_calls_simpler_if_using_simpler_tracking_number(
+    mock_get_simpler_soap_response,
+    mock_get_soap_response,
+    client,
+    monkeypatch,
+    enable_factory_create,
+) -> None:
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("USE_SIMPLER", "false")
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = f"""
+        <soapenv:Envelope
+        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+        xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0"
+        xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0"
+        xmlns:agen1="http://apply.grants.gov/system/AgencyUpdateApplicationInfo-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:UpdateApplicationInfoRequest>
+        <gran:GrantsGovTrackingNumber>{SIMPLER_TRACKING_NUMBER}</gran:GrantsGovTrackingNumber>
+        <agen1:AssignAgencyTrackingNumber>1</agen1:AssignAgencyTrackingNumber>
+        <agen1:SaveAgencyNotes>test 1</agen1:SaveAgencyNotes>
+        </agen:UpdateApplicationInfoRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """
+    envelope = etree.fromstring(mock_data)
+    tracking_number = envelope.find(UPDATE_APPLICATION_INFO)
+    tracking_number.text = SIMPLER_TRACKING_NUMBER
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    response = client.post(
+        full_path,
+        data=etree.tostring(envelope),
+        headers={MTLS_CERT_HEADER_KEY: mtls_cert, "Use-Simpler-Override": "1"},
+    )
+    assert response.status_code == 200
+    mock_get_soap_response.assert_not_called()
+    mock_get_simpler_soap_response.assert_called_once()
