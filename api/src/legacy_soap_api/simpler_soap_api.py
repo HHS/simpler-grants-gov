@@ -192,7 +192,10 @@ def process_simpler_request(
             soap_legacy_response = alternate_legacy_response
         # GetSubmissionListExpanded will call both if use_simpler is true
         # handled in the get_simpler_response
-        elif operation_name == GET_SUBMISSION_LIST_EXPANDED_REQUEST and api_name == SimplerSoapAPI.GRANTORS:
+        elif (
+            operation_name == GET_SUBMISSION_LIST_EXPANDED_REQUEST
+            and api_name == SimplerSoapAPI.GRANTORS
+        ):
             soap_legacy_response = get_legacy_response(soap_request)
         # Fallback: return legacy response and don't call simpler
         else:
