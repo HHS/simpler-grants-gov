@@ -222,13 +222,25 @@ test.describe("Search page - state persistence after refresh", () => {
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(240_000);
-      await goToSearch(page);
 
+      /**
+       * @background
+       * Given I am on the search page
+       * And the search results have loaded
+       */
+      await goToSearch(page);
       await waitForSearchResultsInitialLoad(page);
+
+      // When I open the filter drawer
       await ensureFilterDrawerOpen(page);
 
+      // And the "Opportunity status" accordion is expanded
       await ensureAccordionExpanded(page, "Opportunity status");
+
+      // When I check the "<Opportunity status>" checkbox
       await toggleCheckboxGroup(page, statusCheckboxes);
+
+      // Then the browser URL contains query param "status" with values "<expected statuses>"
       await waitForURLContainsQueryParamValues(
         page,
         "status",
@@ -236,13 +248,22 @@ test.describe("Search page - state persistence after refresh", () => {
         120000,
       );
 
+      // When I refresh the page
       await refreshPageWithCurrentURL(page);
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page, 180000);
 
+      // And the filter drawer is open
       await ensureFilterDrawerOpen(page);
+
+      // And the "Opportunity status" accordion is expanded
       await ensureAccordionExpanded(page, "Opportunity status");
+
+      // And the "<Opportunity status>" checkbox should be checked
       await expectCheckboxesChecked(page, statusCheckboxes);
 
+      // And the browser URL contains query param "status" with values "<expected statuses>"
       expectURLQueryParamValues(page, "status", [
         "forecasted",
         "posted",
@@ -262,13 +283,25 @@ test.describe("Search page - state persistence after refresh", () => {
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(240_000);
-      await goToSearch(page);
 
+      /**
+       * @background
+       * Given I am on the search page
+       * And the search results have loaded
+       */
+      await goToSearch(page);
       await waitForSearchResultsInitialLoad(page);
+
+      // And the filter drawer is open
       await ensureFilterDrawerOpen(page);
 
+      // And the "Funding instrument" accordion is expanded
       await ensureAccordionExpanded(page, "Funding instrument");
+
+      // When I check the "<funding instrument>" checkbox
       await toggleCheckboxGroup(page, fundingInstrumentCheckboxes);
+
+      // Then the browser URL contains query param "fundingInstrument" with values "<expected values>"
       await waitForURLContainsQueryParamValues(
         page,
         "fundingInstrument",
@@ -276,13 +309,22 @@ test.describe("Search page - state persistence after refresh", () => {
         120000,
       );
 
+      // When I refresh the page
       await refreshPageWithCurrentURL(page);
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page, 180000);
 
+      // And the filter drawer is open
       await ensureFilterDrawerOpen(page);
+
+      // And the "Funding instrument" accordion is expanded
       await ensureAccordionExpanded(page, "Funding instrument");
+
+      // And the "<funding instrument>" checkbox should be checked
       await expectCheckboxesChecked(page, fundingInstrumentCheckboxes);
 
+      // And the browser URL contains query param "fundingInstrument" with values "<expected values>"
       expectURLQueryParamValues(page, "fundingInstrument", ["grant"]);
     },
   );
@@ -298,13 +340,27 @@ test.describe("Search page - state persistence after refresh", () => {
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(240_000);
+
+      /**
+       * @background
+       * Given I am on the search page
+       * And the search results have loaded
+       */
       await goToSearch(page);
 
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page);
+
+      // When I open the filter drawer
       await ensureFilterDrawerOpen(page);
 
+      // And the "Eligibility" accordion is expanded
       await ensureAccordionExpanded(page, "Eligibility");
+
+      // When I check the "<eligibility>" checkbox
       await toggleCheckboxGroup(page, eligibilityCheckboxes);
+
+      // Then the browser URL contains query param "eligibility" with values "<expected eligibility>"
       await waitForURLContainsQueryParamValues(
         page,
         "eligibility",
@@ -312,13 +368,22 @@ test.describe("Search page - state persistence after refresh", () => {
         120000,
       );
 
+      // When I refresh the page
       await refreshPageWithCurrentURL(page);
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page, 180000);
 
+      // And the filter drawer is open
       await ensureFilterDrawerOpen(page);
+
+      // And the "Eligibility" accordion is expanded
       await ensureAccordionExpanded(page, "Eligibility");
+
+      // And the "<eligibility>" checkbox should be checked
       await expectCheckboxesChecked(page, eligibilityCheckboxes);
 
+      // And the browser URL contains query param "eligibility" with values "<expected eligibility>"
       expectURLQueryParamValues(page, "eligibility", ["county_governments"]);
     },
   );
@@ -334,13 +399,25 @@ test.describe("Search page - state persistence after refresh", () => {
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(240_000);
-      await goToSearch(page);
 
+      /**
+       * @background
+       * Given I am on the search page
+       * And the search results have loaded
+       */
+      await goToSearch(page);
       await waitForSearchResultsInitialLoad(page);
+
+      // When I open the filter drawer
       await ensureFilterDrawerOpen(page);
 
+      // And the "Category" accordion is expanded
       await ensureAccordionExpanded(page, "Category");
+
+      // When I check the "<category>" checkbox
       await toggleCheckboxGroup(page, categoryCheckboxes);
+
+      // Then the browser URL contains query param "category" with values "<expected category>"
       await waitForURLContainsQueryParamValues(
         page,
         "category",
@@ -348,13 +425,20 @@ test.describe("Search page - state persistence after refresh", () => {
         120000,
       );
 
+      // When I refresh the page
       await refreshPageWithCurrentURL(page);
       await waitForSearchResultsInitialLoad(page, 180000);
 
+      // And the filter drawer is open
       await ensureFilterDrawerOpen(page);
+
+      // And the "Category" accordion is expanded
       await ensureAccordionExpanded(page, "Category");
+
+      // And the "<category>" checkbox should be checked
       await expectCheckboxesChecked(page, categoryCheckboxes);
 
+      // And the browser URL contains query param "category" with values "<expected category>"
       expectURLQueryParamValues(page, "category", ["agriculture"]);
     },
   );
@@ -370,12 +454,22 @@ test.describe("Search page - state persistence after refresh", () => {
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(240_000);
-      await goToSearch(page);
 
+      /**
+       * @background
+       * Given I am on the search page
+       * And the search results have loaded
+       */
+      await goToSearch(page);
       await waitForSearchResultsInitialLoad(page);
+
+      //When I open the filter drawer
       await ensureFilterDrawerOpen(page);
+
+      // And agency filter options have loaded
       await waitForFilterOptions(page, "agency");
 
+      // And the "Agency" accordion is expanded
       await ensureAccordionExpanded(page, "Agency");
 
       // Wait for agency options to render
@@ -394,11 +488,10 @@ test.describe("Search page - state persistence after refresh", () => {
         return;
       }
 
-      // Click the top-level "All" checkbox
+      // When I check the first available top-level agency "All" checkbox
       await toggleCheckbox(page, allCheckboxId);
 
-      // Wait for URL to contain the topLevelAgency parameter
-      // The "All" checkbox sets topLevelAgency, not agency
+      // Then the URL should contain query param "topLevelAgency"
       await page.waitForFunction(
         () => {
           const url = new URL(window.location.href);
@@ -413,20 +506,26 @@ test.describe("Search page - state persistence after refresh", () => {
         urlBeforeRefresh.searchParams.get("topLevelAgency")?.split(",") || [];
       expect(topLevelAgencyValues.length).toBeGreaterThan(0);
 
+      // When I refresh the page
       await refreshPageWithCurrentURL(page);
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page, 180000);
 
+      // And the filter drawer is open
       await ensureFilterDrawerOpen(page);
+
+      // And the "Agency" accordion is expanded
       await ensureAccordionExpanded(page, "Agency");
       await page.waitForTimeout(1000);
 
-      // Verify the "All" checkbox is still checked
+      // And the previously selected top-level agency checkbox should be checked
       const isChecked = await page
         .locator(`input[id="${allCheckboxId}"]`)
         .isChecked();
       expect(isChecked).toBe(true);
 
-      // Verify URL still contains the topLevelAgency parameter with same values
+      // And the URL should contain query param "topLevelAgency" with the previously selected values
       expectURLQueryParamValues(page, "topLevelAgency", topLevelAgencyValues);
     },
   );
@@ -442,27 +541,31 @@ test.describe("Search page - state persistence after refresh", () => {
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
     async ({ page }) => {
       test.setTimeout(240_000);
-      await goToSearch(page);
 
+      /**
+       * @background
+       * Given I am on the search page
+       * And the search results have loaded
+       */
+      await goToSearch(page);
       await waitForSearchResultsInitialLoad(page);
 
-      // Step 1: Open filter drawer
+      // When I open the filter drawer
       await ensureFilterDrawerOpen(page);
 
-      // Step 2: Wait for agency filter options to load, which expands the accordion
+      // And agency filter options have loaded
       await waitForFilterOptions(page, "agency");
 
-      // Step 3: Ensure Agency accordion is expanded (waitForFilterOptions clicks it,
-      // but ensure it's open in case it was already open and got toggled closed)
+      // And the "Agency" accordion is expanded
       await ensureAccordionExpanded(page, "Agency");
 
-      // Step 4: Wait for sub-agency nested lists to be visible
+      // And sub-agency options are visible
       await page.waitForSelector(
         "#opportunity-filter-agency ul.margin-left-4 > li",
         { state: "visible", timeout: 30000 },
       );
 
-      // Step 5: Find first sub-agency with count > 0
+      // When I check the first available sub-agency checkbox with results
       const subAgency = await getFirstSubAgencySelection(page);
       expect(subAgency).toBeTruthy();
       if (!subAgency) {
@@ -474,7 +577,7 @@ test.describe("Search page - state persistence after refresh", () => {
 
       await checkbox.waitFor({ state: "attached", timeout: 30000 });
 
-      // Step 6: Click the sub-agency checkbox with robust cross-browser approach
+      // Click the sub-agency checkbox with robust cross-browser approach
       let selectedAndUpdated = false;
       for (let attempt = 1; attempt <= 3; attempt += 1) {
         // Ensure unchecked before clicking
@@ -561,6 +664,7 @@ test.describe("Search page - state persistence after refresh", () => {
 
         await expect(checkbox).toBeChecked({ timeout: 10000 });
 
+        // Then the URL should contain query param "agency" with the selected sub-agency value
         try {
           await waitForURLContainsQueryParamValues(
             page,
@@ -580,7 +684,7 @@ test.describe("Search page - state persistence after refresh", () => {
       // Wait to ensure filter is fully applied before refresh
       await page.waitForTimeout(3000);
 
-      // Step 7: Refresh and verify persistence
+      // When I refresh the page
       // Use direct navigation with domcontentloaded to avoid networkidle timeouts
       const currentURL = page.url();
       await page.goto(currentURL, {
@@ -590,24 +694,30 @@ test.describe("Search page - state persistence after refresh", () => {
       // Give page time to render content after navigation
       await page.waitForTimeout(2000);
 
+      // Then the search results load
       try {
         await waitForSearchResultsInitialLoad(page, 120000);
       } catch (_e) {
         // Search results may not load if filter didn't persist, but we'll check anyway
       }
 
+      // And the filter drawer is open
       await ensureFilterDrawerOpen(page);
 
-      // Step 8: Re-expand Agency accordion and wait for sub-agencies to render
+      // And agency filter options have loaded
       await waitForFilterOptions(page, "agency");
+
+      // And the "Agency" accordion is expanded
       await ensureAccordionExpanded(page, "Agency");
+
+      // And sub-agency options are visible
       await page.waitForSelector(
         "#opportunity-filter-agency ul.margin-left-4 > li",
         { state: "visible", timeout: 30000 },
       );
       await page.waitForTimeout(1000);
 
-      // Step 9: Verify sub-agency is still checked after refresh
+      // And the previously selected sub-agency checkbox should be checked
       const checkedSubAgencyByValue = page
         .locator(
           `#opportunity-filter-agency input[type="checkbox"][value="${subAgency.value}"]`,
@@ -615,6 +725,7 @@ test.describe("Search page - state persistence after refresh", () => {
         .first();
       await expect(checkedSubAgencyByValue).toBeChecked({ timeout: 15000 });
 
+      // And the URL should contain query param "agency" with the selected sub-agency value
       expectURLQueryParamValues(page, "agency", [subAgency.value]);
     },
   );
