@@ -113,6 +113,7 @@ ENV PATH="/analytics/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \
     TMPDIR="/tmp" \
     UV_CACHE_DIR="/tmp/.cache/uv" \
+    UV_NO_SYNC=1 \
     SSL_CERT_FILE="/etc/pki/tls/certs/ca-bundle.crt" \
     SSL_CERT_DIR="/etc/pki/tls/certs" \
     PYTHONOPTIMIZE=0
