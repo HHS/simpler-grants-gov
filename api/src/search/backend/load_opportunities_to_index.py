@@ -7,14 +7,18 @@ from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 from sqlalchemy import select
-from sqlalchemy.orm import noload, selectinload
+from sqlalchemy.orm import selectinload
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 import src.adapters.db as db
 import src.adapters.search as search
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.db.models.agency_models import Agency
-from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    Opportunity,
+    OpportunitySummary,
+)
 from src.task.task import Task
 from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from src.util.env_config import PydanticBaseEnvConfig
@@ -101,13 +105,19 @@ class LoadOpportunitiesToIndex(Task):
                     Opportunity.is_draft.is_(False),
                     CurrentOpportunitySummary.opportunity_status.isnot(None),
                 )
-                .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
-                # Top level agency won't be automatically fetched up front unless we add this
-                # due to the odd nature of the relationship we have setup for the agency table
-                # Adding it here improves performance when serializing to JSON as we won't need to
-                # call out to the DB repeatedly.
                 .options(
-                    selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency)
+                    # Opportunity summary
+                    selectinload(Opportunity.current_opportunity_summary)
+                    .selectinload(CurrentOpportunitySummary.opportunity_summary)
+                    .options(
+                        selectinload(OpportunitySummary.link_funding_instruments),
+                        selectinload(OpportunitySummary.link_funding_categories),
+                        selectinload(OpportunitySummary.link_applicant_types),
+                    ),
+                    # Assistance listing number
+                    selectinload(Opportunity.opportunity_assistance_listings),
+                    # Agency
+                    selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency),
                 )
                 .execution_options(yield_per=1000)
             )

@@ -8,10 +8,7 @@ from src.data_migration.transformation.subtask.transform_competition import (
     transform_form_family,
     transform_open_to_applicants,
 )
-from src.db.models.competition_models import Competition
-from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.util import file_util
-from tests.lib.db_testing import cascade_delete_from_db_table
 from tests.src.data_migration.transformation.conftest import (
     BaseTransformTestClass,
     setup_competition,
@@ -20,17 +17,12 @@ from tests.src.data_migration.transformation.conftest import (
 
 
 class TestTransformCompetition(BaseTransformTestClass):
-    @pytest.fixture(autouse=True)
-    def cleanup_competitions(self, db_session, test_staging_schema):
-        """Clean up competition data before each test."""
-        # Use cascade delete to properly handle foreign key constraints
-        cascade_delete_from_db_table(db_session, Competition)
 
-        # Clean opportunity tables
-        cascade_delete_from_db_table(db_session, OpportunityAssistanceListing)
-        cascade_delete_from_db_table(db_session, Opportunity)
-
-        db_session.commit()
+    @pytest.fixture(scope="class", autouse=True)
+    def setup(self):
+        # To avoid conflicting with any assistance listings or cfdas in other tests
+        # we set the sequence (ie. the ID) to a much higher number past any that would have been created.
+        f.OpportunityAssistanceListingFactory.reset_sequence(1_000_000)
 
     @pytest.fixture
     def transform_competition(self, transform_oracle_data_task):

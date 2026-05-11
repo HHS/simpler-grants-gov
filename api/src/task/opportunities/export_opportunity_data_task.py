@@ -6,15 +6,20 @@ from enum import StrEnum
 
 from pydantic import Field
 from sqlalchemy import select
-from sqlalchemy.orm import noload, selectinload
+from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.util.file_util as file_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import ExtractType
+from src.db.models.agency_models import Agency
 from src.db.models.extract_models import ExtractMetadata
-from src.db.models.opportunity_models import CurrentOpportunitySummary, Opportunity
+from src.db.models.opportunity_models import (
+    CurrentOpportunitySummary,
+    Opportunity,
+    OpportunitySummary,
+)
 from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_csv
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
@@ -125,7 +130,20 @@ class ExportOpportunityDataTask(Task):
                     Opportunity.is_draft.is_(False),
                     CurrentOpportunitySummary.opportunity_status.isnot(None),
                 )
-                .options(selectinload("*"), noload(Opportunity.all_opportunity_summaries))
+                .options(
+                    # Opportunity summary
+                    selectinload(Opportunity.current_opportunity_summary)
+                    .selectinload(CurrentOpportunitySummary.opportunity_summary)
+                    .options(
+                        selectinload(OpportunitySummary.link_funding_instruments),
+                        selectinload(OpportunitySummary.link_funding_categories),
+                        selectinload(OpportunitySummary.link_applicant_types),
+                    ),
+                    # Assistance listing number
+                    selectinload(Opportunity.opportunity_assistance_listings),
+                    # Agency
+                    selectinload(Opportunity.agency_record).selectinload(Agency.top_level_agency),
+                )
                 .execution_options(yield_per=5000)
             )
             .scalars()

@@ -57,6 +57,7 @@ __check_defined = \
 	infra-lint-workflows \
 	infra-module-database-role-manager \
 	infra-set-up-account \
+	infra-test-modules \
 	infra-test-service \
 	infra-update-app-build-repository \
 	infra-update-app-database-roles \
@@ -204,6 +205,14 @@ infra-validate-module-%:
 	@echo "Validate library module: $*"
 	terraform -chdir=infra/modules/$* init -backend=false
 	terraform -chdir=infra/modules/$* validate
+
+infra-test-modules: ## Run native Terraform unit tests for reusable child modules
+infra-test-modules: $(patsubst %, infra-test-module-%, $(MODULES))
+
+infra-test-module-%:
+	@echo "Test module: $*"
+	terraform -chdir=infra/modules/$* init -backend=false
+	terraform -chdir=infra/modules/$* test
 
 infra-check-app-database-roles: ## Check that app database roles have been configured properly
 	@:$(call check_defined, APP_NAME, the name of subdirectory of /infra that holds the application's infrastructure code)

@@ -121,20 +121,7 @@ describe("getDefaultHeaders", () => {
     expect(headers["Content-Type"]).toEqual("application/json");
   });
 
-  it("includes X-AUTH header when API_AUTH_TOKEN is set", async () => {
-    mockEnvironment.API_AUTH_TOKEN = "test-auth-token";
-    mockEnvironment.API_GW_AUTH = "";
-
-    const { getDefaultHeaders } = await import(
-      "src/services/fetch/fetcherHelpers"
-    );
-    const headers = await getDefaultHeaders({});
-    expect(headers["X-AUTH"]).toEqual("test-auth-token");
-    expect(headers["Content-Type"]).toEqual("application/json");
-  });
-
   it("includes X-API-KEY header when API_GW_AUTH is set", async () => {
-    mockEnvironment.API_AUTH_TOKEN = "";
     mockEnvironment.API_GW_AUTH = "test-api-key";
 
     const { getDefaultHeaders } = await import(
@@ -145,28 +132,13 @@ describe("getDefaultHeaders", () => {
     expect(headers["Content-Type"]).toEqual("application/json");
   });
 
-  it("includes both X-AUTH and X-API-KEY headers when both tokens are set", async () => {
-    mockEnvironment.API_AUTH_TOKEN = "test-auth-token";
-    mockEnvironment.API_GW_AUTH = "test-api-key";
-
-    const { getDefaultHeaders } = await import(
-      "src/services/fetch/fetcherHelpers"
-    );
-    const headers = await getDefaultHeaders({});
-    expect(headers["X-AUTH"]).toEqual("test-auth-token");
-    expect(headers["X-API-KEY"]).toEqual("test-api-key");
-    expect(headers["Content-Type"]).toEqual("application/json");
-  });
-
-  it("does not include static auth headers when tokens are not set", async () => {
-    mockEnvironment.API_AUTH_TOKEN = "";
+  it("does not include X-API-KEY header when API_GW_AUTH is not set", async () => {
     mockEnvironment.API_GW_AUTH = "";
 
     const { getDefaultHeaders } = await import(
       "src/services/fetch/fetcherHelpers"
     );
     const headers = await getDefaultHeaders({});
-    expect(headers["X-AUTH"]).toBeUndefined();
     expect(headers["X-API-KEY"]).toBeUndefined();
     expect(headers["Content-Type"]).toEqual("application/json");
   });

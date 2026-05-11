@@ -1,7 +1,11 @@
 from src.api.schemas.extension import Schema, fields
 from src.api.schemas.extension.field_validators import Length
 from src.api.schemas.response_schema import AbstractResponseSchema, PaginationMixinSchema
-from src.api.schemas.search_schema import BoolSearchSchemaBuilder, StrSearchSchemaBuilder
+from src.api.schemas.search_schema import (
+    BoolSearchSchemaBuilder,
+    StrSearchSchemaBuilder,
+    UuidSearchSchemaBuilder,
+)
 from src.api.schemas.shared_schema import SimpleUserSchema
 from src.constants.lookup_constants import (
     ApprovalResponseType,
@@ -183,8 +187,8 @@ class AwardRecommendationReviewSchema(Schema):
     is_reviewed = fields.Boolean(metadata={"description": "Whether the review has been completed"})
 
 
-class AwardRecommendationDataSchema(Schema):
-    """Schema for the award recommendation details"""
+class AwardRecommendationBaseSchema(Schema):
+    """Base schema for award recommendations (excludes attachments)."""
 
     award_recommendation_id = fields.UUID(
         metadata={"description": "The award recommendation's unique identifier"}
@@ -240,11 +244,6 @@ class AwardRecommendationDataSchema(Schema):
         AwardRecommendationOpportunitySchema,
         metadata={"description": "The associated opportunity"},
     )
-    award_recommendation_attachments = fields.List(
-        fields.Nested(AwardRecommendationAttachmentSchema),
-        dump_default=[],
-        metadata={"description": "Attachments associated with the award recommendation"},
-    )
     award_recommendation_reviews = fields.List(
         fields.Nested(AwardRecommendationReviewSchema),
         dump_default=[],
@@ -252,9 +251,19 @@ class AwardRecommendationDataSchema(Schema):
     )
 
 
+class AwardRecommendationWithAttachmentsSchema(AwardRecommendationBaseSchema):
+    """Schema for the award recommendation details (includes attachments)."""
+
+    award_recommendation_attachments = fields.List(
+        fields.Nested(AwardRecommendationAttachmentSchema),
+        dump_default=[],
+        metadata={"description": "Attachments associated with the award recommendation"},
+    )
+
+
 class AwardRecommendationGetResponseSchema(AbstractResponseSchema):
     data = fields.Nested(
-        AwardRecommendationDataSchema,
+        AwardRecommendationWithAttachmentsSchema,
         metadata={"description": "The award recommendation details"},
     )
 
@@ -576,6 +585,50 @@ class AwardRecommendationRiskListResponseSchema(AbstractResponseSchema, Paginati
     data = fields.List(
         fields.Nested(AwardRecommendationRiskResponseDataSchema),
         metadata={"description": "The list of award recommendation risks"},
+    )
+
+
+####################################
+# List Award Recommendations
+####################################
+
+
+class AwardRecommendationListFilterSchema(Schema):
+    """Schema for the award recommendation list filters"""
+
+    agency_id = fields.Nested(
+        UuidSearchSchemaBuilder("AwardRecommendationListAgencyIdFilterSchema")
+        .with_one_of()
+        .build(),
+        required=True,
+        metadata={
+            "description": "Filter award recommendations by agency. The user must have the "
+            "view_award_recommendation privilege in each agency listed."
+        },
+    )
+
+
+class AwardRecommendationListRequestSchema(Schema):
+    """Schema for POST /alpha/award-recommendations/list request"""
+
+    filters = fields.Nested(AwardRecommendationListFilterSchema(), required=True)
+
+    pagination = fields.Nested(
+        generate_pagination_schema(
+            "AwardRecommendationListPaginationSchema",
+            ["created_at"],
+            default_sort_order=[{"order_by": "created_at", "sort_direction": "descending"}],
+        ),
+        required=True,
+    )
+
+
+class AwardRecommendationListResponseSchema(AbstractResponseSchema, PaginationMixinSchema):
+    """Schema for POST /alpha/award-recommendations/list response"""
+
+    data = fields.List(
+        fields.Nested(AwardRecommendationBaseSchema),
+        metadata={"description": "The list of award recommendations"},
     )
 
 

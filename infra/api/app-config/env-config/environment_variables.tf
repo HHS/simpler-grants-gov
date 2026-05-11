@@ -55,11 +55,6 @@ locals {
   #   }
   # }
   secrets = {
-    API_AUTH_TOKEN = {
-      manage_method     = "manual"
-      secret_store_name = "/api/${var.environment}/api-auth-token"
-    }
-
     NEW_RELIC_LICENSE_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/new-relic-license-key"
@@ -103,6 +98,16 @@ locals {
     SOAP_PARTNER_GATEWAY_URI = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/soap-partner-gateway-uri"
+    }
+
+    SOAP_GRANTORS_PATH = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-grantors-path"
+    }
+
+    SOAP_APPLICANTS_PATH = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/soap-applicants-path"
     }
 
     SOAP_PARTNER_GATEWAY_AUTH_KEY = {

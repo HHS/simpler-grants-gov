@@ -1,6 +1,8 @@
 import clsx from "clsx";
 import { formatDate } from "src/utils/dateUtil";
 
+import { ReactElement } from "react";
+
 interface StatusItemProps {
   description: string;
   showDate?: boolean;
@@ -15,33 +17,25 @@ const StatusItem = ({
   orange = false,
   showDate = true,
   tag = false,
-}: StatusItemProps) => {
+}: StatusItemProps): ReactElement => {
   return (
-    <span
-      className="
-        tablet:padding-x-1
-        tablet:margin-left-neg-1
-        tablet:margin-right-1
-        tablet:border-base-lighter"
+    <div
+      className={clsx("search-result-status__item", {
+        "usa-tag search-result-status__item--tag": tag,
+        "bg-accent-warm-dark": orange,
+      })}
     >
-      <span
-        className={clsx("display-flex", {
-          "usa-tag margin-right-2 tablet:margin-0": tag,
-          "bg-accent-warm-dark": orange,
-        })}
-      >
-        <strong>{description}</strong>
-        {showDate && (
-          <span className="text-no-uppercase padding-left-05">
-            {date ? formatDate(date) : "--"}
-          </span>
-        )}
-      </span>
-    </span>
+      <dt className="search-result-status__term">{description}</dt>
+      {showDate ? (
+        <dd className="search-result-status__description">
+          {date ? formatDate(date) : "--"}
+        </dd>
+      ) : null}
+    </div>
   );
 };
 
-interface SearchResultListItemStatusProps {
+export interface SearchResultListItemStatusProps {
   status: string | null;
   archivedString: string;
   closedString: string;
@@ -59,30 +53,30 @@ const SearchResultListItemStatus = ({
   closedString,
   forecastedString,
   postedString,
-}: SearchResultListItemStatusProps) => {
+}: SearchResultListItemStatusProps): ReactElement => {
   return (
     <>
-      {status === "archived" && (
+      {status === "archived" ? (
         <StatusItem date={archiveDate} description={archivedString} />
-      )}
-      {(status === "archived" || status === "closed") && closedDate && (
+      ) : null}
+      {(status === "archived" || status === "closed") && closedDate ? (
         <StatusItem description={closedString} date={closedDate} />
-      )}
-      {status === "posted" && (
+      ) : null}
+      {status === "posted" ? (
         <StatusItem
           description={postedString}
           date={closedDate}
           orange={true}
           tag={true}
         />
-      )}
-      {status === "forecasted" && (
+      ) : null}
+      {status === "forecasted" ? (
         <StatusItem
           description={forecastedString}
           showDate={false}
           tag={true}
         />
-      )}
+      ) : null}
     </>
   );
 };
