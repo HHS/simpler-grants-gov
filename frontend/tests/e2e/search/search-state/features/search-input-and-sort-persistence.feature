@@ -16,8 +16,8 @@ Background:
 
 /* @tags GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION */
 Scenario: Retain search input and sort after refresh
-  When I enter "<search-term>" in the search input and submit
-  And I open the filter drawer
+  When I enter "<search-term>" in the search input and submit in "<viewport>"
+  And I <sort access action>
   And I select sort order "<sort label>"
   Then the browser URL contains "/search?query=<search-term>&sortby=<sort type>"
   When I refresh the page
@@ -25,8 +25,9 @@ Scenario: Retain search input and sort after refresh
   And the search input should contain "<search-term>"
   And the sort order should be "<sort label>"
   And the browser URL contains "/search?query=<search-term>&sortby=<sort type>"
- 
+
 Examples:
-  | search-term | sort label                 | sort type        |
-  | education   | Award maximum (Highest)    | awardCeilingDesc |
- 
+  | viewport | sort access action      | search-term | sort label                 | sort type        |
+  | mobile   | open the filter drawer  | education   | Award maximum (Highest)    | awardCeilingDesc |
+  | desktop  | view the sort options   | education   | Award maximum (Highest)    | awardCeilingDesc |
+  
