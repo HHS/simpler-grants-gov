@@ -1511,3 +1511,8 @@ $simpler-switch-transition-easing: ease;
 .seg-scroll-margin-top--header {
   scroll-margin-top: 6rem;
 }
+// Award Recommendation Step Connector
+.award-recommendation-step-connector {
+  background-color: #c3e8d8;
+  height: calc(100% + 1rem);
+}
