@@ -131,7 +131,7 @@ describe("AwardRecommendationEditPage", () => {
         params: awardRecommendationParams,
       });
       render(component);
-      expect(await screen.findByText("pageTitleEdit")).toBeVisible();
+      expect(await screen.findByText("onThisPage")).toBeVisible();
       expect(screen.getByTestId("InPageNavigation")).toBeInTheDocument();
     });
 

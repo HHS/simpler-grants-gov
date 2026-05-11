@@ -222,10 +222,7 @@ async function AwardRecommendationEditPageContent({
               tablet={{ col: 3 }}
               className="display-none desktop:display-block"
             >
-              <ApplyFormNav
-                title={t("pageTitleEdit")}
-                fields={navigationItems}
-              />
+              <ApplyFormNav title={t("onThisPage")} fields={navigationItems} />
             </Grid>
             <Grid col={12} desktop={{ col: 9 }}>
               <div id="opportunity" className="seg-scroll-margin-top--header">
