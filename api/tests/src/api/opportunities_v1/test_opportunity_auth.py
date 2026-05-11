@@ -104,7 +104,6 @@ def test_opportunity_get_success_with_api_user_key(
 def test_opportunity_search_with_inactive_api_user_key(client, enable_factory_create, db_session):
     """Test opportunity search endpoint with inactive API user key"""
     inactive_api_key = UserApiKeyFactory.create(is_active=False)
-    db_session.commit()
 
     response = client.post(
         "/v1/opportunities/search",
@@ -121,7 +120,6 @@ def test_opportunity_search_csv_with_inactive_api_user_key(
 ):
     """Test opportunity search CSV endpoint with inactive API user key"""
     inactive_api_key = UserApiKeyFactory.create(is_active=False)
-    db_session.commit()
 
     response = client.post(
         "/v1/opportunities/search/csv",
@@ -138,7 +136,6 @@ def test_opportunity_get_with_inactive_api_user_key(client, enable_factory_creat
     inactive_api_key = UserApiKeyFactory.create(is_active=False)
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()
-    db_session.commit()
 
     response = client.get(
         f"/v1/opportunities/{opportunity.opportunity_id}",
@@ -185,7 +182,6 @@ def test_opportunity_auth_precedence_jwt_first(
     """Test that JWT auth takes precedence over API key auth when both are provided"""
     # Create an opportunity to get
     opportunity = OpportunityFactory.create()
-    db_session.commit()
 
     # Send both headers - JWT should take precedence over API key
     response = client.get(

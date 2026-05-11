@@ -53,7 +53,6 @@ from tests.src.db.models.factories import (
 )
 def test_get_opportunity_200(
     client,
-    api_auth_token,
     enable_factory_create,
     opportunity_params,
     opportunity_summary_params,
@@ -132,11 +131,10 @@ def test_get_opportunity_200_JWT(
 
 
 def test_get_opportunity_with_attachment_200(
-    client, api_auth_token, enable_factory_create, db_session, user_api_key_id
+    client, enable_factory_create, db_session, user_api_key_id
 ):
     # Create an opportunity with an attachment
     opportunity = OpportunityFactory.create(has_attachments=True)
-    db_session.commit()
 
     # Make the GET request
     resp = client.get(
@@ -153,7 +151,7 @@ def test_get_opportunity_with_attachment_200(
 
 
 def test_get_opportunity_with_attachment_200_legacy(
-    client, api_auth_token, enable_factory_create, db_session, user_api_key_id
+    client, enable_factory_create, db_session, user_api_key_id
 ):
     # Create an opportunity with an attachment
     opportunity = OpportunityFactory.create(has_attachments=True)
@@ -193,9 +191,7 @@ def test_get_opportunity_with_attachment_200_legacy_JWT(client, user_auth_token)
     validate_opportunity_with_attachments(opportunity, response_data)
 
 
-def test_get_opportunity_with_agency_200(
-    client, api_auth_token, enable_factory_create, user_api_key_id
-):
+def test_get_opportunity_with_agency_200(client, enable_factory_create, user_api_key_id):
     parent_agency = AgencyFactory.create(agency_code="EXAMPLEAGENCYXYZ")
     child_agency = AgencyFactory.create(
         agency_code="EXAMPLEAGENCYXYZ-12345678", top_level_agency=parent_agency
@@ -215,9 +211,7 @@ def test_get_opportunity_with_agency_200(
     assert response_data["top_level_agency_name"] == parent_agency.agency_name
 
 
-def test_get_opportunity_with_agency_200_legacy(
-    client, api_auth_token, enable_factory_create, user_api_key_id
-):
+def test_get_opportunity_with_agency_200_legacy(client, enable_factory_create, user_api_key_id):
     parent_agency = AgencyFactory.create(agency_code="EXAMPLEAGENCYXYZ2")
     child_agency = AgencyFactory.create(
         agency_code="EXAMPLEAGENCYXYZ2-12345678", top_level_agency=parent_agency
@@ -261,7 +255,6 @@ def test_get_opportunity_with_agency_200_JWT(client, user_auth_token):
 
 def test_get_opportunity_s3_endpoint_url_200(
     client,
-    api_auth_token,
     enable_factory_create,
     db_session,
     mock_s3_bucket,
@@ -297,7 +290,6 @@ def test_get_opportunity_s3_endpoint_url_200(
 
 def test_get_opportunity_s3_endpoint_url_200_legacy(
     client,
-    api_auth_token,
     enable_factory_create,
     db_session,
     mock_s3_bucket,
@@ -367,7 +359,7 @@ def test_get_opportunity_404_not_found(client, user_api_key_id):
     assert resp.get_json()["message"] == f"Could not find Opportunity with ID {opportunity_id}"
 
 
-def test_get_opportunity_404_not_found_legacy(client, api_auth_token, user_api_key_id):
+def test_get_opportunity_404_not_found_legacy(client, user_api_key_id):
     resp = client.get("/v1/opportunities/456789", headers={"X-API-Key": user_api_key_id})
     assert resp.status_code == 404
     assert resp.get_json()["message"] == "Could not find Opportunity with Legacy ID 456789"
@@ -383,9 +375,7 @@ def test_get_opportunity_404_not_found_JWT(client, user_auth_token):
     assert resp.get_json()["message"] == f"Could not find Opportunity with ID {opportunity_id}"
 
 
-def test_get_opportunity_404_not_found_is_draft(
-    client, api_auth_token, enable_factory_create, user_api_key_id
-):
+def test_get_opportunity_404_not_found_is_draft(client, enable_factory_create, user_api_key_id):
     # The endpoint won't return drafts, so this'll be a 404 despite existing
     opportunity = OpportunityFactory.create(is_draft=True)
 
@@ -400,7 +390,7 @@ def test_get_opportunity_404_not_found_is_draft(
 
 
 def test_get_opportunity_404_not_found_is_draft_legacy(
-    client, api_auth_token, enable_factory_create, user_api_key_id
+    client, enable_factory_create, user_api_key_id
 ):
     # The endpoint won't return drafts, so this'll be a 404 despite existing
     opportunity = OpportunityFactory.create(is_draft=True)
@@ -434,7 +424,6 @@ def test_get_opportunity_404_not_found_is_draft_legacy_JWT(client, user_auth_tok
 
 def test_get_opportunity_returns_cdn_urls(
     client,
-    api_auth_token,
     monkeypatch_session,
     enable_factory_create,
     db_session,
@@ -474,7 +463,6 @@ def test_get_opportunity_returns_cdn_urls(
 
 def test_get_opportunity_returns_cdn_urls_legacy(
     client,
-    api_auth_token,
     monkeypatch_session,
     enable_factory_create,
     db_session,
@@ -546,12 +534,11 @@ def test_get_opportunity_returns_cdn_urls_JWT(
 
 
 def test_get_opportunity_with_competitions_200(
-    client, api_auth_token, enable_factory_create, db_session, user_api_key_id
+    client, enable_factory_create, db_session, user_api_key_id
 ):
     # Create an opportunity with a competition
     opportunity = OpportunityFactory.create()
     competition = CompetitionFactory.create(opportunity=opportunity)
-    db_session.commit()
 
     # Make the GET request
     resp = client.get(
@@ -574,7 +561,6 @@ def test_get_opportunity_with_competitions_200_JWT(client, db_session, user_auth
     # Create an opportunity with a competition
     opportunity = OpportunityFactory.create()
     competition = CompetitionFactory.create(opportunity=opportunity)
-    db_session.commit()
 
     # Make the GET request
     resp = client.get(

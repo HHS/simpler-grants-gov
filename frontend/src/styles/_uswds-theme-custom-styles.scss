@@ -945,8 +945,15 @@ dl {
 }
 .share-opportunity-modal .usa-modal__main {
   margin: 0;
-  padding: 4.375rem 5.313rem 4.375rem 5.313rem;
+  padding: 1.5rem;
 }
+
+@include at-media("tablet") {
+  .share-opportunity-modal .usa-modal__main {
+    padding: 4.375rem 5.313rem 4.375rem 5.313rem;
+  }
+}
+
 .share-opportunity-modal .usa-modal__main .usa-modal__heading {
   font-size: 1.75rem;
 }
@@ -1010,6 +1017,193 @@ input[type="checkbox"]:not(checked) ~ .saved-opportunity-radius-md,
   padding: 0.46rem 0.5rem 0.5rem 0.5rem;
   border-radius: 0.25rem;
 }
+
+.search-result-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: units(1);
+  margin: 0;
+
+  &__item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: units("05");
+    margin: 0;
+
+    &--tag {
+      margin-right: units(1);
+    }
+  }
+
+  &__term {
+    font-weight: font-weight("bold");
+  }
+
+  &__description {
+    margin: 0;
+    text-transform: none;
+  }
+}
+
+.saved-opportunity-card {
+  display: grid;
+  grid-template-areas:
+    "title"
+    "status"
+    "metadata"
+    "award"
+    "tags"
+    "action";
+  gap: units(1);
+  padding: units(2);
+  margin-bottom: units(2);
+  border: 1px solid color("base-lighter");
+
+  &__title {
+    grid-area: title;
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: line-height("sans", 2);
+  }
+
+  &__status-row {
+    grid-area: status;
+    margin-top: 0;
+  }
+
+  &__posted-date {
+    display: inline-flex;
+    align-items: baseline;
+    gap: units("05");
+    margin: 0;
+
+    &-term {
+      font-weight: font-weight("bold");
+    }
+
+    &-description {
+      margin: 0;
+    }
+  }
+
+  &__metadata {
+    grid-area: metadata;
+    display: grid;
+    gap: units("05");
+    margin: 0;
+
+    &-item {
+      display: inline-flex;
+      align-items: baseline;
+      gap: units("05");
+      margin: 0;
+      flex-direction: column;
+    }
+
+    &-term {
+      font-weight: font-weight("bold");
+    }
+
+    &-description {
+      margin: 0;
+    }
+  }
+
+  &__award {
+    grid-area: award;
+    display: grid;
+    gap: units(1);
+    margin: 0;
+    padding-top: units(1);
+    padding-bottom: units(1);
+    border-top: 1px solid color("base-lighter");
+    border-bottom: 1px solid color("base-lighter");
+
+    &-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: baseline;
+      column-gap: units(1);
+      margin: 0;
+    }
+
+    &-term {
+      font-weight: font-weight("bold");
+    }
+
+    &-description {
+      margin: 0;
+      text-align: right;
+
+      &--maximum {
+        font-size: 1rem;
+        font-weight: font-weight("normal");
+        line-height: line-height("sans", 1);
+      }
+    }
+  }
+
+  &__tags {
+    grid-area: tags;
+  }
+
+  &__action {
+    grid-area: action;
+    text-align: right;
+  }
+
+  @include at-media("tablet") {
+    grid-template-columns: minmax(0, 1fr) max-content;
+    grid-template-areas:
+      "title award"
+      "status award"
+      "metadata award"
+      "tags action";
+    column-gap: units(4);
+    align-items: stretch;
+
+    &__metadata {
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: units(2);
+      row-gap: units("05");
+
+      &-item {
+        flex-direction: row;
+      }
+    }
+
+    &__award {
+      padding-top: 0;
+      padding-bottom: 0;
+      border-top: 0;
+      border-bottom: 0;
+      justify-items: end;
+      text-align: right;
+
+      &-item {
+        grid-template-columns: 1fr;
+        gap: units("05");
+        justify-items: end;
+      }
+
+      &-description {
+        text-align: right;
+
+        &--maximum {
+          font-size: size("sans", "lg");
+          font-weight: font-weight("bold");
+        }
+      }
+    }
+
+    &__action {
+      align-self: end;
+    }
+  }
+}
+
 // Saved Opportunities Tags
 .saved-opportunity-tags {
   position: relative;
@@ -1312,4 +1506,10 @@ $simpler-switch-transition-easing: ease;
 .notification-preference-card__loading-text {
   color: color("gray-warm-70");
   font-size: size("sans", "2xs");
+}
+
+// Award Recommendation Step Connector
+.award-recommendation-step-connector {
+  background-color: #c3e8d8;
+  height: calc(100% + 1rem);
 }
