@@ -135,7 +135,6 @@ def test_get_opportunity_with_attachment_200(
 ):
     # Create an opportunity with an attachment
     opportunity = OpportunityFactory.create(has_attachments=True)
-    db_session.commit()
 
     # Make the GET request
     resp = client.get(
@@ -540,7 +539,6 @@ def test_get_opportunity_with_competitions_200(
     # Create an opportunity with a competition
     opportunity = OpportunityFactory.create()
     competition = CompetitionFactory.create(opportunity=opportunity)
-    db_session.commit()
 
     # Make the GET request
     resp = client.get(
@@ -563,7 +561,6 @@ def test_get_opportunity_with_competitions_200_JWT(client, db_session, user_auth
     # Create an opportunity with a competition
     opportunity = OpportunityFactory.create()
     competition = CompetitionFactory.create(opportunity=opportunity)
-    db_session.commit()
 
     # Make the GET request
     resp = client.get(
