@@ -134,7 +134,8 @@ FORM_JSON_SCHEMA = {
             "type": "array",
             "title": "Contact People",
             "description": "Repeatable contact people demo for FieldList.",
-            "minItems": 1,
+            "minItems": 2,
+            "maxItems": 3,
             "items": {
                 "type": "object",
                 "required": ["first_name"],

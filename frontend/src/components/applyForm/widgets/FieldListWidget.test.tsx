@@ -89,6 +89,44 @@ describe("FieldListWidget", () => {
     expect(screen.queryAllByTestId("mock-widget")).toHaveLength(0);
   });
 
+  it("renders no entries when minItems is undefined", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.queryByText(/entry\s+1/i)).not.toBeInTheDocument();
+    expect(screen.queryAllByTestId("mock-widget")).toHaveLength(0);
+  });
+
+  it("renders minItems number of entries", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={2}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.getByText(/entry\s+1/i)).toBeInTheDocument();
+    expect(screen.getByText(/entry\s+2/i)).toBeInTheDocument();
+    expect(screen.getAllByTestId("mock-widget")).toHaveLength(2);
+  });
+
   it("adds a row", async () => {
     const user = userEvent.setup();
 
@@ -110,6 +148,25 @@ describe("FieldListWidget", () => {
 
     expect(screen.getByText(/entry\s+2/i)).toBeInTheDocument();
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(2);
+  });
+
+  it("disables add when maxItems is reached", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={1}
+        maxItems={1}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /\+\s*add/i })).toBeDisabled();
   });
 
   it("removes a row without going below minItems", async () => {
@@ -137,7 +194,25 @@ describe("FieldListWidget", () => {
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
 
-  it("marks the form edited when a FieldList child field changes", async () => {
+  it("disables delete when minItems is reached", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={1}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /delete/i })).toBeDisabled();
+  });
+
+  it("marks the form dirty when a FieldList child field changes", async () => {
     const user = userEvent.setup();
     const markFormDirtyMock = jest.fn();
 
@@ -147,6 +222,7 @@ describe("FieldListWidget", () => {
         key="contacts"
         schema={{ type: "array", title: "Contacts" }}
         label="Contacts"
+        minItems={1}
         groupDefinition={baseGroupDefinition}
         rawErrors={[]}
         requiredFields={[]}
@@ -164,7 +240,7 @@ describe("FieldListWidget", () => {
     expect(markFormDirtyMock).toHaveBeenCalled();
   });
 
-  it("marks the form edited when a FieldList row is added", async () => {
+  it("marks the form dirty when a FieldList row is added", async () => {
     const user = userEvent.setup();
     const markFormDirtyMock = jest.fn();
 
@@ -191,7 +267,7 @@ describe("FieldListWidget", () => {
     expect(markFormDirtyMock).toHaveBeenCalledTimes(1);
   });
 
-  it("marks the form edited when a FieldList row is deleted", async () => {
+  it("marks the form dirty when a FieldList row is deleted", async () => {
     const user = userEvent.setup();
     const markFormDirtyMock = jest.fn();
 
@@ -201,6 +277,8 @@ describe("FieldListWidget", () => {
         key="contacts"
         schema={{ type: "array", title: "Contacts" }}
         label="Contacts"
+        minItems={1}
+        value={[{}, {}]}
         groupDefinition={baseGroupDefinition}
         rawErrors={[]}
         requiredFields={[]}
