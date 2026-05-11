@@ -1,3 +1,15 @@
+/**
+* @featureArea Search
+* @feature Search State Persistence
+* @featureFiles
+*   - e2e/search/search-state/features/search-input-and-sort-persistence.feature
+*   - e2e/search/search-state/features/search-core-filters-persistence.feature
+*   - e2e/search/search-state/features/search-agency-filters-persistence.feature
+*   - e2e/search/search-state/features/search-multi-filters-persistence.feature
+* @description Validates persistence of search query, sorting, filters, and agency selections after page refresh via URL sync
+* @tags GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION, FULL_REGRESSION
+*/
+
 import { expect, Page, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import {
@@ -129,6 +141,12 @@ const getFirstSubAgencySelection = async (page: Page) => {
 };
 
 test.describe("Search page - state persistence after refresh", () => {
+  /**
+   * @featureFile e2e/search/search-state/features/search-input-and-sort-persistence.feature
+   * @scenario Retain search input and sort after refresh
+   * Verifies that after entering a search term, selecting a sort order, and refreshing
+   * the page, the search input value and sort selection are restored from the URL.
+   */
   test(
     "should retain search input and sort after refresh",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
@@ -168,6 +186,12 @@ test.describe("Search page - state persistence after refresh", () => {
     },
   );
 
+  /**
+   * @featureFile e2e/search/search-state/features/search-core-filters-persistence.feature
+   * @scenario Retain status filter after refresh
+   * Verifies that selecting the "Closed" status checkbox persists the status filter
+   * (forecasted, posted, closed) in the URL after a page refresh.
+   */
   test(
     "should retain status filter after refresh",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
@@ -202,6 +226,12 @@ test.describe("Search page - state persistence after refresh", () => {
     },
   );
 
+  /**
+   * @featureFile e2e/search/search-state/features/search-core-filters-persistence.feature
+   * @scenario Retain funding instrument filter after refresh
+   * Verifies that selecting a funding instrument checkbox (e.g. "Grant") persists
+   * the fundingInstrument query param in the URL after a page refresh.
+   */
   test(
     "should retain funding instrument filter after refresh",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
@@ -232,6 +262,12 @@ test.describe("Search page - state persistence after refresh", () => {
     },
   );
 
+  /**
+   * @featureFile e2e/search/search-state/features/search-core-filters-persistence.feature
+   * @scenario Retain eligibility filter after refresh
+   * Verifies that selecting an eligibility checkbox (e.g. "County Governments") persists
+   * the eligibility query param in the URL after a page refresh.
+   */
   test(
     "should retain eligibility filter after refresh",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
@@ -262,6 +298,12 @@ test.describe("Search page - state persistence after refresh", () => {
     },
   );
 
+  /**
+   * @featureFile e2e/search/search-state/features/search-core-filters-persistence.feature
+   * @scenario Retain category filter after refresh
+   * Verifies that selecting a category checkbox (e.g. "Agriculture") persists
+   * the category query param in the URL after a page refresh.
+   */
   test(
     "should retain category filter after refresh",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
@@ -292,6 +334,12 @@ test.describe("Search page - state persistence after refresh", () => {
     },
   );
 
+  /**
+   * @featureFile e2e/search/search-state/features/search-agency-filters-persistence.feature
+   * @scenario Retain top-level agency filter after refresh
+   * Verifies that checking a top-level agency "All" checkbox sets the topLevelAgency
+   * query param and that the selection is restored after a page refresh.
+   */
   test(
     "should retain agency filter after refresh",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
@@ -358,6 +406,12 @@ test.describe("Search page - state persistence after refresh", () => {
     },
   );
 
+  /**
+   * @featureFile e2e/search/search-state/features/search-agency-filters-persistence.feature
+   * @scenario Retain sub-agency filter after refresh
+   * Verifies that selecting a sub-agency checkbox (nested under an agency) sets the
+   * agency query param and that the sub-agency selection is restored after a page refresh.
+   */
   test(
     "should retain sub-agency filter after refresh",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
@@ -540,6 +594,13 @@ test.describe("Search page - state persistence after refresh", () => {
     },
   );
 
+  /**
+   * @featureFile e2e/search/search-state/features/search-multi-filters-persistence.feature
+   * @scenario Retain all filters and inputs after refresh
+   * Verifies that a combination of search input, sort order, status, funding instrument,
+   * eligibility, agency, and category filters all persist in the URL after a page refresh.
+   * Uses single-value selections per filter group.
+   */
   test(
     "should retain all filters and inputs after refresh",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
@@ -641,6 +702,14 @@ test.describe("Search page - state persistence after refresh", () => {
     },
   );
 
+  /**
+   * @featureFile e2e/search/search-state/features/search-multi-filters-persistence.feature
+   * @scenario Retain all multi-value filters and inputs after refresh
+   * Verifies that multiple values per filter group (e.g. two funding instruments, two
+   * eligibility types, two categories) all persist correctly in the URL after a page refresh.
+   * Filters are applied sequentially with result-load waits between each to prevent
+   * race conditions where in-flight searches reset panel state from the URL.
+   */
   test(
     "should retain all multi-value filters and inputs after refresh",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION] },
