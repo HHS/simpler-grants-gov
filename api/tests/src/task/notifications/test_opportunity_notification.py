@@ -1099,13 +1099,14 @@ class TestOpportunityNotification:
                 UserOpportunityUpdateContent(
                     subject="Your saved funding opportunities changed on Simpler.Grants.gov",
                     message=(
-                        f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}{UTM_TAG}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div>"
-                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
-                        f"<div>2. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
-                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
-                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
+                        f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}{UTM_TAG}' target='_blank'>Opal 2025 Awards</a><br><br></div>"
+                        '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
+                        f"<div>2. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br></div>"
+                        '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
+                        "<div>Please carefully read the opportunity listing pages to review all changes.<br><br>"
                         f"<a href='http://testhost:3000{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
-                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
+                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div><br>"
+                        "<div>Manage which updates you receive in your <a href='http://testhost:3000/notifications' target='_blank' style='color:blue; text-decoration: underline;'>notification preferences</a>.</div>"
                     ),
                     updated_opportunity_ids=[OPAL.opportunity_id, TOPAZ.opportunity_id],
                 ),
@@ -1123,11 +1124,12 @@ class TestOpportunityNotification:
                 UserOpportunityUpdateContent(
                     subject="Your saved funding opportunity changed on Simpler.Grants.gov",
                     message=(
-                        f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
-                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
-                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
+                        f"The following funding opportunity recently changed:<br><br><div><a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br></div>"
+                        '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
+                        "<div>Please carefully read the opportunity listing pages to review all changes.<br><br>"
                         f"<a href='http://testhost:3000{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
-                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
+                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div><br>"
+                        "<div>Manage which updates you receive in your <a href='http://testhost:3000/notifications' target='_blank' style='color:blue; text-decoration: underline;'>notification preferences</a>.</div>"
                     ),
                     updated_opportunity_ids=[TOPAZ.opportunity_id],
                 ),
@@ -1152,7 +1154,6 @@ class TestOpportunityNotification:
         notification_task,
     ):
         res = notification_task._build_notification_content(version_changes)
-
         assert res == expected
 
     def test_build_notification_content_all_changes(
@@ -1193,25 +1194,25 @@ class TestOpportunityNotification:
         expected = UserOpportunityUpdateContent(
             subject="Your saved funding opportunity changed on Simpler.Grants.gov",
             message=(
-                f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
-                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from November 30, 2025 to not specified.<br><br>'
-                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $10,000,000 to $12,000,000.<br>'
+                f"The following funding opportunity recently changed:<br><br><div><a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br></div>"
+                '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
+                '<p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The application due date changed from November 30, 2025 to not specified.<br><br>'
+                '<p style="padding-left: 20px;"><strong>Awards details</strong></p><p style="padding-left: 40px;">•  Program funding changed from $10,000,000 to $12,000,000.<br>'
                 '<p style="padding-left: 40px;">•  The number of expected awards changed from 7 to 5.<br>'
                 '<p style="padding-left: 40px;">•  The award minimum changed from $100,000 to $200,000.<br>'
                 '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
                 '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative agreement to Grant.<br>'
                 '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
                 '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br><br>'
-                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  The updated email address is john.smith@gmail.com.<br>'
+                '<p style="padding-left: 20px;"><strong>Grantor contact information</strong></p><p style="padding-left: 40px;">•  The updated email address is john.smith@gmail.com.<br>'
                 '<p style="padding-left: 40px;">•  New description: grant manager.<br><br>'
-                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br>'
+                '<p style="padding-left: 20px;"><strong>Eligibility</strong></p><p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br>'
                 '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and indian housing authorities].<br>'
                 '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
-                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">Climate research in mars</div><br>'
-                "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
+                '<p style="padding-left: 20px;"><strong>Documents</strong></p><p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
+                '<p style="padding-left: 20px;"><strong>Description</strong></p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">Climate research in mars</div><br>'
+                "<div>Please carefully read the opportunity listing pages to review all changes.<br><br>"
                 f"<a href='http://testhost:3000{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
                 "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div><br>"
                 "<div>Manage which updates you receive in your <a href='http://testhost:3000/notifications' target='_blank' style='color:blue; text-decoration: underline;'>notification preferences</a>.</div>"
@@ -1226,7 +1227,6 @@ class TestOpportunityNotification:
                 )
             ]
         )
-
         assert res == expected
 
     def test_get_latest_opportunity_versions_suppressed(
