@@ -7,28 +7,44 @@ import { gotoWithRetry } from "./lifecycle-utils";
 
 const { baseUrl } = playwrightEnv;
 
+export const INDIVIDUAL_APPLICANT_LABEL = "As an individual (myself)";
+
+type CreateApplicationInput =
+  | string
+  | {
+      applicantType?: "organization" | "individual";
+      orgLabel?: string;
+      whoIsApplyingLabel?: string;
+    };
+
 async function selectOptionByLabelSubstring(
   selectLocator: Locator,
   labelSubstring: string,
+  fallbackToIndividual: boolean,
 ) {
   const select = selectLocator.first();
   await select.waitFor({ state: "visible", timeout: 5000 });
   await expect(select).toBeEnabled({ timeout: 10000 });
 
-  // Wait for org options to load — on WebKit the dropdown may initially only
-  // show default options before the org list is fetched from the API.
-  // If the org never appears (e.g. e2e user has no orgs), fall back to individual.
+  // Wait for dropdown options to load. For organization tests, allow an
+  // individual fallback when no matching org label exists.
   await expect
     .poll(
       async () => {
         const options = await select.locator("option").allTextContents();
+        const hasRequestedOption = options.some((opt) =>
+          opt.includes(labelSubstring),
+        );
+        const hasIndividualOption = options.some((opt) =>
+          opt.includes(INDIVIDUAL_APPLICANT_LABEL),
+        );
+
         return (
-          options.some((opt) => opt.includes(labelSubstring)) ||
-          options.some((opt) => opt.includes("As an individual"))
+          hasRequestedOption || (fallbackToIndividual && hasIndividualOption)
         );
       },
       {
-        message: `Waiting for options to load in dropdown`,
+        message: "Waiting for options to load in dropdown",
         timeout: 30000,
       },
     )
@@ -45,7 +61,9 @@ async function selectOptionByLabelSubstring(
 
   const resolvedLabel =
     options.find((opt: string) => opt.includes(labelSubstring)) ??
-    options.find((opt: string) => opt.includes("As an individual (myself)"));
+    (fallbackToIndividual
+      ? options.find((opt: string) => opt.includes(INDIVIDUAL_APPLICANT_LABEL))
+      : undefined);
 
   if (!resolvedLabel) {
     throw new Error(
@@ -70,7 +88,7 @@ async function selectOptionByLabelSubstring(
   const selectedValue = await select.inputValue();
   if (!selectedValue) {
     throw new Error(
-      `Failed to select option "${resolvedLabel}" — no value was set after selection.`,
+      `Failed to select option "${resolvedLabel}" - no value was set after selection.`,
     );
   }
 }
@@ -79,13 +97,29 @@ async function selectOptionByLabelSubstring(
  * Creates a new application for the given opportunity.
  * @param page Playwright Page object
  * @param opportunityUrl Opportunity URL (e.g. "/opportunity/abc123")
- * @param orgLabel Organization label to select
+ * @param input Organization label string (legacy) or applicant selection options
  */
 export async function createApplication(
   page: Page,
   opportunityUrl: string,
-  orgLabel: string,
+  input: CreateApplicationInput,
 ) {
+  const isLegacyLabel = typeof input === "string";
+  const applicantType = isLegacyLabel
+    ? "organization"
+    : (input.applicantType ?? "organization");
+  const requestedLabel = isLegacyLabel
+    ? input
+    : (input.whoIsApplyingLabel ??
+      (applicantType === "individual"
+        ? INDIVIDUAL_APPLICANT_LABEL
+        : input.orgLabel));
+
+  if (!requestedLabel) {
+    throw new Error(
+      "createApplication requires orgLabel for organization applicants or whoIsApplyingLabel.",
+    );
+  }
   await gotoWithRetry(page, `${baseUrl}${opportunityUrl}`, {
     waitUntil: "domcontentloaded",
   });
@@ -104,7 +138,11 @@ export async function createApplication(
   );
   const orgSelectCount = await orgSelect.count();
   if (orgSelectCount > 0) {
-    await selectOptionByLabelSubstring(orgSelect, orgLabel);
+    await selectOptionByLabelSubstring(
+      orgSelect,
+      requestedLabel,
+      applicantType === "organization",
+    );
   }
   const nameInput = modal.locator(
     'input[name*="name"], input[placeholder*="application"], input[type="text"]:nth-of-type(1)',
