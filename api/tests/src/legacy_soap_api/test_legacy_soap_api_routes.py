@@ -1021,15 +1021,15 @@ def test_get_submission_list_expanded_always_calls_legacy_and_simpler(
         </soapenv:Envelope>
     """
     envelope = etree.fromstring(mock_data)
-    envelope = etree.fromstring(mock_data)
     agency = AgencyFactory.create()
     privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
     _, _, _, mtls_cert = setup_cert_user(agency, privileges)
-    client.post(
+    response = client.post(
         full_path,
         data=etree.tostring(envelope),
         headers={MTLS_CERT_HEADER_KEY: mtls_cert},
     )
+    assert response.status_code == 200
     mock_get_soap_response.assert_called_once()
     mock_get_simpler_soap_response.assert_called_once()
 
