@@ -17,7 +17,7 @@ Background:
 /* @tags GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION */
 Scenario: Retain search input and sort after refresh
   When I enter "<search-term>" in the search input and submit in "<viewport>"
-  And I <sort access action>
+  And I "<sort access action>"
   And I select sort order "<sort label>"
   Then the browser URL contains "/search?query=<search-term>&sortby=<sort type>"
   When I refresh the page
