@@ -1123,11 +1123,7 @@ def test_calls_simpler_if_using_simpler_tracking_number(
     mock_get_simpler_soap_response.assert_called_once()
 
 
-def test_enable_simpler_routes_set_to_false_stops_simpler_calls(
-    db_session, client, enable_factory_create, monkeypatch
-) -> None:
-    soap_api_config.get_soap_config.cache_clear()
-    monkeypatch.setenv("ENABLE_SIMPLER_ROUTE", "false")
+def post_get_submission_list_expanded(client, add_to_headers=None):
     mtls_cert, serial_number = get_mtls_urlencoded_str_and_serial_number()
     tcertificate = StagingTcertificatesFactory.create(serial_num=serial_number)
     LegacyAgencyCertificateFactory.create(
@@ -1145,6 +1141,21 @@ def test_enable_simpler_routes_set_to_false_stops_simpler_calls(
         "</soapenv:Body>"
         "</soapenv:Envelope>"
     ).encode()
+    headers = {MTLS_CERT_HEADER_KEY: mtls_cert}
+    if add_to_headers is not None:
+        headers.update(add_to_headers)
+    return client.post(
+        full_path,
+        data=mock_data,
+        headers=headers,
+    )
+
+
+def test_enable_simpler_routes_set_to_false_stops_simpler_calls(
+    db_session, client, enable_factory_create, monkeypatch, caplog
+) -> None:
+    soap_api_config.get_soap_config.cache_clear()
+    monkeypatch.setenv("ENABLE_SIMPLER_ROUTE", "false")
     with mock.patch(
         "src.legacy_soap_api.simpler_soap_api.get_legacy_response"
     ) as mock_legacy_response:
@@ -1154,14 +1165,14 @@ def test_enable_simpler_routes_set_to_false_stops_simpler_calls(
         with mock.patch(
             "src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response"
         ) as mock_simpler_response:
-            response = client.post(
-                full_path,
-                data=mock_data,
-                headers={MTLS_CERT_HEADER_KEY: mtls_cert},
-            )
+            response = post_get_submission_list_expanded(client)
     assert response.status_code == 200
     mock_legacy_response.assert_called_once()
     mock_simpler_response.assert_not_called()
+    assert (
+        "soap_client_certificate: simpler route is disabled, returning legacy response"
+        in caplog.messages
+    )
 
 
 def test_enable_simpler_routes_set_to_true_allows_simpler_calls(
@@ -1169,23 +1180,6 @@ def test_enable_simpler_routes_set_to_true_allows_simpler_calls(
 ) -> None:
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("ENABLE_SIMPLER_ROUTE", "true")
-    mtls_cert, serial_number = get_mtls_urlencoded_str_and_serial_number()
-    tcertificate = StagingTcertificatesFactory.create(serial_num=serial_number)
-    LegacyAgencyCertificateFactory.create(
-        serial_number=serial_number,
-        cert_id=tcertificate.currentcertid,
-        expiration_date=datetime(2070, 1, 1).date(),
-    )
-    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
-    mock_data = (
-        '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
-        "<soapenv:Header/>"
-        "<soapenv:Body>"
-        "<agen:GetSubmissionListExpandedRequest>"
-        "</agen:GetSubmissionListExpandedRequest>"
-        "</soapenv:Body>"
-        "</soapenv:Envelope>"
-    ).encode()
     with mock.patch(
         "src.legacy_soap_api.simpler_soap_api.get_legacy_response"
     ) as mock_legacy_response:
@@ -1195,36 +1189,17 @@ def test_enable_simpler_routes_set_to_true_allows_simpler_calls(
         with mock.patch(
             "src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response"
         ) as mock_simpler_response:
-            response = client.post(
-                full_path,
-                data=mock_data,
-                headers={MTLS_CERT_HEADER_KEY: mtls_cert},
-            )
+            response = post_get_submission_list_expanded(client)
     assert response.status_code == 200
     mock_legacy_response.assert_called_once()
     mock_simpler_response.assert_called_once()
 
 
-def test_x(db_session, client, enable_factory_create, monkeypatch) -> None:
+def test_enable_simpler_route_header_overrides_disabled_config(
+    db_session, client, enable_factory_create, monkeypatch, caplog
+) -> None:
     soap_api_config.get_soap_config.cache_clear()
     monkeypatch.setenv("ENABLE_SIMPLER_ROUTE", "false")
-    mtls_cert, serial_number = get_mtls_urlencoded_str_and_serial_number()
-    tcertificate = StagingTcertificatesFactory.create(serial_num=serial_number)
-    LegacyAgencyCertificateFactory.create(
-        serial_number=serial_number,
-        cert_id=tcertificate.currentcertid,
-        expiration_date=datetime(2070, 1, 1).date(),
-    )
-    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
-    mock_data = (
-        '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
-        "<soapenv:Header/>"
-        "<soapenv:Body>"
-        "<agen:GetSubmissionListExpandedRequest>"
-        "</agen:GetSubmissionListExpandedRequest>"
-        "</soapenv:Body>"
-        "</soapenv:Envelope>"
-    ).encode()
     with mock.patch(
         "src.legacy_soap_api.simpler_soap_api.get_legacy_response"
     ) as mock_legacy_response:
@@ -1234,10 +1209,8 @@ def test_x(db_session, client, enable_factory_create, monkeypatch) -> None:
         with mock.patch(
             "src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response"
         ) as mock_simpler_response:
-            response = client.post(
-                full_path,
-                data=mock_data,
-                headers={MTLS_CERT_HEADER_KEY: mtls_cert, ENABLE_SIMPLER_ROUTE_KEY: "1"},
+            response = post_get_submission_list_expanded(
+                client, add_to_headers={ENABLE_SIMPLER_ROUTE_KEY: "1"}
             )
     assert response.status_code == 200
     mock_legacy_response.assert_called_once()
