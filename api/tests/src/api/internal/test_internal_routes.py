@@ -30,7 +30,7 @@ def setup_admin_privileges(db_session, api_key_value):
     factories.LinkRoleRoleTypeFactory.create(role=admin_role, role_type=RoleType.INTERNAL)
 
     factories.InternalUserRoleFactory.create(user=user, role=admin_role)
-    db_session.commit()
+
     return user
 
 
@@ -47,7 +47,6 @@ def test_update_internal_role_success(
     external_link = factories.LinkExternalUserFactory.create(
         user=target_user, email="success@test.org"
     )
-    db_session.commit()
 
     payload = {"user_email": external_link.email, "internal_role_id": str(role_to_assign.role_id)}
 
@@ -72,7 +71,6 @@ def test_update_internal_role_not_found(
 
     target_user = factories.UserFactory.create()
     external_link = factories.LinkExternalUserFactory.create(user=target_user, email="404@test.org")
-    db_session.commit()
 
     payload = {"user_email": external_link.email, "internal_role_id": str(uuid.uuid4())}
 
@@ -98,7 +96,6 @@ def test_update_internal_role_already_assigned(
     )
 
     factories.InternalUserRoleFactory.create(user=target_user, role=role)
-    db_session.commit()
 
     payload = {"user_email": external_link.email, "internal_role_id": str(role.role_id)}
 

@@ -2,6 +2,7 @@
 
 import { useSearchParamUpdater } from "src/hooks/useSearchParamUpdater";
 import { Organization } from "src/types/applicationResponseTypes";
+import { LabelValueOption } from "src/types/generalTypes";
 
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
@@ -12,11 +13,6 @@ interface SavedOpportunityOwnershipFilterProps {
   savedBy: string | null;
 }
 
-interface SavedOpportunityOwnershipFilterOption {
-  value: string;
-  label: string;
-}
-
 export default function SavedOpportunityOwnershipFilter({
   organizations,
   savedBy,
@@ -24,7 +20,7 @@ export default function SavedOpportunityOwnershipFilter({
   const { setQueryParam, removeQueryParam } = useSearchParamUpdater();
   const t = useTranslations("SavedOpportunities");
 
-  const options = useMemo<SavedOpportunityOwnershipFilterOption[]>(() => {
+  const options = useMemo<LabelValueOption[]>(() => {
     const sortedOrganizations = [...organizations].sort(
       (firstOrganization, secondOrganization) => {
         const firstOrganizationName =

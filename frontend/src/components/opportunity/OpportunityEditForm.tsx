@@ -4,6 +4,13 @@ import {
   saveOpportunityEditAction,
   type OpportunityEditValidationErrors,
 } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
+import {
+  categoryOptions,
+  eligbilityValueToGroup,
+  ELIGIBILITY_OPTIONS,
+  fundingOptions,
+  OPPORTUNITY_CATEGORY_OPTIONS,
+} from "src/constants/opportunity";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
 import { useTranslations } from "next-intl";
@@ -23,13 +30,7 @@ import {
 
 import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
 import { OpportunityAttachmentUploadInput } from "src/components/opportunity/OpportunityAttachmentUploadInput";
-import {
-  ELIGIBILITY_OPTIONS,
-  FUNDING_CATEGORY_OPTIONS,
-  FUNDING_INSTRUMENT_OPTIONS,
-  OPPORTUNITY_CATEGORY_OPTIONS,
-  OpportunityEditFormValues,
-} from "./opportunityEditFormConfig";
+import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
 
 function formatNumber(value: string): string {
   const raw = value.replace(/,/g, "");
@@ -225,41 +226,15 @@ export default function OpportunityEditForm({
 
   const leftColumnItems = keyInformationItems.slice(0, 3);
   const rightColumnItems = keyInformationItems.slice(3);
-  const eligibilityGroups = {
-    business: ELIGIBILITY_OPTIONS.filter((option) =>
-      [
-        "for_profit_organizations_other_than_small_businesses",
-        "small_businesses",
-      ].includes(option.value),
-    ),
-    education: ELIGIBILITY_OPTIONS.filter((option) =>
-      [
-        "independent_school_districts",
-        "private_institutions_of_higher_education",
-        "public_and_state_institutions_of_higher_education",
-      ].includes(option.value),
-    ),
-    government: ELIGIBILITY_OPTIONS.filter((option) =>
-      [
-        "city_or_township_governments",
-        "county_governments",
-        "special_district_governments",
-        "state_governments",
-        "federally_recognized_native_american_tribal_governments",
-        "public_and_indian_housing_authorities",
-      ].includes(option.value),
-    ),
-    nonprofit: ELIGIBILITY_OPTIONS.filter((option) =>
-      [
-        "other_native_american_tribal_organizations",
-        "nonprofits_non_higher_education_with_501c3",
-        "nonprofits_non_higher_education_without_501c3",
-      ].includes(option.value),
-    ),
-    misc: ELIGIBILITY_OPTIONS.filter((option) =>
-      ["individuals", "other", "unrestricted"].includes(option.value),
-    ),
-  };
+  const eligibilityGroups = ELIGIBILITY_OPTIONS.reduce(
+    (acc, { label, value }) => {
+      const group = eligbilityValueToGroup[value];
+      if (!acc[group]) acc[group] = [];
+      acc[group].push({ label, value });
+      return acc;
+    },
+    {} as Record<string, { label: string; value: string }[]>,
+  );
   return (
     <form
       id="opportunity-edit-form"
@@ -429,7 +404,7 @@ export default function OpportunityEditForm({
                   disabled={!isDraft}
                 >
                   <option value="">{t("content.select")}</option>
-                  {FUNDING_INSTRUMENT_OPTIONS.map((option) => (
+                  {fundingOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -495,7 +470,7 @@ export default function OpportunityEditForm({
                   disabled={!isDraft}
                 >
                   <option value="">{t("content.selectFundingCategory")}</option>
-                  {FUNDING_CATEGORY_OPTIONS.map((option) => (
+                  {categoryOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -756,7 +731,7 @@ export default function OpportunityEditForm({
                 />
                 <EligibilityCheckboxGroup
                   title={t("labels.eligibilityMiscellaneous")}
-                  options={eligibilityGroups.misc}
+                  options={eligibilityGroups.miscellaneous}
                   baseId="eligible-misc"
                   initialSelectedValues={initialValues.eligibleApplicants}
                   onToggle={handleEligibilityToggle}

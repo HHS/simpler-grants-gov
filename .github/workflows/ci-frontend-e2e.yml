@@ -52,14 +52,23 @@ jobs:
     outputs:
       commit_hash: ${{ steps.get-api-commit-hash.outputs.commit_hash }}
     steps:
+      - name: Troubleshoot shas and refs
+        working-directory: ./
+        env:
+          CLEAN_HEAD_REF: ${{ github.head_ref }}
+        run: |
+          echo "${{ github.event.pull_request.head.sha}}|$CLEAN_HEAD_REF|${{github.ref }}"
+          echo "${{ github.event.repository.full_name }}"
+
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.head_ref || github.ref }}
+          ref: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+          repository: ${{ github.event.repository.full_name }}
           fetch-depth: 1000
       - name: Get commit hash
         id: get-api-commit-hash
         env:
-          CLEAN_REF: ${{ github.head_ref || github.ref }}
+          CLEAN_REF: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
         run: |
           cd ..
           COMMIT_HASH=$(git rev-parse "$CLEAN_REF")
@@ -73,14 +82,23 @@ jobs:
     outputs:
       commit_hash: ${{ steps.get-frontend-commit-hash.outputs.commit_hash }}
     steps:
+      - name: Troubleshoot shas and refs
+        working-directory: ./
+        env:
+          CLEAN_HEAD_REF: ${{ github.head_ref }}
+        run: |
+          echo "${{ github.event.pull_request.head.sha}}|$CLEAN_HEAD_REF|${{github.ref }}"
+          echo "${{ github.event.repository.full_name }}"
+
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.head_ref || github.ref }}
+          ref: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
+          repository: ${{ github.event.repository.full_name }}
           fetch-depth: 1000
       - name: Get commit hash
         id: get-frontend-commit-hash
         env:
-          CLEAN_REF: ${{ github.head_ref || github.ref }}
+          CLEAN_REF: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
         run: |
           cd ..
           COMMIT_HASH=$(git rev-parse "$CLEAN_REF")

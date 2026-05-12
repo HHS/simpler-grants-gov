@@ -95,7 +95,6 @@ def test_agency_search_unauthorized_401_no_auth(client, method, url, body):
 def test_agency_search_with_inactive_api_user_key(client, enable_factory_create, db_session):
     """Test agency search endpoint with inactive API user key"""
     inactive_api_key = UserApiKeyFactory.create(is_active=False)
-    db_session.commit()
 
     response = client.post(
         "/v1/agencies/search",

@@ -71,10 +71,20 @@ output "image_url" {
 
 output "fluent_bit_image_url" {
   description = "image url for the Fluent Bit sidecar"
-  value       = local.fluent_bit_image_url
+  value       = nonsensitive(local.fluent_bit_image_url)
 }
 
 output "environment_variables" {
   description = "environment variable for the app container"
   value       = local.environment_variables
+}
+
+output "nr_host_log_forwarder_arn" {
+  description = "ARN of the New Relic host log forwarder Lambda"
+  value       = aws_lambda_function.nr_host_log_forwarder.arn
+}
+
+output "nr_host_log_forwarder_name" {
+  description = "Name of the New Relic host log forwarder Lambda"
+  value       = aws_lambda_function.nr_host_log_forwarder.function_name
 }

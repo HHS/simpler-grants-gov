@@ -74,7 +74,7 @@ class TestConfirmApplicationDeliveryResponse:
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
         db_session.commit()
 
-        _, _, soap_client_certificate = setup_cert_user(
+        _, _, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
@@ -114,7 +114,7 @@ class TestConfirmApplicationDeliveryResponse:
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
         db_session.commit()
 
-        _, _, soap_client_certificate = setup_cert_user(
+        _, _, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
@@ -142,7 +142,7 @@ class TestConfirmApplicationDeliveryResponse:
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
 
         # Pre-insert a retrieval record to simulate a prior call by this user
-        user, _, soap_client_certificate = setup_cert_user(
+        user, _, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         ApplicationSubmissionRetrievedFactory.create(
@@ -188,7 +188,7 @@ class TestConfirmApplicationDeliveryResponse:
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
 
         # First user retrieves the submission
-        first_user, _, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER})
+        first_user, _, _, _ = setup_cert_user(agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER})
         ApplicationSubmissionRetrievedFactory.create(
             application_submission=submission,
             created_by_user=first_user,
@@ -197,7 +197,7 @@ class TestConfirmApplicationDeliveryResponse:
         db_session.commit()
 
         # Second user attempts to retrieve the same submission
-        _, _, second_soap_client_certificate = setup_cert_user(
+        _, _, second_soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         soap_request = _make_soap_request(second_soap_client_certificate, tracking_number)
@@ -234,7 +234,7 @@ class TestConfirmApplicationDeliveryResponse:
         tracking_number = f"GRANT{submission.legacy_tracking_number}"
         db_session.commit()
 
-        _, _, soap_client_certificate = setup_cert_user(
+        _, _, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
@@ -267,7 +267,7 @@ class TestConfirmApplicationDeliveryResponse:
         agency = AgencyFactory.create()
         tracking_number = "GRANT99999999"
 
-        _, _, soap_client_certificate = setup_cert_user(
+        _, _, soap_client_certificate, _ = setup_cert_user(
             agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)
@@ -298,7 +298,7 @@ class TestConfirmApplicationDeliveryResponse:
         db_session.commit()
 
         # User has correct privilege but for a DIFFERENT agency
-        _, _, soap_client_certificate = setup_cert_user(
+        _, _, soap_client_certificate, _ = setup_cert_user(
             other_agency, {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
         )
         soap_request = _make_soap_request(soap_client_certificate, tracking_number)

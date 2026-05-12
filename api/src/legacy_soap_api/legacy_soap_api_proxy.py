@@ -1,31 +1,31 @@
 import base64
 import logging
-import os
 from datetime import timedelta
 from os.path import join
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 
 from requests import Request, Session
 
-from src.db.models.user_models import LegacyCertificate
 from src.legacy_soap_api.legacy_soap_api_auth import (
     LOG_LOCAL_RESPONSE_HEADER_KEY,
     MTLS_CERT_HEADER_KEY,
     S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY,
-    USE_SOAP_CERT_HEADER_KEY,
     SessionResumptionAdapter,
     SOAPAuth,
-    SOAPClientCertificateLookupError,
-    SOAPClientCertificateNotConfigured,
+    SOAPClientCertificate,
+    SOAPClientMissingCertificate,
     generate_soap_jwt,
 )
-from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig, get_soap_config
+from src.legacy_soap_api.legacy_soap_api_config import (
+    LegacySoapAPIConfig,
+    SimplerSoapAPI,
+    get_soap_config,
+)
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import (
     filter_headers,
-    get_soap_error_response,
     get_streamed_soap_response,
     log_local,
 )
@@ -41,17 +41,14 @@ def get_proxy_headers(
     soap_request: SOAPRequest,
     config: LegacySoapAPIConfig,
     soap_auth: SOAPAuth | None,
-    use_soap_cert: bool,
 ) -> dict:
     # Exclude header keys that are utilized only in simpler soap api. Not needed for proxy request.
-    if use_soap_cert or not soap_auth or not soap_auth.certificate.legacy_certificate:
+    if not soap_auth:
         return filter_headers(
             soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
         )
     return {
-        S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY: get_soap_jwt_auth_jwt(
-            config, soap_auth.certificate.legacy_certificate
-        )
+        S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY: get_soap_jwt_auth_jwt(config, soap_auth.certificate)
     }
 
 
@@ -59,75 +56,33 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     config = get_soap_config()
 
     soap_auth = soap_request.auth
-    use_soap_cert = soap_request.headers.get(USE_SOAP_CERT_HEADER_KEY) == "1"
     should_log_response = soap_request.headers.get(LOG_LOCAL_RESPONSE_HEADER_KEY) == "1"
-    is_valid_soap_certificate = soap_auth and soap_auth.certificate.legacy_certificate
-    proxy_headers = get_proxy_headers(soap_request, config, soap_auth, use_soap_cert)
-    if use_soap_cert or not is_valid_soap_certificate:
-        # Use X-Gg-S2S-Uri header locally if passed, otherwise default to GRANTS_GOV_URI:GRANTS_GOV_PORT.
-        proxy_url = join(
-            soap_request.headers.get(config.gg_s2s_proxy_header_key, config.gg_url),
-            soap_request.full_path.lstrip("/"),
+    proxy_headers = get_proxy_headers(soap_request, config, soap_auth)
+    if soap_auth:
+        path = (
+            config.soap_grantors_path
+            if soap_request.api_name == SimplerSoapAPI.GRANTORS
+            else config.soap_applicants_path
         )
+        proxy_url = join(config.soap_partner_gateway_uri, path.lstrip("/"))
     else:
-        logger.info(
-            "soap_client_certificate: using jwt auth",
-            extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITH_JWT},
-        )
-        proxy_url = join(
-            config.soap_partner_gateway_uri,
-            "grantsws-agency-partner/services/v2/AgencyWebServicesSoapPort",
-        )
-    _request = Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
-
-    if not soap_auth or config.soap_auth_map == {} or not use_soap_cert:
         logger.info(
             "soap_client_certificate: Sending soap request without client certificate",
             extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITHOUT_CERT},
         )
-        response = _get_soap_response(_request, timeout=timeout)
-        if not use_soap_cert and should_log_response:
-            log_local(
-                msg="soap jwt proxy response",
-                data=response.to_bytes().decode("utf-8"),
-            )
-        return response
+        proxy_url = join(
+            soap_request.headers.get(config.gg_s2s_proxy_header_key, config.gg_url),
+            soap_request.full_path.lstrip("/"),
+        )
+    _request = Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
 
-    logger.info("soap_client_certificate: Processing client certificate")
-    # Handle cert based proxy request.
-    temp_file_path = ""
-    # We intentionally do not use a context manager for this file here
-    # due to an issue with Python locking the file while open and
-    # OpenSSL throwing a PEM error and is not able to read from it as a result
-    # Issue discussed here:
-    # https://github.com/python/cpython/issues/58451
-    try:
-        temp_cert_file = get_cert_file(soap_auth, config)
-        temp_file_path = temp_cert_file.name
-        return _get_soap_response(_request, cert=temp_file_path, timeout=timeout)
-    except SOAPClientCertificateLookupError:
-        # This exception handles invalid client certs. We will continue to return the response
-        # from GG.
-        logger.info(
-            "soap_client_certificate: Unknown or invalid client certificate",
-            exc_info=True,
-            extra={"soap_api_event": LegacySoapApiEvent.UNKNOWN_INVALID_CLIENT_CERT},
+    response = _get_soap_response(_request, timeout=timeout)
+    if should_log_response:
+        log_local(
+            msg="soap jwt proxy response",
+            data=response.to_bytes().decode("utf-8"),
         )
-        return _get_soap_response(_request, cert=temp_file_path, timeout=timeout)
-    except SOAPClientCertificateNotConfigured:
-        # This exception handles the case of a valid cert being passed, but not configured
-        # to use Simpler SOAP API.
-        logger.info(
-            "soap_client_certificate: Certificate validated but not configured",
-            exc_info=True,
-            extra={"soap_api_event": LegacySoapApiEvent.NOT_CONFIGURED_CERT},
-        )
-        return get_soap_error_response(
-            faultstring="Client certificate not configured for Simpler SOAP."
-        )
-    finally:
-        if temp_file_path and os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
+    return response
 
 
 def get_cert_file(soap_auth: SOAPAuth, config: LegacySoapAPIConfig) -> _TemporaryFileWrapper:
@@ -155,17 +110,23 @@ def _get_soap_response(
 
 def get_soap_jwt_auth_jwt(
     config: LegacySoapAPIConfig,
-    legacy_certificate: LegacyCertificate,
+    soap_auth_certificate: SOAPClientCertificate,
 ) -> str:
     expiration_time = utcnow() + timedelta(minutes=1)
-    jwt_string = generate_soap_jwt(
-        legacy_certificate.cert_id,
-        expiration_time,
-        config.soap_partner_gateway_uri,
-        config.soap_partner_gateway_auth_key,
-    )
+    if soap_auth_certificate.cert_id is not None:
+        jwt_string = generate_soap_jwt(
+            soap_auth_certificate.cert_id,
+            expiration_time,
+            config.soap_partner_gateway_uri,
+            config.soap_partner_gateway_auth_key,
+        )
+        logger.info(
+            "soap_client_certificate: created SOAP JWT",
+            extra={"soap_api_event": LegacySoapApiEvent.JWT_CREATED},
+        )
+        return base64.b64encode(jwt_string.encode("utf-8")).decode("utf-8")
     logger.info(
-        "soap_client_certificate: created SOAP JWT",
-        extra={"soap_api_event": LegacySoapApiEvent.JWT_CREATED},
+        "soap_client_certificate: No cert_id",
+        extra={"soap_api_event": LegacySoapApiEvent.CALLING_WITHOUT_CERT},
     )
-    return base64.b64encode(jwt_string.encode("utf-8")).decode("utf-8")
+    raise SOAPClientMissingCertificate("soap_client_certificate: no cert_id")
