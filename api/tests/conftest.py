@@ -26,13 +26,12 @@ from src.constants.lookup_constants import Privilege, RoleType
 from src.constants.schema import Schemas
 from src.constants.static_role_values import NAVA_INTERNAL_ROLE
 from src.db import models
-from src.db.models.agency_models import Agency
 from src.db.models.competition_models import FormInstruction
 from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
-from src.db.models.user_models import AgencyUser, User, UserApiKey
+from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.util.local import load_local_env_vars
@@ -570,11 +569,6 @@ class BaseTestClass:
         class implementation.
         """
         cascade_delete_from_db_table(db_session, Opportunity)
-
-    @pytest.fixture(scope="class")
-    def truncate_agencies(self, db_session):
-        cascade_delete_from_db_table(db_session, AgencyUser)
-        cascade_delete_from_db_table(db_session, Agency)
 
     @pytest.fixture(scope="class")
     def truncate_staging_tables(self, db_session, test_staging_schema):

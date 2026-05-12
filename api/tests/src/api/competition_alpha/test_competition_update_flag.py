@@ -23,7 +23,6 @@ def test_update_competition_flag_to_true_success(
 
     competition = factories.CompetitionFactory.create(is_simpler_grants_enabled=False)
     factories.CompetitionInstructionFactory.create(competition=competition)
-    db_session.commit()
 
     payload = {"is_simpler_grants_enabled": True}
     url = f"/alpha/competitions/{competition.competition_id}/flag"
@@ -43,7 +42,6 @@ def test_update_competition_flag_to_false_success(
 
     competition = factories.CompetitionFactory.create(is_simpler_grants_enabled=True)
     factories.CompetitionInstructionFactory.create(competition=competition)
-    db_session.commit()
 
     payload = {"is_simpler_grants_enabled": False}
     url = f"/alpha/competitions/{competition.competition_id}/flag"
