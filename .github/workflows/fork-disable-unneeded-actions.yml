@@ -9,15 +9,34 @@ on:
     # Sprints are 2 weeks long, but crons don't easily support biweekly schedules
     # and this GitHub action won't move tickets out of the current sprint
     - cron: "0 6 * * 1"
+  push:
+    branches:
+      - "mdragon/10242-disable-mainline-scheduled-job"
 
 jobs:
   disable-scheduled:
     name: Disable scheduled jobs
     runs-on: ubuntu-latest
     steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version }}
+          clean: false
+
+      - id: mainline-test
+        # only run this on forks
+        if: ${{ github.repository == 'hhs/simpler-grants-gov' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow list
+
       - id: disable-scheduled-step
         # only run this on forks
         if: ${{ github.repository != 'hhs/simpler-grants-gov' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           # NOTE: Add to this list in alphabetical order, if more jobs shouldn't run on forks
           gh workflow disable "Check Infra deploy status"
