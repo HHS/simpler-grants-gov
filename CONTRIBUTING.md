@@ -73,6 +73,8 @@ This project follows [trunk-based development](./DEVELOPMENT.md#branching-model)
 1.  Work with repo maintainers to get your change reviewed
 1.  Wait for your change to be pulled into `hhs/simpler-grants-gov/main`
 
+You don't have to enable GitHub Actions on your fork. But if you do for some reason, running the [Fork - Disable Unneeded Actions](.github/workflows/fork-disable-unneeded-actions.yml) action will disabled the scheduled jobs that will regularly run, and fail, on your fork: 
+
 ### Testing, Coding Style and Linters
 
 Each application has its own testing and linters. Every commit is tested to adhere to tests and the linting guidelines. It is recommended to run tests and linters locally before committing.
