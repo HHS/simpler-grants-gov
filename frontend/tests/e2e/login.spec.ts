@@ -1,3 +1,12 @@
+/**
+ * @feature Login page redirect behavior
+ * @featureFile e2e/login/features/login.feature
+ * @scenario Redirects to home when no login redirect is stored
+ * @scenario Redirects to a stored internal URL after login
+ * @scenario Redirects to home when stored login redirect is root
+ * @scenario Redirects to home when stored login redirect is external
+ * @scenario Shows "Redirecting..." while login redirect is in progress
+ */
 import { expect, Page, test } from "@playwright/test";
 import { VALID_TAGS } from "tests/e2e/tags";
 

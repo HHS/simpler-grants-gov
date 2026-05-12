@@ -1,3 +1,9 @@
+/**
+ * @feature Login.gov MFA authentication
+ * @featureFile e2e/login/features/login-with-login-gov.feature
+ * @scenario signs in with Login.gov MFA and reaches an authenticated state
+ * @scenario uses an existing authenticated session when already signed in
+ */
 import {
   expect,
   test,
