@@ -16,9 +16,11 @@ Background:
  
 /* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
 Scenario: Retain all filters and inputs after refresh
-  When I enter "<search-term>" in the search input and submit
-  And I open the filter drawer
+  When I enter "<search-term>" in the search input and submit in "<viewport>"
+  And I <sort access action>
   And I select sort order "<sort label>"
+  And I <filter drawer action>
+
   And agency filter options have loaded
  
   And the "Opportunity status" accordion is expanded
@@ -60,6 +62,10 @@ Scenario: Retain all filters and inputs after refresh
   And the browser URL contains query param "category" with values "<category value>"
  
 Examples:
+  | viewport | sort access action      |
+  | mobile   | open the filter drawer  |
+  | desktop  | close the filter drawer |
+
   | search-term  | sort label                 | sort value        |
   | education    | Award Ceiling (Descending) | awardCeilingDesc  |
   
@@ -72,9 +78,11 @@ Examples:
  
 /* @tags GRANTEE, OPPORTUNITY_SEARCH, FULL_REGRESSION */
 Scenario: Retain all multi-value filters and inputs after refresh
-  When I enter "<search-term>" in the search input and submit
-  And I open the filter drawer
+  When I enter "<search-term>" in the search input and submit in "<viewport>"
+  And I <sort access action>
   And I select sort order "<sort label>"
+  And I <filter drawer action>
+
   And agency filter options have loaded
  
   And the "Opportunity status" accordion is expanded
@@ -122,6 +130,10 @@ Scenario: Retain all multi-value filters and inputs after refresh
   And the browser URL contains query param "category" with values "<category values>"
  
 Examples:
+  | viewport | sort access action      |
+  | mobile   | open the filter drawer  |
+  | desktop  | close the filter drawer |
+
   | search-term  | sort label                 | sort value        | status | status values            |
   | education    | Award Ceiling (Descending) | awardCeilingDesc  | closed | closed,forecasted,posted |
 
