@@ -743,48 +743,85 @@ test.describe("Search page - state persistence after refresh", () => {
     async ({ page }, { project }) => {
       test.setTimeout(240_000);
       const isMobile = !!project.name.match(/[Mm]obile/);
-      await goToSearch(page);
 
+      /**
+       * @background
+       * Given I am on the search page
+       * And the search results have loaded
+       */
+      await goToSearch(page);
       await waitForSearchResultsInitialLoad(page);
+
+      // When I enter "<search-term>" in the search input and submit in "<viewport>"
       await fillSearchInputAndSubmit(searchTerm, page, project.name);
+
+      // And the browser URL contains "query=<search-term>"
       await waitForURLContainsQueryParamValue(
         page,
         "query",
         searchTerm,
         120000,
       );
+
+      // And I <sort access action>
       await ensureFilterDrawerOpen(page);
+
+      // And I select sort order "<sort label>"
       await selectSortBy(page, "awardCeilingDesc", isMobile, project.name);
+
+      // And the sort order should be "<sort label>"
       await expectSortBy(page, "awardCeilingDesc", isMobile);
+
+      // And the browser URL contains "sortby=<sort type>"
       await waitForURLContainsQueryParamValue(
         page,
         "sortby",
         "awardCeilingDesc",
         120000,
       );
+
+      // And agency filter options have loaded
       await waitForFilterOptions(page, "agency");
 
+      // And the "Opportunity status" accordion is expanded
       await ensureAccordionExpanded(page, "Opportunity status");
+
+      // And I check the "<status>" status checkbox
       await toggleCheckboxGroup(page, statusCheckboxes);
+
+      // And the browser URL contains query param "status" with values "<status values>"
       await waitForURLContainsQueryParamValues(page, "status", [
         "forecasted",
         "posted",
         "closed",
       ]);
 
+      // And the "Funding instrument" accordion is expanded
       await ensureAccordionExpanded(page, "Funding instrument");
+
+      // And I check the "<funding instrument>" funding instrument checkbox
       await toggleCheckboxGroup(page, fundingInstrumentCheckboxes);
+
+      // And the browser URL contains query param "fundingInstrument" with values "<funding value>"
       await waitForURLContainsQueryParamValues(page, "fundingInstrument", [
         "grant",
       ]);
 
+      // And the "Eligibility" accordion is expanded
       await ensureAccordionExpanded(page, "Eligibility");
+
+      // And I check the "<eligibility>" eligibility checkbox
       await toggleCheckboxGroup(page, eligibilityCheckboxes);
+
+      // And the browser URL contains query param "eligibility" with values "<eligibility value>"
       await waitForURLContainsQueryParamValues(page, "eligibility", [
         "county_governments",
       ]);
 
+      // And the "Agency" accordion is expanded
       await ensureAccordionExpanded(page, "Agency");
+
+      // And I check the first available non-numeric agency checkbox
       const agencyId = await getFirstNonNumericAgencyCheckboxId(page);
       expect(agencyId).toBeTruthy();
       if (!agencyId) {
@@ -793,47 +830,80 @@ test.describe("Search page - state persistence after refresh", () => {
       }
       const agencyCheckboxes = { [agencyId]: agencyId };
       await toggleCheckboxGroup(page, agencyCheckboxes);
+
+      // And the browser URL contains query param "agency"
       await waitForURLContainsQueryParamValues(page, "agency", [agencyId]);
 
+      // And the "Category" accordion is expanded
       await ensureAccordionExpanded(page, "Category");
+
+      // And I check the "<category>" category checkbox
       await toggleCheckboxGroup(page, categoryCheckboxes);
+
+      // And the browser URL contains query param "category" with values "<expected category>"
       await waitForURLContainsQueryParamValues(page, "category", [
         "agriculture",
       ]);
 
+      // When I refresh the page
       await refreshPageWithCurrentURL(page);
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page);
 
+      // And the filter drawer is open
       await ensureFilterDrawerOpen(page);
+
+      // And the sort order should be "<sort label>"
       await expectSortBy(page, "awardCeilingDesc", isMobile);
+
+      // And the search input should contain "<search-term>"
       const searchInput = getSearchInput(page);
       await expect(searchInput).toHaveValue(searchTerm, { timeout: 60000 });
 
+      // And the "Opportunity status" accordion is expanded
       await ensureAccordionExpanded(page, "Opportunity status");
+
+      // And the "<status>" status checkbox should be checked
       await expectCheckboxesChecked(page, statusCheckboxes);
 
+      // And the "Funding instrument" accordion is expanded
       await ensureAccordionExpanded(page, "Funding instrument");
+
+      // And the "<funding instrument>" funding instrument checkbox should be checked
       await expectCheckboxesChecked(page, fundingInstrumentCheckboxes);
 
+      // And the "<eligibility>" eligibility checkbox should be checked
       await ensureAccordionExpanded(page, "Eligibility");
       await expectCheckboxesChecked(page, eligibilityCheckboxes);
 
+      // And the previously selected agency checkbox should be checked
       await ensureAccordionExpanded(page, "Agency");
       await expectCheckboxesChecked(page, agencyCheckboxes);
 
+      // And the "<category>" category checkbox should be checked
       await ensureAccordionExpanded(page, "Category");
       await expectCheckboxesChecked(page, categoryCheckboxes);
 
+      // Then the URL should reflect the accumulated query parameters for the selected filters
+
+      // And the browser URL contains "query=<search-term>"
       expectURLQueryParamValue(page, "query", searchTerm);
+      // And the browser URL contains "sortby=<sort type>"
       expectURLQueryParamValue(page, "sortby", "awardCeilingDesc");
+      // And the browser URL contains query param "status" with values "<status values>"
       expectURLQueryParamValues(page, "status", [
         "forecasted",
         "posted",
         "closed",
       ]);
+      // And the browser URL contains query param "fundingInstrument" with values "<funding value>"
       expectURLQueryParamValues(page, "fundingInstrument", ["grant"]);
+      // And the browser URL contains query param "eligibility" with values "<eligibility value>"
       expectURLQueryParamValues(page, "eligibility", ["county_governments"]);
+      // And the browser URL contains query param "agency" with the selected sub-agency value
       expectURLQueryParamValues(page, "agency", [agencyId]);
+      // And the browser URL contains query param "category" with values "<expected category>"
       expectURLQueryParamValues(page, "category", ["agriculture"]);
     },
   );
@@ -853,19 +923,35 @@ test.describe("Search page - state persistence after refresh", () => {
       test.setTimeout(240_000);
       const isMobile = !!project.name.match(/[Mm]obile/);
 
+      /**
+       * @background
+       * Given I am on the search page
+       * And the search results have loaded
+       */
       await goToSearch(page);
       await waitForSearchResultsInitialLoad(page);
 
+      // When I enter "<search-term>" in the search input and submit in "<viewport>"
       await fillSearchInputAndSubmit(searchTerm, page, project.name);
+
+      // Then the browser URL contains "query=<search-term>"
       await waitForURLContainsQueryParamValue(
         page,
         "query",
         searchTerm,
         120000,
       );
+
+      // And I <sort access action>
       await ensureFilterDrawerOpen(page);
+
+      // And I select sort order "<sort label>"
       await selectSortBy(page, "awardCeilingDesc", isMobile, project.name);
+
+      // And the sort order should be "<sort label>"
       await expectSortBy(page, "awardCeilingDesc", isMobile);
+
+      // And the browser URL contains "sortby=<sort value>"
       await waitForURLContainsQueryParamValue(
         page,
         "sortby",
@@ -873,51 +959,81 @@ test.describe("Search page - state persistence after refresh", () => {
         120000,
       );
 
+      // And agency filter options have loaded
       await waitForFilterOptions(page, "agency");
 
+      // And the "Opportunity status" accordion is expanded
       await ensureAccordionExpanded(page, "Opportunity status");
+
+      // And I check the "<status>" status checkboxes
       await toggleCheckboxGroup(page, statusCheckboxesMulti);
+
+      // And the browser URL contains query param "status" with values "<status values>"
       await waitForURLContainsQueryParamValues(page, "status", [
         "closed",
         "forecasted",
         "posted",
       ]);
-      // Wait for the status-filtered search to finish before touching funding
-      // instrument - otherwise the completing search re-renders the filter panel
-      // from URL state (no fundingInstrument param yet) and resets any checkbox
-      // we just clicked.
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page);
 
+      // And the "Funding instrument" accordion is expanded
       await ensureAccordionExpanded(page, "Funding instrument");
+
+      // And I check the "<funding instrument 1>" funding instrument checkboxes
       await toggleCheckbox(page, "funding-instrument-grant");
+
+      // And the browser URL contains query param "fundingInstrument" with values "<funding values>"
       await waitForURLContainsQueryParamValues(page, "fundingInstrument", [
         "grant",
       ]);
-      // Let the search triggered by clicking 'grant' complete before clicking
-      // 'other' - otherwise the completing search re-syncs the panel from URL
-      // (which only shows 'grant') and unchecks 'other' before it registers.
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page);
+
+      // And I check the "<funding instrument 2>" funding instrument checkbox
       await toggleCheckbox(page, "funding-instrument-other");
+
+      // And the browser URL contains query param "fundingInstrument" with values "<funding values>"
       await waitForURLContainsQueryParamValues(page, "fundingInstrument", [
         "grant",
         "other",
       ]);
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page);
 
+      // And the "Eligibility" accordion is expanded
       await ensureAccordionExpanded(page, "Eligibility");
+
+      // And I check the "<eligibility>" eligibility checkbox
       await toggleCheckbox(page, "eligibility-county_governments");
+
+      // And the browser URL contains query param "eligibility" with values "<eligibility value>"
       await waitForURLContainsQueryParamValues(page, "eligibility", [
         "county_governments",
       ]);
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page);
+
+      // And I check the "<eligibility 2>" eligibility checkbox
       await toggleCheckbox(page, "eligibility-state_governments");
+
+      // And the browser URL contains query param "eligibility" with values "<eligibility values>"
       await waitForURLContainsQueryParamValues(page, "eligibility", [
         "county_governments",
         "state_governments",
       ]);
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page);
 
+      // And the "Agency" accordion is expanded
       await ensureAccordionExpanded(page, "Agency");
+
+      // And I check the first available non-numeric agency checkbox
       const agencyId = await getFirstNonNumericAgencyCheckboxId(page);
       expect(agencyId).toBeTruthy();
       if (!agencyId) {
@@ -925,55 +1041,99 @@ test.describe("Search page - state persistence after refresh", () => {
       }
       const agencyCheckboxes = { [agencyId]: agencyId };
       await toggleCheckboxGroup(page, agencyCheckboxes);
+
+      // And the browser URL contains query param "agency" with the selected agency value
       await waitForURLContainsQueryParamValues(page, "agency", [agencyId]);
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page);
 
+      // And the "Category" accordion is expanded
       await ensureAccordionExpanded(page, "Category");
+
+      // And I check the "<category 1>" category checkbox
       await toggleCheckbox(page, "category-agriculture");
+
+      // And the browser URL contains query param "category" with values "<category values>"
       await waitForURLContainsQueryParamValues(page, "category", [
         "agriculture",
       ]);
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page);
+
+      // And I check the "<category 2>" category checkbox
       await toggleCheckbox(page, "category-recovery_act");
+
+      // And the browser URL contains query param "category" with values "<category values>"
       await waitForURLContainsQueryParamValues(page, "category", [
         "agriculture",
         "recovery_act",
       ]);
 
+      // When I refresh the page
       await refreshPageWithCurrentURL(page);
+
+      // Then the search results load
       await waitForSearchResultsInitialLoad(page);
 
+      // And the filter drawer is open
       await ensureFilterDrawerOpen(page);
+
+      // And the sort order should be "<sort label>"
       await expectSortBy(page, "awardCeilingDesc", isMobile);
+
+      // And the search input should contain "<search-term>"
       const searchInput = getSearchInput(page);
       await expect(searchInput).toHaveValue(searchTerm, { timeout: 60000 });
 
+      // And the "Opportunity status" accordion is expanded
       await ensureAccordionExpanded(page, "Opportunity status");
+
+      // And the "<status>" status checkboxes should be checked
       await expectCheckboxesChecked(page, statusCheckboxesMulti);
 
+      // And the "<funding instrument 1>" funding instrument checkbox should be checked
+      // And the "<funding instrument 2>" funding instrument checkbox should be checked
       await ensureAccordionExpanded(page, "Funding instrument");
       await expectCheckboxesChecked(page, fundingInstrumentCheckboxesMulti);
 
+      // And the "<eligibility 1>" eligibility checkbox should be checked
+      // And the "<eligibility 2>" eligibility checkbox should be checked
       await ensureAccordionExpanded(page, "Eligibility");
       await expectCheckboxesChecked(page, eligibilityCheckboxesMulti);
 
+      // And the previously selected agency checkbox should be checked
       await ensureAccordionExpanded(page, "Agency");
       await expectCheckboxesChecked(page, agencyCheckboxes);
 
+      // And the "<category 1>" category checkbox should be checked
+      // And the "<category 2>" category checkbox should be checked
       await ensureAccordionExpanded(page, "Category");
       await expectCheckboxesChecked(page, categoryCheckboxesMulti);
 
+      // Then the URL should reflect the accumulated query parameters for the selected filters
+
+      // And the browser URL contains query param "status" with values "<status values>"
       expectURLQueryParamValues(page, "status", [
         "closed",
         "forecasted",
         "posted",
       ]);
+
+      // And the browser URL contains query param "fundingInstrument" with values "<funding values>"
       expectURLQueryParamValues(page, "fundingInstrument", ["grant", "other"]);
+
+      // And the browser URL contains query param "eligibility" with values "<eligibility values>"
       expectURLQueryParamValues(page, "eligibility", [
         "county_governments",
         "state_governments",
       ]);
+
+      // And the browser URL contains query param "agency" with the selected agency value
       expectURLQueryParamValues(page, "agency", [agencyId]);
+
+      // And the browser URL contains query param "category" with values "<category values>"
       expectURLQueryParamValues(page, "category", [
         "agriculture",
         "recovery_act",
