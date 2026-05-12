@@ -17,6 +17,8 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
+import { RequiredFieldIndicator } from "src/components/RequiredFieldIndicator";
+
 const exceptionEligibleRecommendationTypes: AwardRecommendationType[] = [
   "recommended_without_funding",
   "not_recommended",
@@ -63,9 +65,9 @@ const RecommendationDetailForm = ({
         <Label
           htmlFor={`award_recommendation_type_${submissionId}`}
           className="text-bold margin-bottom-1"
-          requiredMarker
         >
-          {t("recommendationLabel")}
+          <span>{t("recommendationLabel")}</span>
+          <RequiredFieldIndicator> *</RequiredFieldIndicator>
         </Label>
         <Select
           id={`award_recommendation_type_${submissionId}`}
@@ -130,7 +132,8 @@ const RecommendationDetailForm = ({
       {showExceptionDetail && (
         <div className="margin-bottom-3">
           <p className="text-bold margin-bottom-1 font-sans-sm">
-            {t("exceptionDetailLabel")}
+            <span>{t("exceptionDetailLabel")}</span>
+            <RequiredFieldIndicator> *</RequiredFieldIndicator>
           </p>
           <p className="text-base margin-top-1 margin-bottom-2">
             {t("exceptionDetailDescription")}
@@ -167,9 +170,9 @@ const RecommendationDetailForm = ({
             <Label
               htmlFor={`recommended_amount_${submissionId}`}
               className="text-bold margin-top-0 margin-bottom-1"
-              requiredMarker
             >
-              {t("amountRecommendedLabel")}
+              <span>{t("amountRecommendedLabel")}</span>
+              <RequiredFieldIndicator> *</RequiredFieldIndicator>
             </Label>
             <TextInput
               id={`recommended_amount_${submissionId}`}
