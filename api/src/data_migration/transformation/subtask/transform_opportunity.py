@@ -121,16 +121,16 @@ class TransformOpportunity(AbstractTransformSubTask):
                         "agency_id": agency.agency_id,
                     },
                 )
-                transformed_opportunity.agency_id = agency.agency_id
                 self.increment(self.Metrics.OPPORTUNITY_TRANSFORMED_HAS_AGENCY)
+                transformed_opportunity.agency_id = agency.agency_id
             else:
-                transformed_opportunity.agency_id = None
                 logger.info(
-                    "Attaching agency to opportunity",
+                    "No agency found to attach to opportunity",
                     extra=extra
                     | {"agency_code": transformed_opportunity.agency_code, "agency_id": None},
                 )
                 self.increment(self.Metrics.OPPORTUNITY_TRANSFORMED_NULL_AGENCY)
+                transformed_opportunity.agency_id = None
 
             if is_insert:
                 self.increment(
