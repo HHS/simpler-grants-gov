@@ -43,7 +43,7 @@ dependencies = [
     "common-grants-sdk~=0.6.0",
     "PyYAML>=6.0.3,<7",
     "jsonref>=1.1.0,<2",
-    "urllib3>=2.6.3,<3",
+    "urllib3>=2.7.0,<3",
     "python-statemachine>=3.0.0,<4",
     "beautifulsoup4>=4.14.3,<5",
 ]

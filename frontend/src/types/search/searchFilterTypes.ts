@@ -1,3 +1,5 @@
+import { LabelValueOption } from "src/types/generalTypes";
+
 export const backendFilterNames = [
   "opportunity_status",
   "funding_instrument",
@@ -30,12 +32,10 @@ export type HardcodedFrontendFilterNames = Exclude<
   "agency" | "topLevelAgency" | "assistanceListingNumber"
 >;
 
-export interface FilterOption {
+export interface FilterOption extends LabelValueOption {
   children?: FilterOption[];
   id: string;
   isChecked?: boolean;
-  label: string;
-  value: string;
   tooltip?: string;
 }
 

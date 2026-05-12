@@ -5,6 +5,7 @@ locals {
     app_username                = "app"
     migrator_username           = "migrator"
     schema_name                 = "app"
+    additional_schema_names     = ["legacy", "staging"]
     instance_count              = var.database_instance_count
     max_capacity                = var.database_max_capacity
     enable_http_endpoint        = var.database_enable_http_endpoint
