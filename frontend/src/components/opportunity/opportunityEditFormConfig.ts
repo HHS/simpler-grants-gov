@@ -1,8 +1,3 @@
-import { eligibilityTypes } from "src/constants/opportunity";
-import {
-  categoryOptions,
-  fundingOptions,
-} from "src/constants/searchFilterOptions";
 import {
   OpportunityDetail,
   OpportunitySummaryUpdateRequest,
@@ -34,33 +29,10 @@ export type OpportunityEditFormValues = {
   contactEmailText: string;
 };
 
-export type SelectOption = {
-  label: string;
-  value: string;
-};
-
-export type CheckboxOption = SelectOption;
-
 const emptyString = (value: string | null | undefined) => value ?? "";
 
 const numberToString = (value: number | null | undefined) =>
   value === null || value === undefined ? "" : String(value);
-
-export const ELIGIBILITY_OPTIONS: CheckboxOption[] = eligibilityTypes;
-
-export const OPPORTUNITY_CATEGORY_OPTIONS: SelectOption[] = [
-  { label: "Discretionary", value: "discretionary" },
-  { label: "Mandatory", value: "mandatory" },
-  { label: "Continuation", value: "continuation" },
-  { label: "Earmark", value: "earmark" },
-  { label: "Other", value: "other" },
-];
-
-export const FUNDING_INSTRUMENT_OPTIONS: CheckboxOption[] = fundingOptions.map(
-  ({ label, value }) => ({ label: label.trim(), value }),
-);
-
-export const FUNDING_CATEGORY_OPTIONS: CheckboxOption[] = categoryOptions;
 
 export const buildOpportunityEditInitialValues = (
   opportunity: OpportunityDetail,
