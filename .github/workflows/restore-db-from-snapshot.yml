@@ -25,7 +25,7 @@ on:
 jobs:
   restore-db:
     name: Restore DB
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     # Aurora restore + instance creation typically takes 30-60 minutes.
     # 120 minutes gives comfortable headroom without approaching GHA's 6h limit.
     timeout-minutes: 120
