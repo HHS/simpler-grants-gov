@@ -22,10 +22,7 @@ import { SFLLL_FORM_CONFIG } from "tests/e2e/apply/fixtures/sfLLL-fill-data";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
-import {
-  createApplication,
-  INDIVIDUAL_APPLICANT_LABEL,
-} from "tests/e2e/utils/create-application-utils";
+import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { selectFormInclusionOption } from "tests/e2e/utils/forms/select-form-inclusion-utils";
 import {
@@ -44,18 +41,12 @@ const applicantScenarios = [
   {
     testName:
       "Complete the Application Submission workflow for an Organization user, with required and conditional forms",
-    createApplicationInput: {
-      applicantType: "organization" as const,
-      orgLabel: testOrgLabel,
-    },
+    orgLabel: testOrgLabel,
   },
   {
     testName:
       "Complete the Application Submission workflow for an Individual user, with required and conditional forms",
-    createApplicationInput: {
-      applicantType: "individual" as const,
-      whoIsApplyingLabel: INDIVIDUAL_APPLICANT_LABEL,
-    },
+    orgLabel: undefined,
   },
 ] as const;
 
@@ -69,7 +60,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
   }
 });
 
-for (const { testName, createApplicationInput } of applicantScenarios) {
+for (const { testName, orgLabel } of applicantScenarios) {
   test(
     testName,
     { tag: [SMOKE, GRANTEE, APPLY] },
@@ -85,7 +76,7 @@ for (const { testName, createApplicationInput } of applicantScenarios) {
       await authenticateE2eUser(page, context, !!isMobile);
 
       // Covers "Starting a new application" flow for both org and individual applicants.
-      await createApplication(page, OPPORTUNITY_URL, createApplicationInput);
+      await createApplication(page, OPPORTUNITY_URL, orgLabel);
       const applicationUrl = page.url();
 
       // When the user clicks on SF424B form link

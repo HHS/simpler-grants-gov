@@ -9,14 +9,6 @@ const { baseUrl } = playwrightEnv;
 
 export const INDIVIDUAL_APPLICANT_LABEL = "As an individual (myself)";
 
-type CreateApplicationInput =
-  | string
-  | {
-      applicantType?: "organization" | "individual";
-      orgLabel?: string;
-      whoIsApplyingLabel?: string;
-    };
-
 async function selectOptionByLabelSubstring(
   selectLocator: Locator,
   labelSubstring: string,
@@ -97,28 +89,20 @@ async function selectOptionByLabelSubstring(
  * Creates a new application for the given opportunity.
  * @param page Playwright Page object
  * @param opportunityUrl Opportunity URL (e.g. "/opportunity/abc123")
- * @param input Organization label string (legacy) or applicant selection options
+ * @param orgLabel Optional organization label. If omitted, the application is created as an individual.
  */
 export async function createApplication(
   page: Page,
   opportunityUrl: string,
-  input: CreateApplicationInput,
+  orgLabel?: string,
 ) {
-  const isLegacyLabel = typeof input === "string";
-  const applicantType = isLegacyLabel
-    ? "organization"
-    : (input.applicantType ?? "organization");
-  const requestedLabel = isLegacyLabel
-    ? input
-    : (input.whoIsApplyingLabel ??
-      (applicantType === "individual"
-        ? INDIVIDUAL_APPLICANT_LABEL
-        : input.orgLabel));
+  const isIndividualApplicant = !orgLabel;
+  const requestedLabel = isIndividualApplicant
+    ? INDIVIDUAL_APPLICANT_LABEL
+    : orgLabel;
 
   if (!requestedLabel) {
-    throw new Error(
-      "createApplication requires orgLabel for organization applicants or whoIsApplyingLabel.",
-    );
+    throw new Error("createApplication requires an organization label.");
   }
   await gotoWithRetry(page, `${baseUrl}${opportunityUrl}`, {
     waitUntil: "domcontentloaded",
@@ -141,7 +125,7 @@ export async function createApplication(
     await selectOptionByLabelSubstring(
       orgSelect,
       requestedLabel,
-      applicantType === "organization",
+      isIndividualApplicant,
     );
   }
   const nameInput = modal.locator(
