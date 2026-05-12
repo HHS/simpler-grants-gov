@@ -47,7 +47,6 @@ def saved_searches(user, db_session):
             created_at=datetime(2024, 1, 3, tzinfo=timezone.utc),
         ),
     ]
-    db_session.commit()
     return searches
 
 
@@ -62,7 +61,6 @@ def test_user_get_saved_searches_unauthorized_user(
 ):
     # Try to get searches for a different user ID
     different_user = UserFactory.create()
-    db_session.commit()
 
     response = client.post(
         f"/v1/users/{different_user.user_id}/saved-searches/list",

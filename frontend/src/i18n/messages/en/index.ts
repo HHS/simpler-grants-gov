@@ -1052,6 +1052,7 @@ export const messages = {
       message: "{count, plural, =1 {1 Opportunity} other {# Opportunities}}",
     },
     resultsListItem: {
+      awardInformation: "Award information",
       status: {
         archived: "Archived: ",
         closed: "Closed: ",
@@ -1060,7 +1061,7 @@ export const messages = {
       },
       summary: {
         forecasted: "Forecast posted date: ",
-        posted: "Posted date: ",
+        posted: "Posted: ",
         agency: "Agency: ",
       },
       opportunityNumber: "Opportunity Number: ",
@@ -2057,6 +2058,7 @@ export const messages = {
     heroTitle: "Award Rec #",
     datePrepared: "Date prepared",
     status: "Status",
+    onThisPage: "On this page",
     statusTag: {
       draft: "In Progress",
       in_review: "Pending Review",
@@ -2163,6 +2165,42 @@ export const messages = {
           "Explain how you plan to provide funding over time. For example, will the agency award all funding in a single award or in multiple budget periods across a longer period of performance.",
         noFundingStrategyProvided: "No funding strategy provided.",
       },
+    },
+  },
+  CreateAwardRecommendation: {
+    pageTitle: "Create recommendation",
+    metaDescription: "Create a new award recommendation",
+    beforeYouGetStarted: "Before you get started",
+    introDescription:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
+    steps: {
+      identifyOpportunity: {
+        title: "Identify the opportunity",
+        description:
+          "Identify which funding opportunity is this recommendation is for and provide any additional context including an overview of the program and any legislative requirements the decision maker may need to know.",
+      },
+      applyRecommendations: {
+        title: "Apply your recommendations",
+        description:
+          "Apply your recommendations to all applications submitted for this opportunity.",
+        bullet1: "Explain how you plan to provide funding over time.",
+        bullet2:
+          "Add any needed context for your recommendations for any selected group or single applications.",
+        bullet3:
+          "Identify and document any exceptions to you recommendation method.",
+      },
+      provideAttachments: {
+        title: "Provide any attachments",
+        description:
+          "Include any supplemental documentation to support and inform your recommendations.",
+        bullet1: "Standard and Program terms & conditions",
+        bullet2: "Specific risks & recommended conditions",
+        bullet3: "Other supporting documents",
+      },
+    },
+    buttons: {
+      cancel: "Cancel",
+      next: "Next",
     },
   },
   InviteLegacyUsers: {

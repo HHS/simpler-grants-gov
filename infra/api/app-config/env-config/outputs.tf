@@ -97,3 +97,7 @@ output "workflow_service_config" {
     desired_count = var.workflow_service_desired_count
   }
 }
+
+output "file_scan_cache_config" {
+  value = local.file_scan_cache_config
+}

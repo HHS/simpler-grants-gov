@@ -210,7 +210,7 @@
       "enabled": false,
       "matchFileNames": [
         "analytics/pyproject.toml",
-        "analytics/poetry.lock"
+        "analytics/uv.lock"
       ],
       "matchPackagePatterns": ["kaleido"]
     },

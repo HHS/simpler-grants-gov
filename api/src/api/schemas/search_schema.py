@@ -89,7 +89,7 @@ class StrSearchSchemaBuilder(BaseSearchSchemaBuilder):
         allowed_values: type[StrEnum] | None = None,
         pattern: str | Pattern | None = None,
         example: str | None = None,
-        minimum_length: int | None = None
+        minimum_length: int | None = None,
     ) -> StrSearchSchemaBuilder:
         if pattern is not None and allowed_values is not None:
             raise Exception("Cannot specify both a pattern and allowed_values")
@@ -376,6 +376,13 @@ class UuidSearchSchemaBuilder(BaseSearchSchemaBuilder):
 
     def with_one_of(
         self,
+        *,
+        minimum_length: int | None = 1,
     ) -> UuidSearchSchemaBuilder:
-        self.schema_fields["one_of"] = fields.List(fields.UUID(), allow_none=True)
+        params: dict = {"allow_none": True}
+        if minimum_length is not None:
+            # Note that the list requires at least one value by default (sending us just [] will raise a validation error)
+            params["validate"] = [validators.Length(min=minimum_length)]
+
+        self.schema_fields["one_of"] = fields.List(fields.UUID(), **params)
         return self

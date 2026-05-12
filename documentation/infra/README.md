@@ -12,6 +12,10 @@
 
 * [Module architecture](./module-architecture.md)
 
+## Testing
+
+* [Terraform unit testing](./terraform-unit-testing.md)
+
 ## Learning
 
 * [Introduction to Terraform](./intro-to-terraform.md)

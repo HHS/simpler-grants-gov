@@ -24,7 +24,7 @@ Currently available data-pipeline commands are defined in the project [`Makefile
 The CLI can be used to discover and interactively execute data-pipeline commands.  To run the CLI, type the following into the command line to view a list of available commands:
 
 ```bash
-poetry run analytics --help 
+uv run analytics --help 
 ```
 
 ![Screenshot of passing the --help flag to CLI entry point](../../analytics/static/screenshot-cli-help.png)
@@ -32,7 +32,7 @@ poetry run analytics --help
 Discover the arguments required for a particular command by appending the `--help` flag to that command:
 
 ```bash
-poetry run analytics export gh_issue_data --help
+uv run analytics export gh_issue_data --help
 ```
 
 ![Screenshot of passing the --help flag to a specific command](../../analytics/static/screenshot-command-help.png)
@@ -56,9 +56,9 @@ After exporting SGG project data from GitHub, use `make` to transform and load t
 make gh-transform-and-load
 ```
 
-The same can be achieved with the more verbose and more flexible `poetry` command:
+The same can be achieved with the more verbose and more flexible `uv` command:
 ```bash
-poetry run analytics etl transform_and_load --issue-file ./data/test-etl-01.json --effective-date 2024-10-28 
+uv run analytics etl transform_and_load --issue-file ./data/test-etl-01.json --effective-date 2024-10-28 
 ```
 
 
