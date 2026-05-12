@@ -1,82 +1,54 @@
-[tool.poetry]
+[project]
 name = "simpler-grants-gov-api"
 version = "0.1.0"
 description = "Back end API for simpler.grants.gov"
-packages = [{ include = "src" }]
-authors = ["Nava Engineering <engineering@navapbc.com>"]
-include = ["newrelic.ini"]
+authors = [{ name = "Nava Engineering", email = "engineering@navapbc.com" }]
+requires-python = ">=3.14,<3.15"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "SQLAlchemy[mypy]>=2.0.21,<3",
+    "alembic>=1.12.0,<2",
+    "python-dotenv>=1.0.0,<2",
+    "pydantic>=2.12.5,<3",
+    "botocore>=1.31.62,<2",
+    "boto3>=1.28.62,<2",
+    "smart-open>=7.0.0,<8",
+    "pytz>=2023.3.post1,<2024",
+    "APIFlask>=3.1.0,<4",
+    "marshmallow-dataclass>=8.5.8,<9",
+    "marshmallow>=3.20.1,<4",
+    "gunicorn>=23.0.0,<24",
+    "psycopg[binary]>=3.1.19,<4",
+    "pydantic-settings>=2.0.3,<3",
+    "flask-cors>=6.0.0,<7",
+    "opensearch-py>=2.5.0,<3",
+    "pyjwt[crypto]>=2.9.0,<3",
+    "newrelic==11.5.0",
+    "jinja2>=3.1.5",
+    "tenacity>=8.0,<9",
+    "jsonschema[format-nongpl]>=4.23.0,<5",
+    "pandas>=2.0.3,<3",
+    "pandas-stubs>=2.0.2.230605,<3",
+    "xlrd>=2.0.1,<3",
+    "defusedxml>=0.7.1,<0.8",
+    "xmltodict>=1.0.0,<2",
+    "lxml>=6.0.0,<7",
+    "xmlschema>=3.4.0,<4",
+    "docraptor>=3.0.0,<4",
+    "jsonpath-ng>=1.7.0,<2",
+    "prettytable>=3.16.0,<4",
+    "common-grants-sdk~=0.6.0",
+    "PyYAML>=6.0.3,<7",
+    "jsonref>=1.1.0,<2",
+    "urllib3>=2.6.3,<3",
+    "python-statemachine>=3.0.0,<4",
+    "beautifulsoup4>=4.14.3,<5",
+]
 
-[tool.poetry.dependencies]
-# See /documentation/api/package-depedency-management.md#Upgrading Python
-# for details on upgrading your Python version
-python = "~3.14"
-SQLAlchemy = { version = "^2.0.21", extras = ["mypy"] }
-alembic = "^1.12.0"
-python-dotenv = "^1.0.0"
-pydantic = "^2.12.5"
-botocore = "^1.31.62"
-boto3 = "^1.28.62"
-smart-open = "^7.0.0"
-pytz = "^2023.3.post1"
-APIFlask = "^3.1.0"
-marshmallow-dataclass = { extras = ["enum", "union"], version = "^8.5.8" }
-marshmallow = "^3.20.1"
-gunicorn = "^23.0.0"
-psycopg = { extras = ["binary"], version = "^3.1.19" }
-pydantic-settings = "^2.0.3"
-flask-cors = "^6.0.0"
-opensearch-py = "^2.5.0"
-pyjwt = { extras = ["crypto"], version = "^2.9.0" }
-newrelic = "11.5.0"
-jinja2 = ">=3.1.5"
-tenacity = "^8.0"
-jsonschema = { extras = ["format-nongpl"], version = "^4.23.0" }
-pandas = "^2.0.3"
-pandas-stubs = "^2.0.2.230605"
-xlrd = "^2.0.1"
-defusedxml = "^0.7.1"
-xmltodict = "^1.0.0"
-lxml = "^6.0.0"
-xmlschema = "^3.4.0"
-docraptor = "^3.0.0"
-jsonpath-ng = "^1.7.0"
-prettytable = "^3.16.0"
-common-grants-sdk = "~0.6.0"
-PyYAML = "^6.0.3"
-jsonref = "^1.1.0"
-urllib3 = "^2.6.3"
-python-statemachine = "^3.0.0"
-beautifulsoup4 = "^4.14.3"
-
-[tool.poetry.group.dev.dependencies]
-black = "^24.0.0"
-isort = "^5.12.0"
-mypy = "^1.8.0"
-moto = { extras = ["s3"], version = "^5.0.0" }
-types-pytz = "^2023.3.1.1"
-coverage = "^7.3.2"
-Faker = "^28.0.0"
-factory-boy = "^3.3.0"
-bandit = "^1.7.5"
-pytest = "^8.0.0"
-requests-mock = "^1.12.1"
-types-pyyaml = "^6.0.12.11"
-setuptools = "^75.0.0"
-pydot = "3.0.4"
-sadisplay = "0.4.9"
-ruff = "^0.15.0"
-debugpy = "^1.8.1"
-freezegun = "^1.5.0"
-types-requests = "^2.31"
-graphviz = "^0.20.3"
-eralchemy = "^1.5.0"
-
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
+[project.scripts]
 db-migrate = "src.db.migrations.run:up"
 db-migrate-down = "src.db.migrations.run:down"
 db-migrate-down-all = "src.db.migrations.run:downall"
@@ -87,6 +59,46 @@ setup-postgres-db = "src.db.migrations.setup_local_postgres_db:setup_local_postg
 dat-to-jsonschema = "src.form_schema.dat_to_jsonschema_cli:main"
 validate-simpler-endpoints = "tests.validate_legacy_soap_api.validate_soap_endpoints:validate_simpler_endpoints"
 seed-local-soap-certificate = "tests.lib.seed_local_soap_certificate:seed_local_soap_certificate"
+
+[dependency-groups]
+# NOTE: Dev dependencies are only installed locally and in CI/CD where we run unit tests
+#
+# Any dependencies here are not available when we run our services or scripts non-locally
+dev = [
+    "black>=24.0.0,<25",
+    "isort>=5.12.0,<6",
+    "mypy>=1.8.0,<2",
+    "moto[s3]>=5.0.0,<6",
+    "types-pytz>=2023.3.1.1,<2024",
+    "coverage>=7.3.2,<8",
+    "Faker>=28.0.0,<29",
+    "factory-boy>=3.3.0,<4",
+    "bandit>=1.7.5,<2",
+    "pytest>=8.0.0,<9",
+    "requests-mock>=1.12.1,<2",
+    "types-pyyaml>=6.0.12.11,<7",
+    "setuptools>=75.0.0,<76",
+    "pydot==3.0.4",
+    "sadisplay==0.4.9",
+    "ruff>=0.15.0,<0.16",
+    "debugpy>=1.8.1,<2",
+    "freezegun>=1.5.0,<2",
+    "types-requests>=2.31,<3",
+    "graphviz>=0.20.3,<0.21",
+    "eralchemy>=1.5.0,<2",
+]
+
+[tool.uv]
+default-groups = "all"
+
+[tool.uv.build-backend]
+module-name = ["src"]
+module-root = ""
+source-include = ["newrelic.ini"]
+
+[build-system]
+requires = ["uv_build>=0.11.8,<0.11.9"]
+build-backend = "uv_build"
 
 [tool.black]
 line-length = 100
@@ -109,7 +121,7 @@ target-version = "py314"
 
 [tool.ruff.lint]
 # See: https://docs.astral.sh/ruff/rules/ for all possible rules
-select = ["B", "C", "E", "F", "W", "B9", "UP", "RUF", "PT"]
+select = ["B", "C", "E", "F", "W", "B9", "UP", "RUF", "PT", "TID251", "T20"]
 ignore = [
     # too many leading '#' for block comment, we can format our comments however we want
     "E266",
@@ -187,6 +199,22 @@ allowed-confusables = [
     "PT018"
 ]
 
+# While we generally don't want print statements anywhere in our code
+# We make exceptions for some scripts that run only locally if it helps
+# us format information better.
+"tool/console/interactive.py" = ["T201"]
+"tests/lib/seed_local_soap_certificate.py" = ["T201"]
+"src/task/forms/list_forms_task.py" = ["T201"]
+"src/form_schema/dat_to_jsonschema_cli.py" = ["T201"]
+
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+# For these libraries, we do use them, but have our own derived versions we want
+# to use instead as we've rewritten fundamental components like error messaging.
+"marshmallow.validate".msg = "Do not import marshmallow.validate directly - instead use src.api.schemas.extension.validators as we've rewritten the error messaging"
+"apiflask.validators".msg = "Do not import apiflask.validators directly - instead use src.api.schemas.extension.validators as we've rewritten the error messaging"
+"apiflask.fields".msg = "Do not import apiflask.fields directly - instead use src.api.schemas.extension.fields as we've rewritten the error messaging"
+"apiflask.Schema".msg = "Do not import apiflask.Schema directly - instead use src.api.schemas.extension"
 
 [tool.mypy]
 # https://mypy.readthedocs.io/en/stable/config_file.html
@@ -212,6 +240,13 @@ warn_unreachable = true
 warn_unused_ignores = true
 
 plugins = ["pydantic.mypy"]
+
+# form_json.py files live inside numeric directories (e.g. sf424/1/0/form_json.py)
+# that are not valid Python package names, so mypy cannot resolve their module paths.
+# They are loaded at runtime via importlib in each form package's __init__.py.
+exclude = [
+    "src/form_schema/forms/[^/]+/[0-9]+/[0-9]+/form_json\\.py",
+]
 
 [tool.bandit]
 # Ignore audit logging test file since test audit logging requires a lot of operations that trigger bandit warnings

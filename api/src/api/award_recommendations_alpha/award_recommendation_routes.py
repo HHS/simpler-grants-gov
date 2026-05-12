@@ -12,12 +12,17 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationAuditResponseSchema,
     AwardRecommendationCreateRequestSchema,
     AwardRecommendationGetResponseSchema,
+    AwardRecommendationListRequestSchema,
+    AwardRecommendationListResponseSchema,
     AwardRecommendationReviewUpdateRequestSchema,
     AwardRecommendationReviewUpdateResponseSchema,
+    AwardRecommendationRiskDeleteResponseSchema,
     AwardRecommendationRiskListRequestSchema,
     AwardRecommendationRiskListResponseSchema,
     AwardRecommendationRiskRequestSchema,
     AwardRecommendationRiskResponseSchema,
+    AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema,
+    AwardRecommendationSubmissionDetailsBatchUpdateResponseSchema,
     AwardRecommendationSubmissionListRequestSchema,
     AwardRecommendationSubmissionListResponseSchema,
     AwardRecommendationUpdateRequestSchema,
@@ -29,6 +34,9 @@ from src.services.award_recommendations.create_award_recommendation import (
 )
 from src.services.award_recommendations.create_award_recommendation_risk import (
     create_award_recommendation_risk,
+)
+from src.services.award_recommendations.delete_award_recommendation_risk import (
+    delete_award_recommendation_risk,
 )
 from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_and_verify_access,
@@ -42,6 +50,7 @@ from src.services.award_recommendations.list_award_recommendation_risks import (
 from src.services.award_recommendations.list_award_recommendation_submissions import (
     list_award_recommendation_submissions,
 )
+from src.services.award_recommendations.list_award_recommendations import list_award_recommendations
 from src.services.award_recommendations.update_award_recommendation import (
     update_award_recommendation,
 )
@@ -50,6 +59,9 @@ from src.services.award_recommendations.update_award_recommendation_review impor
 )
 from src.services.award_recommendations.update_award_recommendation_risk import (
     update_award_recommendation_risk,
+)
+from src.services.award_recommendations.update_award_recommendation_submissions import (
+    update_award_recommendation_submissions,
 )
 
 logger = logging.getLogger(__name__)
@@ -102,6 +114,40 @@ def award_recommendation_get(
         )
 
     return response.ApiResponse(message="Success", data=award_recommendation)
+
+
+@award_recommendation_blueprint.post("/award-recommendations/list")
+@award_recommendation_blueprint.input(AwardRecommendationListRequestSchema(), location="json")
+@award_recommendation_blueprint.output(AwardRecommendationListResponseSchema())
+@award_recommendation_blueprint.doc(
+    summary="List Award Recommendations",
+    description="Get paginated list of award recommendations filtered by agency.",
+    responses=[200, 401, 403, 404, 422],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_list(db_session: db.Session, json_data: dict) -> response.ApiResponse:
+    logger.info("POST /alpha/award-recommendations/list")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        award_recommendations, pagination_info = list_award_recommendations(
+            db_session, user, json_data
+        )
+
+    add_extra_data_to_current_request_logs(
+        {
+            "response.pagination.total_pages": pagination_info.total_pages,
+            "response.pagination.total_records": pagination_info.total_records,
+        }
+    )
+    logger.info("Successfully fetched award recommendations")
+
+    return response.ApiResponse(
+        message="Success", data=award_recommendations, pagination_info=pagination_info
+    )
 
 
 @award_recommendation_blueprint.post(
@@ -243,6 +289,42 @@ def award_recommendation_risk_create(
 
 
 @award_recommendation_blueprint.put(
+    "/award-recommendations/<uuid:award_recommendation_id>/submission-details"
+)
+@award_recommendation_blueprint.input(
+    AwardRecommendationSubmissionDetailsBatchUpdateRequestSchema, location="json"
+)
+@award_recommendation_blueprint.output(
+    AwardRecommendationSubmissionDetailsBatchUpdateResponseSchema
+)
+@award_recommendation_blueprint.doc(
+    summary="Batch Update Award Recommendation Submission Details",
+    description="Update multiple submission details for an award recommendation in a single operation.",
+    responses=[200, 401, 403, 404, 422, 500],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_submissions_batch_update(
+    db_session: db.Session, award_recommendation_id: uuid.UUID, json_data: dict
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs({"award_recommendation_id": award_recommendation_id})
+    logger.info("PUT /alpha/award-recommendations/:award_recommendation_id/submission-details")
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        submissions = update_award_recommendation_submissions(
+            db_session,
+            user,
+            award_recommendation_id,
+            json_data.get("award_recommendation_submissions", {}),
+        )
+
+    return response.ApiResponse(message="Success", data=submissions)
+
+
+@award_recommendation_blueprint.put(
     "/award-recommendations/<uuid:award_recommendation_id>/risks/<uuid:award_recommendation_risk_id>"
 )
 @award_recommendation_blueprint.input(AwardRecommendationRiskRequestSchema, location="json")
@@ -355,3 +437,40 @@ def award_recommendation_audit_list(
     return response.ApiResponse(
         message="Success", data=audit_events, pagination_info=pagination_info
     )
+
+
+@award_recommendation_blueprint.delete(
+    "/award-recommendations/<uuid:award_recommendation_id>/risks/<uuid:award_recommendation_risk_id>"
+)
+@award_recommendation_blueprint.output(AwardRecommendationRiskDeleteResponseSchema)
+@award_recommendation_blueprint.doc(
+    summary="Delete Award Recommendation Risk",
+    description="Soft delete a risk for an award recommendation.",
+    responses=[200, 401, 403, 404],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_risk_delete(
+    db_session: db.Session,
+    award_recommendation_id: uuid.UUID,
+    award_recommendation_risk_id: uuid.UUID,
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {
+            "award_recommendation_id": award_recommendation_id,
+            "award_recommendation_risk_id": award_recommendation_risk_id,
+        }
+    )
+    logger.info(
+        "DELETE /alpha/award-recommendations/:award_recommendation_id/risks/:award_recommendation_risk_id"
+    )
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        delete_award_recommendation_risk(
+            db_session, user, award_recommendation_id, award_recommendation_risk_id
+        )
+
+    return response.ApiResponse(message="Success", data=None)

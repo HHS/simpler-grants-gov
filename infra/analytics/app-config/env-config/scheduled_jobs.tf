@@ -1,5 +1,5 @@
 locals {
-  # The `task_command` is what you want your scheduled job to run, for example: ["poetry", "run", "flask"].
+  # The `task_command` is what you want your scheduled job to run, for example: ["analytics", "example-cmd"].
   # Schedule expression defines the frequency at which the job should run.
   # The syntax for `schedule_expression` is explained in the following documentation:
   # https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-scheduled-rule-pattern.html
@@ -12,7 +12,7 @@ locals {
       state               = "ENABLED"
     }
     opportunity-load-csvs = {
-      task_command = ["poetry", "run", "analytics", "etl", "opportunity-load"]
+      task_command = ["analytics", "etl", "opportunity-load"]
       # Every day at 6am Eastern Time during DST. 7am during non-DST.
       schedule_expression = "cron(0 11 * * ? *)"
       state               = "ENABLED"

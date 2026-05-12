@@ -3,7 +3,7 @@
 import json
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import uuid4
 
@@ -20,7 +20,7 @@ def test_json_formatter(capsys: pytest.CaptureFixture):
     console_handler.setFormatter(formatters.JsonFormatter())
     logger.addHandler(console_handler)
 
-    datetime_now = datetime.now(tz=timezone.utc)
+    datetime_now = datetime.now(tz=UTC)
     date_now = datetime_now.date()
     decimal_field = Decimal("12.34567")
     uuid_field = uuid4()

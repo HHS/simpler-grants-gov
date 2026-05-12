@@ -30,8 +30,6 @@ def existing_opportunity(grantor_auth_data, enable_factory_create):
 @pytest.fixture
 def existing_attachment(db_session, existing_opportunity, enable_factory_create, mock_s3_bucket):
     """Create an attachment for the opportunity"""
-    print(f"Creating attachment for opportunity ID: {existing_opportunity.opportunity_id}")
-
     attachment = opportunity_models.OpportunityAttachment(
         attachment_id=uuid.uuid4(),
         legacy_attachment_id=12345,

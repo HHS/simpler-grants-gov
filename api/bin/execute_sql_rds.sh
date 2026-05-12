@@ -35,8 +35,8 @@ main() {
   create_temporary_directory
 
   # Note that to use jtbl, it needs to be installed directly
-  # by the user with pip - if we wanted it to work with our poetry
-  # setup we'd have to run many of these commands via poetry
+  # by the user with pip - if we wanted it to work with our uv
+  # setup we'd have to run many of these commands via uv
   if ! command -v jtbl 2>&1 >/dev/null
   then
     printf "\n${RED}jtbl command not found${END} - please install before running: https://github.com/kellyjonbrazil/jtbl \n\n"

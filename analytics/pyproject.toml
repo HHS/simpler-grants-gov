@@ -1,52 +1,73 @@
-[tool.poetry]
-authors = ["widal001 <billy.daly@agile6.com>"]
-description = "Python package for analyzing data related to the Simpler Grants Project"
+[project]
 name = "simpler-grants-gov-analytics"
-packages = [{ include = "analytics", from = "src" }]
-readme = "README.md"
 version = "0.1.0"
-include = ["newrelic.ini"]
+description = "Python package for analyzing data related to the Simpler Grants Project"
+authors = [{ name = "widal001", email = "billy.daly@agile6.com" }]
+requires-python = ">=3.14,<3.15"
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "dynaconf>=3.2.13,<4",
+    "pandas>=2.0.3,<3",
+    "pandas-stubs>=2.0.2.230605,<3",
+    "pydantic>=2.0.3,<3",
+    "slack-sdk>=3.23.0,<4",
+    "sqlparse>=0.5.0",
+    "typer[all]>=0.25.0,<0.26",
+    "sqlalchemy>=2.0.30,<3",
+    "pydantic-settings>=2.3.4,<3",
+    "boto3>=1.35.56,<2",
+    "boto3-stubs>=1.35.56,<2",
+    "psycopg[binary]>=3.2.3,<4",
+    "smart-open>=7.0.5,<8",
+    "newrelic>=11.5.0,<12",
+    "requests>=2.33.0,<3",
+    "urllib3>=2.6.3,<3",
+]
 
-[tool.poetry.scripts]
+[project.scripts]
 analytics = "analytics.cli:app"
 db-migrate = "analytics.cli:migrate_database"
 
-[tool.poetry.dependencies]
-dynaconf = "^3.2.13"
-pandas = "^2.0.3"
-pandas-stubs = "^2.0.2.230605"
-pydantic = "^2.0.3"
-python = "~3.14"
-slack-sdk = "^3.23.0"
-sqlparse = ">=0.5.0"
-typer = { extras = ["all"], version = "^0.24.0" }
-sqlalchemy = "^2.0.30"
-pydantic-settings = "^2.3.4"
-boto3 = "^1.35.56"
-boto3-stubs = "^1.35.56"
-psycopg = { extras = ["binary"], version = "^3.2.3" }
-smart-open = "^7.0.5"
-newrelic = "^11.5.0"
-requests = "^2.33.0"
-urllib3 = "^2.6.3"
+[dependency-groups]
+dev = [
+    "black>=26.3.1,<27",
+    "mypy>=1.4.1,<2",
+    "pylint>=3.0.2,<4",
+    "pytest>=8.0.0,<9",
+    "pytest-cov>=5.0.0,<6",
+    "ruff>=0.15.0,<0.16",
+    "types-requests>=2.32.0.20241016,<3",
+    "moto>=5.0.22,<6",
+    "syrupy>=4.8.1,<5",
+]
 
-[tool.poetry.group.dev.dependencies]
-black = "^26.3.1"
-mypy = "^1.4.1"
-pylint = "^3.0.2"
-pytest = "^8.0.0"
-pytest-cov = "^5.0.0"
-ruff = "^0.15.0"
-types-requests = "^2.32.0.20241016"
-moto = "^5.0.22"
-syrupy = "^4.8.1"
+[tool.uv]
+default-groups = "all"
+
+[tool.hatch.build.targets.sdist]
+include = ["src/analytics"]
+
+[tool.hatch.build.targets.sdist.force-include]
+"newrelic.ini" = "newrelic.ini"
+
+[tool.hatch.build.targets.wheel]
+include = ["src/analytics"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/analytics" = "analytics"
 
 [build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core"]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.mypy]
 python_version = "3.14"
+
+plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
@@ -82,6 +103,9 @@ ignore = [
   "TD003",   # missing an issue link on TODO
   "FA102",   # Adding "from __future__ import annotations" to any new-style type annotation
   "TC006",   # Changing all cast calls to strings instead of actual types
+  "TC001",   # No imports for only type checking internal implementation
+  "TC002",   # No imports for only type checking third-party libraries
+  "TC003",   # No imports for only type checking standard libraries
 ]
 
 [tool.ruff.lint.flake8-builtins]

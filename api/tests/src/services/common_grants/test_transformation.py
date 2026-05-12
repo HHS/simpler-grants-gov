@@ -715,6 +715,184 @@ class TestTransformation:
         assert old_result is not None, "_legacy_validate_url() should accept NASA URL"
         assert new_result is None, "validate_url() should reject NASA URL"
 
+    def test_validate_url_rejects_urls_that_marshmallow_url_field_rejects(self):
+        """validate_url() must also reject URLs that pass Pydantic's HttpUrl but fail
+        marshmallow's URL field. The CG response is loaded through marshmallow on the
+        way out; a URL that pydantic accepts but marshmallow rejects 500s the entire
+        response (one bad record kills the batch).
+
+        Concrete divergence: comma-separated URLs — agencies sometimes paste multiple
+        URLs into one field. Pydantic's HttpUrl mangles 'https://a.gov,https://b.gov'
+        into a string ('https://a.gov,https//b.gov') it considers valid; marshmallow's
+        fields.URL rejects that string with "Not a valid URL." — producing the
+        ValidationError({'items': {N: {'customFields': {'additionalInfo': {'value':
+        {'url': [..., message='Not a valid URL.']}}}}}}) we observed in prod.
+        """
+        comma_url = "https://www.grants.gov,https://other.example"
+        assert validate_url(comma_url) is None, (
+            "validate_url() must reject URLs that fail marshmallow's URL field, "
+            "otherwise they reach the CG response load and 500 the whole batch"
+        )
+
+        no_tld_url = "http://example"
+        assert validate_url(no_tld_url) is None, (
+            "validate_url() must reject scheme-only-host URLs that pydantic accepts "
+            "but marshmallow rejects"
+        )
+
+    def test_search_response_marshmallow_load_does_not_500_on_problematic_url(self):
+        """End-to-end recreation of the prod 500.
+
+        Builds an opportunity whose summary.additional_info_url is the comma-separated
+        form that triggers the prod 500. Runs the same pipeline the route uses:
+            transform_search_result_to_cg -> build OpportunitiesSearchResponse pydantic
+            -> model_dump(by_alias=True, mode='json') -> response marshmallow load.
+        Before the fix this raises marshmallow.ValidationError on
+        items[0].customFields.additionalInfo.value.url. After the fix the record loads
+        cleanly with additionalInfo absent (because validate_url returned None).
+        """
+        from http import HTTPStatus
+
+        from common_grants_sdk.schemas.pydantic import (
+            OpportunitiesSearchResponse,
+            PaginatedResultsInfo,
+            SortedResultsInfo,
+        )
+
+        from src.api.common_grants.schemas.marshmallow.schemas import (
+            OpportunitiesSearchResponse as OpportunitiesSearchResponseSchema,
+        )
+
+        problematic_url = "https://www.grants.gov,https://other.example"
+        opp_data = {
+            "opportunity_id": uuid4(),
+            "opportunity_title": "Test Opportunity",
+            "opportunity_status": OpportunityStatus.POSTED,
+            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "Test description",
+                "post_date": date(2024, 1, 1),
+                "close_date": date(2024, 12, 31),
+                "additional_info_url": problematic_url,
+                "additional_info_url_description": "Multiple links",
+                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            },
+        }
+
+        cg_opportunity = transform_search_result_to_cg(opp_data)
+        assert cg_opportunity is not None, "transform itself must not drop the record"
+
+        response = OpportunitiesSearchResponse(
+            status=HTTPStatus.OK,
+            message="ok",
+            items=[cg_opportunity],
+            pagination_info=PaginatedResultsInfo(page=1, page_size=1, totalItems=1, totalPages=1),
+            sort_info=SortedResultsInfo(
+                sort_by=OppSortBy.LAST_MODIFIED_AT.value,
+                sort_order="desc",
+                errors=[],
+            ),
+            filter_info=build_filter_info(None),
+        )
+        response_json = response.model_dump(by_alias=True, mode="json")
+
+        # This is the line that raises marshmallow.ValidationError in prod.
+        validated = OpportunitiesSearchResponseSchema().load(response_json)
+
+        assert len(validated["items"]) == 1
+        # Once validate_url filters the bad URL, additionalInfo is absent; that's the
+        # contract — invalid URLs are dropped, not propagated.
+        custom_fields = validated["items"][0].get("customFields") or {}
+        assert custom_fields.get("additionalInfo") is None, (
+            "additionalInfo must be omitted when its url fails validation, not "
+            "passed through with an invalid URL"
+        )
+
+    def test_attachment_download_url_dual_validates(self):
+        """Sibling of the additional-info-url path: AttachmentValue.downloadUrl in
+        the CG response is loaded through marshmallow's fields.URL on the way out;
+        the field validator on the pydantic model must reject the same divergent
+        strings (comma-URLs, scheme-only-host) that validate_url rejects, otherwise
+        an attachment with a malformed download_path 500s the whole batch in the same
+        way an additional_info_url did.
+        """
+        from src.api.common_grants.schemas.pydantic.custom_fields import AttachmentValue
+
+        good_attachment = {
+            "downloadUrl": "https://example.com/file.pdf",
+            "name": "ok.pdf",
+            "sizeInBytes": 1,
+            "mimeType": "application/pdf",
+            "createdAt": datetime(2024, 1, 1, 12, 0, 0),
+            "lastModifiedAt": datetime(2024, 1, 2, 12, 0, 0),
+        }
+        validated = AttachmentValue.model_validate(good_attachment)
+        assert validated.downloadUrl == "https://example.com/file.pdf"
+
+        for divergent in ("https://www.grants.gov,https://other.example", "http://example"):
+            bad_attachment = good_attachment | {"downloadUrl": divergent}
+            validated = AttachmentValue.model_validate(bad_attachment)
+            assert validated.downloadUrl is None, (
+                f"AttachmentValue.downloadUrl must drop {divergent!r}; pydantic accepts it "
+                "but marshmallow's fields.URL — which loads the response — rejects it"
+            )
+
+    def test_dropped_url_log_includes_field_path_and_opportunity_id(self, caplog):
+        """When a URL is dropped during transformation, the WARNING log must carry
+        enough context for an operator to answer 'why is this field missing for
+        opportunity X?' That means: which field path was dropped (so the op can
+        tell whether `source`, `customFields.additionalInfo.url`, or an
+        attachment's `downloadUrl` is missing) and which opportunity_id owns it.
+        Both validate_url callsites in transformation.py thread these through.
+        """
+        import logging
+
+        caplog.set_level(logging.WARNING)
+
+        opp_id = uuid4()
+        opp_data = {
+            "opportunity_id": opp_id,
+            "opportunity_title": "Test",
+            "opportunity_status": OpportunityStatus.POSTED,
+            "created_at": datetime(2024, 1, 1, 12, 0, 0),
+            "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            "summary": {
+                "summary_description": "x",
+                "additional_info_url": "https://www.grants.gov,https://b.gov",  # dual-validate fails
+                "additional_info_url_description": "two links",
+                "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+            },
+            "opportunity_attachments": [
+                {
+                    "download_path": "http://example",  # dual-validate fails
+                    "file_name": "x.pdf",
+                    "file_size_bytes": 1,
+                    "mime_type": "application/pdf",
+                    "created_at": datetime(2024, 1, 1, 12, 0, 0),
+                    "updated_at": datetime(2024, 1, 2, 12, 0, 0),
+                },
+            ],
+        }
+
+        result = transform_search_result_to_cg(opp_data)
+        assert result is not None
+
+        drop_records = [r for r in caplog.records if "Dropping URL field" in r.message]
+        # Three drops: source, customFields.additionalInfo.url, attachments[].downloadUrl
+        # (additional_info_url is consumed by both `source` and the additionalInfo custom field).
+        fields_dropped = {getattr(r, "field", None) for r in drop_records}
+        assert "source" in fields_dropped
+        assert "customFields.additionalInfo.url" in fields_dropped
+        assert "customFields.attachments[].downloadUrl" in fields_dropped
+
+        # opportunity_id is on every drop record so an operator can correlate.
+        for r in drop_records:
+            assert getattr(r, "opportunity_id", None) == opp_id
+            assert r.levelname == "WARNING"
+
     def test_transform_search_result_to_cg_with_nasa_url_bug(self):
         """Test that transformation works correctly with NASA URL that Pydantic rejects.
 
@@ -914,17 +1092,17 @@ class TestTransformation:
         # Verify the URL was rejected
         assert result is None
 
-        # Verify the log was captured
+        # Verify the log was captured. The URL is in extra["url"] and the log
+        # message itself is a fixed string.
         assert any(
-            record.levelname == "INFO"
-            and "URL validation failed for:" in record.message
-            and invalid_url in record.message
+            record.levelname == "WARNING"
+            and "Dropping URL field" in record.message
+            and getattr(record, "url", None) == invalid_url
             for record in caplog.records
         )
 
-        # Verify the extra data is present in the log record
         log_record = next(
-            (record for record in caplog.records if "URL validation failed for:" in record.message),
+            (record for record in caplog.records if "Dropping URL field" in record.message),
             None,
         )
         assert log_record is not None
@@ -977,8 +1155,9 @@ class TestTransformation:
         """Test that transformation with invalid URL logs error but still succeeds."""
         import logging
 
-        # Set up logging to capture info level logs
-        caplog.set_level(logging.INFO)
+        # WARNING because dropping a field from the consumer-facing response is
+        # a data-suppression event, not a routine validation observation.
+        caplog.set_level(logging.WARNING)
 
         # Create opportunity data with an invalid URL
         invalid_url = "https://example.com/path/{invalid}"
@@ -1007,13 +1186,17 @@ class TestTransformation:
         assert result.title == "Test Opportunity"
         assert result.source is None  # URL should be None due to validation failure
 
-        # Verify URL validation error was logged
-        assert any(
-            record.levelname == "INFO"
-            and "URL validation failed for:" in record.message
-            and invalid_url in record.message
-            for record in caplog.records
+        # Verify URL drop was logged with field + opportunity_id context so an
+        # operator can answer "why is `source` missing for opportunity X?"
+        log_record = next(
+            (r for r in caplog.records if "Dropping URL field" in r.message),
+            None,
         )
+        assert log_record is not None
+        assert log_record.levelname == "WARNING"
+        assert getattr(log_record, "url", None) == invalid_url
+        assert getattr(log_record, "field", None) == "source"
+        assert getattr(log_record, "opportunity_id", None) == opp_data["opportunity_id"]
 
 
 class TestPopulateCustomFields:
