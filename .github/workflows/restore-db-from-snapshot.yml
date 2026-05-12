@@ -1,0 +1,117 @@
+name: Restore DB from Staging Snapshot
+run-name: Restore ${{ inputs.target_environment }} DB from ${{ inputs.snapshot_id != '' && inputs.snapshot_id || 'latest staging snapshot' }}${{ inputs.dry_run && ' (dry run)' || '' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: Grantee environment to restore
+        required: true
+        type: choice
+        options:
+          - grantee1
+          - grantee2
+      snapshot_id:
+        description: "Snapshot ID to restore from (leave blank to use the latest staging snapshot)"
+        required: false
+        type: string
+        default: ""
+      dry_run:
+        description: "Dry run: preview what would happen without making changes"
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  restore-db:
+    name: Restore DB
+    runs-on: ubuntu-22.04
+    # Aurora restore + instance creation typically takes 30-60 minutes.
+    # 120 minutes gives comfortable headroom without approaching GHA's 6h limit.
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      id-token: write
+    # Require environment approval so accidental triggers don't destroy prod-like data
+    environment: ${{ inputs.target_environment }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: ./.github/actions/setup-terraform
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/configure-aws-credentials
+        with:
+          app_name: api
+          environment: ${{ inputs.target_environment }}
+
+      - name: Resolve snapshot ID
+        id: snapshot
+        run: |
+          if [[ -n "${{ inputs.snapshot_id }}" ]]; then
+            SNAPSHOT_ID="${{ inputs.snapshot_id }}"
+          else
+            SNAPSHOT_ID=$(aws rds describe-db-cluster-snapshots \
+              --db-cluster-identifier "api-staging" \
+              --snapshot-type automated \
+              --query 'sort_by(DBClusterSnapshots, &SnapshotCreateTime)[-1].DBClusterSnapshotIdentifier' \
+              --output text)
+          fi
+          echo "snapshot_id=${SNAPSHOT_ID}" >> "$GITHUB_OUTPUT"
+          echo "Resolved snapshot: ${SNAPSHOT_ID}"
+
+      - name: Terraform init
+        run: |
+          terraform -chdir="infra/api/database" init \
+            -input=false \
+            -reconfigure \
+            -backend-config="${{ inputs.target_environment }}.s3.tfbackend"
+
+      - name: Plan restore (dry run)
+        if: inputs.dry_run
+        run: |
+          terraform -chdir="infra/api/database" plan \
+            -var="environment_name=${{ inputs.target_environment }}" \
+            -var="database_snapshot_id=${{ steps.snapshot.outputs.snapshot_id }}" \
+            -replace="module.database.aws_rds_cluster.db"
+
+      - name: Apply restore
+        if: ${{ !inputs.dry_run }}
+        run: |
+          terraform -chdir="infra/api/database" apply \
+            -auto-approve \
+            -var="environment_name=${{ inputs.target_environment }}" \
+            -var="database_snapshot_id=${{ steps.snapshot.outputs.snapshot_id }}" \
+            -replace="module.database.aws_rds_cluster.db"
+
+      - name: Write job summary
+        if: ${{ !inputs.dry_run }}
+        run: |
+          {
+            echo "## DB Restore Summary"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| **Target cluster** | \`api-${{ inputs.target_environment }}\` |"
+            echo "| **Source snapshot** | \`${{ steps.snapshot.outputs.snapshot_id }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  run-migrations:
+    name: Run DB migrations
+    needs: [restore-db]
+    # Skip migrations on dry run — restore-db exits early so this job
+    # would run against the unmodified cluster, which is harmless but misleading.
+    if: ${{ !inputs.dry_run }}
+    uses: ./.github/workflows/database-migrations.yml
+    with:
+      app_name: api
+      environment: ${{ inputs.target_environment }}
+      version: ${{ github.sha }}
+
+  send-slack-notification:
+    if: failure()
+    needs: [restore-db, run-migrations]
+    uses: ./.github/workflows/send-slack-notification.yml
+    secrets: inherit

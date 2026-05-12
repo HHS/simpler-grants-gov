@@ -12,6 +12,7 @@ locals {
     min_capacity                = var.database_min_capacity
     app_access_policy_name      = "${var.app_name}-${var.environment}-app-access"
     migrator_access_policy_name = "${var.app_name}-${var.environment}-migrator-access"
+    deletion_protection         = var.database_deletion_protection
 
     newrelic_entity_guid = var.database_newrelic_entity_guid
 

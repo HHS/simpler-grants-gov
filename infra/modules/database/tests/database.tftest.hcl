@@ -73,21 +73,21 @@ run "deletion_protection_enabled_by_default" {
   command = plan
 
   assert {
-    condition     = aws_rds_cluster.db.deletion_protection == !var.is_temporary
+    condition     = aws_rds_cluster.db.deletion_protection == true
     error_message = "Deletion protection should be on by default"
   }
 }
 
-run "deletion_protection_disabled_for_temporary_cluster" {
+run "deletion_protection_disabled_when_explicitly_set" {
   command = plan
 
   variables {
-    is_temporary = true
+    deletion_protection = false
   }
 
   assert {
-    condition     = aws_rds_cluster.db.deletion_protection == !var.is_temporary
-    error_message = "Deletion protection must be disabled for temporary clusters to allow automated teardown"
+    condition     = aws_rds_cluster.db.deletion_protection == false
+    error_message = "Deletion protection must be disabled when deletion_protection = false"
   }
 }
 
