@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { identity } from "lodash";
 import AwardRecommendationSubmissionEditPage from "src/app/[locale]/(base)/award-recommendation/[id]/application-submissions/[applicationSubmissionId]/edit/page";
+import { AwardRecommendationSubmission } from "src/types/awardRecommendationTypes";
 import { LocalizedPageProps } from "src/types/intl";
 import { FeatureFlaggedPageWrapper } from "src/types/uiTypes";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
@@ -58,11 +59,11 @@ jest.mock("src/services/fetch/fetchers/awardRecommendationFetcher", () => ({
   getAwardRecommendationSubmission: (
     awardRecommendationId: string,
     applicationSubmissionId: string,
-  ) =>
+  ): Promise<AwardRecommendationSubmission | null> =>
     mockGetAwardRecommendationSubmission(
       awardRecommendationId,
       applicationSubmissionId,
-    ),
+    ) as Promise<AwardRecommendationSubmission | null>,
 }));
 
 const pageParams = Promise.resolve({
