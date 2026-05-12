@@ -574,7 +574,10 @@ describe("OpportunityEditForm — funding details interactions", () => {
 
   it("formats estimatedTotalProgramFunding with commas from initialValues", () => {
     renderOpportunityEditForm({
-      initialValues: { ...initialValues, estimatedTotalProgramFunding: "750000" },
+      initialValues: {
+        ...initialValues,
+        estimatedTotalProgramFunding: "750000",
+      },
     });
 
     const input = screen.getByRole("textbox", {
