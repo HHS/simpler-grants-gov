@@ -134,40 +134,30 @@ export default function OpportunityEditForm({
 
   // Dispatch CustomEvent so OpportunityEditHeaderActions can update
   // the publish button enabled state in real time.
-  // Accepts overrides for the field that just changed — React state updates
-  // are async so reading state immediately after setState gives the old value.
-  function dispatchValuesChange(
-    override: {
-      publishDate?: string;
-      fundingType?: string;
-      fundingCategories?: string;
-      eligibleApplicants?: string[];
-    } = {},
-  ) {
+  // useEffect fires after every state change so the event always carries
+  // the latest committed values — no manual dispatch calls needed.
+  useEffect(() => {
     const form = document.getElementById("opportunity-edit-form");
     if (!form) return;
     form.dispatchEvent(
       new CustomEvent("opportunity-values-change", {
         bubbles: true,
         detail: {
-          publishDate: override.publishDate ?? publishDate,
-          fundingType: override.fundingType ?? fundingType,
-          fundingCategories: override.fundingCategories ?? fundingCategory,
-          eligibleApplicants:
-            override.eligibleApplicants ?? selectedEligibility,
+          publishDate,
+          fundingType,
+          fundingCategories: fundingCategory,
+          eligibleApplicants: selectedEligibility,
         },
       }),
     );
-  }
+  }, [publishDate, fundingType, fundingCategory, selectedEligibility]);
 
-  // Shared toggle handler for eligibility checkboxes — updates state and
-  // dispatches the CustomEvent with the new selection in one step.
+  // Shared toggle handler for eligibility checkboxes.
   function handleEligibilityToggle(value: string) {
     const next = selectedEligibility.includes(value)
       ? selectedEligibility.filter((v) => v !== value)
       : [...selectedEligibility, value];
     setSelectedEligibility(next);
-    dispatchValuesChange({ eligibleApplicants: next });
   }
 
   function getFieldError(
@@ -434,7 +424,6 @@ export default function OpportunityEditForm({
                   defaultValue={initialValues.fundingType}
                   onChange={(event) => {
                     setFundingType(event.target.value);
-                    dispatchValuesChange({ fundingType: event.target.value });
                   }}
                   className="width-full"
                   disabled={!isDraft}
@@ -501,9 +490,6 @@ export default function OpportunityEditForm({
                   value={fundingCategory}
                   onChange={(event) => {
                     setFundingCategory(event.target.value);
-                    dispatchValuesChange({
-                      fundingCategories: event.target.value,
-                    });
                   }}
                   className="width-full"
                   disabled={!isDraft}
@@ -652,7 +638,6 @@ export default function OpportunityEditForm({
                   placeholder="mm/dd/yyyy"
                   onChange={(value) => {
                     setPublishDate(value ?? "");
-                    dispatchValuesChange({ publishDate: value ?? "" });
                   }}
                   className="width-full"
                   disabled={!isDraft}
