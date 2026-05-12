@@ -19,7 +19,7 @@ Scenario: Retain all filters and inputs after refresh
   When I enter "<search-term>" in the search input and submit in "<viewport>"
   And I <sort access action>
   And I select sort order "<sort label>"
-  And I <filter drawer action>
+  And filter controls are available
 
   And agency filter options have loaded
  
@@ -62,9 +62,9 @@ Scenario: Retain all filters and inputs after refresh
   And the browser URL contains query param "category" with values "<category value>"
  
 Examples:
-  | viewport | sort access action      | filter drawer action        |
-  | mobile   | open the filter drawer  | keep the filter drawer open |
-  | desktop  | close the filter drawer | open the filter drawer      |
+  | viewport | sort access action      |
+  | mobile   | open the filter drawer  |
+  | desktop  | close the filter drawer |
 
   | search-term  | sort label                 | sort value        |
   | education    | Award Ceiling (Descending) | awardCeilingDesc  |
@@ -81,7 +81,7 @@ Scenario: Retain all multi-value filters and inputs after refresh
   When I enter "<search-term>" in the search input and submit in "<viewport>"
   And I <sort access action>
   And I select sort order "<sort label>"
-  And I <filter drawer action>
+  And filter controls are available
 
   And agency filter options have loaded
  
@@ -130,9 +130,9 @@ Scenario: Retain all multi-value filters and inputs after refresh
   And the browser URL contains query param "category" with values "<category values>"
  
 Examples:
-  | viewport | sort access action      | filter drawer action        |
-  | mobile   | open the filter drawer  | keep the filter drawer open |
-  | desktop  | close the filter drawer | open the filter drawer      |
+  | viewport | sort access action      |
+  | mobile   | open the filter drawer  |
+  | desktop  | close the filter drawer |
 
   | search-term  | sort label                 | sort value        | status | status values            |
   | education    | Award Ceiling (Descending) | awardCeilingDesc  | closed | closed,forecasted,posted |
