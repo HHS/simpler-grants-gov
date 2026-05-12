@@ -13564,12 +13564,12 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-    ApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Token
     InternalApiJwtAuth:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
+    ApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Token
 
