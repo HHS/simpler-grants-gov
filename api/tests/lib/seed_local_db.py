@@ -352,13 +352,15 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         "TEST-APPLY-ORG-CT01": uuid.UUID("c4d5e6f7-8091-0123-bcde-4567890123de"),
         "TEST-APPLY-IND-ON01": uuid.UUID("d5e6f7a8-0912-1234-cdef-5678901234ef"),
         "TEST-APPLY-IND-CT01": uuid.UUID("e6f7a8b9-1023-2345-def0-6789012345f0"),
+        "TEST-APPLY-ORG-IND-ON02": uuid.UUID("f21dc67e-84d8-4e2b-ae3e-2d68f83957db"),
+        "TEST-APPLY-ORG-IND-CT02": uuid.UUID("9e3b6fb9-85a7-4b71-9f8f-2ecb31d9e7f4"),
     }
 
     db_session = factories._db_session
 
-    both_competition = fetch_competition(db_session, uuid_map["TEST-APPLY-ORG-IND-CT01"])
-    if not both_competition:
-        both_competition = factories.CompetitionFactory.create(
+    both_competition_1 = fetch_competition(db_session, uuid_map["TEST-APPLY-ORG-IND-CT01"])
+    if not both_competition_1:
+        both_competition_1 = factories.CompetitionFactory.create(
             competition_id=uuid_map["TEST-APPLY-ORG-IND-CT01"],
             opportunity__opportunity_id=uuid_map["TEST-APPLY-ORG-IND-ON01"],
             opportunity__opportunity_title="TEST-APPLY-ORG-IND-OT01",
@@ -398,11 +400,29 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             with_instruction=True,
         )
 
+    both_competition_2 = fetch_competition(db_session, uuid_map["TEST-APPLY-ORG-IND-CT02"])
+
+    if not both_competition_2:
+        both_competition_2 = factories.CompetitionFactory.create(
+            competition_id=uuid_map["TEST-APPLY-ORG-IND-CT02"],
+            opportunity__opportunity_id=uuid_map["TEST-APPLY-ORG-IND-ON02"],
+            opportunity__opportunity_title="TEST-APPLY-ORG-IND-OT02",
+            opportunity__opportunity_number="TEST-APPLY-ORG-IND-ON02",
+            competition_title="TEST-APPLY-ORG-IND-CT02",
+            competition_forms=[],
+            open_to_applicants=[
+                CompetitionOpenToApplicant.INDIVIDUAL,
+                CompetitionOpenToApplicant.ORGANIZATION,
+            ],
+            with_instruction=True,
+        )
+
     # Add forms to each competition
     for competition, opp_num, comp_title in [
-        (both_competition, "TEST-APPLY-ORG-IND-ON01", "TEST-APPLY-ORG-IND-CT01"),
+        (both_competition_1, "TEST-APPLY-ORG-IND-ON01", "TEST-APPLY-ORG-IND-CT01"),
         (org_competition, "TEST-APPLY-ORG-ON01", "TEST-APPLY-ORG-CT01"),
         (ind_competition, "TEST-APPLY-IND-ON01", "TEST-APPLY-IND-CT01"),
+        (both_competition_2, "TEST-APPLY-ORG-IND-ON02", "TEST-APPLY-ORG-IND-CT02"),
     ]:
         # SF424B
         sf424b_form = forms["SF424B"]
@@ -420,6 +440,16 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             factories.CompetitionFormFactory.create(
                 competition=competition, form=sflll_form, is_required=False
             )
+
+        # Project Abstract Summary form
+        project_abstract_summary_v2_0_form = forms["Project_AbstractSummary_2_0"]
+        if not does_competition_form_exist(
+            db_session, competition.competition_id, project_abstract_summary_v2_0_form.form_id
+        ):
+            factories.CompetitionFormFactory.create(
+                competition=competition, form=project_abstract_summary_v2_0_form, is_required=True
+            )
+
         logger.info(
             f"Created Apply Happy Path competition '{comp_title}' for opportunity '{opp_num}' - http://localhost:3000/opportunity/{competition.opportunity_id}"
         )
