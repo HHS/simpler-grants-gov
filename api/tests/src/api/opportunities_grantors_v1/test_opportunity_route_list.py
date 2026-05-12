@@ -1,4 +1,3 @@
-import time
 import uuid
 
 import pytest
@@ -235,8 +234,6 @@ def test_list_opportunities_invalid_token(client, db_session, grantor_auth_data)
 
 def test_list_opportunities_agency_not_found(client, db_session, grantor_auth_data):
     user, agency, token, _ = grantor_auth_data
-
-    time.sleep(0.1)
 
     fake_agency_id = uuid.uuid4()
 

@@ -169,8 +169,8 @@ class TestEPAKeyContactsXMLGeneration:
         assert response.success is True
         xml_data = response.xml_data
 
-        # Verify ContactName structure
-        assert "ContactName>" in xml_data
+        # Verify Name structure
+        assert "Name>" in xml_data
         assert "PrefixName>Dr.<" in xml_data
         assert "FirstName>Alice<" in xml_data
         assert "MiddleName>B<" in xml_data
@@ -274,6 +274,149 @@ class TestEPAKeyContactsXMLGeneration:
         # Empty data returns an error from the service
         assert response.success is False
         assert response.error_message == "No application data provided"
+
+    def test_epa_key_contacts_matches_legacy_xml_structure(self):
+        """Verify generated XML structure matches legacy grants.gov format (GRANT00848297).
+
+        Legacy format (grants.gov training system output):
+            <KeyContactPersons_2_0
+                    xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0"
+                    EPA_KeyContacts_2_0:FormVersion="2.0"
+                    xmlns:EPA_KeyContacts_2_0="http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0">
+                <AuthorizedRepresentative>
+                    <Name xmlns:globLib="...">
+                        <FirstName xmlns:globLib="...">foo</FirstName>
+                        <LastName xmlns:globLib="...">foo</LastName>
+                    </Name>
+                    <Address xmlns:globLib="...">
+                        <Street1 xmlns:globLib="...">foo</Street1>
+                        <City xmlns:globLib="...">foo</City>
+                        <State xmlns:globLib="...">AK: Alaska</State>
+                        <ZipPostalCode xmlns:globLib="...">123451234</ZipPostalCode>
+                        <Country xmlns:globLib="...">USA: UNITED STATES</Country>
+                    </Address>
+                    <Phone xmlns:globLib="...">1231231234</Phone>
+                </AuthorizedRepresentative>
+                <Payee> ... </Payee>
+                <AdminstrativeContact> ... </AdminstrativeContact>
+                <ProjectManager> ... </ProjectManager>
+            </KeyContactPersons_2_0>
+
+        Simpler generates (semantically equivalent — same local names, same namespace URIs,
+        namespace declarations hoisted to root rather than re-declared inline on each element):
+            <EPA_KeyContacts_2_0:KeyContactPersons_2_0
+                    xmlns:EPA_KeyContacts_2_0="http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0"
+                    xmlns:globLib="http://apply.grants.gov/system/GlobalLibrary-V2.0"
+                    EPA_KeyContacts_2_0:FormVersion="2.0">
+                <EPA_KeyContacts_2_0:AuthorizedRepresentative>
+                    <globLib:Name>
+                        <globLib:FirstName>foo</globLib:FirstName>
+                        <globLib:LastName>foo</globLib:LastName>
+                    </globLib:Name>
+                    <globLib:Address>
+                        <globLib:Street1>foo</globLib:Street1>
+                        <globLib:City>foo</globLib:City>
+                        <globLib:State>AK: Alaska</globLib:State>
+                        <globLib:ZipPostalCode>123451234</globLib:ZipPostalCode>
+                        <globLib:Country>USA: UNITED STATES</globLib:Country>
+                    </globLib:Address>
+                    <globLib:Phone>1231231234</globLib:Phone>
+                </EPA_KeyContacts_2_0:AuthorizedRepresentative>
+                <EPA_KeyContacts_2_0:Payee> ... </EPA_KeyContacts_2_0:Payee>
+                <EPA_KeyContacts_2_0:AdminstrativeContact> ... </EPA_KeyContacts_2_0:AdminstrativeContact>
+                <EPA_KeyContacts_2_0:ProjectManager> ... </EPA_KeyContacts_2_0:ProjectManager>
+            </EPA_KeyContacts_2_0:KeyContactPersons_2_0>
+        """
+        EPA_NS = "http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0"
+        GLOB_NS = "http://apply.grants.gov/system/GlobalLibrary-V2.0"
+
+        # Input data matching the legacy XML test submission (GRANT00848297)
+        application_data = {
+            "authorized_representative": {
+                "name": {"first_name": "foo", "last_name": "foo"},
+                "address": {
+                    "street1": "foo",
+                    "city": "foo",
+                    "state": "AK: Alaska",
+                    "zip_code": "123451234",
+                    "country": "USA: UNITED STATES",
+                },
+                "phone": "1231231234",
+            },
+            "payee": {
+                "name": {"first_name": "foo", "last_name": "foo"},
+                "address": {
+                    "street1": "foo",
+                    "city": "foo",
+                    "state": "AL: Alabama",
+                    "zip_code": "123451234",
+                    "country": "USA: UNITED STATES",
+                },
+                "phone": "1231231234",
+            },
+            "administrative_contact": {
+                "name": {"first_name": "foo", "last_name": "foo"},
+                "address": {
+                    "street1": "foo",
+                    "city": "foo",
+                    "state": "AK: Alaska",
+                    "zip_code": "123451234",
+                    "country": "USA: UNITED STATES",
+                },
+                "phone": "1231231234",
+            },
+            "project_manager": {
+                "name": {"first_name": "foo", "last_name": "foo"},
+                "address": {
+                    "street1": "foo",
+                    "city": "foo",
+                    "state": "AL: Alabama",
+                    "zip_code": "123451234",
+                    "country": "USA: UNITED STATES",
+                },
+                "phone": "1231231234",
+            },
+        }
+
+        service = XMLGenerationService()
+        request = XMLGenerationRequest(
+            application_data=application_data,
+            transform_config=EPA_KEY_CONTACTS_TRANSFORM_RULES,
+            pretty_print=True,
+        )
+        response = service.generate_xml(request)
+        assert response.success is True
+
+        root = lxml_etree.fromstring(response.xml_data.encode("utf-8"))
+
+        # Root element: KeyContactPersons_2_0 in EPA namespace
+        assert root.tag == f"{{{EPA_NS}}}KeyContactPersons_2_0"
+        assert root.get(f"{{{EPA_NS}}}FormVersion") == "2.0"
+
+        # All four contact roles must be present in order (per XSD sequence)
+        for role in ["AuthorizedRepresentative", "Payee", "AdminstrativeContact", "ProjectManager"]:
+            assert root.find(f"{{{EPA_NS}}}{role}") is not None, f"Missing {role}"
+
+        # Verify AuthorizedRepresentative structure in detail
+        auth_rep = root.find(f"{{{EPA_NS}}}AuthorizedRepresentative")
+
+        # Name element in globLib namespace (legacy: <Name xmlns:globLib="...">)
+        name_el = auth_rep.find(f"{{{GLOB_NS}}}Name")
+        assert name_el is not None
+        assert name_el.find(f"{{{GLOB_NS}}}FirstName").text.strip() == "foo"
+        assert name_el.find(f"{{{GLOB_NS}}}LastName").text.strip() == "foo"
+
+        # Address in globLib namespace with all sub-elements
+        addr_el = auth_rep.find(f"{{{GLOB_NS}}}Address")
+        assert addr_el is not None
+        assert addr_el.find(f"{{{GLOB_NS}}}Street1").text.strip() == "foo"
+        assert addr_el.find(f"{{{GLOB_NS}}}City").text.strip() == "foo"
+        assert addr_el.find(f"{{{GLOB_NS}}}State").text.strip() == "AK: Alaska"
+        assert addr_el.find(f"{{{GLOB_NS}}}ZipPostalCode").text.strip() == "123451234"
+        assert addr_el.find(f"{{{GLOB_NS}}}Country").text.strip() == "USA: UNITED STATES"
+
+        # Phone in globLib namespace (legacy: <Phone xmlns:globLib="...">)
+        assert auth_rep.find(f"{{{GLOB_NS}}}Phone").text.strip() == "1231231234"
 
 
 @pytest.mark.xml_validation

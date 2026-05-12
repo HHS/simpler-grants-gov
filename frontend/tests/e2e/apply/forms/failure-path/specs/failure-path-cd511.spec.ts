@@ -1,3 +1,9 @@
+/**
+ * @feature Apply - Application Form Failure Path
+ * @featureFile tests/e2e/apply/forms/failure-path/features/negative-path-forms.feature
+ * @scenario Application form completion failure path - cd511
+ */
+
 import {
   test,
   type BrowserContext,
@@ -46,11 +52,22 @@ test(
 
     const isMobile = testInfo.project.name.match(/[Mm]obile/);
 
+    // Given the user is logged in
     await authenticateE2eUser(page, context, !!isMobile);
 
+    // And the user launches the URL for an opportunity with an open competition
+    // When the user clicks "Start Application" in the opportunity page
+    // Then the "Start a new application" modal opens
+    // When the user selects the test organization in the "Who's applying" dropdown
+    // And the user enters the application name
+    // And the user clicks "Create Application"
+    // Then a new application is created
     await createApplication(page, OPPORTUNITY_URL, testOrgLabel);
     const applicationUrl = page.url();
 
+    // And the Application landing page loads with the "CD511" form link visible
+    // And the user clicks on a form link
+    // Then the form opens
     const opened = await openForm(page, CD511_FORM_MATCHER);
     if (!opened) {
       throw new Error(
@@ -58,17 +75,18 @@ test(
       );
     }
 
-    // Do not enter anything and click save - expect validation errors
+    // When the user attempts to save with required fields left empty
     await saveForm(page, true);
 
-    // Checks error alert list at top of form page and inline field errors
+    // Then required field validation errors are shown on the form
     await verifyFormStatusAfterSave(
       page,
       "incomplete",
       CD511_REQUIRED_FIELD_ERRORS,
     );
 
-    // Return to application and verify form row shows "Some issues found"
+    // When the user navigates back to the application landing page
+    // Then under the "CD511" form the status shows "Some issues found. Check your entries."
     await verifyFormStatusOnApplication(
       page,
       "incomplete",

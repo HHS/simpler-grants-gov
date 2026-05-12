@@ -1508,6 +1508,9 @@ $simpler-switch-transition-easing: ease;
   font-size: size("sans", "2xs");
 }
 
+.seg-scroll-margin-top--header {
+  scroll-margin-top: 6rem;
+}
 // Award Recommendation Step Connector
 .award-recommendation-step-connector {
   background-color: #c3e8d8;
