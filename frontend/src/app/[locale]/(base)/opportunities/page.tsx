@@ -389,8 +389,8 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       page_size: 5000,
       sort_order: [
         {
-          order_by: "opportunity_title",
-          sort_direction: "ascending",
+          order_by: "created_at",
+          sort_direction: "descending",
         },
       ],
     };
