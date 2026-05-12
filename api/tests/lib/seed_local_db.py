@@ -340,7 +340,7 @@ def does_opportunity_exist(db_session: db.Session, opportunity_id: uuid.UUID) ->
     return opportunity is not None
 
 
-def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
+def _build_custom_test_competitions(db_session: db.Session, forms: dict[str, Form]) -> None:
     logger.info(
         "Creating custom test opportunities and competitions for Apply Happy Path scenarios"
     )
@@ -355,8 +355,6 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         "TEST-APPLY-ORG-IND-ON02": uuid.UUID("f21dc67e-84d8-4e2b-ae3e-2d68f83957db"),
         "TEST-APPLY-ORG-IND-CT02": uuid.UUID("9e3b6fb9-85a7-4b71-9f8f-2ecb31d9e7f4"),
     }
-
-    db_session = factories._db_session
 
     both_competition_1 = fetch_competition(db_session, uuid_map["TEST-APPLY-ORG-IND-CT01"])
     if not both_competition_1:
@@ -460,7 +458,7 @@ def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> C
     _build_pilot_competition(forms_map)
     _build_individual_only_competition(forms_map)
     _build_organization_only_competition(forms_map)
-    _build_custom_test_competitions(forms_map)
+    _build_custom_test_competitions(db_session, forms_map)
 
     forms = list(forms_map.values())
 
