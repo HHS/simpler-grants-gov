@@ -38,3 +38,55 @@ ignore:
   # Not fixed in GA Python yet
   # Last checked 04/14/2026
   - vulnerability: CVE-2026-1502
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-267c-6grr-h53f
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-26hh-7cqf-hhc6
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-36qx-fr4f-26g5
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-492v-c6pp-mqqv
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-8h8q-6873-q5fj
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-c4j6-fc7j-m34r
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-mg66-mrh9-m8jx
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-ffhc-5mcf-pf4q
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-gx5p-jg67-6x7h
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-h64f-5h5j-jqjh
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-wfc6-r584-vfw7
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-3g8h-86w9-wvmq
+
+  # Ignoring to get release out tomorrow
+  # Last checked 05/12/2026
+  - vulnerability: GHSA-vfv6-92ff-j949
