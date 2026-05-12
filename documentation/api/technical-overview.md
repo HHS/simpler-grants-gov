@@ -21,7 +21,7 @@ generally preferred.
 - [SQLAlchemy][sqlalchemy-home] ([source code][sqlalchemy-src])
 - [Alembic][alembic-home] ([source code][alembic-src])
 - [pydantic][pydantic-home] ([source code][pydantic-src])
-- [poetry](https://python-poetry.org/docs/) - Python dependency management
+- [uv](https://docs.astral.sh/uv/) - Python dependency management
 
 [oas-docs]: http://spec.openapis.org/oas/v3.0.3
 [oas-swagger-docs]: https://swagger.io/docs/specification/about/
@@ -39,7 +39,7 @@ generally preferred.
 
 ## Request operations
 
-- TODO - redo this
+Requests are handled via APIFlask blueprints. Each endpoint defines its request/response schemas, authentication, and route configuration in [api/src/api](../../api/src/api). See [API Details](./api-details.md) for how to define schemas and endpoints.
 
 ## Authentication
 
@@ -47,13 +47,15 @@ Authentication methods are defined in the `security_scheme` config in
 `app.py`. A particular security scheme is enabled for a route via a
 `security` block on that route.
 
-Flask runs the authentication method specified in `api_key_auth.py`
-before passing the request to the route handler. 
-In the `api_key` security scheme, the `X-Auth` points to the
-function that is run to do the authentication.
+Flask runs the authentication method configured on each route
+before passing the request to the route handler. The API supports
+JWT auth (`X-SGG-Token`), API User Key auth (`X-API-Key`),
+and Internal JWT auth (`X-SGG-Internal-Token`).
 
 ## Authorization
-n/a - Specific user authorization is not yet implemented for this API.
+
+The API has an active authorization layer implemented under [api/src/auth/](../../api/src/auth/). For details on how authentication and user logic works, see [authentication.md](./authentication.md) and [api/src/auth/README.md](../../api/src/auth/README.md).
 
 ### Database diagram
-n/a - Database diagrams are not yet available for this application.
+
+ERD diagrams are auto-generated from our SQLAlchemy models and can be found in [documentation/api/database/erds/README.md](./database/erds/README.md).

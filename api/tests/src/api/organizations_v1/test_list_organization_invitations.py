@@ -58,8 +58,6 @@ class TestListOrganizationInvitations:
             role=role,
         )
 
-        db_session.commit()
-
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
             headers={"X-SGG-Token": token},
@@ -112,8 +110,6 @@ class TestListOrganizationInvitations:
             accepted_at=datetime.now(UTC) - timedelta(days=1),
             rejected_at=None,
         )
-
-        db_session.commit()
 
         # Filter for only pending invitations
         resp = client.post(
@@ -210,7 +206,6 @@ class TestListOrganizationInvitations:
         # Create a different organization
 
         other_organization = OrganizationFactory.create()
-        db_session.commit()
 
         resp = client.post(
             f"/v1/organizations/{other_organization.organization_id}/invitations/list",
@@ -296,8 +291,6 @@ class TestListOrganizationInvitations:
             organization_invitation=invitation,
             role=role,
         )
-
-        db_session.commit()
 
         resp = client.post(
             f"/v1/organizations/{organization.organization_id}/invitations/list",
@@ -402,8 +395,6 @@ class TestListOrganizationInvitations:
             accepted_at=None,
             rejected_at=None,
         )
-
-        db_session.commit()
 
         # Filter for expired invitations
         resp = client.post(

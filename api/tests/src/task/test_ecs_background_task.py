@@ -20,7 +20,7 @@ def test_ecs_background_task(app, caplog, monkeypatch_session):
     @ecs_background_task(task_name="my_test_task_name")
     def my_test_func(param1, param2):
         # Add a brief sleep so that we can test the duration logic
-        time.sleep(0.2)  # 0.2s
+        time.sleep(0.05)  # 0.05s
         add_extra_data_to_global_logs({"example_param": 12345})
 
         return param1 + param2
@@ -38,8 +38,8 @@ def test_ecs_background_task(app, caplog, monkeypatch_session):
 
     last_record = relevant_records[-1].__dict__
     # Make sure the ECS task duration was tracked
-    allowed_error = 0.1
-    assert last_record["ecs_task_duration_sec"] == pytest.approx(0.2, abs=allowed_error)
+    allowed_error = 0.03
+    assert last_record["ecs_task_duration_sec"] == pytest.approx(0.05, abs=allowed_error)
     # Make sure the extra we added was put in this automatically
     assert last_record["example_param"] == 12345
     assert last_record["message"] == "Completed ECS task my_test_task_name"

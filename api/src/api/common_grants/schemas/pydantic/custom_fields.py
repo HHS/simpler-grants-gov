@@ -7,7 +7,9 @@ populated by the populate_custom_fields function in the transformation layer.
 from datetime import datetime
 
 from common_grants_sdk.schemas.pydantic import CustomField, CustomFieldType
-from pydantic import BaseModel, HttpUrl, ValidationError, field_validator
+from pydantic import BaseModel, HttpUrl, field_validator
+
+from src.services.common_grants.url_utils import validate_url_compatible
 
 # ===========================================================================================
 # Value Models
@@ -26,10 +28,6 @@ class AgencyValue(BaseModel):
     parentCode: str | None = None
 
 
-class _AttachmentUrlValidator(BaseModel):
-    url: HttpUrl
-
-
 class AttachmentValue(BaseModel):
     downloadUrl: str | None = None
     name: str
@@ -42,13 +40,9 @@ class AttachmentValue(BaseModel):
     @field_validator("downloadUrl", mode="before")
     @classmethod
     def validate_download_url(cls, v: object) -> object:
-        if v is None or v == "":
+        if not isinstance(v, str):
             return None
-        try:
-            _AttachmentUrlValidator.model_validate({"url": v})
-            return v
-        except ValidationError:
-            return None
+        return validate_url_compatible(v)
 
 
 class ContactInfoValue(BaseModel):

@@ -7,6 +7,9 @@ from src.task.ecs_background_task import ecs_background_task
 from src.task.notifications.closing_date_notification import ClosingDateNotificationTask
 from src.task.notifications.config import EmailNotificationConfig, get_email_config
 from src.task.notifications.opportunity_notifcation import OpportunityNotificationTask
+from src.task.notifications.org_saved_opportunity_notification import (
+    OrgSavedOpportunityNotificationTask,
+)
 from src.task.notifications.search_notification import SearchNotificationTask
 from src.task.notifications.sync_suppressed_emails import SyncSuppressedEmailsTask
 from src.task.task import Task
@@ -58,5 +61,9 @@ class EmailNotificationTask(Task):
             ).run()
         if self.notification_config.enable_closing_date_notifications:
             ClosingDateNotificationTask(
+                db_session=self.db_session, notification_config=self.notification_config
+            ).run()
+        if self.notification_config.enable_org_saved_opportunity_notifications:
+            OrgSavedOpportunityNotificationTask(
                 db_session=self.db_session, notification_config=self.notification_config
             ).run()

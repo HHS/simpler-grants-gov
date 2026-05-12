@@ -303,6 +303,10 @@ def test_delete_agency(db_session, enable_factory_create):
     opportunity_summaries = opportunity.all_opportunity_summaries
     attachments = opportunity.opportunity_attachments
 
+    # Set agency_id to null to allow agency deletion
+    opportunity.agency_id = None
+    db_session.flush()
+
     db_session.delete(agency)
     db_session.commit()
     db_session.expunge_all()

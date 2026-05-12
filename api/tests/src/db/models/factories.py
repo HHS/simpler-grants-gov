@@ -16,7 +16,7 @@ import factory
 import factory.fuzzy
 import faker
 from faker.providers import BaseProvider
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.orm import scoped_session
 
 import src.adapters.db as db
@@ -24,6 +24,7 @@ import src.db.models.award_recommendation_models as award_recommendation_models
 import src.db.models.competition_models as competition_models
 import src.db.models.entity_models as entity_models
 import src.db.models.extract_models as extract_models
+import src.db.models.file_upload_models as file_upload_models
 import src.db.models.foreign as foreign
 import src.db.models.lookup_models as lookup_models
 import src.db.models.opportunity_models as opportunity_models
@@ -52,6 +53,7 @@ from src.constants.lookup_constants import (
     CompetitionOpenToApplicant,
     ExternalUserType,
     ExtractType,
+    FileScanStatus,
     FormType,
     FundingCategory,
     FundingInstrument,
@@ -77,6 +79,7 @@ from src.constants.static_role_values import (
     ORG_MEMBER,
 )
 from src.db.models import agency_models
+from src.db.models.agency_models import Agency
 from src.db.models.lookup.lookup_registry import LookupRegistry
 from src.db.models.lookup_models import LkCompetitionOpenToApplicant
 from src.util import file_util
@@ -284,7 +287,7 @@ class CustomProvider(BaseProvider):
         "???-??-##-??",
     ]
 
-    ASSISTANCE_LISTING_NUMBER_FORMATS = ["##-???", "##-###"]
+    ASSISTANCE_LISTING_NUMBER_FORMATS = ["##.???", "##.###"]
 
     def random_agency_code(self) -> str:
         pattern = self.bothify(self.random_element(self.AGENCY_CODE_FORMATS)).upper()
@@ -363,6 +366,21 @@ def get_db_session() -> db.Session:
     return _db_session
 
 
+def lookup_seed_agency_id_by_code(agency_code: str | None) -> uuid.UUID | None:
+    if not agency_code or _db_session is None:
+        return None
+
+    session = get_db_session()
+    db_agency = session.execute(
+        select(Agency).where(Agency.agency_code == agency_code)
+    ).scalar_one_or_none()
+
+    if db_agency is None:
+        return None
+
+    return db_agency.agency_id
+
+
 # The scopefunc ensures that the session gets cleaned up after each test
 # it implicitly calls `remove()` on the session.
 # see https://docs.sqlalchemy.org/en/20/orm/contextual.html
@@ -411,6 +429,7 @@ class OpportunityFactory(BaseFactory):
     opportunity_title = factory.Faker("opportunity_title")
 
     agency_code = factory.Faker("agency_code")
+    agency_id = factory.LazyAttribute(lambda o: lookup_seed_agency_id_by_code(o.agency_code))
 
     category = factory.fuzzy.FuzzyChoice(OpportunityCategory)
     # only set the category explanation if category is Other
@@ -3261,7 +3280,7 @@ class SamGovEntityFactory(BaseFactory):
         model = entity_models.SamGovEntity
 
     sam_gov_entity_id = Generators.UuidObj
-    uei = factory.Sequence(lambda n: f"UEI{n:09d}")  # Example UEI format
+    uei = factory.LazyFunction(lambda: f"UEI{fake.random_int(min=1, max=999999999):09d}")
     legal_business_name = factory.Faker("company")
     expiration_date = factory.Faker("future_date", end_date="+2y")
     initial_registration_date = factory.Faker("date_between", start_date="-5y", end_date="-1y")
@@ -3457,6 +3476,21 @@ class OrganizationSavedOpportunityFactory(BaseFactory):
     opportunity_id = factory.LazyAttribute(lambda o: o.opportunity.opportunity_id)
 
 
+class PendingFileFactory(BaseFactory):
+    class Meta:
+        model = file_upload_models.PendingFile
+
+    pending_file_id = Generators.UuidObj
+
+    user = factory.SubFactory(UserFactory)
+    user_id = factory.LazyAttribute(lambda p: p.user.user_id)
+
+    file_name = factory.Faker("file_name")
+    file_location = factory.Faker("file_path")
+    mime_type = "plain/text"
+    file_scan_status = FileScanStatus.PENDING
+
+
 class SuppressedEmailFactory(BaseFactory):
     class Meta:
         model = user_models.SuppressedEmail
@@ -3474,7 +3508,7 @@ class BaseLegacyCertificateFactory(BaseFactory):
         abstract = True
 
     legacy_certificate_id = Generators.UuidObj
-    cert_id = factory.Faker("random_int", min=1000, max=10000000)
+    cert_id = factory.LazyFunction(lambda: str(random.randint(1000, 10000000)))
     serial_number = factory.Sequence(lambda n: f"{n}")
     expiration_date = factory.Faker("future_date", end_date="+2y")
     user_id = factory.LazyAttribute(lambda s: s.user.user_id)

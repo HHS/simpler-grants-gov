@@ -123,6 +123,7 @@ data "aws_acm_certificate" "secondary_certs" {
   for_each    = local.service_config.enable_https ? toset(lookup(local.service_config, "secondary_domain_names", [])) : toset([])
   domain      = each.value
   most_recent = true
+  key_types   = ["RSA_2048", "RSA_4096"]
 }
 
 data "aws_acm_certificate" "s3_cdn_cert" {
@@ -136,6 +137,7 @@ data "aws_acm_certificate" "mtls_cert" {
   count       = local.service_config.mtls_domain_name != null ? 1 : 0
   domain      = local.service_config.mtls_domain_name
   most_recent = true
+  key_types   = ["RSA_2048", "RSA_4096"]
 }
 
 data "aws_iam_policy" "app_db_access_policy" {
@@ -242,6 +244,7 @@ module "service" {
     # local.identity_provider_environment_variables,
     local.notifications_environment_variables,
     local.sqs_environment_variables,
+    local.file_scan_cache_environment_variables,
     local.service_config.extra_environment_variables,
   )
 
@@ -250,7 +253,8 @@ module "service" {
   extra_policies = merge(
     {
       # storage_access = module.storage.access_policy_arn
-      sqs_access = module.sqs_queue.access_policy_arn
+      sqs_access           = module.sqs_queue.access_policy_arn
+      file_scan_cache_read = module.file_scan_cache.read_access_policy_arn
     },
     module.app_config.enable_identity_provider ? {
       # identity_provider_access = module.identity_provider_client[0].access_policy_arn,
@@ -266,6 +270,8 @@ module "service" {
 
   newrelic_entity_guid      = local.service_config.newrelic_entity_guid
   newrelic_mtls_entity_guid = local.service_config.newrelic_mtls_entity_guid
+  newrelic_host_entity_guid = local.service_config.newrelic_host_entity_guid
+  enable_nrlogs_direct      = false
 
   is_temporary = local.is_temporary
 }

@@ -13,7 +13,7 @@ can cause it to resolve them incorrectly. This was fixed in
 https://github.com/gazpachoking/jsonref/commit/e827f232cdbef2f7f49d3ccc6e93bc43868ae96b
 but the library hasn't made a new release available in PyPi
 more than a year after the fix was made. As an alternative
-to changing our poetry to install directly from GitHub, we
+to changing our package manager to install directly from GitHub, we
 have copied the change here and swap out the function in the jsonref library.
 """
 

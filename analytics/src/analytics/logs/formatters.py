@@ -11,18 +11,16 @@ See https://docs.python.org/3/library/logging.html#formatter-objects
 import json
 import logging
 from collections.abc import Callable
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Any, TypeVar
+from typing import Any
 from uuid import UUID
 
 from analytics.logs import decodelog
 
-T = TypeVar("T")
 
-
-def identity(obj: T) -> T:
+def identity[T](obj: T) -> T:
     """Return an unmodified object."""
     return obj
 
@@ -106,7 +104,7 @@ class HumanReadableFormatter(logging.Formatter):
         """Format the log record to be human-readable with color-coding."""
         message = super().format(record)
         return decodelog.format_line(
-            datetime.fromtimestamp(record.created, tz=timezone.utc),
+            datetime.fromtimestamp(record.created, tz=UTC),
             record.name,
             record.funcName,
             record.levelname,

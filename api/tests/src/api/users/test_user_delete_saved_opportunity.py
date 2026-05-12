@@ -13,9 +13,7 @@ from tests.src.db.models.factories import (
 
 @pytest.fixture
 def user(enable_factory_create, db_session):
-    user = UserFactory.create()
-    db_session.commit()
-    return user
+    return UserFactory.create()
 
 
 @pytest.fixture
