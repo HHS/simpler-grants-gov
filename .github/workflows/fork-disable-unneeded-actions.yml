@@ -34,7 +34,7 @@ jobs:
           gh workflow disable "CI Documentation Linker Checks"
           gh workflow disable "CI Weekly Vulnerability Report"
           gh workflow disable "Co-planning: Sync Fider to GitHub"
-          gh workflow disable "Co-planning: Sync GitHub for Fider"
+          gh workflow disable "Co-planning: Sync GitHub to Fider"
           gh workflow disable "Deliverable mapping: Issue level"
           gh workflow disable "E2E Test Daily"
           gh workflow disable "E2E Tests Weekly"
