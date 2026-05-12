@@ -30,7 +30,7 @@ def setup_local_dynamodb() -> None:
         _create_virus_scan_table(dynamodb)
 
 
-def _create_virus_scan_table(dynamodb: boto3.resource) -> None:
+def _create_virus_scan_table(dynamodb: boto3.resources.base.ServiceResource) -> None:
     """Create the local-virus-scan table if it doesn't already exist"""
     logger.info(
         "Creating DynamoDB table '%s' if it does not already exist", file_scan_cache_table_name
