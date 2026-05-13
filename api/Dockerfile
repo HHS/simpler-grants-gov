@@ -30,6 +30,8 @@ COPY newrelic.ini /api/newrelic.ini
 ENV UV_NO_DEV=1
 # Compile python to *.pyc files for performance
 ENV UV_COMPILE_BYTECODE=1
+ENV UV_CACHE_DIR="/tmp/.cache/uv"
+ENV UV_NO_SYNC=1
 
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
