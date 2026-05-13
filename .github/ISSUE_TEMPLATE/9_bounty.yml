@@ -1,0 +1,134 @@
+---
+name: Bounty issue
+about: Post a funded open source contribution opportunity for Simpler Grants
+title: "[Bounty: $AMOUNT - TIER] Short, action-oriented title"
+labels: bounty, status:open
+assignees: ""
+---
+
+<!--
+Operator setup checklist before posting:
+- Confirm this issue passed all Phase 1 eligibility guardrails:
+  - Not blocking the HHS roadmap
+  - Not under active internal work
+  - No internal infrastructure, secrets, production data, or protected systems required
+  - Within Phase 1 scope: UI, docs, accessibility, tests, developer experience, or isolated bug fix
+  - No core business logic, authentication, authorization, payment, or security-sensitive scope
+  - No PII, FOUO, confidential, or HHS-restricted information required
+- Confirm acceptance criteria were reviewed by at least one maintainer.
+- Confirm tier, amount, and OS Lead sign-off are recorded in the budget tracker.
+- Add the correct tier label: bounty:XL, bounty:L, or bounty:M.
+- Confirm the Contributor Terms of Service link points to the final approved version before launch.
+-->
+
+## Bounty
+
+Amount: **$AMOUNT**
+
+Tier: **TIER** <!-- XL: $500-$1,000; L: $250-$500; M: $100-$250 -->
+
+Contributor Terms of Service: **[Read before claiming](TOS_LINK)**
+
+Status: **Open for claims**
+
+## Contributor Tracking
+
+<!-- Maintainers: update this table manually during Phase 1. Add one row per accepted /claim. Never delete or reuse rows. -->
+
+| Contributor | ToS Ack | Status | Last Updated | PR | Notes |
+| --- | --- | --- | --- | --- | --- |
+| - | - | - | - | - | - |
+
+Status values: `claimed`, `in progress`, `pr submitted`, `in review`, `paid`, `stale`, `withdrawn`, `declined`
+
+## Context
+
+<!-- What is the issue and why does it matter to Simpler Grants users, contributors, maintainers, or accessibility/developer experience? -->
+
+Describe the problem or opportunity here.
+
+## Acceptance Criteria
+
+<!-- Keep these objective and testable. A maintainer should be able to judge pass/fail from this list alone. -->
+
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Criterion 3
+
+## Scope
+
+Included:
+
+- 
+
+Not included:
+
+- 
+
+## Suggested Starting Points
+
+<!-- Add file paths, tests, docs, related issues, design references, or setup notes that help a contributor begin without insider context. -->
+
+- Relevant files:
+- Related tests:
+- Related docs:
+- Related issues or PRs:
+
+## Claim Instructions
+
+To claim this bounty:
+
+1. Read the Contributor Terms of Service linked above.
+2. Comment with the acknowledgment text below.
+3. After posting the acknowledgment, comment `/claim`.
+
+Acknowledgment text:
+
+```text
+I have read and agree to the Simpler Grants Contributor Program Terms of Service. I confirm I am 18 or older, a US citizen, not a current or former Nava or HHS employee or contractor, and not on the OFAC SDN list. I understand that payment requires a merged PR, verification, and W-9 documentation if my cumulative program payments this year will reach $600.
+```
+
+Claim notes:
+
+- You may hold up to 3 active bounty claims at a time.
+- A claim expires after 14 days with no activity.
+- You may request one 7-day extension by commenting with a substantive progress update before the 14-day mark.
+- Payment is made only after the pull request is merged, acceptance criteria are met, and eligibility checks are complete.
+
+## Pull Request Requirements
+
+- Link the PR to this issue using `Closes #ISSUE_NUMBER`.
+- All CI checks must pass.
+- Follow the repository's existing code style and contribution guidelines.
+- Add or update tests for new behavior or regressions.
+- Update documentation when the change affects contributor or user workflows.
+- Do not add new runtime dependencies unless maintainers approve them first.
+
+## Review And Payment
+
+Before merge and payment:
+
+- Two maintainers with merge rights must approve the PR.
+- A maintainer must confirm the acceptance criteria with a PR comment that starts with `Acceptance criteria check: PASS`.
+- Program operators must complete identity, eligibility, OFAC, and tax-threshold checks.
+- If cumulative program payments reach or exceed $600 in the calendar year, a completed W-9 is required before payment.
+
+When multiple valid PRs are submitted for this bounty, the first valid PR by GitHub `opened_at` timestamp receives the bounty. Valid-but-unselected PRs may be eligible for a runner-up courtesy payment while program reserve funds are available.
+
+## Support
+
+Ask questions in this issue thread or in SUPPORT_CHANNEL.
+
+<!--
+Operator closure checklist:
+- Confirm PR merged and Phase 5 validation complete.
+- Submit Tremendous payment within 24 hours of merge and confirm sent within 48 hours.
+- Record payment ID, date, amount, contributor, and issue URL in the budget tracker.
+- Update this issue's tracking table row to paid with payment date.
+- Apply status:paid and close the issue.
+- Replace the bounty banner with:
+
+Bounty PAID - $AMOUNT to @contributor on YYYY-MM-DD.
+No further submissions will be accepted for payment on this issue.
+Thank you to all who claimed and contributed.
+-->
