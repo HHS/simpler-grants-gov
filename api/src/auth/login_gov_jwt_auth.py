@@ -228,6 +228,7 @@ def get_final_redirect_uri(
     token: str | None = None,
     is_user_new: bool | None = None,
     error_description: str | None = None,
+    additional_params: dict | None = None,
     config: LoginGovConfig | None = None,
 ) -> str:
     if config is None:
@@ -243,6 +244,8 @@ def get_final_redirect_uri(
 
     if error_description is not None:
         params["error_description"] = error_description
+    if additional_params is not None:
+        params = params | additional_params
 
     encoded_params = urllib.parse.urlencode(params)
 
