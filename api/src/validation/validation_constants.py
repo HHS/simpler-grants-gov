@@ -41,6 +41,7 @@ class ValidationErrorType(StrEnum):
     MISSING_REQUIRED_FORM = "missing_required_form"
     APPLICATION_FORM_VALIDATION = "application_form_validation"
     MISSING_APPLICATION_FORM = "missing_application_form"
+    SAVED_ITEM_NOT_FOUND = "saved_item_not_found"
 
     UNKNOWN_APPLICATION_ATTACHMENT = "unknown_application_attachment"
 
