@@ -29,19 +29,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # NOTE: Add to this list in alphabetical order, if more jobs shouldn't run on forks
-          gh workflow disable "Check Infra deploy status"
-          gh workflow disable "CI Cron Vulnerability Scans"
-          gh workflow disable "CI Documentation Linker Checks"
-          gh workflow disable "CI Weekly Vulnerability Report"
-          gh workflow disable "Co-planning: Sync Fider to GitHub"
-          gh workflow disable "Co-planning: Sync GitHub for Fider"
-          gh workflow disable "Deliverable mapping: Issue level"
-          gh workflow disable "E2E Test Daily"
-          gh workflow disable "E2E Tests Weekly"
-          gh workflow disable "ECR Cleanup"
-          gh workflow disable "Lint - Bulk inherit parent metadata"
-          gh workflow disable "Lint - Deliverable Acceptance Criteria and Metrics"
-          gh workflow disable "Lint - Propagate milestone to sub-issues"
-          gh workflow disable "Lint - Set point and sprint on close"
-          gh workflow disable "Lint - Sprint rollover"
-          gh workflow disable "Scheduled Dev Deploy"
+          gh workflow disable "Check Infra deploy status" || true
+          gh workflow disable "CI Cron Vulnerability Scans" || true
+          gh workflow disable "CI Documentation Linker Checks" || true
+          gh workflow disable "CI Weekly Vulnerability Report" || true
+          gh workflow disable "Co-planning: Sync Fider to GitHub" || true
+          gh workflow disable "Co-planning: Sync GitHub to Fider" || true
+          gh workflow disable "Deliverable mapping: Issue level" || true
+          gh workflow disable "E2E Test Daily" || true
+          gh workflow disable "E2E Tests Weekly" || true
+          gh workflow disable "ECR Cleanup" || true
+          gh workflow disable "Lint - Bulk inherit parent metadata" || true
+          gh workflow disable "Lint - Deliverable Acceptance Criteria and Metrics" || true
+          gh workflow disable "Lint - Propagate milestone to sub-issues" || true
+          gh workflow disable "Lint - Set point and sprint on close" || true
+          gh workflow disable "Lint - Sprint rollover" || true
+          gh workflow disable "Scheduled Dev Deploy" || true
