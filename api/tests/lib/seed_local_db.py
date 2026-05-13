@@ -404,8 +404,6 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
         "TEST-APPLY-ORG-CT01": uuid.UUID("c4d5e6f7-8091-0123-bcde-4567890123de"),
         "TEST-APPLY-IND-ON01": uuid.UUID("d5e6f7a8-0912-1234-cdef-5678901234ef"),
         "TEST-APPLY-IND-CT01": uuid.UUID("e6f7a8b9-1023-2345-def0-6789012345f0"),
-        "TEST-APPLY-ORG-IND-ON02": uuid.UUID("f21dc67e-84d8-4e2b-ae3e-2d68f83957db"),
-        "TEST-APPLY-ORG-IND-CT02": uuid.UUID("9e3b6fb9-85a7-4b71-9f8f-2ecb31d9e7f4"),
     }
 
     db_session = factories._db_session
@@ -483,11 +481,11 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
     _build_seeded_competition_for_form(
         db_session,
         forms["Project_AbstractSummary_2_0"],
-        opportunity_id=uuid_map["TEST-APPLY-ORG-IND-ON02"],
-        opportunity_number="TEST-APPLY-ORG-IND-ON02",
-        opportunity_title="TEST-APPLY-ORG-IND-OT02",
-        competition_id=uuid_map["TEST-APPLY-ORG-IND-CT02"],
-        competition_title="TEST-APPLY-ORG-IND-CT02",
+        opportunity_id=uuid.UUID("f21dc67e-84d8-4e2b-ae3e-2d68f83957db"),
+        opportunity_number="TEST-PRINT-ORG-IND-ON01",
+        opportunity_title="TEST-PRINT-ORG-IND-OT01",
+        competition_id=uuid.UUID("9e3b6fb9-85a7-4b71-9f8f-2ecb31d9e7f4"),
+        competition_title="TEST-PRINT-ORG-IND-CT01",
         is_required=True,
         open_to_applicants=[
             CompetitionOpenToApplicant.INDIVIDUAL,
