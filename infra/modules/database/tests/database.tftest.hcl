@@ -188,3 +188,16 @@ run "rejects_cluster_name_with_spaces" {
 
   expect_failures = [var.name]
 }
+
+run "snapshot_identifier_is_set_when_provided" {
+  command = plan
+
+  variables {
+    snapshot_identifier = "arn:aws:rds:us-east-1:123456789012:cluster-snapshot:test-snapshot"
+  }
+
+  assert {
+    condition     = aws_rds_cluster.db.snapshot_identifier == "arn:aws:rds:us-east-1:123456789012:cluster-snapshot:test-snapshot"
+    error_message = "Snapshot identifier should be set when provided"
+  }
+}
