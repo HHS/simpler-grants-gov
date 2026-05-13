@@ -14,7 +14,7 @@ const crumbs = [
 ];
 
 describe("Breadcrumbs", () => {
-  it("Has a 'Home' item that is a link", () => {
+  it("has segments with link and text matching passed list", () => {
     render(<Breadcrumbs breadcrumbList={crumbs} />);
 
     const home = screen.getByRole("link", { name: /Home/i });
@@ -22,7 +22,7 @@ describe("Breadcrumbs", () => {
     expect(home).toHaveAttribute("href", "/");
   });
 
-  it("Has a 'Current' item that is not a link", () => {
+  it("has a final segment that is not a link", () => {
     render(<Breadcrumbs breadcrumbList={crumbs} />);
 
     const currentSpan = screen.getByText("Current");
