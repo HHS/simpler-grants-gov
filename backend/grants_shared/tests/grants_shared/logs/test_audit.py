@@ -30,6 +30,13 @@ pytestmark = pytest.mark.audit
 def init_audit_hook():
     audit.init()
 
+    # TODO - the first time getaddrinfo is called it has to
+    # lazy-open a few files. This means when it runs below
+    # it gets many more audit events than we expect.
+    # In the API code, something upstream of the process
+    # must do this
+    socket.getaddrinfo("www.python.org", 80)
+
 
 test_audit_hook_data = [
     pytest.param(eval, ("1+1", None, None), [{"msg": "exec"}], id="eval"),
@@ -133,19 +140,12 @@ def test_audit_hook(
     args: tuple[Any],
     expected_records: list[dict[str, Any]],
 ):
-    caplog.set_level(logging.INFO)
     caplog.clear()
 
     try:
         func(*args)
     except Exception:
         pass
-
-    print("\n")
-    print("=" * 25)
-    print(str(func))
-    for r in caplog.records:
-        print(r.__dict__)
 
     assert len(caplog.records) == len(expected_records)
     for record, expected_record in zip(caplog.records, expected_records, strict=True):
