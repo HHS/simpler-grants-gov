@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
 
-import Breadcrumbs from "src/components//Breadcrumbs";
+import Breadcrumbs from "src/components/Breadcrumbs";
 
 const crumbs = [
   {
@@ -14,7 +14,7 @@ const crumbs = [
 ];
 
 describe("Breadcrumbs", () => {
-  it("Has a 'Home' item that is link", () => {
+  it("Has a 'Home' item that is a link", () => {
     render(<Breadcrumbs breadcrumbList={crumbs} />);
 
     const home = screen.getByRole("link", { name: /Home/i });
@@ -24,11 +24,11 @@ describe("Breadcrumbs", () => {
   it("Has a 'Current' item that is not a link", () => {
     render(<Breadcrumbs breadcrumbList={crumbs} />);
 
-    const currentspan = screen.getByText("Current");
-    expect(currentspan).toBeInTheDocument();
+    const currentSpan = screen.getByText("Current");
+    expect(currentSpan).toBeInTheDocument();
 
-    const currentlink = screen.queryByRole("link", { name: /Current/i });
-    expect(currentlink).not.toBeInTheDocument();
+    const currentLink = screen.queryByRole("link", { name: /Current/i });
+    expect(currentLink).not.toBeInTheDocument();
   });
 
   it("passes accessibility scan", async () => {
