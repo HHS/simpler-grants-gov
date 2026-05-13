@@ -52,10 +52,7 @@ from src.api.users.user_schemas import (
 )
 from src.auth.api_jwt_auth import api_jwt_auth, refresh_token_expiration
 from src.auth.auth_utils import with_login_redirect_error_handler
-from src.auth.login_gov_jwt_auth import (
-    get_final_redirect_uri,
-    get_login_gov_redirect_uri,
-)
+from src.auth.login_gov_jwt_auth import get_final_redirect_uri, get_login_gov_redirect_uri
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.db.models.user_models import UserTokenSession
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
@@ -115,6 +112,7 @@ def user_login(db_session: db.Session, query_data: dict) -> flask.Response:
 
     return response.redirect_response(redirect_uri)
 
+
 @user_blueprint.get("/login/callback")
 @user_blueprint.input(user_schemas.UserLoginGovCallbackSchema, location="query")
 @user_blueprint.doc(responses=[302], hide=True)
@@ -135,6 +133,7 @@ def user_login_callback(db_session: db.Session, query_data: dict) -> flask.Respo
     return response.redirect_response(
         get_final_redirect_uri("success", result.token, result.is_user_new)
     )
+
 
 @user_blueprint.get("/login/result")
 @user_blueprint.doc(hide=True)

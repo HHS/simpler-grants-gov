@@ -7,8 +7,10 @@ import { NextRequest } from "next/server";
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token");
   if (!token) {
-    const errorType = request.nextUrl.searchParams.get("error_type");
-    if (errorType === "pivRequired") {
+    const pivRequired = request.nextUrl.searchParams.get(
+      "login_piv_required_error",
+    );
+    if (pivRequired === "true") {
       return redirect("/login?pivError=true");
     }
     return redirect("/unauthenticated");
