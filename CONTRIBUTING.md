@@ -104,7 +104,7 @@ Current designated maintainers:
 
 ## Bounty Program
 
-The Simpler Grants Funded Open Source Contributor Program is a pilot that pays contributors for accepted, merged pull requests on selected issues. The program is funded by HHS through Nava PBC and is open to any contributor who meets the eligibility criteria below. Phase 1 runs on a fixed four-month budget envelope of $5,000 and is intended as a learning pilot — terms, tiers, and processes may evolve based on what we observe.
+The Simpler Grants Funded Open Source Contributor Program is a pilot that pays contributors for accepted, merged pull requests on selected issues. The program is open to any contributor who meets the eligibility criteria below. Phase 1 runs on a fixed four-month budget envelope of $5,000 and is intended as a learning pilot — terms, tiers, and processes may evolve based on what we observe.
 
 ### Finding bounty issues
 
@@ -136,7 +136,7 @@ To participate in the bounty program, you must:
 
 - Be **18 years or older**.
 - Be a **US citizen**.
-- **Not** be a current or former Nava or HHS employee, contractor, or subcontractor.
+- **Not** be a current or former HHS employee, contractor, or subcontractor.
 - **Not** appear on the US Treasury OFAC [Specially Designated Nationals list](https://ofac.treasury.gov/specially-designated-nationals-and-blocked-persons-list-sdn-human-readable-lists).
 
 Full eligibility terms are in the [Contributor Terms of Service](./CONTRIBUTOR_TOS.md) <!-- TODO: replace once ToS is published -->.
@@ -145,7 +145,7 @@ Full eligibility terms are in the [Contributor Terms of Service](./CONTRIBUTOR_T
 
 - Payments are issued through **Tremendous** to the email address on your verified GitHub account.
 - We target sending payment **within 48 hours** of PR merge and verification.
-- If your cumulative calendar-year program payments will reach **$600 or more**, a completed W-9 must be on file before that payment is released. Nava issues IRS Form 1099-NEC at year end for any contributor at or above the $600 threshold.
+- If your cumulative calendar-year program payments will reach **$600 or more**, a completed W-9 must be on file before that payment is released. IRS Form 1099-NEC will be issued at year end for any contributor at or above the $600 threshold.
 - When multiple valid PRs are submitted for the same bounty, the **first valid PR by timestamp** is paid the full bounty. Other contributors with valid-but-unselected PRs receive a **$50 runner-up courtesy payment** while the program reserve has funds.
 - **Partial completion is not paid.** There are **no clawbacks** for post-merge defects.
 
