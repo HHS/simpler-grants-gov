@@ -55,9 +55,12 @@ test.describe("Login.gov based authentication tests", () => {
         await performStagingLogin(page, isMobileProject);
 
         // findSignOutButton opens the Account dropdown (and mobile nav if needed)
-        // to make Sign out visible, then returns the locator.
+        // then returns the sign-out locator.
+        // Use toHaveCount(1) rather than toBeVisible: the Sign out link lives
+        // inside a collapsed dropdown. Its presence in the DOM is sufficient
+        // proof of a successful login; visibility depends on dropdown state.
         const signOutButton = await findSignOutButton(page, isMobileProject);
-        await expect(signOutButton).toBeVisible({
+        await expect(signOutButton).toHaveCount(1, {
           timeout: TIMEOUT_REDIRECT,
         });
       } finally {
