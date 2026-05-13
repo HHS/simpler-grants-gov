@@ -10,6 +10,7 @@ import {
   FileInput,
   FileInputRef,
   FormGroup,
+  Label,
   ModalRef,
   ModalToggleButton,
 } from "@trussworks/react-uswds";
@@ -133,6 +134,7 @@ export function OpportunityAttachmentUploadInput({
         </Alert>
       )}
 
+      <Label htmlFor="opportunity-attachment-upload">{t("uploadLabel")}</Label>
       <FileInput
         id="opportunity-attachment-upload"
         name="opportunity-attachment-upload"
