@@ -21,7 +21,6 @@ def test_list_api_keys_empty_result(
 def test_list_api_keys_single_key(enable_factory_create, db_session, client, user, user_auth_token):
     """Test listing API keys when user has one key"""
     api_key = UserApiKeyFactory.create(user=user, key_name="Test API Key")
-    db_session.commit()
 
     response = client.post(
         f"/v1/users/{user.user_id}/api-keys/list",
@@ -51,7 +50,6 @@ def test_list_api_keys_multiple_keys_ordered_by_created_at(
     api_key1 = UserApiKeyFactory.create(user=user, key_name="First Key")
     api_key2 = UserApiKeyFactory.create(user=user, key_name="Second Key")
     api_key3 = UserApiKeyFactory.create(user=user, key_name="Third Key")
-    db_session.commit()
 
     response = client.post(
         f"/v1/users/{user.user_id}/api-keys/list",
@@ -86,7 +84,6 @@ def test_list_api_keys_only_users_keys(
     other_user_key = UserApiKeyFactory.create(user=other_user, key_name="Other User Key")
 
     user_key = UserApiKeyFactory.create(user=user, key_name="User Key")
-    db_session.commit()
 
     response = client.post(
         f"/v1/users/{user.user_id}/api-keys/list",
@@ -113,7 +110,6 @@ def test_list_api_keys_includes_inactive_keys(
     """Test that both active and inactive keys are returned"""
     active_key = UserApiKeyFactory.create(user=user, key_name="Active Key", is_active=True)
     inactive_key = UserApiKeyFactory.create(user=user, key_name="Inactive Key", is_active=False)
-    db_session.commit()
 
     response = client.post(
         f"/v1/users/{user.user_id}/api-keys/list",

@@ -16,7 +16,11 @@ from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPClientMissingCertificate,
     generate_soap_jwt,
 )
-from src.legacy_soap_api.legacy_soap_api_config import LegacySoapAPIConfig, get_soap_config
+from src.legacy_soap_api.legacy_soap_api_config import (
+    LegacySoapAPIConfig,
+    SimplerSoapAPI,
+    get_soap_config,
+)
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
@@ -39,7 +43,7 @@ def get_proxy_headers(
     soap_auth: SOAPAuth | None,
 ) -> dict:
     # Exclude header keys that are utilized only in simpler soap api. Not needed for proxy request.
-    if not soap_auth or not soap_auth.certificate.legacy_certificate:
+    if not soap_auth:
         return filter_headers(
             soap_request.headers, [config.gg_s2s_proxy_header_key, MTLS_CERT_HEADER_KEY]
         )
@@ -55,10 +59,12 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
     should_log_response = soap_request.headers.get(LOG_LOCAL_RESPONSE_HEADER_KEY) == "1"
     proxy_headers = get_proxy_headers(soap_request, config, soap_auth)
     if soap_auth:
-        proxy_url = join(
-            config.soap_partner_gateway_uri,
-            soap_request.full_path.lstrip("/"),
+        path = (
+            config.soap_grantors_path
+            if soap_request.api_name == SimplerSoapAPI.GRANTORS
+            else config.soap_applicants_path
         )
+        proxy_url = join(config.soap_partner_gateway_uri, path.lstrip("/"))
     else:
         logger.info(
             "soap_client_certificate: Sending soap request without client certificate",
@@ -68,7 +74,10 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
             soap_request.headers.get(config.gg_s2s_proxy_header_key, config.gg_url),
             soap_request.full_path.lstrip("/"),
         )
-
+    logger.info(
+        "soap_client_certificate: sending request to proxy_url",
+        extra={"proxy_url": proxy_url},
+    )
     _request = Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
 
     response = _get_soap_response(_request, timeout=timeout)
