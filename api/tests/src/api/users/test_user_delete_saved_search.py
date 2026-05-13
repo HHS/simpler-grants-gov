@@ -3,8 +3,7 @@ import uuid
 
 import pytest
 
-from src.db.models.user_models import UserSavedSearch, UserTokenSession
-from tests.lib.db_testing import cascade_delete_from_db_table
+from src.db.models.user_models import UserSavedSearch
 from tests.src.db.models.factories import UserFactory, UserSavedSearchFactory
 
 
@@ -13,14 +12,7 @@ def saved_search(enable_factory_create, user, db_session):
     search = UserSavedSearchFactory.create(
         user=user, name="Test Search", search_query={"keywords": "python"}
     )
-    db_session.commit()
     return search
-
-
-@pytest.fixture(autouse=True)
-def clear_data(db_session):
-    cascade_delete_from_db_table(db_session, UserTokenSession)
-    return
 
 
 def test_user_delete_saved_search_unauthorized_user(

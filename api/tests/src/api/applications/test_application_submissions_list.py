@@ -30,8 +30,6 @@ def test_application_submissions_list_success_jwt_auth(
     submission1 = ApplicationSubmissionFactory.create(application=application)
     submission2 = ApplicationSubmissionFactory.create(application=application)
 
-    db_session.commit()
-
     request_data = {
         "pagination": {
             "page_offset": 1,
@@ -86,8 +84,6 @@ def test_application_submissions_list_success_api_key_auth(
     # Create a submission
     submission = ApplicationSubmissionFactory.create(application=application)
 
-    db_session.commit()
-
     request_data = {
         "pagination": {
             "page_offset": 1,
@@ -121,8 +117,6 @@ def test_application_submissions_list_empty(
         application_user=ApplicationUserFactory.create(user=user, application=application),
         role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
     )
-
-    db_session.commit()
 
     request_data = {
         "pagination": {
@@ -172,8 +166,6 @@ def test_application_submissions_list_forbidden(
     application = ApplicationFactory.create()
 
     # User is NOT associated with application - should get 403
-    db_session.commit()
-
     request_data = {
         "pagination": {
             "page_offset": 1,
@@ -228,10 +220,7 @@ def test_application_submissions_list_pagination(
     )
 
     # Create 5 submissions
-    for _ in range(5):
-        ApplicationSubmissionFactory.create(application=application)
-
-    db_session.commit()
+    ApplicationSubmissionFactory.create_batch(size=5, application=application)
 
     # Request page 1 with page size 2
     request_data = {
@@ -295,8 +284,6 @@ def test_application_submissions_list_default_sort(
     # Create submissions
     ApplicationSubmissionFactory.create(application=application)
 
-    db_session.commit()
-
     # Request without explicit sort order (should use default)
     request_data = {
         "pagination": {
@@ -330,10 +317,7 @@ def test_application_submissions_list_ascending_sort(
     )
 
     # Create submissions
-    ApplicationSubmissionFactory.create(application=application)
-    ApplicationSubmissionFactory.create(application=application)
-
-    db_session.commit()
+    ApplicationSubmissionFactory.create_batch(size=2, application=application)
 
     request_data = {
         "pagination": {
@@ -366,8 +350,6 @@ def test_application_submissions_list_invalid_sort_field(
         application_user=ApplicationUserFactory.create(user=user, application=application),
         role=RoleFactory.create(privileges=[Privilege.VIEW_APPLICATION]),
     )
-
-    db_session.commit()
 
     request_data = {
         "pagination": {

@@ -17,7 +17,7 @@ def manage(config: dict):
         roles, schema_privileges = print_current_db_config(master_conn)
         roles_with_groups = get_roles_with_groups(master_conn)
 
-    configure_default_privileges()
+    configure_default_privileges(config)
 
     return {
         "roles": roles,
@@ -79,7 +79,8 @@ def configure_database(conn: Connection, config: dict) -> None:
     print("-- Configuring database")
     app_username = os.environ.get("APP_USER")
     migrator_username = os.environ.get("MIGRATOR_USER")
-    schema_name = os.environ.get("DB_SCHEMA")
+    schema_name = config.get("schema_name", os.environ.get("DB_SCHEMA"))
+    primary_schema = os.environ.get("DB_SCHEMA")
     database_name = os.environ.get("DB_NAME")
 
     # In Postgres 15 and higher, the CREATE privilege on the public
@@ -91,11 +92,14 @@ def configure_database(conn: Connection, config: dict) -> None:
 
     print("---- Revoking database access from public role")
     db.execute(conn, f"REVOKE ALL ON DATABASE {identifier(database_name)} FROM PUBLIC")
-    print(f"---- Setting default search path to schema {schema_name}")
-    db.execute(
-        conn,
-        f"ALTER DATABASE {identifier(database_name)} SET search_path TO {identifier(schema_name)}",
-    )
+
+    # Only set the search path for the primary schema
+    if schema_name == primary_schema:
+        print(f"---- Setting default search path to schema {schema_name}")
+        db.execute(
+            conn,
+            f"ALTER DATABASE {identifier(database_name)} SET search_path TO {identifier(schema_name)}",
+        )
 
     configure_roles(conn, [migrator_username, app_username], database_name)
     configure_schema(conn, schema_name, migrator_username, app_username)
@@ -131,7 +135,7 @@ def configure_role(conn: Connection, username: str, database_name: str) -> None:
 
 
 def configure_schema(conn: Connection, schema_name: str, migrator_username: str, app_username: str) -> None:
-    print("---- Configuring schema")
+    print(f"---- Configuring schema: {schema_name}")
     print(f"------ Creating schema: {schema_name=}")
     db.execute(conn, f"CREATE SCHEMA IF NOT EXISTS {identifier(schema_name)}")
     print(f"------ Changing schema owner: new_owner={migrator_username}")
@@ -144,9 +148,63 @@ def configure_schema(conn: Connection, schema_name: str, migrator_username: str,
         conn,
         f"GRANT USAGE ON SCHEMA {identifier(schema_name)} TO {identifier(app_username)}",
     )
+    print(f"------ Revoking CREATE on schema: revokee={app_username}")
+    db.execute(
+        conn,
+        f"REVOKE CREATE ON SCHEMA {identifier(schema_name)} FROM {identifier(app_username)}",
+    )
+
+    print(f"------ Granting privileges on existing objects in schema: grantee={app_username}")
+    db.execute(
+        conn,
+        f"GRANT ALL ON ALL TABLES IN SCHEMA {identifier(schema_name)} TO {identifier(app_username)}",
+    )
+    db.execute(
+        conn,
+        f"GRANT ALL ON ALL SEQUENCES IN SCHEMA {identifier(schema_name)} TO {identifier(app_username)}",
+    )
+    db.execute(
+        conn,
+        f"GRANT ALL ON ALL ROUTINES IN SCHEMA {identifier(schema_name)} TO {identifier(app_username)}",
+    )
+
+    fix_schema_object_ownership(conn, schema_name, migrator_username)
 
 
-def configure_default_privileges():
+def fix_schema_object_ownership(conn: Connection, schema_name: str, migrator_username: str) -> None:
+    """Reassign ownership of any tables, foreign tables, sequences, and views
+    in the schema that are not already owned by the migrator user."""
+    print(f"------ Fixing object ownership in schema {schema_name}: new_owner={migrator_username}")
+    db.execute(
+        conn,
+        f"""
+        DO $$
+        DECLARE
+            r RECORD;
+        BEGIN
+            FOR r IN
+                SELECT c.relname, c.relkind
+                FROM pg_class c
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+                JOIN pg_roles o ON o.oid = c.relowner
+                WHERE n.nspname = '{schema_name}'
+                AND o.rolname != '{migrator_username}'
+                AND c.relkind IN ('r', 'f', 'S', 'v')
+            LOOP
+                IF r.relkind = 'S' THEN
+                    EXECUTE format('ALTER SEQUENCE %I.%I OWNER TO %I', '{schema_name}', r.relname, '{migrator_username}');
+                ELSE
+                    EXECUTE format('ALTER TABLE %I.%I OWNER TO %I', '{schema_name}', r.relname, '{migrator_username}');
+                END IF;
+                RAISE NOTICE 'Changed owner of %.% to {migrator_username}', '{schema_name}', r.relname;
+            END LOOP;
+        END
+        $$;
+        """,
+    )
+
+
+def configure_default_privileges(config: dict):
     """
     Configure default privileges so that future tables, sequences, and routines
     created by the migrator user can be accessed by the app user.
@@ -154,10 +212,10 @@ def configure_default_privileges():
     run these SQL queries as the migrator user rather than as the master user.
     """
     migrator_username = os.environ.get("MIGRATOR_USER")
-    schema_name = os.environ.get("DB_SCHEMA")
+    schema_name = config.get("schema_name", os.environ.get("DB_SCHEMA"))
     app_username = os.environ.get("APP_USER")
     with db.connect_using_iam(migrator_username) as conn:
-        print(f"------ Granting privileges for future objects in schema: grantee={app_username}")
+        print(f"------ Granting default privileges for future objects in schema {schema_name}: grantee={app_username}")
         db.execute(
             conn,
             f"ALTER DEFAULT PRIVILEGES IN SCHEMA {identifier(schema_name)} GRANT ALL ON TABLES TO {identifier(app_username)}",

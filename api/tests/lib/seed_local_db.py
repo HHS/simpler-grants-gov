@@ -512,6 +512,8 @@ def seed_local_db(iterations: int, cover_all_agencies: bool, steps: list[str]) -
 
 def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
 
+    if seed_config.seed_agencies:
+        _build_agencies(db_session)
     if seed_config.seed_opportunities:
         _build_opportunities(db_session, seed_config.iterations, seed_config.cover_all_agencies)
         # Need to commit to force any updates made
@@ -519,8 +521,6 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
         db_session.commit()
 
     competition_container: CompetitionContainer | None = None
-    if seed_config.seed_agencies:
-        _build_agencies(db_session)
     if seed_config.seed_forms:
         forms_map = _build_forms(db_session)
         competition_container = _build_competitions(db_session, forms_map)

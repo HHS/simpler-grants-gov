@@ -495,6 +495,8 @@ def validate_opportunity(
     source_opportunity: staging.opportunity.Topportunity,
     expect_in_db: bool = True,
     expect_values_to_match: bool = True,
+    expected_agency: Agency | None = None,
+    expect_agency_id_to_be_set: bool | None = None,
 ):
     opportunity = (
         db_session.query(Opportunity)
@@ -529,6 +531,13 @@ def validate_opportunity(
             assert opportunity.is_draft is False
         else:
             assert opportunity.is_draft is True
+
+        if expected_agency is not None:
+            assert opportunity.agency_id == expected_agency.agency_id
+
+    # Only check if the value was passed in, none won't check
+    if expect_agency_id_to_be_set is not None:
+        assert (opportunity.agency_id is not None) == expect_agency_id_to_be_set
 
 
 def validate_assistance_listing(
