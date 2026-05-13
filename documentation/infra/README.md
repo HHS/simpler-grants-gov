@@ -14,7 +14,7 @@
 
 ## Testing
 
-* [Terraform unit testing](./terraform-unit-testing.md)
+* [Terraform unit testing](/documentation/infra/terraform-unit-testing.md)
 
 ## Learning
 
