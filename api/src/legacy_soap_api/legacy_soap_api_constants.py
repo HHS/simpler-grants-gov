@@ -37,4 +37,4 @@ class LegacySoapApiEvent(StrEnum):
 
     RETURNING_SIMPLER_RESPONSE = "returning_simpler_response"
     RETURNING_LEGACY_SOAP_RESPONSE = "returning_legacy_soap_response"
-    SIMPLER_ROUTE_DISABLED = "simpler-route-disabled"
+    SIMPLER_ROUTE_DISABLED = "simpler_route_disabled"
