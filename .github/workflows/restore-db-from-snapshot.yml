@@ -1,6 +1,17 @@
 name: Restore DB from Staging Snapshot
 run-name: Restore ${{ inputs.target_environment }} DB from ${{ inputs.snapshot_id != '' && inputs.snapshot_id || 'latest staging snapshot' }}${{ inputs.dry_run && ' (dry run)' || '' }}
 
+# Required IAM permissions for this workflow:
+# Staging account:
+#   - rds:DescribeDBClusterSnapshots (on staging cluster)
+#   - kms:Decrypt (on staging cluster's KMS key)
+#   - kms:CreateGrant (on staging cluster's KMS key)
+# Target account:
+#   - rds:CreateDBClusterSnapshot (on target cluster)
+#   - rds:RestoreDBClusterFromSnapshot (on target cluster)
+#   - rds:ModifyDBCluster (on target cluster)
+#   - rds:DeleteDBCluster (on target cluster)
+
 on:
   workflow_dispatch:
     inputs:
@@ -22,6 +33,11 @@ on:
         type: boolean
         default: true
 
+# Prevent concurrent restores to the same environment to avoid Terraform state corruption.
+concurrency:
+  group: restore-db-${{ inputs.target_environment }}
+  cancel-in-progress: false
+
 jobs:
   restore-db:
     name: Restore DB
@@ -34,6 +50,9 @@ jobs:
       id-token: write
     # Require environment approval so accidental triggers don't destroy prod-like data
     environment: ${{ inputs.target_environment }}
+    outputs:
+      snapshot_id: ${{ steps.snapshot.outputs.snapshot_id }}
+      backup_snapshot_id: ${{ steps.create-backup.outputs.backup_snapshot_id }}
 
     steps:
       - uses: actions/checkout@v4
@@ -50,17 +69,34 @@ jobs:
       - name: Resolve snapshot ID
         id: snapshot
         run: |
+          SOURCE_CLUSTER_ID="api-staging"
+
           if [[ -n "${{ inputs.snapshot_id }}" ]]; then
             SNAPSHOT_ID="${{ inputs.snapshot_id }}"
+
+            # Validate snapshot ID format and source
+            if [[ ! "$SNAPSHOT_ID" =~ ^(rds:)?${SOURCE_CLUSTER_ID}- ]]; then
+              echo "::error::Snapshot must be from ${SOURCE_CLUSTER_ID} cluster"
+              echo "::error::Provided: $SNAPSHOT_ID"
+              exit 1
+            fi
           else
+            echo "Fetching latest automated snapshot from ${SOURCE_CLUSTER_ID}..."
             SNAPSHOT_ID=$(aws rds describe-db-cluster-snapshots \
-              --db-cluster-identifier "api-staging" \
+              --db-cluster-identifier "${SOURCE_CLUSTER_ID}" \
               --snapshot-type automated \
               --query 'sort_by(DBClusterSnapshots, &SnapshotCreateTime)[-1].DBClusterSnapshotIdentifier' \
               --output text)
+
+            if [[ -z "$SNAPSHOT_ID" || "$SNAPSHOT_ID" == "None" ]]; then
+              echo "::error::No automated snapshots found for cluster ${SOURCE_CLUSTER_ID}"
+              echo "::error::Verify cluster name and cross-account permissions"
+              exit 1
+            fi
           fi
+
           echo "snapshot_id=${SNAPSHOT_ID}" >> "$GITHUB_OUTPUT"
-          echo "Resolved snapshot: ${SNAPSHOT_ID}"
+          echo "✅ Resolved snapshot: ${SNAPSHOT_ID}"
 
       - name: Terraform init
         run: |
@@ -77,6 +113,26 @@ jobs:
             -var="database_snapshot_id=${{ steps.snapshot.outputs.snapshot_id }}" \
             -replace="module.database.aws_rds_cluster.db"
 
+      - name: Create pre-restore backup
+        id: create-backup
+        if: ${{ !inputs.dry_run }}
+        run: |
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          BACKUP_SNAPSHOT_ID="api-${{ inputs.target_environment }}-pre-restore-${TIMESTAMP}"
+
+          echo "Creating backup snapshot: ${BACKUP_SNAPSHOT_ID}"
+          aws rds create-db-cluster-snapshot \
+            --db-cluster-identifier "api-${{ inputs.target_environment }}" \
+            --db-cluster-snapshot-identifier "${BACKUP_SNAPSHOT_ID}" \
+            --tags Key=Purpose,Value=PreRestoreBackup Key=RestoredFrom,Value="${{ steps.snapshot.outputs.snapshot_id }}"
+
+          echo "⏳ Waiting for backup snapshot to become available..."
+          aws rds wait db-cluster-snapshot-available \
+            --db-cluster-snapshot-identifier "${BACKUP_SNAPSHOT_ID}"
+
+          echo "✅ Backup snapshot created: ${BACKUP_SNAPSHOT_ID}"
+          echo "backup_snapshot_id=${BACKUP_SNAPSHOT_ID}" >> "$GITHUB_OUTPUT"
+
       - name: Apply restore
         if: ${{ !inputs.dry_run }}
         run: |
@@ -90,12 +146,19 @@ jobs:
         if: ${{ !inputs.dry_run }}
         run: |
           {
-            echo "## DB Restore Summary"
+            echo "## ✅ DB Restore Completed"
             echo ""
             echo "| | |"
             echo "|---|---|"
             echo "| **Target cluster** | \`api-${{ inputs.target_environment }}\` |"
             echo "| **Source snapshot** | \`${{ steps.snapshot.outputs.snapshot_id }}\` |"
+            echo "| **Pre-restore backup** | \`${{ steps.create-backup.outputs.backup_snapshot_id }}\` |"
+            echo ""
+            echo "### Rollback Instructions"
+            echo "If you need to rollback this restore, run this workflow again with:"
+            echo '```'
+            echo "Snapshot ID: ${{ steps.create-backup.outputs.backup_snapshot_id }}"
+            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
   run-migrations:
@@ -109,6 +172,34 @@ jobs:
       app_name: api
       environment: ${{ inputs.target_environment }}
       version: ${{ github.sha }}
+
+  notify-success:
+    name: Notify on success
+    needs: [restore-db, run-migrations]
+    if: ${{ success() && !inputs.dry_run }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Send success Slack notification
+        run: |
+          curl -X POST -H "Authorization: Bearer ${{ secrets.ALERTS_SLACK_BOT_TOKEN }}" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            --data '{
+              "channel": "${{ secrets.SLACK_ALERTS_CHANNEL_ID }}",
+              "text": ":white_check_mark: *DB Restore Succeeded*",
+              "attachments": [{
+                "color": "#36a64f",
+                "title": "Restore of '"api-${{ inputs.target_environment }}"' completed",
+                "fields": [
+                  {"title": "Environment",       "value": "'"${{ inputs.target_environment }}"'",                                                    "short": true},
+                  {"title": "Source snapshot",   "value": "'"${{ needs.restore-db.outputs.snapshot_id }}"'",                                         "short": true},
+                  {"title": "Pre-restore backup","value": "'"${{ needs.restore-db.outputs.backup_snapshot_id }}"'",                                   "short": true},
+                  {"title": "Run by",            "value": "'"${{ github.triggering_actor }}"'",                                                      "short": true},
+                  {"title": "Workflow URL",      "value": "'"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"'", "short": false}
+                ],
+                "footer": "GitHub Actions",
+                "ts": '"$(date +%s)"'
+              }]
+            }' https://slack.com/api/chat.postMessage
 
   send-slack-notification:
     if: failure()
