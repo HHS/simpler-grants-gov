@@ -2,6 +2,11 @@
 # Tests for grants_shared.logs.audit.
 #
 
+# we import requests here as something in the import stack
+# does a getaddrinfo. We want that to happen before we run
+# our commands as the first time it runs it has to open/exec
+# several different encoding files.
+import requests  # noqa: F401 isort:skip
 import logging
 import os
 import pathlib
@@ -29,13 +34,6 @@ pytestmark = pytest.mark.audit
 @pytest.fixture(scope="session")
 def init_audit_hook():
     audit.init()
-
-    # TODO - the first time getaddrinfo is called it has to
-    # lazy-open a few files. This means when it runs below
-    # it gets many more audit events than we expect.
-    # In the API code, something upstream of the process
-    # must do this
-    socket.getaddrinfo("www.python.org", 80)
 
 
 test_audit_hook_data = [
