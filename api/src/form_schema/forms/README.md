@@ -1,8 +1,25 @@
 # Overview
-This folder contains the JSON backing the forms that
-we currently support. This is a very simple approach
-to organization of the forms, and likely won't be
-the approach we take long-term past the pilot.
+This folder contains the form template definitions for all forms we support.
+Each form lives in its own subdirectory with the structure:
+
+```
+forms/
+└── <form_name>/
+    ├── __init__.py      # re-exports all public symbols from the current version
+    ├── config.py        # stable identifiers (FORM_ID, SHORT_FORM_NAME) that don't change across versions
+    └── <major>/
+        └── <minor>/
+            ├── __init__.py
+            └── form_json.py  # form definition: FORM_JSON_SCHEMA, FORM_UI_SCHEMA, FORM_RULE_SCHEMA, FORM_XML_TRANSFORM_RULES, and the Form object
+```
+
+All existing forms are version `1/0` in this structure. The `forms/__init__.py` at
+this level collects all forms and exposes `get_active_forms()`.
+
+When a new major version of a form is added, a new `<major>/<minor>/form_json.py`
+is added alongside the existing one — the old version stays in place for any
+competitions still pinned to it. Update `<form_name>/__init__.py` to point to
+the new default version when it becomes the current version.
 
 # How to rebuild a form from grants.gov
 
@@ -351,8 +368,8 @@ with product and confirm the behavior we want for any auto-summed fields.
 
 ## Building the XML Conversion Schema
 We have a configuration for each form to convert it to the XML format
-that grants.gov used. This is further documented in [xml_generation](/api/src/services/xml_generation/README.md)
+that grants.gov used. This is further documented in [xml_generation](../../services/xml_generation/README.md)
 
 ## Deploying a form
 We deploy forms to a given environment using a set of scripts.
-This is documented in [task/forms/README.md](/api/src/task/forms/README.md)
+This is documented in [task/forms/README.md](../../task/forms/README.md)

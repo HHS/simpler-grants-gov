@@ -66,12 +66,13 @@ describe("createOpportunityForm", () => {
     mockUseActionState.mockReturnValue([
       {
         data: {
+          opportunity_id: "opp-001",
           agency_id: "123-ABC",
           opportunity_number: "MY-TEST-001",
           opportunity_title: "Test Opportunity 001",
           category: "other",
           category_explanation: "",
-          assistance_listing_number: "12-345",
+          assistance_listing_number: "12.345",
         },
       },
       noop,
@@ -89,7 +90,7 @@ describe("createOpportunityForm", () => {
     expect(
       screen.getByDisplayValue("Test Opportunity 001"),
     ).toBeInTheDocument();
-    expect(screen.getByDisplayValue("12-345")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("12.345")).toBeInTheDocument();
   });
 
   // --- Test errors from action ---
@@ -171,8 +172,8 @@ describe("createOpportunityForm field change events", () => {
     });
     expect(assitListNbr).toBeInTheDocument();
     expect(assitListNbr).toHaveValue("");
-    fireEvent.change(assitListNbr, { target: { value: "12-345" } });
-    expect(assitListNbr).toHaveValue("12-345");
+    fireEvent.change(assitListNbr, { target: { value: "12.345" } });
+    expect(assitListNbr).toHaveValue("12.345");
     // Save button should still be disabled
     expect(saveButton).toBeDisabled();
 

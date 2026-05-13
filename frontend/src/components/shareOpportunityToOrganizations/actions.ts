@@ -55,7 +55,6 @@ export const saveOpportunityForOrganizationAction = async ({
     const response = await saveOpportunityForOrganization({
       organizationId,
       opportunityId,
-      token: session.token,
     });
 
     const responseJson =
@@ -97,7 +96,6 @@ export const deleteSavedOpportunityForOrganizationAction = async ({
     const response = await deleteSavedOpportunityForOrganization({
       organizationId,
       opportunityId,
-      token: session.token,
     });
 
     const responseJson =

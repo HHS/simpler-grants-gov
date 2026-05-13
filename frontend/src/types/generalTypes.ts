@@ -15,6 +15,11 @@ type Only<T, U> = {
 
 // exported Types ----
 
+export type LabelValueOption = {
+  label: string;
+  value: string;
+};
+
 export type Either<T, U> = Only<T, U> | Only<U, T>;
 
 export type IndexType = number | null;
@@ -281,3 +286,5 @@ export interface ParsedError {
   type?: string;
   details?: FrontendErrorDetails;
 }
+
+export type ApiMethod = "DELETE" | "GET" | "PATCH" | "POST" | "PUT";

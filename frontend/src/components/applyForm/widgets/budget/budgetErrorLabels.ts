@@ -1,4 +1,4 @@
-import { FormValidationWarning } from "src/components/applyForm/types";
+import { FormValidationWarning } from "src/types/applyForm/types";
 
 export type SectionKey = "A" | "B" | "C" | "D" | "E" | "F";
 export type ColumnLabelStyle = "letter" | "number";

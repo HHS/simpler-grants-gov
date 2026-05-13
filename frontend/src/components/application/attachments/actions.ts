@@ -68,11 +68,7 @@ export const uploadAttachmentAction = async (
   };
 
   try {
-    const res = await uploadAttachment(
-      applicationId,
-      session.token,
-      fileFormData,
-    );
+    const res = await uploadAttachment(applicationId, fileFormData);
 
     if (res.status_code !== 200) {
       throw new Error(`Failed to update application: ${res.status_code}`);
@@ -107,11 +103,7 @@ export const deleteAttachmentAction = async (
   }
 
   try {
-    const res = await deleteAttachment(
-      applicationId,
-      applicationAttachmentId,
-      session.token,
-    );
+    const res = await deleteAttachment(applicationId, applicationAttachmentId);
 
     if (res.status_code !== 200) {
       throw new Error(`Failed to delete application: ${res.status_code}`);

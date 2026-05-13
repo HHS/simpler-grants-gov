@@ -40,7 +40,7 @@ const getNewRelicBrowserInstance = (): NewRelicBrowser | null => {
 
 export const setNewRelicCustomAttribute = (
   key: string,
-  value: string,
+  value: string | number,
 ): undefined => {
   const newRelic = getNewRelicBrowserInstance();
   if (!newRelic) {
@@ -56,4 +56,5 @@ export const unsetAllNewRelicQueryAttributes = () => {
   validSearchQueryParamKeys.forEach((key) => {
     setNewRelicCustomAttribute(key, "");
   });
+  setNewRelicCustomAttribute("query_length", 0);
 };

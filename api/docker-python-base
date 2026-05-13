@@ -3,9 +3,8 @@
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 
-ARG PYTHON_VERSION=3.14.3
+ARG PYTHON_VERSION=3.14.4
 ARG PY_MM=3.14
-ARG POETRY_VERSION=2.3.3
 ARG PIP_VERSION=26.0
 
 SHELL ["/bin/bash", "-eux", "-c"]
@@ -56,11 +55,14 @@ WORKDIR /tmp
 RUN rm -rf "Python-${PYTHON_VERSION}" "Python-${PYTHON_VERSION}.tgz" && \
     python3 -m pip install --no-cache-dir --upgrade "pip==${PIP_VERSION}" && \
     ln -sf /usr/local/bin/python3 /usr/local/bin/python && \
-    ln -sf /usr/local/bin/pip3 /usr/local/bin/pip && \
-    pip3 install --no-cache-dir poetry==${POETRY_VERSION}
+    ln -sf /usr/local/bin/pip3 /usr/local/bin/pip
 
 # Ensure virtualenv embeds patched pip (25.3) for offline venv creation
 RUN python3 -m pip install --no-cache-dir --upgrade "virtualenv>=20.35.3"
+
+# Install UV
+# https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.9 /uv /uvx /bin/
 
 # Upgrade urllib3 to fix security vulnerabilities (GHSA-2xpw-w6gg-jr37, GHSA-gm62-xv2j-4w53)
 RUN python3 -m pip install --no-cache-dir --upgrade "urllib3>=2.6.0"
@@ -74,7 +76,7 @@ RUN python3 -m pip install --no-cache-dir --upgrade "cryptography>=46.0.7"
 # List package versions to make it easier to tell if fixed versions of vulnerable packages have been updated in the latest base image
 RUN python3 -m pip list -v
 
-# Remove pip from runtime (keep Poetry)
+# Remove pip from runtime (keep UV)
 RUN rm -rf /usr/local/lib/python${PY_MM}/site-packages/pip* \
     /usr/local/lib/python${PY_MM}/site-packages/setuptools* \
     /usr/local/lib/python${PY_MM}/site-packages/_distutils_hack \
@@ -142,7 +144,14 @@ RUN dnf install -y \
       glib2-2.82.2-767.amzn2023 \
       curl-minimal-8.11.1-4.amzn2023.0.3 \
       libcurl-minimal-8.11.1-4.amzn2023.0.3 \
-      kernel6.18-headers-6.18.15-14.217.amzn2023 && \
+      kernel6.18-headers-6.18.25-55.108.amzn2023 \
+      glibc-2.34-231.amzn2023.0.4 \
+      glibc-common-2.34-231.amzn2023.0.4 \
+      glibc-devel-2.34-231.amzn2023.0.4 \
+      glibc-gconv-extra-2.34-231.amzn2023.0.4 \
+      glibc-headers-x86-2.34-231.amzn2023.0.4 \
+      glibc-minimal-langpack-2.34-231.amzn2023.0.4 \
+      python3-pip-wheel-21.3.1-2.amzn2023.0.17 && \
     # CVE-2026-1757: libxml2 memory leak in xmllint (ALAS2023-2026-1446)
     dnf update -y --releasever=2023.10.20260302 \
       libxml2-2.10.4-1.amzn2023.0.18 \
@@ -159,7 +168,7 @@ COPY --from=amazonlinux-builder /python-version.txt /python-version.txt
 COPY --from=amazonlinux-builder /usr/local/bin/python${PY_MM} /usr/local/bin/python${PY_MM}
 COPY --from=amazonlinux-builder /usr/local/bin/python3 /usr/local/bin/python3
 COPY --from=amazonlinux-builder /usr/local/bin/python /usr/local/bin/python
-COPY --from=amazonlinux-builder /usr/local/bin/poetry /usr/local/bin/poetry
+COPY --from=amazonlinux-builder /usr/bin/uv /usr/bin/uv
 COPY --from=amazonlinux-builder /usr/local/lib/python${PY_MM}/ /usr/local/lib/python${PY_MM}/
 COPY --from=amazonlinux-builder /usr/local/lib/libpython${PY_MM}.so* /usr/local/lib/
 COPY --from=amazonlinux-builder /usr/local/include/python${PY_MM}/ /usr/local/include/python${PY_MM}/

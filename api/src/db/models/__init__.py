@@ -7,6 +7,7 @@ from . import (
     competition_models,
     entity_models,
     extract_models,
+    file_upload_models,
     lookup_models,
     opportunity_models,
     sam_extract_models,
@@ -34,4 +35,5 @@ __all__ = [
     "sam_extract_models",
     "entity_models",
     "workflow_models",
+    "file_upload_models",
 ]

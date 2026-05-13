@@ -9,6 +9,7 @@ import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
+from src.db.models.competition_models import Application, Competition, CompetitionForm, Form
 from src.db.models.opportunity_models import (
     CurrentOpportunitySummary,
     Opportunity,
@@ -17,15 +18,15 @@ from src.db.models.opportunity_models import (
 from src.db.models.user_models import User
 from src.pagination.pagination_models import PaginationInfo, PaginationParams, SortOrder
 from src.pagination.paginator import Paginator
+from src.search.search_models import BoolSearchFilter
 from src.services.opportunities_grantor_v1.get_agency import get_agency
 from src.services.service_utils import apply_sorting
 
 
-class OpportunityFilterSchema(BaseModel):
+class OpportunityListFilterParams(BaseModel):
     """Optional filters for opportunity list"""
 
-    # Placeholder for any required filters
-    pass
+    award_recommendation_ready: BoolSearchFilter | None = None
 
 
 class ListOpportunitiesParams(BaseModel):
@@ -34,7 +35,7 @@ class ListOpportunitiesParams(BaseModel):
     pagination: PaginationParams = Field(
         default_factory=lambda: PaginationParams(page_offset=1, page_size=25)
     )
-    filters: OpportunityFilterSchema | None = Field(default=None)
+    filters: OpportunityListFilterParams | None = Field(default=None)
 
 
 def list_opportunities_with_filters(
@@ -53,7 +54,6 @@ def list_opportunities_with_filters(
     Returns:
         List of Opportunity objects and pagination_info
     """
-    # Build the base query with optimized eager loading
     stmt = (
         select(Opportunity)
         .options(
@@ -64,13 +64,27 @@ def list_opportunities_with_filters(
                 selectinload(OpportunitySummary.link_funding_categories),
                 selectinload(OpportunitySummary.link_applicant_types),
             ),
-            selectinload(Opportunity.current_opportunity_summary).selectinload(
-                CurrentOpportunitySummary.opportunity_summary
+            selectinload(Opportunity.current_opportunity_summary)
+            .selectinload(CurrentOpportunitySummary.opportunity_summary)
+            .options(
+                selectinload(OpportunitySummary.link_funding_instruments),
+                selectinload(OpportunitySummary.link_funding_categories),
+                selectinload(OpportunitySummary.link_applicant_types),
             ),
             selectinload(Opportunity.opportunity_attachments),
-            selectinload(Opportunity.competitions),
+            selectinload(Opportunity.competitions).options(
+                selectinload(Competition.competition_forms)
+                .selectinload(CompetitionForm.form)
+                .selectinload(Form.form_instruction),
+                selectinload(Competition.competition_instructions),
+                selectinload(Competition.opportunity_assistance_listing),
+                selectinload(Competition.link_competition_open_to_applicant),
+                selectinload(Competition.applications).selectinload(
+                    Application.application_submissions
+                ),
+            ),
+            selectinload(Opportunity.award_recommendations),
         )
-        # If opportunity.agency_id is null, use the opportunity.agency_code
         .outerjoin(
             Agency,
             (Opportunity.agency_id == Agency.agency_id)
@@ -79,10 +93,23 @@ def list_opportunities_with_filters(
         .where(Agency.agency_id == agency_id)
     )
 
-    # Apply sorting in the database query
+    if (
+        params.filters
+        and params.filters.award_recommendation_ready
+        and params.filters.award_recommendation_ready.one_of
+        and True in params.filters.award_recommendation_ready.one_of
+    ):
+        stmt = stmt.where(
+            Opportunity.is_draft.is_(False),
+            Opportunity.is_simpler_grants_opportunity.is_(True),
+            Opportunity.competitions.any(
+                Competition.applications.any(Application.application_submissions.any())
+            ),
+            ~Opportunity.award_recommendations.any(),
+        )
+
     stmt = apply_sorting(stmt, Opportunity, params.pagination.sort_order)
 
-    # Use the paginator
     paginator: Paginator[Opportunity] = Paginator(
         table_model=Opportunity,
         stmt=stmt,
@@ -92,7 +119,6 @@ def list_opportunities_with_filters(
 
     opportunities = paginator.page_at(params.pagination.page_offset)
 
-    # Create pagination info
     pagination_info = PaginationInfo(
         total_records=paginator.total_records,
         page_offset=params.pagination.page_offset,
@@ -128,7 +154,7 @@ def get_opportunity_list_for_grantors(
     # Get agency and verify it exists
     agency = get_agency(db_session, agency_id)
 
-    # Verify user has VIEW_PRIVILEGE for the agency
+    # Verify user has VIEW_OPPORTUNITY privilege for the agency
     verify_access(user, {Privilege.VIEW_OPPORTUNITY}, agency)
 
     # Get opportunities with filters and pagination

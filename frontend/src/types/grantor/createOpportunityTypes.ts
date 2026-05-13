@@ -1,4 +1,5 @@
 export interface CreateOpportunityRecord {
+  opportunity_id?: string;
   agency_id: string;
   opportunity_number: string;
   opportunity_title: string;

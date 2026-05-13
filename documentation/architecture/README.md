@@ -128,4 +128,5 @@ Publicly available files such as files attached to Opportunities, Application In
 
 ### SOAP S2S Replacement
 
-To allow for a smooth migration to the Simpler Grants system we have implemented a SOAP intermediary service that will allow data to be retrieved from both Simpler Grants and the existing Grants.gov in a backwards compatible way. This functionality is called the SOAP Notary. It is primarily expected that this functionality will be utilized by Federal Agencies who retrieve Applications for funding from Grants.gov into Grants Management systems. [More details about migrating from SOAP S2S to modernized REST APIs](./soap-notary.md#migrating-to-rest).
+To allow for a smooth migration to the Simpler Grants system we have implemented a SOAP intermediary service that will allow data to be retrieved from both Simpler Grants and the existing Grants.gov in a backwards compatible way. This functionality is called the SOAP Notary. It is primarily expected that this functionality will be utilized by Federal Agencies who retrieve Applications for funding from Grants.gov into Grants Management systems. [More details about migrating from SOAP S2S to modernized REST APIs](./soap-notary.md#migration-away-from-soap).
+

@@ -66,10 +66,7 @@ export const inviteUserAction = async (
 
   let inviteUserResponse: OrganizationInviteRecord;
   try {
-    inviteUserResponse = await inviteUserToOrganization(
-      session.token,
-      requestData,
-    );
+    inviteUserResponse = await inviteUserToOrganization(requestData);
 
     return {
       data: inviteUserResponse,

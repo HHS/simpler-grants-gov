@@ -1,0 +1,28 @@
+# Lychee configuration for simpler-grants-gov
+# Checks internal (relative) documentation links only
+
+# Exclude external URLs (out of scope for this ticket)
+exclude = [
+  "https://",
+  "http://",
+]
+
+# Paths to check
+extensions = [
+  "md",
+]
+
+# Paths to skip
+exclude_path = [
+  "node_modules/",
+  ".git/",
+]
+
+# Timeout for checking links (in seconds)
+timeout = 10
+
+# Set to true to check verbatim links (exact paths)
+include_verbatim = true
+
+# Check anchor fragments (#heading-links) in markdown files
+include_fragments = true

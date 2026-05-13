@@ -1,10 +1,9 @@
+import { categoryOptions, fundingOptions } from "src/constants/opportunity";
 import { SEARCH_NO_STATUS_VALUE } from "src/constants/search";
 import {
-  categoryOptions,
   closeDateOptions,
   costSharingOptions,
   eligibilityOptions,
-  fundingOptions,
   postedDateOptions,
   statusOptions,
 } from "src/constants/searchFilterOptions";

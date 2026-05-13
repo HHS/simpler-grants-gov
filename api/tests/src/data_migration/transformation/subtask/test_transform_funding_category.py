@@ -66,7 +66,7 @@ class TestTransformFundingCategory(BaseTransformTestClass):
         syn_insert1 = setup_funding_category(
             create_existing=False,
             opportunity_summary=opportunity_summary_syn,
-            legacy_lookup_value="EIC",
+            legacy_lookup_value="RT",
         )
         syn_insert2 = setup_funding_category(
             create_existing=False,
@@ -118,7 +118,7 @@ class TestTransformFundingCategory(BaseTransformTestClass):
         validate_funding_category(
             db_session,
             syn_insert1,
-            expected_funding_category=FundingCategory.ENERGY_INFRASTRUCTURE_AND_CRITICAL_MINERAL_AND_MATERIALS,
+            expected_funding_category=FundingCategory.RECREATION_AND_TOURISM,
         )
         validate_funding_category(
             db_session, syn_insert2, expected_funding_category=FundingCategory.HEALTH

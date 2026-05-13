@@ -12,9 +12,9 @@ jest.mock("next-intl/server", () => ({
   getTranslations: () => identity,
 }));
 
-jest.mock("src/services/fetch/fetchers/createOpportunityFetcher", () => ({
-  createOpportunity: (token: unknown, createOppSchema: unknown) =>
-    mockCreateOpportunity(token, createOppSchema) as unknown,
+jest.mock("src/services/fetch/fetchers/grantorOpportunitiesFetcher", () => ({
+  createOpportunity: (createOppSchema: unknown) =>
+    mockCreateOpportunity(createOppSchema) as unknown,
 }));
 
 describe("create opportunity form action", () => {
@@ -29,7 +29,7 @@ describe("create opportunity form action", () => {
   });
   it("returns result of create success", async () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
-    mockCreateOpportunity.mockImplementation((_token, data) => {
+    mockCreateOpportunity.mockImplementation((data) => {
       return data as unknown;
     });
 
@@ -38,7 +38,7 @@ describe("create opportunity form action", () => {
     createFormData.append("opportunityNumber", "MY-TEST-001");
     createFormData.append("opportunityTitle", "Test Opportunity 001");
     createFormData.append("category", "discretionary");
-    createFormData.append("assistanceListingNumber", "12-345");
+    createFormData.append("assistanceListingNumber", "12.345");
 
     const result = await createOpportunityAction(null, createFormData);
     expect(result.data).toEqual({
@@ -47,12 +47,12 @@ describe("create opportunity form action", () => {
       opportunity_title: "Test Opportunity 001",
       category: "discretionary",
       category_explanation: null,
-      assistance_listing_number: "12-345",
+      assistance_listing_number: "12.345",
     });
   });
   it("returns result of create success with category explanation", async () => {
     getSessionMock.mockResolvedValue({ token: "logged in", user_id: "1" });
-    mockCreateOpportunity.mockImplementation((_token, data) => {
+    mockCreateOpportunity.mockImplementation((data) => {
       return data as unknown;
     });
 
@@ -62,7 +62,7 @@ describe("create opportunity form action", () => {
     createFormData.append("opportunityTitle", "Test Opportunity 001");
     createFormData.append("category", "other");
     createFormData.append("categoryExplanation", "Some explanation");
-    createFormData.append("assistanceListingNumber", "12-345");
+    createFormData.append("assistanceListingNumber", "12.345");
 
     const result = await createOpportunityAction(null, createFormData);
     expect(result.data).toEqual({
@@ -71,7 +71,7 @@ describe("create opportunity form action", () => {
       opportunity_title: "Test Opportunity 001",
       category: "other",
       category_explanation: "Some explanation",
-      assistance_listing_number: "12-345",
+      assistance_listing_number: "12.345",
     });
   });
   it("returns API error when applicable", async () => {

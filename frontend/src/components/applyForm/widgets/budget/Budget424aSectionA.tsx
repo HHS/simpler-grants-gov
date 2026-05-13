@@ -1,14 +1,14 @@
 "use client";
 
 import { FormContextType, RJSFSchema, StrictRJSFSchema } from "@rjsf/utils";
+import {
+  FormValidationWarning,
+  UswdsWidgetProps,
+} from "src/types/applyForm/types";
 
 import React, { JSX } from "react";
 import { Table } from "@trussworks/react-uswds";
 
-import {
-  FormValidationWarning,
-  UswdsWidgetProps,
-} from "src/components/applyForm/types";
 import TextWidget from "src/components/applyForm/widgets/TextWidget";
 import { ACTIVITY_ITEMS } from "./budgetConstants";
 import { getErrorsForSection } from "./budgetErrors";
@@ -390,7 +390,6 @@ function Budget424aSectionA<
                       Sum of row {row + 1}
                     </div>
                     <CurrencyInput
-                      disabled
                       id={`activity_line_items[${row}]--budget_summary--total_amount`}
                       rawErrors={getErrorsA({
                         errors,

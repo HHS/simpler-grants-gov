@@ -3,8 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { initialFilterOptions } from "src/utils/testing/fixtures";
 
-import React from "react";
-
 import { RadioButtonFilter } from "src/components/search/Filters/RadioButtonFilter";
 
 const fakeFacetCounts = {
@@ -158,5 +156,73 @@ describe("RadioButtonFilter", () => {
     expect(radioOption).toBeInTheDocument();
     await userEvent.click(radioOption);
     expect(mockSetQueryParam).toHaveBeenCalledWith(queryParamKey, "grant");
+  });
+  it("sets selection back to any radio option on second consecutive selection of the same non-default option", async () => {
+    const { rerender } = render(
+      <RadioButtonFilter
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set("")}
+        facetCounts={undefined}
+      />,
+    );
+    const accordionToggleButton = screen.getByRole("button");
+    await userEvent.click(accordionToggleButton);
+
+    let anyOption = screen.getByRole("radio", {
+      name: "Any test accordion",
+    });
+
+    expect(anyOption).toBeChecked();
+
+    let cooperativeAgreementOption = screen.getByRole("radio", {
+      name: "Cooperative Agreement",
+    });
+
+    expect(cooperativeAgreementOption).not.toBeChecked();
+
+    await userEvent.click(cooperativeAgreementOption);
+
+    let updatedQuery = "cooperative_agreement";
+
+    expect(mockSetQueryParam).toHaveBeenCalledWith(queryParamKey, updatedQuery);
+
+    rerender(
+      <RadioButtonFilter
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set([updatedQuery])}
+        facetCounts={undefined}
+      />,
+    );
+
+    cooperativeAgreementOption = screen.getByRole("radio", {
+      name: "Cooperative Agreement",
+    });
+
+    expect(cooperativeAgreementOption).toBeChecked();
+
+    await userEvent.click(cooperativeAgreementOption);
+
+    updatedQuery = "";
+    expect(mockSetQueryParam).toHaveBeenCalledWith(queryParamKey, updatedQuery);
+
+    rerender(
+      <RadioButtonFilter
+        filterOptions={initialFilterOptions}
+        title={title}
+        queryParamKey={queryParamKey}
+        query={new Set(updatedQuery)}
+        facetCounts={undefined}
+      />,
+    );
+
+    anyOption = screen.getByRole("radio", {
+      name: "Any test accordion",
+    });
+
+    expect(anyOption).toBeChecked();
   });
 });

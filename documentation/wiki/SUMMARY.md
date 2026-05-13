@@ -5,6 +5,7 @@
 ## GET INVOLVED
 
 * [Why open source?](get-involved/get-involved.md)
+* [Open source and security](get-involved/open-source-and-security.md)
 * [How to contribute code](get-involved/github-code.md)
 * [How to file issues](get-involved/github-planning/README.md)
   * [Report a bug](get-involved/github-planning/filling-out-a-bug-report.md)

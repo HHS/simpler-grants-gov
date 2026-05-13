@@ -3,15 +3,6 @@
 # the IAM policy granting the AWS Elastic Load Balancer service
 # to write to the bucket
 locals {
-  # This is needed to gran~t permissions to the ELB service for sending access logs to S3.
-  # The list was obtained from https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html
-  elb_account_map = {
-    "us-east-1" : "127311923021",
-    "us-east-2" : "033677994240",
-    "us-west-1" : "027434742980",
-    "us-west-2" : "797873946194"
-  }
-
   # set log_file_transition = {} to disable lifecycle transitions. Additional lifecycle transitions can be added via a key value pair of `$STORAGE_CLASS=$DAYS`
   log_file_transition = {
     STANDARD_IA = 30
@@ -50,8 +41,14 @@ data "aws_iam_policy_document" "access_logs_put_access" {
     actions = ["s3:PutObject"]
 
     principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${local.elb_account_map[data.aws_region.current.name]}:root"]
+      type        = "Service"
+      identifiers = ["logdelivery.elasticloadbalancing.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
     }
   }
 
@@ -109,6 +106,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "access_logs" {
 }
 
 
+# trivy:ignore:AVD-AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
   bucket = aws_s3_bucket.access_logs.id
   rule {

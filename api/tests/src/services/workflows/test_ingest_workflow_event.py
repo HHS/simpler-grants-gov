@@ -6,6 +6,7 @@ import pytest
 from src.adapters import db
 from src.adapters.aws.sqs_adapter import SQSClient
 from src.constants.lookup_constants import (
+    ApprovalResponseType,
     Privilege,
     WorkflowEntityType,
     WorkflowEventType,
@@ -15,7 +16,7 @@ from src.services.workflows.ingest_workflow_event import ingest_workflow_event
 from src.workflow.event.workflow_event import WorkflowEvent
 from tests.lib.internal_user_test_utils import create_internal_user
 from tests.src.db.models.factories import ApplicationFactory, OpportunityFactory, WorkflowFactory
-from tests.workflow.state_machine.test_state_machines import BasicState
+from tests.src.workflow.state_machine.test_state_machines import BasicState
 
 
 @pytest.fixture
@@ -225,6 +226,207 @@ def test_process_workflow_valid_event(
     assert message.event_type == WorkflowEventType.PROCESS_WORKFLOW
     assert message.process_workflow_context.workflow_id == workflow.workflow_id
     assert message.process_workflow_context.event_to_send == "start_workflow"
+
+
+def test_process_workflow_program_officer_approved_allowed(
+    db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
+):
+    """Test that APPROVED is an allowed approval response type for program officer approval."""
+    workflow = WorkflowFactory.create(
+        is_active=True, workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW
+    )
+
+    payload = {
+        "event_type": WorkflowEventType.PROCESS_WORKFLOW,
+        "process_workflow_context": {
+            "workflow_id": str(workflow.workflow_id),
+            "event_to_send": "receive_program_officer_approval",
+        },
+        "metadata": {
+            "approval_response_type": ApprovalResponseType.APPROVED,
+        },
+    }
+
+    event_id = ingest_workflow_event(db_session, payload, internal_workflow_send_user)
+
+    assert event_id is not None
+    assert isinstance(event_id, uuid.UUID)
+
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 1
+    message = WorkflowEvent.model_validate_json(messages[0].body)
+    assert message.event_id == event_id
+    assert message.acting_user_id == internal_workflow_send_user.user_id
+    assert message.event_type == WorkflowEventType.PROCESS_WORKFLOW
+    assert message.process_workflow_context.workflow_id == workflow.workflow_id
+    assert message.process_workflow_context.event_to_send == "receive_program_officer_approval"
+
+
+def test_process_workflow_program_officer_requires_modification_allowed(
+    db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
+):
+    """Test that REQUIRES_MODIFICATION is an allowed approval response type for program officer approval."""
+    workflow = WorkflowFactory.create(
+        is_active=True, workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW
+    )
+
+    payload = {
+        "event_type": WorkflowEventType.PROCESS_WORKFLOW,
+        "process_workflow_context": {
+            "workflow_id": str(workflow.workflow_id),
+            "event_to_send": "receive_program_officer_approval",
+        },
+        "metadata": {
+            "approval_response_type": ApprovalResponseType.REQUIRES_MODIFICATION,
+        },
+    }
+
+    event_id = ingest_workflow_event(db_session, payload, internal_workflow_send_user)
+
+    assert event_id is not None
+    assert isinstance(event_id, uuid.UUID)
+
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 1
+    message = WorkflowEvent.model_validate_json(messages[0].body)
+    assert message.event_id == event_id
+    assert message.acting_user_id == internal_workflow_send_user.user_id
+    assert message.event_type == WorkflowEventType.PROCESS_WORKFLOW
+    assert message.process_workflow_context.workflow_id == workflow.workflow_id
+    assert message.process_workflow_context.event_to_send == "receive_program_officer_approval"
+
+
+def test_process_workflow_program_officer_declined_not_allowed(
+    db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
+):
+    """Test that a 422 error is raised when approval response type is not allowed for the event."""
+    workflow = WorkflowFactory.create(
+        is_active=True, workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW
+    )
+
+    payload = {
+        "event_type": WorkflowEventType.PROCESS_WORKFLOW,
+        "process_workflow_context": {
+            "workflow_id": str(workflow.workflow_id),
+            "event_to_send": "receive_program_officer_approval",
+        },
+        "metadata": {
+            "approval_response_type": ApprovalResponseType.DECLINED,
+        },
+    }
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        ingest_workflow_event(db_session, payload, internal_workflow_send_user)
+
+    assert exc_info.value.status_code == 422
+    assert (
+        exc_info.value.message
+        == "Approval response type is not allowed for this approval configuration."
+    )
+
+    # Verify no message sent
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 0
+
+
+def test_process_workflow_budget_officer_approved_allowed(
+    db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
+):
+    """Test that APPROVED is an allowed approval response type for budget officer approval."""
+    workflow = WorkflowFactory.create(
+        is_active=True, workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW
+    )
+
+    payload = {
+        "event_type": WorkflowEventType.PROCESS_WORKFLOW,
+        "process_workflow_context": {
+            "workflow_id": str(workflow.workflow_id),
+            "event_to_send": "receive_budget_officer_approval",
+        },
+        "metadata": {
+            "approval_response_type": ApprovalResponseType.APPROVED,
+        },
+    }
+
+    event_id = ingest_workflow_event(db_session, payload, internal_workflow_send_user)
+
+    assert event_id is not None
+    assert isinstance(event_id, uuid.UUID)
+
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 1
+    message = WorkflowEvent.model_validate_json(messages[0].body)
+    assert message.event_id == event_id
+    assert message.acting_user_id == internal_workflow_send_user.user_id
+    assert message.event_type == WorkflowEventType.PROCESS_WORKFLOW
+    assert message.process_workflow_context.workflow_id == workflow.workflow_id
+    assert message.process_workflow_context.event_to_send == "receive_budget_officer_approval"
+
+
+def test_process_workflow_budget_officer_requires_modification_not_allowed(
+    db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
+):
+    """Test that a 422 error is raised when approval response type is not allowed for the event."""
+    workflow = WorkflowFactory.create(
+        is_active=True, workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW
+    )
+
+    payload = {
+        "event_type": WorkflowEventType.PROCESS_WORKFLOW,
+        "process_workflow_context": {
+            "workflow_id": str(workflow.workflow_id),
+            "event_to_send": "receive_budget_officer_approval",
+        },
+        "metadata": {
+            "approval_response_type": ApprovalResponseType.REQUIRES_MODIFICATION,
+        },
+    }
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        ingest_workflow_event(db_session, payload, internal_workflow_send_user)
+
+    assert exc_info.value.status_code == 422
+    assert (
+        exc_info.value.message
+        == "Approval response type is not allowed for this approval configuration."
+    )
+
+    # Verify no message sent
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 0
+
+
+def test_process_workflow_budget_officer_declined_not_allowed(
+    db_session: db.Session, enable_factory_create, internal_workflow_send_user, workflow_sqs_queue
+):
+    """Test that a 422 error is raised when approval response type is not allowed for the event."""
+    workflow = WorkflowFactory.create(
+        is_active=True, workflow_type=WorkflowType.LIMITED_APPROVAL_TEST_WORKFLOW
+    )
+
+    payload = {
+        "event_type": WorkflowEventType.PROCESS_WORKFLOW,
+        "process_workflow_context": {
+            "workflow_id": str(workflow.workflow_id),
+            "event_to_send": "receive_budget_officer_approval",
+        },
+        "metadata": {
+            "approval_response_type": ApprovalResponseType.DECLINED,
+        },
+    }
+
+    with pytest.raises(apiflask.exceptions.HTTPError) as exc_info:
+        ingest_workflow_event(db_session, payload, internal_workflow_send_user)
+
+    assert exc_info.value.status_code == 422
+    assert (
+        exc_info.value.message
+        == "Approval response type is not allowed for this approval configuration."
+    )
+
+    # Verify no message sent
+    messages = SQSClient(workflow_sqs_queue).receive_messages(wait_time=0)
+    assert len(messages) == 0
 
 
 # ========================================

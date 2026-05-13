@@ -1,13 +1,13 @@
 # Burnup
 
-Burnup shows the total number of open issues or points per day over a given date range. burnup charts are often used to answer the following questions:
+Burnup shows the cumulative number of closed issues or points over a given date range, alongside the total scope. Burnup charts are often used to answer the following questions:
 
-- *Have we planned work correctly?* For example, if a burnup chart shows several issues or points open by the end of a sprint, it could signal the need to re-examine how we're planning our sprint capacity.
-- *Have we broken work into manageable chunks?* For example, if we see a long plateau where the number of closed issues remain steady, then suddenly increases, it could be a signal that the amount of work scoped into one ticket is too large.
-- *Are we encountering blockers?* Alternatively, a long plateau could also be a signal of external factors that are blocking forward progress.
+- *Have we planned work correctly?* For example, if the scope line keeps rising while the completed line lags behind, it could signal the need to re-examine how we're planning our sprint capacity.
+- *Have we broken work into manageable chunks?* For example, if we see long plateaus where the completed line remains steady and then suddenly jumps, it could be a signal that the amount of work scoped into one ticket is too large.
+- *Are we encountering blockers?* Alternatively, a long plateau in the completed line could also be a signal of external factors that are blocking forward progress.
 
 > [!NOTE]
-> While burnup can provide helpful signals in the cases above, these signals tell only part of the story. burnup charts should prompt questions, not represent definitive conclusions.
+> While burnup can provide helpful signals in the cases above, these signals tell only part of the story. Burnup charts should prompt questions, not represent definitive conclusions.
 
 ## Methodology
 

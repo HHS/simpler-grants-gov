@@ -82,7 +82,6 @@ describe("PUT /api/user/api-keys/[apiKeyId]", () => {
     expect(data.message).toBe("API key renamed successfully");
     expect(data.data).toEqual(mockApiKeyResponse);
     expect(mockHandleRenameApiKey).toHaveBeenCalledWith(
-      "test-token",
       "test-user-id",
       "test-key-id",
       "Renamed API Key",
@@ -269,7 +268,6 @@ describe("DELETE /api/user/api-keys/[apiKeyId]", () => {
     expect(response.status).toBe(200);
     expect(data.message).toBe("API key deleted successfully");
     expect(mockHandleDeleteApiKey).toHaveBeenCalledWith(
-      "test-token",
       "test-user-id",
       "test-key-id",
     );

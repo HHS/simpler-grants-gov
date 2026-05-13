@@ -9,7 +9,7 @@ export const listApiKeysHandler = async (_request: Request) => {
       throw new UnauthorizedError("No active session to list API keys");
     }
 
-    const response = await handleListApiKeys(session.token, session.user_id);
+    const response = await handleListApiKeys(session.user_id);
 
     if (!response || response.status_code !== 200) {
       throw new ApiRequestError(

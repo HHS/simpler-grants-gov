@@ -48,7 +48,7 @@ def decode_json_line(line: str) -> str | None:
     func_name = data.pop("funcName", "-")
     created = datetime.datetime.fromtimestamp(
         float(data.pop("created", 0)),
-        tz=datetime.timezone.utc,
+        tz=datetime.UTC,
     )
     message = data.pop("message", "-")
 

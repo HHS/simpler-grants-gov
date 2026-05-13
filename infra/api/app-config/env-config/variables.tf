@@ -35,6 +35,7 @@ variable "mtls_domain_name" {
   description = "The domain name for the mTLS side-by-side ALB for the API"
   default     = null
 }
+
 variable "enable_command_execution" {
   type        = bool
   description = "Enables the ability to manually execute commands on running service containers using AWS ECS Exec"
@@ -255,5 +256,11 @@ variable "service_newrelic_entity_guid" {
 variable "service_newrelic_mtls_entity_guid" {
   type        = string
   description = "New Relic entity GUID for the mTLS ALB, used to correlate logs with the infrastructure entity in New Relic."
+  default     = null
+}
+
+variable "api_host_newrelic_entity_guid" {
+  type        = string
+  description = "New Relic entity GUID for the ECS service host, used to correlate container logs with the infrastructure entity in New Relic."
   default     = null
 }

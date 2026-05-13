@@ -41,7 +41,7 @@ resource "aws_ecs_task_definition" "workflow" {
 
   family             = local.workflow_service_name
   execution_role_arn = module.service.task_role_arn
-  task_role_arn      = module.service.app_service_arn
+  task_role_arn      = module.service.workflow_service_role_arn
 
   container_definitions = jsonencode([
     {
@@ -53,7 +53,7 @@ resource "aws_ecs_task_definition" "workflow" {
       essential              = true,
       readonlyRootFilesystem = true,
 
-      command = ["poetry", "run", "flask", "workflow", "workflow-main"],
+      command = ["flask", "workflow", "workflow-main"],
 
       healthCheck = null,
 
@@ -122,6 +122,7 @@ resource "aws_ecs_task_definition" "workflow" {
         { name : "aws_region", value : data.aws_region.current.name },
         { name : "container_name", value : local.workflow_service_name },
         { name : "log_group_name", value : "service/${local.workflow_service_name}" },
+        { name : "NR_DIRECT_LOGS_MATCH", value : "nr_direct_disabled" },
       ],
     },
   ])
@@ -137,6 +138,31 @@ resource "aws_ecs_task_definition" "workflow" {
     aws_cloudwatch_log_group.workflow,
     aws_cloudwatch_log_group.workflow_fluentbit,
   ]
+}
+
+#-------------------------------
+# Workflow New Relic Log Forwarding
+#-------------------------------
+
+resource "aws_lambda_permission" "allow_cloudwatch_workflow" {
+  count = local.enable_workflow_service ? 1 : 0
+
+  statement_id  = "AllowCloudWatchWorkflow"
+  action        = "lambda:InvokeFunction"
+  function_name = module.service.nr_host_log_forwarder_name
+  principal     = "logs.amazonaws.com"
+  source_arn    = "${aws_cloudwatch_log_group.workflow[0].arn}:*"
+}
+
+resource "aws_cloudwatch_log_subscription_filter" "workflow_to_newrelic" {
+  count = local.enable_workflow_service ? 1 : 0
+
+  name            = "${local.workflow_service_name}-to-newrelic"
+  log_group_name  = aws_cloudwatch_log_group.workflow[0].name
+  filter_pattern  = ""
+  destination_arn = module.service.nr_host_log_forwarder_arn
+
+  depends_on = [aws_lambda_permission.allow_cloudwatch_workflow]
 }
 
 #-------------------------------

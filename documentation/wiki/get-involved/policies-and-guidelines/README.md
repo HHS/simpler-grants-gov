@@ -6,7 +6,7 @@ description: Describes our policies and guidelines around collaborating as a com
 
 ## Code of Conduct
 
-Please review our [Code of Conduct](./#code-of-conduct) before engaging with the community. We advise that all community members adhere to these rules in all their communications with other community members. We will enforce this to ensure that all community members can do their best work in a safe environment.&#x20;
+Please review our [Code of Conduct](../../../../CODE_OF_CONDUCT.md) before engaging with the community. We advise that all community members adhere to these rules in all their communications with other community members. We will enforce this to ensure that all community members can do their best work in a safe environment.&#x20;
 
 ## Open Source Policy
 

@@ -27,20 +27,12 @@ describe("handleSavedSearch", () => {
     const fakeSavedSearch = {
       pagination: arbitrarySearchPagination,
     };
-    const result = await handleSavedSearch(
-      "faketoken",
-      "1",
-      fakeSavedSearch,
-      "a name",
-    );
+    const result = await handleSavedSearch("1", fakeSavedSearch, "a name");
 
     expect(result).toEqual({ arbitrary: "data" });
     expect(fetchUserWithMethodMock).toHaveBeenCalledWith("POST");
     expect(fetchUserMock).toHaveBeenCalledWith({
       subPath: "1/saved-searches",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
       body: { search_query: fakeSavedSearch, name: "a name" },
     });
   });
@@ -60,9 +52,6 @@ describe("fetchSavedSearches", () => {
     expect(fetchUserWithMethodMock).toHaveBeenCalledWith("POST");
     expect(fetchUserMock).toHaveBeenCalledWith({
       subPath: "1/saved-searches/list",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
       body: {
         pagination: {
           page_offset: 1,
@@ -90,20 +79,12 @@ describe("handleUpdateSavedSearch", () => {
   it("calls fetchUserWithMethod as expected and returns json result", async () => {
     fetchUserMock.mockReturnValue({ json: () => ({ arbitrary: "data" }) });
     fetchUserWithMethodMock.mockReturnValue(fetchUserMock);
-    const result = await handleUpdateSavedSearch(
-      "faketoken",
-      "1",
-      "2",
-      "a name",
-    );
+    const result = await handleUpdateSavedSearch("1", "2", "a name");
 
     expect(result).toEqual({ arbitrary: "data" });
     expect(fetchUserWithMethodMock).toHaveBeenCalledWith("PUT");
     expect(fetchUserMock).toHaveBeenCalledWith({
       subPath: "1/saved-searches/2",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
       body: { name: "a name" },
     });
   });
@@ -114,15 +95,12 @@ describe("handleDeleteSavedSearch", () => {
   it("calls fetchUserWithMethod as expected and returns json result", async () => {
     fetchUserMock.mockReturnValue({ json: () => ({ arbitrary: "data" }) });
     fetchUserWithMethodMock.mockReturnValue(fetchUserMock);
-    const result = await handleDeleteSavedSearch("faketoken", "1", "2");
+    const result = await handleDeleteSavedSearch("1", "2");
 
     expect(result).toEqual({ arbitrary: "data" });
     expect(fetchUserWithMethodMock).toHaveBeenCalledWith("DELETE");
     expect(fetchUserMock).toHaveBeenCalledWith({
       subPath: "1/saved-searches/2",
-      additionalHeaders: {
-        "X-SGG-Token": "faketoken",
-      },
     });
   });
 });

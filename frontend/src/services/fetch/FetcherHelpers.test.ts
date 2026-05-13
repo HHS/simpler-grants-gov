@@ -8,6 +8,12 @@ import {
 } from "src/services/fetch/fetcherHelpers";
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
+const getSessionMock = jest.fn();
+
+jest.mock("src/services/auth/session", () => ({
+  getSession: (): unknown => getSessionMock(),
+}));
+
 describe("createRequestUrl", () => {
   it("creates the correct url without search params", () => {
     const method = "GET";
@@ -93,8 +99,10 @@ describe("getDefaultHeaders", () => {
   beforeEach(() => {
     jest.resetModules();
     mockEnvironment = {};
-
-    // Mock the environment module
+    // Mock the environment module here for timing - we need to be able to remock this before each test
+    // we'll then import the getDefaultHeaders after doing this mock so that it pulls in the correct
+    // mocked values. Need to do this since environments returns constant variables rather than
+    // running any mockable functionality, which we'd be able to control more easily
     jest.doMock("src/constants/environments", () => ({
       environment: mockEnvironment,
     }));
@@ -105,61 +113,59 @@ describe("getDefaultHeaders", () => {
   });
 
   it("includes Content-Type header by default", async () => {
+    // have to import here to make sure that the environment mock runs first
     const { getDefaultHeaders } = await import(
       "src/services/fetch/fetcherHelpers"
     );
-    const headers = getDefaultHeaders();
-    expect(headers["Content-Type"]).toEqual("application/json");
-  });
-
-  it("includes X-AUTH header when API_AUTH_TOKEN is set", async () => {
-    mockEnvironment.API_AUTH_TOKEN = "test-auth-token";
-    mockEnvironment.API_GW_AUTH = "";
-
-    const { getDefaultHeaders } = await import(
-      "src/services/fetch/fetcherHelpers"
-    );
-    const headers = getDefaultHeaders();
-    expect(headers["X-AUTH"]).toEqual("test-auth-token");
+    const headers = await getDefaultHeaders({});
     expect(headers["Content-Type"]).toEqual("application/json");
   });
 
   it("includes X-API-KEY header when API_GW_AUTH is set", async () => {
-    mockEnvironment.API_AUTH_TOKEN = "";
     mockEnvironment.API_GW_AUTH = "test-api-key";
 
     const { getDefaultHeaders } = await import(
       "src/services/fetch/fetcherHelpers"
     );
-    const headers = getDefaultHeaders();
+    const headers = await getDefaultHeaders({});
     expect(headers["X-API-KEY"]).toEqual("test-api-key");
     expect(headers["Content-Type"]).toEqual("application/json");
   });
 
-  it("includes both X-AUTH and X-API-KEY headers when both tokens are set", async () => {
-    mockEnvironment.API_AUTH_TOKEN = "test-auth-token";
-    mockEnvironment.API_GW_AUTH = "test-api-key";
-
-    const { getDefaultHeaders } = await import(
-      "src/services/fetch/fetcherHelpers"
-    );
-    const headers = getDefaultHeaders();
-    expect(headers["X-AUTH"]).toEqual("test-auth-token");
-    expect(headers["X-API-KEY"]).toEqual("test-api-key");
-    expect(headers["Content-Type"]).toEqual("application/json");
-  });
-
-  it("does not include auth headers when tokens are not set", async () => {
-    mockEnvironment.API_AUTH_TOKEN = "";
+  it("does not include X-API-KEY header when API_GW_AUTH is not set", async () => {
     mockEnvironment.API_GW_AUTH = "";
 
     const { getDefaultHeaders } = await import(
       "src/services/fetch/fetcherHelpers"
     );
-    const headers = getDefaultHeaders();
-    expect(headers["X-AUTH"]).toBeUndefined();
+    const headers = await getDefaultHeaders({});
     expect(headers["X-API-KEY"]).toBeUndefined();
     expect(headers["Content-Type"]).toEqual("application/json");
+  });
+  it("does not include user auth token when not required", async () => {
+    const { getDefaultHeaders } = await import(
+      "src/services/fetch/fetcherHelpers"
+    );
+    const headers = await getDefaultHeaders({});
+    expect(headers["X-SGG-Token"]).toEqual(undefined);
+  });
+  it("does not include user auth token header if required but not available", async () => {
+    getSessionMock.mockResolvedValue(null);
+    const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation();
+    const { getDefaultHeaders } = await import(
+      "src/services/fetch/fetcherHelpers"
+    );
+    const headers = await getDefaultHeaders({ requiresUserAuthToken: true });
+    expect(headers["X-SGG-Token"]).toEqual(undefined);
+    expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+  });
+  it("includes user auth token from session when present and required", async () => {
+    getSessionMock.mockResolvedValue({ token: "a token" });
+    const { getDefaultHeaders } = await import(
+      "src/services/fetch/fetcherHelpers"
+    );
+    const headers = await getDefaultHeaders({ requiresUserAuthToken: true });
+    expect(headers["X-SGG-Token"]).toEqual("a token");
   });
 });
 

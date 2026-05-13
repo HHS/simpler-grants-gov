@@ -1,5 +1,6 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { identity } from "lodash";
+import { UiSchemaField, UiSchemaFieldList } from "src/types/applyForm/types";
 import {
   buildFieldListBaseId,
   determineFieldType,
@@ -10,11 +11,6 @@ import {
   getWarningsForField,
 } from "src/utils/applyForm/getFieldConfig";
 import { fakeValidationError } from "src/utils/testing/fixtures";
-
-import {
-  UiSchemaField,
-  UiSchemaFieldList,
-} from "src/components/applyForm/types";
 
 const mockGetSimpleTranslationsSync = jest.fn().mockImplementation(identity);
 
