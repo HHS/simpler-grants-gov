@@ -19,6 +19,7 @@ describe("Breadcrumbs", () => {
 
     const home = screen.getByRole("link", { name: /Home/i });
     expect(home).toBeInTheDocument();
+    expect(home).toHaveAttribute("href", "/");
   });
 
   it("Has a 'Current' item that is not a link", () => {
