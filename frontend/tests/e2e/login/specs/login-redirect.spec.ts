@@ -1,7 +1,6 @@
 import { expect, Page, test } from "@playwright/test";
-import { VALID_TAGS } from "tests/e2e/tags";
-
 import playwrightEnv from "tests/e2e/playwright-env";
+import { VALID_TAGS } from "tests/e2e/tags";
 
 const { AUTH, SMOKE, CORE_REGRESSION, FULL_REGRESSION } = VALID_TAGS;
 const { baseUrl, targetEnv } = playwrightEnv;
