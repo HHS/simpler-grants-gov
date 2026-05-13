@@ -32,7 +32,7 @@ const setupLoginRedirectSpoof = async (page: Page) => {
       await route.fulfill({
         status: 200,
         contentType: "text/html",
-        body: `<html><head><meta http-equiv=\"refresh\" content=\"0;url=${baseUrl}/\"></head></html>`,
+        body: `<html><head><meta http-equiv="refresh" content="0;url=${baseUrl}/"></head></html>`,
       });
     } else {
       await route.continue();
