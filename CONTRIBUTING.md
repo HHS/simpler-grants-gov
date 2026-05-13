@@ -102,6 +102,68 @@ Current designated maintainers:
 - @KevinJBoyer
 
 
+## Bounty Program
+
+The Simpler Grants Funded Open Source Contributor Program is a pilot that pays contributors for accepted, merged pull requests on selected issues. The program is funded by HHS through Nava PBC and is open to any contributor who meets the eligibility criteria below. Phase 1 runs on a fixed four-month budget envelope of $5,000 and is intended as a learning pilot — terms, tiers, and processes may evolve based on what we observe.
+
+### Finding bounty issues
+
+Look for issues labeled `bounty` in the [issue tracker](https://github.com/HHS/simpler-grants-gov/issues). Each bounty issue title is prefixed with the amount and tier, for example: `[Bounty: $500 — L] Fix keyboard trap in application submission modal`. A current list also appears in the [Bounty Board section of the README](./README.md#bounty-board).
+
+### Bounty tiers
+
+| Tier | Amount | Typical work | Effort estimate |
+|---|---|---|---|
+| XL | $500–$1,000 | Multi-file refactor, complex feature slice, accessibility overhaul | 2–5 days of focused work |
+| L  | $250–$500   | Non-trivial bug, meaningful UI change, docs expansion, targeted a11y fix | 1–2 days |
+| M  | $100–$250   | Small bug fix, copy edit, small a11y fix, test coverage bump | 2–6 hours |
+
+### How to claim a bounty
+
+1. Read the [Contributor Terms of Service](./CONTRIBUTOR_TOS.md) <!-- TODO: replace once ToS is published --> in full before claiming.
+1. Post the ToS acknowledgment comment (the template is in the ToS) on the bounty issue.
+1. Comment `/claim` on the issue.
+1. A program team member will confirm your claim by adding a row to the issue's tracking table.
+
+A few rules about claims:
+
+- A contributor may hold up to **3 active claims** at any time.
+- Claims **expire after 14 days of no activity**. You may request **one 7-day extension** per claim by posting a substantive progress update on the issue before expiration.
+
+### Eligibility
+
+To participate in the bounty program, you must:
+
+- Be **18 years or older**.
+- Be a **US citizen**.
+- **Not** be a current or former Nava or HHS employee, contractor, or subcontractor.
+- **Not** appear on the US Treasury OFAC [Specially Designated Nationals list](https://ofac.treasury.gov/specially-designated-nationals-and-blocked-persons-list-sdn-human-readable-lists).
+
+Full eligibility terms are in the [Contributor Terms of Service](./CONTRIBUTOR_TOS.md) <!-- TODO: replace once ToS is published -->.
+
+### Payment
+
+- Payments are issued through **Tremendous** to the email address on your verified GitHub account.
+- We target sending payment **within 48 hours** of PR merge and verification.
+- If your cumulative calendar-year program payments will reach **$600 or more**, a completed W-9 must be on file before that payment is released. Nava issues IRS Form 1099-NEC at year end for any contributor at or above the $600 threshold.
+- When multiple valid PRs are submitted for the same bounty, the **first valid PR by timestamp** is paid the full bounty. Other contributors with valid-but-unselected PRs receive a **$50 runner-up courtesy payment** while the program reserve has funds.
+- **Partial completion is not paid.** There are **no clawbacks** for post-merge defects.
+
+### Review and quality expectations
+
+Bounty pull requests go through the same review process as any other contribution. CI must pass, two maintainer approvals are required, and a maintainer must explicitly confirm in a PR comment that the issue's acceptance criteria are met. We expect bounty contributors to respond promptly to review feedback so pull requests don't stall. New runtime dependencies require maintainer sign-off before they can be merged.
+
+### Conduct
+
+Bounty contributors are bound by the project [Code of Conduct](./CODE_OF_CONDUCT.md). Disputes about claims, reviews, or payments must be handled through the dispute channel described in the [Contributor Terms of Service](./CONTRIBUTOR_TOS.md) <!-- TODO: replace once ToS is published --> rather than through public campaigns or social-media pressure. Violations may result in a warning, a temporary cooldown, suspension, or permanent removal from the program. Permanent removal forfeits any unpaid bounties.
+
+### Questions and disputes
+
+- **Technical questions about a specific bounty:** ask in the support channel listed on that bounty issue.
+- **Decision appeals or payment disputes:** follow the dispute process in the [Contributor Terms of Service](./CONTRIBUTOR_TOS.md) <!-- TODO: replace once ToS is published -->.
+- **Program-level questions:** contact <!-- TODO: program owner contact (name + email) -->.
+
+
 ## Policies
 
 ### Open Source Policy
