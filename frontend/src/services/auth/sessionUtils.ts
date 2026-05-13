@@ -60,10 +60,3 @@ export async function deleteSession() {
   const cookie = await cookies();
   cookie.delete("session");
 }
-
-export function loginGovLogout(pivRequired = false) {
-  if (pivRequired) {
-    SessionStorage.setItem("showPivError", "true");
-  }
-  redirect(environment.AUTH_LOGOUT_URL);
-}
