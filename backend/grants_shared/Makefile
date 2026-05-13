@@ -16,7 +16,7 @@ SHELL = /bin/bash -o pipefail
 # This variable is used to display errors from MyPy in the 'Files Changed'
 # section of a pull request. If this is set to the incorrect value, you won't be able
 # to see the errors on the correct files in that section
-APP_DIR := /backend/grants_shared
+APP_DIR := backend\/grants_shared
 ifdef CI
  DOCKER_EXEC_ARGS := -T -e CI -e PYTEST_ADDOPTS="--color=yes"
  MYPY_FLAGS := --no-pretty
