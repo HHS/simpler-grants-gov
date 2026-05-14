@@ -121,6 +121,28 @@ describe("saveOpportunityEditAction", () => {
     });
   });
 
+  it("returns a close date validation error when publish date is not a valid YYYY-MM-DD string", async () => {
+    const formData = buildValidFormData();
+    formData.set("publishDate", "not-a-date");
+
+    const result = await saveOpportunityEditAction(initialState, formData);
+
+    expect(result.validationErrors).toEqual({
+      closeDate: ["closeDateOrder"],
+    });
+  });
+
+  it("returns a close date validation error when close date is not a valid YYYY-MM-DD string", async () => {
+    const formData = buildValidFormData();
+    formData.set("closeDate", "not-a-date");
+
+    const result = await saveOpportunityEditAction(initialState, formData);
+
+    expect(result.validationErrors).toEqual({
+      closeDate: ["closeDateOrder"],
+    });
+  });
+
   it("returns an error when opportunityId is missing", async () => {
     const formData = buildValidFormData();
     formData.delete("opportunityId"); // summary context is missing

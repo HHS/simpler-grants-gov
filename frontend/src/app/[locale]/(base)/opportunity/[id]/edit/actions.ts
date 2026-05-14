@@ -1,5 +1,7 @@
 "use server";
 
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import {
@@ -12,6 +14,9 @@ import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 
 import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
+
+// Required for strict date parsing (3rd arg `true`) to reject strings that don't match YYYY-MM-DD exactly.
+dayjs.extend(customParseFormat);
 
 export type OpportunityEditValidationErrors = {
   title?: string[];
@@ -96,7 +101,10 @@ async function validateOpportunityEditForm(formData: FormData) {
         return;
       }
 
-      if (closeDate < publishDate) {
+      const close = dayjs(closeDate, "YYYY-MM-DD", true);
+      const publish = dayjs(publishDate, "YYYY-MM-DD", true);
+
+      if (!close.isValid() || !publish.isValid() || close.isBefore(publish)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["closeDate"],
