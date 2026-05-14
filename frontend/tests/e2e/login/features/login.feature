@@ -1,6 +1,6 @@
 # @featureArea Authentication
-# @specFile e2e/login.spec.ts
-# @debugNote Mirrors frontend/tests/e2e/login.spec.ts
+# @specFile e2e/login/specs/login.spec.ts
+# @debugNote Mirrors e2e/login/specs/login.spec.ts
 
 Feature: Login page redirect behavior
   As a user
