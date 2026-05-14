@@ -1123,6 +1123,60 @@ describe("addPrintWidgetToFields", () => {
     ]);
   });
 
+  it("preserves empty array objects up to minItems", () => {
+    const result = pruneEmptyNestedFields(
+      {
+        contact_people_test: [{ first_name: "Jane" }, {}],
+      },
+      {
+        type: "object",
+        properties: {
+          contact_people_test: {
+            type: "array",
+            minItems: 2,
+            items: {
+              type: "object",
+              properties: {
+                first_name: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      contact_people_test: [{ first_name: "Jane" }, {}],
+    });
+  });
+
+  it("prunes empty array objects beyond minItems", () => {
+    const result = pruneEmptyNestedFields(
+      {
+        contact_people_test: [{ first_name: "Jane" }, {}, {}],
+      },
+      {
+        type: "object",
+        properties: {
+          contact_people_test: {
+            type: "array",
+            minItems: 2,
+            items: {
+              type: "object",
+              properties: {
+                first_name: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      contact_people_test: [{ first_name: "Jane" }, {}],
+    });
+  });
+
   it("handles fieldList with nested fields", () => {
     const uiSchema: UiSchema = [
       {

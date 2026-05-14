@@ -342,14 +342,13 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
    */
   const handleRowsChange = useCallback(
     (getNextRows: (previousRows: GeneralRecord[]) => GeneralRecord[]): void => {
-      setRows((previousRows) => {
-        const nextRows = getNextRows(previousRows);
-        onChange?.(nextRows);
-        markFormDirty?.();
-        return nextRows;
-      });
+      const nextRows = getNextRows(rows);
+
+      setRows(nextRows);
+      onChange?.(nextRows);
+      markFormDirty?.();
     },
-    [onChange, markFormDirty],
+    [markFormDirty, onChange, rows],
   );
 
   const handleAddRow = useCallback((): void => {
