@@ -103,7 +103,7 @@ export async function createApplication(
 
   if (!requestedLabel) {
     throw new Error(
-      "createApplication requires an organization label when applying as an organization."
+      "createApplication requires an organization label when applying as an organization.",
     );
   }
   await gotoWithRetry(page, `${baseUrl}${opportunityUrl}`, {
