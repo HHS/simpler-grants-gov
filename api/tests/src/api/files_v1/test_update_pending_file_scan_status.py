@@ -81,7 +81,7 @@ class TestUpdateFileScanStatusSuccess:
         assert len(log_records) == 1
 
         record = log_records[0]
-        assert record.pending_file_id == str(pending_file.pending_file_id)
+        assert record.pending_file_id == pending_file.pending_file_id
         assert record.user_id is not None
         assert record.file_scan_status == "complete"
         assert record.scan_duration_seconds >= 0
