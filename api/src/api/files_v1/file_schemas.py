@@ -9,7 +9,7 @@ class FileScanStatusUpdateRequestSchema(Schema):
         required=True,
         metadata={
             "description": "The scan status to set on the pending file",
-            "example": "complete",
+            "example": FileScanStatus.COMPLETE,
         },
     )
 
