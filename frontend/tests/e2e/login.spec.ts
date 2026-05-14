@@ -60,10 +60,10 @@ test.describe("Login Page Redirect", () => {
     { tag: [SMOKE, AUTH] },
     async ({ page }) => {
       await page.evaluate(() => {
-        sessionStorage.setItem("login-redirect", "/opportunities");
+        sessionStorage.setItem("login-redirect", "/grantor/opportunities");
       });
       await page.goto("/login", { waitUntil: "domcontentloaded" });
-      await expect(page).toHaveURL(`/opportunities`);
+      await expect(page).toHaveURL(`/grantor/opportunities`);
     },
   );
 
