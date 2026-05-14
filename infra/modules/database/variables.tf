@@ -98,12 +98,6 @@ variable "grants_gov_oracle_cidr_block" {
   type = string
 }
 
-variable "is_temporary" {
-  description = "Whether the service is meant to be spun up temporarily (e.g. for automated infra tests). This is used to disable deletion protection."
-  type        = bool
-  default     = false
-}
-
 variable "vpc_id" {
   type        = string
   description = "Uniquely identifies the VPC."
@@ -119,4 +113,16 @@ variable "newrelic_entity_guid" {
   type        = string
   description = "New Relic entity GUID for the RDS cluster, used to correlate logs with the infrastructure entity in New Relic."
   default     = null
+}
+
+variable "snapshot_identifier" {
+  type        = string
+  description = "Snapshot ARN or ID to restore the cluster from. Triggers a cluster replacement when passed with -replace. Ignored on subsequent applies via ignore_changes."
+  default     = null
+}
+
+variable "deletion_protection" {
+  type        = bool
+  description = "Whether to enable deletion protection on the cluster and backup vault. Set to false for environments that need automated teardown."
+  default     = true
 }

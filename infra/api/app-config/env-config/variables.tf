@@ -199,6 +199,12 @@ variable "database_newrelic_entity_guid" {
   default     = null
 }
 
+variable "database_deletion_protection" {
+  type        = bool
+  description = "Whether to enable deletion protection on the RDS cluster. When null, derives from whether the environment is grantee1 or grantee2."
+  default     = true
+}
+
 variable "secondary_domain_names" {
   type        = list(string)
   description = "A list of domain names the ALB can also use"

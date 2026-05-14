@@ -188,7 +188,7 @@ class ValidationTestRunner:
                 test_name=test_case["name"],
                 json_input=test_case["json_input"],
                 xsd_url_or_path=test_case["xsd_url"],
-                form_name=test_case.get("form_name", "SF424_4_0"),
+                form_name=test_case.get("short_form_name", test_case.get("form_name", "SF424_4_0")),
                 pretty_print=test_case.get("pretty_print", True),
                 attachment_mapping=test_case.get("attachment_mapping"),
             )

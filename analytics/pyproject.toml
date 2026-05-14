@@ -16,7 +16,7 @@ dependencies = [
     "pydantic>=2.0.3,<3",
     "slack-sdk>=3.23.0,<4",
     "sqlparse>=0.5.0",
-    "typer[all]>=0.25.0,<0.26",
+    "typer>=0.25.0,<0.26",
     "sqlalchemy>=2.0.30,<3",
     "pydantic-settings>=2.3.4,<3",
     "boto3>=1.35.56,<2",
@@ -25,7 +25,7 @@ dependencies = [
     "smart-open>=7.0.5,<8",
     "newrelic>=11.5.0,<12",
     "requests>=2.33.0,<3",
-    "urllib3>=2.6.3,<3",
+    "urllib3>=2.7.0,<3",
 ]
 
 [project.scripts]

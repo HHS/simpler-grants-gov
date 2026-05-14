@@ -74,6 +74,10 @@ def get_proxy_response(soap_request: SOAPRequest, timeout: int = PROXY_TIMEOUT) 
             soap_request.headers.get(config.gg_s2s_proxy_header_key, config.gg_url),
             soap_request.full_path.lstrip("/"),
         )
+    logger.info(
+        "soap_client_certificate: sending request to proxy_url",
+        extra={"proxy_url": proxy_url},
+    )
     _request = Request(method="POST", url=proxy_url, headers=proxy_headers, data=soap_request.data)
 
     response = _get_soap_response(_request, timeout=timeout)
