@@ -302,7 +302,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
    * The entries are rehydrated from the incoming `value` prop so the widget
    * stays aligned with saved form data after save / reload.
    */
-  const normalizedInitialRows = useMemo(
+  const initialFieldListRows = useMemo(
     () =>
       normalizeFieldListRows({
         value,
@@ -311,7 +311,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
     [value, minItems],
   );
 
-  const [rows, setRows] = useState<GeneralRecord[]>(normalizedInitialRows);
+  const [rows, setRows] = useState<GeneralRecord[]>(initialFieldListRows);
 
   const onFieldListEntryDelete =
     widgetProps.formContext?.widgetSupport?.onFieldListEntryDelete;
