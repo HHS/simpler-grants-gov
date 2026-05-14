@@ -34,7 +34,7 @@ EXTRA_LOG_DATA_ATTR = "extra_log_data"
 _GLOBAL_LOG_CONTEXT: dict = {}
 
 
-def init_general_logging(app_logger: logging.Logger, app_name: str) -> None:
+def init_general_logging(app_logger: logging.Logger, app_name: str, app_domain: str) -> None:
     """Initialize logging that doesn't depend on a Flask app
 
     If possible, use init_app instead which is called when we
@@ -59,6 +59,7 @@ def init_general_logging(app_logger: logging.Logger, app_name: str) -> None:
         {
             "app.name": app_name,
             "app_name": "api",
+            "app_domain": app_domain,
             "run_mode": get_run_mode(),
             "environment": os.environ.get("ENVIRONMENT"),
             "deploy_github_ref": deploy_metadata.deploy_github_ref,
@@ -70,7 +71,7 @@ def init_general_logging(app_logger: logging.Logger, app_name: str) -> None:
     app_logger.info("initialized flask logger")
 
 
-def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
+def init_app(app_logger: logging.Logger, app: flask.Flask, app_domain: str) -> None:
     """Initialize the Flask app logger.
 
     Adds Flask app context data and Flask request context data
@@ -98,7 +99,7 @@ def init_app(app_logger: logging.Logger, app: flask.Flask) -> None:
     app.before_request(_log_start_request)
     app.after_request(_log_end_request)
 
-    init_general_logging(app_logger, app.name)
+    init_general_logging(app_logger, app.name, app_domain)
 
 
 def add_extra_data_to_current_request_logs(

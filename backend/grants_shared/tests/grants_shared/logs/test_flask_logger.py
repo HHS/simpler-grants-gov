@@ -31,7 +31,7 @@ def app(logger):
         logging.getLogger("grants_shared.hello").info(f"hello, {name}!")
         return "ok"
 
-    flask_logger.init_app(logger, app)
+    flask_logger.init_app(logger, app, "test")
     return app
 
 
@@ -89,7 +89,7 @@ def test_request_lifecycle_logs(
 
 def test_app_context_extra_attributes(app: Flask, caplog: pytest.LogCaptureFixture):
     # Assert that extra attributes related to the app context are present in all log records
-    expected_extra = {"app.name": "test_app_name"}
+    expected_extra = {"app.name": "test_app_name", "app_domain": "test"}
 
     app.test_client().get("/hello/jane")
 
