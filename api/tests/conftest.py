@@ -26,13 +26,12 @@ from src.constants.lookup_constants import Privilege, RoleType
 from src.constants.schema import Schemas
 from src.constants.static_role_values import NAVA_INTERNAL_ROLE
 from src.db import models
-from src.db.models.agency_models import Agency
 from src.db.models.competition_models import FormInstruction
 from src.db.models.foreign import metadata as foreign_metadata
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
-from src.db.models.user_models import AgencyUser, User, UserApiKey
+from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.util.local import load_local_env_vars
@@ -437,19 +436,6 @@ def cli_runner(app: flask.Flask) -> flask.testing.CliRunner:
     return app.test_cli_runner()
 
 
-@pytest.fixture
-def all_api_auth_tokens(monkeypatch):
-    all_auth_tokens = ["abcd1234", "wxyz7890", "lmno56"]
-    monkeypatch.setenv("API_AUTH_TOKEN", ",".join(all_auth_tokens))
-    return all_auth_tokens
-
-
-@pytest.fixture
-def api_auth_token(monkeypatch, all_api_auth_tokens):
-    auth_token = all_api_auth_tokens[0]
-    return auth_token
-
-
 ####################
 # AWS Mock Fixtures
 ####################
@@ -464,9 +450,10 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.setenv("AWS_SECURITY_TOKEN", "testing")
     monkeypatch.setenv("AWS_SESSION_TOKEN", "testing")
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
-    monkeypatch.delenv("S3_ENDPOINT_URL", raising=False)
-    monkeypatch.delenv("SQS_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("AWS_S3_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("AWS_SQS_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("CDN_URL", raising=False)
+    monkeypatch.setattr("src.adapters.aws.aws_session._aws_config", None)
 
 
 @pytest.fixture
@@ -582,11 +569,6 @@ class BaseTestClass:
         class implementation.
         """
         cascade_delete_from_db_table(db_session, Opportunity)
-
-    @pytest.fixture(scope="class")
-    def truncate_agencies(self, db_session):
-        cascade_delete_from_db_table(db_session, AgencyUser)
-        cascade_delete_from_db_table(db_session, Agency)
 
     @pytest.fixture(scope="class")
     def truncate_staging_tables(self, db_session, test_staging_schema):

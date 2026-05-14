@@ -110,16 +110,17 @@ define it like so:
 
 
 ```py
-from src.auth.api_key_auth import api_key_auth
 from apiflask import APIBlueprint
+
 import src.api.response as response
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 
 example_blueprint = APIBlueprint("Example", __name__, tag="Example")
 
 @example_blueprint.post("/example-route/<string:example_id>")
 @example_blueprint.input(ExampleSchema, arg_name="body") # As defined above, arg_name is used to map to the field in the function below
 @example_blueprint.output(ExampleResponseSchema)
-@example_blueprint.auth_required(api_key_auth) # The HTTPTokenAuth object that has a registered authentication function
+@example_blueprint.auth_required(jwt_or_api_user_key_multi_auth) # Supports both JWT (X-SGG-Token) and API User Key (X-API-Key) auth
 def post_example_route(example_id: str, body: dict) -> response.ApiResponse:
     # Implement API logic
 

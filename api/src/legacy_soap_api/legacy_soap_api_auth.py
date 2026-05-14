@@ -14,6 +14,7 @@ from sqlalchemy import func, select
 
 import src.adapters.db as db
 from src.auth.endpoint_access_util import can_access
+from src.db.models import staging
 from src.db.models.agency_models import Agency
 from src.db.models.user_models import LegacyCertificate
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
@@ -24,10 +25,10 @@ from src.util.datetime_util import get_now_us_eastern_date
 logger = logging.getLogger(__name__)
 
 MTLS_CERT_HEADER_KEY = "X-Amzn-Mtls-Clientcert"
-USE_SOAP_CERT_HEADER_KEY = "Use-Soap-Cert"
 S2S_PARTNER_CERTID_JWT_B64_HEADER_KEY = "S2S_PARTNER_CERTID_JWT_B64"
 LOG_LOCAL_RESPONSE_HEADER_KEY = "Log-Local-Response"
 USE_SIMPLER_OVERRIDE_KEY = "Use-Simpler-Override"
+ENABLE_SIMPLER_ROUTE_KEY = "Enable-Simpler-Route"
 
 
 class SOAPClientCertificateNotConfigured(Exception):
@@ -42,11 +43,24 @@ class SOAPClientUserDoesNotHavePermission(Exception):
     pass
 
 
+class SOAPClientTcertificateNotFound(Exception):
+    pass
+
+
+class SOAPClientMissingCertificate(Exception):
+    pass
+
+
+class SOAPClientCertificateIsExpired(Exception):
+    pass
+
+
 class SOAPClientCertificate(BaseModel):
     cert: str
     serial_number: str
     fingerprint: str
     legacy_certificate: LegacyCertificate | None = None
+    cert_id: str | None = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -91,29 +105,93 @@ class SessionResumptionAdapter(HTTPAdapter):
         super().init_poolmanager(*args, **kwargs)
 
 
-def get_soap_auth(mtls_cert: str | None, db_session: db.Session) -> SOAPAuth | None:
+def get_tcertificate(
+    serial_number: str, db_session: db.Session
+) -> staging.certificates.Tcertificates | None:
+    # Since we lower the input serial_number we wrap the column
+    # value in func.lower() to make the match case insensitive. In hexadecimal
+    # there is no distinction between upper and lower case. The serial number
+    # can be either upper or lower cased in the DB.
+    return db_session.scalars(
+        select(staging.certificates.Tcertificates).where(
+            func.lower(staging.certificates.Tcertificates.serial_num) == serial_number.lower()
+        )
+    ).one_or_none()
+
+
+def get_soap_auth(mtls_cert: str | None, db_session: db.Session) -> SOAPAuth:
     if not mtls_cert:
         logger.info(
             "soap_client_certificate: no certificate received from header",
             extra={"soap_api_event": LegacySoapApiEvent.NO_HEADER_CERT},
         )
-        return None
-
+        raise SOAPClientMissingCertificate("No certificate exception")
     logger.info("soap_client_certificate: certificate received header")
-    auth = None
-    try:
-        auth = SOAPAuth(certificate=get_soap_client_certificate(mtls_cert, db_session))
+    cert_str = unquote(mtls_cert)
+    cert = load_pem_x509_certificate(cert_str.encode(), default_backend())
+    # We convert the integer representation of the serial number to lower case hexadecimal here
+    # Note: the 'x' in '032x' returns it lower cased
+    serial_number_hex = format(int(cert.serial_number), "032x")
+
+    tcertificate = get_tcertificate(serial_number_hex, db_session)
+    if not tcertificate:
         logger.info(
-            "soap_client_certificate: successfully extracted certificate and serial number",
-            extra={"soap_api_event": LegacySoapApiEvent.PARSED_CERT},
+            "soap_client_certificate: no tcertificate",
+            extra={"soap_api_event": LegacySoapApiEvent.TCERT_NOT_FOUND},
         )
-    except Exception:
+        raise SOAPClientTcertificateNotFound("No tcertificate")
+    if tcertificate.expirationdate and tcertificate.expirationdate <= get_now_us_eastern_date():
         logger.info(
-            "soap_client_certificate: could not parse and extract serial number",
-            exc_info=True,
-            extra={"soap_api_event": LegacySoapApiEvent.UNPARSEABLE_CERT},
+            "soap_client_certificate: tcertificate is expired",
+            extra={"soap_api_event": LegacySoapApiEvent.CERT_EXPIRED},
         )
-    return auth
+        raise SOAPClientCertificateIsExpired("tcertificate is expired")
+
+    legacy_certificate = get_legacy_certificate_by_serial_number(db_session, serial_number_hex)
+
+    if not legacy_certificate:
+        logger.info(
+            "soap_client_certificate: no LegacyCertificate",
+            extra={"soap_api_event": LegacySoapApiEvent.NOT_CONFIGURED_CERT},
+        )
+        soap_client_certificate = SOAPClientCertificate(
+            cert=cert_str,
+            fingerprint=cert.fingerprint(hashes.SHA256()).hex(),
+            issuer=cert.issuer.rfc4514_string(),
+            serial_number=serial_number_hex,
+            legacy_certificate=None,
+            cert_id=tcertificate.currentcertid,
+        )
+        return SOAPAuth(certificate=soap_client_certificate)
+
+    add_extra_data_to_current_request_logs(
+        {
+            "legacy_certificate_id": legacy_certificate.legacy_certificate_id,
+        }
+    )
+    if legacy_certificate.agency:
+        add_extra_data_to_current_request_logs(
+            {
+                "agency_code": legacy_certificate.agency.agency_code,
+            }
+        )
+
+    if legacy_certificate.expiration_date <= get_now_us_eastern_date():
+        logger.info(
+            "soap_client_certificate: LegacyCertificate is expired",
+            extra={"soap_api_event": LegacySoapApiEvent.CERT_EXPIRED},
+        )
+        raise SOAPClientCertificateIsExpired("LegacyCertificate is expired")
+
+    soap_client_certificate = SOAPClientCertificate(
+        cert=cert_str,
+        fingerprint=cert.fingerprint(hashes.SHA256()).hex(),
+        issuer=cert.issuer.rfc4514_string(),
+        serial_number=serial_number_hex,
+        legacy_certificate=legacy_certificate,
+        cert_id=str(legacy_certificate.cert_id),
+    )
+    return SOAPAuth(certificate=soap_client_certificate)
 
 
 def get_legacy_certificate_by_serial_number(
@@ -128,37 +206,6 @@ def get_legacy_certificate_by_serial_number(
             func.lower(LegacyCertificate.serial_number) == serial_number.lower()
         )
     ).scalar_one_or_none()
-
-
-def get_soap_client_certificate(
-    urlencoded_cert: str, db_session: db.Session
-) -> SOAPClientCertificate:
-    cert_str = unquote(urlencoded_cert)
-    cert = load_pem_x509_certificate(cert_str.encode(), default_backend())
-    # We convert the integer representation of the serial number to lower case hexadecimal here
-    # Note: the 'x' in '032x' returns it lower cased
-    serial_number_hex = format(int(cert.serial_number), "032x")
-    legacy_certificate = get_legacy_certificate_by_serial_number(db_session, serial_number_hex)
-    if legacy_certificate:
-        add_extra_data_to_current_request_logs(
-            {
-                "legacy_certificate_id": legacy_certificate.legacy_certificate_id,
-            }
-        )
-        if legacy_certificate.agency:
-            add_extra_data_to_current_request_logs(
-                {
-                    "agency_code": legacy_certificate.agency.agency_code,
-                }
-            )
-
-    return SOAPClientCertificate(
-        cert=cert_str,
-        fingerprint=cert.fingerprint(hashes.SHA256()).hex(),
-        issuer=cert.issuer.rfc4514_string(),
-        serial_number=str(serial_number_hex),
-        legacy_certificate=legacy_certificate,
-    )
 
 
 def validate_certificate(

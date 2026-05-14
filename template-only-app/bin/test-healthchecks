@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+#
+# Check that the healtcheck-* examples have consistent basic behavior
+
+set -euo pipefail
+
+SCRIPT_DIR=$(dirname "$0")
+
+PORT=3000
+export PORT
+
+trap_background_jobs() {
+    trap 'trap - SIGTERM && kill $(jobs -p)' SIGINT SIGTERM EXIT
+}
+
+start_server_ok_response() {
+    SERVER_DIR=$(mktemp -d)
+
+    pushd "${SERVER_DIR}" > /dev/null
+    # create the file so the python server will return a 200 response for
+    # requests to /health
+    touch health
+    python -m http.server ${PORT} &> /dev/null &
+    popd > /dev/null
+
+    # Give the server time to start
+    sleep 1
+}
+
+start_server_fail_response() {
+    pushd "${SERVER_DIR}" > /dev/null
+    # trigger a non-200 response for requests to /health
+    rm -f health
+    popd > /dev/null
+}
+
+run_healthchecks() {
+    local run_after_each_healthcheck=$1
+    local exit_code
+
+    for healthcheck in "${SCRIPT_DIR}"/healthcheck-*; do
+        echo "${healthcheck}"
+        "${healthcheck}" && exit_code=$? || exit_code=$? && :
+        echo "Exit code: ${exit_code}"
+        ${run_after_each_healthcheck} "${exit_code}"
+        echo ""
+    done
+}
+
+# shellcheck disable=SC2317
+fail_if_non_zero() {
+    local exit_code=$1
+    [ "${exit_code}" == "0" ] || { FAIL_TEST=true && echo "Failed"; }
+}
+
+# shellcheck disable=SC2317
+fail_if_zero() {
+    local exit_code=$1
+    [ "${exit_code}" != "0" ] || { FAIL_TEST=true && echo "Failed"; }
+}
+
+# Start tests
+
+trap_background_jobs
+
+FAIL_TEST=false
+
+# Healthy response
+start_server_ok_response
+
+echo "::group::Test handling of healthy responses"
+run_healthchecks fail_if_non_zero
+echo "::endgroup::"
+
+# Unhealthy response
+start_server_fail_response
+
+echo "::group::Test handling of unhealthy responses"
+run_healthchecks fail_if_zero
+echo "::endgroup::"
+
+if [ "${FAIL_TEST}" == "true" ]; then
+    exit 1
+else
+    exit 0
+fi

@@ -35,6 +35,7 @@ variable "mtls_domain_name" {
   description = "The domain name for the mTLS side-by-side ALB for the API"
   default     = null
 }
+
 variable "enable_command_execution" {
   type        = bool
   description = "Enables the ability to manually execute commands on running service containers using AWS ECS Exec"
@@ -198,6 +199,12 @@ variable "database_newrelic_entity_guid" {
   default     = null
 }
 
+variable "database_deletion_protection" {
+  type        = bool
+  description = "Whether to enable deletion protection on the RDS cluster. When null, derives from whether the environment is grantee1 or grantee2."
+  default     = true
+}
+
 variable "secondary_domain_names" {
   type        = list(string)
   description = "A list of domain names the ALB can also use"
@@ -263,4 +270,3 @@ variable "api_host_newrelic_entity_guid" {
   description = "New Relic entity GUID for the ECS service host, used to correlate container logs with the infrastructure entity in New Relic."
   default     = null
 }
-

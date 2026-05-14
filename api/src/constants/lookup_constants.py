@@ -319,6 +319,8 @@ class Privilege(StrEnum):
     PROGRAM_OFFICER_APPROVAL = "program_officer_approval"
     BUDGET_OFFICER_APPROVAL = "budget_officer_approval"
 
+    INTERNAL_S3_SCAN = "internal_s3_scan"
+
 
 class RoleType(StrEnum):
     ORGANIZATION = "organization"
@@ -430,3 +432,10 @@ class WorkflowEventProcessingResult(StrEnum):
     NON_RETRYABLE_ERROR = "non_retryable_error"
     RETRYABLE_ERROR = "retryable_error"
     GENERAL_ERROR = "general_error"
+
+
+class FileScanStatus(StrEnum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETE = "complete"
+    INFECTED = "infected"

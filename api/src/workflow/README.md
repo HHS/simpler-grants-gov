@@ -510,3 +510,22 @@ def test_example(db_session, enable_factory_create):
 We have several different utilities for testing in the workflow_test_util
 that you should look at that can help simplify the setup and validation
 of tests.
+
+## Setting up the system user for an environment
+We have a system user for our workflow service for running any internal steps
+of a workflow process. To create this user you'll need access to the RDS DB
+to run the following SQL. Replace UUID with a UUID you generate, it'll be the user's ID.
+
+```sql
+insert into api.user(user_id, user_type_id)
+VALUES ('UUID', 4);
+
+insert into api.user_profile(user_profile_id, user_id, first_name, last_name)
+    VALUES (gen_random_uuid(), 'UUID', 'System', 'User');
+
+insert into api.internal_user_role(user_id, role_id)
+VALUES ('UUID', '18258804-a281-41cd-9afb-06061fa7593c');
+```
+
+You'll also need to set this to the `WORKFLOW_SERVICE_INTERNAL_USER_ID`
+environment variable in our terraform for the given environment.

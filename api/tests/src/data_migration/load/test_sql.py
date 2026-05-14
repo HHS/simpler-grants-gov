@@ -2,6 +2,8 @@
 # Unit tests for src.data_migration.load.sql.
 #
 
+from datetime import datetime, timezone
+
 import pytest
 import sqlalchemy
 
@@ -53,6 +55,17 @@ def test_build_select_new_rows_sql(source_table, destination_table):
     )
 
 
+def test_build_select_new_rows_sql_with_cutoff(source_table, destination_table):
+    cutoff = datetime(2024, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
+    select = sql.build_select_new_rows_sql(source_table, destination_table, cutoff=cutoff)
+    sql_str = str(select)
+    assert "NOT IN" in sql_str
+    assert (
+        "test_source_table.created_date IS NULL OR test_source_table.created_date <= :created_date_1"
+        in sql_str
+    )
+
+
 def test_build_select_updated_rows_sql(source_table, destination_table):
     select = sql.build_select_updated_rows_sql(source_table, destination_table)
     assert str(select) == (
@@ -64,6 +77,17 @@ def test_build_select_updated_rows_sql(source_table, destination_table):
         "WHERE coalesce(test_destination_table.last_upd_date, test_destination_table.created_date) < test_source_table.last_upd_date "
         "ORDER BY test_source_table.id1, test_source_table.id2"
     )
+
+
+def test_build_select_updated_rows_sql_with_cutoff(source_table, destination_table):
+    cutoff = datetime(2024, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
+    select = sql.build_select_updated_rows_sql(source_table, destination_table, cutoff=cutoff)
+    sql_str = str(select)
+    assert (
+        "coalesce(test_destination_table.last_upd_date, test_destination_table.created_date) < test_source_table.last_upd_date"
+        in sql_str
+    )
+    assert "test_source_table.last_upd_date <= :last_upd_date_1" in sql_str
 
 
 def test_build_insert_select_sql(source_table, destination_table):

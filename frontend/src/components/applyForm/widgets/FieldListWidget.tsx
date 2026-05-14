@@ -310,20 +310,28 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
   const onFieldListEntryDelete =
     widgetProps.formContext?.widgetSupport?.onFieldListEntryDelete;
 
-  /**
-   * Updates local entry state and optionally forwards the new value through
-   * the widget-style `onChange` prop for compatibility with the broader form
-   * rendering system.
+  const markFormDirty = widgetProps.formContext?.widgetSupport?.markFormDirty;
+
+  /* Applies updates to FieldList rows.
+   *
+   * This is the central update path for:
+   * - child field edits
+   * - row additions
+   * - row deletions
+   *
+   * Also notifies the parent form that the form has been edited,
+   * enabling dirty-state tracking and navigation guards.
    */
   const handleRowsChange = useCallback(
     (getNextRows: (previousRows: GeneralRecord[]) => GeneralRecord[]): void => {
       setRows((previousRows) => {
         const nextRows = getNextRows(previousRows);
         onChange?.(nextRows);
+        markFormDirty?.();
         return nextRows;
       });
     },
-    [onChange],
+    [onChange, markFormDirty],
   );
 
   const handleAddRow = useCallback((): void => {

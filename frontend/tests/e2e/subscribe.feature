@@ -22,6 +22,7 @@ Feature: Newsletter subscription
     Then I should see "Subscribed" heading
 
   Scenario: Show error when subscription fails
+    Given the subscription service is unavailable
     When I fill "First Name (required)" with "Apple"
     And I fill "Email (required)" with "name@example.com"
     And I click "Subscribe" button

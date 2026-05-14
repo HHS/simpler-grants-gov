@@ -1671,9 +1671,9 @@ EPA_KEY_CONTACTS_TEST_CASES = [
                     "street1": "123 Main Street",
                     "street2": "Suite 100",
                     "city": "Washington",
-                    "state": "DC",
+                    "state": "DC: District of Columbia",
                     "zip_code": "20001",
-                    "country": "USA",
+                    "country": "USA: UNITED STATES",
                 },
                 "phone": "202-555-1234",
                 "fax": "202-555-5678",
@@ -1681,6 +1681,7 @@ EPA_KEY_CONTACTS_TEST_CASES = [
             },
         },
         "form_name": "EPA_KeyContacts_2_0",
+        "short_form_name": "EPA_KeyContacts",
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_0-V2.0.xsd",
         "pretty_print": True,
     },
@@ -1696,9 +1697,9 @@ EPA_KEY_CONTACTS_TEST_CASES = [
                 "address": {
                     "street1": "123 Main St",
                     "city": "Washington",
-                    "state": "DC",
+                    "state": "DC: District of Columbia",
                     "zip_code": "20001",
-                    "country": "USA",
+                    "country": "USA: UNITED STATES",
                 },
                 "phone": "202-555-1234",
                 "email": "john@example.org",
@@ -1712,9 +1713,9 @@ EPA_KEY_CONTACTS_TEST_CASES = [
                 "address": {
                     "street1": "456 Finance Ave",
                     "city": "Boston",
-                    "state": "MA",
+                    "state": "MA: Massachusetts",
                     "zip_code": "02101",
-                    "country": "USA",
+                    "country": "USA: UNITED STATES",
                 },
                 "phone": "617-555-9999",
                 "email": "jane@example.org",
@@ -1729,9 +1730,9 @@ EPA_KEY_CONTACTS_TEST_CASES = [
                 "address": {
                     "street1": "789 Admin Blvd",
                     "city": "Chicago",
-                    "state": "IL",
+                    "state": "IL: Illinois",
                     "zip_code": "60601",
-                    "country": "USA",
+                    "country": "USA: UNITED STATES",
                 },
                 "phone": "312-555-4567",
                 "email": "sarah@example.org",
@@ -1749,9 +1750,9 @@ EPA_KEY_CONTACTS_TEST_CASES = [
                     "street1": "101 Research Way",
                     "street2": "Lab Building 5",
                     "city": "San Francisco",
-                    "state": "CA",
+                    "state": "CA: California",
                     "zip_code": "94102",
-                    "country": "USA",
+                    "country": "USA: UNITED STATES",
                 },
                 "phone": "415-555-7890",
                 "fax": "415-555-7891",
@@ -1759,6 +1760,7 @@ EPA_KEY_CONTACTS_TEST_CASES = [
             },
         },
         "form_name": "EPA_KeyContacts_2_0",
+        "short_form_name": "EPA_KeyContacts",
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_0-V2.0.xsd",
         "pretty_print": True,
     },
@@ -1766,6 +1768,7 @@ EPA_KEY_CONTACTS_TEST_CASES = [
         "name": "epa_key_contacts_empty_form",
         "json_input": {},
         "form_name": "EPA_KeyContacts_2_0",
+        "short_form_name": "EPA_KeyContacts",
         "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/EPA_KeyContacts_2_0-V2.0.xsd",
         "pretty_print": True,
     },
@@ -1794,6 +1797,38 @@ PROJECT_ABSTRACT_TEST_CASES = [
     },
 ]
 
+# Sample test cases for Other Narrative Attachments v1.2 validation
+OTHER_NARRATIVE_ATTACHMENTS_TEST_CASES = [
+    {
+        "name": "other_narrative_attachment",
+        "json_input": {
+            "attachments": [
+                "11111111-1111-1111-1111-111111111111",
+                "22222222-2222-2222-2222-222222222222",
+            ],
+        },
+        "form_name": "OtherNarrativeAttachments",
+        "xsd_url": "https://apply07.grants.gov/apply/forms/schemas/OtherNarrativeAttachments_1_2-V1.2.xsd",
+        "pretty_print": True,
+        "attachment_mapping": {
+            "11111111-1111-1111-1111-111111111111": {
+                "FileName": "other_attachment.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "other_attachment.pdf",
+                "HashValue": "aeB1+6gdFwih51ijIRn3b8QYn24=",
+                "HashAlgorithm": "SHA-1",
+            },
+            "22222222-2222-2222-2222-222222222222": {
+                "FileName": "additional_attachment.pdf",
+                "MimeType": "application/pdf",
+                "FileLocation": "additional_attachment.pdf",
+                "HashValue": "qUqP5cyxm6YcTAhz05Hph5gvu9M=",
+                "HashAlgorithm": "SHA-1",
+            },
+        },
+    }
+]
+
 
 def get_all_test_cases() -> list[dict[str, Any]]:
     """Get all available test cases.
@@ -1813,6 +1848,7 @@ def get_all_test_cases() -> list[dict[str, Any]]:
         + EPA4700_4_TEST_CASES
         + EPA_KEY_CONTACTS_TEST_CASES
         + ATTACHMENTFORM_TEST_CASES
+        + OTHER_NARRATIVE_ATTACHMENTS_TEST_CASES
     )
 
 

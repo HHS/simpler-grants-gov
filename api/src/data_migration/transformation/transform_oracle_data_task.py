@@ -26,7 +26,10 @@ from src.data_migration.transformation.subtask.transform_funding_category import
 from src.data_migration.transformation.subtask.transform_funding_instrument import (
     TransformFundingInstrument,
 )
-from src.data_migration.transformation.subtask.transform_opportunity import TransformOpportunity
+from src.data_migration.transformation.subtask.transform_opportunity import (
+    TransformOpportunity,
+    TransformOpportunityAgencyConnection,
+)
 from src.data_migration.transformation.subtask.transform_opportunity_attachment import (
     TransformOpportunityAttachment,
 )
@@ -79,8 +82,15 @@ class TransformOracleDataTask(Task):
         self.transform_config = transform_config
 
     def run_task(self) -> None:
+
+        if self.transform_config.enable_agency:
+            TransformAgency(self).run()
+            TransformAgencyHierarchy(self).run()
+            ValidateAgencyData(self).run()
+
         if self.transform_config.enable_opportunity:
             TransformOpportunity(self).run()
+            TransformOpportunityAgencyConnection(self).run()
 
         if self.transform_config.enable_assistance_listing:
             TransformAssistanceListing(self).run()
@@ -96,11 +106,6 @@ class TransformOracleDataTask(Task):
 
         if self.transform_config.enable_funding_instrument:
             TransformFundingInstrument(self).run()
-
-        if self.transform_config.enable_agency:
-            TransformAgency(self).run()
-            TransformAgencyHierarchy(self).run()
-            ValidateAgencyData(self).run()
 
         if self.transform_config.enable_opportunity_attachment:
             TransformOpportunityAttachment(self).run()

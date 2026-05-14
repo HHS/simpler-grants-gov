@@ -139,7 +139,7 @@ def test_workflow_sqs_messages_process_batch_success(workflow_sqs_queue, app):
         )
 
     message_post_process = boto_client.receive_message(
-        QueueUrl=workflow_sqs_queue, MaxNumberOfMessages=10, WaitTimeSeconds=5
+        QueueUrl=workflow_sqs_queue, MaxNumberOfMessages=10, WaitTimeSeconds=0
     )
 
     # Verify: check metrics reflect 1 batch processed

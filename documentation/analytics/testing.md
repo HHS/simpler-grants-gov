@@ -12,14 +12,14 @@ Run `make unit-test` from the root of the `analytics/` sub-directory to run all 
 
 ### Running specific set of tests
 
-To have greater control over which tests are run, you'll need to use `poetry run pytest` to access the pytest command line. The following commands show you how to invoke progressively smaller subsets of tests:
+To have greater control over which tests are run, you'll need to use `uv run pytest` to access the pytest command line. The following commands show you how to invoke progressively smaller subsets of tests:
 
-- `poetry run pytest` Runs all tests automatically collected in [test discovery](https://docs.pytest.org/en/stable/goodpractices.html#conventions-for-python-test-discovery)
-- `poetry run pytest tests/datasets/` Runs all collected tests in the
+- `uv run pytest` Runs all tests automatically collected in [test discovery](https://docs.pytest.org/en/stable/goodpractices.html#conventions-for-python-test-discovery)
+- `uv run pytest tests/datasets/` Runs all collected tests in the
   `analytics/tests/datasets/` sub-directory
-- `poetry run pytest tests/dataset/test_base.py` Runs all collected the tests in
+- `uv run pytest tests/dataset/test_base.py` Runs all collected the tests in
   the `analytics/tests/datasets/test_base.py` file
-- `poetry run pytest tests/dataset/test_sprint_board.py::TestSprintBoard` Runs
+- `uv run pytest tests/dataset/test_sprint_board.py::TestSprintBoard` Runs
   all tests in the `TestSprintBoard` class in `test_base.py`
 
 Visit the pytest docs for additional information about [testing invocation and usage](https://docs.pytest.org/en/6.2.x/usage.html).
@@ -116,4 +116,4 @@ As the test suite begins to grow, running the full suite can take an increasingl
 2. Run the test suite once with the optional `-x` flag to exit test execution when the new (or modified) test fails.
 3. Iterate on the code and quickly test changes by using the `--lf` flag to rerun just the last failed tests.
 4. Once the test checks for the behavior we expect *and* it runs successfully until `assert 0`, we know that we've implemented the new feature correctly.
-5. Remove `assert 0` from the test then re-run the full test suite (e.g. `poetry run pytest`) to ensure that all tests pass and there are no regressions.
+5. Remove `assert 0` from the test then re-run the full test suite (e.g. `uv run pytest`) to ensure that all tests pass and there are no regressions.

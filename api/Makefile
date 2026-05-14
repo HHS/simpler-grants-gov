@@ -31,14 +31,14 @@ ifdef CI
  MYPY_POSTPROC := | perl -pe "s/^(.+):(\d+):(\d+): error: (.*)/::warning file=$(APP_DIR)\/\1,line=\2,col=\3::\4/"
 endif
 
-# By default, all python/poetry commands will run inside of the docker container
+# By default, all python/uv commands will run inside of the docker container
 # if you wish to run this natively, add PY_RUN_APPROACH=local to your environment vars
 # You can set this by either running `export PY_RUN_APPROACH=local` in your shell or add
 # it to your ~/.zshrc file (and run `source ~/.zshrc`)
 ifeq "$(PY_RUN_APPROACH)" "local"
-PY_RUN_CMD := poetry run
+PY_RUN_CMD := uv run
 else
-PY_RUN_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) poetry run
+PY_RUN_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME)
 endif
 
 FLASK_CMD := $(PY_RUN_CMD) flask
@@ -78,11 +78,8 @@ release-build:
 ##################################################
 
 setup-local:
-	# Configure poetry to use virtualenvs in the project directory
-	poetry config virtualenvs.in-project true
-
 	# Install dependencies
-	poetry install --no-root --all-extras --with dev
+	uv sync --all-groups --locked
 
 setup-env-override-file:
 	./bin/setup-env-override-file.sh $(args)
@@ -106,7 +103,11 @@ start-debug:
 run-logs: start ## Start the API and follow the logs
 	docker compose logs --follow --no-color $(APP_NAME)
 
-init: setup-env-override-file build init-db init-opensearch init-s3mock init-sqsmock init-mock-soap-services ## Run all of the init tasks to set up DB, Search, s3/sqs mocks, and Mock services. To do this "from scratch" use remake-backend instead
+init-components: init-db init-opensearch init-s3mock init-sqsmock init-dynamodb init-mock-soap-services
+
+init: setup-env-override-file build init-components ## Run all of the init tasks (including build) to set up DB, Search, s3/sqs mocks, and Mock services. To do this "from scratch" use remake-backend instead
+
+init-ci-cd: setup-env-override-file init-components ## Do not build, but do run all of the init tasks to set up DB, Search, s3/sqs mocks, and Mock services. To do this "from scratch" use remake-backend instead
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
@@ -182,7 +183,7 @@ db-check-migrations: ## Verify the DB schema matches the DB migrations generated
 	$(alembic_cmd) check || (echo -e "\n$(RED)Migrations are not up-to-date, make sure you generate migrations by running 'make db-migrate-create <msg>'$(NO_COLOR)"; exit 1)
 
 create-erds: # Create ERD diagrams for our DB schema
-	docker compose run --rm openapi-tools poetry run create-erds
+	docker compose run --rm openapi-tools create-erds
 	mv bin/*.png ../documentation/api/database/erds
 
 setup-postgres-db: ## Does any initial setup necessary for our local database to work
@@ -221,6 +222,20 @@ init-sqsmock: start-sqsmock
 
 start-sqsmock:
 	docker compose up --detach sqsmock
+
+
+##################################################
+# DynamoDB Local
+##################################################
+
+init-dynamodb: start-dynamodb setup-dynamodb
+
+start-dynamodb:
+	docker compose up --detach dynamodb-local
+	./bin/wait-for-local-dynamodb.sh
+
+setup-dynamodb: ## Create local DynamoDB tables
+	$(PY_RUN_CMD) setup-local-dynamodb
 
 
 ##################################################
@@ -298,7 +313,7 @@ cmd: ## Run Flask app CLI command (Run `make cli args="--help"` to see list of C
 	$(FLASK_CMD) $(args)
 
 openapi-spec: ## Generate OpenAPI spec
-	docker compose run --rm openapi-tools poetry run flask --app src.app spec --format yaml --output openapi.generated.yml
+	docker compose run --rm openapi-tools flask --app src.app spec --format yaml --output openapi.generated.yml
 
 openapi-spec-common-grants:
 	$(FLASK_CMD) common_grants spec --output ./openapi-cg.generated.yml
@@ -372,17 +387,14 @@ fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make
 load-test-local: # Load test the local environment at localhost:3000
 	artillery run artillery-load-test.yml
 
-load-test-dev: # Load test the dev environment in aws
-	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/dev/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
-	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e dev artillery-load-test.yml
+load-test-dev: # Load test the dev environment in aws. Requires API_KEY env var set to a valid API key.
+	env API_KEY=$(API_KEY) artillery run -e dev artillery-load-test.yml
 
-load-test-staging: # Load test the staging environment in aws
-	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/staging/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
-	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e staging artillery-load-test.yml
+load-test-staging: # Load test the staging environment in aws. Requires API_KEY env var set to a valid API key.
+	env API_KEY=$(API_KEY) artillery run -e staging artillery-load-test.yml
 
-load-test-prod: # Load test the production environment in aws. Please test responsibly
-	$(eval API_AUTH_TOKEN := $(shell aws ssm get-parameter --name /api/prod/api-auth-token --query Parameter.Value --with-decryption --output text | cut -d',' -f1))
-	env API_AUTH_TOKEN=$(API_AUTH_TOKEN) artillery run -e prod artillery-load-test.yml
+load-test-prod: # Load test the production environment in aws. Please test responsibly. Requires API_KEY env var set to a valid API key.
+	env API_KEY=$(API_KEY) artillery run -e prod artillery-load-test.yml
 
 
 
