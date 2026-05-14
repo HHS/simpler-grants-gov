@@ -64,7 +64,7 @@ Scenario: Retain all filters and inputs after refresh
 Examples:
   | viewport | sort access action      |
   | mobile   | open the filter drawer  |
-  | desktop  | close the filter drawer |
+  | desktop  | view the sort options   |
 
   | search-term  | sort label                 | sort value        |
   | education    | Award Ceiling (Descending) | awardCeilingDesc  |
@@ -132,7 +132,7 @@ Scenario: Retain all multi-value filters and inputs after refresh
 Examples:
   | viewport | sort access action      |
   | mobile   | open the filter drawer  |
-  | desktop  | close the filter drawer |
+  | desktop  | view the sort options   |
 
   | search-term  | sort label                 | sort value        | status | status values            |
   | education    | Award Ceiling (Descending) | awardCeilingDesc  | closed | closed,forecasted,posted |
