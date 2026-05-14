@@ -536,7 +536,8 @@ class TestOpportunityNotification:
             [
                 (user.user_id, opp.opportunity_id),
                 (user_2.user_id, opp.opportunity_id),
-            ]
+            ],
+            batch_size=1,
         )
 
         assert results[user.user_id, opp.opportunity_id] == v_1

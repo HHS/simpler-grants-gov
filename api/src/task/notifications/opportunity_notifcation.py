@@ -89,6 +89,10 @@ TRUNCATION_THRESHOLD = 250
 
 UTM_TAG = "?utm_source=notification&utm_medium=email&utm_campaign=opportunity_update"
 
+# In the current implementation, each row here turns into two bound parameters
+# We want to keep this under the 65,000 row limit for Postgres
+NOTIFIED_VERSIONS_BATCH_SIZE = 10_000
+
 
 class OpportunityNotificationTask(BaseNotificationTask):
     def __init__(self, db_session: db.Session, notification_config: EmailNotificationConfig):
@@ -173,7 +177,10 @@ class OpportunityNotificationTask(BaseNotificationTask):
         ]
 
         # Get last notified versions.
-        prior_notified_versions = self._get_last_notified_versions(enabled_user_opportunity_pairs)
+        # Each pair expands to two bind params, so this stays comfortably under Postgres' limit.
+        prior_notified_versions = self._get_last_notified_versions(
+            enabled_user_opportunity_pairs, batch_size=NOTIFIED_VERSIONS_BATCH_SIZE
+        )
 
         users_email_notifications: list[UserEmailNotification] = []
         for user_changed_opp in changed_saved_opportunities:
@@ -302,13 +309,15 @@ class OpportunityNotificationTask(BaseNotificationTask):
         return results
 
     def _get_last_notified_versions(
-        self, user_opportunity_pairs: list
+        self, user_opportunity_pairs: list, batch_size: int
     ) -> dict[tuple[UUID, UUID], OpportunityVersion]:
         """
         Given (user_id, opportunity_id) pairs, return the most recent
         OpportunityVersion for each that was created before the user's
         last_notified_at timestamp.
         """
+        prior_notified_versions: dict[tuple[UUID, UUID], OpportunityVersion] = {}
+
         # Rank all versions per (user, opportunity_id) by created_at desc
         row_number = (
             func.row_number()
@@ -318,37 +327,44 @@ class OpportunityNotificationTask(BaseNotificationTask):
             )
             .label("rn")
         )
-        # Subquery selecting all OpportunityVersions joined with UserSavedOpportunity,
-        # filtered by the given user-opportunity pairs, and versions created before last_notified_at
-        subq = (
-            select(OpportunityVersion, UserSavedOpportunity.user_id.label("user_id"), row_number)
-            .join(
-                UserSavedOpportunity,
-                UserSavedOpportunity.opportunity_id == OpportunityVersion.opportunity_id,
+
+        for start in range(0, len(user_opportunity_pairs), batch_size):
+            user_opportunity_batch = user_opportunity_pairs[start : start + batch_size]
+
+            # Subquery selecting all OpportunityVersions joined with UserSavedOpportunity,
+            # filtered by the given user-opportunity pairs, and versions created before last_notified_at
+            subq = (
+                select(OpportunityVersion, UserSavedOpportunity.user_id.label("user_id"), row_number)
+                .join(
+                    UserSavedOpportunity,
+                    UserSavedOpportunity.opportunity_id == OpportunityVersion.opportunity_id,
+                )
+                .where(
+                    tuple_(UserSavedOpportunity.user_id, UserSavedOpportunity.opportunity_id).in_(
+                        user_opportunity_batch
+                    ),  # Filter for the given pairs
+                    OpportunityVersion.created_at
+                    < UserSavedOpportunity.last_notified_at,  # Grabs the versions created before the users last notification
+                )
+                .subquery()
             )
-            .where(
-                tuple_(UserSavedOpportunity.user_id, UserSavedOpportunity.opportunity_id).in_(
-                    user_opportunity_pairs
-                ),  # Filter for the given pairs
-                OpportunityVersion.created_at
-                < UserSavedOpportunity.last_notified_at,  # Grabs the versions created before the users last notification
+
+            # Map cols in the subquery back to OpportunityVersion model
+            opp_version_from_subq = aliased(OpportunityVersion, subq)
+
+            # Grabs latest version per (user, opportunity_id) pairs
+            stmt = select(
+                subq.c.user_id,
+                subq.c.opportunity_id,
+                opp_version_from_subq,  # OpportunityVersion object
+            ).where(subq.c.rn == 1)
+
+            results = self.db_session.execute(stmt).all()
+            prior_notified_versions.update(
+                {(row.user_id, row.opportunity_id): row[2] for row in results}
             )
-            .subquery()
-        )
 
-        # Map cols in the subquery back to OpportunityVersion model
-        opp_version_from_subq = aliased(OpportunityVersion, subq)
-
-        # Grabs latest version per (user, opportunity_id) pairs
-        stmt = select(
-            subq.c.user_id,
-            subq.c.opportunity_id,
-            opp_version_from_subq,  # OpportunityVersion object
-        ).where(subq.c.rn == 1)
-
-        results = self.db_session.execute(stmt).all()
-
-        return {(row.user_id, row.opportunity_id): row[2] for row in results}
+        return prior_notified_versions
 
     def _build_description_fields_content(self, description_change: dict, opp_id: UUID) -> str:
         after = description_change["after"]
