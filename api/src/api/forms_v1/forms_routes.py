@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 @forms_blueprint.get("/forms/")
 @forms_blueprint.output(forms_schemas.FormsListResponseSchema())
 @forms_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
-@forms_blueprint.doc(responses=[200, 403, 500])
 @flask_db.with_db_session()
 def forms_get_all(db_session: db.Session) -> response.ApiResponse:
     """Get all forms associated with the SGG agency code"""
