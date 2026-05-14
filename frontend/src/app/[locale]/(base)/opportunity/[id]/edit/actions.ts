@@ -12,6 +12,7 @@ import {
 import { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
 import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
 
@@ -277,4 +278,23 @@ export async function publishOpportunityAction(
   }
 
   return { successMessage: "published" };
+}
+
+export async function submitOpportunityAction(
+  prevState: OpportunityEditActionState,
+  formData: FormData,
+): Promise<OpportunityEditActionState> {
+  // Save the form first - if there are validation or API errors, surface them without publishing.
+  const saveResult = await saveOpportunityEditAction(prevState, formData);
+  if (saveResult.errorMessage || saveResult.validationErrors) {
+    return saveResult;
+  }
+
+  const opportunityId = readStringValue(formData.get("opportunityId")).trim();
+  const publishResult = await publishOpportunityAction(opportunityId);
+  if (publishResult.errorMessage) {
+    return publishResult;
+  }
+
+  redirect("/opportunities");
 }

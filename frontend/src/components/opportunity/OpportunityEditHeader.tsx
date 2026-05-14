@@ -1,18 +1,13 @@
 "use client";
 
-import {
-  publishOpportunityAction,
-  saveOpportunityEditAction,
-} from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
+import { submitOpportunityAction } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Button } from "@trussworks/react-uswds";
+import { useActionState, useEffect, useState } from "react";
+import { Alert, Button } from "@trussworks/react-uswds";
 
 import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
 
 type OpportunityEditHeaderProps = {
-  opportunityId: string;
   initialValues: OpportunityEditFormValues;
   previewLabel: string;
   publishLabel: string;
@@ -28,7 +23,6 @@ function isPublishEnabled(values: OpportunityEditFormValues): boolean {
 }
 
 export default function OpportunityEditHeader({
-  opportunityId,
   initialValues,
   previewLabel,
   publishLabel,
@@ -36,8 +30,21 @@ export default function OpportunityEditHeader({
   const [publishEnabled, setPublishEnabled] = useState(
     isPublishEnabled(initialValues),
   );
-  const [isPublishing, setIsPublishing] = useState(false);
-  const router = useRouter();
+  const [submitState, submitFormAction, isSubmitting] = useActionState(
+    submitOpportunityAction,
+    {},
+  );
+
+  // When submit returns validation errors, route them through the form's useActionState
+  // so they display in the form field UI rather than in the header.
+  useEffect(() => {
+    if (submitState.validationErrors) {
+      const form = document.getElementById(
+        "opportunity-edit-form",
+      ) as HTMLFormElement | null;
+      form?.requestSubmit();
+    }
+  }, [submitState.validationErrors]);
 
   useEffect(() => {
     const form = document.getElementById("opportunity-edit-form");
@@ -71,6 +78,17 @@ export default function OpportunityEditHeader({
 
   return (
     <>
+      {submitState.errorMessage && (
+        <Alert
+          type="error"
+          headingLevel="h4"
+          heading="Error"
+          className="margin-bottom-1"
+          slim
+        >
+          {submitState.errorMessage}
+        </Alert>
+      )}
       <Button
         type="button"
         outline
@@ -80,37 +98,11 @@ export default function OpportunityEditHeader({
         {previewLabel}
       </Button>
       <Button
-        type="button"
-        disabled={!publishEnabled || isPublishing}
+        type="submit"
+        form="opportunity-edit-form"
+        formAction={submitFormAction}
+        disabled={!publishEnabled || isSubmitting}
         className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
-        onClick={() => {
-          const form = document.getElementById(
-            "opportunity-edit-form",
-          ) as HTMLFormElement | null;
-          if (form) {
-            const formData = new FormData(form);
-            saveOpportunityEditAction({}, formData)
-              .then((result) => {
-                if (result?.errorMessage || result?.validationErrors) {
-                  form.requestSubmit(); // routes through useActionState so errors display in the form UI
-                  return;
-                }
-                setIsPublishing(true);
-                publishOpportunityAction(opportunityId)
-                  .then((result) => {
-                    if (result?.errorMessage) {
-                      setIsPublishing(false);
-                    } else {
-                      router.push("/opportunities");
-                    }
-                  })
-                  .catch((_e) => setIsPublishing(false));
-              })
-              .catch((_e) => {
-                setIsPublishing(false);
-              });
-          }
-        }}
       >
         {publishLabel}
       </Button>
