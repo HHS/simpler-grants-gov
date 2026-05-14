@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 def update_file_scan_status(
     db_session: db.Session, pending_file_id: uuid.UUID, json_data: dict
 ) -> response.ApiResponse:
-    add_extra_data_to_current_request_logs({"pending_file_id": str(pending_file_id)})
+    add_extra_data_to_current_request_logs({"pending_file_id": pending_file_id})
     logger.info("POST /v1/files/<pending_file_id>")
 
     with db_session.begin():
