@@ -12,7 +12,7 @@ export const INDIVIDUAL_APPLICANT_LABEL = "As an individual (myself)";
 async function selectOptionByLabelSubstring(
   selectLocator: Locator,
   labelSubstring: string,
-  fallbackToIndividual: boolean,
+  isIndividualApplicant: boolean,
 ) {
   const select = selectLocator.first();
   await select.waitFor({ state: "visible", timeout: 5000 });
@@ -32,7 +32,7 @@ async function selectOptionByLabelSubstring(
         );
 
         return (
-          hasRequestedOption || (fallbackToIndividual && hasIndividualOption)
+          hasRequestedOption || (isIndividualApplicant && hasIndividualOption)
         );
       },
       {
@@ -53,7 +53,7 @@ async function selectOptionByLabelSubstring(
 
   const resolvedLabel =
     options.find((opt: string) => opt.includes(labelSubstring)) ??
-    (fallbackToIndividual
+    (isIndividualApplicant
       ? options.find((opt: string) => opt.includes(INDIVIDUAL_APPLICANT_LABEL))
       : undefined);
 
@@ -102,7 +102,9 @@ export async function createApplication(
     : orgLabel;
 
   if (!requestedLabel) {
-    throw new Error("createApplication requires an organization label.");
+    throw new Error(
+      "createApplication requires an organization label when applying as an organization."
+    );
   }
   await gotoWithRetry(page, `${baseUrl}${opportunityUrl}`, {
     waitUntil: "domcontentloaded",
