@@ -14,24 +14,27 @@ def setup_local_dynamodb() -> None:
     with src.logging.init(__package__):
         error_if_not_local()
 
-        dynamodbconfig = DynamoDBConfig()
+        dynamodb_config = DynamoDBConfig()
 
         dynamodb = boto3.resource(
             "dynamodb",
-            endpoint_url=dynamodbconfig.aws_dynamodb_endpoint_url,
+            endpoint_url=dynamodb_config.aws_dynamodb_endpoint_url,
             region_name="us-east-1",
             aws_access_key_id="local",
             aws_secret_access_key="local",
         )
 
-        _create_virus_scan_table(dynamodb, dynamodbconfig.file_scan_cache_table_name)
+        _create_virus_scan_table(dynamodb, dynamodb_config.file_scan_cache_table_name)
 
 
 def _create_virus_scan_table(
     dynamodb: boto3.resources.base.ServiceResource, file_scan_cache_table_name: str
 ) -> None:
     """Create the local-virus-scan table if it doesn't already exist"""
-    logger.info("Creating DynamoDB table if it does not already exist")
+    logger.info(
+        "Creating DynamoDB table if it does not already exist",
+        extra={"table_name": file_scan_cache_table_name},
+    )
 
     try:
         table = dynamodb.create_table(
@@ -48,9 +51,3 @@ def _create_virus_scan_table(
         logger.info("Successfully created table", extra={"table_name": file_scan_cache_table_name})
     except dynamodb.meta.client.exceptions.ResourceInUseException:
         logger.info("Table already exists", extra={"table_name": file_scan_cache_table_name})
-    except Exception as e:
-        logger.exception(
-            "Unexpected error creating table",
-            extra={"table_name": file_scan_cache_table_name, "error_info": e},
-        )
-        raise
