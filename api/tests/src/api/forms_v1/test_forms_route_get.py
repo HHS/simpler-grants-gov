@@ -82,23 +82,25 @@ def test_get_all_forms_includes_all_fields(client, user_auth_token, enable_facto
 def test_get_all_forms_with_instructions(client, user_auth_token, enable_factory_create):
     """Test getting forms with instructions includes instruction fields"""
     form = FormFactory.create(agency_code="SGG", with_instruction=True)
- 
+
     resp = client.get("/v1/forms/", headers={"X-SGG-Token": user_auth_token})
- 
+
     assert resp.status_code == 200
     response_data = resp.get_json()
     forms = response_data["data"]
- 
+
     # Find the form that was just created
     our_form = None
     for f in forms:
         if f["form_id"] == str(form.form_id):
             our_form = f
             break
- 
+
     assert our_form is not None
     assert our_form["form_instruction"] is not None
-    assert our_form["form_instruction"]["form_instruction_id"] == str(form.form_instruction.form_instruction_id)
+    assert our_form["form_instruction"]["form_instruction_id"] == str(
+        form.form_instruction.form_instruction_id
+    )
     assert our_form["form_instruction"]["file_name"] == form.form_instruction.file_name
     assert our_form["form_instruction"]["created_at"] is not None
     assert our_form["form_instruction"]["updated_at"] is not None
