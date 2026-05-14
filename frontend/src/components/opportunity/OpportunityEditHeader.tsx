@@ -11,7 +11,7 @@ import { Button } from "@trussworks/react-uswds";
 
 import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
 
-type OpportunityEditHeaderActionsProps = {
+type OpportunityEditHeaderProps = {
   opportunityId: string;
   initialValues: OpportunityEditFormValues;
   previewLabel: string;
@@ -27,12 +27,12 @@ function isPublishEnabled(values: OpportunityEditFormValues): boolean {
   );
 }
 
-export default function OpportunityEditHeaderActions({
+export default function OpportunityEditHeader({
   opportunityId,
   initialValues,
   previewLabel,
   publishLabel,
-}: OpportunityEditHeaderActionsProps) {
+}: OpportunityEditHeaderProps) {
   const [publishEnabled, setPublishEnabled] = useState(
     isPublishEnabled(initialValues),
   );
