@@ -1,6 +1,6 @@
 /**
  * @feature Newsletter subscription
- * @featureFile frontend/tests/e2e/subscribe.feature
+ * @featureFile e2e/subscribe/features/subscribe.feature
  * @scenario Show the subscription page title
  * @scenario Show errors when submitting empty form
  * @scenario Subscribe with valid name and email
@@ -15,7 +15,7 @@ import {
   test,
 } from "next/experimental/testmode/playwright";
 
-import playwrightEnv from "./playwright-env";
+import playwrightEnv from "../../playwright-env";
 
 const { FULL_REGRESSION } = VALID_TAGS;
 

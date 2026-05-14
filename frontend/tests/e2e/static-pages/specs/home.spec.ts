@@ -1,6 +1,6 @@
 /**
  * @feature Home Page
- * @featureFile frontend/tests/e2e/home.feature
+ * @featureFile e2e/static-pages/features/home.feature
  * @scenarios
  *   - Show the page title
  *   - Clicking "Follow on GitHub" opens the repository in a new tab
@@ -15,8 +15,8 @@
 import { expect, test } from "@playwright/test";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-import playwrightEnv from "./playwright-env";
-import { openMobileNav } from "./playwrightUtils";
+import playwrightEnv from "../../playwright-env";
+import { openMobileNav } from "../../playwrightUtils";
 
 const { STATIC, SMOKE, CORE_REGRESSION, FULL_REGRESSION } = VALID_TAGS;
 

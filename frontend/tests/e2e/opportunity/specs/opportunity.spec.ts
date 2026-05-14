@@ -1,6 +1,6 @@
 /**
  * @feature Opportunity page
- * @featureFile frontend/tests/e2e/opportunity.feature
+ * @featureFile e2e/opportunity/features/opportunity.feature
  * @scenario Show the page title
  * @scenario Show key page content
  * @scenario Expand and collapse the opportunity description
@@ -11,7 +11,7 @@
 import { test as base, expect } from "@playwright/test";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-import playwrightEnv from "./playwright-env";
+import playwrightEnv from "../../playwright-env";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE, CORE_REGRESSION, FULL_REGRESSION } =
   VALID_TAGS;

@@ -12,7 +12,7 @@
  */
 
 import { expect, type BrowserContext, type Page } from "@playwright/test";
-import { createSpoofedSessionCookie } from "tests/e2e/loginUtils";
+import { createSpoofedSessionCookie } from "tests/e2e/utils/loginUtils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { openMobileNav } from "tests/e2e/playwrightUtils";
 import { performStagingLogin } from "tests/e2e/utils/perform-login-utils";

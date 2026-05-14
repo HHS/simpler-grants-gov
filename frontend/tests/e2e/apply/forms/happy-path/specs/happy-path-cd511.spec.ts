@@ -12,7 +12,7 @@ import {
 } from "@playwright/test";
 import { CD511_FORM_CONFIG } from "tests/e2e/apply/fixtures/cd511-field-definitions";
 import { cd511HappyPathTestData } from "tests/e2e/apply/fixtures/cd511-fill-data";
-import { getOpportunityId } from "tests/e2e/get-opportunityId-utils";
+import { getOpportunityId } from "tests/e2e/utils/get-opportunityId-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
