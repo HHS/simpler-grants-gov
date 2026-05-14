@@ -33,7 +33,7 @@ async function waitForFreshTotpWindow(page: Page): Promise<void> {
     TOTP_WINDOW_SECONDS - (Math.floor(Date.now() / 1000) % TOTP_WINDOW_SECONDS);
   if (secondsRemaining <= TOTP_SAFE_THRESHOLD_SECONDS) {
     // console.log(
-    //   `waitForFreshTotpWindow: ${secondsRemaining}s left in TOTP window — waiting ${secondsRemaining + 1}s for next window`,
+    //   `waitForFreshTotpWindow: ${secondsRemaining}s left in TOTP window - waiting ${secondsRemaining + 1}s for next window`,
     // );
     await page.waitForTimeout((secondsRemaining + 1) * 1000);
   }
@@ -43,24 +43,20 @@ export const findSignOutButton = async (
   page: Page,
   isMobileProject: boolean,
 ): Promise<Locator> => {
-  // --- Handle mobile dropdown if needed and confirm login success ---
+  // On mobile, the nav must be open first (via openMobileNav) before the
+  // Account dropdown is accessible. On desktop it is always in the header.
+  // In both cases, expand the Account submenu to reveal Sign out.
   if (isMobileProject) {
-    const dropdownButton = page
-      .locator(
-        'header >> role=button[name="User menu"], header >> [aria-label*="menu"], header >> [aria-label*="User"]',
-      )
-      .first();
-
-    if (await dropdownButton.isVisible().catch(() => false)) {
-      await dropdownButton.click();
-      await page.waitForTimeout(300); // wait for menu to open
-    }
+    await openMobileNav(page);
   }
 
-  // --- Confirm Account element is visible ---
-  const signOutButton = page.locator(
-    'button:has-text("Sign out"), a:has-text("Sign out")',
-  );
+  const accountDropdown = page.locator('button[aria-controls="Account"]');
+  if (await accountDropdown.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await accountDropdown.click();
+    await page.waitForTimeout(300); // wait for submenu to open
+  }
+
+  const signOutButton = page.locator('a:has-text("Sign out")');
 
   return signOutButton;
 };
@@ -203,7 +199,7 @@ export const performStagingLogin = async (
 
       if (codeWasRejected) {
         console.warn(
-          `performStagingLogin: MFA code rejected on attempt ${attempt} — waiting for next TOTP window`,
+          `performStagingLogin: MFA code rejected on attempt ${attempt} - waiting for next TOTP window`,
         );
         // Wait for the next full TOTP window so the next code is guaranteed fresh
         await page.waitForTimeout(TOTP_WINDOW_SECONDS * 1000);

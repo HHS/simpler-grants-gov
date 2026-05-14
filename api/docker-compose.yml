@@ -75,6 +75,14 @@ services:
     networks:
       - default
 
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    networks:
+      - default
 
   grants-api:
     build:
@@ -112,6 +120,7 @@ services:
       - opensearch-node
       - s3mock
       - sqsmock
+      - dynamodb-local
       - mock-oauth2-server
       - mock-applicants-soap-api
     networks:
