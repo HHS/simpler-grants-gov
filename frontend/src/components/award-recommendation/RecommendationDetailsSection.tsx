@@ -4,7 +4,7 @@ import {
   AwardRecommendationSubmission,
   AwardRecommendationType,
 } from "src/types/awardRecommendationTypes";
-import { formatCurrency } from "src/utils/formatCurrencyUtil";
+import { formatCurrencyString } from "src/utils/formatCurrencyUtil";
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -23,15 +23,6 @@ const exceptionEligibleRecommendationTypes: AwardRecommendationType[] = [
   "recommended_without_funding",
   "not_recommended",
 ];
-
-const formatCurrencyString = (value?: string) => {
-  if (!value) return "";
-
-  const parsedValue = Number(value.replace(/[$,\s]/g, ""));
-  if (Number.isNaN(parsedValue)) return value;
-
-  return formatCurrency(parsedValue);
-};
 
 type RecommendationDetailFormProps = {
   submission: AwardRecommendationSubmission;
