@@ -34,6 +34,29 @@ jest.mock("src/components/applyForm/widgets/WidgetRenderers", () => ({
   ),
 }));
 
+const randomUuidMock = jest.fn(() => "mock-entry-id");
+
+Object.defineProperty(globalThis, "crypto", {
+  value: {
+    randomUUID: randomUuidMock,
+  },
+});
+
+let randomUuidIndex = 0;
+
+Object.defineProperty(globalThis, "crypto", {
+  value: {
+    randomUUID: jest.fn(() => {
+      randomUuidIndex += 1;
+      return `mock-entry-id-${randomUuidIndex}`;
+    }),
+  },
+});
+
+beforeEach(() => {
+  randomUuidIndex = 0;
+});
+
 const baseGroupDefinition = [
   {
     widget: "Text" as const,
@@ -265,6 +288,36 @@ describe("FieldListWidget", () => {
     await user.click(screen.getByRole("button", { name: /\+\s*add/i }));
 
     expect(markFormDirtyMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves unsaved entry values when deleting another entry", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={2}
+        maxItems={3}
+        value={[{ first_name: "One" }, { first_name: "Two" }]}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /\+\s*add/i }));
+    await user.type(screen.getByLabelText("contacts[2]--first_name"), "Three");
+
+    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    await user.click(deleteButtons[1]);
+
+    expect(screen.getByLabelText("contacts[1]--first_name")).toHaveValue(
+      "Three",
+    );
   });
 
   it("marks the form dirty when a FieldList row is deleted", async () => {

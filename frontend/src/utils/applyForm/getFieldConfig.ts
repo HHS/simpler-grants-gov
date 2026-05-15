@@ -527,7 +527,7 @@ const getFieldListConfig = ({
     type: "FieldList",
     props: {
       id: uiFieldObject.name,
-      key: `${uiFieldObject.name}-${JSON.stringify(fieldListValue ?? [])}`,
+      key: uiFieldObject.name,
       schema: {
         type: "array",
         title: uiFieldObject.label,
