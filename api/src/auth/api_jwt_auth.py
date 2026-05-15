@@ -156,6 +156,7 @@ def parse_jwt_for_user(
         raise JwtValidationError("Unknown Audience") from e
     except jwt.PyJWTError as e:
         # Every other error case wrap in the same generic error message.
+        logger.warn("Token parse failure: %s", repr(e))
         raise JwtValidationError("Unable to process token") from e
 
     sub_id = parsed_jwt.get("sub", None)

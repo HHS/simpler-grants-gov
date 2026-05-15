@@ -1,6 +1,7 @@
 import "server-only";
 
 import { compact } from "lodash";
+import { Headers } from "node-fetch";
 import { environment } from "src/constants/environments";
 import {
   ApiRequestError,
@@ -111,12 +112,16 @@ export function fetchErrorToNetworkError(
     : new NetworkError(error);
 }
 
-export const throwError = (responseBody: APIResponse, url: string) => {
+export const throwError = (
+  responseBody: APIResponse,
+  url: string,
+  headers?: Headers,
+) => {
   const { status_code = 0, message = "", errors } = responseBody;
-  console.error(`API request error at ${url} (${status_code}): ${message}`);
-  if (status_code === 0 || message === "Internal server error") {
-    console.error("body", JSON.stringify(responseBody));
-  }
+  // errors raised here that have a status_code of 0 (the default above) and a message of "Internal server error" are injected by API GW
+  console.error(
+    `API request error at ${url} (${status_code}): ${message}, requestid: ${headers?.get("x-amzn-requestid") || "not set"}, apigw-id: ${headers?.get("x-amz-apigw-id") || "not set"} `,
+  );
 
   const details = (errors && errors[0]) || {};
 
