@@ -1,5 +1,6 @@
+import itertools
 import logging
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from datetime import datetime
 from typing import cast
 from uuid import UUID
@@ -87,6 +88,8 @@ NOT_SPECIFIED = "not specified"  # If None value display this string
 
 TRUNCATION_THRESHOLD = 250
 
+BATCH_QUERY_SIZE = 1000
+
 UTM_TAG = "?utm_source=notification&utm_medium=email&utm_campaign=opportunity_update"
 
 
@@ -106,6 +109,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         user_opportunity_pairs: list = []
         versionless_opportunities: set = set()
 
+        logger.info("Processing opportunity versions to determine notifications")
         for user_saved_opp, latest_opp_ver in results:
             if latest_opp_ver is None:
                 logger.error(
@@ -173,7 +177,17 @@ class OpportunityNotificationTask(BaseNotificationTask):
         ]
 
         # Get last notified versions.
-        prior_notified_versions = self._get_last_notified_versions(enabled_user_opportunity_pairs)
+        # Batch this into chunks to avoid the query
+        # being incredibly large in the worst case scenario
+        # as it can hit the 65k Postgres limit on fields in a query
+        prior_notified_versions: dict[tuple[UUID, UUID], OpportunityVersion] = {}
+        logger.info("Getting when users were last notified about an opportunity")
+        for enabled_user_opportunity_pairs_batch in itertools.batched(
+            enabled_user_opportunity_pairs, n=BATCH_QUERY_SIZE, strict=False
+        ):
+            prior_notified_versions |= self._get_last_notified_versions(
+                enabled_user_opportunity_pairs_batch
+            )
 
         users_email_notifications: list[UserEmailNotification] = []
         for user_changed_opp in changed_saved_opportunities:
@@ -245,7 +259,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
 
     def _get_users_with_email_disabled(self, user_ids: list[UUID]) -> set[UUID]:
         """Return user IDs that have explicitly disabled email notifications for their own saved opportunities."""
-
+        logger.info("Getting users with email disabled for notifications")
         if not user_ids:
             return set()
         stmt = select(UserSavedOpportunityNotification.user_id).where(
@@ -260,6 +274,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         Retrieve the latest OpportunityVersion for each opportunity saved by users.
         """
         # Rank all versions per opportunity_id, by created_at descending
+        logger.info("Fetching latest opportunity versions")
         row_number = (
             func.row_number()
             .over(
@@ -302,7 +317,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         return results
 
     def _get_last_notified_versions(
-        self, user_opportunity_pairs: list
+        self, user_opportunity_pairs: Iterable
     ) -> dict[tuple[UUID, UUID], OpportunityVersion]:
         """
         Given (user_id, opportunity_id) pairs, return the most recent
