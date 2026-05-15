@@ -31,7 +31,7 @@ module "prod_config" {
   # the "4x" number is functionally arbibrary.
   instance_scaling_max_capacity  = 8
   instance_scaling_cpu_target    = 40
-  instance_scaling_memory_target = 40
+  instance_scaling_memory_target = 70
 
   # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.setting-capacity.html
   # https://us-east-1.console.aws.amazon.com/rds/home?region=us-east-1#database:id=api-prod;is-cluster=true;tab=monitoring
