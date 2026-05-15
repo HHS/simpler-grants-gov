@@ -116,7 +116,7 @@ export function requesterForEndpoint({
         response.ok,
         response.headers.get("Content-Type"),
         response.status,
-        await response.text(),
+        JSON.stringify(jsonBody),
       );
       return throwError(jsonBody, url);
     } else if (
