@@ -1,5 +1,5 @@
 #--------------------------------------------
-# Forward ECS application CloudWatch logs to New Relic
+# Forward ECS application and API Gateway CloudWatch logs to New Relic
 #--------------------------------------------
 
 locals {
@@ -159,4 +159,23 @@ resource "aws_cloudwatch_log_subscription_filter" "host_to_newrelic" {
   destination_arn = aws_lambda_function.nr_host_log_forwarder.arn
 
   depends_on = [aws_lambda_permission.allow_cloudwatch_host]
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch_api_gateway" {
+  count         = var.enable_api_gateway ? 1 : 0
+  statement_id  = "AllowCloudWatchApiGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.nr_host_log_forwarder.function_name
+  principal     = "logs.amazonaws.com"
+  source_arn    = "${aws_cloudwatch_log_group.api_gateway_logs[0].arn}:*"
+}
+
+resource "aws_cloudwatch_log_subscription_filter" "api_gateway_to_newrelic" {
+  count           = var.enable_api_gateway ? 1 : 0
+  name            = "${var.service_name}-api-gateway-to-newrelic"
+  log_group_name  = aws_cloudwatch_log_group.api_gateway_logs[0].name
+  filter_pattern  = ""
+  destination_arn = aws_lambda_function.nr_host_log_forwarder.arn
+
+  depends_on = [aws_lambda_permission.allow_cloudwatch_api_gateway]
 }
