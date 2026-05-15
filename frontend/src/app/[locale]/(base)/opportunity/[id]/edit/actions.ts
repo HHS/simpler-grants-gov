@@ -1,7 +1,5 @@
 "use server";
 
-import dayjs from "dayjs";
-import customParseFormat from "dayjs/plugin/customParseFormat";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import {
@@ -9,15 +7,13 @@ import {
   publishOpportunityForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+import { getConfiguredDayJs } from "src/utils/dateUtil";
 import { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
-
-// Required for strict date parsing (3rd arg `true`) to reject strings that don't match YYYY-MM-DD exactly.
-dayjs.extend(customParseFormat);
 
 export type OpportunityEditValidationErrors = {
   title?: string[];
@@ -102,6 +98,7 @@ async function validateOpportunityEditForm(formData: FormData) {
         return;
       }
 
+      const dayjs = getConfiguredDayJs();
       const close = dayjs(closeDate, "YYYY-MM-DD", true);
       const publish = dayjs(publishDate, "YYYY-MM-DD", true);
 
@@ -252,7 +249,7 @@ export async function saveOpportunityEditAction(
   }
 }
 
-export async function publishOpportunityAction(
+async function publishOpportunityAction(
   opportunityId: string,
 ): Promise<OpportunityEditActionState> {
   const alerts = await getTranslations("OpportunityEdit.content.alerts");
@@ -277,7 +274,7 @@ export async function publishOpportunityAction(
     return { errorMessage: alerts("genericError") };
   }
 
-  return { successMessage: "published" };
+  return {};
 }
 
 export async function submitOpportunityAction(
@@ -286,7 +283,10 @@ export async function submitOpportunityAction(
 ): Promise<OpportunityEditActionState> {
   // Save the form first - if there are validation or API errors, surface them without publishing.
   const saveResult = await saveOpportunityEditAction(prevState, formData);
-  if (saveResult.errorMessage || saveResult.validationErrors) {
+  const hasValidationErrors =
+    saveResult.validationErrors &&
+    Object.keys(saveResult.validationErrors).length > 0;
+  if (saveResult.errorMessage || hasValidationErrors) {
     return saveResult;
   }
 

@@ -131,7 +131,7 @@ describe("saveOpportunityEditAction", () => {
     });
   });
 
-  it("returns a close date validation error when publish date is not a valid YYYY-MM-DD string", async () => {
+  it("maps an unparseable publishDate to a closeDateOrder error (format failure)", async () => {
     const formData = buildValidFormData();
     formData.set("publishDate", "not-a-date");
 
@@ -142,7 +142,7 @@ describe("saveOpportunityEditAction", () => {
     });
   });
 
-  it("returns a close date validation error when close date is not a valid YYYY-MM-DD string", async () => {
+  it("maps an unparseable closeDate to a closeDateOrder error (format failure)", async () => {
     const formData = buildValidFormData();
     formData.set("closeDate", "not-a-date");
 
@@ -526,7 +526,6 @@ describe("submitOpportunityAction", () => {
     const { redirect } = jest.requireMock("next/navigation");
     const mockRedirect = redirect as jest.Mock;
     const formData = buildValidFormData();
-    formData.set("opportunityId", "opp-123");
     formData.set("opportunitySummaryId", "sum-456");
 
     mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(

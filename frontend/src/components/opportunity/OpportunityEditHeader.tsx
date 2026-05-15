@@ -2,6 +2,7 @@
 
 import { submitOpportunityAction } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
 
+import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useState } from "react";
 import { Alert, Button } from "@trussworks/react-uswds";
 
@@ -27,6 +28,7 @@ export default function OpportunityEditHeader({
   previewLabel,
   publishLabel,
 }: OpportunityEditHeaderProps) {
+  const t = useTranslations("OpportunityEdit.content.alerts");
   const [publishEnabled, setPublishEnabled] = useState(
     isPublishEnabled(initialValues),
   );
@@ -82,7 +84,7 @@ export default function OpportunityEditHeader({
         <Alert
           type="error"
           headingLevel="h4"
-          heading="Error"
+          heading={t("errorHeading")}
           className="margin-bottom-1"
           slim
         >

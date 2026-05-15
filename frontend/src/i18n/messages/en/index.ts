@@ -400,6 +400,7 @@ export const messages = {
         forbidden: "You do not have permission to update this opportunity.",
         notFound: "The opportunity summary could not be found.",
         draftOnly: "Only draft opportunity summaries can be updated.",
+        errorHeading: "Error",
         validationHeading: "Please fix the highlighted fields.",
         validationWarningHeading: "Progress saved",
         validationWarningBody:
