@@ -1,3 +1,9 @@
+/**
+ * @feature Login Page Redirect
+ * @featureFile e2e/login/features/login-redirect.feature
+ * @scenario Redirect behavior of the /login page based on stored redirect URL
+ */
+
 import { expect, Page, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
@@ -45,53 +51,70 @@ test.describe("Login Page Redirect", () => {
     await setupLoginRedirectSpoof(page);
   });
 
+  // Scenario: should redirect to home page when no redirect URL is stored
   test(
     "should redirect to home page when no redirect URL is stored",
     { tag: [AUTH, CORE_REGRESSION] },
     async ({ page }) => {
+      // Given I navigate to the Simpler Grants site (done in beforeEach)
+      // When I open the login page
       await page.goto("/login", { waitUntil: "domcontentloaded" });
+      // Then I am redirected to the home page
       await expect(page).toHaveURL("/");
     },
   );
 
+  // Scenario: should redirect to stored URL after login
   test(
     "should redirect to stored URL after login",
     { tag: [SMOKE, AUTH] },
     async ({ page }) => {
+      // Given I have stored "/opportunities" as the login redirect
       await page.evaluate(() => {
         sessionStorage.setItem("login-redirect", "/opportunities");
       });
+      // When I open the login page
       await page.goto("/login", { waitUntil: "domcontentloaded" });
+      // Then I am redirected to "/opportunities"
       await expect(page).toHaveURL(`/opportunities`);
     },
   );
 
+  // Scenario: should redirect to home page when stored URL is empty
   test(
     "should redirect to home page when stored URL is empty",
     { tag: [AUTH, CORE_REGRESSION] },
     async ({ page }) => {
+      // Given I have stored "/" as the login redirect
       await page.evaluate(() => {
         sessionStorage.setItem("login-redirect", "/");
       });
+      // When I open the login page
       await page.goto("/login", { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(TEST_REDIRECT_TIMEOUT);
+      // Then I am redirected to the home page
       await expect(page).toHaveURL("/", { timeout: TEST_REDIRECT_TIMEOUT });
     },
   );
 
+  // Scenario: should redirect to home page when stored URL is external
   test(
     "should redirect to home page when stored URL is external",
     { tag: [AUTH, SMOKE] },
     async ({ page }) => {
+      // Given I have stored "https://external.com" as the login redirect
       await page.evaluate(() => {
         sessionStorage.setItem("login-redirect", "https://external.com");
       });
+      // When I open the login page
       await page.goto("/login", { waitUntil: "domcontentloaded" });
       await page.waitForTimeout(TEST_REDIRECT_TIMEOUT);
+      // Then I am redirected to the home page
       await expect(page).toHaveURL("/", { timeout: TEST_REDIRECT_TIMEOUT });
     },
   );
 
+  // Scenario: should display "Redirecting..." text while redirecting
   test(
     'should display "Redirecting..." text while redirecting',
     { tag: [AUTH, FULL_REGRESSION] },
