@@ -174,6 +174,18 @@ variable "instance_scaling_min_capacity" {
   type        = number
 }
 
+variable "instance_scaling_cpu_target" {
+  description = "Target CPU utilization percentage for autoscaling"
+  type        = number
+  default     = 70
+}
+
+variable "instance_scaling_memory_target" {
+  description = "Target memory utilization percentage for autoscaling"
+  type        = number
+  default     = 70
+}
+
 variable "has_incident_management_service" {
   type = bool
 }
