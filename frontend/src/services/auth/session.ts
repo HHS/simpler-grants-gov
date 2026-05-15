@@ -79,7 +79,6 @@ export const getSession = async (): Promise<UserSession | null> => {
   const cookie = await cookies();
   const clientSessionToken = cookie.get("session")?.value;
   if (!clientSessionToken) {
-    console.error("No session cookie");
     return null;
   }
   const payload = await decryptClientToken(clientSessionToken);
