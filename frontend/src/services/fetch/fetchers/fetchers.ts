@@ -92,6 +92,12 @@ export function requesterForEndpoint({
       throw fetchErrorToNetworkError(e);
     }
 
+    console.log(
+      "Check error",
+      response.ok,
+      response.headers.get("Content-Type"),
+      response.status,
+    );
     if (
       !response.ok &&
       response.headers.get("Content-Type") === "application/json" &&
@@ -106,6 +112,13 @@ export function requesterForEndpoint({
           `bad Json from error response at ${url} with status code ${response.status}`,
         );
       }
+      console.error(
+        "Throwing error",
+        response.ok,
+        response.headers.get("Content-Type"),
+        response.status,
+        await response.text(),
+      );
       return throwError(jsonBody, url);
     } else if (
       !response.ok &&
