@@ -2110,6 +2110,9 @@ export const messages = {
       description:
         "Add any relevant information related to this reviewer and decision-maker for this opportunity",
     },
+    attachments: {
+      heading: "Attachments",
+    },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
     errorHeadingAuthentication: "Authentication Error",
