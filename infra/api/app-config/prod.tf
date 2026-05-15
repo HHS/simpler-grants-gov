@@ -27,8 +27,7 @@ module "prod_config" {
   # The math is: 5 * max(average CPU or average Memory) * 1.3. The 1.3 is for a buffer.
   instance_desired_instance_count = 4
   instance_scaling_min_capacity   = 4
-  # instance_scaling_max_capacity is 4x the instance_scaling_min_capacity
-  # the "4x" number is functionally arbibrary.
+
   instance_scaling_max_capacity  = 8
   instance_scaling_cpu_target    = 40
   instance_scaling_memory_target = 70
