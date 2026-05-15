@@ -64,7 +64,11 @@ def with_login_redirect_error_handler() -> Callable[..., Callable[P, flask.Respo
                     )
 
                 return response.redirect_response(
-                    get_final_redirect_uri("error", error_description=message)
+                    get_final_redirect_uri(
+                        "error",
+                        error_description=message,
+                        login_piv_required_error=e.extra_data.get("login_piv_required_error", None),
+                    )
                 )
             except Exception:
                 # Any other exception, we'll just use a generic error message to be safe
