@@ -1,9 +1,10 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { submitOpportunityAction } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
 
 import { useTranslations } from "next-intl";
-import { useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
 import { Alert, Button } from "@trussworks/react-uswds";
 
 import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
@@ -84,17 +85,6 @@ export default function OpportunityEditHeader({
 
   return (
     <>
-      {submitState.errorMessage && (
-        <Alert
-          type="error"
-          headingLevel="h4"
-          heading={t("errorHeading")}
-          className="margin-bottom-1"
-          slim
-        >
-          {submitState.errorMessage}
-        </Alert>
-      )}
       <Button
         type="button"
         outline
@@ -104,14 +94,37 @@ export default function OpportunityEditHeader({
         {previewLabel}
       </Button>
       <Button
-        type="submit"
-        form="opportunity-edit-form"
-        formAction={submitFormAction}
+        type="button"
+        onClick={() => {
+          const form = document.getElementById(
+            "opportunity-edit-form",
+          ) as HTMLFormElement | null;
+          if (form) {
+            startTransition(() => {
+              submitFormAction(new FormData(form));
+            });
+          }
+        }}
         disabled={!publishEnabled || isSubmitting}
         className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
       >
         {publishLabel}
       </Button>
+      {submitState.errorMessage &&
+        (() => {
+          const alert = (
+            <div className="margin-top-2">
+              <Alert type="error" headingLevel="h3" heading={t("errorHeading")}>
+                {submitState.errorMessage}
+              </Alert>
+            </div>
+          );
+          const target =
+            typeof document !== "undefined"
+              ? document.getElementById("publish-error-container")
+              : null;
+          return target ? createPortal(alert, target) : alert;
+        })()}
     </>
   );
 }

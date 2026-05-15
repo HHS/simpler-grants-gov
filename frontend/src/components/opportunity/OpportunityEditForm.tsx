@@ -286,6 +286,9 @@ export default function OpportunityEditForm({
         </div>
       ) : null}
 
+      {/* Portal target for publish error rendered by OpportunityEditHeader */}
+      <div id="publish-error-container" />
+
       {formState.errorMessage ? (
         <div className="margin-top-2">
           <Alert
