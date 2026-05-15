@@ -114,6 +114,9 @@ export function fetchErrorToNetworkError(
 export const throwError = (responseBody: APIResponse, url: string) => {
   const { status_code = 0, message = "", errors } = responseBody;
   console.error(`API request error at ${url} (${status_code}): ${message}`);
+  if (status_code === 0 || message === "Internal server error") {
+    console.error("body", JSON.stringify(responseBody));
+  }
 
   const details = (errors && errors[0]) || {};
 
