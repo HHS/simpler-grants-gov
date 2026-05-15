@@ -29,6 +29,7 @@ tags:
 - name: Agency v1
 - name: Organization v1
 - name: Internal v1 - Admin Only
+- name: File v1
 - name: User v1 - Internal Only
 - name: Application Alpha
 - name: Form Alpha
@@ -13564,12 +13565,12 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-    InternalApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Internal-Token
     ApiJwtAuth:
       type: apiKey
       in: header
       name: X-SGG-Token
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
 
