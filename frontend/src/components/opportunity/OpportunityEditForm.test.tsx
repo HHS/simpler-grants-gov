@@ -11,9 +11,12 @@ jest.mock("react", () => ({
   useActionState: () => mockUseActionState() as unknown,
 }));
 
-jest.mock("src/app/[locale]/(base)/opportunity/[id]/edit/actions", () => ({
-  saveOpportunityEditAction: jest.fn(),
-}));
+jest.mock(
+  "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/actions",
+  () => ({
+    saveOpportunityEditAction: jest.fn(),
+  }),
+);
 
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
