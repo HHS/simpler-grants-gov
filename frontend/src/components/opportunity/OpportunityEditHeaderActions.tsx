@@ -3,7 +3,7 @@
 import {
   publishOpportunityAction,
   saveOpportunityEditAction,
-} from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
+} from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/actions";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -101,7 +101,7 @@ export default function OpportunityEditHeaderActions({
                     if (result?.errorMessage) {
                       setIsPublishing(false);
                     } else {
-                      router.push("/opportunities");
+                      router.push("/grantor/opportunities");
                     }
                   })
                   .catch((_e) => setIsPublishing(false));
