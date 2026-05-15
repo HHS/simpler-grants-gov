@@ -41,10 +41,12 @@ class FormTemplateRegistry:
             raise ValueError(
                 f"form.form_id must be a uuid.UUID instance, got {type(form.form_id).__name__}"
             )
-        if not isinstance(major_version, int) or isinstance(major_version, bool) or major_version <= 0:
-            raise ValueError(
-                f"major_version must be a positive integer, got {major_version!r}"
-            )
+        if (
+            not isinstance(major_version, int)
+            or isinstance(major_version, bool)
+            or major_version <= 0
+        ):
+            raise ValueError(f"major_version must be a positive integer, got {major_version!r}")
 
         key = FormTemplateKey(form.form_id, major_version)
         if key in self._registry:

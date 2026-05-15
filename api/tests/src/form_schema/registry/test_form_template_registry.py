@@ -4,7 +4,11 @@ import jsonref
 import pytest
 
 from src.db.models.competition_models import Form
-from src.form_schema.registry.form_template_registry import FormTemplateRegistry, FormTemplateKey, form_template_registry
+from src.form_schema.registry.form_template_registry import (
+    FormTemplateKey,
+    FormTemplateRegistry,
+    form_template_registry,
+)
 
 
 def _make_form(
