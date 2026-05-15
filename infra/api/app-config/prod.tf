@@ -25,11 +25,13 @@ module "prod_config" {
   # instance_desired_instance_count and instance_scaling_min_capacity are scaled for 5x the average CPU and Memory
   # seen over 12 months, as of November 2024 exlucing an outlier range around February 2024.
   # The math is: 5 * max(average CPU or average Memory) * 1.3. The 1.3 is for a buffer.
-  instance_desired_instance_count = 2
-  instance_scaling_min_capacity   = 2
+  instance_desired_instance_count = 4
+  instance_scaling_min_capacity   = 4
   # instance_scaling_max_capacity is 4x the instance_scaling_min_capacity
   # the "4x" number is functionally arbibrary.
-  instance_scaling_max_capacity = 8
+  instance_scaling_max_capacity  = 8
+  instance_scaling_cpu_target    = 40
+  instance_scaling_memory_target = 40
 
   # https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.setting-capacity.html
   # https://us-east-1.console.aws.amazon.com/rds/home?region=us-east-1#database:id=api-prod;is-cluster=true;tab=monitoring
@@ -97,7 +99,7 @@ module "prod_config" {
     DOCRAPTOR_TEST_MODE      = "false" # Override to production mode in prod
     PDF_GENERATION_USE_MOCKS = "false" # Use real service in prod
   }
-  instance_cpu    = 1024
+  instance_cpu    = 4096
   instance_memory = 4096
 
   # Enables ECS Exec access for debugging or jump access.

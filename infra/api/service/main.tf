@@ -202,9 +202,11 @@ module "service" {
   fargate_memory           = local.service_config.memory
   desired_instance_count   = local.service_config.desired_instance_count
   enable_command_execution = local.service_config.enable_command_execution
-  max_capacity             = local.service_config.instance_scaling_max_capacity
-  min_capacity             = local.service_config.instance_scaling_min_capacity
-  enable_autoscaling       = true
+  max_capacity                  = local.service_config.instance_scaling_max_capacity
+  min_capacity                  = local.service_config.instance_scaling_min_capacity
+  scaling_target_cpu_percent    = local.service_config.instance_scaling_cpu_target
+  scaling_target_memory_percent = local.service_config.instance_scaling_memory_target
+  enable_autoscaling            = true
 
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 
