@@ -75,6 +75,7 @@ CONTACT_INFO = (
     "24 hours a day, 7 days a week<br>"
     "Closed on federal holidays"
     "</div>"
+    "<br>"
 )
 
 
@@ -82,7 +83,7 @@ OPPORTUNITY_STATUS_MAP = {
     OpportunityStatus.POSTED: "Open",
 }
 
-SECTION_STYLING = '<p style="padding-left: 20px;">{}</p>'
+SECTION_STYLING = '<p style="padding-left: 20px;"><strong>{}</strong></p>'
 BULLET_POINTS_STYLING = '<p style="padding-left: 40px;">• '
 NOT_SPECIFIED = "not specified"  # If None value display this string
 
@@ -641,34 +642,54 @@ class OpportunityNotificationTask(BaseNotificationTask):
     ) -> UserOpportunityUpdateContent | None:
 
         closing_msg = (
-            "<div>"
-            "<strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
-            f"<a href='{self.notification_config.frontend_base_url}{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
-            "</div>"
-        ) + CONTACT_INFO
-
-        all_sections = ""
+            (
+                "<div>"
+                "Please carefully read the opportunity listing pages to review all changes.<br><br>"
+                f"<a href='{self.notification_config.frontend_base_url}{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a>"
+                "</div>"
+            )
+            + CONTACT_INFO
+            + (
+                "<div>"
+                "Manage which updates you receive in your "
+                f"<a href='{self.notification_config.frontend_base_url}/notifications{UTM_TAG}' target='_blank' style='color:blue; text-decoration: underline;'>notification preferences</a>."
+                "</div>"
+            )
+        )
         updated_opp_ids = []
-        opp_count = 1
+        rendered_sections = []
+
         # Get sections statement
         for opp in updated_opportunities:
-            opp_id = opp.opportunity_id
             sections = self._build_sections(opp)
             if not sections:
                 continue
 
+            updated_opp_ids.append(opp.opportunity_id)
+            rendered_sections.append(
+                (
+                    opp,
+                    sections,
+                )
+            )
+
+        if not rendered_sections:
+            return None
+
+        show_numbering = len(rendered_sections) > 1
+
+        all_sections = ""
+
+        for idx, (opp, sections) in enumerate(rendered_sections, start=1):
+            # only show numbering if more than one rendered opportunity
+            prefix = f"{idx}. " if show_numbering else ""
+
             all_sections += (
                 "<div>"
-                f"{opp_count}. <a href='{self.notification_config.frontend_base_url}/opportunity/{opp_id}{UTM_TAG}' target='_blank'>{opp.latest.opportunity_data["opportunity_title"]}</a><br><br>"
-                "Here’s what changed:"
+                f"{prefix}<a href='{self.notification_config.frontend_base_url}/opportunity/{opp.opportunity_id}{UTM_TAG}' target='_blank'>{opp.latest.opportunity_data["opportunity_title"]}</a><br><br>"
                 "</div>"
             ) + sections
 
-            opp_count += 1
-            updated_opp_ids.append(opp_id)
-
-        if not all_sections:
-            return None
         updated_opp_count = len(updated_opp_ids)
         intro = (
             "The following funding opportunities recently changed:<br><br>"
