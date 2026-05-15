@@ -8,6 +8,8 @@ import {
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { UserSession } from "src/types/authTypes";
 
+import { redirect } from "next/navigation";
+
 import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
 import {
   saveOpportunityEditAction,
@@ -50,6 +52,49 @@ const mockUpdateOpportunitySummaryForGrantor = jest.mocked(
 const mockPublishOpportunityForGrantor = jest.mocked(
   publishOpportunityForGrantor,
 );
+const mockRedirect = jest.mocked(redirect);
+
+const successfulSummaryUpdateResponse: Awaited<
+  ReturnType<typeof updateOpportunitySummaryForGrantor>
+> = {
+  message: "success",
+  status_code: 200,
+  data: {
+    opportunity_summary_id: "sum-456",
+    is_forecast: false,
+    summary_description: "Summary text",
+    is_cost_sharing: null,
+    post_date: "2026-03-11",
+    close_date: "2026-04-11",
+    close_date_description: null,
+    archive_date: null,
+    updated_at: "2026-03-11T00:00:00Z",
+    expected_number_of_awards: null,
+    estimated_total_program_funding: null,
+    award_floor: null,
+    award_ceiling: null,
+    additional_info_url: null,
+    additional_info_url_description: null,
+    funding_categories: [],
+    funding_category_description: null,
+    funding_instruments: [],
+    applicant_types: [],
+    applicant_eligibility_description: null,
+    agency_code: null,
+    agency_contact_description: null,
+    agency_email_address: "grants@example.com",
+    agency_email_address_description: null,
+    agency_name: null,
+    agency_phone_number: null,
+    forecasted_post_date: null,
+    forecasted_close_date: null,
+    forecasted_close_date_description: null,
+    forecasted_award_date: null,
+    forecasted_project_start_date: null,
+    fiscal_year: null,
+    version_number: null,
+  },
+};
 
 function buildValidFormData() {
   const formData = new FormData();
@@ -232,48 +277,6 @@ describe("saveOpportunityEditAction", () => {
     formData.set("opportunityId", "opp-123");
     formData.set("opportunitySummaryId", "sum-456");
 
-    const successfulSummaryUpdateResponse: Awaited<
-      ReturnType<typeof updateOpportunitySummaryForGrantor>
-    > = {
-      message: "success",
-      status_code: 200,
-      data: {
-        opportunity_summary_id: "sum-456",
-        is_forecast: false,
-        summary_description: "Summary text",
-        is_cost_sharing: null,
-        post_date: "2026-03-11",
-        close_date: "2026-04-11",
-        close_date_description: null,
-        archive_date: null,
-        updated_at: "2026-03-11T00:00:00Z",
-        expected_number_of_awards: null,
-        estimated_total_program_funding: null,
-        award_floor: null,
-        award_ceiling: null,
-        additional_info_url: null,
-        additional_info_url_description: null,
-        funding_categories: [],
-        funding_category_description: null,
-        funding_instruments: [],
-        applicant_types: [],
-        applicant_eligibility_description: null,
-        agency_code: null,
-        agency_contact_description: null,
-        agency_email_address: "grants@example.com",
-        agency_email_address_description: null,
-        agency_name: null,
-        agency_phone_number: null,
-        forecasted_post_date: null,
-        forecasted_close_date: null,
-        forecasted_close_date_description: null,
-        forecasted_award_date: null,
-        forecasted_project_start_date: null,
-        fiscal_year: null,
-        version_number: null,
-      },
-    };
-
     mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
       successfulSummaryUpdateResponse,
     );
@@ -408,48 +411,6 @@ describe("buildOpportunitySummaryUpdateRequest", () => {
 });
 
 describe("submitOpportunityAction", () => {
-  const successfulUpdateResponse: Awaited<
-    ReturnType<typeof updateOpportunitySummaryForGrantor>
-  > = {
-    message: "success",
-    status_code: 200,
-    data: {
-      opportunity_summary_id: "sum-456",
-      is_forecast: false,
-      summary_description: "Summary text",
-      is_cost_sharing: null,
-      post_date: "2026-03-11",
-      close_date: "2026-04-11",
-      close_date_description: null,
-      archive_date: null,
-      updated_at: "2026-03-11T00:00:00Z",
-      expected_number_of_awards: null,
-      estimated_total_program_funding: null,
-      award_floor: null,
-      award_ceiling: null,
-      additional_info_url: null,
-      additional_info_url_description: null,
-      funding_categories: [],
-      funding_category_description: null,
-      funding_instruments: [],
-      applicant_types: [],
-      applicant_eligibility_description: null,
-      agency_code: null,
-      agency_contact_description: null,
-      agency_email_address: "grants@example.com",
-      agency_email_address_description: null,
-      agency_name: null,
-      agency_phone_number: null,
-      forecasted_post_date: null,
-      forecasted_close_date: null,
-      forecasted_close_date_description: null,
-      forecasted_award_date: null,
-      forecasted_project_start_date: null,
-      fiscal_year: null,
-      version_number: null,
-    },
-  };
-
   beforeEach(() => {
     jest.resetAllMocks();
     mockGetSession.mockResolvedValue({ token: "test-token" } as UserSession);
@@ -493,7 +454,7 @@ describe("submitOpportunityAction", () => {
     formData.set("opportunitySummaryId", "sum-456");
 
     mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
-      successfulUpdateResponse,
+      successfulSummaryUpdateResponse,
     );
     mockPublishOpportunityForGrantor.mockRejectedValue(
       new ApiRequestError("forbidden", "APIRequestError", 403),
@@ -510,7 +471,7 @@ describe("submitOpportunityAction", () => {
     formData.set("opportunitySummaryId", "sum-456");
 
     mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
-      successfulUpdateResponse,
+      successfulSummaryUpdateResponse,
     );
     mockPublishOpportunityForGrantor.mockRejectedValue(
       new ApiRequestError("not found", "APIRequestError", 404),
@@ -522,14 +483,11 @@ describe("submitOpportunityAction", () => {
   });
 
   it("redirects to /opportunities when save and publish both succeed", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { redirect } = jest.requireMock("next/navigation");
-    const mockRedirect = redirect as jest.Mock;
     const formData = buildValidFormData();
     formData.set("opportunitySummaryId", "sum-456");
 
     mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
-      successfulUpdateResponse,
+      successfulSummaryUpdateResponse,
     );
     mockPublishOpportunityForGrantor.mockResolvedValue(
       // publishOpportunityAction discards the resolved value (only errors matter)

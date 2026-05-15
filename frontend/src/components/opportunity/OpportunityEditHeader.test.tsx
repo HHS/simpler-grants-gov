@@ -70,10 +70,6 @@ describe("OpportunityEditHeader", () => {
     mockUseActionState.mockReturnValue([{}, jest.fn(), false]);
   });
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
   it("passes accessibility scan", async () => {
     const { container } = renderHeader();
     expect(await axe(container)).toHaveNoViolations();
@@ -110,7 +106,7 @@ describe("OpportunityEditHeader", () => {
 
     // USWDS Alert renders a heading and body, not a role="alert" element.
     expect(
-      screen.getByRole("heading", { name: "errorHeading" }),
+      screen.getByRole("heading", { name: "errorHeading" }), // useTranslations mock returns the key
     ).toBeInTheDocument();
     expect(screen.getByText("forbidden")).toBeInTheDocument();
   });
