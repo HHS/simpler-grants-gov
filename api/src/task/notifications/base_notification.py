@@ -95,12 +95,8 @@ class BaseNotificationTask(Task):
                         "ses_delivery_status": (
                             email_response.delivery_status if email_response else None
                         ),
-                        "ses_message_id": (
-                            email_response.message_id if email_response else None
-                        ),
-                        "ses_status_code": (
-                            email_response.status_code if email_response else None
-                        ),
+                        "ses_message_id": (email_response.message_id if email_response else None),
+                        "ses_status_code": (email_response.status_code if email_response else None),
                         "ses_status_message": (
                             email_response.status_message if email_response else None
                         ),

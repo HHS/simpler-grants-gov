@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
-from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
+from src.adapters.aws.ses_adapter import _clear_mock_responses, _get_mock_responses
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
 from src.constants.lookup_constants import OpportunityStatus
 from src.db.models.opportunity_models import Opportunity
@@ -27,7 +27,7 @@ notification_config = None
 
 @pytest.fixture
 def user_with_email(db_session, user, monkeypatch):
-    monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+    monkeypatch.setenv("AWS_SES_FROM_EMAIL", "notifications@example.com")
     factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
     return user
 
@@ -148,12 +148,12 @@ def test_search_notifications_cli(
     db_session.refresh(saved_search)
     assert saved_search.last_notified_at > datetime_util.utcnow() - timedelta(minutes=1)
 
-    # Verify email was sent via Pinpoint
+    # Verify email was sent via SES
     mock_responses = _get_mock_responses()
     assert len(mock_responses) == 1
 
     request = mock_responses[0][0]
-    assert request["MessageRequest"]["Addresses"] == {"test@example.com": {"ChannelType": "EMAIL"}}
+    assert request["Destination"]["ToAddresses"] == ["test@example.com"]
 
     # Verify notification log was created
     notification_logs = (
@@ -401,15 +401,11 @@ def test_search_notification_email_format_single_opportunity(
     assert len(mock_responses) == 1
 
     assert (
-        mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-            "SimpleEmail"
-        ]["Subject"]["Data"]
+        mock_responses[0][0]["Content"]["Simple"]["Subject"]["Data"]
         == f"New Grant Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
     )
 
-    email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-        "SimpleEmail"
-    ]["TextPart"]["Data"]
+    email_content = mock_responses[0][0]["Content"]["Simple"]["Body"]["Text"]["Data"]
 
     # Test single opportunity format
     expected_single = f"""A funding opportunity matching your saved search query was recently published.
@@ -484,9 +480,7 @@ def test_search_notification_email_format_no_close_date(
     mock_responses = _get_mock_responses()
     assert len(mock_responses) == 1
 
-    email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-        "SimpleEmail"
-    ]["TextPart"]["Data"]
+    email_content = mock_responses[0][0]["Content"]["Simple"]["Body"]["Text"]["Data"]
 
     # Test opportunity with no close date format
     expected_content = f"""A funding opportunity matching your saved search query was recently published.
@@ -582,15 +576,11 @@ def test_search_notification_email_format_multiple_opportunities(
     assert len(mock_responses) == 1
 
     assert (
-        mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-            "SimpleEmail"
-        ]["Subject"]["Data"]
+        mock_responses[0][0]["Content"]["Simple"]["Subject"]["Data"]
         == f"2 New Grants Published on {datetime_util.utcnow().strftime("%-m/%-d/%Y")}"
     )
 
-    email_content = mock_responses[0][0]["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-        "SimpleEmail"
-    ]["TextPart"]["Data"]
+    email_content = mock_responses[0][0]["Content"]["Simple"]["Body"]["Text"]["Data"]
 
     # Verify both opportunities are in the email (order may vary)
     assert (
