@@ -98,7 +98,7 @@ module "prod_config" {
     DOCRAPTOR_TEST_MODE      = "false" # Override to production mode in prod
     PDF_GENERATION_USE_MOCKS = "false" # Use real service in prod
   }
-  instance_cpu    = 4096
+  instance_cpu    = 2048
   instance_memory = 4096
 
   # Enables ECS Exec access for debugging or jump access.
