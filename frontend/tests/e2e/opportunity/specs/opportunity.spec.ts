@@ -11,7 +11,7 @@
 import { test as base, expect } from "@playwright/test";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-import playwrightEnv from "../../playwright-env";
+import playwrightEnv from "tests/e2e/playwright-env";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE, CORE_REGRESSION, FULL_REGRESSION } =
   VALID_TAGS;

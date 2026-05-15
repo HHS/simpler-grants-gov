@@ -15,8 +15,8 @@
 import { expect, test } from "@playwright/test";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-import playwrightEnv from "../../playwright-env";
-import { openMobileNav } from "../../playwrightUtils";
+import playwrightEnv from "tests/e2e/playwright-env";
+import { openMobileNav } from "tests/e2e/playwrightUtils";
 
 const { STATIC, SMOKE, CORE_REGRESSION, FULL_REGRESSION } = VALID_TAGS;
 

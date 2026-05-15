@@ -1,7 +1,7 @@
 import { BrowserContext } from "@playwright/test";
 import { SignJWT } from "jose";
 
-import playwrightEnv from "../playwright-env";
+import playwrightEnv from "tests/e2e/playwright-env";
 
 /*
 

@@ -7,7 +7,7 @@
 import { expect, test } from "@playwright/test";
 import { VALID_TAGS } from "tests/e2e/tags";
 
-import { expectCheckboxIDIsChecked } from "../../searchSpecUtil";
+import { expectCheckboxIDIsChecked } from "tests/e2e/search/searchSpecUtil";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, SMOKE } = VALID_TAGS;
 

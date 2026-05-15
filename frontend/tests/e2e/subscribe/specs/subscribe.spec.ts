@@ -15,7 +15,7 @@ import {
   test,
 } from "next/experimental/testmode/playwright";
 
-import playwrightEnv from "../../playwright-env";
+import playwrightEnv from "tests/e2e/playwright-env";
 
 const { FULL_REGRESSION } = VALID_TAGS;
 
