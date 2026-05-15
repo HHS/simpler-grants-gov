@@ -60,7 +60,11 @@ test.describe("Login.gov based authentication tests", () => {
           timeout: targetEnv === "staging" ? 180000 : 60000,
         });
 
-        // When the user clicks "Sign in", enters credentials, and completes MFA
+        // When the user clicks the "Sign in" button
+        // And the user enters a valid email and password
+        // And the user submits the login form
+        // And the user enters the authentication code
+        // And the user submits the MFA form
         await performStagingLogin(page, isMobileProject);
 
         // Then the sign out button is visible — the user is successfully logged in

@@ -18,7 +18,7 @@ Feature: Login.gov MFA authentication
     And the user submits the login form
     And the user enters the authentication code
     And the user submits the MFA form
-    Then the user is successfully logged in
+    Then the sign out button is visible
 
   @Login-LoginDotGov
   Scenario: uses an existing authenticated session when already signed in
