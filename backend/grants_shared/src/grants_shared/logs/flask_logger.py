@@ -168,7 +168,9 @@ def _add_request_context_info_to_log_record(record: logging.LogRecord) -> bool:
     if not flask.has_request_context():
         return True
 
-    assert flask.request is not None
+    if flask.request is None:
+        raise Exception("")
+
     extra_log_data: dict[str, str] = getattr(flask.g, EXTRA_LOG_DATA_ATTR, {})
     record.__dict__.update(extra_log_data)
 
