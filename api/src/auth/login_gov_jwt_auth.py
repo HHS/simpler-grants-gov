@@ -15,6 +15,8 @@ from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
+# This ACR value forces login.gov to require PIV/CAC authentication. Documentation: https://developers.login.gov/oidc/authorization/
+LOGIN_GOV_PIV_REQUIRED = "http://idmanagement.gov/ns/assurance/aal/2?hspd12=true"
 
 
 class RedirectParams(BaseModel):
@@ -159,9 +161,7 @@ def get_login_gov_redirect_uri(
         "response_type": "code",
     }
     if redirect_params.piv_required:
-        url_params["acr_values"] = (
-            config.acr_value + " http://idmanagement.gov/ns/assurance/aal/2?hspd12=true"
-        )
+        url_params["acr_values"] = config.acr_value + " " + LOGIN_GOV_PIV_REQUIRED
 
     # We want to redirect to the authorization endpoint of login.gov
     # See: https://developers.login.gov/oidc/authorization/
@@ -201,7 +201,7 @@ def get_final_redirect_uri(
     token: str | None = None,
     is_user_new: bool | None = None,
     error_description: str | None = None,
-    additional_params: dict | None = None,
+    login_piv_required_error: str | None = None,
     config: LoginGovConfig | None = None,
 ) -> str:
     if config is None:
@@ -217,8 +217,8 @@ def get_final_redirect_uri(
 
     if error_description is not None:
         params["error_description"] = error_description
-    if additional_params is not None:
-        params = params | additional_params
+    if login_piv_required_error is not None:
+        params["login_piv_required_error"] = login_piv_required_error
 
     encoded_params = urllib.parse.urlencode(params)
 

@@ -133,7 +133,7 @@ def _validate_piv_requirement(user: User, x509_presented: bool | None) -> None:
             raise_flask_error(
                 422,
                 "Agency users must authenticate using a PIV/CAC card",
-                headers={"login_piv_required_error": "true"},
+                extra_data={"login_piv_required_error": "true"},
             )
         else:
             logger.info(
