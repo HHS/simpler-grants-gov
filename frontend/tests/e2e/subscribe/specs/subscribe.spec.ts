@@ -7,6 +7,7 @@
  * @scenario Show error when subscription fails
  */
 
+import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 
 import {
@@ -14,8 +15,6 @@ import {
   // NextFixture,
   test,
 } from "next/experimental/testmode/playwright";
-
-import playwrightEnv from "tests/e2e/playwright-env";
 
 const { FULL_REGRESSION } = VALID_TAGS;
 

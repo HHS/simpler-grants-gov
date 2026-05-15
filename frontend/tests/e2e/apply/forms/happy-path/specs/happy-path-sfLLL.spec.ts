@@ -6,13 +6,13 @@
 import { test } from "@playwright/test";
 import { SFLLL_TEST_DATA } from "tests/e2e/apply/fixtures/sfLLL-field-definitions";
 import { SFLLL_FORM_CONFIG } from "tests/e2e/apply/fixtures/sfLLL-fill-data";
-import { getOpportunityId } from "tests/e2e/utils/get-opportunityId-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
+import { getOpportunityId } from "tests/e2e/utils/get-opportunityId-utils";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 
