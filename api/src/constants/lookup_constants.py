@@ -457,3 +457,6 @@ class JobType(StrEnum):
     EMAIL_NOTIFICATIONS = "email-notifications"
     BUILD_AUTOMATIC_OPPORTUNITIES = "build-automatic-opportunities"
     SAM_EXTRACTS = "sam-extracts"
+    LOAD_AGENCY_DATA_OPENSEARCH = "load-agency-data-opensearch"
+    EXPORT_OPPORTUNITY_DATA = "export-opportunity-data"
+    LIST_FORMS = "list-forms"

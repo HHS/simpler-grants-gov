@@ -435,6 +435,9 @@ JOB_TYPE_CONFIG: LookupConfig[JobType] = LookupConfig(
         LookupStr(JobType.EMAIL_NOTIFICATIONS, 13),
         LookupStr(JobType.BUILD_AUTOMATIC_OPPORTUNITIES, 14),
         LookupStr(JobType.SAM_EXTRACTS, 15),
+        LookupStr(JobType.LOAD_AGENCY_DATA_OPENSEARCH, 16),
+        LookupStr(JobType.EXPORT_OPPORTUNITY_DATA, 17),
+        LookupStr(JobType.LIST_FORMS, 18),
     ]
 )
 

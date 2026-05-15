@@ -1,8 +1,8 @@
 """add_job_lock_table
 
-Revision ID: b911113c1a8d
+Revision ID: 589b24883aa3
 Revises: e03fbde484cd
-Create Date: 2026-05-15 17:59:15.086637
+Create Date: 2026-05-15 20:29:54.966984
 
 """
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "b911113c1a8d"
+revision = "589b24883aa3"
 down_revision = "e03fbde484cd"
 branch_labels = None
 depends_on = None
