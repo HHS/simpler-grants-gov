@@ -39,6 +39,10 @@ export default function OpportunityEditHeader({
 
   // When submit returns validation errors, route them through the form's useActionState
   // so they display in the form field UI rather than in the header.
+  // NOTE: requestSubmit() causes a second save round-trip because it triggers the
+  // form's own action (saveOpportunityEditAction). The correct fix is to pass errors
+  // directly to OpportunityEditForm without re-submitting, but that requires removing
+  // the CustomEvent-based state management first — tracked in issue #10286.
   useEffect(() => {
     if (submitState.validationErrors) {
       const form = document.getElementById(
