@@ -549,6 +549,16 @@ resource "aws_cloudwatch_log_group" "api_gateway_logs" {
   # checkov:skip=CKV_AWS_158:Encrypt gateway logs with customer key in future work
 }
 
+resource "aws_cloudwatch_log_group" "api_gateway_execution_logs" {
+  count = var.enable_api_gateway ? 1 : 0
+
+  # AWS names this log group automatically; pre-creating it lets Terraform manage retention and subscriptions
+  name              = "API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.api[0].id}/v1"
+  retention_in_days = 1827
+
+  # checkov:skip=CKV_AWS_158:Encrypt gateway logs with customer key in future work
+}
+
 resource "aws_api_gateway_method_settings" "api_v1_stage_settings" {
   count = var.enable_api_gateway ? 1 : 0
 

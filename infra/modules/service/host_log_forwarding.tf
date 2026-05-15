@@ -179,3 +179,22 @@ resource "aws_cloudwatch_log_subscription_filter" "api_gateway_to_newrelic" {
 
   depends_on = [aws_lambda_permission.allow_cloudwatch_api_gateway]
 }
+
+resource "aws_lambda_permission" "allow_cloudwatch_api_gateway_execution" {
+  count         = var.enable_api_gateway ? 1 : 0
+  statement_id  = "AllowCloudWatchApiGatewayExecution"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.nr_host_log_forwarder.function_name
+  principal     = "logs.amazonaws.com"
+  source_arn    = "${aws_cloudwatch_log_group.api_gateway_execution_logs[0].arn}:*"
+}
+
+resource "aws_cloudwatch_log_subscription_filter" "api_gateway_execution_to_newrelic" {
+  count           = var.enable_api_gateway ? 1 : 0
+  name            = "${var.service_name}-api-gateway-execution-to-newrelic"
+  log_group_name  = aws_cloudwatch_log_group.api_gateway_execution_logs[0].name
+  filter_pattern  = ""
+  destination_arn = aws_lambda_function.nr_host_log_forwarder.arn
+
+  depends_on = [aws_lambda_permission.allow_cloudwatch_api_gateway_execution]
+}
