@@ -9,7 +9,7 @@ This module also configures the Flask application to log every
 non-404 request.
 
 Usage:
-    import src.logging.flask_logger as flask_logger
+    import grants_shared.logs.flask_logger as flask_logger
 
     logger = logging.getLogger(__name__)
     app = create_app()
@@ -81,7 +81,7 @@ def init_app(app_logger: logging.Logger, app: flask.Flask, app_domain: str) -> N
     Also configures the app to log every non-404 request using the given logger.
 
     Usage:
-        import src.logging.flask_logger as flask_logger
+        import grants_shared.logs.flask_logger as flask_logger
 
         logger = logging.getLogger(__name__)
         app = create_app()

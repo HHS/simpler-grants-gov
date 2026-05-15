@@ -8,7 +8,7 @@ You can add the filter to a handler:
 
 Example:
     import logging
-    import src.logging.pii as pii
+    import grants_shared.logs.pii as pii
 
     handler = logging.StreamHandler()
     handler.addFilter(pii.mask_pii)
@@ -22,7 +22,7 @@ See https://docs.python.org/3/library/logging.html#logging.Logger.propagate
 
 Example:
     import logging
-    import src.logging.pii as pii
+    import grants_shared.logs.pii as pii
 
     logger = logging.getLogger(__name__)
     logger.addFilter(pii.mask_pii)

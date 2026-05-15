@@ -1,3 +1,4 @@
+import re
 import zoneinfo
 from datetime import date, datetime, timezone
 
@@ -84,8 +85,6 @@ def parse_grants_gov_date(date_str: str | None) -> date | None:
 
     # Strip timezone suffix if present (e.g., "-04:00" or "+05:00")
     # The pattern matches a hyphen or plus sign followed by HH:MM at the end of string
-    import re
-
     cleaned_date_str = re.sub(r"[+-]\d{2}:\d{2}$", "", date_str.strip())
 
     try:

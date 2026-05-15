@@ -58,7 +58,9 @@ def decode_json_line(line: str) -> str | None:
     name = data.pop("name", "-")
     level = data.pop("levelname", "-")
     func_name = data.pop("funcName", "-")
-    created = datetime.datetime.utcfromtimestamp(float(data.pop("created", 0)))
+    created = datetime.datetime.fromtimestamp(
+        float(data.pop("created", 0)), tz=datetime.timezone.utc
+    )
     message = data.pop("message", "-")
 
     if level == "AUDIT":
