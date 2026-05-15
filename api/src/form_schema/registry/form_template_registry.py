@@ -60,16 +60,16 @@ class FormTemplateRegistry:
 
         self._registry[key] = form
 
-    def get_by_id_and_major_version(self, form_id: uuid.UUID, major_version: int) -> Form:
-        """Return the registered form for the given (form_id, major_version) pair.
+    def get_by_id_and_major_version(self, form_key: FormTemplateKey) -> Form:
+        """Return the registered form for the given FormTemplateKey.
 
         Raises:
             ValueError: if no form is registered with that key.
         """
-        form = self._registry.get(FormTemplateKey(form_id, major_version))
+        form = self._registry.get(form_key)
         if form is None:
             raise ValueError(
-                f"No form registered with form_id={form_id}, major_version={major_version}"
+                f"No form registered with form_id={form_key.form_id}, major_version={form_key.major_version}"
             )
         return form
 

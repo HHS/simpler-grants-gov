@@ -55,7 +55,7 @@ def test_register_and_get_returns_form():
 
     registry.register(form, major_version=1)
 
-    result = registry.get_by_id_and_major_version(form.form_id, major_version=1)
+    result = registry.get_by_id_and_major_version(FormTemplateKey(form.form_id, 1))
     assert result is form
 
 
@@ -84,8 +84,8 @@ def test_same_form_id_different_major_versions():
     registry.register(form_v1, major_version=1)
     registry.register(form_v2, major_version=2)
 
-    assert registry.get_by_id_and_major_version(form_id, major_version=1) is form_v1
-    assert registry.get_by_id_and_major_version(form_id, major_version=2) is form_v2
+    assert registry.get_by_id_and_major_version(FormTemplateKey(form_id, 1)) is form_v1
+    assert registry.get_by_id_and_major_version(FormTemplateKey(form_id, 2)) is form_v2
 
 
 def test_register_resolves_json_schema_refs():
@@ -199,7 +199,7 @@ def test_get_raises_for_unregistered_form():
     registry = FormTemplateRegistry()
 
     with pytest.raises(ValueError, match="No form registered"):
-        registry.get_by_id_and_major_version(uuid.uuid4(), major_version=1)
+        registry.get_by_id_and_major_version(FormTemplateKey(uuid.uuid4(), 1))
 
 
 def test_get_raises_for_wrong_major_version():
@@ -208,4 +208,4 @@ def test_get_raises_for_wrong_major_version():
     registry.register(form, major_version=1)
 
     with pytest.raises(ValueError, match="No form registered"):
-        registry.get_by_id_and_major_version(form.form_id, major_version=2)
+        registry.get_by_id_and_major_version(FormTemplateKey(form.form_id, 2))
