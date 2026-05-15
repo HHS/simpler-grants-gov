@@ -118,6 +118,10 @@ export function requesterForEndpoint({
         response.status,
         JSON.stringify(jsonBody),
       );
+
+      for (const pair of response.headers.entries()) {
+        console.error(`Header error ${pair[0]}: ${pair[1]}`);
+      }
       return throwError(jsonBody, url);
     } else if (
       !response.ok &&
