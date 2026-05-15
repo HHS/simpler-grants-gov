@@ -5,6 +5,7 @@ import { useClientFetch } from "src/hooks/useClientFetch";
 import { useEffect, useState } from "react";
 import { GridContainer, Pagination } from "@trussworks/react-uswds";
 
+import { PopoverMenu } from "src/components/PopoverMenu";
 import {
   TableCellData,
   TableWithResponsiveHeader,
@@ -12,10 +13,12 @@ import {
 
 interface AwardRecommendationAttachmentsProps {
   awardRecommendationId: string;
+  mode?: "view" | "edit";
 }
 
 export const AwardRecommendationAttachments = ({
   awardRecommendationId,
+  mode = "view",
 }: AwardRecommendationAttachmentsProps) => {
   const [risks, setRisks] = useState<any[]>([]);
   const [page, setPage] = useState(1);
@@ -32,8 +35,8 @@ export const AwardRecommendationAttachments = ({
       sort_order: [
         {
           order_by: "created_at",
-          sort_direction: "ascending"
-        }
+          sort_direction: "ascending",
+        },
       ],
     };
     clientFetch(`/api/award-recommendations/${awardRecommendationId}/risks`, {
@@ -62,6 +65,7 @@ export const AwardRecommendationAttachments = ({
     { cellData: "Risk #" },
     { cellData: "App #" },
     { cellData: "Condition" },
+    ...(mode === "edit" ? [{ cellData: "Action" }] : []),
   ];
   const risksRows: TableCellData[][] = risks.map((risk) => [
     {
@@ -77,6 +81,25 @@ export const AwardRecommendationAttachments = ({
         <a href="#">{risk.condition_number || risk.condition || "-"}</a>
       ),
     },
+    ...(mode === "edit"
+      ? [
+          {
+            cellData: (
+              <PopoverMenu>
+                <button
+                  className="usa-button usa-button--unstyled width-full text-left padding-y-1 padding-x-2 hover:bg-base-lighter"
+                  onClick={() => {
+                    /* TODO: implement delete risk logic */
+                  }}
+                  type="button"
+                >
+                  Delete
+                </button>
+              </PopoverMenu>
+            ),
+          },
+        ]
+      : []),
   ]);
 
   // Other supporting documents table (empty)
@@ -94,10 +117,25 @@ export const AwardRecommendationAttachments = ({
         <h3 className="margin-bottom-1">
           Standard and program terms & conditions
         </h3>
-        <TableWithResponsiveHeader
-          headerContent={standardHeaders}
-          tableRowData={standardRows}
-        />
+        {mode === "edit" ? (
+          <div className="bg-base-lighter radius-md padding-y-2 padding-x-3 margin-bottom-2">
+            <a
+              className="text-primary text-bold text-left display-block width-full"
+              href="#"
+              style={{ textDecoration: "underline" }}
+              onClick={() => {
+                /* TODO: implement routing */
+              }}
+            >
+              Enter terms & conditions
+            </a>
+          </div>
+        ) : (
+          <TableWithResponsiveHeader
+            headerContent={standardHeaders}
+            tableRowData={standardRows}
+          />
+        )}
         <h3 className="margin-top-6 margin-bottom-1">
           Specific risks & recommended conditions
         </h3>
@@ -118,10 +156,25 @@ export const AwardRecommendationAttachments = ({
         <h3 className="margin-top-6 margin-bottom-1">
           Other supporting documents
         </h3>
-        <TableWithResponsiveHeader
-          headerContent={otherHeaders}
-          tableRowData={otherRows}
-        />
+        {mode === "edit" ? (
+          <div className="bg-base-lighter radius-md padding-y-2 padding-x-3 margin-bottom-2">
+            <a
+              className="text-primary text-bold text-left display-block width-full"
+              href="#"
+              style={{ textDecoration: "underline" }}
+              onClick={() => {
+                /* TODO: implement routing */
+              }}
+            >
+              Enter supporting documents
+            </a>
+          </div>
+        ) : (
+          <TableWithResponsiveHeader
+            headerContent={otherHeaders}
+            tableRowData={otherRows}
+          />
+        )}
       </section>
     </GridContainer>
   );

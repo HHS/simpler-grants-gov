@@ -93,16 +93,24 @@ def seed_award_recommendation_risks_and_submissions(db_session, award_recommenda
     if not ar.award_recommendation_application_submissions:
         return
     submission = ar.award_recommendation_application_submissions[0]
-    risk = factories.AwardRecommendationRiskFactory.create(
-        award_recommendation=ar,
-        award_recommendation_risk_type=AwardRecommendationRiskType.ADDITIONAL_MONITORING,
-        comment="Seeded risk for testing",
-    )
-    factories.AwardRecommendationRiskSubmissionFactory.create(
-        award_recommendation_risk=risk,
-        award_recommendation_application_submission=submission,
-    )
-    logger.info(f"✓ Seeded risk {risk.award_recommendation_risk_number} for AR {ar.award_recommendation_number}")
+    risks = [
+        (AwardRecommendationRiskType.ADDITIONAL_MONITORING, "Seeded risk for testing"),
+        (AwardRecommendationRiskType.ADDITIONAL_MONITORING, "Financial instability detected"),
+        (AwardRecommendationRiskType.ADDITIONAL_MONITORING, "Prior noncompliance with grant terms"),
+        (AwardRecommendationRiskType.ADDITIONAL_MONITORING, "Limited organizational capacity"),
+        (AwardRecommendationRiskType.ADDITIONAL_MONITORING, "Other: Unusual circumstances noted"),
+    ]
+    for risk_type, comment in risks:
+        risk = factories.AwardRecommendationRiskFactory.create(
+            award_recommendation=ar,
+            award_recommendation_risk_type=risk_type,
+            comment=comment,
+        )
+        factories.AwardRecommendationRiskSubmissionFactory.create(
+            award_recommendation_risk=risk,
+            award_recommendation_application_submission=submission,
+        )
+        logger.info(f"✓ Seeded risk {risk.award_recommendation_risk_number} ({risk_type}) for AR {ar.award_recommendation_number}")
 
 def _setup_agency_and_users(db_session: db.Session) -> Agency:
     """Create agency and users with award recommendation roles for testing."""

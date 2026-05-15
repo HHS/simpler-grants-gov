@@ -28,6 +28,10 @@ jest.mock("next/navigation", () => ({
     mockRedirect(...args);
     throw new Error("NEXT_REDIRECT");
   },
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+    refresh: jest.fn(),
+  })),
 }));
 
 const withFeatureFlagMock = jest.fn();
@@ -274,6 +278,20 @@ describe("AwardRecommendationPage", () => {
       );
 
       consoleSpy.mockRestore();
+    });
+
+    it("renders attachments section with navigation link", async () => {
+      const component = await AwardRecommendationPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      const navLinks = screen.getAllByRole("link");
+      const attachmentsLink = navLinks.find(
+        (link) => link.getAttribute("href") === "#attachments",
+      );
+
+      expect(attachmentsLink).toBeInTheDocument();
     });
   });
 
