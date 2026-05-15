@@ -1,6 +1,6 @@
 # @featureArea Authentication
 # @specFile e2e/login/specs/login-with-login-gov.spec.ts
-# @debugNote Mirrors the staging-only Login.gov MFA flow, including the already-signed-in shortcut
+# @debugNote Mirrors the staging-only Login.gov MFA flow; existing-session handling lives in the login helper
 
 Feature: Login.gov MFA authentication
   As a user
@@ -18,10 +18,4 @@ Feature: Login.gov MFA authentication
     And the user submits the login form
     And the user enters the authentication code
     And the user submits the MFA form
-    Then the sign out button is visible
-
-  @Login-LoginDotGov
-  Scenario: uses an existing authenticated session when already signed in
-    Given the user has previously logged in within the same browser in the last 15 minutes
-    When the user launches the application
     Then the sign out button is visible

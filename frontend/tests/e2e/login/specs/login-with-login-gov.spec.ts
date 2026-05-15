@@ -1,7 +1,7 @@
 /**
  * @feature Login.gov MFA Authentication
  * @featureFile e2e/login/features/login-with-login-gov.feature
- * @scenario Login.gov authentication with MFA and already-signed-in session shortcut
+ * @scenario Login.gov authentication with MFA
  */
 
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
