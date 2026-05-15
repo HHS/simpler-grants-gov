@@ -29,6 +29,7 @@ tags:
 - name: Agency v1
 - name: Organization v1
 - name: Internal v1 - Admin Only
+- name: File v1
 - name: User v1 - Internal Only
 - name: Application Alpha
 - name: Form Alpha

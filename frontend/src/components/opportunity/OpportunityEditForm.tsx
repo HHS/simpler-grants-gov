@@ -3,7 +3,14 @@
 import {
   saveOpportunityEditAction,
   type OpportunityEditValidationErrors,
-} from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
+} from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/actions";
+import {
+  categoryOptions,
+  eligbilityValueToGroup,
+  ELIGIBILITY_OPTIONS,
+  fundingOptions,
+  OPPORTUNITY_CATEGORY_OPTIONS,
+} from "src/constants/opportunity";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
 import { useTranslations } from "next-intl";
@@ -23,13 +30,7 @@ import {
 
 import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
 import { OpportunityAttachmentUploadInput } from "src/components/opportunity/OpportunityAttachmentUploadInput";
-import {
-  ELIGIBILITY_OPTIONS,
-  FUNDING_CATEGORY_OPTIONS,
-  FUNDING_INSTRUMENT_OPTIONS,
-  OPPORTUNITY_CATEGORY_OPTIONS,
-  OpportunityEditFormValues,
-} from "./opportunityEditFormConfig";
+import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
 
 function formatNumber(value: string): string {
   const raw = value.replace(/,/g, "");
@@ -45,7 +46,7 @@ type EligibilityCheckboxGroupProps = {
   title: string;
   options: typeof ELIGIBILITY_OPTIONS;
   baseId: string;
-  selectedValues: string[];
+  initialSelectedValues: string[];
   onToggle: (value: string) => void;
   disabled: boolean;
 };
@@ -54,7 +55,7 @@ function EligibilityCheckboxGroup({
   title,
   options,
   baseId,
-  selectedValues,
+  initialSelectedValues,
   onToggle,
   disabled,
 }: EligibilityCheckboxGroupProps) {
@@ -69,7 +70,7 @@ function EligibilityCheckboxGroup({
               name="eligibleApplicants"
               value={option.value}
               label={eligibilityDisplayLabels[option.value] ?? option.label}
-              checked={selectedValues.includes(option.value)}
+              defaultChecked={initialSelectedValues.includes(option.value)}
               onChange={() => onToggle(option.value)}
               disabled={disabled}
             />
@@ -110,16 +111,32 @@ export default function OpportunityEditForm({
   opportunityKeyInformation,
 }: OpportunityEditFormProps) {
   const t = useTranslations("OpportunityEdit");
-  const [values, setValues] =
-    useState<OpportunityEditFormValues>(initialValues);
   const [currentSummaryId, setCurrentSummaryId] =
     useState(opportunitySummaryId);
+
+  // Minimal state — 3 fields that drive conditional show/hide rendering,
+  // plus fundingType and publishDate needed for the CustomEvent that
+  // controls the Publish button in OpportunityEditHeaderActions.
+  const [fundingCategory, setFundingCategory] = useState(
+    initialValues.fundingCategories,
+  );
+  const [closeDate, setCloseDate] = useState(initialValues.closeDate);
+  const [selectedEligibility, setSelectedEligibility] = useState<string[]>(
+    initialValues.eligibleApplicants,
+  );
+  const [fundingType, setFundingType] = useState(initialValues.fundingType);
+  const [publishDate, setPublishDate] = useState(initialValues.publishDate);
+
   const [formState, formAction] = useActionState(saveOpportunityEditAction, {
     validationErrors: {},
   });
   const validationErrors: OpportunityEditValidationErrors | undefined =
     formState.validationErrors;
 
+  // Dispatch CustomEvent so OpportunityEditHeaderActions can update
+  // the publish button enabled state in real time.
+  // useEffect fires after every state change so the event always carries
+  // the latest committed values — no manual dispatch calls needed.
   useEffect(() => {
     const form = document.getElementById("opportunity-edit-form");
     if (!form) return;
@@ -127,36 +144,21 @@ export default function OpportunityEditForm({
       new CustomEvent("opportunity-values-change", {
         bubbles: true,
         detail: {
-          publishDate: values.publishDate,
-          fundingType: values.fundingType,
-          fundingCategories: values.fundingCategories,
-          eligibleApplicants: values.eligibleApplicants,
+          publishDate,
+          fundingType,
+          fundingCategories: fundingCategory,
+          eligibleApplicants: selectedEligibility,
         },
       }),
     );
-  }, [
-    values.publishDate,
-    values.fundingType,
-    values.fundingCategories,
-    values.eligibleApplicants,
-  ]);
+  }, [publishDate, fundingType, fundingCategory, selectedEligibility]);
 
-  function updateField<K extends keyof OpportunityEditFormValues>(
-    key: K,
-    value: OpportunityEditFormValues[K],
-  ) {
-    setValues((currentValues) => ({ ...currentValues, [key]: value }));
-  }
-
-  function toggleArrayValue(key: "eligibleApplicants", value: string) {
-    setValues((currentValues) => {
-      const currentFieldValues = currentValues[key];
-      const nextFieldValues = currentFieldValues.includes(value)
-        ? currentFieldValues.filter((currentValue) => currentValue !== value)
-        : [...currentFieldValues, value];
-
-      return { ...currentValues, [key]: nextFieldValues };
-    });
+  // Shared toggle handler for eligibility checkboxes.
+  function handleEligibilityToggle(value: string) {
+    const next = selectedEligibility.includes(value)
+      ? selectedEligibility.filter((v) => v !== value)
+      : [...selectedEligibility, value];
+    setSelectedEligibility(next);
   }
 
   function getFieldError(
@@ -176,9 +178,9 @@ export default function OpportunityEditForm({
 
   const awardSelectionMethodLabel =
     OPPORTUNITY_CATEGORY_OPTIONS.find(
-      (option) => option.value === values.awardSelectionMethod,
+      (option) => option.value === initialValues.awardSelectionMethod,
     )?.label ??
-    values.awardSelectionMethod ??
+    initialValues.awardSelectionMethod ??
     t("content.notAvailable");
 
   const keyInformationItems = [
@@ -224,50 +226,22 @@ export default function OpportunityEditForm({
 
   const leftColumnItems = keyInformationItems.slice(0, 3);
   const rightColumnItems = keyInformationItems.slice(3);
-  const eligibilityGroups = {
-    business: ELIGIBILITY_OPTIONS.filter((option) =>
-      [
-        "for_profit_organizations_other_than_small_businesses",
-        "small_businesses",
-      ].includes(option.value),
-    ),
-    education: ELIGIBILITY_OPTIONS.filter((option) =>
-      [
-        "independent_school_districts",
-        "private_institutions_of_higher_education",
-        "public_and_state_institutions_of_higher_education",
-      ].includes(option.value),
-    ),
-    government: ELIGIBILITY_OPTIONS.filter((option) =>
-      [
-        "city_or_township_governments",
-        "county_governments",
-        "special_district_governments",
-        "state_governments",
-        "federally_recognized_native_american_tribal_governments",
-        "public_and_indian_housing_authorities",
-      ].includes(option.value),
-    ),
-    nonprofit: ELIGIBILITY_OPTIONS.filter((option) =>
-      [
-        "other_native_american_tribal_organizations",
-        "nonprofits_non_higher_education_with_501c3",
-        "nonprofits_non_higher_education_without_501c3",
-      ].includes(option.value),
-    ),
-    misc: ELIGIBILITY_OPTIONS.filter((option) =>
-      ["individuals", "other", "unrestricted"].includes(option.value),
-    ),
-  };
+  const eligibilityGroups = ELIGIBILITY_OPTIONS.reduce(
+    (acc, { label, value }) => {
+      const group = eligbilityValueToGroup[value];
+      if (!acc[group]) acc[group] = [];
+      acc[group].push({ label, value });
+      return acc;
+    },
+    {} as Record<string, { label: string; value: string }[]>,
+  );
   return (
     <form
       id="opportunity-edit-form"
       onSubmit={(e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        startTransition(() => {
-          formAction(formData);
-        });
+        startTransition(() => formAction(formData));
       }}
       noValidate
     >
@@ -283,11 +257,11 @@ export default function OpportunityEditForm({
         data-testid="isForecast-input"
         value={isForecast ? "true" : "false"}
       />
-      <input type="hidden" name="title" value={values.title} />
+      <input type="hidden" name="title" value={initialValues.title} />
       <input
         type="hidden"
         name="awardSelectionMethod"
-        value={values.awardSelectionMethod}
+        value={initialValues.awardSelectionMethod}
       />
 
       {!isDraft ? (
@@ -422,15 +396,15 @@ export default function OpportunityEditForm({
                 <Select
                   id="funding-type-values"
                   name="funding-type-values"
-                  value={values.fundingType}
-                  onChange={(event) =>
-                    updateField("fundingType", event.target.value)
-                  }
+                  defaultValue={initialValues.fundingType}
+                  onChange={(event) => {
+                    setFundingType(event.target.value);
+                  }}
                   className="width-full"
                   disabled={!isDraft}
                 >
                   <option value="">{t("content.select")}</option>
-                  {FUNDING_INSTRUMENT_OPTIONS.map((option) => (
+                  {fundingOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -452,8 +426,7 @@ export default function OpportunityEditForm({
                       name="costSharing"
                       label={t("labels.yes")}
                       value="true"
-                      checked={values.costSharing === true}
-                      onChange={() => updateField("costSharing", true)}
+                      defaultChecked={initialValues.costSharing === true}
                       disabled={!isDraft}
                     />
                   </div>
@@ -463,8 +436,7 @@ export default function OpportunityEditForm({
                       name="costSharing"
                       label={t("labels.no")}
                       value="false"
-                      checked={values.costSharing === false}
-                      onChange={() => updateField("costSharing", false)}
+                      defaultChecked={initialValues.costSharing === false}
                       disabled={!isDraft}
                     />
                   </div>
@@ -490,15 +462,15 @@ export default function OpportunityEditForm({
                 <Select
                   id="funding-category-values"
                   name="funding-category-values"
-                  value={values.fundingCategories}
-                  onChange={(event) =>
-                    updateField("fundingCategories", event.target.value)
-                  }
+                  value={fundingCategory}
+                  onChange={(event) => {
+                    setFundingCategory(event.target.value);
+                  }}
                   className="width-full"
                   disabled={!isDraft}
                 >
                   <option value="">{t("content.selectFundingCategory")}</option>
-                  {FUNDING_CATEGORY_OPTIONS.map((option) => (
+                  {categoryOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -508,7 +480,7 @@ export default function OpportunityEditForm({
             </div>
           </div>
 
-          {values.fundingCategories === "other" && (
+          {fundingCategory === "other" && (
             <div className="width-full">
               <FormGroup>
                 <DynamicFieldLabel
@@ -519,13 +491,7 @@ export default function OpportunityEditForm({
                 <Textarea
                   id="funding-category-explanation"
                   name="fundingCategoryExplanation"
-                  value={values.fundingCategoryExplanation}
-                  onChange={(event) =>
-                    updateField(
-                      "fundingCategoryExplanation",
-                      event.target.value,
-                    )
-                  }
+                  defaultValue={initialValues.fundingCategoryExplanation}
                   rows={5}
                   className="width-full"
                   disabled={!isDraft}
@@ -551,10 +517,7 @@ export default function OpportunityEditForm({
                   id="expected-number-of-awards"
                   name="expectedNumberOfAwards"
                   type="text"
-                  value={values.expectedNumberOfAwards}
-                  onChange={(event) =>
-                    updateField("expectedNumberOfAwards", event.target.value)
-                  }
+                  defaultValue={initialValues.expectedNumberOfAwards}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -578,13 +541,9 @@ export default function OpportunityEditForm({
                   id="estimated-total-program-funding"
                   name="estimatedTotalProgramFunding"
                   type="text"
-                  value={formatNumber(values.estimatedTotalProgramFunding)}
-                  onChange={(event) =>
-                    updateField(
-                      "estimatedTotalProgramFunding",
-                      event.target.value.replace(/,/g, ""),
-                    )
-                  }
+                  defaultValue={formatNumber(
+                    initialValues.estimatedTotalProgramFunding,
+                  )}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -607,13 +566,7 @@ export default function OpportunityEditForm({
                   id="award-minimum"
                   name="awardMinimum"
                   type="text"
-                  value={formatNumber(values.awardMinimum)}
-                  onChange={(event) =>
-                    updateField(
-                      "awardMinimum",
-                      event.target.value.replace(/,/g, ""),
-                    )
-                  }
+                  defaultValue={formatNumber(initialValues.awardMinimum)}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -633,13 +586,7 @@ export default function OpportunityEditForm({
                   id="award-maximum"
                   name="awardMaximum"
                   type="text"
-                  value={formatNumber(values.awardMaximum)}
-                  onChange={(event) =>
-                    updateField(
-                      "awardMaximum",
-                      event.target.value.replace(/,/g, ""),
-                    )
-                  }
+                  defaultValue={formatNumber(initialValues.awardMaximum)}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -662,9 +609,11 @@ export default function OpportunityEditForm({
                 <DatePicker
                   id="publish-date"
                   name="publishDate"
-                  defaultValue={values.publishDate}
+                  defaultValue={initialValues.publishDate}
                   placeholder="mm/dd/yyyy"
-                  onChange={(value) => updateField("publishDate", value ?? "")}
+                  onChange={(value) => {
+                    setPublishDate(value ?? "");
+                  }}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -683,9 +632,9 @@ export default function OpportunityEditForm({
                 <DatePicker
                   id="close-date"
                   name="closeDate"
-                  defaultValue={values.closeDate}
+                  defaultValue={initialValues.closeDate}
                   placeholder="mm/dd/yyyy"
-                  onChange={(value) => updateField("closeDate", value ?? "")}
+                  onChange={(value) => setCloseDate(value ?? "")}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -693,7 +642,7 @@ export default function OpportunityEditForm({
             </div>
           </div>
 
-          {!values.closeDate && (
+          {!closeDate && (
             <div className="width-full">
               <FormGroup>
                 <DynamicFieldLabel
@@ -704,10 +653,7 @@ export default function OpportunityEditForm({
                 <Textarea
                   id="close-date-explanation"
                   name="closeDateExplanation"
-                  value={values.closeDateExplanation}
-                  onChange={(event) =>
-                    updateField("closeDateExplanation", event.target.value)
-                  }
+                  defaultValue={initialValues.closeDateExplanation}
                   rows={5}
                   className="width-full"
                   disabled={!isDraft}
@@ -751,30 +697,24 @@ export default function OpportunityEditForm({
                   title={t("labels.eligibilityBusiness")}
                   options={eligibilityGroups.business}
                   baseId="eligible-business"
-                  selectedValues={values.eligibleApplicants}
-                  onToggle={(value) =>
-                    toggleArrayValue("eligibleApplicants", value)
-                  }
+                  initialSelectedValues={initialValues.eligibleApplicants}
+                  onToggle={handleEligibilityToggle}
                   disabled={!isDraft}
                 />
                 <EligibilityCheckboxGroup
                   title={t("labels.eligibilityEducation")}
                   options={eligibilityGroups.education}
                   baseId="eligible-education"
-                  selectedValues={values.eligibleApplicants}
-                  onToggle={(value) =>
-                    toggleArrayValue("eligibleApplicants", value)
-                  }
+                  initialSelectedValues={initialValues.eligibleApplicants}
+                  onToggle={handleEligibilityToggle}
                   disabled={!isDraft}
                 />
                 <EligibilityCheckboxGroup
                   title={t("labels.eligibilityGovernment")}
                   options={eligibilityGroups.government}
                   baseId="eligible-government"
-                  selectedValues={values.eligibleApplicants}
-                  onToggle={(value) =>
-                    toggleArrayValue("eligibleApplicants", value)
-                  }
+                  initialSelectedValues={initialValues.eligibleApplicants}
+                  onToggle={handleEligibilityToggle}
                   disabled={!isDraft}
                 />
               </div>
@@ -785,28 +725,24 @@ export default function OpportunityEditForm({
                   title={t("labels.eligibilityNonprofit")}
                   options={eligibilityGroups.nonprofit}
                   baseId="eligible-nonprofit"
-                  selectedValues={values.eligibleApplicants}
-                  onToggle={(value) =>
-                    toggleArrayValue("eligibleApplicants", value)
-                  }
+                  initialSelectedValues={initialValues.eligibleApplicants}
+                  onToggle={handleEligibilityToggle}
                   disabled={!isDraft}
                 />
                 <EligibilityCheckboxGroup
                   title={t("labels.eligibilityMiscellaneous")}
-                  options={eligibilityGroups.misc}
+                  options={eligibilityGroups.miscellaneous}
                   baseId="eligible-misc"
-                  selectedValues={values.eligibleApplicants}
-                  onToggle={(value) =>
-                    toggleArrayValue("eligibleApplicants", value)
-                  }
+                  initialSelectedValues={initialValues.eligibleApplicants}
+                  onToggle={handleEligibilityToggle}
                   disabled={!isDraft}
                 />
               </div>
             </div>
           </div>
 
-          {(values.eligibleApplicants.includes("other") ||
-            values.eligibleApplicants.includes("unrestricted")) && (
+          {(selectedEligibility.includes("other") ||
+            selectedEligibility.includes("unrestricted")) && (
             <div className="width-full">
               <FormGroup error={!!getFieldError("additionalEligibilityInfo")}>
                 <DynamicFieldLabel
@@ -822,10 +758,7 @@ export default function OpportunityEditForm({
                 <Textarea
                   id="additional-eligibility-info"
                   name="additionalEligibilityInfo"
-                  value={values.additionalEligibilityInfo}
-                  onChange={(event) =>
-                    updateField("additionalEligibilityInfo", event.target.value)
-                  }
+                  defaultValue={initialValues.additionalEligibilityInfo}
                   rows={5}
                   className="width-full"
                   disabled={!isDraft}
@@ -863,10 +796,7 @@ export default function OpportunityEditForm({
               <Textarea
                 id="description"
                 name="description"
-                value={values.description}
-                onChange={(event) =>
-                  updateField("description", event.target.value)
-                }
+                defaultValue={initialValues.description}
                 rows={5}
                 className="width-full"
                 disabled={!isDraft}
@@ -891,10 +821,7 @@ export default function OpportunityEditForm({
                   id="additional-info-url"
                   name="additionalInfoUrl"
                   type="url"
-                  value={values.additionalInfoUrl}
-                  onChange={(event) =>
-                    updateField("additionalInfoUrl", event.target.value)
-                  }
+                  defaultValue={initialValues.additionalInfoUrl}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -916,10 +843,7 @@ export default function OpportunityEditForm({
                   id="additional-info-url-text"
                   name="additionalInfoUrlText"
                   type="text"
-                  value={values.additionalInfoUrlText}
-                  onChange={(event) =>
-                    updateField("additionalInfoUrlText", event.target.value)
-                  }
+                  defaultValue={initialValues.additionalInfoUrlText}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -942,10 +866,7 @@ export default function OpportunityEditForm({
               <Textarea
                 id="grantor-contact-details"
                 name="grantorContactDetails"
-                value={values.grantorContactDetails}
-                onChange={(event) =>
-                  updateField("grantorContactDetails", event.target.value)
-                }
+                defaultValue={initialValues.grantorContactDetails}
                 rows={5}
                 className="width-full"
                 disabled={!isDraft}
@@ -968,10 +889,7 @@ export default function OpportunityEditForm({
                   id="contact-email"
                   name="contactEmail"
                   type="email"
-                  value={values.contactEmail}
-                  onChange={(event) =>
-                    updateField("contactEmail", event.target.value)
-                  }
+                  defaultValue={initialValues.contactEmail}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -993,10 +911,7 @@ export default function OpportunityEditForm({
                   id="contact-email-text"
                   name="contactEmailText"
                   type="text"
-                  value={values.contactEmailText}
-                  onChange={(event) =>
-                    updateField("contactEmailText", event.target.value)
-                  }
+                  defaultValue={initialValues.contactEmailText}
                   className="width-full"
                   disabled={!isDraft}
                 />

@@ -20,7 +20,7 @@ resource "aws_backup_vault" "backup_vault" {
   kms_key_arn = data.aws_kms_key.backup_vault_key.arn
 
   # Use a separate line to support automated terraform destroy commands
-  force_destroy = var.is_temporary
+  force_destroy = !var.deletion_protection
 }
 
 # KMS Key for the vault

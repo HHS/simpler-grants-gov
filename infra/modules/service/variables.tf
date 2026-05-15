@@ -122,6 +122,18 @@ variable "min_capacity" {
   default     = 2
 }
 
+variable "scaling_target_cpu_percent" {
+  description = "Target CPU utilization percentage for autoscaling"
+  type        = number
+  default     = 70
+}
+
+variable "scaling_target_memory_percent" {
+  description = "Target memory utilization percentage for autoscaling"
+  type        = number
+  default     = 70
+}
+
 variable "readonly_root_filesystem" {
   description = "Whether the container has a read-only root filesystem"
   type        = bool
