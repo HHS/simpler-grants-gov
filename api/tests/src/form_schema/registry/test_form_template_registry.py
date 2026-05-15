@@ -4,7 +4,7 @@ import jsonref
 import pytest
 
 from src.db.models.competition_models import Form
-from src.form_schema.registry.form_template_registry import FormTemplateRegistry
+from src.form_schema.registry.form_template_registry import FormTemplateRegistry, FormTemplateKey, form_template_registry
 
 
 def _make_form(
@@ -22,6 +22,22 @@ def _make_form(
         ),
         form_ui_schema=[],
     )
+
+
+# ---------------------------------------------------------------------------
+# FormTemplateKey
+# ---------------------------------------------------------------------------
+
+
+def test_form_template_key_is_a_named_tuple():
+    form_id = uuid.uuid4()
+    key = FormTemplateKey(form_id=form_id, major_version=1)
+    assert key.form_id == form_id
+    assert key.major_version == 1
+
+
+def test_module_level_singleton_exists():
+    assert isinstance(form_template_registry, FormTemplateRegistry)
 
 
 # ---------------------------------------------------------------------------
