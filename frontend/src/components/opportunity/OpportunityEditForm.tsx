@@ -3,7 +3,7 @@
 import {
   saveOpportunityEditAction,
   type OpportunityEditValidationErrors,
-} from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
+} from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/actions";
 import {
   categoryOptions,
   eligbilityValueToGroup,

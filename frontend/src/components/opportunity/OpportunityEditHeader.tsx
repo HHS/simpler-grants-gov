@@ -1,7 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { submitOpportunityAction } from "src/app/[locale]/(base)/opportunity/[id]/edit/actions";
+import { submitOpportunityAction } from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/actions";
 
 import { useTranslations } from "next-intl";
 import { startTransition, useActionState, useEffect, useState } from "react";

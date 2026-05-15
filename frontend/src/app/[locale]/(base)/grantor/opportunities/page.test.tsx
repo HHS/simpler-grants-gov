@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { axe } from "jest-axe";
-import OpportunitiesListPage from "src/app/[locale]/(base)/opportunities/page";
+import OpportunitiesListPage from "src/app/[locale]/(base)/grantor/opportunities/page";
 import { UnauthorizedError } from "src/errors";
 import { UserAgency } from "src/services/fetch/fetchers/userAgenciesFetcher";
 import { UserSession } from "src/types/authTypes";
@@ -331,7 +331,7 @@ describe("Opportunities", () => {
       expect(createOpportunityLink).toBeVisible();
       expect(createOpportunityLink).toHaveAttribute(
         "href",
-        "/opportunities/create?agency=agency-uuid-1",
+        "/grantor/opportunities/create?agency=agency-uuid-1",
       );
     });
 
@@ -501,7 +501,7 @@ describe("Opportunities", () => {
       expect(createOpportunityLink).toBeVisible();
       expect(createOpportunityLink).toHaveAttribute(
         "href",
-        "/opportunities/create?agency=agency-uuid-1",
+        "/grantor/opportunities/create?agency=agency-uuid-1",
       );
     });
 
@@ -540,7 +540,7 @@ describe("Opportunities", () => {
       ).toBeVisible();
 
       const editLink =
-        "/opportunity/" + basicOpportunity.opportunity_id + "/edit";
+        "/grantor/opportunity/" + basicOpportunity.opportunity_id + "/edit";
       const oppTitlelink = screen.getByRole("link", {
         name: "Test Opportunity",
       });

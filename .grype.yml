@@ -21,104 +21,14 @@ ignore:
 
   # Not fixed in GA Python yet
   # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 04/15/26
+  # Last checked: 05/13/26
   - vulnerability: CVE-2025-15366
 
   # Not fixed in GA Python yet
   # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 04/15/2026
+  # Last checked: 05/13/2026
   - vulnerability: CVE-2025-15367
-
-  # ignoring so we can get today's release out
-  - vulnerability: GHSA-2g4f-4pwh-qvx6
-
-  # serialize-javascript subdependency via terser-webpack-plugin. The vuln is patched in serialize-javascript but terser-webpack-plugin has not bumped to the next major version for serialize-javascript to remediate the vuln coming down from webpack. Dev only webpack issue, safe to ignore for now
-  - vulnerability: GHSA-5c6j-r48x-rmvq
-
-  # Not fixed in GA Python yet
-  # Last checked 04/14/2026
-  - vulnerability: CVE-2026-1502
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-267c-6grr-h53f
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-26hh-7cqf-hhc6
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-36qx-fr4f-26g5
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-492v-c6pp-mqqv
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-8h8q-6873-q5fj
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-c4j6-fc7j-m34r
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-mg66-mrh9-m8jx
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-ffhc-5mcf-pf4q
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-gx5p-jg67-6x7h
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-h64f-5h5j-jqjh
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-wfc6-r584-vfw7
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-3g8h-86w9-wvmq
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/12/2026
-  - vulnerability: GHSA-vfv6-92ff-j949
 
   # Not fixed in GA Python yet
   # Last checked 05/13/2026
   - vulnerability: CVE-2026-7210
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/13/2026
-  - vulnerability: GHSA-66ff-xgx4-vchm
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/13/2026
-  - vulnerability: GHSA-685m-2w69-288q
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/13/2026
-  - vulnerability: GHSA-75px-5xx7-5xc7
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/13/2026
-  - vulnerability: GHSA-jvwf-75h9-cwgg
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/13/2026
-  - vulnerability: GHSA-q6x5-8v7m-xcrf
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/13/2026
-  - vulnerability: GHSA-2pr8-phx7-x9h3
-
-  # Ignoring to get release out tomorrow
-  # Last checked 05/13/2026
-  - vulnerability: GHSA-fx83-v9x8-x52w
