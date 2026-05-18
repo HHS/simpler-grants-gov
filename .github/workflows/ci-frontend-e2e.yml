@@ -429,7 +429,8 @@ jobs:
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
-          force-webkit-install: "true"
+          # shard 3 is the webkit shard
+          force-webkit-install: ${{ matrix.shard == 3 && 'true' || 'false' }}
 
   create-report:
     name: Create Merged Test Report

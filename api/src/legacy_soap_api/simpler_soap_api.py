@@ -4,6 +4,7 @@ from flask import request
 
 import src.adapters.db as db
 from src.legacy_soap_api.legacy_soap_api_auth import (
+    ENABLE_SIMPLER_ROUTE_KEY,
     MTLS_CERT_HEADER_KEY,
     USE_SIMPLER_OVERRIDE_KEY,
     SOAPClientCertificateIsExpired,
@@ -179,6 +180,16 @@ def process_simpler_request(
         is_legacy_only_certificate = (
             auth and auth.certificate and not auth.certificate.legacy_certificate
         )
+
+        if (
+            not get_soap_config().enable_simpler_route
+            and request.headers.get(ENABLE_SIMPLER_ROUTE_KEY, None) != "1"
+        ):
+            logger.info(
+                "soap_client_certificate: simpler route is disabled, returning legacy response",
+                extra={"soap_api_event": LegacySoapApiEvent.SIMPLER_ROUTE_DISABLED},
+            )
+            return get_legacy_response(soap_request).to_flask_response()
 
         # If it is GetOpportunityList or is valid legacy certificate but not configured in Simpler
         # call legacy and don't call simpler

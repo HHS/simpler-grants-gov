@@ -37,6 +37,9 @@ resource "aws_rds_cluster" "db" {
     ignore_changes = [
       master_username,
       cluster_identifier, # also ignore if it changes
+      # Prevent re-restore on subsequent applies after a snapshot restore.
+      # Use -replace=module.database.aws_rds_cluster.db to trigger a restore.
+      snapshot_identifier,
     ]
   }
 
@@ -60,11 +63,12 @@ resource "aws_rds_cluster" "db" {
   enable_http_endpoint                = var.enable_http_endpoint
   # final_snapshot_identifier = "${var.name}-final"
   skip_final_snapshot = true
+  snapshot_identifier = var.snapshot_identifier
 
   backup_retention_period = 35
   # Use a separate line to support automated terraform destroy commands
   # checkov:skip=CKV_AWS_139:Allow disabling deletion protection for automated tests
-  deletion_protection = !var.is_temporary
+  deletion_protection = var.deletion_protection
 
   serverlessv2_scaling_configuration {
     max_capacity = var.max_capacity

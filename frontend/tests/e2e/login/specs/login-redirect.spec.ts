@@ -1,7 +1,6 @@
 import { expect, Page, test } from "@playwright/test";
+import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
-
-import playwrightEnv from "./playwright-env";
 
 const { AUTH, SMOKE, CORE_REGRESSION, FULL_REGRESSION } = VALID_TAGS;
 const { baseUrl, targetEnv } = playwrightEnv;
@@ -60,10 +59,10 @@ test.describe("Login Page Redirect", () => {
     { tag: [SMOKE, AUTH] },
     async ({ page }) => {
       await page.evaluate(() => {
-        sessionStorage.setItem("login-redirect", "/opportunities");
+        sessionStorage.setItem("login-redirect", "/grantor/opportunities");
       });
       await page.goto("/login", { waitUntil: "domcontentloaded" });
-      await expect(page).toHaveURL(`/opportunities`);
+      await expect(page).toHaveURL(`/grantor/opportunities`);
     },
   );
 
@@ -98,7 +97,7 @@ test.describe("Login Page Redirect", () => {
     { tag: [AUTH, FULL_REGRESSION] },
     async ({ page }) => {
       await page.evaluate(() => {
-        sessionStorage.setItem("login-redirect", "/opportunities");
+        sessionStorage.setItem("login-redirect", "/grantor/opportunities");
       });
 
       await page.goto("/login", { waitUntil: "domcontentloaded" });
@@ -108,12 +107,14 @@ test.describe("Login Page Redirect", () => {
           .waitFor({ state: "visible", timeout: 2000 })
           .then(() => "message"),
         page
-          .waitForURL("/opportunities", { timeout: 15000 })
+          .waitForURL("/grantor/opportunities", { timeout: 15000 })
           .then(() => "redirect"),
       ]);
 
       if (redirectResult === "message") {
-        await expect(page).toHaveURL("/opportunities", { timeout: 15000 });
+        await expect(page).toHaveURL("/grantor/opportunities", {
+          timeout: 15000,
+        });
       }
     },
   );
