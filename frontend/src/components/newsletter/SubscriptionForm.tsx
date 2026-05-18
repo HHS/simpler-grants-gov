@@ -85,7 +85,7 @@ export default function SubscriptionForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={e => { void handleSubmit(e); }}>
       <FormGroup error={showError("name")}>
         <Label htmlFor="name" className="maxw-full">
           {t("form.name") + " "}
