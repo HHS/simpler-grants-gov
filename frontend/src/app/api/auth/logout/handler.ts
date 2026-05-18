@@ -22,7 +22,7 @@ export async function logoutUser() {
   } catch (e) {
     const { message, status, cause } = readError(e as Error, 500);
     // if token expired, delete session and return 401
-    if (status === 401 && cause?.message === "Token expired") {
+    if (status === 401) {
       await deleteSession();
       return NextResponse.json(
         { message: "session previously expired" },

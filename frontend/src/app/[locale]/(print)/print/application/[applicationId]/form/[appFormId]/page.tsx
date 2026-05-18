@@ -3,7 +3,7 @@ import TopLevelError from "src/app/[locale]/(base)/error/page";
 import getFormData from "src/utils/getFormData";
 
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import PrintForm from "src/components/applyForm/PrintForm";
 import { addPrintWidgetToFields } from "src/components/applyForm/utils";
@@ -68,6 +68,7 @@ export default async function FormPage({ params }: FormPageProps) {
 
   if (error || !data) {
     if (error === "NotFound") notFound();
+    if (error === "UnauthorizedError") redirect("/unauthenticated");
     return <TopLevelError />;
   }
 

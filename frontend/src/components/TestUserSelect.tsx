@@ -1,7 +1,5 @@
-import { useClientFetch } from "src/hooks/useClientFetch";
 import { useUser } from "src/services/auth/useUser";
 import { TestUser } from "src/types/userTypes";
-import { storeCurrentPage } from "src/utils/userUtils";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -12,21 +10,17 @@ export const TestUserSelect = ({ testUsers }: { testUsers: TestUser[] }) => {
   const [loggingIn, setLoggingIn] = useState(false);
   const router = useRouter();
   const { refreshUser } = useUser();
-  const { clientFetch } = useClientFetch("unable to perform fake login", {
-    jsonResponse: false,
-  });
 
   const logInTestUser = (jwt: string) => {
-    storeCurrentPage();
     setLoggingIn(true);
-    // will redirect to /login on success
-    clientFetch("/api/user/local-quick-login", {
+    // use plain fetch - no auth token needed for login
+    fetch("/api/user/local-quick-login", {
       method: "POST",
-      body: JSON.stringify({
-        jwt,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jwt }),
     })
-      .then(() => {
+      .then((response) => {
+        if (!response.ok) throw new Error(`Login failed: ${response.status}`);
         return refreshUser();
       })
       .then(() => {
@@ -34,6 +28,7 @@ export const TestUserSelect = ({ testUsers }: { testUsers: TestUser[] }) => {
         router.refresh();
       })
       .catch((e) => {
+        setLoggingIn(false);
         console.error("unable to log in local test user", e);
       });
   };
