@@ -119,6 +119,11 @@ locals {
       secret_store_name = "/api/${var.environment}/use-simpler"
     }
 
+    ENABLE_SIMPLER_ROUTE = {
+      manage_method     = "manual"
+      secret_store_name = "/api/${var.environment}/enable-simpler-route"
+    }
+
     SAM_GOV_API_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/sam-gov-api-key"

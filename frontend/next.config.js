@@ -265,6 +265,21 @@ const nextConfig = {
         destination: "/workspace/saved-search-queries",
         permanent: false,
       },
+      {
+        source: "/opportunity/:opportunity_id/edit",
+        destination: "/grantor/opportunity/:opportunity_id/edit",
+        permanent: false,
+      },
+      {
+        source: "/opportunities",
+        destination: "/grantor/opportunities",
+        permanent: false,
+      },
+      {
+        source: "/opportunities/create",
+        destination: "/grantor/opportunities/create",
+        permanent: false,
+      },
     ];
   },
 };

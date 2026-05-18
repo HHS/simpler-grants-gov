@@ -11,9 +11,12 @@ jest.mock("react", () => ({
   useActionState: () => mockUseActionState() as unknown,
 }));
 
-jest.mock("src/app/[locale]/(base)/opportunities/create/actions", () => ({
-  createOpportunityAction: noop,
-}));
+jest.mock(
+  "src/app/[locale]/(base)/grantor/opportunities/create/actions",
+  () => ({
+    createOpportunityAction: noop,
+  }),
+);
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn().mockReturnValue({

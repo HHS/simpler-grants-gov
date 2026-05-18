@@ -17,6 +17,7 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
   }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 const mockGetItem = jest.spyOn(SessionStorage, "getItem");

@@ -1,0 +1,49 @@
+name: Grants Shared Checks
+
+on:
+  workflow_call:
+    inputs:
+      skip_checks:
+        type: boolean
+        default: false
+        description: Skip the guts of this workflow, but we have to run the workflow for dependency reasons when calling from CD workflows
+  pull_request:
+    paths:
+      - backend/grants_shared/**
+      - .github/workflows/ci-grants-shared.yml
+
+defaults:
+  run:
+    working-directory: ./backend/grants_shared
+
+jobs:
+  lint-test:
+    if: ${{ inputs.skip_checks == null || inputs.skip_checks == false }}
+    name: Grants Shared Lint, Format & Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize the docker containers
+        run: make init
+
+      - name: Run format check
+        run: make format-check
+
+      - name: Run linting
+        run: make lint
+
+      - name: Run security linting
+        run: make lint-security
+
+      - name: Start tests
+        run: make test-coverage
+
+  skip-checks:
+    if: ${{ inputs.skip_checks != null && inputs.skip_checks == true }}
+    name: Skip Checks
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checks skipped
+        working-directory: ./
+        run: exit 0
