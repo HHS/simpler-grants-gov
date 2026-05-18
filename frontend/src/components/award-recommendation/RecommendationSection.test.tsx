@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { identity } from "lodash";
 
 import { RecommendationSection } from "./RecommendationSection";
@@ -138,6 +138,88 @@ describe("RecommendationSection", () => {
       expect(
         screen.getByText("recommendationMethod.label"),
       ).toBeInTheDocument();
+    });
+
+    it("pre-populates merit-review-only radio button when provided", () => {
+      render(
+        <RecommendationSection
+          mode="edit"
+          recommendationMethod="merit_review_ranking_only"
+        />,
+      );
+
+      const meritOnlyRadio = screen.getByLabelText(
+        "recommendationMethod.meritReviewOnly",
+      ) as HTMLInputElement;
+      const meritOtherRadio = screen.getByLabelText(
+        "recommendationMethod.meritReviewOther",
+      ) as HTMLInputElement;
+
+      expect(meritOnlyRadio.checked).toBe(true);
+      expect(meritOtherRadio.checked).toBe(false);
+    });
+
+    it("pre-populates merit-review-other radio button when provided", () => {
+      render(
+        <RecommendationSection
+          mode="edit"
+          recommendationMethod="merit_review_ranking_with_other_factors"
+        />,
+      );
+
+      const meritOnlyRadio = screen.getByLabelText(
+        "recommendationMethod.meritReviewOnly",
+      ) as HTMLInputElement;
+      const meritOtherRadio = screen.getByLabelText(
+        "recommendationMethod.meritReviewOther",
+      ) as HTMLInputElement;
+
+      expect(meritOnlyRadio.checked).toBe(false);
+      expect(meritOtherRadio.checked).toBe(true);
+    });
+
+    it("allows changing radio button selection", () => {
+      render(
+        <RecommendationSection
+          mode="edit"
+          recommendationMethod="merit_review_ranking_only"
+        />,
+      );
+
+      const meritOnlyRadio = screen.getByLabelText(
+        "recommendationMethod.meritReviewOnly",
+      ) as HTMLInputElement;
+      const meritOtherRadio = screen.getByLabelText(
+        "recommendationMethod.meritReviewOther",
+      ) as HTMLInputElement;
+
+      expect(meritOnlyRadio.checked).toBe(true);
+      expect(meritOtherRadio.checked).toBe(false);
+
+      fireEvent.click(meritOtherRadio);
+
+      expect(meritOnlyRadio.checked).toBe(false);
+      expect(meritOtherRadio.checked).toBe(true);
+    });
+
+    it("pre-populates textareas with provided values", () => {
+      render(
+        <RecommendationSection
+          mode="edit"
+          recommendationMethodDetails="Test details"
+          otherKeyInformation="Test info"
+        />,
+      );
+
+      const detailsTextarea = screen.getByTestId(
+        "award-selection-details-textarea",
+      );
+      const otherInfoTextarea = screen.getByTestId(
+        "other-key-information-textarea",
+      );
+
+      expect(detailsTextarea).toHaveValue("Test details");
+      expect(otherInfoTextarea).toHaveValue("Test info");
     });
   });
 

@@ -83,6 +83,15 @@ jest.mock("next-intl", () => ({
   useTranslations: () => identity,
 }));
 
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: jest.fn(() => ({
+    clientFetch: jest.fn().mockResolvedValue({
+      data: [],
+      pagination_info: { total_pages: 1 },
+    }),
+  })),
+}));
+
 const awardRecommendationParams = Promise.resolve({
   locale: "en",
   id: "AR-26-0001",

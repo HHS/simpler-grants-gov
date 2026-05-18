@@ -3,9 +3,11 @@
 import { useClientFetch } from "src/hooks/useClientFetch";
 
 import { useEffect, useState } from "react";
-import { GridContainer, Pagination } from "@trussworks/react-uswds";
+import { Pagination } from "@trussworks/react-uswds";
 
 import { PopoverMenu } from "src/components/PopoverMenu";
+import SimplerAlert from "src/components/SimplerAlert";
+import Spinner from "src/components/Spinner";
 import {
   TableCellData,
   TableWithResponsiveHeader,
@@ -25,10 +27,12 @@ export const AwardRecommendationAttachments = ({
   const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState<boolean>(false);
   const { clientFetch } = useClientFetch("Error fetching risks");
 
-  useEffect(() => {
+  const fetchRisks = async () => {
     setLoading(true);
+    setApiError(false);
     const pagination = {
       page_offset: page,
       page_size: pageSize,
@@ -39,17 +43,28 @@ export const AwardRecommendationAttachments = ({
         },
       ],
     };
-    clientFetch(`/api/award-recommendations/${awardRecommendationId}/risks`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pagination }),
-    })
-      .then((responseBody: any) => {
-        setRisks(responseBody.data || []);
-        setTotalPages(responseBody.pagination_info?.total_pages || 1);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    try {
+      const responseBody: any = await clientFetch(
+        `/api/award-recommendations/${awardRecommendationId}/risks`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pagination }),
+        },
+      );
+      setRisks(responseBody.data || []);
+      setTotalPages(responseBody.pagination_info?.total_pages || 1);
+    } catch (error) {
+      setApiError(true);
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRisks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [awardRecommendationId, page, pageSize, clientFetch]);
 
   // Standard and program terms & conditions table (empty)
@@ -88,8 +103,22 @@ export const AwardRecommendationAttachments = ({
               <PopoverMenu>
                 <button
                   className="usa-button usa-button--unstyled width-full text-left padding-y-1 padding-x-2 hover:bg-base-lighter"
-                  onClick={() => {
-                    /* TODO: implement delete risk logic */
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      await clientFetch(
+                        `/api/award-recommendations/${awardRecommendationId}/risks/${risk.award_recommendation_risk_id}`,
+                        {
+                          method: "DELETE",
+                          headers: { "Content-Type": "application/json" },
+                        },
+                      );
+                      await fetchRisks();
+                    } catch (error) {
+                      setApiError(true);
+                      console.error(error);
+                      setLoading(false);
+                    }
                   }}
                   type="button"
                 >
@@ -138,10 +167,24 @@ export const AwardRecommendationAttachments = ({
       <h3 className="margin-top-6 margin-bottom-1">
         Specific risks & recommended conditions
       </h3>
-      <TableWithResponsiveHeader
-        headerContent={risksHeaders}
-        tableRowData={risksRows}
-      />
+      {apiError && (
+        <SimplerAlert
+          alertClick={() => setApiError(false)}
+          buttonId="risks-error-alert"
+          messageText="Unable to load or update risks. Please try again."
+          type="error"
+        />
+      )}
+      {loading ? (
+        <div className="display-flex flex-justify-center padding-y-4">
+          <Spinner className="height-3 width-3" />
+        </div>
+      ) : (
+        <TableWithResponsiveHeader
+          headerContent={risksHeaders}
+          tableRowData={risksRows}
+        />
+      )}
       <Pagination
         pathname=""
         totalPages={totalPages}

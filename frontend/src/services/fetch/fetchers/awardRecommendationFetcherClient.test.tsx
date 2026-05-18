@@ -1,8 +1,15 @@
-import { getAwardRecommendationRisks } from "./awardRecommendationFetcherClient";
+import {
+  deleteAwardRecommendationRisk,
+  getAwardRecommendationRisks,
+} from "./awardRecommendationFetcherClient";
 
 global.fetch = jest.fn();
 
 describe("getAwardRecommendationRisks", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("fetches and returns risks and pagination info", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       json: async () => ({
@@ -35,5 +42,53 @@ describe("getAwardRecommendationRisks", () => {
         "token",
       ),
     ).rejects.toThrow("fail");
+  });
+});
+
+describe("deleteAwardRecommendationRisk", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("deletes risk successfully", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: "Risk deleted successfully" }),
+    });
+    const result = await deleteAwardRecommendationRisk(
+      "award-id",
+      "risk-id",
+      "token",
+    );
+    expect(result.success).toBe(true);
+    expect(result.message).toBe("Risk deleted successfully");
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining("award-id/risks/risk-id"),
+      expect.objectContaining({
+        method: "DELETE",
+        headers: expect.objectContaining({ "X-SGG-Token": "token" }),
+      }),
+    );
+  });
+
+  it("handles delete failure", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: false,
+      json: async () => ({ message: "Delete failed" }),
+    });
+    const result = await deleteAwardRecommendationRisk(
+      "award-id",
+      "risk-id",
+      "token",
+    );
+    expect(result.success).toBe(false);
+    expect(result.message).toBe("Delete failed");
+  });
+
+  it("handles fetch error", async () => {
+    (global.fetch as jest.Mock).mockRejectedValue(new Error("Network error"));
+    await expect(
+      deleteAwardRecommendationRisk("award-id", "risk-id", "token"),
+    ).rejects.toThrow("Network error");
   });
 });

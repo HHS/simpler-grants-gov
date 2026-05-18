@@ -27,3 +27,26 @@ export const getAwardRecommendationRisks = async (
     paginationInfo: responseBody.pagination_info,
   };
 };
+
+export const deleteAwardRecommendationRisk = async (
+  awardRecommendationId: string,
+  riskId: string,
+  token: string,
+): Promise<{ success: boolean; message?: string }> => {
+  const apiBase = environment.API_URL || "";
+  const response = await fetch(
+    `${apiBase}/alpha/award-recommendations/${awardRecommendationId}/risks/${riskId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "X-SGG-Token": token,
+      },
+    },
+  );
+  const responseBody = await response.json();
+  return {
+    success: response.ok,
+    message: responseBody?.message,
+  };
+};
