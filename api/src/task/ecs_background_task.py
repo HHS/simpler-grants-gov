@@ -27,11 +27,11 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
     - write new ECS task code without thinking about the boilerplate
 
     Usage:
+        The JobType enum is used to pass the task name into the ecs_background_task. A task
+        "my-cool-task" is translated to JobType.MY_COOL_TASK
 
-        TASK_NAME = "my-cool-task"
-
-        @task_blueprint.cli.command(TASK_NAME, help="For running my cool task")
-        @ecs_background_task(TASK_NAME)
+        @task_blueprint.cli.command("my-cool-task", help="For running my cool task")
+        @ecs_background_task(JobType.MY_COOL_TASK)
         @flask_db.with_db_session()
         def entrypoint(db_session: db.Session):
             do_cool_stuff()
