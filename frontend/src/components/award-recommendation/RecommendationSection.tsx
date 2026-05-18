@@ -24,10 +24,6 @@ export const RecommendationSection = ({
     recommendationMethod || "",
   );
 
-  useEffect(() => {
-    setSelectedMethod(recommendationMethod || "");
-  }, [recommendationMethod]);
-
   // Edit mode: form inputs without borders
   if (mode === "edit") {
     return (
