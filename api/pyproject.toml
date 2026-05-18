@@ -43,7 +43,7 @@ dependencies = [
     "common-grants-sdk~=0.6.0",
     "PyYAML>=6.0.3,<7",
     "jsonref>=1.1.0,<2",
-    "urllib3>=2.6.3,<3",
+    "urllib3>=2.7.0,<3",
     "python-statemachine>=3.0.0,<4",
     "beautifulsoup4>=4.14.3,<5",
 ]
@@ -56,6 +56,7 @@ db-seed-local = "tests.lib.seed_local_db:seed_local_db"
 create-erds = "bin.create_erds:main"
 create-workflow-diagrams = "bin.create_workflow_diagrams:main"
 setup-postgres-db = "src.db.migrations.setup_local_postgres_db:setup_local_postgres_db"
+setup-local-dynamodb = "src.db.setup_local_dynamodb:setup_local_dynamodb"
 dat-to-jsonschema = "src.form_schema.dat_to_jsonschema_cli:main"
 validate-simpler-endpoints = "tests.validate_legacy_soap_api.validate_soap_endpoints:validate_simpler_endpoints"
 seed-local-soap-certificate = "tests.lib.seed_local_soap_certificate:seed_local_soap_certificate"

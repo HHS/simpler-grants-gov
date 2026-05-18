@@ -587,7 +587,7 @@ class TestOpportunityNotification:
                         "after": [{"attachment_id": 2}],
                     }
                 },
-                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were added.<br>',
+                '<p style="padding-left: 20px;"><strong>Documents</strong></p><p style="padding-left: 40px;">•  One or more new documents were added.<br>',
             ),
             (
                 {
@@ -596,7 +596,7 @@ class TestOpportunityNotification:
                         "after": [],
                     }
                 },
-                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were removed.<br>',
+                '<p style="padding-left: 20px;"><strong>Documents</strong></p><p style="padding-left: 40px;">•  One or more new documents were removed.<br>',
             ),
             (
                 {
@@ -605,11 +605,11 @@ class TestOpportunityNotification:
                         "after": [{"attachment_id": 2}],
                     }
                 },
-                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  One or more new documents were added.<br><p style="padding-left: 40px;">•  One or more new documents were removed.<br>',
+                '<p style="padding-left: 20px;"><strong>Documents</strong></p><p style="padding-left: 40px;">•  One or more new documents were added.<br><p style="padding-left: 40px;">•  One or more new documents were removed.<br>',
             ),
             (
                 {"additional_info_url": {"before": "grants.gov", "after": "simpler-grants.gov"}},
-                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br>',
+                '<p style="padding-left: 20px;"><strong>Documents</strong></p><p style="padding-left: 40px;">•  A link to additional information was updated.<br>',
             ),
         ],
     )
@@ -622,7 +622,6 @@ class TestOpportunityNotification:
         notification_task,
     ):
         res = notification_task._build_documents_fields(documents_diffs)
-
         assert res == expected_html
 
     @pytest.mark.parametrize(
@@ -630,19 +629,19 @@ class TestOpportunityNotification:
         [
             (
                 {"before": OpportunityStatus.POSTED, "after": OpportunityStatus.CLOSED},
-                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>',
+                '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>',
             ),
             (
                 {"before": OpportunityStatus.FORECASTED, "after": OpportunityStatus.ARCHIVED},
-                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Archived.<br>',
+                '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Forecasted to Archived.<br>',
             ),
             (
                 {"before": OpportunityStatus.FORECASTED, "after": None},
-                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to not specified.<br>',
+                '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Forecasted to not specified.<br>',
             ),
             (
                 {"before": None, "after": OpportunityStatus.ARCHIVED},
-                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from not specified to Archived.<br>',
+                '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from not specified to Archived.<br>',
             ),
         ],
     )
@@ -664,23 +663,23 @@ class TestOpportunityNotification:
             (
                 {"close_date": {"before": "2035-10-10", "after": "2035-10-30"}},
                 None,
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2035 to October 30, 2035.<br>',
+                '<p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2035 to October 30, 2035.<br>',
             ),
             (
                 {"close_date": {"before": "2025-10-10", "after": None}},
                 {"before": OpportunityStatus.POSTED, "after": OpportunityStatus.FORECASTED},
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2025 to not specified.<br>',
+                '<p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2025 to not specified.<br>',
             ),
             # forecasted_award_date
             (
                 {"forecasted_award_date": {"before": "2030-1-6", "after": "2031-5-3"}},
                 None,
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from January 6, 2030 to May 3, 2031.<br>',
+                '<p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The estimated award date changed from January 6, 2030 to May 3, 2031.<br>',
             ),
             (
                 {"forecasted_award_date": {"before": None, "after": "2026-9-11"}},
                 {"before": OpportunityStatus.POSTED, "after": OpportunityStatus.FORECASTED},
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated award date changed from not specified to September 11, 2026.<br>',
+                '<p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The estimated award date changed from not specified to September 11, 2026.<br>',
             ),
             # forecasted_project_start_date
             (
@@ -691,23 +690,23 @@ class TestOpportunityNotification:
                     }
                 },
                 None,
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from January 7, 2027 to May 3, 2031.<br>',
+                '<p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The estimated project start date changed from January 7, 2027 to May 3, 2031.<br>',
             ),
             (
                 {"forecasted_project_start_date": {"before": None, "after": "2028-1-7"}},
                 {"before": OpportunityStatus.POSTED, "after": OpportunityStatus.FORECASTED},
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The estimated project start date changed from not specified to January 7, 2028.<br>',
+                '<p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The estimated project start date changed from not specified to January 7, 2028.<br>',
             ),
             # fiscal_year
             (
                 {"fiscal_year": {"before": 2050, "after": 2051}},
                 None,
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The fiscal year changed from 2050 to 2051.<br>',
+                '<p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The fiscal year changed from 2050 to 2051.<br>',
             ),
             (
                 {"fiscal_year": {"before": 2033, "after": None}},
                 None,
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The fiscal year changed from 2033 to not specified.<br>',
+                '<p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The fiscal year changed from 2033 to not specified.<br>',
             ),
             (
                 {"fiscal_year": {"before": 2033, "after": None}},
@@ -730,7 +729,7 @@ class TestOpportunityNotification:
                     "close_date": {"before": "2035-10-10", "after": "2035-10-30"},
                 },
                 {"before": OpportunityStatus.FORECASTED, "after": OpportunityStatus.POSTED},
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2035 to October 30, 2035.<br>',
+                '<p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The application due date changed from October 10, 2035 to October 30, 2035.<br>',
             ),
         ],
     )
@@ -751,11 +750,11 @@ class TestOpportunityNotification:
         [  # estimated_total_program_funding only
             (
                 {"estimated_total_program_funding": {"before": 500_000, "after": None}},
-                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $500,000 to not specified.<br>',
+                '<p style="padding-left: 20px;"><strong>Awards details</strong></p><p style="padding-left: 40px;">•  Program funding changed from $500,000 to not specified.<br>',
             ),
             (
                 {"expected_number_of_awards": {"before": None, "after": 3}},
-                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  The number of expected awards changed from not specified to 3.<br>',
+                '<p style="padding-left: 20px;"><strong>Awards details</strong></p><p style="padding-left: 40px;">•  The number of expected awards changed from not specified to 3.<br>',
             ),
             # multiple award fields
             (
@@ -763,7 +762,7 @@ class TestOpportunityNotification:
                     "award_floor": {"before": 500_000, "after": 200_000},
                     "award_ceiling": {"before": 1_000_000, "after": 500_000},
                 },
-                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  The award minimum changed from $500,000 to $200,000.<br><p style="padding-left: 40px;">•  The award maximum changed from $1,000,000 to $500,000.<br>',
+                '<p style="padding-left: 20px;"><strong>Awards details</strong></p><p style="padding-left: 40px;">•  The award minimum changed from $500,000 to $200,000.<br><p style="padding-left: 40px;">•  The award maximum changed from $1,000,000 to $500,000.<br>',
             ),
         ],
     )
@@ -784,7 +783,7 @@ class TestOpportunityNotification:
         [
             (
                 {"is_cost_sharing": {"before": True, "after": None}},
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to not specified.<br>',
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to not specified.<br>',
             ),
             (
                 {
@@ -793,15 +792,15 @@ class TestOpportunityNotification:
                         "after": [FundingInstrument.OTHER],
                     }
                 },
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The funding instrument type has changed from Grant to Other.<br>',
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p><p style="padding-left: 40px;">•  The funding instrument type has changed from Grant to Other.<br>',
             ),
             (
                 {"category": {"before": OpportunityCategory.OTHER, "after": None}},
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
             ),
             (
                 {"category_explanation": {"before": None, "after": "to be determined"}},
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>',
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p><p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>',
             ),
             # Skip category_explanation if Category changes from Other to any other category or none
             (
@@ -812,14 +811,14 @@ class TestOpportunityNotification:
                     },
                     "category_explanation": {"before": "to be determined", "after": None},
                 },
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to Mandatory.<br>',
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to Mandatory.<br>',
             ),
             (
                 {
                     "category": {"before": OpportunityCategory.OTHER, "after": None},
                     "category_explanation": {"before": "to be determined", "after": None},
                 },
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p><p style="padding-left: 40px;">•  The opportunity category has changed from Other to not specified.<br>',
             ),
             (
                 {
@@ -829,7 +828,7 @@ class TestOpportunityNotification:
                     },
                     "category_explanation": {"before": None, "after": "To be determined"},
                 },
-                '<p style="padding-left: 20px;">Categorization</p>'
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p>'
                 '<p style="padding-left: 40px;">•  The opportunity category has changed from Discretionary to Other.<br>'
                 '<p style="padding-left: 40px;">•  Opportunity category explanation has changed from not specified to To be determined.<br>',
             ),
@@ -840,7 +839,7 @@ class TestOpportunityNotification:
                         "after": [FundingCategory.OTHER],
                     }
                 },
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Opportunity zone benefits to Other.<br>',
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p><p style="padding-left: 40px;">•  The category of funding activity has changed from Opportunity zone benefits to Other.<br>',
             ),
             # Skip category_explanation if funding_categories changes from Other to any other category or none
             (
@@ -851,7 +850,7 @@ class TestOpportunityNotification:
                     },
                     "funding_category_description": {"before": "to be determined", "after": None},
                 },
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  The category of funding activity has changed from Other to Energy.<br>',
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p><p style="padding-left: 40px;">•  The category of funding activity has changed from Other to Energy.<br>',
             ),
             (
                 {
@@ -861,7 +860,7 @@ class TestOpportunityNotification:
                     },
                     "funding_category_description": {"before": None, "after": "To be determined"},
                 },
-                '<p style="padding-left: 20px;">Categorization</p>'
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p>'
                 '<p style="padding-left: 40px;">•  The category of funding activity has changed from Education to Other.<br>'
                 '<p style="padding-left: 40px;">•  The funding activity category explanation has been changed from not specified to To be determined.<br>',
             ),
@@ -876,7 +875,7 @@ class TestOpportunityNotification:
                         "after": None,
                     },
                 },
-                '<p style="padding-left: 20px;">Categorization</p>'
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p>'
                 '<p style="padding-left: 40px;">•  The category of funding activity has changed from not specified to Education.<br>'
                 '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant to not specified.<br>',
             ),
@@ -898,7 +897,7 @@ class TestOpportunityNotification:
         [
             (
                 {"agency_email_address": {"before": None, "after": "contact@simpler.gov"}},
-                '<p style="padding-left: 20px;">Grantor contact information</p>'
+                '<p style="padding-left: 20px;"><strong>Grantor contact information</strong></p>'
                 '<p style="padding-left: 40px;">•  The updated email address is contact@simpler.gov.<br>',
             ),
             (
@@ -908,7 +907,7 @@ class TestOpportunityNotification:
                         "after": None,
                     }
                 },
-                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: not specified.<br>',
+                '<p style="padding-left: 20px;"><strong>Grantor contact information</strong></p><p style="padding-left: 40px;">•  New description: not specified.<br>',
             ),  # Truncate
             (
                 {
@@ -917,7 +916,7 @@ class TestOpportunityNotification:
                         "after": "For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199.\n Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding weekends and federal holidays.",
                     }
                 },
-                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199.<br> Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding...<br>',
+                '<p style="padding-left: 20px;"><strong>Grantor contact information</strong></p><p style="padding-left: 40px;">•  New description: For additional information about this funding opportunity, please reach out to the Program Office by emailing researchgrants@exampleagency.gov or calling 1-800-555-0199.<br> Assistance is available Monday through Friday, 8:30 AM–5:00 PM ET, excluding...<br>',
             ),
         ],
     )
@@ -947,14 +946,14 @@ class TestOpportunityNotification:
                         "after": [ApplicantType.STATE_GOVERNMENTS],
                     }
                 },
-                '<p style="padding-left: 20px;">Eligibility</p>'
+                '<p style="padding-left: 20px;"><strong>Eligibility</strong></p>'
                 '<p style="padding-left: 40px;">•  Additional eligibility criteria include: [State governments].<br>'
                 '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Other, Public and state institutions of higher education].<br>',
             ),
             # Add
             (
                 {"applicant_eligibility_description": {"before": None, "after": "not decided"}},
-                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was added.<br>',
+                '<p style="padding-left: 20px;"><strong>Eligibility</strong></p><p style="padding-left: 40px;">•  Additional information was added.<br>',
             ),
             # Update
             (
@@ -964,12 +963,12 @@ class TestOpportunityNotification:
                         "after": "business only",
                     }
                 },
-                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was changed.<br>',
+                '<p style="padding-left: 20px;"><strong>Eligibility</strong></p><p style="padding-left: 40px;">•  Additional information was changed.<br>',
             ),
             # Delete
             (
                 {"applicant_eligibility_description": {"before": "Business", "after": None}},
-                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional information was deleted.<br>',
+                '<p style="padding-left: 20px;"><strong>Eligibility</strong></p><p style="padding-left: 40px;">•  Additional information was deleted.<br>',
             ),
             (
                 {
@@ -981,7 +980,7 @@ class TestOpportunityNotification:
                         "after": None,
                     }
                 },
-                '<p style="padding-left: 20px;">Eligibility</p>'
+                '<p style="padding-left: 20px;"><strong>Eligibility</strong></p>'
                 '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Other, Public and state institutions of higher education].<br>',
             ),
         ],
@@ -1009,7 +1008,7 @@ class TestOpportunityNotification:
                     "before": "testing",
                     "after": "The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entities.",
                 },
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entiti<a href="http://testhost:3000/opportunity/7f3c6a9e-4d2b-4e3a-9a7f-8c4c9f5d2b61" style="color:blue;">...Read full description</a></div><br>',
+                '<p style="padding-left: 20px;"><strong>Description</strong></p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">The Climate Innovation Research Grant supports groundbreaking projects aimed at reducing greenhouse gas emissions through renewable energy, sustainable agriculture, and carbon capture technologies. Open to institutions, nonprofits, and private entiti<a href="http://testhost:3000/opportunity/7f3c6a9e-4d2b-4e3a-9a7f-8c4c9f5d2b61" style="color:blue;">...Read full description</a></div><br>',
             ),
             # Truncate with html tag
             (
@@ -1017,7 +1016,7 @@ class TestOpportunityNotification:
                     "before": "testing",
                     "after": '<p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainable agriculture</strong>, and <u>carbon capture technologies</u>. Open to institutions, nonprofits, and private entities.</p>',
                 },
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;"><p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainable agriculture</strong>, and <u>carbon capture technologies</u>. Open to institutions, nonprofits, and private entit<a href="http://testhost:3000/opportunity/7f3c6a9e-4d2b-4e3a-9a7f-8c4c9f5d2b61" style="color:blue;">...Read full description</a></p></div><br>',
+                '<p style="padding-left: 20px;"><strong>Description</strong></p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;"><p> The <strong>Climate Innovation Research Grant</strong> supports groundbreaking projects aimed at reducing <em>greenhouse gas</em> emissions through <a href="https://example.org/renewables">renewable energy</a>,<strong class="highlight"> sustainable agriculture</strong>, and <u>carbon capture technologies</u>. Open to institutions, nonprofits, and private entit<a href="http://testhost:3000/opportunity/7f3c6a9e-4d2b-4e3a-9a7f-8c4c9f5d2b61" style="color:blue;">...Read full description</a></p></div><br>',
             ),
         ],
     )
@@ -1041,7 +1040,7 @@ class TestOpportunityNotification:
                 OpportunityVersionChange(
                     opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_STATUS
                 ),
-                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>',
+                '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>',
             ),
             # Update non-tracked field
             (
@@ -1058,7 +1057,7 @@ class TestOpportunityNotification:
                     OpportunityVersionChange(
                         opportunity_id=OPAL.opportunity_id, previous=OPAL, latest=OPAL_NO_SUMMARY
                     ),
-                    '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to not specified.<br><br><p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from September 1, 2026 to not specified.<br><br><p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $15,000,000 to not specified.<br><p style="padding-left: 40px;">•  The number of expected awards changed from 3 to not specified.<br><p style="padding-left: 40px;">•  The award minimum changed from $50,000 to not specified.<br><p style="padding-left: 40px;">•  The award maximum changed from $5,000,000 to not specified.<br><br><p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to not specified.<br><p style="padding-left: 40px;">•  The funding instrument type has changed from Cooperative agreement to not specified.<br><p style="padding-left: 40px;">•  The category of funding activity has changed from Education to not specified.<br><br><p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: not specified.<br><br><p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and state institutions of higher education].<br><p style="padding-left: 40px;">•  Additional information was deleted.<br>',
+                    '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Open to not specified.<br><br><p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The application due date changed from September 1, 2026 to not specified.<br><br><p style="padding-left: 20px;"><strong>Awards details</strong></p><p style="padding-left: 40px;">•  Program funding changed from $15,000,000 to not specified.<br><p style="padding-left: 40px;">•  The number of expected awards changed from 3 to not specified.<br><p style="padding-left: 40px;">•  The award minimum changed from $50,000 to not specified.<br><p style="padding-left: 40px;">•  The award maximum changed from $5,000,000 to not specified.<br><br><p style="padding-left: 20px;"><strong>Categorization</strong></p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to not specified.<br><p style="padding-left: 40px;">•  The funding instrument type has changed from Cooperative agreement to not specified.<br><p style="padding-left: 40px;">•  The category of funding activity has changed from Education to not specified.<br><br><p style="padding-left: 20px;"><strong>Grantor contact information</strong></p><p style="padding-left: 40px;">•  New description: not specified.<br><br><p style="padding-left: 20px;"><strong>Eligibility</strong></p><p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and state institutions of higher education].<br><p style="padding-left: 40px;">•  Additional information was deleted.<br>',
                 )
             ),
             # OpportunitySummary  Added. Though should not be the case
@@ -1067,7 +1066,7 @@ class TestOpportunityNotification:
                     OpportunityVersionChange(
                         opportunity_id=OPAL.opportunity_id, previous=OPAL_NO_SUMMARY, latest=OPAL
                     ),
-                    '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from not specified to Open.<br><br><p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from not specified to September 1, 2026.<br><br><p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from not specified to $15,000,000.<br><p style="padding-left: 40px;">•  The number of expected awards changed from not specified to 3.<br><p style="padding-left: 40px;">•  The award minimum changed from not specified to $50,000.<br><p style="padding-left: 40px;">•  The award maximum changed from not specified to $5,000,000.<br><br><p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from not specified to Yes.<br><p style="padding-left: 40px;">•  The funding instrument type has changed from not specified to Cooperative agreement.<br><p style="padding-left: 40px;">•  The category of funding activity has changed from not specified to Education.<br><br><p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  New description: customer service.<br><br><p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br><p style="padding-left: 40px;">•  Additional information was added.<br>',
+                    '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from not specified to Open.<br><br><p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The application due date changed from not specified to September 1, 2026.<br><br><p style="padding-left: 20px;"><strong>Awards details</strong></p><p style="padding-left: 40px;">•  Program funding changed from not specified to $15,000,000.<br><p style="padding-left: 40px;">•  The number of expected awards changed from not specified to 3.<br><p style="padding-left: 40px;">•  The award minimum changed from not specified to $50,000.<br><p style="padding-left: 40px;">•  The award maximum changed from not specified to $5,000,000.<br><br><p style="padding-left: 20px;"><strong>Categorization</strong></p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from not specified to Yes.<br><p style="padding-left: 40px;">•  The funding instrument type has changed from not specified to Cooperative agreement.<br><p style="padding-left: 40px;">•  The category of funding activity has changed from not specified to Education.<br><br><p style="padding-left: 20px;"><strong>Grantor contact information</strong></p><p style="padding-left: 40px;">•  New description: customer service.<br><br><p style="padding-left: 20px;"><strong>Eligibility</strong></p><p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br><p style="padding-left: 40px;">•  Additional information was added.<br>',
                 )
             ),
         ],
@@ -1099,13 +1098,14 @@ class TestOpportunityNotification:
                 UserOpportunityUpdateContent(
                     subject="Your saved funding opportunities changed on Simpler.Grants.gov",
                     message=(
-                        f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}{UTM_TAG}' target='_blank'>Opal 2025 Awards</a><br><br>Here’s what changed:</div>"
-                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
-                        f"<div>2. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
-                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
-                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
+                        f"The following funding opportunities recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{OPAL.opportunity_id}{UTM_TAG}' target='_blank'>Opal 2025 Awards</a><br><br></div>"
+                        '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Open to Closed.<br>'
+                        f"<div>2. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br></div>"
+                        '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
+                        "<div>Please carefully read the opportunity listing pages to review all changes.<br><br>"
                         f"<a href='http://testhost:3000{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
-                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
+                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div><br>"
+                        f"<div>Manage which updates you receive in your <a href='http://testhost:3000/notifications{UTM_TAG}' target='_blank' style='color:blue; text-decoration: underline;'>notification preferences</a>.</div>"
                     ),
                     updated_opportunity_ids=[OPAL.opportunity_id, TOPAZ.opportunity_id],
                 ),
@@ -1123,11 +1123,12 @@ class TestOpportunityNotification:
                 UserOpportunityUpdateContent(
                     subject="Your saved funding opportunity changed on Simpler.Grants.gov",
                     message=(
-                        f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
-                        '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
-                        "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
+                        f"The following funding opportunity recently changed:<br><br><div><a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br></div>"
+                        '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br>'
+                        "<div>Please carefully read the opportunity listing pages to review all changes.<br><br>"
                         f"<a href='http://testhost:3000{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
-                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
+                        "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div><br>"
+                        f"<div>Manage which updates you receive in your <a href='http://testhost:3000/notifications{UTM_TAG}' target='_blank' style='color:blue; text-decoration: underline;'>notification preferences</a>.</div>"
                     ),
                     updated_opportunity_ids=[TOPAZ.opportunity_id],
                 ),
@@ -1152,7 +1153,6 @@ class TestOpportunityNotification:
         notification_task,
     ):
         res = notification_task._build_notification_content(version_changes)
-
         assert res == expected
 
     def test_build_notification_content_all_changes(
@@ -1193,27 +1193,28 @@ class TestOpportunityNotification:
         expected = UserOpportunityUpdateContent(
             subject="Your saved funding opportunity changed on Simpler.Grants.gov",
             message=(
-                f"The following funding opportunity recently changed:<br><br><div>1. <a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br>Here’s what changed:</div>"
-                '<p style="padding-left: 20px;">Status</p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
-                '<p style="padding-left: 20px;">Important dates</p><p style="padding-left: 40px;">•  The application due date changed from November 30, 2025 to not specified.<br><br>'
-                '<p style="padding-left: 20px;">Awards details</p><p style="padding-left: 40px;">•  Program funding changed from $10,000,000 to $12,000,000.<br>'
+                f"The following funding opportunity recently changed:<br><br><div><a href='http://testhost:3000/opportunity/{TOPAZ.opportunity_id}{UTM_TAG}' target='_blank'>Topaz 2025 Climate Research Grant</a><br><br></div>"
+                '<p style="padding-left: 20px;"><strong>Status</strong></p><p style="padding-left: 40px;">•  The status changed from Forecasted to Closed.<br><br>'
+                '<p style="padding-left: 20px;"><strong>Important dates</strong></p><p style="padding-left: 40px;">•  The application due date changed from November 30, 2025 to not specified.<br><br>'
+                '<p style="padding-left: 20px;"><strong>Awards details</strong></p><p style="padding-left: 40px;">•  Program funding changed from $10,000,000 to $12,000,000.<br>'
                 '<p style="padding-left: 40px;">•  The number of expected awards changed from 7 to 5.<br>'
                 '<p style="padding-left: 40px;">•  The award minimum changed from $100,000 to $200,000.<br>'
                 '<p style="padding-left: 40px;">•  The award maximum changed from $2,500,000 to $3,000,000.<br><br>'
-                '<p style="padding-left: 20px;">Categorization</p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
+                '<p style="padding-left: 20px;"><strong>Categorization</strong></p><p style="padding-left: 40px;">•  Cost sharing or matching requirement has changed from Yes to No.<br>'
                 '<p style="padding-left: 40px;">•  The funding instrument type has changed from Grant, Cooperative agreement to Grant.<br>'
                 '<p style="padding-left: 40px;">•  The opportunity category has changed from Mandatory to Discretionary.<br>'
                 '<p style="padding-left: 40px;">•  The category of funding activity has changed from Science technology and other research and development, Environment to Energy.<br><br>'
-                '<p style="padding-left: 20px;">Grantor contact information</p><p style="padding-left: 40px;">•  The updated email address is john.smith@gmail.com.<br>'
+                '<p style="padding-left: 20px;"><strong>Grantor contact information</strong></p><p style="padding-left: 40px;">•  The updated email address is john.smith@gmail.com.<br>'
                 '<p style="padding-left: 40px;">•  New description: grant manager.<br><br>'
-                '<p style="padding-left: 20px;">Eligibility</p><p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br>'
+                '<p style="padding-left: 20px;"><strong>Eligibility</strong></p><p style="padding-left: 40px;">•  Additional eligibility criteria include: [Public and state institutions of higher education].<br>'
                 '<p style="padding-left: 40px;">•  Removed eligibility criteria include: [Public and indian housing authorities].<br>'
                 '<p style="padding-left: 40px;">•  Additional information was changed.<br><br>'
-                '<p style="padding-left: 20px;">Documents</p><p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
-                '<p style="padding-left: 20px;">Description</p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">Climate research in mars</div><br>'
-                "<div><strong>Please carefully read the opportunity listing pages to review all changes.</strong><br><br>"
+                '<p style="padding-left: 20px;"><strong>Documents</strong></p><p style="padding-left: 40px;">•  A link to additional information was updated.<br><br>'
+                '<p style="padding-left: 20px;"><strong>Description</strong></p><p style="padding-left: 40px;">•  <i>New Description:</i><div style="padding-left: 40px;">Climate research in mars</div><br>'
+                "<div>Please carefully read the opportunity listing pages to review all changes.<br><br>"
                 f"<a href='http://testhost:3000{UTM_TAG}' target='_blank' style='color:blue;'>Sign in to Simpler.Grants.gov to manage your saved opportunities.</a></div>"
-                "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div>"
+                "<div>If you have questions, please contact the Grants.gov Support Center:<br><br><a href='mailto:support@grants.gov'>support@grants.gov</a><br>1-800-518-4726<br>24 hours a day, 7 days a week<br>Closed on federal holidays</div><br>"
+                f"<div>Manage which updates you receive in your <a href='http://testhost:3000/notifications{UTM_TAG}' target='_blank' style='color:blue; text-decoration: underline;'>notification preferences</a>.</div>"
             ),
             updated_opportunity_ids=[TOPAZ.opportunity_id],
         )
@@ -1225,7 +1226,6 @@ class TestOpportunityNotification:
                 )
             ]
         )
-
         assert res == expected
 
     def test_get_latest_opportunity_versions_suppressed(

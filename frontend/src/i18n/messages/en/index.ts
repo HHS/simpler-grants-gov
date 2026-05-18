@@ -433,6 +433,7 @@ export const messages = {
     },
     attachments: {
       removeButton: "Remove",
+      uploadLabel: "Upload files",
       errorHeading: "Upload error",
       errorUploadFailed: "Failed to upload {fileName}.",
       errorDeleteFailed: "Failed to delete {fileName}.",
@@ -916,6 +917,12 @@ export const messages = {
       "You'll be redirected to Login.gov to sign in or create an account. Then, you'll return to Simpler.Grants.gov as a signed-in user.",
     button: "Sign in with Login.gov",
     close: "Cancel",
+  },
+  PivRequiredModal: {
+    title: "Your account requires additional identity verification.",
+    description:
+      "You must sign in with your government employee ID. Make sure you've set up your Personal Identity Verification (PIV) or Common Access Card (CAC) as a two-factor authentication method.",
+    button: "Sign in using PIV/CAC",
   },
   Footer: {
     agencyName: "Grants.gov",
