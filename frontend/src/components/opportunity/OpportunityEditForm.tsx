@@ -121,6 +121,57 @@ export default function OpportunityEditForm({
   const validationErrors: OpportunityEditValidationErrors | undefined =
     formState.validationErrors;
 
+  //--- Validations for Award Minimum, Award Minimum and Total Program Funding ---
+  const [frontendErrors, setFrontendErrors] =
+    useState<OpportunityEditValidationErrors>({});
+
+  function setSingleFrontendError<
+    K extends keyof OpportunityEditValidationErrors,
+  >(fieldname: K, error: string | null) {
+    if (!error) {
+      // clear the list of errors for this field
+      setFrontendErrors((currentValues) => ({
+        ...currentValues,
+        [fieldname]: [],
+      }));
+    } else {
+      setFrontendErrors((currentValues) => ({
+        ...currentValues,
+        [fieldname]: [error],
+      }));
+    }
+  }
+
+  const singleFieldValidation = () => {
+    const estTotalFunding = Number(values.estimatedTotalProgramFunding ?? 0);
+    const awardMin = Number(values.awardMinimum ?? 0);
+    const awardMax = Number(values.awardMaximum ?? 0);
+
+    // clear old error messages
+    setSingleFrontendError("awardMinimum", null);
+    setSingleFrontendError("awardMaximum", null);
+    setSingleFrontendError("estimatedTotalProgramFunding", null);
+    const maxLimit = 1000000000000000;
+
+    //--- min & max values for Award Minimum, Award Minimum and Total Program Funding ---
+    if (awardMin < 0 || awardMin >= maxLimit) {
+      const errMsg =
+        t("labels.awardMinimum") + t("validationErrors.currencyInput");
+      setSingleFrontendError("awardMinimum", errMsg);
+    }
+    if (awardMax < 0 || awardMax >= maxLimit) {
+      const errMsg =
+        t("labels.awardMaximum") + t("validationErrors.currencyInput");
+      setSingleFrontendError("awardMaximum", errMsg);
+    }
+    if (estTotalFunding < 0 || estTotalFunding >= maxLimit) {
+      const errMsg =
+        t("labels.estimatedTotalProgramFunding") +
+        t("validationErrors.currencyInput");
+      setSingleFrontendError("estimatedTotalProgramFunding", errMsg);
+    }
+  };
+
   useEffect(() => {
     const form = document.getElementById("opportunity-edit-form");
     if (!form) return;
@@ -163,8 +214,11 @@ export default function OpportunityEditForm({
   function getFieldError(
     fieldName: keyof OpportunityEditValidationErrors,
   ): string | undefined {
-    const fieldErrors = validationErrors?.[fieldName];
-    return fieldErrors?.[0];
+    let fieldErrors = validationErrors?.[fieldName];
+    if (!fieldErrors) {
+      fieldErrors = frontendErrors?.[fieldName];
+    }
+    return fieldErrors?.join(" ");
   }
 
   useEffect(() => {
@@ -234,6 +288,7 @@ export default function OpportunityEditForm({
     },
     {} as Record<string, { label: string; value: string }[]>,
   );
+
   return (
     <form
       id="opportunity-edit-form"
@@ -315,20 +370,20 @@ export default function OpportunityEditForm({
       Object.keys(formState.validationErrors).length > 0 ? (
         <div className="margin-top-2">
           <Alert
-            type="warning"
-            heading={t("content.alerts.validationWarningHeading")}
+            type="error"
+            heading={t("content.alerts.validationErrorHeading")}
             headingLevel="h3"
           >
             <span className="display-block margin-top-1 margin-bottom-1">
-              {t("content.alerts.validationWarningBody")}
+              {t("content.alerts.validationErrorBody")}
             </span>
-            {Object.values(formState.validationErrors)
-              .flat()
-              .map((error, i) => (
-                <span key={i} className="display-block">
-                  {error}
-                </span>
-              ))}
+            {Array.from(
+              new Set(Object.values(formState.validationErrors).flat()),
+            ).map((error, i) => (
+              <span key={i} className="display-block">
+                {error}
+              </span>
+            ))}
           </Alert>
         </div>
       ) : null}
@@ -560,6 +615,7 @@ export default function OpportunityEditForm({
                       event.target.value.replace(/,/g, ""),
                     )
                   }
+                  onBlur={singleFieldValidation}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -589,6 +645,7 @@ export default function OpportunityEditForm({
                       event.target.value.replace(/,/g, ""),
                     )
                   }
+                  onBlur={singleFieldValidation}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -615,6 +672,7 @@ export default function OpportunityEditForm({
                       event.target.value.replace(/,/g, ""),
                     )
                   }
+                  onBlur={singleFieldValidation}
                   className="width-full"
                   disabled={!isDraft}
                 />
