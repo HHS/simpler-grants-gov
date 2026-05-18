@@ -2,15 +2,15 @@
 
 ## [Simpler.Grants.Gov](release-notes.md#simplergrantsgov-hosted-a-public-demonstration) Release Notes - April 3, 2026
 
-April 3rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.04.01-1):&#x20;
+April 3rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.04.01-1):
 
 {% columns %}
 {% column width="25%" %}
-#### Announcement
+**Announcement**
 {% endcolumn %}
 
 {% column width="75%" %}
-### More consistent breadcrumb navigation
+#### More consistent breadcrumb navigation
 
 Since [Simpler.Grants.gov](http://simpler.grants.gov) has added more features and nested pages, it's important that users can quickly understand where they are in relation to other content, how they got there, and how various functionalities relate to each other. This latest release makes our use of breadcrumbs consistent at the top of pages to show the location of the current page within the site structure. The team has removed breadcrumbs where they were not necessary, and standardized them where they are helpful — such as pages nested under the improved Workspace menu.
 {% endcolumn %}
@@ -18,67 +18,67 @@ Since [Simpler.Grants.gov](http://simpler.grants.gov) has added more features an
 
 {% columns %}
 {% column width="25%" %}
-#### Bug Fix
+**Bug Fix**
 {% endcolumn %}
 
 {% column width="75%" %}
-### Fixed root cause of 404 pages on [Simpler.Grants.gov](http://simpler.grants.gov)
+#### Fixed root cause of 404 pages on [Simpler.Grants.gov](http://simpler.grants.gov)
 
 Pages for opportunities, applications, and forms were returning HTTP 200 instead of 404 when resources weren't found. The root cause was incorrect rendering of the function that sets the 404 status code, which was addressed and fixed across 4 pages that had the same bug pattern.
 
-This is a result of a great [open source contribution](https://github.com/HHS/simpler-grants-gov/pull/9301) made by user [vijaygovindaraja](https://github.com/vijaygovindaraja) to address this bug in our backlog - thank you for your contribution!&#x20;
+This is a result of a great [open source contribution](https://github.com/HHS/simpler-grants-gov/pull/9301) made by user [vijaygovindaraja](https://github.com/vijaygovindaraja) to address this bug in our backlog - thank you for your contribution!
 {% endcolumn %}
 {% endcolumns %}
 
 {% columns %}
 {% column width="25%" %}
-#### Bug Fix
+**Bug Fix**
 {% endcolumn %}
 
 {% column width="75%" %}
-### Opportunity Forecasts now correctly populate agency contact information
+#### Opportunity Forecasts now correctly populate agency contact information
 
 Previously, when an opportunity forecast was published in Grants.gov, some of the Grantor contact information [was not being properly transferred](https://github.com/HHS/simpler-grants-gov/issues/9186) to [Simpler.Grants.gov](http://simpler.grants.gov) due to how the data was structured in [grants.gov](http://grants.gov). To correct this, we [made a change](https://github.com/HHS/simpler-grants-gov/pull/9187) to capture this information when the forecast is published, in addition to the already-captured information on the opportunity itself.
 
-As a result of this change, the Simpler.Grants.gov team recently did a data update backfilling description information resulting in additional emails being sent to users related to forecasted opportunities. There are no further changes or responses required from users, and functionality is back to normal.&#x20;
+As a result of this change, the Simpler.Grants.gov team recently did a data update backfilling description information resulting in additional emails being sent to users related to forecasted opportunities. There are no further changes or responses required from users, and functionality is back to normal.
 {% endcolumn %}
 {% endcolumns %}
 
 {% columns %}
 {% column width="25%" %}
-#### Improvement
+**Improvement**
 {% endcolumn %}
 
 {% column width="75%" %}
-### Updated workflow emails
+#### Updated workflow emails
 
-Previously, when an opportunity forecast was published in We [updated workflow emails](https://github.com/HHS/simpler-grants-gov/pull/9104) to render correctly and modified the email format to handle new lines more effectively. Additionally, we made minor logging adjustments based on needs for the dashboard.
+We [updated workflow emails](https://github.com/HHS/simpler-grants-gov/pull/9104) to render correctly and modified the email format to handle new lines more effectively. Additionally, we made minor logging adjustments based on needs for the dashboard.
 {% endcolumn %}
 {% endcolumns %}
 
 ## [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - February 23, 2026
 
-February 23rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.02.18-1):&#x20;
+February 23rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.02.18-1):
 
 {% columns %}
 {% column width="25%" %}
-#### Announcement
+**Announcement**
 {% endcolumn %}
 
 {% column width="75%" %}
-### Watch the [Simpler.Grants.Gov](http://simpler.grants.gov) public demonstration
+#### Watch the [Simpler.Grants.Gov](http://simpler.grants.gov) public demonstration
 
-The [Simpler.Grants.gov](http://simpler.grants.gov) team gave a public demonstration of our newest features and functionality hosted by the [Council on Federal Financial Assistance (COFFA)](https://www.coffa.gov/). This virtual session highlighted our progress, shared user research insights, and showcased community engagement efforts. [You can watch the video from January 29, 2026 here](https://simpler.grants.gov/events).&#x20;
+The [Simpler.Grants.gov](http://simpler.grants.gov) team gave a public demonstration of our newest features and functionality hosted by the [Council on Federal Financial Assistance (COFFA)](https://www.coffa.gov/). This virtual session highlighted our progress, shared user research insights, and showcased community engagement efforts. [You can watch the video from January 29, 2026 here](https://simpler.grants.gov/events).
 {% endcolumn %}
 {% endcolumns %}
 
 {% columns %}
 {% column width="25%" %}
-#### Improvement
+**Improvement**
 {% endcolumn %}
 
 {% column width="75%" %}
-### Accessibility and navigation improvements
+#### Accessibility and navigation improvements
 
 This release includes accessibility improvements to help users who navigate with the keyboard — especially people that rely on screen readers and keyboard-first users seeking navigation efficiency. Improvements include [making the "Skip to main" content more visually accessible](https://github.com/HHS/simpler-grants-gov/pull/8565), and [improving the focus styles that make it easier to navigate between search filters](https://github.com/HHS/simpler-grants-gov/pull/8550).
 {% endcolumn %}
@@ -86,11 +86,11 @@ This release includes accessibility improvements to help users who navigate with
 
 {% columns %}
 {% column width="25%" %}
-#### Improvement
+**Improvement**
 {% endcolumn %}
 
 {% column width="75%" %}
-### A better header menu design
+#### A better header menu design
 
 On [Simpler.Grants.gov](http://simpler.grants.gov), both mobile and desktop, the team reformatted the account dropdown menu to be consistent with the rest of the navigation dropdown items and moved ‘Sign in’ after other menu items for more logical keyboard navigation. On mobile, the ‘Sign In’ was moved to the burger menu with other aesthetic and dropdown formatting improvements.
 {% endcolumn %}
@@ -98,11 +98,11 @@ On [Simpler.Grants.gov](http://simpler.grants.gov), both mobile and desktop, the
 
 {% columns %}
 {% column width="25%" %}
-#### Bug Fix
+**Bug Fix**
 {% endcolumn %}
 
 {% column width="75%" %}
-### ‘Start Application’ is disabled when organization data fails to load
+#### ‘Start Application’ is disabled when organization data fails to load
 
 This update prevents users from submitting the ‘Start Application’ modal when organization data fails to load, preventing users from interacting with an incomplete form and avoiding a misleading user experience.
 {% endcolumn %}
@@ -110,15 +110,15 @@ This update prevents users from submitting the ‘Start Application’ modal whe
 
 ## [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - February 4, 2026
 
-February 4th’s update brings [several new changes:](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.02.04-1) &#x20;
+February 4th’s update brings [several new changes:](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.02.04-1)
 
 {% columns %}
 {% column width="25%" %}
-#### Announcement
+**Announcement**
 {% endcolumn %}
 
 {% column width="75%" %}
-### [Simpler.Grants.Gov](http://simpler.grants.gov) hosted a public demonstration
+#### [Simpler.Grants.Gov](http://simpler.grants.gov) hosted a public demonstration
 
 The [Simpler.Grants.gov](http://simpler.grants.gov) team hosted a public demonstration of our newest features and functionality with the [Council on Federal Financial Assistance (COFFA)](https://www.coffa.gov/) and the Department of Health and Human Services (HHS). This virtual session highlighted our progress, shared user research insights, and showcased community engagement efforts.
 {% endcolumn %}
@@ -126,11 +126,11 @@ The [Simpler.Grants.gov](http://simpler.grants.gov) team hosted a public demonst
 
 {% columns %}
 {% column width="25%" %}
-#### Announcement
+**Announcement**
 {% endcolumn %}
 
 {% column width="75%" %}
-### The [Simpler.Grants.gov Roadmap](https://simpler.grants.gov/roadmap) has been updated
+#### The [Simpler.Grants.gov Roadmap](https://simpler.grants.gov/roadmap) has been updated
 
 The team updated the roadmap content to reflect updated goals and recent accomplishments to date. [Check out the updated roadmap](https://simpler.grants.gov/roadmap) to see what we’re working on, what we’ve delivered, and more.
 {% endcolumn %}
@@ -138,11 +138,11 @@ The team updated the roadmap content to reflect updated goals and recent accompl
 
 {% columns %}
 {% column width="25%" %}
-#### New Feature
+**New Feature**
 {% endcolumn %}
 
 {% column width="75%" %}
-### Filtering Search Results by Posted Date
+#### Filtering Search Results by Posted Date
 
 In response to a highly requested feature, users may now filter their search queries by Posted Date. Users may now search and click ‘Filter’ to reveal an accordion drop-down menu that can filter funding opportunities within a posted date of 3, 7, 14, 30, or 60 days.
 {% endcolumn %}
@@ -150,11 +150,11 @@ In response to a highly requested feature, users may now filter their search que
 
 {% columns %}
 {% column width="25%" %}
-#### New Feature
+**New Feature**
 {% endcolumn %}
 
 {% column width="75%" %}
-### Submitted applications are available to download from application page
+#### Submitted applications are available to download from application page
 
 Users can now download their submitted application from the application page. This enables applicants to retain their submitted applications offline and provides transparency into what is sent to grantor agencies.
 {% endcolumn %}
@@ -162,11 +162,11 @@ Users can now download their submitted application from the application page. Th
 
 {% columns %}
 {% column width="25%" %}
-#### Improvement
+**Improvement**
 {% endcolumn %}
 
 {% column width="75%" %}
-### Primary EBIZ POC Role Protections&#x20;
+#### Primary EBIZ POC Role Protections
 
 The team has made sure that users cannot be removed from an organization if they are also the EBIZ POC for that organization by disabling the ‘Remove’ button. This will ensure that organizations do not lose access to the EBIZ POC administrative functions required to use and access Simpler Grants. If your EBIZ POC changes in [Sam.gov](https://sam.gov/), that will automatically be reflected in [Simpler.Grants.gov](http://simpler.grants.gov).
 {% endcolumn %}
@@ -174,11 +174,11 @@ The team has made sure that users cannot be removed from an organization if they
 
 {% columns %}
 {% column width="25%" %}
-#### Improvement
+**Improvement**
 {% endcolumn %}
 
 {% column width="75%" %}
-### Updated logic after applications are submitted&#x20;
+#### Updated logic after applications are submitted
 
 The team has improved the view of submitted applications so selections cannot be altered after application is complete and submitted.
 {% endcolumn %}
@@ -186,19 +186,19 @@ The team has improved the view of submitted applications so selections cannot be
 
 {% columns %}
 {% column width="25%" %}
-#### Improvement
+**Improvement**
 {% endcolumn %}
 
 {% column width="75%" %}
-### Simplified URL structures for applications
+#### Simplified URL structures for applications
 
-The team has updated all application and form pages to point to new routes defined by new information architecture. For example, the previous URL of&#x20;
+The team has updated all application and form pages to point to new routes defined by new information architecture. For example, the previous URL of
 
-> _simpler.grants.gov/workspace/applications/application/\[applicationId]_&#x20;
+> _simpler.grants.gov/workspace/applications/application/\[applicationId]_
 
-will now be&#x20;
+will now be
 
-> _simpler.grants.gov/applications/\[applicationId]._&#x20;
+> _simpler.grants.gov/applications/\[applicationId]._
 
 All previous URL routes will automatically redirect to the new routes.
 {% endcolumn %}
@@ -206,17 +206,17 @@ All previous URL routes will automatically redirect to the new routes.
 
 ## [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - December 23, 2025
 
-December 23rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2025.12.23-1): &#x20;
+December 23rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2025.12.23-1):
 
 {% columns %}
 {% column width="25%" %}
-#### New Feature
+**New Feature**
 {% endcolumn %}
 
 {% column width="75%" %}
-### [Simpler.Grants.Gov](http://simpler.grants.gov) is now the default for searching for opportunities.
+#### [Simpler.Grants.Gov](http://simpler.grants.gov) is now the default for searching for opportunities.
 
-With Simpler Search launching as the default experience, we can get a wider array of users providing feedback about their experience. It also solidifies Simpler.Grants.Gov as the standard for search and helps to iteratively build and deliver working software methodically. Just over the last week, we have seen a 200% increase in users visiting the search page.&#x20;
+With Simpler Search launching as the default experience, we can get a wider array of users providing feedback about their experience. It also solidifies Simpler.Grants.Gov as the standard for search and helps to iteratively build and deliver working software methodically. Just over the last week, we have seen a 200% increase in users visiting the search page.
 
 Users can still access the classic search by first logging into Grants.gov and then searching for opportunities. Some funding opportunities may be removed or modified by the agency that created them, and are no longer accessible from any Grants.gov systems (Classic or Simpler). These changes are unrelated to the switch over to the Simpler Search.
 {% endcolumn %}
@@ -224,11 +224,11 @@ Users can still access the classic search by first logging into Grants.gov and t
 
 {% columns %}
 {% column width="25%" %}
-#### New Feature
+**New Feature**
 {% endcolumn %}
 
 {% column width="75%" %}
-### Activity history is now available on applications.
+#### Activity history is now available on applications.
 
 The new activity history section of the application page shows what changes have been made to an application, when they were made, and who made each change. This surfaces important information to applicants collaborating on applications.
 {% endcolumn %}
@@ -236,11 +236,11 @@ The new activity history section of the application page shows what changes have
 
 {% columns %}
 {% column width="25%" %}
-#### New Improvement
+**New Improvement**
 {% endcolumn %}
 
 {% column width="75%" %}
-### A clearer, persistent confirmation after applying.
+#### A clearer, persistent confirmation after applying.
 
 Instead of a temporary success alert, applicants will now see a permanent confirmation message at the top of their application page after successfully submitting an application. This message provides important information about the submission, what to expect next, and who to contact if they have any questions.
 {% endcolumn %}
@@ -248,32 +248,30 @@ Instead of a temporary success alert, applicants will now see a permanent confir
 
 ## Launching [Simpler.Grants.Gov](http://simpler.grants.gov) Release Notes - December 10, 2025!
 
-We're excited to announce the launch of release notes for Simpler.Grants.Gov! Our goal for these updates is to regularly showcase new features, important bug fixes, improvements to enhance your experience, and more. This update for December 10th brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2025.12.10-1): &#x20;
+We're excited to announce the launch of release notes for Simpler.Grants.Gov! Our goal for these updates is to regularly showcase new features, important bug fixes, improvements to enhance your experience, and more. This update for December 10th brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2025.12.10-1):
 
 {% columns %}
 {% column width="25%" %}
-#### New Feature&#x20;
+**New Feature**
 {% endcolumn %}
 
 {% column width="75%" %}
-### We’ve launched our first iteration of user profile and permissions.&#x20;
+#### We’ve launched our first iteration of user profile and permissions.
 
-Our research showed that users previously struggled to determine who within their organization had the necessary permissions, information, and access which resulted in a confusing chain of misdirected inquiries. These new improvements set the stage that will allow our users to collaborate together when submitting applications and clearly identify individuals with key roles who are responsible for critical tasks like renewing the Unique Entity Identifier (UEI) and inviting users to build out their teams.&#x20;
+Our research showed that users previously struggled to determine who within their organization had the necessary permissions, information, and access which resulted in a confusing chain of misdirected inquiries. These new improvements set the stage that will allow our users to collaborate together when submitting applications and clearly identify individuals with key roles who are responsible for critical tasks like renewing the Unique Entity Identifier (UEI) and inviting users to build out their teams.
 {% endcolumn %}
 {% endcolumns %}
 
 {% columns %}
 {% column width="25%" %}
-#### New Feature
+**New Feature**
 {% endcolumn %}
 
 {% column width="75%" %}
-### We launched new changes to the Activity Dashboard.
+#### We launched new changes to the Activity Dashboard.
 
 We have created a hub that allows users to quickly access their frequently visited features like saved searches and queries, and introduced applications for ease of access and navigation. To solve for the key pain point of finding active grants and managing work, this Activity Dashboard centralizes where you can manage active work, giving users a clearer, personalized way to keep track of their progress.
 {% endcolumn %}
 {% endcolumns %}
-
-
 
 <br>

@@ -12,11 +12,14 @@ def raise_flask_error(
     detail: Any = None,
     headers: ResponseHeaderType | None = None,
     validation_issues: list[ValidationErrorDetail] | None = None,
+    extra_data: dict | None = None,
 ) -> Never:
     # Wrapper around the abort method which makes an error during API processing
     # work properly when APIFlask generates a response.
     # mypy doesn't realize this method never returns, so we define the same method
     # with a return type of Never.
-    abort(
-        status_code, message, detail, headers, extra_data={"validation_issues": validation_issues}
-    )
+    if extra_data is None:
+        extra_data = {}
+    extra_data["validation_issues"] = validation_issues
+
+    abort(status_code, message, detail, headers, extra_data=extra_data)

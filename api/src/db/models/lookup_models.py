@@ -24,6 +24,7 @@ from src.constants.lookup_constants import (
     FundingCategory,
     FundingInstrument,
     JobStatus,
+    JobType,
     OpportunityCategory,
     OpportunityStatus,
     OrganizationAuditEvent,
@@ -414,6 +415,29 @@ FILE_SCAN_STATUS_CONFIG: LookupConfig[FileScanStatus] = LookupConfig(
         LookupStr(FileScanStatus.IN_PROGRESS, 2),
         LookupStr(FileScanStatus.COMPLETE, 3),
         LookupStr(FileScanStatus.INFECTED, 4),
+    ]
+)
+
+JOB_TYPE_CONFIG: LookupConfig[JobType] = LookupConfig(
+    [
+        LookupStr(JobType.MIGRATE_UP, 1),
+        LookupStr(JobType.MIGRATE_DOWN, 2),
+        LookupStr(JobType.MIGRATE_DOWNALL, 3),
+        LookupStr(JobType.LOAD_TRANSFORM, 4),
+        LookupStr(JobType.SETUP_FOREIGN_TABLES, 5),
+        LookupStr(JobType.LOAD_OPPORTUNITY_DATA_OPENSEARCH, 6),
+        LookupStr(JobType.SETUP_LOWER_ENV_AGENCIES, 7),
+        LookupStr(JobType.CREATE_ANALYTICS_DB_CSVS, 8),
+        LookupStr(JobType.CREATE_APPLICATION_SUBMISSION, 9),
+        LookupStr(JobType.SETUP_CERT_USER, 10),
+        LookupStr(JobType.UPDATE_FORM_INSTRUCTION, 11),
+        LookupStr(JobType.UPDATE_FORM, 12),
+        LookupStr(JobType.EMAIL_NOTIFICATIONS, 13),
+        LookupStr(JobType.BUILD_AUTOMATIC_OPPORTUNITIES, 14),
+        LookupStr(JobType.SAM_EXTRACTS, 15),
+        LookupStr(JobType.LOAD_AGENCY_DATA_OPENSEARCH, 16),
+        LookupStr(JobType.EXPORT_OPPORTUNITY_DATA, 17),
+        LookupStr(JobType.LIST_FORMS, 18),
     ]
 )
 
@@ -873,3 +897,15 @@ class LkFileScanStatus(LookupTable, TimestampMixin):
         return LkFileScanStatus(
             file_scan_status_id=lookup.lookup_val, description=lookup.get_description()
         )
+
+
+@LookupRegistry.register_lookup(JOB_TYPE_CONFIG)
+class LkJobType(LookupTable, TimestampMixin):
+    __tablename__ = "lk_job_type"
+
+    job_type_id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str]
+
+    @classmethod
+    def from_lookup(cls, lookup: Lookup) -> LkJobType:
+        return LkJobType(job_type_id=lookup.lookup_val, description=lookup.get_description())
