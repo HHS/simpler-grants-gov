@@ -33,6 +33,7 @@ class LegacySoapAPIConfig(PydanticBaseEnvConfig):
     soap_partner_gateway_auth_key: str = Field("", alias="SOAP_PARTNER_GATEWAY_AUTH_KEY")
     soap_grantors_path: str = Field("", alias="SOAP_GRANTORS_PATH")
     soap_applicants_path: str = Field("", alias="SOAP_APPLICANTS_PATH")
+    enable_simpler_route: bool = Field(True, alias="ENABLE_SIMPLER_ROUTE")
 
     @property
     def gg_url(self) -> str:

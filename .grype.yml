@@ -21,20 +21,14 @@ ignore:
 
   # Not fixed in GA Python yet
   # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 04/15/26
+  # Last checked: 05/13/26
   - vulnerability: CVE-2025-15366
 
   # Not fixed in GA Python yet
   # https://github.com/HHS/simpler-grants-gov/issues/8109
-  # Last checked: 04/15/2026
+  # Last checked: 05/13/2026
   - vulnerability: CVE-2025-15367
 
-  # ignoring so we can get today's release out
-  - vulnerability: GHSA-2g4f-4pwh-qvx6
-
-  # serialize-javascript subdependency via terser-webpack-plugin. The vuln is patched in serialize-javascript but terser-webpack-plugin has not bumped to the next major version for serialize-javascript to remediate the vuln coming down from webpack. Dev only webpack issue, safe to ignore for now
-  - vulnerability: GHSA-5c6j-r48x-rmvq
-
   # Not fixed in GA Python yet
-  # Last checked 04/14/2026
-  - vulnerability: CVE-2026-1502
+  # Last checked 05/13/2026
+  - vulnerability: CVE-2026-7210

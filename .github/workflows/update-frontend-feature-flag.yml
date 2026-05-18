@@ -9,17 +9,8 @@ on:
         required: true
         type: choice
         options:
-          - feature-search-off
-          - feature-opportunity-off
-          - feature-auth-on
-          - feature-saved-opportunities-on
-          - feature-saved-searches-on
           - feature-apply-form-prototype-off
-          - feature-search-drawer-on
-          - feature-search-table-on
           - feature-developer-page-off
-          - feature-user-admin-off
-          - feature-manage-users-off
       environment:
         description: Target environment
         required: true

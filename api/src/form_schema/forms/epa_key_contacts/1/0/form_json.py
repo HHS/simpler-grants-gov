@@ -286,8 +286,9 @@ def _create_contact_person_transform(target_element: str) -> dict:
         },
         "name": {
             "xml_transform": {
-                "target": "ContactName",
+                "target": "Name",
                 "type": "nested_object",
+                "namespace": "globLib",
             },
             "prefix": {
                 "xml_transform": {

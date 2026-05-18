@@ -1,4 +1,4 @@
-FROM ghcr.io/hhs/python-base-image:8ae2ecf@sha256:33d915d6da8c2c4049537fb5a5a209fb6af0a2b7009c524c3474631b57510864 AS base
+FROM ghcr.io/hhs/python-base-image:01d94f1@sha256:bedfbb4e63881e430c16c171ce993f477fd668833dc0cf21d1afeb0cd2bc89e7 AS base
 
 ARG RUN_UID
 ARG RUN_USER
@@ -30,6 +30,8 @@ COPY newrelic.ini /api/newrelic.ini
 ENV UV_NO_DEV=1
 # Compile python to *.pyc files for performance
 ENV UV_COMPILE_BYTECODE=1
+ENV UV_CACHE_DIR="/tmp/.cache/uv"
+ENV UV_NO_SYNC=1
 
 # Build the application wheel and install it into the venv without stripping docstrings (avoid -OO)
 # Clean up build artifacts and caches in a single layer to reduce image size
