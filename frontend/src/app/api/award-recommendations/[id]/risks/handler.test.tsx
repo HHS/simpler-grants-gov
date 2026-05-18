@@ -1,26 +1,32 @@
+import * as sessionModule from "src/services/auth/session";
+import * as fetcherModule from "src/services/fetch/fetchers/awardRecommendationFetcherClient";
+
 import { NextRequest } from "next/server";
 
 import { getRisksForAwardRecommendation } from "./handler";
 
+jest.mock("src/services/auth/sessionUtils", () => ({}));
+jest.mock("src/services/auth/session");
+jest.mock("src/services/fetch/fetchers/awardRecommendationFetcherClient");
+
+interface MockResponse {
+  json: () => Promise<unknown>;
+  status: number;
+}
+
 global.Response = class Response {
   constructor(
-    public body: any,
+    public body: unknown,
     public init?: ResponseInit,
   ) {}
-  static json(data: any, init?: ResponseInit) {
+  static json(data: unknown, init?: ResponseInit): MockResponse {
     return {
-      json: async () => data,
+      json: jest.fn().mockResolvedValue(data),
       status: init?.status || 200,
       ...init,
-    };
+    } as MockResponse;
   }
-} as any;
-
-jest.mock("src/services/auth/session", () => ({ getSession: jest.fn() }));
-jest.mock(
-  "src/services/fetch/fetchers/awardRecommendationFetcherClient",
-  () => ({ getAwardRecommendationRisks: jest.fn() }),
-);
+} as unknown as typeof globalThis.Response;
 
 const mockSession = { token: "test-token" };
 const mockPagination = { page_offset: 1, page_size: 10, sort_order: [] };
@@ -33,26 +39,28 @@ describe("getRisksForAwardRecommendation", () => {
   });
 
   it("returns risks and pagination info on success", async () => {
-    require("src/services/auth/session").getSession.mockResolvedValue(
-      mockSession,
-    );
-    require("src/services/fetch/fetchers/awardRecommendationFetcherClient").getAwardRecommendationRisks.mockResolvedValue(
-      { risks: mockRisks, paginationInfo: mockPaginationInfo },
-    );
+    (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
+    (fetcherModule.getAwardRecommendationRisks as jest.Mock).mockResolvedValue({
+      risks: mockRisks,
+      paginationInfo: mockPaginationInfo,
+    });
     const req = {
-      json: async () => ({ pagination: mockPagination }),
+      json: jest.fn().mockResolvedValue({ pagination: mockPagination }),
     } as unknown as NextRequest;
     const params = Promise.resolve({ id: "award-id" });
     const res = await getRisksForAwardRecommendation(req, { params });
-    const json = await res.json();
+    const json = (await res.json()) as {
+      data: unknown[];
+      pagination_info: unknown;
+    };
     expect(json.data).toEqual(mockRisks);
     expect(json.pagination_info).toEqual(mockPaginationInfo);
   });
 
   it("throws error if no session", async () => {
-    require("src/services/auth/session").getSession.mockResolvedValue(null);
+    (sessionModule.getSession as jest.Mock).mockResolvedValue(null);
     const req = {
-      json: async () => ({ pagination: mockPagination }),
+      json: jest.fn().mockResolvedValue({ pagination: mockPagination }),
     } as unknown as NextRequest;
     const params = Promise.resolve({ id: "award-id" });
     const res = await getRisksForAwardRecommendation(req, { params });

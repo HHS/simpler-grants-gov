@@ -28,8 +28,11 @@ describe("getAwardRecommendationRisks", () => {
       expect.stringContaining("award-id"),
       expect.objectContaining({
         method: "POST",
-        headers: expect.objectContaining({ "X-SGG-Token": "token" }),
-      }),
+        headers: expect.objectContaining({ "X-SGG-Token": "token" }) as Record<
+          string,
+          string
+        >,
+      }) as RequestInit,
     );
   });
 
@@ -68,8 +71,11 @@ describe("deleteAwardRecommendationRisk", () => {
       expect.stringContaining("award-id/risks/risk-id"),
       expect.objectContaining({
         method: "DELETE",
-        headers: expect.objectContaining({ "X-SGG-Token": "token" }),
-      }),
+        headers: expect.objectContaining({ "X-SGG-Token": "token" }) as Record<
+          string,
+          string
+        >,
+      }) as RequestInit,
     );
   });
 

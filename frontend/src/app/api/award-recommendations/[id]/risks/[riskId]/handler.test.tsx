@@ -1,23 +1,32 @@
+import * as sessionModule from "src/services/auth/session";
+import * as fetcherModule from "src/services/fetch/fetchers/awardRecommendationFetcherClient";
+
 import { NextRequest } from "next/server";
 
 import { deleteRiskForAwardRecommendation } from "./handler";
 
+jest.mock("src/services/auth/sessionUtils", () => ({}));
+jest.mock("src/services/auth/session");
+jest.mock("src/services/fetch/fetchers/awardRecommendationFetcherClient");
+
+interface MockResponse {
+  json: () => Promise<unknown>;
+  status: number;
+}
+
 global.Response = class Response {
-  constructor(public body: any, public init?: ResponseInit) {}
-  static json(data: any, init?: ResponseInit) {
+  constructor(
+    public body: unknown,
+    public init?: ResponseInit,
+  ) {}
+  static json(data: unknown, init?: ResponseInit): MockResponse {
     return {
-      json: async () => data,
+      json: jest.fn().mockResolvedValue(data),
       status: init?.status || 200,
       ...init,
-    };
+    } as MockResponse;
   }
-} as any;
-
-jest.mock("src/services/auth/session", () => ({ getSession: jest.fn() }));
-jest.mock(
-  "src/services/fetch/fetchers/awardRecommendationFetcherClient",
-  () => ({ deleteAwardRecommendationRisk: jest.fn() }),
-);
+} as unknown as typeof globalThis.Response;
 
 const mockSession = { token: "test-token" };
 
@@ -27,22 +36,20 @@ describe("deleteRiskForAwardRecommendation", () => {
   });
 
   it("deletes risk successfully", async () => {
-    require("src/services/auth/session").getSession.mockResolvedValue(
-      mockSession,
-    );
-    require("src/services/fetch/fetchers/awardRecommendationFetcherClient").deleteAwardRecommendationRisk.mockResolvedValue(
-      { success: true, message: "Risk deleted" },
-    );
+    (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
+    (
+      fetcherModule.deleteAwardRecommendationRisk as jest.Mock
+    ).mockResolvedValue({ success: true, message: "Risk deleted" });
     const req = {} as unknown as NextRequest;
     const params = Promise.resolve({ id: "award-id", riskId: "risk-id" });
     const res = await deleteRiskForAwardRecommendation(req, { params });
-    const json = await res.json();
+    const json = (await res.json()) as { success: boolean; message: string };
     expect(json.success).toBe(true);
     expect(json.message).toBe("Risk deleted");
   });
 
   it("throws error if no session", async () => {
-    require("src/services/auth/session").getSession.mockResolvedValue(null);
+    (sessionModule.getSession as jest.Mock).mockResolvedValue(null);
     const req = {} as unknown as NextRequest;
     const params = Promise.resolve({ id: "award-id", riskId: "risk-id" });
     const res = await deleteRiskForAwardRecommendation(req, { params });
@@ -50,9 +57,7 @@ describe("deleteRiskForAwardRecommendation", () => {
   });
 
   it("throws error if award recommendation ID is missing", async () => {
-    require("src/services/auth/session").getSession.mockResolvedValue(
-      mockSession,
-    );
+    (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
     const req = {} as unknown as NextRequest;
     const params = Promise.resolve({ id: "", riskId: "risk-id" });
     const res = await deleteRiskForAwardRecommendation(req, { params });
@@ -60,9 +65,7 @@ describe("deleteRiskForAwardRecommendation", () => {
   });
 
   it("throws error if risk ID is missing", async () => {
-    require("src/services/auth/session").getSession.mockResolvedValue(
-      mockSession,
-    );
+    (sessionModule.getSession as jest.Mock).mockResolvedValue(mockSession);
     const req = {} as unknown as NextRequest;
     const params = Promise.resolve({ id: "award-id", riskId: "" });
     const res = await deleteRiskForAwardRecommendation(req, { params });
