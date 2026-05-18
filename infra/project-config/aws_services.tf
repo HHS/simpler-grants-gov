@@ -53,6 +53,9 @@ locals {
     // Amazon CloudWatch Logs – Collects, monitors, and analyzes log data from AWS services.
     "logs",
 
+    // Amazon Pinpoint – Provides customer engagement and messaging capabilities. Used for notifications.
+    "mobiletargeting",
+
     // Amazon EventBridge Pipes – Connects event producers to consumers with filtering and enrichment.
     "pipes",
 
@@ -80,7 +83,7 @@ locals {
     // AWS Cloud Map – Provides service discovery for microservices and applications.
     "servicediscovery",
 
-    // Amazon Simple Email Service (SES) – An email sending and receiving service. Used for email notifications.
+    // Amazon Simple Email Service (SES) – An email sending and receiving service. Used in conjunction with Amazon Pinpoint for notifications.
     "ses",
 
     // Amazon Simple Notification Service (SNS) – A pub/sub messaging service.
