@@ -407,12 +407,10 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
         """Get the presigned s3 url path for downloading the file"""
         # NOTE: These attachments will only ever be in a non-public
         # bucket so we only can presign their URL, we can't use the CDN path.
-        # Use the shorter submission expiry since these may contain PII.
-        s3_config = get_default_s3_config()
+        # Use the shorter submission expiry since these contain PII.
         return pre_sign_file_location(
             self.file_location,
-            s3_config=s3_config,
-            expires_in=s3_config.presigned_submission_duration,
+            expires_in=get_default_s3_config().presigned_submission_duration,
         )
 
 
@@ -486,11 +484,9 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
         # NOTE: These submission files will only ever be in a non-public
         # bucket so we only can presign their URL, we can't use the CDN path.
         # Use the shorter submission expiry since these contain PII.
-        s3_config = get_default_s3_config()
         return pre_sign_file_location(
             self.file_location,
-            s3_config=s3_config,
-            expires_in=s3_config.presigned_submission_duration,
+            expires_in=get_default_s3_config().presigned_submission_duration,
         )
 
 

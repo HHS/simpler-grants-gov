@@ -1,6 +1,8 @@
 import uuid
 from urllib.parse import parse_qs, urlparse
 
+import pytest
+
 import src.util.file_util as file_util
 from src.adapters.aws import S3Config
 from tests.src.db.models.factories import (
@@ -9,6 +11,24 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionNoteFactory,
     ApplicationSubmissionTrackingNumberFactory,
 )
+
+SHORT_DURATION = 900
+LONG_DURATION = 7200
+
+
+@pytest.fixture
+def patched_s3_config(monkeypatch):
+    """Replace the file_util S3Config singleton with distinct submission/default durations."""
+    monkeypatch.setattr(
+        file_util,
+        "_s3_config",
+        S3Config(
+            PUBLIC_FILES_BUCKET="s3://local-mock-public-bucket",
+            DRAFT_FILES_BUCKET="s3://local-mock-draft-bucket",
+            presigned_s3_duration=LONG_DURATION,
+            presigned_submission_duration=SHORT_DURATION,
+        ),
+    )
 
 
 def test_application_submission_factory_creation(enable_factory_create, db_session):
@@ -53,49 +73,23 @@ def test_application_submission_download_path_property(enable_factory_create, db
 
 
 def test_application_submission_download_path_uses_submission_duration(
-    enable_factory_create, db_session, monkeypatch
+    enable_factory_create, db_session, patched_s3_config
 ):
     """Submission downloads must use the shorter submission expiry, not the default."""
-    short_duration = 900
-    long_duration = 7200
-    monkeypatch.setattr(
-        file_util,
-        "_s3_config",
-        S3Config(
-            PUBLIC_FILES_BUCKET="s3://local-mock-public-bucket",
-            DRAFT_FILES_BUCKET="s3://local-mock-draft-bucket",
-            presigned_s3_duration=long_duration,
-            presigned_submission_duration=short_duration,
-        ),
-    )
-
     submission = ApplicationSubmissionFactory.create()
 
     query = parse_qs(urlparse(submission.download_path).query)
-    assert int(query["X-Amz-Expires"][0]) == short_duration
+    assert int(query["X-Amz-Expires"][0]) == SHORT_DURATION
 
 
 def test_application_attachment_download_path_uses_submission_duration(
-    enable_factory_create, db_session, monkeypatch
+    enable_factory_create, db_session, patched_s3_config
 ):
     """Application attachments contain PII and must also use the shorter expiry."""
-    short_duration = 900
-    long_duration = 7200
-    monkeypatch.setattr(
-        file_util,
-        "_s3_config",
-        S3Config(
-            PUBLIC_FILES_BUCKET="s3://local-mock-public-bucket",
-            DRAFT_FILES_BUCKET="s3://local-mock-draft-bucket",
-            presigned_s3_duration=long_duration,
-            presigned_submission_duration=short_duration,
-        ),
-    )
-
     attachment = ApplicationAttachmentFactory.create()
 
     query = parse_qs(urlparse(attachment.download_path).query)
-    assert int(query["X-Amz-Expires"][0]) == short_duration
+    assert int(query["X-Amz-Expires"][0]) == SHORT_DURATION
 
 
 def test_application_submission_relationships(enable_factory_create, db_session):

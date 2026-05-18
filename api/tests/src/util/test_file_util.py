@@ -275,50 +275,41 @@ def _get_expires_in(url: str) -> int:
     return int(query["X-Amz-Expires"][0])
 
 
-def test_pre_sign_file_location_default_duration(mock_s3_bucket):
-    s3_config = S3Config(
+@pytest.fixture
+def presign_s3_config(mock_s3_bucket):
+    return S3Config(
         PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
         DRAFT_FILES_BUCKET=f"s3://{mock_s3_bucket}",
         presigned_s3_duration=7200,
         presigned_submission_duration=900,
     )
 
+
+def test_pre_sign_file_location_default_duration(mock_s3_bucket, presign_s3_config):
     url = file_util.pre_sign_file_location(
-        f"s3://{mock_s3_bucket}/some/file.txt", s3_config=s3_config
+        f"s3://{mock_s3_bucket}/some/file.txt", s3_config=presign_s3_config
     )
 
     assert _get_expires_in(url) == 7200
 
 
-def test_pre_sign_file_location_submission_duration_override(mock_s3_bucket):
+def test_pre_sign_file_location_submission_duration_override(mock_s3_bucket, presign_s3_config):
     """Submission download paths pass an explicit shorter expiry."""
-    s3_config = S3Config(
-        PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
-        DRAFT_FILES_BUCKET=f"s3://{mock_s3_bucket}",
-        presigned_s3_duration=7200,
-        presigned_submission_duration=900,
-    )
-
     url = file_util.pre_sign_file_location(
         f"s3://{mock_s3_bucket}/submissions/file.zip",
-        s3_config=s3_config,
-        expires_in=s3_config.presigned_submission_duration,
+        s3_config=presign_s3_config,
+        expires_in=presign_s3_config.presigned_submission_duration,
     )
 
     assert _get_expires_in(url) == 900
 
 
-def test_pre_sign_file_location_explicit_expires_in_takes_precedence(mock_s3_bucket):
-    s3_config = S3Config(
-        PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
-        DRAFT_FILES_BUCKET=f"s3://{mock_s3_bucket}",
-        presigned_s3_duration=7200,
-        presigned_submission_duration=900,
-    )
-
+def test_pre_sign_file_location_explicit_expires_in_takes_precedence(
+    mock_s3_bucket, presign_s3_config
+):
     url = file_util.pre_sign_file_location(
         f"s3://{mock_s3_bucket}/some/file.txt",
-        s3_config=s3_config,
+        s3_config=presign_s3_config,
         expires_in=60,
     )
 
