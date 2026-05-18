@@ -39,11 +39,14 @@ export async function POST(request: NextRequest) {
       email,
     };
 
-    const sendyResponse = await fetch(`${environment.SENDY_API_URL}/subscribe`, {
-      method: "POST",
-      headers: { "Content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(requestData),
-    });
+    const sendyResponse = await fetch(
+      `${environment.SENDY_API_URL}/subscribe`,
+      {
+        method: "POST",
+        headers: { "Content-type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(requestData),
+      },
+    );
 
     const responseText = await sendyResponse.text();
 
