@@ -10,6 +10,7 @@ from typing import ParamSpec, TypeVar
 import newrelic.agent
 import requests
 
+from src.constants.lookup_constants import JobType
 from src.logging.flask_logger import add_extra_data_to_global_logs
 
 logger = logging.getLogger(__name__)
@@ -18,7 +19,7 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def ecs_background_task(task_name: JobType) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """
     Decorator for any ECS Task entrypoint function.
 
@@ -37,7 +38,7 @@ def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P
             do_cool_stuff()
 
     Parameters:
-      task_name (str): Name of the ECS task
+      task_name (JobType): Job type of the ECS task
 
     IMPORTANT: Do not specify this decorator before the task command.
                Click effectively rewrites your function to be a main function
