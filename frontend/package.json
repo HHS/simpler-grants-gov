@@ -122,7 +122,7 @@
     "flatted": "3.4.2",
     "axios": "^1.15.2",
     "follow-redirects": "^1.16.0",
-    "protobufjs": "^7.5.5",
+    "protobufjs": "^7.5.6",
     "uuid": "^14.0.0",
     "devEngines": {
       "packageManager": {
