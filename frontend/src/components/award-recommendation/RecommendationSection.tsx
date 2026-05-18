@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CharacterCount, Radio } from "@trussworks/react-uswds";
 
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
