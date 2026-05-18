@@ -7,6 +7,7 @@ import { notFound, redirect } from "next/navigation";
 
 import PrintForm from "src/components/applyForm/PrintForm";
 import { addPrintWidgetToFields } from "src/components/applyForm/utils";
+import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +72,7 @@ export default async function FormPage({ params }: FormPageProps) {
 
   if (error || !data) {
     if (error === "UnauthorizedError") redirect("/unauthenticated");
+    if (error === "ForbiddenError") return <UnauthorizedMessage />;
     return <TopLevelError />;
   }
 

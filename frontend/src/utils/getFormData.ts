@@ -18,7 +18,7 @@ import { validateUiSchema } from "src/components/applyForm/validate";
 
 // either return error or data, not both
 type FormDataResult =
-  | { error: "TopLevelError" | "NotFound" | "UnauthorizedError"; data?: never }
+  | { error: "TopLevelError" | "NotFound" | "UnauthorizedError" | "ForbiddenError"; data?: never }
   | {
       error?: never;
       data: {
@@ -96,12 +96,20 @@ export default async function getFormData({
     formValidationWarnings =
       (response.warnings as unknown as FormValidationWarning[]) || null;
   } catch (e) {
-    if (parseErrorStatus(e as ApiRequestError) === 404) {
+    const status = parseErrorStatus(e as ApiRequestError);
+    if (status === 404) {
       console.error(
         `Error retrieving application details for applicationID (${applicationId}), appFormId ${appFormId}:`,
         e,
       );
       return { error: "NotFound" };
+    }
+    if (status === 403 || status === 401) {
+      console.error(
+        `Forbidden access to form for applicationID (${applicationId}), appFormId ${appFormId}:`,
+        e,
+      );
+      return { error: "ForbiddenError" };
     }
     return { error: "TopLevelError" };
   }
