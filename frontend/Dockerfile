@@ -59,18 +59,15 @@ WORKDIR /frontend
 
 # Update system and install security updates
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends --only-upgrade \
+  && apt-get install -y --no-install-recommends \
        dpkg=1.21.23 \
        libc-bin=2.36-9+deb12u14 \
        libc6=2.36-9+deb12u14 \
        libsystemd0=252.39-1~deb12u2 \
        libudev1=252.39-1~deb12u2 \
-       libcap2=1:2.66-4+deb12u3 \
+       libcap2=1:2.66-4+deb12u3+b1 \
        sed=4.9-1+deb12u1 \
-       openssl \
-       libssl3 \
-       libgnutls30 \
-       wget \
+       wget=1.21.3-1+deb12u1 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
