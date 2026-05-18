@@ -1,5 +1,69 @@
 # Release Notes
 
+## [Simpler.Grants.Gov](release-notes.md#simplergrantsgov-hosted-a-public-demonstration) Release Notes - May 18, 2026
+
+May 18th’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.05.13-1):
+
+{% columns %}
+{% column width="25%" %}
+**Improvement**
+{% endcolumn %}
+
+{% column width="75%" %}
+#### Save Opportunities to Organizations
+
+Users can now save opportunities to their organization so that all members can see what others are interested in to increase collaboration. Users can also receive email notifications for newly saved opportunities by members of your organization. After saving an opportunity, users can select ‘Sharing Options’ to add it to their organization.
+
+<img src="../.gitbook/assets/unknown (1).jpeg" alt="" height="411.15059999999994" width="520">
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+**New Feature**
+{% endcolumn %}
+
+{% column width="75%" %}
+#### Added a new filter category
+
+To support agencies like the [U.S. Economic Development Agency](https://www.eda.gov/funding/programs/american-rescue-plan/travel-tourism-and-outdoor-recreation) with a new classification of grants that support infrastructure projects, park development, and more, the [Simpler.Grants.gov](http://simpler.grants.gov) team added a new "[Recreation and Tourism](https://github.com/HHS/simpler-grants-gov/pull/9716)" category for users to filter by as new opportunities are posted for this type of grant.
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+**Announcement**
+{% endcolumn %}
+
+{% column width="75%" %}
+#### Updated [Simpler.Grants.gov](http://simpler.grants.gov) website content
+
+The [Simpler.Grants.gov](http://simpler.grants.gov) team has updated language across several static pages to better reflect the team’s progress on Simpler Grants and provide more clarity on where users can find the information they need.
+{% endcolumn %}
+{% endcolumns %}
+
+{% columns %}
+{% column width="25%" %}
+**Shout Outs**
+{% endcolumn %}
+
+{% column width="75%" %}
+#### Open Source Contributors
+
+The [Simpler.Grants.gov](http://simpler.grants.gov) team extends a big thank you to:&#x20;
+
+[vijaygovindaraja](https://github.com/vijaygovindaraja) for [Fixing the search loading state by adding Suspense boundary around filters](https://github.com/HHS/simpler-grants-gov/pull/9295),
+
+[monapdx](https://github.com/monapdx) for [Adding a documentation improvement issue type](https://github.com/HHS/simpler-grants-gov/pull/9576#pullrequestreview-4107434147),
+
+[bobyu7941](https://github.com/bobyu7941) for [Fixing a documentation issue on our CONTRIBUTING.md](https://github.com/HHS/simpler-grants-gov/commit/85e4aee8e7738886989b9e1dc3b0e4aad5a86a52),&#x20;
+
+[MozamilS](https://github.com/MozamilS) for [Adding a comprehensive example local frontend .env example](https://github.com/HHS/simpler-grants-gov/pull/9577/changes),
+
+[AsMurphy-student](https://github.com/AsMurphy-student) for [fixing frontend dev docs typos](https://github.com/HHS/simpler-grants-gov/pull/9535).
+{% endcolumn %}
+{% endcolumns %}
+
 ## [Simpler.Grants.Gov](release-notes.md#simplergrantsgov-hosted-a-public-demonstration) Release Notes - April 3, 2026
 
 April 3rd’s update brings [several new changes](https://github.com/HHS/simpler-grants-gov/releases/tag/2026.04.01-1):
