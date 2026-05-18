@@ -12,7 +12,7 @@ describe("getAwardRecommendationRisks", () => {
 
   it("fetches and returns risks and pagination info", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
-      json: async () => ({
+      json: jest.fn().mockResolvedValue({
         data: [{ id: 1 }],
         pagination_info: { total_pages: 1 },
       }),
@@ -53,7 +53,9 @@ describe("deleteAwardRecommendationRisk", () => {
   it("deletes risk successfully", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => ({ message: "Risk deleted successfully" }),
+      json: jest
+        .fn()
+        .mockResolvedValue({ message: "Risk deleted successfully" }),
     });
     const result = await deleteAwardRecommendationRisk(
       "award-id",
@@ -74,7 +76,7 @@ describe("deleteAwardRecommendationRisk", () => {
   it("handles delete failure", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
-      json: async () => ({ message: "Delete failed" }),
+      json: jest.fn().mockResolvedValue({ message: "Delete failed" }),
     });
     const result = await deleteAwardRecommendationRisk(
       "award-id",

@@ -15,7 +15,13 @@ describe("AwardRecommendationAttachments", () => {
       data: [
         {
           risk_number: 1,
-          app_number: "APP-001",
+          applications: [
+            {
+              award_recommendation_application_submission_id: "ar-sub-123",
+              application_submission_id: "app-sub-123",
+              application_submission_number: "APP-001",
+            },
+          ],
           condition: "Test Condition",
         },
       ],
@@ -26,9 +32,7 @@ describe("AwardRecommendationAttachments", () => {
     });
     render(<AwardRecommendationAttachments awardRecommendationId="test-id" />);
     expect(screen.getByTestId("spinner")).toBeInTheDocument();
-    await waitFor(() =>
-      expect(screen.getByText("Test Condition")).toBeInTheDocument(),
-    );
+    expect(await screen.findByText("Test Condition")).toBeInTheDocument();
     expect(screen.getByText("APP-001")).toBeInTheDocument();
     expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
   });
@@ -42,11 +46,11 @@ describe("AwardRecommendationAttachments", () => {
       clientFetch: mockFetch,
     });
     render(<AwardRecommendationAttachments awardRecommendationId="test-id" />);
-    await waitFor(() =>
-      expect(
-        screen.getByText("Unable to load or update risks. Please try again."),
-      ).toBeInTheDocument(),
-    );
+    expect(
+      await screen.findByText(
+        "Unable to load or update risks. Please try again.",
+      ),
+    ).toBeInTheDocument();
     expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
     expect(screen.getByTestId("simpler-alert")).toBeInTheDocument();
     expect(consoleErrorSpy).toHaveBeenCalled();
@@ -64,11 +68,9 @@ describe("AwardRecommendationAttachments", () => {
       render(
         <AwardRecommendationAttachments awardRecommendationId="test-id" />,
       );
-      await waitFor(() =>
-        expect(
-          screen.getByText("Specific risks & recommended conditions"),
-        ).toBeInTheDocument(),
-      );
+      expect(
+        await screen.findByText("Specific risks & recommended conditions"),
+      ).toBeInTheDocument();
       expect(screen.queryByText("Risk 1")).not.toBeInTheDocument();
     });
 
@@ -79,7 +81,13 @@ describe("AwardRecommendationAttachments", () => {
           data: [
             {
               risk_number: 1,
-              app_number: "APP-001",
+              applications: [
+                {
+                  award_recommendation_application_submission_id: "ar-sub-1",
+                  application_submission_id: "app-sub-1",
+                  application_submission_number: "APP-001",
+                },
+              ],
               condition: "Condition 1",
             },
           ],
@@ -89,7 +97,13 @@ describe("AwardRecommendationAttachments", () => {
           data: [
             {
               risk_number: 2,
-              app_number: "APP-002",
+              applications: [
+                {
+                  award_recommendation_application_submission_id: "ar-sub-2",
+                  application_submission_id: "app-sub-2",
+                  application_submission_number: "APP-002",
+                },
+              ],
               condition: "Condition 2",
             },
           ],
@@ -101,14 +115,10 @@ describe("AwardRecommendationAttachments", () => {
       render(
         <AwardRecommendationAttachments awardRecommendationId="test-id" />,
       );
-      await waitFor(() =>
-        expect(screen.getByText("Condition 1")).toBeInTheDocument(),
-      );
+      expect(await screen.findByText("Condition 1")).toBeInTheDocument();
       const next = screen.getByLabelText("Next page");
-      next && next.click();
-      await waitFor(() =>
-        expect(screen.getByText("Condition 2")).toBeInTheDocument(),
-      );
+      if (next) next.click();
+      expect(await screen.findByText("Condition 2")).toBeInTheDocument();
     });
 
     it("renders delete button and PopoverMenu in edit mode", async () => {
@@ -116,7 +126,13 @@ describe("AwardRecommendationAttachments", () => {
         data: [
           {
             risk_number: 1,
-            app_number: "APP-010",
+            applications: [
+              {
+                award_recommendation_application_submission_id: "ar-sub-10",
+                application_submission_id: "app-sub-10",
+                application_submission_number: "APP-010",
+              },
+            ],
             condition: "Condition A",
             award_recommendation_risk_id: "risk-123",
           },
@@ -132,9 +148,7 @@ describe("AwardRecommendationAttachments", () => {
           mode="edit"
         />,
       );
-      await waitFor(() =>
-        expect(screen.getByText("Condition A")).toBeInTheDocument(),
-      );
+      expect(await screen.findByText("Condition A")).toBeInTheDocument();
       const actionHeaders = screen.getAllByText("Action");
       expect(actionHeaders.length).toBeGreaterThan(0);
       expect(
@@ -170,9 +184,7 @@ describe("AwardRecommendationAttachments", () => {
           mode="edit"
         />,
       );
-      await waitFor(() =>
-        expect(screen.getByText("Condition A")).toBeInTheDocument(),
-      );
+      expect(await screen.findByText("Condition A")).toBeInTheDocument();
       const popoverButton = screen.getByRole("button", {
         name: "",
         hidden: true,
@@ -218,9 +230,7 @@ describe("AwardRecommendationAttachments", () => {
           mode="edit"
         />,
       );
-      await waitFor(() =>
-        expect(screen.getByText("Condition A")).toBeInTheDocument(),
-      );
+      expect(await screen.findByText("Condition A")).toBeInTheDocument();
       const popoverButton = screen.getByRole("button", {
         name: "",
         hidden: true,
@@ -228,11 +238,11 @@ describe("AwardRecommendationAttachments", () => {
       fireEvent.click(popoverButton);
       const deleteButton = await screen.findByText("Delete");
       fireEvent.click(deleteButton);
-      await waitFor(() => {
-        expect(
-          screen.getByText("Unable to load or update risks. Please try again."),
-        ).toBeInTheDocument();
-      });
+      expect(
+        await screen.findByText(
+          "Unable to load or update risks. Please try again.",
+        ),
+      ).toBeInTheDocument();
       expect(screen.getByTestId("simpler-alert")).toBeInTheDocument();
       expect(consoleErrorSpy).toHaveBeenCalled();
       consoleErrorSpy.mockRestore();
@@ -262,9 +272,7 @@ describe("AwardRecommendationAttachments", () => {
       render(
         <AwardRecommendationAttachments awardRecommendationId="test-id" />,
       );
-      await waitFor(() =>
-        expect(screen.getByText("GRANT-2024-001")).toBeInTheDocument(),
-      );
+      expect(await screen.findByText("GRANT-2024-001")).toBeInTheDocument();
     });
 
     it("displays application count when array has multiple items", async () => {
@@ -301,9 +309,7 @@ describe("AwardRecommendationAttachments", () => {
       render(
         <AwardRecommendationAttachments awardRecommendationId="test-id" />,
       );
-      await waitFor(() =>
-        expect(screen.getByText("3 applications")).toBeInTheDocument(),
-      );
+      expect(await screen.findByText("3 applications")).toBeInTheDocument();
     });
 
     it("displays dash when applications array is empty", async () => {
@@ -324,9 +330,7 @@ describe("AwardRecommendationAttachments", () => {
       render(
         <AwardRecommendationAttachments awardRecommendationId="test-id" />,
       );
-      await waitFor(() =>
-        expect(screen.getByText("Condition A")).toBeInTheDocument(),
-      );
+      expect(await screen.findByText("Condition A")).toBeInTheDocument();
       const cells = screen.getAllByText("-");
       expect(cells.length).toBeGreaterThan(0);
     });

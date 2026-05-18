@@ -150,13 +150,13 @@ describe("RecommendationSection", () => {
 
       const meritOnlyRadio = screen.getByLabelText(
         "recommendationMethod.meritReviewOnly",
-      ) as HTMLInputElement;
+      );
       const meritOtherRadio = screen.getByLabelText(
         "recommendationMethod.meritReviewOther",
-      ) as HTMLInputElement;
+      );
 
-      expect(meritOnlyRadio.checked).toBe(true);
-      expect(meritOtherRadio.checked).toBe(false);
+      expect(meritOnlyRadio).toBeChecked();
+      expect(meritOtherRadio).not.toBeChecked();
     });
 
     it("pre-populates merit-review-other radio button when provided", () => {
@@ -169,13 +169,13 @@ describe("RecommendationSection", () => {
 
       const meritOnlyRadio = screen.getByLabelText(
         "recommendationMethod.meritReviewOnly",
-      ) as HTMLInputElement;
+      );
       const meritOtherRadio = screen.getByLabelText(
         "recommendationMethod.meritReviewOther",
-      ) as HTMLInputElement;
+      );
 
-      expect(meritOnlyRadio.checked).toBe(false);
-      expect(meritOtherRadio.checked).toBe(true);
+      expect(meritOnlyRadio).not.toBeChecked();
+      expect(meritOtherRadio).toBeChecked();
     });
 
     it("allows changing radio button selection", () => {
@@ -188,18 +188,18 @@ describe("RecommendationSection", () => {
 
       const meritOnlyRadio = screen.getByLabelText(
         "recommendationMethod.meritReviewOnly",
-      ) as HTMLInputElement;
+      );
       const meritOtherRadio = screen.getByLabelText(
         "recommendationMethod.meritReviewOther",
-      ) as HTMLInputElement;
+      );
 
-      expect(meritOnlyRadio.checked).toBe(true);
-      expect(meritOtherRadio.checked).toBe(false);
+      expect(meritOnlyRadio).toBeChecked();
+      expect(meritOtherRadio).not.toBeChecked();
 
       fireEvent.click(meritOtherRadio);
 
-      expect(meritOnlyRadio.checked).toBe(false);
-      expect(meritOtherRadio.checked).toBe(true);
+      expect(meritOnlyRadio).not.toBeChecked();
+      expect(meritOtherRadio).toBeChecked();
     });
 
     it("pre-populates textareas with provided values", () => {

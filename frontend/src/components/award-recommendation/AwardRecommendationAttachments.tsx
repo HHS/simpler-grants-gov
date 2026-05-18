@@ -1,6 +1,8 @@
 "use client";
 
 import { useClientFetch } from "src/hooks/useClientFetch";
+import { PaginationInfo } from "src/types/apiResponseTypes";
+import { AwardRecommendationRisk } from "src/types/awardRecommendationTypes";
 
 import { useEffect, useState } from "react";
 import { Pagination } from "@trussworks/react-uswds";
@@ -22,7 +24,7 @@ export const AwardRecommendationAttachments = ({
   awardRecommendationId,
   mode = "view",
 }: AwardRecommendationAttachmentsProps) => {
-  const [risks, setRisks] = useState<any[]>([]);
+  const [risks, setRisks] = useState<AwardRecommendationRisk[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -44,14 +46,17 @@ export const AwardRecommendationAttachments = ({
       ],
     };
     try {
-      const responseBody: any = await clientFetch(
+      const responseBody = (await clientFetch(
         `/api/award-recommendations/${awardRecommendationId}/risks`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ pagination }),
         },
-      );
+      )) as {
+        data: AwardRecommendationRisk[];
+        pagination_info?: PaginationInfo;
+      };
       setRisks(responseBody.data || []);
       setTotalPages(responseBody.pagination_info?.total_pages || 1);
     } catch (error) {
@@ -63,7 +68,7 @@ export const AwardRecommendationAttachments = ({
   };
 
   useEffect(() => {
-    fetchRisks();
+    void fetchRisks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [awardRecommendationId, page, pageSize, clientFetch]);
 
@@ -82,64 +87,68 @@ export const AwardRecommendationAttachments = ({
     { cellData: "Condition" },
     ...(mode === "edit" ? [{ cellData: "Action" }] : []),
   ];
-  const risksRows: TableCellData[][] = risks.map((risk) => [
-    {
-      cellData: (
-        <a href="#">
-          {risk.risk_number || risk.award_recommendation_risk_number}
-        </a>
-      ),
-    },
-    {
-      cellData: (() => {
-        if (Array.isArray(risk.applications)) {
-          if (risk.applications.length === 0) return "-";
-          if (risk.applications.length === 1)
-            return risk.applications[0].application_submission_number;
-          return `${risk.applications.length} applications`;
-        }
-        return "-";
-      })(),
-    },
-    {
-      cellData: (
-        <a href="#">{risk.condition_number || risk.condition || "-"}</a>
-      ),
-    },
-    ...(mode === "edit"
-      ? [
-          {
-            cellData: (
-              <PopoverMenu>
-                <button
-                  className="usa-button usa-button--unstyled width-full text-left padding-y-1 padding-x-2 hover:bg-base-lighter"
-                  onClick={async () => {
-                    try {
-                      setLoading(true);
-                      await clientFetch(
-                        `/api/award-recommendations/${awardRecommendationId}/risks/${risk.award_recommendation_risk_id}`,
-                        {
-                          method: "DELETE",
-                          headers: { "Content-Type": "application/json" },
-                        },
-                      );
-                      await fetchRisks();
-                    } catch (error) {
-                      setApiError(true);
-                      console.error(error);
-                      setLoading(false);
-                    }
-                  }}
-                  type="button"
-                >
-                  Delete
-                </button>
-              </PopoverMenu>
-            ),
-          },
-        ]
-      : []),
-  ]);
+  const risksRows: TableCellData[][] = risks.map(
+    (risk: AwardRecommendationRisk) => [
+      {
+        cellData: (
+          <a href="#">
+            {risk.risk_number || risk.award_recommendation_risk_number}
+          </a>
+        ),
+      },
+      {
+        cellData: (() => {
+          if (Array.isArray(risk.applications)) {
+            if (risk.applications.length === 0) return "-";
+            if (risk.applications.length === 1)
+              return risk.applications[0].application_submission_number;
+            return `${risk.applications.length} applications`;
+          }
+          return "-";
+        })(),
+      },
+      {
+        cellData: (
+          <a href="#">{risk.condition_number || risk.condition || "-"}</a>
+        ),
+      },
+      ...(mode === "edit"
+        ? [
+            {
+              cellData: (
+                <PopoverMenu>
+                  <button
+                    className="usa-button usa-button--unstyled width-full text-left padding-y-1 padding-x-2 hover:bg-base-lighter"
+                    onClick={() => {
+                      void (async () => {
+                        try {
+                          setLoading(true);
+                          await clientFetch(
+                            `/api/award-recommendations/${awardRecommendationId}/risks/${risk.award_recommendation_risk_id}`,
+                            {
+                              method: "DELETE",
+                              headers: { "Content-Type": "application/json" },
+                            },
+                          );
+                          await fetchRisks();
+                        } catch (error) {
+                          setApiError(true);
+                          console.error(error);
+                          setLoading(false);
+                        }
+                      })();
+                    }}
+                    type="button"
+                  >
+                    Delete
+                  </button>
+                </PopoverMenu>
+              ),
+            },
+          ]
+        : []),
+    ],
+  );
 
   // Other supporting documents table (empty)
   const otherHeaders: TableCellData[] = [
