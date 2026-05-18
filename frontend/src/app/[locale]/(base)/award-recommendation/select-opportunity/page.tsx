@@ -18,7 +18,9 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   const meta: Metadata = {
     title: t("AwardRecommendationSelectFundingOpportunity.pageTitle"),
-    description: t("AwardRecommendationSelectFundingOpportunity.metaDescription"),
+    description: t(
+      "AwardRecommendationSelectFundingOpportunity.metaDescription",
+    ),
   };
   return meta;
 }
@@ -32,7 +34,9 @@ async function SelectOpportunityPageContent({
 }: SelectOpportunityPageProps) {
   await params;
 
-  const t = await getTranslations("AwardRecommendationSelectFundingOpportunity");
+  const t = await getTranslations(
+    "AwardRecommendationSelectFundingOpportunity",
+  );
 
   return (
     <>

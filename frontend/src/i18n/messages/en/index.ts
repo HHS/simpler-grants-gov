@@ -2281,7 +2281,8 @@ export const messages = {
   AwardRecommendationSelectFundingOpportunity: {
     pageTitle: "Select funding opportunity | Simpler.Grants.gov",
     pageHeading: "Award Recommendations",
-    metaDescription: "Select a funding opportunity for your award recommendation",
+    metaDescription:
+      "Select a funding opportunity for your award recommendation",
     whichFundingOpportunity: "Which funding opportunity is this for?",
   },
 };

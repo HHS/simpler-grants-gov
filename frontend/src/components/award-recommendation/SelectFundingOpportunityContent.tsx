@@ -1,16 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { Button, Grid } from "@trussworks/react-uswds";
+import { Grid } from "@trussworks/react-uswds";
 
 export const SelectFundingOpportunityContent = () => {
   const t = useTranslations("AwardRecommendationSelectFundingOpportunity");
-  const router = useRouter();
-
-  const handleNext = () => {
-    // TODO: Navigate to next step
-  };
 
   return (
     <Grid row className="grid-gap">
