@@ -49,10 +49,14 @@ interface FormPageProps {
 }
 
 /*
-  The use case for this page is to allow generating PDF versions of completed application forms
-  by Docraptor. Docraptor will not be able to log in as a user to access application information.
-  Instead, requests from Docraptor will contain an "internal token" header ("X-SGG-Internal-Token")
-  containing an alternate authorization token that can be used to fetch the form data without logging in.
+  This page supports two access patterns:
+  1. Automated PDF generation (e.g., Docraptor):
+     - Requests include an "internal token" header ("X-SGG-Internal-Token") for authorization.
+     - Used by services that cannot log in as a user.
+  2. Regular authenticated users:
+     - Users logged in via session can browse directly to this page to view/print completed application forms.
+
+  If neither a valid internal token nor a valid user session is present, the user is redirected to /unauthenticated.
 */
 
 export default async function FormPage({ params }: FormPageProps) {
