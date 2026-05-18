@@ -17,7 +17,7 @@ The API is currently in early development. Features are under active development
 ### Getting Started
 
 {% hint style="info" %}
-Are you looking for more guidance? [Check out our full API tutorial](simpler-grants-api-tutorial/) to get started creating applications that leverage the Simpler.Grants.gov API.&#x20;
+Are you looking for more guidance? [Check out our full API tutorial](/documentation/wiki/product/api/simpler-grants-api-tutorial/) to get started creating applications that leverage the Simpler.Grants.gov API.&#x20;
 {% endhint %}
 
 #### Prerequisites
@@ -52,16 +52,16 @@ X-API-Key: YOUR_API_KEY_HERE
 #### Base URL
 
 * **Production**: `https://api.simpler.grants.gov`
-* **Development**: Contact [support](../simpler-grants.gov-analytics/) for development endpoints
+* **Development**: Contact [support](/documentation/wiki/product/simpler-grants.gov-analytics/) for development endpoints
 
 #### **Core Endpoints**
 
 {% content-ref url="search-opportunities.md" %}
-[search-opportunities.md](search-opportunities.md)
+[search-opportunities.md](/documentation/wiki/product/api/search-opportunities.md)
 {% endcontent-ref %}
 
 {% content-ref url="extracts.md" %}
-[extracts.md](extracts.md)
+[extracts.md](/documentation/wiki/product/api/extracts.md)
 {% endcontent-ref %}
 
 #### Common Issues

@@ -55,7 +55,7 @@ Each network config will have the following properties:
 
 ### Add network_name tag to VPC
 
-Add a "network_name" name tag to the VPC with the name of the network. The VPC tag will be used by the service layer to identify the VPC in an [aws_vpc data source](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc). Tags are used because at this time AWS VPCs do not have any user-provided identifiers such as a VPC name. Generated identifiers like `vpc_id` cannot be used because `vpc_id` is not known statically at configuration time, and we are following the pattern of [using configuration and data sources to manage dependencies between different infrastructure layers](/docs/infra/module-dependencies.md#use-config-modules-and-data-resources-to-manage-dependencies-between-root-modules).
+Add a "network_name" name tag to the VPC with the name of the network. The VPC tag will be used by the service layer to identify the VPC in an [aws_vpc data source](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc). Tags are used because at this time AWS VPCs do not have any user-provided identifiers such as a VPC name. Generated identifiers like `vpc_id` cannot be used because `vpc_id` is not known statically at configuration time, and we are following the pattern of [using configuration and data sources to manage dependencies between different infrastructure layers](/documentation/infra/module-dependencies.md#use-config-modules-and-data-resources-to-manage-dependencies-between-root-modules).
 
 ## Application-specific network configuration
 

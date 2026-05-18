@@ -39,7 +39,7 @@ generally preferred.
 
 ## Request operations
 
-Requests are handled via APIFlask blueprints. Each endpoint defines its request/response schemas, authentication, and route configuration in [api/src/api](../../api/src/api). See [API Details](./api-details.md) for how to define schemas and endpoints.
+Requests are handled via APIFlask blueprints. Each endpoint defines its request/response schemas, authentication, and route configuration in [api/src/api](/api/src/api). See [API Details](/documentation/api/api-details.md) for how to define schemas and endpoints.
 
 ## Authentication
 
@@ -54,8 +54,8 @@ and Internal JWT auth (`X-SGG-Internal-Token`).
 
 ## Authorization
 
-The API has an active authorization layer implemented under [api/src/auth/](../../api/src/auth/). For details on how authentication and user logic works, see [authentication.md](./authentication.md) and [api/src/auth/README.md](../../api/src/auth/README.md).
+The API has an active authorization layer implemented under [api/src/auth/](/api/src/auth/). For details on how authentication and user logic works, see [authentication.md](/documentation/api/authentication.md) and [api/src/auth/README.md](/api/src/auth/README.md).
 
 ### Database diagram
 
-ERD diagrams are auto-generated from our SQLAlchemy models and can be found in [documentation/api/database/erds/README.md](./database/erds/README.md).
+ERD diagrams are auto-generated from our SQLAlchemy models and can be found in [documentation/api/database/erds/README.md](/documentation/api/database/erds/README.md).

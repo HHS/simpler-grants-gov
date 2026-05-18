@@ -11,6 +11,6 @@ This website is a shared resource for internal Simpler.Grants.gov team members, 
 ### Interested in joining the Simpler Grants community? Start here:
 
 {% content-ref url="get-involved/get-involved.md" %}
-[get-involved.md](get-involved/get-involved.md)
+[get-involved.md](/documentation/wiki/get-involved/get-involved.md)
 {% endcontent-ref %}
 

@@ -7,8 +7,8 @@ The AWS account setup process will:
 
 ## Prerequisites
 
-- You'll need to have [set up infrastructure tools](./set-up-infrastructure-tools.md), like Terraform, AWS CLI, and AWS authentication.
-- You'll also need to make sure the [project is configured](../..//infra/project-config/main.tf).
+- You'll need to have [set up infrastructure tools](/documentation/infra/set-up-infrastructure-tools.md), like Terraform, AWS CLI, and AWS authentication.
+- You'll also need to make sure the [project is configured](/infra/project-config/main.tf).
 
 ## Overview of Terraform backend management
 
@@ -42,7 +42,7 @@ This command will create the S3 tfstate bucket and the GitHub OIDC provider. It 
 
 ### 3. Update the account names map in app-config
 
-In [app-config/main.tf](../../infra/frontend/app-config/main.tf), update the `account_names_by_environment` config to reflect the account name you chose.
+In [app-config/main.tf](/infra/frontend/app-config/main.tf), update the `account_names_by_environment` config to reflect the account name you chose.
 
 ## Making changes to the account
 
@@ -54,4 +54,4 @@ make infra-update-current-account
 
 ## Destroying infrastructure
 
-To undeploy and destroy infrastructure, see [instructions on destroying infrastructure](./destroy-infrastructure.md).
+To undeploy and destroy infrastructure, see [instructions on destroying infrastructure](/documentation/infra/destroy-infrastructure.md).

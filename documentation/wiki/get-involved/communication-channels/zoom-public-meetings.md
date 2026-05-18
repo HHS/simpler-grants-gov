@@ -23,7 +23,7 @@ Welcome to our Zoom meetings platform! Zoom is our primary tool for virtual meet
 
 ### 1. Meeting Etiquette
 
-* Follow the[ code of conduct](../policies-and-guidelines/) that has been set by the Simpler Grants community
+* Follow the[ code of conduct](/documentation/wiki/get-involved/policies-and-guidelines/) that has been set by the Simpler Grants community
 * Keep discussions relevant to the meeting agenda and avoid disruptive behavior.
 * Mute your microphone when not speaking to minimize background noise.
 * Use the "Raise Hand" feature to indicate when you want to speak or have a question.

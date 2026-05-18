@@ -1,18 +1,18 @@
 # Development
 
-This application is dockerized. Take a look at [Dockerfile](../../api/Dockerfile) to see how it works.
+This application is dockerized. Take a look at [Dockerfile](/api/Dockerfile) to see how it works.
 
-A very simple [docker-compose.yml](../../docker-compose.yml) has been included to support local development and deployment.
+A very simple [docker-compose.yml](/docker-compose.yml) has been included to support local development and deployment.
 
 Several components like tests, linting, and scripts can be run either inside of the Docker container, or outside on your  machine.
 
 **Running in Docker is the default**, but on some machines like the M1 Mac, running natively may be desirable for performance reasons.
 
-If you are looking to develop using a Windows computer, see [windows-setup.md](./windows-setup.md) for installation and development instructions.
+If you are looking to develop using a Windows computer, see [windows-setup.md](/documentation/api/windows-setup.md) for installation and development instructions.
 
 ## Docker
 
-This section covers development using Docker. There are a number of Docker commands included in the [Makefile](../../api/Makefile) which are helpful for local development. Run `make help` for a list of commands.
+This section covers development using Docker. There are a number of Docker commands included in the [Makefile](/api/Makefile) which are helpful for local development. Run `make help` for a list of commands.
 
 ### Setup
 
@@ -23,7 +23,7 @@ match exactly what you do, it's one way of getting the tools, some have multiple
 
 * Install [xcode-select](https://developer.apple.com/documentation/xcode/installing-the-command-line-tools/) - these are the developer tools needed for most command line tools.
 * Install [Homebrew](https://brew.sh/) - for installing several packages
-* Install [postgres](https://www.postgresql.org/download/macosx/) - Can use brew, make sure to specify the version in our [docker-compose](../../api/docker-compose.yml) (eg. `brew install postgresql@17`)
+* Install [postgres](https://www.postgresql.org/download/macosx/) - Can use brew, make sure to specify the version in our [docker-compose](/api/docker-compose.yml) (eg. `brew install postgresql@17`)
 * Install [libpq](https://formulae.brew.sh/formula/libpq) - Postgres utils, including one used by a script to verify the DB is ready
 * Install [docker](https://docs.docker.com/engine/install/)
 * Install [uv](https://docs.astral.sh/uv/getting-started/installation/) - For managing packages
@@ -71,19 +71,19 @@ To see the current API definiton, you can go to the local [swagger docs](http://
 
 Each endpoint specifies which auth token it needs behind the lock icon. The `ApiJwtAuth` token is printed as part of user creation in `make setup-api-data`, search for `create_jwt_for_user` to see the `auth.token_id` value. For the `ApiUserKeyAuth` token, search for `X-API-Key` for the different values for each role (hint: they typically are the user name + \_key, for instance `one_org_user` the key value is `one_org_user_key`). You can set these tokens per end point, or set them globally at the top on the lock icon labeled Authorize.
 
-For more on auth tokens, see [authentication.md](./authentication.md)
+For more on auth tokens, see [authentication.md](/documentation/api/authentication.md)
 
 #### Mock Oauth2 Server
 
-A mock Oauth2 server is defined and managed in the API's [docker-compose.yml](../../api/docker-compose.yml) file. It creates a mock endpoint that is configured to work with the API to stand in for login.gov for local development, and is available at `http://localhost:5001` when running the API containers.
+A mock Oauth2 server is defined and managed in the API's [docker-compose.yml](/api/docker-compose.yml) file. It creates a mock endpoint that is configured to work with the API to stand in for login.gov for local development, and is available at `http://localhost:5001` when running the API containers.
 
 ### Environment Variables
 
 Most configuration options are managed by environment variables.
 
-Environment variables for local development are stored in the [local.env](../../api/local.env) file. This file is automatically loaded when running. If running within Docker, this file is specified as an `env_file` in the [docker-compose](../../docker-compose.yml) file, and loaded [by a script](../../api/src/util/local.py) automatically when running most other components outside the container.
+Environment variables for local development are stored in the [local.env](/api/local.env) file. This file is automatically loaded when running. If running within Docker, this file is specified as an `env_file` in the [docker-compose](/docker-compose.yml) file, and loaded [by a script](/api/src/util/local.py) automatically when running most other components outside the container.
 
-Any environment variables specified directly in the [docker-compose](../../docker-compose.yml) file will take precedent over those specified in the [local.env](../../api/local.env) file.
+Any environment variables specified directly in the [docker-compose](/docker-compose.yml) file will take precedent over those specified in the [local.env](/api/local.env) file.
 
 ### Troubleshooting
 
@@ -126,7 +126,7 @@ Running in the native/local approach may require additional packages to be insta
 
 ### Prerequisites
 
-1. Install the version of Python specified in [pyproject.toml](../../api/pyproject.toml)
+1. Install the version of Python specified in [pyproject.toml](/api/pyproject.toml)
    [pyenv](https://github.com/pyenv/pyenv#installation) is one popular option for installing Python,
    or [asdf](https://asdf-vm.com/).
    - If using pyenv run `pyenv local <version>` to ensure that version will be used in subsequent steps
@@ -177,7 +177,7 @@ export PY_RUN_APPROACH=local
 
 ### Database setup: Run Migrations/Seeds
 
-If you haven't done local development before you'll need to execute the migrations and seed the DB with data using the steps in [database-local-usage.md](database/database-local-usage.md)
+If you haven't done local development before you'll need to execute the migrations and seed the DB with data using the steps in [database-local-usage.md](/documentation/api/database/database-local-usage.md)
 
 ### Services
 
@@ -222,7 +222,7 @@ If you want to connect to SQS with the AWS CLI, you can do:
 `aws --endpoint-url http://localhost:9324 sqs list-queues` which in this case would list the queues.
 
 SQS queues are automatically created based on the configuration that we specify in the
-[custom.conf](../../api/mock-sqs/custom.conf) file which gets passed to the elasticmq docker image during
+[custom.conf](/api/mock-sqs/custom.conf) file which gets passed to the elasticmq docker image during
 startup.
 
 The SQS queues **DO NOT** maintain state if you stop and restart the container. If you stop the SQS
@@ -230,4 +230,4 @@ mock container all messages in the queues will be lost.
 
 ## Next steps
 
-Now that you're up and running, read the [application docs](../../api/README.md) to familiarize yourself with the application.
+Now that you're up and running, read the [application docs](/api/README.md) to familiarize yourself with the application.

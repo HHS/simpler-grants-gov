@@ -4,7 +4,7 @@ Simpler.Grants.gov uses GitHub as our primary work tracker. If you encounter bug
 
 ## Getting Started
 
-Make sure that all issues follow the Simpler.Grants.gov [Code of Conduct](../policies-and-guidelines/code-of-conduct.md). We understand that experiencing issues with software can be frustrating, especially when it prevents you from doing work. However, please remember that a human on the other side will be reading your issue and responding to it.
+Make sure that all issues follow the Simpler.Grants.gov [Code of Conduct](/documentation/wiki/get-involved/policies-and-guidelines/code-of-conduct.md). We understand that experiencing issues with software can be frustrating, especially when it prevents you from doing work. However, please remember that a human on the other side will be reading your issue and responding to it.
 
 ### 1. Navigate to Issues
 

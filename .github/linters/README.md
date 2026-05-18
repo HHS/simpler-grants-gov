@@ -49,7 +49,7 @@ root
    - For a reference please see [`linters/scripts/set-points-and-sprint.sh`][set-points-and-sprint-script] and its associated query [`linters/queries/get-project-items.graphql`][get-project-items-query]
 2. Update the permissions on your script so it can be executed: `chmod 744 ./scripts/<path-to-script>`
 3. Test your script locally `./scripts/<path-to-script> --dry-run`
-4. Add your script to the [CI checks for the linters](../workflows/ci-project-linters.yml). Make sure you include any environment variables needed by your script and the `--dry-run` flag in the GitHub action `run` statement.
+4. Add your script to the [CI checks for the linters](/.github/workflows/ci-project-linters.yml). Make sure you include any environment variables needed by your script and the `--dry-run` flag in the GitHub action `run` statement.
 5. Create a new GitHub action workflow to run your linter.
    - **Note:** Make sure the name of the yaml file is prefixed with `lint-` (or `ci-` if run on PRs).
    - **Note:** Make sure the workflow is run from the `linters/` sub-directory.

@@ -88,5 +88,5 @@ Cons
 
 ## Related ADRS
 
-- [Separate the database infrastructure into a separate layer](./2023-05-25-separate-database-infrastructure-into-separate-layer.md)
-- [Provision database users with serverless function](./2023-05-25-provision-database-users-with-serverless-function.md)
+- [Separate the database infrastructure into a separate layer](/docs/decisions/infra/2023-05-25-separate-database-infrastructure-into-separate-layer.md)
+- [Provision database users with serverless function](/docs/decisions/infra/2023-05-25-provision-database-users-with-serverless-function.md)

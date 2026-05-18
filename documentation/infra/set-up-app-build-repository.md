@@ -6,7 +6,7 @@ The application build repository setup process will create infrastructure resour
 
 Before setting up the application's build repository you'll need to have:
 
-1. [Set up the AWS account](./set-up-aws-account.md)
+1. [Set up the AWS account](/documentation/infra/set-up-aws-account.md)
 
 ## 1. Configure backend
 
@@ -28,4 +28,4 @@ make infra-update-app-build-repository APP_NAME=app
 
 ## Set up application environments
 
-Once you set up the deployment process, you can proceed to [set up application environments](./set-up-app-env.md)
+Once you set up the deployment process, you can proceed to [set up application environments](/documentation/infra/set-up-app-env.md)

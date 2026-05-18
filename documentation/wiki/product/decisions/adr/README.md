@@ -1,3 +1,3 @@
 # ADRs
 
-[ADRs we've adopted](../../../SUMMARY.md)
+[ADRs we've adopted](/documentation/wiki/SUMMARY.md)

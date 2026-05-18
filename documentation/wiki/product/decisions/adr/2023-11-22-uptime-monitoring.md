@@ -8,7 +8,7 @@
 
 ## Context and Problem Statement
 
-We need a tool for external uptime monitoring of the website and API. We have [internal monitoring](../../../../../infra/modules/monitoring/main.tf) setup, but not external. This would be useful for cases in which a load balancer or CDN (if we adopt one) are not operating correctly, or there is a DNS issue with the site.
+We need a tool for external uptime monitoring of the website and API. We have [internal monitoring](/infra/modules/monitoring/main.tf) setup, but not external. This would be useful for cases in which a load balancer or CDN (if we adopt one) are not operating correctly, or there is a DNS issue with the site.
 
 ## Decision Drivers
 

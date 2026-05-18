@@ -7,7 +7,7 @@ Some applications need their own user authentication system when they can't rely
 
 ## Requirements
 
-While not strictly required, it's recommended to [set up notifications](./notifications.md) first. Without notifications configured, account verification and password reset emails will use Cognito's default email configuration, which has daily email sending limits.
+While not strictly required, it's recommended to [set up notifications](/docs/infra/notifications.md) first. Without notifications configured, account verification and password reset emails will use Cognito's default email configuration, which has daily email sending limits.
 
 ## 1. Enable identity provider in application config
 

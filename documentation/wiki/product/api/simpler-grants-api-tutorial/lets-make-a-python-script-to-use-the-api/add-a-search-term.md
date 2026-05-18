@@ -40,5 +40,5 @@ def search_opportunities(search_term=""):
 ```
 
 {% hint style="warning" %}
-Something not working as expected? Check out [common issues & solutions](../common-issues-and-solutions.md).&#x20;
+Something not working as expected? Check out [common issues & solutions](/documentation/wiki/product/api/simpler-grants-api-tutorial/common-issues-and-solutions.md).&#x20;
 {% endhint %}
