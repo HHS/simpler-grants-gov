@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
+from src.adapters.aws.ses_adapter import _clear_mock_responses, _get_mock_responses
 from src.constants.lookup_constants import ApprovalResponseType, Privilege, WorkflowType
 from src.db.models.agency_models import Agency
 from src.db.models.user_models import User
@@ -31,13 +31,13 @@ def verify_email(
     expected_state: BasicState,
     expected_privilege: Privilege,
 ) -> None:
-    assert user.email in raw_email["MessageRequest"]["Addresses"]
-    email = raw_email["MessageRequest"]["MessageConfiguration"]["EmailMessage"]["SimpleEmail"]
+    assert user.email in raw_email["Destination"]["ToAddresses"]
+    email = raw_email["Content"]["Simple"]
 
     subject = email["Subject"]["Data"]
     assert subject == "Approval required for 'Basic Test Workflow'"
 
-    body = email["TextPart"]["Data"]
+    body = email["Body"]["Text"]["Data"]
 
     assert (
         f"An approval is required for a Basic Test Workflow that is currently in state '{expected_state}' from a user with the following privilege(s): {expected_privilege}"
