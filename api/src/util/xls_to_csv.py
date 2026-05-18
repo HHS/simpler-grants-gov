@@ -31,9 +31,12 @@ def xls_to_csv(xls_file_path: str, sheet_index: int = 1, skip_rows: int = 2) -> 
         df.to_csv(csv_buffer, index=False)
         csv_buffer.seek(0)
         csv_content = csv_buffer.getvalue()
-        logger.info(f"Successfully converted sheet {sheet_index + 1} to CSV string")
+        logger.info(
+            "Successfully converted Excel sheet to CSV string",
+            extra={"sheet_index": sheet_index + 1},
+        )
         return csv_content
 
     except Exception as e:
-        logger.error(f"Error converting Excel to CSV: {str(e)}")
+        logger.exception("Failed to convert Excel to CSV")
         raise RuntimeError(f"Error converting Excel to CSV: {str(e)}") from e
