@@ -96,7 +96,11 @@ def open_stream(
         return smart_open.open(path, mode, encoding=encoding)
 
 
-def pre_sign_file_location(file_path: str, s3_config: S3Config | None = None) -> str:
+def pre_sign_file_location(
+    file_path: str,
+    s3_config: S3Config | None = None,
+    expires_in: int | None = None,
+) -> str:
     if s3_config is None:
         s3_config = get_default_s3_config()
 
@@ -105,7 +109,7 @@ def pre_sign_file_location(file_path: str, s3_config: S3Config | None = None) ->
     pre_sign_file_loc = s3_client.generate_presigned_url(
         "get_object",
         Params={"Bucket": bucket, "Key": key},
-        ExpiresIn=s3_config.presigned_s3_duration,
+        ExpiresIn=expires_in if expires_in is not None else s3_config.presigned_s3_duration,
     )
     if s3_config.aws_s3_endpoint_url:
         # Only relevant when local, due to docker path issues

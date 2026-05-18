@@ -1,4 +1,5 @@
 import os
+from urllib.parse import parse_qs, urlparse
 
 import boto3
 import pytest
@@ -6,6 +7,7 @@ from smart_open import open as smart_open
 
 import src.util.file_util as file_util
 import tests.src.db.models.factories as f
+from src.adapters.aws import S3Config
 
 
 def create_file(root_path, file_path):
@@ -266,3 +268,58 @@ def test_write_to_file(tmp_path):
     file_util.write_to_file(file_path, contents)
     assert file_util.file_exists(file_path) is True
     assert file_util.read_file(file_path) == contents
+
+
+def _get_expires_in(url: str) -> int:
+    query = parse_qs(urlparse(url).query)
+    return int(query["X-Amz-Expires"][0])
+
+
+def test_pre_sign_file_location_default_duration(mock_s3_bucket):
+    s3_config = S3Config(
+        PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
+        DRAFT_FILES_BUCKET=f"s3://{mock_s3_bucket}",
+        presigned_s3_duration=7200,
+        presigned_submission_duration=900,
+    )
+
+    url = file_util.pre_sign_file_location(
+        f"s3://{mock_s3_bucket}/some/file.txt", s3_config=s3_config
+    )
+
+    assert _get_expires_in(url) == 7200
+
+
+def test_pre_sign_file_location_submission_duration_override(mock_s3_bucket):
+    """Submission download paths pass an explicit shorter expiry."""
+    s3_config = S3Config(
+        PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
+        DRAFT_FILES_BUCKET=f"s3://{mock_s3_bucket}",
+        presigned_s3_duration=7200,
+        presigned_submission_duration=900,
+    )
+
+    url = file_util.pre_sign_file_location(
+        f"s3://{mock_s3_bucket}/submissions/file.zip",
+        s3_config=s3_config,
+        expires_in=s3_config.presigned_submission_duration,
+    )
+
+    assert _get_expires_in(url) == 900
+
+
+def test_pre_sign_file_location_explicit_expires_in_takes_precedence(mock_s3_bucket):
+    s3_config = S3Config(
+        PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
+        DRAFT_FILES_BUCKET=f"s3://{mock_s3_bucket}",
+        presigned_s3_duration=7200,
+        presigned_submission_duration=900,
+    )
+
+    url = file_util.pre_sign_file_location(
+        f"s3://{mock_s3_bucket}/some/file.txt",
+        s3_config=s3_config,
+        expires_in=60,
+    )
+
+    assert _get_expires_in(url) == 60

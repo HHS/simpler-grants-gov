@@ -27,7 +27,11 @@ from src.db.models.lookup_models import (
 )
 from src.db.models.opportunity_models import Opportunity, OpportunityAssistanceListing
 from src.util.datetime_util import get_now_us_eastern_date
-from src.util.file_util import pre_sign_file_location, presign_or_s3_cdnify_url
+from src.util.file_util import (
+    get_default_s3_config,
+    pre_sign_file_location,
+    presign_or_s3_cdnify_url,
+)
 
 # Add conditional import for type checking
 if TYPE_CHECKING:
@@ -403,7 +407,13 @@ class ApplicationAttachment(ApiSchemaTable, TimestampMixin):
         """Get the presigned s3 url path for downloading the file"""
         # NOTE: These attachments will only ever be in a non-public
         # bucket so we only can presign their URL, we can't use the CDN path.
-        return pre_sign_file_location(self.file_location)
+        # Use the shorter submission expiry since these may contain PII.
+        s3_config = get_default_s3_config()
+        return pre_sign_file_location(
+            self.file_location,
+            s3_config=s3_config,
+            expires_in=s3_config.presigned_submission_duration,
+        )
 
 
 class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
@@ -475,7 +485,13 @@ class ApplicationSubmission(ApiSchemaTable, TimestampMixin):
         """Get the presigned s3 url path for downloading the submission file"""
         # NOTE: These submission files will only ever be in a non-public
         # bucket so we only can presign their URL, we can't use the CDN path.
-        return pre_sign_file_location(self.file_location)
+        # Use the shorter submission expiry since these contain PII.
+        s3_config = get_default_s3_config()
+        return pre_sign_file_location(
+            self.file_location,
+            s3_config=s3_config,
+            expires_in=s3_config.presigned_submission_duration,
+        )
 
 
 class ApplicationSubmissionRetrieved(ApiSchemaTable, TimestampMixin):
