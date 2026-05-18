@@ -237,5 +237,98 @@ describe("AwardRecommendationAttachments", () => {
       expect(consoleErrorSpy).toHaveBeenCalled();
       consoleErrorSpy.mockRestore();
     });
+
+    it("displays single application number when array has one item", async () => {
+      const mockFetch = jest.fn().mockResolvedValue({
+        data: [
+          {
+            risk_number: 1,
+            applications: [
+              {
+                award_recommendation_application_submission_id: "ar-sub-123",
+                application_submission_id: "app-sub-123",
+                application_submission_number: "GRANT-2024-001",
+              },
+            ],
+            condition: "Condition A",
+            award_recommendation_risk_id: "risk-123",
+          },
+        ],
+        pagination_info: { total_pages: 1 },
+      });
+      (useClientFetchModule.useClientFetch as jest.Mock).mockReturnValue({
+        clientFetch: mockFetch,
+      });
+      render(
+        <AwardRecommendationAttachments awardRecommendationId="test-id" />,
+      );
+      await waitFor(() =>
+        expect(screen.getByText("GRANT-2024-001")).toBeInTheDocument(),
+      );
+    });
+
+    it("displays application count when array has multiple items", async () => {
+      const mockFetch = jest.fn().mockResolvedValue({
+        data: [
+          {
+            risk_number: 1,
+            applications: [
+              {
+                award_recommendation_application_submission_id: "ar-sub-1",
+                application_submission_id: "app-sub-1",
+                application_submission_number: "GRANT-2024-001",
+              },
+              {
+                award_recommendation_application_submission_id: "ar-sub-2",
+                application_submission_id: "app-sub-2",
+                application_submission_number: "GRANT-2024-002",
+              },
+              {
+                award_recommendation_application_submission_id: "ar-sub-3",
+                application_submission_id: "app-sub-3",
+                application_submission_number: "GRANT-2024-003",
+              },
+            ],
+            condition: "Condition A",
+            award_recommendation_risk_id: "risk-123",
+          },
+        ],
+        pagination_info: { total_pages: 1 },
+      });
+      (useClientFetchModule.useClientFetch as jest.Mock).mockReturnValue({
+        clientFetch: mockFetch,
+      });
+      render(
+        <AwardRecommendationAttachments awardRecommendationId="test-id" />,
+      );
+      await waitFor(() =>
+        expect(screen.getByText("3 applications")).toBeInTheDocument(),
+      );
+    });
+
+    it("displays dash when applications array is empty", async () => {
+      const mockFetch = jest.fn().mockResolvedValue({
+        data: [
+          {
+            risk_number: 1,
+            applications: [],
+            condition: "Condition A",
+            award_recommendation_risk_id: "risk-123",
+          },
+        ],
+        pagination_info: { total_pages: 1 },
+      });
+      (useClientFetchModule.useClientFetch as jest.Mock).mockReturnValue({
+        clientFetch: mockFetch,
+      });
+      render(
+        <AwardRecommendationAttachments awardRecommendationId="test-id" />,
+      );
+      await waitFor(() =>
+        expect(screen.getByText("Condition A")).toBeInTheDocument(),
+      );
+      const cells = screen.getAllByText("-");
+      expect(cells.length).toBeGreaterThan(0);
+    });
   });
 });

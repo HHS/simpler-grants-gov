@@ -7,11 +7,11 @@ import src.adapters.db as db
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import (
     ApplicationStatus,
+    AwardRecommendationRiskType,
     AwardRecommendationStatus,
     AwardRecommendationType,
     AwardSelectionMethod,
     OpportunityStatus,
-    AwardRecommendationRiskType,
 )
 from src.constants.static_role_values import (
     AWARD_RECOMMENDATION_USER,
@@ -84,6 +84,7 @@ def _build_award_recommendations(db_session: db.Session) -> None:
     _log_summary(award_recommendations_created)
     seed_award_recommendation_risks_and_submissions(db_session, award_recommendations_created)
 
+
 def seed_award_recommendation_risks_and_submissions(db_session, award_recommendations_created):
     """Seed example risks and risk submissions for the first created award recommendation."""
     logger = logging.getLogger(__name__)
@@ -110,7 +111,10 @@ def seed_award_recommendation_risks_and_submissions(db_session, award_recommenda
             award_recommendation_risk=risk,
             award_recommendation_application_submission=submission,
         )
-        logger.info(f"✓ Seeded risk {risk.award_recommendation_risk_number} ({risk_type}) for AR {ar.award_recommendation_number}")
+        logger.info(
+            f"✓ Seeded risk {risk.award_recommendation_risk_number} ({risk_type}) for AR {ar.award_recommendation_number}"
+        )
+
 
 def _setup_agency_and_users(db_session: db.Session) -> Agency:
     """Create agency and users with award recommendation roles for testing."""

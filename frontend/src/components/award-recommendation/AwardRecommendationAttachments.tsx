@@ -90,7 +90,17 @@ export const AwardRecommendationAttachments = ({
         </a>
       ),
     },
-    { cellData: risk.application_numbers || risk.app_number || "-" },
+    {
+      cellData: (() => {
+        if (Array.isArray(risk.applications)) {
+          if (risk.applications.length === 0) return "-";
+          if (risk.applications.length === 1)
+            return risk.applications[0].application_submission_number;
+          return `${risk.applications.length} applications`;
+        }
+        return "-";
+      })(),
+    },
     {
       cellData: (
         <a href="#">{risk.condition_number || risk.condition || "-"}</a>
