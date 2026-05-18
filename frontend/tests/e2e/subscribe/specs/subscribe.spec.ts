@@ -20,7 +20,6 @@ test.beforeEach(async ({ page }) => {
 
   // Background: Given I open "/newsletter"
   await page.goto("/newsletter", { waitUntil: "domcontentloaded", timeout });
-
 });
 
 /**
