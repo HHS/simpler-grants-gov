@@ -117,7 +117,6 @@ def send_ses_email(
             message_id="message-not-sent",
             trace_id=trace_id,
         )
-        response = SesResponse(results={to_address: result})
 
         logger.error(
             "Failed to send email",
@@ -131,7 +130,7 @@ def send_ses_email(
         )
         raise Exception(
             f"Failed to send email ses_trace_id: {trace_id} with ses_delivery_status: {result.delivery_status}"
-        )
+        ) from e
 
     # SES v2 returns a MessageId on success
     message_id = raw_response.get("MessageId", "message-not-sent")
