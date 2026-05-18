@@ -4,8 +4,11 @@ import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 
 const subscribeSchema = z.object({
-  name: z.string().min(1),
-  email: z.string().min(1).email(),
+  name: z.string().min(1, "Please enter a name."),
+  email: z
+    .string()
+    .min(1, "Please enter an email address.")
+    .email("Please enter a valid email address."),
 });
 
 export async function POST(request: NextRequest) {
