@@ -14,7 +14,7 @@ May 18th’s update brings [several new changes](https://github.com/HHS/simpler-
 
 Users can now save opportunities to their organization so that all members can see what others are interested in to increase collaboration. Users can also receive email notifications for newly saved opportunities by members of your organization. After saving an opportunity, users can select ‘Sharing Options’ to add it to their organization.
 
-<img src="../.gitbook/assets/unknown (1).jpeg" alt="" height="411.15059999999994" width="520">
+<figure><img src="../.gitbook/assets/image1.gif" alt=""><figcaption></figcaption></figure>
 {% endcolumn %}
 {% endcolumns %}
 
