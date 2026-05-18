@@ -22,7 +22,7 @@ export const AwardRecommendationAttachments = ({
 }: AwardRecommendationAttachmentsProps) => {
   const [risks, setRisks] = useState<any[]>([]);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10); // adjust as needed
+  const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const { clientFetch } = useClientFetch("Error fetching risks");
@@ -111,72 +111,70 @@ export const AwardRecommendationAttachments = ({
   const otherRows: TableCellData[][] = [];
 
   return (
-    <GridContainer>
-      <section className="margin-top-8">
-        <h2>Attachments</h2>
-        <h3 className="margin-bottom-1">
-          Standard and program terms & conditions
-        </h3>
-        {mode === "edit" ? (
-          <div className="bg-base-lighter radius-md padding-y-2 padding-x-3 margin-bottom-2">
-            <a
-              className="text-primary text-bold text-left display-block width-full"
-              href="#"
-              style={{ textDecoration: "underline" }}
-              onClick={() => {
-                /* TODO: implement routing */
-              }}
-            >
-              Enter terms & conditions
-            </a>
-          </div>
-        ) : (
-          <TableWithResponsiveHeader
-            headerContent={standardHeaders}
-            tableRowData={standardRows}
-          />
-        )}
-        <h3 className="margin-top-6 margin-bottom-1">
-          Specific risks & recommended conditions
-        </h3>
+    <section className="margin-top-8">
+      <h2>Attachments</h2>
+      <h3 className="margin-bottom-1">
+        Standard and program terms & conditions
+      </h3>
+      {mode === "edit" ? (
+        <div className="bg-base-lighter radius-md padding-y-2 padding-x-3 margin-bottom-2">
+          <a
+            className="text-bold text-left display-block width-full"
+            href="#"
+            style={{ textDecoration: "underline" }}
+            onClick={() => {
+              /* TODO: implement routing */
+            }}
+          >
+            Enter terms & conditions
+          </a>
+        </div>
+      ) : (
         <TableWithResponsiveHeader
-          headerContent={risksHeaders}
-          tableRowData={risksRows}
+          headerContent={standardHeaders}
+          tableRowData={standardRows}
         />
-        <Pagination
-          pathname=""
-          totalPages={totalPages}
-          currentPage={page}
-          maxSlots={7}
-          onClickNext={() => setPage(page + 1)}
-          onClickPrevious={() => setPage(page > 1 ? page - 1 : 1)}
-          onClickPageNumber={(_, p) => setPage(p)}
-          aria-disabled={loading}
+      )}
+      <h3 className="margin-top-6 margin-bottom-1">
+        Specific risks & recommended conditions
+      </h3>
+      <TableWithResponsiveHeader
+        headerContent={risksHeaders}
+        tableRowData={risksRows}
+      />
+      <Pagination
+        pathname=""
+        totalPages={totalPages}
+        currentPage={page}
+        maxSlots={7}
+        onClickNext={() => setPage(page + 1)}
+        onClickPrevious={() => setPage(page > 1 ? page - 1 : 1)}
+        onClickPageNumber={(_, p) => setPage(p)}
+        aria-disabled={loading}
+      />
+      <h3 className="margin-top-6 margin-bottom-1">
+        Other supporting documents
+      </h3>
+      {mode === "edit" ? (
+        <div className="bg-base-lighter radius-md padding-y-2 padding-x-3 margin-bottom-2">
+          <a
+            className="text-bold text-left display-block width-full"
+            href="#"
+            style={{ textDecoration: "underline" }}
+            onClick={() => {
+              /* TODO: implement routing */
+            }}
+          >
+            Enter supporting documents
+          </a>
+        </div>
+      ) : (
+        <TableWithResponsiveHeader
+          headerContent={otherHeaders}
+          tableRowData={otherRows}
         />
-        <h3 className="margin-top-6 margin-bottom-1">
-          Other supporting documents
-        </h3>
-        {mode === "edit" ? (
-          <div className="bg-base-lighter radius-md padding-y-2 padding-x-3 margin-bottom-2">
-            <a
-              className="text-primary text-bold text-left display-block width-full"
-              href="#"
-              style={{ textDecoration: "underline" }}
-              onClick={() => {
-                /* TODO: implement routing */
-              }}
-            >
-              Enter supporting documents
-            </a>
-          </div>
-        ) : (
-          <TableWithResponsiveHeader
-            headerContent={otherHeaders}
-            tableRowData={otherRows}
-          />
-        )}
-      </section>
-    </GridContainer>
+      )}
+    </section>
   );
 };
 
