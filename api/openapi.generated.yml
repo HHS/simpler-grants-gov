@@ -29,6 +29,7 @@ tags:
 - name: Agency v1
 - name: Organization v1
 - name: Internal v1 - Admin Only
+- name: File v1
 - name: User v1 - Internal Only
 - name: Application Alpha
 - name: Form Alpha
@@ -105,8 +106,21 @@ paths:
       - ApiUserKeyAuth: *id001
   /v1/users/login:
     get:
-      parameters: []
+      parameters:
+      - in: query
+        name: piv_required
+        description: Whether the user is required to use a PIV to login
+        schema:
+          type: boolean
+          nullable: true
+        required: false
       responses:
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Validation error
         '302':
           content:
             application/json:
@@ -13564,12 +13578,12 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-    InternalApiJwtAuth:
-      type: apiKey
-      in: header
-      name: X-SGG-Internal-Token
     ApiJwtAuth:
       type: apiKey
       in: header
       name: X-SGG-Token
+    InternalApiJwtAuth:
+      type: apiKey
+      in: header
+      name: X-SGG-Internal-Token
 

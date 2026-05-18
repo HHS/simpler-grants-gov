@@ -1,8 +1,16 @@
+/**
+ * @feature Search Error Handling and Recovery
+ * @featureFile tests/e2e/search/search-state/features/search-error-recovery.feature
+ * @scenario Show an error state for invalid search params and recover by running a valid search
+ */
+
 import { expect, test } from "@playwright/test";
 import playwrightEnv from "tests/e2e/playwright-env";
+import {
+  toggleCheckbox,
+  toggleFilterDrawer,
+} from "tests/e2e/search/searchSpecUtil";
 import { VALID_TAGS } from "tests/e2e/tags";
-
-import { toggleCheckbox, toggleFilterDrawer } from "./searchSpecUtil";
 
 const { GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION } = VALID_TAGS;
 
@@ -13,9 +21,10 @@ test.describe("Search error page", () => {
     "should return an error page when expected",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page }) => {
-      // trigger error by providing an invalid status value
+      // Given I navigate to "/search?status=not_a_status"
       await page.goto("/search?status=not_a_status");
 
+      // Then I should see an error alert on the page
       expect(page.locator(".usa-alert--error")).toBeTruthy();
     },
   );
@@ -24,11 +33,16 @@ test.describe("Search error page", () => {
     "should allow for performing a new search from error state",
     { tag: [GRANTEE, OPPORTUNITY_SEARCH, CORE_REGRESSION] },
     async ({ page }) => {
+      // Given I navigate to "/search?status=not_a_status"
       await page.goto("/search?status=not_a_status");
 
+      // When I open the filters
       await toggleFilterDrawer(page);
+
+      // And I select the "Closed" opportunity status filter
       await toggleCheckbox(page, "status-closed");
 
+      // Then the URL should include "status=closed"
       await page.waitForURL(/closed/, {
         timeout: SEARCH_TIMEOUT,
       });

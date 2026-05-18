@@ -58,6 +58,7 @@ from src.constants.lookup_constants import (
     FundingCategory,
     FundingInstrument,
     JobStatus,
+    JobType,
     OpportunityCategory,
     OpportunityCategoryLegacy,
     OpportunityStatus,
@@ -804,7 +805,7 @@ class AssistanceListingFactory(BaseFactory):
     class Meta:
         model = opportunity_models.AssistanceListing
 
-    assistance_listing_record_id = Generators.UuidObj
+    assistance_listing_id = Generators.UuidObj
 
     program_title = factory.Faker("company")
     assistance_listing_number = factory.Faker("assistance_listing_number")
@@ -3633,3 +3634,16 @@ class ApplicationSubmissionRetrievedFactory(BaseFactory):
 
     modified_by_user = factory.SubFactory(UserFactory)
     modified_by_user_id = factory.LazyAttribute(lambda o: o.modified_by_user.user_id)
+
+
+class JobLockFactory(BaseFactory):
+    class Meta:
+        model = task_models.JobLock
+
+    job_lock_id = Generators.UuidObj
+    job_type = JobType.MIGRATE_UP
+    is_locked = False
+    locked_until = factory.LazyFunction(
+        lambda: fake.date_time_between(start_date="now", end_date="+1d", tzinfo=timezone.utc)
+    )
+    locked_by = Generators.UuidObj
