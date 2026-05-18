@@ -17,7 +17,9 @@ export async function getRisksForAwardRecommendation(
   try {
     const session = await getSession();
     if (!session || !session.token) {
-      throw new UnauthorizedError("No active session to fetch award recommendation risks");
+      throw new UnauthorizedError(
+        "No active session to fetch award recommendation risks",
+      );
     }
 
     if (!id) {
