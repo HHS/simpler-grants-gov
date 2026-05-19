@@ -270,47 +270,16 @@ def test_write_to_file(tmp_path):
     assert file_util.read_file(file_path) == contents
 
 
-def _get_expires_in(url: str) -> int:
-    query = parse_qs(urlparse(url).query)
-    return int(query["X-Amz-Expires"][0])
-
-
-@pytest.fixture
-def presign_s3_config(mock_s3_bucket):
-    return S3Config(
+def test_pre_sign_file_location_uses_configured_duration(mock_s3_bucket):
+    """Presigned URLs use the duration from S3Config (defaults to 15 minutes)."""
+    s3_config = S3Config(
         PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
         DRAFT_FILES_BUCKET=f"s3://{mock_s3_bucket}",
-        presigned_s3_duration=7200,
-        presigned_submission_duration=900,
     )
 
-
-def test_pre_sign_file_location_default_duration(mock_s3_bucket, presign_s3_config):
     url = file_util.pre_sign_file_location(
-        f"s3://{mock_s3_bucket}/some/file.txt", s3_config=presign_s3_config
+        f"s3://{mock_s3_bucket}/some/file.txt", s3_config=s3_config
     )
 
-    assert _get_expires_in(url) == 7200
-
-
-def test_pre_sign_file_location_submission_duration_override(mock_s3_bucket, presign_s3_config):
-    """Submission download paths pass an explicit shorter expiry."""
-    url = file_util.pre_sign_file_location(
-        f"s3://{mock_s3_bucket}/submissions/file.zip",
-        s3_config=presign_s3_config,
-        expires_in=presign_s3_config.presigned_submission_duration,
-    )
-
-    assert _get_expires_in(url) == 900
-
-
-def test_pre_sign_file_location_explicit_expires_in_takes_precedence(
-    mock_s3_bucket, presign_s3_config
-):
-    url = file_util.pre_sign_file_location(
-        f"s3://{mock_s3_bucket}/some/file.txt",
-        s3_config=presign_s3_config,
-        expires_in=60,
-    )
-
-    assert _get_expires_in(url) == 60
+    query = parse_qs(urlparse(url).query)
+    assert int(query["X-Amz-Expires"][0]) == 900
