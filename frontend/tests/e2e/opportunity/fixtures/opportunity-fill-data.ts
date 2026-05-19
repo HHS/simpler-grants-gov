@@ -12,8 +12,8 @@ function generateOpportunityNumber(): string {
 
 function generateTodayDate(): string {
   const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
   const year = now.getFullYear();
 
   return `${month}/${day}/${year}`;
@@ -23,8 +23,8 @@ function generateDateFromToday(daysToAdd: number): string {
   const date = new Date();
   date.setDate(date.getDate() + daysToAdd);
 
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
   const year = date.getFullYear();
 
   return `${month}/${day}/${year}`;
@@ -34,26 +34,26 @@ function generateDateFromToday(daysToAdd: number): string {
 export const createOpportunityFillData = {
   opportunityNumber: generateOpportunityNumber(),
   opportunityTitle: `This is test data - ${generateOpportunityNumber()}`,
-  grantSelectionMethod: 'discretionary',
-  assistanceListingNumber: '00.000',
+  grantSelectionMethod: "discretionary",
+  assistanceListingNumber: "00.000",
 };
 
 // Fill data for Opportunity page
 export const editOpportunityFillData = {
-  fundingType: 'grant',
-  category: 'recovery_act',
-  expectedAwards: '10',
-  totalProgram: '1000000',
-  awardMinimum: '50000',
-  awardMaximum: '100000',
+  fundingType: "grant",
+  category: "recovery_act",
+  expectedAwards: "10",
+  totalProgram: "1000000",
+  awardMinimum: "50000",
+  awardMaximum: "100000",
   publishDate: generateTodayDate(),
   closeDate: generateDateFromToday(30),
-  description: 'Additional - Test opportunity description',
-  additionalInfoLink: 'https://www.example.com/additional-info',
-  additionalInfoText: 'Test Additional Info',
-  grantorContact: 'Test grantor contact details',
-  contactEmail: 'test@example.com',
-  emailDisplayText: 'Test Contact Email',
+  description: "Additional - Test opportunity description",
+  additionalInfoLink: "https://www.example.com/additional-info",
+  additionalInfoText: "Test Additional Info",
+  grantorContact: "Test grantor contact details",
+  contactEmail: "test@example.com",
+  emailDisplayText: "Test Contact Email",
   eligibleApplicantSmallBusinesses: true,
   eligibleApplicantOtherNativeAmericanTribal: true,
   eligibleApplicantIndependentSchoolDistricts: true,

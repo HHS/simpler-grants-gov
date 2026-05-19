@@ -1,5 +1,3 @@
-
-
 /**
  * @feature Opportunity - Happy Path
  * @featureFile e2e/opportunity/features/happy-path-create-opportunity.feature
@@ -7,11 +5,11 @@
  */
 
 import {
+  expect,
   test,
   type BrowserContext,
   type Page,
   type TestInfo,
-  expect,
 } from "@playwright/test";
 import { opportunityFieldDefinitions } from "tests/e2e/opportunity/fixtures/opportunity-field-definitions";
 import {
@@ -64,7 +62,9 @@ test(
     await authenticateE2eUser(page, context, !!isMobile);
 
     // Navigate to Opportunities List page after login
-    await page.goto(`https://staging.simpler.grants.gov/${OPPORTUNITY_LIST_URL}`);
+    await page.goto(
+      `https://staging.simpler.grants.gov/${OPPORTUNITY_LIST_URL}`,
+    );
 
     // expect to be on the Opportunities List page
     await expect(
@@ -72,7 +72,9 @@ test(
     ).toBeVisible();
 
     // click the "Create Opportunity" button (anchor with class 'usa-button') to go to the "Create Opportunity" page
-    await page.locator('a.usa-button', { hasText: 'Create Opportunity' }).click();
+    await page
+      .locator("a.usa-button", { hasText: "Create Opportunity" })
+      .click();
 
     // Fill the opportunity page using the reusable function and fixtures
     await fillOpportunityPage(

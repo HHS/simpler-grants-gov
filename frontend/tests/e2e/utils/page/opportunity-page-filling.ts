@@ -1,5 +1,4 @@
 import { Page, TestInfo } from "@playwright/test";
-
 import {
   fillPagePartial,
   type PageFillFieldDefinitions,
@@ -52,4 +51,3 @@ export async function fillOpportunityPage(
     contentType: "text/plain",
   });
 }
-
