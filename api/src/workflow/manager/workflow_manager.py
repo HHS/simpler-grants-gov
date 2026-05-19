@@ -3,9 +3,12 @@ import logging
 import signal
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from datetime import datetime
 from types import FrameType
 
+from flask import Flask, current_app
 from pydantic import ValidationError
 
 from src.adapters import db
@@ -38,6 +41,14 @@ class WorkflowManagerConfig(PydanticBaseEnvConfig):
     # Only used for testing, we have no limit
     # under ordinary circumstances
     workflow_maximum_batch_count: int | None = None  # WORKFLOW_MAXIMUM_BATCH_COUNT
+
+    # Per-event timeout when processing in parallel. If a thread doesn't
+    # return a result within this many seconds, we stop waiting on it,
+    # treat the event as failed (message kept on the queue), and move on.
+    # The thread itself can't be forcibly killed - the DB transaction
+    # opened inside it will roll back when the underlying operation
+    # eventually errors or completes.
+    workflow_event_processing_timeout_sec: int = 30  # WORKFLOW_EVENT_PROCESSING_TIMEOUT_SEC
 
 
 class WorkflowManager:
@@ -177,26 +188,49 @@ class WorkflowManager:
         messages_to_delete: list[str] = []
         messages_to_keep: list[str] = []
 
-        # Note that the initial approach won't be multi-threaded
-        # We'll follow-up on that later
-        for sqs_container in sqs_containers:
-            try:
-                event_result = handle_event(sqs_container)
-            except Exception:
-                logger.exception(
-                    "Failed to handle current event",
-                    extra=sqs_container.get_log_extra(),
-                )
-                messages_to_keep.append(sqs_container.receipt_handle)
-                continue
+        if sqs_containers:
+            # Each container is processed on its own thread so that IO waits
+            # (DB calls, downstream services) overlap. The core loop stays
+            # single-threaded - we wait for every thread in this batch to
+            # finish before deleting any messages.
+            app = current_app._get_current_object()  # type: ignore[attr-defined]
+            timeout = self.config.workflow_event_processing_timeout_sec
 
-            if event_result in [
-                WorkflowEventProcessingResult.SUCCESS,
-                WorkflowEventProcessingResult.NON_RETRYABLE_ERROR,
-            ]:
-                messages_to_delete.append(sqs_container.receipt_handle)
-            else:
-                messages_to_keep.append(sqs_container.receipt_handle)
+            with ThreadPoolExecutor(max_workers=len(sqs_containers)) as executor:
+                future_to_container = {
+                    executor.submit(_handle_event_in_thread, app, container): container
+                    for container in sqs_containers
+                }
+
+                for future, sqs_container in future_to_container.items():
+                    try:
+                        event_result = future.result(timeout=timeout)
+                    except FuturesTimeoutError:
+                        # Python threads can't be forcibly killed - the thread
+                        # will keep running until its DB call errors or returns,
+                        # at which point the surrounding transaction rolls back.
+                        # We stop waiting on it and treat the message as failed.
+                        logger.error(
+                            "Workflow event handler exceeded timeout",
+                            extra=sqs_container.get_log_extra() | {"timeout_sec": timeout},
+                        )
+                        messages_to_keep.append(sqs_container.receipt_handle)
+                        continue
+                    except Exception:
+                        logger.exception(
+                            "Failed to handle current event",
+                            extra=sqs_container.get_log_extra(),
+                        )
+                        messages_to_keep.append(sqs_container.receipt_handle)
+                        continue
+
+                    if event_result in [
+                        WorkflowEventProcessingResult.SUCCESS,
+                        WorkflowEventProcessingResult.NON_RETRYABLE_ERROR,
+                    ]:
+                        messages_to_delete.append(sqs_container.receipt_handle)
+                    else:
+                        messages_to_keep.append(sqs_container.receipt_handle)
 
         self.delete_messages(messages_to_delete)
 
@@ -258,6 +292,16 @@ class WorkflowManager:
                 )
         except Exception:
             logger.exception("Failed to delete messages from SQS queue")
+
+
+def _handle_event_in_thread(
+    app: Flask, sqs_container: SqsMessageContainer
+) -> WorkflowEventProcessingResult:
+    # handle_event's @with_db_session decorator pulls the DB client off
+    # current_app, which is per-thread. Push the app context here so the
+    # decorator can find it from inside the worker thread.
+    with app.app_context():
+        return handle_event(sqs_container)
 
 
 @flask_db.with_db_session()

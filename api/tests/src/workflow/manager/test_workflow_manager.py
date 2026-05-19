@@ -1,5 +1,7 @@
 import json
 import logging
+import threading
+import time
 import uuid
 from unittest.mock import patch
 
@@ -456,3 +458,69 @@ def test_process_sqs_event_general_error(mock_event_handler_preprocess, app):
 
     # Verify
     assert result == WorkflowEventProcessingResult.GENERAL_ERROR
+
+
+def test_process_batch_runs_events_concurrently(workflow_sqs_queue, app, valid_message_body):
+    """Verify process_batch dispatches each event to its own thread.
+
+    A threading.Barrier with a short timeout deterministically distinguishes
+    concurrent vs. sequential execution: if the handler ran sequentially the
+    first thread would block forever (the others can't arrive at the barrier),
+    so the barrier's timeout would fire and the test would fail.
+    """
+    sqs_client = SQSClient(
+        queue_url=workflow_sqs_queue, sqs_client=boto3.client("sqs", region_name="us-east-1")
+    )
+
+    num_events = 3
+    for _ in range(num_events):
+        body = dict(valid_message_body)
+        body["event_id"] = str(uuid.uuid4())
+        sqs_client.send_message(body)
+
+    barrier = threading.Barrier(num_events, timeout=5)
+
+    def fake_handle_event(sqs_container):
+        barrier.wait()
+        return WorkflowEventProcessingResult.SUCCESS
+
+    config = WorkflowManagerConfig(workflow_cycle_duration=0, workflow_maximum_batch_count=1)
+    workflow_manager = WorkflowManager(config=config)
+
+    with app.app_context(), patch(
+        "src.workflow.manager.workflow_manager.handle_event", fake_handle_event
+    ):
+        messages_to_delete, messages_to_keep = workflow_manager.process_batch()
+
+    assert len(messages_to_delete) == num_events
+    assert len(messages_to_keep) == 0
+
+
+def test_process_batch_event_timeout_keeps_message(workflow_sqs_queue, app, valid_message_body):
+    """A handler that exceeds the per-event timeout has its message kept on the queue."""
+    sqs_client = SQSClient(
+        queue_url=workflow_sqs_queue, sqs_client=boto3.client("sqs", region_name="us-east-1")
+    )
+    sqs_client.send_message(valid_message_body)
+
+    def slow_handle_event(sqs_container):
+        # Long enough to be guaranteed past the timeout below. The
+        # ThreadPoolExecutor will wait for this to finish on shutdown,
+        # so keep it short so the test stays fast.
+        time.sleep(1)
+        return WorkflowEventProcessingResult.SUCCESS
+
+    config = WorkflowManagerConfig(
+        workflow_cycle_duration=0,
+        workflow_maximum_batch_count=1,
+        workflow_event_processing_timeout_sec=0,
+    )
+    workflow_manager = WorkflowManager(config=config)
+
+    with app.app_context(), patch(
+        "src.workflow.manager.workflow_manager.handle_event", slow_handle_event
+    ):
+        messages_to_delete, messages_to_keep = workflow_manager.process_batch()
+
+    assert messages_to_delete == []
+    assert len(messages_to_keep) == 1
