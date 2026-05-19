@@ -168,7 +168,9 @@ def test_org_name_required_when_not_individual(project_performance_site_location
             "country": "GBR: UNITED KINGDOM",
         }
     }
-    validate_required(data, ["$.primary_site.organization_name"], project_performance_site_location_v4_0)
+    validate_required(
+        data, ["$.primary_site.organization_name"], project_performance_site_location_v4_0
+    )
 
 
 def test_additional_site_missing_required_fields(project_performance_site_location_v4_0):

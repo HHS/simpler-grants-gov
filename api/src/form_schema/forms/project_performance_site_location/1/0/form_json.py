@@ -249,6 +249,7 @@ FORM_RULE_SCHEMA = {
     "additional_locations_attachment": {"gg_validation": {"rule": "attachment"}},
 }
 
+
 # Helper to build site location field mappings for XML (shared between primary and additional sites)
 def _site_location_xml_fields() -> dict:
     return {
