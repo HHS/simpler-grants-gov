@@ -210,7 +210,7 @@ class WorkflowManager:
                         # will keep running until its DB call errors or returns,
                         # at which point the surrounding transaction rolls back.
                         # We stop waiting on it and treat the message as failed.
-                        logger.error(
+                        logger.warning(
                             "Workflow event handler exceeded timeout",
                             extra=sqs_container.get_log_extra() | {"timeout_sec": timeout},
                         )

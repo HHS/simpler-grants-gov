@@ -1,7 +1,6 @@
 import json
 import logging
 import threading
-import time
 import uuid
 from unittest.mock import patch
 
@@ -504,10 +503,10 @@ def test_process_batch_event_timeout_keeps_message(workflow_sqs_queue, app, vali
     sqs_client.send_message(valid_message_body)
 
     def slow_handle_event(sqs_container):
-        # Long enough to be guaranteed past the timeout below. The
-        # ThreadPoolExecutor will wait for this to finish on shutdown,
-        # so keep it short so the test stays fast.
-        time.sleep(1)
+        # The handler just needs to still be running when future.result(timeout=0)
+        # is called - any brief wait suffices. ThreadPoolExecutor waits for this
+        # to finish on shutdown, so keep it short so the test stays fast.
+        threading.Event().wait(0.05)
         return WorkflowEventProcessingResult.SUCCESS
 
     config = WorkflowManagerConfig(
