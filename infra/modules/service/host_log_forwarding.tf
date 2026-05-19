@@ -1,5 +1,5 @@
 #--------------------------------------------
-# Forward ECS application CloudWatch logs to New Relic
+# Forward ECS application and API Gateway CloudWatch logs to New Relic
 #--------------------------------------------
 
 locals {
@@ -159,4 +159,48 @@ resource "aws_cloudwatch_log_subscription_filter" "host_to_newrelic" {
   destination_arn = aws_lambda_function.nr_host_log_forwarder.arn
 
   depends_on = [aws_lambda_permission.allow_cloudwatch_host]
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch_api_gateway" {
+  count         = var.enable_api_gateway ? 1 : 0
+  statement_id  = "AllowCloudWatchApiGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.nr_host_log_forwarder.function_name
+  principal     = "logs.amazonaws.com"
+  source_arn    = "${aws_cloudwatch_log_group.api_gateway_logs[0].arn}:*"
+}
+
+resource "aws_cloudwatch_log_subscription_filter" "api_gateway_to_newrelic" {
+  count           = var.enable_api_gateway ? 1 : 0
+  name            = "${var.service_name}-api-gateway-to-newrelic"
+  log_group_name  = aws_cloudwatch_log_group.api_gateway_logs[0].name
+  filter_pattern  = ""
+  destination_arn = aws_lambda_function.nr_host_log_forwarder.arn
+
+  depends_on = [aws_lambda_permission.allow_cloudwatch_api_gateway]
+}
+
+locals {
+  # AWS auto-creates this log group when execution logging is enabled; construct the name from the REST API ID
+  api_gateway_execution_log_group_name = var.enable_api_gateway ? "API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.api[0].id}/v1" : ""
+  api_gateway_execution_log_group_arn  = var.enable_api_gateway ? "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.api[0].id}/v1" : ""
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch_api_gateway_execution" {
+  count         = var.enable_api_gateway ? 1 : 0
+  statement_id  = "AllowCloudWatchApiGatewayExecution"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.nr_host_log_forwarder.function_name
+  principal     = "logs.amazonaws.com"
+  source_arn    = "${local.api_gateway_execution_log_group_arn}:*"
+}
+
+resource "aws_cloudwatch_log_subscription_filter" "api_gateway_execution_to_newrelic" {
+  count           = var.enable_api_gateway ? 1 : 0
+  name            = "${var.service_name}-api-gateway-execution-to-newrelic"
+  log_group_name  = local.api_gateway_execution_log_group_name
+  filter_pattern  = ""
+  destination_arn = aws_lambda_function.nr_host_log_forwarder.arn
+
+  depends_on = [aws_lambda_permission.allow_cloudwatch_api_gateway_execution]
 }
