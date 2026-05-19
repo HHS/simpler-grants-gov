@@ -33,6 +33,7 @@ describe("getNextRoutes", () => {
       "/(base)/search",
       "/(base)/settings",
       "/(base)/unauthenticated",
+      "/(base)/unauthorized",
       "/(base)/vision",
       "/(base)/workspace/applications/[applicationId]/form/[appFormId]",
       "/(base)/workspace/applications/[applicationId]/form/[appFormId]/success",
