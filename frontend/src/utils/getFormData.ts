@@ -18,7 +18,14 @@ import { validateUiSchema } from "src/components/applyForm/validate";
 
 // either return error or data, not both
 type FormDataResult =
-  | { error: "TopLevelError" | "NotFound" | "UnauthorizedError" | "ForbiddenError"; data?: never }
+  | {
+      error:
+        | "TopLevelError"
+        | "NotFound"
+        | "UnauthorizedError"
+        | "ForbiddenError";
+      data?: never;
+    }
   | {
       error?: never;
       data: {
