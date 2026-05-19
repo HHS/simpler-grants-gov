@@ -73,6 +73,7 @@ class TestUpdateFileScanStatusSuccess:
         assert record.user_id is not None
         assert record.file_scan_status == FileScanStatus.COMPLETE
         assert record.scan_duration_seconds >= 0
+        assert record.prior_file_scan_status == FileScanStatus.PENDING
 
 
 class TestUpdateFileScanStatus401:
