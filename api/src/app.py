@@ -24,6 +24,7 @@ from src.api.competition_alpha import competition_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.files_v1 import file_blueprint as files_v1_blueprint
 from src.api.form_alpha import form_blueprint
+from src.api.forms_v1 import forms_blueprint as forms_v1_blueprint
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.internal import internal_blueprint
 from src.api.local import local_blueprint
@@ -181,9 +182,11 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(healthcheck_blueprint)
     app.register_blueprint(opportunities_v1_blueprint)
 
-    # Endpoint for Create Opportunity
+    # Endpoints for Opportunity Publishing
     if endpoint_config.enable_grantor_opportunity_endpoints:
         app.register_blueprint(opportunities_grantor_v1_blueprint)
+
+    app.register_blueprint(forms_v1_blueprint)
 
     app.register_blueprint(extracts_v1_blueprint)
     app.register_blueprint(agencies_v1_blueprint)
