@@ -1,4 +1,4 @@
-name: Bounty
+name: Internal - Bounty
 description: Post a paid contribution opportunity under the Simpler Grants Funded Open Source Contributor Program. For program owners only.
 title: "[Bounty: $AMOUNT — TIER] <short description>"
 labels: ["bounty", "status:open"]
