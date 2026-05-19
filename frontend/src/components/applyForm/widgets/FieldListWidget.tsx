@@ -32,7 +32,7 @@ type FieldListChangeParams = {
   nextValue: unknown;
 };
 
-type FieldListEntryValue = {
+type FieldListEntry = {
   entryId: string;
   value: GeneralRecord;
 };
@@ -50,13 +50,13 @@ const FIELD_LIST_INDEX_TOKEN = "~~index~~";
  * If the schema defines `minItems`, blank entries are appended so the UI shows
  * the required minimum number of entries.
  */
-const normalizeFieldListEntryValues = ({
+const normalizeFieldListEntries = ({
   value,
   minItems,
 }: {
   value: GeneralRecord[] | undefined;
   minItems?: number;
-}): FieldListEntryValue[] => {
+}): FieldListEntry[] => {
   const startingEntries = Array.isArray(value)
     ? value
         .filter((entryValue): entryValue is GeneralRecord => {
@@ -85,8 +85,12 @@ const normalizeFieldListEntryValues = ({
   ];
 };
 
+let fieldListEntryValueIdCounter = 0;
+
 const createFieldListEntryValueId = (): string => {
-  return crypto.randomUUID();
+  fieldListEntryValueIdCounter += 1;
+
+  return `${Date.now()}-${fieldListEntryValueIdCounter}`;
 };
 
 /**
@@ -128,8 +132,8 @@ const getFieldListStorageKey = ({ baseId }: { baseId: string }): string => {
 const addFieldListEntry = ({
   entries,
 }: {
-  entries: FieldListEntryValue[];
-}): FieldListEntryValue[] => {
+  entries: FieldListEntry[];
+}): FieldListEntry[] => {
   return [
     ...entries,
     {
@@ -185,9 +189,7 @@ const toBroadlyDefinedWidgetValue = (
  * The parent form and save pipeline expect FieldList data as `GeneralRecord[]`.
  * `entryId` is only used locally by the widget for stable React rendering.
  */
-const getFieldListValues = (
-  entries: FieldListEntryValue[],
-): GeneralRecord[] => {
+const getFieldListValues = (entries: FieldListEntry[]): GeneralRecord[] => {
   return entries.map((entry) => entry.value);
 };
 
@@ -321,19 +323,19 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
    * The entries are rehydrated from the incoming `value` prop so the widget
    * stays aligned with saved form data after save / reload.
    */
-  const initialFieldListEntryValues = useMemo(
+  const initialFieldListEntries = useMemo(
     () =>
-      normalizeFieldListEntryValues({
+      normalizeFieldListEntries({
         value,
         minItems,
       }),
     [value, minItems],
   );
 
-  const [entries, setEntries] = useState<FieldListEntryValue[]>(
-    initialFieldListEntryValues,
+  const [entries, setEntries] = useState<FieldListEntry[]>(
+    initialFieldListEntries,
   );
-  const entriesRef = useRef<FieldListEntryValue[]>(initialFieldListEntryValues);
+  const entriesRef = useRef<FieldListEntry[]>(initialFieldListEntries);
 
   const onFieldListEntryDelete =
     widgetProps.formContext?.widgetSupport?.onFieldListEntryDelete;
@@ -364,9 +366,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
    */
   const handleEntriesChange = useCallback(
     (
-      getNextEntries: (
-        previousEntries: FieldListEntryValue[],
-      ) => FieldListEntryValue[],
+      getNextEntries: (previousEntries: FieldListEntry[]) => FieldListEntry[],
     ): void => {
       const nextEntries = getNextEntries(entriesRef.current);
       entriesRef.current = nextEntries;

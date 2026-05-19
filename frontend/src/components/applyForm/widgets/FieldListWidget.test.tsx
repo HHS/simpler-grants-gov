@@ -34,29 +34,6 @@ jest.mock("src/components/applyForm/widgets/WidgetRenderers", () => ({
   ),
 }));
 
-const randomUuidMock = jest.fn(() => "mock-entry-id");
-
-Object.defineProperty(globalThis, "crypto", {
-  value: {
-    randomUUID: randomUuidMock,
-  },
-});
-
-let randomUuidIndex = 0;
-
-Object.defineProperty(globalThis, "crypto", {
-  value: {
-    randomUUID: jest.fn(() => {
-      randomUuidIndex += 1;
-      return `mock-entry-id-${randomUuidIndex}`;
-    }),
-  },
-});
-
-beforeEach(() => {
-  randomUuidIndex = 0;
-});
-
 const baseGroupDefinition = [
   {
     widget: "Text" as const,
