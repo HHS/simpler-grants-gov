@@ -19,8 +19,8 @@ FROM base AS dev
 WORKDIR /frontend
 
 COPY tsconfig.json .
-COPY *.config.js .
-COPY *.d.ts .
+COPY *.config.js ./
+COPY *.d.ts ./
 COPY src ./src
 COPY stories ./stories
 COPY .storybook ./.storybook
