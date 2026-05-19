@@ -165,9 +165,7 @@ describe("AwardRecommendationSubmissionEditPage", () => {
         "recommended_without_funding",
       );
 
-      const checkbox = screen.getByLabelText(
-        "hasExceptionLabel",
-      ) as HTMLInputElement;
+      const checkbox = screen.getByLabelText("hasExceptionLabel");
       expect(checkbox).toBeChecked();
       expect(screen.getByTestId("exception-detail-textarea")).toBeVisible();
     });
@@ -182,9 +180,7 @@ describe("AwardRecommendationSubmissionEditPage", () => {
       const recommendationSelect = await screen.findByRole("combobox");
       await user.selectOptions(recommendationSelect, "not_recommended");
 
-      const checkbox = screen.getByLabelText(
-        "hasExceptionLabel",
-      ) as HTMLInputElement;
+      const checkbox = screen.getByLabelText("hasExceptionLabel");
       expect(checkbox).not.toBeChecked();
       expect(
         screen.queryByTestId("exception-detail-textarea"),
