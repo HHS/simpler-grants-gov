@@ -3,6 +3,7 @@ import copy
 import jsonref
 import pytest
 
+from src.form_schema.forms import init_form_registry
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.form_schema.jsonschema_validator import validate_json_schema
 from src.form_schema.registry.form_template_registry import form_template_registry
@@ -166,7 +167,8 @@ def test_resolve_jsonschema_invalid_ref():
 
 def test_resolve_jsonschema_succeeds_for_all_registered_forms():
     """Verify all registered forms successfully resolve JSON schema references."""
-    import src.form_schema.forms  # noqa: F401
+
+    init_form_registry()
 
     forms = form_template_registry.get_all()
 
@@ -174,5 +176,4 @@ def test_resolve_jsonschema_succeeds_for_all_registered_forms():
         resolved_schema = resolve_jsonschema(form.form_json_schema)
 
         assert resolved_schema is not None
-        # Verify resolved schema is still valid JSON schema
         validate_json_schema({}, resolved_schema)

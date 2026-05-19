@@ -38,8 +38,9 @@ _ALL_FORMS: list[Form] = [
 ]
 
 
-for _form in _ALL_FORMS:
-    form_template_registry.register(_form, major_version=1)
+def init_form_registry() -> None:
+    for _form in _ALL_FORMS:
+        form_template_registry.register(_form, major_version=1)
 
 
 def get_active_forms() -> list[Form]:
