@@ -24,6 +24,15 @@ const exceptionEligibleRecommendationTypes: AwardRecommendationType[] = [
   "not_recommended",
 ];
 
+const defaultHasExceptionByRecommendationType: Record<
+  AwardRecommendationType,
+  boolean
+> = {
+  recommended_for_funding: false,
+  recommended_without_funding: true,
+  not_recommended: false,
+};
+
 type RecommendationDetailFormProps = {
   submission: AwardRecommendationSubmission;
 };
@@ -68,16 +77,12 @@ const RecommendationDetailForm = ({
             const nextRecommendationType = event.target
               .value as AwardRecommendationType;
             setRecommendationType(nextRecommendationType);
-
-            if (
-              !exceptionEligibleRecommendationTypes.includes(
-                nextRecommendationType,
-              )
-            ) {
-              setHasException(false);
-            }
+            setHasException(
+              defaultHasExceptionByRecommendationType[nextRecommendationType],
+            );
           }}
           className="maxw-card-lg"
+          required
         >
           <option value="recommended_for_funding">
             {t("recommendationOptions.recommended")}
@@ -138,6 +143,7 @@ const RecommendationDetailForm = ({
             rows={6}
             className="maxw-full"
             data-testid="exception-detail-textarea"
+            required
           />
         </div>
       )}
@@ -174,6 +180,7 @@ const RecommendationDetailForm = ({
               onBlur={(event) =>
                 setRecommendedAmount(formatCurrencyString(event.target.value))
               }
+              required
             />
           </Grid>
         </Grid>

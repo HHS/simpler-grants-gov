@@ -138,6 +138,59 @@ describe("AwardRecommendationSubmissionEditPage", () => {
       expect(recommendedAmountInput).toHaveValue("$1,234");
     });
 
+    it("hides the exception checkbox when recommended_for_funding is selected", async () => {
+      const component = await AwardRecommendationSubmissionEditPage({
+        params: pageParams,
+      });
+      render(component);
+
+      expect(
+        screen.queryByLabelText("hasExceptionLabel"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("exception-detail-textarea"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("checks the exception checkbox by default when recommended_without_funding is selected", async () => {
+      const user = userEvent.setup();
+      const component = await AwardRecommendationSubmissionEditPage({
+        params: pageParams,
+      });
+      render(component);
+
+      const recommendationSelect = await screen.findByRole("combobox");
+      await user.selectOptions(
+        recommendationSelect,
+        "recommended_without_funding",
+      );
+
+      const checkbox = screen.getByLabelText(
+        "hasExceptionLabel",
+      ) as HTMLInputElement;
+      expect(checkbox).toBeChecked();
+      expect(screen.getByTestId("exception-detail-textarea")).toBeVisible();
+    });
+
+    it("leaves the exception checkbox unchecked by default when not_recommended is selected", async () => {
+      const user = userEvent.setup();
+      const component = await AwardRecommendationSubmissionEditPage({
+        params: pageParams,
+      });
+      render(component);
+
+      const recommendationSelect = await screen.findByRole("combobox");
+      await user.selectOptions(recommendationSelect, "not_recommended");
+
+      const checkbox = screen.getByLabelText(
+        "hasExceptionLabel",
+      ) as HTMLInputElement;
+      expect(checkbox).not.toBeChecked();
+      expect(
+        screen.queryByTestId("exception-detail-textarea"),
+      ).not.toBeInTheDocument();
+    });
+
     it("renders cancel and save buttons", async () => {
       const component = await AwardRecommendationSubmissionEditPage({
         params: pageParams,
