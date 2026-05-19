@@ -13,6 +13,7 @@ import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
+import src.form_schema.forms  # noqa: F401
 import src.logging
 import src.logging.flask_logger as flask_logger
 from src.adapters.newrelic import init_newrelic
