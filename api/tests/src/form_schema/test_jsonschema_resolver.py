@@ -5,6 +5,7 @@ import pytest
 
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.form_schema.jsonschema_validator import validate_json_schema
+from src.form_schema.registry.form_template_registry import form_template_registry
 from src.form_schema.shared import ADDRESS_SHARED_V1, COMMON_SHARED_V1
 
 
@@ -161,3 +162,17 @@ def test_resolve_jsonschema_invalid_ref():
 
     with pytest.raises(jsonref.JsonRefError, match="Unresolvable JSON pointer"):
         resolve_jsonschema(schema)
+
+
+def test_resolve_jsonschema_succeeds_for_all_registered_forms():
+    """Verify all registered forms successfully resolve JSON schema references."""
+    import src.form_schema.forms  # noqa: F401
+
+    forms = form_template_registry.get_all()
+
+    for form in forms:
+        resolved_schema = resolve_jsonschema(form.form_json_schema)
+
+        assert resolved_schema is not None
+        # Verify resolved schema is still valid JSON schema
+        validate_json_schema({}, resolved_schema)
