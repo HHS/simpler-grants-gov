@@ -120,6 +120,16 @@ class UserLoginGovCallbackSchema(Schema):
     )
 
 
+class UserLoginSchema(Schema):
+    # This is defining the inputs we receive on the callback from login.gov's
+    # authorization endpoint and must match:
+    # https://developers.login.gov/oidc/authorization/#authorization-response
+    piv_required = fields.Boolean(
+        allow_none=True,
+        metadata={"description": "Whether the user is required to use a PIV to login"},
+    )
+
+
 class UserTokenRefreshResponseSchema(AbstractResponseSchema):
     # No data returned
     data = fields.MixinField(metadata={"example": None})

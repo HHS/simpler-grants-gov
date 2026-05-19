@@ -504,6 +504,25 @@ class BuildAutomaticOpportunitiesTask(Task):
             ],
         )
 
+        # Opportunity with static OpportunityID open to both orgs and ind
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-PRINT-ORG-IND-OT01",
+                opportunity_number="TEST-PRINT-ORG-IND-ON01",
+                opportunity_id=uuid.UUID("f21dc67e-84d8-4e2b-ae3e-2d68f83957db"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-PRINT-ORG-IND-CT01",
+                    required_form_ids=[ProjectAbstractSummary_v2_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
     def create_opportunity(
         self,
         data: OpportunityContainer,

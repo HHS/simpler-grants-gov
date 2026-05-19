@@ -918,6 +918,12 @@ export const messages = {
     button: "Sign in with Login.gov",
     close: "Cancel",
   },
+  PivRequiredModal: {
+    title: "Your account requires additional identity verification.",
+    description:
+      "You must sign in with your government employee ID. Make sure you've set up your Personal Identity Verification (PIV) or Common Access Card (CAC) as a two-factor authentication method.",
+    button: "Sign in using PIV/CAC",
+  },
   Footer: {
     agencyName: "Grants.gov",
     agencyContactCenter: "Grants.gov Program Management Office",
@@ -2053,6 +2059,8 @@ export const messages = {
       "We have encountered an error loading your award recommendations, please try again later.",
     metaDescription: "View your award recommendations",
     metaDescriptionEdit: "Edit your award recommendations",
+    pageTitleEditApplicationSubmissionDetails:
+      "Edit application submission details",
     pageHeading: "Award Recommendations",
     heroTitle: "Award Rec #",
     datePrepared: "Date prepared",
@@ -2065,6 +2073,7 @@ export const messages = {
     },
     heroButtons: {
       save: "Save",
+      cancel: "Cancel",
       create: "Create",
       edit: "Edit",
       preview: "Preview",
@@ -2111,6 +2120,25 @@ export const messages = {
       description:
         "Add any relevant information related to this reviewer and decision-maker for this opportunity",
     },
+    recommendationDetails: {
+      heading: "Recommendation details",
+      recommendationLabel: "Recommendation",
+      recommendationOptions: {
+        recommended: "Recommended",
+        recommendedWithoutFunding: "Recommended but not funded",
+        notRecommended: "Not recommended",
+      },
+      hasExceptionLabel: "Contains exceptions to selection method",
+      commentsLabel: "Recommendation comments",
+      commentsDescription:
+        "Add any needed context for your recommendations for any selected group or single application.",
+      exceptionDetailLabel: "Exceptions to selection method",
+      exceptionDetailDescription:
+        "Select one or more applications and explain any exceptions to the general selection method. For example, the reasons for any applications skipped on the merit review ranking or other similar exceptions.",
+      fundingHeading: "Funding recommendations",
+      amountRequestedLabel: "Amount Requested",
+      amountRecommendedLabel: "Amount Recommended",
+    },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
     errorHeadingAuthentication: "Authentication Error",
@@ -2118,6 +2146,10 @@ export const messages = {
       "You are not authenticated. Please sign in to view award recommendations.",
     awardRecommendationFetchError:
       "Error fetching award recommendation data. Please try refreshing the page.",
+    errorHeadingAwardRecommendationSubmission:
+      "Error fetching application submission details",
+    awardRecommendationSubmissionFetchError:
+      "Error fetching application submission data. Please try refreshing the page.",
     recommendations: {
       heading: "Recommendations",
       editPageDescription:
