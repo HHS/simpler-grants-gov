@@ -7,28 +7,36 @@ import { gotoWithRetry } from "./lifecycle-utils";
 
 const { baseUrl } = playwrightEnv;
 
+export const INDIVIDUAL_APPLICANT_LABEL = "As an individual (myself)";
+
 async function selectOptionByLabelSubstring(
   selectLocator: Locator,
   labelSubstring: string,
+  isIndividualApplicant: boolean,
 ) {
   const select = selectLocator.first();
   await select.waitFor({ state: "visible", timeout: 5000 });
   await expect(select).toBeEnabled({ timeout: 10000 });
 
-  // Wait for org options to load — on WebKit the dropdown may initially only
-  // show default options before the org list is fetched from the API.
-  // If the org never appears (e.g. e2e user has no orgs), fall back to individual.
+  // Wait for dropdown options to load. For organization tests, allow an
+  // individual fallback when no matching org label exists.
   await expect
     .poll(
       async () => {
         const options = await select.locator("option").allTextContents();
+        const hasRequestedOption = options.some((opt) =>
+          opt.includes(labelSubstring),
+        );
+        const hasIndividualOption = options.some((opt) =>
+          opt.includes(INDIVIDUAL_APPLICANT_LABEL),
+        );
+
         return (
-          options.some((opt) => opt.includes(labelSubstring)) ||
-          options.some((opt) => opt.includes("As an individual"))
+          hasRequestedOption || (isIndividualApplicant && hasIndividualOption)
         );
       },
       {
-        message: `Waiting for options to load in dropdown`,
+        message: "Waiting for options to load in dropdown",
         timeout: 30000,
       },
     )
@@ -45,7 +53,9 @@ async function selectOptionByLabelSubstring(
 
   const resolvedLabel =
     options.find((opt: string) => opt.includes(labelSubstring)) ??
-    options.find((opt: string) => opt.includes("As an individual (myself)"));
+    (isIndividualApplicant
+      ? options.find((opt: string) => opt.includes(INDIVIDUAL_APPLICANT_LABEL))
+      : undefined);
 
   if (!resolvedLabel) {
     throw new Error(
@@ -70,7 +80,7 @@ async function selectOptionByLabelSubstring(
   const selectedValue = await select.inputValue();
   if (!selectedValue) {
     throw new Error(
-      `Failed to select option "${resolvedLabel}" — no value was set after selection.`,
+      `Failed to select option "${resolvedLabel}" - no value was set after selection.`,
     );
   }
 }
@@ -79,13 +89,23 @@ async function selectOptionByLabelSubstring(
  * Creates a new application for the given opportunity.
  * @param page Playwright Page object
  * @param opportunityUrl Opportunity URL (e.g. "/opportunity/abc123")
- * @param orgLabel Organization label to select
+ * @param orgLabel Optional organization label. If omitted, the application is created as an individual.
  */
 export async function createApplication(
   page: Page,
   opportunityUrl: string,
-  orgLabel: string,
+  orgLabel?: string,
 ) {
+  const isIndividualApplicant = !orgLabel;
+  const requestedLabel = isIndividualApplicant
+    ? INDIVIDUAL_APPLICANT_LABEL
+    : orgLabel;
+
+  if (!requestedLabel) {
+    throw new Error(
+      "createApplication requires an organization label when applying as an organization.",
+    );
+  }
   await gotoWithRetry(page, `${baseUrl}${opportunityUrl}`, {
     waitUntil: "domcontentloaded",
   });
@@ -104,7 +124,11 @@ export async function createApplication(
   );
   const orgSelectCount = await orgSelect.count();
   if (orgSelectCount > 0) {
-    await selectOptionByLabelSubstring(orgSelect, orgLabel);
+    await selectOptionByLabelSubstring(
+      orgSelect,
+      requestedLabel,
+      isIndividualApplicant,
+    );
   }
   const nameInput = modal.locator(
     'input[name*="name"], input[placeholder*="application"], input[type="text"]:nth-of-type(1)',

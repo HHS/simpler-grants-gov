@@ -8,6 +8,7 @@ locals {
     enable_command_execution      = var.enable_command_execution
     enable_https                  = var.enable_https
     newrelic_entity_guid          = var.service_newrelic_entity_guid
+    newrelic_host_entity_guid     = var.service_host_newrelic_entity_guid
     domain_name                   = var.domain_name
     instance_scaling_max_capacity = var.instance_scaling_max_capacity
     instance_scaling_min_capacity = var.instance_scaling_min_capacity

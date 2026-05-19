@@ -25,7 +25,8 @@ module "grantee2_config" {
   instance_cpu    = 1024
   instance_memory = 2048
 
-  service_newrelic_entity_guid = ""
+  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXw4MzgyMTcwOTA1MjIyODM3MDk2"
+  service_host_newrelic_entity_guid = "NTI0OTgwOXxCUk9XU0VSfEFQUExJQ0FUSU9OfDExMjA1MjMyNDY"
 
   # Enables ECS Exec access for debugging or jump access.
   # Defaults to `false`. Uncomment the next line to enable.

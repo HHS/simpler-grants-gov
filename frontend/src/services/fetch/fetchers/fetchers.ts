@@ -14,6 +14,7 @@ import {
   publishGrantorOpportunityEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
+  toDynamicAwardRecommendationEndpoint,
   toDynamicGrantorsEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
@@ -141,6 +142,9 @@ export const fetchOpportunitySearch = requesterForEndpoint(
 export const fetchAwardRecommendation = cache(
   requesterForEndpoint(fetchAwardRecommendationEndpoint),
 );
+
+export const fetchAwardRecommendationWithMethod = (type: "POST" | "PUT") =>
+  requesterForEndpoint(toDynamicAwardRecommendationEndpoint(type));
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 
