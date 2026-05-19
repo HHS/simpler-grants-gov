@@ -209,3 +209,15 @@ def test_get_raises_for_wrong_major_version():
 
     with pytest.raises(ValueError, match="No form registered"):
         registry.get_by_id_and_major_version(FormTemplateKey(form.form_id, 2))
+
+
+# ---------------------------------------------------------------------------
+# Startup wiring / integration behavior
+# ---------------------------------------------------------------------------
+
+
+def test_all_forms_are_registered_on_startup():
+    import src.form_schema.forms  # noqa: F401 ; triggers registration at import time
+
+    forms = form_template_registry.get_all()
+    assert len(forms) == 16
