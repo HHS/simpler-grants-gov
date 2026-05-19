@@ -16,6 +16,7 @@ from src.constants.lookup_constants import (
     CompetitionOpenToApplicant,
     FundingCategory,
     FundingInstrument,
+    JobType,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -504,6 +505,25 @@ class BuildAutomaticOpportunitiesTask(Task):
             ],
         )
 
+        # Opportunity with static OpportunityID open to both orgs and ind
+        self.create_opportunity(
+            OpportunityContainer(
+                opportunity_title="TEST-PRINT-ORG-IND-OT01",
+                opportunity_number="TEST-PRINT-ORG-IND-ON01",
+                opportunity_id=uuid.UUID("f21dc67e-84d8-4e2b-ae3e-2d68f83957db"),
+            ),
+            competitions=[
+                CompetitionContainer(
+                    competition_title="TEST-PRINT-ORG-IND-CT01",
+                    required_form_ids=[ProjectAbstractSummary_v2_0.form_id],
+                    open_to_applicants=[
+                        CompetitionOpenToApplicant.INDIVIDUAL,
+                        CompetitionOpenToApplicant.ORGANIZATION,
+                    ],
+                )
+            ],
+        )
+
     def create_opportunity(
         self,
         data: OpportunityContainer,
@@ -690,6 +710,6 @@ class BuildAutomaticOpportunitiesTask(Task):
     "build-automatic-opportunities", help="Utility to automatically create opportunities for forms"
 )
 @flask_db.with_db_session()
-@ecs_background_task(task_name="build-automatic-opportunities")
+@ecs_background_task(task_name=JobType.BUILD_AUTOMATIC_OPPORTUNITIES)
 def generate_opportunity_sql(db_session: db.Session) -> None:
     BuildAutomaticOpportunitiesTask(db_session).run()

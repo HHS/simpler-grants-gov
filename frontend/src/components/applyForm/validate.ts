@@ -158,7 +158,6 @@ export const UiJsonSchema: RJSFSchema = {
         description: {
           type: "string",
         },
-        defaultSize: { type: "integer", minimum: 0 },
         children: {
           type: "array",
           items: {
@@ -166,7 +165,7 @@ export const UiJsonSchema: RJSFSchema = {
           },
         },
       },
-      required: ["type", "label", "name", "children", "defaultSize"],
+      required: ["type", "label", "name", "children"],
       additionalProperties: false,
     },
   },
