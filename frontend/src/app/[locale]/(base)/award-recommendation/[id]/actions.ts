@@ -65,6 +65,25 @@ export async function saveAwardRecommendation(
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
+export async function saveAwardRecommendationSubmissionDetails(
+  formData: FormData,
+): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const rawFormData = Object.fromEntries(formData.entries());
+
+  try {
+    // TODO: Implement submission detail save functionality when the frontend
+    // wiring for the batch update endpoint is ready.
+    return;
+  } catch (e) {
+    const error = e as Error;
+    console.error(
+      `Error saving award recommendation submission details - ${error.message} ${error.cause?.toString() || ""}`,
+    );
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function submitAwardRecommendationForReview(
   formData: FormData,
 ): Promise<AwardRecommendationActionResponse> {
