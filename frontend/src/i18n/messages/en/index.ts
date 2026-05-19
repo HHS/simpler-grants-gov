@@ -2285,4 +2285,11 @@ export const messages = {
       "Your notification preference was not saved. Refresh the page to try again.",
     srPendingSave: "Saving notification preference...",
   },
+  AwardRecommendationSelectFundingOpportunity: {
+    pageTitle: "Select funding opportunity | Simpler.Grants.gov",
+    pageHeading: "Award Recommendations",
+    metaDescription:
+      "Select a funding opportunity for your award recommendation",
+    whichFundingOpportunity: "Which funding opportunity is this for?",
+  },
 };
