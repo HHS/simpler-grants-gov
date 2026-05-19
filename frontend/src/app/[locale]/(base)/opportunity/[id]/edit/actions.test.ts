@@ -105,7 +105,22 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      awardMaximum: ["awardMaximumOrder"],
+      awardMinimum: ["awardMinLessThanMax"],
+      awardMaximum: ["awardMinLessThanMax"],
+    });
+  });
+
+  it("returns exceedTotalFunding error when award min or max exceeds the total funding", async () => {
+    const formData = buildValidFormData();
+    formData.set("estimatedTotalProgramFunding", "1000");
+    formData.set("awardMinimum", "5000");
+    formData.set("awardMaximum", "6000");
+
+    const result = await saveOpportunityEditAction(initialState, formData);
+
+    expect(result.validationErrors).toEqual({
+      awardMinimum: ["awardMinimumexceedTotalFunding"],
+      awardMaximum: ["awardMaximumexceedTotalFunding"],
     });
   });
 
