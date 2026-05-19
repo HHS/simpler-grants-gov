@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
-from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
+from src.adapters.aws.ses_adapter import _clear_mock_responses, _get_mock_responses
 from src.db.models.entity_models import OrganizationSavedOpportunity
 from src.db.models.user_models import SuppressedEmail, UserNotificationLog
 from src.task.notifications.config import EmailNotificationConfig
@@ -19,7 +19,7 @@ class TestOrgSavedOpportunityNotification:
 
     @pytest.fixture
     def configuration(self, monkeypatch):
-        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+        monkeypatch.setenv("AWS_SES_FROM_EMAIL", "notifications@example.com")
         self.notification_config = EmailNotificationConfig()
         self.notification_config.reset_emails_without_sending = False
 
@@ -81,7 +81,7 @@ class TestOrgSavedOpportunityNotification:
         assert notification_logs[0].notification_sent is True
         assert notification_logs[0].user_id == user_with_email.user_id
 
-        # Verify email was sent via Pinpoint
+        # Verify email was sent via SES
         mock_responses = _get_mock_responses()
         assert len(mock_responses) == 1
 
@@ -391,9 +391,7 @@ class TestOrgSavedOpportunityNotification:
         assert len(mock_responses) == 1
 
         request, _ = mock_responses[0]
-        email_html = request["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-            "SimpleEmail"
-        ]["HtmlPart"]["Data"]
+        email_html = request["Content"]["Simple"]["Body"]["Html"]["Data"]
 
         # Should show "+ 2 more opportunities" for the 2 truncated items
         assert "+ 2 more opportunities" in email_html
@@ -423,9 +421,7 @@ class TestOrgSavedOpportunityNotification:
         assert len(mock_responses) == 1
 
         request, _ = mock_responses[0]
-        email_html = request["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-            "SimpleEmail"
-        ]["HtmlPart"]["Data"]
+        email_html = request["Content"]["Simple"]["Body"]["Html"]["Data"]
 
         assert "Test Grant Opportunity" in email_html
         assert f"/opportunity/{opportunity.opportunity_id}" in email_html

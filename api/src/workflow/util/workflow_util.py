@@ -6,7 +6,7 @@ workflow logic.
 import logging
 import uuid
 
-from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
+from src.adapters.aws.ses_adapter import send_ses_email
 from src.db.models.user_models import User
 from src.task.notifications.config import get_email_config
 from src.workflow.event.state_machine_event import StateMachineEvent
@@ -45,11 +45,11 @@ def send_workflow_email(
 
     try:
         logger.info("Sending email for workflow", extra=log_extra)
-        send_pinpoint_email_raw(
+        send_ses_email(
             to_address=user.email,
             subject=subject,
             message=message,
-            app_id=config.app_id,
+            from_email=config.from_email,
             trace_id=trace_id,
         )
 

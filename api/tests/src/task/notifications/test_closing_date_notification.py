@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import select
 
 import tests.src.db.models.factories as factories
-from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
+from src.adapters.aws.ses_adapter import _clear_mock_responses, _get_mock_responses
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import (
     SuppressedEmail,
@@ -30,7 +30,7 @@ class TestClosingDateNotification:
 
     @pytest.fixture
     def user_with_email(self, db_session, user, monkeypatch):
-        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+        monkeypatch.setenv("AWS_SES_FROM_EMAIL", "notifications@example.com")
         factories.LinkExternalUserFactory.create(user=user, email="test@example.com")
         return user
 
@@ -143,7 +143,7 @@ class TestClosingDateNotification:
             user_with_email.user_id
         }
 
-        # Verify email was sent via Pinpoint
+        # Verify email was sent via SES
         mock_responses = _get_mock_responses()
         assert len(mock_responses) == 1
 
