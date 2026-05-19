@@ -11,7 +11,7 @@ class S3Config(PydanticBaseEnvConfig):
     # We should generally not need to set this except
     # locally to use s3mock
     aws_s3_endpoint_url: str | None = Field(alias="AWS_S3_ENDPOINT_URL", default=None)
-    presigned_s3_duration: int = 7200  # 2 hours in seconds
+    presigned_s3_duration: int = 900  # 15 minutes in seconds
 
     # CDN URL for public files - if set, will be used instead of presigned URLs
     cdn_url: str | None = None
