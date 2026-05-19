@@ -17,6 +17,7 @@ import {
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
+import { FileUploadPoc } from "src/components/FileUploadPoc";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
@@ -146,19 +147,10 @@ const AttachmentUploadWidget = (props: UswdsWidgetProps) => {
         <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
       {!showFile && (
-        <FileInput
-          id={id}
-          name={id}
-          required={required}
-          disabled={disabled}
-          readOnly={readOnly}
-          ref={fileInputRef}
-          onChange={(e) => {
-            handleChange(e).catch((error) => console.error(error));
+        <FileUploadPoc
+          parentOnChange={(e) => {
+            return handleChange(e).catch((error) => console.error(error));
           }}
-          accept={contentMediaType}
-          aria-describedby={describedby}
-          aria-invalid={error}
         />
       )}
 
