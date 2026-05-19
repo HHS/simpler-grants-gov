@@ -3,7 +3,7 @@ name: Bounty issue
 about: Post a funded open source contribution opportunity for Simpler Grants
 title: "[Bounty: $AMOUNT - TIER] Short, action-oriented title"
 labels: bounty, status:open
-assignees: ""
+
 ---
 
 <!--
