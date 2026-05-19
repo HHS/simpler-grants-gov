@@ -185,52 +185,8 @@ class WorkflowManager:
         """Fetch and process a batch of events from SQS."""
         sqs_containers = self.fetch_messages()
         logger.info("Fetched SQS messages", extra={"message_count": len(sqs_containers)})
-        messages_to_delete: list[str] = []
-        messages_to_keep: list[str] = []
 
-        if sqs_containers:
-            # Each container is processed on its own thread so that IO waits
-            # (DB calls, downstream services) overlap. The core loop stays
-            # single-threaded - we wait for every thread in this batch to
-            # finish before deleting any messages.
-            app = current_app._get_current_object()  # type: ignore[attr-defined]
-            timeout = self.config.workflow_event_processing_timeout_sec
-
-            with ThreadPoolExecutor(max_workers=len(sqs_containers)) as executor:
-                future_to_container = {
-                    executor.submit(_handle_event_in_thread, app, container): container
-                    for container in sqs_containers
-                }
-
-                for future, sqs_container in future_to_container.items():
-                    try:
-                        event_result = future.result(timeout=timeout)
-                    except FuturesTimeoutError:
-                        # Python threads can't be forcibly killed - the thread
-                        # will keep running until its DB call errors or returns,
-                        # at which point the surrounding transaction rolls back.
-                        # We stop waiting on it and treat the message as failed.
-                        logger.warning(
-                            "Workflow event handler exceeded timeout",
-                            extra=sqs_container.get_log_extra() | {"timeout_sec": timeout},
-                        )
-                        messages_to_keep.append(sqs_container.receipt_handle)
-                        continue
-                    except Exception:
-                        logger.exception(
-                            "Failed to handle current event",
-                            extra=sqs_container.get_log_extra(),
-                        )
-                        messages_to_keep.append(sqs_container.receipt_handle)
-                        continue
-
-                    if event_result in [
-                        WorkflowEventProcessingResult.SUCCESS,
-                        WorkflowEventProcessingResult.NON_RETRYABLE_ERROR,
-                    ]:
-                        messages_to_delete.append(sqs_container.receipt_handle)
-                    else:
-                        messages_to_keep.append(sqs_container.receipt_handle)
+        messages_to_delete, messages_to_keep = self._handle_containers(sqs_containers)
 
         self.delete_messages(messages_to_delete)
 
@@ -246,6 +202,61 @@ class WorkflowManager:
                 "failed_message_count": len(messages_to_keep),
             },
         )
+        return messages_to_delete, messages_to_keep
+
+    def _handle_containers(
+        self, sqs_containers: list[SqsMessageContainer]
+    ) -> tuple[list[str], list[str]]:
+        """Run each container through handle_event concurrently and classify the results.
+
+        Returns the receipt handles to delete and the receipt handles to keep on the queue.
+        Each container is processed on its own thread so IO waits (DB calls, downstream
+        services) overlap; the core loop stays single-threaded and waits for every thread
+        in this batch to finish before any messages are deleted.
+        """
+        messages_to_delete: list[str] = []
+        messages_to_keep: list[str] = []
+
+        if not sqs_containers:
+            return messages_to_delete, messages_to_keep
+
+        app = current_app._get_current_object()  # type: ignore[attr-defined]
+        timeout = self.config.workflow_event_processing_timeout_sec
+
+        with ThreadPoolExecutor(max_workers=len(sqs_containers)) as executor:
+            future_to_container = {
+                executor.submit(_handle_event_in_thread, app, container): container
+                for container in sqs_containers
+            }
+
+            for future, sqs_container in future_to_container.items():
+                try:
+                    event_result = future.result(timeout=timeout)
+                except FuturesTimeoutError:
+                    # Python threads can't be forcibly killed - the thread will
+                    # keep running until its DB call errors or returns, at which
+                    # point the surrounding transaction rolls back. We stop waiting
+                    # on it and treat the message as failed.
+                    logger.exception(
+                        "Workflow event handler exceeded timeout",
+                        extra=sqs_container.get_log_extra() | {"timeout_sec": timeout},
+                    )
+                    event_result = WorkflowEventProcessingResult.GENERAL_ERROR
+                except Exception:
+                    logger.exception(
+                        "Failed to handle current event",
+                        extra=sqs_container.get_log_extra(),
+                    )
+                    event_result = WorkflowEventProcessingResult.GENERAL_ERROR
+
+                if event_result in [
+                    WorkflowEventProcessingResult.SUCCESS,
+                    WorkflowEventProcessingResult.NON_RETRYABLE_ERROR,
+                ]:
+                    messages_to_delete.append(sqs_container.receipt_handle)
+                else:
+                    messages_to_keep.append(sqs_container.receipt_handle)
+
         return messages_to_delete, messages_to_keep
 
     def fetch_messages(self) -> list[SqsMessageContainer]:
