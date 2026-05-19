@@ -22,6 +22,7 @@ from src.api.award_recommendations_alpha import award_recommendation_blueprint
 from src.api.common_grants import common_grants_blueprint
 from src.api.competition_alpha import competition_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
+from src.api.files_v1 import file_blueprint as files_v1_blueprint
 from src.api.form_alpha import form_blueprint
 from src.api.healthcheck import healthcheck_blueprint
 from src.api.internal import internal_blueprint
@@ -68,6 +69,8 @@ class EndpointConfig(PydanticBaseEnvConfig):
     enable_award_recommendation_endpoints: bool = Field(
         False, alias="ENABLE_AWARD_RECOMMENDATION_ENDPOINTS"
     )
+
+    enable_file_upload_endpoints: bool = Field(False, alias="ENABLE_FILE_UPLOAD_ENDPOINTS")
 
     enable_grantor_opportunity_endpoints: bool = Field(
         False, alias="ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS"
@@ -186,6 +189,9 @@ def register_blueprints(app: APIFlask) -> None:
     app.register_blueprint(agencies_v1_blueprint)
     app.register_blueprint(organizations_v1_blueprint)
     app.register_blueprint(internal_blueprint)
+
+    if endpoint_config.enable_file_upload_endpoints:
+        app.register_blueprint(files_v1_blueprint)
 
     app.register_blueprint(user_blueprint)
 

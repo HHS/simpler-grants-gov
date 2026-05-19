@@ -91,6 +91,7 @@ runs:
         npm install @playwright/test
         npx playwright install --with-deps
 
+    # this should only be needed on shard 3, the WebKit shard
     - name: Install Webkit dependencies
       if: ${{ inputs.force-webkit-install == 'true' }}
       shell: bash

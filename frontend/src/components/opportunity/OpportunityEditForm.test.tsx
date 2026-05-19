@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { axe } from "jest-axe";
 
 import OpportunityEditForm from "./OpportunityEditForm";
 import { OpportunityEditFormValues } from "./opportunityEditFormConfig";
@@ -10,9 +11,12 @@ jest.mock("react", () => ({
   useActionState: () => mockUseActionState() as unknown,
 }));
 
-jest.mock("src/app/[locale]/(base)/opportunity/[id]/edit/actions", () => ({
-  saveOpportunityEditAction: jest.fn(),
-}));
+jest.mock(
+  "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/actions",
+  () => ({
+    saveOpportunityEditAction: jest.fn(),
+  }),
+);
 
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
@@ -149,6 +153,22 @@ describe("OpportunityEditForm — rendering", () => {
     renderOpportunityEditForm({ isDraft: false });
 
     expect(screen.getByText("content.draftOnlyWarning")).toBeInTheDocument();
+  });
+
+  it("pre-checks eligibility checkboxes from initialValues", () => {
+    renderOpportunityEditForm();
+
+    // initialValues.eligibleApplicants includes "individuals" - verify it renders checked
+    const individualsCheckbox = screen.getByRole("checkbox", {
+      name: /individuals/i,
+    });
+    expect(individualsCheckbox).toBeChecked();
+  });
+
+  it("has no accessibility violations", async () => {
+    const { container } = renderOpportunityEditForm();
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });
 
@@ -555,13 +575,17 @@ describe("OpportunityEditForm — funding details interactions", () => {
     expect(input).toHaveValue("10");
   });
 
-  it("formats estimatedTotalProgramFunding with commas on re-render", () => {
-    renderOpportunityEditForm();
+  it("formats estimatedTotalProgramFunding with commas from initialValues", () => {
+    renderOpportunityEditForm({
+      initialValues: {
+        ...initialValues,
+        estimatedTotalProgramFunding: "750000",
+      },
+    });
 
     const input = screen.getByRole("textbox", {
       name: /labels\.estimatedTotalProgramFunding/i,
     });
-    fireEvent.change(input, { target: { value: "750000" } });
 
     expect(input).toHaveValue("750,000");
   });
@@ -577,13 +601,14 @@ describe("OpportunityEditForm — funding details interactions", () => {
     expect(input).toHaveValue("500");
   });
 
-  it("formats awardMaximum with commas on re-render", () => {
-    renderOpportunityEditForm();
+  it("formats awardMaximum with commas from initialValues", () => {
+    renderOpportunityEditForm({
+      initialValues: { ...initialValues, awardMaximum: "5000" },
+    });
 
     const input = screen.getByRole("textbox", {
       name: /labels\.awardMaximum/i,
     });
-    fireEvent.change(input, { target: { value: "5000" } });
 
     expect(input).toHaveValue("5,000");
   });
