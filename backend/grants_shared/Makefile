@@ -119,3 +119,39 @@ lint-mypy:
 
 lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 	$(PY_RUN_CMD) bandit -c pyproject.toml -r . --number 3 --skip B101 -ll -x ./.venv
+
+
+##################################################
+# Release functionality
+##################################################
+
+bump-patch-version: ## Bump the patch version of the code (eg. 1.0.1 -> 1.0.2)
+	uv version --bump patch
+
+bump-minor-version: ## Bump the minor version of the code (eg. 1.0.1 -> 1.1.0)
+	uv version --bump minor
+
+
+# TODO - see if there is a way to run this outside docker happily?
+smoke-test-wheel:
+	docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) uv run --isolated --with dist/*.whl tests/grants_shared/smoke_test.py
+
+# TODO - same here
+smoke-test-gz:
+	docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) uv run --isolated --with dist/*.tar.gz tests/grants_shared/smoke_test.py
+
+release-build:
+	docker buildx build \
+		--target base \
+		--platform=linux/amd64 \
+		--build-arg RUN_USER=$(RUN_USER) \
+		--build-arg RUN_UID=$(RUN_UID) \
+		$(OPTS) \
+		.
+
+##################################################
+# Misc functionality
+##################################################
+
+help: ## Prints the help documentation and info about each command
+	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

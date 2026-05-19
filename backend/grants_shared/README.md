@@ -1,15 +1,15 @@
 # Grants Shared
 
-This repo exists to contain the shared code used by the backend
-of simpler.grants.gov which is made up of multiple backend services.
+This repo contains the shared code used by the different backend APIs
+on the simpler.grants.gov system.
 
 This code is not meant to be used outside of the [Simpler Grants](https://github.com/HHS/simpler-grants-gov) system. 
+We cannot provide support for anyone who attempts to use this code for other projects.
 
 [License](https://github.com/HHS/simpler-grants-gov/blob/main/LICENSE.md)
 
 ## Installation
-TODO - this code isn't yet in PyPi, so this won't actually work yet.
-Will update instructions more thoroughly once it is available.
+You can install this package with any python dependency manager.
 
 ```shell
 # Using pip
@@ -20,6 +20,20 @@ poetry add grants_shared
 
 # Using uv
 uv add grants_shared
+```
+
+## Upgrading this package
+TODO - will writeup
+
+```shell
+# Upgrade the version with uv
+# https://docs.astral.sh/uv/guides/package/#updating-your-version
+
+# Generally do a patch version (eg. 1.0.1 -> 1.0.2)
+uv version --bump patch
+
+# OR do a minor version for anything fairly big (eg. 1.1.3 -> 1.2.0)
+# uv version --bump minor
 ```
 
 ## Usage
@@ -37,3 +51,6 @@ make test
 make format
 make lint
 ```
+
+Further documentation can be found in our [Github](https://github.com/HHS/simpler-grants-gov/tree/main/documentation)
+

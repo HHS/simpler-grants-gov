@@ -1,0 +1,24 @@
+name: Release Grants Shared Package to PyPi
+on:
+  workflow_call:
+
+jobs:
+  do-release:
+    name: Do Release
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build
+        run: make build
+
+      # TODO - consider format/lint/test checks to be safe?
+
+      - name: Smoke Test (wheel)
+        run: make smoke-test-wheel
+
+      - name: Smoke Test (source distribution)
+        run: make smoke-test-gz
+
+      # TODO - add uv publish here
