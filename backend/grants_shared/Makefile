@@ -140,14 +140,9 @@ smoke-test-wheel:
 smoke-test-gz:
 	docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) uv run --isolated --with dist/*.tar.gz tests/grants_shared/smoke_test.py
 
-release-build:
-	docker buildx build \
-		--target base \
-		--platform=linux/amd64 \
-		--build-arg RUN_USER=$(RUN_USER) \
-		--build-arg RUN_UID=$(RUN_UID) \
-		$(OPTS) \
-		.
+# TODO - same
+publish-to-pypi:
+	uv publish
 
 ##################################################
 # Misc functionality

@@ -5,7 +5,11 @@ on:
   pull_request: # TODO - remove, just need for testing
     paths:
       - backend/grants_shared/**
-      - .github/workflows/ci-grants-shared.yml
+      - .github/workflows/release-grants-shared.yml
+
+defaults:
+  run:
+    working-directory: ./backend/grants_shared
 
 jobs:
   do-release:
@@ -27,3 +31,6 @@ jobs:
         run: make smoke-test-gz
 
       # TODO - add uv publish here
+
+      # - name: Release to PyPi
+      #   run: make publish-to-pypi
