@@ -19,8 +19,8 @@ import {
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
-import { fillOpportunityPage } from "tests/e2e/utils/page/opportunity-page-filling";
 import { gotoWithRetry } from "tests/e2e/utils/lifecycle-utils";
+import { fillOpportunityPage } from "tests/e2e/utils/page/opportunity-page-filling";
 
 const { baseUrl } = playwrightEnv;
 const { GRANTOR } = VALID_TAGS;
@@ -60,7 +60,7 @@ test(
 
     // Navigate to Opportunities List page after login
     await gotoWithRetry(page, `${baseUrl}${OPPORTUNITY_LIST_URL}`, {
-        waitUntil: "domcontentloaded",
+      waitUntil: "domcontentloaded",
     });
 
     // expect to be on the Opportunities List page
