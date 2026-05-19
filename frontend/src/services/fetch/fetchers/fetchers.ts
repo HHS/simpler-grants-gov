@@ -92,12 +92,6 @@ export function requesterForEndpoint({
       throw fetchErrorToNetworkError(e);
     }
 
-    console.log(
-      "Check error",
-      response.ok,
-      response.headers.get("Content-Type"),
-      response.status,
-    );
     if (
       !response.ok &&
       response.headers.get("Content-Type") === "application/json" &&

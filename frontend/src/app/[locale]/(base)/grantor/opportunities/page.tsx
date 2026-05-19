@@ -330,7 +330,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
   // A. Check the user's session
   const userSession = await getSession();
   if (!userSession || !userSession.token) {
-    console.error("Bad sesssion", userSession);
+    console.error("Invalid session", userSession);
     return <TopLevelError />;
   }
 
@@ -374,7 +374,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
       userPrivilegeDef,
     );
   } catch (error) {
-    console.error("Bad privilege", error);
+    console.error("Error fetching privileges", error);
     if (error instanceof UnauthorizedError) {
       throw error;
     }
@@ -403,7 +403,7 @@ async function OpportunitiesListPage(props: OpportunitiesListProps) {
         pageRequest,
       );
     } catch (error) {
-      console.error("Bad opps", error);
+      console.error("Error fetching Opportunities", error);
       if (error instanceof UnauthorizedError) {
         throw error;
       }
