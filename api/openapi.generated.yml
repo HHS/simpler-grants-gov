@@ -106,8 +106,21 @@ paths:
       - ApiUserKeyAuth: *id001
   /v1/users/login:
     get:
-      parameters: []
+      parameters:
+      - in: query
+        name: piv_required
+        description: Whether the user is required to use a PIV to login
+        schema:
+          type: boolean
+          nullable: true
+        required: false
       responses:
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseSchema'
+          description: Validation error
         '302':
           content:
             application/json:
@@ -13561,10 +13574,6 @@ components:
       required:
       - is_reviewed
   securitySchemes:
-    ApiUserKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
     ApiJwtAuth:
       type: apiKey
       in: header
@@ -13573,4 +13582,8 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
+    ApiUserKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
 

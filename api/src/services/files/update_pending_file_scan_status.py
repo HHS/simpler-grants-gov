@@ -28,6 +28,7 @@ def update_pending_file_scan_status(
     if pending_file is None:
         raise_flask_error(404, "Pending file not found")
 
+    prior_file_scan_status = pending_file.file_scan_status
     pending_file.file_scan_status = file_scan_status
 
     now = datetime_util.utcnow()
@@ -38,6 +39,7 @@ def update_pending_file_scan_status(
         extra={
             "pending_file_id": pending_file.pending_file_id,
             "user_id": user.user_id,
+            "prior_file_scan_status": prior_file_scan_status,
             "file_scan_status": file_scan_status,
             "scan_duration_seconds": scan_duration_seconds,
         },

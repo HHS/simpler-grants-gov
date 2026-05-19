@@ -8,6 +8,7 @@ import { TestUser } from "src/types/userTypes";
 
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { PivRequiredModal } from "src/components/application/editAppFilingName/PivRequiredModal";
 import RouteFocusManager from "src/components/RouteFocusManager";
 import { ActivityMonitor } from "./ActivityMonitor";
 import Footer from "./Footer";
@@ -64,6 +65,7 @@ export default async function Layout({ children, locale }: Props) {
             </main>
           </RouteFocusManager>
         </LoginModalProvider>
+        <PivRequiredModal />
         <Footer />
         <GrantsIdentifier />
       </div>
