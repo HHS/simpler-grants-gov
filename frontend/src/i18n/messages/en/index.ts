@@ -2120,6 +2120,9 @@ export const messages = {
       description:
         "Add any relevant information related to this reviewer and decision-maker for this opportunity",
     },
+    attachments: {
+      heading: "Attachments",
+    },
     recommendationDetails: {
       heading: "Recommendation details",
       recommendationLabel: "Recommendation",
@@ -2178,8 +2181,6 @@ export const messages = {
     pageTitle: "Create recommendation",
     metaDescription: "Create a new award recommendation",
     beforeYouGetStarted: "Before you get started",
-    introDescription:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
     steps: {
       identifyOpportunity: {
         title: "Identify the opportunity",

@@ -461,6 +461,23 @@ class AwardRecommendationRiskRequestSchema(Schema):
     )
 
 
+class ApplicationSubmissionInfoSchema(Schema):
+    """Schema for application submission information within a risk"""
+
+    award_recommendation_application_submission_id = fields.UUID(
+        metadata={"description": "The award recommendation application submission ID"}
+    )
+    application_submission_id = fields.UUID(
+        metadata={"description": "The application submission ID"}
+    )
+    application_submission_number = fields.String(
+        metadata={
+            "description": "The application submission number",
+            "example": "GRANT-2024-001",
+        },
+    )
+
+
 class AwardRecommendationRiskResponseDataSchema(Schema):
     """Schema for risk response data (used by create and update)"""
 
@@ -484,6 +501,18 @@ class AwardRecommendationRiskResponseDataSchema(Schema):
         fields.UUID(),
         metadata={
             "description": "List of award recommendation application submission IDs linked to this risk"
+        },
+    )
+    applications = fields.List(
+        fields.Nested(ApplicationSubmissionInfoSchema),
+        metadata={
+            "description": "List of application submissions linked to this risk",
+            "example": [
+                {
+                    "application_submission_id": "123e4567-e89b-12d3-a456-426614174000",
+                    "application_submission_number": "GRANT-2024-001",
+                }
+            ],
         },
     )
 
