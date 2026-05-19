@@ -25,7 +25,8 @@ module "prod_config" {
   instance_cpu    = 1024
   instance_memory = 2048
 
-  service_newrelic_entity_guid = "NTI0OTgwOXxJTkZSQXxOQXw1NzYwODQ3NjY0MzMyMjc3MjYz"
+  service_newrelic_entity_guid      = "NTI0OTgwOXxJTkZSQXxOQXw1NzYwODQ3NjY0MzMyMjc3MjYz"
+  service_host_newrelic_entity_guid = "NTI0OTgwOXxCUk9XU0VSfEFQUExJQ0FUSU9OfDExMjAzNTI2NjI"
 
   # Enables ECS Exec access for debugging or jump access.
   # Defaults to `false`. Uncomment the next line to enable.
