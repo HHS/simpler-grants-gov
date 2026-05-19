@@ -20,7 +20,9 @@ import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { fillOpportunityPage } from "tests/e2e/utils/page/opportunity-page-filling";
+import { gotoWithRetry } from "tests/e2e/utils/lifecycle-utils";
 
+const { baseUrl } = playwrightEnv;
 const { GRANTOR } = VALID_TAGS;
 const { targetEnv } = playwrightEnv;
 
@@ -30,12 +32,7 @@ const opportunityPageConfig = {
   saveButtonTestId: "save-button",
 };
 
-const AGENCY_ID =
-  targetEnv === "staging"
-    ? "ef55f467-e42c-4eec-9048-a50245b59734"
-    : "ef55f467-e42c-4eec-9048-a50245b59734";
-
-const OPPORTUNITY_LIST_URL = `/grantor/opportunities?agency=${AGENCY_ID}`;
+const OPPORTUNITY_LIST_URL = `/opportunities`;
 
 // Skip non-Chrome browsers in staging
 test.beforeEach(({ page: _ }, testInfo) => {
@@ -62,9 +59,9 @@ test(
     await authenticateE2eUser(page, context, !!isMobile);
 
     // Navigate to Opportunities List page after login
-    await page.goto(
-      `https://staging.simpler.grants.gov/${OPPORTUNITY_LIST_URL}`,
-    );
+    await gotoWithRetry(page, `${baseUrl}${OPPORTUNITY_LIST_URL}`, {
+        waitUntil: "domcontentloaded",
+    });
 
     // expect to be on the Opportunities List page
     await expect(
