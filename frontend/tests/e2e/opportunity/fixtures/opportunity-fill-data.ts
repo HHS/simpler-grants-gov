@@ -30,7 +30,7 @@ function generateDateFromToday(daysToAdd: number): string {
   return `${month}/${day}/${year}`;
 }
 
-// Fill data for Opportunity page
+// Fill data for create opportunity page
 export const createOpportunityFillData = {
   opportunityNumber: generateOpportunityNumber(),
   opportunityTitle: `This is test data - ${generateOpportunityNumber()}`,
@@ -38,7 +38,7 @@ export const createOpportunityFillData = {
   assistanceListingNumber: "00.000",
 };
 
-// Fill data for Opportunity page
+// Fill data for edit opportunity page
 export const editOpportunityFillData = {
   fundingType: "grant",
   category: "recovery_act",
