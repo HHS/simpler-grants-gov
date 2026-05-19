@@ -10,7 +10,7 @@ from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.adapters.db import flask_db
-from src.constants.lookup_constants import AgencySubmissionNotificationSetting
+from src.constants.lookup_constants import AgencySubmissionNotificationSetting, JobType
 from src.constants.static_role_values import OPPORTUNITY_PUBLISHER
 from src.db.models.agency_models import Agency
 from src.db.models.user_models import AgencyUser, AgencyUserRole, Role, User, UserType
@@ -138,6 +138,6 @@ class SetupLowerEnvAgenciesTask(Task):
     "setup-lower-env-agencies", help="Utility to automatically create agencies for users"
 )
 @flask_db.with_db_session()
-@ecs_background_task(task_name="setup-lower-env-agencies")
+@ecs_background_task(task_name=JobType.SETUP_LOWER_ENV_AGENCIES)
 def generate_agency_sql(db_session: db.Session) -> None:
     SetupLowerEnvAgenciesTask(db_session).run()

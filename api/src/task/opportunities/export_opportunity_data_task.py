@@ -12,7 +12,7 @@ import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.util.file_util as file_util
 from src.api.opportunities_v1.opportunity_schemas import OpportunityV1Schema
-from src.constants.lookup_constants import ExtractType
+from src.constants.lookup_constants import ExtractType, JobType
 from src.db.models.agency_models import Agency
 from src.db.models.extract_models import ExtractMetadata
 from src.db.models.opportunity_models import (
@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
     help="Generate JSON and CSV files containing an export of all opportunity data",
 )
 @flask_db.with_db_session()
-@ecs_background_task(task_name="export-opportunity-data")
+@ecs_background_task(task_name=JobType.EXPORT_OPPORTUNITY_DATA)
 def export_opportunity_data(db_session: db.Session) -> None:
     ExportOpportunityDataTask(db_session).run()
 

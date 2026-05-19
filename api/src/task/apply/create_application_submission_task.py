@@ -15,7 +15,7 @@ import src.adapters.db as db
 from src.adapters.aws import S3Config
 from src.adapters.db import flask_db
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
-from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus
+from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus, JobType
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationSubmission
 from src.services.applications.application_audit import add_audit_event
 from src.services.applications.application_validation import is_form_required
@@ -487,7 +487,7 @@ def build_s3_application_submission_path(
     help="Create application submissions for all submitted apps",
 )
 @flask_db.with_db_session()
-@ecs_background_task(task_name="create-application-submission")
+@ecs_background_task(task_name=JobType.CREATE_APPLICATION_SUBMISSION)
 def create_application_submission(db_session: db.Session) -> None:
     CreateApplicationSubmissionTask(db_session).run()
 
