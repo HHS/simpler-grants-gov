@@ -481,28 +481,90 @@ const isEmptyField = (mightBeEmpty: unknown): boolean => {
   });
 };
 
-// if a nested field contains no defined items, remove it from the data
-// handles array values as well - will set an empty array if no items have data
-export const pruneEmptyNestedFields = (structuredFormData: object): object => {
+/**
+ * Returns the schema for a child field from either the original schema shape
+ * or the condensed schema shape.
+ *
+ * Some callers pass a standard JSON schema where child fields live under
+ * `properties`. Other callers pass the condensed form schema used by
+ * `formDataToObject`, where child fields are flattened to the current level.
+ */
+const getChildSchema = ({
+  schema,
+  key,
+}: {
+  schema?: RJSFSchema;
+  key: string;
+}): RJSFSchema | undefined => {
+  return (schema?.properties?.[key] ??
+    (schema as Record<string, unknown> | undefined)?.[key]) as
+    | RJSFSchema
+    | undefined;
+};
+
+/**
+ * Removes empty nested values from shaped form data before save.
+ *
+ * Empty values are usually pruned so we do not persist empty nested objects
+ * created by the form renderer. FieldList arrays are the exception: when an
+ * array schema defines `minItems`, empty entry objects up to that minimum must be
+ * preserved so validation can report entry-level required-field errors instead of
+ * array-level "too short" errors.
+ *
+ * Example:
+ *   minItems: 2
+ *   [{ first_name: "Jane" }, {}]
+ *
+ * should remain:
+ *   [{ first_name: "Jane" }, {}]
+ *
+ * while extra empty entry beyond `minItems` can still be pruned.
+ */
+export const pruneEmptyNestedFields = (
+  structuredFormData: object,
+  schema?: RJSFSchema,
+): object => {
   return Object.entries(structuredFormData).reduce(
     (acc, [key, value]) => {
+      const fieldSchema = getChildSchema({ schema, key });
+
       if (Array.isArray(value)) {
-        const pruned = value.reduce((prunedArray: unknown[], arrayItem) => {
-          if (isBasicallyAnObject(arrayItem)) {
-            // remove any empty stuff from the object array items
-            const prunedItem = pruneEmptyNestedFields(arrayItem as object);
-            // remove the entire item if it comes back empty
-            if (!isEmptyField(prunedItem)) {
-              prunedArray.push(prunedItem);
+        // Preserve empty object rows required by minItems. Without this,
+        // required FieldList rows can be pruned before backend validation,
+        // causing array-level minItems errors instead of child-field errors.
+        const minimumItems =
+          typeof fieldSchema?.minItems === "number" ? fieldSchema.minItems : 0;
+
+        const pruned = value.reduce(
+          (prunedArray: unknown[], arrayItem, index) => {
+            if (isBasicallyAnObject(arrayItem)) {
+              const itemSchema =
+                fieldSchema?.items &&
+                !Array.isArray(fieldSchema.items) &&
+                typeof fieldSchema.items === "object"
+                  ? (fieldSchema.items as RJSFSchema)
+                  : undefined;
+
+              const prunedItem = pruneEmptyNestedFields(
+                arrayItem as object,
+                itemSchema,
+              );
+
+              // Keep non-empty rows. Also keep empty rows while they are within
+              // the schema-required minimum item count.
+              if (!isEmptyField(prunedItem) || index < minimumItems) {
+                prunedArray.push(prunedItem);
+              }
+            } else if (
+              !isEmptyField(arrayItem) ||
+              (!isBasicallyAnObject(arrayItem) && arrayItem !== undefined)
+            ) {
+              prunedArray.push(arrayItem);
             }
-          } else if (
-            !isEmptyField(arrayItem) ||
-            (!isBasicallyAnObject(arrayItem) && arrayItem !== undefined)
-          ) {
-            prunedArray.push(arrayItem);
-          }
-          return prunedArray;
-        }, []);
+            return prunedArray;
+          },
+          [],
+        );
         acc[key] = pruned;
         return acc;
       }
@@ -513,7 +575,9 @@ export const pruneEmptyNestedFields = (structuredFormData: object): object => {
       if (isEmptyField(value)) {
         return acc;
       }
-      const pruned = pruneEmptyNestedFields(value as object);
+
+      const pruned = pruneEmptyNestedFields(value as object, fieldSchema);
+
       acc[key] = pruned;
       return acc;
     },
@@ -540,7 +604,10 @@ export const shapeFormData = <T extends object>(
       delimiter: "--",
     },
   );
-  return pruneEmptyNestedFields(structuredFormData) as T;
+  return pruneEmptyNestedFields(
+    structuredFormData,
+    condenseFormSchemaProperties(formSchema) as RJSFSchema,
+  ) as T;
 };
 
 const removePropertyPaths = (path: unknown): string => {

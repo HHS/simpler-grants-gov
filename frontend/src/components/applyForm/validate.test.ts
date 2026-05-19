@@ -122,7 +122,6 @@ describe("validateFormData", () => {
           type: "fieldList",
           label: "Test",
           name: "test",
-          defaultSize: 1,
           children: [
             {
               type: "section",

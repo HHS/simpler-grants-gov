@@ -16,6 +16,7 @@ from src.constants.lookup_constants import (
     CompetitionOpenToApplicant,
     FundingCategory,
     FundingInstrument,
+    JobType,
     OpportunityCategory,
     OpportunityStatus,
 )
@@ -709,6 +710,6 @@ class BuildAutomaticOpportunitiesTask(Task):
     "build-automatic-opportunities", help="Utility to automatically create opportunities for forms"
 )
 @flask_db.with_db_session()
-@ecs_background_task(task_name="build-automatic-opportunities")
+@ecs_background_task(task_name=JobType.BUILD_AUTOMATIC_OPPORTUNITIES)
 def generate_opportunity_sql(db_session: db.Session) -> None:
     BuildAutomaticOpportunitiesTask(db_session).run()
