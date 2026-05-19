@@ -10,7 +10,6 @@ from typing import ParamSpec, TypeVar
 import newrelic.agent
 import requests
 
-from src.constants.lookup_constants import JobType
 from src.logging.flask_logger import add_extra_data_to_global_logs
 
 logger = logging.getLogger(__name__)
@@ -19,7 +18,7 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-def ecs_background_task(task_name: JobType) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def ecs_background_task(task_name: str) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """
     Decorator for any ECS Task entrypoint function.
 
