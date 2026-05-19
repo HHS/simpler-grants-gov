@@ -55,7 +55,7 @@ interface FormPageProps {
      - Used by services that cannot log in as a user.
   2. Regular authenticated users:
      - Users logged in via session can browse directly to this page to view/print completed application forms.
-  If neither a valid internal token nor a valid user session is present, the user is redirected to /unauthenticated.
+  If neither a valid internal token nor a valid user session is present, the users are redirected to appropriate error page.
 */
 
 export default async function FormPage({ params }: FormPageProps) {

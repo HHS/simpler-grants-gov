@@ -111,7 +111,14 @@ export default async function getFormData({
       );
       return { error: "NotFound" };
     }
-    if (status === 403 || status === 401) {
+    if (status === 401) {
+      console.error(
+        `Unauthenticated access to form for applicationID (${applicationId}), appFormId ${appFormId}:`,
+        e,
+      );
+      return { error: "UnauthorizedError" };
+    }
+    if (status === 403) {
       console.error(
         `Forbidden access to form for applicationID (${applicationId}), appFormId ${appFormId}:`,
         e,
