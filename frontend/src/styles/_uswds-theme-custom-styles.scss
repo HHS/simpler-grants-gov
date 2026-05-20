@@ -1249,7 +1249,7 @@ input[type="checkbox"]:not(checked) ~ .saved-opportunity-radius-md,
 }
 
 /*
-  Notifications page error message fade in animation. 
+  Notifications page error message fade in animation.
   This is used on the notifications page when an error occurs fetching notifications,
   to fade in the error message in a way that draws attention without being too jarring.
 */
@@ -1515,4 +1515,9 @@ $simpler-switch-transition-easing: ease;
 .award-recommendation-step-connector {
   background-color: #c3e8d8;
   height: calc(100% + 1rem);
+}
+
+// hide trussworks multi file upload status view
+.usa-file-input__preview {
+  display: none;
 }

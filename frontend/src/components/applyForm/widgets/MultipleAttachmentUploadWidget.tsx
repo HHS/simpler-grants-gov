@@ -20,6 +20,7 @@ import {
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
+import { FileUploadPoc } from "src/components/FileUploadPoc";
 import { DynamicFieldLabel } from "./DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 import { MultipleAttachmentUploadList } from "./MultiAttachmentUploadList";
@@ -194,7 +195,7 @@ const MultipleAttachmentUploadWidget = ({
         <FieldErrors fieldName={id} rawErrors={rawErrors as string[]} />
       )}
 
-      <FileInput
+      {/* <FileInput
         id={id}
         name={id}
         ref={fileInputRef}
@@ -208,6 +209,14 @@ const MultipleAttachmentUploadWidget = ({
           );
         }}
         aria-describedby={describedby}
+      /> */}
+      <FileUploadPoc
+        multiFile
+        parentOnChange={(e) => {
+          handleFileChange(e.currentTarget.files).catch((error) =>
+            console.error(error),
+          );
+        }}
       />
 
       <input
