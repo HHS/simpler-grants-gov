@@ -330,7 +330,6 @@ describe("getFieldConfig", () => {
         type: "fieldList",
         name: "contacts",
         label: "Contacts",
-        defaultSize: 1,
         children: [
           {
             type: "field",
@@ -365,7 +364,6 @@ describe("getFieldConfig", () => {
         type: "fieldList",
         name: "contacts",
         label: "Contacts",
-        defaultSize: 1,
         children: [
           {
             type: "section",
@@ -392,13 +390,11 @@ describe("getFieldConfig", () => {
         type: "fieldList",
         name: "outer",
         label: "Outer",
-        defaultSize: 1,
         children: [
           {
             type: "fieldList",
             name: "inner",
             label: "Inner",
-            defaultSize: 1,
             children: [],
           },
         ],
