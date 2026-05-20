@@ -172,5 +172,5 @@ export const getModifiedTimeDisplay = (
 };
 
 export const printIdHeaders = (headers: Headers): string => {
-  return ` requestid: ${headers?.get("x-amzn-requestid") || "not set"}, apigw-id: ${headers?.get("x-amz-apigw-id") || "not set"} `;
+  return `requestid: ${headers?.get("x-amzn-requestid") || "not set"}, apigw-id: ${headers?.get("x-amz-apigw-id") || "not set"}, amzn-errortype: ${headers?.get("x-amzn-errortype") || "not set"}`;
 };

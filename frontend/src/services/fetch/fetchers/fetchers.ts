@@ -30,6 +30,7 @@ import {
   throwError,
 } from "src/services/fetch/fetcherHelpers";
 import { APIResponse } from "src/types/apiResponseTypes";
+import { printIdHeaders } from "src/utils/generalUtils";
 
 import { cache } from "react";
 
@@ -112,11 +113,9 @@ export function requesterForEndpoint({
         response.headers.get("Content-Type"),
         response.status,
         JSON.stringify(jsonBody),
+        printIdHeaders(response.headers),
       );
 
-      for (const pair of response.headers.entries()) {
-        console.error(`Header error ${pair[0]}: ${pair[1]}`);
-      }
       return throwError(jsonBody, url, response.headers);
     } else if (
       !response.ok &&
