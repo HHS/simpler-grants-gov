@@ -8,8 +8,6 @@ import {
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { UserSession } from "src/types/authTypes";
 
-import { redirect } from "next/navigation";
-
 import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
 import {
   saveOpportunityEditAction,
@@ -34,8 +32,9 @@ jest.mock(
   }),
 );
 
+const mockRedirect = jest.fn();
 jest.mock("next/navigation", () => ({
-  redirect: jest.fn(),
+  redirect: (url: string) => mockRedirect(url),
 }));
 
 const initialState: OpportunityEditActionState = {
@@ -52,7 +51,7 @@ const mockUpdateOpportunitySummaryForGrantor = jest.mocked(
 const mockPublishOpportunityForGrantor = jest.mocked(
   publishOpportunityForGrantor,
 );
-const mockRedirect = jest.mocked(redirect);
+
 
 const successfulSummaryUpdateResponse: Awaited<
   ReturnType<typeof updateOpportunitySummaryForGrantor>
@@ -482,7 +481,7 @@ describe("submitOpportunityAction", () => {
     expect(result).toEqual({ errorMessage: "notFound" });
   });
 
-  it("redirects to /opportunities when save and publish both succeed", async () => {
+  it("redirects to /grantor/opportunities when save and publish both succeed", async () => {
     const formData = buildValidFormData();
     formData.set("opportunitySummaryId", "sum-456");
 
@@ -496,6 +495,6 @@ describe("submitOpportunityAction", () => {
 
     await submitOpportunityAction(initialState, formData);
 
-    expect(mockRedirect).toHaveBeenCalledWith("/opportunities");
+    expect(mockRedirect).toHaveBeenCalledWith("/grantor/opportunities");
   });
 });

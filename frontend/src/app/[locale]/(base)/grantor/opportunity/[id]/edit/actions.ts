@@ -296,5 +296,5 @@ export async function submitOpportunityAction(
     return publishResult;
   }
 
-  redirect("/opportunities");
+  redirect("/grantor/opportunities");
 }
