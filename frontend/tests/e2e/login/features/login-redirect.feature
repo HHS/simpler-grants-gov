@@ -33,4 +33,4 @@ Feature: Login page redirect behavior
     Given I have stored "/grantor/opportunities" as the login redirect
     When I open the login page
     Then I see "Redirecting..."
-    And I am redirected to "/opportunities"
+    And I am redirected to "/grantor/opportunities"
