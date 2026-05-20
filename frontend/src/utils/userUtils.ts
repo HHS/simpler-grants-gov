@@ -23,7 +23,9 @@ export const userRoleForOrganization = (
 };
 
 export const storeCurrentPage = () => {
-  const startURL = `${location.pathname}${location.search}`;
+  const searchParams = new URLSearchParams(location.search);
+  const redirectUrl = searchParams.get("redirectUrl");
+  const startURL = redirectUrl ?? `${location.pathname}${location.search}`;
   if (startURL !== "") {
     SessionStorage.setItem("login-redirect", startURL);
   }

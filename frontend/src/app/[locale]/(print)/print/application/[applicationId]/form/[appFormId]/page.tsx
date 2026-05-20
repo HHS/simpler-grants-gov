@@ -59,7 +59,8 @@ interface FormPageProps {
 */
 
 export default async function FormPage({ params }: FormPageProps) {
-  const { applicationId, appFormId, setAttachmentsChanged } = await params;
+  const { applicationId, appFormId, locale, setAttachmentsChanged } =
+    await params;
   const headersList = await headers();
   const internalToken = headersList.get("X-SGG-Internal-Token") ?? undefined;
 
@@ -71,7 +72,12 @@ export default async function FormPage({ params }: FormPageProps) {
 
   if (error || !data) {
     if (error === "NotFound") notFound();
-    if (error === "UnauthorizedError") redirect("/unauthenticated");
+    if (error === "UnauthorizedError") {
+      const redirectUrl = `/${locale}/print/application/${applicationId}/form/${appFormId}`;
+      redirect(
+        `/unauthenticated?redirectUrl=${encodeURIComponent(redirectUrl)}`,
+      );
+    }
     if (error === "ForbiddenError") redirect("/unauthorized");
     return <TopLevelError />;
   }

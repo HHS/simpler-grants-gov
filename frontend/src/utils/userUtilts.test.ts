@@ -93,6 +93,21 @@ describe("storeCurrentPage", () => {
     expect(mockSetItem).toHaveBeenCalledWith("login-redirect", "path/search");
   });
 
+  it("should store redirectUrl query param when present", () => {
+    Object.defineProperty(global, "location", {
+      value: {
+        pathname: "/en/unauthenticated",
+        search:
+          "?redirectUrl=%2Fen%2Fprint%2Fapplication%2Ftest-app%2Fform%2Ftest-form",
+      },
+    });
+    storeCurrentPage();
+    expect(mockSetItem).toHaveBeenCalledWith(
+      "login-redirect",
+      "/en/print/application/test-app/form/test-form",
+    );
+  });
+
   it("should not store URL in session storage if pathname and search are empty", () => {
     Object.defineProperty(global, "location", {
       value: { pathname: "", search: "" },
