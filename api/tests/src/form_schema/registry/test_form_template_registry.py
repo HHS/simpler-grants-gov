@@ -4,7 +4,7 @@ import jsonref
 import pytest
 
 from src.db.models.competition_models import Form
-from src.form_schema.forms import _ALL_FORMS
+from src.form_schema.forms import _ALL_FORMS  # noqa: F401 ; triggers registration at import time
 from src.form_schema.registry.form_template_registry import (
     FormTemplateKey,
     FormTemplateRegistry,
@@ -218,9 +218,6 @@ def test_get_raises_for_wrong_major_version():
 
 
 def test_all_forms_are_registered_on_startup():
-    form_template_registry._registry.clear()
-
-    import src.form_schema.forms  # noqa: F401 ; triggers registration at import time
 
     forms = form_template_registry.get_all()
     assert len(forms) == len(_ALL_FORMS)
