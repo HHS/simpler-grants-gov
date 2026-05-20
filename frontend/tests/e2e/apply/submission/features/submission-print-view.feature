@@ -60,8 +60,8 @@ Feature: Happy Path – Application Submission and Print View Workflow
     And the user validates the print view
 
   Examples:
-    | user type    | who is applying            |
-    | Organization | Organization A             |
+    | user type    | who is applying           |
+    | Organization | Organization A            |
     | Individual   | As an individual (myself) |
 
 # =================================================================
