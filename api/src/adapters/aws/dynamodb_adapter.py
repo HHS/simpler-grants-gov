@@ -92,7 +92,13 @@ class DynamoDBClient:
         try:
             logger.info(
                 "Getting item from DynamoDB",
-                extra={"table_name": table_name, "key": key},
+                extra={
+                    "table_name": table_name,
+                    "key_name": key_name,
+                    "key_type": key_type,
+                    "value": value,
+                    "consistent_read": consistent_read,
+                },
             )
 
             response = self.client.get_item(
@@ -106,12 +112,24 @@ class DynamoDBClient:
             if item:
                 logger.info(
                     "Successfully retrieved item from DynamoDB",
-                    extra={"table_name": table_name, "key": key},
+                    extra={
+                        "table_name": table_name,
+                        "key_name": key_name,
+                        "key_type": key_type,
+                        "value": value,
+                        "consistent_read": consistent_read,
+                    },
                 )
             else:
                 logger.info(
                     "Item not found in DynamoDB",
-                    extra={"table_name": table_name, "key": key},
+                    extra={
+                        "table_name": table_name,
+                        "key_name": key_name,
+                        "key_type": key_type,
+                        "value": value,
+                        "consistent_read": consistent_read,
+                    },
                 )
 
             return DynamoDBGetItemResponse(item=item)
@@ -119,6 +137,12 @@ class DynamoDBClient:
         except Exception:
             logger.exception(
                 "Failed to get item from DynamoDB",
-                extra={"table_name": table_name, "key": key},
+                extra={
+                    "table_name": table_name,
+                    "key_name": key_name,
+                    "key_type": key_type,
+                    "value": value,
+                    "consistent_read": consistent_read,
+                },
             )
             raise
