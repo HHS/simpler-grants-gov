@@ -146,10 +146,11 @@ jobs:
         run: |
           npm ci
 
-      - run: npx playwright install --with-deps
+      # 2 of the 4 shards need chrome, so cache that, install the others as needed
+      - run: npx playwright install --with-deps chrome
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-      - run: npx playwright install-deps
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      #- run: npx playwright install-deps
+      #  if: steps.playwright-cache.outputs.cache-hit != 'true'
 
       # We package ourselves as tar.gz because this preserves permissions that a regular artifact upload/download does not.
       - name: Package node_modules
@@ -429,8 +430,10 @@ jobs:
           staging_test_user_email: ${{ secrets.STAGING_TEST_USER_EMAIL }}
           staging_test_user_password: ${{ secrets.STAGING_TEST_USER_PASSWORD }}
           staging_test_user_mfa_key: ${{ secrets.STAGING_TEST_USER_MFA_KEY }}
+          # shard 2 is the webkit shard
+          do-firefox-install: ${{ matrix.shard == 2 && 'true' || 'false' }}
           # shard 3 is the webkit shard
-          force-webkit-install: ${{ matrix.shard == 3 && 'true' || 'false' }}
+          do-webkit-install: ${{ matrix.shard == 3 && 'true' || 'false' }}
 
   create-report:
     name: Create Merged Test Report

@@ -44,8 +44,14 @@ inputs:
   workers:
     description: "number of workers to use for test run"
     default: ""
-  force-webkit-install:
-    description: "webkit dependencies aren't all cached, so we need to force it to install"
+  do-chrome-install:
+    description: "install chrome for playwright"
+    default: "false"
+  do-firefox-install:
+    description: "install firefox for playwright"
+    default: "false"
+  do-webkit-install:
+    description: "install webkit for playwright"
     default: "false"
   staging_test_user_api_key:
     description: "test user API key used in spoofing staging user logins"
@@ -83,17 +89,30 @@ runs:
         cache: ${{ inputs.package_manager }}
         cache-dependency-path: ${{ inputs.lockfile_path }}
 
-    - name: Install Node dependencies & Playwright
+    - name: Install Playwright
       if: ${{ inputs.needs_node_setup == 'true' }}
       shell: bash
       working-directory: ./frontend
       run: |
         npm install @playwright/test
-        npx playwright install --with-deps
+
+    - name: Install Firefox and dependencies
+      if: ${{ inputs.do-firefox-install == 'true' }}
+      shell: bash
+      working-directory: ./frontend
+      run: |
+        npx playwright install --with-deps firefox
+
+    - name: Install Chrome and dependencies
+      if: ${{ inputs.do-chrome-install == 'true' }}
+      shell: bash
+      working-directory: ./frontend
+      run: |
+        npx playwright install --with-deps chrome
 
     # this should only be needed on shard 3, the WebKit shard
-    - name: Install Webkit dependencies
-      if: ${{ inputs.force-webkit-install == 'true' }}
+    - name: Install Webkit and dependencies
+      if: ${{ inputs.do-webkit-install == 'true' }}
       shell: bash
       working-directory: ./frontend
       run: |
