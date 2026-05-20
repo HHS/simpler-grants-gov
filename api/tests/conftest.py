@@ -521,16 +521,16 @@ def mock_dynamodb(reset_aws_env_vars):
 
 
 @pytest.fixture
-def mock_dynamodb_table(mock_dynamodb, monkeypatch):
+def file_scan_dynamodb_table(mock_dynamodb, monkeypatch):
     dynamodb = boto3.client("dynamodb", region_name="us-east-1")
     table_name = "test-local-virus-scan"
     dynamodb.create_table(
         TableName=table_name,
         KeySchema=[
-            {"AttributeName": "attachment_id", "KeyType": "HASH"},
+            {"AttributeName": "file_id", "KeyType": "HASH"},
         ],
         AttributeDefinitions=[
-            {"AttributeName": "attachment_id", "AttributeType": "S"},
+            {"AttributeName": "file_id", "AttributeType": "S"},
         ],
         BillingMode="PAY_PER_REQUEST",
     )

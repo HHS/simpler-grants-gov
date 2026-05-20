@@ -45,7 +45,9 @@ class DynamoDBClient:
     def get_item(
         self,
         table_name: str,
-        key: dict[str, Any],
+        key_name: str,
+        value: Any,
+        key_type: str = "S",
         consistent_read: bool = True,
     ) -> DynamoDBGetItemResponse:
         """
@@ -53,16 +55,44 @@ class DynamoDBClient:
 
         Args:
             table_name: The name of the DynamoDB table
-            key: The key of the item to retrieve (in DynamoDB format)
+            key_name: The name of the key attribute
+            value: The value of the key
+            key_type: DynamoDB type - "S" (string), "N" (number), "B" (binary). Default: "S"
             consistent_read: Whether to use consistent read (default: True)
 
         Returns:
             DynamoDBGetItemResponse containing the item if found, None otherwise
+
+        Examples:
+            # String key (most common)
+            response = client.get_item(
+                table_name="virus-scan-cache",
+                key_name="file_id",
+                value="abc-123"
+            )
+
+            # Number key
+            response = client.get_item(
+                table_name="user-table",
+                key_name="user_id",
+                value="12345",
+                key_type="N"
+            )
+
+            # Eventually consistent read
+            response = client.get_item(
+                table_name="my-table",
+                key_name="id",
+                value="test-id",
+                consistent_read=False
+            )
         """
+        key = {key_name: {key_type: value}}
+        
         try:
             logger.info(
                 "Getting item from DynamoDB",
-                extra={"table_name": table_name, "key": str(key)},
+                extra={"table_name": table_name, "key": key},
             )
 
             response = self.client.get_item(
@@ -76,12 +106,12 @@ class DynamoDBClient:
             if item:
                 logger.info(
                     "Successfully retrieved item from DynamoDB",
-                    extra={"table_name": table_name, "key": str(key)},
+                    extra={"table_name": table_name, "key": key},
                 )
             else:
                 logger.info(
                     "Item not found in DynamoDB",
-                    extra={"table_name": table_name, "key": str(key)},
+                    extra={"table_name": table_name, "key": key},
                 )
 
             return DynamoDBGetItemResponse(item=item)
@@ -89,6 +119,6 @@ class DynamoDBClient:
         except Exception:
             logger.exception(
                 "Failed to get item from DynamoDB",
-                extra={"table_name": table_name, "key": str(key)},
+                extra={"table_name": table_name, "key": key},
             )
             raise
