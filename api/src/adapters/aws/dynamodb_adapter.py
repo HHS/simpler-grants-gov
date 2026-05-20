@@ -88,7 +88,7 @@ class DynamoDBClient:
             )
         """
         key = {key_name: {key_type: value}}
-        
+
         try:
             logger.info(
                 "Getting item from DynamoDB",
