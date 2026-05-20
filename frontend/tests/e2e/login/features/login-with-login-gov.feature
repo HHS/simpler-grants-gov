@@ -2,7 +2,7 @@
 # @specFile e2e/login/specs/login-with-login-gov.spec.ts
 # @debugNote Mirrors the staging-only Login.gov MFA flow; existing-session handling lives in the login helper
 
-Feature: Login.gov MFA authentication
+Feature: Sign in with Login.gov
   As a user
   I want to sign in with Login.gov
   So that I can access my Simpler Grants account
