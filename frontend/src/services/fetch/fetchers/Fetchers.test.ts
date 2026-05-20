@@ -123,11 +123,12 @@ describe("requesterForEndpoint", () => {
     expect(response).toEqual(fakeResponse);
   });
   it("extracts errors from json response where applicable", async () => {
+    const mockHeaders = { get: () => "application/json" };
     fetchMock.mockResolvedValue({
       json: responseJsonMock,
       ok: false,
       status: 404,
-      headers: { get: () => "application/json" },
+      headers: mockHeaders,
     });
 
     const requester = requesterForEndpoint(basicEndpoint);
@@ -138,7 +139,11 @@ describe("requesterForEndpoint", () => {
       additionalHeaders: { "Header-Name": "headerValue" },
     });
     expect(responseJsonMock).toHaveBeenCalledTimes(1);
-    expect(throwErrorMock).toHaveBeenCalledWith(fakeJsonBody, "fakeurl/1");
+    expect(throwErrorMock).toHaveBeenCalledWith(
+      fakeJsonBody,
+      "fakeurl/1",
+      mockHeaders,
+    );
   });
   it("returns without error if status included in allowedErrorStatuses", async () => {
     fetchMock.mockResolvedValue({
