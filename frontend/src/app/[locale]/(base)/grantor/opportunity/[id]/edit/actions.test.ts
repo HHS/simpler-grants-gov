@@ -34,7 +34,9 @@ jest.mock(
 
 const mockRedirect = jest.fn();
 jest.mock("next/navigation", () => ({
-  redirect: (url: string) => mockRedirect(url),
+  redirect: (url: string): void => {
+    mockRedirect(url);
+  },
 }));
 
 const initialState: OpportunityEditActionState = {
@@ -51,7 +53,6 @@ const mockUpdateOpportunitySummaryForGrantor = jest.mocked(
 const mockPublishOpportunityForGrantor = jest.mocked(
   publishOpportunityForGrantor,
 );
-
 
 const successfulSummaryUpdateResponse: Awaited<
   ReturnType<typeof updateOpportunitySummaryForGrantor>
