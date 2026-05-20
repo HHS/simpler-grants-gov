@@ -17,7 +17,7 @@ Feature: Login page redirect behavior
   Scenario: should redirect to stored URL after login
     Given I have stored "/grantor/opportunities" as the login redirect
     When I open the login page
-    Then I am redirected to "/opportunities"
+    Then I am redirected to "/grantor/opportunities"
 
   Scenario: should redirect to home page when stored URL is empty
     Given I have stored "/" as the login redirect
