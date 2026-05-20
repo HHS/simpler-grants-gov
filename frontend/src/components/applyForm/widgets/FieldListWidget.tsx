@@ -13,67 +13,88 @@ import {
 } from "src/utils/applyForm/fieldListHelpers";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
 import { isFieldRequired } from "src/components/applyForm/utils";
 import { renderWidget } from "./WidgetRenderers";
 
 /**
- * Params for updating a specific field within a FieldList row.
+ * Params for updating a specific field within a FieldList entry.
  *
  * `nextValue` is typed as `unknown` because widget `onChange` handlers
  * emit `unknown` by contract. This value is normalized to
  * `BroadlyDefinedWidgetValue` inside `handleFieldChange`.
  */
 type FieldListChangeParams = {
-  entryIndex: number;
+  entryId: string;
   storageKey: string;
   nextValue: unknown;
+};
+
+type FieldListEntry = {
+  entryId: string;
+  value: GeneralRecord;
 };
 
 const FIELD_LIST_INDEX_TOKEN = "~~index~~";
 
 /**
- * Normalizes the incoming FieldList value into a predictable row array.
+ * Builds the initial entries rendered by FieldList.
  *
- * FieldList values are stored as an array of row objects:
+ * Saved form data is stored as `GeneralRecord[]`, but the widget needs stable
+ * client-side entry ids so React can preserve each entry's local state when
+ * entries are added or removed. The entry ids are only used for rendering and
+ * are stripped before values are sent back to the parent form.
  *
- * [
- *   { first_name: "Jon", last_name: "Doe" },
- *   { first_name: "Jane" }
- * ]
- *
+ * If the schema defines `minItems`, blank entries are appended so the UI shows
+ * the required minimum number of entries.
  */
-const normalizeFieldListRows = ({
+const normalizeFieldListEntries = ({
   value,
   minItems,
 }: {
   value: GeneralRecord[] | undefined;
   minItems?: number;
-}): GeneralRecord[] => {
-  const startingRows = Array.isArray(value)
-    ? value.filter((entryValue): entryValue is GeneralRecord => {
-        return typeof entryValue === "object" && entryValue !== null;
-      })
+}): FieldListEntry[] => {
+  const startingEntries = Array.isArray(value)
+    ? value
+        .filter((entryValue): entryValue is GeneralRecord => {
+          return typeof entryValue === "object" && entryValue !== null;
+        })
+        .map((entryValue) => ({
+          entryId: createFieldListEntryValueId(),
+          value: entryValue,
+        }))
     : [];
 
-  const minimumRowCount = minItems ?? 0;
+  const minimumEntryCount = minItems ?? 0;
 
-  if (startingRows.length >= minimumRowCount) {
-    return startingRows;
+  if (startingEntries.length >= minimumEntryCount) {
+    return startingEntries;
   }
 
-  const missingRowCount = minimumRowCount - startingRows.length;
+  const missingEntryCount = minimumEntryCount - startingEntries.length;
 
   return [
-    ...startingRows,
-    ...Array.from({ length: missingRowCount }, () => ({})),
+    ...startingEntries,
+    ...Array.from({ length: missingEntryCount }, () => ({
+      entryId: createFieldListEntryValueId(),
+      value: {},
+    })),
   ];
 };
 
+let fieldListEntryValueIdCounter = 0;
+
+const createFieldListEntryValueId = (): string => {
+  fieldListEntryValueIdCounter += 1;
+
+  return `${Date.now()}-${fieldListEntryValueIdCounter}`;
+};
+
 /**
- * Replaces the FieldList row index placeholder with the actual row index.
+ * Replaces the FieldList entry index placeholder with the actual entry index.
  *
  * Example:
  *   contact_people_test[~~index~~]--first_name
@@ -92,15 +113,13 @@ const replaceFieldListIndexPlaceholder = ({
 };
 
 /**
- * Extracts the row-local storage key from a generated FieldList base id.
+ * Extracts the field key used to store a child value within an entry object.
  *
  * Example:
  *   contact_people_test[~~index~~]--first_name
  *
  * yields:
  *   first_name
- *
- * This key is used to read and write values within an individual row object.
  */
 const getFieldListStorageKey = ({ baseId }: { baseId: string }): string => {
   const baseIdParts = baseId.split("--");
@@ -108,33 +127,24 @@ const getFieldListStorageKey = ({ baseId }: { baseId: string }): string => {
 };
 
 /**
- * Returns a new row array with one additional empty row appended.
+ * Returns a new entry array with one additional empty entry appended.
  */
-const addFieldListRow = ({
-  rows,
+const addFieldListEntry = ({
+  entries,
 }: {
-  rows: GeneralRecord[];
-}): GeneralRecord[] => {
-  return [...rows, {}];
+  entries: FieldListEntry[];
+}): FieldListEntry[] => {
+  return [
+    ...entries,
+    {
+      entryId: createFieldListEntryValueId(),
+      value: {},
+    },
+  ];
 };
 
 /**
- * Returns a new row array with the row at `entryIndex` removed.
- */
-const removeFieldListRow = ({
-  rows,
-  entryIndex,
-}: {
-  rows: GeneralRecord[];
-  entryIndex: number;
-}): GeneralRecord[] => {
-  return rows.filter(
-    (_, currentEntryIndex) => currentEntryIndex !== entryIndex,
-  );
-};
-
-/**
- * Narrows row values into the value shapes accepted by the widget renderer.
+ * Narrows entry values into the value shapes accepted by the widget renderer.
  *
  * Child widgets rendered inside FieldList still expect standard widget values
  * such as:
@@ -144,7 +154,7 @@ const removeFieldListRow = ({
  * - string[]
  * - object
  *
- * Since row object access returns `unknown`, this helper safely converts the
+ * Since entry object access returns `unknown`, this helper safely converts the
  * value into a `BroadlyDefinedWidgetValue` when possible.
  */
 const toBroadlyDefinedWidgetValue = (
@@ -173,23 +183,33 @@ const toBroadlyDefinedWidgetValue = (
   return undefined;
 };
 
+/**
+ * Removes FieldList-only metadata before sending values back to the parent form.
+ *
+ * The parent form and save pipeline expect FieldList data as `GeneralRecord[]`.
+ * `entryId` is only used locally by the widget for stable React rendering.
+ */
+const getFieldListValues = (entries: FieldListEntry[]): GeneralRecord[] => {
+  return entries.map((entry) => entry.value);
+};
+
 function FieldListEntry({
-  id,
+  entryId,
   entryIndex,
   entryValue,
   canDeleteEntry,
-  handleDeleteRow,
+  handleDeleteEntry,
   handleFieldChange,
   rawErrors,
   fieldListPath,
   groupDefinition,
   requiredFields,
 }: {
-  id: string;
+  entryId: string;
   entryIndex: number;
   entryValue: GeneralRecord;
   canDeleteEntry: boolean;
-  handleDeleteRow: (entryIndex: number) => void;
+  handleDeleteEntry: (entryId: string) => void;
   handleFieldChange: (params: FieldListChangeParams) => void;
   rawErrors?: FormattedFormValidationWarning[];
   fieldListPath: string;
@@ -199,17 +219,14 @@ function FieldListEntry({
   const t = useTranslations("Application.applyForm.fieldListWidget");
 
   return (
-    <div
-      key={`${id}--row-${entryIndex}`}
-      className="field-list-widget__row border radius-md border-base-lighter padding-2 margin-2"
-    >
+    <div className="field-list-widget__entry border radius-md border-base-lighter padding-2 margin-2">
       <div className="field-list-widget__controls display-flex flex-align-center flex-justify margin-bottom-2">
         <strong>
           {t("entry")} {entryIndex + 1}
         </strong>
         <Button
           type="button"
-          onClick={() => handleDeleteRow(entryIndex)}
+          onClick={() => handleDeleteEntry(entryId)}
           disabled={!canDeleteEntry}
         >
           {t("delete")}
@@ -244,24 +261,28 @@ function FieldListEntry({
         );
 
         /**
-         * Build a standard widget prop object for the child field so it
-         * can be rendered through the existing WidgetRenderers pipeline.
+         * FieldList children need to be reactive so local entry state stays in sync
+         * while users type. Standard form fields can remain non-reactive, but FieldList
+         * must update local state before add/delete operations so unsaved entry values
+         * are not lost when indexes shift.
          */
         const childWidgetProps: UswdsWidgetProps = {
           ...groupItem.generalProps,
           schema: groupItem.generalProps.schema as RJSFSchema,
           id: generatedId,
           name: generatedId,
-          key: generatedId,
+          key: `${entryId}-${storageKey}`,
           value: currentValue,
           rawErrors: childErrors,
           required: isRequired,
-          onChange: (nextValue) =>
+          updateOnInput: true,
+          onChange: (nextValue) => {
             handleFieldChange({
-              entryIndex,
+              entryId,
               storageKey,
               nextValue,
-            }),
+            });
+          },
         };
         return renderWidget({
           type: groupItem.widget,
@@ -302,79 +323,104 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
    * The entries are rehydrated from the incoming `value` prop so the widget
    * stays aligned with saved form data after save / reload.
    */
-  const normalizedInitialRows = useMemo(
+  const initialFieldListEntries = useMemo(
     () =>
-      normalizeFieldListRows({
+      normalizeFieldListEntries({
         value,
         minItems,
       }),
     [value, minItems],
   );
 
-  const [rows, setRows] = useState<GeneralRecord[]>(normalizedInitialRows);
+  const [entries, setEntries] = useState<FieldListEntry[]>(
+    initialFieldListEntries,
+  );
+  const entriesRef = useRef<FieldListEntry[]>(initialFieldListEntries);
 
   const onFieldListEntryDelete =
     widgetProps.formContext?.widgetSupport?.onFieldListEntryDelete;
+
+  const markFormDirty = widgetProps.formContext?.widgetSupport?.markFormDirty;
 
   const isInteractionDisabled = Boolean(disabled || readOnly || isFormLocked);
   const minimumEntryCount = minItems ?? 0;
   const maximumEntryCount = maxItems;
 
-  const isAtMinimumEntryCount = rows.length <= minimumEntryCount;
+  const isAtMinimumEntryCount = entries.length <= minimumEntryCount;
   const isAtMaximumEntryCount =
-    maximumEntryCount !== undefined && rows.length >= maximumEntryCount;
+    maximumEntryCount !== undefined && entries.length >= maximumEntryCount;
 
   const canAddEntry = !isInteractionDisabled && !isAtMaximumEntryCount;
   const canDeleteEntry = !isInteractionDisabled && !isAtMinimumEntryCount;
+
   /**
-   * Updates local entry state and optionally forwards the new value through
-   * the widget-style `onChange` prop for compatibility with the broader form
-   * rendering system.
+   * Applies updates to FieldList entries.
+   *
+   * This is the central update path for:
+   * - child field edits
+   * - entry additions
+   * - entry deletions
+   *
+   * Also marks the parent form dirty so existing unsaved-change
+   * protections apply to FieldList interactions.
    */
-  const handleRowsChange = useCallback(
-    (getNextRows: (previousRows: GeneralRecord[]) => GeneralRecord[]): void => {
-      setRows((previousRows) => {
-        const nextRows = getNextRows(previousRows);
-        onChange?.(nextRows);
-        return nextRows;
-      });
+  const handleEntriesChange = useCallback(
+    (
+      getNextEntries: (previousEntries: FieldListEntry[]) => FieldListEntry[],
+    ): void => {
+      const nextEntries = getNextEntries(entriesRef.current);
+      entriesRef.current = nextEntries;
+      setEntries(nextEntries);
+      onChange?.(getFieldListValues(nextEntries));
+      markFormDirty?.();
     },
-    [onChange],
+    [markFormDirty, onChange],
   );
 
-  const handleAddRow = useCallback((): void => {
-    if (maximumEntryCount !== undefined && rows.length >= maximumEntryCount) {
+  const handleAddEntry = useCallback((): void => {
+    const currentEntries = entriesRef.current;
+
+    if (
+      maximumEntryCount !== undefined &&
+      currentEntries.length >= maximumEntryCount
+    ) {
       return;
     }
 
-    handleRowsChange((previousRows) =>
-      addFieldListRow({
-        rows: previousRows,
+    handleEntriesChange((previousEntries) =>
+      addFieldListEntry({
+        entries: previousEntries,
       }),
     );
-  }, [handleRowsChange, maximumEntryCount, rows.length]);
+  }, [handleEntriesChange, maximumEntryCount]);
 
-  const handleDeleteRow = useCallback(
-    (entryIndex: number): void => {
-      if (rows.length <= minimumEntryCount) {
+  const handleDeleteEntry = useCallback(
+    (entryId: string): void => {
+      const currentEntries = entriesRef.current;
+
+      if (currentEntries.length <= minimumEntryCount) {
+        return;
+      }
+
+      const entryIndex = currentEntries.findIndex(
+        (entry) => entry.entryId === entryId,
+      );
+
+      if (entryIndex === -1) {
         return;
       }
 
       onFieldListEntryDelete?.(fieldListPath, entryIndex);
 
-      handleRowsChange((previousRows) =>
-        removeFieldListRow({
-          rows: previousRows,
-          entryIndex,
-        }),
+      handleEntriesChange((previousEntries) =>
+        previousEntries.filter((entry) => entry.entryId !== entryId),
       );
     },
     [
       fieldListPath,
-      handleRowsChange,
+      handleEntriesChange,
       minimumEntryCount,
       onFieldListEntryDelete,
-      rows.length,
     ],
   );
 
@@ -383,26 +429,29 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
    *
    * Receives raw `unknown` values from child widgets and normalizes them
    * before updating the row state. Ensures updates are scoped to the correct
-   * row and field, and preserves immutability of the rows array.
+   * row and field, and preserves immutability of the entries array.
    */
   const handleFieldChange = useCallback(
-    ({ entryIndex, storageKey, nextValue }: FieldListChangeParams): void => {
+    ({ entryId, storageKey, nextValue }: FieldListChangeParams): void => {
       const normalizedNextValue = toBroadlyDefinedWidgetValue(nextValue);
 
-      handleRowsChange((previousRows) =>
-        previousRows.map((previousRow, currentEntryIndex) => {
-          if (currentEntryIndex !== entryIndex) {
-            return previousRow;
+      handleEntriesChange((previousEntries) =>
+        previousEntries.map((previousEntry) => {
+          if (previousEntry.entryId !== entryId) {
+            return previousEntry;
           }
 
           return {
-            ...previousRow,
-            [storageKey]: normalizedNextValue,
+            ...previousEntry,
+            value: {
+              ...previousEntry.value,
+              [storageKey]: normalizedNextValue,
+            },
           };
         }),
       );
     },
-    [handleRowsChange],
+    [handleEntriesChange],
   );
 
   return (
@@ -420,15 +469,15 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
         </ul>
       ) : null}
 
-      {rows.map((entryValue, entryIndex) => {
+      {entries.map((entry, entryIndex) => {
         return (
           <FieldListEntry
-            key={`${id}-${entryIndex}`}
-            id={id}
+            key={entry.entryId}
+            entryId={entry.entryId}
+            entryValue={entry.value}
             entryIndex={entryIndex}
-            entryValue={entryValue}
             canDeleteEntry={canDeleteEntry}
-            handleDeleteRow={handleDeleteRow}
+            handleDeleteEntry={handleDeleteEntry}
             handleFieldChange={handleFieldChange}
             groupDefinition={groupDefinition}
             rawErrors={rawErrors}
@@ -443,7 +492,7 @@ function FieldListWidget(widgetProps: FieldListWidgetProps) {
         </p>
       ) : null}
       <div className="field-list-widget__controls display-flex flex-align-center flex-justify-between margin-bottom-2">
-        <Button type="button" onClick={handleAddRow} disabled={!canAddEntry}>
+        <Button type="button" onClick={handleAddEntry} disabled={!canAddEntry}>
           + {t("add")}
         </Button>
       </div>

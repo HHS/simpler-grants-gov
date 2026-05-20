@@ -8,6 +8,7 @@ import { UserProfile } from "src/types/authTypes";
 import {
   AwardRecommendationDetails,
   AwardRecommendationStatus,
+  AwardRecommendationSubmission,
 } from "src/types/awardRecommendationTypes";
 import { BaseOpportunity } from "src/types/opportunity/opportunityResponseTypes";
 import {
@@ -70,6 +71,27 @@ export const mockAwardRecommendationDetails: AwardRecommendationDetails = {
   },
   created_at: "2026-01-01T00:00:00Z",
 };
+
+export const mockAwardRecommendationSubmissions: AwardRecommendationSubmission[] =
+  [
+    {
+      award_recommendation_application_submission_id:
+        "63588df8-f2d1-44ed-a201-5804abba696b",
+      application_submission: {
+        application_submission_id: "63588df8-f2d1-44ed-a201-5804abba696c",
+        application_submission_number: "SUB-26-0001",
+        project_title: "Test project",
+        total_requested_amount: "50000.00",
+      },
+      submission_detail: {
+        award_recommendation_type: "recommended_for_funding",
+        recommended_amount: "50000.00",
+        general_comment: "",
+        has_exception: false,
+        exception_detail: "",
+      },
+    },
+  ];
 
 export const mockOpportunity: BaseOpportunity = {
   opportunity_id: "63588df8-f2d1-44ed-a201-5804abba696a",

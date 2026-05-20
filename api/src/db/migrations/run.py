@@ -1,5 +1,5 @@
 # Convenience script for running alembic migration commands through a pyscript
-# rather than the command line. This allows poetry to package and alias it for
+# rather than the command line. This allows us to package and alias it for
 # running on the production docker image from any directory.
 import logging
 import os
@@ -13,6 +13,7 @@ from alembic.config import Config
 from alembic.runtime import migration
 
 import src.logging
+from src.constants.lookup_constants import JobType
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.logging.flask_logger import init_general_logging
 
@@ -31,7 +32,7 @@ src.logging.init("migrations")
 init_general_logging(logging.root, "migrations")
 
 
-@ecs_background_task("migrate-up")
+@ecs_background_task(JobType.MIGRATE_UP)
 def up(revision: str = "head") -> None:
     enable_query_logging()
     command.upgrade(alembic_cfg, revision)
@@ -39,13 +40,13 @@ def up(revision: str = "head") -> None:
     sync_lookup_values()
 
 
-@ecs_background_task("migrate-down")
+@ecs_background_task(JobType.MIGRATE_DOWN)
 def down(revision: str = "-1") -> None:
     enable_query_logging()
     command.downgrade(alembic_cfg, revision)
 
 
-@ecs_background_task("migrate-downall")
+@ecs_background_task(JobType.MIGRATE_DOWNALL)
 def downall(revision: str = "base") -> None:
     enable_query_logging()
     command.downgrade(alembic_cfg, revision)

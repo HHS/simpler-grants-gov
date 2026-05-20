@@ -23,6 +23,8 @@ output "service_config" {
     instance_desired_instance_count = var.instance_desired_instance_count
     instance_scaling_max_capacity   = var.instance_scaling_max_capacity
     instance_scaling_min_capacity   = var.instance_scaling_min_capacity
+    instance_scaling_cpu_target     = var.instance_scaling_cpu_target
+    instance_scaling_memory_target  = var.instance_scaling_memory_target
     database_engine_version         = var.database_engine_version
     instance_cpu                    = var.instance_cpu
     instance_memory                 = var.instance_memory
@@ -96,4 +98,8 @@ output "workflow_service_config" {
     memory        = var.workflow_service_memory
     desired_count = var.workflow_service_desired_count
   }
+}
+
+output "file_scan_cache_config" {
+  value = local.file_scan_cache_config
 }

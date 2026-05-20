@@ -1,0 +1,12 @@
+services:
+  grants-shared:
+    build:
+      context: .
+      target: dev
+      args:
+        - RUN_UID=${RUN_UID:-4000}
+        - RUN_USER=${RUN_USER:-grants-shared}
+    container_name: grants-shared
+    env_file: ./local.env
+    volumes:
+      - .:/grants_shared

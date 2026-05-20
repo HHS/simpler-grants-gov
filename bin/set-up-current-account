@@ -25,11 +25,12 @@ set -euo pipefail
 account_name="$1"
 
 account_id=$(./bin/current-account-id)
-region=$(./bin/current-region)
 
-# Get project name
+# Get project name and region from project config
+# This ensures consistency with how terraform computes the bucket name
 terraform -chdir="infra/project-config" apply -auto-approve > /dev/null
 project_name=$(terraform -chdir="infra/project-config" output --raw project_name)
+region=$(terraform -chdir="infra/project-config" output --raw default_region)
 
 tf_state_bucket_name="${project_name}-${account_id}-${region}-tf"
 tf_state_key="infra/account.tfstate"

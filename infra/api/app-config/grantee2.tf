@@ -13,6 +13,7 @@ module "grantee2_config" {
   has_database                      = local.has_database
   database_enable_http_endpoint     = true
   database_newrelic_entity_guid     = ""
+  database_deletion_protection      = false
   has_incident_management_service   = local.has_incident_management_service
   enable_identity_provider          = local.enable_identity_provider
   enable_notifications              = local.enable_notifications
@@ -48,12 +49,15 @@ module "grantee2_config" {
 
   service_override_extra_environment_variables = {
     # Email notification
-    RESET_EMAILS_WITHOUT_SENDING = "false"
+    RESET_EMAILS_WITHOUT_SENDING = "true"
 
     # PDF Generation - Staging overrides
     FRONTEND_URL             = "https://grantee2.teams.simpler.grants.gov"
     DOCRAPTOR_TEST_MODE      = "true"
     PDF_GENERATION_USE_MOCKS = "false"
+
+    # Reuse staging's login.gov sandbox app registration
+    LOGIN_GOV_CLIENT_ID = "urn:gov:gsa:openidconnect.profiles:sp:sso:hhs-staging-simpler-grants-gov"
   }
   # Enables ECS Exec access for debugging or jump access.
   # See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html

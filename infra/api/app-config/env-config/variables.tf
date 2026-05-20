@@ -174,6 +174,18 @@ variable "instance_scaling_min_capacity" {
   type        = number
 }
 
+variable "instance_scaling_cpu_target" {
+  description = "Target CPU utilization percentage for autoscaling"
+  type        = number
+  default     = 70
+}
+
+variable "instance_scaling_memory_target" {
+  description = "Target memory utilization percentage for autoscaling"
+  type        = number
+  default     = 70
+}
+
 variable "has_incident_management_service" {
   type = bool
 }
@@ -197,6 +209,12 @@ variable "database_newrelic_entity_guid" {
   type        = string
   description = "New Relic entity GUID for the RDS cluster, used to correlate logs with the infrastructure entity in New Relic."
   default     = null
+}
+
+variable "database_deletion_protection" {
+  type        = bool
+  description = "Whether to enable deletion protection on the RDS cluster. When null, derives from whether the environment is grantee1 or grantee2."
+  default     = true
 }
 
 variable "secondary_domain_names" {
@@ -264,4 +282,3 @@ variable "api_host_newrelic_entity_guid" {
   description = "New Relic entity GUID for the ECS service host, used to correlate container logs with the infrastructure entity in New Relic."
   default     = null
 }
-

@@ -433,6 +433,7 @@ export const messages = {
     },
     attachments: {
       removeButton: "Remove",
+      uploadLabel: "Upload files",
       errorHeading: "Upload error",
       errorUploadFailed: "Failed to upload {fileName}.",
       errorDeleteFailed: "Failed to delete {fileName}.",
@@ -916,6 +917,12 @@ export const messages = {
       "You'll be redirected to Login.gov to sign in or create an account. Then, you'll return to Simpler.Grants.gov as a signed-in user.",
     button: "Sign in with Login.gov",
     close: "Cancel",
+  },
+  PivRequiredModal: {
+    title: "Your account requires additional identity verification.",
+    description:
+      "You must sign in with your government employee ID. Make sure you've set up your Personal Identity Verification (PIV) or Common Access Card (CAC) as a two-factor authentication method.",
+    button: "Sign in using PIV/CAC",
   },
   Footer: {
     agencyName: "Grants.gov",
@@ -2052,10 +2059,13 @@ export const messages = {
       "We have encountered an error loading your award recommendations, please try again later.",
     metaDescription: "View your award recommendations",
     metaDescriptionEdit: "Edit your award recommendations",
+    pageTitleEditApplicationSubmissionDetails:
+      "Edit application submission details",
     pageHeading: "Award Recommendations",
     heroTitle: "Award Rec #",
     datePrepared: "Date prepared",
     status: "Status",
+    onThisPage: "On this page",
     statusTag: {
       draft: "In Progress",
       in_review: "Pending Review",
@@ -2063,6 +2073,7 @@ export const messages = {
     },
     heroButtons: {
       save: "Save",
+      cancel: "Cancel",
       create: "Create",
       edit: "Edit",
       preview: "Preview",
@@ -2109,6 +2120,25 @@ export const messages = {
       description:
         "Add any relevant information related to this reviewer and decision-maker for this opportunity",
     },
+    recommendationDetails: {
+      heading: "Recommendation details",
+      recommendationLabel: "Recommendation",
+      recommendationOptions: {
+        recommended: "Recommended",
+        recommendedWithoutFunding: "Recommended but not funded",
+        notRecommended: "Not recommended",
+      },
+      hasExceptionLabel: "Contains exceptions to selection method",
+      commentsLabel: "Recommendation comments",
+      commentsDescription:
+        "Add any needed context for your recommendations for any selected group or single application.",
+      exceptionDetailLabel: "Exceptions to selection method",
+      exceptionDetailDescription:
+        "Select one or more applications and explain any exceptions to the general selection method. For example, the reasons for any applications skipped on the merit review ranking or other similar exceptions.",
+      fundingHeading: "Funding recommendations",
+      amountRequestedLabel: "Amount Requested",
+      amountRecommendedLabel: "Amount Recommended",
+    },
     errorHeadingAwardRecommendation:
       "Error fetching award recommendation details",
     errorHeadingAuthentication: "Authentication Error",
@@ -2116,6 +2146,10 @@ export const messages = {
       "You are not authenticated. Please sign in to view award recommendations.",
     awardRecommendationFetchError:
       "Error fetching award recommendation data. Please try refreshing the page.",
+    errorHeadingAwardRecommendationSubmission:
+      "Error fetching application submission details",
+    awardRecommendationSubmissionFetchError:
+      "Error fetching application submission data. Please try refreshing the page.",
     recommendations: {
       heading: "Recommendations",
       editPageDescription:
@@ -2138,6 +2172,42 @@ export const messages = {
           "Explain how you plan to provide funding over time. For example, will the agency award all funding in a single award or in multiple budget periods across a longer period of performance.",
         noFundingStrategyProvided: "No funding strategy provided.",
       },
+    },
+  },
+  CreateAwardRecommendation: {
+    pageTitle: "Create recommendation",
+    metaDescription: "Create a new award recommendation",
+    beforeYouGetStarted: "Before you get started",
+    introDescription:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
+    steps: {
+      identifyOpportunity: {
+        title: "Identify the opportunity",
+        description:
+          "Identify which funding opportunity is this recommendation is for and provide any additional context including an overview of the program and any legislative requirements the decision maker may need to know.",
+      },
+      applyRecommendations: {
+        title: "Apply your recommendations",
+        description:
+          "Apply your recommendations to all applications submitted for this opportunity.",
+        bullet1: "Explain how you plan to provide funding over time.",
+        bullet2:
+          "Add any needed context for your recommendations for any selected group or single applications.",
+        bullet3:
+          "Identify and document any exceptions to you recommendation method.",
+      },
+      provideAttachments: {
+        title: "Provide any attachments",
+        description:
+          "Include any supplemental documentation to support and inform your recommendations.",
+        bullet1: "Standard and Program terms & conditions",
+        bullet2: "Specific risks & recommended conditions",
+        bullet3: "Other supporting documents",
+      },
+    },
+    buttons: {
+      cancel: "Cancel",
+      next: "Next",
     },
   },
   InviteLegacyUsers: {

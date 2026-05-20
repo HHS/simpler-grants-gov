@@ -29,7 +29,7 @@ SOAP_URI =
 For cert and key use awk command to replace newlines
 `awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;} bps_grantors.crt`
 `awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;} bps_grantors.key`
-May need to run `poetry install` to update command
+May need to run `uv sync` to update command
 To run use: `make validate-simpler-endpoints``
 """
 
@@ -252,7 +252,7 @@ def validate_grantors_get_application_zip_request(soap_context: ValidateSoapCont
     # The xml namespaces here do not need to be cleaned because there are no
     # blank namepsaces to default to the wrong url here
     validate_response_xml(resp.content, "GetApplicationZipResponse", soap_context)
-    print("Validation: GetApplicationZip is validated")
+    logger.info("Validation: GetApplicationZip is validated")
 
 
 def validate_grantors_get_submission_list_expanded_request(
@@ -262,7 +262,7 @@ def validate_grantors_get_submission_list_expanded_request(
     assert resp.status_code == 200
     fixed_bytes = clean_xml_namespaces(resp.content)
     validate_response_xml(fixed_bytes, "GetSubmissionListExpandedResponse", soap_context)
-    print("Validation: GetSubmissionListExpanded is validated")
+    logger.info("Validation: GetSubmissionListExpanded is validated")
 
 
 def validate_confirm_application_delivery_request(
@@ -272,7 +272,7 @@ def validate_confirm_application_delivery_request(
     assert resp.status_code == 200
     fixed_bytes = clean_xml_namespaces(resp.content)
     validate_response_xml(fixed_bytes, "ConfirmApplicationDeliveryResponse", soap_context)
-    print("Validation: ConfirmApplicationDelivery is validated")
+    logger.info("Validation: ConfirmApplicationDelivery is validated")
 
 
 def validate_update_application_info_request(
@@ -282,7 +282,7 @@ def validate_update_application_info_request(
     assert resp.status_code == 200
     fixed_bytes = clean_xml_namespaces(resp.content)
     validate_response_xml(fixed_bytes, "UpdateApplicationInfoResponse", soap_context)
-    print("Validation: UpdateApplicationInfo is validated")
+    logger.info("Validation: UpdateApplicationInfo is validated")
 
 
 def get_credentials(stack: ExitStack) -> tuple:

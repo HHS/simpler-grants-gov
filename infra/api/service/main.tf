@@ -198,13 +198,15 @@ module "service" {
   mtls_certificate_arn      = local.service_config.mtls_domain_name != null ? data.aws_acm_certificate.mtls_cert[0].arn : null
 
 
-  fargate_cpu              = local.service_config.cpu
-  fargate_memory           = local.service_config.memory
-  desired_instance_count   = local.service_config.desired_instance_count
-  enable_command_execution = local.service_config.enable_command_execution
-  max_capacity             = local.service_config.instance_scaling_max_capacity
-  min_capacity             = local.service_config.instance_scaling_min_capacity
-  enable_autoscaling       = true
+  fargate_cpu                   = local.service_config.cpu
+  fargate_memory                = local.service_config.memory
+  desired_instance_count        = local.service_config.desired_instance_count
+  enable_command_execution      = local.service_config.enable_command_execution
+  max_capacity                  = local.service_config.instance_scaling_max_capacity
+  min_capacity                  = local.service_config.instance_scaling_min_capacity
+  scaling_target_cpu_percent    = local.service_config.instance_scaling_cpu_target
+  scaling_target_memory_percent = local.service_config.instance_scaling_memory_target
+  enable_autoscaling            = true
 
   aws_services_security_group_id = data.aws_security_groups.aws_services.ids[0]
 
@@ -244,6 +246,7 @@ module "service" {
     # local.identity_provider_environment_variables,
     local.notifications_environment_variables,
     local.sqs_environment_variables,
+    local.file_scan_cache_environment_variables,
     local.service_config.extra_environment_variables,
   )
 
@@ -252,7 +255,8 @@ module "service" {
   extra_policies = merge(
     {
       # storage_access = module.storage.access_policy_arn
-      sqs_access = module.sqs_queue.access_policy_arn
+      sqs_access           = module.sqs_queue.access_policy_arn
+      file_scan_cache_read = module.file_scan_cache.read_access_policy_arn
     },
     module.app_config.enable_identity_provider ? {
       # identity_provider_access = module.identity_provider_client[0].access_policy_arn,

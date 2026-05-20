@@ -1,4 +1,4 @@
-FROM ghcr.io/hhs/python-base-image:5799799@sha256:2f4311cdd515ea06dbbbfe337dc09ede70d022e178cb9989caff9cc174a5b009 AS base
+FROM ghcr.io/hhs/python-base-image:9690ede@sha256:c30c2e08a241c92d8d5398713f51cb230325f215cdc0df53b94afe5e513d6d1a AS base
 
 ARG RUN_UID
 ARG RUN_USER
@@ -12,36 +12,36 @@ RUN : "${RUN_USER:?RUN_USER and RUN_UID need to be set and non-empty.}" && : "${
       grep -Eq "^${RUN_USER}:" /etc/group || groupadd -g "${RUN_UID}" "${RUN_USER}"; \
       grep -Eq "^${RUN_USER}:" /etc/passwd || useradd -l -M -s /bin/bash -u "${RUN_UID}" -g "${RUN_USER}" "${RUN_USER}"; \
     fi && \
-    mkdir -p "/home/${RUN_USER}" /analytics /analytics/tmp /var/spool/mail /tmp /var/tmp /usr/tmp && \
-    chown -R "${RUN_UID}:${RUN_UID}" "/home/${RUN_USER}" /analytics /analytics/tmp && \
+    mkdir -p "/home/${RUN_USER}" /analytics /analytics/tmp /var/spool/mail /tmp /var/tmp /usr/tmp /opt/venv && \
+    chown -R "${RUN_UID}:${RUN_UID}" "/home/${RUN_USER}" /analytics /analytics/tmp /opt/venv && \
     chmod 700 /analytics/tmp && \
-    chmod 1777 /tmp /var/tmp /usr/tmp
+    chmod 1777 /tmp /var/tmp /usr/tmp /opt/venv
 
 # Set PYTHONPATH so that the tests can find the source code.
 ENV PYTHONPATH="/analytics/src/:$PYTHONPATH"
 
 WORKDIR /analytics
 
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml uv.lock ./
 
 RUN rm -rf /analytics/.venv || true
-
-ENV POETRY_VIRTUALENVS_IN_PROJECT=true
-ENV VIRTUALENV_ALWAYS_COPY=1
-ENV VIRTUALENV_APP_DATA="/tmp"
 
 COPY src /analytics/src
 COPY newrelic.ini /analytics/newrelic.ini
 COPY README.md /analytics/README.md
-COPY config.py /analytics/config.py
+
+# Disable dev dependencies in UV sync
+ENV UV_NO_DEV=1
+# Compile python to *.pyc files for performance
+ENV UV_COMPILE_BYTECODE=1
 
 # Install dependencies and build the application wheel
 # Clean up build artifacts and caches in a single layer to reduce image size
 RUN PY_MM=$(cat /tmp/py_version.txt) && \
-    /usr/local/bin/python"${PY_MM}" -m poetry install --only main --no-root && \
-    /usr/local/bin/python"${PY_MM}" -m poetry build --format wheel && \
-    /analytics/.venv/bin/pip install --no-cache-dir dist/simpler_grants_gov_analytics-0.1.0-py3-none-any.whl && \
-    /analytics/.venv/bin/python -m pip install --no-cache-dir "virtualenv>=20.35.3" && \
+    uv sync --locked --no-dev && \
+    uv build --wheel && \
+    uv pip install --no-cache-dir dist/simpler_grants_gov_analytics-0.1.0-py3-none-any.whl && \
+    uv pip install --no-cache-dir "virtualenv>=20.35.3" && \
     SITE_BASE="/analytics/.venv/lib/python${PY_MM}/site-packages" && \
     mkdir -p "${SITE_BASE}/src" && \
     cp "/analytics/newrelic.ini" "${SITE_BASE}/src/newrelic.ini" && \
@@ -63,6 +63,14 @@ RUN PY_MM=$(cat /tmp/py_version.txt) && \
 FROM base AS dev
 ARG RUN_USER
 
+# We want dev dependencies in the dev image
+ENV UV_NO_DEV=0
+# In dev, prefer external venv to avoid mutating release venv
+ENV VIRTUAL_ENV=/opt/venv
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+# Place entry points in the environment at the front of the path
+ENV PATH="/opt/venv/bin:$PATH"
+
 # Disable Python optimization to preserve docstrings required by jsonpath_ng
 # https://github.com/h2non/jsonpath-ng?tab=readme-ov-file#special-note-about-ply-and-docstrings
 ENV PYTHONOPTIMIZE=0
@@ -71,15 +79,13 @@ ENV TMPDIR="/tmp"
 USER ${RUN_USER}
 WORKDIR /analytics
 
-ENV POETRY_VIRTUALENVS_IN_PROJECT=false
-
-COPY pyproject.toml poetry.lock ./
-
-RUN poetry config virtualenvs.in-project false && poetry env use python
-# Install all dependencies including dev dependencies
-RUN poetry install --no-root --with dev
+COPY pyproject.toml uv.lock ./
 
 COPY . /analytics
+
+# Install all dependencies including dev dependencies
+RUN uv venv /opt/venv && uv sync --locked --all-groups
+
 
 #---------
 # Release
@@ -99,13 +105,15 @@ COPY --from=base /tmp/py_version.txt /tmp/py_version.txt
 COPY Makefile /analytics/Makefile
 COPY config /analytics/config
 
-# Copy pyproject.toml and src for poetry run support
+# Copy pyproject.toml and src for uv run support
 COPY pyproject.toml /analytics/pyproject.toml
 COPY src /analytics/src
 
 ENV PATH="/analytics/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
     HOST=0.0.0.0 \
     TMPDIR="/tmp" \
+    UV_CACHE_DIR="/tmp/.cache/uv" \
+    UV_NO_SYNC=1 \
     SSL_CERT_FILE="/etc/pki/tls/certs/ca-bundle.crt" \
     SSL_CERT_DIR="/etc/pki/tls/certs" \
     PYTHONOPTIMIZE=0

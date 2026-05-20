@@ -102,12 +102,13 @@ The token you receive can then be set to the X-SGG-Token header for authenticati
 
 @user_blueprint.get("/login")
 @user_blueprint.doc(responses=[302], description=LOGIN_DESCRIPTION)
+@user_blueprint.input(user_schemas.UserLoginSchema, location="query")
 @with_login_redirect_error_handler()
 @flask_db.with_db_session()
-def user_login(db_session: db.Session) -> flask.Response:
+def user_login(db_session: db.Session, query_data: dict) -> flask.Response:
     logger.info("GET /v1/users/login")
     with db_session.begin():
-        redirect_uri = get_login_gov_redirect_uri(db_session)
+        redirect_uri = get_login_gov_redirect_uri(query_data, db_session)
 
     return response.redirect_response(redirect_uri)
 

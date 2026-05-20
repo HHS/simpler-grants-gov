@@ -508,14 +508,20 @@ const getFieldListConfig = ({
       };
     },
   );
+
   const fieldListValue =
     formData && typeof formData === "object" && !Array.isArray(formData)
       ? (formData as Record<string, unknown>)[uiFieldObject.name]
       : undefined;
+
   const requiredFields = getFieldListRequiredFields({
     formSchema,
     fieldListName: uiFieldObject.name,
   });
+
+  const fieldListSchema = formSchema.properties?.[uiFieldObject.name] as
+    | RJSFSchema
+    | undefined;
 
   return {
     type: "FieldList",
@@ -530,6 +536,8 @@ const getFieldListConfig = ({
       label: uiFieldObject.label,
       description: uiFieldObject.description,
       name: uiFieldObject.name,
+      minItems: fieldListSchema?.minItems,
+      maxItems: fieldListSchema?.maxItems,
       groupDefinition,
       rawErrors: errors ?? [],
       requiredFields,

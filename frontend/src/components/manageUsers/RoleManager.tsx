@@ -1,6 +1,7 @@
 "use client";
 
 import { useClientFetch } from "src/hooks/useClientFetch";
+import { LabelValueOption } from "src/types/generalTypes";
 
 import { useTranslations } from "next-intl";
 import { useRef, useState, type ChangeEvent } from "react";
@@ -13,16 +14,11 @@ import {
 
 import { RoleChangeModal } from "./RoleChangeModal";
 
-interface RoleOption {
-  value: string;
-  label: string;
-}
-
 interface RoleManagerProps {
   organizationId: string;
   userId: string;
   currentRoleId: string;
-  roleOptions: RoleOption[];
+  roleOptions: LabelValueOption[];
   disabled?: boolean;
 }
 
