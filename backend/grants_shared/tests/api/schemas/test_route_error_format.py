@@ -9,7 +9,7 @@ import dataclasses
 
 import pytest
 from apiflask import APIBlueprint, APIFlask
-from lib.schema_validation_utils import (
+from test_util.schema_validation_utils import (
     FieldTestSchema,
     get_expected_validation_errors,
     get_invalid_field_test_schema_req,

@@ -1,7 +1,7 @@
 import inspect
 
 import pytest
-from lib.schema_validation_utils import (
+from test_util.schema_validation_utils import (
     DummySchema,
     EnumA,
     EnumB,

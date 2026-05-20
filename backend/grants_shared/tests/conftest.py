@@ -1,7 +1,7 @@
 import uuid
 
 import _pytest.monkeypatch
-import lib.db_testing as db_testing
+import test_util.db_testing as db_testing
 import pytest
 
 import grants_shared.adapters.db as db

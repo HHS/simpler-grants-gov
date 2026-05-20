@@ -4,7 +4,7 @@ import time
 
 import pytest
 from flask import Flask
-from lib.assertions import assert_dict_contains
+from test_util.assertions import assert_dict_contains
 
 import grants_shared.logs.flask_logger as flask_logger
 
