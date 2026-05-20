@@ -68,6 +68,8 @@ resource "aws_iam_role_policy" "scanner_s3" {
 }
 
 resource "aws_cloudwatch_log_group" "scanner" {
+  # checkov:skip=CKV_AWS_158:Lambda logs contain only scan outcomes — AWS-managed encryption is sufficient
+  # checkov:skip=CKV_AWS_338:30 days is enough for Lambda diagnostic logs;
   name              = local.scanner_log_group
   retention_in_days = 30
 }

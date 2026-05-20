@@ -1,4 +1,9 @@
+# freshclam pulls signatures from the public ClamAV CDN (database.clamav.net),
+# which has no stable IP range; the scanner reaches S3 via NAT. Outbound to
+# 0.0.0.0/0 is required and matches the pattern in modules/service/networking.tf.
+# trivy:ignore:AVD-AWS-0104
 resource "aws_security_group" "lambda" {
+  # checkov:skip=CKV_AWS_382:Egress to ClamAV CDN (no stable IP range) and S3 via NAT is required
   name        = "${var.name}-lambda"
   description = "ClamAV scanner and freshclam Lambdas"
   vpc_id      = var.vpc_id
@@ -27,6 +32,8 @@ resource "aws_security_group" "efs" {
 }
 
 resource "aws_efs_file_system" "clamav" {
+  # checkov:skip=CKV_AWS_184:Stores the public ClamAV signature DB — AWS-managed encryption is sufficient
+  # checkov:skip=CKV2_AWS_18:DB is fully regenerable by the freshclam Lambda; backups add cost for no benefit
   encrypted = true
 
   lifecycle_policy {

@@ -38,6 +38,8 @@ resource "aws_iam_role_policy" "freshclam_efs" {
 }
 
 resource "aws_cloudwatch_log_group" "freshclam" {
+  # checkov:skip=CKV_AWS_158:Lambda logs contain only signature-refresh outcomes — AWS-managed encryption is sufficient
+  # checkov:skip=CKV_AWS_338:30 days is enough for Lambda diagnostic logs;
   name              = local.freshclam_log_group
   retention_in_days = 30
 }
