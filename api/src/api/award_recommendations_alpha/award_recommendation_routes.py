@@ -8,6 +8,7 @@ from src.api.award_recommendations_alpha.award_recommendation_blueprint import (
     award_recommendation_blueprint,
 )
 from src.api.award_recommendations_alpha.award_recommendation_schemas import (
+    AwardRecommendationAttachmentDeleteResponseSchema,
     AwardRecommendationAuditRequestSchema,
     AwardRecommendationAuditResponseSchema,
     AwardRecommendationCreateRequestSchema,
@@ -34,6 +35,9 @@ from src.services.award_recommendations.create_award_recommendation import (
 )
 from src.services.award_recommendations.create_award_recommendation_risk import (
     create_award_recommendation_risk,
+)
+from src.services.award_recommendations.delete_award_recommendation_attachment import (
+    delete_award_recommendation_attachment,
 )
 from src.services.award_recommendations.delete_award_recommendation_risk import (
     delete_award_recommendation_risk,
@@ -471,6 +475,46 @@ def award_recommendation_risk_delete(
 
         delete_award_recommendation_risk(
             db_session, user, award_recommendation_id, award_recommendation_risk_id
+        )
+
+    return response.ApiResponse(message="Success", data=None)
+
+
+@award_recommendation_blueprint.delete(
+    "/award-recommendations/<uuid:award_recommendation_id>/attachments/<uuid:award_recommendation_attachment_id>"
+)
+@award_recommendation_blueprint.output(AwardRecommendationAttachmentDeleteResponseSchema)
+@award_recommendation_blueprint.doc(
+    summary="Delete Award Recommendation Attachment",
+    description="Soft delete an attachment for an award recommendation.",
+    responses=[200, 401, 403, 404],
+)
+@award_recommendation_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+@flask_db.with_db_session()
+def award_recommendation_attachment_delete(
+    db_session: db.Session,
+    award_recommendation_id: uuid.UUID,
+    award_recommendation_attachment_id: uuid.UUID,
+) -> response.ApiResponse:
+    add_extra_data_to_current_request_logs(
+        {
+            "award_recommendation_id": award_recommendation_id,
+            "award_recommendation_attachment_id": award_recommendation_attachment_id,
+        }
+    )
+    logger.info(
+        "DELETE /alpha/award-recommendations/:award_recommendation_id/attachments/:award_recommendation_attachment_id"
+    )
+
+    with db_session.begin():
+        user = jwt_or_api_user_key_multi_auth.get_user()
+        db_session.add(user)
+
+        delete_award_recommendation_attachment(
+            db_session,
+            user,
+            award_recommendation_id,
+            award_recommendation_attachment_id,
         )
 
     return response.ApiResponse(message="Success", data=None)
