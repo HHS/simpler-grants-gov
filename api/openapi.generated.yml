@@ -13574,10 +13574,6 @@ components:
       required:
       - is_reviewed
   securitySchemes:
-    ApiUserKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
     ApiJwtAuth:
       type: apiKey
       in: header
@@ -13586,4 +13582,8 @@ components:
       type: apiKey
       in: header
       name: X-SGG-Internal-Token
+    ApiUserKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
 
