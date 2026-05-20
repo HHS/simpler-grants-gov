@@ -3,7 +3,7 @@ import uuid
 from abc import abstractmethod
 
 from src.adapters import db
-from src.adapters.aws.pinpoint_adapter import send_pinpoint_email_raw
+from src.adapters.aws.ses_adapter import send_ses_email
 from src.db.models.user_models import UserNotificationLog
 from src.task.notifications import constants
 from src.task.notifications.config import EmailNotificationConfig, get_email_config
@@ -47,7 +47,7 @@ class BaseNotificationTask(Task):
             trace_id = str(uuid.uuid4())
             logger.info(
                 "Sending notification to user",
-                extra={"user_id": user_notification.user_id, "pinpoint_trace_id": trace_id},
+                extra={"user_id": user_notification.user_id, "ses_trace_id": trace_id},
             )
             notification_log = UserNotificationLog(
                 user_notification_log_id=uuid.uuid4(),
@@ -76,11 +76,11 @@ class BaseNotificationTask(Task):
 
                     return
 
-                response = send_pinpoint_email_raw(
+                response = send_ses_email(
                     to_address=user_notification.user_email,
                     subject=user_notification.subject,
                     message=user_notification.content,
-                    app_id=self.notification_config.app_id,
+                    from_email=self.notification_config.from_email,
                     trace_id=trace_id,
                 )
 
@@ -92,19 +92,15 @@ class BaseNotificationTask(Task):
                         "user_id": user_notification.user_id,
                         "notification_reason": user_notification.notification_reason,
                         "notification_log_id": notification_log.user_notification_log_id,
-                        "pinpoint_delivery_status": (
+                        "ses_delivery_status": (
                             email_response.delivery_status if email_response else None
                         ),
-                        "pinpoint_message_id": (
-                            email_response.message_id if email_response else None
-                        ),
-                        "pinpoint_status_code": (
-                            email_response.status_code if email_response else None
-                        ),
-                        "pinpoint_status_message": (
+                        "ses_message_id": (email_response.message_id if email_response else None),
+                        "ses_status_code": (email_response.status_code if email_response else None),
+                        "ses_status_message": (
                             email_response.status_message if email_response else None
                         ),
-                        "pinpoint_trace_id": trace_id,
+                        "ses_trace_id": trace_id,
                     },
                 )
                 notification_log.notification_sent = True
@@ -119,7 +115,7 @@ class BaseNotificationTask(Task):
                     extra={
                         "user_id": user_notification.user_id,
                         "notification_reason": user_notification.notification_reason,
-                        "pinpoint_trace_id": trace_id,
+                        "ses_trace_id": trace_id,
                     },
                 )
                 self.increment(Metrics.FAILED_TO_SEND)

@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import pytest
 
-from src.adapters.aws.pinpoint_adapter import _clear_mock_responses, _get_mock_responses
+from src.adapters.aws.ses_adapter import _clear_mock_responses, _get_mock_responses
 from src.constants.lookup_constants import Privilege, RoleType
 from src.db.models.entity_models import LinkOrganizationInvitationToRole, OrganizationInvitation
 from src.task.notifications.config import _reset_email_config
@@ -57,7 +57,7 @@ class TestCreateOrganizationInvitation:
         self, client, db_session, enable_factory_create, admin_role, member_role, monkeypatch
     ):
         """Should successfully create invitation with single role"""
-        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+        monkeypatch.setenv("AWS_SES_FROM_EMAIL", "notifications@example.com")
         _clear_mock_responses()
 
         # Create admin user in organization
@@ -112,9 +112,7 @@ class TestCreateOrganizationInvitation:
         mock_responses = _get_mock_responses()
         assert len(mock_responses) == 1
         request = mock_responses[0][0]
-        assert request["MessageRequest"]["Addresses"] == {
-            "newuser@example.com": {"ChannelType": "EMAIL"}
-        }
+        assert request["Destination"]["ToAddresses"] == ["newuser@example.com"]
 
     def test_create_invitation_multiple_roles_success(
         self, client, db_session, enable_factory_create, admin_role, member_role, limited_role
@@ -600,7 +598,7 @@ class TestCreateOrganizationInvitation:
         self, client, db_session, enable_factory_create, admin_role, member_role, monkeypatch
     ):
         """Should send invitation email with proper content"""
-        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+        monkeypatch.setenv("AWS_SES_FROM_EMAIL", "notifications@example.com")
         monkeypatch.setenv("FRONTEND_BASE_URL", "http://localhost:3000")
         _reset_email_config()  # Reset singleton to pick up new env vars
         _clear_mock_responses()
@@ -625,9 +623,7 @@ class TestCreateOrganizationInvitation:
         assert len(mock_responses) == 1
 
         request = mock_responses[0][0]
-        email_config = request["MessageRequest"]["MessageConfiguration"]["EmailMessage"][
-            "SimpleEmail"
-        ]
+        email_config = request["Content"]["Simple"]
 
         # Verify exact subject
         subject = email_config["Subject"]["Data"]
@@ -637,7 +633,7 @@ class TestCreateOrganizationInvitation:
         )
 
         # Verify exact HTML content
-        html_content = email_config["HtmlPart"]["Data"]
+        html_content = email_config["Body"]["Html"]["Data"]
         expected_html = f"""
 <html>
 <body>
@@ -668,14 +664,14 @@ class TestCreateOrganizationInvitation:
         self, client, db_session, enable_factory_create, admin_role, member_role, monkeypatch
     ):
         """Should create invitation even if email sending fails"""
-        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+        monkeypatch.setenv("AWS_SES_FROM_EMAIL", "notifications@example.com")
 
         # Create admin user in organization
         admin_user, organization, token = create_user_in_org(db_session=db_session, role=admin_role)
 
-        # Mock send_pinpoint_email_raw to raise an exception
+        # Mock send_ses_email to raise an exception
         with patch(
-            "src.services.organizations_v1.create_organization_invitation.send_pinpoint_email_raw"
+            "src.services.organizations_v1.create_organization_invitation.send_ses_email"
         ) as mock_send:
             mock_send.side_effect = Exception("Email service unavailable")
 
@@ -704,7 +700,7 @@ class TestCreateOrganizationInvitation:
             )
             assert invitation is not None
 
-            # Verify send_pinpoint_email_raw was called (and failed)
+            # Verify send_ses_email was called (and failed)
             assert mock_send.called
 
     def test_create_invitation_generates_trace_id_for_email(
@@ -717,8 +713,8 @@ class TestCreateOrganizationInvitation:
         monkeypatch,
         caplog,
     ):
-        """Should generate a trace_id for Pinpoint and log it"""
-        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+        """Should generate a trace_id for SES and log it"""
+        monkeypatch.setenv("AWS_SES_FROM_EMAIL", "notifications@example.com")
         _clear_mock_responses()
 
         # Create admin user in organization
@@ -740,12 +736,15 @@ class TestCreateOrganizationInvitation:
         mock_responses = _get_mock_responses()
         assert len(mock_responses) == 1
 
-        request = mock_responses[0][0]
-        pinpoint_trace_id = request["MessageRequest"]["TraceId"]
+        # SES doesn't include the trace_id in the request payload; the adapter
+        # threads it through to the response result instead.
+        _, response = mock_responses[0]
+        result = response.results["newuser@example.com"]
+        ses_trace_id = result.trace_id
 
         # Verify we got a trace_id (should be a UUID)
-        assert pinpoint_trace_id is not None
-        assert len(pinpoint_trace_id) > 0
+        assert ses_trace_id is not None
+        assert len(ses_trace_id) > 0
 
         # Verify the trace_id appears in the logs
         log_records = [r for r in caplog.records if "Sending invitation email" in r.message]
@@ -753,5 +752,5 @@ class TestCreateOrganizationInvitation:
 
         log_record = log_records[0]
 
-        # Verify the pinpoint_trace_id in the log matches what was sent to Pinpoint
-        assert log_record.__dict__.get("pinpoint_trace_id") == pinpoint_trace_id
+        # Verify the ses_trace_id in the log matches what the adapter generated
+        assert log_record.__dict__.get("ses_trace_id") == ses_trace_id

@@ -6,7 +6,7 @@ import pytest
 
 import tests.src.db.models.factories as factories
 from src.adapters import db
-from src.adapters.aws.pinpoint_adapter import _clear_mock_responses
+from src.adapters.aws.ses_adapter import _clear_mock_responses
 from src.constants.lookup_constants import (
     ApplicantType,
     FundingCategory,
@@ -215,7 +215,7 @@ TOPAZ_STATUS = build_opp_and_version(
 class TestOpportunityNotification:
     @pytest.fixture
     def set_env_var_for_email_notification_config(self, monkeypatch):
-        monkeypatch.setenv("AWS_PINPOINT_APP_ID", "test-app-id")
+        monkeypatch.setenv("AWS_SES_FROM_EMAIL", "notifications@example.com")
         monkeypatch.setenv("FRONTEND_BASE_URL", "http://testhost:3000")
 
     @pytest.fixture(autouse=True)
