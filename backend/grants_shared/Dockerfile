@@ -23,7 +23,7 @@ COPY pyproject.toml uv.lock ./
 
 RUN rm -rf /grants_shared/.venv || true
 
-COPY src /grants_shared/src
+COPY . /grants_shared
 
 # Disable dev dependencies in UV sync
 ENV UV_NO_DEV=1
@@ -34,11 +34,10 @@ ENV UV_NO_SYNC=1
 
 RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
     uv sync --locked --no-dev && \
-    uv build --wheel && \
     SITE_BASE="/grants_shared/.venv/lib/python${PY_MM}/site-packages" && \
     mkdir -p "${SITE_BASE}/src" && \
     (find /tmp -mindepth 1 ! -name 'py_version.txt' -delete 2>/dev/null || true) && \
-    (rm -rf /root/.cache "/home/${RUN_USER}/.cache" /var/tmp/* /grants_shared/dist /grants_shared/src || true)
+    (rm -rf /root/.cache "/home/${RUN_USER}/.cache" /var/tmp/* /grants_shared/src || true)
 
 
 #==============================================
@@ -63,13 +62,11 @@ ENV TMPDIR="/tmp"
 USER ${RUN_USER}
 WORKDIR /grants_shared
 
-COPY pyproject.toml uv.lock ./
-
-COPY . /grants_shared
-
 # Install all dependencies including dev dependencies
 RUN uv venv /opt/venv && uv sync --locked --all-groups
 
+# TODO - is this safe to be here? Verify dependencies are non-dev only
+RUN uv build --wheel
 
 ##########
 # NOTE
