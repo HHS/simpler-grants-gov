@@ -322,58 +322,6 @@ def _build_competition_with_all_forms(forms: list[Form]) -> Competition:
     return competition
 
 
-def _build_seeded_competition_for_form(
-    db_session: db.Session,
-    form: Form,
-    *,
-    opportunity_id: uuid.UUID,
-    opportunity_number: str,
-    opportunity_title: str,
-    competition_id: uuid.UUID,
-    competition_title: str,
-    is_required: bool = False,
-    open_to_applicants: list[CompetitionOpenToApplicant] | None = None,
-) -> Competition:
-
-    if open_to_applicants is None:
-        open_to_applicants = [
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ]
-
-    competition = fetch_competition(db_session, competition_id)
-
-    if not competition:
-        competition = factories.CompetitionFactory.create(
-            competition_id=competition_id,
-            opportunity__opportunity_id=opportunity_id,
-            opportunity__opportunity_number=opportunity_number,
-            opportunity__opportunity_title=opportunity_title,
-            competition_title=competition_title,
-            competition_forms=[],
-            open_to_applicants=open_to_applicants,
-            with_instruction=True,
-        )
-
-    if not does_competition_form_exist(
-        db_session,
-        competition.competition_id,
-        form.form_id,
-    ):
-        factories.CompetitionFormFactory.create(
-            competition=competition,
-            form=form,
-            is_required=is_required,
-        )
-
-    logger.info(
-        f"Created seeded competition '{competition_title}' "
-        f"for opportunity '{opportunity_number}'"
-    )
-
-    return competition
-
-
 # Build custom competitions 8037 for testing 7953
 def does_competition_form_exist(db_session, competition_id, form_id):
     return (
@@ -472,26 +420,9 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             factories.CompetitionFormFactory.create(
                 competition=competition, form=sflll_form, is_required=False
             )
-
         logger.info(
             f"Created Apply Happy Path competition '{comp_title}' for opportunity '{opp_num}' - http://localhost:3000/opportunity/{competition.opportunity_id}"
         )
-
-    # CT02 isolated scenario for testing Print Form
-    _build_seeded_competition_for_form(
-        db_session,
-        forms["Project_AbstractSummary_2_0"],
-        opportunity_id=uuid.UUID("f21dc67e-84d8-4e2b-ae3e-2d68f83957db"),
-        opportunity_number="TEST-PRINT-ORG-IND-ON01",
-        opportunity_title="TEST-PRINT-ORG-IND-OT01",
-        competition_id=uuid.UUID("9e3b6fb9-85a7-4b71-9f8f-2ecb31d9e7f4"),
-        competition_title="TEST-PRINT-ORG-IND-CT01",
-        is_required=True,
-        open_to_applicants=[
-            CompetitionOpenToApplicant.INDIVIDUAL,
-            CompetitionOpenToApplicant.ORGANIZATION,
-        ],
-    )
 
 
 def _build_competitions(db_session: db.Session, forms_map: dict[str, Form]) -> CompetitionContainer:

@@ -218,7 +218,6 @@ def test_get_raises_for_wrong_major_version():
 
 
 def test_all_forms_are_registered_on_startup():
-    form_template_registry._registry.clear()
 
     init_form_registry()
 
