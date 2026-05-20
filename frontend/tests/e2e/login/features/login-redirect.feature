@@ -1,6 +1,6 @@
 # @featureArea Authentication
 # @specFile e2e/login/specs/login-redirect.spec.ts
-# @debugNote Mirrors e2e/login/specs/login.spec.ts
+# @debugNote Redirected to "/grantor/opportunities"
 
 Feature: Login page redirect behavior
   As a user
