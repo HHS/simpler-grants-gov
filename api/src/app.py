@@ -77,9 +77,7 @@ class EndpointConfig(PydanticBaseEnvConfig):
         False, alias="ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS"
     )
 
-    enable_competition_endpoints: bool = Field(
-        False, alias="ENABLE_COMPETITION_ENDPOINTS"
-    )
+    enable_competition_endpoints: bool = Field(False, alias="ENABLE_COMPETITION_ENDPOINTS")
 
     # Do not ever change this to True, this controls endpoints we only
     # want to exist for local development.
