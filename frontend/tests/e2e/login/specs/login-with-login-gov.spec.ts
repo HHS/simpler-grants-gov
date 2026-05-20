@@ -1,5 +1,5 @@
 /**
- * @feature Login.gov MFA Authentication
+ * @feature Sign in with Login.gov
  * @featureFile e2e/login/features/login-with-login-gov.feature
  * @scenario Login.gov authentication with MFA
  */
