@@ -4,7 +4,7 @@ import jsonref
 import pytest
 
 from src.db.models.competition_models import Form
-from src.form_schema.forms import _ALL_FORMS  # noqa: F401 ; triggers registration at import time
+from src.form_schema.forms import _ALL_FORMS
 from src.form_schema.registry.form_template_registry import (
     FormTemplateKey,
     FormTemplateRegistry,
