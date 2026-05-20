@@ -30,7 +30,7 @@ Feature: Login page redirect behavior
     Then I am redirected to the home page
 
   Scenario: should display "Redirecting..." text while redirecting
-    Given I have stored "/opportunities" as the login redirect
+    Given I have stored "/grantor/opportunities" as the login redirect
     When I open the login page
     Then I see "Redirecting..."
     And I am redirected to "/opportunities"
