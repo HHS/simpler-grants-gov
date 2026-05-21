@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { identity } from "lodash";
 import * as useClientFetchModule from "src/hooks/useClientFetch";
 
 import { AwardRecommendationAttachments } from "./AwardRecommendationAttachments";
@@ -7,6 +8,9 @@ jest.mock("src/hooks/useClientFetch");
 jest.mock("src/components/Spinner", () => ({
   __esModule: true,
   default: () => <div data-testid="spinner">Loading...</div>,
+}));
+jest.mock("next-intl", () => ({
+  useTranslations: () => identity,
 }));
 
 describe("AwardRecommendationAttachments", () => {
@@ -46,11 +50,7 @@ describe("AwardRecommendationAttachments", () => {
       clientFetch: mockFetch,
     });
     render(<AwardRecommendationAttachments awardRecommendationId="test-id" />);
-    expect(
-      await screen.findByText(
-        "Unable to load or update risks. Please try again.",
-      ),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("errorMessage")).toBeInTheDocument();
     expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
     expect(screen.getByTestId("simpler-alert")).toBeInTheDocument();
     expect(consoleErrorSpy).toHaveBeenCalled();
@@ -68,9 +68,7 @@ describe("AwardRecommendationAttachments", () => {
       render(
         <AwardRecommendationAttachments awardRecommendationId="test-id" />,
       );
-      expect(
-        await screen.findByText("Specific risks & recommended conditions"),
-      ).toBeInTheDocument();
+      expect(await screen.findByText("risksHeading")).toBeInTheDocument();
       expect(screen.queryByText("Risk 1")).not.toBeInTheDocument();
     });
 
@@ -149,7 +147,7 @@ describe("AwardRecommendationAttachments", () => {
         />,
       );
       expect(await screen.findByText("Condition A")).toBeInTheDocument();
-      const actionHeaders = screen.getAllByText("Action");
+      const actionHeaders = screen.getAllByText("action");
       expect(actionHeaders.length).toBeGreaterThan(0);
       expect(
         screen.getByRole("button", { name: "", hidden: true }),
@@ -190,7 +188,7 @@ describe("AwardRecommendationAttachments", () => {
         hidden: true,
       });
       fireEvent.click(popoverButton);
-      const deleteButton = await screen.findByText("Delete");
+      const deleteButton = await screen.findByText("delete");
       fireEvent.click(deleteButton);
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -236,13 +234,9 @@ describe("AwardRecommendationAttachments", () => {
         hidden: true,
       });
       fireEvent.click(popoverButton);
-      const deleteButton = await screen.findByText("Delete");
+      const deleteButton = await screen.findByText("delete");
       fireEvent.click(deleteButton);
-      expect(
-        await screen.findByText(
-          "Unable to load or update risks. Please try again.",
-        ),
-      ).toBeInTheDocument();
+      expect(await screen.findByText("errorMessage")).toBeInTheDocument();
       expect(screen.getByTestId("simpler-alert")).toBeInTheDocument();
       expect(consoleErrorSpy).toHaveBeenCalled();
       consoleErrorSpy.mockRestore();

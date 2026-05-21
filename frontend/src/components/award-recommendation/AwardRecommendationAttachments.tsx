@@ -4,6 +4,7 @@ import { useClientFetch } from "src/hooks/useClientFetch";
 import { PaginationInfo } from "src/types/apiResponseTypes";
 import { AwardRecommendationRisk } from "src/types/awardRecommendationTypes";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Pagination } from "@trussworks/react-uswds";
 
@@ -24,6 +25,7 @@ export const AwardRecommendationAttachments = ({
   awardRecommendationId,
   mode = "view",
 }: AwardRecommendationAttachmentsProps) => {
+  const t = useTranslations("AwardRecommendation.attachments");
   const [risks, setRisks] = useState<AwardRecommendationRisk[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
@@ -74,18 +76,18 @@ export const AwardRecommendationAttachments = ({
 
   // Standard and program terms & conditions table (empty)
   const standardHeaders: TableCellData[] = [
-    { cellData: "Attached document" },
-    { cellData: "Uploaded by" },
-    { cellData: "Upload date" },
+    { cellData: t("attachedDocument") },
+    { cellData: t("uploadedBy") },
+    { cellData: t("uploadDate") },
   ];
   const standardRows: TableCellData[][] = [];
 
   // Risks table
   const risksHeaders: TableCellData[] = [
-    { cellData: "Risk #" },
-    { cellData: "App #" },
-    { cellData: "Condition" },
-    ...(mode === "edit" ? [{ cellData: "Action" }] : []),
+    { cellData: t("riskNumber") },
+    { cellData: t("appNumber") },
+    { cellData: t("condition") },
+    ...(mode === "edit" ? [{ cellData: t("action") }] : []),
   ];
   const risksRows: TableCellData[][] = risks.map(
     (risk: AwardRecommendationRisk) => [
@@ -102,7 +104,7 @@ export const AwardRecommendationAttachments = ({
             if (risk.applications.length === 0) return "-";
             if (risk.applications.length === 1)
               return risk.applications[0].application_submission_number;
-            return `${risk.applications.length} applications`;
+            return `${risk.applications.length} ${t("applications")}`;
           }
           return "-";
         })(),
@@ -140,7 +142,7 @@ export const AwardRecommendationAttachments = ({
                     }}
                     type="button"
                   >
-                    Delete
+                    {t("delete")}
                   </button>
                 </PopoverMenu>
               ),
@@ -152,18 +154,16 @@ export const AwardRecommendationAttachments = ({
 
   // Other supporting documents table (empty)
   const otherHeaders: TableCellData[] = [
-    { cellData: "Attached document" },
-    { cellData: "Uploaded by" },
-    { cellData: "Upload date" },
+    { cellData: t("attachedDocument") },
+    { cellData: t("uploadedBy") },
+    { cellData: t("uploadDate") },
   ];
   const otherRows: TableCellData[][] = [];
 
   return (
     <section className="margin-top-8">
-      <h2>Attachments</h2>
-      <h3 className="margin-bottom-1">
-        Standard and program terms & conditions
-      </h3>
+      <h2>{t("heading")}</h2>
+      <h3 className="margin-bottom-1">{t("standardTermsHeading")}</h3>
       {mode === "edit" ? (
         <div className="bg-base-lighter radius-md padding-y-2 padding-x-3 margin-bottom-2">
           <a
@@ -174,7 +174,7 @@ export const AwardRecommendationAttachments = ({
               /* TODO: implement routing */
             }}
           >
-            Enter terms & conditions
+            {t("enterTermsConditions")}
           </a>
         </div>
       ) : (
@@ -183,14 +183,12 @@ export const AwardRecommendationAttachments = ({
           tableRowData={standardRows}
         />
       )}
-      <h3 className="margin-top-6 margin-bottom-1">
-        Specific risks & recommended conditions
-      </h3>
+      <h3 className="margin-top-6 margin-bottom-1">{t("risksHeading")}</h3>
       {apiError && (
         <SimplerAlert
           alertClick={() => setApiError(false)}
           buttonId="risks-error-alert"
-          messageText="Unable to load or update risks. Please try again."
+          messageText={t("errorMessage")}
           type="error"
         />
       )}
@@ -215,7 +213,7 @@ export const AwardRecommendationAttachments = ({
         aria-disabled={loading}
       />
       <h3 className="margin-top-6 margin-bottom-1">
-        Other supporting documents
+        {t("otherDocumentsHeading")}
       </h3>
       {mode === "edit" ? (
         <div className="bg-base-lighter radius-md padding-y-2 padding-x-3 margin-bottom-2">
@@ -227,7 +225,7 @@ export const AwardRecommendationAttachments = ({
               /* TODO: implement routing */
             }}
           >
-            Enter supporting documents
+            {t("enterSupportingDocuments")}
           </a>
         </div>
       ) : (
