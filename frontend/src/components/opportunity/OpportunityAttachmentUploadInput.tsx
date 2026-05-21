@@ -41,10 +41,10 @@ export function OpportunityAttachmentUploadInput({
 
   const { clientFetch: uploadFetch } = useClientFetch<{
     opportunity_attachment_id: string;
-  }>("upload attachment");
+  }>("Error uploading opportunity attachment");
   const { clientFetch: deleteFetch } = useClientFetch<{
     message: string;
-  }>("delete attachment");
+  }>("Error deleting opportunity attachment");
 
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>(
     initialAttachments.map((attachment) => ({

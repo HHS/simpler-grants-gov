@@ -286,7 +286,6 @@ variable "fargate_memory" {
 variable "network_name" {
   type        = string
   description = "The name of the network within which the service will run"
-
 }
 
 variable "project_name" {
