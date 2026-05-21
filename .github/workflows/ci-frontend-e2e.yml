@@ -358,11 +358,31 @@ jobs:
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build
 
+      - name: Get list of changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v47.0.6
+        with:
+          files: |
+            /frontend/tests/e2e/apply/forms/*.spec.ts
+            /frontend/src/components/applyForm/**
+            /frontend/src/app/[locale]/workspace/applications/[applicationId]/**/*.tsx
+            /api/src/form_schema/forms/**
+            /api/src/form_schema/shared/**
+            /api/src/form_schema/rule_processing/**
+
       - name: Determine test groups to run
         shell: bash
+        env:
+          ANY_CHANGED_FILES: ${{ steps.changed-files.outputs.any_changed }}
         run: |
+          echo "Any apply form files changed?"
+          echo "$ANY_CHANGED_FILES"
           if [[ $GITHUB_EVENT_NAME = "pull_request" ]]; then
-            echo "test_group_tags=@smoke" >> "$GITHUB_ENV"
+            if [[ $ANY_CHANGED_FILES = "false" ]]; then
+              echo "test_group_tags=@smoke" >> "$GITHUB_ENV"
+            else
+              echo "test_group_tags=@smoke|@apply-forms" >> "$GITHUB_ENV"
+            fi
           elif [[ $GITHUB_EVENT_NAME = "push" ]]; then
             echo "test_group_tags=@smoke|@core-regression" >> "$GITHUB_ENV"
           else
