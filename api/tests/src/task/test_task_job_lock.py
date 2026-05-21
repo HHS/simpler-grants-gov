@@ -3,6 +3,7 @@ import uuid
 from datetime import timedelta
 
 import pytest
+from sqlalchemy import delete
 
 import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import JobType
@@ -17,12 +18,17 @@ from src.task.task_job_lock import (
 from tests.src.db.models.factories import JobLockFactory
 
 
+@pytest.fixture
+def clean_job_locks(db_session):
+    db_session.execute(delete(JobLock))
+    db_session.commit()
+    return
+
+
 def test_task_job_lock__does_not_create_a_job_lock_if_enable_job_lock_is_false(
-    monkeypatch_session, db_session, enable_factory_create
+    clean_job_locks, monkeypatch_session, db_session, enable_factory_create
 ):
     monkeypatch_session.setenv("ENABLE_JOB_LOCK", "False")
-    db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
-    db_session.flush()
     with TaskJobLock(db_session, job_type=JobType.SETUP_CERT_USER, lock_duration_minutes=60):
         pass
     job_lock = (
@@ -32,7 +38,7 @@ def test_task_job_lock__does_not_create_a_job_lock_if_enable_job_lock_is_false(
 
 
 def test_task_job_lock_does_not_modify_a_job_lock_if_enable_job_lock_is_false(
-    monkeypatch_session, db_session, enable_factory_create
+    clean_job_locks, monkeypatch_session, db_session, enable_factory_create
 ):
     monkeypatch_session.setenv("ENABLE_JOB_LOCK", "False")
     now = datetime_util.utcnow()
@@ -45,7 +51,7 @@ def test_task_job_lock_does_not_modify_a_job_lock_if_enable_job_lock_is_false(
 
 
 def test_task_job_lock_creates_job_lock_if_one_does_not_exist(
-    monkeypatch_session, db_session, enable_factory_create
+    clean_job_locks, monkeypatch_session, db_session, enable_factory_create
 ):
     monkeypatch_session.setenv("ENABLE_JOB_LOCK", "True")
     with TaskJobLock(db_session, job_type=JobType.SETUP_CERT_USER, lock_duration_minutes=60):
@@ -58,13 +64,12 @@ def test_task_job_lock_creates_job_lock_if_one_does_not_exist(
 
 
 def test_task_job_lock_updates_a_job_lock_if_enable_job_lock_is_true(
-    caplog, monkeypatch_session, db_session, enable_factory_create
+    clean_job_locks, caplog, monkeypatch_session, db_session, enable_factory_create
 ):
     monkeypatch_session.setenv("ENABLE_JOB_LOCK", "True")
     caplog.set_level(logging.INFO)
     now = datetime_util.utcnow()
     old_date = now - timedelta(days=366)
-    db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
     job_lock = JobLockFactory.create(job_type=JobType.SETUP_CERT_USER, updated_at=old_date)
     db_session.commit()
     with TaskJobLock(db_session, job_type=JobType.SETUP_CERT_USER, lock_duration_minutes=60):
@@ -78,12 +83,11 @@ def test_task_job_lock_updates_a_job_lock_if_enable_job_lock_is_true(
 
 
 def test_task_job_lock_handles_when_locked_until_is_in_the_past(
-    monkeypatch_session, db_session, enable_factory_create
+    clean_job_locks, monkeypatch_session, db_session, enable_factory_create
 ):
     monkeypatch_session.setenv("ENABLE_JOB_LOCK", "True")
     now = datetime_util.utcnow()
     old_date = now - timedelta(days=366)
-    db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
     job_lock = JobLockFactory.create(
         job_type=JobType.SETUP_CERT_USER,
         updated_at=old_date,
@@ -100,12 +104,11 @@ def test_task_job_lock_handles_when_locked_until_is_in_the_past(
 
 
 def test_task_job_lock_when_job_lock_locked_until_is_in_the_past(
-    caplog, monkeypatch_session, db_session, enable_factory_create
+    clean_job_locks, caplog, monkeypatch_session, db_session, enable_factory_create
 ):
     monkeypatch_session.setenv("ENABLE_JOB_LOCK", "True")
     now = datetime_util.utcnow()
     old_date = now - timedelta(days=366)
-    db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
     job_lock = JobLockFactory.create(
         job_type=JobType.SETUP_CERT_USER,
         updated_at=old_date,
@@ -122,13 +125,12 @@ def test_task_job_lock_when_job_lock_locked_until_is_in_the_past(
 
 
 def test_task_job_lock_when_is_locked_is_true_and_locked_until_is_in_future_raises_exc(
-    caplog, monkeypatch_session, db_session, enable_factory_create
+    clean_job_locks, caplog, monkeypatch_session, db_session, enable_factory_create
 ):
     monkeypatch_session.setenv("ENABLE_JOB_LOCK", "True")
     caplog.set_level(logging.INFO)
     now = datetime_util.utcnow()
     old_date = now - timedelta(days=366)
-    db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
     job_lock = JobLockFactory.create(
         job_type=JobType.SETUP_CERT_USER,
         updated_at=old_date,
@@ -163,16 +165,15 @@ def test_verify_job_lock_raises_when_locked_by_does_not_match(
 
 
 def test_job_lock_raises_when_lock_deleted_between_enter_and_exit(
-    caplog, db_session, enable_factory_create
+    clean_job_locks, caplog, db_session, enable_factory_create
 ):
     now = datetime_util.utcnow()
     old_date = now - timedelta(days=366)
-    db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
     JobLockFactory.create(job_type=JobType.SETUP_CERT_USER, updated_at=old_date)
     db_session.commit()
     with pytest.raises(TaskJobLockError) as excinfo:  # noqa
         with TaskJobLock(db_session, job_type=JobType.SETUP_CERT_USER, lock_duration_minutes=60):
-            db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
+            db_session.execute(delete(JobLock).where(JobLock.job_type == JobType.SETUP_CERT_USER))
             db_session.flush()
             db_session.commit()
 

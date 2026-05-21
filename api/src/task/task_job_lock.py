@@ -63,7 +63,7 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
         self.job_type = job_type
         self.lock_duration_minutes = lock_duration_minutes
         self.internal_lock_id = uuid.uuid4()
-        self.config = self.get_task_job_lock_config()
+        self.config = TaskJobLockConfig()
         self.extra = {
             "job_type": self.job_type,
             "internal_lock_id": self.internal_lock_id,
@@ -94,7 +94,7 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
                 )
                 raise TaskJobLockIsLockedError
 
-            self.set_job_lock_to_locked(job_lock)
+            job_lock = self.set_job_lock_to_locked(job_lock)
             self.verify_job_lock(job_lock)
 
     def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
@@ -108,10 +108,6 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
                 job_lock = self.get_job_lock()
 
                 if not job_lock:
-                    logger.info(
-                        "JobLock not found",
-                        extra={**self.extra, "success": False, "error": "TaskJobLockNotfoundError"},
-                    )
                     raise TaskJobLockNotFoundError
 
                 job_lock = self.set_job_lock_to_unlocked(job_lock)
@@ -149,9 +145,6 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
         if self.lock_acquired_at is not None:
             return (datetime_util.utcnow() - self.lock_acquired_at).total_seconds()
         return None
-
-    def get_task_job_lock_config(self) -> TaskJobLockConfig:
-        return TaskJobLockConfig()
 
     def verify_job_lock(self, job_lock: JobLock) -> None:
         job_lock = self.refresh_job_lock(job_lock)
