@@ -52,14 +52,6 @@ jobs:
     outputs:
       commit_hash: ${{ steps.get-api-commit-hash.outputs.commit_hash }}
     steps:
-      - name: Troubleshoot shas and refs
-        working-directory: ./
-        env:
-          CLEAN_HEAD_REF: ${{ github.head_ref }}
-        run: |
-          echo "${{ github.event.pull_request.head.sha}}|$CLEAN_HEAD_REF|${{github.ref }}"
-          echo "${{ github.event.repository.full_name }}"
-
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
@@ -82,14 +74,6 @@ jobs:
     outputs:
       commit_hash: ${{ steps.get-frontend-commit-hash.outputs.commit_hash }}
     steps:
-      - name: Troubleshoot shas and refs
-        working-directory: ./
-        env:
-          CLEAN_HEAD_REF: ${{ github.head_ref }}
-        run: |
-          echo "${{ github.event.pull_request.head.sha}}|$CLEAN_HEAD_REF|${{github.ref }}"
-          echo "${{ github.event.repository.full_name }}"
-
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha  || github.head_ref || github.ref }}
@@ -155,7 +139,6 @@ jobs:
       - name: Package node_modules
         run: |
           tar -czf /tmp/node_modules.tar.gz ./node_modules/
-          ls /tmp
 
       - name: Upload node_modules artifact
         uses: actions/upload-artifact@v7
@@ -168,7 +151,6 @@ jobs:
         run: |
           cd ~/.cache/ms-playwright
           tar -czf /tmp/playwright.tar.gz .
-          ls /tmp
 
       - name: Upload Playwright artifact
         uses: actions/upload-artifact@v7
@@ -268,11 +250,7 @@ jobs:
       - name: Expand node_modules
         if: steps.npm-cache.outputs.cache-hit != 'true'
         run: |
-          ls -la .
-          ls -la ./node_modules
           tar -xzf /tmp/node_modules.tar.gz
-          ls -la .
-          ls -la ./node_modules
 
       - uses: actions/cache@v5
         id: playwright-cache
@@ -298,10 +276,6 @@ jobs:
           cd ~
           mkdir -p .cache/ms-playwright
           tar -xzf /tmp/playwright.tar.gz -C ~/.cache/ms-playwright
-
-      - name: Docker images
-        run: |
-          docker image ls
 
       - name: Restore Docker image cached
         id: restore-docker-image-cached
@@ -333,10 +307,6 @@ jobs:
           IMAGE_ID="$(docker image ls -q simpler-grants-gov-api)"
           docker tag "$IMAGE_ID" api-grants-api:latest || true
 
-      - name: Docker images
-        run: |
-          docker image ls
-
       - name: Init API Server for e2e tests
         run: |
           cd ../api
@@ -347,8 +317,6 @@ jobs:
           # Run init first to generate JWT keys in override.env
 
           make init-ci-cd
-
-          ls -a
 
       - name: Start API Server for e2e tests
         run: |
@@ -389,21 +357,6 @@ jobs:
           # Use the 127.0.0.1 url for tests (IPv4 only)
           sed -i 's|^SENDY_API_URL=.*|SENDY_API_URL=http://127.0.0.1:3000|' .env.local
           npm run build
-
-      - name: ls frontend
-        run: |
-          pwd
-          ls -la .
-          echo ====
-          ls -la ./.next
-          echo ======
-          ls -la ./.next/standalone
-          echo ========
-          ls -la ./node_modules/.bin
-
-      - name: Docker images
-        run: |
-          docker image ls
 
       - name: Determine test groups to run
         shell: bash
