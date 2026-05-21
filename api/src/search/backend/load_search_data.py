@@ -2,6 +2,7 @@ import src.adapters.db as db
 import src.adapters.search as search
 from src.adapters.db import flask_db
 from src.adapters.search import flask_opensearch
+from src.constants.lookup_constants import JobType
 from src.search.backend.load_agencies_to_index import LoadAgenciesToIndex
 from src.search.backend.load_opportunities_to_index import LoadOpportunitiesToIndex
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
@@ -13,7 +14,7 @@ from src.task.ecs_background_task import ecs_background_task
 )
 @flask_db.with_db_session()
 @flask_opensearch.with_search_client()
-@ecs_background_task(task_name="load-opportunity-data-opensearch")
+@ecs_background_task(task_name=JobType.LOAD_OPPORTUNITY_DATA_OPENSEARCH)
 def load_opportunity_data(
     search_client: search.SearchClient,
     db_session: db.Session,
@@ -26,7 +27,7 @@ def load_opportunity_data(
 )
 @flask_db.with_db_session()
 @flask_opensearch.with_search_client()
-@ecs_background_task(task_name="load-agency-data-opensearch")
+@ecs_background_task(task_name=JobType.LOAD_AGENCY_DATA_OPENSEARCH)
 def load_agency_data(
     search_client: search.SearchClient,
     db_session: db.Session,
