@@ -134,6 +134,7 @@ bump-minor-version: ## Bump the minor version of the code (eg. 1.0.1 -> 1.1.0)
 
 # TODO - see if there is a way to run this outside docker happily?
 smoke-test-wheel:
+	ls dist
 	docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) uv run --isolated --with dist/*.whl tests/grants_shared/smoke_test.py
 
 # TODO - same here
