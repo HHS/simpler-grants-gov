@@ -86,7 +86,7 @@ resource "aws_lambda_function" "scanner" {
 
   filename         = data.archive_file.scanner.output_path
   source_code_hash = data.archive_file.scanner.output_base64sha256
-  runtime          = "python3.12"
+  runtime          = "python3.14"
   handler          = "scan.lambda_handler"
 
   layers      = [aws_lambda_layer_version.clamav.arn]

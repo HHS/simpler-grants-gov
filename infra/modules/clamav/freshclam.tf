@@ -55,7 +55,7 @@ resource "aws_lambda_function" "freshclam" {
 
   filename         = data.archive_file.freshclam.output_path
   source_code_hash = data.archive_file.freshclam.output_base64sha256
-  runtime          = "python3.12"
+  runtime          = "python3.14"
   handler          = "update_definitions.lambda_handler"
 
   layers      = [aws_lambda_layer_version.clamav.arn]
