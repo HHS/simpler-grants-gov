@@ -3,7 +3,7 @@
 #==============================================
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS amazonlinux-builder
 
-ARG PYTHON_VERSION=3.14.4
+ARG PYTHON_VERSION=3.14.5
 ARG PY_MM=3.14
 ARG PIP_VERSION=26.0
 
@@ -72,6 +72,9 @@ RUN python3 -m pip install --no-cache-dir --upgrade "filelock>=3.20.1"
 
 # Upgrade cryptography to fix GHSA-m959-cc7f-wv43
 RUN python3 -m pip install --no-cache-dir --upgrade "cryptography>=46.0.7"
+
+# Upgrade idna to fix GHSA-65pc-fj4g-8rjx
+RUN python3 -m pip install --no-cache-dir --upgrade "idna>=3.15"
 
 # List package versions to make it easier to tell if fixed versions of vulnerable packages have been updated in the latest base image
 RUN python3 -m pip list -v

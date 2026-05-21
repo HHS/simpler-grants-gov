@@ -1,6 +1,8 @@
 # DNS query logging
 
 resource "aws_cloudwatch_log_group" "dns_query_logging" {
+  provider = aws.us-east-1
+
   count = var.manage_dns ? 1 : 0
 
   name              = "/dns/${var.name}"
@@ -36,6 +38,8 @@ data "aws_iam_policy_document" "dns_query_logging" {
 }
 
 resource "aws_cloudwatch_log_resource_policy" "dns_query_logging" {
+  provider = aws.us-east-1
+
   count = var.manage_dns ? 1 : 0
 
   policy_document = data.aws_iam_policy_document.dns_query_logging.json
