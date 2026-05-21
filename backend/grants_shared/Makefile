@@ -134,14 +134,6 @@ bump-patch-version: ## Bump the patch version of the code (eg. 1.0.1 -> 1.0.2)
 bump-minor-version: ## Bump the minor version of the code (eg. 1.0.1 -> 1.1.0)
 	uv version --bump minor
 
-# TODO - same here
-smoke-test-gz:
-	docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) uv run --isolated --with dist/*.tar.gz tests/grants_shared/smoke_test.py
-
-# TODO - same
-publish-to-pypi:
-	uv publish
-
 ##################################################
 # Misc functionality
 ##################################################
