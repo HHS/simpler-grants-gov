@@ -400,8 +400,8 @@ export const SF424A_FORM_CONFIG: FillFormConfig = {
 // Top alert validation errors for SF-424A blank-save behavior.
 export const SF424A_ALERT_ERRORS: FieldError[] = [
   {
-    fieldId: "activity_line_items",
-    message: "[] should be non-empty",
+    fieldId: "activity_line_items[0]--activity_title",
+    message: "'activity_title' is a required property",
   },
   {
     fieldId: "confirmation",

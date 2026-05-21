@@ -8,6 +8,7 @@ from pydantic import Field
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
+from src.constants.lookup_constants import JobType
 from src.db.models import metadata as api_metadata
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
@@ -110,7 +111,7 @@ TABLES_TO_EXTRACT = {
 )
 @click.option("--tables-to-extract", "-t", help="Tables to extract to a CSV file", multiple=True)
 @flask_db.with_db_session()
-@ecs_background_task(task_name="create-analytics-db-csvs")
+@ecs_background_task(task_name=JobType.CREATE_ANALYTICS_DB_CSVS)
 def create_analytics_db_csvs(db_session: db.Session, tables_to_extract: list[str]) -> None:
     logger.info("Create extract CSV file start")
 

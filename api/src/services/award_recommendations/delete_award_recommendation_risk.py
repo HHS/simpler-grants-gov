@@ -2,7 +2,7 @@ from uuid import UUID
 
 from src.adapters import db
 from src.db.models.user_models import User
-from src.services.award_recommendations.create_award_recommendation_risk import (
+from src.services.award_recommendations.get_award_recommendation import (
     get_award_recommendation_for_update,
 )
 from src.services.award_recommendations.update_award_recommendation_risk import get_risk_for_update

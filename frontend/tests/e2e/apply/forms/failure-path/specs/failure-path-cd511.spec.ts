@@ -1,6 +1,6 @@
 /**
  * @feature Apply - Application Form Failure Path
- * @featureFile tests/e2e/apply/forms/failure-path/features/negative-path-forms.feature
+ * @featureFile tests/e2e/apply/forms/failure-path/features/failure-path-forms.feature
  * @scenario Application form completion failure path - cd511
  */
 
@@ -14,7 +14,6 @@ import {
   CD511_FORM_MATCHER,
   CD511_REQUIRED_FIELD_ERRORS,
 } from "tests/e2e/apply/fixtures/cd511-field-definitions";
-import { getOpportunityId } from "tests/e2e/get-opportunityId-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
@@ -25,6 +24,7 @@ import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
+import { getOpportunityId } from "tests/e2e/utils/get-opportunityId-utils";
 
 const { APPLY, CORE_REGRESSION } = VALID_TAGS;
 

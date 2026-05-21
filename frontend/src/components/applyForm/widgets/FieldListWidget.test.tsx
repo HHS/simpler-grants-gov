@@ -48,7 +48,7 @@ const baseGroupDefinition = [
 ];
 
 describe("FieldListWidget", () => {
-  it("renders label, description, and default row widgets", () => {
+  it("renders label, description, and minimum entry widgets", () => {
     render(
       <FieldListWidget
         id="contacts"
@@ -56,7 +56,7 @@ describe("FieldListWidget", () => {
         schema={{ type: "array", title: "Contacts" }}
         label="Contacts"
         description="Add contacts"
-        defaultSize={1}
+        minItems={1}
         groupDefinition={baseGroupDefinition}
         rawErrors={[]}
         requiredFields={[]}
@@ -70,6 +70,63 @@ describe("FieldListWidget", () => {
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
 
+  it("renders no entries when minItems is 0", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={0}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.queryByText(/entry\s+1/i)).not.toBeInTheDocument();
+    expect(screen.queryAllByTestId("mock-widget")).toHaveLength(0);
+  });
+
+  it("renders no entries when minItems is undefined", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.queryByText(/entry\s+1/i)).not.toBeInTheDocument();
+    expect(screen.queryAllByTestId("mock-widget")).toHaveLength(0);
+  });
+
+  it("renders minItems number of entries", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={2}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.getByText(/entry\s+1/i)).toBeInTheDocument();
+    expect(screen.getByText(/entry\s+2/i)).toBeInTheDocument();
+    expect(screen.getAllByTestId("mock-widget")).toHaveLength(2);
+  });
+
   it("adds a row", async () => {
     const user = userEvent.setup();
 
@@ -79,7 +136,7 @@ describe("FieldListWidget", () => {
         key="contacts"
         schema={{ type: "array", title: "Contacts" }}
         label="Contacts"
-        defaultSize={1}
+        minItems={1}
         groupDefinition={baseGroupDefinition}
         rawErrors={[]}
         requiredFields={[]}
@@ -93,7 +150,26 @@ describe("FieldListWidget", () => {
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(2);
   });
 
-  it("removes a row", async () => {
+  it("disables add when maxItems is reached", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={1}
+        maxItems={1}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /\+\s*add/i })).toBeDisabled();
+  });
+
+  it("removes a row without going below minItems", async () => {
     const user = userEvent.setup();
 
     render(
@@ -102,7 +178,8 @@ describe("FieldListWidget", () => {
         key="contacts"
         schema={{ type: "array", title: "Contacts" }}
         label="Contacts"
-        defaultSize={2}
+        minItems={1}
+        value={[{}, {}]}
         groupDefinition={baseGroupDefinition}
         rawErrors={[]}
         requiredFields={[]}
@@ -117,7 +194,25 @@ describe("FieldListWidget", () => {
     expect(screen.getAllByTestId("mock-widget")).toHaveLength(1);
   });
 
-  it("marks the form edited when a FieldList child field changes", async () => {
+  it("disables delete when minItems is reached", () => {
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={1}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /delete/i })).toBeDisabled();
+  });
+
+  it("marks the form dirty when a FieldList child field changes", async () => {
     const user = userEvent.setup();
     const markFormDirtyMock = jest.fn();
 
@@ -127,7 +222,7 @@ describe("FieldListWidget", () => {
         key="contacts"
         schema={{ type: "array", title: "Contacts" }}
         label="Contacts"
-        defaultSize={1}
+        minItems={1}
         groupDefinition={baseGroupDefinition}
         rawErrors={[]}
         requiredFields={[]}
@@ -145,7 +240,7 @@ describe("FieldListWidget", () => {
     expect(markFormDirtyMock).toHaveBeenCalled();
   });
 
-  it("marks the form edited when a FieldList row is added", async () => {
+  it("marks the form dirty when a FieldList row is added", async () => {
     const user = userEvent.setup();
     const markFormDirtyMock = jest.fn();
 
@@ -155,7 +250,6 @@ describe("FieldListWidget", () => {
         key="contacts"
         schema={{ type: "array", title: "Contacts" }}
         label="Contacts"
-        defaultSize={1}
         groupDefinition={baseGroupDefinition}
         rawErrors={[]}
         requiredFields={[]}
@@ -173,7 +267,37 @@ describe("FieldListWidget", () => {
     expect(markFormDirtyMock).toHaveBeenCalledTimes(1);
   });
 
-  it("marks the form edited when a FieldList row is deleted", async () => {
+  it("preserves unsaved entry values when deleting another entry", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <FieldListWidget
+        id="contacts"
+        key="contacts"
+        schema={{ type: "array", title: "Contacts" }}
+        label="Contacts"
+        minItems={2}
+        maxItems={3}
+        value={[{ first_name: "One" }, { first_name: "Two" }]}
+        groupDefinition={baseGroupDefinition}
+        rawErrors={[]}
+        requiredFields={[]}
+        name="contacts"
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /\+\s*add/i }));
+    await user.type(screen.getByLabelText("contacts[2]--first_name"), "Three");
+
+    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    await user.click(deleteButtons[1]);
+
+    expect(screen.getByLabelText("contacts[1]--first_name")).toHaveValue(
+      "Three",
+    );
+  });
+
+  it("marks the form dirty when a FieldList row is deleted", async () => {
     const user = userEvent.setup();
     const markFormDirtyMock = jest.fn();
 
@@ -183,7 +307,8 @@ describe("FieldListWidget", () => {
         key="contacts"
         schema={{ type: "array", title: "Contacts" }}
         label="Contacts"
-        defaultSize={2}
+        minItems={1}
+        value={[{}, {}]}
         groupDefinition={baseGroupDefinition}
         rawErrors={[]}
         requiredFields={[]}
