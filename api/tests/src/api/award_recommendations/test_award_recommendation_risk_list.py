@@ -131,8 +131,18 @@ class TestListAwardRecommendationRisks200:
         ]
 
         expected_sub_ids = [str(sub.award_recommendation_application_submission_id)]
+        expected_applications = [
+            {
+                "award_recommendation_application_submission_id": str(
+                    sub.award_recommendation_application_submission_id
+                ),
+                "application_submission_id": str(sub.application_submission_id),
+                "application_submission_number": sub.application_submission.application_submission_number,
+            }
+        ]
         for risk_data in resp.json["data"]:
             assert risk_data["award_recommendation_application_submission_ids"] == expected_sub_ids
+            assert risk_data["applications"] == expected_applications
 
         resp2 = client.post(
             f"{API_URL}/{award_recommendation.award_recommendation_id}/risks/list",
@@ -149,6 +159,7 @@ class TestListAwardRecommendationRisks200:
             resp2.json["data"][0]["award_recommendation_application_submission_ids"]
             == expected_sub_ids
         )
+        assert resp2.json["data"][0]["applications"] == expected_applications
 
     def test_list_risks_200_desc_sort(self, client, db_session, agency, award_recommendation):
         user, _, token = create_user_in_agency_with_jwt(
@@ -190,8 +201,18 @@ class TestListAwardRecommendationRisks200:
         ]
 
         expected_sub_ids = [str(sub.award_recommendation_application_submission_id)]
+        expected_applications = [
+            {
+                "award_recommendation_application_submission_id": str(
+                    sub.award_recommendation_application_submission_id
+                ),
+                "application_submission_id": str(sub.application_submission_id),
+                "application_submission_number": sub.application_submission.application_submission_number,
+            }
+        ]
         for risk_data in resp.json["data"]:
             assert risk_data["award_recommendation_application_submission_ids"] == expected_sub_ids
+            assert risk_data["applications"] == expected_applications
 
 
 ####################################
