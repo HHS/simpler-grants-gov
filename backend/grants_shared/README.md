@@ -22,8 +22,11 @@ poetry add grants_shared
 uv add grants_shared
 ```
 
-## Upgrading this package
-TODO - will writeup
+## Release Process
+
+### Version Upgrade
+
+When you make changes, upgrade the version of the package.
 
 ```shell
 # Upgrade the version with uv
@@ -32,9 +35,14 @@ TODO - will writeup
 # Generally do a patch version (eg. 1.0.1 -> 1.0.2)
 uv version --bump patch
 
-# OR do a minor version for anything fairly big (eg. 1.1.3 -> 1.2.0)
+# Or do a minor version for anything fairly big (eg. 1.1.3 -> 1.2.0)
 # uv version --bump minor
 ```
+
+### Release to PyPi
+After your change has been merged to main, you can
+publish a new release in PyPi with our [Github action](https://github.com/HHS/simpler-grants-gov/actions/workflows/publish-grants-shared.yml)
+
 
 ## Usage
 Guidance on common commands and running the application will come in later

@@ -21,6 +21,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Init / Build
+        run: make init
+
+      - name: Run format check
+        run: make format-check
+
+      - name: Run linting
+        run: make lint
+
+      - name: Run security linting
+        run: make lint-security
+
+      - name: Start tests
+        run: make test-coverage
+
       - name: Get Project Version
         id: get-version
         run: |
@@ -28,11 +43,7 @@ jobs:
           echo "grants_shared project version is currently: ${PROJECT_VERSION}"
           echo "project_version=$PROJECT_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Build
-        run: make build
-
-      # TODO - consider format/lint/test checks to be safe?
-
+      # Verify we built the package in the right shape to use as a module
       - name: Smoke Test (wheel)
         run: |
           make docker-cmd args="uv run --isolated --with dist/grants_shared-${{steps.get-version.outputs.project_version}}-py3-none-any.whl tests/grants_shared/smoke_test.py"
