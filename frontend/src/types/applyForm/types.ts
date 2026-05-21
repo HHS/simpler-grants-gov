@@ -229,7 +229,9 @@ export interface UswdsWidgetProps<
   T = unknown,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = never,
-> extends GenericObjectType,
+>
+  extends
+    GenericObjectType,
     Pick<
       HTMLAttributes<HTMLElement>,
       Exclude<keyof HTMLAttributes<HTMLElement>, "onBlur" | "onFocus">

@@ -127,8 +127,10 @@ export interface OpportunitySummaryDetailApiResponse extends APIResponse {
   data: OpportunitySummaryDetail;
 }
 
-export interface GrantorOpportunityDetail
-  extends Omit<OpportunityDetail, "attachments"> {
+export interface GrantorOpportunityDetail extends Omit<
+  OpportunityDetail,
+  "attachments"
+> {
   is_draft: boolean;
   forecast_summary?: OpportunitySummaryDetail;
   non_forecast_summary?: OpportunitySummaryDetail;

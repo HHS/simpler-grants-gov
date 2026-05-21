@@ -1,4 +1,4 @@
-import { ReadonlyFieldCheck } from "tests/e2e/utils/post-submission-utils";
+import { ReadonlyFieldCheck } from "tests/e2e/utils/submission/post-submission-utils";
 
 export const sf424BHappyPathTestData = (
   orgLabel: string,

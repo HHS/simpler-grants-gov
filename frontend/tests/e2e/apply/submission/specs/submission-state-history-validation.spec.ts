@@ -28,11 +28,11 @@ import {
 import {
   verifyFormFieldsAreReadonlyAfterSubmission,
   verifyPostSubmission,
-} from "tests/e2e/utils/post-submission-utils";
+} from "tests/e2e/utils/submission/post-submission-utils";
 import {
   submitApplicationAndVerify,
   type SubmitOutcome,
-} from "tests/e2e/utils/submit-application-utils";
+} from "tests/e2e/utils/submission/submit-application-utils";
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01

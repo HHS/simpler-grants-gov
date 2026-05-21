@@ -19,6 +19,7 @@ export const fieldDefinitionsProjectAbstractSummary: FormFillFieldDefinitions =
     },
     abstract: {
       testId: "textarea",
+      printTestId: "project_abstract",
       type: "text",
       field: "Abstract",
     },

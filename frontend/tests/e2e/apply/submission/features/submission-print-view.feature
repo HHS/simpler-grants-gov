@@ -1,5 +1,3 @@
-/**
-* @featureArea Submission
 * @feature Print view validation
 * @specFile e2e/apply/submission/specs/submission-print-view.spec.ts
 * @description Validates that submitted application data renders correctly in the internal post-submission print view workflow.
@@ -144,4 +142,4 @@ And the values entered for each field appear under the correct field titles
 When the user opens browser print preview
 Then the print layout renders correctly
 And no interactive elements break the print layout
-And all visible form data appears in the print output
+And all visible form data appears in the print outp

@@ -6,6 +6,13 @@ import { clickSaveButton } from "./save-form-utils";
 
 export interface FillFieldDefinition {
   testId?: string;
+  /**
+   * Optional override for the testId used when asserting this field in a
+   * read-only/print view context. When present, the loader uses this instead
+   * of `testId` to locate the field in the print view output.
+   * Example: abstract input has testId "textarea" but prints as "project_abstract".
+   */
+  printTestId?: string;
   selector?: string;
   optionTestIdPrefix?: string;
   hasTextRegex?: string;
