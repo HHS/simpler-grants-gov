@@ -88,17 +88,18 @@ class DynamoDBClient:
             )
         """
         key = {key_name: {key_type: value}}
+        log_extra = {
+            "table_name": table_name,
+            "key_name": key_name,
+            "key_type": key_type,
+            "value": value,
+            "consistent_read": consistent_read,
+        }
 
         try:
             logger.info(
                 "Getting item from DynamoDB",
-                extra={
-                    "table_name": table_name,
-                    "key_name": key_name,
-                    "key_type": key_type,
-                    "value": value,
-                    "consistent_read": consistent_read,
-                },
+                extra=log_extra,
             )
 
             response = self.client.get_item(
@@ -112,24 +113,12 @@ class DynamoDBClient:
             if item:
                 logger.info(
                     "Successfully retrieved item from DynamoDB",
-                    extra={
-                        "table_name": table_name,
-                        "key_name": key_name,
-                        "key_type": key_type,
-                        "value": value,
-                        "consistent_read": consistent_read,
-                    },
+                    extra=log_extra,
                 )
             else:
                 logger.info(
                     "Item not found in DynamoDB",
-                    extra={
-                        "table_name": table_name,
-                        "key_name": key_name,
-                        "key_type": key_type,
-                        "value": value,
-                        "consistent_read": consistent_read,
-                    },
+                    extra=log_extra,
                 )
 
             return DynamoDBGetItemResponse(item=item)
@@ -137,12 +126,6 @@ class DynamoDBClient:
         except Exception:
             logger.exception(
                 "Failed to get item from DynamoDB",
-                extra={
-                    "table_name": table_name,
-                    "key_name": key_name,
-                    "key_type": key_type,
-                    "value": value,
-                    "consistent_read": consistent_read,
-                },
+                extra=log_extra,
             )
             raise
