@@ -43,5 +43,4 @@ RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
     uv venv /opt/venv && \
     uv sync --locked --all-groups && \
     uv build && \
-    (find /tmp -mindepth 1 ! -name 'py_version.txt' -delete 2>/dev/null || true) && \
     (rm -rf /root/.cache "/home/${RUN_USER}/.cache" /var/tmp/* /grants_shared/src || true)
