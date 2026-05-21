@@ -88,7 +88,7 @@ export const CreateRecommendationContent = () => {
   };
 
   const handleNext = () => {
-    // TODO: Navigate to next step
+    router.push("/award-recommendation/select-opportunity");
   };
 
   return (

@@ -2061,6 +2061,7 @@ export const messages = {
     metaDescriptionEdit: "Edit your award recommendations",
     pageHeading: "Award Recommendations",
     heroTitle: "Award Rec #",
+    createHeroTitle: "Create recommendation",
     datePrepared: "Date prepared",
     status: "Status",
     onThisPage: "On this page",
@@ -2291,5 +2292,6 @@ export const messages = {
     metaDescription:
       "Select a funding opportunity for your award recommendation",
     whichFundingOpportunity: "Which funding opportunity is this for?",
+    cancelButtonText: "Cancel",
   },
 };
