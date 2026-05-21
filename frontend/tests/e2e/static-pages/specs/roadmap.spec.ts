@@ -1,6 +1,6 @@
 /**
  * @feature Roadmap page
- * @featureFile frontend/tests/e2e/roadmap.feature
+ * @featureFile e2e/static-pages/features/roadmap.feature
  * @scenario Show the page title
  * @scenario Return to top link works
  * @scenario View all deliverables on Github
