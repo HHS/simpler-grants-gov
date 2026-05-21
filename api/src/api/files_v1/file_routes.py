@@ -1,13 +1,18 @@
 import logging
 import uuid
 
+from flask import Response, stream_with_context
+
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
 import src.api.files_v1.file_schemas as file_schemas
 import src.api.response as response
+from src.adapters.aws.dynamodb_adapter import DynamoDBClient
 from src.api.files_v1.file_blueprint import file_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
+from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
 from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from src.services.files.stream_file_scan_results import stream_file_scan_results
 from src.services.files.update_pending_file_scan_status import update_pending_file_scan_status
 
 logger = logging.getLogger(__name__)
@@ -34,3 +39,33 @@ def update_file_scan_status(
         )
 
     return response.ApiResponse(message="Success")
+
+
+@file_blueprint.get("/<uuid:pending_file_id>/results")
+@file_blueprint.output(file_schemas.FileScanResultsResponseSchema)
+@file_blueprint.doc(
+    summary="Stream file scan results",
+    description=(
+        "Stream the scan status of a pending file as newline-delimited JSON. "
+        "Each chunk matches the documented response schema. The endpoint polls "
+        "DynamoDB on a configurable interval and ends the stream when the scan "
+        "reaches a terminal status (complete/infected) or the configured max "
+        "duration elapses."
+    ),
+    responses=[200, 401, 403, 404],
+)
+@file_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
+def get_file_scan_results(pending_file_id: uuid.UUID) -> Response:
+    user = jwt_or_api_user_key_multi_auth.get_user()
+    add_extra_data_to_current_request_logs(
+        {"pending_file_id": pending_file_id, "user_id": user.user_id}
+    )
+    logger.info("GET /v1/files/<pending_file_id>/results")
+
+    stream = stream_file_scan_results(
+        pending_file_id=pending_file_id,
+        user=user,
+        dynamodb_client=DynamoDBClient(),
+    )
+
+    return Response(stream_with_context(stream), mimetype="application/x-ndjson")

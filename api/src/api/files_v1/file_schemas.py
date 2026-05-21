@@ -16,3 +16,18 @@ class FileScanStatusUpdateRequestSchema(Schema):
 
 class FileScanStatusUpdateResponseSchema(AbstractResponseSchema):
     pass
+
+
+class FileScanResultsDataSchema(Schema):
+    status = fields.Enum(
+        FileScanStatus,
+        required=True,
+        metadata={
+            "description": "The current scan status of the file",
+            "example": FileScanStatus.PENDING,
+        },
+    )
+
+
+class FileScanResultsResponseSchema(Schema):
+    data = fields.Nested(FileScanResultsDataSchema, required=True)
