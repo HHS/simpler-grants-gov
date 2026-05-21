@@ -23,14 +23,17 @@ ifdef CI
  MYPY_POSTPROC := | perl -pe "s/^(.+):(\d+):(\d+): error: (.*)/::warning file=$(APP_DIR)\/\1,line=\2,col=\3::\4/"
 endif
 
+DOCKER_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME)
+
 # By default, all python/uv commands will run inside of the docker container
 # if you wish to run this natively, add PY_RUN_APPROACH=local to your environment vars
 # You can set this by either running `export PY_RUN_APPROACH=local` in your shell or add
 # it to your ~/.zshrc file (and run `source ~/.zshrc`)
+
 ifeq "$(PY_RUN_APPROACH)" "local"
 PY_RUN_CMD := uv run
 else
-PY_RUN_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME)
+PY_RUN_CMD := $(DOCKER_CMD)
 endif
 
 # Docker user configuration
@@ -131,11 +134,6 @@ bump-patch-version: ## Bump the patch version of the code (eg. 1.0.1 -> 1.0.2)
 bump-minor-version: ## Bump the minor version of the code (eg. 1.0.1 -> 1.1.0)
 	uv version --bump minor
 
-
-# TODO - see if there is a way to run this outside docker happily?
-smoke-test-wheel:
-	docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) uv run --verbose --isolated --with dist/*.whl tests/grants_shared/smoke_test.py
-
 # TODO - same here
 smoke-test-gz:
 	docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME) uv run --isolated --with dist/*.tar.gz tests/grants_shared/smoke_test.py
@@ -147,6 +145,9 @@ publish-to-pypi:
 ##################################################
 # Misc functionality
 ##################################################
+
+docker-cmd:
+	$(DOCKER_CMD) $(args)
 
 help: ## Prints the help documentation and info about each command
 	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
