@@ -25,52 +25,24 @@ RUN rm -rf /grants_shared/.venv || true
 
 COPY . /grants_shared
 
-# Disable dev dependencies in UV sync
-ENV UV_NO_DEV=1
+# Prefer external venv to avoid mutating release venv
+ENV VIRTUAL_ENV=/opt/venv
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+# Place entry points in the environment at the front of the path
+ENV PATH="/opt/venv/bin:$PATH"
+
+# We are fine with dev dependencies in this
+# image as we don't need a release image
+ENV UV_NO_DEV=0
 # Compile python to *.pyc files for performance
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_CACHE_DIR="/tmp/.cache/uv"
 ENV UV_NO_SYNC=1
 
 RUN set -e && PY_MM=$(cat /tmp/py_version.txt) && \
-    uv sync --locked --no-dev && \
-    SITE_BASE="/grants_shared/.venv/lib/python${PY_MM}/site-packages" && \
-    mkdir -p "${SITE_BASE}/src" && \
+    uv venv /opt/venv && \
+    uv sync --locked --all-groups && \
+    uv build && \
     (find /tmp -mindepth 1 ! -name 'py_version.txt' -delete 2>/dev/null || true) && \
     (rm -rf /root/.cache "/home/${RUN_USER}/.cache" /var/tmp/* /grants_shared/src || true)
 
-
-#==============================================
-# Stage 2: Dev image
-#==============================================
-FROM base AS dev
-ARG RUN_USER
-
-# We want dev dependencies in the dev image
-ENV UV_NO_DEV=0
-# In dev, prefer external venv to avoid mutating release venv
-ENV VIRTUAL_ENV=/opt/venv
-ENV UV_PROJECT_ENVIRONMENT=/opt/venv
-# Place entry points in the environment at the front of the path
-ENV PATH="/opt/venv/bin:$PATH"
-
-# Disable Python optimization to preserve docstrings required by jsonpath_ng
-# https://github.com/h2non/jsonpath-ng?tab=readme-ov-file#special-note-about-ply-and-docstrings
-ENV PYTHONOPTIMIZE=0
-ENV TMPDIR="/tmp"
-
-USER ${RUN_USER}
-WORKDIR /grants_shared
-
-# Install all dependencies including dev dependencies
-RUN uv venv /opt/venv && uv sync --locked --all-groups
-
-# TODO - is this safe to be here? Verify dependencies are non-dev only
-RUN uv build --wheel
-
-##########
-# NOTE
-##########
-# We don't need a release image as we never deploy these images anywhere.
-# We need the dev image locally, and for releasing the package itself, that
-# is done with the wheel we created in the base image.
