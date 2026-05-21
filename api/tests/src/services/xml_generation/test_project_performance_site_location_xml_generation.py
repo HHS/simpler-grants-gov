@@ -115,7 +115,7 @@ class TestPerformanceSiteXMLGeneration:
         }
         xml = self._generate(data)
 
-        assert xml.count("OtherSite") == 4  # open + close tags × 2 sites
+        assert xml.count("OtherSite") == 4  # open + close tags x 2 sites
 
     def test_no_additional_sites_omits_other_site(self):
         xml = self._generate({"primary_site": _INTL_SITE})
