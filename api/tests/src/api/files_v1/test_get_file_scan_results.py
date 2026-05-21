@@ -121,8 +121,11 @@ class TestGetFileScanResultsSuccess:
             FileScanStatus.PENDING,
         )
 
-        # Mutate the underlying record between get_item calls so we can drive
-        # the polling loop through status transitions deterministically.
+        # We monkeypatch DynamoDBClient.get_item not to mock its behavior
+        # (the real moto-backed call still runs) but to use it as a hook for
+        # mutating the underlying record between polls. This drives the
+        # polling loop through deterministic status transitions without
+        # relying on real time / sleep.
         real_get_item = DynamoDBClient.get_item
         transitions = iter([FileScanStatus.IN_PROGRESS, FileScanStatus.COMPLETE])
 
@@ -283,6 +286,7 @@ class TestGetFileScanResults403:
         )
 
         assert resp.status_code == 403
+        assert resp.get_json()["message"] == "Forbidden"
 
 
 class TestGetFileScanResults404:
@@ -301,4 +305,4 @@ class TestGetFileScanResults404:
         )
 
         assert resp.status_code == 404
-        assert "File scan record not found" in resp.get_json()["message"]
+        assert resp.get_json()["message"] == "File scan record not found"

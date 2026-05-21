@@ -1,5 +1,6 @@
 import logging
 import uuid
+from collections.abc import Iterator
 
 from flask import Response, stream_with_context
 
@@ -62,10 +63,15 @@ def get_file_scan_results(pending_file_id: uuid.UUID) -> Response:
     )
     logger.info("GET /v1/files/<pending_file_id>/results")
 
-    stream = stream_file_scan_results(
+    chunks = stream_file_scan_results(
         pending_file_id=pending_file_id,
         user=user,
         dynamodb_client=DynamoDBClient(),
     )
+    response_schema = file_schemas.FileScanResultsResponseSchema()
 
-    return Response(stream_with_context(stream), mimetype="application/x-ndjson")
+    def serialize() -> Iterator[str]:
+        for chunk in chunks:
+            yield response_schema.dumps(chunk) + "\n"
+
+    return Response(stream_with_context(serialize()), mimetype="application/x-ndjson")

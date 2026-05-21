@@ -30,4 +30,11 @@ class FileScanResultsDataSchema(Schema):
 
 
 class FileScanResultsResponseSchema(Schema):
+    """Schema for a single streamed chunk in the file-scan-results NDJSON response.
+
+    Intentionally does not inherit from ``AbstractResponseSchema`` because each
+    chunk is a partial update on the wire and does not carry ``status_code`` /
+    ``message`` envelope fields.
+    """
+
     data = fields.Nested(FileScanResultsDataSchema, required=True)

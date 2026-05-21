@@ -1,8 +1,8 @@
-import json
 import logging
 import time
 import uuid
 from collections.abc import Iterator
+from typing import Any
 
 from pydantic import Field
 
@@ -42,7 +42,7 @@ def _get_scan_record(
     dynamodb_client: DynamoDBClient,
     table_name: str,
     pending_file_id: uuid.UUID,
-) -> dict | None:
+) -> dict[str, Any] | None:
     response = dynamodb_client.get_item(
         table_name=table_name,
         key_name=SCAN_RECORD_FILE_ID_KEY,
@@ -52,7 +52,7 @@ def _get_scan_record(
     return response.item
 
 
-def _get_string_attr(record: dict, attr: str) -> str | None:
+def _get_string_attr(record: dict[str, Any], attr: str) -> str | None:
     # DynamoDB returns items in attribute-value format: {"attr": {"S": "value"}}.
     # We only need the string-typed attributes on the scan record.
     raw = record.get(attr)
@@ -67,12 +67,15 @@ def stream_file_scan_results(
     dynamodb_client: DynamoDBClient,
     config: FileScanStreamConfig | None = None,
     dynamodb_config: DynamoDBConfig | None = None,
-) -> Iterator[str]:
+) -> Iterator[dict[str, Any]]:
     """Stream file scan status updates for the given pending file.
 
     The initial DynamoDB lookup happens before any chunks are yielded so we can
     return a 404 or 403 with the proper HTTP status. After streaming starts, any
     subsequent error (missing record, user mismatch) just ends the stream.
+
+    Yields chunks shaped like ``FileScanResultsResponseSchema``; the caller is
+    responsible for serializing each chunk through that schema.
     """
     if config is None:
         config = FileScanStreamConfig()
@@ -89,7 +92,7 @@ def stream_file_scan_results(
 
     record_user_id = _get_string_attr(record, SCAN_RECORD_USER_ID_ATTR)
     if record_user_id != str(user.user_id):
-        logger.info(
+        logger.warning(
             "User attempted to access another user's file scan results",
             extra={
                 "pending_file_id": pending_file_id,
@@ -99,7 +102,7 @@ def stream_file_scan_results(
         )
         raise_flask_error(403, "Forbidden")
 
-    def generate() -> Iterator[str]:
+    def generate() -> Iterator[dict[str, Any]]:
         current_record = record
         start_time = datetime_util.utcnow()
 
@@ -108,7 +111,10 @@ def stream_file_scan_results(
             if raw_status is None:
                 logger.warning(
                     "Scan record missing status attribute, ending stream",
-                    extra={"pending_file_id": pending_file_id},
+                    extra={
+                        "pending_file_id": pending_file_id,
+                        "user_id": user.user_id,
+                    },
                 )
                 return
 
@@ -119,12 +125,13 @@ def stream_file_scan_results(
                     "Unable to parse file scan status from record, ending stream",
                     extra={
                         "pending_file_id": pending_file_id,
+                        "user_id": user.user_id,
                         "raw_status": raw_status,
                     },
                 )
                 return
 
-            yield json.dumps({"data": {"status": status.value}}) + "\n"
+            yield {"data": {"status": status.value}}
 
             if status in TERMINAL_STATUSES:
                 logger.info(
@@ -152,11 +159,19 @@ def stream_file_scan_results(
             time.sleep(config.poll_interval_seconds)
 
             next_record = _get_scan_record(dynamodb_client, table_name, pending_file_id)
-            if next_record is None or _get_string_attr(
-                next_record, SCAN_RECORD_USER_ID_ATTR
-            ) != str(user.user_id):
+            if next_record is None:
                 logger.info(
-                    "File scan record disappeared or user no longer authorized, ending stream",
+                    "File scan record disappeared during stream, ending stream",
+                    extra={
+                        "pending_file_id": pending_file_id,
+                        "user_id": user.user_id,
+                    },
+                )
+                return
+
+            if _get_string_attr(next_record, SCAN_RECORD_USER_ID_ATTR) != str(user.user_id):
+                logger.warning(
+                    "File scan record user_id changed during stream, ending stream",
                     extra={
                         "pending_file_id": pending_file_id,
                         "user_id": user.user_id,
