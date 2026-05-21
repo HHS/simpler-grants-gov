@@ -2127,7 +2127,10 @@ export const messages = {
       uploadDate: "Upload date",
       standardTermsHeading: "Standard and program terms & conditions",
       enterTermsConditions: "Enter terms & conditions",
+      editTermsConditions: "Edit terms & conditions",
       risksHeading: "Specific risks & recommended conditions",
+      enterRisks: "Enter risks & recommended conditions",
+      editRisks: "Edit risks & recommended conditions",
       riskNumber: "Risk #",
       appNumber: "App #",
       condition: "Condition",
@@ -2137,6 +2140,7 @@ export const messages = {
       errorMessage: "Unable to load or update risks. Please try again.",
       otherDocumentsHeading: "Other supporting documents",
       enterSupportingDocuments: "Enter supporting documents",
+      editSupportingDocuments: "Edit supporting documents",
     },
     recommendationDetails: {
       heading: "Recommendation details",

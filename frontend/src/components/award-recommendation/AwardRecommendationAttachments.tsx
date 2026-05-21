@@ -162,9 +162,23 @@ export const AwardRecommendationAttachments = ({
 
   return (
     <section className="margin-top-8">
-      <h2>{t("heading")}</h2>
-      <h3 className="margin-bottom-1">{t("standardTermsHeading")}</h3>
-      {mode === "edit" ? (
+      <h2 className="margin-bottom-1">{t("heading")}</h2>
+      <div className="display-flex flex-justify flex-align-end margin-bottom-1">
+        <h3 className="margin-y-0">{t("standardTermsHeading")}</h3>
+        {mode === "edit" && standardRows.length > 0 && (
+          <a
+            href="#"
+            className="text-bold"
+            style={{ textDecoration: "underline" }}
+            onClick={() => {
+              /* TODO: implement routing */
+            }}
+          >
+            {t("editTermsConditions")}
+          </a>
+        )}
+      </div>
+      {mode === "edit" && standardRows.length === 0 ? (
         <div className="bg-base-lighter radius-md padding-y-2 padding-x-3 margin-bottom-2">
           <a
             className="text-bold text-left display-block width-full"
@@ -183,7 +197,21 @@ export const AwardRecommendationAttachments = ({
           tableRowData={standardRows}
         />
       )}
-      <h3 className="margin-top-6 margin-bottom-1">{t("risksHeading")}</h3>
+      <div className="display-flex flex-justify flex-align-end margin-top-6 margin-bottom-1">
+        <h3 className="margin-y-0">{t("risksHeading")}</h3>
+        {mode === "edit" && risks.length > 0 && (
+          <a
+            href="#"
+            className="text-bold"
+            style={{ textDecoration: "underline" }}
+            onClick={() => {
+              /* TODO: implement routing */
+            }}
+          >
+            {t("editRisks")}
+          </a>
+        )}
+      </div>
       {apiError && (
         <SimplerAlert
           alertClick={() => setApiError(false)}
@@ -196,26 +224,55 @@ export const AwardRecommendationAttachments = ({
         <div className="display-flex flex-justify-center padding-y-4">
           <Spinner className="height-3 width-3" />
         </div>
+      ) : mode === "edit" && risks.length === 0 ? (
+        <div className="bg-base-lighter radius-md padding-y-2 padding-x-3 margin-bottom-2">
+          <a
+            className="text-bold text-left display-block width-full"
+            href="#"
+            style={{ textDecoration: "underline" }}
+            onClick={() => {
+              /* TODO: implement routing */
+            }}
+          >
+            {t("enterRisks")}
+          </a>
+        </div>
       ) : (
-        <TableWithResponsiveHeader
-          headerContent={risksHeaders}
-          tableRowData={risksRows}
-        />
+        <>
+          <TableWithResponsiveHeader
+            headerContent={risksHeaders}
+            tableRowData={risksRows}
+          />
+          {risks.length > 0 && (
+            <Pagination
+              pathname=""
+              totalPages={totalPages}
+              currentPage={page}
+              maxSlots={7}
+              onClickNext={() => setPage(page + 1)}
+              onClickPrevious={() => setPage(page > 1 ? page - 1 : 1)}
+              onClickPageNumber={(_, p) => setPage(p)}
+              aria-disabled={loading}
+            />
+          )}
+        </>
       )}
-      <Pagination
-        pathname=""
-        totalPages={totalPages}
-        currentPage={page}
-        maxSlots={7}
-        onClickNext={() => setPage(page + 1)}
-        onClickPrevious={() => setPage(page > 1 ? page - 1 : 1)}
-        onClickPageNumber={(_, p) => setPage(p)}
-        aria-disabled={loading}
-      />
-      <h3 className="margin-top-6 margin-bottom-1">
-        {t("otherDocumentsHeading")}
-      </h3>
-      {mode === "edit" ? (
+      <div className="display-flex flex-justify flex-align-end margin-top-6 margin-bottom-1">
+        <h3 className="margin-y-0">{t("otherDocumentsHeading")}</h3>
+        {mode === "edit" && otherRows.length > 0 && (
+          <a
+            href="#"
+            className="text-bold"
+            style={{ textDecoration: "underline" }}
+            onClick={() => {
+              /* TODO: implement routing */
+            }}
+          >
+            {t("editSupportingDocuments")}
+          </a>
+        )}
+      </div>
+      {mode === "edit" && otherRows.length === 0 ? (
         <div className="bg-base-lighter radius-md padding-y-2 padding-x-3 margin-bottom-2">
           <a
             className="text-bold text-left display-block width-full"
