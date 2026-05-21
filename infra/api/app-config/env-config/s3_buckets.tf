@@ -27,6 +27,11 @@ locals {
       public  = false
       paths   = []
     }
+    file-scan = {
+      env_var = "FILE_SCAN_BUCKET"
+      public  = false
+      paths   = []
+    }
     api-analytics-transfer = {
       env_var = "API_ANALYTICS_BUCKET"
       public  = false
