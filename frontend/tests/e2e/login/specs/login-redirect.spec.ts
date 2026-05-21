@@ -114,20 +114,25 @@ test.describe("Login Page Redirect", () => {
   );
 
   // Scenario: should display "Redirecting..." text while redirecting
-  test(
+test(
     'should display "Redirecting..." text while redirecting',
     { tag: [AUTH, FULL_REGRESSION] },
     async ({ page }) => {
+      // Given I have stored "/grantor/opportunities" as the login redirect
       await page.evaluate(() => {
         sessionStorage.setItem("login-redirect", "/grantor/opportunities");
       });
 
+      // When I open the login page
       await page.goto("/login", { waitUntil: "domcontentloaded" });
+
+      // Then I see "Redirecting..."
       const redirectingText = page.getByText("Redirecting...");
       const redirectResult = await Promise.race([
         redirectingText
           .waitFor({ state: "visible", timeout: 2000 })
           .then(() => "message"),
+        // And I am redirected to "/grantor/opportunities"
         page
           .waitForURL("/grantor/opportunities", { timeout: 15000 })
           .then(() => "redirect"),
@@ -141,3 +146,4 @@ test.describe("Login Page Redirect", () => {
     },
   );
 });
+
