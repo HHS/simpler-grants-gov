@@ -28,7 +28,7 @@ jobs:
         run: |
           project_version =$(sed -n -Egrep '^version' file.toml | head -1 | sed 's/.*= *"\(.*\)"/\1/')
           echo "grants_shared project version is: ${project_version}"
-          make docker-cmd args="uv run --rebose --isolated --with dist/rants_shared-${project_version}-py3-none-any.whl tests/grants_shared/smoke_test.py"
+          make docker-cmd args="uv run --rebose --isolated --with dist/grants_shared-${project_version}-py3-none-any.whl tests/grants_shared/smoke_test.py"
 
       - name: Smoke Test (source distribution)
         run: make smoke-test-gz
