@@ -14,7 +14,7 @@ from src.adapters.db import PostgresDBClient
 from src.constants.lookup_constants import CompetitionOpenToApplicant
 from src.db.models.competition_models import Competition, CompetitionForm, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
-from src.form_schema.forms import get_active_forms
+from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
@@ -522,6 +522,7 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
 
     competition_container: CompetitionContainer | None = None
     if seed_config.seed_forms:
+        init_form_registry()
         forms_map = _build_forms(db_session)
         competition_container = _build_competitions(db_session, forms_map)
     if seed_config.seed_users:

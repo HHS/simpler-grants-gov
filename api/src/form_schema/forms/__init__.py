@@ -1,3 +1,5 @@
+import logging
+
 from src.db.models.competition_models import Form
 
 from ..registry.form_template_registry import form_template_registry
@@ -17,6 +19,8 @@ from .sf424b import SF424b_v1_1
 from .sf424d import SF424d_v1_1
 from .sflll import SFLLL_v2_0
 from .supplementary_neh_cover_sheet import SupplementaryNEHCoverSheet_v3_0
+
+logger = logging.getLogger(__name__)
 
 _ALL_FORMS: list[Form] = [
     SF424_v4_0,
@@ -39,8 +43,12 @@ _ALL_FORMS: list[Form] = [
 
 
 def init_form_registry() -> None:
-    for _form in _ALL_FORMS:
-        form_template_registry.register(_form, major_version=1)
+    logger.info("Registering forms")
+    if len(form_template_registry.get_all()) == 0:
+        for _form in _ALL_FORMS:
+            form_template_registry.register(_form, major_version=1)
+
+    logger.info("Finished registering forms")
 
 
 def get_active_forms() -> list[Form]:
