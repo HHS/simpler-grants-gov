@@ -24,8 +24,8 @@ class CompetitionInstructionCreateSchema(Schema):
     )
 
 
-class CompetitionCreateRequestItemSchema(Schema):
-    """Schema for a single competition in the create request"""
+class CompetitionCreateRequestSchema(Schema):
+    """Schema for POST /v1/competitions/ request"""
 
     opportunity_id = fields.UUID(
         required=True, metadata={"description": "The opportunity ID this competition belongs to"}
@@ -77,12 +77,6 @@ class CompetitionCreateRequestItemSchema(Schema):
             "example": {"assistance_listing_number": "43.012", "program_title": "Space Technology"},
         },
     )
-
-
-class CompetitionCreateRequestSchema(Schema):
-    """Schema for POST /v1/competitions/ request - accepts a list of competitions"""
-
-    pass
 
 
 class CompetitionCreateResponseSchema(AbstractResponseSchema):

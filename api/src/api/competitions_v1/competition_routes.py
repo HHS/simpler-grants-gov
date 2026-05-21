@@ -13,9 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 @competition_blueprint.post("/")
-@competition_blueprint.input(
-    competition_schemas.CompetitionCreateRequestItemSchema(), location="json"
-)
+@competition_blueprint.input(competition_schemas.CompetitionCreateRequestSchema(), location="json")
 @competition_blueprint.output(competition_schemas.CompetitionCreateResponseSchema())
 @competition_blueprint.auth_required(jwt_or_api_user_key_multi_auth)
 @competition_blueprint.doc(responses=[200, 403, 404, 422, 500])
