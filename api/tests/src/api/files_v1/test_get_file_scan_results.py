@@ -227,6 +227,7 @@ class TestGetFileScanResultsSuccess:
         assert record.pending_file_id == pending_file_id
         assert record.user_id == user.user_id
         assert record.file_scan_status == FileScanStatus.COMPLETE
+        assert record.stream_duration_seconds >= 0
 
 
 class TestGetFileScanResults401:

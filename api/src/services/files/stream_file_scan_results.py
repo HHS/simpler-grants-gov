@@ -2,6 +2,7 @@ import logging
 import time
 import uuid
 from collections.abc import Iterator
+from dataclasses import dataclass
 from typing import Any
 
 from pydantic import Field
@@ -38,27 +39,112 @@ class FileScanStreamConfig(PydanticBaseEnvConfig):
     )
 
 
+@dataclass(frozen=True)
+class FileScanRecord:
+    """Scan-cache record from DynamoDB with attributes pre-parsed.
+
+    Fields are typed as Optional because a record in DynamoDB can be partially
+    written or carry an unknown status value; callers decide what to do with
+    a missing or unparseable field.
+    """
+
+    user_id: str | None
+    status: FileScanStatus | None
+    # Kept for diagnostic logging when ``status`` couldn't be parsed.
+    raw_status: str | None
+
+
+def _get_string_attr(item: dict[str, Any], attr: str) -> str | None:
+    # DynamoDB returns items in attribute-value format: {"attr": {"S": "value"}}.
+    # We only need the string-typed attributes on the scan record.
+    raw = item.get(attr)
+    if not isinstance(raw, dict):
+        return None
+    return raw.get("S")
+
+
+def _parse_scan_record(item: dict[str, Any]) -> FileScanRecord:
+    raw_status = _get_string_attr(item, SCAN_RECORD_STATUS_ATTR)
+    status: FileScanStatus | None = None
+    if raw_status is not None:
+        try:
+            status = FileScanStatus(raw_status)
+        except ValueError:
+            status = None
+    return FileScanRecord(
+        user_id=_get_string_attr(item, SCAN_RECORD_USER_ID_ATTR),
+        status=status,
+        raw_status=raw_status,
+    )
+
+
 def _get_scan_record(
     dynamodb_client: DynamoDBClient,
     table_name: str,
     pending_file_id: uuid.UUID,
-) -> dict[str, Any] | None:
+) -> FileScanRecord | None:
     response = dynamodb_client.get_item(
         table_name=table_name,
         key_name=SCAN_RECORD_FILE_ID_KEY,
         value=str(pending_file_id),
         consistent_read=True,
     )
-    return response.item
-
-
-def _get_string_attr(record: dict[str, Any], attr: str) -> str | None:
-    # DynamoDB returns items in attribute-value format: {"attr": {"S": "value"}}.
-    # We only need the string-typed attributes on the scan record.
-    raw = record.get(attr)
-    if not isinstance(raw, dict):
+    if response.item is None:
         return None
-    return raw.get("S")
+    return _parse_scan_record(response.item)
+
+
+def _resolve_status(
+    record: FileScanRecord, pending_file_id: uuid.UUID, user_id: uuid.UUID
+) -> FileScanStatus | None:
+    """Return the record's status, or log and return None to end the stream."""
+    if record.status is not None:
+        return record.status
+
+    if record.raw_status is None:
+        logger.warning(
+            "Scan record missing status attribute, ending stream",
+            extra={"pending_file_id": pending_file_id, "user_id": user_id},
+        )
+    else:
+        logger.warning(
+            "Unable to parse file scan status from record, ending stream",
+            extra={
+                "pending_file_id": pending_file_id,
+                "user_id": user_id,
+                "raw_status": record.raw_status,
+            },
+        )
+    return None
+
+
+def _fetch_next_record(
+    dynamodb_client: DynamoDBClient,
+    table_name: str,
+    pending_file_id: uuid.UUID,
+    user_id: uuid.UUID,
+) -> FileScanRecord | None:
+    """Re-query the scan record for the next poll iteration.
+
+    Returns the record if it still exists and still belongs to ``user_id``;
+    otherwise logs and returns None to signal that the stream should end.
+    """
+    next_record = _get_scan_record(dynamodb_client, table_name, pending_file_id)
+    if next_record is None:
+        logger.info(
+            "File scan record disappeared during stream, ending stream",
+            extra={"pending_file_id": pending_file_id, "user_id": user_id},
+        )
+        return None
+
+    if next_record.user_id != str(user_id):
+        logger.warning(
+            "File scan record user_id changed during stream, ending stream",
+            extra={"pending_file_id": pending_file_id, "user_id": user_id},
+        )
+        return None
+
+    return next_record
 
 
 def stream_file_scan_results(
@@ -90,14 +176,13 @@ def stream_file_scan_results(
     if record is None:
         raise_flask_error(404, "File scan record not found")
 
-    record_user_id = _get_string_attr(record, SCAN_RECORD_USER_ID_ATTR)
-    if record_user_id != str(user.user_id):
+    if record.user_id != str(user.user_id):
         logger.warning(
             "User attempted to access another user's file scan results",
             extra={
                 "pending_file_id": pending_file_id,
                 "user_id": user.user_id,
-                "record_user_id": record_user_id,
+                "record_user_id": record.user_id,
             },
         )
         raise_flask_error(403, "Forbidden")
@@ -107,31 +192,13 @@ def stream_file_scan_results(
         start_time = datetime_util.utcnow()
 
         while True:
-            raw_status = _get_string_attr(current_record, SCAN_RECORD_STATUS_ATTR)
-            if raw_status is None:
-                logger.warning(
-                    "Scan record missing status attribute, ending stream",
-                    extra={
-                        "pending_file_id": pending_file_id,
-                        "user_id": user.user_id,
-                    },
-                )
-                return
-
-            try:
-                status = FileScanStatus(raw_status)
-            except ValueError:
-                logger.warning(
-                    "Unable to parse file scan status from record, ending stream",
-                    extra={
-                        "pending_file_id": pending_file_id,
-                        "user_id": user.user_id,
-                        "raw_status": raw_status,
-                    },
-                )
+            status = _resolve_status(current_record, pending_file_id, user.user_id)
+            if status is None:
                 return
 
             yield {"data": {"status": status.value}}
+
+            elapsed = (datetime_util.utcnow() - start_time).total_seconds()
 
             if status in TERMINAL_STATUSES:
                 logger.info(
@@ -140,11 +207,11 @@ def stream_file_scan_results(
                         "pending_file_id": pending_file_id,
                         "user_id": user.user_id,
                         "file_scan_status": status,
+                        "stream_duration_seconds": elapsed,
                     },
                 )
                 return
 
-            elapsed = (datetime_util.utcnow() - start_time).total_seconds()
             if elapsed >= config.max_duration_seconds:
                 logger.info(
                     "File scan results stream reached max duration",
@@ -152,31 +219,17 @@ def stream_file_scan_results(
                         "pending_file_id": pending_file_id,
                         "user_id": user.user_id,
                         "last_file_scan_status": status,
+                        "stream_duration_seconds": elapsed,
                     },
                 )
                 return
 
             time.sleep(config.poll_interval_seconds)
 
-            next_record = _get_scan_record(dynamodb_client, table_name, pending_file_id)
+            next_record = _fetch_next_record(
+                dynamodb_client, table_name, pending_file_id, user.user_id
+            )
             if next_record is None:
-                logger.info(
-                    "File scan record disappeared during stream, ending stream",
-                    extra={
-                        "pending_file_id": pending_file_id,
-                        "user_id": user.user_id,
-                    },
-                )
-                return
-
-            if _get_string_attr(next_record, SCAN_RECORD_USER_ID_ATTR) != str(user.user_id):
-                logger.warning(
-                    "File scan record user_id changed during stream, ending stream",
-                    extra={
-                        "pending_file_id": pending_file_id,
-                        "user_id": user.user_id,
-                    },
-                )
                 return
 
             current_record = next_record
