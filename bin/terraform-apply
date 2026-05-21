@@ -21,11 +21,6 @@ set -euo pipefail
 module_dir="$1"
 config_name="$2"
 
-# Convenience script for running terraform apply
-# config_name – the name of the backend config.
-# For example, if a backend config file is named "myaccount.s3.tfbackend", then the config_name would be "myaccount"
-# module_dir – the location of the root module to initialize and apply
-
 # 1. Set working directory to the terraform root module directory
 
 cd "${module_dir}"

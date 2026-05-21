@@ -1,4 +1,5 @@
 import os
+from urllib.parse import parse_qs, urlparse
 
 import boto3
 import pytest
@@ -6,6 +7,7 @@ from smart_open import open as smart_open
 
 import src.util.file_util as file_util
 import tests.src.db.models.factories as f
+from src.adapters.aws import S3Config
 
 
 def create_file(root_path, file_path):
@@ -266,3 +268,18 @@ def test_write_to_file(tmp_path):
     file_util.write_to_file(file_path, contents)
     assert file_util.file_exists(file_path) is True
     assert file_util.read_file(file_path) == contents
+
+
+def test_pre_sign_file_location_uses_configured_duration(mock_s3_bucket):
+    """Presigned URLs use the duration from S3Config (defaults to 15 minutes)."""
+    s3_config = S3Config(
+        PUBLIC_FILES_BUCKET=f"s3://{mock_s3_bucket}",
+        DRAFT_FILES_BUCKET=f"s3://{mock_s3_bucket}",
+    )
+
+    url = file_util.pre_sign_file_location(
+        f"s3://{mock_s3_bucket}/some/file.txt", s3_config=s3_config
+    )
+
+    query = parse_qs(urlparse(url).query)
+    assert int(query["X-Amz-Expires"][0]) == 900
