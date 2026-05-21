@@ -18,3 +18,4 @@ Feature: Sign in with Login.gov
     And the user submits the login form
     And the user enters the authentication code
     And the user submits the MFA form
+    Then the user is successfully logged in
