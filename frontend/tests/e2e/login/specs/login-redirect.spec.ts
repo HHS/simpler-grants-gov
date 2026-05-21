@@ -69,7 +69,7 @@ test.describe("Login Page Redirect", () => {
     "should redirect to stored URL after login",
     { tag: [SMOKE, AUTH] },
     async ({ page }) => {
-      // Given I have stored "/opportunities" as the login redirect
+      // Given I have stored "/grantor/opportunities" as the login redirect
       await page.evaluate(() => {
         sessionStorage.setItem("login-redirect", "/grantor/opportunities");
       });
