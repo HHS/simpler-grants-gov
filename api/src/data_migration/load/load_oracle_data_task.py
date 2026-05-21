@@ -69,7 +69,10 @@ class LoadOracleDataTask(src.task.task.Task):
         self.foreign_tables = foreign_tables
         self.staging_tables = staging_tables
         self.insert_chunk_size = insert_chunk_size
-        self.batch_cutoff = datetime_util.get_now_us_eastern_datetime()
+        # Strip tzinfo so the cutoff is a naive datetime with EST wall-clock values.
+        # The Oracle foreign data stores EST timestamps but Postgres treats them as UTC, so a
+        # tz-aware cutoff is converted to UTC for comparison and ends up 4-5h ahead of the source.
+        self.batch_cutoff = datetime_util.get_now_us_eastern_datetime().replace(tzinfo=None)
 
     def run_task(self) -> None:
         """Main task process, called by run()."""
