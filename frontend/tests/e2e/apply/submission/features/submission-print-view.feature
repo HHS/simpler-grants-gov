@@ -1,3 +1,4 @@
+/**
 * @feature Print view validation
 * @specFile e2e/apply/submission/specs/submission-print-view.spec.ts
 * @description Validates that submitted application data renders correctly in the internal post-submission print view workflow.
@@ -40,10 +41,10 @@ Feature: Happy Path – Application Submission and Print View Workflow
     # --- Completing Required Forms ---
     Given the user has completed the required forms
 
-    # --- Completing Conditionally Required Forms ---
+    # --- Completing Conditionally Required Forms (if present) ---
     And the user has completed the conditionally required forms
 
-    # --- Confirm Optional Forms for Submission ---
+    # --- Confirm Optional Forms for Submission (if present) ---
     And the user has confirmed optional forms for submission
 
     # --- Validate Required and Optional Forms ---
@@ -104,7 +105,7 @@ And the form URL is in the format:
 When the user clicks on the Application Name link
 Then the system navigates back to the application landing page
 
-# --- Confirm Optional Forms for Submission ---
+# --- Confirm Optional Forms for Submission (if present) ---
 When the user scrolls to the "Conditionally-Required forms" section
 And under "Submit with application" the user selects "Yes" for completed optional forms
 Then no validation errors should appear
@@ -142,4 +143,5 @@ And the values entered for each field appear under the correct field titles
 When the user opens browser print preview
 Then the print layout renders correctly
 And no interactive elements break the print layout
-And all visible form data appears in the print outp
+And all visible form data appears in the print output
+ 
