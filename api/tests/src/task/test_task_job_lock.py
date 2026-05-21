@@ -18,10 +18,9 @@ from tests.src.db.models.factories import JobLockFactory
 
 
 def test_task_job_lock__does_not_create_a_job_lock_if_enable_job_lock_is_false(
-    caplog, monkeypatch_session, db_session, enable_factory_create
+    monkeypatch_session, db_session, enable_factory_create
 ):
     monkeypatch_session.setenv("ENABLE_JOB_LOCK", "False")
-    caplog.set_level(logging.INFO)
     db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
     db_session.flush()
     with TaskJobLock(db_session, job_type=JobType.SETUP_CERT_USER, lock_duration_minutes=60):
@@ -33,10 +32,9 @@ def test_task_job_lock__does_not_create_a_job_lock_if_enable_job_lock_is_false(
 
 
 def test_task_job_lock_does_not_modify_a_job_lock_if_enable_job_lock_is_false(
-    caplog, monkeypatch_session, db_session, enable_factory_create
+    monkeypatch_session, db_session, enable_factory_create
 ):
     monkeypatch_session.setenv("ENABLE_JOB_LOCK", "False")
-    caplog.set_level(logging.INFO)
     now = datetime_util.utcnow()
     old_date = now - timedelta(days=366)
     job_lock = JobLockFactory.create(job_type=JobType.SETUP_CERT_USER, updated_at=old_date)
@@ -47,10 +45,9 @@ def test_task_job_lock_does_not_modify_a_job_lock_if_enable_job_lock_is_false(
 
 
 def test_task_job_lock_creates_job_lock_if_one_does_not_exist(
-    caplog, monkeypatch_session, db_session, enable_factory_create
+    monkeypatch_session, db_session, enable_factory_create
 ):
     monkeypatch_session.setenv("ENABLE_JOB_LOCK", "True")
-    caplog.set_level(logging.INFO)
     with TaskJobLock(db_session, job_type=JobType.SETUP_CERT_USER, lock_duration_minutes=60):
         pass
     job_lock = (
@@ -75,13 +72,15 @@ def test_task_job_lock_updates_a_job_lock_if_enable_job_lock_is_true(
     db_session.refresh(job_lock)
     assert job_lock.updated_at > old_date
     assert job_lock.job_type == JobType.SETUP_CERT_USER
+    record = next(r for r in caplog.records if r.message == "Job lock held duration")
+    assert record.lock_duration_seconds > 0
+    assert record.success is True
 
 
 def test_task_job_lock_handles_when_locked_until_is_in_the_past(
-    caplog, monkeypatch_session, db_session, enable_factory_create
+    monkeypatch_session, db_session, enable_factory_create
 ):
     monkeypatch_session.setenv("ENABLE_JOB_LOCK", "True")
-    caplog.set_level(logging.INFO)
     now = datetime_util.utcnow()
     old_date = now - timedelta(days=366)
     db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
@@ -104,7 +103,6 @@ def test_task_job_lock_when_job_lock_locked_until_is_in_the_past(
     caplog, monkeypatch_session, db_session, enable_factory_create
 ):
     monkeypatch_session.setenv("ENABLE_JOB_LOCK", "True")
-    caplog.set_level(logging.INFO)
     now = datetime_util.utcnow()
     old_date = now - timedelta(days=366)
     db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
@@ -131,7 +129,7 @@ def test_task_job_lock_when_is_locked_is_true_and_locked_until_is_in_future_rais
     now = datetime_util.utcnow()
     old_date = now - timedelta(days=366)
     db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
-    JobLockFactory.create(
+    job_lock = JobLockFactory.create(
         job_type=JobType.SETUP_CERT_USER,
         updated_at=old_date,
         is_locked=True,
@@ -141,32 +139,32 @@ def test_task_job_lock_when_is_locked_is_true_and_locked_until_is_in_future_rais
     with pytest.raises(TaskJobLockIsLockedError):
         with TaskJobLock(db_session, job_type=JobType.SETUP_CERT_USER, lock_duration_minutes=60):
             pass
+    record = next(r for r in caplog.records if r.message == "Job is currently locked")
+    assert record.success is False
+    assert record.locking_job_lock_id == job_lock.job_lock_id
+    assert record.error == "TaskJobLockIsLockedError"
 
 
-def test_task_job_lock_will_raise_exc_if_logged_by_id_does_not_match_internal_id(
-    caplog, monkeypatch_session, db_session, enable_factory_create
+def test_verify_job_lock_raises_when_locked_by_does_not_match(
+    caplog, db_session, enable_factory_create
 ):
-    monkeypatch_session.setenv("ENABLE_JOB_LOCK", "True")
     caplog.set_level(logging.INFO)
-    now = datetime_util.utcnow()
-    old_date = now - timedelta(days=366)
-    db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
-    job_lock = JobLockFactory.create(job_type=JobType.SETUP_CERT_USER, updated_at=old_date)
+    job_lock = JobLockFactory.create(job_type=JobType.SETUP_CERT_USER, locked_by=uuid.uuid4())
     db_session.commit()
-    with pytest.raises(TaskJobLockError) as excinfo:  # noqa
-        with TaskJobLock(db_session, job_type=JobType.SETUP_CERT_USER, lock_duration_minutes=60):
-            job_lock.locked_by = uuid.uuid4()
-            db_session.add(job_lock)
-            db_session.flush()
-            db_session.commit()
 
-    assert isinstance(excinfo.value.__cause__, TaskJobLockInternalIDError)
+    task_job_lock = TaskJobLock(db_session, job_type=JobType.MIGRATE_UP)
+
+    with pytest.raises(TaskJobLockInternalIDError):
+        task_job_lock.verify_job_lock(job_lock)
+    record = next(r for r in caplog.records if r.message == "Job lock ids do not match")
+    assert record.success is False
+    assert record.locked_by == job_lock.locked_by
+    assert record.error == "TaskJobLockInternalIDError"
 
 
 def test_job_lock_raises_when_lock_deleted_between_enter_and_exit(
-    db_session, enable_factory_create, caplog
+    caplog, db_session, enable_factory_create
 ):
-    caplog.set_level(logging.INFO)
     now = datetime_util.utcnow()
     old_date = now - timedelta(days=366)
     db_session.query(JobLock).filter_by(job_type=JobType.SETUP_CERT_USER).delete()
@@ -179,3 +177,7 @@ def test_job_lock_raises_when_lock_deleted_between_enter_and_exit(
             db_session.commit()
 
     assert isinstance(excinfo.value.__cause__, TaskJobLockNotFoundError)
+    record = next(r for r in caplog.records if r.message == "Failed to free the job lock")
+    assert record.success is False
+    assert record.error == "TaskJobLockNotFoundError"
+    assert record.lock_duration_seconds > 0

@@ -1,7 +1,7 @@
 import contextlib
 import logging
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from sqlalchemy import select
@@ -69,22 +69,33 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
             "internal_lock_id": self.internal_lock_id,
             "job_lock_enabled": self.config.enable_job_lock,
         }
+        self.lock_acquired_at: datetime | None = None
 
     def __enter__(self) -> None:
         logger.info("Entering the lock", extra=self.extra)
         if not self.config.enable_job_lock:
             return
 
+        self.lock_acquired_at = datetime_util.utcnow()
+
         with self.db_session.begin():
             job_lock = self.get_or_create_job_lock()
 
             now = datetime_util.utcnow()
             if job_lock.is_locked and job_lock.locked_until > now:
-                updated_extra = {**self.extra, "locking_job_lock_id": job_lock.job_lock_id}
-                logger.warning("Job is currently locked", extra=updated_extra)
+                logger.warning(
+                    "Job is currently locked",
+                    extra={
+                        **self.extra,
+                        "locking_job_lock_id": job_lock.job_lock_id,
+                        "success": False,
+                        "error": "TaskJobLockIsLockedError",
+                    },
+                )
                 raise TaskJobLockIsLockedError
 
             self.set_job_lock_to_locked(job_lock)
+            self.verify_job_lock(job_lock)
 
     def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
         logger.info("Exiting the lock", extra=self.extra)
@@ -99,14 +110,33 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
                 if not job_lock:
                     logger.info(
                         "JobLock not found",
-                        extra=self.extra,
+                        extra={**self.extra, "success": False, "error": "TaskJobLockNotfoundError"},
                     )
                     raise TaskJobLockNotFoundError
 
                 job_lock = self.set_job_lock_to_unlocked(job_lock)
+                self.verify_job_lock(job_lock)
+
+                logger.info(
+                    "Job lock held duration",
+                    extra={
+                        **self.extra,
+                        "lock_duration_seconds": self.get_duration_seconds(),
+                        "success": True,
+                        "lock_acquired_at": self.lock_acquired_at,
+                    },
+                )
 
         except Exception as e:
-            logger.exception("Failed to free the job lock", extra=self.extra)
+            logger.exception(
+                "Failed to free the job lock",
+                extra={
+                    **self.extra,
+                    "success": False,
+                    "error": type(e).__name__,
+                    "lock_duration_seconds": self.get_duration_seconds(),
+                },
+            )
             # If the exc_type passed in was not null, don't do anything
             # as that exception will be re-raised after this method ends
             # Leave the original error alone
@@ -115,16 +145,25 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
             # Otherwise raise the specific exception we encountered for the job lock update failure.
             raise TaskJobLockError from e
 
+    def get_duration_seconds(self) -> float | None:
+        if self.lock_acquired_at is not None:
+            return (datetime_util.utcnow() - self.lock_acquired_at).total_seconds()
+        return None
+
     def get_task_job_lock_config(self) -> TaskJobLockConfig:
         return TaskJobLockConfig()
 
     def verify_job_lock(self, job_lock: JobLock) -> None:
         job_lock = self.refresh_job_lock(job_lock)
         if job_lock.locked_by != self.internal_lock_id:
-            updated_extra = {**self.extra, "locked_by": job_lock.locked_by}
             logger.info(
-                "JobLock ids do not match",
-                extra=updated_extra,
+                "Job lock ids do not match",
+                extra={
+                    **self.extra,
+                    "locked_by": job_lock.locked_by,
+                    "success": False,
+                    "error": "TaskJobLockInternalIDError",
+                },
             )
             raise TaskJobLockInternalIDError
 
