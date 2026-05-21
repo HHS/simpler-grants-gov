@@ -12,9 +12,22 @@ Validator = validators.Validator  # re-export
 
 
 class Regexp(validators.Regexp):
-    REGEX_ERROR = MarshmallowErrorContainer(
-        ValidationErrorType.FORMAT, "String does not match expected pattern."
-    )
+    """
+    Validator which can run a regex against a string.
+    """
+
+    def __init__(
+        self,
+        regex: str | bytes | typing.Pattern,
+        flags: int = 0,
+        error_message: str = "String does not match expected pattern.",
+    ):
+        """
+        :param regex: The regular expression to run the text against.
+        :param flags: The regular expression flags to use.
+        :param error_message: Error message to raise in case of validation error.
+        """
+        super().__init__(regex, flags, error=error_message)
 
     @typing.overload
     def __call__(self, value: str) -> str: ...
@@ -24,7 +37,9 @@ class Regexp(validators.Regexp):
 
     def __call__(self, value: str | bytes) -> str | bytes:
         if self.regex.match(value) is None:  # type: ignore
-            raise ValidationError([self.REGEX_ERROR])
+            raise ValidationError(
+                [MarshmallowErrorContainer(ValidationErrorType.FORMAT, self.error)]
+            )
 
         return value
 

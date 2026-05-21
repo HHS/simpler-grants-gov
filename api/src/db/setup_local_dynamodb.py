@@ -40,10 +40,10 @@ def _create_virus_scan_table(
         table = dynamodb.create_table(
             TableName=file_scan_cache_table_name,
             KeySchema=[
-                {"AttributeName": "attachment_id", "KeyType": "HASH"},  # Partition key
+                {"AttributeName": "file_id", "KeyType": "HASH"},  # Partition key
             ],
             AttributeDefinitions=[
-                {"AttributeName": "attachment_id", "AttributeType": "S"},  # String type
+                {"AttributeName": "file_id", "AttributeType": "S"},  # String type
             ],
             BillingMode="PAY_PER_REQUEST",  # On-demand billing for local development
         )
