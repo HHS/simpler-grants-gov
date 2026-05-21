@@ -113,6 +113,9 @@ jobs:
     needs: [get-api-commit-hash]
     runs-on: ubuntu-24.04
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
       - name: Cache npm and playwright
         uses: ./.github/actions/cache-npm-and-playwright
 
