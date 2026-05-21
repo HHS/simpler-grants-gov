@@ -154,11 +154,23 @@ export default function OpportunityEditForm({
     }
   }
 
-  const singleFieldValidation = () => {
-    const estTotalFunding = Number(values.estimatedTotalProgramFunding ?? 0);
-    const awardMin = Number(values.awardMinimum ?? 0);
-    const awardMax = Number(values.awardMaximum ?? 0);
-
+  function parseCurrencyValue(value: string | null): number {
+    const raw = (value ?? "").replace(/,/g, "");
+    return Number(raw) || 0;
+  }
+  const singleFieldValidation = (event: React.FocusEvent<HTMLInputElement>) => {
+    const form = event.currentTarget.form;
+    if (!form) return;
+    const formData = new FormData(form);
+    const estTotalFunding = parseCurrencyValue(
+      formData.get("estimatedTotalProgramFunding") as string | null,
+    );
+    const awardMin = parseCurrencyValue(
+      formData.get("awardMinimum") as string | null,
+    );
+    const awardMax = parseCurrencyValue(
+      formData.get("awardMaximum") as string | null,
+    );
     // clear old error messages
     setSingleFrontendError("awardMinimum", null);
     setSingleFrontendError("awardMaximum", null);

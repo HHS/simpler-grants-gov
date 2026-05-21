@@ -939,4 +939,54 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
       ),
     ).toBeInTheDocument();
   });
+
+  it("awardMinimum should show an error if the value is less than 0", async () => {
+    const user = userEvent.setup();
+    renderOpportunityEditForm();
+
+    const input = screen.getByRole("textbox", {
+      name: /labels\.awardMinimum/i,
+    });
+    await user.clear(input);
+    await user.type(input, "-50000");
+    await user.tab();
+
+    expect(
+      screen.getByText("labels.awardMinimumvalidationErrors.currencyInput"),
+    ).toBeInTheDocument();
+  });
+
+  it("awardMaximum should show an error if the value is less than 0", async () => {
+    const user = userEvent.setup();
+    renderOpportunityEditForm();
+
+    const input = screen.getByRole("textbox", {
+      name: /labels\.awardMaximum/i,
+    });
+    await user.clear(input);
+    await user.type(input, "-50000");
+    await user.tab();
+
+    expect(
+      screen.getByText("labels.awardMaximumvalidationErrors.currencyInput"),
+    ).toBeInTheDocument();
+  });
+
+  it("estimatedTotalProgramFunding should show an error if the value is less than 0", async () => {
+    const user = userEvent.setup();
+    renderOpportunityEditForm();
+
+    const input = screen.getByRole("textbox", {
+      name: /labels\.estimatedTotalProgramFunding/i,
+    });
+    await user.clear(input);
+    await user.type(input, "-1000");
+    await user.tab();
+
+    expect(
+      screen.getByText(
+        "labels.estimatedTotalProgramFundingvalidationErrors.currencyInput",
+      ),
+    ).toBeInTheDocument();
+  });
 });
