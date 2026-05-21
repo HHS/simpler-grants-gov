@@ -191,9 +191,7 @@ class TestPerformanceSiteXSDValidation:
         )
         return application
 
-    def test_us_site_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session
-    ):
+    def test_us_site_validates_against_xsd(self, enable_factory_create, xsd_validator, db_session):
         application = self._make_application(
             enable_factory_create,
             db_session,
@@ -206,9 +204,9 @@ class TestPerformanceSiteXSDValidation:
         xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
 
         result = self._extract_and_validate(xml_string, xsd_validator)
-        assert result["valid"], (
-            f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
-        )
+        assert result[
+            "valid"
+        ], f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
 
     def test_international_site_validates_against_xsd(
         self, enable_factory_create, xsd_validator, db_session
@@ -225,9 +223,9 @@ class TestPerformanceSiteXSDValidation:
         xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
 
         result = self._extract_and_validate(xml_string, xsd_validator)
-        assert result["valid"], (
-            f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
-        )
+        assert result[
+            "valid"
+        ], f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
 
     def test_with_additional_sites_validates_against_xsd(
         self, enable_factory_create, xsd_validator, db_session
@@ -247,6 +245,6 @@ class TestPerformanceSiteXSDValidation:
         xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
 
         result = self._extract_and_validate(xml_string, xsd_validator)
-        assert result["valid"], (
-            f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
-        )
+        assert result[
+            "valid"
+        ], f"XSD validation failed:\n{result['error_message']}\nXML:\n{xml_string[:3000]}"
