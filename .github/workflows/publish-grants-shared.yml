@@ -47,13 +47,11 @@ jobs:
         run: |
           make docker-cmd args="uv run --isolated --with dist/grants_shared-${{steps.get-version.outputs.project_version}}.tar.gz tests/grants_shared/smoke_test.py"
 
-      # This publish relies on trusted publishing which
-      # uses a trusted connection between github actions
-      # and PyPi to avoid us needing to manage API Keys
+      # This publish relies on an API key configured
+      # for the repo and stored in a Github secret.
       #
       # See the following for more information:
       # * https://docs.astral.sh/uv/guides/integration/github/#publishing-to-pypi
-      # * https://docs.pypi.org/trusted-publishers/
       - name: Release to PyPi
         run: |
           make docker-cmd args="uv publish"
