@@ -5,15 +5,15 @@ on:
   pull_request: # TODO - remove, just need for testing
     paths:
       - backend/grants_shared/**
-      - .github/workflows/release-grants-shared.yml
+      - .github/workflows/publish-grants-shared.yml
 
 defaults:
   run:
     working-directory: ./backend/grants_shared
 
 jobs:
-  do-release:
-    name: Do Release
+  publish-to-pypi:
+    name: Publish grants_shared to PyPi
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
