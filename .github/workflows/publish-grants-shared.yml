@@ -2,11 +2,6 @@ name: Release Grants Shared Package to PyPi
 on:
   workflow_call:
 
-  pull_request: # TODO - remove, just need for testing
-    paths:
-      - backend/grants_shared/**
-      - .github/workflows/publish-grants-shared.yml
-
 defaults:
   run:
     working-directory: ./backend/grants_shared
