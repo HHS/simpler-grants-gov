@@ -124,11 +124,6 @@ locals {
       secret_store_name = "/api/${var.environment}/enable-simpler-route"
     }
 
-    ENABLE_JOB_LOCK = {
-      manage_method     = "manual"
-      secret_store_name = "/api/${var.environment}/enable-job-lock"
-    }
-
     SAM_GOV_API_KEY = {
       manage_method     = "manual"
       secret_store_name = "/api/${var.environment}/sam-gov-api-key"

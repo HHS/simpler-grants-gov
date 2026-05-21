@@ -2,10 +2,8 @@ import contextlib
 import logging
 import uuid
 from datetime import timedelta
-from functools import cache
 from typing import Any
 
-from pydantic import Field
 from sqlalchemy import select
 
 from src.adapters import db
@@ -33,12 +31,7 @@ class TaskJobLockNotFoundError(Exception):
 
 
 class TaskJobLockConfig(PydanticBaseEnvConfig):
-    enable_job_lock: bool = Field(alias="ENABLE_JOB_LOCK")
-
-
-@cache
-def get_task_job_lock_config() -> TaskJobLockConfig:
-    return TaskJobLockConfig()
+    enable_job_lock: bool = False
 
 
 class TaskJobLock(contextlib.AbstractContextManager[None]):
@@ -50,15 +43,31 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
         *,
         lock_duration_minutes: int = 60,
     ) -> None:
+        """
+        Context Manager for any job task in order to prevent job tasks of the same kind overriding each other.
+
+        Usage:
+            with job_lock(
+                db_session,
+                job_type=JobType.EXAMPLE_JOB,
+                lock_duration_minutes=60
+            ):
+                # any logic you want to be locked can go here
+                ExampleJobTask(db_session).run()
+
+        Parameters:
+          job_type (JobType): Job type of the task
+          lock_duration_minutes: sets a time for the locked status
+        """
         self.db_session = db_session
         self.job_type = job_type
         self.lock_duration_minutes = lock_duration_minutes
         self.internal_lock_id = uuid.uuid4()
-        self.config = get_task_job_lock_config()
+        self.config = self.get_task_job_lock_config()
         self.extra = {
             "job_type": self.job_type,
             "internal_lock_id": self.internal_lock_id,
-            "job_locked_enabled": self.config.enable_job_lock,
+            "job_lock_enabled": self.config.enable_job_lock,
         }
 
     def __enter__(self) -> None:
@@ -66,23 +75,16 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
         if not self.config.enable_job_lock:
             return
 
-        with self.db_session.begin_nested():
-            job_lock = self.get_job_lock()
-
-            if job_lock is None:
-                job_lock = JobLock(job_type=self.job_type, is_locked=False)
+        with self.db_session.begin():
+            job_lock = self.get_or_create_job_lock()
 
             now = datetime_util.utcnow()
             if job_lock.is_locked and job_lock.locked_until > now:
-                logger.error("Job is currently locked", extra=self.extra)
+                updated_extra = {**self.extra, "locking_job_lock_id": job_lock.job_lock_id}
+                logger.warning("Job is currently locked", extra=updated_extra)
                 raise TaskJobLockIsLockedError
 
-            job_lock.locked_until = datetime_util.utcnow() + timedelta(
-                minutes=self.lock_duration_minutes
-            )
-            job_lock.is_locked = True
-            job_lock.locked_by = self.internal_lock_id
-            self.db_session.add(job_lock)
+            self.set_job_lock_to_locked(job_lock)
 
     def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
         logger.info("Exiting the lock", extra=self.extra)
@@ -91,26 +93,18 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
             return
 
         try:
-            with self.db_session.begin_nested():
+            with self.db_session.begin():
                 job_lock = self.get_job_lock()
 
                 if not job_lock:
-                    logger.error(
+                    logger.info(
                         "JobLock not found",
                         extra=self.extra,
                     )
                     raise TaskJobLockNotFoundError
 
-                if job_lock.locked_by != self.internal_lock_id:
-                    updated_extra = {**self.extra, "locked_by": job_lock.locked_by}
-                    logger.error(
-                        "JobLock ids do not match",
-                        extra=updated_extra,
-                    )
-                    raise TaskJobLockInternalIDError
+                job_lock = self.set_job_lock_to_unlocked(job_lock)
 
-                job_lock.is_locked = False
-                self.db_session.add(job_lock)
         except Exception as e:
             logger.exception("Failed to free the job lock", extra=self.extra)
             # If the exc_type passed in was not null, don't do anything
@@ -121,7 +115,48 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
             # Otherwise raise the specific exception we encountered for the job lock update failure.
             raise TaskJobLockError from e
 
+    def get_task_job_lock_config(self) -> TaskJobLockConfig:
+        return TaskJobLockConfig()
+
+    def verify_job_lock(self, job_lock: JobLock) -> None:
+        job_lock = self.refresh_job_lock(job_lock)
+        if job_lock.locked_by != self.internal_lock_id:
+            updated_extra = {**self.extra, "locked_by": job_lock.locked_by}
+            logger.info(
+                "JobLock ids do not match",
+                extra=updated_extra,
+            )
+            raise TaskJobLockInternalIDError
+
     def get_job_lock(self) -> JobLock | None:
         return self.db_session.execute(
-            select(JobLock).where(JobLock.job_type == self.job_type)
+            select(JobLock).where(JobLock.job_type == self.job_type).with_for_update()
         ).scalar_one_or_none()
+
+    def get_or_create_job_lock(self) -> JobLock:
+        job_lock = self.get_job_lock()
+        if job_lock is None:
+            job_lock = JobLock(job_type=self.job_type, is_locked=False)
+        return job_lock
+
+    def add_job_lock(self, job_lock: JobLock) -> None:
+        self.db_session.add(job_lock)
+        self.db_session.flush()
+
+    def refresh_job_lock(self, job_lock: JobLock) -> JobLock:
+        self.db_session.refresh(job_lock)
+        return job_lock
+
+    def set_job_lock_to_locked(self, job_lock: JobLock) -> JobLock:
+        job_lock.locked_until = datetime_util.utcnow() + timedelta(
+            minutes=self.lock_duration_minutes
+        )
+        job_lock.is_locked = True
+        job_lock.locked_by = self.internal_lock_id
+        self.add_job_lock(job_lock)
+        return job_lock
+
+    def set_job_lock_to_unlocked(self, job_lock: JobLock) -> JobLock:
+        job_lock.is_locked = False
+        self.add_job_lock(job_lock)
+        return job_lock
