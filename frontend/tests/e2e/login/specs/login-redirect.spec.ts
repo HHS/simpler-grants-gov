@@ -114,7 +114,7 @@ test.describe("Login Page Redirect", () => {
   );
 
   // Scenario: should display "Redirecting..." text while redirecting
-test(
+  test(
     'should display "Redirecting..." text while redirecting',
     { tag: [AUTH, FULL_REGRESSION] },
     async ({ page }) => {
@@ -146,4 +146,3 @@ test(
     },
   );
 });
-
