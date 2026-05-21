@@ -3,6 +3,10 @@ import type { FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling
 // Shape of each form entry in print-view-opportunities.json
 export interface PrintViewFormEntry {
   formKey: string;
+  /**
+   * Values may be exact strings or regex patterns encoded as strings (e.g. "/\\d{2}\\.[A-Z0-9]{3}/i").
+   * The loader converts pattern strings to RegExp at load time.
+   */
   expectedPrepopulatedFields: Record<string, string>;
 }
 
@@ -22,7 +26,8 @@ export type PrintViewOpportunityRegistry = Record<
 export interface ResolvedPrintViewForm {
   formKey: string;
   formConfig: FillFormConfig;
-  expectedPrepopulatedFields: Record<string, string>;
+  /** String values are exact matches; RegExp values validate format only. */
+  expectedPrepopulatedFields: Record<string, string | RegExp>;
   /**
    * Maps fill-data key → print view testId.
    * Derived from formConfig.fields using printTestId ?? testId.
@@ -45,6 +50,7 @@ export interface FilledFormEntry {
   formName: string | RegExp;
   testData: Record<string, string>;
   printUrl: string;
-  expectedPrepopulatedFields: Record<string, string>;
+  /** String values are exact matches; RegExp values validate format only. */
+  expectedPrepopulatedFields: Record<string, string | RegExp>;
   userEnteredFieldTestIds: Record<string, string>;
 }

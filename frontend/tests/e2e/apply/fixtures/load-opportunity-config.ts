@@ -9,6 +9,18 @@ import type {
 import opportunityRegistry from "./print-view-opportunities.json";
 
 /**
+ * Converts a string value to a RegExp if it is encoded as a regex literal
+ * (e.g. "/\\d{2}\\.[A-Z0-9]{3}/i"), otherwise returns the string as-is.
+ * This lets JSON entries express format-only assertions without pinning exact values.
+ */
+function parseFieldValue(value: string): string | RegExp {
+  const match = value.match(/^\/(.+)\/([gimsuy]*)$/);
+  if (match) {
+    return new RegExp(match[1], match[2]);
+  }
+  return value;
+}
+/**
  * Maps formKey → FillFormConfig (from form fixture).
  * Add a new entry here when a new form type is introduced.
  */
@@ -61,10 +73,17 @@ export function loadOpportunityConfig(
         .filter((pair): pair is [string, string] => pair[1] !== undefined),
     );
 
+    const expectedPrepopulatedFields = Object.fromEntries(
+      Object.entries(form.expectedPrepopulatedFields).map(([key, value]) => [
+        key,
+        parseFieldValue(value),
+      ]),
+    );
+
     return {
       formKey: form.formKey,
       formConfig,
-      expectedPrepopulatedFields: form.expectedPrepopulatedFields,
+      expectedPrepopulatedFields,
       userEnteredFieldTestIds,
     };
   });

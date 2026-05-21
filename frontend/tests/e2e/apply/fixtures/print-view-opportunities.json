@@ -6,7 +6,7 @@
         "formKey": "projectAbstractSummary",
         "expectedPrepopulatedFields": {
           "funding_opportunity_number": "TEST-PRINT-ORG-IND-ON01",
-          "assistance_listing_number": "70.376"
+          "assistance_listing_number": "/\\d{2}\\.[A-Z0-9]{3}/i"
         }
       }
     ]
