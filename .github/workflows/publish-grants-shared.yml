@@ -36,7 +36,9 @@ jobs:
           make docker-cmd args="uv run --isolated --with dist/grants_shared-${{steps.get-version.outputs.project_version}}-py3-none-any.whl tests/grants_shared/smoke_test.py"
 
       - name: Smoke Test (source distribution)
-        run: make smoke-test-gz
+        run: |
+          make docker-cmd args="uv run --isolated --with dist/grants_shared-${{steps.get-version.outputs.project_version}}.tar.gz tests/grants_shared/smoke_test.py"
+
 
       # TODO - add uv publish here
 
