@@ -1,7 +1,5 @@
 import logging
 
-import logging
-
 from src.db.models.competition_models import Form
 
 from ..registry.form_template_registry import form_template_registry

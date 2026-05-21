@@ -13,7 +13,6 @@ import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
-import src.form_schema.forms  # noqa: F401
 import src.logging
 import src.logging.flask_logger as flask_logger
 from src.adapters.newrelic import init_newrelic
@@ -42,6 +41,7 @@ from src.auth.api_jwt_auth import initialize_jwt_auth
 from src.auth.auth_utils import get_app_security_scheme
 from src.auth.login_gov_jwt_auth import initialize_login_gov_config
 from src.data_migration.data_migration_blueprint import data_migration_blueprint
+from src.form_schema.forms import init_form_registry
 from src.legacy_soap_api import init_app as init_legacy_soap_api
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
@@ -114,6 +114,8 @@ def create_app() -> APIFlask:
     init_legacy_soap_api(app)
 
     register_well_known(app, endpoint_config.domain_verification_map)
+
+    init_form_registry()
 
     return app
 
