@@ -365,7 +365,7 @@ jobs:
           files: |
             frontend/tests/e2e/apply/forms/**/*.spec.ts
             frontend/src/components/applyForm/**
-            frontend/src/app/[locale]/workspace/applications/[applicationId]/**/*.tsx
+            frontend/src/app/[locale]/workspace/applications/[applicationId]/form/**/*.tsx
             api/src/form_schema/forms/**
             api/src/form_schema/shared/**
             api/src/form_schema/rule_processing/**
