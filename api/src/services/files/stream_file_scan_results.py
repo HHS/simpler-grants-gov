@@ -31,27 +31,21 @@ SCAN_RECORD_STATUS_ATTR = "status"
 
 
 class FileScanStreamConfig(PydanticBaseEnvConfig):
-    poll_interval_seconds: float = Field(
-        default=3.0, alias="FILE_SCAN_RESULTS_POLL_INTERVAL_SECONDS"
-    )
-    max_duration_seconds: float = Field(
-        default=60.0, alias="FILE_SCAN_RESULTS_MAX_DURATION_SECONDS"
-    )
+    poll_interval_seconds: float = Field(alias="FILE_SCAN_RESULTS_POLL_INTERVAL_SECONDS")
+    max_duration_seconds: float = Field(alias="FILE_SCAN_RESULTS_MAX_DURATION_SECONDS")
 
 
 @dataclass(frozen=True)
 class FileScanRecord:
-    """Scan-cache record from DynamoDB with attributes pre-parsed.
+    """A fully-parsed scan-cache record from DynamoDB."""
 
-    Fields are typed as Optional because a record in DynamoDB can be partially
-    written or carry an unknown status value; callers decide what to do with
-    a missing or unparseable field.
-    """
+    user_id: str
+    status: FileScanStatus
 
-    user_id: str | None
-    status: FileScanStatus | None
-    # Kept for diagnostic logging when ``status`` couldn't be parsed.
-    raw_status: str | None
+
+class InvalidFileScanRecordError(Exception):
+    """A DynamoDB scan record is missing required attributes or has an
+    unknown status value. Treated as an infrastructure error (500)."""
 
 
 def _get_string_attr(item: dict[str, Any], attr: str) -> str | None:
@@ -64,18 +58,26 @@ def _get_string_attr(item: dict[str, Any], attr: str) -> str | None:
 
 
 def _parse_scan_record(item: dict[str, Any]) -> FileScanRecord:
+    user_id = _get_string_attr(item, SCAN_RECORD_USER_ID_ATTR)
+    if user_id is None:
+        raise InvalidFileScanRecordError(
+            f"Scan record missing {SCAN_RECORD_USER_ID_ATTR!r} attribute"
+        )
+
     raw_status = _get_string_attr(item, SCAN_RECORD_STATUS_ATTR)
-    status: FileScanStatus | None = None
-    if raw_status is not None:
-        try:
-            status = FileScanStatus(raw_status)
-        except ValueError:
-            status = None
-    return FileScanRecord(
-        user_id=_get_string_attr(item, SCAN_RECORD_USER_ID_ATTR),
-        status=status,
-        raw_status=raw_status,
-    )
+    if raw_status is None:
+        raise InvalidFileScanRecordError(
+            f"Scan record missing {SCAN_RECORD_STATUS_ATTR!r} attribute"
+        )
+
+    try:
+        status = FileScanStatus(raw_status)
+    except ValueError as exc:
+        raise InvalidFileScanRecordError(
+            f"Scan record has unknown {SCAN_RECORD_STATUS_ATTR!r} value: {raw_status!r}"
+        ) from exc
+
+    return FileScanRecord(user_id=user_id, status=status)
 
 
 def _get_scan_record(
@@ -94,30 +96,6 @@ def _get_scan_record(
     return _parse_scan_record(response.item)
 
 
-def _resolve_status(
-    record: FileScanRecord, pending_file_id: uuid.UUID, user_id: uuid.UUID
-) -> FileScanStatus | None:
-    """Return the record's status, or log and return None to end the stream."""
-    if record.status is not None:
-        return record.status
-
-    if record.raw_status is None:
-        logger.warning(
-            "Scan record missing status attribute, ending stream",
-            extra={"pending_file_id": pending_file_id, "user_id": user_id},
-        )
-    else:
-        logger.warning(
-            "Unable to parse file scan status from record, ending stream",
-            extra={
-                "pending_file_id": pending_file_id,
-                "user_id": user_id,
-                "raw_status": record.raw_status,
-            },
-        )
-    return None
-
-
 def _fetch_next_record(
     dynamodb_client: DynamoDBClient,
     table_name: str,
@@ -127,11 +105,17 @@ def _fetch_next_record(
     """Re-query the scan record for the next poll iteration.
 
     Returns the record if it still exists and still belongs to ``user_id``;
-    otherwise logs and returns None to signal that the stream should end.
+    returns None (and logs) if the record was deleted between polls or now
+    belongs to a different user. Raises InvalidFileScanRecordError if the
+    record exists but is malformed -- the caller is expected to log + re-raise
+    so the stream terminates loudly.
     """
     next_record = _get_scan_record(dynamodb_client, table_name, pending_file_id)
     if next_record is None:
-        logger.info(
+        # The record existed at the start of the stream, so its disappearance
+        # mid-poll is a "should never happen" state -- TTL expiry on an active
+        # scan, an external delete, etc. Log loudly so the cause can be found.
+        logger.error(
             "File scan record disappeared during stream, ending stream",
             extra={"pending_file_id": pending_file_id, "user_id": user_id},
         )
@@ -157,8 +141,9 @@ def stream_file_scan_results(
     """Stream file scan status updates for the given pending file.
 
     The initial DynamoDB lookup happens before any chunks are yielded so we can
-    return a 404 or 403 with the proper HTTP status. After streaming starts, any
-    subsequent error (missing record, user mismatch) just ends the stream.
+    return a 404 / 403 / 500 with the proper HTTP status. After streaming
+    starts, a missing record or user mismatch just ends the stream; a malformed
+    record raises (terminating the connection) and is logged.
 
     Yields chunks shaped like ``FileScanResultsResponseSchema``; the caller is
     responsible for serializing each chunk through that schema.
@@ -170,8 +155,10 @@ def stream_file_scan_results(
 
     table_name = dynamodb_config.file_scan_cache_table_name
 
-    # First lookup happens outside the generator so that 404/403 results in a
-    # proper HTTP status code rather than a truncated stream.
+    # First lookup happens outside the generator so that 404/403/500 results in
+    # a proper HTTP status code rather than a truncated stream. A malformed
+    # record raised from _get_scan_record propagates as an unhandled exception,
+    # which the framework converts to a 500 with stack-trace logging.
     record = _get_scan_record(dynamodb_client, table_name, pending_file_id)
     if record is None:
         raise_flask_error(404, "File scan record not found")
@@ -192,10 +179,7 @@ def stream_file_scan_results(
         start_time = datetime_util.utcnow()
 
         while True:
-            status = _resolve_status(current_record, pending_file_id, user.user_id)
-            if status is None:
-                return
-
+            status = current_record.status
             yield {"data": {"status": status.value}}
 
             elapsed = (datetime_util.utcnow() - start_time).total_seconds()
@@ -226,9 +210,24 @@ def stream_file_scan_results(
 
             time.sleep(config.poll_interval_seconds)
 
-            next_record = _fetch_next_record(
-                dynamodb_client, table_name, pending_file_id, user.user_id
-            )
+            try:
+                next_record = _fetch_next_record(
+                    dynamodb_client, table_name, pending_file_id, user.user_id
+                )
+            except InvalidFileScanRecordError:
+                # Streaming has already started so we can't change the HTTP
+                # status; log explicitly (Flask's error processor only fires
+                # for HTTPError) and re-raise to abort the connection.
+                logger.exception(
+                    "Invalid file scan record encountered mid-stream, aborting",
+                    extra={
+                        "pending_file_id": pending_file_id,
+                        "user_id": user.user_id,
+                        "stream_duration_seconds": elapsed,
+                    },
+                )
+                raise
+
             if next_record is None:
                 return
 

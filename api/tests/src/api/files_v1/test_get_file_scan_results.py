@@ -188,6 +188,63 @@ class TestGetFileScanResultsSuccess:
         # elapsed-time check before sleeping or re-querying.
         assert chunks == [{"data": {"status": FileScanStatus.PENDING.value}}]
 
+    def test_record_disappearing_mid_stream_logs_error(
+        self,
+        client,
+        user,
+        user_auth_token,
+        dynamodb_boto_client,
+        file_scan_dynamodb_table,
+        monkeypatch,
+        caplog,
+    ):
+        """If the record is deleted between polls, we log at ERROR and end the stream."""
+        pending_file_id = uuid.uuid4()
+        _put_scan_record(
+            dynamodb_boto_client,
+            file_scan_dynamodb_table,
+            pending_file_id,
+            user.user_id,
+            FileScanStatus.PENDING,
+        )
+
+        real_get_item = DynamoDBClient.get_item
+        first_call = {"done": False}
+
+        def wrapped_get_item(self, *args, **kwargs):
+            result = real_get_item(self, *args, **kwargs)
+            if not first_call["done"]:
+                first_call["done"] = True
+                dynamodb_boto_client.delete_item(
+                    TableName=file_scan_dynamodb_table,
+                    Key={"file_id": {"S": str(pending_file_id)}},
+                )
+            return result
+
+        monkeypatch.setattr(DynamoDBClient, "get_item", wrapped_get_item)
+
+        with caplog.at_level("ERROR"):
+            resp = client.get(
+                _build_url(pending_file_id),
+                headers={"X-SGG-Token": user_auth_token},
+            )
+            chunks = _parse_chunks(resp)
+
+        assert resp.status_code == 200
+        # First chunk was emitted before the record vanished; nothing after.
+        assert chunks == [{"data": {"status": FileScanStatus.PENDING.value}}]
+
+        disappeared_records = [
+            r
+            for r in caplog.records
+            if r.message == "File scan record disappeared during stream, ending stream"
+        ]
+        assert len(disappeared_records) == 1
+        record = disappeared_records[0]
+        assert record.levelname == "ERROR"
+        assert record.pending_file_id == pending_file_id
+        assert record.user_id == user.user_id
+
     def test_logs_terminal_status_reached(
         self,
         client,
@@ -307,3 +364,152 @@ class TestGetFileScanResults404:
 
         assert resp.status_code == 404
         assert resp.get_json()["message"] == "File scan record not found"
+
+
+class TestGetFileScanResults500:
+    """Malformed DynamoDB records are an infrastructure error -- fail fast."""
+
+    def test_missing_user_id_returns_500(
+        self,
+        client,
+        user_auth_token,
+        dynamodb_boto_client,
+        file_scan_dynamodb_table,
+    ):
+        pending_file_id = uuid.uuid4()
+        dynamodb_boto_client.put_item(
+            TableName=file_scan_dynamodb_table,
+            Item={
+                "file_id": {"S": str(pending_file_id)},
+                "status": {"S": FileScanStatus.PENDING.value},
+            },
+        )
+
+        resp = client.get(
+            _build_url(pending_file_id),
+            headers={"X-SGG-Token": user_auth_token},
+        )
+
+        assert resp.status_code == 500
+
+    def test_missing_status_returns_500(
+        self,
+        client,
+        user,
+        user_auth_token,
+        dynamodb_boto_client,
+        file_scan_dynamodb_table,
+    ):
+        pending_file_id = uuid.uuid4()
+        dynamodb_boto_client.put_item(
+            TableName=file_scan_dynamodb_table,
+            Item={
+                "file_id": {"S": str(pending_file_id)},
+                "user_id": {"S": str(user.user_id)},
+            },
+        )
+
+        resp = client.get(
+            _build_url(pending_file_id),
+            headers={"X-SGG-Token": user_auth_token},
+        )
+
+        assert resp.status_code == 500
+
+    def test_unknown_status_value_returns_500(
+        self,
+        client,
+        user,
+        user_auth_token,
+        dynamodb_boto_client,
+        file_scan_dynamodb_table,
+    ):
+        pending_file_id = uuid.uuid4()
+        dynamodb_boto_client.put_item(
+            TableName=file_scan_dynamodb_table,
+            Item={
+                "file_id": {"S": str(pending_file_id)},
+                "user_id": {"S": str(user.user_id)},
+                "status": {"S": "not-a-real-status"},
+            },
+        )
+
+        resp = client.get(
+            _build_url(pending_file_id),
+            headers={"X-SGG-Token": user_auth_token},
+        )
+
+        assert resp.status_code == 500
+
+    def test_malformed_record_mid_stream_logs_and_aborts(
+        self,
+        client,
+        user,
+        user_auth_token,
+        dynamodb_boto_client,
+        file_scan_dynamodb_table,
+        monkeypatch,
+        caplog,
+    ):
+        """A malformed record discovered mid-stream is logged and aborts the connection."""
+        pending_file_id = uuid.uuid4()
+        _put_scan_record(
+            dynamodb_boto_client,
+            file_scan_dynamodb_table,
+            pending_file_id,
+            user.user_id,
+            FileScanStatus.PENDING,
+        )
+
+        # After the first valid lookup, corrupt the record so the next poll
+        # raises InvalidFileScanRecordError.
+        real_get_item = DynamoDBClient.get_item
+        first_call = {"done": False}
+
+        def wrapped_get_item(self, *args, **kwargs):
+            result = real_get_item(self, *args, **kwargs)
+            if not first_call["done"]:
+                first_call["done"] = True
+                dynamodb_boto_client.put_item(
+                    TableName=file_scan_dynamodb_table,
+                    Item={
+                        "file_id": {"S": str(pending_file_id)},
+                        "user_id": {"S": str(user.user_id)},
+                        "status": {"S": "not-a-real-status"},
+                    },
+                )
+            return result
+
+        monkeypatch.setattr(DynamoDBClient, "get_item", wrapped_get_item)
+
+        with caplog.at_level("ERROR"):
+            try:
+                resp = client.get(
+                    _build_url(pending_file_id),
+                    headers={"X-SGG-Token": user_auth_token},
+                )
+                # Consume what was emitted before the exception aborted the stream.
+                body = resp.get_data(as_text=True)
+            except Exception:
+                # If the test client propagates the exception from inside the
+                # generator (Flask's default behavior with TESTING=True), that
+                # is equally acceptable -- the stream aborted loudly.
+                body = ""
+
+        abort_records = [
+            r
+            for r in caplog.records
+            if r.message == "Invalid file scan record encountered mid-stream, aborting"
+        ]
+        assert len(abort_records) == 1
+        record = abort_records[0]
+        assert record.pending_file_id == pending_file_id
+        assert record.user_id == user.user_id
+        assert record.exc_info is not None
+
+        # If the test client returned a response, it should only contain the
+        # first (valid) chunk -- the abort happened before any further chunks
+        # were yielded.
+        if body:
+            chunks = [json.loads(line) for line in body.splitlines() if line.strip()]
+            assert chunks == [{"data": {"status": FileScanStatus.PENDING.value}}]
