@@ -56,3 +56,33 @@ def get_award_recommendation_and_verify_access(
     verify_access(user, {Privilege.VIEW_AWARD_RECOMMENDATION}, agency)
 
     return award_recommendation
+
+
+def get_award_recommendation_for_update(
+    db_session: db.Session, user: User, award_recommendation_id: uuid.UUID
+) -> AwardRecommendation:
+    stmt = (
+        select(AwardRecommendation)
+        .where(
+            AwardRecommendation.award_recommendation_id == award_recommendation_id,
+            AwardRecommendation.is_deleted.isnot(True),
+        )
+        .options(
+            selectinload(AwardRecommendation.opportunity).selectinload(Opportunity.agency_record),
+        )
+    )
+
+    award_recommendation = db_session.execute(stmt).scalar_one_or_none()
+    if award_recommendation is None:
+        raise_flask_error(
+            404,
+            message=f"Could not find Award Recommendation with ID {award_recommendation_id}",
+        )
+
+    agency = award_recommendation.opportunity.agency_record
+    if agency is None:
+        raise_flask_error(403, message="Forbidden")
+
+    verify_access(user, {Privilege.UPDATE_AWARD_RECOMMENDATION}, agency)
+
+    return award_recommendation

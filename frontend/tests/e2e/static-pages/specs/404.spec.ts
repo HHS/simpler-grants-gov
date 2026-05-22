@@ -1,6 +1,6 @@
 /**
  * @feature 404 page
- * @featureFile frontend/tests/e2e/404.feature
+ * @featureFile e2e/static-pages/features/404.feature
  * @scenario Show the 404 page title
  * @scenario Show the link back home
  */

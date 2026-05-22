@@ -1,6 +1,6 @@
 /**
  * @feature Vision page
- * @featureFile frontend/tests/e2e/vision.feature
+ * @featureFile e2e/static-pages/features/vision.feature
  * @scenario Show the page title
  * @scenario Open the public wiki link in a new tab
  * @scenario Open the user studies sign-up link in a new tab
