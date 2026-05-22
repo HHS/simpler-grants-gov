@@ -8,6 +8,7 @@ from pathlib import Path
 import click
 
 from src.form_schema.forms import init_form_registry
+from src.services.xml_generation.config import _build_xml_form_map
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.validation.test_cases import (
@@ -203,7 +204,7 @@ def validate_xml_generation_command(
     try:
         # Use default cache directory if not specified
         if not cache_dir:
-            cache_dir = Path(__file__).resolve().parents[1] / "services/xml_generation/xsds"
+            cache_dir = str(Path(__file__).resolve().parents[1] / "services/xml_generation/xsds")
 
         # Verify cache directory exists
         cache_path = Path(cache_dir)
@@ -342,6 +343,7 @@ def fetch_xsds_command(
             xsd_url = test_case.get("xsd_url")
             if xsd_url and xsd_url not in xsd_urls:
                 xsd_urls.add(xsd_url)
+
 
         if not xsd_urls:
             click.echo("Warning: No XSD URLs found in test cases", err=True)

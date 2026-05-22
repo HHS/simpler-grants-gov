@@ -7,7 +7,6 @@ from typing import Any
 
 import click
 
-from src.services.xml_generation.config import _build_xml_form_map
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
@@ -16,14 +15,6 @@ from .xsd_validator import XSDValidator
 
 logger = logging.getLogger(__name__)
 
-# Build form map dynamically from all registered forms (case-insensitive keyed by short_form_name)
-_XML_FORM_MAP = _build_xml_form_map()
-
-
-def _get_transform_config(form_name: str) -> dict | None:
-    """Return transform config for a form, matching case-insensitively."""
-    return _XML_FORM_MAP.get(form_name.upper())
-
 
 class ValidationTestRunner:
     """Runs validation tests for XML generation against XSD schemas.
@@ -31,12 +22,19 @@ class ValidationTestRunner:
     **Prerequisites**: XSD files must be pre-downloaded using the fetch-xsds CLI command.
     """
 
-    def __init__(self, xsd_cache_dir: str | Path):
+    def __init__(
+        self,
+        xsd_cache_dir: str | Path,
+        xml_form_map: dict[str, Any],
+    ):
         """Initialize validation test runner.
 
         Args:
             xsd_cache_dir: Directory containing cached XSD files.
                           XSD files must be pre-downloaded using 'flask task fetch-xsds'.
+            xml_form_map: Pre-built mapping of form names to transform configuration.
+        Must be initialized AFTER form registry setup using
+        'init_form_registry()' and '_build_xml_form_map()'.
 
         Raises:
             XSDValidationError: If cache directory doesn't exist
@@ -44,6 +42,11 @@ class ValidationTestRunner:
         self.xml_service = XMLGenerationService()
         self.xsd_validator = XSDValidator(xsd_cache_dir)
         self.results: list[dict[str, Any]] = []
+        self.xml_form_map = xml_form_map
+
+    def _get_transform_config(self, form_name: str) -> dict | None:
+        """Return transform config for a form, matching case-insensitively."""
+        return self.xml_form_map.get(form_name.upper())
 
     def _convert_attachment_mapping(
         self, attachment_mapping: dict[str, Any] | None
@@ -96,7 +99,7 @@ class ValidationTestRunner:
 
         try:
             # Get transform rules for the form
-            transform_config = _get_transform_config(form_name)
+            transform_config = self._get_transform_config(form_name)
             if not transform_config:
                 return {
                     "test_name": test_name,
@@ -106,7 +109,6 @@ class ValidationTestRunner:
                     "xml_content": None,
                     "validation_result": None,
                 }
-
             # Generate XML
             # Convert attachment_mapping dictionaries to AttachmentInfo objects
             converted_attachments = self._convert_attachment_mapping(attachment_mapping)
