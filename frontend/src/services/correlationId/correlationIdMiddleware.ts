@@ -22,8 +22,8 @@ export const CORRELATION_ID_MAX_AGE_SECONDS = 60 * 60 * 24;
 const UUID_V4_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export const isValidCorrelationId = (value: string | undefined): boolean =>
-  typeof value === "string" && UUID_V4_REGEX.test(value);
+export const isValidCorrelationId = (value: string): boolean =>
+  UUID_V4_REGEX.test(value);
 
 type CreationReason = "missing" | "invalid";
 
@@ -51,8 +51,8 @@ export const applyCorrelationId = (
   const existing = request.cookies.get(CORRELATION_ID_COOKIE)?.value;
 
   let correlationId: string;
-  if (isValidCorrelationId(existing)) {
-    correlationId = existing as string;
+  if (existing !== undefined && isValidCorrelationId(existing)) {
+    correlationId = existing;
   } else {
     correlationId = crypto.randomUUID();
     logAnonymousSessionStarted(
