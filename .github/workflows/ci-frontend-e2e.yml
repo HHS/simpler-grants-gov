@@ -149,8 +149,6 @@ jobs:
       # Install Chrome only for caching; other browsers installed per-shard in test job
       - run: npx playwright install --with-deps chrome
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-      #- run: npx playwright install-deps
-      #  if: steps.playwright-cache.outputs.cache-hit != 'true'
 
       # We package ourselves as tar.gz because this preserves permissions that a regular artifact upload/download does not.
       - name: Package node_modules
