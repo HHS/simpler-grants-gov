@@ -3,6 +3,7 @@ import logging
 import click
 import requests
 
+from src.constants.lookup_constants import JobType
 from src.db.models.competition_models import Form
 from src.task.ecs_background_task import ecs_background_task
 from src.task.forms.form_task_shared import BaseFormTask, build_form_json, get_form_url
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
     type=click.Choice(["local", "dev", "staging", "training", "prod"]),
 )
 @click.option("--form-id", required=True, type=str)
-@ecs_background_task(task_name="update-form")
+@ecs_background_task(task_name=JobType.UPDATE_FORM)
 def update_form(
     environment: str,
     form_id: str,

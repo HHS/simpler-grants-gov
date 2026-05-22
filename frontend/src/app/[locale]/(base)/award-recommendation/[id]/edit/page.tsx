@@ -22,6 +22,7 @@ import {
 } from "@trussworks/react-uswds";
 
 import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
+import AwardRecommendationAttachments from "src/components/award-recommendation/AwardRecommendationAttachments";
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
@@ -198,6 +199,7 @@ async function AwardRecommendationEditPageContent({
   const navigationItems = [
     { text: t("opportunity"), href: "opportunity" },
     { text: t("recommendations.heading"), href: "recommendations" },
+    { text: t("attachments.heading"), href: "attachments" },
   ];
 
   return (
@@ -255,6 +257,14 @@ async function AwardRecommendationEditPageContent({
                       awardRecommendationDetails.funding_strategy
                     }
                   />
+                </div>
+                <div id="attachments" className="seg-scroll-margin-top--header">
+                  {awardRecommendationId && (
+                    <AwardRecommendationAttachments
+                      awardRecommendationId={awardRecommendationId}
+                      mode="edit"
+                    />
+                  )}
                 </div>
               </div>
             </Grid>

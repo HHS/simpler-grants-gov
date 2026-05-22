@@ -596,7 +596,6 @@ describe("buildWarningTree", () => {
         type: "fieldList" as const,
         name: "contacts",
         label: "Contacts",
-        defaultSize: 1,
         children: [
           {
             type: "field" as const,
@@ -643,7 +642,6 @@ describe("buildWarningTree", () => {
             type: "fieldList" as const,
             name: "contacts",
             label: "Contacts",
-            defaultSize: 1,
             children: [
               {
                 type: "field" as const,
@@ -682,7 +680,6 @@ describe("buildWarningTree", () => {
         type: "fieldList",
         name: "contact_people_test",
         label: "Contact People",
-        defaultSize: 1,
         children: [
           {
             type: "field",
@@ -752,7 +749,6 @@ describe("buildWarningTree", () => {
         type: "fieldList",
         name: "contact_people_test",
         label: "Contact People",
-        defaultSize: 1,
         children: [
           {
             type: "field",
@@ -1127,13 +1123,66 @@ describe("addPrintWidgetToFields", () => {
     ]);
   });
 
+  it("preserves empty array objects up to minItems", () => {
+    const result = pruneEmptyNestedFields(
+      {
+        contact_people_test: [{ first_name: "Jane" }, {}],
+      },
+      {
+        type: "object",
+        properties: {
+          contact_people_test: {
+            type: "array",
+            minItems: 2,
+            items: {
+              type: "object",
+              properties: {
+                first_name: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      contact_people_test: [{ first_name: "Jane" }, {}],
+    });
+  });
+
+  it("prunes empty array objects beyond minItems", () => {
+    const result = pruneEmptyNestedFields(
+      {
+        contact_people_test: [{ first_name: "Jane" }, {}, {}],
+      },
+      {
+        type: "object",
+        properties: {
+          contact_people_test: {
+            type: "array",
+            minItems: 2,
+            items: {
+              type: "object",
+              properties: {
+                first_name: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      contact_people_test: [{ first_name: "Jane" }, {}],
+    });
+  });
+
   it("handles fieldList with nested fields", () => {
     const uiSchema: UiSchema = [
       {
         type: "fieldList" as const,
         name: "contacts",
         label: "Contacts",
-        defaultSize: 1,
         children: [
           {
             type: "field" as const,
@@ -1157,7 +1206,6 @@ describe("addPrintWidgetToFields", () => {
         type: "fieldList",
         name: "contacts",
         label: "Contacts",
-        defaultSize: 1,
         children: [
           {
             type: "field",
@@ -1259,7 +1307,6 @@ describe("addPrintWidgetToFields", () => {
           type: "fieldList",
           name: "contact_people_test",
           label: "Contact People",
-          defaultSize: 1,
           children: [],
         },
       ];
@@ -1284,7 +1331,6 @@ describe("addPrintWidgetToFields", () => {
               type: "fieldList",
               name: "contact_people_test",
               label: "Contact People",
-              defaultSize: 1,
               children: [],
             },
           ],
@@ -1351,7 +1397,6 @@ describe("addPrintWidgetToFields", () => {
           type: "fieldList",
           name: "contact_people_test",
           label: "Contact People",
-          defaultSize: 1,
           children: [],
         },
       ];
