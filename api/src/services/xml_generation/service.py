@@ -351,20 +351,26 @@ class XMLGenerationService:
     ) -> None:
         """Add an element to a parent using lxml with proper namespace handling."""
         if isinstance(value, list):
-            # Handle arrays - emit each item as a direct sibling under parent (no wrapper)
-            # Determine element name for items (used when no __wrapper override per item)
-            if field_name in namespace_fields:
-                namespace_prefix = namespace_fields[field_name]
-                namespace_uri = nsmap.get(namespace_prefix, "")
-                default_element_name = f"{{{namespace_uri}}}{field_name}"
-            else:
-                default_namespace_uri = (
+            # Items with __wrapper: field_name is an outer container (BudgetSummary > SummaryLineItem).
+            # Items without __wrapper: each item is emitted as field_name (multiple OtherSite siblings).
+            has_wrapped_items = any(
+                isinstance(item, dict) and "__wrapper" in item for item in value
+            )
+
+            def _make_subelement(el_name: str, parent_el: Any) -> Any:
+                if el_name in namespace_fields:
+                    ns_prefix = namespace_fields[el_name]
+                    ns_uri = nsmap.get(ns_prefix, "")
+                    return lxml_etree.SubElement(parent_el, f"{{{ns_uri}}}{el_name}")
+                default_ns = (
                     nsmap.get(root_element_name or "", "") if root_element_name else ""
                 )
-                if default_namespace_uri:
-                    default_element_name = f"{{{default_namespace_uri}}}{field_name}"
-                else:
-                    default_element_name = field_name
+                if default_ns:
+                    return lxml_etree.SubElement(parent_el, f"{{{default_ns}}}{el_name}")
+                return lxml_etree.SubElement(parent_el, el_name)
+
+            # Create outer container when items have __wrapper
+            array_parent = _make_subelement(field_name, parent) if has_wrapped_items else parent
 
             for item in value:
                 if isinstance(item, dict):
@@ -375,24 +381,10 @@ class XMLGenerationService:
                     # Create a copy of item without metadata keys
                     item_data = {k: v for k, v in item.items() if not k.startswith("__")}
 
-                    # Use wrapper as element name, or default to field_name
+                    # Use wrapper as element name, or fall back to field_name
                     item_element_name = item_wrapper if item_wrapper else field_name
 
-                    # Create the item element directly under parent
-                    if item_element_name in namespace_fields:
-                        namespace_prefix = namespace_fields[item_element_name]
-                        namespace_uri = nsmap.get(namespace_prefix, "")
-                        full_element_name = f"{{{namespace_uri}}}{item_element_name}"
-                        item_element = lxml_etree.SubElement(parent, full_element_name)
-                    else:
-                        default_namespace_uri = (
-                            nsmap.get(root_element_name or "", "") if root_element_name else ""
-                        )
-                        if default_namespace_uri:
-                            full_element_name = f"{{{default_namespace_uri}}}{item_element_name}"
-                            item_element = lxml_etree.SubElement(parent, full_element_name)
-                        else:
-                            item_element = lxml_etree.SubElement(parent, item_element_name)
+                    item_element = _make_subelement(item_element_name, array_parent)
 
                     # Add attributes to the item element
                     if item_attributes:
@@ -427,8 +419,8 @@ class XMLGenerationService:
                                 root_element_name,
                             )
                 else:
-                    # Simple value in array - create element directly under parent
-                    item_element = lxml_etree.SubElement(parent, default_element_name)
+                    # Simple value in array
+                    item_element = _make_subelement(field_name, array_parent)
                     item_element.text = str(item)
 
         elif isinstance(value, dict):
