@@ -117,9 +117,9 @@ class TaskJobLock(contextlib.AbstractContextManager[None]):
                 job_lock = self.set_job_lock_to_unlocked(job_lock)
 
                 logger.info(
-                    "Job lock held duration",
-                    extra={
-                        **self.extra,
+                    "Job lock released",
+                    extra=self.extra
+                    | {
                         "lock_duration_seconds": self.get_duration_seconds(),
                         "success": True,
                         "lock_acquired_at": self.lock_acquired_at,
