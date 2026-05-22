@@ -33,7 +33,6 @@ from tests.src.db.models.factories import (
 )
 
 
-
 class TestProjectAbstractSummaryXMLGeneration:
     """Test cases for Project Abstract Summary XML generation service."""
 
@@ -213,7 +212,6 @@ class TestProjectAbstractSummaryXMLGeneration:
         # Verify the abstract is included (elements use namespace prefix)
         assert "ProjectAbstract>" in xml_data
         assert "</Project_AbstractSummary_2_0:ProjectAbstract>" in xml_data
-
 
 
 class TestProjectAbstractSummaryXSDValidation:

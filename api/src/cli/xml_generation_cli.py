@@ -8,7 +8,6 @@ from pathlib import Path
 import click
 
 from src.form_schema.forms import init_form_registry
-from src.services.xml_generation.config import _build_xml_form_map
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.validation.test_cases import (
@@ -232,7 +231,7 @@ def validate_xml_generation_command(
                 click.echo("Error: No test cases found", err=True)
                 sys.exit(1)
 
-        # APPLY SKIP FILTER HERE (IMPORTANT)
+        # APPLY SKIP FILTER
         test_cases, skipped = filter_skipped(test_cases)
         if skipped:
             click.echo("Skipped tests (Fix existing skipped XSD validation tests #10424):")
@@ -431,7 +430,6 @@ def fetch_xsds_command(
         logger.error(f"Fetch failed: {e}", exc_info=verbose)
         click.echo(f"Error: Fetch failed: {e}", err=True)
         sys.exit(1)
-
 
 
 def filter_skipped(test_cases):

@@ -25,7 +25,6 @@ from tests.src.db.models.factories import (
 )
 
 
-
 class TestSFLLLXMLGeneration:
     """Test SF-LLL XML generation."""
 

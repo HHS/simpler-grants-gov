@@ -33,7 +33,6 @@ from tests.src.db.models.factories import (
 )
 
 
-
 class TestGGLobbyingFormXMLGeneration:
     """Test cases for GG_LobbyingForm XML generation service."""
 
@@ -192,7 +191,6 @@ class TestGGLobbyingFormXMLGeneration:
         assert (
             applicant_pos < rep_name_pos < rep_title_pos < rep_sig_pos < date_pos
         ), "Elements not in XSD sequence order"
-
 
 
 class TestGGLobbyingFormXSDValidation:

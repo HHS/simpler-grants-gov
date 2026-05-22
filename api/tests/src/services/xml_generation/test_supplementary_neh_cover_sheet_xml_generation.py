@@ -27,7 +27,6 @@ from tests.src.db.models.factories import (
 )
 
 
-
 class TestSupplementaryNEHCoverSheetXMLGeneration:
     """Test cases for Supplementary Cover Sheet for NEH Grant Programs XML generation service."""
 
@@ -471,7 +470,6 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
         assert (
             app_info_start < proj_field_pos < app_info_end
         ), "ProjFieldCode must be nested inside ApplicationInfoGroup"
-
 
 
 class TestSupplementaryNEHCoverSheetXSDValidation:

@@ -38,7 +38,6 @@ def _build_attachment(uuid_str, filename, mime, location, hash_value):
     )
 
 
-
 class TestOtherNarrativeAttachmentsXMLGeneration:
     """Test cases for Other Narrative Attachments XML generation service."""
 
@@ -133,7 +132,6 @@ class TestOtherNarrativeAttachmentsXMLGeneration:
         hash_pos = xml_data.find("HashValue")
 
         assert file_name_pos < mime_pos < location_pos < hash_pos
-
 
 
 class TestOtherNarrativeAttachmentsXSDValidation:

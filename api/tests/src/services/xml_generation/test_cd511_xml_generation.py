@@ -31,7 +31,6 @@ from tests.src.db.models.factories import (
 )
 
 
-
 class TestCD511XMLGeneration:
     """Test cases for CD511 XML generation service."""
 
@@ -238,7 +237,6 @@ class TestCD511XMLGeneration:
 
         # All elements should exist and be in order
         assert org_pos < award_pos < project_pos < contact_pos < title_pos < sig_pos < date_pos
-
 
 
 class TestCD511XSDValidation:

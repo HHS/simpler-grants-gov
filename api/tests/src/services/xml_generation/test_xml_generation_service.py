@@ -9,7 +9,6 @@ from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 
 
-
 class TestXMLGenerationService:
     """Test cases for XMLGenerationService."""
 

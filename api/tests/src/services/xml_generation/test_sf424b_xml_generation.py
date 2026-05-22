@@ -31,7 +31,6 @@ from tests.src.db.models.factories import (
 )
 
 
-
 class TestSF424BXMLGeneration:
     """Test cases for SF-424B XML generation service."""
 
@@ -374,7 +373,6 @@ class TestSF424BXMLGeneration:
             in xml_data
         )
         assert "<SF424B:SubmittedDate>2025-04-15</SF424B:SubmittedDate>" in xml_data
-
 
 
 class TestSF424BXSDValidation:

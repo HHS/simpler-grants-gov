@@ -12,7 +12,6 @@ from src.services.xml_generation.models.attachment import (
 )
 
 
-
 class TestAttachmentFile:
     """Test cases for AttachmentFile model."""
 
@@ -113,7 +112,6 @@ class TestAttachmentFile:
             AttachmentFile.from_file_path(nonexistent_path)
 
 
-
 class TestAttachmentGroup:
     """Test cases for AttachmentGroup model."""
 
@@ -190,7 +188,6 @@ class TestAttachmentGroup:
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             "application/octet-stream",  # Fallback on some systems
         ]
-
 
 
 class TestAttachmentData:

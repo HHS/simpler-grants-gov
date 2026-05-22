@@ -28,7 +28,6 @@ from tests.src.db.models.factories import (
 )
 
 
-
 class TestSubmissionXSDValidation:
     """End-to-end XSD validation tests for complete application submissions."""
 

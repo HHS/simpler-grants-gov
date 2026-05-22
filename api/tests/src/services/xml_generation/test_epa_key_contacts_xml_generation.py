@@ -58,7 +58,6 @@ def _create_sample_contact_person(prefix="Dr.", first_name="John", last_name="Sm
     }
 
 
-
 class TestEPAKeyContactsXMLGeneration:
     """Test cases for EPA Key Contacts XML generation service."""
 
@@ -417,7 +416,6 @@ class TestEPAKeyContactsXMLGeneration:
 
         # Phone in globLib namespace (legacy: <Phone xmlns:globLib="...">)
         assert auth_rep.find(f"{{{GLOB_NS}}}Phone").text.strip() == "1231231234"
-
 
 
 class TestEPAKeyContactsXSDValidation:
