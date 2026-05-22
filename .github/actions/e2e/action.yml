@@ -96,13 +96,6 @@ runs:
       run: |
         npm install @playwright/test
 
-    - name: Install Firefox and dependencies
-      if: ${{ inputs.do-firefox-install == 'true' }}
-      shell: bash
-      working-directory: ./frontend
-      run: |
-        npx playwright install --with-deps firefox
-
     - name: Install Chrome and dependencies
       if: ${{ inputs.do-chrome-install == 'true' }}
       shell: bash
@@ -110,13 +103,20 @@ runs:
       run: |
         npx playwright install --with-deps chrome
 
+    - name: Install Firefox and dependencies
+      if: ${{ inputs.do-firefox-install == 'true' }}
+      shell: bash
+      working-directory: ./frontend
+      run: |
+        npx playwright install --with-deps firefox
+
     # this should only be needed on shard 3, the WebKit shard
     - name: Install Webkit and dependencies
       if: ${{ inputs.do-webkit-install == 'true' }}
       shell: bash
       working-directory: ./frontend
       run: |
-        npx playwright install-deps webkit
+        npx playwright install --with-deps webkit
 
     - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
       if: ${{ inputs.playwright_tags == '' }}
