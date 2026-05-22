@@ -68,7 +68,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: grants-shared-dist
-          path: backend/grants-shared/dist/
+          path: /home/runner/work/simpler-grants-gov/simpler-grants-gov/backend/grants_shared/dist
           if-no-files-found: error
           retention-days: 1
           overwrite: true
