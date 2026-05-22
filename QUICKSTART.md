@@ -4,15 +4,21 @@ This Quickstart file is intended to help newcomers get SimplerGrants setup as ea
 
 Prior to following any of the sections below, ensure you have forked SimplerGrants and cloned your fork.
 
-## Prerequisites
+## Frontend Prerequisites
 
-- Docker (put version later im lazy)
-- Node (version later)
-- Python (version later)
+- Node ([check for version in .nvmrc](./frontend/.nvmrc))
+
+## API Prerequisites
+
+- Docker (with docker compose plugin)
+- Make
+- Git (should already be installed)
 
 ## Frontend-Only
 
 The Frontend can be easily setup locally if you intend to work on Frontend Issues. To see further information, such as running the Frontend with Docker, read [here](./documentation/frontend/development.md).
+
+Ensure you have the [Frontend Preqs](#frontend-prerequisites) installed before proceeding.
 
 1. Navigate to the Frontend Directory
 
@@ -35,6 +41,8 @@ npm run local
 ## API-Only
 
 The API can be run without the Frontend if you intend to work on API issues. For more information on API Development Setup, you can read [here](./documentation/api/development.md).
+
+Ensure you have the [API Preqs](#api-prerequisites) installed before proceeding.
 
 1. Navigate to the API Directory
 
