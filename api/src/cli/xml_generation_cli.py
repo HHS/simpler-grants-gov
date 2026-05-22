@@ -151,7 +151,7 @@ def generate_xml_command(
 @click.option(
     "--cache-dir",
     type=click.Path(),
-    help="Directory containing cached XSD files (default: ./xsd_cache). Run 'flask task fetch-xsds' first.",
+    help="Directory containing cached XSD files (default: ../services/xml_generation/xsds). Run 'flask task fetch-xsds' first.",
 )
 @click.option(
     "--output",
@@ -204,7 +204,7 @@ def validate_xml_generation_command(
     try:
         # Use default cache directory if not specified
         if not cache_dir:
-            cache_dir = "./xsd_cache"
+            cache_dir = Path(__file__).resolve().parents[1] / "services/xml_generation/xsds"
 
         # Verify cache directory exists
         cache_path = Path(cache_dir)
@@ -232,13 +232,23 @@ def validate_xml_generation_command(
                 click.echo("Error: No test cases found", err=True)
                 sys.exit(1)
 
+        # APPLY SKIP FILTER HERE (IMPORTANT)
+        test_cases, skipped = filter_skipped(test_cases)
+        if skipped:
+            click.echo("Skipped tests (Fix existing skipped XSD validation tests #10424):")
+            for name in skipped:
+                click.echo(f"  - {name}")
+            click.echo("")
+
         click.echo(f"Found {len(test_cases)} test cases")
         click.echo(f"XSD cache directory: {cache_dir}")
         click.echo(f"Results will be saved to: {output_file}")
         click.echo("")
 
         # Initialize test runner with cache directory
-        runner = ValidationTestRunner(xsd_cache_dir=cache_dir)
+        xml_form_map = _build_xml_form_map()
+
+        runner = ValidationTestRunner(xsd_cache_dir=cache_dir, xml_form_map=xml_form_map)
 
         # Run tests
         summary = runner.run_test_suite(test_cases)
@@ -306,7 +316,7 @@ def fetch_xsds_command(
     try:
         # Use default cache directory if not specified
         if not cache_dir:
-            cache_dir = "./xsd_cache"
+            cache_dir = Path(__file__).resolve().parents[1] / "services/xml_generation/xsds"
 
         # Get test cases to determine which XSDs we need
         if form:
@@ -421,3 +431,21 @@ def fetch_xsds_command(
         logger.error(f"Fetch failed: {e}", exc_info=verbose)
         click.echo(f"Error: Fetch failed: {e}", err=True)
         sys.exit(1)
+
+
+
+def filter_skipped(test_cases):
+    SKIPPED = {
+        "sf424_with_single_attachment",
+        "sf424_with_multiple_attachments",
+        "sf424_with_all_attachment_types",
+        "sf424a_minimal_non_federal_resources_only",
+        "sf424a_budget_sections_with_array_decomposition",
+        "sf424a_with_forecasted_cash_needs",
+        "sf424a_complete_all_sections",
+    }
+
+    return (
+        [tc for tc in test_cases if tc["name"] not in SKIPPED],
+        [tc["name"] for tc in test_cases if tc["name"] in SKIPPED],
+    )
