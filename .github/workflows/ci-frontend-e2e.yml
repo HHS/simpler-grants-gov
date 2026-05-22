@@ -146,7 +146,7 @@ jobs:
         run: |
           npm ci
 
-      # 2 of the 4 shards need chrome, so cache that, install the others as needed
+      # Install Chrome only for caching; other browsers installed per-shard in test job
       - run: npx playwright install --with-deps chrome
         if: steps.playwright-cache.outputs.cache-hit != 'true'
       #- run: npx playwright install-deps

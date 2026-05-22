@@ -8,7 +8,6 @@ description: Composite action to run Playwright against specified environment
 # At least one browser input must be set to 'true' for a valid test run.
 # ---
 
-
 inputs:
   version:
     description: "ref / sha / branch to run tests against"
@@ -97,13 +96,14 @@ runs:
         cache: ${{ inputs.package_manager }}
         cache-dependency-path: ${{ inputs.lockfile_path }}
 
-    - name: Install Playwright
+    - name: Install Playwright core package
       if: ${{ inputs.needs_node_setup == 'true' }}
       shell: bash
       working-directory: ./frontend
       run: |
         npm install @playwright/test
 
+    # Conditionally install Chrome if requested
     - name: Install Chrome and dependencies
       if: ${{ inputs.do-chrome-install == 'true' }}
       shell: bash
@@ -111,6 +111,7 @@ runs:
       run: |
         npx playwright install --with-deps chrome
 
+    # Conditionally install Firefox if requested (Shard 2 on the CI/CD run)
     - name: Install Firefox and dependencies
       if: ${{ inputs.do-firefox-install == 'true' }}
       shell: bash
@@ -118,7 +119,7 @@ runs:
       run: |
         npx playwright install --with-deps firefox
 
-    # this should only be needed on shard 3, the WebKit shard
+    # Conditionally install Webkit if requested (Shard 3 on the CI/CD run)
     - name: Install Webkit and dependencies
       if: ${{ inputs.do-webkit-install == 'true' }}
       shell: bash
