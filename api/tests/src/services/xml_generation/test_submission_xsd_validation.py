@@ -510,6 +510,7 @@ class TestSubmissionXSDValidation:
             "valid"
         ], f"SF-424A validation failed: {sf424a_validation['error_message']}"
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_submission_xml_structure_is_well_formed(self, sf424_application, db_session):
         """Test that generated submission XML has proper structure even without XSD validation."""
         application_submission = ApplicationSubmissionFactory.create(

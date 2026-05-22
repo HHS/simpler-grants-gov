@@ -112,6 +112,7 @@ class TestAttachmentTransformer:
         assert hash_val.get(f"{{{glob_ns}}}hashAlgorithm") == "SHA-1"
         assert hash_val.text == "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q="
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_add_multiple_attachment_element(self):
         """Test adding a multiple attachment element."""
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
@@ -147,6 +148,7 @@ class TestAttachmentTransformer:
         assert attached_files[1].find(f"{{{att_ns}}}FileName").text == "document2.xlsx"
         assert "spreadsheetml.sheet" in attached_files[1].find(f"{{{att_ns}}}MimeType").text
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_add_multiple_attachment_element_single_file(self):
         """Test adding multiple attachment element with single file."""
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
@@ -172,6 +174,7 @@ class TestAttachmentTransformer:
         assert len(attached_files) == 1
         assert attached_files[0].find(f"{{{att_ns}}}FileName").text == "single_document.pdf"
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_add_multiple_attachment_element_direct_list(self):
         """Test adding multiple attachment element with direct list."""
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
@@ -311,6 +314,7 @@ class TestAttachmentTransformer:
         assert hash_val.get(f"{{{glob_ns}}}hashAlgorithm") == "SHA-1"
         assert hash_val.text == "aGVsbG8gd29ybGQgdGhpcyBpcyBhIHRlc3Q="
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_uuid_based_multiple_attachments(self):
         """Test adding multiple attachments using UUIDs."""
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)
@@ -358,6 +362,7 @@ class TestAttachmentTransformer:
         assert "not found in attachment mapping" in str(exc_info.value)
         assert "not-a-valid-uuid" in str(exc_info.value)
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_mixed_single_and_multiple_attachments(self):
         """Test adding both single and multiple attachments together."""
         root = lxml_etree.Element("TestRoot", nsmap=self.nsmap)

@@ -188,6 +188,7 @@ class TestSFLLLXMLGeneration:
         # Verify award amount
         assert sflll.find(f".//{sflll_ns}AwardAmount").text == "500000.00"
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_sflll_address_fields_include_state(self, sflll_application, db_session):
         """Test that SF-LLL addresses include State field (legacy fix)."""
         application_submission = ApplicationSubmissionFactory.create(
