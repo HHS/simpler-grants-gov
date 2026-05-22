@@ -21,7 +21,7 @@ function parseFieldValue(value: string): string | RegExp {
   return value;
 }
 /**
- * Maps formKey → FillFormConfig (from form fixture).
+ * Maps formKey -> FillFormConfig (from form fixture).
  * Add a new entry here when a new form type is introduced.
  */
 const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
@@ -33,7 +33,7 @@ const FORM_CONFIG_REGISTRY: Record<string, FillFormConfig> = {
  *
  * The JSON is keyed directly by opportunityNumber, so lookup is O(1).
  * Each form's userEnteredFieldTestIds is derived from formConfig.fields using
- * printTestId ?? testId — no separate print-fields registry needed.
+ * printTestId ?? testId - no separate print-fields registry needed.
  *
  * @throws if no opportunity is registered for the given opportunityNumber
  * @throws if a form's formKey has no matching entry in FORM_CONFIG_REGISTRY
