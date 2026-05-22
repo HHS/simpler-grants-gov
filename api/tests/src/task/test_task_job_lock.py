@@ -148,7 +148,7 @@ def test_task_job_lock_when_is_locked_is_true_and_locked_until_is_in_future_rais
 
 
 def test_verify_job_lock_raises_when_locked_by_does_not_match(
-    caplog, db_session, enable_factory_create
+    clean_job_locks, caplog, db_session, enable_factory_create
 ):
     caplog.set_level(logging.INFO)
     job_lock = JobLockFactory.create(job_type=JobType.SETUP_CERT_USER, locked_by=uuid.uuid4())
