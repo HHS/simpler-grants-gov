@@ -109,7 +109,7 @@ runs:
       shell: bash
       working-directory: ./frontend
       run: |
-        npx playwright install --with-deps chrome
+        npx playwright install --with-deps chromium-headless-shell
 
     # Conditionally install Firefox if requested (Shard 2 on the CI/CD run)
     - name: Install Firefox and dependencies
