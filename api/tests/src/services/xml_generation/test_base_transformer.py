@@ -160,3 +160,54 @@ class TestRecursiveXMLTransformer:
         assert nested_result["Street1"] == "123 Main St"
         assert nested_result["City"] == "Washington"
         assert nested_result["State"] == "DC"
+
+    def test_transform_array_of_dicts(self):
+        transform_config = {
+            "sites": {
+                "xml_transform": {"target": "Sites", "type": "array"},
+                "items": {
+                    "name": {"xml_transform": {"target": "Name"}},
+                    "city": {"xml_transform": {"target": "City"}},
+                },
+            }
+        }
+        transformer = RecursiveXMLTransformer(transform_config)
+
+        result = transformer.transform(
+            {"sites": [{"name": "Lab A", "city": "Boston"}, {"name": "Lab B", "city": "Austin"}]}
+        )
+
+        assert result["Sites"] == [
+            {"Name": "Lab A", "City": "Boston"},
+            {"Name": "Lab B", "City": "Austin"},
+        ]
+
+    def test_transform_array_empty_list_returns_none(self):
+        transform_config = {
+            "sites": {
+                "xml_transform": {"target": "Sites", "type": "array"},
+                "items": {
+                    "name": {"xml_transform": {"target": "Name"}},
+                },
+            }
+        }
+        transformer = RecursiveXMLTransformer(transform_config)
+
+        result = transformer.transform({"sites": []})
+
+        assert "Sites" not in result
+
+    def test_transform_array_non_list_input_returns_none(self):
+        transform_config = {
+            "sites": {
+                "xml_transform": {"target": "Sites", "type": "array"},
+                "items": {
+                    "name": {"xml_transform": {"target": "Name"}},
+                },
+            }
+        }
+        transformer = RecursiveXMLTransformer(transform_config)
+
+        result = transformer.transform({"sites": "not-a-list"})
+
+        assert "Sites" not in result

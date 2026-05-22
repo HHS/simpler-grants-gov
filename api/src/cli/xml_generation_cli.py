@@ -7,6 +7,7 @@ from pathlib import Path
 
 import click
 
+from src.form_schema.forms import init_form_registry
 from src.services.xml_generation.config import _build_xml_form_map
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
@@ -17,9 +18,6 @@ from src.services.xml_generation.validation.test_cases import (
 from src.services.xml_generation.validation.test_runner import ValidationTestRunner
 from src.services.xml_generation.validation.xsd_fetcher import XSDFetcher
 from src.task.task_blueprint import task_blueprint
-
-# Build form map at module level to enable click.Choice validation
-FORM_TRANSFORM_RULES_MAP = _build_xml_form_map()
 
 
 @task_blueprint.cli.command("generate-xml")
@@ -37,8 +35,6 @@ FORM_TRANSFORM_RULES_MAP = _build_xml_form_map()
 @click.option(
     "--form",
     default="SF424_4_0",
-    type=click.Choice(list(FORM_TRANSFORM_RULES_MAP.keys()), case_sensitive=False),
-    help="Form name/version. Default: SF424_4_0",
 )
 @click.option(
     "--compact",
@@ -82,6 +78,26 @@ def generate_xml_command(
         flask task generate-xml --json '{"field": "value"}' --compact --output out.xml
     """
     try:
+        init_form_registry()
+
+        # Normalize
+        form_key = form.upper()
+
+        # -----------------------------
+        # Validate + lookup transform config
+        # -----------------------------
+        form_transform_rules_map = _build_xml_form_map()
+
+        transform_config = form_transform_rules_map.get(form_key)
+
+        if transform_config is None:
+            valid_forms = ", ".join(sorted(form_transform_rules_map.keys()))
+            click.echo(
+                f"Error: Invalid form '{form}'. " f"Valid options are: {valid_forms}",
+                err=True,
+            )
+            sys.exit(1)
+
         # Read JSON input
         if json_string:
             application_data = json.loads(json_string)
@@ -93,7 +109,7 @@ def generate_xml_command(
             sys.exit(1)
 
         # Get transform config for the specified form (validated by click.Choice)
-        transform_config = FORM_TRANSFORM_RULES_MAP.get(form.upper())
+        transform_config = form_transform_rules_map.get(form.upper())
 
         # Create service and generate XML
         service = XMLGenerationService()
@@ -178,11 +194,13 @@ def validate_xml_generation_command(
         # Use custom cache directory
         flask task validate-xml-generation --cache-dir /tmp/xsd_cache
     """
+    init_form_registry()
+
     # Set up logging level
     logger = logging.getLogger(__name__)
+
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
-
     try:
         # Use default cache directory if not specified
         if not cache_dir:
