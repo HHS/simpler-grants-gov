@@ -202,7 +202,6 @@ export async function saveOpportunityEditAction(
           ...buildOpportunitySummaryUpdateRequest(formData),
           is_forecast: isForecast,
         },
-        token: session.token,
       });
 
       return {
@@ -215,7 +214,6 @@ export async function saveOpportunityEditAction(
       opportunityId,
       opportunitySummaryId,
       body: buildOpportunitySummaryUpdateRequest(formData),
-      token: session.token,
     });
 
     return {
@@ -260,7 +258,7 @@ async function publishOpportunityAction(
   }
 
   try {
-    await publishOpportunityForGrantor(opportunityId, session.token);
+    await publishOpportunityForGrantor(opportunityId);
   } catch (error) {
     const status =
       error instanceof ApiRequestError ? parseErrorStatus(error) : null;
