@@ -362,9 +362,7 @@ class XMLGenerationService:
                     ns_prefix = namespace_fields[el_name]
                     ns_uri = nsmap.get(ns_prefix, "")
                     return lxml_etree.SubElement(parent_el, f"{{{ns_uri}}}{el_name}")
-                default_ns = (
-                    nsmap.get(root_element_name or "", "") if root_element_name else ""
-                )
+                default_ns = nsmap.get(root_element_name or "", "") if root_element_name else ""
                 if default_ns:
                     return lxml_etree.SubElement(parent_el, f"{{{default_ns}}}{el_name}")
                 return lxml_etree.SubElement(parent_el, el_name)
