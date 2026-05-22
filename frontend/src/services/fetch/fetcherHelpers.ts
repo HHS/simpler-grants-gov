@@ -18,7 +18,7 @@ import { getSession } from "src/services/auth/session";
 import { APIResponse } from "src/types/apiResponseTypes";
 import { ApiMethod } from "src/types/generalTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
-import { printAwsHeaders } from "src/utils/generalUtils";
+import { printAwsHeaders, printResponseInfo } from "src/utils/generalUtils";
 
 // Configuration of headers to send with all requests
 // optionally adds content type and user auth token
