@@ -81,7 +81,6 @@ export const getSession = async (): Promise<UserSession | null> => {
   if (!clientSessionToken) return null;
   const payload = await decryptClientToken(clientSessionToken);
   if (!payload) {
-    console.error("No session payload");
     return null;
   }
   const { token, exp } = payload;

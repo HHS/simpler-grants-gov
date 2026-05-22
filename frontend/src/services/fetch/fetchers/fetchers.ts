@@ -30,7 +30,7 @@ import {
   throwError,
 } from "src/services/fetch/fetcherHelpers";
 import { APIResponse } from "src/types/apiResponseTypes";
-import { printIdHeaders } from "src/utils/generalUtils";
+import { printAwsHeaders } from "src/utils/generalUtils";
 
 import { cache } from "react";
 
@@ -107,16 +107,8 @@ export function requesterForEndpoint({
           `bad Json from error response at ${url} with status code ${response.status}`,
         );
       }
-      console.error(
-        "Throwing error",
-        response.ok,
-        response.headers.get("Content-Type"),
-        response.status,
-        JSON.stringify(jsonBody),
-        printIdHeaders(response.headers),
-      );
 
-      return throwError(jsonBody, url, response.headers);
+      return throwError(jsonBody, url, response);
     } else if (
       !response.ok &&
       !allowedErrorStatuses.includes(response.status)

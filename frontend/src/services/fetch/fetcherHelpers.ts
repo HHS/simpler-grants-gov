@@ -18,7 +18,7 @@ import { getSession } from "src/services/auth/session";
 import { APIResponse } from "src/types/apiResponseTypes";
 import { ApiMethod } from "src/types/generalTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
-import { printIdHeaders } from "src/utils/generalUtils";
+import { printAwsHeaders } from "src/utils/generalUtils";
 
 // Configuration of headers to send with all requests
 // optionally adds content type and user auth token
@@ -115,12 +115,12 @@ export function fetchErrorToNetworkError(
 export const throwError = (
   responseBody: APIResponse,
   url: string,
-  headers: Headers,
+  response: Response,
 ) => {
   const { status_code = 0, message = "", errors } = responseBody;
   // errors raised here that have a status_code of 0 (the default above) and a message of "Internal server error" are injected by API GW
   console.error(
-    `API request error at ${url} (${status_code}): ${message}, ${printIdHeaders(headers)}`,
+    `API request error at ${url} (${status_code}): ${message}, ${printResponseInfo(response)}, ${printAwsHeaders(response.headers)}`,
   );
 
   const details = (errors && errors[0]) || {};
