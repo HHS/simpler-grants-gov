@@ -32,8 +32,10 @@ DOCKER_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME)
 
 ifeq "$(PY_RUN_APPROACH)" "local"
 PY_RUN_CMD := uv run
+RUN_CMD :=
 else
 PY_RUN_CMD := $(DOCKER_CMD)
+RUN_CMD := $(DOCKER_CMD)
 endif
 
 # Docker user configuration
@@ -129,17 +131,20 @@ lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 ##################################################
 
 bump-patch-version: ## Bump the patch version of the code (eg. 1.0.1 -> 1.0.2)
-	uv version --bump patch
+	$(RUN_CMD) uv version --bump patch
 
 bump-minor-version: ## Bump the minor version of the code (eg. 1.0.1 -> 1.1.0)
-	uv version --bump minor
+	$(RUN_CMD) uv version --bump minor
 
 ##################################################
 # Misc functionality
 ##################################################
 
-docker-cmd:
+docker-cmd: ## Run a command inside docker. Use as 'make docker-cmd args="uv --help"'
 	$(DOCKER_CMD) $(args)
+
+run-cmd: ## Run a generic command inside/outside docker based on the PY_RUN_APPROACH env var. Use as 'make run-cmd args="uv --help"'
+	$(RUN_CMD) $(args)
 
 help: ## Prints the help documentation and info about each command
 	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
