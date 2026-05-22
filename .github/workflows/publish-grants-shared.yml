@@ -1,25 +1,37 @@
 name: Release Grants Shared Package to PyPi
 on:
   workflow_dispatch:
+  pull_request: # TODO - remove, just need for testing
+    paths:
+      - backend/grants_shared/**
+      - .github/workflows/publish-grants-shared.yml
 
 defaults:
   run:
     working-directory: ./backend/grants_shared
 
 jobs:
-  publish-to-pypi:
-    name: Publish grants_shared to PyPi
+  build-grants-shared:
+    name: Build grants_shared for PyPi
     runs-on: ubuntu-22.04
     env:
-      UV_PUBLISH_TOKEN: ${{ secrets.GRANTS_SHARED_PYPI_KEY }}
+      # UV_PUBLISH_TOKEN: ${{ secrets.GRANTS_SHARED_PYPI_KEY }}
+      PY_RUN_APPROACH: "local"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          ref: "main"
+        # TODO - testing
+        #with:
+        #   ref: "main"
 
-      - name: Init / Build
-        run: make init
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install Python 3.14
+        run: uv python install 3.14
+
+      - name: Init
+        run: make setup-local
 
       - name: Run format check
         run: make format-check
@@ -33,6 +45,9 @@ jobs:
       - name: Start tests
         run: make test-coverage
 
+      - name: Build
+        run: uv build
+
       - name: Get Project Version
         id: get-version
         run: |
@@ -43,17 +58,38 @@ jobs:
       # Verify we built the package in the right shape to use as a module
       - name: Smoke Test (wheel)
         run: |
-          make docker-cmd args="uv run --isolated --with dist/grants_shared-${{steps.get-version.outputs.project_version}}-py3-none-any.whl tests/grants_shared/smoke_test.py"
+          uv run --isolated --with dist/grants_shared-${{steps.get-version.outputs.project_version}}-py3-none-any.whl tests/grants_shared/smoke_test.py
 
       - name: Smoke Test (source distribution)
         run: |
-          make docker-cmd args="uv run --isolated --with dist/grants_shared-${{steps.get-version.outputs.project_version}}.tar.gz tests/grants_shared/smoke_test.py"
+          uv run --isolated --with dist/grants_shared-${{steps.get-version.outputs.project_version}}.tar.gz tests/grants_shared/smoke_test.py
 
-      # This publish relies on an API key configured
-      # for the repo and stored in a Github secret.
-      #
-      # See the following for more information:
-      # * https://docs.astral.sh/uv/guides/integration/github/#publishing-to-pypi
-      - name: Release to PyPi
-        run: |
-          make docker-cmd args="uv publish"
+      - name: Upload dist
+        uses: actions/upload-artifact@v7
+        with:
+          name: grants-shared-dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 1
+          overwrite: true
+
+  publish-grants-shared:
+    # Separate dedicated job as we have to grant this one additional write
+    # privileges against our repo for the id-token, want to isolate that.
+    # TODO - more info
+    # https://docs.astral.sh/uv/guides/integration/github/#publishing-to-pypi
+    name: Publish grants_shared to PyPi
+    runs-on: ubuntu-22.04
+    environment: pypi-publish
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Retrieve dist
+        uses: actions/download-artifact@v7
+        with:
+          name: grants-shared-dist
+          path: dist/
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
