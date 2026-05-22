@@ -1,3 +1,5 @@
+import "server-only";
+
 import {
   GrantorOpportunityApiResponse,
   OpportunitySummaryCreateRequest,
@@ -16,22 +18,18 @@ type UpdateOpportunitySummaryForGrantorParams = {
   opportunityId: string;
   opportunitySummaryId: string;
   body: OpportunitySummaryUpdateRequest;
-  token: string;
 };
 
 type CreateOpportunitySummaryForGrantorParams = {
   opportunityId: string;
   body: OpportunitySummaryCreateRequest;
-  token: string;
 };
 
 export async function getOpportunityForGrantor(
   opportunityId: string,
-  token: string,
 ): Promise<GrantorOpportunityApiResponse> {
   const response = await getGrantorOpportunityRequest({
     subPath: opportunityId,
-    additionalHeaders: { "X-SGG-Token": token },
   });
   return (await response.json()) as GrantorOpportunityApiResponse;
 }
@@ -40,12 +38,10 @@ export async function updateOpportunitySummaryForGrantor({
   opportunityId,
   opportunitySummaryId,
   body,
-  token,
 }: UpdateOpportunitySummaryForGrantorParams): Promise<OpportunitySummaryDetailApiResponse> {
   const response = await updateGrantorOpportunitySummaryRequest({
     subPath: `${opportunityId}/summaries/${opportunitySummaryId}`,
     body,
-    additionalHeaders: { "X-SGG-Token": token },
   });
 
   return (await response.json()) as OpportunitySummaryDetailApiResponse;
@@ -54,12 +50,10 @@ export async function updateOpportunitySummaryForGrantor({
 export async function createOpportunitySummaryForGrantor({
   opportunityId,
   body,
-  token,
 }: CreateOpportunitySummaryForGrantorParams): Promise<OpportunitySummaryDetailApiResponse> {
   const response = await createGrantorOpportunitySummaryRequest({
     subPath: `${opportunityId}/summaries`,
     body,
-    additionalHeaders: { "X-SGG-Token": token },
   });
 
   return (await response.json()) as OpportunitySummaryDetailApiResponse;
@@ -67,11 +61,9 @@ export async function createOpportunitySummaryForGrantor({
 
 export async function publishOpportunityForGrantor(
   opportunityId: string,
-  token: string,
 ): Promise<GrantorOpportunityApiResponse> {
   const response = await publishGrantorOpportunityRequest({
     subPath: `${opportunityId}/publish`,
-    additionalHeaders: { "X-SGG-Token": token },
   });
 
   return (await response.json()) as GrantorOpportunityApiResponse;

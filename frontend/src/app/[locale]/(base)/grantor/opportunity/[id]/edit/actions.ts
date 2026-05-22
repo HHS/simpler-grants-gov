@@ -1,7 +1,6 @@
 "use server";
 
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import {
   createOpportunitySummaryForGrantor,
   publishOpportunityForGrantor,
@@ -180,11 +179,6 @@ export async function saveOpportunityEditAction(
     };
   }
 
-  const session = await getSession();
-  if (!session?.token) {
-    return { errorMessage: alerts("unauthenticated") };
-  }
-
   const validatedFields = await validateOpportunityEditForm(formData);
 
   if (!validatedFields.success) {
@@ -202,7 +196,6 @@ export async function saveOpportunityEditAction(
           ...buildOpportunitySummaryUpdateRequest(formData),
           is_forecast: isForecast,
         },
-        token: session.token,
       });
 
       return {
@@ -215,7 +208,6 @@ export async function saveOpportunityEditAction(
       opportunityId,
       opportunitySummaryId,
       body: buildOpportunitySummaryUpdateRequest(formData),
-      token: session.token,
     });
 
     return {
@@ -224,6 +216,12 @@ export async function saveOpportunityEditAction(
   } catch (error) {
     const status =
       error instanceof ApiRequestError ? parseErrorStatus(error) : null;
+
+    if (status === 401) {
+      return {
+        errorMessage: alerts("unauthenticated"),
+      };
+    }
 
     if (status === 403) {
       return {
@@ -254,23 +252,24 @@ async function publishOpportunityAction(
 ): Promise<OpportunityEditActionState> {
   const alerts = await getTranslations("OpportunityEdit.content.alerts");
 
-  const session = await getSession();
-  if (!session?.token) {
-    return { errorMessage: alerts("unauthenticated") };
-  }
-
   try {
-    await publishOpportunityForGrantor(opportunityId, session.token);
+    await publishOpportunityForGrantor(opportunityId);
   } catch (error) {
     const status =
       error instanceof ApiRequestError ? parseErrorStatus(error) : null;
 
+    if (status === 401) {
+      return { errorMessage: alerts("unauthenticated") };
+    }
+
     if (status === 403) {
       return { errorMessage: alerts("forbidden") };
     }
+
     if (status === 404) {
       return { errorMessage: alerts("notFound") };
     }
+
     return { errorMessage: alerts("genericError") };
   }
 

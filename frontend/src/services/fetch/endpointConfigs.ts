@@ -148,6 +148,7 @@ export const getGrantorOpportunityEndpoint = {
   version: "v1",
   namespace: "grantors/opportunities",
   method: "GET" as ApiMethod,
+  requiresAuth: true,
 };
 
 export const updateGrantorOpportunitySummaryEndpoint = {
@@ -155,6 +156,7 @@ export const updateGrantorOpportunitySummaryEndpoint = {
   version: "v1",
   namespace: "grantors/opportunities",
   method: "PUT" as ApiMethod,
+  requiresAuth: true,
 };
 
 export const createGrantorOpportunitySummaryEndpoint = {
@@ -162,6 +164,7 @@ export const createGrantorOpportunitySummaryEndpoint = {
   version: "v1",
   namespace: "grantors/opportunities",
   method: "POST" as ApiMethod,
+  requiresAuth: true,
 };
 
 export const publishGrantorOpportunityEndpoint = {
@@ -169,6 +172,7 @@ export const publishGrantorOpportunityEndpoint = {
   version: "v1",
   namespace: "grantors/opportunities",
   method: "POST" as ApiMethod,
+  requiresAuth: true,
 };
 
 // opting out of traditional X-SGG based auth since these requests will use the
