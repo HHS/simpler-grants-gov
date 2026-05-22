@@ -32,7 +32,7 @@ from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
-from src.form_schema.forms import get_active_forms
+from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.util.local import load_local_env_vars
 from src.workflow.registry.workflow_client_registry import (
@@ -452,6 +452,7 @@ def reset_aws_env_vars(monkeypatch):
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
     monkeypatch.delenv("AWS_S3_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("AWS_SQS_ENDPOINT_URL", raising=False)
+    monkeypatch.delenv("AWS_DYNAMODB_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("CDN_URL", raising=False)
     monkeypatch.setattr("src.adapters.aws.aws_session._aws_config", None)
 
@@ -511,6 +512,30 @@ def workflow_sqs_queue(mock_sqs, monkeypatch):
     # Set the env var of this queue so the SQSConfig picks it up
     monkeypatch.setenv("WORKFLOW_QUEUE_URL", queue["QueueUrl"])
     return queue["QueueUrl"]
+
+
+@pytest.fixture
+def mock_dynamodb(reset_aws_env_vars):
+    with moto.mock_aws(config={"core": {"service_whitelist": ["dynamodb"]}}):
+        yield
+
+
+@pytest.fixture
+def file_scan_dynamodb_table(mock_dynamodb, monkeypatch):
+    dynamodb = boto3.client("dynamodb", region_name="us-east-1")
+    table_name = "test-local-virus-scan"
+    dynamodb.create_table(
+        TableName=table_name,
+        KeySchema=[
+            {"AttributeName": "file_id", "KeyType": "HASH"},
+        ],
+        AttributeDefinitions=[
+            {"AttributeName": "file_id", "AttributeType": "S"},
+        ],
+        BillingMode="PAY_PER_REQUEST",
+    )
+    monkeypatch.setenv("FILE_SCAN_CACHE_TABLE_NAME", table_name)
+    return table_name
 
 
 ####################
@@ -644,6 +669,7 @@ def load_active_forms(db_session, enable_factory_create) -> None:
     Note that because these are all in the same DB, don't
     modify these forms otherwise you might break other tests that use them.
     """
+    init_form_registry()
 
     existing_form_instruction_ids = set(
         db_session.execute(select(FormInstruction.form_instruction_id)).scalars()

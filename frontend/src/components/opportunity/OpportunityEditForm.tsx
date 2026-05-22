@@ -116,7 +116,7 @@ export default function OpportunityEditForm({
 
   // Minimal state — 3 fields that drive conditional show/hide rendering,
   // plus fundingType and publishDate needed for the CustomEvent that
-  // controls the Publish button in OpportunityEditHeaderActions.
+  // controls the Publish button in OpportunityEditHeader.
   const [fundingCategory, setFundingCategory] = useState(
     initialValues.fundingCategories,
   );
@@ -196,7 +196,7 @@ export default function OpportunityEditForm({
     }
   };
 
-  // Dispatch CustomEvent so OpportunityEditHeaderActions can update
+  // Dispatch CustomEvent so OpportunityEditHeader can update
   // the publish button enabled state in real time.
   // useEffect fires after every state change so the event always carries
   // the latest committed values — no manual dispatch calls needed.
@@ -352,6 +352,9 @@ export default function OpportunityEditForm({
           </Alert>
         </div>
       ) : null}
+
+      {/* Portal target for publish error rendered by OpportunityEditHeader */}
+      <div id="publish-error-container" />
 
       {formState.errorMessage ? (
         <div className="margin-top-2">

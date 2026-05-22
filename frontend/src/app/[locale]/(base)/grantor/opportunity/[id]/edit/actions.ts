@@ -7,9 +7,11 @@ import {
   publishOpportunityForGrantor,
   updateOpportunitySummaryForGrantor,
 } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
+import { getConfiguredDayJs } from "src/utils/dateUtil";
 import { z } from "zod";
 
 import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
 import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
 
@@ -97,7 +99,11 @@ async function validateOpportunityEditForm(formData: FormData) {
         return;
       }
 
-      if (closeDate < publishDate) {
+      const dayjs = getConfiguredDayJs();
+      const close = dayjs(closeDate, "YYYY-MM-DD", true);
+      const publish = dayjs(publishDate, "YYYY-MM-DD", true);
+
+      if (!close.isValid() || !publish.isValid() || close.isBefore(publish)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["closeDate"],
@@ -284,7 +290,7 @@ export async function saveOpportunityEditAction(
   }
 }
 
-export async function publishOpportunityAction(
+async function publishOpportunityAction(
   opportunityId: string,
 ): Promise<OpportunityEditActionState> {
   const alerts = await getTranslations("OpportunityEdit.content.alerts");
@@ -309,5 +315,27 @@ export async function publishOpportunityAction(
     return { errorMessage: alerts("genericError") };
   }
 
-  return { successMessage: "published" };
+  return {};
+}
+
+export async function submitOpportunityAction(
+  prevState: OpportunityEditActionState,
+  formData: FormData,
+): Promise<OpportunityEditActionState> {
+  // Save the form first - if there are validation or API errors, surface them without publishing.
+  const saveResult = await saveOpportunityEditAction(prevState, formData);
+  const hasValidationErrors =
+    saveResult.validationErrors &&
+    Object.keys(saveResult.validationErrors).length > 0;
+  if (saveResult.errorMessage || hasValidationErrors) {
+    return saveResult;
+  }
+
+  const opportunityId = readStringValue(formData.get("opportunityId")).trim();
+  const publishResult = await publishOpportunityAction(opportunityId);
+  if (publishResult.errorMessage) {
+    return publishResult;
+  }
+
+  redirect("/grantor/opportunities");
 }

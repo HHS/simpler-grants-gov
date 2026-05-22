@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { CharacterCount, Radio } from "@trussworks/react-uswds";
 
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
@@ -19,6 +20,9 @@ export const RecommendationSection = ({
   otherKeyInformation,
 }: RecommendationSectionProps) => {
   const t = useTranslations("AwardRecommendation");
+  const [selectedMethod, setSelectedMethod] = useState(
+    recommendationMethod || "",
+  );
 
   // Edit mode: form inputs without borders
   if (mode === "edit") {
@@ -36,15 +40,19 @@ export const RecommendationSection = ({
               id="merit_review_only"
               name="award_selection_method"
               label={t("recommendationMethod.meritReviewOnly")}
-              value="merit-review-only"
-              defaultChecked={recommendationMethod === "merit-review-only"}
+              value="merit_review_ranking_only"
+              checked={selectedMethod === "merit_review_ranking_only"}
+              onChange={(e) => setSelectedMethod(e.target.value)}
             />
             <Radio
               id="merit_review_other"
               name="award_selection_method"
               label={t("recommendationMethod.meritReviewOther")}
-              value="merit-review-other"
-              defaultChecked={recommendationMethod === "merit-review-other"}
+              value="merit_review_ranking_with_other_factors"
+              checked={
+                selectedMethod === "merit_review_ranking_with_other_factors"
+              }
+              onChange={(e) => setSelectedMethod(e.target.value)}
             />
           </div>
           <div className="margin-bottom-3">
