@@ -1,6 +1,4 @@
-import TopLevelError from "src/app/[locale]/(base)/error/page";
 import { UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { fetchUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
