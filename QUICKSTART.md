@@ -62,7 +62,7 @@ make init
 make setup-api-data
 ```
 
-4. Start API with logs (API will be available at [`localhost:3000`](http://localhost:8080/))
+4. Start API with logs (API will be available at [`localhost:8080`](http://localhost:8080/))
 
 ```bash
 make run-logs
