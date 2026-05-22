@@ -76,7 +76,9 @@ describe("throwError", () => {
           ],
         },
         "http://any.url",
-        new Headers({ "x-amzn-requestid": "fake-x-amzn-requestid" }),
+        {
+          headers: new Headers({ "x-amzn-requestid": "fake-x-amzn-requestid" }),
+        } as unknown as Response,
       );
     });
     expect(expectedError).toBeInstanceOf(UnauthorizedError);

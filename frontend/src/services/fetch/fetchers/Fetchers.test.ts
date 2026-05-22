@@ -124,12 +124,13 @@ describe("requesterForEndpoint", () => {
   });
   it("extracts errors from json response where applicable", async () => {
     const mockHeaders = { get: () => "application/json" };
-    fetchMock.mockResolvedValue({
+    const mockResponse = {
       json: responseJsonMock,
       ok: false,
       status: 404,
       headers: mockHeaders,
-    });
+    };
+    fetchMock.mockResolvedValue(mockResponse);
 
     const requester = requesterForEndpoint(basicEndpoint);
 
@@ -142,7 +143,7 @@ describe("requesterForEndpoint", () => {
     expect(throwErrorMock).toHaveBeenCalledWith(
       fakeJsonBody,
       "fakeurl/1",
-      mockHeaders,
+      mockResponse,
     );
   });
   it("returns without error if status included in allowedErrorStatuses", async () => {
