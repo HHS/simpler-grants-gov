@@ -2,7 +2,7 @@ import abc
 import logging
 
 from src.db.models.competition_models import Form
-from src.form_schema.forms import get_active_forms
+from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.form_schema.jsonschema_validator import validate_json_schema
 from src.util.env_config import PydanticBaseEnvConfig
@@ -35,6 +35,7 @@ class FormTaskConfig(PydanticBaseEnvConfig):
 class BaseFormTask(abc.ABC):
     def __init__(self) -> None:
         self.config = FormTaskConfig()
+        init_form_registry()
 
     def build_headers(self) -> dict:
         return {

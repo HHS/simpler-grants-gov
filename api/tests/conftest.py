@@ -32,7 +32,7 @@ from src.db.models.lookup.sync_lookup_values import sync_lookup_values
 from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
-from src.form_schema.forms import get_active_forms
+from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.util.local import load_local_env_vars
 from src.workflow.registry.workflow_client_registry import (
@@ -669,6 +669,7 @@ def load_active_forms(db_session, enable_factory_create) -> None:
     Note that because these are all in the same DB, don't
     modify these forms otherwise you might break other tests that use them.
     """
+    init_form_registry()
 
     existing_form_instruction_ids = set(
         db_session.execute(select(FormInstruction.form_instruction_id)).scalars()

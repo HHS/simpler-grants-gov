@@ -3,51 +3,18 @@ import string
 import uuid
 
 from sqlalchemy import exists, select
-from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
-from src.api.route_utils import raise_flask_error
-from src.auth.endpoint_access_util import verify_access
-from src.constants.lookup_constants import Privilege
 from src.db.models.award_recommendation_models import (
-    AwardRecommendation,
     AwardRecommendationApplicationSubmission,
     AwardRecommendationRisk,
     AwardRecommendationRiskSubmission,
 )
-from src.db.models.opportunity_models import Opportunity
 from src.db.models.user_models import User
+from src.services.award_recommendations.get_award_recommendation import (
+    get_award_recommendation_for_update,
+)
 from src.services.award_recommendations.utils import validate_all_submissions_exist
-
-
-def get_award_recommendation_for_update(
-    db_session: db.Session, user: User, award_recommendation_id: uuid.UUID
-) -> AwardRecommendation:
-    stmt = (
-        select(AwardRecommendation)
-        .where(
-            AwardRecommendation.award_recommendation_id == award_recommendation_id,
-            AwardRecommendation.is_deleted.isnot(True),
-        )
-        .options(
-            selectinload(AwardRecommendation.opportunity).selectinload(Opportunity.agency_record),
-        )
-    )
-
-    award_recommendation = db_session.execute(stmt).scalar_one_or_none()
-    if award_recommendation is None:
-        raise_flask_error(
-            404,
-            message=f"Could not find Award Recommendation with ID {award_recommendation_id}",
-        )
-
-    agency = award_recommendation.opportunity.agency_record
-    if agency is None:
-        raise_flask_error(403, message="Forbidden")
-
-    verify_access(user, {Privilege.UPDATE_AWARD_RECOMMENDATION}, agency)
-
-    return award_recommendation
 
 
 def _generate_risk_number(db_session: db.Session, agency_code: str) -> str:
@@ -114,5 +81,12 @@ def create_award_recommendation_risk(
         )
 
     db_session.add(risk)
+    db_session.flush()
+
+    # Eagerly load relationships needed for the applications property by accessing them
+    for rs in risk.award_recommendation_risk_submissions:
+        _ = (
+            rs.award_recommendation_application_submission.application_submission.application_submission_number
+        )
 
     return risk
