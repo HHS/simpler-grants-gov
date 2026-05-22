@@ -1,3 +1,4 @@
+import opportunityRegistry from "tests/e2e/apply/fixtures/print-view-opportunities.json";
 import { PROJECT_ABSTRACT_SUMMARY_FORM_CONFIG } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
 import type { FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
 
@@ -6,7 +7,6 @@ import type {
   ResolvedPrintViewForm,
   ResolvedPrintViewOpportunityConfig,
 } from "./opportunity-print-view.types";
-import opportunityRegistry from "tests/e2e/apply/fixtures/print-view-opportunities.json";
 
 /**
  * Converts a string value to a RegExp if it is encoded as a regex literal

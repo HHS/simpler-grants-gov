@@ -26,8 +26,6 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
-import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
@@ -37,6 +35,8 @@ import {
   verifyFormStatusAfterSave,
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
+import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
+import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import {
   buildPrintUrl,
   buildPrintViewTestData,
