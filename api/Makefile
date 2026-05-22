@@ -261,13 +261,13 @@ start-mock-oauth2:
 ##################################################
 
 test: ## Run all tests except for audit logging and XML validation tests
-	$(PY_RUN_CMD) pytest -m "not audit and not xml_validation" $(args)
+	$(PY_RUN_CMD) pytest -m "not audit" $(args)
 
 test-audit: ## Run audit logging tests
 	$(PY_RUN_CMD) pytest -m "audit" $(args)
 
 test-coverage: ## Run tests and generate coverage report
-	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit and not xml_validation" $(args)
+	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit" $(args)
 	$(PY_RUN_CMD) coverage run --data-file=.coverage.audit --branch --source=src -m pytest -m "audit" $(args)
 	$(PY_RUN_CMD) coverage combine --data-file=.coverage --append
 	$(PY_RUN_CMD) coverage report
@@ -377,7 +377,7 @@ help: ## Prints the help documentation and info about each command
 test-xml-validation: ## Run XML validation tests against XSD schemas (usage: make test-xml-validation form=SF424_4_0)
 	$(PY_RUN_CMD) flask task validate-xml-generation $(if $(form),--form $(form)) $(args)
 
-fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make fetch-xsds cache_dir=./xsd_cache)
+fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make fetch-xsds cache_dir=../services/xml_generation/xsds/)
 	$(PY_RUN_CMD) flask task fetch-xsds $(if $(cache_dir),--cache-dir $(cache_dir)) $(if $(form),--form $(form)) $(args)
 
 ##################################################
