@@ -904,7 +904,7 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
     await user.tab();
 
     expect(
-      screen.getByText("labels.awardMinimumvalidationErrors.currencyInput"),
+      screen.getByText("validationErrors.awardMinCurrencyInput"),
     ).toBeInTheDocument();
   });
 
@@ -919,7 +919,7 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
     await user.tab();
 
     expect(
-      screen.getByText("labels.awardMaximumvalidationErrors.currencyInput"),
+      screen.getByText("validationErrors.awardMaxCurrencyInput"),
     ).toBeInTheDocument();
   });
 
@@ -934,9 +934,7 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
     await user.tab();
 
     expect(
-      screen.getByText(
-        "labels.estimatedTotalProgramFundingvalidationErrors.currencyInput",
-      ),
+      screen.getByText("validationErrors.totalFundingCurrencyInput"),
     ).toBeInTheDocument();
   });
 
@@ -952,7 +950,7 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
     await user.tab();
 
     expect(
-      screen.getByText("labels.awardMinimumvalidationErrors.currencyInput"),
+      screen.getByText("validationErrors.awardMinCurrencyInput"),
     ).toBeInTheDocument();
   });
 
@@ -968,7 +966,7 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
     await user.tab();
 
     expect(
-      screen.getByText("labels.awardMaximumvalidationErrors.currencyInput"),
+      screen.getByText("validationErrors.awardMaxCurrencyInput"),
     ).toBeInTheDocument();
   });
 
@@ -984,9 +982,7 @@ describe("OpportunityEditForm — field validations on exiting the field", () =>
     await user.tab();
 
     expect(
-      screen.getByText(
-        "labels.estimatedTotalProgramFundingvalidationErrors.currencyInput",
-      ),
+      screen.getByText("validationErrors.totalFundingCurrencyInput"),
     ).toBeInTheDocument();
   });
 });

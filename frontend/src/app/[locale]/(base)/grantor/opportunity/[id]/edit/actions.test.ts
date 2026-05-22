@@ -174,8 +174,8 @@ describe("saveOpportunityEditAction", () => {
     const result = await saveOpportunityEditAction(initialState, formData);
 
     expect(result.validationErrors).toEqual({
-      awardMinimum: ["awardMinimumexceedTotalFunding"],
-      awardMaximum: ["awardMaximumexceedTotalFunding"],
+      awardMinimum: ["awardMinLessThanTotal"],
+      awardMaximum: ["awardMaxLessThanTotal"],
     });
   });
 
