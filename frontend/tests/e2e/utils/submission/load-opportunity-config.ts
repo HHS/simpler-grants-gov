@@ -6,7 +6,7 @@ import type {
   ResolvedPrintViewForm,
   ResolvedPrintViewOpportunityConfig,
 } from "./opportunity-print-view.types";
-import opportunityRegistry from "./print-view-opportunities.json";
+import opportunityRegistry from "tests/e2e/apply/fixtures/print-view-opportunities.json";
 
 /**
  * Converts a string value to a RegExp if it is encoded as a regex literal
@@ -57,7 +57,7 @@ export function loadOpportunityConfig(
     if (!formConfig) {
       throw new Error(
         `No FillFormConfig registered for formKey: "${form.formKey}". ` +
-          `Add it to FORM_CONFIG_REGISTRY in load-opportunity-config.ts.`,
+          `Add it to FORM_CONFIG_REGISTRY in tests/e2e/utils/submission/load-opportunity-config.ts.`,
       );
     }
 

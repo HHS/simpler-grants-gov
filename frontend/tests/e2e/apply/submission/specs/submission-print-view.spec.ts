@@ -10,7 +10,7 @@
  *
  * To add a new opportunity:
  *   1. Register it in tests/e2e/apply/fixtures/print-view-opportunities.json
- *   2. Add any new form's FillFormConfig to FORM_CONFIG_REGISTRY in load-opportunity-config.ts
+ *   2. Add any new form's FillFormConfig to FORM_CONFIG_REGISTRY in tests/e2e/utils/submission/load-opportunity-config.ts
  *   3. Add a test data builder for the new formKey in print-view-utils.ts
  *
  * Examples:
@@ -26,8 +26,8 @@ import {
   type Page,
   type TestInfo,
 } from "@playwright/test";
-import { loadOpportunityConfig } from "tests/e2e/apply/fixtures/load-opportunity-config";
-import type { FilledFormEntry } from "tests/e2e/apply/fixtures/opportunity-print-view.types";
+import { loadOpportunityConfig } from "tests/e2e/utils/submission/load-opportunity-config";
+import type { FilledFormEntry } from "tests/e2e/utils/submission/opportunity-print-view.types";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
