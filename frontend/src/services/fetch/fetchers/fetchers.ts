@@ -30,7 +30,6 @@ import {
   throwError,
 } from "src/services/fetch/fetcherHelpers";
 import { APIResponse } from "src/types/apiResponseTypes";
-import { printAwsHeaders } from "src/utils/generalUtils";
 
 import { cache } from "react";
 
