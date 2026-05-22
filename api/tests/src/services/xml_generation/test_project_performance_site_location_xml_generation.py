@@ -105,7 +105,7 @@ class TestPerformanceSiteXMLGeneration:
         # US-only fields should be absent
         assert "ZipPostalCode" not in xml
         assert "CongressionalDistrictProgramProject" not in xml
-        assert "State" not in xml
+        assert "<globLib:State" not in xml
 
     def test_individual_submitter_maps_yes(self):
         xml = self._generate({"primary_site": _INDIVIDUAL_US_SITE})
