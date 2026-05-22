@@ -133,7 +133,7 @@ remake-backend: volume-recreate setup-api-data ## Completely recreate API servic
 init-db: start-db setup-postgres-db db-migrate
 
 start-db:
-	docker compose up --detach grants-db
+	docker compose -f ../backend/docker-compose.db.yml up --detach grants-db
 	./bin/wait-for-local-db.sh
 
 #########################
