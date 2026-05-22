@@ -177,7 +177,10 @@ class TestRecursiveXMLTransformer:
             {"sites": [{"name": "Lab A", "city": "Boston"}, {"name": "Lab B", "city": "Austin"}]}
         )
 
-        assert result["Sites"] == [{"Name": "Lab A", "City": "Boston"}, {"Name": "Lab B", "City": "Austin"}]
+        assert result["Sites"] == [
+            {"Name": "Lab A", "City": "Boston"},
+            {"Name": "Lab B", "City": "Austin"},
+        ]
 
     def test_transform_array_empty_list_returns_none(self):
         transform_config = {
