@@ -63,15 +63,12 @@ jobs:
       - name: Smoke Test (source distribution)
         run: |
           uv run --isolated --with dist/grants_shared-${{steps.get-version.outputs.project_version}}.tar.gz tests/grants_shared/smoke_test.py
-          
-          ls
-          ls dist
 
       - name: Upload dist
         uses: actions/upload-artifact@v7
         with:
           name: grants-shared-dist
-          path: dist/
+          path: backend/grants-shared/dist/
           if-no-files-found: error
           retention-days: 1
           overwrite: true
