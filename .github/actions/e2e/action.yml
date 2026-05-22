@@ -5,7 +5,7 @@ description: Composite action to run Playwright against specified environment
 # This action conditionally installs Playwright browsers (Chrome, Firefox, WebKit)
 # based on the do-chrome-install, do-firefox-install, and do-webkit-install inputs.
 # Only the browsers needed for the current test shard are installed, improving CI efficiency.
-# At least one browser input must be set to 'true' for a valid test run.
+# Chrome is cached outside this job, and will be available even if not instructed to install.
 # ---
 
 inputs:
