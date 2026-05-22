@@ -49,7 +49,7 @@ const SearchTableStatusDisplay = ({
   const backgroundClass = statusColorClasses[status];
   return (
     <div
-      className={clsx("text-center padding-y-05 minw-15 radius-md", {
+      className={clsx("font-sans-xs text-center padding-y-05 minw-15 radius-md", {
         [backgroundClass]: !!backgroundClass,
       })}
     >
