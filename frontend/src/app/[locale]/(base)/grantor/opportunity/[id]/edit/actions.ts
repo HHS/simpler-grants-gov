@@ -51,7 +51,6 @@ async function validateOpportunityEditForm(formData: FormData) {
   const validationErrors = await getTranslations(
     "OpportunityEdit.validationErrors",
   );
-  const fieldNames = await getTranslations("OpportunityEdit.labels");
   const reviewOpportunityEditSchema = z
     .object({
       title: z.string().trim(),
@@ -127,9 +126,7 @@ async function validateOpportunityEditForm(formData: FormData) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["awardMinimum"],
-            message:
-              fieldNames("awardMinimum") +
-              validationErrors("exceedTotalFunding"),
+            message: validationErrors("awardMinLessThanTotal"),
           });
         }
         // Award Maximum cannot exceed the Estimated Total Program Funding.
@@ -143,9 +140,7 @@ async function validateOpportunityEditForm(formData: FormData) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["awardMaximum"],
-            message:
-              fieldNames("awardMaximum") +
-              validationErrors("exceedTotalFunding"),
+            message: validationErrors("awardMaxLessThanTotal"),
           });
         }
         // Award Minimum cannot exceed Award Maximum.

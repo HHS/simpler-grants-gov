@@ -12,6 +12,7 @@ import {
   OPPORTUNITY_CATEGORY_OPTIONS,
 } from "src/constants/opportunity";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
+import { getNumericAmountFromString } from "src/utils/formatCurrencyUtil";
 
 import { useTranslations } from "next-intl";
 import { startTransition, useActionState, useEffect, useState } from "react";
@@ -133,7 +134,7 @@ export default function OpportunityEditForm({
   const validationErrors: OpportunityEditValidationErrors | undefined =
     formState.validationErrors;
 
-  //--- Validations for Award Minimum, Award Minimum and Total Program Funding ---
+  //--- Validations for Award Minimum, Award Maximum and Total Program Funding ---
   const [frontendErrors, setFrontendErrors] =
     useState<OpportunityEditValidationErrors>({});
 
@@ -154,21 +155,17 @@ export default function OpportunityEditForm({
     }
   }
 
-  function parseCurrencyValue(value: string | null): number {
-    const raw = (value ?? "").replace(/,/g, "");
-    return Number(raw) || 0;
-  }
   const singleFieldValidation = (event: React.FocusEvent<HTMLInputElement>) => {
     const form = event.currentTarget.form;
     if (!form) return;
     const formData = new FormData(form);
-    const estTotalFunding = parseCurrencyValue(
+    const estTotalFunding = getNumericAmountFromString(
       formData.get("estimatedTotalProgramFunding") as string | null,
     );
-    const awardMin = parseCurrencyValue(
+    const awardMin = getNumericAmountFromString(
       formData.get("awardMinimum") as string | null,
     );
-    const awardMax = parseCurrencyValue(
+    const awardMax = getNumericAmountFromString(
       formData.get("awardMaximum") as string | null,
     );
     // clear old error messages
@@ -179,19 +176,15 @@ export default function OpportunityEditForm({
 
     //--- min & max values for Award Minimum, Award Minimum and Total Program Funding ---
     if (awardMin < 0 || awardMin >= maxLimit) {
-      const errMsg =
-        t("labels.awardMinimum") + t("validationErrors.currencyInput");
+      const errMsg = t("validationErrors.awardMinCurrencyInput");
       setSingleFrontendError("awardMinimum", errMsg);
     }
     if (awardMax < 0 || awardMax >= maxLimit) {
-      const errMsg =
-        t("labels.awardMaximum") + t("validationErrors.currencyInput");
+      const errMsg = t("validationErrors.awardMaxCurrencyInput");
       setSingleFrontendError("awardMaximum", errMsg);
     }
     if (estTotalFunding < 0 || estTotalFunding >= maxLimit) {
-      const errMsg =
-        t("labels.estimatedTotalProgramFunding") +
-        t("validationErrors.currencyInput");
+      const errMsg = t("validationErrors.totalFundingCurrencyInput");
       setSingleFrontendError("estimatedTotalProgramFunding", errMsg);
     }
   };
