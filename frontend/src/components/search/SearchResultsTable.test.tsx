@@ -2,7 +2,10 @@ import { render, screen, within } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { mockOpportunity } from "src/utils/testing/fixtures";
 
-import { SearchResultsTable, AwardValue } from "src/components/search/SearchResultsTable";
+import {
+  AwardValue,
+  SearchResultsTable,
+} from "src/components/search/SearchResultsTable";
 import { OpportunitySaveUserControl } from "src/components/user/OpportunitySaveUserControl";
 
 jest.mock("src/components/user/OpportunitySaveUserControl", () => ({
@@ -383,7 +386,7 @@ describe("AwardValue", () => {
     render(<AwardValue awardValue={99000000000} />);
     expect(screen.getByText("$99,000,000,000")).toHaveClass(
       "font-sans-xs",
-      "text-no-wrap"
+      "text-no-wrap",
     );
   });
 });
