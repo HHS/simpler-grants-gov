@@ -316,7 +316,7 @@ def fetch_xsds_command(
     try:
         # Use default cache directory if not specified
         if not cache_dir:
-            cache_dir = Path(__file__).resolve().parents[1] / "services/xml_generation/xsds"
+            cache_dir = str(Path(__file__).resolve().parents[1] / "services/xml_generation/xsds")
 
         # Get test cases to determine which XSDs we need
         if form:
@@ -343,7 +343,6 @@ def fetch_xsds_command(
             xsd_url = test_case.get("xsd_url")
             if xsd_url and xsd_url not in xsd_urls:
                 xsd_urls.add(xsd_url)
-
 
         if not xsd_urls:
             click.echo("Warning: No XSD URLs found in test cases", err=True)
@@ -434,7 +433,7 @@ def fetch_xsds_command(
         sys.exit(1)
 
 
-def filter_skipped(test_cases):
+def filter_skipped(test_cases: list) -> tuple[list, list]:
     SKIPPED = {
         "sf424_with_single_attachment",
         "sf424_with_multiple_attachments",
