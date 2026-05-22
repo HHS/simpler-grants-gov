@@ -363,7 +363,7 @@ jobs:
         uses: tj-actions/changed-files@v47.0.6
         with:
           files: |
-            /frontend/tests/e2e/apply/forms/*.spec.ts
+            /frontend/tests/e2e/apply/forms/**/*.spec.ts
             /frontend/src/components/applyForm/**
             /frontend/src/app/[locale]/workspace/applications/[applicationId]/**/*.tsx
             /api/src/form_schema/forms/**
