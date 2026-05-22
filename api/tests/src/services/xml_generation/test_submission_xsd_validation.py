@@ -28,7 +28,7 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
+
 class TestSubmissionXSDValidation:
     """End-to-end XSD validation tests for complete application submissions."""
 

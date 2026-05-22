@@ -38,7 +38,7 @@ def _build_attachment(uuid_str, filename, mime, location, hash_value):
     )
 
 
-@pytest.mark.xml_validation
+
 class TestOtherNarrativeAttachmentsXMLGeneration:
     """Test cases for Other Narrative Attachments XML generation service."""
 
@@ -135,7 +135,7 @@ class TestOtherNarrativeAttachmentsXMLGeneration:
         assert file_name_pos < mime_pos < location_pos < hash_pos
 
 
-@pytest.mark.xml_validation
+
 class TestOtherNarrativeAttachmentsXSDValidation:
     """XSD validation tests for Other Narrative Attachments XML."""
 

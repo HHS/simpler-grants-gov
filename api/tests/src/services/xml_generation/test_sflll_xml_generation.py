@@ -25,7 +25,7 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
+
 class TestSFLLLXMLGeneration:
     """Test SF-LLL XML generation."""
 

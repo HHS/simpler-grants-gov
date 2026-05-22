@@ -31,7 +31,7 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
+
 class TestSF424BXMLGeneration:
     """Test cases for SF-424B XML generation service."""
 
@@ -376,7 +376,7 @@ class TestSF424BXMLGeneration:
         assert "<SF424B:SubmittedDate>2025-04-15</SF424B:SubmittedDate>" in xml_data
 
 
-@pytest.mark.xml_validation
+
 class TestSF424BXSDValidation:
     """XSD validation tests for SF-424B form XML."""
 

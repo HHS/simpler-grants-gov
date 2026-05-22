@@ -33,7 +33,7 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
+
 class TestGGLobbyingFormXMLGeneration:
     """Test cases for GG_LobbyingForm XML generation service."""
 
@@ -194,7 +194,7 @@ class TestGGLobbyingFormXMLGeneration:
         ), "Elements not in XSD sequence order"
 
 
-@pytest.mark.xml_validation
+
 class TestGGLobbyingFormXSDValidation:
     """XSD validation tests for GG_LobbyingForm XML."""
 

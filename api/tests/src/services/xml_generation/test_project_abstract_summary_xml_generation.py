@@ -33,7 +33,7 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
+
 class TestProjectAbstractSummaryXMLGeneration:
     """Test cases for Project Abstract Summary XML generation service."""
 
@@ -215,7 +215,7 @@ class TestProjectAbstractSummaryXMLGeneration:
         assert "</Project_AbstractSummary_2_0:ProjectAbstract>" in xml_data
 
 
-@pytest.mark.xml_validation
+
 class TestProjectAbstractSummaryXSDValidation:
     """XSD validation tests for Project Abstract Summary form XML."""
 

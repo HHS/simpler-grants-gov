@@ -58,7 +58,7 @@ def _create_sample_contact_person(prefix="Dr.", first_name="John", last_name="Sm
     }
 
 
-@pytest.mark.xml_validation
+
 class TestEPAKeyContactsXMLGeneration:
     """Test cases for EPA Key Contacts XML generation service."""
 
@@ -419,7 +419,7 @@ class TestEPAKeyContactsXMLGeneration:
         assert auth_rep.find(f"{{{GLOB_NS}}}Phone").text.strip() == "1231231234"
 
 
-@pytest.mark.xml_validation
+
 class TestEPAKeyContactsXSDValidation:
     """XSD validation tests for EPA Key Contacts form XML."""
 

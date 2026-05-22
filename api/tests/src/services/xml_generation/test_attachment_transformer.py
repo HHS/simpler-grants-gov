@@ -9,7 +9,7 @@ from src.services.xml_generation.transformers.attachment_transformer import Atta
 from src.services.xml_generation.utils.attachment_mapping import AttachmentInfo
 
 
-@pytest.mark.xml_validation
+
 class TestAttachmentTransformer:
     """Test cases for AttachmentTransformer."""
 

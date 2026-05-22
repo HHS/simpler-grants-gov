@@ -31,7 +31,7 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
+
 class TestCD511XMLGeneration:
     """Test cases for CD511 XML generation service."""
 
@@ -240,7 +240,7 @@ class TestCD511XMLGeneration:
         assert org_pos < award_pos < project_pos < contact_pos < title_pos < sig_pos < date_pos
 
 
-@pytest.mark.xml_validation
+
 class TestCD511XSDValidation:
     """XSD validation tests for CD511 form XML."""
 

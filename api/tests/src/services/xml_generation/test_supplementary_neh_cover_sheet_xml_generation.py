@@ -27,7 +27,7 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.xml_validation
+
 class TestSupplementaryNEHCoverSheetXMLGeneration:
     """Test cases for Supplementary Cover Sheet for NEH Grant Programs XML generation service."""
 
@@ -473,7 +473,7 @@ class TestSupplementaryNEHCoverSheetXMLGeneration:
         ), "ProjFieldCode must be nested inside ApplicationInfoGroup"
 
 
-@pytest.mark.xml_validation
+
 class TestSupplementaryNEHCoverSheetXSDValidation:
     """XSD validation tests for Supplementary Cover Sheet for NEH Grant Programs form XML."""
 
