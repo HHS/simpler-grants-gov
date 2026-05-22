@@ -102,7 +102,7 @@ def transform_submission(submission: ApplicationSubmission) -> dict[str, str | d
 
 def get_submissions(
     db_session: db.Session,
-    request: schemas.GetSubmissionListExpandedRequest,
+    request: schemas.GetSubmissionListExpandedRequest | schemas.GetSubmissionListRequest,
     soap_request: SOAPRequest,
     soap_config: SOAPOperationConfig,
 ) -> list[ApplicationSubmission]:
@@ -230,6 +230,26 @@ def get_submission_list_expanded(
     request: schemas.GetSubmissionListExpandedRequest,
     soap_request: SOAPRequest,
     soap_config: SOAPOperationConfig,
+) -> list[schemas.SubmissionInfoExpanded]:
+    """Gather submission data from the database.
+
+    Performs authentication, authorization, filtering, and transforms
+    database submissions into SubmissionInfoExpanded objects.
+
+    Returns a list of SubmissionInfoExpanded from Simpler.
+    """
+    submissions = get_submissions(db_session, request, soap_request, soap_config)
+    return [
+        schemas.SubmissionInfoExpanded(**transform_submission(submission))
+        for submission in submissions
+    ]
+
+
+def get_submission_list(
+    db_session: db.Session,
+    request: schemas.GetSubmissionListRequest,
+    soap_request: SOAPRequest,
+    soap_config: SOAPOperationConfig,
 ) -> list[schemas.SubmissionInfo]:
     """Gather submission data from the database.
 
@@ -244,8 +264,32 @@ def get_submission_list_expanded(
     ]
 
 
-def get_submission_list_expanded_response(
+def get_submission_list_response(
     simpler_submissions: list[schemas.SubmissionInfo],
+    proxy_response: SOAPResponse,
+) -> schemas.GetSubmissionListResponse:
+    """Build the SOAP response envelope from Simpler and proxy data.
+
+    Parses proxy submissions, merges with Simpler submissions,
+    sorts by date, and constructs the response.
+    """
+    info: list[schemas.SubmissionInfo] = []
+    try:
+        info.extend(parse_submissions_from_proxy(proxy_response))
+    except Exception:
+        logger.exception("Failed to parse submission list XML response")
+    info.extend(simpler_submissions)
+    info.sort(
+        key=lambda x: x.received_date_time or datetime.min.replace(tzinfo=timezone.utc),
+        reverse=True,
+    )
+    return schemas.GetSubmissionListResponse(
+        success=True, available_application_number=len(info), submission_info=info
+    )
+
+
+def get_submission_list_expanded_response(
+    simpler_submissions: list[schemas.SubmissionInfoExpanded],
     proxy_response: SOAPResponse,
 ) -> schemas.GetSubmissionListExpandedResponse:
     """Build the SOAP response envelope from Simpler and proxy data.
@@ -253,7 +297,7 @@ def get_submission_list_expanded_response(
     Parses proxy submissions, merges with Simpler submissions,
     sorts by date, and constructs the response.
     """
-    info: list[schemas.SubmissionInfo] = []
+    info: list[schemas.SubmissionInfoExpanded] = []
     try:
         info.extend(parse_submissions_from_proxy(proxy_response))
     except Exception:
@@ -268,7 +312,9 @@ def get_submission_list_expanded_response(
     )
 
 
-def parse_submissions_from_proxy(proxy_response: SOAPResponse) -> list[schemas.SubmissionInfo]:
+def parse_submissions_from_proxy(
+    proxy_response: SOAPResponse,
+) -> list[schemas.SubmissionInfoExpanded]:
     xml_bytes = b"".join(clean_mtom_generator(proxy_response.stream()))
     info = []
     if xml_bytes:
@@ -278,7 +324,7 @@ def parse_submissions_from_proxy(proxy_response: SOAPResponse) -> list[schemas.S
             try:
                 element_bytes = etree.tostring(element)
                 submission_info_dict = xmltodict.parse(element_bytes).get("ns2:SubmissionInfo")
-                info.append(schemas.SubmissionInfo(**submission_info_dict))
+                info.append(schemas.SubmissionInfoExpanded(**submission_info_dict))
             except PydanticValidationError:
                 logger.exception("Skipping invalid submission due to validation error")
                 continue

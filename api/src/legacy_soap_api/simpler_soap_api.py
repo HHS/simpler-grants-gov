@@ -40,6 +40,7 @@ from src.logging.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 
+GET_SUBMISSION_LIST_REQUEST = "GetSubmissionListRequest"
 GET_SUBMISSION_LIST_EXPANDED_REQUEST = "GetSubmissionListExpandedRequest"
 GET_OPPORTUNITY_LIST_REQUEST = "GetOpportunityListRequest"
 
@@ -204,7 +205,7 @@ def process_simpler_request(
         # GetSubmissionListExpanded will call both if use_simpler is true
         # handled in the get_simpler_response
         elif (
-            operation_name == GET_SUBMISSION_LIST_EXPANDED_REQUEST
+            operation_name in [GET_SUBMISSION_LIST_EXPANDED_REQUEST, GET_SUBMISSION_LIST_REQUEST]
             and api_name == SimplerSoapAPI.GRANTORS
         ):
             soap_legacy_response = get_legacy_response(soap_request)

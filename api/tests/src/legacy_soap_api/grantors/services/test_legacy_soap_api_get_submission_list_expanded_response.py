@@ -7,7 +7,7 @@ import pytz
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.legacy_soap_api.grantors import schemas
-from src.legacy_soap_api.grantors.services.get_submission_list_expanded_response import (
+from src.legacy_soap_api.grantors.services import (
     get_submission_list_expanded,
     get_submission_list_expanded_response,
 )
