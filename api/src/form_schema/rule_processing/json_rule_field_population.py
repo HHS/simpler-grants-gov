@@ -22,7 +22,7 @@ def get_opportunity_number(context: JsonRuleContext, json_rule: JsonRule) -> str
         # there are no null opportunity numbers, this is just a safety net
         # so we always populate something
         logger.error(
-            "Opportunity with null opportunity_number run through pre-population",
+            "XXXX with null opportunity_number run through pre-population",
             extra=context.get_log_context(),
         )
         return UNKNOWN_VALUE
