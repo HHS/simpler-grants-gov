@@ -363,12 +363,12 @@ jobs:
         uses: tj-actions/changed-files@v47.0.6
         with:
           files: |
-            /frontend/tests/e2e/apply/forms/**/*.spec.ts
-            /frontend/src/components/applyForm/**
-            /frontend/src/app/[locale]/workspace/applications/[applicationId]/**/*.tsx
-            /api/src/form_schema/forms/**
-            /api/src/form_schema/shared/**
-            /api/src/form_schema/rule_processing/**
+            frontend/tests/e2e/apply/forms/**/*.spec.ts
+            frontend/src/components/applyForm/**
+            frontend/src/app/[locale]/workspace/applications/[applicationId]/**/*.tsx
+            api/src/form_schema/forms/**
+            api/src/form_schema/shared/**
+            api/src/form_schema/rule_processing/**
 
       - name: Determine test groups to run
         shell: bash
