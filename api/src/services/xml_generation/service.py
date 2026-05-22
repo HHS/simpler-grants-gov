@@ -351,23 +351,21 @@ class XMLGenerationService:
     ) -> None:
         """Add an element to a parent using lxml with proper namespace handling."""
         if isinstance(value, list):
-            # Handle arrays - create wrapper element first, then add items
+            # Handle arrays - emit each item as a direct sibling under parent (no wrapper)
+            # Determine element name for items (used when no __wrapper override per item)
             if field_name in namespace_fields:
                 namespace_prefix = namespace_fields[field_name]
                 namespace_uri = nsmap.get(namespace_prefix, "")
-                element_name = f"{{{namespace_uri}}}{field_name}"
-                wrapper_element = lxml_etree.SubElement(parent, element_name)
+                default_element_name = f"{{{namespace_uri}}}{field_name}"
             else:
                 default_namespace_uri = (
                     nsmap.get(root_element_name or "", "") if root_element_name else ""
                 )
                 if default_namespace_uri:
-                    element_name = f"{{{default_namespace_uri}}}{field_name}"
-                    wrapper_element = lxml_etree.SubElement(parent, element_name)
+                    default_element_name = f"{{{default_namespace_uri}}}{field_name}"
                 else:
-                    wrapper_element = lxml_etree.SubElement(parent, field_name)
+                    default_element_name = field_name
 
-            # Add each item in the array
             for item in value:
                 if isinstance(item, dict):
                     # Check for __wrapper and __attributes metadata
@@ -380,21 +378,21 @@ class XMLGenerationService:
                     # Use wrapper as element name, or default to field_name
                     item_element_name = item_wrapper if item_wrapper else field_name
 
-                    # Create the item element
+                    # Create the item element directly under parent
                     if item_element_name in namespace_fields:
                         namespace_prefix = namespace_fields[item_element_name]
                         namespace_uri = nsmap.get(namespace_prefix, "")
                         full_element_name = f"{{{namespace_uri}}}{item_element_name}"
-                        item_element = lxml_etree.SubElement(wrapper_element, full_element_name)
+                        item_element = lxml_etree.SubElement(parent, full_element_name)
                     else:
                         default_namespace_uri = (
                             nsmap.get(root_element_name or "", "") if root_element_name else ""
                         )
                         if default_namespace_uri:
                             full_element_name = f"{{{default_namespace_uri}}}{item_element_name}"
-                            item_element = lxml_etree.SubElement(wrapper_element, full_element_name)
+                            item_element = lxml_etree.SubElement(parent, full_element_name)
                         else:
-                            item_element = lxml_etree.SubElement(wrapper_element, item_element_name)
+                            item_element = lxml_etree.SubElement(parent, item_element_name)
 
                     # Add attributes to the item element
                     if item_attributes:
@@ -429,21 +427,8 @@ class XMLGenerationService:
                                 root_element_name,
                             )
                 else:
-                    # Simple value in array - create element with field_name
-                    if field_name in namespace_fields:
-                        namespace_prefix = namespace_fields[field_name]
-                        namespace_uri = nsmap.get(namespace_prefix, "")
-                        element_name = f"{{{namespace_uri}}}{field_name}"
-                        item_element = lxml_etree.SubElement(wrapper_element, element_name)
-                    else:
-                        default_namespace_uri = (
-                            nsmap.get(root_element_name or "", "") if root_element_name else ""
-                        )
-                        if default_namespace_uri:
-                            element_name = f"{{{default_namespace_uri}}}{field_name}"
-                            item_element = lxml_etree.SubElement(wrapper_element, element_name)
-                        else:
-                            item_element = lxml_etree.SubElement(wrapper_element, field_name)
+                    # Simple value in array - create element directly under parent
+                    item_element = lxml_etree.SubElement(parent, default_element_name)
                     item_element.text = str(item)
 
         elif isinstance(value, dict):

@@ -2,10 +2,11 @@ import uuid
 
 from src.constants.lookup_constants import FormType
 from src.db.models.competition_models import Form
-from src.form_schema.shared import COMMON_SHARED_V1
+from src.form_schema.shared import ADDRESS_SHARED_V1, COMMON_SHARED_V1
 
-# Congressional district format: 2 chars + hyphen + 3 chars (e.g., CA-005, MD-all, US-all, 00-000)
-_CONGRESSIONAL_DISTRICT_PATTERN = r"^.{2}-.{3}$"
+# Congressional district format: 2 alphanumeric chars + hyphen + 3 alphanumeric chars
+# Examples: CA-005, MD-all, US-all, 00-000
+_CONGRESSIONAL_DISTRICT_PATTERN = r"^[A-Z0-9]{2}-[A-Za-z0-9]{3}$"
 
 # Shared site location fields, used in both primary_site and site_location $defs
 _SITE_LOCATION_PROPERTIES = {
@@ -24,64 +25,10 @@ _SITE_LOCATION_PROPERTIES = {
         "title": "UEI",
         "description": "Enter the UEI associated with the organization where the project will be performed.",
     },
-    "street1": {
-        "type": "string",
-        "title": "Street 1",
-        "description": "Enter first line of the street address.",
-        "minLength": 1,
-        "maxLength": 55,
-    },
-    "street2": {
-        "type": "string",
-        "title": "Street 2",
-        "description": "Enter second line of the street address.",
-        "minLength": 1,
-        "maxLength": 55,
-    },
-    "city": {
-        "type": "string",
-        "title": "City",
-        "description": "Enter the city of the performance site location.",
-        "minLength": 1,
-        "maxLength": 35,
-    },
-    "county": {
-        "type": "string",
-        "title": "County",
-        "description": "Enter the county of the performance site location.",
-        "minLength": 1,
-        "maxLength": 30,
-    },
-    "state": {
-        "type": "string",
-        "title": "State",
-        "description": "Enter the state where the performance site is located. Required if the site is in the United States.",
-        # State uses the same enum as address_shared but we define it inline here
-        # since we are not nesting inside an address sub-object.
-        # Values match globLib:State / ADDRESS_SHARED_V1 state_code
-        "minLength": 1,
-        "maxLength": 55,
-    },
-    "province": {
-        "type": "string",
-        "title": "Province",
-        "description": "Enter the province where the performance site is located.",
-        "minLength": 1,
-        "maxLength": 30,
-    },
-    "country": {
-        "type": "string",
-        "title": "Country",
-        "description": "Select the country for the performance site location.",
-        "minLength": 1,
-        "maxLength": 49,
-    },
-    "zip_code": {
-        "type": "string",
-        "title": "ZIP / Postal Code",
-        "description": "Enter the nine-digit Postal Code (e.g., ZIP code). Required if the site is in the United States.",
-        "minLength": 1,
-        "maxLength": 30,
+    "address": {
+        "allOf": [{"$ref": ADDRESS_SHARED_V1.field_ref("address")}],
+        "title": "Address",
+        "description": "Enter the performance site address.",
     },
     "congressional_district": {
         "type": "string",
@@ -97,14 +44,20 @@ _SITE_LOCATION_PROPERTIES = {
     },
 }
 
-# Conditional rules shared between primary_site and site_location:
-# If country is US, state, zip_code, and congressional_district are required.
-_US_COUNTRY_CONDITIONAL = {
+# Conditional rule shared between primary_site and site_location:
+# If address.country is US, congressional_district is required.
+# State and zip_code requirements are handled within the shared address schema.
+_US_CONGRESSIONAL_DISTRICT_CONDITIONAL = {
     "if": {
-        "properties": {"country": {"const": "USA: UNITED STATES"}},
-        "required": ["country"],
+        "properties": {
+            "address": {
+                "properties": {"country": {"const": "USA: UNITED STATES"}},
+                "required": ["country"],
+            }
+        },
+        "required": ["address"],
     },
-    "then": {"required": ["state", "zip_code", "congressional_district"]},
+    "then": {"required": ["congressional_district"]},
 }
 
 FORM_JSON_SCHEMA = {
@@ -129,13 +82,13 @@ FORM_JSON_SCHEMA = {
         },
     },
     "$defs": {
-        # Primary site: street1, city, country required; organization_name required unless
+        # Primary site: address required; organization_name required unless
         # submitting_as_individual is true.
         "primary_site": {
             "type": "object",
-            "required": ["street1", "city", "country"],
+            "required": ["address"],
             "allOf": [
-                _US_COUNTRY_CONDITIONAL,
+                _US_CONGRESSIONAL_DISTRICT_CONDITIONAL,
                 # If submitting_as_individual is true, organization_name is not required;
                 # otherwise it is required.
                 {
@@ -148,11 +101,11 @@ FORM_JSON_SCHEMA = {
             ],
             "properties": _SITE_LOCATION_PROPERTIES,
         },
-        # Additional site: street1, city, country required when the site object is present.
+        # Additional site: address required when the site object is present.
         "site_location": {
             "type": "object",
-            "required": ["street1", "city", "country"],
-            "allOf": [_US_COUNTRY_CONDITIONAL],
+            "required": ["address"],
+            "allOf": [_US_CONGRESSIONAL_DISTRICT_CONDITIONAL],
             "properties": _SITE_LOCATION_PROPERTIES,
         },
     },
@@ -178,35 +131,35 @@ FORM_UI_SCHEMA = [
             },
             {
                 "type": "field",
-                "definition": "/properties/primary_site/properties/street1",
+                "definition": "/properties/primary_site/properties/address/properties/street1",
             },
             {
                 "type": "field",
-                "definition": "/properties/primary_site/properties/street2",
+                "definition": "/properties/primary_site/properties/address/properties/street2",
             },
             {
                 "type": "field",
-                "definition": "/properties/primary_site/properties/city",
+                "definition": "/properties/primary_site/properties/address/properties/city",
             },
             {
                 "type": "field",
-                "definition": "/properties/primary_site/properties/county",
+                "definition": "/properties/primary_site/properties/address/properties/county",
             },
             {
                 "type": "field",
-                "definition": "/properties/primary_site/properties/state",
+                "definition": "/properties/primary_site/properties/address/properties/state",
             },
             {
                 "type": "field",
-                "definition": "/properties/primary_site/properties/province",
+                "definition": "/properties/primary_site/properties/address/properties/province",
             },
             {
                 "type": "field",
-                "definition": "/properties/primary_site/properties/country",
+                "definition": "/properties/primary_site/properties/address/properties/country",
             },
             {
                 "type": "field",
-                "definition": "/properties/primary_site/properties/zip_code",
+                "definition": "/properties/primary_site/properties/address/properties/zip_code",
             },
             {
                 "type": "field",
@@ -257,7 +210,7 @@ def _site_location_xml_fields() -> dict:
             "xml_transform": {
                 "target": "Individual",
                 "namespace": "globLib",
-                "value_transform": "boolean_to_yes_no",
+                "value_transform": {"type": "boolean_to_yes_no"},
             }
         },
         "organization_name": {
@@ -272,53 +225,59 @@ def _site_location_xml_fields() -> dict:
                 "namespace": "globLib",
             }
         },
-        "street1": {
+        "address": {
             "xml_transform": {
-                "target": "Street1",
-                "namespace": "globLib",
-            }
-        },
-        "street2": {
-            "xml_transform": {
-                "target": "Street2",
-                "namespace": "globLib",
-            }
-        },
-        "city": {
-            "xml_transform": {
-                "target": "City",
-                "namespace": "globLib",
-            }
-        },
-        "county": {
-            "xml_transform": {
-                "target": "County",
-                "namespace": "globLib",
-            }
-        },
-        "state": {
-            "xml_transform": {
-                "target": "State",
-                "namespace": "globLib",
-            }
-        },
-        "province": {
-            "xml_transform": {
-                "target": "Province",
-                "namespace": "globLib",
-            }
-        },
-        "country": {
-            "xml_transform": {
-                "target": "Country",
-                "namespace": "globLib",
-            }
-        },
-        "zip_code": {
-            "xml_transform": {
-                "target": "ZipPostalCode",
-                "namespace": "globLib",
-            }
+                "target": "Address",
+                "type": "nested_object",
+            },
+            "street1": {
+                "xml_transform": {
+                    "target": "Street1",
+                    "namespace": "globLib",
+                }
+            },
+            "street2": {
+                "xml_transform": {
+                    "target": "Street2",
+                    "namespace": "globLib",
+                }
+            },
+            "city": {
+                "xml_transform": {
+                    "target": "City",
+                    "namespace": "globLib",
+                }
+            },
+            "county": {
+                "xml_transform": {
+                    "target": "County",
+                    "namespace": "globLib",
+                }
+            },
+            "state": {
+                "xml_transform": {
+                    "target": "State",
+                    "namespace": "globLib",
+                }
+            },
+            "province": {
+                "xml_transform": {
+                    "target": "Province",
+                    "namespace": "globLib",
+                }
+            },
+            "country": {
+                "xml_transform": {
+                    "target": "Country",
+                    "namespace": "globLib",
+                }
+            },
+            "zip_code": {
+                "xml_transform": {
+                    "target": "ZipPostalCode",
+                    "namespace": "globLib",
+                }
+            },
         },
         "congressional_district": {
             "xml_transform": {

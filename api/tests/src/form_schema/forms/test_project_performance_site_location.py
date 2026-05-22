@@ -15,13 +15,15 @@ _FULL_US_SITE = {
     "submitting_as_individual": False,
     "organization_name": "Example University",
     "uei": "ABCDEFGHIJ12",
-    "street1": "123 Research Blvd",
-    "street2": "Building 4",
-    "city": "Science City",
-    "county": "Grant County",
-    "state": "CA: California",
-    "country": "USA: UNITED STATES",
-    "zip_code": "90210-1234",
+    "address": {
+        "street1": "123 Research Blvd",
+        "street2": "Building 4",
+        "city": "Science City",
+        "county": "Grant County",
+        "state": "CA: California",
+        "country": "USA: UNITED STATES",
+        "zip_code": "90210-1234",
+    },
     "congressional_district": "CA-033",
 }
 
@@ -29,28 +31,34 @@ _FULL_INTL_SITE = {
     "submitting_as_individual": False,
     "organization_name": "International Research Institute",
     "uei": "ZZZZZZZZZZ99",
-    "street1": "10 Rue de la Paix",
-    "street2": "Suite 200",
-    "city": "Paris",
-    "province": "Île-de-France",
-    "country": "FRA: FRANCE",
+    "address": {
+        "street1": "10 Rue de la Paix",
+        "street2": "Suite 200",
+        "city": "Paris",
+        "province": "Île-de-France",
+        "country": "FRA: FRANCE",
+    },
 }
 
 _INDIVIDUAL_US_SITE = {
     "submitting_as_individual": True,
-    "street1": "456 Main St",
-    "city": "Springfield",
-    "country": "USA: UNITED STATES",
-    "zip_code": "12345-6789",
+    "address": {
+        "street1": "456 Main St",
+        "city": "Springfield",
+        "country": "USA: UNITED STATES",
+        "zip_code": "12345-6789",
+        "state": "IL: Illinois",
+    },
     "congressional_district": "IL-013",
-    "state": "IL: Illinois",
 }
 
 _INDIVIDUAL_INTL_SITE = {
     "submitting_as_individual": True,
-    "street1": "1 High Street",
-    "city": "London",
-    "country": "GBR: UNITED KINGDOM",
+    "address": {
+        "street1": "1 High Street",
+        "city": "London",
+        "country": "GBR: UNITED KINGDOM",
+    },
 }
 
 
@@ -115,13 +123,11 @@ def test_empty_form_missing_primary_site(project_performance_site_location_v4_0)
 
 
 def test_empty_primary_site_missing_required_fields(project_performance_site_location_v4_0):
-    """Empty primary_site object triggers required errors for street1, city, country,
-    and organization_name (since submitting_as_individual is absent/false)."""
+    """Empty primary_site object triggers required errors for address and organization_name
+    (since submitting_as_individual is absent/false)."""
     data = {"primary_site": {}}
     expected = [
-        "$.primary_site.street1",
-        "$.primary_site.city",
-        "$.primary_site.country",
+        "$.primary_site.address",
         "$.primary_site.organization_name",
     ]
     validate_required(data, expected, project_performance_site_location_v4_0)
@@ -132,14 +138,16 @@ def test_us_primary_site_missing_state_zip_district(project_performance_site_loc
     data = {
         "primary_site": {
             "organization_name": "Test Org",
-            "street1": "123 Main St",
-            "city": "Springfield",
-            "country": "USA: UNITED STATES",
+            "address": {
+                "street1": "123 Main St",
+                "city": "Springfield",
+                "country": "USA: UNITED STATES",
+            },
         }
     }
     expected = [
-        "$.primary_site.state",
-        "$.primary_site.zip_code",
+        "$.primary_site.address.state",
+        "$.primary_site.address.zip_code",
         "$.primary_site.congressional_district",
     ]
     validate_required(data, expected, project_performance_site_location_v4_0)
@@ -150,9 +158,11 @@ def test_org_name_not_required_when_individual(project_performance_site_location
     data = {
         "primary_site": {
             "submitting_as_individual": True,
-            "street1": "123 Main St",
-            "city": "Springfield",
-            "country": "GBR: UNITED KINGDOM",
+            "address": {
+                "street1": "123 Main St",
+                "city": "Springfield",
+                "country": "GBR: UNITED KINGDOM",
+            },
         }
     }
     validate_required(data, [], project_performance_site_location_v4_0)
@@ -163,9 +173,11 @@ def test_org_name_required_when_not_individual(project_performance_site_location
     data = {
         "primary_site": {
             "submitting_as_individual": False,
-            "street1": "123 Main St",
-            "city": "Springfield",
-            "country": "GBR: UNITED KINGDOM",
+            "address": {
+                "street1": "123 Main St",
+                "city": "Springfield",
+                "country": "GBR: UNITED KINGDOM",
+            },
         }
     }
     validate_required(
@@ -174,15 +186,13 @@ def test_org_name_required_when_not_individual(project_performance_site_location
 
 
 def test_additional_site_missing_required_fields(project_performance_site_location_v4_0):
-    """Empty additional site object triggers required errors for street1, city, country."""
+    """Empty additional site object triggers required error for address."""
     data = {
         "primary_site": _INDIVIDUAL_INTL_SITE,
         "additional_sites": [{}],
     }
     expected = [
-        "$.additional_sites[0].street1",
-        "$.additional_sites[0].city",
-        "$.additional_sites[0].country",
+        "$.additional_sites[0].address",
     ]
     validate_required(data, expected, project_performance_site_location_v4_0)
 
@@ -193,15 +203,17 @@ def test_us_additional_site_missing_state_zip_district(project_performance_site_
         "primary_site": _INDIVIDUAL_INTL_SITE,
         "additional_sites": [
             {
-                "street1": "789 Oak Ave",
-                "city": "Austin",
-                "country": "USA: UNITED STATES",
+                "address": {
+                    "street1": "789 Oak Ave",
+                    "city": "Austin",
+                    "country": "USA: UNITED STATES",
+                }
             }
         ],
     }
     expected = [
-        "$.additional_sites[0].state",
-        "$.additional_sites[0].zip_code",
+        "$.additional_sites[0].address.state",
+        "$.additional_sites[0].address.zip_code",
         "$.additional_sites[0].congressional_district",
     ]
     validate_required(data, expected, project_performance_site_location_v4_0)
@@ -213,65 +225,65 @@ def test_us_additional_site_missing_state_zip_district(project_performance_site_
 
 
 def test_min_length_violations(project_performance_site_location_v4_0):
-    """Empty string values for string fields trigger minLength errors."""
+    """Empty string values for string fields trigger minLength errors.
+    Note: state and country use enum validation (via shared address schema) and are excluded."""
     data = {
         "primary_site": {
             "submitting_as_individual": True,
             "organization_name": "",
-            "street1": "",
-            "street2": "",
-            "city": "",
-            "county": "",
-            "state": "",
-            "province": "",
-            "country": "",
-            "zip_code": "",
+            "address": {
+                "street1": "",
+                "street2": "",
+                "city": "",
+                "county": "",
+                "province": "",
+                "country": "GBR: UNITED KINGDOM",
+                "zip_code": "",
+            },
         }
     }
     expected = [
         "$.primary_site.organization_name",
-        "$.primary_site.street1",
-        "$.primary_site.street2",
-        "$.primary_site.city",
-        "$.primary_site.county",
-        "$.primary_site.state",
-        "$.primary_site.province",
-        "$.primary_site.country",
-        "$.primary_site.zip_code",
+        "$.primary_site.address.street1",
+        "$.primary_site.address.street2",
+        "$.primary_site.address.city",
+        "$.primary_site.address.county",
+        "$.primary_site.address.province",
+        "$.primary_site.address.zip_code",
     ]
     validate_min_length(data, expected, project_performance_site_location_v4_0)
 
 
 def test_max_length_violations(project_performance_site_location_v4_0):
-    """Values exceeding maxLength trigger maxLength errors."""
+    """Values exceeding maxLength trigger maxLength errors.
+    Note: state and country use enum validation (via shared address schema) and are excluded.
+    Note: congressional_district is also excluded since a too-long value also fails the
+    pattern constraint, which would produce a second error type for the same field."""
     data = {
         "primary_site": {
             "submitting_as_individual": True,
             "organization_name": "A" * 61,
             "uei": "B" * 13,
-            "street1": "C" * 56,
-            "street2": "D" * 56,
-            "city": "E" * 36,
-            "county": "F" * 31,
-            "state": "G" * 56,
-            "province": "H" * 31,
-            "country": "I" * 50,
-            "zip_code": "J" * 31,
-            # congressional_district is excluded here: a too-long value also fails the
-            # pattern constraint, which would produce a second error type for the same field.
+            "address": {
+                "street1": "C" * 56,
+                "street2": "D" * 56,
+                "city": "E" * 36,
+                "county": "F" * 31,
+                "province": "H" * 31,
+                "country": "GBR: UNITED KINGDOM",
+                "zip_code": "J" * 31,
+            },
         }
     }
     expected = [
         "$.primary_site.organization_name",
         "$.primary_site.uei",
-        "$.primary_site.street1",
-        "$.primary_site.street2",
-        "$.primary_site.city",
-        "$.primary_site.county",
-        "$.primary_site.state",
-        "$.primary_site.province",
-        "$.primary_site.country",
-        "$.primary_site.zip_code",
+        "$.primary_site.address.street1",
+        "$.primary_site.address.street2",
+        "$.primary_site.address.city",
+        "$.primary_site.address.county",
+        "$.primary_site.address.province",
+        "$.primary_site.address.zip_code",
     ]
     validate_max_length(data, expected, project_performance_site_location_v4_0)
 
@@ -281,11 +293,13 @@ def test_congressional_district_min_length(project_performance_site_location_v4_
     data = {
         "primary_site": {
             "submitting_as_individual": True,
-            "street1": "123 Main",
-            "city": "DC",
-            "country": "USA: UNITED STATES",
-            "state": "DC: District of Columbia",
-            "zip_code": "20001-0001",
+            "address": {
+                "street1": "123 Main",
+                "city": "DC",
+                "country": "USA: UNITED STATES",
+                "state": "DC: District of Columbia",
+                "zip_code": "20001-0001",
+            },
             "congressional_district": "CA",  # too short, also fails pattern
         }
     }
@@ -301,11 +315,13 @@ def test_congressional_district_pattern(project_performance_site_location_v4_0):
     data = {
         "primary_site": {
             "submitting_as_individual": True,
-            "street1": "123 Main",
-            "city": "DC",
-            "country": "USA: UNITED STATES",
-            "state": "DC: District of Columbia",
-            "zip_code": "20001-0001",
+            "address": {
+                "street1": "123 Main",
+                "city": "DC",
+                "country": "USA: UNITED STATES",
+                "state": "DC: District of Columbia",
+                "zip_code": "20001-0001",
+            },
             "congressional_district": "CA0005",  # 6 chars but no hyphen
         }
     }

@@ -35,32 +35,38 @@ _US_SITE = {
     "submitting_as_individual": False,
     "organization_name": "Example University",
     "uei": "ABCDEFGHIJ12",
-    "street1": "123 Research Blvd",
-    "street2": "Suite 400",
-    "city": "Science City",
-    "county": "Grant County",
-    "state": "CA: California",
-    "country": "USA: UNITED STATES",
-    "zip_code": "90210-1234",
+    "address": {
+        "street1": "123 Research Blvd",
+        "street2": "Suite 400",
+        "city": "Science City",
+        "county": "Grant County",
+        "state": "CA: California",
+        "country": "USA: UNITED STATES",
+        "zip_code": "90210-1234",
+    },
     "congressional_district": "CA-033",
 }
 
 _INTL_SITE = {
     "submitting_as_individual": False,
     "organization_name": "International Research Institute",
-    "street1": "10 Rue de la Paix",
-    "city": "Paris",
-    "country": "FRA: FRANCE",
+    "address": {
+        "street1": "10 Rue de la Paix",
+        "city": "Paris",
+        "country": "FRA: FRANCE",
+    },
 }
 
 _INDIVIDUAL_US_SITE = {
     "submitting_as_individual": True,
-    "street1": "456 Main St",
-    "city": "Springfield",
-    "country": "USA: UNITED STATES",
-    "zip_code": "12345-6789",
+    "address": {
+        "street1": "456 Main St",
+        "city": "Springfield",
+        "country": "USA: UNITED STATES",
+        "zip_code": "12345-6789",
+        "state": "IL: Illinois",
+    },
     "congressional_district": "IL-013",
-    "state": "IL: Illinois",
 }
 
 
@@ -104,7 +110,7 @@ class TestPerformanceSiteXMLGeneration:
     def test_individual_submitter_maps_yes(self):
         xml = self._generate({"primary_site": _INDIVIDUAL_US_SITE})
 
-        assert "Individual>Yes<" in xml
+        assert "Individual>Y: Yes<" in xml
         # OrganizationName not provided — should be absent
         assert "OrganizationName" not in xml
 
