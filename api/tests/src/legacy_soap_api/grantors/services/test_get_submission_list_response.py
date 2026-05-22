@@ -250,7 +250,7 @@ class TestGetSubmissionListResponseStatusFilter(BaseTestClass):
         assert result.success is True
         assert result.available_application_number == 5
 
-    def test_get_submission_list_response_does_not_include_grants_gov_tracking_number_if_it_is_none(
+    def test_get_submission_list_response_does_not_include_grants_gov_application_status_if_it_is_none(
         self, db_session, enable_factory_create, setup_data
     ):
         submission = ApplicationSubmissionFactory.create(
@@ -273,6 +273,8 @@ class TestGetSubmissionListResponseStatusFilter(BaseTestClass):
             simpler_submissions=simpler_submissions,
             proxy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
+        get_submission_list_response_dict = result.submission_info[0].to_soap_envelope_dict(
+            "GetSubmissionListResponse"
+        )["Envelope"]["Body"]["GetSubmissionListResponse"]
         assert result.success is True
-        assert result.available_application_number == 1
-        assert "GrantGovApplicationStatus" not in dict(result.submission_info[0])
+        assert "GrantsGovApplicationStatus" not in get_submission_list_response_dict.keys()

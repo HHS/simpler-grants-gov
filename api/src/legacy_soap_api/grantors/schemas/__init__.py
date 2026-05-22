@@ -12,8 +12,6 @@ from src.legacy_soap_api.grantors.schemas.get_application_zip_schemas import (
 )
 from src.legacy_soap_api.grantors.schemas.get_submission_list_schemas import (
     ExpandedApplicationFilter,
-    GetSubmissionListExpandedRequest,
-    GetSubmissionListExpandedResponse,
     GetSubmissionListRequest,
     GetSubmissionListResponse,
     SubmissionInfo,
@@ -34,8 +32,6 @@ __all__ = [
     "FileDataHandler",
     "XOPIncludeData",
     "GetApplicationZipRequest",
-    "GetSubmissionListExpandedRequest",
-    "GetSubmissionListExpandedResponse",
     "ExpandedApplicationFilter",
     "SubmissionInfo",
     "UpdateApplicationInfoResponse",

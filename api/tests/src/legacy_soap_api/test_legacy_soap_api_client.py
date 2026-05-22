@@ -1258,7 +1258,7 @@ class TestSimplerSOAPGetSubmissionListExpanded:
                 "\n--uuid:aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb--"
             ).encode("utf-8")
             assert result.data == expected
-            assert "Failed to parse submission list expanded XML response" in caplog.messages
+            assert "Failed to parse submission list XML response" in caplog.messages
 
     def test_get_simpler_soap_response_returns_valid_submission_info_from_proxy_and_skips_invalid(
         self, db_session, enable_factory_create, mock_s3_bucket, caplog

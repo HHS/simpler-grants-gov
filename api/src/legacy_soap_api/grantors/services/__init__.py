@@ -7,8 +7,6 @@ from src.legacy_soap_api.grantors.services.get_application_zip_response import (
 )
 from src.legacy_soap_api.grantors.services.get_submission_list_response import (
     get_submission_list,
-    get_submission_list_expanded,
-    get_submission_list_expanded_response,
     get_submission_list_response,
 )
 from src.legacy_soap_api.grantors.services.update_application_info_response import (
@@ -22,8 +20,6 @@ __all__ = [
     "get_submission_list_response",
     "get_confirm_application_delivery_response",
     "get_application_zip_response",
-    "get_submission_list_expanded",
-    "get_submission_list_expanded_response",
     "update_application_info",
     "get_update_application_info_response",
 ]

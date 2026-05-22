@@ -38,21 +38,17 @@ class SubmissionInfoExpanded(SubmissionInfo):
     uei: str | None = Field(default=None, alias="UEI")
 
 
-class GetSubmissionListResponse[T: SubmissionInfo](BaseSOAPSchema):
+class GetSubmissionListResponse(BaseSOAPSchema):
     success: bool = Field(default=True, alias="ns2:Success")
     available_application_number: int | None = Field(
         default=None, alias="ns2:AvailableApplicationNumber"
     )
-    submission_info: list[T] = Field(default_factory=list, alias="ns2:SubmissionInfo")
+    submission_info: list[SubmissionInfo] | list[SubmissionInfoExpanded] = Field(
+        default_factory=list, alias="ns2:SubmissionInfo"
+    )
 
     def to_soap_envelope_dict(self, operation_name: str) -> dict:
         return super().to_soap_envelope_dict(f"ns2:{operation_name}")
-
-
-class GetSubmissionListExpandedResponse(GetSubmissionListResponse[SubmissionInfoExpanded]):
-    submission_info: list[SubmissionInfoExpanded] = Field(
-        default_factory=list, alias="ns2:SubmissionInfo"
-    )
 
 
 class ExpandedApplicationFilter(BaseModel):
@@ -124,7 +120,3 @@ class GetSubmissionListRequest(BaseModel):
                     "The content of element 'ExpandedApplicationFilter' is not complete. One of '{\"http://apply.grants.gov/system/GrantsCommonElements-V1.0\":FilterType}' is expected."
                 )
         return data
-
-
-class GetSubmissionListExpandedRequest(GetSubmissionListRequest):
-    pass

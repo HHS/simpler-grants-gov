@@ -47,7 +47,7 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
         ).encode("utf-8")
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+        schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         expected = {
             "expanded_application_filter": {
                 "filters": {
@@ -82,7 +82,7 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
         with pytest.raises(SOAPInvalidEnvelope) as e:
-            grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+            grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         assert (
             f"{e.value}"
             == "The content of element 'ExpandedApplicationFilter' is not complete. One of '{\"http://apply.grants.gov/system/GrantsCommonElements-V1.0\":FilterValue}' is expected."
@@ -106,7 +106,7 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
         with pytest.raises(SOAPInvalidEnvelope) as e:
-            grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+            grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         assert (
             f"{e.value}"
             == "The content of element 'ExpandedApplicationFilter' is not complete. One of '{\"http://apply.grants.gov/system/GrantsCommonElements-V1.0\":FilterType}' is expected."
@@ -130,7 +130,7 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
         ).encode("utf-8")
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+        schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         expected = {
             "expanded_application_filter": {
                 "filters": {
@@ -166,7 +166,7 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
         ).encode("utf-8")
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+        schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         expected = {
             "expanded_application_filter": {
                 "filters": {
@@ -196,7 +196,7 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
         soap_operation_dict = (
             get_soap_operation_dict(str(payload.payload), payload.operation_name) or {}
         )
-        schema = grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+        schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         assert schema.model_dump() == {"expanded_application_filter": None}
 
     def test_get_submission_list_expanded_request_filters_created_by_multiple_statuses(
@@ -225,7 +225,7 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
         ).encode("utf-8")
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantors_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
+        schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         expected = {
             "expanded_application_filter": {
                 "filters": {"Status": ["Rejected with Errors", "Validated", "Received"]}
@@ -308,7 +308,7 @@ class TestSubmissionInfoExpandedDefaultNone:
         assert info.funding_opportunity_number is None
 
     def test_get_submission_list_expanded_response_from_empty_dict(self):
-        response = grantors_schemas.GetSubmissionListExpandedResponse(**{})
+        response = grantors_schemas.GetSubmissionListResponse(**{})
         assert response.success is True
         assert response.available_application_number is None
         assert response.submission_info == []
