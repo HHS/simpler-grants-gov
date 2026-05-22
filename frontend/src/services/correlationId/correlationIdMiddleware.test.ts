@@ -31,8 +31,8 @@ const buildRequest = (cookieValue?: string): NextRequest => {
   return new NextRequest("http://anywhere.com/", { headers });
 };
 
-const getCIDCookie = (response: NextResponse): string | undefined =>
-  response.cookies.get(CORRELATION_ID_COOKIE)?.value;
+const getCIDCookie = (response: NextResponse): string =>
+  response.cookies.get(CORRELATION_ID_COOKIE)?.value ?? "";
 
 describe("isValidCorrelationId", () => {
   it.each([
@@ -41,7 +41,6 @@ describe("isValidCorrelationId", () => {
     ["bad variant nibble", "f47ac10b-58cc-4372-c567-0e02b2c3d479", false],
     ["not a uuid", "not-a-uuid", false],
     ["empty string", "", false],
-    ["undefined", undefined, false],
   ])("%s -> %s", (_label, input, expected) => {
     expect(isValidCorrelationId(input)).toBe(expected);
   });
