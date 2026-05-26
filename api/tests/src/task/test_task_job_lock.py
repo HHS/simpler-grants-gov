@@ -90,7 +90,6 @@ def test_task_job_lock_handles_when_locked_until_is_in_the_past(db_session, enab
         is_locked=True,
         locked_until=now - timedelta(days=2),
     )
-    db_session.commit()
     with TaskJobLock(db_session, job_type=JobType.LOAD_TRANSFORM, lock_duration_minutes=60):
         pass
     db_session.refresh(job_lock)
@@ -110,7 +109,6 @@ def test_task_job_lock_when_job_lock_locked_until_is_in_the_past(
         is_locked=False,
         locked_until=now - timedelta(days=2),
     )
-    db_session.commit()
     with TaskJobLock(db_session, job_type=JobType.SETUP_FOREIGN_TABLES, lock_duration_minutes=60):
         pass
     db_session.refresh(job_lock)
@@ -131,7 +129,6 @@ def test_task_job_lock_when_is_locked_is_true_and_locked_until_is_in_future_rais
         is_locked=True,
         locked_until=now + timedelta(days=2),
     )
-    db_session.commit()
     with pytest.raises(TaskJobLockIsLockedError):
         with TaskJobLock(
             db_session, job_type=JobType.LOAD_OPPORTUNITY_DATA_OPENSEARCH, lock_duration_minutes=60
@@ -150,7 +147,6 @@ def test_verify_job_lock_raises_when_locked_by_does_not_match(
     job_lock = JobLockFactory.create(
         job_type=JobType.SETUP_LOWER_ENV_AGENCIES, locked_by=uuid.uuid4()
     )
-    db_session.commit()
 
     task_job_lock = TaskJobLock(db_session, job_type=JobType.CREATE_ANALYTICS_DB_CSVS)
 
