@@ -377,8 +377,8 @@ help: ## Prints the help documentation and info about each command
 test-xml-validation: ## Run XML validation tests against XSD schemas (usage: make test-xml-validation form=SF424_4_0)
 	$(PY_RUN_CMD) flask task validate-xml-generation $(if $(form),--form $(form)) $(args)
 
-fetch-xsds: ## Pre-fetch and cache XSD files for offline validation (usage: make fetch-xsds cache_dir=../services/xml_generation/xsds/)
-	$(PY_RUN_CMD) flask task fetch-xsds $(if $(cache_dir),--cache-dir $(cache_dir)) $(if $(form),--form $(form)) $(args)
+fetch-xsds: ## Pre-fetch and store XSD files for offline validation (usage: make fetch-xsds xsd_dir=../services/xml_generation/xsds/)
+	$(PY_RUN_CMD) flask task fetch-xsds $(if $(xsd_dir),--xsd-dir $(xsd_dir)) $(if $(form),--form $(form)) $(args)
 
 ##################################################
 # Load testing

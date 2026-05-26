@@ -191,7 +191,7 @@ def validate_xml_generation_command(
         # Save results to custom file
         flask task validate-xml-generation --output validation_results.json
 
-        # Use custom directory
+        # Use XSD directory
         flask task validate-xml-generation --xsd_dir ../services/xml_generation/xsds
     """
     init_form_registry()
@@ -202,11 +202,11 @@ def validate_xml_generation_command(
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     try:
-        # Use default directory if not specified
+        # Use default XSD directory if not specified
         if not xsd_dir:
             xsd_dir = str(Path(__file__).resolve().parents[1] / "services/xml_generation/xsds")
 
-        # Verify directory exists
+        # Verify XSD directory exists
         xsd_path = Path(xsd_dir)
         if not xsd_path.exists():
             click.echo(
@@ -296,13 +296,13 @@ def fetch_xsds_command(
     """Pre-fetch and store XSD files for offline validation.
 
     This command downloads XSD schema files and stores them in a local
-    directory. Run this before using the validate-xml-generation command.
+    XSD directory. Run this before using the validate-xml-generation command.
 
     Examples:
         # Fetch all XSD files (uses ../services/xml_generation/xsds by default)
         flask task fetch-xsds
 
-        # Fetch XSDs to a specific directory
+        # Fetch XSDs to a specific XSD directory
         flask task fetch-xsds --dir ../services/xml_generation/xsds
 
         # Fetch XSD for a specific form

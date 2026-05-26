@@ -37,7 +37,7 @@ class ValidationTestRunner:
         'init_form_registry()' and '_build_xml_form_map()'.
 
         Raises:
-            XSDValidationError: If directory doesn't exist
+            XSDValidationError: If XSD directory doesn't exist
         """
         self.xml_service = XMLGenerationService()
         self.xsd_validator = XSDValidator(xsd_dir)
@@ -87,7 +87,7 @@ class ValidationTestRunner:
         Args:
             test_name: Name of the test case
             json_input: JSON input data
-            xsd_url_or_path: URL to XSD file (will be converted to file path)
+            xsd_url_or_path: URL to XSD file (will be converted to XSD file path)
             form_name: Form name for XML generation
             attachment_mapping: Optional attachment mapping for forms with attachments
             pretty_print: Whether to pretty-print XML
@@ -143,7 +143,7 @@ class ValidationTestRunner:
                     "validation_result": None,
                 }
 
-            # Convert URL to file path
+            # Convert URL to XSD file path
             xsd_file_path = self._get_xsd_file_path(xsd_url_or_path)
 
             validation_result = self.xsd_validator.validate_xml(response.xml_data, xsd_file_path)
@@ -174,7 +174,7 @@ class ValidationTestRunner:
             return error_result
 
     def _get_xsd_file_path(self, xsd_url: str) -> Path:
-        """Convert XSD URL to file path."""
+        """Convert XSD URL to XSD file path."""
         # Extract filename from URL
         xsd_filename = xsd_url.split("/")[-1]
         return self.xsd_validator.xsd_dir / xsd_filename
