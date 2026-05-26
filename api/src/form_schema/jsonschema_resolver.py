@@ -21,15 +21,18 @@ have copied the change here and swap out the function in the jsonref library.
 def _walk_refs(
     obj: Any, func: Callable[[Any], Any], replace: bool = False, _processed: dict | None = None
 ) -> Any:
-    # Keep track of already processed items to prevent recursion
+    # Track processed proxies to prevent infinite recursion on circular refs.
+    # Store (proxy, resolved) tuples — the proxy ref prevents GC-based id() reuse
+    # from causing false cache hits on later proxies at the same address.
     _processed = _processed or {}
     if type(obj) is jsonref.JsonRef:
         oid = id(obj)
         if oid in _processed:
-            return _processed[oid]
+            return _processed[oid][1]
         r = func(obj)
-        obj = r if replace else obj
-        _processed[oid] = obj
+        result = r if replace else obj
+        _processed[oid] = (obj, result)
+        obj = result
     if isinstance(obj, Mapping):
         for k, v in obj.items():
             r = _walk_refs(v, func, replace=replace, _processed=_processed)

@@ -2,7 +2,7 @@ services:
   grants-shared:
     build:
       context: .
-      target: dev
+      target: base
       args:
         - RUN_UID=${RUN_UID:-4000}
         - RUN_USER=${RUN_USER:-grants-shared}
@@ -10,3 +10,9 @@ services:
     env_file: ./local.env
     volumes:
       - .:/grants_shared
+      # Override the dist folder so the build is isolated
+      # and doesn't override with what exists outside
+      - dist:/grants_shared/dist
+
+volumes:
+  dist:

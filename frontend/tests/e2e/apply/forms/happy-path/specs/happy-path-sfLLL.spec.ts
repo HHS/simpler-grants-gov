@@ -14,7 +14,7 @@ import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { getOpportunityId } from "tests/e2e/utils/get-opportunityId-utils";
 
-const { APPLY, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 
@@ -42,7 +42,7 @@ test.describe("Application form completion happy path - SFLLL", () => {
   });
   test(
     "Completes and saves form without errors",
-    { tag: [APPLY, CORE_REGRESSION] },
+    { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
     async ({ page, context }, testInfo) => {
       test.setTimeout(300_000); // 5 min timeout
 

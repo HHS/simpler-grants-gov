@@ -4,10 +4,7 @@ import pytest
 
 from src.constants.lookup_constants import ApplicationStatus, Privilege
 from src.legacy_soap_api.grantors import schemas as grantor_schemas
-from src.legacy_soap_api.grantors.services import (
-    get_submission_list_expanded,
-    get_submission_list_expanded_response,
-)
+from src.legacy_soap_api.grantors.services import get_submission_list, get_submission_list_response
 from src.legacy_soap_api.legacy_soap_api_auth import SOAPAuth
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import (
@@ -110,14 +107,15 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         )
         payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantor_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
-        simpler_submissions = get_submission_list_expanded(
+        schema = grantor_schemas.GetSubmissionListRequest(**soap_operation_dict)
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
@@ -137,14 +135,15 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         )
         payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantor_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
-        simpler_submissions = get_submission_list_expanded(
+        schema = grantor_schemas.GetSubmissionListRequest(**soap_operation_dict)
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
@@ -164,14 +163,15 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         )
         payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantor_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
-        simpler_submissions = get_submission_list_expanded(
+        schema = grantor_schemas.GetSubmissionListRequest(**soap_operation_dict)
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
@@ -191,14 +191,15 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         )
         payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantor_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
-        simpler_submissions = get_submission_list_expanded(
+        schema = grantor_schemas.GetSubmissionListRequest(**soap_operation_dict)
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
@@ -216,14 +217,15 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         soap_request = _make_soap_request(setup_data["soap_client_certificate"], status="Validated")
         payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantor_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
-        simpler_submissions = get_submission_list_expanded(
+        schema = grantor_schemas.GetSubmissionListRequest(**soap_operation_dict)
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
@@ -241,21 +243,22 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         soap_request = _make_soap_request(setup_data["soap_client_certificate"], status="X")
         payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantor_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
-        simpler_submissions = get_submission_list_expanded(
+        schema = grantor_schemas.GetSubmissionListRequest(**soap_operation_dict)
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
         assert result.success is True
         assert result.available_application_number == 5
 
-    def test_get_submission_list_expanded_response_does_not_include_grants_gov_tracking_number_if_it_is_none(
+    def test_get_submission_list_expanded_response_does_not_include_grants_gov_application_status_if_it_is_none(
         self, db_session, enable_factory_create, setup_data
     ):
         submission = ApplicationSubmissionFactory.create(
@@ -267,17 +270,21 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         )
         payload = SOAPPayload(soap_payload=soap_request.data.head().decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
-        schema = grantor_schemas.GetSubmissionListExpandedRequest(**soap_operation_dict)
-        simpler_submissions = get_submission_list_expanded(
+        schema = grantor_schemas.GetSubmissionListRequest(**soap_operation_dict)
+        simpler_submissions = get_submission_list(
             db_session=db_session,
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
+            is_expanded=True,
         )
-        result = get_submission_list_expanded_response(
+        result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
+        get_submission_list_response_dict = result.submission_info[0].to_soap_envelope_dict(
+            "GetSubmissionListExpandedResponse"
+        )["Envelope"]["Body"]["GetSubmissionListExpandedResponse"]
         assert result.success is True
         assert result.available_application_number == 1
-        assert "GrantGovApplicationStatus" not in dict(result.submission_info[0])
+        assert "GrantsGovApplicationStatus" not in get_submission_list_response_dict.keys()
