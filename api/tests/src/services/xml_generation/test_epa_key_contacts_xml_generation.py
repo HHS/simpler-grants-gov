@@ -13,9 +13,11 @@ import pytest
 from lxml import etree as lxml_etree
 
 import src.adapters.db as db
+from src.db.models.competition_models import Form
 from src.form_schema.forms.epa_key_contacts import (
     FORM_XML_TRANSFORM_RULES as EPA_KEY_CONTACTS_TRANSFORM_RULES,
 )
+from src.form_schema.forms.epa_key_contacts import EPA_KEY_CONTACT_v2_0
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -27,7 +29,6 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
@@ -445,7 +446,9 @@ class TestEPAKeyContactsXSDValidation:
         return xsd_validator.xsd_cache_dir / xsd_filename
 
     @pytest.fixture
-    def epa_key_contacts_application(self, enable_factory_create, db_session: db.Session):
+    def epa_key_contacts_application(
+        self, enable_factory_create, db_session: db.Session, seed_form_registry
+    ):
         """Create an application with EPA Key Contacts form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -467,13 +470,7 @@ class TestEPAKeyContactsXSDValidation:
             opportunity_assistance_listing=assistance_listing,
         )
 
-        # Create EPA Key Contacts form with XML transform config
-        epa_kc_form = FormFactory.create(
-            form_name="EPA KEY CONTACTS FORM",
-            short_form_name="EPA_KeyContacts",
-            form_version="2.0",
-            json_to_xml_schema=EPA_KEY_CONTACTS_TRANSFORM_RULES,
-        )
+        epa_kc_form = db_session.get(Form, EPA_KEY_CONTACT_v2_0.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="EPA Key Contacts Test Application"
@@ -569,7 +566,7 @@ class TestEPAKeyContactsXSDValidation:
         )
 
     def test_epa_key_contacts_empty_form_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session
+        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
     ):
         """Test that EPA Key Contacts with no contacts validates against XSD (all elements are optional)."""
         agency = AgencyFactory.create()
@@ -592,12 +589,7 @@ class TestEPAKeyContactsXSDValidation:
             opportunity_assistance_listing=assistance_listing,
         )
 
-        epa_kc_form = FormFactory.create(
-            form_name="EPA KEY CONTACTS FORM",
-            short_form_name="EPA_KeyContacts",
-            form_version="2.0",
-            json_to_xml_schema=EPA_KEY_CONTACTS_TRANSFORM_RULES,
-        )
+        epa_kc_form = db_session.get(Form, EPA_KEY_CONTACT_v2_0.form_id)
 
         application = ApplicationFactory.create(
             competition=competition,

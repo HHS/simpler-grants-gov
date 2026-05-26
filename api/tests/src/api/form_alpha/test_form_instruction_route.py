@@ -6,8 +6,9 @@ from werkzeug.datastructures import FileStorage
 
 import src.adapters.db as db
 import src.util.file_util as file_util
-from src.db.models.competition_models import FormInstruction
-from tests.src.db.models.factories import FormFactory, FormInstructionFactory
+from src.db.models.competition_models import Form, FormInstruction
+from src.form_schema.forms import SF424_v4_0
+from tests.src.db.models.factories import FormInstructionFactory
 
 
 @pytest.fixture
@@ -24,10 +25,11 @@ def test_form_instruction_upsert_create_new(
     db_session: db.Session,
     form_instruction_file,
     enable_factory_create,
+    seed_form_registry,
     internal_admin_user_api_key,
     mock_s3_bucket,
 ):
-    form = FormFactory.create()
+    form = db_session.get(Form, SF424_v4_0.form_id)
     form_instruction_id = uuid.uuid4()
 
     # Execute
@@ -58,10 +60,11 @@ def test_form_instruction_upsert_update_existing(
     db_session: db.Session,
     form_instruction_file,
     enable_factory_create,
+    seed_form_registry,
     internal_admin_user_api_key,
     mock_s3_bucket,
 ):
-    form = FormFactory.create()
+    form = db_session.get(Form, SF424_v4_0.form_id)
     existing_instruction = FormInstructionFactory.create()
     old_location = f"s3://{mock_s3_bucket}/old/path/file.pdf"
     existing_instruction.file_location = old_location

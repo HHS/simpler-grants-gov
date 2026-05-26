@@ -9,6 +9,7 @@ from src.constants.lookup_constants import (
     CompetitionOpenToApplicant,
     Privilege,
 )
+from src.db.models.competition_models import Form
 from src.services.applications.add_organization_to_application import (
     add_organization_to_application,
 )
@@ -19,7 +20,6 @@ from tests.src.db.models.factories import (
     ApplicationUserRoleFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OrganizationFactory,
     OrganizationUserFactory,
     OrganizationUserRoleFactory,
@@ -43,13 +43,20 @@ def test_add_organization_to_application_success(enable_factory_create, db_sessi
     )
 
     # Create a form with simple schema for testing pre-population
-    form = FormFactory.create(
+    form = Form(
+        form_name="Test form",
+        short_form_name="TST_1_0",
+        form_version="1.0",
+        agency_code="TEST",
         form_json_schema={
             "type": "object",
             "properties": {"name": {"type": "string"}},
             "required": ["name"],
-        }
+        },
+        form_ui_schema=[],
     )
+    db_session.add(form)
+    db_session.flush()
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     # Create application without an organization
@@ -364,13 +371,20 @@ def test_add_organization_triggers_form_prepopulation(enable_factory_create, db_
     )
 
     # Create a form with simple schema
-    form = FormFactory.create(
+    form = Form(
+        form_name="Test form",
+        short_form_name="TST_1_0",
+        form_version="1.0",
+        agency_code="TEST",
         form_json_schema={
             "type": "object",
             "properties": {"test_field": {"type": "string"}},
             "required": ["test_field"],
-        }
+        },
+        form_ui_schema=[],
     )
+    db_session.add(form)
+    db_session.flush()
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(
@@ -467,17 +481,24 @@ def test_add_organization_repopulates_application_response_from_org(
     )
 
     # Create form schema that includes sam_uei
-    form = FormFactory.create(
+    form = Form(
+        form_name="Test form",
+        short_form_name="TST_1_0",
+        form_version="1.0",
+        agency_code="TEST",
         form_json_schema={
             "type": "object",
             "properties": {
                 "sam_uei": {"type": "string"},
             },
         },
+        form_ui_schema=[],
         form_rule_schema={
             "sam_uei": {"gg_pre_population": {"rule": "uei"}},
         },
     )
+    db_session.add(form)
+    db_session.flush()
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     application = ApplicationFactory.create(

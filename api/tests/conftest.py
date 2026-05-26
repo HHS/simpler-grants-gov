@@ -695,6 +695,16 @@ def load_active_forms(db_session, enable_factory_create) -> None:
 
 
 @pytest.fixture
+def seed_form_registry(load_active_forms) -> None:
+    """Populate the test DB with all registry forms.
+
+    Preferred alias for load_active_forms in new tests. After this fixture runs,
+    any registered form (e.g. SF424_v4_0) can be retrieved via db_session.get().
+    """
+    # Intentionally empty — the effect comes entirely from the load_active_forms dependency.
+
+
+@pytest.fixture
 def workflow_user(enable_factory_create, monkeypatch) -> User:
     """Get the workflow user, setting them up with expected params
 
