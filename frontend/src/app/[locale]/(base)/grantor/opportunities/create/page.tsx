@@ -1,4 +1,5 @@
-import { UnauthorizedError } from "src/errors";
+import TopLevelError from "src/app/[locale]/(base)/error/page";
+import { MissingAuthError, UnauthorizedError } from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { fetchUserAgencies } from "src/services/fetch/fetchers/agenciesFetcher";
 import { RelevantAgencyRecord } from "src/types/search/searchFilterTypes";
@@ -71,18 +72,14 @@ async function CreateOpportunityPage({ searchParams }: CreateOpportunityProps) {
     ? selectedAgencyParam[0]
     : selectedAgencyParam;
 
-  const userSession = await getSession();
-
-  // Check the user's session
-  if (!userSession || !userSession.token) {
-    return <TopLevelError />;
-  }
-
   // Get agencies
   let userAgencies: RelevantAgencyRecord[];
   try {
     userAgencies = await fetchUserAgencies();
   } catch (error) {
+    if (error instanceof MissingAuthError) {
+      return <TopLevelError />;
+    }
     if (error instanceof UnauthorizedError) {
       throw error;
     }

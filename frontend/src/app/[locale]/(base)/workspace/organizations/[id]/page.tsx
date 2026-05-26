@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import { getOrganizationDetails } from "src/services/fetch/fetchers/organizationsFetcher";
 
 import { getTranslations } from "next-intl/server";
@@ -23,10 +22,6 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   let title = `${t("OrganizationDetail.pageTitle")} | Simpler.Grants.gov`;
   try {
-    const session = await getSession();
-    if (!session?.token) {
-      throw new Error("not logged in");
-    }
     const organizationDetails = await getOrganizationDetails(id);
     title = `${t("OrganizationDetail.pageTitle")}: ${organizationDetails.sam_gov_entity.legal_business_name || ""} | Simpler.Grants.gov`;
   } catch (error) {

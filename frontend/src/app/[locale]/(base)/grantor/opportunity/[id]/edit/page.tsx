@@ -1,6 +1,9 @@
 import { Metadata } from "next";
-import { ApiRequestError, parseErrorStatus } from "src/errors";
-import { getSession } from "src/services/auth/session";
+import {
+  ApiRequestError,
+  MissingAuthError,
+  parseErrorStatus,
+} from "src/errors";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
@@ -32,11 +35,8 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   let title = t("OpportunityEdit.pageTitle");
   try {
-    const session = await getSession();
-    if (session?.token) {
-      const { data } = await getOpportunityForGrantor(id);
-      title = `${t("OpportunityEdit.pageTitle")} - ${data.opportunity_title || ""}`;
-    }
+    const { data } = await getOpportunityForGrantor(id);
+    title = `${t("OpportunityEdit.pageTitle")} - ${data.opportunity_title || ""}`;
   } catch {
     // fall back to static title
   }
@@ -53,11 +53,6 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
   const t = await getTranslations({ locale, namespace: "Errors" });
   const tEdit = await getTranslations({ locale, namespace: "OpportunityEdit" });
 
-  const session = await getSession();
-  if (!session || !session.token) {
-    return <UnauthorizedMessage />;
-  }
-
   // TODO(#8601): Replace this fail-closed placeholder with a real grantor authorization
   // check once the frontend has a way to verify whether the current session can edit
   // this opportunity for its agency.
@@ -73,6 +68,10 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
       response.data.non_forecast_summary?.opportunity_summary_id ??
       "";
   } catch (error) {
+    if (error instanceof MissingAuthError) {
+      // TODO: should be an anauthenticated message
+      return <UnauthorizedMessage />;
+    }
     const status = parseErrorStatus(error as ApiRequestError);
     if (status === 404) {
       notFound();

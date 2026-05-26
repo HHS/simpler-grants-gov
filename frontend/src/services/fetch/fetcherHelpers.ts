@@ -7,6 +7,7 @@ import {
   BadRequestError,
   ForbiddenError,
   InternalServerError,
+  MissingAuthError,
   NetworkError,
   NotFoundError,
   RequestTimeoutError,
@@ -44,8 +45,7 @@ export async function getDefaultHeaders({
   if (requiresUserAuthToken) {
     const session = await getSession();
     if (!session?.token) {
-      // May want to throw here
-      throw new Error(
+      throw new MissingAuthError(
         `No user token present for call to authorized endpoint at ${url || "unknown url"}`,
       );
     }

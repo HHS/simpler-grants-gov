@@ -3,8 +3,12 @@
  * Note that the errors defined here rely on stringifying JSON data into the Error's message parameter
  * That data will need to be parsed back out into JSON when reading the error
  */
+import { error } from "console";
+import errorMap from "node_modules/zod/v3/locales/en.cjs";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
+
+import { ErrorMessage } from "@trussworks/react-uswds";
 
 export const parseErrorStatus = (error: ApiRequestError): number => {
   const { message } = error;
@@ -21,6 +25,18 @@ export const parseErrorStatus = (error: ApiRequestError): number => {
     return 500;
   }
 };
+
+export class MissingAuthError extends Error {
+  constructor(message: string) {
+    const erroMessage =
+      message || "Request requires authentication and is missing user token";
+    const cause = {
+      type: "MissingAuthError",
+      message: ErrorMessage,
+    };
+    super(erroMessage, { cause });
+  }
+}
 
 /**
  * A fetch request failed due to a network error. The error wasn't the fault of the user,

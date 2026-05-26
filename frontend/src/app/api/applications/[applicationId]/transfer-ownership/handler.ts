@@ -13,11 +13,6 @@ export const transferOwnershipHandler = async (
   options: { params: Promise<{ applicationId: string }> },
 ): Promise<Response> => {
   try {
-    const session = await getSession();
-    if (!session?.token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { applicationId } = await options.params;
 
     let parsedBody: TransferOwnershipRequestBody;

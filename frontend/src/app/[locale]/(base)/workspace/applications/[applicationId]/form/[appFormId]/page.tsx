@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import TopLevelError from "src/app/[locale]/(base)/error/page";
+import { ApiRequestError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getApplicationDetails } from "src/services/fetch/fetchers/applicationFetcher";
@@ -47,23 +48,18 @@ interface formPageProps {
 async function FormPage({ params }: formPageProps) {
   const { applicationId, appFormId } = await params;
   const { data, error } = await getFormData({ applicationId, appFormId });
-  const userSession = await getSession();
   const t = await getTranslations("Application");
-
-  if (!userSession || !userSession.token) {
-    return <TopLevelError />;
-  }
 
   let response;
   try {
     response = await getApplicationDetails(applicationId);
 
     if (response.status_code !== 200) {
-      console.error(
-        `Error retrieving application details for (${applicationId})`,
-        response,
+      throw new ApiRequestError(
+        "API request error",
+        "APIRequestError",
+        response.status_code,
       );
-      return <TopLevelError />;
     }
   } catch (e) {
     console.error(
