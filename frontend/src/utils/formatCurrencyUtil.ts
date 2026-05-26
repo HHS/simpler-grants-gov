@@ -18,3 +18,10 @@ export const formatCurrencyString = (value?: string) => {
 
   return formatCurrency(parsedValue);
 };
+
+export const getNumericAmountFromString = (
+  value: string | null | undefined,
+): number => {
+  const raw = (value ?? "").replace(/,/g, "");
+  return Number(raw) || 0;
+};
