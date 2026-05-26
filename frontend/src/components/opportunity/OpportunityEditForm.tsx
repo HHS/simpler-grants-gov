@@ -292,14 +292,8 @@ export default function OpportunityEditForm({
 
       <div className="display-flex flex-wrap flex-align-center margin-bottom-4">
         <Button
-          type="button"
+          type="submit"
           outline
-          onClick={() => {
-            if (!formRef.current) return;
-            const formData = new FormData(formRef.current);
-            formData.set("submitType", "save");
-            startTransition(() => formAction(formData));
-          }}
           disabled={isPending}
           className="height-auto margin-0 margin-bottom-1 margin-right-105 font-sans-sm text-bold line-height-sans-1"
         >
