@@ -12,15 +12,15 @@ import {
 } from "@playwright/test";
 import { EPA4700_4_FORM_CONFIG } from "tests/e2e/apply/fixtures/epa4700-4-field-definitions";
 import { epa4700_4HappyPathTestData } from "tests/e2e/apply/fixtures/epa4700-4-fill-data";
-import { getOpportunityId } from "tests/e2e/get-opportunityId-utils";
 import playwrightEnv from "tests/e2e/playwright-env";
 import { VALID_TAGS } from "tests/e2e/tags";
 import { authenticateE2eUser } from "tests/e2e/utils/authenticate-e2e-user-utils";
 import { createApplication } from "tests/e2e/utils/create-application-utils";
 import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
+import { getOpportunityId } from "tests/e2e/utils/get-opportunityId-utils";
 
-const { APPLY, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_URL = `/opportunity/${getOpportunityId()}`;
@@ -37,7 +37,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "Application form completion happy path - EPA Form 4700-4",
-  { tag: [APPLY, CORE_REGRESSION] },
+  { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,

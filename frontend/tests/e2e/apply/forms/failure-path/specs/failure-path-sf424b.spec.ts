@@ -1,6 +1,6 @@
 /**
  * @feature Apply - Application Form Failure Path
- * @featureFile tests/e2e/apply/forms/failure-path/features/negative-path-forms.feature
+ * @featureFile tests/e2e/apply/forms/failure-path/features/failure-path-forms.feature
  * @scenario Application form completion failure path - sf424b
  */
 
@@ -25,7 +25,7 @@ import {
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-const { APPLY, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID = "f7a1c2b3-4d5e-6789-8abc-1234567890ab"; // TEST-APPLY-ORG-IND-ON01
@@ -43,7 +43,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "SF-424B error validation - required fields and inline errors",
-  { tag: [APPLY, CORE_REGRESSION] },
+  { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,

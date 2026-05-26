@@ -211,6 +211,19 @@ class AwardRecommendationRisk(ApiSchemaTable, TimestampMixin):
             for rs in self.award_recommendation_risk_submissions
         ]
 
+    @property
+    def applications(self) -> list[dict[str, str | uuid.UUID]]:
+        """Get list of application submission info (ID and number) for this risk."""
+        return [
+            {
+                "award_recommendation_application_submission_id": rs.award_recommendation_application_submission_id,
+                "application_submission_id": rs.award_recommendation_application_submission.application_submission_id,
+                "application_submission_number": rs.award_recommendation_application_submission.application_submission_number,
+            }
+            for rs in self.award_recommendation_risk_submissions
+            if rs.award_recommendation_application_submission.application_submission_number
+        ]
+
 
 class AwardRecommendationApplicationSubmission(ApiSchemaTable, TimestampMixin):
     __tablename__ = "award_recommendation_application_submission"
