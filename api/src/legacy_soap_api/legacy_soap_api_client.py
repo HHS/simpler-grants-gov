@@ -13,8 +13,8 @@ from src.legacy_soap_api.grantors.services import (
     confirm_application_delivery,
     get_application_zip_response,
     get_confirm_application_delivery_response,
-    get_submission_list_expanded,
-    get_submission_list_expanded_response,
+    get_submission_list,
+    get_submission_list_response,
     get_update_application_info_response,
     update_application_info,
 )
@@ -262,17 +262,33 @@ class SimplerGrantorsS2SClient(BaseSOAPClient):
             grants_gov_tracking_number=tracking_number,
         )
 
-    def get_submission_list_expanded_request(
+    def get_submission_list_request(
         self, proxy_response: SOAPResponse
-    ) -> grantors_schemas.GetSubmissionListExpandedResponse:
+    ) -> grantors_schemas.GetSubmissionListResponse:
         soap_request_dict = self.get_soap_request_dict() or {}
-        simpler_submissions = get_submission_list_expanded(
+        simpler_submissions = get_submission_list(
             db_session=self.db_session,
             soap_request=self.soap_request,
-            request=grantors_schemas.GetSubmissionListExpandedRequest(**soap_request_dict),
+            request=grantors_schemas.GetSubmissionListRequest(**soap_request_dict),
             soap_config=self.operation_config,
         )
-        return get_submission_list_expanded_response(
+        return get_submission_list_response(
+            simpler_submissions=simpler_submissions,
+            proxy_response=proxy_response,
+        )
+
+    def get_submission_list_expanded_request(
+        self, proxy_response: SOAPResponse
+    ) -> grantors_schemas.GetSubmissionListResponse:
+        soap_request_dict = self.get_soap_request_dict() or {}
+        simpler_submissions = get_submission_list(
+            db_session=self.db_session,
+            soap_request=self.soap_request,
+            request=grantors_schemas.GetSubmissionListRequest(**soap_request_dict),
+            soap_config=self.operation_config,
+            is_expanded=True,
+        )
+        return get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=proxy_response,
         )
