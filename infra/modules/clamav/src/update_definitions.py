@@ -1,10 +1,4 @@
-"""Refresh the ClamAV signature database on EFS.
-
-Invoked on a schedule by EventBridge. Writes a minimal freshclam.conf to
-/tmp (Lambda's only writable non-mounted path), points DatabaseDirectory at
-the EFS mount, and runs the freshclam binary from the Lambda layer. Emits
-a single JSON log line describing the outcome.
-"""
+"""Refresh the ClamAV signature database on EFS."""
 
 import json
 import os
@@ -14,6 +8,17 @@ from pathlib import Path
 CLAMAV_DB_DIR = os.environ.get("CLAMAV_DB_DIR", "/mnt/clamav")
 FRESHCLAM_BIN = "/opt/bin/freshclam"
 CONFIG_PATH = Path("/tmp/freshclam.conf")
+
+# Fail fast at cold start if the layer is missing the binary.
+if not Path(FRESHCLAM_BIN).exists():
+    raise RuntimeError(
+        f"freshclam binary not found at {FRESHCLAM_BIN}; layer build is missing or corrupted"
+    )
+
+
+class FreshclamError(Exception):
+    """Raised when freshclam exits non-zero. Re-raised from the handler
+    so Lambda reports an error and the alerts alarm fires."""
 
 
 def lambda_handler(event, context):
@@ -37,10 +42,17 @@ def lambda_handler(event, context):
         "freshclam_stderr": completed.stderr.strip(),
         "database_files": [
             {"name": p.name, "size_bytes": p.stat().st_size}
-            for p in sorted(Path(CLAMAV_DB_DIR).iterdir()) if p.is_file()
+            for p in sorted(Path(CLAMAV_DB_DIR).iterdir())
+            if p.is_file()
         ],
     }
     print(json.dumps(result), flush=True)
+
+    if completed.returncode != 0:
+        raise FreshclamError(
+            f"freshclam exited {completed.returncode}: {completed.stderr.strip()!r}"
+        )
+
     return result
 
 

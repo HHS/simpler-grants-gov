@@ -55,7 +55,7 @@ resource "aws_lambda_function" "freshclam" {
 
   filename         = data.archive_file.freshclam.output_path
   source_code_hash = data.archive_file.freshclam.output_base64sha256
-  runtime          = "python3.14"
+  runtime          = "python3.13"
   handler          = "update_definitions.lambda_handler"
 
   layers      = [aws_lambda_layer_version.clamav.arn]
@@ -113,4 +113,38 @@ resource "aws_lambda_permission" "allow_eventbridge_invoke" {
   function_name = aws_lambda_function.freshclam.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.freshclam_schedule.arn
+}
+
+# Populate the signature database synchronously on first apply
+resource "aws_lambda_invocation" "freshclam_bootstrap" {
+  function_name   = aws_lambda_function.freshclam.function_name
+  qualifier       = aws_lambda_function.freshclam.version
+  lifecycle_scope = "CREATE_ONLY"
+  input           = jsonencode({ trigger = "bootstrap" })
+
+  depends_on = [
+    aws_efs_mount_target.clamav,
+    aws_cloudwatch_log_group.freshclam,
+  ]
+}
+
+# Alarm on any freshclam invocation error.
+resource "aws_cloudwatch_metric_alarm" "freshclam_failures" {
+  alarm_name          = "${local.freshclam_name}-failures"
+  alarm_description   = "freshclam failed to refresh the ClamAV signature database — DB will go stale if not resolved"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  metric_name         = "Errors"
+  namespace           = "AWS/Lambda"
+  period              = 60
+  statistic           = "Sum"
+  threshold           = 1
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    FunctionName = aws_lambda_function.freshclam.function_name
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+  ok_actions    = [aws_sns_topic.alerts.arn]
 }

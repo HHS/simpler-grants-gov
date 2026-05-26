@@ -32,3 +32,23 @@ output "layer_arn" {
   description = "ARN of the ClamAV binaries Lambda layer."
   value       = aws_lambda_layer_version.clamav.arn
 }
+
+output "scanner_dlq_arn" {
+  description = "ARN of the SQS dead-letter queue for failed scanner invocations."
+  value       = aws_sqs_queue.scanner_dlq.arn
+}
+
+output "scanner_dlq_url" {
+  description = "URL of the SQS dead-letter queue for failed scanner invocations."
+  value       = aws_sqs_queue.scanner_dlq.url
+}
+
+output "scanner_dlq_name" {
+  description = "Name of the SQS dead-letter queue for failed scanner invocations."
+  value       = aws_sqs_queue.scanner_dlq.name
+}
+
+output "alerts_topic_arn" {
+  description = "ARN of the SNS topic for ClamAV operational alerts (infected files, freshclam failures, DLQ buildup)."
+  value       = aws_sns_topic.alerts.arn
+}
