@@ -5,6 +5,7 @@ with only a few alterations.
 """
 
 import io
+import uuid
 from datetime import timedelta
 from urllib import parse
 
@@ -16,7 +17,7 @@ from cryptography.x509.oid import NameOID
 import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import Privilege
 from src.db.models.agency_models import Agency
-from src.db.models.competition_models import ApplicationForm
+from src.db.models.competition_models import ApplicationForm, Form
 from src.db.models.user_models import Role, User
 from src.legacy_soap_api.legacy_soap_api_auth import (
     LOG_LOCAL_RESPONSE_HEADER_KEY,
@@ -35,7 +36,6 @@ from tests.src.db.models.factories import (
     ApplicationUserFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     LegacyAgencyCertificateFactory,
     LinkExternalUserFactory,
     OpportunityAssistanceListingFactory,
@@ -43,6 +43,7 @@ from tests.src.db.models.factories import (
     OrganizationFactory,
     RoleFactory,
     StagingTcertificatesFactory,
+    get_db_session,
 )
 
 DEFAULT_VALUE = object()
@@ -105,7 +106,18 @@ def setup_application_for_form_validation(
     }
 
     competition = CompetitionFactory.create(**competition_params)
-    form = FormFactory.create(form_json_schema=json_schema, form_rule_schema=rule_schema)
+    form = Form(
+        form_name="Test form",
+        short_form_name=f"TST_{uuid.uuid4().hex[:8]}",
+        form_version="1.0",
+        agency_code="TEST",
+        form_json_schema=json_schema,
+        form_ui_schema=[],
+        form_rule_schema=rule_schema,
+    )
+    db_session = get_db_session()
+    db_session.add(form)
+    db_session.flush()
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     organization = None

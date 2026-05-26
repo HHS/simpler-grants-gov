@@ -1,5 +1,8 @@
 from uuid import uuid4
 
+from src.db.models.competition_models import Form
+from src.form_schema.forms import SF424_v4_0
+from src.form_schema.forms.sf424a import SF424a_v1_0
 from tests.src.api.competition_alpha.test_competition_update_flag import (
     add_manage_competition_privilege,
 )
@@ -12,13 +15,14 @@ def test_put_competition_forms_add_success(
     internal_admin_user,
     internal_admin_user_api_key,
     enable_factory_create,
+    seed_form_registry,
 ):
     """Test adding forms to a competition with no existing forms"""
     add_manage_competition_privilege(db_session, internal_admin_user)
 
     competition = factories.CompetitionFactory.create(competition_forms=[])
-    form1 = factories.FormFactory.create()
-    form2 = factories.FormFactory.create()
+    form1 = db_session.get(Form, SF424_v4_0.form_id)
+    form2 = db_session.get(Form, SF424a_v1_0.form_id)
 
     payload = {
         "forms": [
@@ -36,13 +40,18 @@ def test_put_competition_forms_add_success(
 
 
 def test_put_competition_forms_update_existing(
-    client, db_session, internal_admin_user, internal_admin_user_api_key, enable_factory_create
+    client,
+    db_session,
+    internal_admin_user,
+    internal_admin_user_api_key,
+    enable_factory_create,
+    seed_form_registry,
 ):
     """Test updating is_required on an existing competition form"""
     add_manage_competition_privilege(db_session, internal_admin_user)
 
     competition = factories.CompetitionFactory.create(competition_forms=[])
-    form = factories.FormFactory.create()
+    form = db_session.get(Form, SF424_v4_0.form_id)
 
     factories.CompetitionFormFactory.create(
         competition=competition,
@@ -79,13 +88,18 @@ def test_put_competition_forms_update_existing(
 
 
 def test_put_competition_forms_remove_missing(
-    client, db_session, internal_admin_user, internal_admin_user_api_key, enable_factory_create
+    client,
+    db_session,
+    internal_admin_user,
+    internal_admin_user_api_key,
+    enable_factory_create,
+    seed_form_registry,
 ):
     """Test removing forms not included in the request"""
     add_manage_competition_privilege(db_session, internal_admin_user)
     competition = factories.CompetitionFactory.create(competition_forms=[])
-    form1 = factories.FormFactory.create()
-    form2 = factories.FormFactory.create()
+    form1 = db_session.get(Form, SF424_v4_0.form_id)
+    form2 = db_session.get(Form, SF424a_v1_0.form_id)
 
     factories.CompetitionFormFactory.create(competition=competition, form=form1, is_required=True)
     factories.CompetitionFormFactory.create(competition=competition, form=form2, is_required=True)
@@ -107,12 +121,17 @@ def test_put_competition_forms_remove_missing(
 
 
 def test_put_competition_forms_competition_not_found(
-    client, db_session, internal_admin_user, internal_admin_user_api_key, enable_factory_create
+    client,
+    db_session,
+    internal_admin_user,
+    internal_admin_user_api_key,
+    enable_factory_create,
+    seed_form_registry,
 ):
     """Test 404 when competition does not exist"""
     add_manage_competition_privilege(db_session, internal_admin_user)
 
-    form = factories.FormFactory.create()
+    form = db_session.get(Form, SF424_v4_0.form_id)
 
     payload = {
         "forms": [
@@ -127,13 +146,18 @@ def test_put_competition_forms_competition_not_found(
 
 
 def test_put_competition_forms_form_not_found(
-    client, db_session, internal_admin_user, internal_admin_user_api_key, enable_factory_create
+    client,
+    db_session,
+    internal_admin_user,
+    internal_admin_user_api_key,
+    enable_factory_create,
+    seed_form_registry,
 ):
     """Test 404 when one of multiple requested forms does not exist"""
     add_manage_competition_privilege(db_session, internal_admin_user)
 
     competition = factories.CompetitionFactory.create(competition_forms=[])
-    existing_form = factories.FormFactory.create()
+    existing_form = db_session.get(Form, SF424_v4_0.form_id)
 
     payload = {
         "forms": [
@@ -153,14 +177,29 @@ def test_put_competition_forms_form_not_found(
 
 
 def test_put_competition_forms_form_deprecated(
-    client, db_session, internal_admin_user, internal_admin_user_api_key, enable_factory_create
+    client,
+    db_session,
+    internal_admin_user,
+    internal_admin_user_api_key,
+    enable_factory_create,
+    seed_form_registry,
 ):
     """Test 404 when one of multiple requested forms is deprecated"""
     add_manage_competition_privilege(db_session, internal_admin_user)
 
     competition = factories.CompetitionFactory.create(competition_forms=[])
-    existing_form = factories.FormFactory.create()
-    deprecated_form = factories.FormFactory.create(is_deprecated=True)
+    existing_form = db_session.get(Form, SF424_v4_0.form_id)
+    deprecated_form = Form(
+        form_name="Deprecated Form",
+        short_form_name="DEPR_1_0",
+        form_version="1.0",
+        agency_code="TEST",
+        form_json_schema={},
+        form_ui_schema=[],
+        is_deprecated=True,
+    )
+    db_session.add(deprecated_form)
+    db_session.flush()
 
     payload = {
         "forms": [
@@ -184,10 +223,11 @@ def test_put_competition_forms_unauthorized(
     db_session,
     internal_admin_user_api_key,
     enable_factory_create,
+    seed_form_registry,
 ):
     """Test adding forms to a competition without the required privilege"""
     competition = factories.CompetitionFactory.create(competition_forms=[])
-    form1 = factories.FormFactory.create()
+    form1 = db_session.get(Form, SF424_v4_0.form_id)
 
     payload = {
         "forms": [

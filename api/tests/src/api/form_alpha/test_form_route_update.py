@@ -1,7 +1,8 @@
 import uuid
 
 from src.constants.lookup_constants import FormType
-from tests.src.db.models.factories import FormFactory, FormInstructionFactory
+from src.db.models.competition_models import Form
+from tests.src.db.models.factories import FormInstructionFactory
 
 
 def test_form_update_success_new_form(client, internal_admin_user_api_key, enable_factory_create):
@@ -41,15 +42,19 @@ def test_form_update_success_new_form(client, internal_admin_user_api_key, enabl
 
 
 def test_form_update_success_existing_form(
-    client, internal_admin_user_api_key, enable_factory_create
+    client, db_session, internal_admin_user_api_key, enable_factory_create
 ):
     """Test successfully updating an existing form via PUT endpoint"""
-    existing_form = FormFactory.create(
+    existing_form = Form(
         form_name="Original Name",
         short_form_name="original_name",
         form_version="1.0",
         agency_code="ORIG",
+        form_json_schema={},
+        form_ui_schema=[],
     )
+    db_session.add(existing_form)
+    db_session.flush()
 
     form_data = {
         "form_name": "Updated Name",
@@ -246,10 +251,22 @@ def test_form_update_with_new_fields(client, internal_admin_user_api_key, enable
 
 
 def test_form_update_existing_form_with_new_fields(
-    client, internal_admin_user_api_key, enable_factory_create
+    client, db_session, internal_admin_user_api_key, enable_factory_create
 ):
     """Test updating an existing form to add new fields"""
-    existing_form = FormFactory.create(form_type=None, sgg_version=None, is_deprecated=None)
+    existing_form = Form(
+        form_name="Test Form",
+        short_form_name="test_form_existing",
+        form_version="1.0",
+        agency_code="TEST",
+        form_json_schema={},
+        form_ui_schema=[],
+        form_type=None,
+        sgg_version=None,
+        is_deprecated=None,
+    )
+    db_session.add(existing_form)
+    db_session.flush()
 
     form_data = {
         "form_name": existing_form.form_name,

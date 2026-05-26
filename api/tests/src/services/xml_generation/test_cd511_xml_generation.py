@@ -13,7 +13,9 @@ import pytest
 from lxml import etree as lxml_etree
 
 import src.adapters.db as db
+from src.db.models.competition_models import Form
 from src.form_schema.forms.cd511 import FORM_XML_TRANSFORM_RULES as CD511_TRANSFORM_RULES
+from src.form_schema.forms.cd511 import CD511_v1_1
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -25,7 +27,6 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
@@ -266,7 +267,7 @@ class TestCD511XSDValidation:
         return xsd_validator.xsd_cache_dir / xsd_filename
 
     @pytest.fixture
-    def cd511_application(self, enable_factory_create, db_session: db.Session):
+    def cd511_application(self, enable_factory_create, db_session: db.Session, seed_form_registry):
         """Create an application with CD511 form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -288,13 +289,7 @@ class TestCD511XSDValidation:
             opportunity_assistance_listing=assistance_listing,
         )
 
-        # Create CD511 form with XML transform config
-        cd511_form = FormFactory.create(
-            form_name="CD511",
-            short_form_name="CD511",
-            form_version="1.1",
-            json_to_xml_schema=CD511_TRANSFORM_RULES,
-        )
+        cd511_form = db_session.get(Form, CD511_v1_1.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="CD511 Test Application"
@@ -373,7 +368,7 @@ class TestCD511XSDValidation:
         )
 
     def test_cd511_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session
+        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
     ):
         """Test that CD511 with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -396,12 +391,7 @@ class TestCD511XSDValidation:
             opportunity_assistance_listing=assistance_listing,
         )
 
-        cd511_form = FormFactory.create(
-            form_name="CD511",
-            short_form_name="CD511",
-            form_version="1.1",
-            json_to_xml_schema=CD511_TRANSFORM_RULES,
-        )
+        cd511_form = db_session.get(Form, CD511_v1_1.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="CD511 Minimal Test Application"

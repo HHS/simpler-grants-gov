@@ -13,9 +13,11 @@ import pytest
 from lxml import etree as lxml_etree
 
 import src.adapters.db as db
+from src.db.models.competition_models import Form
 from src.form_schema.forms.project_abstract_summary import (
     FORM_XML_TRANSFORM_RULES as PROJECT_ABSTRACT_SUMMARY_TRANSFORM_RULES,
 )
+from src.form_schema.forms.project_abstract_summary import ProjectAbstractSummary_v2_0
 from src.services.xml_generation.models import XMLGenerationRequest
 from src.services.xml_generation.service import XMLGenerationService
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
@@ -27,7 +29,6 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
@@ -242,7 +243,9 @@ class TestProjectAbstractSummaryXSDValidation:
         return xsd_validator.xsd_cache_dir / xsd_filename
 
     @pytest.fixture
-    def project_abstract_summary_application(self, enable_factory_create, db_session: db.Session):
+    def project_abstract_summary_application(
+        self, enable_factory_create, db_session: db.Session, seed_form_registry
+    ):
         """Create an application with Project Abstract Summary form and realistic data."""
         agency = AgencyFactory.create()
 
@@ -264,13 +267,7 @@ class TestProjectAbstractSummaryXSDValidation:
             opportunity_assistance_listing=assistance_listing,
         )
 
-        # Create Project Abstract Summary form with XML transform config
-        pas_form = FormFactory.create(
-            form_name="Project Abstract Summary",
-            short_form_name="Project_AbstractSummary_2_0",
-            form_version="2.0",
-            json_to_xml_schema=PROJECT_ABSTRACT_SUMMARY_TRANSFORM_RULES,
-        )
+        pas_form = db_session.get(Form, ProjectAbstractSummary_v2_0.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="Project Abstract Summary Test Application"
@@ -350,7 +347,7 @@ class TestProjectAbstractSummaryXSDValidation:
         )
 
     def test_project_abstract_summary_minimal_data_validates_against_xsd(
-        self, enable_factory_create, xsd_validator, db_session
+        self, enable_factory_create, xsd_validator, db_session, seed_form_registry
     ):
         """Test that Project Abstract Summary with minimal required data validates against XSD."""
         agency = AgencyFactory.create()
@@ -373,12 +370,7 @@ class TestProjectAbstractSummaryXSDValidation:
             opportunity_assistance_listing=assistance_listing,
         )
 
-        pas_form = FormFactory.create(
-            form_name="Project Abstract Summary",
-            short_form_name="Project_AbstractSummary_2_0",
-            form_version="2.0",
-            json_to_xml_schema=PROJECT_ABSTRACT_SUMMARY_TRANSFORM_RULES,
-        )
+        pas_form = db_session.get(Form, ProjectAbstractSummary_v2_0.form_id)
 
         application = ApplicationFactory.create(
             competition=competition,

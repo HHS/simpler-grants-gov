@@ -6,7 +6,8 @@ import pytest
 from lxml import etree as lxml_etree
 
 import src.adapters.db as db
-from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES
+from src.db.models.competition_models import Form
+from src.form_schema.forms.sf424 import FORM_XML_TRANSFORM_RULES, SF424_v4_0
 from src.services.xml_generation.constants import Namespace
 from src.services.xml_generation.submission_xml_assembler import SubmissionXMLAssembler
 from tests.src.db.models.factories import (
@@ -16,7 +17,6 @@ from tests.src.db.models.factories import (
     ApplicationSubmissionFactory,
     CompetitionFactory,
     CompetitionFormFactory,
-    FormFactory,
     OpportunityAssistanceListingFactory,
     OpportunityFactory,
 )
@@ -26,7 +26,7 @@ class TestSubmissionXMLAssembler:
     """Test cases for SubmissionXMLAssembler."""
 
     @pytest.fixture
-    def sample_application(self, enable_factory_create, db_session: db.Session):
+    def sample_application(self, enable_factory_create, db_session: db.Session, seed_form_registry):
         """Create a sample application with SF424 form for testing."""
         agency = AgencyFactory.create()
 
@@ -48,13 +48,7 @@ class TestSubmissionXMLAssembler:
             opportunity_assistance_listing=assistance_listing,
         )
 
-        # Create SF424 form with XML transform config
-        sf424_form = FormFactory.create(
-            form_name="Application for Federal Assistance (SF-424)",
-            short_form_name="SF424_4_0",
-            form_version="4.0",
-            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
-        )
+        sf424_form = db_session.get(Form, SF424_v4_0.form_id)
 
         application = ApplicationFactory.create(
             competition=competition, application_name="Test Application"
@@ -109,18 +103,23 @@ class TestSubmissionXMLAssembler:
 
         assert len(supported_forms) == 1
         app_form = supported_forms[0]
-        assert app_form.form.short_form_name == "SF424_4_0"
+        assert app_form.form.short_form_name == SF424_v4_0.short_form_name
 
     def test_get_supported_forms_mixed_support(
-        self, sample_application, sample_application_submission, enable_factory_create
+        self, sample_application, sample_application_submission, enable_factory_create, db_session
     ):
         """Test getting supported forms when some forms are unsupported."""
         # Add an unsupported form to the application
-        unsupported_form = FormFactory.create(
+        unsupported_form = Form(
             form_name="SF-424A Budget Information",
             short_form_name="SF424A_1_0",
             form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema=[],
         )
+        db_session.add(unsupported_form)
+        db_session.flush()
 
         competition_form = CompetitionFormFactory.create(
             competition=sample_application.competition, form=unsupported_form
@@ -137,7 +136,7 @@ class TestSubmissionXMLAssembler:
         # Should only return SF424_4_0, not SF424A_1_0
         assert len(supported_forms) == 1
         app_form = supported_forms[0]
-        assert app_form.form.short_form_name == "SF424_4_0"
+        assert app_form.form.short_form_name == SF424_v4_0.short_form_name
 
     def test_get_supported_forms_none_supported(
         self, sample_application, sample_application_submission, enable_factory_create, db_session
@@ -147,11 +146,16 @@ class TestSubmissionXMLAssembler:
         sample_application.application_forms = []
         db_session.flush()
 
-        unsupported_form = FormFactory.create(
+        unsupported_form = Form(
             form_name="SF-424A Budget Information",
             short_form_name="SF424A_1_0",
             form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema=[],
         )
+        db_session.add(unsupported_form)
+        db_session.flush()
 
         competition_form = CompetitionFormFactory.create(
             competition=sample_application.competition, form=unsupported_form
@@ -377,11 +381,16 @@ class TestSubmissionXMLAssembler:
         sample_application.application_forms = []
         db_session.flush()
 
-        unsupported_form = FormFactory.create(
+        unsupported_form = Form(
             form_name="SF-424A Budget Information",
             short_form_name="SF424A_1_0",
             form_version="1.0",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema=[],
         )
+        db_session.add(unsupported_form)
+        db_session.flush()
 
         competition_form = CompetitionFormFactory.create(
             competition=sample_application.competition, form=unsupported_form
@@ -437,11 +446,16 @@ class TestSubmissionXMLAssembler:
         )
 
         # Create an UNSUPPORTED form (SF-424A doesn't have XML transform config)
-        unsupported_form = FormFactory.create(
+        unsupported_form = Form(
             form_name="Budget Information - Non-Construction Programs",
             short_form_name="SF424A_1_1",
             form_version="1.1",
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema=[],
         )
+        db_session.add(unsupported_form)
+        db_session.flush()
 
         application = ApplicationFactory.create(
             competition=competition, application_name="Test Application with Unsupported Form"
@@ -608,16 +622,21 @@ class TestSubmissionXMLAssembler:
         assert Namespace.GLOB in root.nsmap.values()
 
     def test_get_supported_forms_filters_non_required_not_included(
-        self, sample_application, sample_application_submission, enable_factory_create
+        self, sample_application, sample_application_submission, enable_factory_create, db_session
     ):
         """Test that non-required forms with is_included_in_submission=False are filtered out."""
         # Create a non-required form with XML support
-        optional_form = FormFactory.create(
+        optional_form = Form(
             form_name="Optional Form",
             short_form_name="OPTIONAL_1_0",
             form_version="1.0",
-            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,  # Has XML support
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema=[],
+            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
         )
+        db_session.add(optional_form)
+        db_session.flush()
 
         # Create competition form marked as NOT required
         competition_form = CompetitionFormFactory.create(
@@ -639,19 +658,24 @@ class TestSubmissionXMLAssembler:
 
         # Should only return SF424_4_0 (required), not the optional form
         assert len(supported_forms) == 1
-        assert supported_forms[0].form.short_form_name == "SF424_4_0"
+        assert supported_forms[0].form.short_form_name == SF424_v4_0.short_form_name
 
     def test_get_supported_forms_includes_non_required_when_included(
-        self, sample_application, sample_application_submission, enable_factory_create
+        self, sample_application, sample_application_submission, enable_factory_create, db_session
     ):
         """Test that non-required forms with is_included_in_submission=True are included."""
         # Create a non-required form with XML support
-        optional_form = FormFactory.create(
+        optional_form = Form(
             form_name="Optional Form",
             short_form_name="OPTIONAL_1_0",
             form_version="1.0",
-            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,  # Has XML support
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema=[],
+            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
         )
+        db_session.add(optional_form)
+        db_session.flush()
 
         # Create competition form marked as NOT required
         competition_form = CompetitionFormFactory.create(
@@ -674,7 +698,7 @@ class TestSubmissionXMLAssembler:
         # Should return both SF424_4_0 and the optional form
         assert len(supported_forms) == 2
         form_names = {form.form.short_form_name for form in supported_forms}
-        assert "SF424_4_0" in form_names
+        assert SF424_v4_0.short_form_name in form_names
         assert "OPTIONAL_1_0" in form_names
 
     def test_get_supported_forms_includes_required_regardless_of_is_included(
@@ -691,19 +715,24 @@ class TestSubmissionXMLAssembler:
 
         # Should still return SF424_4_0 because it's required
         assert len(supported_forms) == 1
-        assert supported_forms[0].form.short_form_name == "SF424_4_0"
+        assert supported_forms[0].form.short_form_name == SF424_v4_0.short_form_name
 
     def test_get_supported_forms_filters_non_required_null_is_included(
-        self, sample_application, sample_application_submission, enable_factory_create
+        self, sample_application, sample_application_submission, enable_factory_create, db_session
     ):
         """Test that non-required forms with is_included_in_submission=None are filtered out."""
         # Create a non-required form with XML support
-        optional_form = FormFactory.create(
+        optional_form = Form(
             form_name="Optional Form",
             short_form_name="OPTIONAL_1_0",
             form_version="1.0",
-            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,  # Has XML support
+            agency_code="TEST",
+            form_json_schema={},
+            form_ui_schema=[],
+            json_to_xml_schema=FORM_XML_TRANSFORM_RULES,
         )
+        db_session.add(optional_form)
+        db_session.flush()
 
         # Create competition form marked as NOT required
         competition_form = CompetitionFormFactory.create(
@@ -725,4 +754,4 @@ class TestSubmissionXMLAssembler:
 
         # Should only return SF424_4_0 (required), not the optional form
         assert len(supported_forms) == 1
-        assert supported_forms[0].form.short_form_name == "SF424_4_0"
+        assert supported_forms[0].form.short_form_name == SF424_v4_0.short_form_name
