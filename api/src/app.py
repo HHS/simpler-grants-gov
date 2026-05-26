@@ -21,7 +21,6 @@ from src.api.application_alpha import application_blueprint
 from src.api.award_recommendations_alpha import award_recommendation_blueprint
 from src.api.common_grants import common_grants_blueprint
 from src.api.competition_alpha import competition_blueprint
-from src.api.competitions_v1 import competition_blueprint as competitions_v1_blueprint
 from src.api.extracts_v1 import extract_blueprint as extracts_v1_blueprint
 from src.api.files_v1 import file_blueprint as files_v1_blueprint
 from src.api.form_alpha import form_blueprint
@@ -76,8 +75,6 @@ class EndpointConfig(PydanticBaseEnvConfig):
     enable_grantor_opportunity_endpoints: bool = Field(
         False, alias="ENABLE_GRANTOR_OPPORTUNITY_ENDPOINTS"
     )
-
-    enable_competition_endpoints: bool = Field(False, alias="ENABLE_COMPETITION_ENDPOINTS")
 
     # Do not ever change this to True, this controls endpoints we only
     # want to exist for local development.
@@ -188,8 +185,6 @@ def register_blueprints(app: APIFlask) -> None:
     if endpoint_config.enable_grantor_opportunity_endpoints:
         app.register_blueprint(opportunities_grantor_v1_blueprint)
 
-    if endpoint_config.enable_competition_endpoints:
-        app.register_blueprint(competitions_v1_blueprint)
     app.register_blueprint(extracts_v1_blueprint)
     app.register_blueprint(agencies_v1_blueprint)
     app.register_blueprint(organizations_v1_blueprint)

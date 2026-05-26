@@ -13,7 +13,6 @@ from tests.src.db.models.factories import (
 
 
 def create_competition_request(
-    opportunity_id,
     assistance_listing_number,
     competition_title="Proposal for Advanced Research",
     opening_date=None,
@@ -46,7 +45,6 @@ def create_competition_request(
         ]
 
     return {
-        "opportunity_id": str(opportunity_id),
         "competition_title": competition_title,
         "opening_date": opening_date,
         "closing_date": closing_date,
@@ -103,12 +101,11 @@ def test_competition_create_successful_creation(
     opportunity, opp_assistance_listing = opportunity_with_assistance_listing
 
     competition_request = create_competition_request(
-        opportunity_id=opportunity.opportunity_id,
         assistance_listing_number=opp_assistance_listing.assistance_listing_number,
     )
 
     response = client.post(
-        "/v1/competitions/",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
         json=competition_request,
         headers={"X-SGG-Token": token},
     )
@@ -146,12 +143,11 @@ def test_competition_create_with_invalid_jwt_token(client, opportunity_with_assi
     opportunity, opp_assistance_listing = opportunity_with_assistance_listing
 
     competition_request = create_competition_request(
-        opportunity_id=opportunity.opportunity_id,
         assistance_listing_number=opp_assistance_listing.assistance_listing_number,
     )
 
     response = client.post(
-        "/v1/competitions/",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
         json=competition_request,
         headers={"X-SGG-Token": "invalid_token_value"},
     )
@@ -179,12 +175,11 @@ def test_competition_create_no_permissions(
     )
 
     competition_request = create_competition_request(
-        opportunity_id=opportunity.opportunity_id,
         assistance_listing_number=opp_assistance_listing.assistance_listing_number,
     )
 
     response = client.post(
-        "/v1/competitions/",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
         json=competition_request,
         headers={"X-SGG-Token": token},
     )
@@ -200,12 +195,11 @@ def test_competition_create_opportunity_not_found(client, grantor_auth_data):
 
     fake_opportunity_id = uuid.uuid4()
     competition_request = create_competition_request(
-        opportunity_id=fake_opportunity_id,
         assistance_listing_number="43.012",
     )
 
     response = client.post(
-        "/v1/competitions/",
+        f"/v1/grantors/opportunities/{fake_opportunity_id}/competitions",
         json=competition_request,
         headers={"X-SGG-Token": token},
     )
@@ -223,12 +217,11 @@ def test_competition_create_assistance_listing_not_found(
     opportunity, _ = opportunity_with_assistance_listing
 
     competition_request = create_competition_request(
-        opportunity_id=opportunity.opportunity_id,
-        assistance_listing_number="99.ZZZ",  # Non-existent
+        assistance_listing_number="99.ZZZ",
     )
 
     response = client.post(
-        "/v1/competitions/",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
         json=competition_request,
         headers={"X-SGG-Token": token},
     )
@@ -238,12 +231,15 @@ def test_competition_create_assistance_listing_not_found(
     assert response_json["message"] == "Assistance listing 99.ZZZ not found on opportunity"
 
 
-def test_competition_create_missing_required_fields(client, grantor_auth_data):
+def test_competition_create_missing_required_fields(
+    client, grantor_auth_data, opportunity_with_assistance_listing
+):
     """Test competition creation with missing required fields"""
     _, _, token, _ = grantor_auth_data
+    opportunity, _ = opportunity_with_assistance_listing
 
     response = client.post(
-        "/v1/competitions/",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
         json={
             "competition_title": "Test Competition"
             # Missing other required fields
@@ -268,7 +264,6 @@ def test_competition_create_invalid_data_types(
     opportunity, opp_assistance_listing = opportunity_with_assistance_listing
 
     competition_request = create_competition_request(
-        opportunity_id=opportunity.opportunity_id,
         assistance_listing_number=opp_assistance_listing.assistance_listing_number,
     )
 
@@ -276,7 +271,7 @@ def test_competition_create_invalid_data_types(
     competition_request["opening_date"] = "not-a-date"
 
     response = client.post(
-        "/v1/competitions/",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
         json=competition_request,
         headers={"X-SGG-Token": token},
     )
@@ -297,13 +292,12 @@ def test_competition_create_empty_open_to_applicants(
     opportunity, opp_assistance_listing = opportunity_with_assistance_listing
 
     competition_request = create_competition_request(
-        opportunity_id=opportunity.opportunity_id,
         assistance_listing_number=opp_assistance_listing.assistance_listing_number,
-        open_to_applicants=[],  # Empty list should fail validation
+        open_to_applicants=[],
     )
 
     response = client.post(
-        "/v1/competitions/",
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
         json=competition_request,
         headers={"X-SGG-Token": token},
     )
