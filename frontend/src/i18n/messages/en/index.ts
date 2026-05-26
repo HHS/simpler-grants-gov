@@ -402,9 +402,8 @@ export const messages = {
         draftOnly: "Only draft opportunity summaries can be updated.",
         errorHeading: "Publish error",
         validationHeading: "Please fix the highlighted fields.",
-        validationWarningHeading: "Progress saved",
-        validationWarningBody:
-          "Your progress has been saved. However, this opportunity cannot be submitted/published until the following required fields are completed:",
+        validationErrorHeading: "Error(s) Found",
+        validationErrorBody: "Please correct the following errors:",
       },
     },
     validationErrors: {
@@ -419,8 +418,6 @@ export const messages = {
       closeDateOrder: "Close date must be on or after publish date.",
       awardMinimum: "Enter an award minimum.",
       awardMaximum: "Enter an award maximum.",
-      awardMaximumOrder:
-        "Award maximum must be greater than or equal to award minimum.",
       fundingType: "Select a funding type.",
       fundingCategory: "Select a funding category.",
       expectedNumberOfAwards: "Enter the expected number of awards.",
@@ -431,6 +428,17 @@ export const messages = {
       additionalInfoUrl: "Enter an additional information URL.",
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
+      awardMinCurrencyInput:
+        "Award minimum must be greater than zero and less than $1,000,000,000,000,000.",
+      awardMaxCurrencyInput:
+        "Award maximum must be greater than zero and less than $1,000,000,000,000,000.",
+      totalFundingCurrencyInput:
+        "Estimated total program funding must be greater than zero and less than $1,000,000,000,000,000.",
+      awardMinLessThanTotal:
+        "Award minimum cannot exceed the Estimated Total Program Funding.",
+      awardMaxLessThanTotal:
+        "Award maximum cannot exceed the Estimated Total Program Funding.",
+      awardMinLessThanMax: "Award minimum cannot exceed Award maximum.",
     },
     attachments: {
       removeButton: "Remove",
