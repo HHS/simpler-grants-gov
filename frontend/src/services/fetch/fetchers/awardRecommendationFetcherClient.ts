@@ -14,7 +14,6 @@ type ApiResponse<T> = {
 export const getAwardRecommendationRisks = async (
   id: string,
   pagination: PaginationRequestBody,
-  token: string,
 ): Promise<{
   risks: AwardRecommendationRisk[];
   paginationInfo: PaginationInfo | undefined;
@@ -26,7 +25,6 @@ export const getAwardRecommendationRisks = async (
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-SGG-Token": token,
       },
       body: JSON.stringify({ pagination }),
     },
@@ -43,7 +41,6 @@ export const getAwardRecommendationRisks = async (
 export const deleteAwardRecommendationRisk = async (
   awardRecommendationId: string,
   riskId: string,
-  token: string,
 ): Promise<{ success: boolean; message?: string }> => {
   const apiBase = environment.API_URL || "";
   const response = await fetch(
@@ -52,7 +49,6 @@ export const deleteAwardRecommendationRisk = async (
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        "X-SGG-Token": token,
       },
     },
   );

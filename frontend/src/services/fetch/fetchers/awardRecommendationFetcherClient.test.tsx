@@ -17,21 +17,17 @@ describe("getAwardRecommendationRisks", () => {
         pagination_info: { total_pages: 1 },
       }),
     });
-    const result = await getAwardRecommendationRisks(
-      "award-id",
-      { page_offset: 1, page_size: 10, sort_order: [] },
-      "token",
-    );
+    const result = await getAwardRecommendationRisks("award-id", {
+      page_offset: 1,
+      page_size: 10,
+      sort_order: [],
+    });
     expect(result.risks).toEqual([{ id: 1 }]);
     expect(result.paginationInfo).toEqual({ total_pages: 1 });
     expect(global.fetch).toHaveBeenCalledWith(
       expect.stringContaining("award-id"),
       expect.objectContaining({
         method: "POST",
-        headers: expect.objectContaining({ "X-SGG-Token": "token" }) as Record<
-          string,
-          string
-        >,
       }) as RequestInit,
     );
   });
@@ -39,11 +35,11 @@ describe("getAwardRecommendationRisks", () => {
   it("handles fetch error", async () => {
     (global.fetch as jest.Mock).mockRejectedValue(new Error("fail"));
     await expect(
-      getAwardRecommendationRisks(
-        "award-id",
-        { page_offset: 1, page_size: 10, sort_order: [] },
-        "token",
-      ),
+      getAwardRecommendationRisks("award-id", {
+        page_offset: 1,
+        page_size: 10,
+        sort_order: [],
+      }),
     ).rejects.toThrow("fail");
   });
 });
@@ -60,21 +56,13 @@ describe("deleteAwardRecommendationRisk", () => {
         .fn()
         .mockResolvedValue({ message: "Risk deleted successfully" }),
     });
-    const result = await deleteAwardRecommendationRisk(
-      "award-id",
-      "risk-id",
-      "token",
-    );
+    const result = await deleteAwardRecommendationRisk("award-id", "risk-id");
     expect(result.success).toBe(true);
     expect(result.message).toBe("Risk deleted successfully");
     expect(global.fetch).toHaveBeenCalledWith(
       expect.stringContaining("award-id/risks/risk-id"),
       expect.objectContaining({
         method: "DELETE",
-        headers: expect.objectContaining({ "X-SGG-Token": "token" }) as Record<
-          string,
-          string
-        >,
       }) as RequestInit,
     );
   });
@@ -84,11 +72,7 @@ describe("deleteAwardRecommendationRisk", () => {
       ok: false,
       json: jest.fn().mockResolvedValue({ message: "Delete failed" }),
     });
-    const result = await deleteAwardRecommendationRisk(
-      "award-id",
-      "risk-id",
-      "token",
-    );
+    const result = await deleteAwardRecommendationRisk("award-id", "risk-id");
     expect(result.success).toBe(false);
     expect(result.message).toBe("Delete failed");
   });
@@ -96,7 +80,7 @@ describe("deleteAwardRecommendationRisk", () => {
   it("handles fetch error", async () => {
     (global.fetch as jest.Mock).mockRejectedValue(new Error("Network error"));
     await expect(
-      deleteAwardRecommendationRisk("award-id", "risk-id", "token"),
+      deleteAwardRecommendationRisk("award-id", "risk-id"),
     ).rejects.toThrow("Network error");
   });
 });

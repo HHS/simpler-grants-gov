@@ -25,11 +25,7 @@ export async function deleteRiskForAwardRecommendation(
       throw new Error("Risk ID is required");
     }
 
-    const result = await deleteAwardRecommendationRisk(
-      id,
-      riskId,
-      session.token,
-    );
+    const result = await deleteAwardRecommendationRisk(id, riskId);
 
     return Response.json({
       message: result.message || "Risk deleted successfully",

@@ -32,7 +32,6 @@ export async function getRisksForAwardRecommendation(
     const { risks, paginationInfo } = await getAwardRecommendationRisks(
       id,
       pagination,
-      session.token,
     );
 
     return Response.json({
