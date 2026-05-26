@@ -12,15 +12,15 @@ GRANTS_GOV_TRACKING_NUMBER_2 = "GRANT80000001"
 GRANTS_GOV_TRACKING_NUMBER_3 = "GRANT80000002"
 
 
-class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
-    def test_get_submission_list_expanded_request_schema_can_consumed_incoming_request_xml_with_all_filters(
+class TestLegacySoapGrantorGetSubmissionListSchema:
+    def test_get_submission_list_request_schema_can_consumed_incoming_request_xml_with_all_filters(
         self, db_session
     ):
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
             "<soapenv:Body>"
-            "<agen:GetSubmissionListExpandedRequest>"
+            "<agen:GetSubmissionListRequest>"
             "<gran:ExpandedApplicationFilter>"
             "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
             f"<gran:FilterValue>{GRANTS_GOV_TRACKING_NUMBER_1}</gran:FilterValue>"
@@ -41,7 +41,7 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
             "<gran:FilterType>FundingOpportunityNumber</gran:FilterType>"
             f"<gran:FilterValue>FundingOppNumber-PER-124</gran:FilterValue>"
             "</gran:ExpandedApplicationFilter>"
-            "</agen:GetSubmissionListExpandedRequest>"
+            "</agen:GetSubmissionListRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
         ).encode("utf-8")
@@ -64,18 +64,18 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
         }
         assert schema.model_dump() == expected
 
-    def test_get_submission_list_expanded_request_schema_throws_exception_if_filter_types_but_no_filter_value(
+    def test_get_submission_list_request_schema_throws_exception_if_filter_types_but_no_filter_value(
         self, db_session
     ):
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
             "<soapenv:Body>"
-            "<agen:GetSubmissionListExpandedRequest>"
+            "<agen:GetSubmissionListRequest>"
             "<gran:ExpandedApplicationFilter>"
             "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
             "</gran:ExpandedApplicationFilter>"
-            "</agen:GetSubmissionListExpandedRequest>"
+            "</agen:GetSubmissionListRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
         ).encode("utf-8")
@@ -88,18 +88,18 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
             == "The content of element 'ExpandedApplicationFilter' is not complete. One of '{\"http://apply.grants.gov/system/GrantsCommonElements-V1.0\":FilterValue}' is expected."
         )
 
-    def test_get_submission_list_expanded_request_schema_throws_exception_if_filter_value_but_no_filter_type(
+    def test_get_submission_list_request_schema_throws_exception_if_filter_value_but_no_filter_type(
         self, db_session
     ):
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
             "<soapenv:Body>"
-            "<agen:GetSubmissionListExpandedRequest>"
+            "<agen:GetSubmissionListRequest>"
             "<gran:ExpandedApplicationFilter>"
             "<gran:FilterValue>GrantsGovTrackingNumber</gran:FilterValue>"
             "</gran:ExpandedApplicationFilter>"
-            "</agen:GetSubmissionListExpandedRequest>"
+            "</agen:GetSubmissionListRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
         ).encode("utf-8")
@@ -112,19 +112,19 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
             == "The content of element 'ExpandedApplicationFilter' is not complete. One of '{\"http://apply.grants.gov/system/GrantsCommonElements-V1.0\":FilterType}' is expected."
         )
 
-    def test_get_submission_list_expanded_request_schema_can_consumed_incoming_request_xml_with_one_filter(
+    def test_get_submission_list_request_schema_can_consumed_incoming_request_xml_with_one_filter(
         self, db_session
     ):
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
             "<soapenv:Body>"
-            "<agen:GetSubmissionListExpandedRequest>"
+            "<agen:GetSubmissionListRequest>"
             "<gran:ExpandedApplicationFilter>"
             "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
             f"<gran:FilterValue>{GRANTS_GOV_TRACKING_NUMBER_1}</gran:FilterValue>"
             "</gran:ExpandedApplicationFilter>"
-            "</agen:GetSubmissionListExpandedRequest>"
+            "</agen:GetSubmissionListRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
         ).encode("utf-8")
@@ -140,14 +140,14 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
         }
         assert schema.model_dump() == expected
 
-    def test_get_submission_list_expanded_request_schema_can_consumed_incoming_request_xml_with_more_than_one_filter_of_same_type(
+    def test_get_submission_list_request_schema_can_consumed_incoming_request_xml_with_more_than_one_filter_of_same_type(
         self, db_session
     ):
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
             "<soapenv:Body>"
-            "<agen:GetSubmissionListExpandedRequest>"
+            "<agen:GetSubmissionListRequest>"
             "<gran:ExpandedApplicationFilter>"
             "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
             f"<gran:FilterValue>{GRANTS_GOV_TRACKING_NUMBER_1}</gran:FilterValue>"
@@ -160,7 +160,7 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
             "<gran:FilterType>GrantsGovTrackingNumber</gran:FilterType>"
             f"<gran:FilterValue>{GRANTS_GOV_TRACKING_NUMBER_3}</gran:FilterValue>"
             "</gran:ExpandedApplicationFilter>"
-            "</agen:GetSubmissionListExpandedRequest>"
+            "</agen:GetSubmissionListRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
         ).encode("utf-8")
@@ -180,15 +180,15 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
         }
         assert schema.model_dump() == expected
 
-    def test_get_submission_list_expanded_request_schema_can_consumed_incoming_request_xml_with_no_filter_values(
+    def test_get_submission_list_request_schema_can_consumed_incoming_request_xml_with_no_filter_values(
         self, db_session
     ):
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
             "<soapenv:Body>"
-            "<agen:GetSubmissionListExpandedRequest>"
-            "</agen:GetSubmissionListExpandedRequest>"
+            "<agen:GetSubmissionListRequest>"
+            "</agen:GetSubmissionListRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
         ).encode("utf-8")
@@ -199,14 +199,12 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
         schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         assert schema.model_dump() == {"expanded_application_filter": None}
 
-    def test_get_submission_list_expanded_request_filters_created_by_multiple_statuses(
-        self, db_session
-    ):
+    def test_get_submission_list_request_filters_created_by_multiple_statuses(self, db_session):
         request_xml_bytes = (
             '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
             "<soapenv:Header/>"
             "<soapenv:Body>"
-            "<agen:GetSubmissionListExpandedRequest>"
+            "<agen:GetSubmissionListRequest>"
             "<gran:ExpandedApplicationFilter>"
             "<gran:FilterType>Status</gran:FilterType>"
             "<gran:FilterValue>Rejected with Errors</gran:FilterValue>"
@@ -219,7 +217,7 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
             "<gran:FilterType>Status</gran:FilterType>"
             "<gran:FilterValue>Received</gran:FilterValue>"
             "</gran:ExpandedApplicationFilter>"
-            "</agen:GetSubmissionListExpandedRequest>"
+            "</agen:GetSubmissionListRequest>"
             "</soapenv:Body>"
             "</soapenv:Envelope>"
         ).encode("utf-8")
@@ -234,7 +232,7 @@ class TestLegacySoapGrantorGetSubmissionListExpandedSchema:
         assert schema.model_dump() == expected
 
 
-class TestSubmissionInfoExpandedTimezoneValidation:
+class TestSubmissionInfoTimezoneValidation:
     SUBMISSION_DEFAULTS = {
         "FundingOpportunityNumber": "OPP-001",
         "CFDANumber": "10.001",
@@ -248,7 +246,7 @@ class TestSubmissionInfoExpandedTimezoneValidation:
     }
 
     def _make_submission_info(self, received_date_time):
-        return grantors_schemas.SubmissionInfoExpanded(
+        return grantors_schemas.SubmissionInfo(
             **{**self.SUBMISSION_DEFAULTS, "ns2:ReceivedDateTime": received_date_time}
         )
 
@@ -285,11 +283,11 @@ class TestSubmissionInfoExpandedTimezoneValidation:
         assert sorted_info[0].received_date_time == aware_dt
 
 
-class TestSubmissionInfoExpandedDefaultNone:
-    """Test that SubmissionInfoExpanded fields default to None when keys are missing from input."""
+class TestSubmissionInfoDefaultNone:
+    """Test that SubmissionInfo fields default to None when keys are missing from input."""
 
     def test_submission_info_from_empty_dict(self):
-        info = grantors_schemas.SubmissionInfoExpanded(**{})
+        info = grantors_schemas.SubmissionInfo(**{})
         assert info.funding_opportunity_number is None
         assert info.cfda_number is None
         assert info.grants_gov_tracking_number is None
@@ -302,12 +300,12 @@ class TestSubmissionInfoExpandedDefaultNone:
         assert info.active_exclusions is None
 
     def test_submission_info_with_partial_dict(self):
-        info = grantors_schemas.SubmissionInfoExpanded(**{"PackageID": "00000000INDV"})
+        info = grantors_schemas.SubmissionInfo(**{"PackageID": "00000000INDV"})
         assert info.package_id == "00000000INDV"
         assert info.cfda_number is None
         assert info.funding_opportunity_number is None
 
-    def test_get_submission_list_expanded_response_from_empty_dict(self):
+    def test_get_submission_list_response_from_empty_dict(self):
         response = grantors_schemas.GetSubmissionListResponse(**{})
         assert response.success is True
         assert response.available_application_number is None

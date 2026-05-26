@@ -30,7 +30,7 @@ def _make_soap_request(soap_client_certificate, status=None, tracking_number=Non
         'xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">'
         "<soapenv:Header/>"
         "<soapenv:Body>"
-        "<agen:GetSubmissionListExpandedRequest>"
+        "<agen:GetSubmissionListRequest>"
     )
     if status:
         request_xml += (
@@ -47,24 +47,22 @@ def _make_soap_request(soap_client_certificate, status=None, tracking_number=Non
             "</gran:ExpandedApplicationFilter>"
         )
 
-    request_xml += (
-        "</agen:GetSubmissionListExpandedRequest>" "</soapenv:Body>" "</soapenv:Envelope>"
-    )
+    request_xml += "</agen:GetSubmissionListRequest>" "</soapenv:Body>" "</soapenv:Envelope>"
     return SOAPRequest(
         data=SoapRequestStreamer(stream=io.BytesIO(request_xml.encode("utf-8"))),
         full_path="x",
         headers={},
         method="POST",
         api_name=SimplerSoapAPI.GRANTORS,
-        operation_name="GetSubmissionListExpandedRequest",
+        operation_name="GetSubmissionListRequest",
         auth=SOAPAuth(certificate=soap_client_certificate),
     )
 
 
 def _make_operation_config():
     return SOAPOperationConfig(
-        request_operation_name="GetSubmissionListExpandedRequest",
-        response_operation_name="GetSubmissionListExpandedResponse",
+        request_operation_name="GetSubmissionListRequest",
+        response_operation_name="GetSubmissionListResponse",
         privileges={Privilege.LEGACY_AGENCY_VIEWER},
         always_call_simpler=True,
     )
@@ -77,7 +75,7 @@ def _setup_submission(agency, application_status=ApplicationStatus.ACCEPTED):
     )
 
 
-class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
+class TestGetSubmissionListResponseStatusFilter(BaseTestClass):
     @pytest.fixture(scope="class")
     def setup_data(self, db_session, enable_factory_create):
         agency = AgencyFactory.create()
@@ -99,7 +97,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             "soap_client_certificate": soap_client_certificate,
         }
 
-    def test_get_submission_list_expanded_filters_on_agency_tracking_number_assigned(
+    def test_get_submission_list_filters_on_agency_tracking_number_assigned(
         self, db_session, enable_factory_create, setup_data
     ):
         soap_request = _make_soap_request(
@@ -113,7 +111,6 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
-            is_expanded=True,
         )
         result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
@@ -127,7 +124,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             == "Agency Tracking Number Assigned"
         )
 
-    def test_get_submission_list_expanded_agency_tracking_number_assigned_filter_supercedes_received_by_agency(
+    def test_get_submission_list_agency_tracking_number_assigned_filter_supercedes_received_by_agency(
         self, db_session, enable_factory_create, setup_data
     ):
         soap_request = _make_soap_request(
@@ -141,7 +138,6 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
-            is_expanded=True,
         )
         result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
@@ -155,7 +151,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             submission.grants_gov_tracking_number for submission in result.submission_info
         ]
 
-    def test_get_submission_list_expanded_filters_on_received_by_agency(
+    def test_get_submission_list_filters_on_received_by_agency(
         self, db_session, enable_factory_create, setup_data
     ):
         soap_request = _make_soap_request(
@@ -169,7 +165,6 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
-            is_expanded=True,
         )
         result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
@@ -183,7 +178,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         assert len(set(application_status)) == 1
         assert application_status[0] == "Received by Agency"
 
-    def test_get_submission_list_expanded_received_by_tracking_number_filter_does_not_return_agency_tracking_number_assigned_status(
+    def test_get_submission_list_received_by_tracking_number_filter_does_not_return_agency_tracking_number_assigned_status(
         self, db_session, enable_factory_create, setup_data
     ):
         soap_request = _make_soap_request(
@@ -197,7 +192,6 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
-            is_expanded=True,
         )
         result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
@@ -211,7 +205,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         assert len(set(application_status)) == 1
         assert application_status[0] == "Received by Agency"
 
-    def test_get_submission_list_expanded_agency_tracking_number_received_filter_supersedes_application_status(
+    def test_get_submission_list_agency_tracking_number_received_filter_supersedes_application_status(
         self, db_session, enable_factory_create, setup_data
     ):
         soap_request = _make_soap_request(setup_data["soap_client_certificate"], status="Validated")
@@ -223,7 +217,6 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
-            is_expanded=True,
         )
         result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
@@ -237,7 +230,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         assert len(set(application_status)) == 1
         assert application_status[0] == "Validated"
 
-    def test_get_submission_list_expanded_entering_invalid_status_just_ignores_status_filters_entirely(
+    def test_get_submission_list_entering_invalid_status_just_ignores_status_filters_entirely(
         self, db_session, enable_factory_create, setup_data
     ):
         soap_request = _make_soap_request(setup_data["soap_client_certificate"], status="X")
@@ -249,7 +242,6 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
-            is_expanded=True,
         )
         result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
@@ -258,7 +250,7 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
         assert result.success is True
         assert result.available_application_number == 5
 
-    def test_get_submission_list_expanded_response_does_not_include_grants_gov_application_status_if_it_is_none(
+    def test_get_submission_list_response_does_not_include_grants_gov_application_status_if_it_is_none(
         self, db_session, enable_factory_create, setup_data
     ):
         submission = ApplicationSubmissionFactory.create(
@@ -276,15 +268,13 @@ class TestGetSubmissionListExpandedResponseStatusFilter(BaseTestClass):
             request=schema,
             soap_request=soap_request,
             soap_config=_make_operation_config(),
-            is_expanded=True,
         )
         result = get_submission_list_response(
             simpler_submissions=simpler_submissions,
             proxy_response=SOAPResponse(data="", status_code=200, headers={}),
         )
         get_submission_list_response_dict = result.submission_info[0].to_soap_envelope_dict(
-            "GetSubmissionListExpandedResponse"
-        )["Envelope"]["Body"]["GetSubmissionListExpandedResponse"]
+            "GetSubmissionListResponse"
+        )["Envelope"]["Body"]["GetSubmissionListResponse"]
         assert result.success is True
-        assert result.available_application_number == 1
         assert "GrantsGovApplicationStatus" not in get_submission_list_response_dict.keys()
