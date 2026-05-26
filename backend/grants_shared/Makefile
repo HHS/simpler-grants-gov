@@ -18,19 +18,24 @@ SHELL = /bin/bash -o pipefail
 # to see the errors on the correct files in that section
 APP_DIR := backend\/grants_shared
 ifdef CI
- DOCKER_EXEC_ARGS := -T -e CI -e PYTEST_ADDOPTS="--color=yes"
+ DOCKER_EXEC_ARGS := -T -e CI -e PYTEST_ADDOPTS="--color=yes" -e UV_PUBLISH_TOKEN
  MYPY_FLAGS := --no-pretty
  MYPY_POSTPROC := | perl -pe "s/^(.+):(\d+):(\d+): error: (.*)/::warning file=$(APP_DIR)\/\1,line=\2,col=\3::\4/"
 endif
+
+DOCKER_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME)
 
 # By default, all python/uv commands will run inside of the docker container
 # if you wish to run this natively, add PY_RUN_APPROACH=local to your environment vars
 # You can set this by either running `export PY_RUN_APPROACH=local` in your shell or add
 # it to your ~/.zshrc file (and run `source ~/.zshrc`)
+
 ifeq "$(PY_RUN_APPROACH)" "local"
 PY_RUN_CMD := uv run
+RUN_CMD :=
 else
-PY_RUN_CMD := docker compose run $(DOCKER_EXEC_ARGS) --rm $(APP_NAME)
+PY_RUN_CMD := $(DOCKER_CMD)
+RUN_CMD := $(DOCKER_CMD)
 endif
 
 # Docker user configuration
@@ -119,3 +124,27 @@ lint-mypy:
 
 lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 	$(PY_RUN_CMD) bandit -c pyproject.toml -r . --number 3 --skip B101 -ll -x ./.venv
+
+
+##################################################
+# Release functionality
+##################################################
+
+bump-patch-version: ## Bump the patch version of the code (eg. 1.0.1 -> 1.0.2)
+	$(RUN_CMD) uv version --bump patch
+
+bump-minor-version: ## Bump the minor version of the code (eg. 1.0.1 -> 1.1.0)
+	$(RUN_CMD) uv version --bump minor
+
+##################################################
+# Misc functionality
+##################################################
+
+docker-cmd: ## Run a command inside docker. Use as 'make docker-cmd args="uv --help"'
+	$(DOCKER_CMD) $(args)
+
+run-cmd: ## Run a generic command inside/outside docker based on the PY_RUN_APPROACH env var. Use as 'make run-cmd args="uv --help"'
+	$(RUN_CMD) $(args)
+
+help: ## Prints the help documentation and info about each command
+	@grep -E '^[/a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
