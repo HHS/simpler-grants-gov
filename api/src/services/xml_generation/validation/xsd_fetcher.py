@@ -1,4 +1,4 @@
-"""Utility for fetching and caching XSD files."""
+"""Utility for fetching and storing XSD files."""
 
 import logging
 from pathlib import Path
@@ -27,18 +27,18 @@ KNOWN_XSD_DEPENDENCIES = {
 class XSDFetcher:
     """Fetches XSD files and their dependencies for offline validation.
 
-    This utility downloads XSD schema files and caches them
+    This utility downloads XSD schema files and stores them
     locally for use during validation testing.
     """
 
-    def __init__(self, cache_dir: str | Path):
+    def __init__(self, xsd_dir: str | Path):
         """Initialize XSD fetcher.
 
         Args:
-            cache_dir: Directory to cache downloaded XSD files
+            xsd_dir: Directory to store downloaded XSD files
         """
-        self.cache_dir = Path(cache_dir)
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.xsd_dir = Path(xsd_dir)
+        self.xsd_dir.mkdir(parents=True, exist_ok=True)
 
     def fetch_xsd_with_dependencies(
         self, xsd_url: str, visited: set[str] | None = None
@@ -47,7 +47,7 @@ class XSDFetcher:
         if visited is None:
             visited = set()
 
-        result: dict[str, Any] = {"fetched": [], "cached": [], "errors": []}
+        result: dict[str, Any] = {"fetched": [], "stored": [], "errors": []}
 
         # Skip if already processed
         if xsd_url in visited:
@@ -58,11 +58,11 @@ class XSDFetcher:
         try:
             # Download the main XSD if needed
             xsd_filename = xsd_url.split("/")[-1]
-            xsd_path = self.cache_dir / xsd_filename
+            xsd_path = self.xsd_dir / xsd_filename
 
             if xsd_path.exists():
-                logger.debug(f"Using cached XSD: {xsd_path}")
-                result["cached"].append(xsd_url)
+                logger.debug(f"Using existing XSD: {xsd_path}")
+                result["stored"].append(xsd_url)
             else:
                 logger.info(f"Downloading XSD: {xsd_url}")
                 response = requests.get(xsd_url, timeout=30)
@@ -71,7 +71,7 @@ class XSDFetcher:
                 with open(xsd_path, "wb") as f:
                     f.write(response.content)
 
-                logger.info(f"Downloaded and cached: {xsd_path}")
+                logger.info(f"Downloaded and stored: {xsd_path}")
                 result["fetched"].append(xsd_url)
 
             # Fetch known dependencies
@@ -81,7 +81,7 @@ class XSDFetcher:
                 try:
                     dep_result = self.fetch_xsd_with_dependencies(dep_url, visited)
                     result["fetched"].extend(dep_result["fetched"])
-                    result["cached"].extend(dep_result["cached"])
+                    result["stored"].extend(dep_result["stored"])
                     result["errors"].extend(dep_result["errors"])
                 except Exception as e:
                     error_msg = f"Failed to fetch dependency {dep_url}: {e}"

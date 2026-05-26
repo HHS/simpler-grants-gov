@@ -156,3 +156,5 @@ dmypy.json
 # Artilery
 frontend/tests/artillery/params.json
 
+# XML validation results
+validation_results.json

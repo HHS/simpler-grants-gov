@@ -24,23 +24,23 @@ class ValidationTestRunner:
 
     def __init__(
         self,
-        xsd_cache_dir: str | Path,
+        xsd_dir: str | Path,
         xml_form_map: dict[str, Any],
     ):
         """Initialize validation test runner.
 
         Args:
-            xsd_cache_dir: Directory containing cached XSD files.
+            xsd_dir: Directory containing XSD files.
                           XSD files must be pre-downloaded using 'flask task fetch-xsds'.
             xml_form_map: Pre-built mapping of form names to transform configuration.
         Must be initialized AFTER form registry setup using
         'init_form_registry()' and '_build_xml_form_map()'.
 
         Raises:
-            XSDValidationError: If cache directory doesn't exist
+            XSDValidationError: If directory doesn't exist
         """
         self.xml_service = XMLGenerationService()
-        self.xsd_validator = XSDValidator(xsd_cache_dir)
+        self.xsd_validator = XSDValidator(xsd_dir)
         self.results: list[dict[str, Any]] = []
         self.xml_form_map = xml_form_map
 
@@ -87,7 +87,7 @@ class ValidationTestRunner:
         Args:
             test_name: Name of the test case
             json_input: JSON input data
-            xsd_url_or_path: URL to XSD file (will be converted to cached file path)
+            xsd_url_or_path: URL to XSD file (will be converted to file path)
             form_name: Form name for XML generation
             attachment_mapping: Optional attachment mapping for forms with attachments
             pretty_print: Whether to pretty-print XML
@@ -143,7 +143,7 @@ class ValidationTestRunner:
                     "validation_result": None,
                 }
 
-            # Convert URL to cached file path
+            # Convert URL to file path
             xsd_file_path = self._get_xsd_file_path(xsd_url_or_path)
 
             validation_result = self.xsd_validator.validate_xml(response.xml_data, xsd_file_path)
@@ -174,10 +174,10 @@ class ValidationTestRunner:
             return error_result
 
     def _get_xsd_file_path(self, xsd_url: str) -> Path:
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to file path."""
         # Extract filename from URL
         xsd_filename = xsd_url.split("/")[-1]
-        return self.xsd_validator.xsd_cache_dir / xsd_filename
+        return self.xsd_validator.xsd_dir / xsd_filename
 
     def run_test_suite(self, test_cases: list[dict[str, Any]]) -> dict[str, Any]:
         """Run a suite of validation tests."""

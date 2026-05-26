@@ -198,24 +198,22 @@ class TestGGLobbyingFormXSDValidation:
 
     @pytest.fixture
     def xsd_validator(self):
-        """Create XSD validator with cache directory."""
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
-        if not xsd_cache_dir.exists():
-            pytest.skip(
-                "XSD cache directory not found. Run 'flask task fetch-xsds' to download schemas."
-            )
+        """Create XSD validator with directory."""
+        xsd_dir = Path(__file__).parent.parent.parent.parent.parent / "services/xml_generation/xsds"
+        if not xsd_dir.exists():
+            pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
         # Check if GG_LobbyingForm XSD exists
-        gg_lobbying_form_xsd_path = xsd_cache_dir / "GG_LobbyingForm-V1.1.xsd"
+        gg_lobbying_form_xsd_path = xsd_dir / "GG_LobbyingForm-V1.1.xsd"
         if not gg_lobbying_form_xsd_path.exists():
             pytest.skip(
-                "GG_LobbyingForm-V1.1.xsd not found in cache. Run 'flask task fetch-xsds' to download schemas."
+                "GG_LobbyingForm-V1.1.xsd not found. Run 'flask task fetch-xsds' to download schemas."
             )
-        return XSDValidator(xsd_cache_dir)
+        return XSDValidator(xsd_dir)
 
     def _get_xsd_file_path(self, xsd_validator: XSDValidator, xsd_url: str):
-        """Convert XSD URL to cached file path."""
+        """Convert XSD URL to file path."""
         xsd_filename = xsd_url.split("/")[-1]
-        return xsd_validator.xsd_cache_dir / xsd_filename
+        return xsd_validator.xsd_dir / xsd_filename
 
     @pytest.fixture
     def gg_lobbying_form_application(self, enable_factory_create, db_session: db.Session):
