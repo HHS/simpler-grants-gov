@@ -20,7 +20,7 @@ import { fillForm } from "tests/e2e/utils/forms/general-forms-filling";
 import { verifyFormStatusAfterSave } from "tests/e2e/utils/forms/verify-form-status-utils";
 import { getOpportunityId } from "tests/e2e/utils/get-opportunityId-utils";
 
-const { APPLY, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 
@@ -38,7 +38,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "Application form completion happy path - SF424",
-  { tag: [APPLY, CORE_REGRESSION] },
+  { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,
