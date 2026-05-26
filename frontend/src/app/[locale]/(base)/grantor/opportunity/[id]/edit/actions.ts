@@ -297,3 +297,13 @@ export async function submitOpportunityAction(
 
   redirect("/grantor/opportunities");
 }
+
+export async function opportunityEditFormAction(
+  prevState: OpportunityEditActionState,
+  formData: FormData,
+): Promise<OpportunityEditActionState> {
+  if (readStringValue(formData.get("submitType")) === "publish") {
+    return submitOpportunityAction(prevState, formData);
+  }
+  return saveOpportunityEditAction(prevState, formData);
+}

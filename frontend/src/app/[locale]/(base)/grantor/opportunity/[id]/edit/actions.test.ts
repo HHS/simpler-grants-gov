@@ -8,6 +8,7 @@ import {
 
 import { buildOpportunitySummaryUpdateRequest } from "src/components/opportunity/opportunityEditFormConfig";
 import {
+  opportunityEditFormAction,
   saveOpportunityEditAction,
   submitOpportunityAction,
   type OpportunityEditActionState,
@@ -520,6 +521,49 @@ describe("submitOpportunityAction", () => {
 
     await submitOpportunityAction(initialState, formData);
 
+    expect(mockRedirect).toHaveBeenCalledWith("/grantor/opportunities");
+  });
+});
+
+describe("opportunityEditFormAction", () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it("delegates to saveOpportunityEditAction when submitType is 'save'", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunityId", "opp-123");
+    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("submitType", "save");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+
+    const result = await opportunityEditFormAction(initialState, formData);
+
+    expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
+    expect(mockPublishOpportunityForGrantor).not.toHaveBeenCalled();
+    expect(result).toEqual({ successMessage: "success" });
+  });
+
+  it("delegates to submitOpportunityAction when submitType is 'publish'", async () => {
+    const formData = buildValidFormData();
+    formData.set("opportunityId", "opp-123");
+    formData.set("opportunitySummaryId", "sum-456");
+    formData.set("submitType", "publish");
+
+    mockUpdateOpportunitySummaryForGrantor.mockResolvedValue(
+      successfulSummaryUpdateResponse,
+    );
+    mockPublishOpportunityForGrantor.mockResolvedValue(
+      {} as Awaited<ReturnType<typeof publishOpportunityForGrantor>>,
+    );
+
+    await opportunityEditFormAction(initialState, formData);
+
+    expect(mockUpdateOpportunitySummaryForGrantor).toHaveBeenCalledTimes(1);
+    expect(mockPublishOpportunityForGrantor).toHaveBeenCalledTimes(1);
     expect(mockRedirect).toHaveBeenCalledWith("/grantor/opportunities");
   });
 });

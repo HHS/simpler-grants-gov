@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  saveOpportunityEditAction,
+  opportunityEditFormAction,
   type OpportunityEditValidationErrors,
 } from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/actions";
 import {
@@ -14,9 +14,16 @@ import {
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
 
 import { useTranslations } from "next-intl";
-import { startTransition, useActionState, useEffect, useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Alert,
+  Button,
   Checkbox,
   DatePicker,
   ErrorMessage,
@@ -98,6 +105,9 @@ type OpportunityEditFormProps = {
     awardSelectionMethod: string;
     awardSelectionMethodExplanation: string;
   };
+  saveLabel: string;
+  previewLabel: string;
+  publishLabel: string;
 };
 
 export default function OpportunityEditForm({
@@ -109,14 +119,17 @@ export default function OpportunityEditForm({
   isNewlyCreated = false,
   initialAttachments = [],
   opportunityKeyInformation,
+  saveLabel,
+  previewLabel,
+  publishLabel,
 }: OpportunityEditFormProps) {
   const t = useTranslations("OpportunityEdit");
+  const formRef = useRef<HTMLFormElement>(null);
   const [currentSummaryId, setCurrentSummaryId] =
     useState(opportunitySummaryId);
 
-  // Minimal state — 3 fields that drive conditional show/hide rendering,
-  // plus fundingType and publishDate needed for the CustomEvent that
-  // controls the Publish button in OpportunityEditHeader.
+  // State for fields that drive conditional show/hide rendering and
+  // the publish button enabled state.
   const [fundingCategory, setFundingCategory] = useState(
     initialValues.fundingCategories,
   );
@@ -127,31 +140,20 @@ export default function OpportunityEditForm({
   const [fundingType, setFundingType] = useState(initialValues.fundingType);
   const [publishDate, setPublishDate] = useState(initialValues.publishDate);
 
-  const [formState, formAction] = useActionState(saveOpportunityEditAction, {
-    validationErrors: {},
-  });
+  const [formState, formAction, isPending] = useActionState(
+    opportunityEditFormAction,
+    {
+      validationErrors: {},
+    },
+  );
+
+  const publishEnabled =
+    publishDate.trim() !== "" &&
+    fundingType.trim() !== "" &&
+    fundingCategory.trim() !== "" &&
+    selectedEligibility.length > 0;
   const validationErrors: OpportunityEditValidationErrors | undefined =
     formState.validationErrors;
-
-  // Dispatch CustomEvent so OpportunityEditHeader can update
-  // the publish button enabled state in real time.
-  // useEffect fires after every state change so the event always carries
-  // the latest committed values — no manual dispatch calls needed.
-  useEffect(() => {
-    const form = document.getElementById("opportunity-edit-form");
-    if (!form) return;
-    form.dispatchEvent(
-      new CustomEvent("opportunity-values-change", {
-        bubbles: true,
-        detail: {
-          publishDate,
-          fundingType,
-          fundingCategories: fundingCategory,
-          eligibleApplicants: selectedEligibility,
-        },
-      }),
-    );
-  }, [publishDate, fundingType, fundingCategory, selectedEligibility]);
 
   // Shared toggle handler for eligibility checkboxes.
   function handleEligibilityToggle(value: string) {
@@ -237,10 +239,12 @@ export default function OpportunityEditForm({
   );
   return (
     <form
+      ref={formRef}
       id="opportunity-edit-form"
       onSubmit={(e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
+        formData.set("submitType", "save");
         startTransition(() => formAction(formData));
       }}
       noValidate
@@ -286,8 +290,43 @@ export default function OpportunityEditForm({
         </div>
       ) : null}
 
-      {/* Portal target for publish error rendered by OpportunityEditHeader */}
-      <div id="publish-error-container" />
+      <div className="display-flex flex-wrap flex-align-center margin-bottom-4">
+        <Button
+          type="button"
+          outline
+          onClick={() => {
+            if (!formRef.current) return;
+            const formData = new FormData(formRef.current);
+            formData.set("submitType", "save");
+            startTransition(() => formAction(formData));
+          }}
+          disabled={isPending}
+          className="height-auto margin-0 margin-bottom-1 margin-right-105 font-sans-sm text-bold line-height-sans-1"
+        >
+          {saveLabel}
+        </Button>
+        <Button
+          type="button"
+          outline
+          disabled
+          className="height-auto margin-0 margin-bottom-1 margin-right-105 font-sans-sm text-bold line-height-sans-1"
+        >
+          {previewLabel}
+        </Button>
+        <Button
+          type="button"
+          onClick={() => {
+            if (!formRef.current) return;
+            const formData = new FormData(formRef.current);
+            formData.set("submitType", "publish");
+            startTransition(() => formAction(formData));
+          }}
+          disabled={!publishEnabled || isPending}
+          className="height-auto margin-0 margin-bottom-1 font-sans-sm text-bold line-height-sans-1"
+        >
+          {publishLabel}
+        </Button>
+      </div>
 
       {formState.errorMessage ? (
         <div className="margin-top-2">
