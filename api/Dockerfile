@@ -135,4 +135,4 @@ ENV PATH="/api/.venv/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin" \
 # Run as the non-root user
 USER ${RUN_USER}
 
-CMD ["gunicorn", "--worker-tmp-dir=/dev/shm", "src.app:create_app()", "--log-level", "debug", "--limit-request-field_size", "0", "--limit-request-fields", "32768"]
+CMD ["gunicorn", "--worker-tmp-dir=/dev/shm", "src.app:create_app()", "--log-level", "debug"]

@@ -26,4 +26,4 @@ workers = (len(os.sched_getaffinity(0)) * 2) + 1
 threads = 4
 
 limit_request_fields = 32768
-limit_request_field_size = 0
+limit_request_field_size = 100000
