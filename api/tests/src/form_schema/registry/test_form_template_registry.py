@@ -4,6 +4,7 @@ import jsonref
 import pytest
 
 from src.db.models.competition_models import Form
+from src.form_schema.forms import _ALL_FORMS, init_form_registry
 from src.form_schema.registry.form_template_registry import (
     FormTemplateKey,
     FormTemplateRegistry,
@@ -209,3 +210,17 @@ def test_get_raises_for_wrong_major_version():
 
     with pytest.raises(ValueError, match="No form registered"):
         registry.get_by_id_and_major_version(FormTemplateKey(form.form_id, 2))
+
+
+# ---------------------------------------------------------------------------
+# Startup wiring / integration behavior
+# ---------------------------------------------------------------------------
+
+
+def test_all_forms_are_registered_on_startup():
+
+    init_form_registry()
+
+    forms = form_template_registry.get_all()
+
+    assert len(forms) == len(_ALL_FORMS)

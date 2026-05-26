@@ -21,7 +21,6 @@ class SubmissionInfo(BaseSOAPSchema):
     package_id: str | None = Field(default=None, alias="PackageID")
     delinquent_federal_debt: str | None = Field(default=None, alias="DelinquentFederalDebt")
     active_exclusions: str | None = Field(default=None, alias="ActiveExclusions")
-    uei: str | None = Field(default=None, alias="UEI")
 
     @field_validator("received_date_time", mode="before")
     @classmethod
@@ -35,12 +34,18 @@ class SubmissionInfo(BaseSOAPSchema):
         return dt.isoformat(timespec="milliseconds")
 
 
-class GetSubmissionListExpandedResponse(BaseSOAPSchema):
+class SubmissionInfoExpanded(SubmissionInfo):
+    uei: str | None = Field(default=None, alias="UEI")
+
+
+class GetSubmissionListResponse(BaseSOAPSchema):
     success: bool = Field(default=True, alias="ns2:Success")
     available_application_number: int | None = Field(
         default=None, alias="ns2:AvailableApplicationNumber"
     )
-    submission_info: list[SubmissionInfo] = Field(default_factory=list, alias="ns2:SubmissionInfo")
+    submission_info: list[SubmissionInfo] | list[SubmissionInfoExpanded] = Field(
+        default_factory=list, alias="ns2:SubmissionInfo"
+    )
 
     def to_soap_envelope_dict(self, operation_name: str) -> dict:
         return super().to_soap_envelope_dict(f"ns2:{operation_name}")
@@ -100,7 +105,7 @@ class ConsolidatedFilter(BaseModel):
         return {"filters": consolidated}
 
 
-class GetSubmissionListExpandedRequest(BaseModel):
+class GetSubmissionListRequest(BaseModel):
     expanded_application_filter: ConsolidatedFilter | None = Field(
         alias="ExpandedApplicationFilter", default=None
     )

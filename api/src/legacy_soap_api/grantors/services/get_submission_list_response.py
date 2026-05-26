@@ -102,7 +102,7 @@ def transform_submission(submission: ApplicationSubmission) -> dict[str, str | d
 
 def get_submissions(
     db_session: db.Session,
-    request: schemas.GetSubmissionListExpandedRequest,
+    request: schemas.GetSubmissionListRequest,
     soap_request: SOAPRequest,
     soap_config: SOAPOperationConfig,
 ) -> list[ApplicationSubmission]:
@@ -225,50 +225,57 @@ def _apply_agency_filter(stmt: Select, agency: Agency | None) -> Select:
     return stmt.where(Opportunity.agency_code == agency.agency_code)
 
 
-def get_submission_list_expanded(
+def get_submission_list(
     db_session: db.Session,
-    request: schemas.GetSubmissionListExpandedRequest,
+    request: schemas.GetSubmissionListRequest,
     soap_request: SOAPRequest,
     soap_config: SOAPOperationConfig,
-) -> list[schemas.SubmissionInfo]:
+    is_expanded: bool = False,
+) -> list[schemas.SubmissionInfo] | list[schemas.SubmissionInfoExpanded]:
     """Gather submission data from the database.
 
     Performs authentication, authorization, filtering, and transforms
-    database submissions into SubmissionInfo objects.
+    database submissions into SubmissionInfo or SubmissionInfoExpanded objects.
 
-    Returns a list of SubmissionInfo from Simpler.
+    Returns a list of SubmissionInfo or SubmissionInfoExpanded from Simpler.
     """
+    schema: type[schemas.SubmissionInfoExpanded | schemas.SubmissionInfo]
+
+    if is_expanded:
+        schema = schemas.SubmissionInfoExpanded
+    else:
+        schema = schemas.SubmissionInfo
     submissions = get_submissions(db_session, request, soap_request, soap_config)
-    return [
-        schemas.SubmissionInfo(**transform_submission(submission)) for submission in submissions
-    ]
+    return [schema(**transform_submission(submission)) for submission in submissions]
 
 
-def get_submission_list_expanded_response(
-    simpler_submissions: list[schemas.SubmissionInfo],
+def get_submission_list_response(
+    simpler_submissions: list[schemas.SubmissionInfo] | list[schemas.SubmissionInfoExpanded],
     proxy_response: SOAPResponse,
-) -> schemas.GetSubmissionListExpandedResponse:
+) -> schemas.GetSubmissionListResponse:
     """Build the SOAP response envelope from Simpler and proxy data.
 
     Parses proxy submissions, merges with Simpler submissions,
     sorts by date, and constructs the response.
     """
-    info: list[schemas.SubmissionInfo] = []
+    info: list[schemas.SubmissionInfo | schemas.SubmissionInfoExpanded] = []
     try:
         info.extend(parse_submissions_from_proxy(proxy_response))
     except Exception:
-        logger.exception("Failed to parse submission list expanded XML response")
+        logger.exception("Failed to parse submission list XML response")
     info.extend(simpler_submissions)
     info.sort(
         key=lambda x: x.received_date_time or datetime.min.replace(tzinfo=timezone.utc),
         reverse=True,
     )
-    return schemas.GetSubmissionListExpandedResponse(
+    return schemas.GetSubmissionListResponse(
         success=True, available_application_number=len(info), submission_info=info
     )
 
 
-def parse_submissions_from_proxy(proxy_response: SOAPResponse) -> list[schemas.SubmissionInfo]:
+def parse_submissions_from_proxy(
+    proxy_response: SOAPResponse,
+) -> list[schemas.SubmissionInfoExpanded]:
     xml_bytes = b"".join(clean_mtom_generator(proxy_response.stream()))
     info = []
     if xml_bytes:
@@ -278,7 +285,7 @@ def parse_submissions_from_proxy(proxy_response: SOAPResponse) -> list[schemas.S
             try:
                 element_bytes = etree.tostring(element)
                 submission_info_dict = xmltodict.parse(element_bytes).get("ns2:SubmissionInfo")
-                info.append(schemas.SubmissionInfo(**submission_info_dict))
+                info.append(schemas.SubmissionInfoExpanded(**submission_info_dict))
             except PydanticValidationError:
                 logger.exception("Skipping invalid submission due to validation error")
                 continue
