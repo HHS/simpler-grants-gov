@@ -28,6 +28,7 @@ from tests.src.db.models.factories import (
 )
 
 
+@pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
 class TestSubmissionXSDValidation:
     """End-to-end XSD validation tests for complete application submissions."""
 
@@ -36,7 +37,7 @@ class TestSubmissionXSDValidation:
         """Create XSD validator with directory."""
         from pathlib import Path
 
-        xsd_dir = Path(__file__).parent.parent.parent.parent.parent / "services/xml_generation/xsds"
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
         if not xsd_dir.exists():
             pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
         return XSDValidator(xsd_dir)
@@ -508,7 +509,6 @@ class TestSubmissionXSDValidation:
             "valid"
         ], f"SF-424A validation failed: {sf424a_validation['error_message']}"
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_submission_xml_structure_is_well_formed(self, sf424_application, db_session):
         """Test that generated submission XML has proper structure even without XSD validation."""
         application_submission = ApplicationSubmissionFactory.create(

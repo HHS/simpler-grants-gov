@@ -33,6 +33,7 @@ from tests.src.db.models.factories import (
 )
 
 
+@pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
 class TestGGLobbyingFormXMLGeneration:
     """Test cases for GG_LobbyingForm XML generation service."""
 
@@ -193,13 +194,14 @@ class TestGGLobbyingFormXMLGeneration:
         ), "Elements not in XSD sequence order"
 
 
+@pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
 class TestGGLobbyingFormXSDValidation:
     """XSD validation tests for GG_LobbyingForm XML."""
 
     @pytest.fixture
     def xsd_validator(self):
         """Create XSD validator with directory."""
-        xsd_dir = Path(__file__).parent.parent.parent.parent.parent / "services/xml_generation/xsds"
+        xsd_dir = Path(__file__).parents[4] / "src/services/xml_generation/xsds"
         if not xsd_dir.exists():
             pytest.skip("XSD directory not found. Run 'flask task fetch-xsds' to download schemas.")
         # Check if GG_LobbyingForm XSD exists

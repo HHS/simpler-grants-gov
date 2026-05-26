@@ -146,7 +146,7 @@ class TestPerformanceSiteXSDValidation:
 
     @pytest.fixture
     def xsd_validator(self):
-        xsd_cache_dir = Path(__file__).parent.parent.parent.parent.parent / "xsd_cache"
+        xsd_cache_dir = Path(__file__).parents[1] / "xsd_cache"
         if not xsd_cache_dir.exists():
             pytest.skip("XSD cache directory not found. Run 'flask task fetch-xsds'.")
         xsd_path = xsd_cache_dir / "PerformanceSite_4_0-V4.0.xsd"

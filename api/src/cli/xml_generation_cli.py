@@ -204,7 +204,7 @@ def validate_xml_generation_command(
     try:
         # Use default XSD directory if not specified
         if not xsd_dir:
-            xsd_dir = str(Path(__file__).resolve().parents[1] / "services/xml_generation/xsds")
+            xsd_dir = str(Path(__file__).resolve().parents[4] / "src/services/xml_generation/xsds")
 
         # Verify XSD directory exists
         xsd_path = Path(xsd_dir)
@@ -316,7 +316,7 @@ def fetch_xsds_command(
     try:
         # Use default XSD directory if not specified
         if not xsd_dir:
-            xsd_dir = str(Path(__file__).resolve().parents[1] / "services/xml_generation/xsds")
+            xsd_dir = str(Path(__file__).resolve().parents[4] / "src/services/xml_generation/xsds")
 
         # Get test cases to determine which XSDs we need
         if form:
