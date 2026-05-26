@@ -1,5 +1,4 @@
-import { ApiRequestError, readError, UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
+import { ApiRequestError, readError } from "src/errors";
 import { deleteSession } from "src/services/auth/sessionUtils";
 import { postUserLogout } from "src/services/fetch/fetchers/fetchers";
 
@@ -7,10 +6,6 @@ import { NextResponse } from "next/server";
 
 export async function logoutUser() {
   try {
-    const session = await getSession();
-    if (!session || !session.token) {
-      throw new UnauthorizedError("No active session to logout");
-    }
     // logout on API via /v1/users/token/logout
     const response = await postUserLogout();
     if (!response) {

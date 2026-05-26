@@ -1,39 +1,7 @@
 import "server-only";
 
-import { getSession } from "src/services/auth/session";
 import { fetchUserWithMethod } from "src/services/fetch/fetchers/fetchers";
-import { ApiKey } from "src/types/apiKeyTypes";
 import { APIResponse } from "src/types/apiResponseTypes";
-
-// this is a duplicate - resolve with handleListApiKeys
-export const fetchApiKeys = async (): Promise<ApiKey[]> => {
-  const session = await getSession();
-  if (!session || !session.token) {
-    return [];
-  }
-
-  const body = {
-    pagination: {
-      page_offset: 1,
-      page_size: 25,
-      sort_order: [
-        {
-          order_by: "created_at",
-          sort_direction: "descending",
-        },
-      ],
-    },
-  };
-
-  const subPath = `${session.user_id}/api-keys/list`;
-  const resp = await fetchUserWithMethod("POST")({
-    subPath,
-    body,
-  });
-
-  const json = (await resp.json()) as { data: ApiKey[] };
-  return json.data;
-};
 
 export const handleListApiKeys = async (
   userId: string,

@@ -3,8 +3,6 @@
  * Note that the errors defined here rely on stringifying JSON data into the Error's message parameter
  * That data will need to be parsed back out into JSON when reading the error
  */
-import { error } from "console";
-import errorMap from "node_modules/zod/v3/locales/en.cjs";
 import { FrontendErrorDetails } from "src/types/apiResponseTypes";
 import { QueryParamData } from "src/types/search/searchRequestTypes";
 
@@ -27,7 +25,7 @@ export const parseErrorStatus = (error: ApiRequestError): number => {
 };
 
 export class MissingAuthError extends Error {
-  constructor(message: string) {
+  constructor(message?: string) {
     const erroMessage =
       message || "Request requires authentication and is missing user token";
     const cause = {
