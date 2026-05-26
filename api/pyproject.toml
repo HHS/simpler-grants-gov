@@ -85,7 +85,7 @@ dev = [
     "debugpy>=1.8.1,<2",
     "freezegun>=1.5.0,<2",
     "types-requests>=2.31,<3",
-    "graphviz>=0.20.3,<0.21",
+    "graphviz>=0.21,<0.22",
     "eralchemy>=1.5.0,<2",
 ]
 
@@ -98,7 +98,7 @@ module-root = ""
 source-include = ["newrelic.ini"]
 
 [build-system]
-requires = ["uv_build>=0.11.8,<0.11.9"]
+requires = ["uv_build>=0.11.16,<0.11.17"]
 build-backend = "uv_build"
 
 [tool.black]
