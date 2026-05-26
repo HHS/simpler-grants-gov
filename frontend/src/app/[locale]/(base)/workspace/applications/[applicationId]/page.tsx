@@ -5,7 +5,6 @@ import {
   MissingAuthError,
   parseErrorStatus,
 } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import {
   getApplicationDetails,

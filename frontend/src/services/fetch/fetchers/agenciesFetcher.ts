@@ -1,10 +1,6 @@
 "server only";
 
-import {
-  ApiRequestError,
-  MissingAuthError,
-  UnauthorizedError,
-} from "src/errors";
+import { ApiRequestError, MissingAuthError } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import {
   fetchUserWithMethod,

@@ -1,5 +1,3 @@
-import { UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import { Organization } from "src/types/applicationResponseTypes";
 import { OrganizationInviteRecord } from "src/types/organizationTypes";
 import {

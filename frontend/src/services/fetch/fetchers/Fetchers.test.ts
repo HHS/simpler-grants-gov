@@ -103,6 +103,7 @@ describe("requesterForEndpoint", () => {
     expect(getDefaultHeadersMock).toHaveBeenCalledWith({
       addContentType: true,
       requiresUserAuthToken: true,
+      url: "fakeurl/1",
     });
     expect(fetchMock).toHaveBeenCalledWith("fakeurl/1", {
       body: JSON.stringify({ key: "value" }),

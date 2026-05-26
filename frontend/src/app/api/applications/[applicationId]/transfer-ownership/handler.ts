@@ -1,5 +1,4 @@
 import { readError } from "src/errors";
-import { getSession } from "src/services/auth/session";
 import { addOrganizationToApplication } from "src/services/fetch/fetchers/addOrganizationToApplication";
 
 import { NextResponse } from "next/server";
