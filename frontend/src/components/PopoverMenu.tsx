@@ -3,7 +3,7 @@
 import { ReactNode, Ref, useEffect, useRef, useState } from "react";
 import { Button } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "./USWDSIcon";
+import { USWDSIcon } from "./core/USWDSIcon";
 
 const PopoverTrigger = ({
   buttonRef,

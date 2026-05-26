@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ReactNode, useMemo, useState } from "react";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { SaveSearchModal } from "./SaveSearchModal";
 import { SaveSearchSelector } from "./SaveSearchSelector";
 import SearchQueryCopyButton from "./SearchQueryCopyButton";

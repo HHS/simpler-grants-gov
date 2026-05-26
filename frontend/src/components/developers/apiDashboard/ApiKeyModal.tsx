@@ -22,11 +22,11 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import CopyIcon from "src/components/CopyIcon";
-import { LoadingButton } from "src/components/LoadingButton";
-import SimplerAlert from "src/components/SimplerAlert";
-import { SimplerModal } from "src/components/SimplerModal";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import CopyIcon from "src/components/core/CopyIcon";
+import { LoadingButton } from "src/components/core/LoadingButton";
+import SimplerAlert from "src/components/core/SimplerAlert";
+import { SimplerModal } from "src/components/core/SimplerModal";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 interface ApiKeyModalProps {
   mode: "create" | "edit" | "delete";

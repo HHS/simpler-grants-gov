@@ -2,8 +2,8 @@ import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
-import { LoginModal } from "./LoginModal";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
+import { LoginModal } from "./core/loginModal/LoginModal";
 
 export const LoginButtonModal = ({
   navLoginLinkText,

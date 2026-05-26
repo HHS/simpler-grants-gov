@@ -26,7 +26,7 @@ import { Alert, GridContainer } from "@trussworks/react-uswds";
 import {
   TableCellData,
   TableWithResponsiveHeader,
-} from "src/components/TableWithResponsiveHeader";
+} from "src/components/core/TableWithResponsiveHeader";
 import { AgencySelector } from "src/components/workspace/AgencySelector";
 
 export const OpportunitiesPageWrapper = ({ children }: PropsWithChildren) => {

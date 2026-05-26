@@ -1,4 +1,4 @@
-import Snackbar from "src/components/Snackbar";
+import Snackbar from "src/components/core/Snackbar";
 
 const meta = {
   title: "Components/Snackbar",

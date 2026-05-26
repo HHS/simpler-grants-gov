@@ -12,7 +12,7 @@ import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { FormGroup, TextInput } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { DynamicFieldLabel } from "../../core/DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /** The `TextWidget` component uses the `BaseInputTemplate`.

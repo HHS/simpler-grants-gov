@@ -7,7 +7,7 @@ import { ChangeEvent, FocusEvent, useCallback } from "react";
 import { FormGroup, Textarea } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { DynamicFieldLabel } from "../../core/DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /** The `TextareaWidget` is a widget for rendering input fields as textarea.

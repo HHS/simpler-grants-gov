@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRef } from "react";
 import { Button, ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
-import { LoginModal } from "src/components/LoginModal";
+import { LoginModal } from "src/components/core/loginModal/LoginModal";
 
 export default function DevelopersInfoButtons() {
   const t = useTranslations("Developers");

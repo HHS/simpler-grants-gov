@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { Button } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type TransferOwnershipButtonProps = {
   onClick: () => void;

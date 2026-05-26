@@ -14,7 +14,7 @@ import React, { FocusEvent, useCallback, useMemo } from "react";
 import { FormGroup, Radio } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { DynamicFieldLabel } from "../../core/DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /**

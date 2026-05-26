@@ -14,7 +14,7 @@ import {
 
 import Link from "next/link";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { DeleteSavedSearchModal } from "src/components/workspace/DeleteSavedSearchModal";
 import { EditSavedSearchModal } from "src/components/workspace/EditSavedSearchModal";
 

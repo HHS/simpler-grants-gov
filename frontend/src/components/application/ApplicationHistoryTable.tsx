@@ -7,7 +7,7 @@ import { Alert } from "@trussworks/react-uswds";
 import {
   TableCellData,
   TableWithResponsiveHeader,
-} from "src/components/TableWithResponsiveHeader";
+} from "src/components/core/TableWithResponsiveHeader";
 
 export type ApplicationHistoryCardProps = ApplicationHistory[];
 

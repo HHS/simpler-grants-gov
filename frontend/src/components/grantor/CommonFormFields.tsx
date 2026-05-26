@@ -11,7 +11,7 @@ import {
 } from "@trussworks/react-uswds";
 
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { DynamicFieldLabel } from "src/components/applyForm/widgets/DynamicFieldLabel";
+import { DynamicFieldLabel } from "src/components/core/DynamicFieldLabel";
 
 // ----------------------------------------------------------
 // Common TextInput with error block

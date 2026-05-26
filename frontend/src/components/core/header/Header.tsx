@@ -1,0 +1,427 @@
+"use client";
+
+import clsx from "clsx";
+import GrantsLogo from "public/img/grants-logo.svg";
+import { applicationTestUserId, LOGIN_URL } from "src/constants/auth";
+import { ExternalRoutes } from "src/constants/routes";
+import { useSnackbar } from "src/hooks/useSnackbar";
+import { useUser } from "src/services/auth/useUser";
+import { IndexType } from "src/types/generalTypes";
+import { TestUser } from "src/types/userTypes";
+import { isCurrentPath, isExternalLink } from "src/utils/generalUtils";
+import { storeCurrentPage } from "src/utils/userUtils";
+
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  GovBanner,
+  NavMenuButton,
+  PrimaryNav,
+  Title,
+  Header as USWDSHeader,
+} from "@trussworks/react-uswds";
+
+import { USWDSIcon } from "src/components/core/USWDSIcon";
+import { RouteChangeWatcher } from "../../RouteChangeWatcher";
+import { SignOutNavLink, TestApplicationLink } from "../../user/UserControl";
+import NavDropdown from "./NavDropdown";
+import { TestUserSelect } from "./TestUserSelect";
+
+type PrimaryLink = {
+  text?: string;
+  href?: string;
+  children?: PrimaryLink[];
+};
+
+const homeRegexp = /^\/(?:e[ns])?$/;
+
+const NavLink = ({
+  href = "",
+  classes,
+  onClick,
+  text,
+}: {
+  href?: string;
+  classes?: string;
+  onClick: () => void;
+  text: string;
+}) => {
+  let iconBtnClass, linkTarget;
+
+  if (isExternalLink(href)) {
+    iconBtnClass = "icon-btn";
+    linkTarget = "_blank";
+  }
+
+  return (
+    <Link
+      href={href}
+      key={href}
+      className={classes}
+      target={linkTarget}
+      onClick={onClick}
+    >
+      <span className={iconBtnClass}>
+        {text}
+        {isExternalLink(href) && (
+          <USWDSIcon name="launch" className="usa-icon--size-2" />
+        )}
+      </span>
+    </Link>
+  );
+};
+
+const NavLinks = ({
+  mobileExpanded,
+  onToggleMobileNav,
+  localDev = false,
+}: {
+  mobileExpanded: boolean;
+  onToggleMobileNav: () => void;
+  localDev: boolean;
+}) => {
+  const t = useTranslations("Header.navLinks");
+  const path = usePathname();
+  const getSearchLink = useCallback(
+    (onSearch: boolean) => {
+      return {
+        text: t("search"),
+        href: onSearch ? "/search?refresh=true" : "/search",
+      };
+    },
+    [t],
+  );
+  const { user } = useUser();
+
+  const navLinkList = useMemo(() => {
+    const anonymousNavLinks: PrimaryLink[] = [
+      { text: t("home"), href: "/" },
+      getSearchLink(path.includes("/search")),
+      {
+        text: t("about"),
+        children: [
+          { text: t("vision"), href: "/vision" },
+          { text: t("roadmap"), href: "/roadmap" },
+        ],
+      },
+      {
+        text: t("community"),
+        children: [
+          { text: t("newsletter"), href: "/newsletter" },
+          { text: t("events"), href: "/events" },
+          { text: t("developers"), href: "/developers" },
+          { text: t("wiki"), href: ExternalRoutes.WIKI },
+          { text: t("forum"), href: ExternalRoutes.FORUM },
+        ],
+      },
+    ];
+    if (!user?.token) {
+      return anonymousNavLinks;
+    }
+
+    const workspaceSubNavs = [];
+
+    workspaceSubNavs.push({
+      text: t("workspaceDashboard"),
+      href: "/workspace",
+    });
+
+    workspaceSubNavs.push({
+      text: t("applications"),
+      href: "/workspace/applications",
+    });
+    workspaceSubNavs.push({
+      text: t("organizations"),
+      href: "/workspace/organizations",
+    });
+
+    workspaceSubNavs.push({
+      text: t("savedOpportunities"),
+      href: "/workspace/saved-opportunities",
+    });
+
+    workspaceSubNavs.push({
+      text: t("savedSearches"),
+      href: "/workspace/saved-search-queries",
+    });
+
+    return anonymousNavLinks.toSpliced(anonymousNavLinks.length, 0, {
+      text: t("workspace"),
+      children: workspaceSubNavs,
+    });
+  }, [t, path, getSearchLink, user]);
+
+  const getCurrentNavItemIndex = useCallback(
+    (currentPath: string): number => {
+      // handle base case of home page separately
+      if (currentPath.match(homeRegexp)) {
+        return 0;
+      }
+      const index = navLinkList.slice(1).findIndex(({ href, children }) => {
+        if (!href) {
+          if (!children?.length) {
+            return false;
+          }
+          // mark as current if any child page is active
+          return children.some((child) => {
+            return child?.href && isCurrentPath(child.href, currentPath);
+          });
+        } else {
+          return isCurrentPath(href, currentPath);
+        }
+      });
+      // account for home path as default / not found
+      return index === -1 ? index : index + 1;
+    },
+    [navLinkList],
+  );
+
+  const [currentNavItemIndex, setCurrentNavItemIndex] = useState<number>(
+    getCurrentNavItemIndex(path),
+  );
+  const [activeNavDropdownIndex, setActiveNavDropdownIndex] =
+    useState<IndexType>(null);
+
+  useEffect(() => {
+    setCurrentNavItemIndex(getCurrentNavItemIndex(path));
+  }, [path, getCurrentNavItemIndex]);
+
+  const closeMobileNav = useCallback(() => {
+    if (mobileExpanded) {
+      onToggleMobileNav();
+    }
+  }, [mobileExpanded, onToggleMobileNav]);
+
+  const closeDropdownAndMobileNav = useCallback(() => {
+    setActiveNavDropdownIndex(null);
+    closeMobileNav();
+  }, [closeMobileNav]);
+
+  const navItems = useMemo(() => {
+    const items = navLinkList.map((link: PrimaryLink, index: number) => {
+      if (!link.text) {
+        return <></>;
+      }
+      if (link.children) {
+        const childItems = link.children.map((childLink) => {
+          if (!childLink.text) {
+            return <></>;
+          }
+          return (
+            <NavLink
+              href={childLink.href}
+              key={childLink.href}
+              onClick={closeDropdownAndMobileNav}
+              text={childLink.text}
+            />
+          );
+        });
+        return (
+          <NavDropdown
+            key={link.href}
+            activeNavDropdownIndex={activeNavDropdownIndex}
+            index={index}
+            isCurrent={currentNavItemIndex === index}
+            linkText={link.text}
+            menuItems={childItems}
+            setActiveNavDropdownIndex={setActiveNavDropdownIndex}
+          />
+        );
+      }
+      return (
+        <NavLink
+          href={link.href}
+          key={link.href}
+          onClick={closeDropdownAndMobileNav}
+          text={link.text}
+          classes={clsx({
+            "usa-nav__link": true,
+            "usa-current": currentNavItemIndex === index,
+            "text-bold": true,
+          })}
+        />
+      );
+    });
+
+    // add user account nav  depending on login status
+    if (!user?.token) {
+      items.push(
+        <NavLink
+          key="sign-in"
+          href={LOGIN_URL}
+          onClick={() => {
+            storeCurrentPage();
+            closeDropdownAndMobileNav();
+          }}
+          text={t("login")}
+          classes={clsx({
+            "usa-nav__link": true,
+            "text-normal": true,
+          })}
+        />,
+      );
+    } else {
+      const accountIndex = navLinkList.length;
+      const isApplicationTestUser =
+        localDev && user?.user_id === applicationTestUserId;
+      items.push(
+        <NavDropdown
+          key="account"
+          activeNavDropdownIndex={activeNavDropdownIndex}
+          index={accountIndex}
+          isCurrent={false}
+          linkText={t("account")}
+          menuItems={[
+            <NavLink
+              href="/settings"
+              key="settings"
+              onClick={closeDropdownAndMobileNav}
+              text={t("settings")}
+            />,
+            <NavLink
+              href="/notifications"
+              key="notifications"
+              onClick={closeDropdownAndMobileNav}
+              text={t("notifications")}
+            />,
+            isApplicationTestUser && <TestApplicationLink />,
+            <SignOutNavLink key="logout" onClick={closeDropdownAndMobileNav} />,
+          ]}
+          setActiveNavDropdownIndex={setActiveNavDropdownIndex}
+        />,
+      );
+    }
+
+    return items;
+  }, [
+    activeNavDropdownIndex,
+    closeDropdownAndMobileNav,
+    currentNavItemIndex,
+    navLinkList,
+    setActiveNavDropdownIndex,
+    t,
+    user?.token,
+    user?.user_id,
+    localDev,
+  ]);
+
+  return (
+    <PrimaryNav
+      items={navItems}
+      mobileExpanded={mobileExpanded}
+      onToggleMobileNav={onToggleMobileNav}
+      className="padding-bottom-05"
+    ></PrimaryNav>
+  );
+};
+
+const Header = ({
+  locale,
+  localDev = false,
+  testUsers = [],
+}: {
+  locale?: string;
+  localDev?: boolean;
+  testUsers?: TestUser[];
+}) => {
+  const t = useTranslations("Header");
+  const [isMobileNavExpanded, setIsMobileNavExpanded] =
+    useState<boolean>(false);
+
+  const { hasBeenLoggedOut, resetHasBeenLoggedOut } = useUser();
+  const { showSnackbar, Snackbar, hideSnackbar, snackbarIsVisible } =
+    useSnackbar();
+
+  useEffect(() => {
+    if (hasBeenLoggedOut) {
+      showSnackbar(-1);
+      resetHasBeenLoggedOut();
+    }
+  }, [hasBeenLoggedOut, showSnackbar, resetHasBeenLoggedOut]);
+
+  const closeMenuOnEscape = useCallback((event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      setIsMobileNavExpanded(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isMobileNavExpanded) {
+      document.addEventListener("keyup", closeMenuOnEscape);
+    }
+    return () => {
+      document.removeEventListener("keyup", closeMenuOnEscape);
+    };
+  }, [isMobileNavExpanded, closeMenuOnEscape]);
+
+  const language = locale && locale.match("/^es/") ? "spanish" : "english";
+
+  const handleMobileNavToggle = () => {
+    setIsMobileNavExpanded(!isMobileNavExpanded);
+  };
+
+  return (
+    <>
+      <Suspense>
+        <RouteChangeWatcher />
+      </Suspense>
+      <div
+        className={clsx({
+          "usa-overlay": true,
+          "desktop:display-none": true,
+          "is-visible": isMobileNavExpanded,
+        })}
+        onClick={() => {
+          if (isMobileNavExpanded) {
+            setIsMobileNavExpanded(false);
+          }
+        }}
+      />
+      <GovBanner language={language} />
+      <USWDSHeader
+        basic={true}
+        className="desktop:position-sticky top-0 desktop:z-500 bg-white border-bottom-2px border-primary-vivid"
+      >
+        <div className="usa-nav-container display-flex flex-justify">
+          <div className="usa-navbar border-bottom-0">
+            <Title className="margin-y-2">
+              <div className="display-flex flex-align-center">
+                <Link href="/" className="position-relative">
+                  <Image
+                    alt={t("title")}
+                    src={GrantsLogo as string}
+                    className="height-4 display-block position-relative desktop:height-auto"
+                    unoptimized
+                    priority
+                    fill
+                  />
+                </Link>
+              </div>
+            </Title>
+          </div>
+          {localDev && testUsers && <TestUserSelect testUsers={testUsers} />}
+          <div className="usa-navbar order-last desktop:display-none">
+            <NavMenuButton
+              onClick={handleMobileNavToggle}
+              label={t("navLinks.menuToggle")}
+              className="usa-menu-btn"
+            />
+          </div>
+          <NavLinks
+            mobileExpanded={isMobileNavExpanded}
+            onToggleMobileNav={handleMobileNavToggle}
+            localDev={localDev}
+          />
+        </div>
+      </USWDSHeader>
+      <Snackbar close={hideSnackbar} isVisible={snackbarIsVisible}>
+        {t("tokenExpired")}
+      </Snackbar>
+    </>
+  );
+};
+
+export default Header;

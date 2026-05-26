@@ -3,9 +3,9 @@ import { ExternalRoutes } from "src/constants/routes";
 import { useMessages, useTranslations } from "next-intl";
 import Link from "next/link";
 
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { gitHubLinkForIssue } from "src/components/GithubLink";
 import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 export default function RoadmapWhatWereWorkingOn() {
   const t = useTranslations("Roadmap.sections.progress");

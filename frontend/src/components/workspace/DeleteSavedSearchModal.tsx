@@ -14,10 +14,10 @@ import {
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
-import { LoadingButton } from "src/components/LoadingButton";
-import SimplerAlert from "src/components/SimplerAlert";
-import { SimplerModal } from "src/components/SimplerModal";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { LoadingButton } from "src/components/core/LoadingButton";
+import SimplerAlert from "src/components/core/SimplerAlert";
+import { SimplerModal } from "src/components/core/SimplerModal";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 function SuccessContent({
   modalRef,

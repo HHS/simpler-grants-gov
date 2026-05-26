@@ -7,7 +7,7 @@ import { splitMarkup } from "src/utils/generalUtils";
 
 import { useTranslations } from "next-intl";
 
-import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import ContentDisplayToggle from "src/components/core/ContentDisplayToggle";
 import OpportunityDownload from "src/components/opportunity/OpportunityDownload";
 import { OpportunityEligibility } from "./OpportunityEligibility";
 

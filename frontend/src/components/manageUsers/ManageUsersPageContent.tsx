@@ -5,7 +5,7 @@ import { AuthorizedData, FetchedResource } from "src/types/authTypes";
 import { getTranslations } from "next-intl/server";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 import { PageHeader } from "src/components/manageUsers/PageHeader";
 import { ActiveUsersSection } from "./ActiveUsersSection";
 import { InvitedUsersSection } from "./InvitedUsersSection";

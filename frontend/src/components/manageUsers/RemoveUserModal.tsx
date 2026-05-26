@@ -11,8 +11,8 @@ import {
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
-import { LoadingButton } from "src/components/LoadingButton";
-import { SimplerModal } from "src/components/SimplerModal";
+import { LoadingButton } from "src/components/core/LoadingButton";
+import { SimplerModal } from "src/components/core/SimplerModal";
 
 export interface RemoveUserModalProps {
   isSubmitting: boolean;

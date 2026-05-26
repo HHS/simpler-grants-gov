@@ -5,7 +5,7 @@ import { Attachment } from "src/types/attachmentTypes";
 import { RefObject } from "react";
 import { ModalRef, ModalToggleButton } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 interface AttachmentDeleteButtonProps {
   buttonText: string;

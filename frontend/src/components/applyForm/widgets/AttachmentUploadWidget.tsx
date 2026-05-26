@@ -17,7 +17,7 @@ import {
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
 import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { DynamicFieldLabel } from "./DynamicFieldLabel";
+import { DynamicFieldLabel } from "../../core/DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 const AttachmentUploadWidget = (props: UswdsWidgetProps) => {

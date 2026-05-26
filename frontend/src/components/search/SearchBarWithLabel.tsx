@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Label } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import SearchBar from "./SearchBar";
 
 interface SearchBarProps {

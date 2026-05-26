@@ -10,9 +10,9 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ModalToggleButton } from "@trussworks/react-uswds";
 
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import SaveButton from "src/components/SaveButton";
 import SaveIcon from "src/components/SaveIcon";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 const SAVED_OPPS_PAGE_LINK = "/workspace/saved-opportunities";
 
