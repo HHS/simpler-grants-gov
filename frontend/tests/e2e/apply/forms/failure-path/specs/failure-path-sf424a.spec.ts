@@ -30,7 +30,7 @@ import {
   verifyFormStatusOnApplication,
 } from "tests/e2e/utils/forms/verify-form-status-utils";
 
-const { APPLY, CORE_REGRESSION } = VALID_TAGS;
+const { APPLY, APPLY_FORMS, CORE_REGRESSION } = VALID_TAGS;
 
 const { testOrgLabel, targetEnv } = playwrightEnv;
 const OPPORTUNITY_ID =
@@ -51,7 +51,7 @@ test.beforeEach(({ page: _ }, testInfo) => {
 
 test(
   "SF-424A error validation - required fields and inline errors",
-  { tag: [APPLY, CORE_REGRESSION] },
+  { tag: [APPLY, APPLY_FORMS, CORE_REGRESSION] },
   async (
     { page, context }: { page: Page; context: BrowserContext },
     testInfo: TestInfo,

@@ -28,6 +28,10 @@ jest.mock("next/navigation", () => ({
     mockRedirect(...args);
     throw new Error("NEXT_REDIRECT");
   },
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+    refresh: jest.fn(),
+  })),
 }));
 
 const withFeatureFlagMock = jest.fn();
@@ -77,6 +81,15 @@ jest.mock("react", () => ({
 
 jest.mock("next-intl", () => ({
   useTranslations: () => identity,
+}));
+
+jest.mock("src/hooks/useClientFetch", () => ({
+  useClientFetch: jest.fn(() => ({
+    clientFetch: jest.fn().mockResolvedValue({
+      data: [],
+      pagination_info: { total_pages: 1 },
+    }),
+  })),
 }));
 
 const awardRecommendationParams = Promise.resolve({
@@ -332,6 +345,20 @@ describe("AwardRecommendationEditPage", () => {
       const textarea = screen.getByTestId("other-key-information-textarea");
       expect(textarea).toHaveAttribute("id", "other_key_information");
       expect(textarea).toHaveAttribute("name", "other_key_information");
+    });
+
+    it("renders attachments section with navigation link", async () => {
+      const component = await AwardRecommendationEditPage({
+        params: awardRecommendationParams,
+      });
+      render(component);
+
+      const navLinks = screen.getAllByRole("link");
+      const attachmentsLink = navLinks.find(
+        (link) => link.getAttribute("href") === "#attachments",
+      );
+
+      expect(attachmentsLink).toBeInTheDocument();
     });
   });
 

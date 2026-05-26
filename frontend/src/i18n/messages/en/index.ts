@@ -400,6 +400,7 @@ export const messages = {
         forbidden: "You do not have permission to update this opportunity.",
         notFound: "The opportunity summary could not be found.",
         draftOnly: "Only draft opportunity summaries can be updated.",
+        errorHeading: "Publish error",
         validationHeading: "Please fix the highlighted fields.",
         validationWarningHeading: "Progress saved",
         validationWarningBody:
@@ -2120,6 +2121,28 @@ export const messages = {
       description:
         "Add any relevant information related to this reviewer and decision-maker for this opportunity",
     },
+    attachments: {
+      heading: "Attachments",
+      attachedDocument: "Attached document",
+      uploadedBy: "Uploaded by",
+      uploadDate: "Upload date",
+      standardTermsHeading: "Standard and program terms & conditions",
+      enterTermsConditions: "Enter terms & conditions",
+      editTermsConditions: "Edit terms & conditions",
+      risksHeading: "Specific risks & recommended conditions",
+      enterRisks: "Enter risks & recommended conditions",
+      editRisks: "Edit risks & recommended conditions",
+      riskNumber: "Risk #",
+      appNumber: "App #",
+      condition: "Condition",
+      action: "Action",
+      delete: "Delete",
+      applications: "applications",
+      errorMessage: "Unable to load or update risks. Please try again.",
+      otherDocumentsHeading: "Other supporting documents",
+      enterSupportingDocuments: "Enter supporting documents",
+      editSupportingDocuments: "Edit supporting documents",
+    },
     recommendationDetails: {
       heading: "Recommendation details",
       recommendationLabel: "Recommendation",
@@ -2178,8 +2201,6 @@ export const messages = {
     pageTitle: "Create recommendation",
     metaDescription: "Create a new award recommendation",
     beforeYouGetStarted: "Before you get started",
-    introDescription:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
     steps: {
       identifyOpportunity: {
         title: "Identify the opportunity",

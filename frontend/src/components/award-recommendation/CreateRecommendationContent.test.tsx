@@ -28,11 +28,6 @@ describe("CreateRecommendationContent", () => {
     expect(screen.getByText("beforeYouGetStarted")).toBeInTheDocument();
   });
 
-  it("renders the intro description", () => {
-    render(<CreateRecommendationContent />);
-    expect(screen.getByText("introDescription")).toBeInTheDocument();
-  });
-
   it("renders all three steps", () => {
     render(<CreateRecommendationContent />);
 

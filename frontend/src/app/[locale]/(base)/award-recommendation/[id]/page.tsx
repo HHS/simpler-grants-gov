@@ -13,6 +13,7 @@ import { Suspense } from "react";
 import { Alert, Grid, GridContainer } from "@trussworks/react-uswds";
 
 import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
+import AwardRecommendationAttachments from "src/components/award-recommendation/AwardRecommendationAttachments";
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
@@ -169,6 +170,7 @@ async function AwardRecommendationPageContent({
   const navigationItems = [
     { text: t("opportunity"), href: "opportunity" },
     { text: t("recommendations.heading"), href: "recommendations" },
+    { text: t("attachments.heading"), href: "attachments" },
   ];
 
   return (
@@ -230,6 +232,13 @@ async function AwardRecommendationPageContent({
                     }
                     viewMode={true}
                   />
+                </div>
+                <div id="attachments" className="seg-scroll-margin-top--header">
+                  {awardRecommendationId && (
+                    <AwardRecommendationAttachments
+                      awardRecommendationId={awardRecommendationId}
+                    />
+                  )}
                 </div>
               </div>
             </Grid>

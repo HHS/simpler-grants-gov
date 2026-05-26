@@ -14,6 +14,7 @@ from src.form_schema.forms import (
     ProjectAbstract_v1_2,
     ProjectAbstractSummary_v2_0,
     ProjectNarrativeAttachment_v1_2,
+    ProjectPerformanceSiteLocation_v4_0,
     SF424_v4_0,
     SF424a_v1_0,
     SF424b_v1_1,
@@ -139,3 +140,8 @@ def epa_key_contact_v2_0():
 @pytest.fixture(scope="session")
 def attachment_form_v1_2():
     return setup_resolved_form(AttachmentForm_v1_2)
+
+
+@pytest.fixture(scope="session")
+def project_performance_site_location_v4_0():
+    return setup_resolved_form(ProjectPerformanceSiteLocation_v4_0)

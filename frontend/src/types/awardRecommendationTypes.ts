@@ -53,6 +53,24 @@ export type AwardRecommendationOpportunity = {
 /**
  * AwardRecommendationDetails represents the data structure from the API
  */
+export type ApplicationSubmissionInfo = {
+  award_recommendation_application_submission_id: string;
+  application_submission_id: string;
+  application_submission_number: string;
+};
+
+export type AwardRecommendationRisk = {
+  award_recommendation_risk_id: string;
+  award_recommendation_risk_number?: string;
+  risk_number: number;
+  condition: string;
+  condition_number?: string;
+  award_recommendation_application_submission_ids: string[];
+  applications: ApplicationSubmissionInfo[];
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type AwardRecommendationDetails = {
   award_recommendation_id: string;
   award_recommendation_number: string;
