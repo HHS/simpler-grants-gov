@@ -46,22 +46,24 @@ def test_task_job_lock_does_not_modify_a_job_lock_if_enable_job_lock_is_false(
 def test_task_job_lock_creates_job_lock_if_one_does_not_exist(
     db_session, enable_factory_create
 ) -> None:
-    with mock.patch("src.task.task_job_lock.TaskJobLock.get_job_lock", side_effect=[None, None]):
-        context_manager = TaskJobLock(
-            db_session, job_type=JobType.MIGRATE_DOWN, lock_duration_minutes=60
-        )
-        job_lock = context_manager.get_or_create_job_lock()
-        context_manager.set_job_lock_to_locked(job_lock)
-        db_session.add(job_lock)
-        db_session.flush()
+    pre_existing = db_session.execute(
+        select(JobLock).where(JobLock.job_type == JobType.MIGRATE_DOWN)
+    ).scalar_one_or_none()
+    assert pre_existing is None
+    db_session.commit()
+
+    context_manager = TaskJobLock(
+        db_session, job_type=JobType.MIGRATE_DOWN, lock_duration_minutes=60
+    )
+    with context_manager:
+        pass
+
     job_lock = db_session.execute(
-        select(JobLock).where(
-            JobLock.job_type == JobType.MIGRATE_DOWN,
-            JobLock.locked_by == context_manager.internal_lock_id,
-        )
+        select(JobLock).where(JobLock.job_type == JobType.MIGRATE_DOWN)
     ).scalar_one_or_none()
     assert job_lock is not None
-    assert job_lock.job_type == JobType.MIGRATE_DOWN
+    assert job_lock.locked_by == context_manager.internal_lock_id
+    assert job_lock.is_locked is False
 
 
 def test_task_job_lock_updates_a_job_lock_if_enable_job_lock_is_true(
