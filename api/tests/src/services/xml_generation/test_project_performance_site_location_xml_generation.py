@@ -13,6 +13,8 @@ import src.adapters.db as db
 from src.db.models.competition_models import Form
 from src.form_schema.forms.project_performance_site_location import (
     FORM_XML_TRANSFORM_RULES as PERFORMANCE_SITE_TRANSFORM_RULES,
+)
+from src.form_schema.forms.project_performance_site_location import (
     ProjectPerformanceSiteLocation_v4_0,
 )
 from src.services.xml_generation.models import XMLGenerationRequest
@@ -173,9 +175,7 @@ class TestPerformanceSiteXSDValidation:
         xsd_path = xsd_validator.xsd_cache_dir / "PerformanceSite_4_0-V4.0.xsd"
         return xsd_validator.validate_xml(form_xml, xsd_path)
 
-    def _make_application(
-        self, enable_factory_create, db_session: db.Session, response: dict
-    ):
+    def _make_application(self, enable_factory_create, db_session: db.Session, response: dict):
         agency = AgencyFactory.create()
         opportunity = OpportunityFactory.create(agency_code=agency.agency_code)
         assistance_listing = OpportunityAssistanceListingFactory.create(opportunity=opportunity)
