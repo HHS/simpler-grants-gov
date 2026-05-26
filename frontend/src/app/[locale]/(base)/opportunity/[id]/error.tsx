@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
-import ServerErrorAlert from "src/components/ServerErrorAlert";
+import ServerErrorAlert from "src/components/core/GeneralErrorAlert";
 
 export default function OpportunityError({
   error,

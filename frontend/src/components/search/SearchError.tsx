@@ -6,7 +6,7 @@ import { ErrorProps } from "src/types/uiTypes";
 import { useTranslations } from "next-intl";
 import { Alert } from "@trussworks/react-uswds";
 
-import ServerErrorAlert from "src/components/ServerErrorAlert";
+import ServerErrorAlert from "src/components/core/GeneralErrorAlert";
 
 function isValidJSON(str: string) {
   try {
