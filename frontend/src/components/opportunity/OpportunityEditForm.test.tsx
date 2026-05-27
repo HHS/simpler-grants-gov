@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 
 import OpportunityEditForm from "./OpportunityEditForm";
@@ -284,7 +285,7 @@ describe("OpportunityEditForm — alert banners", () => {
     renderOpportunityEditForm();
 
     expect(
-      screen.getByText("content.alerts.validationWarningHeading"),
+      screen.getByText("content.alerts.validationErrorHeading"),
     ).toBeInTheDocument();
     // Each error appears both in the summary alert and as an inline field error
     expect(screen.getAllByText("Funding type is required")).toHaveLength(2);
@@ -970,5 +971,115 @@ describe("OpportunityEditForm — action buttons", () => {
     fireEvent.click(screen.getByRole("button", { name: "Publish" }));
 
     expect(mockFormAction).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ─── Field validations on exiting the field ──────────────────────────────────
+describe("OpportunityEditForm — field validations on exiting the field", () => {
+  beforeEach(() => {
+    mockUseActionState.mockReturnValue([
+      { validationErrors: {} },
+      jest.fn(),
+      false,
+    ]);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  const overMaxLimit = "1000000000000001";
+
+  it("awardMinimum should show an error if the value is greater than the max allowed", async () => {
+    const user = userEvent.setup();
+    renderOpportunityEditForm();
+
+    const input = screen.getByRole("textbox", {
+      name: /labels\.awardMinimum/i,
+    });
+    await user.type(input, overMaxLimit);
+    await user.tab();
+
+    expect(
+      screen.getByText("validationErrors.awardMinCurrencyInput"),
+    ).toBeInTheDocument();
+  });
+
+  it("awardMaximum should show an error if the value is greater than the max allowed", async () => {
+    const user = userEvent.setup();
+    renderOpportunityEditForm();
+
+    const input = screen.getByRole("textbox", {
+      name: /labels\.awardMaximum/i,
+    });
+    await user.type(input, overMaxLimit);
+    await user.tab();
+
+    expect(
+      screen.getByText("validationErrors.awardMaxCurrencyInput"),
+    ).toBeInTheDocument();
+  });
+
+  it("estimatedTotalProgramFunding should show an error if the value is greater than the max allowed", async () => {
+    const user = userEvent.setup();
+    renderOpportunityEditForm();
+
+    const input = screen.getByRole("textbox", {
+      name: /labels\.estimatedTotalProgramFunding/i,
+    });
+    await user.type(input, overMaxLimit);
+    await user.tab();
+
+    expect(
+      screen.getByText("validationErrors.totalFundingCurrencyInput"),
+    ).toBeInTheDocument();
+  });
+
+  it("awardMinimum should show an error if the value is less than 0", async () => {
+    const user = userEvent.setup();
+    renderOpportunityEditForm();
+
+    const input = screen.getByRole("textbox", {
+      name: /labels\.awardMinimum/i,
+    });
+    await user.clear(input);
+    await user.type(input, "-50000");
+    await user.tab();
+
+    expect(
+      screen.getByText("validationErrors.awardMinCurrencyInput"),
+    ).toBeInTheDocument();
+  });
+
+  it("awardMaximum should show an error if the value is less than 0", async () => {
+    const user = userEvent.setup();
+    renderOpportunityEditForm();
+
+    const input = screen.getByRole("textbox", {
+      name: /labels\.awardMaximum/i,
+    });
+    await user.clear(input);
+    await user.type(input, "-50000");
+    await user.tab();
+
+    expect(
+      screen.getByText("validationErrors.awardMaxCurrencyInput"),
+    ).toBeInTheDocument();
+  });
+
+  it("estimatedTotalProgramFunding should show an error if the value is less than 0", async () => {
+    const user = userEvent.setup();
+    renderOpportunityEditForm();
+
+    const input = screen.getByRole("textbox", {
+      name: /labels\.estimatedTotalProgramFunding/i,
+    });
+    await user.clear(input);
+    await user.type(input, "-1000");
+    await user.tab();
+
+    expect(
+      screen.getByText("validationErrors.totalFundingCurrencyInput"),
+    ).toBeInTheDocument();
   });
 });

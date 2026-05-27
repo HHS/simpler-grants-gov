@@ -88,3 +88,13 @@ output "nr_host_log_forwarder_name" {
   description = "Name of the New Relic host log forwarder Lambda"
   value       = aws_lambda_function.nr_host_log_forwarder.function_name
 }
+
+output "s3_bucket_ids" {
+  description = "Map of s3_buckets keys to their generated bucket IDs."
+  value       = { for k, v in aws_s3_bucket.s3_buckets : k => v.id }
+}
+
+output "s3_bucket_arns" {
+  description = "Map of s3_buckets keys to their generated bucket ARNs."
+  value       = { for k, v in aws_s3_bucket.s3_buckets : k => v.arn }
+}
