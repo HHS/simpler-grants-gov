@@ -19,8 +19,7 @@ SHELL = /bin/bash -o pipefail
 APP_DIR := api
 ifdef CI
  DOCKER_EXEC_ARGS := -T -e CI -e PYTEST_ADDOPTS="--color=yes"
- MYPY_FLAGS := 
- MYPY_POSTPROC := | perl -pe "s/^(.+):(\d+):(\d+): error: (.*)/::warning file=$(APP_DIR)\/\1,line=\2,col=\3::\4/"
+ MYPY_POSTPROC := 
 endif
 
 # By default, all python/uv commands will run inside of the docker container
@@ -286,7 +285,7 @@ lint-ruff-fix:
 	$(PY_RUN_CMD) ruff check . --fix
 
 lint-mypy:
-	$(PY_RUN_CMD) mypy --show-error-codes --verbose $(MYPY_FLAGS) src bin $(MYPY_POSTPROC)
+	$(PY_RUN_CMD) mypy --show-error-codes --verbose src bin $(MYPY_POSTPROC)
 
 lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 	$(PY_RUN_CMD) bandit -c pyproject.toml -r . --number 3 --skip B101 -ll -x ./.venv
