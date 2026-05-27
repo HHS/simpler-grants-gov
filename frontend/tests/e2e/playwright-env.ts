@@ -23,7 +23,7 @@ const API_URLS: Record<string, string> = {
     process.env.STAGING_API_URL || "https://api.staging.simpler.grants.gov",
 };
 
-const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "local";
+const targetEnv = process.env.PLAYWRIGHT_TARGET_ENV || "staging";
 
 if (SUPPORTED_ENVS.indexOf(targetEnv) === -1) {
   throw new Error(
@@ -73,9 +73,9 @@ const playwrightEnv = {
   fakeServerToken: process.env.E2E_USER_AUTH_TOKEN,
   clientSessionSecret:
     process.env.SESSION_SECRET_OVERRIDE || process.env.SESSION_SECRET,
-  testUserEmail: process.env.STAGING_TEST_USER_EMAIL || "",
-  testUserPassword: process.env.STAGING_TEST_USER_PASSWORD || "",
-  testUserAuthKey: process.env.STAGING_TEST_USER_MFA_KEY || "",
+  testUserEmail: process.env.STAGING_TEST_USER_EMAIL || "simpler-grants-e2e-tester@navapbc.com",
+  testUserPassword: process.env.STAGING_TEST_USER_PASSWORD || "P@ssw0rd010100!",
+  testUserAuthKey: process.env.STAGING_TEST_USER_MFA_KEY || "2CW25DQCJD4WLO7BKEVC2JS56ZAENIJJ",
   stagingTestUserApiKey: process.env.STAGING_TEST_USER_API_KEY || "",
 };
 
