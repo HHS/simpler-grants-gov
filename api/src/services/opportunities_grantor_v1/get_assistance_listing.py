@@ -1,4 +1,3 @@
-
 from sqlalchemy import select
 
 import src.adapters.db as db
