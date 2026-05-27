@@ -3,8 +3,12 @@ import uuid
 import pytest
 from sqlalchemy import select
 
-from src.constants.lookup_constants import AwardRecommendationStatus, Privilege
-from src.db.models.award_recommendation_models import AwardRecommendation
+from src.constants.lookup_constants import (
+    AwardRecommendationAuditEvent,
+    AwardRecommendationStatus,
+    Privilege,
+)
+from src.db.models.award_recommendation_models import AwardRecommendation, AwardRecommendationAudit
 from src.db.models.opportunity_models import Opportunity
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt
 from tests.src.db.models.factories import (
@@ -74,6 +78,40 @@ class TestDeleteAwardRecommendation200:
             )
         ).scalar_one()
         assert deleted_award_recommendation.is_deleted is True
+
+    def test_delete_award_recommendation_creates_audit_event_200(
+        self, client, db_session, agency, award_recommendation
+    ):
+        user, _, token = create_user_in_agency_with_jwt(
+            db_session, agency=agency, privileges=[Privilege.UPDATE_AWARD_RECOMMENDATION]
+        )
+
+        resp = client.delete(
+            f"{API_URL}/{award_recommendation.award_recommendation_id}",
+            headers={"X-SGG-Token": token},
+        )
+
+        assert resp.status_code == 200
+
+        db_session.expire_all()
+
+        audit_event = db_session.execute(
+            select(AwardRecommendationAudit)
+            .where(
+                AwardRecommendationAudit.award_recommendation_id
+                == award_recommendation.award_recommendation_id
+            )
+            .where(
+                AwardRecommendationAudit.award_recommendation_audit_event
+                == AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_DELETED
+            )
+        ).scalar_one()
+
+        assert audit_event.user_id == user.user_id
+        assert (
+            audit_event.award_recommendation_audit_event
+            == AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_DELETED
+        )
 
 
 ####################################
