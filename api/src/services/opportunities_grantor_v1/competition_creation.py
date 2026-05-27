@@ -14,16 +14,6 @@ from src.services.opportunities_grantor_v1.get_opportunity import get_opportunit
 logger = logging.getLogger(__name__)
 
 
-class CompetitionInstructionCreate(BaseModel):
-    file_name: str
-    download_path: str
-
-
-class OpportunityAssistanceListingData(BaseModel):
-    assistance_listing_number: str
-    program_title: str
-
-
 class CompetitionCreateItem(BaseModel):
     opportunity_id: uuid.UUID
     competition_title: str
