@@ -286,7 +286,7 @@ lint-ruff-fix:
 	$(PY_RUN_CMD) ruff check . --fix
 
 lint-mypy:
-	$(PY_RUN_CMD) mypy --show-error-codes $(MYPY_FLAGS) src bin $(MYPY_POSTPROC)
+	$(PY_RUN_CMD) mypy --show-error-codes --verbose $(MYPY_FLAGS) src bin $(MYPY_POSTPROC)
 
 lint-security: # https://bandit.readthedocs.io/en/latest/index.html
 	$(PY_RUN_CMD) bandit -c pyproject.toml -r . --number 3 --skip B101 -ll -x ./.venv
