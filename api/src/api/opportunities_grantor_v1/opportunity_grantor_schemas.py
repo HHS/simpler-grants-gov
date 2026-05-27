@@ -655,7 +655,10 @@ class CompetitionCreateRequestSchema(Schema):
         validate=validators.Length(min=1),
         metadata={
             "description": "List of applicant types eligible for this competition",
-            "example": ["individual", "organization"],
+            "example": [
+                CompetitionOpenToApplicant.INDIVIDUAL,
+                CompetitionOpenToApplicant.ORGANIZATION,
+            ],
         },
     )
 
