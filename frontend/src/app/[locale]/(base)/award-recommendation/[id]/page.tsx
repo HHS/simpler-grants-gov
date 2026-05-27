@@ -18,7 +18,7 @@ import AwardRecommendationHero, {
 } from "src/components/award-recommendation/AwardRecommendationHero";
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
 import { RecommendationSummarySection } from "src/components/award-recommendation/RecommendationSummarySection";
-import ApplyFormNav from "src/components/core/LeftHandFormNav";
+import ApplyFormNav from "src/components/core/forms/LeftHandFormNav";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 import { submitAwardRecommendationForReview } from "./actions";
 

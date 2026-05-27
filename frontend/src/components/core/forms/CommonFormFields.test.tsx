@@ -6,7 +6,7 @@ import {
   CommonSelectInput,
   CommonTextArea,
   CommonTextInput,
-} from "./CommonFormFields";
+} from "../../grantor/CommonFormFields";
 
 const dynamicFieldLabelProps = {
   labelId: "label-for-something",

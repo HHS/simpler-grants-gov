@@ -16,9 +16,9 @@ import {
   type ComboBoxRef,
 } from "@trussworks/react-uswds";
 
-import { FieldErrors } from "src/components/applyForm/FieldErrors";
+import { FieldErrors } from "src/components/core/forms/FieldErrors";
 import { Pill } from "src/components/core/Pill";
-import { DynamicFieldLabel } from "../../core/DynamicFieldLabel";
+import { DynamicFieldLabel } from "../../core/forms/DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 function toStringArray(selectedValue: unknown): string[] {

@@ -10,8 +10,8 @@ import {
   TextInput,
 } from "@trussworks/react-uswds";
 
-import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { DynamicFieldLabel } from "src/components/core/DynamicFieldLabel";
+import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
+import { FieldErrors } from "src/components/core/forms/FieldErrors";
 
 // ----------------------------------------------------------
 // Common TextInput with error block

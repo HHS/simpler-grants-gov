@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import { DynamicFieldLabel } from "src/components/core/DynamicFieldLabel";
+import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 
 describe("DynamicFieldLabel", () => {
   it("renders the label with title only", () => {

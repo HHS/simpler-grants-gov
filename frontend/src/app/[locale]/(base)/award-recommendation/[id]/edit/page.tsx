@@ -28,7 +28,7 @@ import AwardRecommendationHero, {
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
 import { RecommendationSummarySection } from "src/components/award-recommendation/RecommendationSummarySection";
 import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
-import ApplyFormNav from "src/components/core/LeftHandFormNav";
+import ApplyFormNav from "src/components/core/forms/LeftHandFormNav";
 
 export async function generateMetadata({
   params,

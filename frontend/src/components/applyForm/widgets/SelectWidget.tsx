@@ -21,8 +21,8 @@ import {
   Select,
 } from "@trussworks/react-uswds";
 
-import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { DynamicFieldLabel } from "../../core/DynamicFieldLabel";
+import { FieldErrors } from "src/components/core/forms/FieldErrors";
+import { DynamicFieldLabel } from "../../core/forms/DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 function getValue(event: SyntheticEvent<HTMLSelectElement>, multiple: boolean) {

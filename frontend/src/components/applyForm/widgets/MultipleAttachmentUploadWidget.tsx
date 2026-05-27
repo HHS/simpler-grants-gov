@@ -19,8 +19,8 @@ import {
 } from "@trussworks/react-uswds";
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
-import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { DynamicFieldLabel } from "../../core/DynamicFieldLabel";
+import { FieldErrors } from "src/components/core/forms/FieldErrors";
+import { DynamicFieldLabel } from "../../core/forms/DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 import { MultipleAttachmentUploadList } from "./MultiAttachmentUploadList";
 

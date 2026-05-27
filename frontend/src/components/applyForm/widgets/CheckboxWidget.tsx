@@ -6,8 +6,8 @@ import { UswdsWidgetProps } from "src/types/applyForm/types";
 import React, { ChangeEvent, FocusEvent, useCallback } from "react";
 import { Checkbox, FormGroup } from "@trussworks/react-uswds";
 
-import { FieldErrors } from "src/components/applyForm/FieldErrors";
-import { DynamicFieldLabel } from "../../core/DynamicFieldLabel";
+import { FieldErrors } from "src/components/core/forms/FieldErrors";
+import { DynamicFieldLabel } from "../../core/forms/DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 function CheckboxWidget<
