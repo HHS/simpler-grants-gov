@@ -1,9 +1,8 @@
 import type { Page, TestInfo } from "@playwright/test";
 import { buildFlexibleFormNameRegex, openForm } from "./form-navigation-utils";
 import { clickSaveButton } from "./save-form-utils";
-import { fieldHandlerDispatcher } from "@e2e-utils/index";
-import { FillFieldDefinition, FormFillFieldDefinitions } from "../../utils/types";
-import { fieldDependsOn } from "../../utils/types";
+import { fieldHandlerDispatcher } from "tests/e2e/utils/index";
+import { FillFieldDefinition, FormFillFieldDefinitions, fieldDependsOn } from "tests/e2e/utils/types";
 
 export async function fillField(
 	testInfo: TestInfo,
