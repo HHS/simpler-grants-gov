@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 export default function Login() {
   const router = useRouter();

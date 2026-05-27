@@ -1,7 +1,7 @@
 import { RefObject } from "react";
 import { ModalRef } from "@trussworks/react-uswds";
 
-import { SimplerModal } from "src/components/SimplerModal";
+import { SimplerModal } from "src/components/core/SimplerModal";
 import { EditAppFilingNameModalBody } from "./EditAppFilingNameModalBody";
 import { EditAppFilingNameModalForm } from "./EditAppFilingNameModalForm";
 

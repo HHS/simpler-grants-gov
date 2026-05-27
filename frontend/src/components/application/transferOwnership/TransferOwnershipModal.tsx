@@ -13,8 +13,8 @@ import {
   type ModalRef,
 } from "@trussworks/react-uswds";
 
-import { SimplerModal } from "src/components/SimplerModal";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { SimplerModal } from "src/components/core/SimplerModal";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import { TransferOwnershipOrganizationSelect } from "./TransferOwnershipOrganizationSelect";
 
 interface TransferOwnershipModalProps {

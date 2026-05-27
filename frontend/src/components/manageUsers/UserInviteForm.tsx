@@ -26,8 +26,8 @@ import {
 } from "@trussworks/react-uswds";
 
 import { ConditionalFormActionError } from "src/components/ConditionalFormActionError";
-import { RequiredFieldIndicator } from "src/components/RequiredFieldIndicator";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { RequiredFieldIndicator } from "src/components/core/RequiredFieldIndicator";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 const OrganizationInviteValidationError =
   ConditionalFormActionError<OrganizationInviteValidationErrors>;

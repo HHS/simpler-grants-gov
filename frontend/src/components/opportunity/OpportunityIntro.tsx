@@ -7,7 +7,7 @@ import { legacyOpportunityUrl } from "src/utils/opportunity/opportunityUtils";
 
 import { useTranslations } from "next-intl";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type Props = {
   opportunityData: OpportunityDetail;

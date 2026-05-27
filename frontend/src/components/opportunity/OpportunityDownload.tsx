@@ -5,7 +5,7 @@ import { OpportunityDocument } from "src/types/opportunity/opportunityResponseTy
 import { useTranslations } from "next-intl";
 import { Button, Link } from "@trussworks/react-uswds";
 
-import { USWDSIcon } from "src/components/USWDSIcon";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 type OpportunityDownloadProps = {
   attachments: OpportunityDocument[];

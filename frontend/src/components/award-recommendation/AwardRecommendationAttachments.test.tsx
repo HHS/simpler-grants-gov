@@ -5,7 +5,7 @@ import * as useClientFetchModule from "src/hooks/useClientFetch";
 import { AwardRecommendationAttachments } from "./AwardRecommendationAttachments";
 
 jest.mock("src/hooks/useClientFetch");
-jest.mock("src/components/Spinner", () => ({
+jest.mock("src/components/core/Spinner", () => ({
   __esModule: true,
   default: () => <div data-testid="spinner">Loading...</div>,
 }));
