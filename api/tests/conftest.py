@@ -133,6 +133,9 @@ def set_env_var_defaults(monkeypatch_session):
     # We will set this to false so we skip logs during unit tests and keep enabled during dev.
     monkeypatch_session.setenv("SOAP_ENABLE_VERBOSE_LOGGING", "0")
 
+    # Stops the local file-scan watcher from spawning a thread per app fixture.
+    monkeypatch_session.setenv("DISABLE_LOCAL_FILE_SCANNER", "TRUE")
+
 
 @pytest.fixture(scope="session", autouse=True)
 def init_new_relic_app():

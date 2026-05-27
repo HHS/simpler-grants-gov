@@ -44,6 +44,7 @@ from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.form_schema.forms import init_form_registry
 from src.legacy_soap_api import init_app as init_legacy_soap_api
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
+from src.services.files.local_file_scanner import setup_local_file_scanner
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
 from src.util.local import error_if_not_local
@@ -116,6 +117,8 @@ def create_app() -> APIFlask:
     register_well_known(app, endpoint_config.domain_verification_map)
 
     init_form_registry()
+
+    setup_local_file_scanner()
 
     return app
 
