@@ -25,9 +25,10 @@ import {
 } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/core/USWDSIcon";
-import { RouteChangeWatcher } from "../../RouteChangeWatcher";
-import { SignOutNavLink, TestApplicationLink } from "../../user/UserControl";
 import NavDropdown from "./NavDropdown";
+import { RouteChangeWatcher } from "./RouteChangeWatcher";
+import { SignOutNavLink } from "./SignOutNavLink";
+import { TestApplicationLink } from "./TestApplicationLink";
 import { TestUserSelect } from "./TestUserSelect";
 
 type PrimaryLink = {

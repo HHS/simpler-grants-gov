@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import InfoTooltip from "src/components/InfoTooltip";
+import InfoTooltip from "src/components/core/tooltip/InfoTooltip";
 
 jest.mock("src/components/TooltipWrapper", () => ({
   DynamicTooltipWrapper: (props: unknown) =>

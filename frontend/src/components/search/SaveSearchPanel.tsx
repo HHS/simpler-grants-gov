@@ -14,7 +14,7 @@ import { SaveSearchSelector } from "./SaveSearchSelector";
 import SearchQueryCopyButton from "./SearchQueryCopyButton";
 
 const DynamicTooltipWrapper = dynamic(
-  () => import("src/components/TooltipWrapper"),
+  () => import("src/components/core/tooltip/TooltipWrapper"),
   {
     ssr: false,
     loading: () => <USWDSIcon className="margin-left-1" name="info_outline" />,

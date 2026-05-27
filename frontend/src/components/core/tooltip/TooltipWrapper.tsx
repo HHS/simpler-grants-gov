@@ -19,7 +19,7 @@ export const TooltipWrapper = (props: TooltipProps) => {
 };
 
 export const DynamicTooltipWrapper = dynamic(
-  () => import("src/components/TooltipWrapper"),
+  () => import("src/components/core/tooltip/TooltipWrapper"),
   {
     ssr: false, // works around bug with Trussworks assigning different random ids on server and client renders
   },

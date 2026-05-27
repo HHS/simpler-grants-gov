@@ -2,7 +2,7 @@ import clsx from "clsx";
 
 import { forwardRef, ReactNode } from "react";
 
-import { USWDSIcon } from "./core/USWDSIcon";
+import { USWDSIcon } from "../USWDSIcon";
 import { DynamicTooltipWrapper } from "./TooltipWrapper";
 
 export interface InfoTooltipProps {
