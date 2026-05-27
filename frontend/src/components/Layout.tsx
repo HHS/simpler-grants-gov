@@ -8,12 +8,12 @@ import { TestUser } from "src/types/userTypes";
 
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { PivRequiredModal } from "src/components/application/editAppFilingName/PivRequiredModal";
-import RouteFocusManager from "src/components/RouteFocusManager";
-import { ActivityMonitor } from "./ActivityMonitor";
+import { PivRequiredModal } from "src/components/core/loginModal/PivRequiredModal";
+import RouteFocusManager from "src/components/core/RouteFocusManager";
+import { ActivityMonitor } from "./core/ActivityMonitor";
+import Footer from "./core/Footer";
+import GrantsIdentifier from "./core/GrantsIdentifier";
 import Header from "./core/header/Header";
-import Footer from "./Footer";
-import GrantsIdentifier from "./GrantsIdentifier";
 
 type Props = {
   children: React.ReactNode;

@@ -1,6 +1,6 @@
 import { identity } from "lodash";
 
-import ContentDisplayToggle from "src/components/ContentDisplayToggle";
+import ContentDisplayToggle from "src/components/core/ContentDisplayToggle";
 
 const meta = {
   title: "Components/ContentDisplayToggle",

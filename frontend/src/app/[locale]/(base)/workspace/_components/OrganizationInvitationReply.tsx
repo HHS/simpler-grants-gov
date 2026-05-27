@@ -7,8 +7,8 @@ import { useTranslations } from "next-intl";
 import { PropsWithChildren, useCallback, useState } from "react";
 import { Button, Grid } from "@trussworks/react-uswds";
 
-import SimplerAlert from "src/components/SimplerAlert";
-import { USWDSIcon } from "src/components/USWDSIcon";
+import SimplerAlert from "src/components/core/SimplerAlert";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 
 const ReplyWidgetWrapper = ({ children }: PropsWithChildren) => {
   return (

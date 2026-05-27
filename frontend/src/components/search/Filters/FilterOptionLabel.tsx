@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { FilterOption } from "src/types/search/searchFilterTypes";
 
-import InfoTooltip from "src/components/InfoTooltip";
+import InfoTooltip from "src/components/core/tooltip/InfoTooltip";
 
 export function FilterOptionLabel({
   option,

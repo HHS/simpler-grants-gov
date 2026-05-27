@@ -6,9 +6,9 @@ import {
 
 import { getTranslations } from "next-intl/server";
 
+import { AuthorizationGate } from "src/components/core/AuthorizationGate";
+import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { ManageUsersPageContent } from "src/components/manageUsers/ManageUsersPageContent";
-import { AuthorizationGate } from "src/components/user/AuthorizationGate";
-import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 
 interface ManageUsersPageProps {
   params: Promise<{ locale: string; id: string }>;

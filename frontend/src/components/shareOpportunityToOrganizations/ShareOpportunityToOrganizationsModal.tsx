@@ -14,11 +14,11 @@ import {
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
+import { SimplerModal } from "src/components/core/SimplerModal";
 import {
   deleteSavedOpportunityForOrganizationAction,
   saveOpportunityForOrganizationAction,
 } from "src/components/shareOpportunityToOrganizations/actions";
-import { SimplerModal } from "src/components/SimplerModal";
 
 const MODAL_ID = "share-opportunity-to-organizations";
 

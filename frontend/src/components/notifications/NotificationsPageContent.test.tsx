@@ -44,7 +44,7 @@ jest.mock("@trussworks/react-uswds", () => ({
   },
 }));
 
-jest.mock("src/components/Spinner", () => ({
+jest.mock("src/components/core/Spinner", () => ({
   __esModule: true,
   default: () => <span role="progressbar" aria-label="Loading!" />,
 }));

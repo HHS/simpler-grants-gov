@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Button, Grid, GridContainer } from "@trussworks/react-uswds";
 
-import Breadcrumbs from "src/components/Breadcrumbs";
+import Breadcrumbs from "src/components/core/Breadcrumbs";
 import AwardRecommendationStatusTag from "./AwardRecommendationStatusTag";
 
 // Action button - performs an action via form action (save, submit, etc.)
