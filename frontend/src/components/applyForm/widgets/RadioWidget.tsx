@@ -13,8 +13,8 @@ import { TextTypes, UswdsWidgetProps } from "src/types/applyForm/types";
 import React, { FocusEvent, useCallback, useMemo } from "react";
 import { FormGroup, Radio } from "@trussworks/react-uswds";
 
+import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 import { FieldErrors } from "src/components/core/forms/FieldErrors";
-import { DynamicFieldLabel } from "../../core/forms/DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 /**

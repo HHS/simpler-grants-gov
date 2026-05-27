@@ -23,7 +23,7 @@ import React, {
 } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
-import ApplyFormNav from "../core/forms/LeftHandFormNav";
+import ApplyFormNav from "src/components/core/forms/LeftHandFormNav";
 import { handleFormAction } from "./actions";
 import { ApplyFormMessage } from "./ApplyFormMessage";
 import { FormFields } from "./FormFields";

@@ -16,8 +16,8 @@ import {
 } from "@trussworks/react-uswds";
 
 import { DeleteAttachmentModal } from "src/components/application/attachments/DeleteAttachmentModal";
+import { DynamicFieldLabel } from "src/components/core/forms/DynamicFieldLabel";
 import { FieldErrors } from "src/components/core/forms/FieldErrors";
-import { DynamicFieldLabel } from "../../core/forms/DynamicFieldLabel";
 import { getLabelTypeFromOptions } from "./getLabelTypeFromOptions";
 
 const AttachmentUploadWidget = (props: UswdsWidgetProps) => {

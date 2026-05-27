@@ -2206,6 +2206,8 @@ export const messages = {
         description:
           "Explain how you plan to provide funding over time. For example, will the agency award all funding in a single award or in multiple budget periods across a longer period of performance.",
         noFundingStrategyProvided: "No funding strategy provided.",
+        showDescription: "Show full description",
+        hideSummaryDescription: "Hide full description",
       },
     },
   },

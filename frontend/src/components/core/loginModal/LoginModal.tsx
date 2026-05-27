@@ -8,9 +8,9 @@ import {
   ModalToggleButton,
 } from "@trussworks/react-uswds";
 
+import { LoginLink } from "src/components/core/LoginButton";
+import { SimplerModal } from "src/components/core/SimplerModal";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
-import { LoginLink } from "../LoginButton";
-import { SimplerModal } from "../SimplerModal";
 
 export const LoginModal = ({
   modalRef,
