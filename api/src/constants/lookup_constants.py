@@ -176,6 +176,8 @@ class FormType(StrEnum):
 
     ATTACHMENT_FORM = "AttachmentForm"
 
+    PROJECT_PERFORMANCE_SITE_LOCATION = "ProjectPerformanceSiteLocation"
+
 
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"

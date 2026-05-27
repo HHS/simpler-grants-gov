@@ -1037,6 +1037,35 @@ def test_get_submission_list_expanded_always_calls_legacy_and_simpler(
 
 @mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
 @mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
+def test_get_submission_list_always_calls_legacy_and_simpler(
+    mock_get_simpler_soap_response, mock_get_soap_response, client, enable_factory_create
+) -> None:
+    full_path = "/grantsws-agency/services/v2/AgencyWebServicesSoapPort"
+    mock_data = """
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:agen="http://apply.grants.gov/services/AgencyWebServices-V2.0" xmlns:gran="http://apply.grants.gov/system/GrantsCommonElements-V1.0">
+        <soapenv:Header/>
+        <soapenv:Body>
+        <agen:GetSubmissionListRequest>
+        </agen:GetSubmissionListRequest>
+        </soapenv:Body>
+        </soapenv:Envelope>
+    """
+    envelope = etree.fromstring(mock_data)
+    agency = AgencyFactory.create()
+    privileges = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
+    _, _, _, mtls_cert = setup_cert_user(agency, privileges)
+    response = client.post(
+        full_path,
+        data=etree.tostring(envelope),
+        headers={MTLS_CERT_HEADER_KEY: mtls_cert},
+    )
+    assert response.status_code == 200
+    mock_get_soap_response.assert_called_once()
+    mock_get_simpler_soap_response.assert_called_once()
+
+
+@mock.patch("src.legacy_soap_api.legacy_soap_api_proxy._get_soap_response")
+@mock.patch("src.legacy_soap_api.simpler_soap_api.get_simpler_soap_response")
 def test_calls_legacy_if_using_legacy_tracking_number(
     mock_get_simpler_soap_response,
     mock_get_soap_response,
