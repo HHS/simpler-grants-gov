@@ -2063,6 +2063,10 @@ export const messages = {
     breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
+    summary: {
+      showDescription: "Show full description",
+      hideSummaryDescription: "Hide full description",
+    },
     awardRecs: "Award Recs",
     errorMessage:
       "We have encountered an error loading your award recommendations, please try again later.",

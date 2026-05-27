@@ -5,8 +5,8 @@ import { UswdsIconNames } from "src/types/generalTypes";
 import { ReactNode, useRef } from "react";
 import { ModalRef } from "@trussworks/react-uswds";
 
-import { Drawer } from "../../drawer/Drawer";
-import { DrawerControl } from "../../drawer/DrawerControl";
+import { Drawer } from "./Drawer";
+import { DrawerControl } from "./DrawerControl";
 
 // largely state / ref management for a modal / drawer setup defined in child components and passed children
 export function DrawerUnit({
