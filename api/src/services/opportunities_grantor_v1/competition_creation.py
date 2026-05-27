@@ -29,8 +29,8 @@ class OpportunityAssistanceListingData(BaseModel):
 class CompetitionCreateItem(BaseModel):
     opportunity_id: uuid.UUID
     competition_title: str
-    opening_date: date
-    closing_date: date
+    opening_date: date | None
+    closing_date: date | None
     contact_info: str
     open_to_applicants: list[CompetitionOpenToApplicant]
 

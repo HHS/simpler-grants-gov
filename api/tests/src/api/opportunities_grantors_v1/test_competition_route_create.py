@@ -223,3 +223,24 @@ def test_competition_create_empty_open_to_applicants(
         "shorter than minimum length 1" in error.get("message", "").lower()
         for error in response_json.get("errors", [])
     )
+
+
+def test_competition_create_with_null_dates(client, grantor_auth_data, opportunity_for_competition):
+    """Test competition creation with null opening and closing dates (always open)"""
+    _, _, token, _ = grantor_auth_data
+    opportunity = opportunity_for_competition
+
+    competition_request = create_competition_request()
+    competition_request["opening_date"] = None
+    competition_request["closing_date"] = None
+
+    response = client.post(
+        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
+        json=competition_request,
+        headers={"X-SGG-Token": token},
+    )
+
+    assert response.status_code == 200
+    competition_data = response.get_json()["data"]
+    assert competition_data["opening_date"] is None
+    assert competition_data["closing_date"] is None

@@ -635,11 +635,13 @@ class CompetitionCreateRequestSchema(Schema):
         },
     )
     opening_date = fields.Date(
-        required=True,
+        required=False,
+        allow_none=True,
         metadata={"description": "The opening date of the competition", "example": "2026-05-11"},
     )
     closing_date = fields.Date(
-        required=True,
+        required=False,
+        allow_none=True,
         metadata={"description": "The closing date of the competition", "example": "2026-05-11"},
     )
     contact_info = fields.String(
