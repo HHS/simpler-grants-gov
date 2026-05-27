@@ -202,5 +202,9 @@ resource "aws_cloudwatch_log_subscription_filter" "api_gateway_execution_to_newr
   filter_pattern  = ""
   destination_arn = aws_lambda_function.nr_host_log_forwarder.arn
 
-  depends_on = [aws_lambda_permission.allow_cloudwatch_api_gateway_execution]
+  depends_on = [
+    aws_lambda_permission.allow_cloudwatch_api_gateway_execution,
+    aws_api_gateway_stage.api_v1_stage,
+    aws_api_gateway_method_settings.api_v1_stage_settings,
+  ]
 }
