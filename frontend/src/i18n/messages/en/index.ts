@@ -384,10 +384,6 @@ export const messages = {
         "Enter the text that will be shown as the email link.",
       attachmentsIntro:
         "Upload the official Notice of Funding Opportunity (NOFO) and any supporting templates or guidelines that applicants need to complete their submission.",
-      reviewButton: {
-        idle: "Review required fields",
-        pending: "Reviewing...",
-      },
       alerts: {
         success: "Saved successfully",
         successBody: "Your changes have been saved.",
@@ -400,8 +396,6 @@ export const messages = {
         forbidden: "You do not have permission to update this opportunity.",
         notFound: "The opportunity summary could not be found.",
         draftOnly: "Only draft opportunity summaries can be updated.",
-        errorHeading: "Publish error",
-        validationHeading: "Please fix the highlighted fields.",
         validationErrorHeading: "Error(s) Found",
         validationErrorBody: "Please correct the following errors:",
       },
