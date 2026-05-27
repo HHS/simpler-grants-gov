@@ -5,23 +5,15 @@ import pytest
 
 from src.constants.lookup_constants import CompetitionOpenToApplicant, Privilege
 from tests.lib.agency_test_utils import create_user_in_agency_with_jwt_and_api_key
-from tests.src.db.models.factories import (
-    AssistanceListingFactory,
-    OpportunityAssistanceListingFactory,
-    OpportunityFactory,
-)
+from tests.src.db.models.factories import OpportunityFactory
 
 
 def create_competition_request(
-    assistance_listing_number,
     competition_title="Proposal for Advanced Research",
     opening_date=None,
     closing_date=None,
     contact_info="Bob Smith\nFakeMail@fake.com",
-    is_simpler_grants_enabled=True,
     open_to_applicants=None,
-    competition_instructions=None,
-    program_title="Space Technology",
 ):
     """Create a valid competition creation request"""
     if opening_date is None:
@@ -36,26 +28,12 @@ def create_competition_request(
             CompetitionOpenToApplicant.ORGANIZATION,
         ]
 
-    if competition_instructions is None:
-        competition_instructions = [
-            {
-                "file_name": "competition_instructions.pdf",
-                "download_path": "s3://simpler-grants-gov-dev/competition-instructions/file.pdf",
-            }
-        ]
-
     return {
         "competition_title": competition_title,
         "opening_date": opening_date,
         "closing_date": closing_date,
         "contact_info": contact_info,
-        "is_simpler_grants_enabled": is_simpler_grants_enabled,
         "open_to_applicants": open_to_applicants,
-        "competition_instructions": competition_instructions,
-        "opportunity_assistance_listing": {
-            "assistance_listing_number": assistance_listing_number,
-            "program_title": program_title,
-        },
     }
 
 
@@ -70,39 +48,26 @@ def grantor_auth_data(db_session, enable_factory_create):
 
 
 @pytest.fixture
-def opportunity_with_assistance_listing(grantor_auth_data, enable_factory_create):
-    """Create an opportunity with an associated assistance listing"""
+def opportunity_for_competition(grantor_auth_data, enable_factory_create):
+    """Create an opportunity in the user's agency"""
     _, agency, _, _ = grantor_auth_data
-
-    # Create assistance listing
-    assistance_listing = AssistanceListingFactory.create()
 
     # Create opportunity in the same agency as the user
     opportunity = OpportunityFactory.create(
         agency_id=agency.agency_id, agency_code=agency.agency_code
     )
 
-    # Link opportunity to assistance listing
-    opp_assistance_listing = OpportunityAssistanceListingFactory.create(
-        opportunity=opportunity,
-        assistance_listing_id=assistance_listing.assistance_listing_id,
-        assistance_listing_number="43.012",
-        program_title=assistance_listing.program_title,
-    )
-
-    return opportunity, opp_assistance_listing
+    return opportunity
 
 
 def test_competition_create_successful_creation(
-    client, grantor_auth_data, opportunity_with_assistance_listing
+    client, grantor_auth_data, opportunity_for_competition
 ):
     """Test successful competition creation"""
     _, _, token, _ = grantor_auth_data
-    opportunity, opp_assistance_listing = opportunity_with_assistance_listing
+    opportunity = opportunity_for_competition
 
-    competition_request = create_competition_request(
-        assistance_listing_number=opp_assistance_listing.assistance_listing_number,
-    )
+    competition_request = create_competition_request()
 
     response = client.post(
         f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
@@ -121,30 +86,16 @@ def test_competition_create_successful_creation(
     assert competition_data["opening_date"] == competition_request["opening_date"]
     assert competition_data["closing_date"] == competition_request["closing_date"]
     assert competition_data["contact_info"] == competition_request["contact_info"]
-    assert (
-        competition_data["is_simpler_grants_enabled"]
-        == competition_request["is_simpler_grants_enabled"]
-    )
     assert set(competition_data["open_to_applicants"]) == set(
         competition_request["open_to_applicants"]
     )
-    assert len(competition_data["competition_instructions"]) == 1
-    assert (
-        competition_data["competition_instructions"][0]["file_name"]
-        == "competition_instructions.pdf"
-    )
-    assert (
-        competition_data["opportunity_assistance_listing"]["assistance_listing_number"] == "43.012"
-    )
 
 
-def test_competition_create_with_invalid_jwt_token(client, opportunity_with_assistance_listing):
+def test_competition_create_with_invalid_jwt_token(client, opportunity_for_competition):
     """Test competition creation endpoint with invalid JWT token"""
-    opportunity, opp_assistance_listing = opportunity_with_assistance_listing
+    opportunity = opportunity_for_competition
 
-    competition_request = create_competition_request(
-        assistance_listing_number=opp_assistance_listing.assistance_listing_number,
-    )
+    competition_request = create_competition_request()
 
     response = client.post(
         f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
@@ -156,7 +107,7 @@ def test_competition_create_with_invalid_jwt_token(client, opportunity_with_assi
 
 
 def test_competition_create_no_permissions(
-    client, db_session, enable_factory_create, opportunity_with_assistance_listing
+    client, db_session, enable_factory_create, opportunity_for_competition
 ):
     """Test competition creation without UPDATE_OPPORTUNITY privilege"""
     user, agency, token, _ = create_user_in_agency_with_jwt_and_api_key(
@@ -166,17 +117,8 @@ def test_competition_create_no_permissions(
 
     # Create opportunity in the same agency
     opportunity = OpportunityFactory.create(agency_id=agency.agency_id)
-    assistance_listing = AssistanceListingFactory.create()
-    opp_assistance_listing = OpportunityAssistanceListingFactory.create(
-        opportunity_id=opportunity.opportunity_id,
-        assistance_listing_id=assistance_listing.assistance_listing_id,
-        assistance_listing_number=assistance_listing.assistance_listing_number,
-        program_title=assistance_listing.program_title,
-    )
 
-    competition_request = create_competition_request(
-        assistance_listing_number=opp_assistance_listing.assistance_listing_number,
-    )
+    competition_request = create_competition_request()
 
     response = client.post(
         f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
@@ -194,9 +136,7 @@ def test_competition_create_opportunity_not_found(client, grantor_auth_data):
     _, _, token, _ = grantor_auth_data
 
     fake_opportunity_id = uuid.uuid4()
-    competition_request = create_competition_request(
-        assistance_listing_number="43.012",
-    )
+    competition_request = create_competition_request()
 
     response = client.post(
         f"/v1/grantors/opportunities/{fake_opportunity_id}/competitions",
@@ -209,34 +149,12 @@ def test_competition_create_opportunity_not_found(client, grantor_auth_data):
     assert response_json["message"] == f"Could not find Opportunity with ID {fake_opportunity_id}"
 
 
-def test_competition_create_assistance_listing_not_found(
-    client, grantor_auth_data, opportunity_with_assistance_listing
-):
-    """Test competition creation with non-existent assistance listing"""
-    _, _, token, _ = grantor_auth_data
-    opportunity, _ = opportunity_with_assistance_listing
-
-    competition_request = create_competition_request(
-        assistance_listing_number="99.ZZZ",
-    )
-
-    response = client.post(
-        f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
-        json=competition_request,
-        headers={"X-SGG-Token": token},
-    )
-
-    assert response.status_code == 404
-    response_json = response.get_json()
-    assert response_json["message"] == "Assistance listing 99.ZZZ not found on opportunity"
-
-
 def test_competition_create_missing_required_fields(
-    client, grantor_auth_data, opportunity_with_assistance_listing
+    client, grantor_auth_data, opportunity_for_competition
 ):
     """Test competition creation with missing required fields"""
     _, _, token, _ = grantor_auth_data
-    opportunity, _ = opportunity_with_assistance_listing
+    opportunity = opportunity_for_competition
 
     response = client.post(
         f"/v1/grantors/opportunities/{opportunity.opportunity_id}/competitions",
@@ -257,15 +175,13 @@ def test_competition_create_missing_required_fields(
 
 
 def test_competition_create_invalid_data_types(
-    client, grantor_auth_data, opportunity_with_assistance_listing
+    client, grantor_auth_data, opportunity_for_competition
 ):
     """Test competition creation with invalid data types"""
     _, _, token, _ = grantor_auth_data
-    opportunity, opp_assistance_listing = opportunity_with_assistance_listing
+    opportunity = opportunity_for_competition
 
-    competition_request = create_competition_request(
-        assistance_listing_number=opp_assistance_listing.assistance_listing_number,
-    )
+    competition_request = create_competition_request()
 
     # Invalid date format
     competition_request["opening_date"] = "not-a-date"
@@ -285,14 +201,13 @@ def test_competition_create_invalid_data_types(
 
 
 def test_competition_create_empty_open_to_applicants(
-    client, grantor_auth_data, opportunity_with_assistance_listing
+    client, grantor_auth_data, opportunity_for_competition
 ):
     """Test competition creation with empty open_to_applicants list"""
     _, _, token, _ = grantor_auth_data
-    opportunity, opp_assistance_listing = opportunity_with_assistance_listing
+    opportunity = opportunity_for_competition
 
     competition_request = create_competition_request(
-        assistance_listing_number=opp_assistance_listing.assistance_listing_number,
         open_to_applicants=[],
     )
 
