@@ -11,9 +11,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PivRequiredModal } from "src/components/application/editAppFilingName/PivRequiredModal";
 import RouteFocusManager from "src/components/RouteFocusManager";
 import { ActivityMonitor } from "./ActivityMonitor";
+import Header from "./core/header/Header";
 import Footer from "./Footer";
 import GrantsIdentifier from "./GrantsIdentifier";
-import Header from "./Header";
 
 type Props = {
   children: React.ReactNode;
