@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { Alert, Table } from "@trussworks/react-uswds";
 
-import ServerErrorAlert from "src/components/ServerErrorAlert";
+import ServerErrorAlert from "src/components/core/GeneralErrorAlert";
 import { OrganizationRosterInfo } from "./OrganizationRosterInfo";
 
 export const OrganizationRosterSkeleton = ({

@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { SignOutNavLink } from "src/components/user/UserControl";
+import { SignOutNavLink } from "./SignOutNavLink";
 
 const mockPush = jest.fn();
 const mockRefresh = jest.fn();

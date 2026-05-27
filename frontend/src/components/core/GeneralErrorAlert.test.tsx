@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 
-import ServerErrorAlert from "src/components/ServerErrorAlert";
+import ServerErrorAlert from "src/components/core/GeneralErrorAlert";
 
 describe("ServerErrorAlert", () => {
   it("should display the error message", () => {

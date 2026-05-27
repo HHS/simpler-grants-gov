@@ -21,14 +21,14 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
-import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
 import AwardRecommendationAttachments from "src/components/award-recommendation/AwardRecommendationAttachments";
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
 import { RecommendationSummarySection } from "src/components/award-recommendation/RecommendationSummarySection";
-import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
+import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
+import ApplyFormNav from "src/components/core/forms/LeftHandFormNav";
 
 export async function generateMetadata({
   params,
@@ -96,8 +96,10 @@ const OpportunitySection = ({
         <p className="text-bold margin-bottom-2">{t("opportunitySummary")}</p>
         <div className="margin-bottom-3">
           {hasSummary ? (
-            <SummaryDescriptionDisplay
-              summaryDescription={summaryDescription || ""}
+            <ExpandableTextContent
+              textContent={summaryDescription || ""}
+              showCallToAction={t("summary.showDescription")}
+              hideCallToAction={t("summary.hideSummaryDescription")}
             />
           ) : (
             <div>{t("noSummaryAvailable")}</div>

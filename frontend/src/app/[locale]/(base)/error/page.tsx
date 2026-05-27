@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import ServerErrorAlert from "src/components/ServerErrorAlert";
+import ServerErrorAlert from "src/components/core/GeneralErrorAlert";
 
 export async function generateMetadata() {
   const t = await getTranslations();

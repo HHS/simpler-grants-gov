@@ -9,12 +9,12 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { Alert, Button, GridContainer } from "@trussworks/react-uswds";
 
-import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
+import ApplyFormNav from "src/components/core/forms/LeftHandFormNav";
+import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
+import { USWDSIcon } from "src/components/core/USWDSIcon";
 import OpportunityEditForm from "src/components/opportunity/OpportunityEditForm";
 import { buildOpportunityEditInitialValues } from "src/components/opportunity/opportunityEditFormConfig";
 import OpportunityEditHeader from "src/components/opportunity/OpportunityEditHeader";
-import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
-import { USWDSIcon } from "src/components/USWDSIcon";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;
