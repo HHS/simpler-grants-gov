@@ -15,7 +15,7 @@ jest.mock("next-intl/server", () => ({
   getTranslations: () => Promise.resolve(mockUseTranslations),
 }));
 
-jest.mock("src/components/Breadcrumbs", () => ({
+jest.mock("src/components/core/Breadcrumbs", () => ({
   __esModule: true,
   default: (props: { breadcrumbList: { title: string; path: string }[] }) => {
     mockBreadcrumbs(props);

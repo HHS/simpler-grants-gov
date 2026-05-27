@@ -50,7 +50,7 @@ jest.mock("src/hooks/useFeatureFlags", () => ({
   }),
 }));
 
-jest.mock("src/components/RouteChangeWatcher", () => ({
+jest.mock("src/components/core/header/RouteChangeWatcher", () => ({
   RouteChangeWatcher: () => <></>,
 }));
 
