@@ -9,6 +9,22 @@ from tests.src.api.competition_alpha.test_competition_update_flag import (
 from tests.src.db.models import factories
 
 
+def _make_form(db_session, **kwargs) -> Form:
+    defaults: dict = {
+        "form_name": "Test form",
+        "short_form_name": "TST_1_0",
+        "form_version": "1.0",
+        "agency_code": "TEST",
+        "form_json_schema": {},
+        "form_ui_schema": [],
+    }
+    defaults.update(kwargs)
+    form = Form(**defaults)
+    db_session.add(form)
+    db_session.flush()
+    return form
+
+
 def test_put_competition_forms_add_success(
     client,
     db_session,
@@ -189,17 +205,12 @@ def test_put_competition_forms_form_deprecated(
 
     competition = factories.CompetitionFactory.create(competition_forms=[])
     existing_form = db_session.get(Form, SF424_v4_0.form_id)
-    deprecated_form = Form(
+    deprecated_form = _make_form(
+        db_session,
         form_name="Deprecated Form",
         short_form_name="DEPR_1_0",
-        form_version="1.0",
-        agency_code="TEST",
-        form_json_schema={},
-        form_ui_schema=[],
         is_deprecated=True,
     )
-    db_session.add(deprecated_form)
-    db_session.flush()
 
     payload = {
         "forms": [
