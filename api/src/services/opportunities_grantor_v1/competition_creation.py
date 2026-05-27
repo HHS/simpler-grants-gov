@@ -3,8 +3,6 @@ import uuid
 from datetime import date
 
 from pydantic import BaseModel
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
@@ -56,25 +54,14 @@ def create_competition(db_session: db.Session, user: User, competition_data: dic
         is_simpler_grants_enabled=True,
     )
 
-    # Set open_to_applicants using the association proxy
+    # Explicitly initialize all relationships that will be serialized
     competition.open_to_applicants = set(request.open_to_applicants)
+    competition.competition_forms = []
+    competition.competition_instructions = []
+    competition.opportunity_assistance_listing = None
 
     db_session.add(competition)
     db_session.flush()
-
-    # Reload with all relationships
-    stmt = (
-        select(Competition)
-        .options(
-            selectinload(Competition.competition_forms),
-            selectinload(Competition.competition_instructions),
-            selectinload(Competition.opportunity_assistance_listing),
-            selectinload(Competition.link_competition_open_to_applicant),
-        )
-        .where(Competition.competition_id == competition.competition_id)
-    )
-
-    competition = db_session.execute(stmt).scalar_one()
 
     logger.info(
         "Created competition",
