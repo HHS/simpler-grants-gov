@@ -21,13 +21,13 @@ import {
   GridContainer,
 } from "@trussworks/react-uswds";
 
-import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
 import AwardRecommendationAttachments from "src/components/award-recommendation/AwardRecommendationAttachments";
 import AwardRecommendationHero, {
   HeroButtonConfig,
 } from "src/components/award-recommendation/AwardRecommendationHero";
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
 import { RecommendationSummarySection } from "src/components/award-recommendation/RecommendationSummarySection";
+import ApplyFormNav from "src/components/core/LeftHandFormNav";
 import { SummaryDescriptionDisplay } from "src/components/opportunity/OpportunityDescription";
 
 export async function generateMetadata({

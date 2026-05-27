@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 
-const ApplyFormNav = ({
+const LeftHandFormNav = ({
   fields,
   title,
 }: {
@@ -36,4 +36,4 @@ const ApplyFormNav = ({
   );
 };
 
-export default ApplyFormNav;
+export default LeftHandFormNav;
