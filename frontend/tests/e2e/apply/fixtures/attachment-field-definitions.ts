@@ -1,5 +1,5 @@
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
-import { FormFillFieldDefinitions } from "@e2e-utils/types";
+import { FormFillFieldDefinitions } from "../../utils/types";
 
 // Matches "Attachment Form" link/heading on the application page
 export const ATTACHMENT_FORM_MATCHER = /^Attachment Form$/i;
