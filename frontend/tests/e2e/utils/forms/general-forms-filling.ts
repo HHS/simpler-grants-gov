@@ -126,3 +126,15 @@ export async function fillForm(
 		throw error;
 	}
 }
+export interface FillFormConfig {
+  formName: string | RegExp;
+  fields: FormFillFieldDefinitions;
+  saveButtonTestId: string;
+  noErrorsText?: string;
+  /**
+   * Optional form-specific hook called before the save button is clicked.
+   * Use for pre-save interactions that cannot be expressed as a field definition.
+   * e.g. SF-424A confirmation checkbox that only appears in this form.
+   */
+  beforeSave?: (page: Page) => Promise<void>;
+}

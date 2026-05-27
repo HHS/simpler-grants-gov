@@ -35,7 +35,7 @@ export const fileHandler: FieldHandler = async (testInfo, page, field, data) => 
       .waitFor({ state: "visible", timeout: 30000 });
   } else {
     await page
-      .locator(`span:has-text(\"${fileName}\")`)
+      .locator(`span:has-text("${fileName}")`)
       .waitFor({ state: "visible", timeout: 30000 });
   }
   if (hiddenInputSelector) {
