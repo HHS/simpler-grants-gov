@@ -1,7 +1,9 @@
 import uuid
 
 import _pytest.monkeypatch
+import boto3
 import pytest
+from moto import mock_aws
 
 from grants_shared.adapters import db
 from grants_shared.db.models.base import metadata
@@ -111,3 +113,19 @@ def db_session(db_client: db.DBClient) -> db.Session:
     """
     with db_client.get_session() as session:
         yield session
+
+
+#################
+# AWS Mocking
+#################
+
+
+@pytest.fixture
+def ses_client(monkeypatch):
+    """
+    Create a mocked SES client using moto. The mock is automatically cleaned up after the test.
+    """
+    monkeypatch.setenv("IS_LOCAL_AWS", "0")
+
+    with mock_aws():
+        yield boto3.client("ses", region_name="us-east-1")
