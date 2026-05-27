@@ -19,7 +19,7 @@ SHELL = /bin/bash -o pipefail
 APP_DIR := api
 ifdef CI
  DOCKER_EXEC_ARGS := -T -e CI -e PYTEST_ADDOPTS="--color=yes"
- MYPY_FLAGS := --no-pretty
+ MYPY_FLAGS := 
  MYPY_POSTPROC := | perl -pe "s/^(.+):(\d+):(\d+): error: (.*)/::warning file=$(APP_DIR)\/\1,line=\2,col=\3::\4/"
 endif
 
