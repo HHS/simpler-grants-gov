@@ -49,6 +49,23 @@ from tests.src.db.models.factories import (
 DEFAULT_VALUE = object()
 
 
+def _make_form(**kwargs) -> Form:
+    defaults: dict = {
+        "form_name": "Test form",
+        "short_form_name": f"TST_{uuid.uuid4().hex[:8]}",
+        "form_version": "1.0",
+        "agency_code": "TEST",
+        "form_json_schema": {},
+        "form_ui_schema": [],
+    }
+    defaults.update(kwargs)
+    form = Form(**defaults)
+    db_session = get_db_session()
+    db_session.add(form)
+    db_session.flush()
+    return form
+
+
 def setup_application_for_form_validation(
     json_data: dict,
     json_schema: dict,
@@ -106,18 +123,7 @@ def setup_application_for_form_validation(
     }
 
     competition = CompetitionFactory.create(**competition_params)
-    form = Form(
-        form_name="Test form",
-        short_form_name=f"TST_{uuid.uuid4().hex[:8]}",
-        form_version="1.0",
-        agency_code="TEST",
-        form_json_schema=json_schema,
-        form_ui_schema=[],
-        form_rule_schema=rule_schema,
-    )
-    db_session = get_db_session()
-    db_session.add(form)
-    db_session.flush()
+    form = _make_form(form_json_schema=json_schema, form_rule_schema=rule_schema)
     competition_form = CompetitionFormFactory.create(competition=competition, form=form)
 
     organization = None
