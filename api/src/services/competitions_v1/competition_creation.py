@@ -53,6 +53,7 @@ def create_competition(db_session: db.Session, user: User, competition_data: dic
         opening_date=request.opening_date,
         closing_date=request.closing_date,
         contact_info=request.contact_info,
+        is_simpler_grants_enabled=True,
     )
 
     # Set open_to_applicants using the association proxy
