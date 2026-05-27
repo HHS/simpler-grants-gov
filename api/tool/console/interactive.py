@@ -115,7 +115,7 @@ def reload_repl() -> None:
 
         # reloading the logging initialization and stuff can cause some issues,
         # avoid it all for now
-        if "<module 'src.util.logging" in str(module):
+        if "<module 'grants_shared.logs" in str(module):
             continue
 
         try:
