@@ -4,11 +4,12 @@ import uuid
 from datetime import timedelta
 
 import click
+import grants_shared.logs
+import grants_shared.util.datetime_util as datetime_util
+from grants_shared.util.local import error_if_not_local
 from sqlalchemy import select
 
 import src.adapters.db as db
-import grants_shared.logs
-import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.constants.lookup_constants import CompetitionOpenToApplicant
@@ -16,7 +17,6 @@ from src.db.models.competition_models import Competition, CompetitionForm, Form,
 from src.db.models.opportunity_models import Opportunity
 from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
-from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
 from tests.lib.seed_agencies_and_users import _build_agencies_and_users
 from tests.lib.seed_award_recommendations import _build_award_recommendations

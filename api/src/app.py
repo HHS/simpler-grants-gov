@@ -3,9 +3,12 @@ import logging
 import os
 from typing import Any
 
+import grants_shared.logs
+import grants_shared.logs.flask_logger as flask_logger
 from apiflask import APIFlask, exceptions
 from flask import Response
 from flask_cors import CORS
+from grants_shared.util.local import error_if_not_local
 from pydantic import Field
 
 import src.adapters.db as db
@@ -13,8 +16,6 @@ import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
-import grants_shared.logs
-import grants_shared.logs.flask_logger as flask_logger
 from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.application_alpha import application_blueprint
@@ -46,7 +47,6 @@ from src.legacy_soap_api import init_app as init_legacy_soap_api
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
-from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 

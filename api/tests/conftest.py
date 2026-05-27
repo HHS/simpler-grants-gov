@@ -11,6 +11,7 @@ import pytest
 from apiflask import APIFlask
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from grants_shared.util.local import load_local_env_vars
 from sqlalchemy import select, text
 
 import src.adapters.db as db
@@ -34,7 +35,6 @@ from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
-from src.util.local import load_local_env_vars
 from src.workflow.registry.workflow_client_registry import (
     WorkflowClientRegistry,
     init_workflow_client_registry,

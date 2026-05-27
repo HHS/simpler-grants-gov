@@ -7,16 +7,16 @@ from dataclasses import dataclass, field
 from urllib.parse import quote
 
 import click
+import grants_shared.logs
 import requests
+from grants_shared.util.local import error_if_not_local
 from lxml import etree
 from pydantic import Field
 
 import src.adapters.db as db
-import grants_shared.logs
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
 from src.util.env_config import PydanticBaseEnvConfig
-from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 

@@ -2,10 +2,10 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Any
 
+from grants_shared.util.datetime_util import make_timezone_aware
 from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
 
 from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema, SOAPInvalidEnvelope
-from src.util.datetime_util import make_timezone_aware
 
 
 class SubmissionInfo(BaseSOAPSchema):

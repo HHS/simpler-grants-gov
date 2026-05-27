@@ -6,10 +6,10 @@ import logging
 import time
 
 import sqlalchemy
+from grants_shared.util import datetime_util
 
 import src.task.task
 from src.adapters import db
-from src.util import datetime_util
 
 from . import sql
 
@@ -275,5 +275,3 @@ class LoadOracleDataTask(src.task.task.Task):
                 extra["table"] = table.name
                 extra[f"count.{table.schema}.{table.name}"] = count
         logger.info(f"row count {message}", extra=extra, stacklevel=2)
-
-

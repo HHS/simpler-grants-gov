@@ -2,10 +2,10 @@
 import logging
 import pathlib
 
+import grants_shared.logs
 from eralchemy import render_er
 from sqlalchemy import MetaData
 
-import grants_shared.logs
 from src.db.models.base import ApiSchemaTable
 from src.db.models.staging.staging_base import StagingBase
 

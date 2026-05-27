@@ -9,6 +9,8 @@ from datetime import datetime
 from types import FrameType
 
 from flask import Flask, current_app
+from grants_shared.util import datetime_util
+from grants_shared.util.json_util import json_encoder
 from pydantic import ValidationError
 
 from src.adapters import db
@@ -18,9 +20,7 @@ from src.adapters.db import flask_db
 from src.adapters.search import SearchClient, flask_opensearch
 from src.constants.lookup_constants import WorkflowEventProcessingResult
 from src.db.models.workflow_models import WorkflowEventHistory
-from src.util import datetime_util
 from src.util.env_config import PydanticBaseEnvConfig
-from src.util.json_util import json_encoder
 from src.workflow.event.sqs_message_container import SqsMessageContainer
 from src.workflow.event.workflow_event import WorkflowEvent
 from src.workflow.handler.event_handler import EventHandler

@@ -1,12 +1,12 @@
 import logging
 
+import grants_shared.logs
 import sqlalchemy
+from grants_shared.util.local import error_if_not_local
 
 import src.adapters.db as db
-import grants_shared.logs
 from src.adapters.db import PostgresDBClient
 from src.constants.schema import Schemas
-from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 

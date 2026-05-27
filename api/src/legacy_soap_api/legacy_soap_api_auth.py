@@ -8,6 +8,8 @@ import jwt
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509 import load_pem_x509_certificate
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.util.datetime_util import get_now_us_eastern_date
 from pydantic import BaseModel, ConfigDict
 from requests.adapters import HTTPAdapter
 from sqlalchemy import func, select
@@ -19,8 +21,6 @@ from src.db.models.agency_models import Agency
 from src.db.models.user_models import LegacyCertificate
 from src.legacy_soap_api.legacy_soap_api_config import SimplerSoapAPI, SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_constants import LegacySoapApiEvent
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
-from src.util.datetime_util import get_now_us_eastern_date
 
 logger = logging.getLogger(__name__)
 

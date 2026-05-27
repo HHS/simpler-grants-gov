@@ -7,13 +7,13 @@ responses is consistent and functioning as intended.
 
 import dataclasses
 
+import grants_shared.logs
 import pytest
 from apiflask import APIBlueprint, APIKeyHeaderAuth
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
 from werkzeug.http import HTTP_STATUS_CODES
 
 import src.app as app_entry
-import grants_shared.logs
 from src.api.response import ApiResponse, ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.api.schemas.extension import Schema, fields

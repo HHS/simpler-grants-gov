@@ -1,9 +1,9 @@
 import logging
 from datetime import date, timedelta
 
+import grants_shared.util.datetime_util as datetime_util
 import pytest
 
-import src.util.datetime_util as datetime_util
 from src.constants.lookup_constants import Privilege
 from src.legacy_soap_api.legacy_soap_api_auth import (
     SOAPAuth,

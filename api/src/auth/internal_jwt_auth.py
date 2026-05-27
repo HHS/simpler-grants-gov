@@ -2,10 +2,11 @@ import logging
 import uuid
 from datetime import datetime
 
+import grants_shared.util.datetime_util as datetime_util
 import jwt
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from sqlalchemy import select
 
-import src.util.datetime_util as datetime_util
 from src.adapters import db
 from src.adapters.db import flask_db
 from src.api.route_utils import raise_flask_error
@@ -13,7 +14,6 @@ from src.auth.api_jwt_auth import ApiJwtConfig, get_config
 from src.auth.auth_errors import JwtValidationError
 from src.auth.jwt_user_http_token_auth import JwtUserHttpTokenAuth
 from src.db.models.competition_models import ShortLivedInternalToken
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 

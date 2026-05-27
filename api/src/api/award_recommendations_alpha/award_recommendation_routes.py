@@ -1,6 +1,8 @@
 import logging
 import uuid
 
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+
 import src.adapters.db as db
 from src.adapters.db import flask_db
 from src.api import response
@@ -29,7 +31,6 @@ from src.api.award_recommendations_alpha.award_recommendation_schemas import (
     AwardRecommendationUpdateRequestSchema,
 )
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.award_recommendations.create_award_recommendation import (
     create_award_recommendation,
 )

@@ -6,10 +6,10 @@ import datetime
 import logging
 
 import factory
+import grants_shared.logs
 import sqlalchemy
 
 import src.adapters.db
-import grants_shared.logs
 import tests.src.db.models.factories as factories
 from src.db.models import foreign
 

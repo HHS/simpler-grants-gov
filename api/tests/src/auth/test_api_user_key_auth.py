@@ -1,8 +1,8 @@
+import grants_shared.logs
 import pytest
 from freezegun import freeze_time
 
 import src.app as app_entry
-import grants_shared.logs
 from src.auth.api_user_key_auth import (
     ApiKeyValidationError,
     api_user_key_auth,

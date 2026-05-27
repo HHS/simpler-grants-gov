@@ -4,6 +4,7 @@ import os
 from collections.abc import Iterator, Sequence
 from enum import StrEnum
 
+from grants_shared.util.datetime_util import get_now_us_eastern_datetime
 from pydantic import Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -24,7 +25,6 @@ from src.services.opportunities_v1.opportunity_to_csv import opportunities_to_cs
 from src.task.ecs_background_task import ecs_background_task
 from src.task.task import Task
 from src.task.task_blueprint import task_blueprint
-from src.util.datetime_util import get_now_us_eastern_datetime
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)

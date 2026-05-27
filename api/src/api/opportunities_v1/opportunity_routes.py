@@ -3,7 +3,9 @@ import logging
 from collections.abc import Sequence
 from uuid import UUID
 
+import grants_shared.util.datetime_util as datetime_util
 from flask import Response
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 import src.adapters.db as db
 import src.adapters.db.flask_db as flask_db
@@ -11,10 +13,8 @@ import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.opportunities_v1.opportunity_schemas as opportunity_schemas
 import src.api.response as response
-import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
-from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.opportunities_v1.get_opportunity import (
     get_opportunity,
     get_opportunity_by_legacy_id,

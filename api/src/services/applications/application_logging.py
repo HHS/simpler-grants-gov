@@ -1,7 +1,8 @@
 from uuid import UUID
 
-from src.db.models.competition_models import Application
 from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+
+from src.db.models.competition_models import Application
 
 
 def add_application_metadata_to_logs(application: Application) -> None:

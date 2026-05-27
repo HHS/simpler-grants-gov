@@ -8,14 +8,14 @@ from typing import Any
 
 import alembic.command as command
 import alembic.script as script
+import grants_shared.logs
 import sqlalchemy
 from alembic.config import Config
 from alembic.runtime import migration
+from grants_shared.logs.flask_logger import init_general_logging
 
-import grants_shared.logs
 from src.constants.lookup_constants import JobType
 from src.db.models.lookup.sync_lookup_values import sync_lookup_values
-from grants_shared.logs.flask_logger import init_general_logging
 
 from src.task.ecs_background_task import ecs_background_task  # isort:skip
 

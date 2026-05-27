@@ -1,12 +1,12 @@
 from calendar import timegm
 from datetime import datetime
 
+import grants_shared.logs
 import jwt
 import pytest
 from freezegun import freeze_time
 
 import src.app as app_entry
-import grants_shared.logs
 from src.auth.api_jwt_auth import (
     ApiJwtConfig,
     api_jwt_auth,

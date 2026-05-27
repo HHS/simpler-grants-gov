@@ -1,4 +1,5 @@
 import pytest
+from grants_shared.util.datetime_util import get_now_us_eastern_date
 
 from src.form_schema.rule_processing.json_rule_context import JsonRule
 from src.form_schema.rule_processing.json_rule_field_population import (
@@ -6,7 +7,6 @@ from src.form_schema.rule_processing.json_rule_field_population import (
     PRE_POPULATION_MAPPER,
     handle_field_population,
 )
-from src.util.datetime_util import get_now_us_eastern_date
 from tests.src.form_schema.rule_processing.conftest import setup_context
 
 

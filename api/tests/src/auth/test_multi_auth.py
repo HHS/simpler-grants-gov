@@ -1,9 +1,10 @@
 from datetime import timedelta
 
+import grants_shared.logs
 import pytest
+from grants_shared.util import datetime_util
 
 import src.app as app_entry
-import grants_shared.logs
 from src.auth.api_jwt_auth import create_jwt_for_user
 from src.auth.internal_jwt_auth import create_jwt_for_internal_token
 from src.auth.multi_auth import (
@@ -11,7 +12,6 @@ from src.auth.multi_auth import (
     jwt_key_or_internal_multi_auth,
     jwt_or_api_user_key_multi_auth,
 )
-from src.util import datetime_util
 from tests.src.db.models.factories import UserApiKeyFactory, UserFactory
 
 
