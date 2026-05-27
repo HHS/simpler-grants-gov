@@ -14,7 +14,7 @@ from src.adapters.db import PostgresDBClient
 from src.constants.lookup_constants import CompetitionOpenToApplicant
 from src.db.models.competition_models import Competition, CompetitionForm, Form, FormInstruction
 from src.db.models.opportunity_models import Opportunity
-from src.form_schema.forms import get_active_forms
+from src.form_schema.forms import get_active_forms, init_form_registry
 from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.util.local import error_if_not_local
 from tests.lib.seed_agencies import _build_agencies
@@ -477,7 +477,7 @@ def _build_custom_test_competitions(forms: dict[str, Form]) -> None:
             f"Created Apply Happy Path competition '{comp_title}' for opportunity '{opp_num}' - http://localhost:3000/opportunity/{competition.opportunity_id}"
         )
 
-    # CT02 isolated scenario for testing Print Form
+    # Isolated scenario for testing Print Form
     _build_seeded_competition_for_form(
         db_session,
         forms["Project_AbstractSummary_2_0"],
@@ -591,6 +591,7 @@ def run_seed_logic(db_session: db.Session, seed_config: SeedConfig) -> None:
 
     competition_container: CompetitionContainer | None = None
     if seed_config.seed_forms:
+        init_form_registry()
         forms_map = _build_forms(db_session)
         competition_container = _build_competitions(db_session, forms_map)
     if seed_config.seed_users:

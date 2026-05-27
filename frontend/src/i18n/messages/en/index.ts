@@ -400,10 +400,10 @@ export const messages = {
         forbidden: "You do not have permission to update this opportunity.",
         notFound: "The opportunity summary could not be found.",
         draftOnly: "Only draft opportunity summaries can be updated.",
+        errorHeading: "Publish error",
         validationHeading: "Please fix the highlighted fields.",
-        validationWarningHeading: "Progress saved",
-        validationWarningBody:
-          "Your progress has been saved. However, this opportunity cannot be submitted/published until the following required fields are completed:",
+        validationErrorHeading: "Error(s) Found",
+        validationErrorBody: "Please correct the following errors:",
       },
     },
     validationErrors: {
@@ -418,8 +418,6 @@ export const messages = {
       closeDateOrder: "Close date must be on or after publish date.",
       awardMinimum: "Enter an award minimum.",
       awardMaximum: "Enter an award maximum.",
-      awardMaximumOrder:
-        "Award maximum must be greater than or equal to award minimum.",
       fundingType: "Select a funding type.",
       fundingCategory: "Select a funding category.",
       expectedNumberOfAwards: "Enter the expected number of awards.",
@@ -430,6 +428,17 @@ export const messages = {
       additionalInfoUrl: "Enter an additional information URL.",
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
+      awardMinCurrencyInput:
+        "Award minimum must be greater than zero and less than $1,000,000,000,000,000.",
+      awardMaxCurrencyInput:
+        "Award maximum must be greater than zero and less than $1,000,000,000,000,000.",
+      totalFundingCurrencyInput:
+        "Estimated total program funding must be greater than zero and less than $1,000,000,000,000,000.",
+      awardMinLessThanTotal:
+        "Award minimum cannot exceed the Estimated Total Program Funding.",
+      awardMaxLessThanTotal:
+        "Award maximum cannot exceed the Estimated Total Program Funding.",
+      awardMinLessThanMax: "Award minimum cannot exceed Award maximum.",
     },
     attachments: {
       removeButton: "Remove",
@@ -2120,6 +2129,28 @@ export const messages = {
       description:
         "Add any relevant information related to this reviewer and decision-maker for this opportunity",
     },
+    attachments: {
+      heading: "Attachments",
+      attachedDocument: "Attached document",
+      uploadedBy: "Uploaded by",
+      uploadDate: "Upload date",
+      standardTermsHeading: "Standard and program terms & conditions",
+      enterTermsConditions: "Enter terms & conditions",
+      editTermsConditions: "Edit terms & conditions",
+      risksHeading: "Specific risks & recommended conditions",
+      enterRisks: "Enter risks & recommended conditions",
+      editRisks: "Edit risks & recommended conditions",
+      riskNumber: "Risk #",
+      appNumber: "App #",
+      condition: "Condition",
+      action: "Action",
+      delete: "Delete",
+      applications: "applications",
+      errorMessage: "Unable to load or update risks. Please try again.",
+      otherDocumentsHeading: "Other supporting documents",
+      enterSupportingDocuments: "Enter supporting documents",
+      editSupportingDocuments: "Edit supporting documents",
+    },
     recommendationDetails: {
       heading: "Recommendation details",
       recommendationLabel: "Recommendation",
@@ -2178,8 +2209,6 @@ export const messages = {
     pageTitle: "Create recommendation",
     metaDescription: "Create a new award recommendation",
     beforeYouGetStarted: "Before you get started",
-    introDescription:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
     steps: {
       identifyOpportunity: {
         title: "Identify the opportunity",

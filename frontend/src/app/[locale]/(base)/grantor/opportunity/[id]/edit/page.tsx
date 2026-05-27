@@ -12,7 +12,7 @@ import { Alert, Button, GridContainer } from "@trussworks/react-uswds";
 import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
 import OpportunityEditForm from "src/components/opportunity/OpportunityEditForm";
 import { buildOpportunityEditInitialValues } from "src/components/opportunity/opportunityEditFormConfig";
-import OpportunityEditHeaderActions from "src/components/opportunity/OpportunityEditHeaderActions";
+import OpportunityEditHeader from "src/components/opportunity/OpportunityEditHeader";
 import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
 import { USWDSIcon } from "src/components/USWDSIcon";
 
@@ -34,7 +34,7 @@ export async function generateMetadata({
   try {
     const session = await getSession();
     if (session?.token) {
-      const { data } = await getOpportunityForGrantor(id, session.token);
+      const { data } = await getOpportunityForGrantor(id);
       title = `${t("OpportunityEdit.pageTitle")} - ${data.opportunity_title || ""}`;
     }
   } catch {
@@ -66,7 +66,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
   let opportunityData: GrantorOpportunityDetail;
   let opportunitySummaryId: string;
   try {
-    const response = await getOpportunityForGrantor(id, session.token);
+    const response = await getOpportunityForGrantor(id);
     opportunityData = response.data;
     opportunitySummaryId =
       response.data.forecast_summary?.opportunity_summary_id ??
@@ -197,8 +197,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
                 >
                   {tEdit("header.saveButton")}
                 </Button>
-                <OpportunityEditHeaderActions
-                  opportunityId={opportunityData.opportunity_id}
+                <OpportunityEditHeader
                   initialValues={initialValues}
                   previewLabel={tEdit("header.previewButton")}
                   publishLabel={tEdit("header.publishButton")}

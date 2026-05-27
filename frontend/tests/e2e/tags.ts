@@ -6,6 +6,7 @@ enum validFeatureTags {
   STATIC = "@static",
   AUTH = "@auth",
   USER_MANAGEMENT = "@user-management",
+  APPLY_FORMS = "@apply-forms",
 }
 
 enum validExecutionTags {

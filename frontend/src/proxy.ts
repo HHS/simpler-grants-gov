@@ -5,6 +5,7 @@
  * @see https://nextjs.org/docs/app/building-your-application/routing/middleware
  */
 import { defaultLocale, locales } from "src/i18n/config";
+import { applyCorrelationId } from "src/services/correlationId/correlationIdMiddleware";
 import { featureFlagsManager } from "src/services/featureFlags/FeatureFlagManager";
 
 import createIntlMiddleware from "next-intl/middleware";
@@ -83,15 +84,18 @@ export default function proxy(request: NextRequest): NextResponse {
   // only allow for cdn testing/troubleshooting in lower envs
 
   if (isACdnTestRequest(request)) {
-    const testResponse = handleCdnTest(request);
+    const testResponse = applyCorrelationId(request, handleCdnTest(request));
     logRequest(request, testResponse);
     return testResponse;
   }
 
   const isApiRoute = !!request.url.match(/api\//);
-  const response = isApiRoute
-    ? featureFlagsManager.middleware(request, NextResponse.next())
-    : featureFlagsManager.middleware(request, i18nMiddleware(request));
+  const response = applyCorrelationId(
+    request,
+    isApiRoute
+      ? featureFlagsManager.middleware(request, NextResponse.next())
+      : featureFlagsManager.middleware(request, i18nMiddleware(request)),
+  );
 
   // Check for site-wide maintenance mode.
   // Pass searchParams so query param overrides (e.g. ?_ff=maintenanceMode:false)

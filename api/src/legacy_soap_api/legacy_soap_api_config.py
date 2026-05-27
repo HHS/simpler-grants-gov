@@ -83,6 +83,7 @@ class SOAPOperationConfig:
     always_call_simpler: bool = False
 
     # These are the privileges needed for these endpoints:
+    # GetSubmissionListRequest = {Privilege.LEGACY_AGENCY_VIEWER}
     # GetSubmissionListExpandedRequest = {Privilege.LEGACY_AGENCY_VIEWER}
     # GetApplicationRequest = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
     # GetApplicationZipRequest = {Privilege.LEGACY_AGENCY_GRANT_RETRIEVER}
@@ -145,6 +146,11 @@ SIMPLER_SOAP_OPERATION_CONFIGS: dict[SimplerSoapAPI, dict[str, SOAPOperationConf
             request_operation_name="GetApplicationZipRequest",
             response_operation_name="GetApplicationZipResponse",
             privileges={Privilege.LEGACY_AGENCY_GRANT_RETRIEVER},
+        ),
+        "GetSubmissionListRequest": SOAPOperationConfig(
+            request_operation_name="GetSubmissionListRequest",
+            response_operation_name="GetSubmissionListResponse",
+            privileges={Privilege.LEGACY_AGENCY_VIEWER},
         ),
         "GetSubmissionListExpandedRequest": SOAPOperationConfig(
             request_operation_name="GetSubmissionListExpandedRequest",

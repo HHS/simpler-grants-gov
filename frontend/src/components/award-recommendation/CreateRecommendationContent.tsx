@@ -98,9 +98,7 @@ export const CreateRecommendationContent = () => {
           <h2 className="margin-top-0 margin-bottom-2 font-sans-xl text-bold">
             {t("beforeYouGetStarted")}
           </h2>
-          <p className="text-base margin-bottom-5 font-sans-sm line-height-sans-4">
-            {t("introDescription")}
-          </p>
+          <p className="text-base margin-bottom-5 font-sans-sm line-height-sans-4"></p>
 
           <BeforeYouGetStartedStep />
           <ApplyRecommendationsStep />

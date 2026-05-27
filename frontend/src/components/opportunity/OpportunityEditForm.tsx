@@ -12,6 +12,7 @@ import {
   OPPORTUNITY_CATEGORY_OPTIONS,
 } from "src/constants/opportunity";
 import { OpportunityAttachment } from "src/types/opportunity/opportunityAttachmentTypes";
+import { getNumericAmountFromString } from "src/utils/formatCurrencyUtil";
 
 import { useTranslations } from "next-intl";
 import { startTransition, useActionState, useEffect, useState } from "react";
@@ -116,7 +117,7 @@ export default function OpportunityEditForm({
 
   // Minimal state — 3 fields that drive conditional show/hide rendering,
   // plus fundingType and publishDate needed for the CustomEvent that
-  // controls the Publish button in OpportunityEditHeaderActions.
+  // controls the Publish button in OpportunityEditHeader.
   const [fundingCategory, setFundingCategory] = useState(
     initialValues.fundingCategories,
   );
@@ -133,7 +134,62 @@ export default function OpportunityEditForm({
   const validationErrors: OpportunityEditValidationErrors | undefined =
     formState.validationErrors;
 
-  // Dispatch CustomEvent so OpportunityEditHeaderActions can update
+  //--- Validations for Award Minimum, Award Maximum and Total Program Funding ---
+  const [frontendErrors, setFrontendErrors] =
+    useState<OpportunityEditValidationErrors>({});
+
+  function setSingleFrontendError<
+    K extends keyof OpportunityEditValidationErrors,
+  >(fieldname: K, error: string | null) {
+    if (!error) {
+      // clear the list of errors for this field
+      setFrontendErrors((currentValues) => ({
+        ...currentValues,
+        [fieldname]: [],
+      }));
+    } else {
+      setFrontendErrors((currentValues) => ({
+        ...currentValues,
+        [fieldname]: [error],
+      }));
+    }
+  }
+
+  const singleFieldValidation = (event: React.FocusEvent<HTMLInputElement>) => {
+    const form = event.currentTarget.form;
+    if (!form) return;
+    const formData = new FormData(form);
+    const estTotalFunding = getNumericAmountFromString(
+      formData.get("estimatedTotalProgramFunding") as string | null,
+    );
+    const awardMin = getNumericAmountFromString(
+      formData.get("awardMinimum") as string | null,
+    );
+    const awardMax = getNumericAmountFromString(
+      formData.get("awardMaximum") as string | null,
+    );
+    // clear old error messages
+    setSingleFrontendError("awardMinimum", null);
+    setSingleFrontendError("awardMaximum", null);
+    setSingleFrontendError("estimatedTotalProgramFunding", null);
+    const maxLimit = 1000000000000000;
+
+    //--- min & max values for Award Minimum, Award Minimum and Total Program Funding ---
+    if (awardMin < 0 || awardMin >= maxLimit) {
+      const errMsg = t("validationErrors.awardMinCurrencyInput");
+      setSingleFrontendError("awardMinimum", errMsg);
+    }
+    if (awardMax < 0 || awardMax >= maxLimit) {
+      const errMsg = t("validationErrors.awardMaxCurrencyInput");
+      setSingleFrontendError("awardMaximum", errMsg);
+    }
+    if (estTotalFunding < 0 || estTotalFunding >= maxLimit) {
+      const errMsg = t("validationErrors.totalFundingCurrencyInput");
+      setSingleFrontendError("estimatedTotalProgramFunding", errMsg);
+    }
+  };
+
+  // Dispatch CustomEvent so OpportunityEditHeader can update
   // the publish button enabled state in real time.
   // useEffect fires after every state change so the event always carries
   // the latest committed values — no manual dispatch calls needed.
@@ -164,8 +220,11 @@ export default function OpportunityEditForm({
   function getFieldError(
     fieldName: keyof OpportunityEditValidationErrors,
   ): string | undefined {
-    const fieldErrors = validationErrors?.[fieldName];
-    return fieldErrors?.[0];
+    let fieldErrors = validationErrors?.[fieldName];
+    if (!fieldErrors) {
+      fieldErrors = frontendErrors?.[fieldName];
+    }
+    return fieldErrors?.join(" ");
   }
 
   useEffect(() => {
@@ -235,6 +294,7 @@ export default function OpportunityEditForm({
     },
     {} as Record<string, { label: string; value: string }[]>,
   );
+
   return (
     <form
       id="opportunity-edit-form"
@@ -286,6 +346,9 @@ export default function OpportunityEditForm({
         </div>
       ) : null}
 
+      {/* Portal target for publish error rendered by OpportunityEditHeader */}
+      <div id="publish-error-container" />
+
       {formState.errorMessage ? (
         <div className="margin-top-2">
           <Alert
@@ -314,20 +377,20 @@ export default function OpportunityEditForm({
       Object.keys(formState.validationErrors).length > 0 ? (
         <div className="margin-top-2">
           <Alert
-            type="warning"
-            heading={t("content.alerts.validationWarningHeading")}
+            type="error"
+            heading={t("content.alerts.validationErrorHeading")}
             headingLevel="h3"
           >
             <span className="display-block margin-top-1 margin-bottom-1">
-              {t("content.alerts.validationWarningBody")}
+              {t("content.alerts.validationErrorBody")}
             </span>
-            {Object.values(formState.validationErrors)
-              .flat()
-              .map((error, i) => (
-                <span key={i} className="display-block">
-                  {error}
-                </span>
-              ))}
+            {Array.from(
+              new Set(Object.values(formState.validationErrors).flat()),
+            ).map((error, i) => (
+              <span key={i} className="display-block">
+                {error}
+              </span>
+            ))}
           </Alert>
         </div>
       ) : null}
@@ -544,6 +607,7 @@ export default function OpportunityEditForm({
                   defaultValue={formatNumber(
                     initialValues.estimatedTotalProgramFunding,
                   )}
+                  onBlur={singleFieldValidation}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -567,6 +631,7 @@ export default function OpportunityEditForm({
                   name="awardMinimum"
                   type="text"
                   defaultValue={formatNumber(initialValues.awardMinimum)}
+                  onBlur={singleFieldValidation}
                   className="width-full"
                   disabled={!isDraft}
                 />
@@ -587,6 +652,7 @@ export default function OpportunityEditForm({
                   name="awardMaximum"
                   type="text"
                   defaultValue={formatNumber(initialValues.awardMaximum)}
+                  onBlur={singleFieldValidation}
                   className="width-full"
                   disabled={!isDraft}
                 />
