@@ -7,9 +7,6 @@ import time
 
 import sqlalchemy
 
-import src.db.models.foreign
-import src.db.models.staging
-import src.logging
 import src.task.task
 from src.adapters import db
 from src.util import datetime_util
@@ -280,20 +277,3 @@ class LoadOracleDataTask(src.task.task.Task):
         logger.info(f"row count {message}", extra=extra, stacklevel=2)
 
 
-def main() -> None:
-    with src.logging.init(__package__):
-        db_client = db.PostgresDBClient()
-
-        foreign_tables = {t.name: t for t in src.db.models.foreign.metadata.tables.values()}
-        staging_tables = {t.name: t for t in src.db.models.staging.metadata.tables.values()}
-
-        with db_client.get_session() as db_session:
-            LoadOracleDataTask(
-                db_session,
-                foreign_tables,
-                staging_tables,
-            ).run()
-
-
-if __name__ == "__main__":
-    main()

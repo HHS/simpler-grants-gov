@@ -7,7 +7,7 @@ import click
 from sqlalchemy import select
 
 import src.adapters.db as db
-import src.logging
+import grants_shared.logs
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.adapters.db import PostgresDBClient
@@ -568,7 +568,7 @@ def seed_local_db(iterations: int, cover_all_agencies: bool, steps: list[str]) -
         seed_award_recommendations="ALL" in steps or "award_recommendations" in steps,
     )
 
-    with src.logging.init("seed_local_db"):
+    with grants_shared.logs.init("seed_local_db"):
         logger.info("Running seed script for local DB")
         error_if_not_local()
 

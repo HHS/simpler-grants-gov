@@ -5,7 +5,7 @@ import pathlib
 from eralchemy import render_er
 from sqlalchemy import MetaData
 
-import src.logging
+import grants_shared.logs
 from src.db.models.base import ApiSchemaTable
 from src.db.models.staging.staging_base import StagingBase
 
@@ -29,7 +29,7 @@ def create_erds(metadata: MetaData, file_name: str) -> None:
 
 
 def main() -> None:
-    with src.logging.init(__package__):
+    with grants_shared.logs.init(__package__):
         logger.info("Generating ERD diagrams")
 
         create_erds(STAGING_BASE_METADATA, "staging-schema")

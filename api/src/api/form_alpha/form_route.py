@@ -7,7 +7,7 @@ import src.api.form_alpha.form_schema as form_schema
 import src.api.response as response
 from src.api.form_alpha.form_blueprint import form_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.form_alpha.get_form import get_form
 from src.services.form_alpha.update_form import update_form
 from src.services.form_alpha.upsert_form_instruction import upsert_form_instruction

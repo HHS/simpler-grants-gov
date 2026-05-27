@@ -14,7 +14,7 @@ import src.api.response as response
 import src.util.datetime_util as datetime_util
 from src.api.opportunities_v1.opportunity_blueprint import opportunity_blueprint
 from src.auth.multi_auth import jwt_or_api_user_key_multi_auth
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.opportunities_v1.get_opportunity import (
     get_opportunity,
     get_opportunity_by_legacy_id,

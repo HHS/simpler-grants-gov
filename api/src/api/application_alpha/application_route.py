@@ -36,7 +36,7 @@ from src.auth.api_jwt_auth import api_jwt_auth
 from src.auth.multi_auth import jwt_key_or_internal_multi_auth, jwt_or_api_user_key_multi_auth
 from src.constants.lookup_constants import ApplicationAuditEvent
 from src.db.models.user_models import UserTokenSession
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.applications.add_organization_to_application import (
     add_organization_to_application,
 )

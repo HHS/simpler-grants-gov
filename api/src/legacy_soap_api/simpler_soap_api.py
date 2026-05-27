@@ -36,7 +36,7 @@ from src.legacy_soap_api.legacy_soap_api_utils import (
     get_soap_fault_error_response,
 )
 from src.legacy_soap_api.soap_payload_handler import get_soap_operation_name
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 

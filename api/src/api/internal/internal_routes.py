@@ -6,7 +6,7 @@ import src.api.internal.internal_schema as internal_schema
 import src.api.response as response
 from src.api.internal.internal_blueprint import internal_blueprint
 from src.auth.api_user_key_auth import api_user_key_auth
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.internal.create_e2e_token import create_e2e_token
 from src.services.internal.update_internal_user_role import update_internal_user_role
 

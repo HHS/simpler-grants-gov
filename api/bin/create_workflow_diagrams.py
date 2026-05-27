@@ -3,7 +3,7 @@ import pathlib
 
 from statemachine.contrib.diagram import DotGraphMachine
 
-import src.logging
+import grants_shared.logs
 from src.util.local import error_if_not_local
 from src.workflow.registry.workflow_registry import WorkflowRegistry
 
@@ -41,5 +41,5 @@ def create_workflow_diagrams() -> None:
 
 
 def main() -> None:
-    with src.logging.init(__package__):
+    with grants_shared.logs.init(__package__):
         create_workflow_diagrams()

@@ -38,7 +38,7 @@ from src.api.common_grants.schemas.marshmallow.schemas import (
     PaginatedQueryParams as PaginatedQueryParamsSchema,
 )
 from src.auth.api_user_key_auth import api_user_key_auth
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 from src.services.common_grants.opportunity_service import CommonGrantsOpportunityService
 from src.services.common_grants.transformation import build_filter_info
 from src.util.dict_util import flatten_dict

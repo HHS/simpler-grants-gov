@@ -568,6 +568,35 @@ wheels = [
 ]
 
 [[package]]
+name = "grants-shared"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "apiflask" },
+    { name = "boto3" },
+    { name = "botocore" },
+    { name = "jsonpath-ng" },
+    { name = "jsonref" },
+    { name = "jsonschema", extra = ["format-nongpl"] },
+    { name = "marshmallow" },
+    { name = "newrelic" },
+    { name = "pandas" },
+    { name = "pandas-stubs" },
+    { name = "psycopg", extra = ["binary"] },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "pyjwt", extra = ["crypto"] },
+    { name = "python-dotenv" },
+    { name = "pytz" },
+    { name = "smart-open" },
+    { name = "sqlalchemy", extra = ["mypy"] },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/32/98/b2312c1030399eb0562a42564bebbe9cfaf530f3e0c0f93a790706aababb/grants_shared-0.2.1.tar.gz", hash = "sha256:4f7b404b1575ce881cd595e7a67149d4c4770a76ddac7fccf7b0d7d9465c549b", size = 19804, upload-time = "2026-05-22T20:10:20.828Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d4/6f/95047836621631234e697cf4b04a588eb8ccf679fc775fee8b90f87daba9/grants_shared-0.2.1-py3-none-any.whl", hash = "sha256:bd485314ff26ff35fb35bea3bd16d45fd22cb9f1e5ab3471f90e28bbbb46bb2d", size = 20124, upload-time = "2026-05-22T20:10:19.674Z" },
+]
+
+[[package]]
 name = "graphviz"
 version = "0.21"
 source = { registry = "https://pypi.org/simple" }
@@ -1024,14 +1053,22 @@ wheels = [
 
 [[package]]
 name = "newrelic"
-version = "11.5.0"
+version = "12.1.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/19/09/7031e28416bd79111e4dc2986f54bbfdbd707bf712210388ff649a2528f0/newrelic-11.5.0.tar.gz", hash = "sha256:39607be7a43d1bff59119039b0e9c145bf27debbc2075ec24549817a8faf5a5c", size = 1415240, upload-time = "2026-02-20T00:17:29.971Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/56/16/4dd1efc8443e50ddb7f3b83ea35a45b08ded6e9bd4694e73720d90df9b8b/newrelic-12.1.0.tar.gz", hash = "sha256:309e515ae3cb7981919dd2eaf9d2c0510e46e3e3a60b915e5c79b8257ececa82", size = 1379969, upload-time = "2026-03-26T21:50:12.721Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/59/23/d626af55d35e46f822da657f5a0f117b4947b1e36b90371352d7e9b3c304/newrelic-11.5.0-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:051227445ab789128a490eb9cb3fe50af271488c9f15012e3eb937c46c4c5a1c", size = 927552, upload-time = "2026-02-20T00:17:06.283Z" },
-    { url = "https://files.pythonhosted.org/packages/bc/59/2bb56313a48ce69ddbdca25cf49ea4deca76bd9922e30f2b07bf0279861c/newrelic-11.5.0-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:e7085cbe9e2fd2c98fbcd67e82b245a9924522373033d80a712bb68b534fffa8", size = 928985, upload-time = "2026-02-20T00:17:08.846Z" },
-    { url = "https://files.pythonhosted.org/packages/07/a6/0e5843797442620b8874ec91f5c242dddb49361c3edbf3b9879c683d8e48/newrelic-11.5.0-cp314-cp314-musllinux_1_2_aarch64.whl", hash = "sha256:799c7c7b1cfa0e7a69982ef4f356eba6063f234d49c2f66e01205220768b89c8", size = 927158, upload-time = "2026-02-20T00:17:10.52Z" },
-    { url = "https://files.pythonhosted.org/packages/e7/60/5727f3a6c64374e39f78ef1434fbb77a032c7a2d6d570c4fb9c81154f823/newrelic-11.5.0-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:c2d61a523a5fcdaee58c547081b81d61ae613dd64a1c4c781c715c6e4bf5a54a", size = 927059, upload-time = "2026-02-20T00:17:12.439Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/7d/1f53b4a73619d39ee18cdbb1003b24c153ac846ebaaccfa37e20d6886306/newrelic-12.1.0-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:65eaa0eb614594c9892601f7a0e4e7b9c6efbc16f2c95aeb10178c5a693cd344", size = 920511, upload-time = "2026-03-26T21:49:45.131Z" },
+    { url = "https://files.pythonhosted.org/packages/33/b0/bf5219829f0b2f3bfdbcea5171a022ad6f4c979f1f430bff59ad52f4f716/newrelic-12.1.0-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:97b2bc236fec4fbfcd9e53b3bb7f63344fc89b3b2021dece5608ee6f009845bf", size = 924050, upload-time = "2026-03-26T21:49:46.675Z" },
+    { url = "https://files.pythonhosted.org/packages/00/2c/9ae170a9e13bc4c9125a7c85b7d0a031c69b3c7dbe51861b2ee9b7dcdee1/newrelic-12.1.0-cp314-cp314-musllinux_1_2_aarch64.whl", hash = "sha256:6cb2c1b7d93a3c7945bed0d9c61f91dab1e93de8f803679db76ca2056b864ec4", size = 921878, upload-time = "2026-03-26T21:49:48.728Z" },
+    { url = "https://files.pythonhosted.org/packages/c5/b8/fecad76aa1b9e4aa7572d15dd42f9b65a909027953ad83b852e1bb84feef/newrelic-12.1.0-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:f220830707cb4af47d403b22c5934854ac1331460ddda9204d42882b55059dde", size = 919652, upload-time = "2026-03-26T21:49:50.24Z" },
+    { url = "https://files.pythonhosted.org/packages/92/fe/96bb83fc0919843aaa161ff02d1a78ab58574e8e63cb2c09d88fa71b20de/newrelic-12.1.0-cp314-cp314-win_amd64.whl", hash = "sha256:13d4ec1f00db7868237d30cc92d4191139b38b5215f0f0ff194736749800ccc6", size = 853352, upload-time = "2026-03-26T21:49:52.346Z" },
+    { url = "https://files.pythonhosted.org/packages/be/ae/489d56517d58844cd53facd7c36ced6458e884988ceae9a14a19988cea05/newrelic-12.1.0-cp314-cp314-win_arm64.whl", hash = "sha256:a2057b4379c6f8e6349840433998c9df7abc1175b7ec66229e70ce0a6b66aa0d", size = 850549, upload-time = "2026-03-26T21:49:53.984Z" },
+    { url = "https://files.pythonhosted.org/packages/da/10/7f844635367fcf9721970a850105affc7793f749f80862f0fc20b42e4657/newrelic-12.1.0-cp314-cp314t-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:6f32c4d5cae4bea17d385480f86ca98d841480af166243271b233244c3c7a4e0", size = 955001, upload-time = "2026-03-26T21:49:56.074Z" },
+    { url = "https://files.pythonhosted.org/packages/e6/ac/f24078c8aa40ba6340faa3ababf0503c47d5c73944b102254c7a3db8493b/newrelic-12.1.0-cp314-cp314t-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:214a06e33af8c973909b272a9508feaa11feddb924494157944cdf8dd51c8239", size = 962889, upload-time = "2026-03-26T21:49:57.657Z" },
+    { url = "https://files.pythonhosted.org/packages/c1/67/6efae990302d435511867a83e2c61433489d421355fca1388c8e9fd950c3/newrelic-12.1.0-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:4dc1833bbd271390cbf9a671f50566924344efdd68025dca12230321d3d5dc2d", size = 958832, upload-time = "2026-03-26T21:49:59.088Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/ab/72cae97164de845590c23d9c9b930a4242ec7aa7cc44454ea07ded5697be/newrelic-12.1.0-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:3fbd2adcf20f4ef0cae3379feb0c354c1d34ac139035d1f21f69669f488a907d", size = 952482, upload-time = "2026-03-26T21:50:00.561Z" },
+    { url = "https://files.pythonhosted.org/packages/9e/b2/97cf773ff6921353c109eb6763313651d91da38302bde9f62f8d7c813410/newrelic-12.1.0-cp314-cp314t-win_amd64.whl", hash = "sha256:bf618a355b49aac3118266aa743a159201247266f330bccd7c0035a9939c396a", size = 856775, upload-time = "2026-03-26T21:50:02.433Z" },
+    { url = "https://files.pythonhosted.org/packages/11/cf/60db73f4af7c5e4fe06a926b2553e51ae0fe5a5fc60ba80c18c22932950d/newrelic-12.1.0-cp314-cp314t-win_arm64.whl", hash = "sha256:1b37f10844fd27b81d80351d1c3623e0fda434b86b01e3942ff4511161df5eee", size = 852149, upload-time = "2026-03-26T21:50:03.919Z" },
 ]
 
 [[package]]
@@ -1387,11 +1424,11 @@ wheels = [
 
 [[package]]
 name = "pytz"
-version = "2023.4"
+version = "2026.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ae/fd/c5bafe60236bc2a464452f916b6a1806257109c8954d6a7d19e5d4fb012f/pytz-2023.4.tar.gz", hash = "sha256:31d4583c4ed539cd037956140d695e42c033a19e984bfce9964a3f7d59bc2b40", size = 319467, upload-time = "2024-01-29T03:49:27.068Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ff/46/dd499ec9038423421951e4fad73051febaa13d2df82b4064f87af8b8c0c3/pytz-2026.2.tar.gz", hash = "sha256:0e60b47b29f21574376f218fe21abc009894a2321ea16c6754f3cad6eb7cdd6a", size = 320861, upload-time = "2026-05-04T01:35:29.667Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3b/dd/9b84302ba85ac6d3d3042d3e8698374838bde1c386b4adb1223d7a0efd4e/pytz-2023.4-py2.py3-none-any.whl", hash = "sha256:f90ef520d95e7c46951105338d918664ebfd6f1d995bd7d153127ce90efafa6a", size = 506530, upload-time = "2024-01-29T03:41:21.437Z" },
+    { url = "https://files.pythonhosted.org/packages/ec/dd/96da98f892250475bdf2328112d7468abdd4acc7b902b6af23f4ed958ea0/pytz-2026.2-py2.py3-none-any.whl", hash = "sha256:04156e608bee23d3792fd45c94ae47fae1036688e75032eea2e3bf0323d1f126", size = 510141, upload-time = "2026-05-04T01:35:27.408Z" },
 ]
 
 [[package]]
@@ -1629,6 +1666,7 @@ dependencies = [
     { name = "defusedxml" },
     { name = "docraptor" },
     { name = "flask-cors" },
+    { name = "grants-shared" },
     { name = "gunicorn" },
     { name = "jinja2" },
     { name = "jsonpath-ng" },
@@ -1695,6 +1733,7 @@ requires-dist = [
     { name = "defusedxml", specifier = ">=0.7.1,<0.8" },
     { name = "docraptor", specifier = ">=3.0.0,<4" },
     { name = "flask-cors", specifier = ">=6.0.0,<7" },
+    { name = "grants-shared", specifier = ">=0.2.1" },
     { name = "gunicorn", specifier = ">=23.0.0,<24" },
     { name = "jinja2", specifier = ">=3.1.5" },
     { name = "jsonpath-ng", specifier = ">=1.7.0,<2" },
@@ -1703,7 +1742,7 @@ requires-dist = [
     { name = "lxml", specifier = ">=6.0.0,<7" },
     { name = "marshmallow", specifier = ">=3.20.1,<4" },
     { name = "marshmallow-dataclass", specifier = ">=8.5.8,<9" },
-    { name = "newrelic", specifier = "==11.5.0" },
+    { name = "newrelic", specifier = ">=12.1.0,<13" },
     { name = "opensearch-py", specifier = ">=2.5.0,<3" },
     { name = "pandas", specifier = ">=2.0.3,<3" },
     { name = "pandas-stubs", specifier = ">=2.0.2.230605,<3" },
@@ -1714,7 +1753,7 @@ requires-dist = [
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.9.0,<3" },
     { name = "python-dotenv", specifier = ">=1.0.0,<2" },
     { name = "python-statemachine", specifier = ">=3.0.0,<4" },
-    { name = "pytz", specifier = ">=2023.3.post1,<2024" },
+    { name = "pytz", specifier = ">=2026.2,<2027" },
     { name = "pyyaml", specifier = ">=6.0.3,<7" },
     { name = "smart-open", specifier = ">=7.0.0,<8" },
     { name = "sqlalchemy", extras = ["mypy"], specifier = ">=2.0.21,<3" },

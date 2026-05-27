@@ -16,7 +16,7 @@ import rich.pretty
 import src.adapters.db as db
 import src.db  # noqa: F401 isort:skip
 import src.db.models
-import src.logging
+import grants_shared.logs
 import src.util
 import tests.src.db.models.factories
 from src.adapters.db.clients.postgres_client import PostgresDBClient
@@ -132,7 +132,7 @@ def reload_module(m: ModuleType) -> None:
 
 
 if __name__ == "__main__":
-    with src.logging.init(__package__):
+    with grants_shared.logs.init(__package__):
         interactive_variables = interactive_console()
         globals().update(interactive_variables)
         rich.pretty.install(indent_guides=True, max_length=20, max_string=400)

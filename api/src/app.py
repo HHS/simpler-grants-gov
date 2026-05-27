@@ -13,8 +13,8 @@ import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
-import src.logging
-import src.logging.flask_logger as flask_logger
+import grants_shared.logs
+import grants_shared.logs.flask_logger as flask_logger
 from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.application_alpha import application_blueprint
@@ -121,8 +121,8 @@ def create_app() -> APIFlask:
 
 
 def setup_logging(app: APIFlask) -> None:
-    src.logging.init(__package__)
-    flask_logger.init_app(logging.root, app)
+    grants_shared.logs.init(__package__)
+    flask_logger.init_app(logging.root, app, "simpler-grants")
 
 
 def register_db_client(app: APIFlask) -> None:

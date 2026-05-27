@@ -13,7 +13,7 @@ from src.auth.api_jwt_auth import ApiJwtConfig, get_config
 from src.auth.auth_errors import JwtValidationError
 from src.auth.jwt_user_http_token_auth import JwtUserHttpTokenAuth
 from src.db.models.competition_models import ShortLivedInternalToken
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
 
 logger = logging.getLogger(__name__)
 

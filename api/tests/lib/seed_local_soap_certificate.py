@@ -12,7 +12,7 @@ from cryptography.x509.oid import NameOID
 from sqlalchemy import select
 
 import src.adapters.db as db
-import src.logging
+import grants_shared.logs
 import src.util.datetime_util as datetime_util
 import tests.src.db.models.factories as factories
 from src.constants.lookup_constants import Privilege
@@ -165,7 +165,7 @@ def _build_legacy_certificate_and_submission(
     help="Agency code to use (defaults to agency of first submission it can find)",
 )
 def seed_local_soap_certificate(dir_path: str | None, agency_code: str | None = None) -> None:
-    with src.logging.init("seed_local_soap_certificate"):
+    with grants_shared.logs.init("seed_local_soap_certificate"):
         logger.info("Running seed script for local soap certificate testing")
         db_client = db.PostgresDBClient()
         with db_client.get_session() as db_session:
