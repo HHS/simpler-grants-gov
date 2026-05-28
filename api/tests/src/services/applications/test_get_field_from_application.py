@@ -46,7 +46,7 @@ def add_form_to_application(
 def test_get_project_title_from_application_sf424(
     db_session, enable_factory_create, load_active_forms
 ):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     add_form_to_application(
         db_session, application, SF424_v4_0, {"project_title": "my fun project"}
     )
@@ -56,7 +56,7 @@ def test_get_project_title_from_application_sf424(
 def test_get_project_title_from_project_abstract_summary(
     db_session, enable_factory_create, load_active_forms
 ):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     add_form_to_application(
         db_session,
         application,
@@ -69,7 +69,7 @@ def test_get_project_title_from_project_abstract_summary(
 def test_get_project_title_no_form_with_value_present(
     db_session, enable_factory_create, load_active_forms
 ):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     # Add a few forms with various fields
     add_form_to_application(db_session, application, SF424a_v1_0, {"activity_line_items": []})
     add_form_to_application(db_session, application, SF424b_v1_1, {"title": "a different title"})
@@ -83,7 +83,7 @@ def test_get_project_title_no_form_with_value_present(
 
 
 def test_get_project_title_both_forms_present(db_session, enable_factory_create, load_active_forms):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     # Both forms are present, so the first one in the list is used
     add_form_to_application(
         db_session, application, SF424_v4_0, {"project_title": "my fun project"}
@@ -100,7 +100,7 @@ def test_get_project_title_both_forms_present(db_session, enable_factory_create,
 def test_get_project_title_both_forms_present_null_on_first(
     db_session, enable_factory_create, load_active_forms
 ):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     # Both forms are present, so the first one in the list is used
     add_form_to_application(db_session, application, SF424_v4_0, {"project_title": None})
     add_form_to_application(
@@ -115,13 +115,13 @@ def test_get_project_title_both_forms_present_null_on_first(
 def test_get_project_title_from_application_bad_title(
     db_session, enable_factory_create, load_active_forms
 ):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     add_form_to_application(db_session, application, SF424_v4_0, {"project_title": 123})
     assert get_project_title_from_application(application) is None
 
 
 def test_get_requested_amount_sf424(db_session, enable_factory_create, load_active_forms):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     add_form_to_application(
         db_session, application, SF424_v4_0, {"federal_estimated_funding": "100.12"}
     )
@@ -129,7 +129,7 @@ def test_get_requested_amount_sf424(db_session, enable_factory_create, load_acti
 
 
 def test_get_requested_amount_sf424a(db_session, enable_factory_create, load_active_forms):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     add_form_to_application(
         db_session,
         application,
@@ -142,7 +142,7 @@ def test_get_requested_amount_sf424a(db_session, enable_factory_create, load_act
 def test_get_requested_amount_both_forms_present(
     db_session, enable_factory_create, load_active_forms
 ):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     # Both forms are present, so the first one in the list is used
     add_form_to_application(
         db_session, application, SF424_v4_0, {"federal_estimated_funding": "35.45"}
@@ -159,7 +159,7 @@ def test_get_requested_amount_both_forms_present(
 def test_get_requested_amount_both_forms_present_null_on_first(
     db_session, enable_factory_create, load_active_forms
 ):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     add_form_to_application(
         db_session, application, SF424_v4_0, {"non_federal_estimated_funding": "123.45"}
     )
@@ -175,7 +175,7 @@ def test_get_requested_amount_both_forms_present_null_on_first(
 def test_get_requested_amount_no_form_with_value_present(
     db_session, enable_factory_create, load_active_forms
 ):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     # Add a few forms with various fields
     add_form_to_application(db_session, application, SF424b_v1_1, {"title": "a different title"})
     add_form_to_application(db_session, application, SF424d_v1_1, {"title": "yet another title"})
@@ -196,7 +196,7 @@ def test_get_requested_amount_no_form_with_value_present(
 def test_get_requested_amount_bad_monetary_amount(
     db_session, enable_factory_create, load_active_forms
 ):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     add_form_to_application(
         db_session,
         application,
@@ -209,7 +209,7 @@ def test_get_requested_amount_bad_monetary_amount(
 def test_get_project_title_in_non_included_form(
     db_session, enable_factory_create, load_active_forms
 ):
-    application = ApplicationFactory.create()
+    application = ApplicationFactory.create(competition__competition_forms=[])
     # The first form won't be used because it's not included in the submission and isn't required
     add_form_to_application(
         db_session,

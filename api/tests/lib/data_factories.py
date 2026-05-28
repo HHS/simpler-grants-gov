@@ -62,7 +62,6 @@ def _make_form(**kwargs) -> Form:
     form = Form(**defaults)
     db_session = get_db_session()
     db_session.add(form)
-    db_session.flush()
     return form
 
 
