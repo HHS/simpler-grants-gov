@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 
 class CompetitionCreateItem(BaseModel):
-    opportunity_id: uuid.UUID
     competition_title: str
     opening_date: date | None
     closing_date: date | None
@@ -23,12 +22,14 @@ class CompetitionCreateItem(BaseModel):
     open_to_applicants: list[CompetitionOpenToApplicant]
 
 
-def create_competition(db_session: db.Session, user: User, competition_data: dict) -> Competition:
+def create_competition(
+    db_session: db.Session, user: User, competition_data: dict, opportunity_id: uuid.UUID
+) -> Competition:
     # Parse and validate input
     request = CompetitionCreateItem(**competition_data)
 
     # Check if opportunity exists
-    opportunity = get_opportunity_for_grantors(db_session, user, request.opportunity_id)
+    opportunity = get_opportunity_for_grantors(db_session, user, opportunity_id)
 
     # Check if user has permission to update opportunities for this agency
     verify_access(user, {Privilege.UPDATE_OPPORTUNITY}, opportunity.agency_record)
@@ -36,7 +37,7 @@ def create_competition(db_session: db.Session, user: User, competition_data: dic
     # Create the competition
     competition = Competition(
         competition_id=uuid.uuid4(),
-        opportunity_id=request.opportunity_id,
+        opportunity_id=opportunity_id,
         competition_title=request.competition_title,
         opening_date=request.opening_date,
         closing_date=request.closing_date,
@@ -57,7 +58,7 @@ def create_competition(db_session: db.Session, user: User, competition_data: dic
         "Created competition",
         extra={
             "competition_id": competition.competition_id,
-            "opportunity_id": request.opportunity_id,
+            "opportunity_id": opportunity_id,
         },
     )
 

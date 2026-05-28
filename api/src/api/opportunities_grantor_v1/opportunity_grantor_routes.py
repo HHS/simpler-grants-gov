@@ -284,7 +284,6 @@ def competition_create(
         user = jwt_or_api_user_key_multi_auth.get_user()
         db_session.add(user)
 
-        json_data["opportunity_id"] = opportunity_id
-        competition = create_competition(db_session, user, json_data)
+        competition = create_competition(db_session, user, json_data, opportunity_id)
 
     return response.ApiResponse(message="Success", data=competition)
