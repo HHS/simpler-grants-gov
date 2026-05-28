@@ -1654,7 +1654,6 @@ dependencies = [
     { name = "sqlalchemy", extra = ["mypy"] },
     { name = "tenacity" },
     { name = "urllib3" },
-    { name = "watchfiles" },
     { name = "xlrd" },
     { name = "xmlschema" },
     { name = "xmltodict" },
@@ -1683,6 +1682,7 @@ dev = [
     { name = "types-pytz" },
     { name = "types-pyyaml" },
     { name = "types-requests" },
+    { name = "watchfiles" },
 ]
 
 [package.metadata]
@@ -1721,7 +1721,6 @@ requires-dist = [
     { name = "sqlalchemy", extras = ["mypy"], specifier = ">=2.0.21,<3" },
     { name = "tenacity", specifier = ">=8.0,<9" },
     { name = "urllib3", specifier = ">=2.7.0,<3" },
-    { name = "watchfiles", specifier = ">=1.0.0,<2" },
     { name = "xlrd", specifier = ">=2.0.1,<3" },
     { name = "xmlschema", specifier = ">=3.4.0,<4" },
     { name = "xmltodict", specifier = ">=1.0.0,<2" },
@@ -1750,6 +1749,7 @@ dev = [
     { name = "types-pytz", specifier = ">=2023.3.1.1,<2024" },
     { name = "types-pyyaml", specifier = ">=6.0.12.11,<7" },
     { name = "types-requests", specifier = ">=2.31,<3" },
+    { name = "watchfiles", specifier = ">=1.0.0,<2" },
 ]
 
 [[package]]
