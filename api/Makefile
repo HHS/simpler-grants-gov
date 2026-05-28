@@ -260,7 +260,7 @@ start-mock-oauth2:
 # Testing
 ##################################################
 
-test: ## Run all tests except for audit logging and XML validation tests
+test: ## Run all tests except for audit logging
 	$(PY_RUN_CMD) pytest -m "not audit" $(args)
 
 test-audit: ## Run audit logging tests
