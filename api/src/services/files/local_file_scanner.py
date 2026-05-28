@@ -8,7 +8,6 @@ from typing import Any
 
 from pydantic import Field
 from sqlalchemy import select
-from watchfiles import Change, watch
 
 import src.adapters.db as db
 import src.util.file_util as file_util
@@ -16,6 +15,8 @@ from src.adapters.aws.dynamodb_adapter import DynamoDBClient, DynamoDBConfig
 from src.adapters.aws.s3_adapter import S3Config
 from src.constants.lookup_constants import FileScanStatus
 from src.db.models.file_upload_models import PendingFile
+from src.db.models.user_models import User
+from src.services.files.update_pending_file_scan_status import update_pending_file_scan_status
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)
@@ -26,15 +27,16 @@ logger = logging.getLogger(__name__)
 SCENARIO_INFECTED = "scenario-infected"
 SCENARIO_WAIT_10S = "scenario-wait10s"
 
-WAIT_10S_DELAY_SECONDS = 10
-
-# Pause briefly after a metadata change so we don't read s3mock's file mid-write
-# during a slow / multi-part upload. We have no signal from the file system that
-# tells us the upload is "done", so we rely on this short fixed delay.
-PRE_PROCESS_DELAY_SECONDS = 1.0
-
 UNSCANNED_PREFIX = "unscanned/"
 INFECTED_PREFIX = "infected/"
+SCANNED_PREFIX = "scanned/"
+
+# Every terminal status moves the file out of unscanned/
+# Clean files to scanned/, infected ones to a quarantine prefix.
+TERMINAL_STATUS_PREFIX: dict[FileScanStatus, str] = {
+    FileScanStatus.COMPLETE: SCANNED_PREFIX,
+    FileScanStatus.INFECTED: INFECTED_PREFIX,
+}
 
 # s3mock writes this file alongside each object after the upload completes,
 # which is what we use as the signal that a file is ready to be scanned.
@@ -55,17 +57,29 @@ class _EnvironmentConfig(PydanticBaseEnvConfig):
 
 class LocalFileScannerConfig(PydanticBaseEnvConfig):
     # Required (not defaulted) so a misconfigured local env explodes early
-    # rather than silently spawning a scanner thread we didn't want.
-    disable_local_file_scanner: bool = Field(alias="DISABLE_LOCAL_FILE_SCANNER")
+    # rather than silently spawning (or not spawning) the scanner thread.
+    enable_local_file_scanner: bool = Field(alias="ENABLE_LOCAL_FILE_SCANNER")
     # Path the api container can read s3mock's on-disk store from.
     local_s3_store_path: str = Field(alias="LOCAL_S3_STORE_PATH")
+    # Pause this long after a metadata change before reading s3mock's file,
+    # so we don't catch a slow / multi-part upload mid-write. We have no
+    # signal from the file system that tells us the upload is "done".
+    pre_process_delay_seconds: float = Field(alias="LOCAL_FILE_SCANNER_PRE_PROCESS_DELAY_SECONDS")
+    # How long the scenario-wait10s path sleeps between in_progress and the
+    # final terminal status. Configurable so tests can set it to zero.
+    wait_scenario_delay_seconds: float = Field(
+        alias="LOCAL_FILE_SCANNER_WAIT_SCENARIO_DELAY_SECONDS"
+    )
+    # User the scanner authenticates as when calling the file-scan callback
+    # service. Must hold the INTERNAL_S3_SCAN privilege.
+    file_scanner_user_id: uuid.UUID = Field(alias="LOCAL_FILE_SCANNER_USER_ID")
 
 
 def setup_local_file_scanner() -> None:
     """Start a background thread that mocks the s3 virus-scanning lambda.
 
-    Runs only when ENVIRONMENT=local, the scanner is not explicitly disabled,
-    and WERKZEUG_RUN_MAIN=true. The Flask reloader sets that env var in its
+    Runs only when ENVIRONMENT=local, ENABLE_LOCAL_FILE_SCANNER=TRUE, and
+    WERKZEUG_RUN_MAIN=true. The Flask reloader sets that last env var in its
     worker child only -- gating on it prevents the parent from starting a
     second copy of the thread.
     """
@@ -74,7 +88,7 @@ def setup_local_file_scanner() -> None:
         return
 
     config = LocalFileScannerConfig()
-    if config.disable_local_file_scanner:
+    if not config.enable_local_file_scanner:
         return
 
     if env.werkzeug_run_main != "true":
@@ -100,6 +114,9 @@ def setup_local_file_scanner() -> None:
 
 
 def _run_scanner(watch_path: Path) -> None:
+    # Imported inline because watchfiles is a dev-only dependency
+    from watchfiles import Change, watch
+
     db_client = db.PostgresDBClient()
 
     # force_polling makes the watcher work across Docker bind mounts on macOS
@@ -126,7 +143,8 @@ def _spawn_worker(metadata_file_path: str, db_client: db.DBClient) -> None:
 
 def _safe_process_metadata_change(metadata_file_path: str, db_client: db.DBClient) -> None:
     try:
-        time.sleep(PRE_PROCESS_DELAY_SECONDS)
+        config = LocalFileScannerConfig()
+        time.sleep(config.pre_process_delay_seconds)
         process_metadata_change(metadata_file_path, db_client)
     except Exception:
         logger.exception(
@@ -165,11 +183,9 @@ def process_metadata_change(metadata_file_path: str, db_client: db.DBClient) -> 
 
     if scenario == SCENARIO_WAIT_10S:
         _apply_status(db_client, pending_file_id, FileScanStatus.IN_PROGRESS, log_extra)
-        time.sleep(WAIT_10S_DELAY_SECONDS)
+        time.sleep(LocalFileScannerConfig().wait_scenario_delay_seconds)
 
-    if final_status == FileScanStatus.INFECTED:
-        _move_to_infected(s3_key)
-
+    _move_to_terminal_prefix(s3_key, final_status)
     _apply_status(db_client, pending_file_id, final_status, log_extra)
 
     logger.info(
@@ -233,19 +249,38 @@ def _update_pending_file_status(
     status: FileScanStatus,
     log_extra: dict[str, Any],
 ) -> uuid.UUID | None:
-    user_id: uuid.UUID | None = None
+    """Update the pending_file row via the shared service function.
+
+    Returns the uploader's user_id (for the DynamoDB record), or None when
+    the row is missing or the scanner user is misconfigured.
+    """
+    config = LocalFileScannerConfig()
+    uploader_user_id: uuid.UUID | None = None
     with db_client.get_session() as db_session, db_session.begin():
-        stmt = select(PendingFile).where(PendingFile.pending_file_id == pending_file_id)
-        pending_file = db_session.execute(stmt).scalar_one_or_none()
+        scanner_user = db_session.execute(
+            select(User).where(User.user_id == config.file_scanner_user_id)
+        ).scalar_one_or_none()
+        if scanner_user is None:
+            logger.error(
+                "Local file scanner user not found",
+                extra={**log_extra, "scanner_user_id": config.file_scanner_user_id},
+            )
+            return None
+
+        # Pre-check so a missing file is a warning, not the 404 the service would raise
+        pending_file = db_session.execute(
+            select(PendingFile).where(PendingFile.pending_file_id == pending_file_id)
+        ).scalar_one_or_none()
         if pending_file is None:
             logger.warning(
                 "Local file scanner could not find pending file row",
                 extra=log_extra,
             )
-        else:
-            pending_file.file_scan_status = status
-            user_id = pending_file.user_id
-    return user_id
+            return None
+
+        uploader_user_id = pending_file.user_id
+        update_pending_file_scan_status(db_session, pending_file_id, status, scanner_user)
+    return uploader_user_id
 
 
 def _write_dynamodb_status(
@@ -263,8 +298,7 @@ def _write_dynamodb_status(
     )
 
 
-def _move_to_infected(s3_key: str) -> None:
-    s3_config = S3Config()
-    bucket_path = s3_config.file_scan_bucket_path
-    infected_key = INFECTED_PREFIX + s3_key[len(UNSCANNED_PREFIX) :]
-    file_util.move_file(f"{bucket_path}/{s3_key}", f"{bucket_path}/{infected_key}")
+def _move_to_terminal_prefix(s3_key: str, status: FileScanStatus) -> None:
+    bucket_path = S3Config().file_scan_bucket_path
+    destination_key = TERMINAL_STATUS_PREFIX[status] + s3_key[len(UNSCANNED_PREFIX) :]
+    file_util.move_file(f"{bucket_path}/{s3_key}", f"{bucket_path}/{destination_key}")

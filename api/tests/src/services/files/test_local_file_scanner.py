@@ -90,19 +90,24 @@ class TestDetectScenario:
 
 
 class TestProcessMetadataChange:
-    def test_complete_path_updates_postgres_and_dynamodb(
+    def test_complete_path_moves_file_and_updates_status(
         self,
         tmp_path,
         db_client,
         db_session,
         aws_setup,
+        s3_scanner_user,
     ):
         pending_file = factories.PendingFileFactory.create(file_scan_status=FileScanStatus.PENDING)
         db_session.commit()
 
+        s3_client = boto3.client("s3", region_name="us-east-1")
+        unscanned_key = f"unscanned/{pending_file.pending_file_id}/resume.pdf"
+        s3_client.put_object(Bucket=aws_setup["bucket"], Key=unscanned_key, Body=b"file contents")
+
         metadata_path = _write_metadata(
             tmp_path / pending_file.pending_file_id.hex / "objectMetadata.json",
-            f"unscanned/{pending_file.pending_file_id}/resume.pdf",
+            unscanned_key,
         )
 
         process_metadata_change(str(metadata_path), db_client)
@@ -117,12 +122,21 @@ class TestProcessMetadataChange:
         assert item["status"]["S"] == FileScanStatus.COMPLETE.value
         assert item["user_id"]["S"] == str(pending_file.user_id)
 
+        expected_scanned_key = f"scanned/{pending_file.pending_file_id}/resume.pdf"
+        moved_body = s3_client.get_object(Bucket=aws_setup["bucket"], Key=expected_scanned_key)[
+            "Body"
+        ].read()
+        assert moved_body == b"file contents"
+        with pytest.raises(s3_client.exceptions.NoSuchKey):
+            s3_client.get_object(Bucket=aws_setup["bucket"], Key=unscanned_key)
+
     def test_infected_scenario_moves_file_and_marks_infected(
         self,
         tmp_path,
         db_client,
         db_session,
         aws_setup,
+        s3_scanner_user,
     ):
         pending_file = factories.PendingFileFactory.create(file_scan_status=FileScanStatus.PENDING)
         db_session.commit()
@@ -157,18 +171,23 @@ class TestProcessMetadataChange:
         db_client,
         db_session,
         aws_setup,
+        s3_scanner_user,
         caplog,
         monkeypatch,
     ):
         # Skip the actual 10s wait; we only care about the status sequence.
-        monkeypatch.setattr(local_file_scanner, "WAIT_10S_DELAY_SECONDS", 0)
+        monkeypatch.setenv("LOCAL_FILE_SCANNER_WAIT_SCENARIO_DELAY_SECONDS", "0")
 
         pending_file = factories.PendingFileFactory.create(file_scan_status=FileScanStatus.PENDING)
         db_session.commit()
 
+        s3_client = boto3.client("s3", region_name="us-east-1")
+        unscanned_key = f"unscanned/{pending_file.pending_file_id}/scenario-wait10s-cover.pdf"
+        s3_client.put_object(Bucket=aws_setup["bucket"], Key=unscanned_key, Body=b"file contents")
+
         metadata_path = _write_metadata(
             tmp_path / pending_file.pending_file_id.hex / "objectMetadata.json",
-            f"unscanned/{pending_file.pending_file_id}/scenario-wait10s-cover.pdf",
+            unscanned_key,
         )
 
         with caplog.at_level("INFO"):
@@ -209,12 +228,19 @@ class TestProcessMetadataChange:
         tmp_path,
         db_client,
         aws_setup,
+        s3_scanner_user,
         caplog,
     ):
         unknown_id = uuid.uuid4()
+        # Upload the s3 file so _move_to_terminal_prefix has something to move;
+        # the test is verifying the postgres-side missing-row behavior, not S3.
+        s3_client = boto3.client("s3", region_name="us-east-1")
+        unscanned_key = f"unscanned/{unknown_id}/file.pdf"
+        s3_client.put_object(Bucket=aws_setup["bucket"], Key=unscanned_key, Body=b"x")
+
         metadata_path = _write_metadata(
             tmp_path / "obj" / "objectMetadata.json",
-            f"unscanned/{unknown_id}/file.pdf",
+            unscanned_key,
         )
 
         with caplog.at_level("WARNING"):
@@ -235,7 +261,7 @@ class TestProcessMetadataChange:
 
 
 class TestSetupLocalFileScanner:
-    """DISABLE_LOCAL_FILE_SCANNER is forced TRUE in conftest, so each test
+    """ENABLE_LOCAL_FILE_SCANNER is forced FALSE in conftest, so each test
     re-enables it before re-checking one specific guard."""
 
     def _scanner_thread_running(self) -> bool:
@@ -246,13 +272,13 @@ class TestSetupLocalFileScanner:
 
     def test_does_not_spawn_when_environment_is_not_local(self, monkeypatch):
         monkeypatch.setenv("ENVIRONMENT", "prod")
-        monkeypatch.setenv("DISABLE_LOCAL_FILE_SCANNER", "FALSE")
+        monkeypatch.setenv("ENABLE_LOCAL_FILE_SCANNER", "TRUE")
         setup_local_file_scanner()
         assert not self._scanner_thread_running()
 
     def test_does_not_spawn_when_disabled(self, monkeypatch):
         monkeypatch.setenv("ENVIRONMENT", "local")
-        monkeypatch.setenv("DISABLE_LOCAL_FILE_SCANNER", "TRUE")
+        monkeypatch.setenv("ENABLE_LOCAL_FILE_SCANNER", "FALSE")
         setup_local_file_scanner()
         assert not self._scanner_thread_running()
 
@@ -261,7 +287,7 @@ class TestSetupLocalFileScanner:
         # worker; the parent imports the app with the var unset. We must not
         # spawn the thread there or it ends up running twice.
         monkeypatch.setenv("ENVIRONMENT", "local")
-        monkeypatch.setenv("DISABLE_LOCAL_FILE_SCANNER", "FALSE")
+        monkeypatch.setenv("ENABLE_LOCAL_FILE_SCANNER", "TRUE")
         monkeypatch.delenv("WERKZEUG_RUN_MAIN", raising=False)
         setup_local_file_scanner()
         assert not self._scanner_thread_running()

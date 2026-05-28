@@ -46,7 +46,6 @@ dependencies = [
     "urllib3>=2.7.0,<3",
     "python-statemachine>=3.0.0,<4",
     "beautifulsoup4>=4.14.3,<5",
-    "watchfiles>=1.0.0,<2",
 ]
 
 [project.scripts]
@@ -88,6 +87,7 @@ dev = [
     "types-requests>=2.31,<3",
     "graphviz>=0.21,<0.22",
     "eralchemy>=1.5.0,<2",
+    "watchfiles>=1.0.0,<2",
 ]
 
 [tool.uv]
