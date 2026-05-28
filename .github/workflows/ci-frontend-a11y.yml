@@ -63,6 +63,9 @@ jobs:
       - name: Clear Puppeteer browser cache
         run: rm -rf ~/.cache/puppeteer
 
+      - name: Install Chrome for Puppeteer
+        run: npx puppeteer browsers install chrome
+
       - name: Run pa11y-ci
         run: |
           set -e # Ensure the script fails if any command fails
