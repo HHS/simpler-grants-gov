@@ -50,6 +50,7 @@ class TestSFLLLXMLGeneration:
             opening_date=date(2026, 1, 21),
             closing_date=date(2027, 1, 2),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         application = ApplicationFactory.create(

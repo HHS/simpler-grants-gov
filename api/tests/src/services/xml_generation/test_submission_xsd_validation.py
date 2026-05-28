@@ -70,6 +70,7 @@ class TestSubmissionXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         sf424_form = db_session.get(Form, SF424_v4_0.form_id)
@@ -157,6 +158,7 @@ class TestSubmissionXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         sf424a_form = db_session.get(Form, SF424a_v1_0.form_id)
@@ -335,6 +337,7 @@ class TestSubmissionXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         application = ApplicationFactory.create(
@@ -553,6 +556,7 @@ class TestSubmissionXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         sflll_form = db_session.get(Form, SFLLL_v2_0.form_id)
@@ -690,6 +694,7 @@ class TestSubmissionXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         sflll_form = db_session.get(Form, SFLLL_v2_0.form_id)

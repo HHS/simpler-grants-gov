@@ -523,6 +523,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         neh_form = db_session.get(Form, SupplementaryNEHCoverSheet_v3_0.form_id)
@@ -636,6 +637,7 @@ class TestSupplementaryNEHCoverSheetXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         neh_form = db_session.get(Form, SupplementaryNEHCoverSheet_v3_0.form_id)

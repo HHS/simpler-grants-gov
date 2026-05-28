@@ -243,6 +243,7 @@ class TestGGLobbyingFormXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         gg_lobbying_form = db_session.get(Form, GG_LobbyingForm_v1_1.form_id)
@@ -345,6 +346,7 @@ class TestGGLobbyingFormXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         gg_lobbying_form = db_session.get(Form, GG_LobbyingForm_v1_1.form_id)

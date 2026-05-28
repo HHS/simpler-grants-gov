@@ -46,6 +46,7 @@ class TestSubmissionXMLAssembler:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         sf424_form = db_session.get(Form, SF424_v4_0.form_id)
@@ -443,6 +444,7 @@ class TestSubmissionXMLAssembler:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         # Create an UNSUPPORTED form (SF-424A doesn't have XML transform config)

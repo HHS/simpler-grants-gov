@@ -468,6 +468,7 @@ class TestEPAKeyContactsXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         epa_kc_form = db_session.get(Form, EPA_KEY_CONTACT_v2_0.form_id)
@@ -587,6 +588,7 @@ class TestEPAKeyContactsXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         epa_kc_form = db_session.get(Form, EPA_KEY_CONTACT_v2_0.form_id)
