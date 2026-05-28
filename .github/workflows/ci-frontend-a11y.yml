@@ -31,12 +31,23 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
 
       - name: Install dependencies
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
         run: npm ci
 
       - name: Install Chrome for Puppeteer
         run: |
+          set -euo pipefail
           rm -rf ~/.cache/puppeteer
           npx puppeteer browsers install chrome
+          chrome_bin=$(find ~/.cache/puppeteer/chrome -type f -name chrome -perm -u+x | head -n1)
+          if [ -z "$chrome_bin" ]; then
+            echo "::error::Chrome binary not found under ~/.cache/puppeteer/chrome after install"
+            ls -laR ~/.cache/puppeteer || true
+            exit 1
+          fi
+          echo "Chrome installed at: $chrome_bin"
+          "$chrome_bin" --version
 
       - name: Create screenshots directory
         run: mkdir -p screenshots-output
