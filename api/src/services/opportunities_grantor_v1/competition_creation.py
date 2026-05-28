@@ -1,12 +1,9 @@
 import logging
 import uuid
-from datetime import date
-
-from pydantic import BaseModel
 
 import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
-from src.constants.lookup_constants import CompetitionOpenToApplicant, Privilege
+from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import Competition
 from src.db.models.user_models import User
 from src.services.opportunities_grantor_v1.get_opportunity import get_opportunity_for_grantors
@@ -14,19 +11,9 @@ from src.services.opportunities_grantor_v1.get_opportunity import get_opportunit
 logger = logging.getLogger(__name__)
 
 
-class CompetitionCreateItem(BaseModel):
-    competition_title: str
-    opening_date: date | None
-    closing_date: date | None
-    contact_info: str
-    open_to_applicants: list[CompetitionOpenToApplicant]
-
-
 def create_competition(
     db_session: db.Session, user: User, competition_data: dict, opportunity_id: uuid.UUID
 ) -> Competition:
-    # Parse and validate input
-    request = CompetitionCreateItem(**competition_data)
 
     # Check if opportunity exists
     opportunity = get_opportunity_for_grantors(db_session, user, opportunity_id)
@@ -43,7 +30,7 @@ def create_competition(
     )
 
     # Explicitly initialize all relationships that will be serialized
-    competition.open_to_applicants = set(request.open_to_applicants)
+    competition.open_to_applicants = set(competition_data["open_to_applicants"])
     competition.competition_forms = []
     competition.competition_instructions = []
     competition.opportunity_assistance_listing = None
