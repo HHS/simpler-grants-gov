@@ -130,11 +130,21 @@ jobs:
         run: |
           npm ci
 
-      # Install all browser binaries so the cached tarball covers every shard.
+      # Install browser binaries so the cached tarball covers every shard.
       # OS-level deps are installed per-shard via `playwright install-deps` in the e2e action,
       # so `--with-deps` is intentionally omitted here (it would re-run apt for all 3 browsers and stall the cache job).
-      - run: npx playwright install chromium-headless-shell firefox webkit
+      # Split into separate steps so each browser's progress is visible in CI logs.
+      - name: Install Chromium binary
         if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium-headless-shell
+
+      - name: Install Firefox binary
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install firefox
+
+      - name: Install Webkit binary
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install webkit
 
       # We package ourselves as tar.gz because this preserves permissions that a regular artifact upload/download does not.
       - name: Package node_modules
