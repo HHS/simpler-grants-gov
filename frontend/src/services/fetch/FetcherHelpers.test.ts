@@ -9,9 +9,14 @@ import {
 import { wrapForExpectedError } from "src/utils/testing/commonTestUtils";
 
 const getSessionMock = jest.fn();
+const getCorrelationIdMock = jest.fn();
 
 jest.mock("src/services/auth/session", () => ({
   getSession: (): unknown => getSessionMock(),
+}));
+
+jest.mock("src/services/correlationId/correlationId", () => ({
+  getCorrelationId: (): unknown => getCorrelationIdMock(),
 }));
 
 describe("createRequestUrl", () => {
