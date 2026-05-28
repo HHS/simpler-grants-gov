@@ -35,19 +35,16 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: "true"
         run: npm ci
 
-      - name: Install Chrome for Puppeteer
+      - name: Setup Chrome
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Point puppeteer at system Chrome
         run: |
-          set -euo pipefail
-          rm -rf ~/.cache/puppeteer
-          npx puppeteer browsers install chrome
-          chrome_bin=$(find ~/.cache/puppeteer/chrome -type f -name chrome -perm -u+x | head -n1)
-          if [ -z "$chrome_bin" ]; then
-            echo "::error::Chrome binary not found under ~/.cache/puppeteer/chrome after install"
-            ls -laR ~/.cache/puppeteer || true
-            exit 1
-          fi
-          echo "Chrome installed at: $chrome_bin"
-          "$chrome_bin" --version
+          echo "PUPPETEER_EXECUTABLE_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
+          "${{ steps.setup-chrome.outputs.chrome-path }}" --version
 
       - name: Create screenshots directory
         run: mkdir -p screenshots-output
