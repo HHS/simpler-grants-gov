@@ -1,6 +1,7 @@
 # Database Management
 
 - [Database Management](#database-management)
+  - [Shared Setup](#shared-setup)
   - [Basic operations](#basic-operations)
     - [Initialize](#initialize)
     - [Start](#start)
@@ -8,6 +9,58 @@
   - [Running migrations](#running-migrations)
   - [Creating new migrations](#creating-new-migrations)
   - [Multi-head situations](#multi-head-situations)
+
+## Shared Setup
+As we have multiple backend applications that require a database, rather
+than create a separate database instance for each of them, we instead create
+one database instance with separate logical databases inside it. Each database
+is isolated from the others and has their own users.
+
+As part of the setup defined in [docker-compose.db.yml](../../../backend/docker-compose.db.yml) we setup:
+* A Postgres DB
+* Separate logical databases with their own separate super users - this way the services are still isolated
+
+### Adding a new service that depends on this DB
+If you wish to add a new service that depends on the database, you'll need to do the following.
+
+In your docker-compose file, add the `local_db` network as an external network
+```yml
+networks:
+  local_db:
+    external: true
+    name: local_db
+```
+
+Any services in the docker-compose that need to reach that DB like an API service
+needs to include that network:
+
+```yml
+services:
+  grants-api:
+    # include whatever you need here for the service itself
+    networks:
+      - local_db
+      - default
+```
+
+In [docker-compose.db.yml](../../../backend/docker-compose.db.yml) update the
+`POSTGRES_MULTIPLE_DATABASES: "app,app:analytics,analytics"` env variable to include
+the name of the database + user you want the service to connect as. We generally name
+these the same. When the DB service starts up, we'll create a logical database owned
+by a user with that name. All users will have a password of `secret123`.
+
+You'll need to completely remake the database for the user to be created, some of our services
+have utilities for that already, but you can also run:
+
+```shell
+# Drop the volume, this will delete all DB data
+docker compose -f docker-compose.db.yml down --volumes grants-db
+
+# Start the DB
+docker compose -f docker-compose.db.yml up grants-db
+```
+
+You must specify the docker compose file, otherwise docker won't know where to look for `grants-db`.
 
 ## Basic operations
 ### Initialize

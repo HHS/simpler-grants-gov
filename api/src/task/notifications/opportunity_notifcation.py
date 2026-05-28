@@ -113,7 +113,7 @@ class OpportunityNotificationTask(BaseNotificationTask):
         logger.info("Processing opportunity versions to determine notifications")
         for user_saved_opp, latest_opp_ver in results:
             if latest_opp_ver is None:
-                logger.error(
+                logger.warning(
                     "No prior version recorded for this opportunity;",
                     extra={"opportunity_id": user_saved_opp.opportunity_id},
                 )
