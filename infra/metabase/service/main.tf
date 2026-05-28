@@ -109,18 +109,9 @@ module "service" {
     }],
   )
 
-  db_vars = {
-    security_group_ids         = module.database[0].security_group_ids
-    app_access_policy_arn      = module.database[0].app_access_policy_arn
-    migrator_access_policy_arn = module.database[0].migrator_access_policy_arn
-    connection_info = {
-      host        = data.aws_rds_cluster.db_cluster.endpoint
-      port        = data.aws_rds_cluster.db_cluster.port
-      user        = local.database_config.app_username
-      db_name     = data.aws_rds_cluster.db_cluster.database_name
-      schema_name = local.database_config.schema_name
-    }
-  }
+  # Metabase connects to existing analytics database, doesn't need database module security groups/policies
+  # Connection info is provided via environment variables (MB_DB_HOST, MB_DB_PORT, etc.) and secrets (MB_DB_PASS)
+  db_vars = null
 
   is_temporary = false
 }

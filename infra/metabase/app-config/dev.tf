@@ -10,7 +10,7 @@ module "dev_config" {
   analytics_database_cluster_name = "analytics-dev"
 
   domain_name  = "metabase.dev.simpler.grants.gov"
-  enable_https = true
+  enable_https = false # Certificate not provisioned in dev yet
 
   # Scaled down resources for dev environment (Issue #10239)
   service_cpu    = 512  # Down from 2048
