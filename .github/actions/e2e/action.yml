@@ -103,29 +103,30 @@ runs:
       run: |
         npm install @playwright/test
 
-    # Conditionally install Chrome if requested
-    - name: Install Chrome and dependencies
+    # Browser binaries come from the cached ~/.cache/ms-playwright tarball restored upstream.
+    # These steps install only the OS-level deps (apt packages) needed to run each browser.
+    - name: Install Chrome OS deps
       if: ${{ inputs.do-chrome-install == 'true' }}
       shell: bash
       working-directory: ./frontend
       run: |
-        npx playwright install --with-deps chromium-headless-shell
+        npx playwright install-deps chromium-headless-shell
 
-    # Conditionally install Firefox if requested (Shard 2 on the CI/CD run)
-    - name: Install Firefox and dependencies
+    # Shard 2 on the CI/CD run
+    - name: Install Firefox OS deps
       if: ${{ inputs.do-firefox-install == 'true' }}
       shell: bash
       working-directory: ./frontend
       run: |
-        npx playwright install --with-deps firefox
+        npx playwright install-deps firefox
 
-    # Conditionally install Webkit if requested (Shard 3 on the CI/CD run)
-    - name: Install Webkit and dependencies
+    # Shard 3 on the CI/CD run
+    - name: Install Webkit OS deps
       if: ${{ inputs.do-webkit-install == 'true' }}
       shell: bash
       working-directory: ./frontend
       run: |
-        npx playwright install --with-deps webkit
+        npx playwright install-deps webkit
 
     - name: Run all e2e tests (Shard ${{ inputs.current_shard }}/${{ inputs.total_shards }})
       if: ${{ inputs.playwright_tags == '' }}
