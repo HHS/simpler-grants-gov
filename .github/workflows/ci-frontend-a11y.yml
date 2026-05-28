@@ -31,20 +31,10 @@ jobs:
           cache: ${{ env.PACKAGE_MANAGER }}
 
       - name: Install dependencies
-        env:
-          PUPPETEER_SKIP_DOWNLOAD: "true"
         run: npm ci
 
-      - name: Setup Chrome
-        id: setup-chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
-
-      - name: Point puppeteer at system Chrome
-        run: |
-          echo "PUPPETEER_EXECUTABLE_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
-          "${{ steps.setup-chrome.outputs.chrome-path }}" --version
+      - name: Install Chrome for Puppeteer
+        run: npx puppeteer browsers install chrome
 
       - name: Create screenshots directory
         run: mkdir -p screenshots-output
