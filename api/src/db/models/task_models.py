@@ -30,6 +30,7 @@ class JobLock(ApiSchemaTable, TimestampMixin):
         "job_type_id",
         LookupColumn(LkJobType),
         ForeignKey(LkJobType.job_type_id),
+        unique=True,
     )
     is_locked: Mapped[bool]
     locked_until: Mapped[datetime]
