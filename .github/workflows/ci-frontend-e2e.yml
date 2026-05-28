@@ -114,7 +114,7 @@ jobs:
           # lookup-only: true
           path: |
             ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-playwright-all-browsers-${{ hashFiles('**/package-lock.json') }}
 
       - uses: actions/cache@v5
         id: npm-cache
@@ -258,7 +258,7 @@ jobs:
           # fail-on-cache-miss: true
           path: |
             ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-playwright-all-browsers-${{ hashFiles('**/package-lock.json') }}
 
       # We download because the cache is not reliably hitting even when it exists
       # We expand the tar.gz manually because this preserves permissions that a regular artifact upload/download does not.

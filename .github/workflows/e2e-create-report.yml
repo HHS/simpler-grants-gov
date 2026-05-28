@@ -43,7 +43,7 @@ jobs:
         with:
           path: |
             ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-playwright-all-browsers-${{ hashFiles('**/package-lock.json') }}
 
       # - name: npm ci
       #   if: steps.npm-cache.outputs.cache-hit != 'true'
