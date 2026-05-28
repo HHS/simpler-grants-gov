@@ -363,7 +363,7 @@ def create_test_db(test_schema: str) -> EtlDb:
 
 def _create_schema(conn: EtlDb.connection, schema: str) -> None:
     """Create a database schema."""
-    db_test_user = "app"
+    db_test_user = "analytics"
 
     with conn.begin():
         conn.execute(
