@@ -105,15 +105,18 @@ init-ci-cd: setup-env-override-file init-components ## Do not build, but do run 
 
 clean-volumes: ## Remove project docker volumes - which includes the DB, and OpenSearch state
 	docker compose down --volumes
+	docker compose -f ../backend/docker-compose.db.yml down --volumes
 
 volume-recreate: clean-volumes init ## Destroy current volumes, setup new ones - will remove all existing data
 
-stop:
+stop: ## Stop the docker containers
 	docker compose down
+	docker compose -f ../backend/docker-compose.db.yml down
 
 check: format-check lint db-check-migrations test
 
 remake-backend: volume-recreate setup-api-data ## Completely recreate API services, load data into the DB and search index
+
 ##################################################
 # DB & migrations
 ##################################################
@@ -127,8 +130,8 @@ remake-backend: volume-recreate setup-api-data ## Completely recreate API servic
 init-db: start-db setup-postgres-db db-migrate
 
 start-db:
-	docker compose up --detach grants-db
-	./bin/wait-for-local-db.sh
+	docker compose -f ../backend/docker-compose.db.yml up --detach grants-db
+	../backend/scripts/wait-for-local-db.sh
 
 #########################
 # DB Migrations
