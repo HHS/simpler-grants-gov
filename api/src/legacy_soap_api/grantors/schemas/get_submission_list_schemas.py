@@ -1,4 +1,3 @@
-from collections import defaultdict
 from datetime import datetime
 from typing import Any
 
@@ -63,27 +62,30 @@ class ExpandedApplicationFilter(BaseModel):
         return v
 
 
-def update_consolidated(consolidated: dict, filter_type: str, filter_value: str | list) -> dict:
+def update_consolidated(
+    consolidated: list[ExpandedApplicationFilter], filter_type: str, filter_value: str | list
+) -> list[ExpandedApplicationFilter]:
     filter_item = ExpandedApplicationFilter.model_validate(
         {"FilterType": filter_type, "FilterValue": filter_value}
     )
-    consolidated[filter_item.filter_type].append(filter_item.filter_value)
+    consolidated.append(filter_item)
     return consolidated
 
 
 class ConsolidatedFilter(BaseModel):
-    filters: dict[str, list[str] | list[int]]
+    filters: list[ExpandedApplicationFilter]
 
     @model_validator(mode="before")
     @classmethod
     def consolidate_filters(
         cls, data: dict[str, list[str] | str] | list
-    ) -> dict[str, dict[str, str]]:
+    ) -> dict[str, list[ExpandedApplicationFilter]]:
         if not isinstance(data, list):
             data = [data]
 
         # Consolidate the filter values here by type
-        consolidated: dict = defaultdict(list)
+        # consolidated: dict = defaultdict(list)
+        consolidated: list = []
         for item in data:
             # Check for missing keys
             for value in ["FilterType", "FilterValue"]:

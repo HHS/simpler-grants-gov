@@ -131,9 +131,9 @@ def get_submissions(
 
     if request.expanded_application_filter and request.expanded_application_filter.filters:
         submission_filters = request.expanded_application_filter.filters
-        if status := submission_filters.get("Status"):
-            # If more than one status in filter then just return nothing
-            if status and len(status) > 1:
+        status = [d.filter_value for d in submission_filters if d.filter_type == "Status"]
+        if status:
+            if len(status) > 1:
                 return []
             status_value = str(status[0])
             # GrantsGovTrackingNumber comes from three different places with a hierarchy
@@ -158,28 +158,41 @@ def get_submissions(
                         Application.application_status == simpler_status,
                     )
         # Each one of these filters is Last One Wins so if multiple of the same type are entered the last one is the only one that matters
-        if grants_gov_tracking_numbers := submission_filters.get("GrantsGovTrackingNumber"):
+        grants_gov_tracking_numbers = [
+            d.filter_value for d in submission_filters if d.filter_type == "GrantsGovTrackingNumber"
+        ]
+        if grants_gov_tracking_numbers:
             stmt = stmt.where(
                 [
                     ApplicationSubmission.legacy_tracking_number == tracking_number
                     for tracking_number in grants_gov_tracking_numbers
                 ][-1]
             )
-        if cfda_numbers := submission_filters.get("CFDANumber"):
+        cfda_numbers = [d.filter_value for d in submission_filters if d.filter_type == "CFDANumber"]
+        # if cfda_numbers := submission_filters.get("CFDANumber"):
+        if cfda_numbers:
             stmt = stmt.where(
                 [
                     OpportunityAssistanceListing.assistance_listing_number == cfda
                     for cfda in cfda_numbers
                 ][-1]
             )
-        if funding_opportunity_numbers := submission_filters.get("FundingOpportunityNumber"):
+        funding_opportunity_numbers = [
+            d.filter_value
+            for d in submission_filters
+            if d.filter_type == "FundingOpportunityNumber"
+        ]
+        if funding_opportunity_numbers:
             stmt = stmt.where(
                 [
                     Opportunity.opportunity_number == opportunity_number
                     for opportunity_number in funding_opportunity_numbers
                 ][-1]
             )
-        if opportunity_ids := submission_filters.get("OpportunityID"):
+        opportunity_ids = [
+            d.filter_value for d in submission_filters if d.filter_type == "OpportunityID"
+        ]
+        if opportunity_ids:
             stmt = stmt.where(
                 [Opportunity.legacy_opportunity_id == int(oid) for oid in opportunity_ids if oid][
                     -1
@@ -187,17 +200,24 @@ def get_submissions(
             )
 
         # Unsupported but logged
-        if competition_ids := submission_filters.get("CompetitionID"):
+        competition_ids = [
+            d.filter_value for d in submission_filters if d.filter_type == "CompetitionID"
+        ]
+        if competition_ids:
             extra = {
                 "competition_ids": str(competition_ids),
             }
             logger.info("GetSubmissionListExpanded Filter: CompetitionIDs", extra=extra)
-        if package_ids := submission_filters.get("PackageID"):
+        package_ids = [d.filter_value for d in submission_filters if d.filter_type == "PackageID"]
+        if package_ids:
             extra = {
                 "package_ids": str(package_ids),
             }
             logger.info("GetSubmissionListExpanded Filter: PackageIDs", extra=extra)
-        if submission_titles := submission_filters.get("SubmissionTitle"):
+        submission_titles = [
+            d.filter_value for d in submission_filters if d.filter_type == "SubmissionTitle"
+        ]
+        if submission_titles:
             extra = {
                 "submission_titles": str(submission_titles),
             }
