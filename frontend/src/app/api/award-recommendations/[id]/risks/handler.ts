@@ -1,6 +1,5 @@
-import { readError, UnauthorizedError } from "src/errors";
-import { getSession } from "src/services/auth/session";
-import { getAwardRecommendationRisks } from "src/services/fetch/fetchers/awardRecommendationFetcherClient";
+import { readError } from "src/errors";
+import { getAwardRecommendationRisks } from "src/services/fetch/fetchers/awardRecommendationFetcher";
 import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 
 import { NextRequest } from "next/server";
@@ -15,13 +14,6 @@ export async function getRisksForAwardRecommendation(
   };
 
   try {
-    const session = await getSession();
-    if (!session || !session.token) {
-      throw new UnauthorizedError(
-        "No active session to fetch award recommendation risks",
-      );
-    }
-
     if (!id) {
       throw new Error("Award recommendation ID is required");
     }
@@ -32,7 +24,6 @@ export async function getRisksForAwardRecommendation(
     const { risks, paginationInfo } = await getAwardRecommendationRisks(
       id,
       pagination,
-      session.token,
     );
 
     return Response.json({

@@ -1,5 +1,7 @@
 import {
+  deleteAwardRecommendationRisk,
   getAwardRecommendationDetails,
+  getAwardRecommendationRisks,
   getAwardRecommendationSubmission,
   listAwardRecommendationSubmissions,
 } from "src/services/fetch/fetchers/awardRecommendationFetcher";
@@ -16,17 +18,24 @@ const mockJson = jest.fn().mockResolvedValue({
 const mockFetchAwardRecommendation = jest.fn().mockResolvedValue({
   json: mockJson,
 });
-const mockFetchAwardRecommendationWithMethod = jest.fn().mockResolvedValue({
-  json: jest.fn().mockResolvedValue({
-    data: mockAwardRecommendationSubmissions,
-  } as APIResponse),
-});
+const mockFetchAwardRecommendationWithMethod = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchAwardRecommendation: (params: unknown): Promise<Response> =>
     mockFetchAwardRecommendation(params) as Promise<Response>,
-  fetchAwardRecommendationWithMethod: (_type: "POST" | "PUT") =>
-    mockFetchAwardRecommendationWithMethod,
+  fetchAwardRecommendationWithMethod: (type: "POST" | "PUT" | "DELETE") => {
+    mockFetchAwardRecommendationWithMethod.mockReturnValue(
+      jest.fn().mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue({
+          data: type === "POST" ? mockAwardRecommendationSubmissions : null,
+          pagination_info: type === "POST" ? { total_pages: 1 } : undefined,
+          message: type === "DELETE" ? "Success" : undefined,
+        } as APIResponse),
+      }),
+    );
+    return mockFetchAwardRecommendationWithMethod();
+  },
 }));
 
 describe("getAwardRecommendationDetails", () => {
@@ -112,5 +121,35 @@ describe("getAwardRecommendationSubmission", () => {
     );
 
     expect(result).toBeNull();
+  });
+});
+
+describe("getAwardRecommendationRisks", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("fetches and returns risks and pagination info", async () => {
+    const result = await getAwardRecommendationRisks("award-id", {
+      page_offset: 1,
+      page_size: 10,
+      sort_order: [],
+    });
+    expect(result.risks).toBeDefined();
+    expect(result.paginationInfo).toBeDefined();
+    expect(mockFetchAwardRecommendationWithMethod).toHaveBeenCalled();
+  });
+});
+
+describe("deleteAwardRecommendationRisk", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("deletes risk successfully", async () => {
+    const result = await deleteAwardRecommendationRisk("award-id", "risk-id");
+    expect(result.success).toBe(true);
+    expect(result.message).toBeDefined();
+    expect(mockFetchAwardRecommendationWithMethod).toHaveBeenCalled();
   });
 });

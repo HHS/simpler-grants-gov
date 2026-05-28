@@ -140,8 +140,9 @@ export const fetchAwardRecommendation = cache(
   requesterForEndpoint(fetchAwardRecommendationEndpoint),
 );
 
-export const fetchAwardRecommendationWithMethod = (type: "POST" | "PUT") =>
-  requesterForEndpoint(toDynamicAwardRecommendationEndpoint(type));
+export const fetchAwardRecommendationWithMethod = (
+  type: "POST" | "PUT" | "DELETE",
+) => requesterForEndpoint(toDynamicAwardRecommendationEndpoint(type));
 
 export const postUserLogout = requesterForEndpoint(userLogoutEndpoint);
 

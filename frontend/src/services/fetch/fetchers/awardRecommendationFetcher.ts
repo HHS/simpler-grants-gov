@@ -1,8 +1,10 @@
-import { APIResponse } from "src/types/apiResponseTypes";
+import { APIResponse, PaginationInfo } from "src/types/apiResponseTypes";
 import {
   AwardRecommendationDetails,
+  AwardRecommendationRisk,
   AwardRecommendationSubmission,
 } from "src/types/awardRecommendationTypes";
+import { PaginationRequestBody } from "src/types/search/searchRequestTypes";
 
 import {
   fetchAwardRecommendation,
@@ -64,4 +66,37 @@ export const getAwardRecommendationSubmission = async (
         submissionId,
     ) ?? null
   );
+};
+
+// Client-safe fetchers for award recommendation risks
+export const getAwardRecommendationRisks = async (
+  id: string,
+  pagination: PaginationRequestBody,
+): Promise<{
+  risks: AwardRecommendationRisk[];
+  paginationInfo: PaginationInfo | undefined;
+}> => {
+  const response = await fetchAwardRecommendationWithMethod("POST")({
+    subPath: `${id}/risks/list`,
+    body: { pagination },
+  });
+  const responseBody = (await response.json()) as APIResponse;
+  return {
+    risks: (responseBody.data as AwardRecommendationRisk[]) || [],
+    paginationInfo: responseBody.pagination_info,
+  };
+};
+
+export const deleteAwardRecommendationRisk = async (
+  awardRecommendationId: string,
+  riskId: string,
+): Promise<{ success: boolean; message?: string }> => {
+  const response = await fetchAwardRecommendationWithMethod("DELETE")({
+    subPath: `${awardRecommendationId}/risks/${riskId}`,
+  });
+  const responseBody = (await response.json()) as APIResponse;
+  return {
+    success: response.ok,
+    message: responseBody.message,
+  };
 };
