@@ -18,7 +18,7 @@ const mockJson = jest.fn().mockResolvedValue({
 const mockFetchAwardRecommendation = jest.fn().mockResolvedValue({
   json: mockJson,
 });
-const mockFetchAwardRecommendationWithMethod = jest.fn();
+const mockInnerFetch = jest.fn();
 
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchAwardRecommendation: (params: unknown): Promise<Response> =>
@@ -26,17 +26,15 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchAwardRecommendationWithMethod: (
     type: "POST" | "PUT" | "DELETE",
   ): jest.Mock => {
-    mockFetchAwardRecommendationWithMethod.mockReturnValue(
-      jest.fn().mockResolvedValue({
-        ok: true,
-        json: jest.fn().mockResolvedValue({
-          data: type === "POST" ? mockAwardRecommendationSubmissions : null,
-          pagination_info: type === "POST" ? { total_pages: 1 } : undefined,
-          message: type === "DELETE" ? "Success" : undefined,
-        } as APIResponse),
-      }),
-    );
-    return mockFetchAwardRecommendationWithMethod() as jest.Mock;
+    mockInnerFetch.mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        data: type === "POST" ? mockAwardRecommendationSubmissions : null,
+        pagination_info: type === "POST" ? { total_pages: 1 } : undefined,
+        message: type === "DELETE" ? "Success" : undefined,
+      } as APIResponse),
+    });
+    return mockInnerFetch;
   },
 }));
 
@@ -77,7 +75,7 @@ describe("listAwardRecommendationSubmissions", () => {
   it("calls fetchAwardRecommendationWithMethod with the correct arguments", async () => {
     await listAwardRecommendationSubmissions("an id");
 
-    expect(mockFetchAwardRecommendationWithMethod).toHaveBeenCalledWith({
+    expect(mockInnerFetch).toHaveBeenCalledWith({
       subPath: "an id/submissions/list",
       body: {
         pagination: {
@@ -139,7 +137,7 @@ describe("getAwardRecommendationRisks", () => {
     });
     expect(result.risks).toBeDefined();
     expect(result.paginationInfo).toBeDefined();
-    expect(mockFetchAwardRecommendationWithMethod).toHaveBeenCalled();
+    expect(mockInnerFetch).toHaveBeenCalled();
   });
 });
 
@@ -152,6 +150,6 @@ describe("deleteAwardRecommendationRisk", () => {
     const result = await deleteAwardRecommendationRisk("award-id", "risk-id");
     expect(result.success).toBe(true);
     expect(result.message).toBeDefined();
-    expect(mockFetchAwardRecommendationWithMethod).toHaveBeenCalled();
+    expect(mockInnerFetch).toHaveBeenCalled();
   });
 });
