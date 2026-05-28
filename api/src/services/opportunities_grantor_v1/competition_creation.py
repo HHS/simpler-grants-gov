@@ -38,11 +38,8 @@ def create_competition(
     competition = Competition(
         competition_id=uuid.uuid4(),
         opportunity_id=opportunity_id,
-        competition_title=request.competition_title,
-        opening_date=request.opening_date,
-        closing_date=request.closing_date,
-        contact_info=request.contact_info,
         is_simpler_grants_enabled=True,
+        **competition_data
     )
 
     # Explicitly initialize all relationships that will be serialized
