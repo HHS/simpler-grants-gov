@@ -23,7 +23,9 @@ const mockFetchAwardRecommendationWithMethod = jest.fn();
 jest.mock("src/services/fetch/fetchers/fetchers", () => ({
   fetchAwardRecommendation: (params: unknown): Promise<Response> =>
     mockFetchAwardRecommendation(params) as Promise<Response>,
-  fetchAwardRecommendationWithMethod: (type: "POST" | "PUT" | "DELETE") => {
+  fetchAwardRecommendationWithMethod: (
+    type: "POST" | "PUT" | "DELETE",
+  ): jest.Mock => {
     mockFetchAwardRecommendationWithMethod.mockReturnValue(
       jest.fn().mockResolvedValue({
         ok: true,
@@ -34,7 +36,7 @@ jest.mock("src/services/fetch/fetchers/fetchers", () => ({
         } as APIResponse),
       }),
     );
-    return mockFetchAwardRecommendationWithMethod();
+    return mockFetchAwardRecommendationWithMethod() as jest.Mock;
   },
 }));
 
