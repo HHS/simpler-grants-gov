@@ -34,7 +34,7 @@ export async function generateMetadata({
   try {
     const session = await getSession();
     if (session?.token) {
-      const { data } = await getOpportunityForGrantor(id, session.token);
+      const { data } = await getOpportunityForGrantor(id);
       title = `${t("OpportunityEdit.pageTitle")} - ${data.opportunity_title || ""}`;
     }
   } catch {
@@ -66,7 +66,7 @@ async function OpportunityEditPage({ params, searchParams }: PageProps) {
   let opportunityData: GrantorOpportunityDetail;
   let opportunitySummaryId: string;
   try {
-    const response = await getOpportunityForGrantor(id, session.token);
+    const response = await getOpportunityForGrantor(id);
     opportunityData = response.data;
     opportunitySummaryId =
       response.data.forecast_summary?.opportunity_summary_id ??

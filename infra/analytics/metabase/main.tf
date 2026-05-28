@@ -78,6 +78,7 @@ data "aws_acm_certificate" "certificate" {
 module "service" {
   source                   = "../../modules/service"
   service_name             = local.service_name
+  environment_name         = var.environment_name
   image_repository_url     = "docker.io/metabase/metabase-enterprise" # https://hub.docker.com/r/metabase/metabase
   image_tag                = local.image_tag
   network_name             = local.environment_config.network_name

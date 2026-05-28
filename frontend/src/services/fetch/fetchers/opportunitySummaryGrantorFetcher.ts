@@ -5,33 +5,24 @@ import {
   OpportunitySummaryUpdateRequest,
 } from "src/types/opportunity/opportunityResponseTypes";
 
-import {
-  createGrantorOpportunitySummaryRequest,
-  getGrantorOpportunityRequest,
-  publishGrantorOpportunityRequest,
-  updateGrantorOpportunitySummaryRequest,
-} from "./fetchers";
+import { fetchGrantorOpportunityWithMethod } from "./fetchers";
 
 type UpdateOpportunitySummaryForGrantorParams = {
   opportunityId: string;
   opportunitySummaryId: string;
   body: OpportunitySummaryUpdateRequest;
-  token: string;
 };
 
 type CreateOpportunitySummaryForGrantorParams = {
   opportunityId: string;
   body: OpportunitySummaryCreateRequest;
-  token: string;
 };
 
 export async function getOpportunityForGrantor(
   opportunityId: string,
-  token: string,
 ): Promise<GrantorOpportunityApiResponse> {
-  const response = await getGrantorOpportunityRequest({
+  const response = await fetchGrantorOpportunityWithMethod("GET")({
     subPath: opportunityId,
-    additionalHeaders: { "X-SGG-Token": token },
   });
   return (await response.json()) as GrantorOpportunityApiResponse;
 }
@@ -40,12 +31,10 @@ export async function updateOpportunitySummaryForGrantor({
   opportunityId,
   opportunitySummaryId,
   body,
-  token,
 }: UpdateOpportunitySummaryForGrantorParams): Promise<OpportunitySummaryDetailApiResponse> {
-  const response = await updateGrantorOpportunitySummaryRequest({
+  const response = await fetchGrantorOpportunityWithMethod("PUT")({
     subPath: `${opportunityId}/summaries/${opportunitySummaryId}`,
     body,
-    additionalHeaders: { "X-SGG-Token": token },
   });
 
   return (await response.json()) as OpportunitySummaryDetailApiResponse;
@@ -54,12 +43,10 @@ export async function updateOpportunitySummaryForGrantor({
 export async function createOpportunitySummaryForGrantor({
   opportunityId,
   body,
-  token,
 }: CreateOpportunitySummaryForGrantorParams): Promise<OpportunitySummaryDetailApiResponse> {
-  const response = await createGrantorOpportunitySummaryRequest({
+  const response = await fetchGrantorOpportunityWithMethod("POST")({
     subPath: `${opportunityId}/summaries`,
     body,
-    additionalHeaders: { "X-SGG-Token": token },
   });
 
   return (await response.json()) as OpportunitySummaryDetailApiResponse;
@@ -67,11 +54,9 @@ export async function createOpportunitySummaryForGrantor({
 
 export async function publishOpportunityForGrantor(
   opportunityId: string,
-  token: string,
 ): Promise<GrantorOpportunityApiResponse> {
-  const response = await publishGrantorOpportunityRequest({
+  const response = await fetchGrantorOpportunityWithMethod("POST")({
     subPath: `${opportunityId}/publish`,
-    additionalHeaders: { "X-SGG-Token": token },
   });
 
   return (await response.json()) as GrantorOpportunityApiResponse;

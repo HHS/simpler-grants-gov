@@ -2,23 +2,20 @@ import "server-only";
 
 import { ApiRequestError } from "src/errors";
 import {
-  createGrantorOpportunitySummaryEndpoint,
   EndpointConfig,
   fetchAwardRecommendationEndpoint,
   fetchCompetitionEndpoint,
   fetchFormEndpoint,
   fetchOpportunityEndpoint,
-  getGrantorOpportunityEndpoint,
   getLocalUsersEndpoint,
   opportunitySearchEndpoint,
-  publishGrantorOpportunityEndpoint,
   searchAgenciesEndpoint,
   toDynamicApplicationsEndpoint,
   toDynamicAwardRecommendationEndpoint,
+  toDynamicGrantorOpportunityEndpoint,
   toDynamicGrantorsEndpoint,
   toDynamicOrganizationsEndpoint,
   toDynamicUsersEndpoint,
-  updateGrantorOpportunitySummaryEndpoint,
   userLogoutEndpoint,
   userRefreshEndpoint,
 } from "src/services/fetch/endpointConfigs";
@@ -106,7 +103,8 @@ export function requesterForEndpoint({
           `bad Json from error response at ${url} with status code ${response.status}`,
         );
       }
-      return throwError(jsonBody, url);
+
+      return throwError(jsonBody, url, response);
     } else if (
       !response.ok &&
       !allowedErrorStatuses.includes(response.status)
@@ -161,21 +159,9 @@ export const fetchOrganizationWithMethod = (
 
 export const fetchLocalUsers = requesterForEndpoint(getLocalUsersEndpoint);
 
+export const fetchGrantorOpportunityWithMethod = (
+  type: "POST" | "DELETE" | "GET" | "PUT",
+) => requesterForEndpoint(toDynamicGrantorOpportunityEndpoint(type));
+
 export const fetchGrantorWithMethod = (type: "POST") =>
   requesterForEndpoint(toDynamicGrantorsEndpoint(type));
-
-export const getGrantorOpportunityRequest = requesterForEndpoint(
-  getGrantorOpportunityEndpoint,
-);
-
-export const updateGrantorOpportunitySummaryRequest = requesterForEndpoint(
-  updateGrantorOpportunitySummaryEndpoint,
-);
-
-export const createGrantorOpportunitySummaryRequest = requesterForEndpoint(
-  createGrantorOpportunitySummaryEndpoint,
-);
-
-export const publishGrantorOpportunityRequest = requesterForEndpoint(
-  publishGrantorOpportunityEndpoint,
-);

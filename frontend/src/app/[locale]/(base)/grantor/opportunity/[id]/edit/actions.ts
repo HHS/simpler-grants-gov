@@ -110,24 +110,60 @@ async function validateOpportunityEditForm(formData: FormData) {
         });
       }
     })
-    .superRefine(({ awardMinimum, awardMaximum }, ctx) => {
-      const min = Number(awardMinimum.replace(/,/g, ""));
-      const max = Number(awardMaximum.replace(/,/g, ""));
-
-      if (
-        awardMinimum &&
-        awardMaximum &&
-        !isNaN(min) &&
-        !isNaN(max) &&
-        min > max
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["awardMaximum"],
-          message: validationErrors("awardMaximumOrder"),
-        });
-      }
-    });
+    .superRefine(
+      ({ awardMinimum, awardMaximum, estimatedTotalProgramFunding }, ctx) => {
+        const min = Number(awardMinimum.replace(/,/g, ""));
+        const max = Number(awardMaximum.replace(/,/g, ""));
+        const total = Number(estimatedTotalProgramFunding.replace(/,/g, ""));
+        // Award Minimum cannot exceed the Estimated Total Program Funding.
+        if (
+          awardMinimum &&
+          estimatedTotalProgramFunding &&
+          !isNaN(min) &&
+          !isNaN(total) &&
+          min > total
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["awardMinimum"],
+            message: validationErrors("awardMinLessThanTotal"),
+          });
+        }
+        // Award Maximum cannot exceed the Estimated Total Program Funding.
+        if (
+          awardMaximum &&
+          estimatedTotalProgramFunding &&
+          !isNaN(max) &&
+          !isNaN(total) &&
+          max > total
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["awardMaximum"],
+            message: validationErrors("awardMaxLessThanTotal"),
+          });
+        }
+        // Award Minimum cannot exceed Award Maximum.
+        if (
+          awardMinimum &&
+          awardMaximum &&
+          !isNaN(min) &&
+          !isNaN(max) &&
+          min > max
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["awardMinimum"],
+            message: validationErrors("awardMinLessThanMax"),
+          });
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["awardMaximum"],
+            message: validationErrors("awardMinLessThanMax"),
+          });
+        }
+      },
+    );
 
   return reviewOpportunityEditSchema.safeParse({
     title: readStringValue(formData.get("title")),
@@ -202,7 +238,6 @@ export async function saveOpportunityEditAction(
           ...buildOpportunitySummaryUpdateRequest(formData),
           is_forecast: isForecast,
         },
-        token: session.token,
       });
 
       return {
@@ -215,7 +250,6 @@ export async function saveOpportunityEditAction(
       opportunityId,
       opportunitySummaryId,
       body: buildOpportunitySummaryUpdateRequest(formData),
-      token: session.token,
     });
 
     return {
@@ -260,7 +294,7 @@ async function publishOpportunityAction(
   }
 
   try {
-    await publishOpportunityForGrantor(opportunityId, session.token);
+    await publishOpportunityForGrantor(opportunityId);
   } catch (error) {
     const status =
       error instanceof ApiRequestError ? parseErrorStatus(error) : null;
