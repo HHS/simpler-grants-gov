@@ -28,20 +28,3 @@ export function LoginLink({
     </a>
   );
 }
-
-export function LoginButton({
-  navLoginLinkText,
-}: {
-  navLoginLinkText: string;
-}) {
-  return (
-    <div className="usa-nav__primary-item border-top-0 height-full">
-      <LoginLink
-        className="usa-nav__link text-normal font-sans-2xs display-flex flex-align-center height-full"
-        data-testid="sign-in-button"
-      >
-        {navLoginLinkText}
-      </LoginLink>
-    </div>
-  );
-}
