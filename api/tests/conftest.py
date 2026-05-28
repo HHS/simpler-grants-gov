@@ -701,7 +701,9 @@ def seed_form_registry(load_active_forms) -> None:
     Preferred alias for load_active_forms in new tests. After this fixture runs,
     any registered form (e.g. SF424_v4_0) can be retrieved via db_session.get().
     """
-    # Intentionally empty — the effect comes entirely from the load_active_forms dependency.
+    factories._seed_form_registry_active = True
+    yield
+    factories._seed_form_registry_active = False
 
 
 @pytest.fixture
