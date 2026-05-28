@@ -287,6 +287,7 @@ class TestCD511XSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         cd511_form = db_session.get(Form, CD511_v1_1.form_id)
@@ -389,6 +390,7 @@ class TestCD511XSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         cd511_form = db_session.get(Form, CD511_v1_1.form_id)

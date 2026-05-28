@@ -423,6 +423,7 @@ class TestSF424BXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         sf424b_form = db_session.get(Form, SF424b_v1_1.form_id)
@@ -516,6 +517,7 @@ class TestSF424BXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
 
         sf424b_form = db_session.get(Form, SF424b_v1_1.form_id)

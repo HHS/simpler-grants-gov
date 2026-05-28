@@ -184,6 +184,7 @@ class TestPerformanceSiteXSDValidation:
             opening_date=date(2025, 1, 1),
             closing_date=date(2025, 12, 31),
             opportunity_assistance_listing=assistance_listing,
+            competition_forms=[],
         )
         form = db_session.get(Form, ProjectPerformanceSiteLocation_v4_0.form_id)
         application = ApplicationFactory.create(competition=competition)
