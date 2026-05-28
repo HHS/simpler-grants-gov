@@ -38,7 +38,7 @@ describe("deleteRiskForAwardRecommendation", () => {
     jest.clearAllMocks();
   });
 
-  it("deletes risk successfully", async () => {
+  it("returns success response when delete is successful", async () => {
     (
       fetcherModule.deleteAwardRecommendationRisk as jest.Mock
     ).mockResolvedValue({ success: true, message: "Risk deleted" });
@@ -46,6 +46,10 @@ describe("deleteRiskForAwardRecommendation", () => {
     const params = Promise.resolve({ id: "award-id", riskId: "risk-id" });
     const res = await deleteRiskForAwardRecommendation(req, { params });
     const json = (await res.json()) as { success: boolean; message: string };
+    expect(fetcherModule.deleteAwardRecommendationRisk).toHaveBeenCalledWith(
+      "award-id",
+      "risk-id",
+    );
     expect(json.success).toBe(true);
     expect(json.message).toBe("Risk deleted");
   });
