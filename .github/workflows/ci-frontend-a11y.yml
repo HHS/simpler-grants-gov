@@ -60,6 +60,9 @@ jobs:
           chmod +x ./bin/wait-for-frontend.sh
           ./bin/wait-for-frontend.sh
 
+      - name: Clear Puppeteer browser cache
+        run: rm -rf ~/.cache/puppeteer
+
       - name: Run pa11y-ci
         run: |
           set -e # Ensure the script fails if any command fails
