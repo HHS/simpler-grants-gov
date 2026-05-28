@@ -28,7 +28,7 @@ import AwardRecommendationHero, {
 import { RecommendationSection } from "src/components/award-recommendation/RecommendationSection";
 import { RecommendationSummarySection } from "src/components/award-recommendation/RecommendationSummarySection";
 import { ExpandableTextContent } from "src/components/core/ExpandableTextContent";
-import ApplyFormNav from "src/components/core/forms/LeftHandFormNav";
+import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 
 export async function generateMetadata({
   params,
@@ -226,7 +226,10 @@ async function AwardRecommendationEditPageContent({
               tablet={{ col: 3 }}
               className="display-none desktop:display-block"
             >
-              <ApplyFormNav title={t("onThisPage")} fields={navigationItems} />
+              <LeftHandFormNav
+                title={t("onThisPage")}
+                fields={navigationItems}
+              />
             </Grid>
             <Grid col={12} desktop={{ col: 9 }}>
               <div id="opportunity" className="seg-scroll-margin-top--header">

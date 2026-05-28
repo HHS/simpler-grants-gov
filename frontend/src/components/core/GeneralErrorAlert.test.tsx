@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 
-import ServerErrorAlert from "src/components/core/GeneralErrorAlert";
+import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
 
-describe("ServerErrorAlert", () => {
+describe("GeneralErrorAlert", () => {
   it("should display the error message", () => {
-    render(<ServerErrorAlert callToAction="Please try your search again." />);
+    render(<GeneralErrorAlert callToAction="Please try your search again." />);
     expect(screen.getByText("heading")).toBeInTheDocument();
     expect(
       screen.getByText("genericMessage Please try your search again."),
@@ -13,7 +13,7 @@ describe("ServerErrorAlert", () => {
   });
 
   it("should not have any accessibility violations", async () => {
-    const { container } = render(<ServerErrorAlert />);
+    const { container } = render(<GeneralErrorAlert />);
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });

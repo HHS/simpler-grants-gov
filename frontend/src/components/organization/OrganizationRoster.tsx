@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { Alert, Table } from "@trussworks/react-uswds";
 
-import ServerErrorAlert from "src/components/core/GeneralErrorAlert";
+import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
 import { OrganizationRosterInfo } from "./OrganizationRosterInfo";
 
 export const OrganizationRosterSkeleton = ({
@@ -87,7 +87,7 @@ export const OrganizationRoster = async ({
     organizationUsers = await getOrganizationUsers(organizationId);
   } catch (e) {
     console.error(e);
-    return <ServerErrorAlert />;
+    return <GeneralErrorAlert />;
   }
 
   if (organizationUsers?.length) {

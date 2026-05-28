@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { GridContainer } from "@trussworks/react-uswds";
 
-import ServerErrorAlert from "src/components/core/GeneralErrorAlert";
+import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
 
 export async function generateMetadata() {
   const t = await getTranslations();
@@ -21,7 +21,7 @@ const TopLevelError = () => {
   const t = useTranslations("Errors");
   return (
     <GridContainer>
-      <ServerErrorAlert callToAction={t("tryAgain")} />
+      <GeneralErrorAlert callToAction={t("tryAgain")} />
     </GridContainer>
   );
 };

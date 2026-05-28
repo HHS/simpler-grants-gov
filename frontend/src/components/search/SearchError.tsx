@@ -6,7 +6,7 @@ import { ErrorProps } from "src/types/uiTypes";
 import { useTranslations } from "next-intl";
 import { Alert } from "@trussworks/react-uswds";
 
-import ServerErrorAlert from "src/components/core/GeneralErrorAlert";
+import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
 
 function isValidJSON(str: string) {
   try {
@@ -32,7 +32,7 @@ export function SearchError({ error }: ErrorProps) {
         {`Error in ${parsedErrorData.details.field || "a search field"}: ${parsedErrorData.details.message || "adjust your search and try again"}`}
       </Alert>
     ) : (
-      <ServerErrorAlert callToAction={t("genericErrorCta")} />
+      <GeneralErrorAlert callToAction={t("genericErrorCta")} />
     );
 
   return <div className="tablet:grid-col-8">{ErrorAlert}</div>;
