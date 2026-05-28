@@ -71,3 +71,53 @@ dedication](https://creativecommons.org/publicdomain/zero/1.0/).
 All contributions to this project will be released under the CC0 dedication. By
 submitting a pull request or issue, you are agreeing to comply with this waiver
 of copyright interest.
+
+## Bounty: $200 — L
+
+This bounty is for contributors who are interested in making a meaningful impact on the **Simpler.Grants.gov** project. The task involves addressing a specific issue that is labeled as **L** (Low complexity) and is worth **$200**. The goal is to ensure that the change meets the acceptance criteria and is well-documented for both users and developers.
+
+### In Scope
+
+The task is focused on implementing a specific feature or fixing a bug that is clearly defined in the issue description. This includes modifying existing code, adding new functionality, or improving the user experience. The exact scope is outlined in the "In scope" section of the issue, and contributors should ensure that their work aligns with this.
+
+### Out of Scope
+
+Any changes that fall outside the defined scope, such as refactoring unrelated code, improving performance without specific requirements, or modifying third-party libraries, are not part of this bounty. Contributors should avoid making changes that are not explicitly requested.
+
+### Suggested Starting Points
+
+To get started, contributors should review the following files and directories:
+
+- **Files**: Look for files that are related to the functionality or bug mentioned in the issue. These may include Python scripts in the `api` directory or frontend components in the `frontend` directory.
+- **Tests**: Ensure that all existing tests continue to pass after making changes. If new behavior is introduced, new tests should be added to cover it.
+- **Docs**: Update any relevant documentation, including READMEs, API references, or user guides, to reflect the changes made.
+- **Related PRs / Issues**: Check for any related pull requests or issues that may provide additional context or guidance.
+
+### Example: Adding a New API Endpoint
+
+If the task involves adding a new API endpoint, the following Python code demonstrates how to implement this using Flask:
+
+```python
+from flask import Flask, jsonify, request
+from flask_restx import Resource, Api
+
+app = Flask(__name__)
+api = Api(app)
+
+@api.route('/api/new-endpoint')
+class NewEndpoint(Resource):
+    def get(self):
+        return jsonify({"message": "This is a new endpoint"})
+
+    def post(self):
+        data = request.get_json()
+        return jsonify({"received": data}), 201
+```
+
+This example shows a basic structure for a new endpoint that supports both GET and POST requests. Ensure that the endpoint is properly documented and that tests are written to validate its behavior.
+
+### Documentation and Testing
+
+All changes must be accompanied by updated documentation. If the change affects the user experience or introduces new functionality, update the relevant sections in the `documentation` directory. Additionally, ensure that all existing tests pass and that new tests are added to cover the new behavior.
+
+By following these guidelines, contributors can ensure that their work meets the quality standards of the **Simpler.Grants.gov** project and contributes effectively to the open-source community.
