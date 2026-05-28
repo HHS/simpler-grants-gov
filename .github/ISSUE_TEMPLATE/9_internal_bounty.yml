@@ -90,18 +90,17 @@ body:
     validations:
       required: false
 
-  - type: markdown
+  - type: textarea
+    id: contributor_tracking_table
     attributes:
+      label: Contributor tracking table
+      description: Program owners maintain this table. One row per `/claim` — never delete or re-use a row, always append. Rows are ordered by claim date, oldest first. Status values - `claimed`, `in progress`, `pr submitted`, `in review`, `paid`, `stale`, `withdrawn`, `declined`.
       value: |
-        ## Contributor tracking table
-
-        Program owners maintain this table. One row per `/claim` — never delete or re-use a row, always append. Rows are ordered by claim date, oldest first.
-
         | Contributor | ToS Ack | Status | Last Updated | PR | Notes |
         | ----------- | ------- | ------ | ------------ | -- | ----- |
         | _no claims yet_ | | | | | |
-
-        **Status values:** `claimed`, `in progress`, `pr submitted`, `in review`, `paid`, `stale`, `withdrawn`, `declined`.
+    validations:
+      required: true
 
   - type: markdown
     attributes:
