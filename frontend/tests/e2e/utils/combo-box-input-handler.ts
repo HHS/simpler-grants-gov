@@ -4,12 +4,19 @@
 
 import { FieldHandler } from "./types";
 
-export const comboBoxInputHandler: FieldHandler = async (testInfo, page, field, data) => {
+export const comboBoxInputHandler: FieldHandler = async (
+  testInfo,
+  page,
+  field,
+  data,
+) => {
   if (!field.testId) {
     throw new Error(`Combo box field ${field.field} requires a testId`);
   }
   if (typeof data !== "string") {
-    throw new Error(`Combo box field ${field.field} requires string data, received ${typeof data}`);
+    throw new Error(
+      `Combo box field ${field.field} requires string data, received ${typeof data}`,
+    );
   }
   const toggleLocator = page.getByTestId(field.testId);
   await toggleLocator.waitFor({ state: "visible", timeout: 5000 });

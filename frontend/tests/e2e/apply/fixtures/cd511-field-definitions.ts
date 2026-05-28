@@ -1,6 +1,6 @@
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
-import { FormFillFieldDefinitions } from "tests/e2e/utils/types";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
+import { FormFillFieldDefinitions } from "tests/e2e/utils/types";
 
 export const CD511_FORM_MATCHER = "CD511";
 

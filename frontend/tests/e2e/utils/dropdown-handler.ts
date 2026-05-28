@@ -5,9 +5,16 @@
 import { selectDropdownByValueOrLabel } from "./select-dropdown-utils";
 import { FieldHandler } from "./types";
 
-export const dropdownHandler: FieldHandler = async (testInfo, page, field, data) => {
+export const dropdownHandler: FieldHandler = async (
+  testInfo,
+  page,
+  field,
+  data,
+) => {
   if (typeof data !== "string") {
-    throw new Error(`Dropdown field ${field.field} requires string data, received ${typeof data}`);
+    throw new Error(
+      `Dropdown field ${field.field} requires string data, received ${typeof data}`,
+    );
   }
   if (field.selector) {
     await selectDropdownByValueOrLabel(page, field.selector, data);
@@ -19,5 +26,7 @@ export const dropdownHandler: FieldHandler = async (testInfo, page, field, data)
     await locator.click();
     return;
   }
-  throw new Error(`Dropdown field ${field.field} is missing selector or testId`);
+  throw new Error(
+    `Dropdown field ${field.field} is missing selector or testId`,
+  );
 };

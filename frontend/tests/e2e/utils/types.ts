@@ -37,10 +37,16 @@ export type FieldHandler = (
   testInfo: TestInfo,
   page: Page,
   field: FillFieldDefinition,
-  data: string | boolean | undefined
+  data: string | boolean | undefined,
 ) => Promise<void>;
 
 // Helper function to check if a field depends on another field
-export function fieldDependsOn(field: FillFieldDefinition, formData: Record<string, unknown>): boolean {
-  return !field.dependsOn || String(formData[field.dependsOn.field]) === String(field.dependsOn.value);
+export function fieldDependsOn(
+  field: FillFieldDefinition,
+  formData: Record<string, unknown>,
+): boolean {
+  return (
+    !field.dependsOn ||
+    String(formData[field.dependsOn.field]) === String(field.dependsOn.value)
+  );
 }

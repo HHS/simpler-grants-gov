@@ -4,14 +4,23 @@
 
 import { FieldHandler } from "./types";
 
-export const fileHandler: FieldHandler = async (testInfo, page, field, data) => {
+export const fileHandler: FieldHandler = async (
+  testInfo,
+  page,
+  field,
+  data,
+) => {
   if (!field.testId && !field.selector) {
     throw new Error(`File field ${field.field} requires a selector or testId`);
   }
   if (typeof data !== "string") {
-    throw new Error(`File field ${field.field} requires string data (file path), received ${typeof data}`);
+    throw new Error(
+      `File field ${field.field} requires string data (file path), received ${typeof data}`,
+    );
   }
-  const locator = field.selector ? page.locator(field.selector) : page.getByTestId(field.testId!);
+  const locator = field.selector
+    ? page.locator(field.selector)
+    : page.getByTestId(field.testId!);
   await locator.waitFor({ state: "attached", timeout: 30000 });
   await locator.scrollIntoViewIfNeeded();
   const inputName = await locator.getAttribute("name");
@@ -41,8 +50,7 @@ export const fileHandler: FieldHandler = async (testInfo, page, field, data) => 
   if (hiddenInputSelector) {
     await page.waitForFunction(
       ({ selector, uploadedFileName }) => {
-        const hiddenInput =
-          document.querySelector<HTMLInputElement>(selector);
+        const hiddenInput = document.querySelector<HTMLInputElement>(selector);
         if (!hiddenInput?.value) {
           return false;
         }

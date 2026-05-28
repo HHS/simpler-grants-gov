@@ -1,6 +1,6 @@
 import { FORM_DEFAULTS } from "tests/e2e/utils/forms/form-defaults";
-import { FormFillFieldDefinitions } from "tests/e2e/utils/types";
 import { FieldError } from "tests/e2e/utils/forms/verify-form-errors-utils";
+import { FormFillFieldDefinitions } from "tests/e2e/utils/types";
 
 export const SF424D_FORM_MATCHER =
   /SF\s*[-‑–—]?\s*424D|Assurances\s+for\s+Construction\s+Programs/i;
