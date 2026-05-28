@@ -348,6 +348,7 @@ fake.add_provider(CustomProvider)
 factory.Faker.add_provider(CustomProvider)
 
 _db_session: db.Session | None = None
+_seed_form_registry_active: bool = False
 
 
 def get_db_session() -> db.Session:
@@ -1749,6 +1750,15 @@ def _get_default_competition_form() -> competition_models.Form:
     """Return SF424 from the DB if seed_form_registry is active, else fall back to FormFactory."""
     if _db_session is None:
         return FormFactory.build()
+
+    if not _seed_form_registry_active:
+        warnings.warn(
+            "CompetitionFormFactory: SF424 not in DB — add seed_form_registry to your test. "
+            "Falling back to FormFactory (deprecated).",
+            DeprecationWarning,
+            stacklevel=4,
+        )
+        return FormFactory.create()
 
     session = get_db_session()
     form = session.get(competition_models.Form, SF424_v4_0.form_id)
