@@ -35,7 +35,6 @@ jobs:
 
       - name: Install Chrome for Puppeteer
         run: npx puppeteer browsers install chrome
--
       - name: Create screenshots directory
         run: mkdir -p screenshots-output
 
