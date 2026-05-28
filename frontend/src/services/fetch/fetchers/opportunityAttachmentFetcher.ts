@@ -1,15 +1,11 @@
 import "server-only";
 
-import { toDynamicGrantorOpportunityEndpoint } from "src/services/fetch/endpointConfigs";
 import {
   OpportunityAttachmentListResponse,
   OpportunityAttachmentUploadResponse,
 } from "src/types/opportunity/opportunityAttachmentTypes";
 
-import { requesterForEndpoint } from "./fetchers";
-
-const fetchGrantorOpportunityWithMethod = (type: "POST" | "DELETE" | "GET") =>
-  requesterForEndpoint(toDynamicGrantorOpportunityEndpoint(type));
+import { fetchGrantorOpportunityWithMethod } from "./fetchers";
 
 export const listOpportunityAttachments = async (
   opportunityId: string,
