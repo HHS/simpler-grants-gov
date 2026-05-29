@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import RoadmapWhatWereWorkingOn from "src/components/roadmap/sections/RoadmapWhatWereWorkingOn";
+import RoadmapWhatWereWorkingOn from "./RoadmapWhatWereWorkingOn";
 
 describe("RoadmapWhatWereWorkingOn Content", () => {
   it("Renders with expected header", () => {

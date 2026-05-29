@@ -1,6 +1,6 @@
-import { useMessages, useTranslations } from "next-intl";
+import RoadmapPageSection from "src/app/[locale]/(base)/roadmap/_components/RoadmapPageSection";
 
-import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
+import { useMessages, useTranslations } from "next-intl";
 
 export default function RoadmapTimeline() {
   const t = useTranslations("Roadmap.sections.timeline");

@@ -1,10 +1,9 @@
+import RoadmapPageSection from "src/app/[locale]/(base)/roadmap/_components/RoadmapPageSection";
 import { ExternalRoutes } from "src/constants/routes";
 
 import { useMessages, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Accordion } from "@trussworks/react-uswds";
-
-import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
 
 export default function RoadmapMilestones() {
   const t = useTranslations("Roadmap.sections.milestones");

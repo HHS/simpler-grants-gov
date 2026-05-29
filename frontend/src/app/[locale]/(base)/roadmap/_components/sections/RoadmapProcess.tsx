@@ -1,9 +1,9 @@
+import RoadmapPageSection from "src/app/[locale]/(base)/roadmap/_components/RoadmapPageSection";
 import { UswdsIconNames } from "src/types/generalTypes";
 
 import { useTranslations } from "next-intl";
 
 import IconInfo from "src/components/homepage/IconInfoSection";
-import RoadmapPageSection from "src/components/roadmap/RoadmapPageSection";
 
 type RoadmapProcessSectionContentProps = {
   content: string;

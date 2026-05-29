@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import RoadmapProcess from "src/components/roadmap/sections/RoadmapProcess";
+import RoadmapProcess from "./RoadmapProcess";
 
 describe("RoadmapProcess Content", () => {
   it("Renders with expected header", () => {

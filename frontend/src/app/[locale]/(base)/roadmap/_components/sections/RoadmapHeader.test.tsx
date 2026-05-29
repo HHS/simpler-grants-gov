@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import RoadmapHeader from "src/components/roadmap/sections/RoadmapHeader";
+import RoadmapHeader from "./RoadmapHeader";
 
 describe("RoadmapHeader Content", () => {
   it("Renders with expected header", () => {

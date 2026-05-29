@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import RoadmapTimeline from "src/components/roadmap/sections/RoadmapTimeline";
+import RoadmapTimeline from "./RoadmapTimeline";
 
 describe("RoadmapTimeline Content", () => {
   it("Renders with expected header", () => {

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import RoadmapMilestones from "src/components/roadmap/sections/RoadmapMilestones";
+import RoadmapMilestones from "./RoadmapMilestones";
 
 describe("RoadmapMilestones Content", () => {
   it("Renders with expected header", () => {
