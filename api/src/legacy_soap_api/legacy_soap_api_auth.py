@@ -143,10 +143,17 @@ def get_soap_auth(mtls_cert: str | None, db_session: db.Session) -> SOAPAuth:
     if tcertificate.expirationdate and tcertificate.expirationdate <= get_now_us_eastern_date():
         logger.info(
             "soap_client_certificate: tcertificate is expired",
-            extra={"soap_api_event": LegacySoapApiEvent.CERT_EXPIRED},
+            extra={
+                "soap_api_event": LegacySoapApiEvent.CERT_EXPIRED,
+                "tcertificates_id": tcertificate.tcertificates_id,
+            },
         )
         raise SOAPClientCertificateIsExpired("tcertificate is expired")
 
+    logger.info(
+        "soap_client_certificate: valid tcertificate located",
+        extra={"tcertificates_id": tcertificate.tcertificates_id},
+    )
     legacy_certificate = get_legacy_certificate_by_serial_number(db_session, serial_number_hex)
 
     if not legacy_certificate:
