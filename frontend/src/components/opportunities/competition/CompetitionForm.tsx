@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@trussworks/react-uswds";
 
-import ApplyFormNav from "src/components/applyForm/ApplyFormNav";
+import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import { OpenAndCloseDates } from "src/components/opportunities/competition/sections/OpenAndCloseDates";
 import { SubmissionSetUp } from "src/components/opportunities/competition/sections/SubmissionSetUp";
 
@@ -31,7 +31,7 @@ export function CompetitionForm() {
     <div className="bg-white">
       <div className="grid-container padding-bottom-4">
         <div className="usa-in-page-nav-container">
-          <ApplyFormNav title="" fields={navigationItems} />
+          <LeftHandFormNav title="" fields={navigationItems} />
           <section className="order-2 width-full maxw-tablet-xl padding-top-4">
             <div
               id="application-requirements"
