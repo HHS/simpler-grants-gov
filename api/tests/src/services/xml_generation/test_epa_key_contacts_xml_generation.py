@@ -524,7 +524,6 @@ class TestEPAKeyContactsXSDValidation:
 
         return application
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_epa_key_contacts_submission_xml_validates_against_xsd(
         self, epa_key_contacts_application, xsd_validator, db_session
     ):
@@ -544,7 +543,9 @@ class TestEPAKeyContactsXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         epa_ns = "{http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         epa_elements = forms_element.findall(f".//{epa_ns}KeyContactPersons_2_0")
@@ -565,7 +566,6 @@ class TestEPAKeyContactsXSDValidation:
             f"Generated XML:\n{epa_xml[:2000]}"
         )
 
-    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_epa_key_contacts_empty_form_validates_against_xsd(
         self, enable_factory_create, xsd_validator, db_session
     ):
@@ -617,15 +617,20 @@ class TestEPAKeyContactsXSDValidation:
         )
 
         assembler = SubmissionXMLAssembler(application, application_submission)
-        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
+        import pdb
 
+        pdb.set_trace()
+
+        xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
         assert xml_string is not None
 
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         epa_ns = "{http://apply.grants.gov/forms/EPA_KeyContacts_2_0-V2.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         epa_elements = forms_element.findall(f".//{epa_ns}KeyContactPersons_2_0")
         assert len(epa_elements) == 1
 

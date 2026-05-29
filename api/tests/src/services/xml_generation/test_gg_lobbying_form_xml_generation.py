@@ -33,7 +33,6 @@ from tests.src.db.models.factories import (
 )
 
 
-@pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
 class TestGGLobbyingFormXMLGeneration:
     """Test cases for GG_LobbyingForm XML generation service."""
 
@@ -194,7 +193,6 @@ class TestGGLobbyingFormXMLGeneration:
         ), "Elements not in XSD sequence order"
 
 
-@pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
 class TestGGLobbyingFormXSDValidation:
     """XSD validation tests for GG_LobbyingForm XML."""
 
@@ -302,7 +300,8 @@ class TestGGLobbyingFormXSDValidation:
 
         # Extract GG_LobbyingForm form element
         gg_lobbying_ns = "{http://apply.grants.gov/forms/GG_LobbyingForm-V1.1}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         gg_lobbying_elements = forms_element.findall(f".//{gg_lobbying_ns}LobbyingForm")
@@ -393,7 +392,8 @@ class TestGGLobbyingFormXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         gg_lobbying_ns = "{http://apply.grants.gov/forms/GG_LobbyingForm-V1.1}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         gg_lobbying_elements = forms_element.findall(f".//{gg_lobbying_ns}LobbyingForm")
         assert len(gg_lobbying_elements) == 1
 

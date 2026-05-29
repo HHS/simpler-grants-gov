@@ -70,7 +70,6 @@ _INDIVIDUAL_US_SITE = {
 }
 
 
-@pytest.mark.xml_validation
 class TestPerformanceSiteXMLGeneration:
     """Unit tests for Performance Site XML generation (no DB required)."""
 
@@ -140,7 +139,6 @@ class TestPerformanceSiteXMLGeneration:
         assert primary_pos < other_pos
 
 
-@pytest.mark.xml_validation
 class TestPerformanceSiteXSDValidation:
     """XSD validation tests for Performance Site Location form XML."""
 

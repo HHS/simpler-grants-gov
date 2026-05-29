@@ -214,7 +214,6 @@ class TestProjectAbstractSummaryXMLGeneration:
         assert "</Project_AbstractSummary_2_0:ProjectAbstract>" in xml_data
 
 
-@pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
 class TestProjectAbstractSummaryXSDValidation:
     """XSD validation tests for Project Abstract Summary form XML."""
 
@@ -323,7 +322,8 @@ class TestProjectAbstractSummaryXSDValidation:
 
         # Extract Project Abstract Summary form element
         pas_ns = "{http://apply.grants.gov/forms/Project_AbstractSummary_2_0-V2.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         pas_elements = forms_element.findall(f".//{pas_ns}Project_AbstractSummary_2_0")
@@ -410,7 +410,8 @@ class TestProjectAbstractSummaryXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         pas_ns = "{http://apply.grants.gov/forms/Project_AbstractSummary_2_0-V2.0}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         pas_elements = forms_element.findall(f".//{pas_ns}Project_AbstractSummary_2_0")
         assert len(pas_elements) == 1
 

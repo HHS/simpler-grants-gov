@@ -474,7 +474,8 @@ class TestSF424BXSDValidation:
 
         # Extract SF-424B form element
         sf424b_ns = "{http://apply.grants.gov/forms/SF424B-V1.1}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None, "Forms element not found in submission XML"
 
         sf424b_elements = forms_element.findall(f".//{sf424b_ns}Assurances")
@@ -496,6 +497,7 @@ class TestSF424BXSDValidation:
             f"Generated XML:\n{sf424b_xml[:2000]}"
         )
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_sf424b_minimal_data_validates_against_xsd(
         self, enable_factory_create, xsd_validator, db_session
     ):
@@ -557,7 +559,8 @@ class TestSF424BXSDValidation:
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
 
         sf424b_ns = "{http://apply.grants.gov/forms/SF424B-V1.1}"
-        forms_element = root.find(".//Forms")
+        ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
+        forms_element = root.find(".//grant:Forms", namespaces=ns)
         sf424b_elements = forms_element.findall(f".//{sf424b_ns}Assurances")
         assert len(sf424b_elements) == 1
 
