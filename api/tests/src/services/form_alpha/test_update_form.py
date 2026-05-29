@@ -4,9 +4,8 @@ import pytest
 from apiflask.exceptions import HTTPError
 
 from src.constants.lookup_constants import FormType
-from src.db.models.competition_models import Form
 from src.services.form_alpha.update_form import update_form
-from tests.src.db.models.factories import FormInstructionFactory
+from tests.src.db.models.factories import FormFactory, FormInstructionFactory
 
 
 def test_update_form_create_new(enable_factory_create, db_session, internal_admin_user):
@@ -42,17 +41,13 @@ def test_update_form_create_new(enable_factory_create, db_session, internal_admi
 
 def test_update_form_update_existing(enable_factory_create, db_session, internal_admin_user):
     """Test updating an existing form"""
-    existing_form = Form(
+    existing_form = FormFactory.create(
         form_name="Original Name",
         short_form_name="original_name",
         form_version="1.0",
         agency_code="ORIG",
         omb_number="0000-0001",
-        form_json_schema={},
-        form_ui_schema=[],
     )
-    db_session.add(existing_form)
-    db_session.flush()
 
     form_data = {
         "form_name": "Updated Name",
@@ -156,17 +151,7 @@ def test_update_form_nullable_fields(enable_factory_create, db_session, internal
 def test_update_form_overwrite_instruction(enable_factory_create, db_session, internal_admin_user):
     """Test updating a form to remove form instruction"""
     form_instruction = FormInstructionFactory.create()
-    existing_form = Form(
-        form_name="Form with Instruction",
-        short_form_name="form_with_instr",
-        form_version="1.0",
-        agency_code="TEST",
-        form_json_schema={},
-        form_ui_schema=[],
-        form_instruction_id=form_instruction.form_instruction_id,
-    )
-    db_session.add(existing_form)
-    db_session.flush()
+    existing_form = FormFactory.create(form_instruction=form_instruction)
 
     form_data = {
         "form_name": "Updated Form",

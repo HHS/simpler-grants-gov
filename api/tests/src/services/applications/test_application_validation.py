@@ -6,7 +6,6 @@ from freezegun import freeze_time
 
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant
-from src.db.models.competition_models import Form
 from src.services.applications.application_validation import (
     ApplicationAction,
     get_application_form_errors,
@@ -22,6 +21,7 @@ from tests.src.db.models.factories import (
     ApplicationFormFactory,
     CompetitionFactory,
     CompetitionFormFactory,
+    FormFactory,
     OrganizationFactory,
     SamGovEntityFactory,
 )
@@ -35,7 +35,7 @@ VALID_FORM_C_RESPONSE = {"str_c": "text"}
 
 @pytest.fixture
 def form_a():
-    return Form(
+    return FormFactory.build(
         form_name="form_a",
         form_json_schema={
             "type": "object",
@@ -56,7 +56,7 @@ def form_a():
 
 @pytest.fixture
 def form_b():
-    return Form(
+    return FormFactory.build(
         form_name="form_b",
         form_json_schema={
             "type": "object",
@@ -71,7 +71,7 @@ def form_b():
 
 @pytest.fixture
 def form_c():
-    return Form(
+    return FormFactory.build(
         form_name="form_c",
         form_json_schema={
             "type": "object",
