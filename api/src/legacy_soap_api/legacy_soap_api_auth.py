@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 from urllib.parse import unquote
 
+import grants_shared.adapters.db as db
 import jwt
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -14,7 +15,6 @@ from pydantic import BaseModel, ConfigDict
 from requests.adapters import HTTPAdapter
 from sqlalchemy import func, select
 
-import src.adapters.db as db
 from src.auth.endpoint_access_util import can_access
 from src.db.models import staging
 from src.db.models.agency_models import Agency

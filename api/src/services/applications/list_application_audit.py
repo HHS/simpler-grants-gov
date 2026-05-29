@@ -1,12 +1,12 @@
 import uuid
 from collections.abc import Sequence
 
+import grants_shared.adapters.db as db
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select
 
-import src.adapters.db as db
 from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import Privilege
 from src.db.models.competition_models import ApplicationAudit, ApplicationForm, CompetitionForm

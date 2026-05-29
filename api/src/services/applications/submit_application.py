@@ -1,9 +1,9 @@
 import logging
 from uuid import UUID
 
+import grants_shared.adapters.db as db
 from grants_shared.util.datetime_util import utcnow
 
-import src.adapters.db as db
 from src.auth.endpoint_access_util import check_user_access
 from src.constants.lookup_constants import ApplicationAuditEvent, ApplicationStatus, Privilege
 from src.db.models.competition_models import Application

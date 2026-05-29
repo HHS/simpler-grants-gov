@@ -1,8 +1,8 @@
 import uuid
 
+import grants_shared.adapters.db as db
 from sqlalchemy import select
 
-import src.adapters.db as db
 from src.api.route_utils import raise_flask_error
 from src.db.models.award_recommendation_models import AwardRecommendationAttachment
 from src.db.models.user_models import User
