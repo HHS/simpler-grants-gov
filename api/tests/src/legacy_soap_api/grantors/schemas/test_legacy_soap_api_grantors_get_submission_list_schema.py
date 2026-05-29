@@ -48,21 +48,20 @@ class TestLegacySoapGrantorGetSubmissionListSchema:
         payload = SOAPPayload(soap_payload=request_xml_bytes.decode())
         soap_operation_dict = get_soap_operation_dict(str(payload.payload), payload.operation_name)
         schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
-        expected = {
-            "expanded_application_filter": {
-                "filters": {
-                    "CFDANumber": ["CFDA-PER-123", "CFDA-PER-124"],
-                    "FundingOpportunityNumber": [
-                        "FundingOppNumber-PER-123",
-                        "FundingOppNumber-PER-124",
-                    ],
-                    "GrantsGovTrackingNumber": [
-                        int(GRANTS_GOV_TRACKING_NUMBER_1.split("GRANT")[1])
-                    ],
-                }
-            }
-        }
-        assert schema.model_dump() == expected
+        expected = [
+            {"filter_type": "CFDANumber", "filter_value": "CFDA-PER-123"},
+            {"filter_type": "CFDANumber", "filter_value": "CFDA-PER-124"},
+            {"filter_type": "FundingOpportunityNumber", "filter_value": "FundingOppNumber-PER-123"},
+            {"filter_type": "FundingOpportunityNumber", "filter_value": "FundingOppNumber-PER-124"},
+            {
+                "filter_type": "GrantsGovTrackingNumber",
+                "filter_value": int(GRANTS_GOV_TRACKING_NUMBER_1.split("GRANT")[1]),
+            },
+        ]
+        assert sorted(
+            schema.model_dump()["expanded_application_filter"]["filters"],
+            key=lambda x: x["filter_type"],
+        ) == sorted(expected, key=lambda x: x["filter_type"])
 
     def test_get_submission_list_request_schema_throws_exception_if_filter_types_but_no_filter_value(
         self, db_session
@@ -133,9 +132,12 @@ class TestLegacySoapGrantorGetSubmissionListSchema:
         schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         expected = {
             "expanded_application_filter": {
-                "filters": {
-                    "GrantsGovTrackingNumber": [int(GRANTS_GOV_TRACKING_NUMBER_1.split("GRANT")[1])]
-                }
+                "filters": [
+                    {
+                        "filter_type": "GrantsGovTrackingNumber",
+                        "filter_value": int(GRANTS_GOV_TRACKING_NUMBER_1.split("GRANT")[1]),
+                    }
+                ]
             }
         }
         assert schema.model_dump() == expected
@@ -169,13 +171,20 @@ class TestLegacySoapGrantorGetSubmissionListSchema:
         schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         expected = {
             "expanded_application_filter": {
-                "filters": {
-                    "GrantsGovTrackingNumber": [
-                        int(GRANTS_GOV_TRACKING_NUMBER_1.split("GRANT")[1]),
-                        int(GRANTS_GOV_TRACKING_NUMBER_2.split("GRANT")[1]),
-                        int(GRANTS_GOV_TRACKING_NUMBER_3.split("GRANT")[1]),
-                    ]
-                }
+                "filters": [
+                    {
+                        "filter_type": "GrantsGovTrackingNumber",
+                        "filter_value": int(GRANTS_GOV_TRACKING_NUMBER_1.split("GRANT")[1]),
+                    },
+                    {
+                        "filter_type": "GrantsGovTrackingNumber",
+                        "filter_value": int(GRANTS_GOV_TRACKING_NUMBER_2.split("GRANT")[1]),
+                    },
+                    {
+                        "filter_type": "GrantsGovTrackingNumber",
+                        "filter_value": int(GRANTS_GOV_TRACKING_NUMBER_3.split("GRANT")[1]),
+                    },
+                ]
             }
         }
         assert schema.model_dump() == expected
@@ -226,10 +235,19 @@ class TestLegacySoapGrantorGetSubmissionListSchema:
         schema = grantors_schemas.GetSubmissionListRequest(**soap_operation_dict)
         expected = {
             "expanded_application_filter": {
-                "filters": {"Status": ["Rejected with Errors", "Validated", "Received"]}
+                "filters": [
+                    {"filter_type": "Status", "filter_value": "Rejected with Errors"},
+                    {"filter_type": "Status", "filter_value": "Validated"},
+                    {"filter_type": "Status", "filter_value": "Received"},
+                ]
             }
         }
-        assert schema.model_dump() == expected
+        assert sorted(
+            schema.model_dump()["expanded_application_filter"]["filters"],
+            key=lambda x: x["filter_type"],
+        ) == sorted(
+            expected["expanded_application_filter"]["filters"], key=lambda x: x["filter_type"]
+        )
 
 
 class TestSubmissionInfoTimezoneValidation:
