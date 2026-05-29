@@ -1,8 +1,7 @@
 import { RJSFSchema } from "@rjsf/utils";
 import { render, screen, waitFor } from "@testing-library/react";
+import ApplyForm from "src/app/[locale]/(base)/workspace/applications/[applicationId]/form/[appFormId]/_components/ApplyForm";
 import { UiSchema } from "src/types/applyForm/types";
-
-import ApplyForm from "src/components/applyForm/ApplyForm";
 
 type FormActionArgs = [
   {
