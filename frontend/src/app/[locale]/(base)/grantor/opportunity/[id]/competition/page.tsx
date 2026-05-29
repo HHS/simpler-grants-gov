@@ -1,0 +1,46 @@
+import { Metadata } from "next";
+import { getSession } from "src/services/auth/session";
+import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
+
+import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
+
+import { CompetitionForm } from "src/components/opportunities/competition/CompetitionForm";
+import { UnauthorizedMessage } from "src/components/user/UnauthorizedMessage";
+
+type PageProps = {
+  params: Promise<{ id: string; locale: string }>;
+};
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string; locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: "OpportunityCompetition",
+  });
+  return {
+    title: t("pageTitle"),
+    description: t("metaDescription"),
+  };
+}
+
+async function OpportunityCompetitionPage({ params: _params }: PageProps) {
+  const session = await getSession();
+  if (!session || !session.token) {
+    return <UnauthorizedMessage />;
+  }
+
+  return <CompetitionForm />;
+}
+
+export default withFeatureFlag<PageProps, never>(
+  OpportunityCompetitionPage,
+  "opportunitiesListOff",
+  () => redirect("/maintenance"),
+);
