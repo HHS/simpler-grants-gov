@@ -58,7 +58,7 @@ def get_award_recommendation_and_verify_access(
 
     verify_access(user, {Privilege.VIEW_AWARD_RECOMMENDATION}, agency)
 
-    award_recommendation.award_recommendation_summary = get_award_recommendation_summary(
+    award_recommendation.award_recommendation_summary = get_award_recommendation_summary(  # type: ignore[attr-defined]
         db_session, award_recommendation_id
     )
 
