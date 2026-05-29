@@ -31,6 +31,7 @@ export async function generateMetadata({
 }
 
 async function OpportunityCompetitionPage({ params }: PageProps) {
+  // TODO(#10507): fetch opportunity by id, handle 403 with <UnauthorizedMessage />
   const { id: _id, locale: _locale } = await params;
   const session = await getSession();
   if (!session || !session.token) {

@@ -2365,7 +2365,6 @@ export const messages = {
       expectedApplicationSize: "Expected application size",
       expectedApplicationSizeHint:
         "Approximate file size of a typical submission",
-      openAndCloseDatesSubheader: "Open and close dates",
       openDate: "Open date",
       openDateHint: "First day to start applying.",
       closeDate: "Close date",
