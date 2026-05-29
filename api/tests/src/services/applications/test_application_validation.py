@@ -6,6 +6,7 @@ from freezegun import freeze_time
 
 from src.api.response import ValidationErrorDetail
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant
+from src.db.models.competition_models import Form
 from src.services.applications.application_validation import (
     ApplicationAction,
     get_application_form_errors,
