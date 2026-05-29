@@ -1,6 +1,6 @@
-import HomepageHero from "src/components/homepage/sections/HomepageHero";
 import HomepageBuilding from "./sections/HomepageBuilding";
 import HomepageExperimental from "./sections/HomepageExperimental";
+import HomepageHero from "./sections/HomepageHero";
 import HomepageInvovled from "./sections/HomepageInvolved";
 
 export default function HomePageSections() {

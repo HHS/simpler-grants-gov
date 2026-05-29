@@ -1,17 +1,17 @@
 import React from "react";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-interface homePageSectionProps {
+interface HomePageSectionProps {
   children: React.ReactNode;
   className?: string;
   title?: string;
 }
 
-export default function homePageSection({
+export default function HomePageSection({
   children,
   className = "",
   title = "",
-}: homePageSectionProps) {
+}: HomePageSectionProps) {
   return (
     <div className={className}>
       <GridContainer className="display-flex flex-column padding-y-4 grid-container tablet-lg:flex-row tablet-lg:padding-y-6">

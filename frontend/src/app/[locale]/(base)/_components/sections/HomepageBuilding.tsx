@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Grid, GridContainer } from "@trussworks/react-uswds";
 
-const BuildingContent = () => {
+const HomepageBuilding = () => {
   const t = useTranslations("Homepage.sections.building");
 
   return (
@@ -64,4 +64,4 @@ const BuildingContent = () => {
   );
 };
 
-export default BuildingContent;
+export default HomepageBuilding;

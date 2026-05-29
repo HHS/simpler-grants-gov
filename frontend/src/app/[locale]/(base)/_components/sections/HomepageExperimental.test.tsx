@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import HomepageExperimental from "src/components/homepage/sections/HomepageExperimental";
+import HomepageExperimental from "./HomepageExperimental";
 
 describe("Homepage Experimental Content", () => {
   it("Renders without errors", () => {

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import HomepageInvolved from "src/components/homepage/sections/HomepageInvolved";
+import HomepageInvolved from "./HomepageInvolved";
 
 describe("Homepage Involved Content", () => {
   it("Renders without errors", () => {

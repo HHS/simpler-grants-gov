@@ -1,3 +1,4 @@
+import HomePageSection from "src/app/[locale]/(base)/_components/HomePageSection";
 import { ExternalRoutes } from "src/constants/routes";
 import { UswdsIconNames } from "src/types/generalTypes";
 
@@ -5,10 +6,9 @@ import { useMessages, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Grid } from "@trussworks/react-uswds";
 
-import HomePageSection from "src/components/homepage/homePageSection";
 import IconInfo from "src/components/homepage/IconInfoSection";
 
-const ExperimentalContent = () => {
+const HomepageExperimental = () => {
   const t = useTranslations("Homepage.sections.experimental");
   const messages = useMessages() as unknown as IntlMessages;
   const { iconSections } = messages.Homepage.sections.experimental;
@@ -57,4 +57,4 @@ const ExperimentalContent = () => {
   );
 };
 
-export default ExperimentalContent;
+export default HomepageExperimental;

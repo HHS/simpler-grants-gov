@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import HomepageBuilding from "src/components/homepage/sections/HomepageBuilding";
+import HomepageBuilding from "./HomepageBuilding";
 
 describe("Homepage Building Content", () => {
   it("Renders without errors", () => {

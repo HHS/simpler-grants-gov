@@ -1,12 +1,12 @@
+import HomePageSection from "src/app/[locale]/(base)/_components/HomePageSection";
 import { ExternalRoutes } from "src/constants/routes";
 
 import { useTranslations } from "next-intl";
 import { Grid } from "@trussworks/react-uswds";
 
-import HomePageSection from "src/components/homepage/homePageSection";
 import IconInfo from "src/components/homepage/IconInfoSection";
 
-const InvolvedContent = () => {
+const HomepageInvolved = () => {
   const t = useTranslations("Homepage.sections.involved");
 
   return (
@@ -79,4 +79,4 @@ const InvolvedContent = () => {
   );
 };
 
-export default InvolvedContent;
+export default HomepageInvolved;

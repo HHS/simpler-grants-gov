@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import HomepageHero from "src/components/homepage/sections/HomepageHero";
+import HomepageHero from "./HomepageHero";
 
 describe("Homepage Hero Content", () => {
   it("Renders without errors", () => {

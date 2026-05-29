@@ -6,7 +6,7 @@ import { GridContainer } from "@trussworks/react-uswds";
 
 import { USWDSIcon } from "src/components/USWDSIcon";
 
-const Hero = () => {
+const HomepageHero = () => {
   const t = useTranslations("Homepage");
 
   return (
@@ -42,4 +42,4 @@ const Hero = () => {
   );
 };
 
-export default Hero;
+export default HomepageHero;
