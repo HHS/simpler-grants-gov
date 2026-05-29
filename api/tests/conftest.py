@@ -1,4 +1,3 @@
-import copy
 import logging
 import uuid
 from os import path
@@ -33,7 +32,6 @@ from src.db.models.opportunity_models import Opportunity
 from src.db.models.staging import metadata as staging_metadata
 from src.db.models.user_models import User, UserApiKey
 from src.form_schema.forms import get_active_forms, init_form_registry
-from src.form_schema.jsonschema_resolver import resolve_jsonschema
 from src.util.local import load_local_env_vars
 from src.workflow.registry.workflow_client_registry import (
     WorkflowClientRegistry,
@@ -688,10 +686,9 @@ def load_active_forms(db_session, enable_factory_create) -> None:
                 file_name=f"{form.short_form_name}.txt",
             )
 
-        # do a copy so we aren't modifying a global form object
-        copied_form = copy.deepcopy(form)
-        copied_form.form_json_schema = resolve_jsonschema(form.form_json_schema)
-        db_session.merge(copied_form, load=True)
+        # Session.merge() does not modify the source object; schemas are already
+        # resolved by init_form_registry() so no deepcopy or re-resolve needed.
+        db_session.merge(form, load=True)
 
 
 @pytest.fixture
