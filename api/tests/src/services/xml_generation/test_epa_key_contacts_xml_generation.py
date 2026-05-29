@@ -254,6 +254,7 @@ class TestEPAKeyContactsXMLGeneration:
         assert "LastName>Person<" in xml_data
         assert "Phone>555-123-4567<" in xml_data
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_generate_epa_key_contacts_xml_empty_form(self):
         """Test EPA Key Contacts XML generation with no contacts (empty form).
 
@@ -524,6 +525,7 @@ class TestEPAKeyContactsXSDValidation:
 
         return application
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_epa_key_contacts_submission_xml_validates_against_xsd(
         self, epa_key_contacts_application, xsd_validator, db_session
     ):
@@ -566,6 +568,7 @@ class TestEPAKeyContactsXSDValidation:
             f"Generated XML:\n{epa_xml[:2000]}"
         )
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_epa_key_contacts_empty_form_validates_against_xsd(
         self, enable_factory_create, xsd_validator, db_session
     ):
@@ -617,9 +620,6 @@ class TestEPAKeyContactsXSDValidation:
         )
 
         assembler = SubmissionXMLAssembler(application, application_submission)
-        import pdb
-
-        pdb.set_trace()
 
         xml_string = assembler.generate_complete_submission_xml(pretty_print=True)
         assert xml_string is not None

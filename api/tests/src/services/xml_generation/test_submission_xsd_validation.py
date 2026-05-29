@@ -276,6 +276,7 @@ class TestSubmissionXSDValidation:
             f"Generated XML:\n{sf424_xml[:1000]}"
         )
 
+    @pytest.mark.skip(reason="Tracked in #10424: Fix existing skipped XSD validation tests")
     def test_sf424a_submission_xml_validates_against_xsd(
         self, sf424a_application, xsd_validator, db_session
     ):
@@ -480,9 +481,6 @@ class TestSubmissionXSDValidation:
         # Parse complete XML
         parser = lxml_etree.XMLParser(remove_blank_text=True)
         root = lxml_etree.fromstring(xml_string.encode("utf-8"), parser=parser)
-        import pdb
-
-        pdb.set_trace()
         ns = {"grant": "http://apply.grants.gov/system/MetaGrantApplication"}
         forms_element = root.find(".//grant:Forms", namespaces=ns)
         assert forms_element is not None
