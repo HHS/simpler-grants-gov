@@ -1,9 +1,12 @@
 import { Metadata } from "next";
+import OpportunityEditForm from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/_components/OpportunityEditForm";
+import OpportunityEditHeader from "src/app/[locale]/(base)/grantor/opportunity/[id]/edit/_components/OpportunityEditHeader";
 import { ApiRequestError, parseErrorStatus } from "src/errors";
 import { getSession } from "src/services/auth/session";
 import withFeatureFlag from "src/services/featureFlags/withFeatureFlag";
 import { getOpportunityForGrantor } from "src/services/fetch/fetchers/opportunitySummaryGrantorFetcher";
 import { GrantorOpportunityDetail } from "src/types/opportunity/opportunityResponseTypes";
+import { buildOpportunityEditInitialValues } from "src/utils/opportunityEditFormConfig";
 
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
@@ -12,9 +15,6 @@ import { Alert, Button, GridContainer } from "@trussworks/react-uswds";
 import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import { UnauthorizedMessage } from "src/components/core/UnauthorizedMessage";
 import { USWDSIcon } from "src/components/core/USWDSIcon";
-import OpportunityEditForm from "src/components/opportunity/OpportunityEditForm";
-import { buildOpportunityEditInitialValues } from "src/components/opportunity/opportunityEditFormConfig";
-import OpportunityEditHeader from "src/components/opportunity/OpportunityEditHeader";
 
 type PageProps = {
   params: Promise<{ id: string; locale: string }>;

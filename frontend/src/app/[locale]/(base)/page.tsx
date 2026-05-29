@@ -1,9 +1,8 @@
 import { Metadata } from "next";
+import HomePageSections from "src/app/[locale]/(base)/_components/HomePageSections";
 import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
-
-import HomePageSections from "src/components/homepage/HomePageSections";
 
 export async function generateMetadata({ params }: LocalizedPageProps) {
   const { locale } = await params;
