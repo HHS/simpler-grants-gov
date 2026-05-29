@@ -9,14 +9,6 @@ APP_NAME := grants-api
 RED := \033[0;31m
 NO_COLOR := \033[0m
 
-# Adding this to the end of a script that outputs JSON will convert
-# it to a readable format with timestamps and color-coding.
-#
-# Note that you can also change the LOG_FORMAT env var to switch
-# between JSON & human readable format. This is left in place
-# in the event JSON is output from a process we don't log.
-DECODE_LOG := 2>&1 | python3 -u src/logging/util/decodelog.py
-
 # Required for CI flags below to work properly
 SHELL = /bin/bash -o pipefail
 
@@ -28,7 +20,9 @@ APP_DIR := api
 ifdef CI
  DOCKER_EXEC_ARGS := -T -e CI -e PYTEST_ADDOPTS="--color=yes"
  MYPY_FLAGS := --no-pretty
- MYPY_POSTPROC := | perl -pe "s/^(.+):(\d+):(\d+): error: (.*)/::warning file=$(APP_DIR)\/\1,line=\2,col=\3::\4/"
+ # The perl command here modifies the output format to appear as a warning on the github action
+ # See https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#setting-a-warning-message
+ MYPY_POSTPROC := | perl -pe "s/^(.+):(\d+):(\d+): error: (.*)/::warning file=$(APP_DIR)\/\1,line=\2,col=\3::\1:\2:\3 :error: \4/ or s/^/::warning ::/"
 endif
 
 # By default, all python/uv commands will run inside of the docker container
@@ -263,16 +257,11 @@ start-mock-oauth2:
 # Testing
 ##################################################
 
-test: ## Run all tests except for audit logging and XML validation tests
-	$(PY_RUN_CMD) pytest -m "not audit and not xml_validation" $(args)
-
-test-audit: ## Run audit logging tests
-	$(PY_RUN_CMD) pytest -m "audit" $(args)
+test: ## Run all tests except for XML validation tests
+	$(PY_RUN_CMD) pytest -m "not xml_validation" $(args)
 
 test-coverage: ## Run tests and generate coverage report
-	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not audit and not xml_validation" $(args)
-	$(PY_RUN_CMD) coverage run --data-file=.coverage.audit --branch --source=src -m pytest -m "audit" $(args)
-	$(PY_RUN_CMD) coverage combine --data-file=.coverage --append
+	$(PY_RUN_CMD) coverage run --branch --source=src -m pytest -m "not xml_validation" $(args)
 	$(PY_RUN_CMD) coverage report
 
 test-coverage-report: ## Open HTML test coverage report

@@ -3,9 +3,12 @@ import logging
 import os
 from typing import Any
 
+import grants_shared.logs
+import grants_shared.logs.flask_logger as flask_logger
 from apiflask import APIFlask, exceptions
 from flask import Response
 from flask_cors import CORS
+from grants_shared.util.local import error_if_not_local
 from pydantic import Field
 
 import src.adapters.db as db
@@ -13,8 +16,6 @@ import src.adapters.db.flask_db as flask_db
 import src.adapters.search as search
 import src.adapters.search.flask_opensearch as flask_opensearch
 import src.api.feature_flags.feature_flag_config as feature_flag_config
-import src.logging
-import src.logging.flask_logger as flask_logger
 from src.adapters.newrelic import init_newrelic
 from src.api.agencies_v1 import agency_blueprint as agencies_v1_blueprint
 from src.api.application_alpha import application_blueprint
@@ -44,9 +45,9 @@ from src.data_migration.data_migration_blueprint import data_migration_blueprint
 from src.form_schema.forms import init_form_registry
 from src.legacy_soap_api import init_app as init_legacy_soap_api
 from src.search.backend.load_search_data_blueprint import load_search_data_blueprint
+from src.services.files.local_file_scanner import setup_local_file_scanner
 from src.task import task_blueprint
 from src.util.env_config import PydanticBaseEnvConfig
-from src.util.local import error_if_not_local
 
 logger = logging.getLogger(__name__)
 
@@ -117,12 +118,14 @@ def create_app() -> APIFlask:
 
     init_form_registry()
 
+    setup_local_file_scanner()
+
     return app
 
 
 def setup_logging(app: APIFlask) -> None:
-    src.logging.init(__package__)
-    flask_logger.init_app(logging.root, app)
+    grants_shared.logs.init(__package__)
+    flask_logger.init_app(logging.root, app, "simpler-grants")
 
 
 def register_db_client(app: APIFlask) -> None:

@@ -1,6 +1,7 @@
 import logging
 import uuid
 
+from grants_shared.util import datetime_util
 from sqlalchemy import select
 
 import src.adapters.db as db
@@ -9,7 +10,6 @@ from src.auth.endpoint_access_util import verify_access
 from src.constants.lookup_constants import FileScanStatus, Privilege
 from src.db.models.file_upload_models import PendingFile
 from src.db.models.user_models import User
-from src.util import datetime_util
 
 logger = logging.getLogger(__name__)
 

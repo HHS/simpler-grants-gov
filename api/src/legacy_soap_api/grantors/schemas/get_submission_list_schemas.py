@@ -1,11 +1,10 @@
-from collections import defaultdict
 from datetime import datetime
 from typing import Any
 
+from grants_shared.util.datetime_util import make_timezone_aware
 from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
 
 from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema, SOAPInvalidEnvelope
-from src.util.datetime_util import make_timezone_aware
 
 
 class SubmissionInfo(BaseSOAPSchema):
@@ -52,44 +51,41 @@ class GetSubmissionListResponse(BaseSOAPSchema):
 
 
 class ExpandedApplicationFilter(BaseModel):
-    filter_value: list[str | int] = Field(default_factory=list, alias="FilterValue")
+    filter_value: str | int = Field(alias="FilterValue")
     filter_type: str = Field(alias="FilterType")
 
     @field_validator("filter_value", mode="before")
     @classmethod
-    def convert_grants_gov_tracking_numbers_to_int(cls, v: Any, info: Any) -> Any:
-        return [
-            (
-                int(item.split("GRANT")[1])
-                if isinstance(item, str) and item.startswith("GRANT")
-                else item
-            )
-            for item in v
-        ]
+    def convert_grants_gov_tracking_numbers_to_int(cls, v: Any) -> Any:
+        if isinstance(v, str) and v.startswith("GRANT"):
+            return int(v.split("GRANT")[1])
+        return v
 
 
-def update_consolidated(consolidated: dict, filter_type: str, filter_value: str | list) -> dict:
-    value = filter_value if isinstance(filter_value, list) else [filter_value]
+def update_consolidated(
+    consolidated: list[ExpandedApplicationFilter], filter_type: str, filter_value: str | list
+) -> list[ExpandedApplicationFilter]:
     filter_item = ExpandedApplicationFilter.model_validate(
-        {"FilterType": filter_type, "FilterValue": value}
+        {"FilterType": filter_type, "FilterValue": filter_value}
     )
-    consolidated[filter_item.filter_type].extend(filter_item.filter_value)
+    consolidated.append(filter_item)
     return consolidated
 
 
 class ConsolidatedFilter(BaseModel):
-    filters: dict[str, list[str] | list[int]]
+    filters: list[ExpandedApplicationFilter]
 
     @model_validator(mode="before")
     @classmethod
     def consolidate_filters(
         cls, data: dict[str, list[str] | str] | list
-    ) -> dict[str, dict[str, str]]:
+    ) -> dict[str, list[ExpandedApplicationFilter]]:
         if not isinstance(data, list):
             data = [data]
 
         # Consolidate the filter values here by type
-        consolidated: dict = defaultdict(list)
+        # consolidated: dict = defaultdict(list)
+        consolidated: list = []
         for item in data:
             # Check for missing keys
             for value in ["FilterType", "FilterValue"]:

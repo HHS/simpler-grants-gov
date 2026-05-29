@@ -28,9 +28,14 @@ def get_boto_dynamodb_client(
     if dynamodb_config is None:
         dynamodb_config = DynamoDBConfig()
 
-    params = {}
+    params: dict[str, Any] = {}
     if dynamodb_config.aws_dynamodb_endpoint_url is not None:
         params["endpoint_url"] = dynamodb_config.aws_dynamodb_endpoint_url
+        # dynamodb-local rejects the "NO_CREDS" access key the default boto
+        # session uses for fake-AWS; pass the same value setup_local_dynamodb
+        # uses so reads and writes both work against the local container.
+        params["aws_access_key_id"] = "local"
+        params["aws_secret_access_key"] = "local"
 
     if session is None:
         session = get_boto_session()
@@ -129,3 +134,31 @@ class DynamoDBClient:
                 extra=log_extra,
             )
             raise
+
+    def put_item(
+        self,
+        table_name: str,
+        item: dict[str, Any],
+    ) -> None:
+        """
+        Write an item to DynamoDB. PutItem is unconditional, so this both
+        creates new rows and replaces existing ones.
+
+        Args:
+            table_name: The name of the DynamoDB table
+            item: The full item in DynamoDB attribute-value format
+                (e.g., {"file_id": {"S": "abc-123"}, "status": {"S": "complete"}})
+
+        Examples:
+            client.put_item(
+                table_name="virus-scan-cache",
+                item={
+                    "file_id": {"S": "abc-123"},
+                    "user_id": {"S": "user-1"},
+                    "status": {"S": "complete"},
+                },
+            )
+        """
+        log_extra = {"table_name": table_name, "key_attribute_value": item.get("file_id")}
+        logger.info("Putting item into DynamoDB", extra=log_extra)
+        self.client.put_item(TableName=table_name, Item=item)

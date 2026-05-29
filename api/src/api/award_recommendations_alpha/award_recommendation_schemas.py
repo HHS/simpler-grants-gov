@@ -525,6 +525,10 @@ class AwardRecommendationAttachmentDeleteResponseSchema(AbstractResponseSchema):
     data = fields.MixinField(metadata={"example": None})
 
 
+class AwardRecommendationDeleteResponseSchema(AbstractResponseSchema):
+    data = fields.MixinField(metadata={"example": None})
+
+
 class AwardRecommendationRiskResponseSchema(AbstractResponseSchema):
     """Schema for risk response (used by create and update)"""
 
