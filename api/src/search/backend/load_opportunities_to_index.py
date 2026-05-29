@@ -3,6 +3,7 @@ import uuid
 from collections.abc import Iterator, Sequence
 from enum import StrEnum
 
+from grants_shared.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from opensearchpy.exceptions import ConnectionTimeout, TransportError
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
@@ -20,7 +21,6 @@ from src.db.models.opportunity_models import (
     OpportunitySummary,
 )
 from src.task.task import Task
-from src.util.datetime_util import get_now_us_eastern_datetime, utcnow
 from src.util.env_config import PydanticBaseEnvConfig
 
 logger = logging.getLogger(__name__)

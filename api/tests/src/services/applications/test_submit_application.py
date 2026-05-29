@@ -3,11 +3,11 @@ from datetime import timedelta
 
 import apiflask.exceptions
 import pytest
+from grants_shared.util.datetime_util import get_now_us_eastern_date
 
 from src.constants.lookup_constants import ApplicationStatus, CompetitionOpenToApplicant, Privilege
 from src.form_schema.rule_processing.json_rule_field_population import UNKNOWN_VALUE
 from src.services.applications.submit_application import submit_application
-from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.src.db.models.factories import (
     ApplicationFactory,

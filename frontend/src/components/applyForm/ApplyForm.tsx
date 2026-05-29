@@ -14,18 +14,12 @@ import { rebaseFieldListWarningsAfterDelete } from "src/utils/applyForm/rebaseFi
 
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
-import React, {
-  ReactNode,
-  useActionState,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { ReactNode, useActionState, useEffect, useMemo, useState } from "react";
 import { Alert, Button, FormGroup } from "@trussworks/react-uswds";
 
+import LeftHandFormNav from "src/components/core/forms/LeftHandFormNav";
 import { handleFormAction } from "./actions";
 import { ApplyFormMessage } from "./ApplyFormMessage";
-import ApplyFormNav from "./ApplyFormNav";
 import { FormFields } from "./FormFields";
 import { getFieldsForNav } from "./utils";
 
@@ -260,7 +254,7 @@ const ApplyForm = ({
             />
           </AttachmentsProvider>
         </FormGroup>
-        <ApplyFormNav title={translate("navTitle")} fields={navFields} />
+        <LeftHandFormNav title={translate("navTitle")} fields={navFields} />
       </div>
     </form>
   );

@@ -36,13 +36,6 @@ jest.mock("src/services/auth/session", () => ({
 jest.mock("src/services/fetch/fetchers/opportunityFetcher");
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher");
 
-jest.mock("src/components/ContentLayout", () => ({
-  __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-}));
-
 jest.mock("src/components/opportunity/OpportunityIntro", () => ({
   __esModule: true,
   default: () => <div data-testid="opportunity-intro" />,

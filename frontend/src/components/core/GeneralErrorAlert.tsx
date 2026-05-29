@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Alert } from "@trussworks/react-uswds";
 
-const ServerErrorAlert = ({ callToAction }: { callToAction?: string }) => {
+const GeneralErrorAlert = ({ callToAction }: { callToAction?: string }) => {
   const t = useTranslations("Errors");
 
   return (
@@ -13,4 +13,4 @@ const ServerErrorAlert = ({ callToAction }: { callToAction?: string }) => {
   );
 };
 
-export default ServerErrorAlert;
+export default GeneralErrorAlert;
