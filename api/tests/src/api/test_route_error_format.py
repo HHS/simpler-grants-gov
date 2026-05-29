@@ -7,13 +7,13 @@ responses is consistent and functioning as intended.
 
 import dataclasses
 
+import grants_shared.logs
 import pytest
 from apiflask import APIBlueprint, APIKeyHeaderAuth
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
 from werkzeug.http import HTTP_STATUS_CODES
 
 import src.app as app_entry
-import src.logging
 from src.api.response import ApiResponse, ValidationErrorDetail
 from src.api.route_utils import raise_flask_error
 from src.api.schemas.extension import Schema, fields
@@ -104,7 +104,7 @@ def simple_app(monkeypatch):
     # To avoid re-initializing logging everytime we
     # setup the app, we disabled it above and do it here
     # in case you want it while running your tests
-    with src.logging.init(__package__):
+    with grants_shared.logs.init(__package__):
         yield app
 
 

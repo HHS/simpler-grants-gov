@@ -3,6 +3,7 @@ from collections.abc import Generator, Iterator
 from datetime import datetime, timezone
 
 import xmltodict
+from grants_shared.util.datetime_util import adjust_timezone
 from lxml import etree
 from pydantic import ValidationError as PydanticValidationError
 from sqlalchemy import or_, select
@@ -24,7 +25,6 @@ from src.legacy_soap_api.legacy_soap_api_config import SOAPOperationConfig
 from src.legacy_soap_api.legacy_soap_api_schemas import SOAPResponse
 from src.legacy_soap_api.legacy_soap_api_schemas.base import SOAPRequest
 from src.legacy_soap_api.legacy_soap_api_utils import convert_bool_to_yes_no
-from src.util.datetime_util import adjust_timezone
 
 logger = logging.getLogger(__name__)
 GRANTS_APPLICATION_STATUSES = {

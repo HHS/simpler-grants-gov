@@ -1,6 +1,8 @@
 import logging
 from uuid import UUID
 
+from grants_shared.logs.flask_logger import add_extra_data_to_current_request_logs
+
 from src.adapters import db
 from src.adapters.db import flask_db
 from src.api import response
@@ -27,7 +29,6 @@ from src.api.organizations_v1.organization_schemas import (
 )
 from src.auth.api_jwt_auth import api_jwt_auth
 from src.db.models.user_models import UserTokenSession
-from src.logging.flask_logger import add_extra_data_to_current_request_logs
 from src.services.organizations_v1.create_organization_invitation import (
     create_organization_invitation,
 )

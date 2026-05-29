@@ -1,12 +1,12 @@
 from datetime import date
 from typing import Self
 
+from grants_shared.util.datetime_util import parse_grants_gov_date
 from pydantic import Field, field_validator, model_validator
 
 from src.legacy_soap_api.applicants.fault_messages import OpportunityListRequestInvalidParams
 from src.legacy_soap_api.legacy_soap_api_schemas import BaseSOAPSchema
 from src.legacy_soap_api.legacy_soap_api_utils import SOAPFaultException
-from src.util.datetime_util import parse_grants_gov_date
 
 GET_OPPORTUNITY_LIST_REQUEST_ERR = "No package_id or opportunity_filter provided."
 OPPORTUNITY_LIST_NO_DATA_PROVIDED_ERR = (
