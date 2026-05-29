@@ -4,7 +4,7 @@ import {
   Summary,
 } from "src/types/opportunity/opportunityResponseTypes";
 
-import OpportunityLink from "src/components/opportunity/OpportunityLink";
+import OpportunityLink from "./OpportunityLink";
 
 // Mock `useTranslations`
 jest.mock("next-intl", () => ({

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { Summary } from "src/types/opportunity/opportunityResponseTypes";
 import { formatDate } from "src/utils/dateUtil";
 
-import OpportunityHistory from "src/components/opportunity/OpportunityHistory";
+import OpportunityHistory from "./OpportunityHistory";
 
 // Mock the formatDate function
 jest.mock("src/utils/dateUtil", () => ({

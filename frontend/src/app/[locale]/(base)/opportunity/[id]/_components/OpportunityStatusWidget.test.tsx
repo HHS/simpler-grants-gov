@@ -4,7 +4,7 @@ import {
   Summary,
 } from "src/types/opportunity/opportunityResponseTypes";
 
-import OpportunityStatusWidget from "src/components/opportunity/OpportunityStatusWidget";
+import OpportunityStatusWidget from "./OpportunityStatusWidget";
 
 jest.mock("src/utils/dateUtil", () => ({
   formatDate: jest.fn((date: string) => date),

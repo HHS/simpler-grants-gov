@@ -36,42 +36,42 @@ jest.mock("src/services/auth/session", () => ({
 jest.mock("src/services/fetch/fetchers/opportunityFetcher");
 jest.mock("src/services/fetch/fetchers/savedOpportunityFetcher");
 
-jest.mock("src/components/opportunity/OpportunityIntro", () => ({
+jest.mock("./_components/OpportunityIntro", () => ({
   __esModule: true,
   default: () => <div data-testid="opportunity-intro" />,
 }));
 
-jest.mock("src/components/opportunity/OpportunityDescription", () => ({
+jest.mock("./_components/OpportunityDescription", () => ({
   __esModule: true,
   default: () => <div />,
 }));
 
-jest.mock("src/components/opportunity/OpportunityDocuments", () => ({
+jest.mock("./_components/OpportunityDocuments", () => ({
   __esModule: true,
   default: () => <div />,
 }));
 
-jest.mock("src/components/opportunity/OpportunityLink", () => ({
+jest.mock("./_components/OpportunityLink", () => ({
   __esModule: true,
   default: () => <div />,
 }));
 
-jest.mock("src/components/opportunity/OpportunityStatusWidget", () => ({
+jest.mock("./_components/OpportunityStatusWidget", () => ({
   __esModule: true,
   default: () => <div />,
 }));
 
-jest.mock("src/components/opportunity/OpportunityCTA", () => ({
+jest.mock("./_components/OpportunityCTA", () => ({
   __esModule: true,
   default: () => <div />,
 }));
 
-jest.mock("src/components/opportunity/OpportunityAwardInfo", () => ({
+jest.mock("./_components/OpportunityAwardInfo", () => ({
   __esModule: true,
   default: () => <div />,
 }));
 
-jest.mock("src/components/opportunity/OpportunityHistory", () => ({
+jest.mock("./_components/OpportunityHistory", () => ({
   __esModule: true,
   default: () => <div />,
 }));

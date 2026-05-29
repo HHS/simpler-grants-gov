@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import OpportunityDocuments from "src/components/opportunity/OpportunityDocuments";
+import OpportunityDocuments from "./OpportunityDocuments";
 
 const mockData = [
   {

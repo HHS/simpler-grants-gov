@@ -5,7 +5,7 @@ import {
   fakeUserOrganization,
 } from "src/utils/testing/fixtures";
 
-import { StartApplicationModalControl } from "src/components/workspace/StartApplicationModal/StartApplicationModalControl";
+import { StartApplicationModalControl } from "./StartApplicationModalControl";
 
 const mockUseUser = jest.fn(() => ({
   user: {

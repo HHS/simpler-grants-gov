@@ -4,7 +4,7 @@ import { fakeUserOrganization } from "src/utils/testing/fixtures";
 
 import { createRef } from "react";
 
-import { StartApplicationModal } from "src/components/workspace/StartApplicationModal/StartApplicationModal";
+import { StartApplicationModal } from "./StartApplicationModal";
 
 const mockRouterPush = jest.fn();
 const clientFetchMock = jest.fn();

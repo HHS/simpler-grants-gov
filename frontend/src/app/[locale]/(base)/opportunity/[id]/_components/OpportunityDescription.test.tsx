@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import DOMPurify from "isomorphic-dompurify";
 import { Summary } from "src/types/opportunity/opportunityResponseTypes";
 
-import OpportunityDescription from "src/components/opportunity/OpportunityDescription";
+import OpportunityDescription from "./OpportunityDescription";
 
 const splitMarkupMock = jest
   .fn()
