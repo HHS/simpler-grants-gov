@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import { SavedOpportunityTag } from "./buildSavedOpportunityTags";
+import { SavedOpportunityTag } from "src/components/saved-opportunities/buildSavedOpportunityTags";
 import { SavedOpportunityTags } from "./SavedOpportunityTags";
 
 jest.mock("next-intl", () => ({

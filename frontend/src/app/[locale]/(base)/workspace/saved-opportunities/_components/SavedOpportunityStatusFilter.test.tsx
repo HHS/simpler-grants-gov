@@ -1,7 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
-
-import SavedOpportunityStatusFilter from "src/components/saved-opportunities/SavedOpportunityStatusFilter";
+import SavedOpportunityStatusFilter from "src/app/[locale]/(base)/workspace/saved-opportunities/_components/SavedOpportunityStatusFilter";
 
 const setQueryParamMock = jest.fn();
 const removeQueryParamMock = jest.fn();

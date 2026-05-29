@@ -46,32 +46,27 @@ jest.mock("src/components/search/SearchResultsListItem", () => ({
   ),
 }));
 
-jest.mock(
-  "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal",
-  () => ({
-    __esModule: true,
-    ShareOpportunityToOrganizationsModal: ({
-      onSavedOrganizationsChange,
-      organizations,
-    }: MockShareOpportunityToOrganizationsModalProps) => (
-      <div>
-        <div data-testid="modal-organizations">
-          {organizations
-            .map((organization) => organization.organization_id)
-            .join(",")}
-        </div>
-        <button
-          type="button"
-          onClick={() =>
-            onSavedOrganizationsChange(new Set(["organization-1"]))
-          }
-        >
-          Save organizations
-        </button>
+jest.mock("./ShareOpportunityToOrganizationsModal", () => ({
+  __esModule: true,
+  ShareOpportunityToOrganizationsModal: ({
+    onSavedOrganizationsChange,
+    organizations,
+  }: MockShareOpportunityToOrganizationsModalProps) => (
+    <div>
+      <div data-testid="modal-organizations">
+        {organizations
+          .map((organization) => organization.organization_id)
+          .join(",")}
       </div>
-    ),
-  }),
-);
+      <button
+        type="button"
+        onClick={() => onSavedOrganizationsChange(new Set(["organization-1"]))}
+      >
+        Save organizations
+      </button>
+    </div>
+  ),
+}));
 
 describe("SavedOpportunitiesController", () => {
   it("passes showShareButton as false when the user has no organizations", async () => {

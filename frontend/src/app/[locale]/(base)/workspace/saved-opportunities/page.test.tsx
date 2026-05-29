@@ -74,12 +74,9 @@ const opportunityMock = jest.fn().mockResolvedValue({ data: [] });
 const mockUseSearchParams = jest.fn().mockReturnValue(new URLSearchParams());
 const mockBreadcrumbs = jest.fn();
 
-jest.mock(
-  "src/components/shareOpportunityToOrganizations/ShareOpportunityToOrganizationsModal",
-  () => ({
-    ShareOpportunityToOrganizationsModal: () => null,
-  }),
-);
+jest.mock("./_components/ShareOpportunityToOrganizationsModal", () => ({
+  ShareOpportunityToOrganizationsModal: () => null,
+}));
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams() as unknown,
