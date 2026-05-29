@@ -3,6 +3,8 @@ import uuid
 from datetime import date, timedelta
 
 import pytest
+from grants_shared.util import datetime_util
+from grants_shared.util.datetime_util import get_now_us_eastern_date
 from sqlalchemy import select
 
 import src.adapters.db as db
@@ -17,8 +19,6 @@ from src.constants.lookup_constants import (
 from src.db.models import competition_models
 from src.db.models.competition_models import Application, ApplicationForm, ApplicationStatus
 from src.db.models.user_models import ApplicationUser
-from src.util import datetime_util
-from src.util.datetime_util import get_now_us_eastern_date
 from src.validation.validation_constants import ValidationErrorType
 from tests.lib.application_test_utils import create_user_in_app
 from tests.lib.organization_test_utils import create_user_in_org
