@@ -15,7 +15,7 @@ import Link from "next/link";
 import { GridContainer } from "@trussworks/react-uswds";
 
 import Breadcrumbs from "src/components/Breadcrumbs";
-import ServerErrorAlert from "src/components/ServerErrorAlert";
+import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
 import { USWDSIcon } from "src/components/USWDSIcon";
 import { SavedSearchesList } from "src/components/workspace/SavedSearchesList";
 
@@ -67,7 +67,7 @@ export default async function SavedSearchQueries({
         <GridContainer>
           <h1 className="margin-top-0">{t("heading")}</h1>
         </GridContainer>
-        <ServerErrorAlert callToAction={t("error")} />
+        <GeneralErrorAlert callToAction={t("error")} />
       </>
     );
   }

@@ -3,9 +3,9 @@ import { LocalizedPageProps } from "src/types/intl";
 
 import { getTranslations } from "next-intl/server";
 
+import GeneralErrorAlert from "src/components/core/GeneralErrorAlert";
 import ApiKeyTable from "src/components/developers/apiDashboard/ApiKeyTable";
 import { CreateApiKeyButton } from "src/components/developers/apiDashboard/CreateApiKeyButton";
-import ServerErrorAlert from "src/components/ServerErrorAlert";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -24,7 +24,7 @@ export default async function ApiDashboardPage({ params }: LocalizedPageProps) {
         <div className="grid-container margin-y-5">
           <h1 className="margin-top-0">{t("heading")}</h1>
         </div>
-        <ServerErrorAlert callToAction={t("errorLoadingKeys")} />
+        <GeneralErrorAlert callToAction={t("errorLoadingKeys")} />
       </>
     );
   }
