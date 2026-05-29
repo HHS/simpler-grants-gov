@@ -2,7 +2,8 @@
 
 import { FilterOption } from "src/types/search/searchFilterTypes";
 
-import FilterCheckbox from "src/components/FilterCheckbox";
+import { Checkbox } from "@trussworks/react-uswds";
+
 import { FilterOptionLabel } from "src/components/search/Filters/FilterOptionLabel";
 
 interface SearchFilterCheckboxProps {
@@ -31,13 +32,13 @@ const SearchFilterCheckbox = ({
     accordionTitle === "Agency" ? `agency-${option.id}` : option.id;
 
   return (
-    <FilterCheckbox
+    <Checkbox
       id={option.id}
+      name={getNameAttribute() || ""}
       label={<FilterOptionLabel option={option} facetCounts={facetCounts} />}
-      name={getNameAttribute()} // value passed to server action  {name: "{option.label}", value: "on" } (if no value provided)
       onChange={handleChange}
       checked={query.has(option.value) || parentSelected}
-      value={option.value}
+      value={option.value || ""}
     />
   );
 };

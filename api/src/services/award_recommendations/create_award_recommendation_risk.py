@@ -81,5 +81,12 @@ def create_award_recommendation_risk(
         )
 
     db_session.add(risk)
+    db_session.flush()
+
+    # Eagerly load relationships needed for the applications property by accessing them
+    for rs in risk.award_recommendation_risk_submissions:
+        _ = (
+            rs.award_recommendation_application_submission.application_submission.application_submission_number
+        )
 
     return risk

@@ -2,10 +2,9 @@
 
 import { useFeatureFlags } from "src/hooks/useFeatureFlags";
 
-import React, { useState } from "react";
-import { Button, Table } from "@trussworks/react-uswds";
-
-import BetaAlert from "src/components/BetaAlert";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { Alert, Button, GridContainer, Table } from "@trussworks/react-uswds";
 
 /**
  * View for managing feature flags
@@ -20,13 +19,16 @@ export default function FeatureFlagsTable() {
     setFeatureFlag(flagName, value);
   };
 
+  const t = useTranslations("FeatureFlagsAdmin");
+
   return (
     <>
       {pendingChanges && (
-        <BetaAlert
-          heading="Refresh your page"
-          alertMessage="Hard refresh your page when done changing Flags for the changes to fully apply."
-        />
+        <GridContainer>
+          <Alert type="warning" headingLevel="h2" heading={t("heading")} noIcon>
+            {t("alertMessage")}
+          </Alert>
+        </GridContainer>
       )}
       <Table>
         <thead>

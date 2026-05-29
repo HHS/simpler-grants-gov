@@ -176,6 +176,8 @@ class FormType(StrEnum):
 
     ATTACHMENT_FORM = "AttachmentForm"
 
+    PROJECT_PERFORMANCE_SITE_LOCATION = "ProjectPerformanceSiteLocation"
+
 
 class CompetitionOpenToApplicant(StrEnum):
     INDIVIDUAL = "individual"
@@ -268,6 +270,7 @@ class AwardRecommendationRiskType(StrEnum):
 class AwardRecommendationAuditEvent(StrEnum):
     AWARD_RECOMMENDATION_CREATED = "award_recommendation_created"
     AWARD_RECOMMENDATION_UPDATED = "award_recommendation_updated"
+    AWARD_RECOMMENDATION_DELETED = "award_recommendation_deleted"
     ATTACHMENT_CREATED = "attachment_created"
     ATTACHMENT_UPDATED = "attachment_updated"
     ATTACHMENT_DELETED = "attachment_deleted"

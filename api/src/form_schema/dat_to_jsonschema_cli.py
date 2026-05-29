@@ -5,9 +5,9 @@ import json
 import logging
 
 import click
+from grants_shared.logs import init
 
 from src.form_schema.dat_to_jsonschema import parse_xls_to_schema
-from src.logging import init
 
 logger = logging.getLogger(__name__)
 

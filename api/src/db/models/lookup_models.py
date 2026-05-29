@@ -195,6 +195,7 @@ FORM_TYPE_CONFIG: LookupConfig[FormType] = LookupConfig(
         LookupStr(FormType.EPA_FORM_4700_4, 14),
         LookupStr(FormType.EPA_KEY_CONTACTS, 15),
         LookupStr(FormType.ATTACHMENT_FORM, 16),
+        LookupStr(FormType.PROJECT_PERFORMANCE_SITE_LOCATION, 17),
     ]
 )
 
@@ -299,6 +300,7 @@ AWARD_RECOMMENDATION_AUDIT_EVENT_CONFIG: LookupConfig[AwardRecommendationAuditEv
         LookupStr(AwardRecommendationAuditEvent.REVIEW_UPDATED, 14),
         LookupStr(AwardRecommendationAuditEvent.REVIEW_DELETED, 15),
         LookupStr(AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_SUBMISSION_UPDATED, 16),
+        LookupStr(AwardRecommendationAuditEvent.AWARD_RECOMMENDATION_DELETED, 17),
     ]
 )
 

@@ -94,12 +94,6 @@ export const messages = {
       link: "Read about the Spring 2025 Coding Challenge",
     },
   },
-  BetaAlert: {
-    alertTitle:
-      "This site is a work in progress, with new features and updates based on your feedback.",
-    alert:
-      "Search for grants here. To use more advanced features or to apply, go to <LinkToGrants>Grants.gov</LinkToGrants>.",
-  },
   OpportunityListing: {
     pageTitle: "Opportunity Listing",
     metaDescription:
@@ -402,9 +396,8 @@ export const messages = {
         draftOnly: "Only draft opportunity summaries can be updated.",
         errorHeading: "Publish error",
         validationHeading: "Please fix the highlighted fields.",
-        validationWarningHeading: "Progress saved",
-        validationWarningBody:
-          "Your progress has been saved. However, this opportunity cannot be submitted/published until the following required fields are completed:",
+        validationErrorHeading: "Error(s) Found",
+        validationErrorBody: "Please correct the following errors:",
       },
     },
     validationErrors: {
@@ -419,8 +412,6 @@ export const messages = {
       closeDateOrder: "Close date must be on or after publish date.",
       awardMinimum: "Enter an award minimum.",
       awardMaximum: "Enter an award maximum.",
-      awardMaximumOrder:
-        "Award maximum must be greater than or equal to award minimum.",
       fundingType: "Select a funding type.",
       fundingCategory: "Select a funding category.",
       expectedNumberOfAwards: "Enter the expected number of awards.",
@@ -431,6 +422,17 @@ export const messages = {
       additionalInfoUrl: "Enter an additional information URL.",
       additionalInfoUrlText: "Enter additional information URL text.",
       grantorContactDetails: "Enter grantor contact details.",
+      awardMinCurrencyInput:
+        "Award minimum must be greater than zero and less than $1,000,000,000,000,000.",
+      awardMaxCurrencyInput:
+        "Award maximum must be greater than zero and less than $1,000,000,000,000,000.",
+      totalFundingCurrencyInput:
+        "Estimated total program funding must be greater than zero and less than $1,000,000,000,000,000.",
+      awardMinLessThanTotal:
+        "Award minimum cannot exceed the Estimated Total Program Funding.",
+      awardMaxLessThanTotal:
+        "Award maximum cannot exceed the Estimated Total Program Funding.",
+      awardMinLessThanMax: "Award minimum cannot exceed Award maximum.",
     },
     attachments: {
       removeButton: "Remove",
@@ -2055,6 +2057,10 @@ export const messages = {
     breadcrumbOrganizations: "Organizations",
   },
   AwardRecommendation: {
+    summary: {
+      showDescription: "Show full description",
+      hideSummaryDescription: "Hide full description",
+    },
     awardRecs: "Award Recs",
     errorMessage:
       "We have encountered an error loading your award recommendations, please try again later.",
@@ -2121,6 +2127,28 @@ export const messages = {
       description:
         "Add any relevant information related to this reviewer and decision-maker for this opportunity",
     },
+    attachments: {
+      heading: "Attachments",
+      attachedDocument: "Attached document",
+      uploadedBy: "Uploaded by",
+      uploadDate: "Upload date",
+      standardTermsHeading: "Standard and program terms & conditions",
+      enterTermsConditions: "Enter terms & conditions",
+      editTermsConditions: "Edit terms & conditions",
+      risksHeading: "Specific risks & recommended conditions",
+      enterRisks: "Enter risks & recommended conditions",
+      editRisks: "Edit risks & recommended conditions",
+      riskNumber: "Risk #",
+      appNumber: "App #",
+      condition: "Condition",
+      action: "Action",
+      delete: "Delete",
+      applications: "applications",
+      errorMessage: "Unable to load or update risks. Please try again.",
+      otherDocumentsHeading: "Other supporting documents",
+      enterSupportingDocuments: "Enter supporting documents",
+      editSupportingDocuments: "Edit supporting documents",
+    },
     recommendationDetails: {
       heading: "Recommendation details",
       recommendationLabel: "Recommendation",
@@ -2172,6 +2200,8 @@ export const messages = {
         description:
           "Explain how you plan to provide funding over time. For example, will the agency award all funding in a single award or in multiple budget periods across a longer period of performance.",
         noFundingStrategyProvided: "No funding strategy provided.",
+        showDescription: "Show full description",
+        hideSummaryDescription: "Hide full description",
       },
     },
   },
@@ -2179,8 +2209,6 @@ export const messages = {
     pageTitle: "Create recommendation",
     metaDescription: "Create a new award recommendation",
     beforeYouGetStarted: "Before you get started",
-    introDescription:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
     steps: {
       identifyOpportunity: {
         title: "Identify the opportunity",
@@ -2311,5 +2339,10 @@ export const messages = {
     preferencesNotSavedError:
       "Your notification preference was not saved. Refresh the page to try again.",
     srPendingSave: "Saving notification preference...",
+  },
+  FeatureFlagsAdmin: {
+    heading: "Refresh your page",
+    alertMessage:
+      "Hard refresh your page when done changing Flags for the changes to fully apply.",
   },
 };

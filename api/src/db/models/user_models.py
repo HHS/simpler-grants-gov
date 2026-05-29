@@ -1,6 +1,7 @@
 import uuid
 from datetime import date, datetime
 
+from grants_shared.util import datetime_util
 from sqlalchemy import ForeignKey, UniqueConstraint, and_
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
@@ -15,7 +16,6 @@ from src.db.models.competition_models import Application
 from src.db.models.entity_models import Organization
 from src.db.models.lookup_models import LkExternalUserType, LkPrivilege, LkRoleType, LkUserType
 from src.db.models.opportunity_models import Opportunity
-from src.util import datetime_util
 
 
 class User(ApiSchemaTable, TimestampMixin):
