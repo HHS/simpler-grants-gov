@@ -20,7 +20,7 @@ import grants_shared.logs
 import src.util
 import tests.src.db.models.factories
 from src.adapters.db.clients.postgres_client import PostgresDBClient
-from src.adapters.db.clients.postgres_config import get_db_config
+from grants_shared.adapters.db.clients.postgres_config import get_db_config
 
 INTRO = """
 Simpler Grants Gov Python console

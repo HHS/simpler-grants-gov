@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import pytest
 
 from src.adapters.db.clients.postgres_client import get_connection_parameters, verify_ssl
-from src.adapters.db.clients.postgres_config import get_db_config
+from grants_shared.adapters.db.clients.postgres_config import get_db_config
 
 
 @dataclass

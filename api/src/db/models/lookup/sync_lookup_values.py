@@ -2,7 +2,7 @@ import logging
 
 import src.adapters.db as db
 from src.adapters.db import PostgresDBClient
-from src.adapters.db.clients.postgres_config import get_db_config
+from grants_shared.adapters.db.clients.postgres_config import get_db_config
 from src.db.models.lookup import Lookup, LookupRegistry, LookupTable
 
 logger = logging.getLogger(__name__)
