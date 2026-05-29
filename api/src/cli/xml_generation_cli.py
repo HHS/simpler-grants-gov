@@ -149,7 +149,7 @@ def generate_xml_command(
     help="Form name to test (e.g., SF424_4_0). If not specified, runs all forms.",
 )
 @click.option(
-    "--xsd_dir",
+    "--xsd-dir",
     type=click.Path(),
     help="Directory containing XSD files (default: ../services/xml_generation/xsds). Run 'flask task fetch-xsds' first.",
 )
@@ -192,7 +192,7 @@ def validate_xml_generation_command(
         flask task validate-xml-generation --output validation_results.json
 
         # Use XSD directory
-        flask task validate-xml-generation --xsd_dir ../services/xml_generation/xsds
+        flask task validate-xml-generation --xsd-dir ../services/xml_generation/xsds
     """
     init_form_registry()
 
@@ -204,7 +204,7 @@ def validate_xml_generation_command(
     try:
         # Use default XSD directory if not specified
         if not xsd_dir:
-            xsd_dir = str(Path(__file__).resolve().parents[4] / "src/services/xml_generation/xsds")
+            xsd_dir = str(Path(__file__).resolve().parents[2] / "src/services/xml_generation/xsds")
 
         # Verify XSD directory exists
         xsd_path = Path(xsd_dir)
@@ -303,7 +303,7 @@ def fetch_xsds_command(
         flask task fetch-xsds
 
         # Fetch XSDs to a specific XSD directory
-        flask task fetch-xsds --dir ../services/xml_generation/xsds
+        flask task fetch-xsds --xsd-dir ../services/xml_generation/xsds
 
         # Fetch XSD for a specific form
         flask task fetch-xsds --form SF424_4_0
@@ -312,11 +312,10 @@ def fetch_xsds_command(
 
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
-
     try:
         # Use default XSD directory if not specified
         if not xsd_dir:
-            xsd_dir = str(Path(__file__).resolve().parents[4] / "src/services/xml_generation/xsds")
+            xsd_dir = str(Path(__file__).resolve().parents[2] / "src/services/xml_generation/xsds")
 
         # Get test cases to determine which XSDs we need
         if form:
