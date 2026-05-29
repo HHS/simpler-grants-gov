@@ -106,6 +106,7 @@ for (const { testName, orgLabel } of applicantScenarios) {
         const testData = buildPrintViewTestData(
           form.formKey,
           baseSuffix + index,
+          form.formConfig,
         );
 
         await fillForm(testInfo, page, form.formConfig, testData, false);

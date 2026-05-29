@@ -1,4 +1,7 @@
+import path from "path";
 import type { Page } from "@playwright/test";
+import type { fieldDefinitionsProjectAbstractSummary } from "tests/e2e/apply/fixtures/project-abstract-summary-field-definitions";
+import type { FillFormConfig } from "tests/e2e/utils/forms/general-forms-filling";
 
 /**
  * Converts a workspace application form URL to its corresponding print view URL.
@@ -44,11 +47,14 @@ const PRINT_VIEW_TEST_DATA_BUILDERS: Record<
   string,
   (suffix: number) => Record<string, string>
 > = {
-  projectAbstractSummary: (suffix) => ({
-    applicantName: `TESTER BR ${suffix}`,
-    projectTitle: `TESTING ${suffix}`,
-    abstract: `This is a print view automation test ${suffix}`,
-  }),
+  projectAbstractSummary: (suffix) =>
+    ({
+      applicantName: `TESTER BR ${suffix}`,
+      projectTitle: `TESTING ${suffix}`,
+      abstract: `This is a print view automation test ${suffix}`,
+    }) satisfies Partial<
+      Record<keyof typeof fieldDefinitionsProjectAbstractSummary, string>
+    >,
 };
 
 /**
@@ -65,6 +71,7 @@ const PRINT_VIEW_TEST_DATA_BUILDERS: Record<
 export function buildPrintViewTestData(
   formKey: string,
   suffix: number,
+  formConfig: FillFormConfig,
 ): Record<string, string> {
   const builder = PRINT_VIEW_TEST_DATA_BUILDERS[formKey];
   if (!builder) {
@@ -73,5 +80,24 @@ export function buildPrintViewTestData(
         `Add it to PRINT_VIEW_TEST_DATA_BUILDERS in print-view-utils.ts.`,
     );
   }
-  return builder(suffix);
+  const testData = builder(suffix);
+
+  // Completeness check: every non-attachment, non-conditional field in the form
+  // definition must have a value in the test data. This ensures the builder stays
+  // in sync with field definition changes automatically — no manual list to maintain.
+  const missingKeys = Object.entries(formConfig.fields)
+    .filter(
+      ([key, def]) =>
+        def.type !== "file" && !def.dependsOn && testData[key] === undefined,
+    )
+    .map(([key, def]) => `${key} (${def.field})`);
+
+  if (missingKeys.length > 0) {
+    throw new Error(
+      `Test data builder for "${formKey}" is missing values for: ${missingKeys.join(", ")}. ` +
+        `Add them to PRINT_VIEW_TEST_DATA_BUILDERS["${formKey}"] in print-view-utils.ts.`,
+    );
+  }
+
+  return testData;
 }

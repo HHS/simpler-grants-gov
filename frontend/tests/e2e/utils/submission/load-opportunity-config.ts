@@ -61,8 +61,13 @@ export function loadOpportunityConfig(
       );
     }
 
+    const prepopulatedFieldKeys = new Set(
+      Object.keys(form.expectedPrepopulatedFields),
+    );
+
     const userEnteredFieldTestIds = Object.fromEntries(
       Object.entries(formConfig.fields)
+        .filter(([key]) => !prepopulatedFieldKeys.has(key))
         .map(
           ([key, def]) =>
             [key, def.printTestId ?? def.testId] as [
